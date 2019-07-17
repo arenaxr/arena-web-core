@@ -1,11 +1,13 @@
 # AframeSandbox
 proof of concept code for visualization of primitives from MQTT messages
 
-This code originated as a clone of the demo for a tool that exports a Unity scene as an A-Frame page.
-It was then modified to do real-time updating of scene objects based on another demo ("multi-user VR")
+## References
+This code originated as a clone of the demo for a tool that exports a Unity scene as an A-Frame page https://github.com/if1live/unity-scene-web-exporter .
+It was then modified to do real-time updating of scene objects based on another demo ("networked AFrame" https://github.com/networked-aframe/networked-aframe) and using MQTT in a browser https://github.com/reese-long/mqtt-browser-demo 
 
 It now bears very little resemblance to the original, much commented out of `index.html`, and much added:
 
+## Files
  * `mqtt.js` - Javascript to subscribe to MQTT topic(s) via wildcard, parse primitive-object messages, and add/remove AFrame Elements to the scene accordingly.
  The message format (as part of a higher level, more general "ARENA" system design plan for AR) is documented at work-in-progress  
 https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FSub_Structure
@@ -17,7 +19,7 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
 
-## About the Code
+## Commentary
 Some hard-coded things:
  * MQTT broker running on `oz.andrew.cmu.edu` - runs with WebSockets enabled, because Paho MQTT needs to use WebSockets
  * MQTT topic structure is in flux. Used to be everything went to `/topic/render`, moving to `/topic/scene/#`. Each Object in the scene gets it's own topic, which is the 'name' of the object, e.g: `/topic/render/sphere_3` according to 
