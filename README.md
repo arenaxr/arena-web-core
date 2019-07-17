@@ -16,3 +16,17 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `CONIX.png` - a bitmap so we can draw the Conix logo on things (support for bitmaps on primitives is a TODO) that should really be in:
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
+
+## About the Code
+Some hard-coded things:
+ * MQTT broker running on `oz.andrew.cmu.edu` - runs with WebSockets enabled, because Paho MQTT needs to use WebSockets
+ * MQTT topic structure is in flux. Used to be everything went to `/topic/render`, moving to `/topic/scene/#`. Each Object in the scene gets it's own topic, which is the 'name' of the object, e.g: `/topic/render/sphere_3` according to 
+ * Naming convention: PrimitiveName_ID where Id is some unique identifier (integers for now), and PrimitiveName is something like 'sphere' 'cube' 'cylinder' etc.
+ * MQTT draw messages set the 'Retain' flag such that new people visiting the page (example running at http://staines.andrew.cmu.edu/aframe) will see them. This is how to 'persist' things in the Scene. Otherwise set Retain to False or 'off' and the primitive gets drawn & seen only by those currently viewing the scene; a page re-load and they will disappear
+ * Because of this, if you render a ton of retained things, there's a risk of spamming the scene. You might need to clean up by doing something like
+  1. Get all the retained objects by subscribing to /topic/render/#
+  2. Iterate through the ones you want to remove
+  3. For each, issue a publish command to the object+topic, with retain set, and an empty message. This clears the topic. e.g:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/sphere_3 -m "" -r
+```
