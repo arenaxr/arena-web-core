@@ -14,8 +14,6 @@ function onConnect() {
     console.log("onConnect");
     client.subscribe(renderTopic);
     // example MQTT publish command
-    // Don't ask me where count came from, or what type it is,
-    // you're supposed to not worry about this and just let Javascript take you away...
     //setInterval(() => { publish(outputTopic, `The count is now ${count++}`) }, 1000)
 
 }
