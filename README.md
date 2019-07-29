@@ -18,6 +18,33 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `CONIX.png` - a bitmap so we can draw the Conix logo on things (support for bitmaps on primitives is a TODO) that should really be in:
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
+ 
+ ## Update 7/29/19: general purpose AFrame support
+ 
+ Instantiate a cube and set all it's basic parameters
+```
+$ mosquitto_pub -h oz -t /topic/render/cube_1 -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
+```
+change only the color of the already-drawn cube
+```
+$ mosquitto_pub -h oz -t /topic/render/cube_1/material/color -m '#00AA00'
+```
+move the position of the already drawn cube
+```
+$ mosquitto_pub -h oz -t /topic/render/cube_1/position -m "x:1; y:2; z:3;"
+```
+rotate the already drawn cube
+```
+$ mosquitto_pub -h oz -t /topic/render/cube_1/rotation -m "x:1; y:2; z:3;"
+```
+a wacky torusKnot, then turn it blue
+```
+mosquitto_pub -h oz -t /topic/render/torusKnot_1 -m "torusKnot_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
+mosquitto_pub -h oz -t /topic/render/torusKnot_1/material/color -m '#0000FF'
+```
+This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)
+It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
+Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth.
 
 ## Commentary
 Some hard-coded things:
