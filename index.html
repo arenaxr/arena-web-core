@@ -6,19 +6,24 @@
     <meta name="description" content="Hello world!">
     <!-- the AFrame script library (minified) -->
     <script src="https://aframe.io/releases/0.3.2/aframe.min.js"></script>
+    <!-- the camera change event listener helper -->
+    <script src="events.js"></script>
     <!-- the MQTT.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
     <!-- our mqtt.js script -->
     <script src="./mqtt.js" type="text/javascript"></script>
   </head>
   <body>
-<a-scene name="KanauScene">
+<a-scene name="MQTTScene">
   <a-assets>
+    <a-asset-item id="body-obj" src="./models/body.obj"></a-asset-item>
+    <a-asset-item id="body-mtl" src="./models/body.mtl"></a-asset-item>
+    <a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
+    <a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
+
     <!--
     <a-asset-item id="Plane-obj" src="./models/Plane.obj"></a-asset-item>
     <a-asset-item id="Plane-mtl" src="./models/Plane.mtl"></a-asset-item>
-    <a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
-    <a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
     <a-asset-item id="body-obj" src="./models/body.obj"></a-asset-item>
     <a-asset-item id="body-mtl" src="./models/body.mtl"></a-asset-item>
     <a-asset-item id="enginside-obj" src="./models/enginside.obj"></a-asset-item>
@@ -42,13 +47,15 @@
     -->
   </a-assets>
   <a-sky radius="5000" color="#314D79"></a-sky>
-  <a-entity position="0 1 4" name="Dummy">
-    <a-entity position="0 0 0.001" name="PerspectiveCamera" tag="MainCamera">
-      <a-camera far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true">
+  <a-entity position="0 1 4" id="CameraRig">
+    <a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
+      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener>
         <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
       </a-camera>
     </a-entity>
   </a-entity>
+  <a-entity position="-1.149 0.31 0" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
+
 <!--
   <a-entity position="0 -0.19 0" name="Plane" layer="Water" obj-model="obj: #Plane-obj; "></a-entity>
   <a-entity position="-1.149 0.31 0" rotation="0 -221.0385 0" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
