@@ -25,7 +25,7 @@ function onConnect() {
     // Publish initial camera presence
 
     var mymsg = camName+",0,0,0,0,0,0,0,0,0,0,#000000,on";
-    publish_retained(outputTopic, mymsg);
+    publish_retained(outputTopic+camName, mymsg);
     //console.log("my-camera element", myCam);
 
     myCam.addEventListener('poseChanged', e => {
@@ -42,7 +42,7 @@ function onConnect() {
 
 	// suppress duplicates
 	if (msg !== oldMsg) {
-	    publish_retained(outputTopic, msg);
+	    publish_retained(outputTopic+camName, msg);
 	    oldMsg = msg;
 	    //console.log("cam moved: ",outputTopic+camName, msg);
 	}
@@ -50,7 +50,7 @@ function onConnect() {
 
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
-	publish(outputTopic, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
+	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, "");
     }
 
@@ -93,7 +93,7 @@ function onMessageArrived(message) {
     // Depending on topic depth, three cases
     var topicMultiProperty = renderTopic.split("/").length + 2;
     var topicSingleComponent = renderTopic.split("/").length + 1;
-    var topicAtomicUpdate = renderTopic.split("/").length -1;
+    var topicAtomicUpdate = renderTopic.split("/").length;
     //console.log (topic.length, "<- topic.length");
     
     switch (topic.length) {
