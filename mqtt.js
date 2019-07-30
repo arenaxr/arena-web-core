@@ -13,7 +13,7 @@ client.connect({ onSuccess: onConnect });
 
 // This is apparently called "at startup" when the page(?) is loaded(?)
 function onConnect() {
-    console.log("onConnect");
+    //console.log("onConnect");
     
     // Let's get the camera and publish it's presence over MQTT
     // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
@@ -25,8 +25,8 @@ function onConnect() {
     // Publish initial camera presence
 
     var mymsg = camName+",0,0,0,0,0,0,0,0,0,0,#000000,on";
-    publish_retained(outputTopic+camName, mymsg);
-    console.log("my-camera element", myCam);
+    publish_retained(outputTopic, mymsg);
+    //console.log("my-camera element", myCam);
 
     myCam.addEventListener('poseChanged', e => {
 	//console.log(e.detail);
@@ -40,9 +40,9 @@ function onConnect() {
 	    e.detail._w.toFixed(3)+
 	    ",0,0,0,#000000,on";
 
-	// squash duplicates
+	// suppress duplicates
 	if (msg !== oldMsg) {
-	    publish_retained(outputTopic+camName, msg);
+	    publish_retained(outputTopic, msg);
 	    oldMsg = msg;
 	    //console.log("cam moved: ",outputTopic+camName, msg);
 	}
@@ -50,7 +50,7 @@ function onConnect() {
 
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
-	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
+	publish(outputTopic, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, "");
     }
 
@@ -60,8 +60,8 @@ function onConnect() {
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-	console.log("onConnectionLost:" + responseObject.errorMessage);
-    } else
+	console.log(responseObject.errorMessage);
+    } // reconnect
     client.connect({ onSuccess: onConnect });
 }
 
@@ -83,41 +83,65 @@ const publish = (dest, msg) => {
 function onMessageArrived(message) {
 
     // parse topic
-    var topic = message.destinationName.split("/");
-    console.log("topic", topic);
-    console.log("length", topic.length);
+    var dest = message.destinationName;
+    // strip nasty trailing slash
+    if(dest.charAt( dest.length-1 ) == "/") {
+	dest = dest.slice(0, -1)
+    }
+    var topic = dest.split("/");
     
-    if (topic.length === renderTopic.split("/").length + 2) {
-	// Multi-property component update, e.g: /topic/render/objectId/material/color
-	var propertyName = topic[topic.length - 1];  // e.g. 'color'
+    // Depending on topic depth, three cases
+    var topicMultiProperty = renderTopic.split("/").length + 2;
+    var topicSingleComponent = renderTopic.split("/").length + 1;
+    var topicAtomicUpdate = renderTopic.split("/").length -1;
+    //console.log (topic.length, "<- topic.length");
+    
+    switch (topic.length) {
+    case topicMultiProperty:
+	// Multi-property component update, e.g: topic/render/cube_1/material/color "#FFFFFF"
+	var propertyName  = topic[topic.length - 1]; // e.g. 'color'
 	var componentName = topic[topic.length - 2]; // the parameter to modify e.g 'material'
-	var sceneObject = topic[topic.length - 3];   // the object with the parameter
-	console.log("propertyName", propertyName);
-	console.log("componentName", componentName);
-	console.log("sceneObject", sceneObject);
+	var sceneObject   = topic[topic.length - 3]; // the object with the parameter
+	//console.log("propertyName", propertyName);
+	//console.log("componentName", componentName);
+	//console.log("sceneObject", sceneObject);
 
 	var entityEl = sceneObjects[sceneObject];
 	
-	console.log("payloadstring", message.payloadString);
-	console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
+	//console.log("payloadstring", message.payloadString);
+	//console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
 	
 	//entityEl.setAttribute(componentName, propertyName, AFRAME.utils.styleParser.parse(message.payloadString));
-	AFRAME.utils.entity.setComponentProperty(entityEl, componentName+'.'+propertyName, message.payloadString);
-    } else if (topic.length === renderTopic.split("/").length + 1) {
-	// single component update, e.g: /topic/render/objectId/componentName/componentJson
+	if (entityEl)
+	    AFRAME.utils.entity.setComponentProperty(entityEl, componentName+'.'+propertyName, message.payloadString);
+	else
+	    console.log("Error: " + sceneObject + " not in sceneObjects");
+	break;
+    case topicSingleComponent:
+	// single component update, e.g: topic/render/cube_1/position "x:1; y:2; z:3;"
 	var componentName = topic[topic.length - 1]; // the parameter to modify
-	var sceneObject = topic[topic.length - 2];   // the object with the parameter
-	console.log("componentName", componentName);
-	console.log("sceneObject", sceneObject);
+	var sceneObject   = topic[topic.length - 2]; // the object with the parameter
+	//console.log("componentName", componentName);
+	//console.log("sceneObject", sceneObject);
 
 	var entityEl = sceneObjects[sceneObject];
 	
-	console.log("payloadstring", message.payloadString);
-	console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
-	
-	entityEl.setAttribute(componentName, AFRAME.utils.styleParser.parse(message.payloadString));
-    } else { // full object update, e.g: /topic/render/object_id,x,y,z,x,y,z,w,sx,sy,sz,#colorhex,on/off
-	
+	//console.log("payloadstring", message.payloadString);
+
+	if (entityEl) {
+	    if (message.payloadString.includes(";")) { // javascript style "x:1; y:2; z:3;"
+		//console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
+		entityEl.setAttribute(componentName, AFRAME.utils.styleParser.parse(message.payloadString));
+	    }
+	    else { // raw, don't parse the format. e.g. "url(http://oz.org/Modelfile.glb)"
+		//console.log("unparsed", message.payloadString);
+		entityEl.setAttribute(componentName, message.payloadString);
+	    }
+	}
+	else
+	    console.log("Error: " + sceneObject + " not in sceneObjects");
+	break;
+    case topicAtomicUpdate:
 	// parse string
 	var res = message.payloadString.split(",");
 	var name = res[0];
@@ -150,8 +174,10 @@ function onMessageArrived(message) {
 	// Delete or add a new Scene object
 
 	if (onoff === "off") {
-	    sceneEl.removeChild(sceneObjects[name]);
-	    delete sceneObjects[name];
+	    if (sceneObjects[name]) {
+		sceneEl.removeChild(sceneObjects[name]);
+		delete sceneObjects[name];
+	    } else console.log("Error: " + name + " not in sceneObjects");
 	} else {
 	    var entityEl;
 	    if (name in sceneObjects) {
@@ -165,7 +191,7 @@ function onMessageArrived(message) {
 		if (type === "camera") {
 		    // Create a thin black box for now = "camera"
 		    entityEl.setAttribute('geometry', 'primitive', 'box');
-		    entityEl.setAttribute('scale', 0.1 + ' ' + 0.1 + ' ' + 1);
+		    entityEl.setAttribute('scale', 0.1 + ' ' + 0.3 + ' ' + 1);
 		    entityEl.setAttribute('material', 'color', "#000000");
 		    console.log("their camera:", entityEl);
 		}
@@ -174,8 +200,8 @@ function onMessageArrived(message) {
 		
 		// Add it to our dictionary of scene objects
 		sceneObjects[name] = entityEl;
-		console.log("entityEL:",entityEl);
-		console.log("added ", entityEl, "to sceneObjects["+name+"]");
+		//console.log("entityEL:",entityEl);
+		//console.log("added ", entityEl, "to sceneObjects["+name+"]");
 	    }
 
 	    switch(type) {
@@ -187,13 +213,14 @@ function onMessageArrived(message) {
 	    case "camera":
 		// no changes but position & rotation later
 		break;
+	    case "gltf-model":
+		// freak case: use color field for URL
+		//entityEl.setAttribute('geometry', 'primitive', type);
+		entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
+		entityEl.setAttribute("gltf-model", color);		
+		break;
 	    default:
 		entityEl.setAttribute('geometry', 'primitive', type);
-
-		//    var posString = "\""+x+", y: "+y+", z:"+z+"\"";
-		//    var rotString = "{x: "+xrot+", y: "+yrot+", z:"+zrot+"}";
-		//    var scaleString = "{x: "+xrot+", y: "+yrot+", z:"+zrot+"}";
-
 		//entityEl.object3D.scale.set(xscale,yscale,zscale);
 		entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
 		entityEl.setAttribute('material', 'color', color);
@@ -212,5 +239,7 @@ function onMessageArrived(message) {
 	    //console.log("rotation: ",entityEl.getAttribute('rotation'));
 	    //console.log("scale: ",entityEl.getAttribute('scale'));
 	}
+	break;
     }
 }
+
