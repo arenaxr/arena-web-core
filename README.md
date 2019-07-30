@@ -19,7 +19,7 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
  
- ## Update 7/29/19: general purpose AFrame support
+ ## Update 7/29/19: general purpose AFrame using Subtopics
  
  Instantiate a cube and set all it's basic parameters
 ```
