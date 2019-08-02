@@ -46,6 +46,10 @@ Instantiate a glTF v2.0 binary model (file extension .glb) from a URL
 ```
 mosquitto_pub -r -h oz -t /topic/render/gltf-model_1 -m "gltf-model_1,0,0,0,0,0,0,0,1,1,1,url(models/Duck.glb),on"
 ```
+Warp the camera to a new coordinate (system)
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/camera_73B0B20D-4E12-4A46-83FB-0A71FEFA2163/rig -m "3,3,0,0,0,0,0"
+```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
