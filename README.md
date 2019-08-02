@@ -23,7 +23,7 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  
  Instantiate a cube and set all it's basic parameters
 ```
-mosquitto_pub -h oz -t /topic/render -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
+mosquitto_pub -r -h oz -t /topic/render/cube_1 -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 ```
 change only the color of the already-drawn cube
 ```
@@ -39,12 +39,21 @@ mosquitto_pub -h oz -t /topic/render/cube_1/rotation -m "x:1; y:2; z:3;"
 ```
 Instantiate a wacky torusKnot, then turn it blue
 ```
-mosquitto_pub -h oz -t /topic/render -m "torusKnot_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
+mosquitto_pub -r -h oz -t /topic/render/torusKnot_1 -m "torusKnot_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 mosquitto_pub -h oz -t /topic/render/torusKnot_1/material/color -m '#0000FF'
 ```
+Instantiate a glTF v2.0 binary model (file extension .glb) from a URL
+```
+mosquitto_pub -r -h oz -t /topic/render/gltf-model_1 -m "gltf-model_1,0,0,0,0,0,0,0,1,1,1,url(models/Duck.glb),on"
+```
+Warp the camera to a new coordinate (system)
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/camera_73B0B20D-4E12-4A46-83FB-0A71FEFA2163/rig -m "3,3,0,0,0,0,0"
+```
+
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
-Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth.
+Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth, but not necessarily in the right order. Maybe we use smaller property-update message format for only 'realtime' or 'live' viewers, rather than persist each and every update. This helps address a possible problem with single-property-update topic 'spam': don't retain -> no spam.
 
 ## Commentary
 Some hard-coded things:
