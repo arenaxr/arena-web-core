@@ -5,6 +5,7 @@ const renderTopic = "/topic/render/#";
 const outputTopic = "/topic/render/";
 var camName = "";
 var oldMsg = "";
+var cameraRig;
 
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
@@ -19,26 +20,28 @@ function onConnect() {
     // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
     // add event listener for camera moved ("poseChanged") event
     var myCam = document.getElementById('my-camera');
+    cameraRig = document.getElementById('CameraRig');
     console.log('my-camera: ',myCam.object3D.uuid);
+    console.log('cameraRig: ', cameraRig);
     camName = "camera_" + myCam.object3D.uuid;
 
     // Publish initial camera presence
-
-    var mymsg = camName+",0,0,0,0,0,0,0,0,0,0,#000000,on";
+    var color = '#'+Math.floor(Math.random()*16777215).toString(16);
+    var mymsg = camName+",0,2.6,-4,0,0,0,0,0,0,0,"+color+",on";
     publish_retained(outputTopic+camName, mymsg);
     //console.log("my-camera element", myCam);
 
     myCam.addEventListener('poseChanged', e => {
-	//console.log(e.detail);
+	//console.log(e.detail);	
 	var msg = camName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
-	    e.detail.z.toFixed(3)+","+
+	    -e.detail.z.toFixed(3)+","+
 	    e.detail._x.toFixed(3)+","+
 	    e.detail._y.toFixed(3)+","+
 	    e.detail._z.toFixed(3)+","+
 	    e.detail._w.toFixed(3)+
-	    ",0,0,0,#000000,on";
+	    ",0,0,0,"+color+",on";
 
 	// suppress duplicates
 	if (msg !== oldMsg) {
@@ -124,6 +127,28 @@ function onMessageArrived(message) {
 	//console.log("componentName", componentName);
 	//console.log("sceneObject", sceneObject);
 
+	if (sceneObject === camName) {
+	    var coords = message.payloadString.split(",");
+
+	    var x    = coords[0]; var y    = coords[1]; var z    = coords[2];
+	    var xrot = coords[3]; var yrot = coords[4]; var zrot = coords[5]; var wrot = coords[6];
+
+	    var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
+	    var euler = new THREE.Euler();
+	    var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
+	    var vec = foo.toVector3();
+	    var eulerx = -THREE.Math.radToDeg(vec.x);
+	    var eulery = -THREE.Math.radToDeg(vec.y);
+	    var eulerz = THREE.Math.radToDeg(vec.z);
+
+	    cameraRig.setAttribute('position', x + ' ' + y + ' ' + (0 - z));
+	    cameraRig.setAttribute('rotation', eulerx + ' ' + eulery + ' ' + eulerz);
+
+	    console.log("cameraRig update: ", cameraRig);
+	    
+	    break;
+	}
+
 	var entityEl = sceneObjects[sceneObject];
 	
 	//console.log("payloadstring", message.payloadString);
@@ -135,6 +160,7 @@ function onMessageArrived(message) {
 	    }
 	    else { // raw, don't parse the format. e.g. "url(http://oz.org/Modelfile.glb)"
 		//console.log("unparsed", message.payloadString);
+
 		entityEl.setAttribute(componentName, message.payloadString);
 	    }
 	}
@@ -190,9 +216,38 @@ function onMessageArrived(message) {
 
 		if (type === "camera") {
 		    // Create a thin black box for now = "camera"
+		    /*
 		    entityEl.setAttribute('geometry', 'primitive', 'box');
 		    entityEl.setAttribute('scale', 0.1 + ' ' + 0.3 + ' ' + 1);
 		    entityEl.setAttribute('material', 'color', "#000000");
+		    */
+		    entityEl.setAttribute('scale', 4 + ' ' + 4 + ' ' + 4);
+		    entityEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
+
+		    // place a colored box above the head
+		    var headtext = document.createElement('a-text');
+		    var uuid = name.split("-");
+		    var camid = uuid[uuid.length-1];
+		    
+		    headtext.setAttribute('value', camid);
+		    headtext.setAttribute('position', 0 + ' ' + 0.15 + ' ' + -0.1);
+		    headtext.setAttribute('scale', 0.2 + ' ' + 0.2 + ' ' + 0.2);
+
+		    var headBox = document.createElement('a-entity');
+		    headBox.setAttribute('geometry', 'primitive', 'box');
+		    headBox.setAttribute('position', 0 + ' ' + 0.15 + ' ' + -0.1);
+		    headBox.setAttribute('scale', 0.02 + ' ' + 0.02 + ' ' + 0.02);
+		    headBox.setAttribute('material', 'color', color);
+
+		    entityEl.appendChild(headBox);
+//		    entityEl.appendChild(headtext);
+
+		    // how set texture???
+		    //entityEl.setAttribute("src", "url(CONIX.jpg)");
+		    //var color = '#'+Math.floor(Math.random()*16777215).toString(16);
+		    //entityEl.setAttribute('shader', 'standard');
+		    //entityEl.setAttribute('material', 'color', color);
+		    
 		    console.log("their camera:", entityEl);
 		}
 
@@ -211,11 +266,12 @@ function onMessageArrived(message) {
 		entityEl.setAttribute('material', 'color', color);
 		break;
 	    case "camera":
-		// no changes but position & rotation later
+		// HACK: our "head" (camera) model faces the wrong direction
+		eulery = 180 - eulery;
 		break;
 	    case "gltf-model":
 		// freak case: use color field for URL
-		//entityEl.setAttribute('geometry', 'primitive', type);
+		//entityEl.setAttribute('geometry', 'primitive', type); // this breaks things
 		entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
 		entityEl.setAttribute("gltf-model", color);		
 		break;
@@ -233,6 +289,7 @@ function onMessageArrived(message) {
 	    //entityEl.object3D.quaternion.set(xrot,yrot,zrot,wrot);
 
 	    entityEl.setAttribute('rotation', eulerx + ' ' + eulery + ' ' + eulerz);
+
 
 	    //    console.log("geometry: ", entityEl.getAttribute('geometry'));
 	    //console.log("position:" ,entityEl.getAttribute('position'));

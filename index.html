@@ -2,11 +2,14 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Hello AFrame with MQTT!</title>
+    <title>ARENA</title>
     <meta name="description" content="Hello world!">
     <!-- the AFrame script library (minified) -->
     <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
+    <!-- these look useful but also incomprehensible documentation -->
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.min.js"></script>
+    <!-- pretty backgrounds -->
+    <script src="aframe-environment-component.min.js"></script>
     <!-- the camera change event listener helper -->
     <script src="events.js"></script>
     <!-- the MQTT.js library -->
@@ -45,17 +48,18 @@
     <a-asset-item id="windows-mtl" src="./models/windows.mtl"></a-asset-item>
     <a-asset-item id="wings-obj" src="./models/wings.obj"></a-asset-item>
     <a-asset-item id="wings-mtl" src="./models/wings.mtl"></a-asset-item>
-
-    <a-asset-itiem id="duck" src="Duck.glb"></a-asset-item>
-    -->
+-->
 
 </a-assets>
 
-  <a-sky radius="5000" color="#314D79"></a-sky>
+<!--  <a-sky radius="5000" color="#000000"></a-sky> -->
+<a-entity environment="preset: starry; groundTexture: 'none';"></a-entity>
   <a-entity position="0 1 4" id="CameraRig">
     <a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
       <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener>
+	<!--
         <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
+	-->
       </a-camera>
     </a-entity>
   </a-entity>
@@ -91,11 +95,14 @@
     <a-entity name="wings" obj-model="obj: #wings-obj; mtl: #wings-mtl"></a-entity>
   </a-entity>
   -->
-<!-- LIGHTS
   <a-light position="-0.93 1.58 -1.14" name="PointLight 1" type="point" color="#9090AD" intensity="0.75"></a-light>
   <a-light position="-0.272 0.39 1.25" name="PointLight 2" type="point" color="#C2E6C7"></a-light>
   <a-light name="AmbientLight" type="ambient" color="#363942"></a-light>
--->
+<!--
+  
+<a-entity light="type: ambient; color: #BBB"></a-entity>
+<a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
+  -->
 </a-scene>
 </body>
 </html>
