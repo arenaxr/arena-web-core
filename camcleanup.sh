@@ -1,7 +1,14 @@
-while true; do
-    var=`mosquitto_sub -v -h oz -t /topic/render/# -C 1 | awk '{ print $1 }'`
-    if grep -q "camera" <<<"$var"; then
-	echo "Removing " $var
-	mosquitto_pub -h oz.andrew.cmu.edu -t $var -r -m ""
+#/bin/bash -x
+for f in `mosquitto_sub -v -h oz -C 7 -t /topic/render/# | awk '{ print $1 }'`; do
+#    echo $f
+    if grep -q "camera" <<<"$f"; then
+	echo "Removing " $f
+	mosquitto_pub -h oz.andrew.cmu.edu -t $f -r -m ""
+	#	mosquitto_pub -h oz.andrew.cmu.edu -t $var -r -m ""
+    fi
+    if grep -q "rig" <<<"$f"; then
+	echo "Removing " $f
+	mosquitto_pub -h oz.andrew.cmu.edu -t $f -r -m ""
+	#	mosquitto_pub -h oz.andrew.cmu.edu -t $var -r -m ""
     fi
 done

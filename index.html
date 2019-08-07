@@ -54,17 +54,18 @@
 
 <!--  <a-sky radius="5000" color="#000000"></a-sky> -->
 <a-entity environment="preset: starry; groundTexture: 'none';"></a-entity>
-  <a-entity position="0 1 4" id="CameraRig">
+  <a-entity position="0 0 0" id="CameraRig">
     <a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
       <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener>
 	<!--
         <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
+	<a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>
 	-->
       </a-camera>
     </a-entity>
   </a-entity>
   
-  <a-entity position="-1.149 0.31 0" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
+  <a-entity position="-1.149 0.31 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
 
   <!-- duck examples
   <a-entity position="1 2 3" id="theduck" name="duckname" gltf-model="#duck"></a-entity>
