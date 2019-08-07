@@ -66,6 +66,10 @@ Persist a red light to the scene
 ```
 mosquitto_pub -t /topic/render/light_3 -r -h oz.andrew.cmu.edu -m "light_3,1,1,1,0.25,0.25,0,1,1,1,1,#FF0000,on"
 ```
+Draw a purple line from (0,0,0) to (1,1,1)
+```
+mosquitto_pub -t /topic/render/line_1 -h oz.andrew.cmu.edu -m "line_1,1,1,1,0,0,0,1,1,1,1,#CE00FF,on"
+```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
