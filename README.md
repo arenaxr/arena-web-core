@@ -23,19 +23,23 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  
  Instantiate a cube and set all it's basic parameters
 ```
-mosquitto_pub -r -h oz -t /topic/render/cube_1 -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
+mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 ```
 change only the color of the already-drawn cube
 ```
-mosquitto_pub -h oz -t /topic/render/cube_1/material/color -m '#00AA00'
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/material/color -m '#00AA00'
 ```
 move the position of the already drawn cube
 ```
-mosquitto_pub -h oz -t /topic/render/cube_1/position -m "x:1; y:2; z:3;"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/position -m "x:1; y:2; z:3;"
 ```
 rotate the already drawn cube
 ```
-mosquitto_pub -h oz -t /topic/render/cube_1/rotation -m "x:1; y:2; z:3;"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/rotation -m "x:1; y:2; z:3;"
+```
+animate rotation of the already drawn cube
+```
+mosquitto_pub -r -t /topic/render/cube_1/animation -h oz.andrew.cmu.edu -m "property: rotation; to: 0 360 0; loop: true; dur: 10000"
 ```
 Instantiate a wacky torusKnot, then turn it blue
 ```
@@ -46,9 +50,9 @@ Instantiate a glTF v2.0 binary model (file extension .glb) from a URL
 ```
 mosquitto_pub -r -h oz -t /topic/render/gltf-model_1 -m "gltf-model_1,0,0,0,0,0,0,0,1,1,1,url(models/Duck.glb),on"
 ```
-Warp the camera to a new coordinate (system)
+Warp the camera with ID camera_5432 to a new coordinate (system)
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/camera_73B0B20D-4E12-4A46-83FB-0A71FEFA2163/rig -m "3,3,0,0,0,0,0"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/camera_5432/rig -m "3,3,0,0,0,0,0"
 ```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)
