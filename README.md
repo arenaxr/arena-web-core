@@ -21,7 +21,7 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  
  ## Update 7/29/19: general purpose AFrame using Subtopics
  
- Instantiate a cube and set all it's basic parameters
+ Instantiate, persist a cube and set all it's basic parameters
 ```
 mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 ```
@@ -41,6 +41,10 @@ animate rotation of the already drawn cube
 ```
 mosquitto_pub -r -t /topic/render/cube_1/animation -h oz.andrew.cmu.edu -m "property: rotation; to: 0 360 0; loop: true; dur: 10000"
 ```
+remove the cube
+```
+mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m ""
+```
 Instantiate a wacky torusKnot, then turn it blue
 ```
 mosquitto_pub -r -h oz -t /topic/render/torusKnot_1 -m "torusKnot_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
@@ -53,6 +57,14 @@ mosquitto_pub -r -h oz -t /topic/render/gltf-model_1 -m "gltf-model_1,0,0,0,0,0,
 Warp the camera with ID camera_5432 to a new coordinate (system)
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/camera_5432/rig -m "3,3,0,0,0,0,0"
+```
+Add some text that says "Hello World"
+```
+mosquitto_pub -t /topic/render/text_3 -r -h oz.andrew.cmu.edu -m "text_3,1,1,1,0,0,0,1,1,1,1,Hello World,on"
+```
+Persist a red light to the scene
+```
+mosquitto_pub -t /topic/render/light_3 -r -h oz.andrew.cmu.edu -m "light_3,1,1,1,0.25,0.25,0,1,1,1,1,#FF0000,on"
 ```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)
