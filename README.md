@@ -80,7 +80,11 @@ mosquitto_pub -t /topic/render/light_3 -r -h oz.andrew.cmu.edu -m "light_3,1,1,1
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
 ```
-mosquitto_pub -t /topic/render/line_1 -h oz.andrew.cmu.edu -m "line_1,2,2,2,3,3,3,0,0,0,0,#CE00FF,on"
+mosquitto_pub -t /topic/render/line_1 -r -h oz.andrew.cmu.edu -m "line_1,2,2,2,3,3,3,0,0,0,0,#CE00FF,on"
+```
+Extend the line with a new segment, colored green
+```
+mosquitto_pub -t /topic/render/line_1/line__2 -r -h oz.andrew.cmu.edu -m "start: 3 3 3; end: 4 4 4; color: #00FF00"
 ```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)  
