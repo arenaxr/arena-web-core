@@ -35,6 +35,11 @@ function onConnect() {
     var myCam = document.getElementById('my-camera');
     cameraRig = document.getElementById('CameraRig');
     conixBox = document.getElementById('Box-obj');
+    environs = document.getElementById('env');
+
+    // make 'env' a scene object so it can be modified
+    // Add it to our dictionary of scene objects
+    sceneObjects['env'] = environs;
 
     var boxtext = document.createElement('a-text');
     
@@ -84,7 +89,7 @@ function onConnect() {
     window.onbeforeunload = function(){
 	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, "");
-    }
+    }    
 
     // ok NOW start listening for MQTT messages
     client.subscribe(renderTopic);
@@ -123,10 +128,10 @@ function onMessageArrived(message) {
     var topic = dest.split("/");
     
     // Depending on topic depth, three cases
-    var topicChildObject = renderTopic.split("/").length + 3;
-    var topicMultiProperty = renderTopic.split("/").length + 2;
-    var topicSingleComponent = renderTopic.split("/").length + 1;
-    var topicAtomicUpdate = renderTopic.split("/").length;
+    var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
+    var topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
+    var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
+    var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
     //console.log(message.payloadString);
     //console.log (topic.length, "<- topic.length");
     
@@ -152,7 +157,10 @@ function onMessageArrived(message) {
 	    console.log("Error: " + sceneObject + " not in sceneObjects");
 	break;
     case topicSingleComponent:
-	// single component update, e.g: topic/render/cube_1/position "x:1; y:2; z:3;"
+	// single component update, e.g: /topic/render/cube_1/position "x:1; y:2; z:3;"
+	//                               /topic/render/line_1/line__2 "start: 3 3 3; end: 4 4 4; color: #00ff00"
+	//                               /topic/render/camera_1234/rig "1,2,3,0,0,0,0"
+	
 	var componentName = topic[topic.length - 1]; // the parameter to modify
 	var sceneObject   = topic[topic.length - 2]; // the object with the parameter
 	//console.log("componentName", componentName);
@@ -192,22 +200,32 @@ function onMessageArrived(message) {
 	    }
 	    else { // raw, don't parse the format. e.g. "url(http://oz.org/Modelfile.glb)"
 		//console.log("unparsed", message.payloadString);
-
-		entityEl.setAttribute(componentName, message.payloadString);
+		if (componentName === "click") {
+		    var splits = message.payloadString.split(',');
+		    var point = new THREE.Vector3(splits[0], splits[1], splits[2]);
+		    var myEvent = new CustomEvent('click',
+						  { detail:
+						    { intersection: point }
+						  });
+		    entityEl.emit(myEvent);
+		}
+		else {
+		    entityEl.setAttribute(componentName, message.payloadString);
+		}
 	    }
 	}
 	else
 	    console.log("Error: " + sceneObject + " not in sceneObjects");
 	break;
     case topicAtomicUpdate:
-	var sceneEl = document.querySelector('a-scene');
+	var sceneObject = document.querySelector('a-scene');
 
 	if (message.payloadString.length === 0) {
 	    var name = topic[topic.length - 1]; // the object with the parameter
 	    //console.log(message.payloadString, topic, name);
 
 	    if (sceneObjects[name]) {
-		sceneEl.removeChild(sceneObjects[name]);
+		sceneObject.removeChild(sceneObjects[name]);
 		delete sceneObjects[name];
 		return;
 	    } else console.log("Error: " + name + " not in sceneObjects");
@@ -244,7 +262,7 @@ function onMessageArrived(message) {
 
 	if (onoff === "off") {
 	    if (sceneObjects[name]) {
-		sceneEl.removeChild(sceneObjects[name]);
+		sceneObject.removeChild(sceneObjects[name]);
 		delete sceneObjects[name];
 	    } else console.log("Error: " + name + " not in sceneObjects");
 	} else {
@@ -264,7 +282,7 @@ function onMessageArrived(message) {
 		    childEl.setAttribute('scale', 4 + ' ' + 4 + ' ' + 4);
 		    childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
 
-		    // place a colored box above the head
+		    // place a colored text above the head
 		    var headtext = document.createElement('a-text');
 		    
 		    headtext.setAttribute('value', name);
@@ -280,7 +298,7 @@ function onMessageArrived(message) {
 		    //console.log("their camera:", entityEl);
 		}
 
-		sceneEl.appendChild(entityEl);
+		sceneObject.appendChild(entityEl);
 		
 		// Add it to our dictionary of scene objects
 		sceneObjects[name] = entityEl;
