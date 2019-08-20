@@ -8,6 +8,13 @@ var camName = "";
 var oldMsg = "";
 var cameraRig;
 
+// Depending on topic depth, four message categories
+var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
+var topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
+var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
+var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
+var Scene;
+
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
@@ -37,21 +44,22 @@ function onConnect() {
     conixBox = document.getElementById('Box-obj');
     environs = document.getElementById('env');
 
-    // make 'env' a scene object so it can be modified
-    // Add it to our dictionary of scene objects
+    // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
+    // Add them to our dictionary of scene objects
     sceneObjects['env'] = environs;
+    sceneObjects['Box-obj'] = conixBox;
 
-    var boxtext = document.createElement('a-text');
-    
+    // example to create a text field atop a box
+//    var boxtext = document.createElement('a-text');
     //boxtext.setAttribute('value', name);
-    boxtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
-    boxtext.setAttribute('side', "double");
-    boxtext.setAttribute('align', "center");
-    boxtext.setAttribute('anchor', "center");
-    boxtext.setAttribute('rotation', 0 + ' ' + 225 + ' ' + 0);
-    boxtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
+//    boxtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
+//    boxtext.setAttribute('side', "double");
+//    boxtext.setAttribute('align', "center");
+//    boxtext.setAttribute('anchor', "center");
+//    boxtext.setAttribute('rotation', 0 + ' ' + 225 + ' ' + 0);
+//    boxtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
     //boxtext.setAttribute('color', color); // color
-    conixBox.appendChild(boxtext);
+//    conixBox.appendChild(boxtext);
 
     console.log('my-camera: ',timeID);
     console.log('cameraRig: ', cameraRig);
@@ -89,7 +97,9 @@ function onConnect() {
     window.onbeforeunload = function(){
 	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, "");
-    }    
+    }
+
+    Scene = document.querySelector('a-scene');
 
     // ok NOW start listening for MQTT messages
     client.subscribe(renderTopic);
@@ -127,15 +137,11 @@ function onMessageArrived(message) {
     }
     var topic = dest.split("/");
     
-    // Depending on topic depth, three cases
-    var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
-    var topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
-    var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
-    var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
     //console.log(message.payloadString);
     //console.log (topic.length, "<- topic.length");
     
     switch (topic.length) {
+
     case topicMultiProperty:
 	// Multi-property component update, e.g: topic/render/cube_1/material/color "#FFFFFF"
 	var propertyName  = topic[topic.length - 1]; // e.g. 'color'
@@ -156,6 +162,7 @@ function onMessageArrived(message) {
 	else
 	    console.log("Error: " + sceneObject + " not in sceneObjects");
 	break;
+
     case topicSingleComponent:
 	// single component update, e.g: /topic/render/cube_1/position "x:1; y:2; z:3;"
 	//                               /topic/render/line_1/line__2 "start: 3 3 3; end: 4 4 4; color: #00ff00"
@@ -202,12 +209,22 @@ function onMessageArrived(message) {
 		//console.log("unparsed", message.payloadString);
 		if (componentName === "click") {
 		    var splits = message.payloadString.split(',');
-		    var point = new THREE.Vector3(splits[0], splits[1], splits[2]);
-		    var myEvent = new CustomEvent('click',
-						  { detail:
-						    { intersection: point }
-						  });
-		    entityEl.emit(myEvent);
+		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
+						    parseFloat(splits[1]),
+						    parseFloat(splits[2]));
+//		    var myEvent = new CustomEvent('click',
+//						  { detail:
+//						    { intersection:
+//						      {
+//							  point: myPoint }
+//						    }
+//						  });
+
+		    //entityEl.emit(myEvent, null, true);
+		    entityEl.emit('click', { intersection:
+					     {
+						 point: myPoint }
+					   }, true);
 		}
 		else {
 		    entityEl.setAttribute(componentName, message.payloadString);
@@ -217,15 +234,14 @@ function onMessageArrived(message) {
 	else
 	    console.log("Error: " + sceneObject + " not in sceneObjects");
 	break;
-    case topicAtomicUpdate:
-	var sceneObject = document.querySelector('a-scene');
 
+    case topicAtomicUpdate:
 	if (message.payloadString.length === 0) {
 	    var name = topic[topic.length - 1]; // the object with the parameter
 	    //console.log(message.payloadString, topic, name);
 
 	    if (sceneObjects[name]) {
-		sceneObject.removeChild(sceneObjects[name]);
+		Scene.removeChild(sceneObjects[name]);
 		delete sceneObjects[name];
 		return;
 	    } else console.log("Error: " + name + " not in sceneObjects");
@@ -262,7 +278,7 @@ function onMessageArrived(message) {
 
 	if (onoff === "off") {
 	    if (sceneObjects[name]) {
-		sceneObject.removeChild(sceneObjects[name]);
+		Scene.removeChild(sceneObjects[name]);
 		delete sceneObjects[name];
 	    } else console.log("Error: " + name + " not in sceneObjects");
 	} else {
@@ -298,7 +314,7 @@ function onMessageArrived(message) {
 		    //console.log("their camera:", entityEl);
 		}
 
-		sceneObject.appendChild(entityEl);
+		Scene.appendChild(entityEl);
 		
 		// Add it to our dictionary of scene objects
 		sceneObjects[name] = entityEl;
@@ -342,12 +358,14 @@ function onMessageArrived(message) {
 		break;
 	    }
 
-	    // Common for all: set position & rotation
-	    //    entityEl.object3D.position.set(x,y,z);
-	    entityEl.setAttribute('position', x + ' ' + y + ' ' +  z);
 	    //entityEl.object3D.quaternion.set(xrot,yrot,zrot,wrot);
 
-	    entityEl.setAttribute('rotation', eulerx + ' ' + eulery + ' ' + eulerz);
+	    if (type !== 'line') {
+		// Common for all but lines: set position & rotation
+		//    entityEl.object3D.position.set(x,y,z);
+		entityEl.setAttribute('position', x + ' ' + y + ' ' +  z);
+		entityEl.setAttribute('rotation', eulerx + ' ' + eulery + ' ' + eulerz);
+	    }
 
 	    //    console.log("geometry: ", entityEl.getAttribute('geometry'));
 	    //console.log("position:" ,entityEl.getAttribute('position'));
@@ -356,8 +374,7 @@ function onMessageArrived(message) {
 	}
 	break;
     default:
-	console.log("EMPTY MESSAGE?");
-	console.log(message.payloadstring);
+	console.log("EMPTY MESSAGE?", dest, message.payloadstring);
 	break;
     }
 }

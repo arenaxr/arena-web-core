@@ -21,8 +21,6 @@
   <body>
 <a-scene name="MQTTScene">
   <a-assets>
-    <a-asset-item id="body-obj" src="./models/body.obj"></a-asset-item>
-    <a-asset-item id="body-mtl" src="./models/body.mtl"></a-asset-item>
     <a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
     <a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
 
@@ -50,18 +48,21 @@
     <a-asset-item id="wings-obj" src="./models/wings.obj"></a-asset-item>
     <a-asset-item id="wings-mtl" src="./models/wings.mtl"></a-asset-item>
     <video id="vrvideo" autoplay loop="true" src="vr.mp4"></video>
-    -->
+
     <video id="vrvideo" autoplay loop="true" src="audio.mp4"></video>
-    
+    -->    
 </a-assets>
 
 <!--  <a-sky radius="5000" color="#000000"></a-sky> -->
 <a-entity id="env" environment="preset: starry; groundTexture: 'none';"></a-entity>
   <a-entity position="0 0 0" id="CameraRig">
     <a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
-      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
+      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener> <!-- mouse-cursor> -->
+<!--
         <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
+
 	<a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>
+-->
       </a-camera>
     </a-entity>
   </a-entity>
@@ -69,7 +70,9 @@
   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
 -->
   <!-- CONIX cube -->
-  <a-entity click-listener position="-1.149 0.31 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
+  <a-entity click-listener position="-1.149 0.31 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+  </a-entity>
+    <a-text id="conix-text" position="-1.149 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
   <!-- duck examples
   <a-entity position="1 2 3" id="theduck" name="duckname" gltf-model="#duck"></a-entity>
