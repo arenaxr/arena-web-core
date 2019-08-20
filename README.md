@@ -91,6 +91,11 @@ Add the "click-listener" event to a scene object; click-listener is a Component 
 ```
 mosquitto_pub -t /topic/render/cube_1/click-listener -m ""
 ```
+#### Background themes
+Adds one of many predefined backgrounds ( one of: [ none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris]) to the scene
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/env/environment -m "preset: XXX"
+```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)  
 The naming convention for a scene object identifier such as `line_1` is that the part before the underscore is the name of the A-Frame entity, and the part after the underscore is a unique identifier to differentiate from other entities (of the same type) in the scene.
