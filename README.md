@@ -96,6 +96,13 @@ Adds one of many predefined backgrounds ( one of: [ none, default, contact, egyp
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/env/environment -m "preset: XXX"
 ```
+#### Particles
+This requires importing yet another javascript code blob, see https://www.npmjs.com/package/aframe-particle-system-component  
+Done in two parts; first render the holder object for particles, then populate it
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1 -m "particle_1,0,0,0,0,0,0,1,1,1,1,#FFEEAA,on"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1/particle-system -m "preset: snow"
+```
 
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)  
 The naming convention for a scene object identifier such as `line_1` is that the part before the underscore is the name of the A-Frame entity, and the part after the underscore is a unique identifier to differentiate from other entities (of the same type) in the scene.
