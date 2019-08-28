@@ -2,8 +2,25 @@ const timeID = new Date().getTime() % 10000;
 const client = new Paho.MQTT.Client("oz.andrew.cmu.edu", Number(9001), "myClientId" + timeID);
 var sceneObjects = new Object(); // This will be an associative array of strings and objects
 
-const renderTopic = "/topic/render/#";
-const outputTopic = "/topic/render/";
+var queryString = window.location.search;
+queryString = queryString.substring(1);
+console.log(queryString);
+const sceneTopic = queryString;
+
+var renderTopic=""
+var outputTopic=""
+if (sceneTopic !== "") {
+    renderTopic = "/topic/render/"+sceneTopic+"/#";
+    outputTopic = "/topic/render/"+sceneTopic;
+} else {
+    renderTopic = "/topic/render/#";
+    outputTopic = "/topic/render";
+}
+
+console.log(window.location);
+console.log(renderTopic);
+console.log(outputTopic);
+
 var camName = "";
 var oldMsg = "";
 var cameraRig;
@@ -21,9 +38,9 @@ client.onMessageArrived = onMessageArrived;
 console.log("time: " , timeID);
 camName = "camera_" + timeID;
 
-// Last Will and Testament to be filled in once we know our camera ID
+// Last Will and Testament message sent to subscribers if this client loses connection
 var lwt = new Paho.MQTT.Message("");
-lwt.destinationName = outputTopic+camName;
+lwt.destinationName = outputTopic+"/"+camName;
 lwt.qos = 0;
 lwt.retained = true;
 
@@ -69,7 +86,7 @@ function onConnect() {
     // Publish initial camera presence
     var color = '#'+Math.floor(Math.random()*16777215).toString(16);
     var mymsg = camName+",0,1.6,0,0,0,0,0,0,0,0,"+color+",on";
-    publish_retained(outputTopic+camName, mymsg);
+    publish(outputTopic+"/"+camName, mymsg);
     console.log("my-camera element", myCam);
 
     myCam.addEventListener('poseChanged', e => {
@@ -86,7 +103,7 @@ function onConnect() {
 
 	// suppress duplicates
 	if (msg !== oldMsg) {
-	    publish_retained(outputTopic+camName, msg);
+	    publish(outputTopic+"/"+camName, msg);
 	    oldMsg = msg;
 	    //console.log("cam moved: ",outputTopic+camName, msg);
 	}
@@ -95,7 +112,7 @@ function onConnect() {
     
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
-	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
+	publish(outputTopic+"/"+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, "");
     }
 
@@ -160,7 +177,7 @@ function onMessageArrived(message) {
 	if (entityEl)
 	    AFRAME.utils.entity.setComponentProperty(entityEl, componentName+'.'+propertyName, message.payloadString);
 	else
-	    console.log("Error: " + sceneObject + " not in sceneObjects");
+	    console.log("Warning: " + sceneObject + " not in sceneObjects");
 	break;
 
     case topicSingleComponent:
@@ -183,14 +200,14 @@ function onMessageArrived(message) {
 	    var euler = new THREE.Euler();
 	    var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
 	    var vec = foo.toVector3();
-	    var eulerx = THREE.Math.radToDeg(vec.x);
-	    var eulery = THREE.Math.radToDeg(vec.y);
-	    var eulerz = THREE.Math.radToDeg(vec.z);
+	    //var eulerx = THREE.Math.radToDeg(vec.x);
+	    //var eulery = THREE.Math.radToDeg(vec.y);
+	    //var eulerz = THREE.Math.radToDeg(vec.z);
 
 	    console.log("cameraRig update: ", cameraRig);
 	    
-	    cameraRig.setAttribute('position', x      + ' ' + y      + ' ' + z     );
-	    cameraRig.setAttribute('rotation', eulerx + ' ' + eulery + ' ' + eulerz);
+	    cameraRig.object3D.position.set(x,y,z);
+	    cameraRig.object3D.rotation.set(vec.x,vec.y,vec.z);
 //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
 
 	    break;
@@ -232,7 +249,7 @@ function onMessageArrived(message) {
 	    }
 	}
 	else
-	    console.log("Error: " + sceneObject + " not in sceneObjects");
+	    console.log("Warning: " + sceneObject + " not in sceneObjects");
 	break;
 
     case topicAtomicUpdate:
@@ -244,7 +261,7 @@ function onMessageArrived(message) {
 		Scene.removeChild(sceneObjects[name]);
 		delete sceneObjects[name];
 		return;
-	    } else console.log("Error: " + name + " not in sceneObjects");
+	    } else console.log("Warning: " + name + " not in sceneObjects");
 	    return;
 	}
 	// parse string
@@ -265,9 +282,9 @@ function onMessageArrived(message) {
 	var euler = new THREE.Euler();
 	var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
 	var vec = foo.toVector3();
-	var eulerx = THREE.Math.radToDeg(vec.x);
-	var eulery = THREE.Math.radToDeg(vec.y);
-	var eulerz = THREE.Math.radToDeg(vec.z);
+	//var eulerx = THREE.Math.radToDeg(vec.x);
+	//var eulery = THREE.Math.radToDeg(vec.y);
+	//var eulerz = THREE.Math.radToDeg(vec.z);
 	
 	var xscale = res[8]; var yscale = res[9]; var zscale = res[10];
 	if (type === "cylinder") { yscale = yscale * 4; };
@@ -280,7 +297,7 @@ function onMessageArrived(message) {
 	    if (sceneObjects[name]) {
 		Scene.removeChild(sceneObjects[name]);
 		delete sceneObjects[name];
-	    } else console.log("Error: " + name + " not in sceneObjects");
+	    } else console.log("Warning: " + name + " not in sceneObjects");
 	} else {
 	    var entityEl;
 	    if (name in sceneObjects) {
@@ -295,7 +312,7 @@ function onMessageArrived(message) {
 		if (type === "camera") {
 		    childEl = document.createElement('a-entity');
 		    childEl.setAttribute('rotation', 0+' '+180+' '+0);
-		    childEl.setAttribute('scale', 4 + ' ' + 4 + ' ' + 4);
+		    childEl.object3D.scale.set(4,4,4);
 		    childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
 
 		    // place a colored text above the head
@@ -335,10 +352,14 @@ function onMessageArrived(message) {
 		entityEl.setAttribute('line', 'end', xrot + ' ' + yrot + ' ' + zrot);
 		entityEl.setAttribute('line', 'color', color);
 		break;
+	    case "particle":
+		// two part operation: part 1, create an entity at a position /topic/render/particle_1 -m "particle_1,1,1,1,0,0,0,1,1,1,1,#abcdef,on"
+		// then set it's particle-system attribute later e.g. /topic/render/particle_1/particle-system -m "preset: snow"
+		entityEl.object3D.position.set(x, y, z);
+		break;		
 	    case "gltf-model":
-		// freak case: use color field for URL
-		//entityEl.setAttribute('geometry', 'primitive', type); // this breaks things
-		entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
+		// overload: store URL in #color field
+		entityEl.object3D.scale.set(xscale, yscale, zscale);
 		entityEl.setAttribute("gltf-model", color);		
 		break;
 	    case "text":
@@ -352,8 +373,7 @@ function onMessageArrived(message) {
 		break;
 	    default:
 		entityEl.setAttribute('geometry', 'primitive', type);
-		//entityEl.object3D.scale.set(xscale,yscale,zscale);
-		entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
+		entityEl.object3D.scale.set(xscale,yscale,zscale);
 		entityEl.setAttribute('material', 'color', color);
 		break;
 	    }
@@ -362,9 +382,8 @@ function onMessageArrived(message) {
 
 	    if (type !== 'line') {
 		// Common for all but lines: set position & rotation
-		//    entityEl.object3D.position.set(x,y,z);
-		entityEl.setAttribute('position', x + ' ' + y + ' ' +  z);
-		entityEl.setAttribute('rotation', eulerx + ' ' + eulery + ' ' + eulerz);
+		entityEl.object3D.position.set(x,y,z);
+		entityEl.object3D.rotation.set(vec.x,vec.y,vec.z);
 	    }
 
 	    //    console.log("geometry: ", entityEl.getAttribute('geometry'));
