@@ -72,10 +72,19 @@ Add some text that says "Hello World"
 ```
 mosquitto_pub -t /topic/render/text_3 -r -h oz.andrew.cmu.edu -m "text_3,1,1,1,0,0,0,1,1,1,1,Hello World,on"
 ```
+Change arbitrary text properties ( https://aframe.io/docs/0.9.0/components/text.html#properties ) for example, material.color:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/text_1/material -m "color: blue"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/text_1/material -m "color: #FF0000"
+```
 #### Lights
 Persist a red light to the scene
 ```
 mosquitto_pub -t /topic/render/light_3 -r -h oz.andrew.cmu.edu -m "light_3,1,1,1,0.25,0.25,0,1,1,1,1,#FF0000,on"
+```
+Default is ambient light. To change type, or other light ( https://aframe.io/docs/0.9.0/components/light.html ) parameters, example: change to ambient
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/nick/light_1234/light -m "type: directional" -r
 ```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
