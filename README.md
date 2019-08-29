@@ -19,7 +19,21 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
  
- ## Update 7/29/19: general purpose AFrame using Subtopics
+ ### models/
+ Here are some ready to use models on the server, accessible with the models/modelname.glb parameter:
+```
+2CylinderEngine.glb      BoxAnimated.glb               Corset.glb             MetalRoughSpheres.glb        RiggedSimple.glb           VertexColorTest.glb
+AlphaBlendModeTest.glb   BoxInterleaved.glb            Court.glb              Monster.glb                  Shuttle.glb                WaterBottle.glb
+AnimatedMorphCube.glb    BoxTextured.glb               DamagedHelmet.glb      MorphPrimitivesTest.glb      SmilingFace.glb            anthony.glb
+AnimatedMorphSphere.glb  BoxTexturedNonPowerOfTwo.glb  Drone.glb              MultiUVTest.glb              Snoop.glb                  drone.glb
+AntiqueCamera.glb        BoxVertexColors.glb           Duck.glb               NormalTangentMirrorTest.glb  SpecGlossVsMetalRough.glb  er1k.glb
+Avocado.glb              BrainStem.glb                 GearboxAssy.glb        NormalTangentTest.glb        TextureCoordinateTest.glb  falcon.glb
+BarramundiFish.glb       Buggy.glb                     Head2.glb              OrientationTest.glb          TextureSettingsTest.glb    hololens.glb
+BoomBox.glb              CesiumMan.glb                 InterpolationTest.glb  ReciprocatingSaw.glb         UnlitTest.glb              nuno.glb
+Box.glb                  CesiumMilkTruck.glb           Lantern.glb            RiggedFigure.glb             VC.glb                     toni.glb
+```
+ 
+ ## General Purpose AFrame using Subtopics
  
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
