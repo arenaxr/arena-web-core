@@ -96,7 +96,7 @@ Persist a red light to the scene
 ```
 mosquitto_pub -t /topic/render/light_3 -r -h oz.andrew.cmu.edu -m "light_3,1,1,1,0.25,0.25,0,1,1,1,1,#FF0000,on"
 ```
-Default is ambient light. To change type, or other light ( https://aframe.io/docs/0.9.0/components/light.html ) parameters, example: change to ambient
+Default is ambient light. To change type, or other light ( https://aframe.io/docs/0.9.0/components/light.html ) parameters, example: change to directional. Options: ambient, directional, hemisphere, point, spot
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/nick/light_1234/light -m "type: directional" -r
 ```
