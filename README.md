@@ -5,7 +5,9 @@ Render 3d content in AFrame from MQTT messages
 This code originated as a clone of the demo for a tool that exports a Unity scene as an A-Frame page https://github.com/if1live/unity-scene-web-exporter .
 It was then modified to do real-time updating of scene objects based on another demo ("networked AFrame" https://github.com/networked-aframe/networked-aframe) and using MQTT in a browser https://github.com/reese-long/mqtt-browser-demo 
 
-It now bears very little resemblance to the original, much commented out of `index.html`, and much added. The live ARENA site can be viewed at http://xr.andrew.cmu.edu on most devices.
+It now bears very little resemblance to the original, much commented out of `index.html`, and much added. The live ARENA site can be viewed at http://xr.andrew.cmu.edu on most devices. 
+
+A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such a `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`
 
 ## Files
  * `mqtt.js` - Javascript to subscribe to MQTT topic(s) via wildcard, parse primitive-object messages, and add/remove AFrame Elements to the scene accordingly.
@@ -34,7 +36,7 @@ Box.glb                  CesiumMilkTruck.glb           Lantern.glb            Ri
 ```
  
  ## General Purpose AFrame using Subtopics
- 
+ Most of these take 10 comma separated digits which are x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%)
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
 ```
@@ -72,12 +74,12 @@ mosquitto_pub -r -h oz -t /topic/render/torusKnot_1 -m "torusKnot_1,0,0,0,0,0,0,
 mosquitto_pub -h oz -t /topic/render/torusKnot_1/material/color -m '#0000FF'
 ```
 #### Models
-Instantiate a glTF v2.0 binary model (file extension .glb) from a URL
+Instantiate a glTF v2.0 binary model (file extension .glb) from a URL. 
 ```
 mosquitto_pub -r -h oz -t /topic/render/gltf-model_1 -m "gltf-model_1,0,0,0,0,0,0,0,1,1,1,url(models/Duck.glb),on"
 ```
 #### Relocalize Camera
-Warp the camera with ID camera_5432 to a new coordinate (system)
+Warp the camera with ID camera_5432 to a new coordinate (system). Values are x,y,z, (meters) x,y,z,w (quaternions)
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/camera_5432/rig -m "3,3,0,0,0,0,0"
 ```
