@@ -67,8 +67,12 @@ remove the cube
 ```
 mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m ""
 ```
+#### Images
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/image_2 -m "image_2,0,2,-4,0,0,0,0,2,2,2,images/east.png,on"
+```
 #### Other Primitives: TorusKnot
-Instantiate a wacky torusKnot, then turn it blue
+Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs)
 ```
 mosquitto_pub -r -h oz -t /topic/render/torusKnot_1 -m "torusKnot_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 mosquitto_pub -h oz -t /topic/render/torusKnot_1/material/color -m '#0000FF'
