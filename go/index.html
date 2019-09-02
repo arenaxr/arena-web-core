@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head><font size=6>ARENA Start Page</font><br>
+  </head>
+  <body>
+    Your Name:
+    <input type="text" id="myName"></input><br>
+    Environment Theme:
+    <select id="selectedTheme">
+      <option value="starry">starry</option>
+      <option value="none">none</option>
+      <option value="osiris">osiris</option>
+      <option value="default">default</option>
+      <option value="contact">contact</option>
+      <option value="egypt">egypt</option>
+      <option value="checkerboard">checkerboard</option>
+      <option value="forest">forest</option>
+      <option value="goaland">goaland</option>
+      <option value="yavapai">yavapai</option>
+      <option value="goldmine">goldmine</option>
+      <option value="threetowers">threetowers</option>
+      <option value="poison">poison</option>
+      <option value="arches">arches</option>
+      <option value="tron">tron</option>
+      <option value="japan">japan</option>
+      <option value="dream">dream</option>
+      <option value="volcano">volcano</option>
+    </select><br>
+    Scene: ("render" is the default ARENA scene. Others include "arena-xr", "drone", or create a brand new scene!)<br>
+    <input type=text id="selectedScene" value="render"></input><br>
+<!--
+    Weather:
+    <select id="selectedWeather">
+      <option value="none">none</option>
+      <option value="default">stars</option>
+      <option value="dust">dust</option>
+      <option value="snow">snow</option>
+      <option value="rain">rain</option>
+    </select><br>
+-->
+    <button type="Button" onclick="goThere()">Enter</button>
+    <script>
+      function goThere() {
+      var name = document.getElementById("myName").value;
+      var theme = document.getElementById("selectedTheme").value;
+      var scene = document.getElementById("selectedScene").value;
+
+      <!--var weather = document.getElementById("selectedWeather").value;-->
+      var weather = "none";
+      var theUrl = "http://xr.andrew.cmu.edu?name="+name+"&theme="+theme+"&scene="+scene+"&weather="+weather;
+      
+      console.log("theUrl:", theUrl);
+      window.location.href = theUrl;
+      }
+    </script>
+  </body>
+ </html>
