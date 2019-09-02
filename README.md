@@ -69,8 +69,13 @@ mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m ""
 ```
 #### Images
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/image_2 -m "image_2,0,2,-4,0,0,0,0,2,2,2,images/east.png,on"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/image_2 -m "image_2,0,2,-4,0,0,0,0,2,2,2,images/2.png,on"
 ```
+Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modifications to materials that have the same bitmap ("src") parameter as some kind of performance boost. But a message like this (after one like the previous) can set the tiling (repeat 4 times along X and Y axes), if you maybe play with the bitmap:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/drone/image_2/material -m "src:images/2.png; repeat: 4 4" -r
+```
+Need to try URLs instead of `images/2.png` to see if we can point to a bitmap at an arbitrary URL.
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs)
 ```
