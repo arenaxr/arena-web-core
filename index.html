@@ -6,9 +6,9 @@
     <title>ARENA</title>
     <meta name="description" content="Hello world!">
     <!-- the AFrame script library (minified) -->
-    <script src="https://aframe.io/releases/0.9.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/0.9.0/aframe.js"></script>
     <!-- these look useful but also incomprehensible documentation -->
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.min.js"></script>
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script>
     <!-- pretty backgrounds -->
     <script src="aframe-environment-component.min.js"></script>
     <!-- the camera change event listener helper -->
@@ -17,8 +17,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
     <!-- our mqtt.js script -->
     <script src="./mqtt.js" type="text/javascript"></script>
-    <!-- particles dude-->
+    <!-- particles dude  
     <script src="aframe-particle-system-component.min.js"></script>
+-->
   </head>
   <body>
 <a-scene name="MQTTScene"> <!-- stats -->
@@ -58,10 +59,14 @@
 
 <!--  <a-sky radius="5000" color="#000000"></a-sky> -->
 <a-entity id="env" environment="preset: starry; groundTexture: 'none';"></a-entity>
-  <a-entity position="0 0 0" id="CameraRig">
+
+<a-entity position="0 2.25 -4" id="weather" particle-system="preset: dust" enabled="false"></a-entity>
+
+  <a-entity position="0 0 0" id="CameraRig" movement-controls="fly: true; speed=0.3">
     <a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
-      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
+      <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true" look-controls pose-listener mouse-cursor>
 <!--
+      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
         <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
 -->
 	<a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>

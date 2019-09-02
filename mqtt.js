@@ -4,26 +4,41 @@ var sceneObjects = new Object(); // This will be an associative array of strings
 
 var queryString = window.location.search;
 queryString = queryString.substring(1);
-console.log(queryString);
 const sceneTopic = queryString;
 
-var renderTopic=""
-var outputTopic=""
-if (sceneTopic !== "") {
-    renderTopic = "/topic/render/"+sceneTopic+"/#";
-    outputTopic = "/topic/render/"+sceneTopic;
-} else {
-    renderTopic = "/topic/render/#";
-    outputTopic = "/topic/render";
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+	vars[key] = value;
+    });
+    return vars;
+}
+function getUrlParam(parameter, defaultvalue){
+    var urlparameter = defaultvalue;
+    if(window.location.href.indexOf(parameter) > -1){
+	urlparameter = getUrlVars()[parameter];
+    }
+    if (urlparameter === "") return defaultvalue;
+    return urlparameter;
 }
 
-console.log(window.location);
+var renderParam=getUrlParam('scene','render');
+var userParam=getUrlParam('name','X');
+var themeParam=getUrlParam('theme','starry');
+var weatherParam=getUrlParam('weather','none');
+
+console.log(renderParam, userParam, themeParam);
+
+outputTopic = "/topic/"+renderParam+"/";
+renderTopic = outputTopic+"#";
+
 console.log(renderTopic);
 console.log(outputTopic);
 
 var camName = "";
 var oldMsg = "";
 var cameraRig;
+var weather;
 
 // Depending on topic depth, four message categories
 var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
@@ -36,11 +51,11 @@ client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
 console.log("time: " , timeID);
-camName = "camera_" + timeID;
+camName = "camera_" + timeID + "_" + userParam;
 
 // Last Will and Testament message sent to subscribers if this client loses connection
 var lwt = new Paho.MQTT.Message("");
-lwt.destinationName = outputTopic+"/"+camName;
+lwt.destinationName = outputTopic+camName;
 lwt.qos = 0;
 lwt.retained = true;
 
@@ -60,6 +75,16 @@ function onConnect() {
     cameraRig = document.getElementById('CameraRig');
     conixBox = document.getElementById('Box-obj');
     environs = document.getElementById('env');
+    weather = document.getElementById('weather');
+
+    environs.setAttribute('environment', 'preset', themeParam);
+
+    if (weatherParam !== "none") {
+	weather.setAttribute('particle-system', 'preset', weatherParam);
+	weather.setAttribute('particle-system', 'enabled', 'true');
+    } else
+	weather.setAttribute('particle-system', 'enabled', 'false');
+
 
     // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
     // Add them to our dictionary of scene objects
@@ -86,7 +111,7 @@ function onConnect() {
     // Publish initial camera presence
     var color = '#'+Math.floor(Math.random()*16777215).toString(16);
     var mymsg = camName+",0,1.6,0,0,0,0,0,0,0,0,"+color+",on";
-    publish(outputTopic+"/"+camName, mymsg);
+    publish(outputTopic+camName, mymsg);
     console.log("my-camera element", myCam);
 
     myCam.addEventListener('poseChanged', e => {
@@ -103,7 +128,7 @@ function onConnect() {
 
 	// suppress duplicates
 	if (msg !== oldMsg) {
-	    publish(outputTopic+"/"+camName, msg);
+	    publish(outputTopic+camName, msg);
 	    oldMsg = msg;
 	    //console.log("cam moved: ",outputTopic+camName, msg);
 	}
@@ -112,7 +137,7 @@ function onConnect() {
     
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
-	publish(outputTopic+"/"+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
+	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, "");
     }
 
@@ -154,8 +179,8 @@ function onMessageArrived(message) {
     }
     var topic = dest.split("/");
     
-    //console.log(message.payloadString);
-    //console.log (topic.length, "<- topic.length");
+    // console.log(message.payloadString);
+    // console.log (topic.length, "<- topic.length");
     
     switch (topic.length) {
 
@@ -224,21 +249,28 @@ function onMessageArrived(message) {
 	    }
 	    else { // raw, don't parse the format. e.g. "url(http://oz.org/Modelfile.glb)"
 		//console.log("unparsed", message.payloadString);
-		if (componentName === "click") {
+		if (componentName === "mousedown") {
 		    var splits = message.payloadString.split(',');
 		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
 						    parseFloat(splits[1]),
 						    parseFloat(splits[2]));
-//		    var myEvent = new CustomEvent('click',
-//						  { detail:
-//						    { intersection:
-//						      {
-//							  point: myPoint }
-//						    }
-//						  });
+		    var clicker = splits[3];
 
-		    //entityEl.emit(myEvent, null, true);
-		    entityEl.emit('click', { intersection:
+		    // emit a synthetic click event with ugly data syntax
+		    entityEl.emit('mousedown', { "clicker": clicker, intersection:
+					     {
+						 point: myPoint }
+					   }, true);
+		}
+		if (componentName === "mouseup") {
+		    var splits = message.payloadString.split(',');
+		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
+						    parseFloat(splits[1]),
+						    parseFloat(splits[2]));
+		    var clicker = splits[3];
+
+		    // emit a synthetic click event with ugly data syntax
+		    entityEl.emit('mouseup', { "clicker": clicker, intersection:
 					     {
 						 point: myPoint }
 					   }, true);
@@ -317,8 +349,9 @@ function onMessageArrived(message) {
 
 		    // place a colored text above the head
 		    var headtext = document.createElement('a-text');
+		    var personName = name.split('_')[2];
 		    
-		    headtext.setAttribute('value', name);
+		    headtext.setAttribute('value', personName);
 		    headtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
 		    headtext.setAttribute('side', "double");
 		    headtext.setAttribute('align', "center");
@@ -347,6 +380,12 @@ function onMessageArrived(message) {
 		break;
 	    case "camera":
 		break;
+	    case "image": // use the color slot for URL (like gltf-models do)
+		entityEl.setAttribute('geometry', 'primitive', 'plane');
+		entityEl.setAttribute('material', 'src', color);
+		entityEl.setAttribute('material', 'shader', 'flat');
+		entityEl.object3D.scale.set(xscale,yscale,zscale);
+		break;
 	    case "line":
 		entityEl.setAttribute('line', 'start', x + ' ' + y + ' ' + z);
 		entityEl.setAttribute('line', 'end', xrot + ' ' + yrot + ' ' + zrot);
@@ -359,7 +398,8 @@ function onMessageArrived(message) {
 		break;		
 	    case "gltf-model":
 		// overload: store URL in #color field
-		entityEl.object3D.scale.set(xscale, yscale, zscale);
+		//entityEl.object3D.scale.set(xscale, yscale, zscale);
+		entityEl.setAttribute('scale', xscale+' '+ yscale+' '+ zscale);
 		entityEl.setAttribute("gltf-model", color);		
 		break;
 	    case "text":
