@@ -118,7 +118,11 @@ mosquitto_pub -t /topic/piano/box_3 -m "box_3,2,0,-4,0,0,0,0,1,1,1,#33AAEE,on" -
 ```
 then add sound with click event listener:
 ```
-mosquitto_pub -t /topic/piano/box_3/sound -m "src:url(http://xr.andrew.cmu.edu/audio/toypiano/A1.wav); on: click" -r
+mosquitto_pub -t /topic/piano/box_3/sound -m "src:url(http://xr.andrew.cmu.edu/audio/toypiano/A1.wav); on: mousedown" -r
+```
+This lets only you hear the piano. To share the piano click events with others viewing the scene, add an event-listener Component:
+```
+mosquitto_pub -t /topic/piano/box_3/click_listener -m "" -r
 ```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
