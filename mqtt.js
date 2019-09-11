@@ -2,6 +2,9 @@ const timeID = new Date().getTime() % 10000;
 const client = new Paho.MQTT.Client("oz.andrew.cmu.edu", Number(9001), "myClientId" + timeID);
 var sceneObjects = new Object(); // This will be an associative array of strings and objects
 
+// rate limit camera position updates
+updateMillis = 100;
+
 var queryString = window.location.search;
 queryString = queryString.substring(1);
 const sceneTopic = queryString;
@@ -38,7 +41,11 @@ console.log(outputTopic);
 var camName = "";
 var oldMsg = "";
 var cameraRig;
+var my_camera;
 var weather;
+var date = new Date();
+var lastUpdate = date.getTime();
+var stamp = lastUpdate;
 
 // Depending on topic depth, four message categories
 var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
@@ -71,8 +78,11 @@ function onConnect() {
     // Let's get the camera and publish it's presence over MQTT
     // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
     // add event listener for camera moved ("poseChanged") event
-    var myCam = document.getElementById('my-camera');
-    cameraRig = document.getElementById('CameraRig');
+    vive_lefthand = document.getElementById('vive-leftHand');
+    vive_righthand = document.getElementById('vive-rightHand');
+    
+    my_camera = document.getElementById('my-camera');     // this is an <a-camera>
+    cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     conixBox = document.getElementById('Box-obj');
     environs = document.getElementById('env');
     weather = document.getElementById('weather');
@@ -91,18 +101,6 @@ function onConnect() {
     sceneObjects['env'] = environs;
     sceneObjects['Box-obj'] = conixBox;
 
-    // example to create a text field atop a box
-//    var boxtext = document.createElement('a-text');
-    //boxtext.setAttribute('value', name);
-//    boxtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
-//    boxtext.setAttribute('side', "double");
-//    boxtext.setAttribute('align', "center");
-//    boxtext.setAttribute('anchor', "center");
-//    boxtext.setAttribute('rotation', 0 + ' ' + 225 + ' ' + 0);
-//    boxtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
-    //boxtext.setAttribute('color', color); // color
-//    conixBox.appendChild(boxtext);
-
     console.log('my-camera: ',timeID);
     console.log('cameraRig: ', cameraRig);
 
@@ -112,9 +110,9 @@ function onConnect() {
     var color = '#'+Math.floor(Math.random()*16777215).toString(16);
     var mymsg = camName+",0,1.6,0,0,0,0,0,0,0,0,"+color+",on";
     publish(outputTopic+camName, mymsg);
-    console.log("my-camera element", myCam);
+    console.log("my-camera element", my_camera);
 
-    myCam.addEventListener('poseChanged', e => {
+    my_camera.addEventListener('poseChanged', e => {
 	//console.log(e.detail);	
 	var msg = camName+","+
 	    e.detail.x.toFixed(3)+","+
@@ -128,9 +126,16 @@ function onConnect() {
 
 	// suppress duplicates
 	if (msg !== oldMsg) {
-	    publish(outputTopic+camName, msg);
-	    oldMsg = msg;
-	    //console.log("cam moved: ",outputTopic+camName, msg);
+	    // rate limit
+	    date = new Date();
+	    stamp = date.getTime();
+	    if ((stamp - lastUpdate) >= updateMillis) {
+
+		publish(outputTopic+camName, msg);
+		oldMsg = msg;
+		lastUpdate = stamp;
+		//console.log("cam moved: ",outputTopic+camName, msg);
+	    }
 	}
     });
     
@@ -177,10 +182,10 @@ function onMessageArrived(message) {
     if(dest.charAt( dest.length-1 ) == "/") {
 	dest = dest.slice(0, -1)
     }
-    var topic = dest.split("/");
+    const topic = dest.split("/");
     
-    // console.log(message.payloadString);
-    // console.log (topic.length, "<- topic.length");
+    //console.log(message.payloadString);
+    //console.log (topic.length, "<- topic.length");
     
     switch (topic.length) {
 
@@ -215,7 +220,8 @@ function onMessageArrived(message) {
 	//console.log("componentName", componentName);
 	//console.log("sceneObject", sceneObject);
 
-	if (sceneObject === camName) {
+	// Camera Rig updates
+	if (sceneObject === camName) { // our Rig
 	    var coords = message.payloadString.split(",");
 
 	    var x    = coords[0]; var y    = coords[1]; var z    = coords[2];
@@ -225,17 +231,32 @@ function onMessageArrived(message) {
 	    var euler = new THREE.Euler();
 	    var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
 	    var vec = foo.toVector3();
-	    //var eulerx = THREE.Math.radToDeg(vec.x);
-	    //var eulery = THREE.Math.radToDeg(vec.y);
-	    //var eulerz = THREE.Math.radToDeg(vec.z);
 
-	    console.log("cameraRig update: ", cameraRig);
-	    
 	    cameraRig.object3D.position.set(x,y,z);
 	    cameraRig.object3D.rotation.set(vec.x,vec.y,vec.z);
 //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
 
 	    break;
+	} else { // others' Rigs(?)
+	    
+	    if (componentName === "rig") { // warp others' camera Rigs
+		var rigEl = sceneObjects[sceneObject];
+		
+		var coords = message.payloadString.split(",");
+
+		var x    = coords[0]; var y    = coords[1]; var z    = coords[2];
+		var xrot = coords[3]; var yrot = coords[4]; var zrot = coords[5]; var wrot = coords[6];
+
+		var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
+		var euler = new THREE.Euler();
+		var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
+		var vec = foo.toVector3();
+		
+		rigEl.object3D.position.set(x,y,z);
+		rigEl.object3D.rotation.set(vec.x,vec.y,vec.z);
+
+		break;
+	    }
 	}
 
 	var entityEl = sceneObjects[sceneObject];
@@ -285,7 +306,12 @@ function onMessageArrived(message) {
 	break;
 
     case topicAtomicUpdate:
+
+	// These are 'long' messages lie "obj_id,0,0,0,0,0,0,0,0,0,0,#000000,off"
+	// for which the values are x,y,z xrot,yrot,zrot,wrot (quaternions) xscale,yscale,zscale, payload (color), on/off
+
 	if (message.payloadString.length === 0) {
+	    // An empty message after an object_id means remove it
 	    var name = topic[topic.length - 1]; // the object with the parameter
 	    //console.log(message.payloadString, topic, name);
 
@@ -296,12 +322,43 @@ function onMessageArrived(message) {
 	    } else console.log("Warning: " + name + " not in sceneObjects");
 	    return;
 	}
+
 	// parse string
 	var res = message.payloadString.split(",");
 	var name = res[0];
 
 	// if this is our own camera, don't attempt to draw it
 	if (name === camName) return;
+
+	if (res.length === 1) {
+	    // a 1 parameter message is parent child relationship e.g. /topic/render/parent_id -m "child_id"
+	    
+	    var parentEl = sceneObjects[topic[topic.length - 1]]; // scene object_id
+	    var childEl  = sceneObjects[message.payloadString];
+
+	    // error checks
+	    if (!parentEl) {
+		console.log("Warning: " + parentEl + " not in sceneObjects");
+		return;
+	    }
+	    if (!childEl) {
+		console.log("Warning: " + childEl + " not in sceneObjects");
+		return;
+	    }
+
+	    console.log("parent", parentEl);
+	    console.log("child", childEl);
+
+	    childEl.flushToDOM();
+	    var copy = childEl.cloneNode(true);
+	    parentEl.appendChild(copy);
+	    sceneObjects[name] = copy;
+	    childEl.parentNode.removeChild(childEl);
+	    
+	    console.log("parent", parentEl);
+	    console.log("child", childEl);
+	    return;
+	} 
 	
 	type = name.substring(0, name.indexOf('_'));
 	if (type === "cube") {type = "box"}; // different name in Unity
@@ -336,12 +393,23 @@ function onMessageArrived(message) {
 		entityEl = sceneObjects[name];
 		//console.log("existing object: ", name);
 		//console.log(entityEl);
-	    } else { // CREATE NEW SCENE OBJECT
-		entityEl = document.createElement('a-entity');
-		entityEl.setAttribute('id', name);
-		entityEl.setAttribute('rotation.order' , "YXZ");
+	    } else { // CREATE NEW SCENE OBJECT		
 
 		if (type === "camera") {
+		    entityEl = document.createElement('a-entity');
+		    entityEl.setAttribute('id', name+"_rigChild");
+		    entityEl.setAttribute('rotation.order' , "YXZ");
+		    entityEl.object3D.position.set(0,0,0);
+		    entityEl.object3D.rotation.set(0,0,0);
+		    
+		    var rigEl;
+		    rigEl = document.createElement('a-entity');
+		    rigEl.setAttribute('id', name);
+		    rigEl.setAttribute('rotation.order' , "YXZ");
+		    rigEl.object3D.position.set(0,0,0);
+		    rigEl.object3D.rotation.set(0,0,0);
+		    
+		    // this is the head 3d model
 		    childEl = document.createElement('a-entity');
 		    childEl.setAttribute('rotation', 0+' '+180+' '+0);
 		    childEl.object3D.scale.set(4,4,4);
@@ -361,15 +429,26 @@ function onMessageArrived(message) {
 		    entityEl.appendChild(headtext);
 		    entityEl.appendChild(childEl);
 
-		    //console.log("their camera:", entityEl);
-		}
+		    rigEl.appendChild(entityEl);
+		    
+		    Scene.appendChild(rigEl);
+		    sceneObjects[name] = rigEl;
 
-		Scene.appendChild(entityEl);
-		
-		// Add it to our dictionary of scene objects
-		sceneObjects[name] = entityEl;
-		//console.log("entityEL:",entityEl);
-		//console.log("added ", entityEl, "to sceneObjects["+name+"]");
+		    entityEl = rigEl;
+
+		    console.log("their camera:", rigEl);
+		} else {
+		    entityEl = document.createElement('a-entity');
+		    entityEl.setAttribute('id', name);
+		    entityEl.setAttribute('rotation.order' , "YXZ");
+
+		    Scene.appendChild(entityEl);
+		    
+		    // Add it to our dictionary of scene objects
+		    sceneObjects[name] = entityEl;
+		    //console.log("entityEL:",entityEl);
+		    //console.log("added ", entityEl, "to sceneObjects["+name+"]");
+		}
 	    }
 
 	    switch(type) {
@@ -379,6 +458,8 @@ function onMessageArrived(message) {
 		entityEl.setAttribute('light', 'color', color);
 		break;
 	    case "camera":
+		console.log("Camera update", entityEl);
+		console.log(entityEl.getAttribute('position'));
 		break;
 	    case "image": // use the color slot for URL (like gltf-models do)
 		entityEl.setAttribute('geometry', 'primitive', 'plane');
@@ -404,6 +485,8 @@ function onMessageArrived(message) {
 		break;
 	    case "text":
 		// use color field for text string
+		if (entityEl.hasChildNodes()) // assume only one we added
+		    entityEl.removeChild(entityEl.childNodes[0]);
 		textEl = document.createElement('a-text');
 		textEl.setAttribute('value', color);
 		textEl.setAttribute('side', "double");
