@@ -14,10 +14,10 @@ Step one is to clone this repo into the default web content folder on a linux ma
 Step two, you'll also probably want to be running the Mosquitto MQTT server. In addition, it should be a version that supports websockets. To get one with this feature, and without a known crash bug, we recommend using version 1.6.3 and building with websockets enabled, e.g. in `config.mk` set `WITH_WEBSOCKETS:=yes`.
 
 ### Local Instance Installation with docker
-1. Clone this repo.
-2. Run docker compose inside the repo: ```docker-compose up```. 
+1. Clone this repo
+2. Run docker compose inside the repo: ```docker-compose up```
 3. This will start an MQTT server (ports 1883 and 9001) and a webserver (port 8080) on your local machine. The webserver is configured to serve the files in the current folder (the repo folder)
-4. Open your browser at ```http://localhost:8080/go/```
+4. Open your browser at ```http://localhost:8080/go/``` and make sure to chnage the *MQTT Server* to ```localhost``` 
 5. Enjoy!
 
 ## Files
