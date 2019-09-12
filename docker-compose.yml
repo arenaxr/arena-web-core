@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  mosquitto: 
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+
+  web:
+    image: httpd:2.4 
+    volumes: 
+      - ./:/usr/local/apache2/htdocs/ 
+    ports:
+      - "8080:80"
