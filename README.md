@@ -9,6 +9,9 @@ It now bears very little resemblance to the original, much commented out of `ind
 
 A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such a `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`
 
+## INSTALLATION
+Step one is to clone this repo into the default web content folder on a linux machine runing Apache, e.g. in `/var/www/html`.
+Step two, you'll also probably want to be running the Mosquitto MQTT server. In addition, it should be a version that supports websockets. To get one with this feature, and without a known crash bug, we recommend using version 1.6.3 and building with websockets enabled, e.g. in `config.mk` set `WITH_WEBSOCKETS:=yes`.
 ## Files
  * `mqtt.js` - Javascript to subscribe to MQTT topic(s) via wildcard, parse primitive-object messages, and add/remove AFrame Elements to the scene accordingly.
  The message format (as part of a higher level, more general "ARENA" system design plan for AR) is documented at work-in-progress  
