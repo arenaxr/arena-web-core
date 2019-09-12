@@ -17,8 +17,7 @@ Step two, you'll also probably want to be running the Mosquitto MQTT server. In 
 1. Clone this repo
 2. Run docker compose inside the repo: ```docker-compose up```
 3. This will start an MQTT server (ports 1883 and 9001) and a webserver (port 8080) on your local machine. The webserver is configured to serve the files in the current folder (the repo folder)
-4. Open your browser at ```http://localhost:8080/go/``` and make sure to chnage the *MQTT Server* to ```localhost``` 
-5. Enjoy!
+4. Open your browser at ```http://localhost:8080/go/``` and make sure to change the *MQTT Server* to ```localhost``` 
 
 ## Files
  * `mqtt.js` - Javascript to subscribe to MQTT topic(s) via wildcard, parse primitive-object messages, and add/remove AFrame Elements to the scene accordingly.
