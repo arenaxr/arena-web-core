@@ -221,8 +221,6 @@ AFRAME.registerComponent('vive-listener', {
 	    }
 	});
 
-
-
     }
 });
 
