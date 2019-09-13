@@ -10,16 +10,81 @@
     <!-- these look useful but also incomprehensible documentation -->
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script>
 
+<<<<<<< HEAD
+    <!--    <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>-->
+    <!-- pretty backgrounds -->
+    <script src="aframe-environment-component.min.js"></script>
+    <!-- our camera change and other event listener Components -->
+    <script src="events.js"></script>
+    <!-- the Paho MQTT.js library -->
+=======
 <!--    <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>-->
     <!-- pretty backgrounds -->
     <script src="aframe-environment-component.min.js"></script>
     <!-- the camera change event listener helper -->
     <script src="events.js"></script>
     <!-- the MQTT.js library -->
+>>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
-    <!-- our mqtt.js script -->
+    <!-- our mqtt.js (main) script -->
     <script src="./mqtt.js" type="text/javascript"></script>
     <!-- particles dude  
+<<<<<<< HEAD
+	 <script src="aframe-particle-system-component.min.js"></script>
+	 -->
+  </head>
+  <body>
+    <a-scene name="MQTTScene"> <!-- stats -->
+      <a-assets>
+	<a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
+	<a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
+
+	<video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
+	
+      </a-assets>
+
+      <!--  <a-sky radius="5000" color="#000000"></a-sky> -->
+      <a-entity id="env" environment="preset: starry; groundTexture: 'none';"></a-entity>
+
+      <a-entity position="0 2.25 -4" id="weather" particle-system="preset: dust" enabled="false"></a-entity>
+
+      <a-entity position="0 0 0" id="CameraRig" movement-controls="fly: true; speed=0.3">
+	<a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
+	  <!-- this camera can 'fly': z axis follows pitch of head direction -->
+	  <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true" look-controls pose-listener mouse-cursor>
+	    <!--
+		<a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
+		  <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
+		  -->
+	    <a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>
+
+	  </a-camera>
+	</a-entity>
+      </a-entity>
+
+      <a-entity vive-pose-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>
+      <a-entity vive-pose-listener id="vive-rightHand" laser-controls="hand:right"></a-entity>
+
+      <!-- video example: may autoplay in Firefox, all black in Chrome :-/ 
+	   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
+	   -->
+      <!-- CONIX cube -->
+      <a-entity click-listener position="-1.149 0.31 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+	<a-entity vive-listener position="-1,-1,-1" id="Vive-listener"></a-entity>
+      </a-entity>
+      <a-text id="conix-text" position="-1.149 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
+
+      <!-- let there be LIGHTS -->
+      <a-light position="-0.93 1.58 -1.14" name="PointLight 1" type="point" color="#9090AD" intensity="0.75"></a-light>
+      <a-light position="-0.272 0.39 1.25" name="PointLight 2" type="point" color="#C2E6C7"></a-light>
+      <a-light name="AmbientLight" type="ambient" color="#363942"></a-light>
+      <!--
+	  <a-entity light="type: ambient; color: #BBB"></a-entity>
+	  <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
+	  -->
+    </a-scene>
+  </body>
+=======
     <script src="aframe-particle-system-component.min.js"></script>
 -->
   </head>
@@ -129,4 +194,5 @@
   -->
 </a-scene>
 </body>
+>>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 </html>
