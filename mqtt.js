@@ -1,8 +1,4 @@
 const timeID = new Date().getTime() % 10000;
-<<<<<<< HEAD
-=======
-const client = new Paho.MQTT.Client("oz.andrew.cmu.edu", Number(9001), "myClientId" + timeID);
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 var sceneObjects = new Object(); // This will be an associative array of strings and objects
 
 // rate limit camera position updates
@@ -32,10 +28,7 @@ var renderParam=getUrlParam('scene','render');
 var userParam=getUrlParam('name','X');
 var themeParam=getUrlParam('theme','starry');
 var weatherParam=getUrlParam('weather','none');
-<<<<<<< HEAD
 var mqttParam=getUrlParam('mqttServer','oz.andrew.cmu.edu');
-=======
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 
 console.log(renderParam, userParam, themeParam);
 
@@ -47,17 +40,13 @@ console.log(outputTopic);
 
 var camName = "";
 var oldMsg = "";
-<<<<<<< HEAD
+
 var oldMsgLeft = "";
 var oldMsgRight = "";
 var cameraRig;
 var my_camera;
 var vive_leftHand;
 var vive_rightHand;
-=======
-var cameraRig;
-var my_camera;
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 var weather;
 var date = new Date();
 var lastUpdate = date.getTime();
@@ -69,11 +58,8 @@ var topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/ren
 var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
 var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
 var Scene;
-<<<<<<< HEAD
 
 const client = new Paho.MQTT.Client(mqttParam, Number(9001), "myClientId" + timeID);
-=======
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
@@ -99,13 +85,9 @@ function onConnect() {
     // Let's get the camera and publish it's presence over MQTT
     // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
     // add event listener for camera moved ("poseChanged") event
-<<<<<<< HEAD
+
     vive_leftHand = document.getElementById('vive-leftHand');
     vive_rightHand = document.getElementById('vive-rightHand');
-=======
-    vive_lefthand = document.getElementById('vive-leftHand');
-    vive_righthand = document.getElementById('vive-rightHand');
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     
     my_camera = document.getElementById('my-camera');     // this is an <a-camera>
     cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
@@ -113,26 +95,17 @@ function onConnect() {
     environs = document.getElementById('env');
     weather = document.getElementById('weather');
 
-<<<<<<< HEAD
+
     if (environs)
 	environs.setAttribute('environment', 'preset', themeParam);
-=======
-    environs.setAttribute('environment', 'preset', themeParam);
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 
     if (weatherParam !== "none") {
 	weather.setAttribute('particle-system', 'preset', weatherParam);
 	weather.setAttribute('particle-system', 'enabled', 'true');
-<<<<<<< HEAD
+
     } else if (weather)
 	weather.setAttribute('particle-system', 'enabled', 'false');
 
-=======
-    } else
-	weather.setAttribute('particle-system', 'enabled', 'false');
-
-
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
     // Add them to our dictionary of scene objects
     sceneObjects['env'] = environs;
@@ -140,7 +113,7 @@ function onConnect() {
 
     console.log('my-camera: ',timeID);
     console.log('cameraRig: ', cameraRig);
-<<<<<<< HEAD
+
 
     //lwt.destinationName = outputTopic+camName;
 
@@ -150,17 +123,6 @@ function onConnect() {
     publish(outputTopic+camName, mymsg);
     console.log("my-camera element", my_camera);
 
-=======
-
-    //lwt.destinationName = outputTopic+camName;
-
-    // Publish initial camera presence
-    var color = '#'+Math.floor(Math.random()*16777215).toString(16);
-    var mymsg = camName+",0,1.6,0,0,0,0,0,0,0,0,"+color+",on";
-    publish(outputTopic+camName, mymsg);
-    console.log("my-camera element", my_camera);
-
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     my_camera.addEventListener('poseChanged', e => {
 	//console.log(e.detail);	
 	var msg = camName+","+
@@ -187,7 +149,7 @@ function onConnect() {
 	    }
 	}
     });
-<<<<<<< HEAD
+
 
     if (vive_leftHand)
     vive_leftHand.addEventListener('viveChanged', e => {
@@ -246,8 +208,6 @@ function onConnect() {
 	    }
 	}
     });
-=======
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     
     
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
@@ -367,7 +327,6 @@ function onMessageArrived(message) {
 
 		break;
 	    }
-<<<<<<< HEAD
 	}
 
 	var entityEl = sceneObjects[sceneObject];
@@ -434,74 +393,6 @@ function onMessageArrived(message) {
 	    return;
 	}
 
-=======
-	}
-
-	var entityEl = sceneObjects[sceneObject];
-	
-	//console.log("payloadstring", message.payloadString);
-
-	if (entityEl) {
-	    if (message.payloadString.includes(";")) { // javascript style "x:1; y:2; z:3;"
-		//console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
-		entityEl.setAttribute(componentName, AFRAME.utils.styleParser.parse(message.payloadString));
-	    }
-	    else { // raw, don't parse the format. e.g. "url(http://oz.org/Modelfile.glb)"
-		//console.log("unparsed", message.payloadString);
-		if (componentName === "mousedown") {
-		    var splits = message.payloadString.split(',');
-		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
-						    parseFloat(splits[1]),
-						    parseFloat(splits[2]));
-		    var clicker = splits[3];
-
-		    // emit a synthetic click event with ugly data syntax
-		    entityEl.emit('mousedown', { "clicker": clicker, intersection:
-					     {
-						 point: myPoint }
-					   }, true);
-		}
-		if (componentName === "mouseup") {
-		    var splits = message.payloadString.split(',');
-		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
-						    parseFloat(splits[1]),
-						    parseFloat(splits[2]));
-		    var clicker = splits[3];
-
-		    // emit a synthetic click event with ugly data syntax
-		    entityEl.emit('mouseup', { "clicker": clicker, intersection:
-					     {
-						 point: myPoint }
-					   }, true);
-		}
-		else {
-		    entityEl.setAttribute(componentName, message.payloadString);
-		}
-	    }
-	}
-	else
-	    console.log("Warning: " + sceneObject + " not in sceneObjects");
-	break;
-
-    case topicAtomicUpdate:
-
-	// These are 'long' messages lie "obj_id,0,0,0,0,0,0,0,0,0,0,#000000,off"
-	// for which the values are x,y,z xrot,yrot,zrot,wrot (quaternions) xscale,yscale,zscale, payload (color), on/off
-
-	if (message.payloadString.length === 0) {
-	    // An empty message after an object_id means remove it
-	    var name = topic[topic.length - 1]; // the object with the parameter
-	    //console.log(message.payloadString, topic, name);
-
-	    if (sceneObjects[name]) {
-		Scene.removeChild(sceneObjects[name]);
-		delete sceneObjects[name];
-		return;
-	    } else console.log("Warning: " + name + " not in sceneObjects");
-	    return;
-	}
-
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 	// parse string
 	var res = message.payloadString.split(",");
 	var name = res[0];

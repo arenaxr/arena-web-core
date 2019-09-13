@@ -38,11 +38,7 @@ AFRAME.registerComponent('vive-pose-listener', {
 	
 	var newPose = rotationCoords+positionCoords;
 	if (this.lastPose !== newPose) {
-<<<<<<< HEAD
 	    this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
-=======
-	    this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
 	    this.lastPose = newPose;
 	}
 

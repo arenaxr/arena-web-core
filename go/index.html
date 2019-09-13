@@ -26,13 +26,9 @@
       <option value="dream">dream</option>
       <option value="volcano">volcano</option>
     </select><br>
-<<<<<<< HEAD
     MQTT Server:
     <input type="text" id="mqttServer" value="oz.andrew.cmu.edu"></input><br>
     Scene: ("render" is the default ARENA scene. Others include "arena-xr", "piano", "drone", or create a brand new scene!)<br>
-=======
-    Scene: ("render" is the default ARENA scene. Others include "arena-xr", "drone", or create a brand new scene!)<br>
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     <input type=text id="selectedScene" value="render"></input><br>
 <!--
     Weather:
@@ -44,18 +40,13 @@
       <option value="rain">rain</option>
     </select><br>
 -->
-<<<<<<< HEAD
     <button type="Button" onclick="goThere()">Enter VR</button>
     <button type="Button" onclick="goThereXR()">Enter XR</button>
-=======
-    <button type="Button" onclick="goThere()">Enter</button>
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
     <script>
       function goThere() {
       var name = document.getElementById("myName").value;
       var theme = document.getElementById("selectedTheme").value;
       var scene = document.getElementById("selectedScene").value;
-<<<<<<< HEAD
       var mqtt = document.getElementById("mqttServer").value;
 
       <!--var weather = document.getElementById("selectedWeather").value;-->
@@ -75,12 +66,6 @@
       <!--var weather = document.getElementById("selectedWeather").value;-->
       var weather = "none";
       var theUrl = "http://xr.andrew.cmu.edu/arena-xr?name="+name+"&theme="+theme+"&scene="+scene+"&weather="+weather+"&mqttServer="+mqtt;
-=======
-
-      <!--var weather = document.getElementById("selectedWeather").value;-->
-      var weather = "none";
-      var theUrl = "http://xr.andrew.cmu.edu?name="+name+"&theme="+theme+"&scene="+scene+"&weather="+weather;
->>>>>>> 399aeda08a6f576bcff4f9dad3cface1dcbd7721
       
       console.log("theUrl:", theUrl);
       window.location.href = theUrl;
