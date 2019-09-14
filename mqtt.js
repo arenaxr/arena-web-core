@@ -39,18 +39,23 @@ console.log(renderTopic);
 console.log(outputTopic);
 
 var camName = "";
-var oldMsg = "";
 
-var oldMsgLeft = "";
-var oldMsgRight = "";
 var cameraRig;
+var ViveListenBox;
 var my_camera;
 var vive_leftHand;
 var vive_rightHand;
 var weather;
 var date = new Date();
+
+// Rate limiting variables
+var oldMsg = "";
+var oldMsgLeft = "";
+var oldMsgRight = "";
 var lastUpdate = date.getTime();
 var stamp = lastUpdate;
+var stampLeft = lastUpdate;
+var stampRight = lastUpdate;
 
 // Depending on topic depth, four message categories
 var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
@@ -65,7 +70,8 @@ client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
 console.log("time: " , timeID);
-camName = "camera_" + timeID + "_" + userParam;
+idTag = timeID + "_" + userParam;
+camName = "camera_" + idTag;
 
 // Last Will and Testament message sent to subscribers if this client loses connection
 var lwt = new Paho.MQTT.Message("");
@@ -92,6 +98,7 @@ function onConnect() {
     my_camera = document.getElementById('my-camera');     // this is an <a-camera>
     cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     conixBox = document.getElementById('Box-obj');
+    ViveListenBox = document.getElementById('ViveListenBox');
     environs = document.getElementById('env');
     weather = document.getElementById('weather');
 
@@ -110,6 +117,7 @@ function onConnect() {
     // Add them to our dictionary of scene objects
     sceneObjects['env'] = environs;
     sceneObjects['Box-obj'] = conixBox;
+    sceneObjects['ViveListenBox'] = ViveListenBox;
 
     console.log('my-camera: ',timeID);
     console.log('cameraRig: ', cameraRig);
@@ -154,7 +162,7 @@ function onConnect() {
     if (vive_leftHand)
     vive_leftHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
-	var objName="viveLeft_"+camName;
+	var objName="viveLeft_"+idTag;
 	var msg = objName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
@@ -169,12 +177,12 @@ function onConnect() {
 	if (msg !== oldMsgLeft) {
 	    // rate limit
 	    date = new Date();
-	    stamp = date.getTime();
-	    if ((stamp - lastUpdate) >= updateMillis) {
+	    stampLeft = date.getTime();
+	    if ((stampLeft - lastUpdateLeft) >= updateMillis) {
 
 		publish(outputTopic+objName, msg);
 		oldMsgLeft = msg;
-		lastUpdate = stamp;
+		lastUpdateLeft = stampLeft;
 		//console.log("viveLeft moved: ",outputTopic+objName, msg);
 	    }
 	}
@@ -183,7 +191,7 @@ function onConnect() {
     if (vive_rightHand)
     vive_rightHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
-	var objName="viveRight_"+camName;
+	var objName="viveRight_"+idTag;
 	var msg = objName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
@@ -198,12 +206,12 @@ function onConnect() {
 	if (msg !== oldMsgRight) {
 	    // rate limit
 	    date = new Date();
-	    stamp = date.getTime();
-	    if ((stamp - lastUpdate) >= updateMillis) {
+	    stampRight = date.getTime();
+	    if ((stampRight - lastUpdateRight) >= updateMillis) {
 
 		publish(outputTopic+objName, msg);
 		oldMsgRight = msg;
-		lastUpdate = stamp;
+		lastUpdateRight = stampRight;
 		//console.log("viveRight moved: ",outputTopic+objName, msg);
 	    }
 	}
@@ -528,8 +536,12 @@ function onMessageArrived(message) {
 		entityEl.setAttribute('light', 'color', color);
 		break;
 	    case "camera":
-		console.log("Camera update", entityEl);
-		console.log(entityEl.getAttribute('position'));
+		//console.log("Camera update", entityEl);
+		//console.log(entityEl.getAttribute('position'));
+		break;
+	    case "viveLeft":
+		break;
+	    case "viveRight":
 		break;
 	    case "image": // use the color slot for URL (like gltf-models do)
 		entityEl.setAttribute('geometry', 'primitive', 'plane');

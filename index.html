@@ -4,7 +4,7 @@
     <link rel="icon" type="image/png" href="http://xr.andrew.cmu.edu/conix-x.png">
     <meta charset="utf-8">
     <title>ARENA</title>
-    <meta name="description" content="Hello world!">
+    <meta name="description" content="Augmented Reality Edge Networking Architecture">
     <!-- the AFrame script library (minified) -->
     <script src="https://aframe.io/releases/0.9.2/aframe.js"></script>
     <!-- these look useful but also incomprehensible documentation -->
@@ -59,10 +59,11 @@
 	   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
 	   -->
       <!-- CONIX cube -->
-      <a-entity click-listener position="-1.149 0.31 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
-	<a-entity vive-listener position="-1,-1,-1" id="Vive-listener"></a-entity>
+      <a-entity click-listener position="-1.149 0.5 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
       </a-entity>
       <a-text id="conix-text" position="-1.149 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
+
+      <a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
 
       <!-- let there be LIGHTS -->
       <a-light position="-0.93 1.58 -1.14" name="PointLight 1" type="point" color="#9090AD" intensity="0.75"></a-light>

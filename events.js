@@ -13,7 +13,7 @@ AFRAME.registerComponent('pose-listener', {
 	const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
 	const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 	
-	var newPose = rotationCoords+positionCoords;
+	var newPose = rotationCoords+" "+positionCoords;
 	if (this.lastPose !== newPose) {
 	    this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
 	    this.lastPose = newPose;
@@ -36,7 +36,7 @@ AFRAME.registerComponent('vive-pose-listener', {
 	const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
 	const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 	
-	var newPose = rotationCoords+positionCoords;
+	var newPose = rotationCoords+" "+positionCoords;
 	if (this.lastPose !== newPose) {
 	    this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
 	    this.lastPose = newPose;
@@ -107,6 +107,10 @@ AFRAME.registerComponent('vive-listener', {
 	
 	this.el.addEventListener('triggerdown', function (evt) {
 	    
+	    publish(outputTopic+this.id+"/triggerdown");
+	    console.log(outputTopic+this.id+"/triggerdown");
+	    return;
+
 	    var coordsText = evt.detail.intersection.point.x.toFixed(3)+","+
 		evt.detail.intersection.point.y.toFixed(3)+","+
 		evt.detail.intersection.point.z.toFixed(3);
@@ -128,7 +132,12 @@ AFRAME.registerComponent('vive-listener', {
 		console.log(this.id+' was clicked at: ', evt.detail.intersection.point, 'by', camName);
 	    }
 	});
+	
 	this.el.addEventListener('triggerup', function (evt) {
+	    
+	    publish(outputTopic+this.id+"/triggerdown");
+	    console.log(outputTopic+this.id+"/triggerdown");
+	    return;
 	    
 	    var coordsText = evt.detail.intersection.point.x.toFixed(3)+","+
 		evt.detail.intersection.point.y.toFixed(3)+","+
