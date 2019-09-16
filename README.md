@@ -166,6 +166,17 @@ The naming convention for a scene object identifier such as `line_1` is that the
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
 Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth, but not necessarily in the right order. Maybe we use smaller property-update message format for only 'realtime' or 'live' viewers, rather than persist each and every update. This helps address a possible problem with single-property-update topic 'spam': don't retain -> no spam.
 
+#### Vive (laser) controls
+I noticed the controllers don't show up in the scene unless they both - and EVERYTHING else for SteamVR - are all working (headset, lighthouses).
+ * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above).
+NEW EVENTS
+ * triggerdown / triggerup for left and right hand controllers  
+The MQTT topic name for these events will be the standard prefix (e.g. /topic/render/) concatenated with a string made up of camera name + an identifier +  eventID resulting in e.g. `/topic/render/vive-leftHand_1234_eric/triggerdown` or `/topic/render/vive-rightHand_1234_eric/triggerup`
+while the MQTT MESSAGE will be coordinates concatenated by that same identifier, e.g: `1.234,5.678,9.012,vive-leftHand_1234_eric` - the idea being that the identifier matches the camera ID of the person in the scene who did the clicking, or in this case pulled the Vive trigger buttons
+Lastly are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages at 10 frames per second, much like the headset positions work. This supports the notion of tracking controller movement in real time, including direction (pose).
+
+There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *otehr peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events broadcast over MQTT get interpreted by viewers and turned into local, synthetic click events. (This kind of functionality remains to be added)
+
 ## Commentary
 Some hard-coded things:
  * MQTT broker running on `oz.andrew.cmu.edu` - runs with WebSockets enabled, because Paho MQTT needs to use WebSockets
