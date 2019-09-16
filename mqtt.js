@@ -53,6 +53,8 @@ var oldMsg = "";
 var oldMsgLeft = "";
 var oldMsgRight = "";
 var lastUpdate = date.getTime();
+var lastUpdateLeft = lastUpdate;
+var lastUpdateRight = lastUpdate;
 var stamp = lastUpdate;
 var stampLeft = lastUpdate;
 var stampRight = lastUpdate;
@@ -188,6 +190,7 @@ function onConnect() {
 	}
     });
 
+    // realtime position tracking of right hand controller
     if (vive_rightHand)
     vive_rightHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);

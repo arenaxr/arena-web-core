@@ -107,57 +107,59 @@ AFRAME.registerComponent('vive-listener', {
 	
 	this.el.addEventListener('triggerdown', function (evt) {
 	    
-	    publish(outputTopic+this.id+"/triggerdown");
-	    console.log(outputTopic+this.id+"/triggerdown");
-	    return;
+	    //	    var newRotation = this.el.object3D.quaternion;
+	    var newPosition = this.object3D.position;
+	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+	    const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 
-	    var coordsText = evt.detail.intersection.point.x.toFixed(3)+","+
-		evt.detail.intersection.point.y.toFixed(3)+","+
-		evt.detail.intersection.point.z.toFixed(3);
+	    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
 	    
-	    if ('cursorEl' in evt.detail) {
-		// original click event; simply publish to MQTT
-		publish(outputTopic+this.id+"/triggerdown", coordsText+","+camName);
-		console.log(this.id+' was clicked at: ', evt.detail.intersection.point, 'by', camName);
-	    } else {
+	    var coordsText = newPosition.x.toFixed(3)+","+
+		newPosition.y.toFixed(3)+","+
+		newPosition.z.toFixed(3);
 
-		// do the event handling for MQTT event; this is just an example
-		//this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-		// Really, what happens after MQTT event is handled outside the viewer by programs on MQTT bus
-		var clicker = evt.detail.clicker;
+	    // original click event; simply publish to MQTT
+	    var objName=this.id+"_"+idTag;
+	    publish(outputTopic+objName+"/triggerdown", coordsText+","+objName);
+	    console.log(this.id+' triggerdown at: ', coordsText, 'by', objName);
 
-		var sceney = this.sceneEl;
-		var textEl = sceney.querySelector('#conix-text');
-		textEl.setAttribute('value', this.id + " triggerdown" + '\n' +coordsText+'\n'+clicker );
-		console.log(this.id+' was clicked at: ', evt.detail.intersection.point, 'by', camName);
-	    }
+	    // Need to respond to synthetic event for someone else's click(!!!)
+	    // for now just do our own
+
+	    var sceney = this.sceneEl;
+	    var textEl = sceney.querySelector('#vive-text');
+	    textEl.setAttribute('value', objName + " triggerdown" + '\n' +coordsText);
+	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
+
 	});
 	
 	this.el.addEventListener('triggerup', function (evt) {
 	    
-	    publish(outputTopic+this.id+"/triggerdown");
-	    console.log(outputTopic+this.id+"/triggerdown");
-	    return;
 	    
-	    var coordsText = evt.detail.intersection.point.x.toFixed(3)+","+
-		evt.detail.intersection.point.y.toFixed(3)+","+
-		evt.detail.intersection.point.z.toFixed(3);
+	    //	    var newRotation = this.el.object3D.quaternion;
+	    var newPosition = this.object3D.position;
+	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+	    const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
+
+	    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
 	    
-	    if ('cursorEl' in evt.detail) {
-		// original click event; simply publish to MQTT
-		publish(outputTopic+this.id+"/triggerup", coordsText+","+camName);
-		console.log(this.id+' was clicked at: ', evt.detail.intersection.point);
-	    } else {
-		var clicker = evt.detail.clicker;
-		var sceney = this.sceneEl;
-		var textEl = sceney.querySelector('#conix-text');
-		textEl.setAttribute('value', this.id + " triggerup" + '\n' +coordsText+'\n'+clicker );
-		console.log(this.id+' was clicked at: ', evt.detail.intersection.point);
-	    }
+	    var coordsText = newPosition.x.toFixed(3)+","+
+		newPosition.y.toFixed(3)+","+
+		newPosition.z.toFixed(3);
+
+	    // original click event; simply publish to MQTT
+	    var objName=this.id+"_"+idTag;
+	    publish(outputTopic+objName+"/triggerdown", coordsText+","+objName);
+	    console.log(this.id+' triggerdown at: ', coordsText, 'by', objName);
+
+	    var sceney = this.sceneEl;
+	    var textEl = sceney.querySelector('#vive-text');
+	    textEl.setAttribute('value', this.id + " triggerdown" + '\n' +coordsText);
+	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
 	});
 
 	// BUNCHES OF EVENTS for vive-controls
-
+/*
 	// Grip up/down
 	this.el.addEventListener('gripup', function (evt) {
 	    var coordsText = evt.detail.intersection.point.x.toFixed(3)+","+evt.detail.intersection.point.y.toFixed(3)+","+evt.detail.intersection.point.z.toFixed(3);
@@ -229,7 +231,8 @@ AFRAME.registerComponent('vive-listener', {
 		publish(outputTopic+this.id+"/trackpaddown", coordsText+","+camName);
 	    }
 	});
-
+*/
     }
 });
+
 

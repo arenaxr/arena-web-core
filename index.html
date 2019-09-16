@@ -52,8 +52,8 @@
 	</a-entity>
       </a-entity>
 
-      <a-entity vive-pose-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>
-      <a-entity vive-pose-listener id="vive-rightHand" laser-controls="hand:right"></a-entity>
+      <a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>
+      <a-entity vive-pose-listener vive-listener id="vive-rightHand" laser-controls="hand:right"></a-entity>
 
       <!-- video example: may autoplay in Firefox, all black in Chrome :-/ 
 	   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
@@ -64,6 +64,7 @@
       <a-text id="conix-text" position="-1.149 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
       <a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
+      <a-text id="vive-text" position="2 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
       <!-- let there be LIGHTS -->
       <a-light position="-0.93 1.58 -1.14" name="PointLight 1" type="point" color="#9090AD" intensity="0.75"></a-light>
