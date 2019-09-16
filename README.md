@@ -175,7 +175,7 @@ The MQTT topic name for these events will be the standard prefix (e.g. /topic/re
 while the MQTT MESSAGE will be coordinates concatenated by that same identifier, e.g: `1.234,5.678,9.012,vive-leftHand_1234_eric` - the idea being that the identifier matches the camera ID of the person in the scene who did the clicking, or in this case pulled the Vive trigger buttons
 Lastly are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages at 10 frames per second, much like the headset positions work. This supports the notion of tracking controller movement in real time, including direction (pose).
 
-There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *otehr peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events broadcast over MQTT get interpreted by viewers and turned into local, synthetic click events. (This kind of functionality remains to be added)
+There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events broadcast over MQTT get interpreted by viewers and turned into local, synthetic click events. (This kind of functionality remains to be added) So for now only the person wearing the Vive headset & using the controllers can see the results of their actions (and programs subscribing to MQTT).
 
 ## Commentary
 Some hard-coded things:
