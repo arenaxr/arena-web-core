@@ -72,8 +72,10 @@ client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
 console.log("time: " , timeID);
-idTag = timeID + "_" + userParam;
-camName = "camera_" + idTag;
+idTag = timeID + "_" + userParam; // e.g. 1234_eric
+camName = "camera_" + idTag;      // e.g. camera_1234_eric
+viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
+viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 
 // Last Will and Testament message sent to subscribers if this client loses connection
 var lwt = new Paho.MQTT.Message("");
@@ -224,7 +226,9 @@ function onConnect() {
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
 	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
-	publish_retained(outputTopic+camName, "");
+	publish_retained(outputTopic+camName, ""); // no longer needed, don't retain head pose
+	publish(outputTopic+camName, viveLName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
+	publish(outputTopic+camName, viveRName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
     }
 
     Scene = document.querySelector('a-scene');
@@ -410,6 +414,8 @@ function onMessageArrived(message) {
 
 	// if this is our own camera, don't attempt to draw it
 	if (name === camName) return;
+	if (name === viveLName) return;
+	if (name === viveRName) return;
 
 	if (res.length === 1) {
 	    // a 1 parameter message is parent child relationship e.g. /topic/render/parent_id -m "child_id"
@@ -475,8 +481,20 @@ function onMessageArrived(message) {
 		//console.log("existing object: ", name);
 		//console.log(entityEl);
 	    } else { // CREATE NEW SCENE OBJECT		
+		if (type === "viveLeft" || type === "viveRight") {
+		    // create vive controller for 'other persons controller'
+		    entityEl = document.createElement('a-entity');
+		    entityEl.setAttribute('id', name);
+		    entityEl.setAttribute('rotation.order' , "YXZ");
+		    entityEl.setAttribute('obj-model', "obj: #viveControl-obj; mtl: #viveControl-mtl");
+		    entityEl.object3D.position.set(0,0,0);
+		    entityEl.object3D.rotation.set(0,0,0);
 
-		if (type === "camera") {
+		    // Add it to our dictionary of scene objects
+		    Scene.appendChild(entityEl);
+		    sceneObjects[name] = entityEl;
+		}
+		else if (type === "camera") {
 		    entityEl = document.createElement('a-entity');
 		    entityEl.setAttribute('id', name+"_rigChild");
 		    entityEl.setAttribute('rotation.order' , "YXZ");

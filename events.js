@@ -109,10 +109,9 @@ AFRAME.registerComponent('vive-listener', {
 	    
 	    //	    var newRotation = this.el.object3D.quaternion;
 	    var newPosition = this.object3D.position;
-	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
-	    const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-
 	    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
+	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+	    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 	    
 	    var coordsText = newPosition.x.toFixed(3)+","+
 		newPosition.y.toFixed(3)+","+
@@ -130,18 +129,15 @@ AFRAME.registerComponent('vive-listener', {
 	    var textEl = sceney.querySelector('#vive-text');
 	    textEl.setAttribute('value', objName + " triggerdown" + '\n' +coordsText);
 	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
-
 	});
 	
 	this.el.addEventListener('triggerup', function (evt) {
 	    
-	    
 	    //	    var newRotation = this.el.object3D.quaternion;
 	    var newPosition = this.object3D.position;
-	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
-	    const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-
 	    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
+	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+	    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 	    
 	    var coordsText = newPosition.x.toFixed(3)+","+
 		newPosition.y.toFixed(3)+","+
