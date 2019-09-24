@@ -126,7 +126,7 @@ AFRAME.registerComponent('vive-listener', {
 	    // for now just do our own
 
 	    var sceney = this.sceneEl;
-	    var textEl = sceney.querySelector('#vive-text');
+	    var textEl = sceney.querySelector('#conix-text');
 	    textEl.setAttribute('value', objName + " triggerdown" + '\n' +coordsText);
 	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
 	});
@@ -145,12 +145,12 @@ AFRAME.registerComponent('vive-listener', {
 
 	    // original click event; simply publish to MQTT
 	    var objName=this.id+"_"+idTag;
-	    publish(outputTopic+objName+"/triggerdown", coordsText+","+objName);
-	    console.log(this.id+' triggerdown at: ', coordsText, 'by', objName);
+	    publish(outputTopic+objName+"/triggerup", coordsText+","+objName);
+	    console.log(this.id+' triggerup at: ', coordsText, 'by', objName);
 
 	    var sceney = this.sceneEl;
-	    var textEl = sceney.querySelector('#vive-text');
-	    textEl.setAttribute('value', this.id + " triggerdown" + '\n' +coordsText);
+	    var textEl = sceney.querySelector('#conix-text');
+	    textEl.setAttribute('value', this.id + " triggerup" + '\n' +coordsText);
 	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
 	});
 

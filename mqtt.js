@@ -28,7 +28,9 @@ var renderParam=getUrlParam('scene','render');
 var userParam=getUrlParam('name','X');
 var themeParam=getUrlParam('theme','starry');
 var weatherParam=getUrlParam('weather','none');
-var mqttParam=getUrlParam('mqttServer','oz.andrew.cmu.edu');
+var mqttParamZ=getUrlParam('mqttServer','oz.andrew.cmu.edu');
+var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
+var fixedCamera=getUrlParam('fixedCamera','');
 
 console.log(renderParam, userParam, themeParam);
 
@@ -41,7 +43,6 @@ console.log(outputTopic);
 var camName = "";
 
 var cameraRig;
-var ViveListenBox;
 var my_camera;
 var vive_leftHand;
 var vive_rightHand;
@@ -66,14 +67,23 @@ var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/ren
 var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
 var Scene;
 
-const client = new Paho.MQTT.Client(mqttParam, Number(9001), "myClientId" + timeID);
+
+//const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
+const client = new Paho.MQTT.Client(mqttParam, "myClientId" + timeID);
 
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
 console.log("time: " , timeID);
 idTag = timeID + "_" + userParam; // e.g. 1234_eric
-camName = "camera_" + idTag;      // e.g. camera_1234_eric
+
+if (fixedCamera !== '') {
+    camName = fixedCamera;
+}
+else {
+    camName = "camera_" + idTag;      // e.g. camera_1234_eric
+}
+
 viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
 viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 
@@ -102,7 +112,6 @@ function onConnect() {
     my_camera = document.getElementById('my-camera');     // this is an <a-camera>
     cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     conixBox = document.getElementById('Box-obj');
-    ViveListenBox = document.getElementById('ViveListenBox');
     environs = document.getElementById('env');
     weather = document.getElementById('weather');
 
@@ -121,7 +130,6 @@ function onConnect() {
     // Add them to our dictionary of scene objects
     sceneObjects['env'] = environs;
     sceneObjects['Box-obj'] = conixBox;
-    sceneObjects['ViveListenBox'] = ViveListenBox;
 
     console.log('my-camera: ',timeID);
     console.log('cameraRig: ', cameraRig);
@@ -394,7 +402,8 @@ function onMessageArrived(message) {
 
 	// These are 'long' messages lie "obj_id,0,0,0,0,0,0,0,0,0,0,#000000,off"
 	// for which the values are x,y,z xrot,yrot,zrot,wrot (quaternions) xscale,yscale,zscale, payload (color), on/off
-
+	//console.log("payloadstring", message.payloadString);
+	
 	if (message.payloadString.length === 0) {
 	    // An empty message after an object_id means remove it
 	    var name = topic[topic.length - 1]; // the object with the parameter
@@ -413,9 +422,12 @@ function onMessageArrived(message) {
 	var name = res[0];
 
 	// if this is our own camera, don't attempt to draw it
-	if (name === camName) return;
-	if (name === viveLName) return;
-	if (name === viveRName) return;
+	if (name === camName)
+	    return;
+	if (name === viveLName)
+	    return;
+	if (name === viveRName)
+	    return;
 
 	if (res.length === 1) {
 	    // a 1 parameter message is parent child relationship e.g. /topic/render/parent_id -m "child_id"

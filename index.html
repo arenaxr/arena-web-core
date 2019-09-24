@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="icon" type="image/png" href="http://xr.andrew.cmu.edu/conix-x.png">
+    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
     <meta charset="utf-8">
     <title>ARENA</title>
     <meta name="description" content="Augmented Reality Edge Networking Architecture">
     <!-- the AFrame script library (minified) -->
     <script src="https://aframe.io/releases/0.9.2/aframe.js"></script>
     <!-- these look useful but also incomprehensible documentation -->
-<!-- 
 
+    <!-- possibly not needed
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script> 
-
-<script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.js"></script>
+    <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
     -->
-    <!--    <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>-->
+
     <!-- pretty backgrounds -->
     <script src="aframe-environment-component.min.js"></script>
     <!-- our camera change and other event listener Components -->
     <script src="events.js"></script>
     <!-- the Paho MQTT.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js" type="text/javascript"></script>
+    <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script> -->
     <!-- our mqtt.js (main) script -->
     <script src="./mqtt.js" type="text/javascript"></script>
     <!-- particles dude  
@@ -28,12 +29,12 @@
 	 -->
   </head>
   <body>
-    <a-scene stats name="MQTTScene"> <!-- stats -->
+    <a-scene name="MQTTScene"> <!-- stats -->
       <a-assets>
 	<a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
 	<a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
 
-	<!-- Vive controls -->
+	<!-- Vive controller 3d model -->
 	<a-asset-item id="viveControl-obj" src="https://cdn.aframe.io/controllers/vive/vr_controller_vive.obj"></a-asset-item>
 	<a-asset-item id="viveControl-mtl" src="https://cdn.aframe.io/controllers/vive/vr_controller_vive.mtl"></a-asset-item>
 	
@@ -60,8 +61,8 @@
 	</a-entity>
       </a-entity>
 
-      <a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>
-      <a-entity vive-pose-listener vive-listener id="vive-rightHand" laser-controls="hand:right"></a-entity>
+      <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>
+      <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right"></a-entity>
 
       <!-- a Vive controller
       <a-entity id="viveController" visible="false" position="0 1 -2" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl"></a-entity>
@@ -71,12 +72,10 @@
 	   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
 	   -->
       <!-- CONIX cube -->
-      <a-entity click-listener position="-1.149 0.5 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+      <a-entity vive-listener click-listener position="-1.149 0.5 -4" rotation="0 -221.0385 0" id="Box-obj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
       </a-entity>
       <a-text id="conix-text" position="-1.149 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
-      <a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
-      <a-text id="vive-text" position="2 1.2 -4" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
       <!-- let there be LIGHTS -->
       <a-light position="-0.93 1.58 -1.14" name="PointLight 1" type="point" color="#9090AD" intensity="0.75"></a-light>
