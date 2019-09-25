@@ -161,6 +161,13 @@ mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1 -m "particle_1,0,
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1/particle-system -m "preset: snow"
 ```
 
+#### Parent/Child Linking (experimental)
+There's support to attach already-existing parent and child scene objects. For example if parent object is box_1 and child object is sphere_2, the command would look like:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/box_1 -m "sphere_2"
+```
+But somehow modifying parameters of child objects seems to cause them to forget other parameters, e.g. changing position affects scale, and vice versa.
+
 This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)  
 The naming convention for a scene object identifier such as `line_1` is that the part before the underscore is the name of the A-Frame entity, and the part after the underscore is a unique identifier to differentiate from other entities (of the same type) in the scene.
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
