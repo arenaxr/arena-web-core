@@ -161,6 +161,12 @@ mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1 -m "particle_1,0,
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1/particle-system -m "preset: snow"
 ```
 
+#### Physics
+You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/earth/box_3/dynamic-body -m ""
+```
+
 #### Parent/Child Linking (experimental)
 There's support to attach already-existing parent and child scene objects. For example if parent object is box_1 and child object is sphere_2, the command would look like:
 ```
