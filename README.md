@@ -184,7 +184,26 @@ I noticed the controllers don't show up in the scene unless they both - and EVER
  * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above).
 NEW EVENTS
  * triggerdown / triggerup for left and right hand controllers  
-The MQTT topic name for these events will be the standard prefix (e.g. /topic/render/) concatenated with a string made up of camera name + an identifier +  eventID resulting in e.g. `/topic/render/vive-leftHand_1234_eric/triggerdown` or `/topic/render/vive-rightHand_1234_eric/triggerup`
+The MQTT topic name for these events will be the standard prefix (e.g. /topic/render/) concatenated with a string made up of camera name + an identifier +  eventID resulting in e.g.
+```
+/topic/render/vive-leftHand_1234_eric/triggerdown
+``` 
+or 
+```
+/topic/render/vive-rightHand_1234_eric/triggerup
+```
+ * Full list of Vive controller event names:
+   - triggerdown
+   - triggerup
+   - gripdown
+   - gripup
+   - menudown
+   - menuup
+   - systemdown
+   - systemup
+   - trackpaddown
+   - trackpadup
+   
 The MQTT MESSAGE will be coordinates concatenated with that same identifier, e.g: `1.234,5.678,9.012,vive-leftHand_1234_eric` - the idea being that the identifier matches the camera ID of the person in the scene who did the clicking, or in this case pulled the Vive trigger buttons. The listener can be added directly in the hard coded index.html main Arena page, e.g:
 ```
 <a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
