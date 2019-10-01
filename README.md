@@ -73,9 +73,9 @@ animate rotation of the already drawn cube
 mosquitto_pub -r -t /topic/render/cube_1/animation -h oz.andrew.cmu.edu -m "property: rotation; to: 0 360 0; loop: true; dur: 10000"
 ```
 #### Remove
-remove the cube
+remove the cube (-n means send a null message)
 ```
-mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m ""
+mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -n
 ```
 #### Images
 ```
@@ -132,7 +132,7 @@ mosquitto_pub -t /topic/piano/box_3/sound -m "src:url(http://xr.andrew.cmu.edu/a
 ```
 This lets only you hear the piano. To share the piano click events with others viewing the scene, add an event-listener Component:
 ```
-mosquitto_pub -t /topic/piano/box_3/click_listener -m "" -r
+mosquitto_pub -t /topic/piano/box_3/click_listener -n -r
 ```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
@@ -146,7 +146,7 @@ mosquitto_pub -t /topic/render/line_1/line__2 -r -h oz.andrew.cmu.edu -m "start:
 #### Events
 Add the "click-listener" event to a scene object; click-listener is a Component defined in `events.js`. This works for adding other, arbitrary Components. A non-empty message gets sent to the Component's `init:` function
 ```
-mosquitto_pub -t /topic/render/cube_1/click-listener -m ""
+mosquitto_pub -t /topic/render/cube_1/click-listener -n
 ```
 #### Background themes
 Adds one of many predefined backgrounds ( one of: [ none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris]) to the scene
@@ -164,7 +164,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/particle_1/particle-system -
 #### Physics
 You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/earth/box_3/dynamic-body -m ""
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/earth/box_3/dynamic-body -n
 ```
 
 #### Parent/Child Linking (experimental)
@@ -210,11 +210,11 @@ The MQTT MESSAGE will be coordinates concatenated with that same identifier, e.g
 ```
 or on demand from an MQTT message like click listeners, e.g:
 ```
-mosquitto_pub -t /topic/render/cube_1/vive-listener -m ""
+mosquitto_pub -t /topic/render/cube_1/vive-listener -n
 ```
  * 6dof pose events are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages, limited to 10 frames per second, much like the headset pose messages work. This supports the notion of tracking controller movement in real time, including direction (pose). These are enabled, much like the pose-listener Component (both defined in events.js) by adding the vive-pose-listener Component to a scene object directly, in the hard-coded index.html part of every Arena page e.g. `<a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>` 
 
-There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. (This kind of functionality remains to be added for Vive controller clicks) So for now only the person wearing the Vive headset & using the controllers can see the 3d models of their own controllers in VR. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
+There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. The exception is that the laser-controls interface sends click events when the triggers are pressed, and click events ARE published to all scene subscribers. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
 
 ## Commentary
 Some hard-coded things:
@@ -227,5 +227,5 @@ Some hard-coded things:
   2. Iterate through the ones you want to remove
   3. For each, issue a publish command to the object+topic, with retain set, and an empty message. This clears the topic. e.g:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/sphere_3 -m "" -r
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/sphere_3 -n -r
 ```
