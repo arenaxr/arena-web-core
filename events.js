@@ -2,11 +2,6 @@
 AFRAME.registerComponent('pose-listener', {
     tick() {
 
-//	var newRotation = new THREE.Quaternion();
-//	var newPosition = new THREE.Vector3();
-	
-//    	this.el.object3D.getWorldQuaternion(newRotation);
-//	this.el.object3D.getWorldPosition(newPosition);
 	var newRotation = this.el.object3D.quaternion;
 	var newPosition = this.el.object3D.position;
     	
@@ -25,11 +20,6 @@ AFRAME.registerComponent('pose-listener', {
 AFRAME.registerComponent('vive-pose-listener', {
     tick() {
 
-//	var newRotation = new THREE.Quaternion();
-//	var newPosition = new THREE.Vector3();
-	
-//    	this.el.object3D.getWorldQuaternion(newRotation);
-//	this.el.object3D.getWorldPosition(newPosition);
 	var newRotation = this.el.object3D.quaternion;
 	var newPosition = this.el.object3D.position;
     	
@@ -44,6 +34,34 @@ AFRAME.registerComponent('vive-pose-listener', {
 
     },
 });
+
+// gets camName as a global from mqtt.js - Javascript lets you :-/
+function updateConixBox(eventName, coordsText, myThis) {
+    var sceney = myThis.sceneEl;
+    var textEl = sceney.querySelector('#conix-text');
+    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' +coordsText);
+    console.log(myThis.id+' was clicked at: ', coordsText, ' by', camName);
+}
+
+function eventAction(evt, eventName, myThis) {
+    //	    var newRotation = this.el.object3D.quaternion;
+    var newPosition = myThis.object3D.position;
+    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
+    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
+    
+    var coordsText = newPosition.x.toFixed(3)+","+
+	newPosition.y.toFixed(3)+","+
+	newPosition.z.toFixed(3);
+
+    // publish to MQTT
+    var objName=myThis.id+"_"+idTag;
+    publish(outputTopic+objName+"/"+eventName, coordsText+","+objName);
+    console.log(myThis.id+' '+eventName+' at: ', coordsText, 'by', objName);
+
+    updateConixBox(eventName, coordsText, myThis);
+}
+
 
 // Component: listen for clicks, call defined function on event evt
 
@@ -71,6 +89,7 @@ AFRAME.registerComponent('click-listener', {
 		textEl.setAttribute('value', this.id + " mousedown" + '\n' +coordsText+'\n'+clicker );
 	    }
 	});
+	
 	this.el.addEventListener('mouseup', function (evt) {
 	    
 	    var coordsText = evt.detail.intersection.point.x.toFixed(3)+","+
@@ -80,20 +99,23 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		publish(outputTopic+this.id+"/mouseup", coordsText+","+camName);
-		console.log(this.id+' was clicked at: ', evt.detail.intersection.point);
+		console.log(this.id+' was clicked at: ', evt.detail.intersection.point, 'by', camName);
 		// example of warping to a URL
 		//if (this.id === "Box-obj")
 		//    window.location.href = 'http://conix.io/';
 	    } else {
 
 		// do the event handling for MQTT event; this is just an example
-		//this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+		//		this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
+		// this example pushes the object with 50 in the +Y direction
+		foo = new THREE.Vector3(1,50,1);
+		bod = new THREE.Vector3(1,1,1);
+		this.body.applyImpulse(foo,bod);
 
 		var clicker = evt.detail.clicker;
 		var sceney = this.sceneEl;
 		var textEl = sceney.querySelector('#conix-text');
 		textEl.setAttribute('value', this.id + " mouseup" + '\n' +coordsText+'\n'+clicker );
-
 	    }
 	});
     }
@@ -104,34 +126,31 @@ AFRAME.registerComponent('vive-listener', {
     init: function () {
 	
 	// Trigger up/down
-	
-	this.el.addEventListener('triggerdown', function (evt) {
-	    
-	    //	    var newRotation = this.el.object3D.quaternion;
-	    var newPosition = this.object3D.position;
-	    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
-	    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
-	    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-	    
-	    var coordsText = newPosition.x.toFixed(3)+","+
-		newPosition.y.toFixed(3)+","+
-		newPosition.z.toFixed(3);
 
-	    // original click event; simply publish to MQTT
-	    var objName=this.id+"_"+idTag;
-	    publish(outputTopic+objName+"/triggerdown", coordsText+","+objName);
-	    console.log(this.id+' triggerdown at: ', coordsText, 'by', objName);
+	this.el.addEventListener('triggerup', function(evt) {
+	    eventAction(evt, 'triggerup', this)});
+	this.el.addEventListener('triggerdown', function(evt) {
+	    eventAction(evt, 'triggerdown', this)});
+	this.el.addEventListener('gripup', function(evt) {
+	    eventAction(evt, 'gripup', this)});
+	this.el.addEventListener('gripdown', function(evt) {
+	    eventAction(evt, 'gripdown', this)});
+	this.el.addEventListener('menuup', function(evt) {
+	    eventAction(evt, 'menuup', this)});
+	this.el.addEventListener('menudown', function(evt) {
+	    eventAction(evt, 'menudown', this)});
+	this.el.addEventListener('systemup', function(evt) {
+	    eventAction(evt, 'systemup', this)});
+	this.el.addEventListener('systemdown', function(evt) {
+	    eventAction(evt, 'systemdown', this)});
+	this.el.addEventListener('trackpadup', function(evt) {
+	    eventAction(evt, 'trackpadup', this)});
+	this.el.addEventListener('trackpaddown', function(evt) {
+	    eventAction(evt, 'trackpaddown', this)});
 
-	    // Need to respond to synthetic event for someone else's click(!!!)
-	    // for now just do our own
-
-	    var sceney = this.sceneEl;
-	    var textEl = sceney.querySelector('#conix-text');
-	    textEl.setAttribute('value', objName + " triggerdown" + '\n' +coordsText);
-	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
-	});
-	
-	this.el.addEventListener('triggerup', function (evt) {
+/*	
+	this.el.addEventListener('triggerup', function(evt) {
+function (evt)} {
 	    
 	    //	    var newRotation = this.el.object3D.quaternion;
 	    var newPosition = this.object3D.position;
@@ -148,11 +167,9 @@ AFRAME.registerComponent('vive-listener', {
 	    publish(outputTopic+objName+"/triggerup", coordsText+","+objName);
 	    console.log(this.id+' triggerup at: ', coordsText, 'by', objName);
 
-	    var sceney = this.sceneEl;
-	    var textEl = sceney.querySelector('#conix-text');
-	    textEl.setAttribute('value', this.id + " triggerup" + '\n' +coordsText);
-	    console.log(this.id+' was clicked at: ', coordsText, ' by', camName);
+	    updateConixBox(this, "triggerup", coordsText);
 	});
+*/
 
 	// BUNCHES OF EVENTS for vive-controls
 /*

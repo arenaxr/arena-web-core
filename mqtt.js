@@ -4,10 +4,6 @@ var sceneObjects = new Object(); // This will be an associative array of strings
 // rate limit camera position updates
 updateMillis = 100;
 
-var queryString = window.location.search;
-queryString = queryString.substring(1);
-const sceneTopic = queryString;
-
 function getUrlVars() {
     var vars = {};
     var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -26,7 +22,7 @@ function getUrlParam(parameter, defaultvalue){
 
 var renderParam=getUrlParam('scene','render');
 var userParam=getUrlParam('name','X');
-var themeParam=getUrlParam('theme','starry');
+var themeParam=getUrlParam('theme','japan');
 var weatherParam=getUrlParam('weather','none');
 var mqttParamZ=getUrlParam('mqttServer','oz.andrew.cmu.edu');
 var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
@@ -42,6 +38,8 @@ console.log(outputTopic);
 
 var camName = "";
 
+var fallBox;
+var fallBox2;
 var cameraRig;
 var my_camera;
 var vive_leftHand;
@@ -65,7 +63,6 @@ var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/ren
 var topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
 var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
 var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
-var Scene;
 
 
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
@@ -78,7 +75,7 @@ console.log("time: " , timeID);
 idTag = timeID + "_" + userParam; // e.g. 1234_eric
 
 if (fixedCamera !== '') {
-    camName = fixedCamera;
+    camName = "camera_" + fixedCamera + "_" + fixedCamera;
 }
 else {
     camName = "camera_" + idTag;      // e.g. camera_1234_eric
@@ -114,7 +111,9 @@ function onConnect() {
     conixBox = document.getElementById('Box-obj');
     environs = document.getElementById('env');
     weather = document.getElementById('weather');
-
+    Scene = document.querySelector('a-scene');
+    fallBox = document.getElementById('fallBox');
+    fallBox2 = document.getElementById('fallBox2');
 
     if (environs)
 	environs.setAttribute('environment', 'preset', themeParam);
@@ -130,10 +129,13 @@ function onConnect() {
     // Add them to our dictionary of scene objects
     sceneObjects['env'] = environs;
     sceneObjects['Box-obj'] = conixBox;
+    sceneObjects['Scene'] = Scene;
+    sceneObjects['fallBox'] = fallBox;
+    sceneObjects['fallBox2'] = fallBox2;
 
-    console.log('my-camera: ',timeID);
+    console.log('my-camera: ',camName);
     console.log('cameraRig: ', cameraRig);
-
+    console.log('fallBox: ', sceneObjects[fallBox]);
 
     //lwt.destinationName = outputTopic+camName;
 
@@ -169,7 +171,6 @@ function onConnect() {
 	    }
 	}
     });
-
 
     if (vive_leftHand)
     vive_leftHand.addEventListener('viveChanged', e => {
@@ -229,8 +230,7 @@ function onConnect() {
 	    }
 	}
     });
-    
-    
+        
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
 	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
@@ -238,8 +238,6 @@ function onConnect() {
 	publish(outputTopic+camName, viveLName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish(outputTopic+camName, viveRName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
     }
-
-    Scene = document.querySelector('a-scene');
 
     // ok NOW start listening for MQTT messages
     client.subscribe(renderTopic);
@@ -257,6 +255,7 @@ const publish_retained = (dest, msg) => {
     let message = new Paho.MQTT.Message(msg);
     message.destinationName = dest;
     message.retained = true;
+    // message.qos = 2;
     client.send(message);
 }
 
@@ -315,6 +314,8 @@ function onMessageArrived(message) {
 
 	// Camera Rig updates
 	if (sceneObject === camName) { // our Rig
+	    console.log("moving our camera rig, sceneObject: " + sceneObject);
+	    
 	    var coords = message.payloadString.split(",");
 
 	    var x    = coords[0]; var y    = coords[1]; var z    = coords[2];
@@ -333,6 +334,8 @@ function onMessageArrived(message) {
 	} else { // others' Rigs(?)
 	    
 	    if (componentName === "rig") { // warp others' camera Rigs
+		console.log("moving other-persons' camera sceneObject: " + sceneObject);
+
 		var rigEl = sceneObjects[sceneObject];
 		
 		var coords = message.payloadString.split(",");
@@ -358,12 +361,13 @@ function onMessageArrived(message) {
 
 	if (entityEl) {
 	    if (message.payloadString.includes(";")) { // javascript style "x:1; y:2; z:3;"
-		//console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
+		console.log("parsed:", AFRAME.utils.styleParser.parse(message.payloadString));
 		entityEl.setAttribute(componentName, AFRAME.utils.styleParser.parse(message.payloadString));
 	    }
 	    else { // raw, don't parse the format. e.g. "url(http://oz.org/Modelfile.glb)"
 		//console.log("unparsed", message.payloadString);
-		if (componentName === "mousedown") {
+		switch (componentName) {
+		case "mousedown":
 		    var splits = message.payloadString.split(',');
 		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
 						    parseFloat(splits[1]),
@@ -374,9 +378,9 @@ function onMessageArrived(message) {
 		    entityEl.emit('mousedown', { "clicker": clicker, intersection:
 					     {
 						 point: myPoint }
-					   }, true);
-		}
-		if (componentName === "mouseup") {
+					       }, true);
+		    break;
+		case "mouseup":
 		    var splits = message.payloadString.split(',');
 		    var myPoint = new THREE.Vector3(parseFloat(splits[0]),
 						    parseFloat(splits[1]),
@@ -387,10 +391,78 @@ function onMessageArrived(message) {
 		    entityEl.emit('mouseup', { "clicker": clicker, intersection:
 					     {
 						 point: myPoint }
-					   }, true);
-		}
-		else {
+					     }, true);
+		    break;
+		case "child": // parent/child relationship e.g. /topic/render/parent_id/child -m "child_id"
+
+		    var res = message.payloadString.split(",");
+		    var childName = res[0];
+		    var parentEl = sceneObjects[sceneObject]; // scene object_id
+		    var childEl  = sceneObjects[message.payloadString];
+
+		    // error checks
+		    if (!parentEl) {
+			console.log("Warning: " + parentEl + " not in sceneObjects");
+			return;
+		    }
+		    if (!childEl) {
+			console.log("Warning: " + childEl + " not in sceneObjects");
+			return;
+		    }
+
+		    console.log("parent", parentEl);
+		    console.log("child", childEl);
+
+		    childEl.flushToDOM();
+		    var copy = childEl.cloneNode(true);
+		    copy.setAttribute("name", "copy");
+		    copy.flusToDOM();
+		    parentEl.appendChild(copy);
+		    sceneObjects[childName] = copy;
+		    // remove from scene
+		    childEl.parentNode.removeChild(childEl);
+		    
+		    console.log("parent", parentEl);
+		    console.log("child", childEl);
+		    break;
+		case "parent": // parent/child relationship e.g. /topic/render/child_id/parent -m "parent_id"
+
+		    var res = message.payloadString.split(",");
+		    var parentName = res[0];
+		    var childEl = sceneObjects[sceneObject]; // scene object_id
+		    var parentEl  = sceneObjects[message.payloadString];
+
+		    // error checks
+		    if (!parentEl) {
+			console.log("Warning: " + parentEl + " not in sceneObjects");
+			return;
+		    }
+		    if (!childEl) {
+			console.log("Warning: " + childEl + " not in sceneObjects");
+			return;
+		    }
+
+		    console.log("parent", parentEl);
+		    console.log("child", childEl);
+
+		    childEl.flushToDOM();
+		    var copy = childEl.cloneNode(true);
+		    copy.setAttribute("name", "copy");
+		    copy.flushToDOM();
+		    parentEl.appendChild(copy);
+		    sceneObjects[childName] = copy;
+		    childEl.parentNode.removeChild(childEl);
+		    
+		    console.log("parent", parentEl);
+		    console.log("child", childEl);
+		    break;
+		case "dynamic-body":
+		    console.log("dynamic-body");
 		    entityEl.setAttribute(componentName, message.payloadString);
+		    break;
+		default:
+		    entityEl.setAttribute(componentName, message.payloadString);
+		    break;
 		}
 	    }
 	}
@@ -400,7 +472,7 @@ function onMessageArrived(message) {
 
     case topicAtomicUpdate:
 
-	// These are 'long' messages lie "obj_id,0,0,0,0,0,0,0,0,0,0,#000000,off"
+	// These are 'long' messages like -t /topic/render/obj_id -m "obj_id,0,0,0,0,0,0,0,0,0,0,#000000,off"
 	// for which the values are x,y,z xrot,yrot,zrot,wrot (quaternions) xscale,yscale,zscale, payload (color), on/off
 	//console.log("payloadstring", message.payloadString);
 	
@@ -428,36 +500,6 @@ function onMessageArrived(message) {
 	    return;
 	if (name === viveRName)
 	    return;
-
-	if (res.length === 1) {
-	    // a 1 parameter message is parent child relationship e.g. /topic/render/parent_id -m "child_id"
-	    
-	    var parentEl = sceneObjects[topic[topic.length - 1]]; // scene object_id
-	    var childEl  = sceneObjects[message.payloadString];
-
-	    // error checks
-	    if (!parentEl) {
-		console.log("Warning: " + parentEl + " not in sceneObjects");
-		return;
-	    }
-	    if (!childEl) {
-		console.log("Warning: " + childEl + " not in sceneObjects");
-		return;
-	    }
-
-	    console.log("parent", parentEl);
-	    console.log("child", childEl);
-
-	    childEl.flushToDOM();
-	    var copy = childEl.cloneNode(true);
-	    parentEl.appendChild(copy);
-	    sceneObjects[name] = copy;
-	    childEl.parentNode.removeChild(childEl);
-	    
-	    console.log("parent", parentEl);
-	    console.log("child", childEl);
-	    return;
-	} 
 	
 	type = name.substring(0, name.indexOf('_'));
 	if (type === "cube") {type = "box"}; // different name in Unity
