@@ -493,7 +493,7 @@ function onMessageArrived(message) {
 	var res = message.payloadString.split(",");
 	var name = res[0];
 
-	// if this is our own camera, don't attempt to draw it
+	// if this is our own camera or controller, don't attempt to draw it
 	if (name === camName)
 	    return;
 	if (name === viveLName)
@@ -525,13 +525,16 @@ function onMessageArrived(message) {
 
 	if (onoff === "off") {
 	    if (sceneObjects[name]) {
-		Scene.removeChild(sceneObjects[name]);
-		delete sceneObjects[name];
+		// don't delete, keep around for re-use e.g. skeleton bones
+		//Scene.removeChild(sceneObjects[name]);
+		//delete sceneObjects[name];
+		sceneObjects[name].setAttribute('visible', false);
 	    } else console.log("Warning: " + name + " not in sceneObjects");
 	} else {
 	    var entityEl;
 	    if (name in sceneObjects) {
 		entityEl = sceneObjects[name];
+		entityEl.setAttribute('visible', true); // might have been set invisible with 'off' earlier
 		//console.log("existing object: ", name);
 		//console.log(entityEl);
 	    } else { // CREATE NEW SCENE OBJECT		
@@ -629,6 +632,11 @@ function onMessageArrived(message) {
 		entityEl.setAttribute('line', 'end', xrot + ' ' + yrot + ' ' + zrot);
 		entityEl.setAttribute('line', 'color', color);
 		break;
+	    case "thickline":
+		entityEl.setAttribute('meshline', "lineWidth: "+xscale);
+		entityEl.setAttribute('meshline', 'path: '+x+' '+y+' '+z+","+xrot+" "+yrot+" "+zrot);
+		entityEl.setAttribute('meshline', 'color', color);
+		break;
 	    case "particle":
 		// two part operation: part 1, create an entity at a position /topic/render/particle_1 -m "particle_1,1,1,1,0,0,0,1,1,1,1,#abcdef,on"
 		// then set it's particle-system attribute later e.g. /topic/render/particle_1/particle-system -m "preset: snow"
@@ -660,7 +668,7 @@ function onMessageArrived(message) {
 
 	    //entityEl.object3D.quaternion.set(xrot,yrot,zrot,wrot);
 
-	    if (type !== 'line') {
+	    if (type !== 'line' && type !== 'thickline') {
 		// Common for all but lines: set position & rotation
 		entityEl.object3D.position.set(x,y,z);
 		entityEl.object3D.rotation.set(vec.x,vec.y,vec.z);
