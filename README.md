@@ -87,7 +87,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t /topic/drone/image_2/material -m "src:imag
 ```
 Need to try URLs instead of `images/2.png` to see if we can point to a bitmap at an arbitrary URL.
 #### Other Primitives: TorusKnot
-Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs)
+Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
 mosquitto_pub -r -h oz -t /topic/render/torusKnot_1 -m "torusKnot_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 mosquitto_pub -h oz -t /topic/render/torusKnot_1/material/color -m '#0000FF'
@@ -143,6 +143,12 @@ Extend the line with a new segment, colored green
 ```
 mosquitto_pub -t /topic/render/line_1/line__2 -r -h oz.andrew.cmu.edu -m "start: 3 3 3; end: 4 4 4; color: #00FF00"
 ```
+#### Thicklines
+"thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the first scale value specifies thickness, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,1,1:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/thickline_8 -m "thickline_8,0,0,0,1,1,1,0,11,0,0,#FF88EE,on"
+```
+You might be wondering, why can't normal line just use the scale value to specify thickness? But this one goes to eleven! (really though, normal lines perform faster)
 #### Events
 Add the "click-listener" event to a scene object; click-listener is a Component defined in `events.js`. This works for adding other, arbitrary Components. A non-empty message gets sent to the Component's `init:` function
 ```
