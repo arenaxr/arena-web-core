@@ -185,10 +185,27 @@ The naming convention for a scene object identifier such as `line_1` is that the
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
 Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth, but not necessarily in the right order. Maybe we use smaller property-update message format for only 'realtime' or 'live' viewers, rather than persist each and every update. This helps address a possible problem with single-property-update topic 'spam': don't retain -> no spam.
 
+#### Scene (global) settings
+Some settings are available by setting attributes of the Scene element (see https://aframe.io/docs/0.9.0/core/scene.html) for example,
+turn on statistics:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/stats -m "true"
+```
+customise the fog:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/fog -m "type: linear; color: #AAA"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/fog -m "type: linear; color: #FFF"
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/fog -m "type: linear; color: #000"
+```
+remove the "enter VR" icon:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/vr-mode-ui -m "enabled: false"
+```
 #### Vive (laser) controls
 I noticed the controllers don't show up in the scene unless they both - and EVERYTHING else for SteamVR - are all working (headset, lighthouses). And sometimes you have to restart SteamVR for hand controllers to show up in the scene; even though SteamVR shows them as being working/on/available/etc., it's possible to open VR mode in an Arena scene and be missing the hand controls.
+ 
+#### EVENTS
  * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above).
-NEW EVENTS
  * triggerdown / triggerup for left and right hand controllers  
 The MQTT topic name for these events will be the standard prefix (e.g. /topic/render/) concatenated with a string made up of camera name + an identifier +  eventID resulting in e.g.
 ```
