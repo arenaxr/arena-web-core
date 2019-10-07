@@ -25,7 +25,8 @@ var userParam=getUrlParam('name','X');
 var themeParam=getUrlParam('theme','japan');
 var weatherParam=getUrlParam('weather','none');
 var mqttParamZ=getUrlParam('mqttServer','oz.andrew.cmu.edu');
-var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
+var mqttParam='wss://'+mqttParamZ+'/mqtt';
+// var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
 var fixedCamera=getUrlParam('fixedCamera','');
 
 console.log(renderParam, userParam, themeParam);
@@ -127,6 +128,7 @@ function onConnect() {
 
     // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
     // Add them to our dictionary of scene objects
+    sceneObjects['Scene'] = Scene;
     sceneObjects['env'] = environs;
     sceneObjects['Box-obj'] = conixBox;
     sceneObjects['Scene'] = Scene;
