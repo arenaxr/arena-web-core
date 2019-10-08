@@ -57,6 +57,11 @@ change only the color of the already-drawn cube
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/material/color -m '#00AA00'
 ```
+#### Transparency
+Say the cube has already been drawn. In a second command, something like this sets 50% transparency:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/material -m "transparent: true; opacity: 0.5"
+```
 #### Move
 move the position of the already drawn cube
 ```
