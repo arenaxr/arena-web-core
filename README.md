@@ -90,8 +90,11 @@ Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modificatio
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/drone/image_2/material -m "src:images/2.png; repeat: 4 4" -r
 ```
-URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`
-
+URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
+To update the image of a named image already in the scene, use this syntax:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/drone/image_2/material -m "src: http://xr.andrew.cmu.edu/abstract/downtown.png"
+```
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
