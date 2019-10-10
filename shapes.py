@@ -44,7 +44,7 @@ while (True):
     print(MESSAGE)
 
     #os.system("mosquitto_pub -h " + HOST + " -t " + TOPIC + "/" + name + " -m " + MESSAGE + " -r");
-    publish.single(TOPIC, MESSAGE+",on", hostname=HOST, retain=False)
+    publish.single(TOPIC+'/'+name, MESSAGE+",on", hostname=HOST, retain=False)
     if (len(messages) >= 25):
         publish.single(TOPIC, messages.pop(0)+",off",hostname=HOST, retain=False)
     time.sleep(0.1)
