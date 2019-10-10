@@ -57,6 +57,11 @@ change only the color of the already-drawn cube
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/material/color -m '#00AA00'
 ```
+#### Transparency
+Say the cube has already been drawn. In a second command, something like this sets 50% transparency:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/material -m "transparent: true; opacity: 0.5"
+```
 #### Move
 move the position of the already drawn cube
 ```
@@ -85,7 +90,11 @@ Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modificatio
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/drone/image_2/material -m "src:images/2.png; repeat: 4 4" -r
 ```
-Need to try URLs instead of `images/2.png` to see if we can point to a bitmap at an arbitrary URL.
+URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
+To update the image of a named image already in the scene, use this syntax:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/drone/image_2/material -m "src: http://xr.andrew.cmu.edu/abstract/downtown.png"
+```
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
@@ -205,7 +214,11 @@ mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/vr-mode-ui -m "enabled
 I noticed the controllers don't show up in the scene unless they both - and EVERYTHING else for SteamVR - are all working (headset, lighthouses). And sometimes you have to restart SteamVR for hand controllers to show up in the scene; even though SteamVR shows them as being working/on/available/etc., it's possible to open VR mode in an Arena scene and be missing the hand controls.
  
 #### EVENTS
- * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above).
+ * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above). Mouse events occur if you click in a browser, or tap on a touchscreen as well.
+  - mouseenter
+  - mouseleave
+  - mousedown 
+  - mouseup
  * triggerdown / triggerup for left and right hand controllers  
 The MQTT topic name for these events will be the standard prefix (e.g. /topic/render/) concatenated with a string made up of camera name + an identifier +  eventID resulting in e.g.
 ```
@@ -239,7 +252,24 @@ mosquitto_pub -t /topic/render/cube_1/vive-listener -n
 
 There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. The exception is that the laser-controls interface sends click events when the triggers are pressed, and click events ARE published to all scene subscribers. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
 
-## Commentary
+## Discussion
+### Camera
+(from A-Frame documentation)
+
+The camera component defines from which perspective the user views the scene. The camera is commonly paired with controls components that allow input devices to move and rotate the camera.
+
+A camera should usually be positioned at the average height of human eye level (1.6 meters). When used with controls that receive rotation or position (e.g. from a VR device) this position will be overridden.
+```
+<a-entity camera look-controls position="0 1.6 0"></a-entity>
+```
+  - The above example puts the camera at a position in the scene, but sure enough, when we use a tablet+WebXRViewer or a VR or AR headset, these values are overwritten. IN FACT it turns out that from a desktop browser, at the start of our A-Frame session, regardless of the values set in the HTML above, the start position is set to (0, 1.6, 0). It was misleading that the HTML definition just happened to match. Our code sets it to (0,0,0) in the declaration. It gets more interesting: on a tablet or phone, the start position again gets overridden - by (0,0,0) this time!
+
+When moving or rotating the camera relative to the scene, use a camera rig. By doing so, the camera’s height offset can be updated by roomscale devices, while still allowing the tracked area to be moved independently around the scene.
+```
+<a-entity id="rig" position="25 10 0">
+  <a-entity id="camera" camera look-controls></a-entity>
+</a-entity>
+```
 Some hard-coded things:
  * MQTT broker running on `oz.andrew.cmu.edu` - runs with WebSockets enabled, because Paho MQTT needs to use WebSockets
  * MQTT topic structure is in flux. Used to be everything went to `/topic/render`, but this is definitely going to change. Each Object in the scene gets it's own topic, which is the 'name' of the object, e.g: `/topic/render/sphere_3` according to 
