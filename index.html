@@ -67,14 +67,15 @@
 		<a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
 		  <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
 		  -->
-	    <a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>
+	    <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: [click-listener]"></a-entity>
 
 	  </a-camera>
 	</a-entity>
       </a-entity>
 
-      <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>
-      <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right"></a-entity>
+      <!-- commented out vive-listener component in below -->
+      <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
+      <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
 
       <!-- a Vive controller
       <a-entity id="viveController" visible="false" position="0 1 -2" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl"></a-entity>

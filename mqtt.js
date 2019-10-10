@@ -2,7 +2,7 @@ const timeID = new Date().getTime() % 10000;
 var sceneObjects = new Object(); // This will be an associative array of strings and objects
 
 // rate limit camera position updates
-updateMillis = 100;
+const updateMillis = 100;
 
 function getUrlVars() {
     var vars = {};
@@ -32,6 +32,7 @@ var fixedCamera=getUrlParam('fixedCamera','');
 console.log(renderParam, userParam, themeParam);
 
 outputTopic = "/topic/"+renderParam+"/";
+vioTopic = "/topic/vio/";
 renderTopic = outputTopic+"#";
 
 console.log(renderTopic);
@@ -72,7 +73,6 @@ const client = new Paho.MQTT.Client(mqttParam, "myClientId" + timeID);
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
-console.log("time: " , timeID);
 idTag = timeID + "_" + userParam; // e.g. 1234_eric
 
 if (fixedCamera !== '') {
@@ -81,6 +81,7 @@ if (fixedCamera !== '') {
 else {
     camName = "camera_" + idTag;      // e.g. camera_1234_eric
 }
+console.log("camName: " , camName);
 
 viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
 viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
@@ -159,18 +160,38 @@ function onConnect() {
 	    e.detail._w.toFixed(3)+
 	    ",0,0,0,"+color+",on";
 
-	// suppress duplicates
-	if (msg !== oldMsg) {
-	    // rate limit
-	    date = new Date();
-	    stamp = date.getTime();
-	    if ((stamp - lastUpdate) >= updateMillis) {
+	// rig updates for VIO
 
-		publish(outputTopic+camName, msg);
+	// suppress duplicates
+	//if (msg !== oldMsg) {
+	if (true) {
+	    // rate limit
+	    //date = new Date();
+	    stamp = date.getTime();
+	    //if ((stamp - lastUpdate) >= updateMillis) {
+
+		publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
 		oldMsg = msg;
 		lastUpdate = stamp;
 		//console.log("cam moved: ",outputTopic+camName, msg);
-	    }
+
+		if (fixedCamera !== '') {
+		    
+		    pos= my_camera.object3D.position
+		    rot = my_camera.object3D.quaternion
+		    var viomsg = camName+","+
+			pos.x.toFixed(3)+","+
+			pos.y.toFixed(3)+","+
+			pos.z.toFixed(3)+","+
+			rot.x.toFixed(3)+","+
+			rot.y.toFixed(3)+","+
+			rot.z.toFixed(3)+","+
+			rot.w.toFixed(3)+
+			",0,0,0,"+color+",on";
+
+		    publish(vioTopic+camName, viomsg);
+		}
+	    //}
 	}
     });
 
@@ -190,16 +211,16 @@ function onConnect() {
 
 	// suppress duplicates
 	if (msg !== oldMsgLeft) {
-	    // rate limit
-	    date = new Date();
-	    stampLeft = date.getTime();
-	    if ((stampLeft - lastUpdateLeft) >= updateMillis) {
+	    // rate limiting is now handled in vive-pose-listener
+	    //date = new Date();
+	    //stampLeft = date.getTime();
+	    //if ((stampLeft - lastUpdateLeft) >= updateMillis) {
 
 		publish(outputTopic+objName, msg);
 		oldMsgLeft = msg;
-		lastUpdateLeft = stampLeft;
+		//lastUpdateLeft = stampLeft;
 		//console.log("viveLeft moved: ",outputTopic+objName, msg);
-	    }
+	    //}
 	}
     });
 
@@ -221,15 +242,15 @@ function onConnect() {
 	// suppress duplicates
 	if (msg !== oldMsgRight) {
 	    // rate limit
-	    date = new Date();
-	    stampRight = date.getTime();
-	    if ((stampRight - lastUpdateRight) >= updateMillis) {
+	    //date = new Date();
+	    //stampRight = date.getTime();
+	    //if ((stampRight - lastUpdateRight) >= updateMillis) {
 
 		publish(outputTopic+objName, msg);
 		oldMsgRight = msg;
-		lastUpdateRight = stampRight;
+		//lastUpdateRight = stampRight;
 		//console.log("viveRight moved: ",outputTopic+objName, msg);
-	    }
+	    //}
 	}
     });
         
@@ -333,8 +354,8 @@ function onMessageArrived(message) {
 //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
 
 	    break;
-	} else { // others' Rigs(?)
-	    
+	} else { // others' Rigs
+	    /*
 	    if (componentName === "rig") { // warp others' camera Rigs
 		console.log("moving other-persons' camera sceneObject: " + sceneObject);
 
@@ -355,6 +376,7 @@ function onMessageArrived(message) {
 
 		break;
 	    }
+*/
 	}
 
 	var entityEl = sceneObjects[sceneObject];
@@ -582,6 +604,7 @@ function onMessageArrived(message) {
 		    headtext.setAttribute('side', "double");
 		    headtext.setAttribute('align', "center");
 		    headtext.setAttribute('anchor', "center");
+		    headtext.setAttribute('width', 5);
 		    headtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
 		    headtext.setAttribute('color', color); // color
 		    entityEl.appendChild(headtext);
