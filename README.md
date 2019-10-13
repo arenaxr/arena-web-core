@@ -143,6 +143,12 @@ This lets only you hear the piano. To share the piano click events with others v
 ```
 mosquitto_pub -t /topic/piano/box_3/click_listener -n -r
 ```
+#### 360 Video
+First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/waterfall/sphere_2 -m "sphere_2,0,0,0,0,0,0,1,200,200,200,white,on" -r
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/waterfall/sphere_2/material -m "src:images/360falls.mp4; side: back" -r
+```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
 ```
