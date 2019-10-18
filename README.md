@@ -73,10 +73,14 @@ move the position of the already drawn cube
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/position -m "x:1; y:2; z:3;"
 ```
 #### Rotate
-rotate the already drawn cube
+rotate the already drawn cube; these are A-frame rotations in degrees
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/rotation -m "x:1; y:2; z:3;"
 ```
+the quaternion (native) representation of rotation is a bit more tricky. The 4 parameters are X,Y,Z,W. Here are some simple examples:
+  - `1,0,0,0`: rotate 180 degrees around X axis
+  - `0,0.7,0,0.7`: rotate 90 degrees around Y axis
+  - `0,0,-0.7,0.7`: rotate -90 degrees around Z axis
 #### Animate
 animate rotation of the already drawn cube
 ```
