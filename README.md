@@ -31,7 +31,7 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
  
- ### models/
+ ### 3D models/
  Here are some ready to use models on the server, accessible with the models/modelname.glb parameter:
 ```
 2CylinderEngine.glb      BoxAnimated.glb               Corset.glb             MetalRoughSpheres.glb        RiggedSimple.glb           VertexColorTest.glb
@@ -44,7 +44,12 @@ BarramundiFish.glb       Buggy.glb                     Head2.glb              Or
 BoomBox.glb              CesiumMan.glb                 InterpolationTest.glb  ReciprocatingSaw.glb         UnlitTest.glb              nuno.glb
 Box.glb                  CesiumMilkTruck.glb           Lantern.glb            RiggedFigure.glb             VC.glb                     toni.glb
 ```
- 
+##### Getting models from Sketchfab
+Sketchfab GLTF models don't always come in convenient single .glb files. Sometimes they consist of a main .gltf file that refers to several textures and other files in a textures/ folder and .glb file. And to make matters worse, the default name is scene.gltf. But if you put everything from the download into a folder of it's own, you can keep it separate from other scene.gltf files, and they will find the right files through relative paths. For example
+```
+ls /var/www/html/models/nara
+scene.bin  scene.gltf  textures
+``` 
  ## General Purpose AFrame using Subtopics
  Most of these take 10 comma separated digits which are x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%)
 #### Draw a Cube
@@ -68,10 +73,14 @@ move the position of the already drawn cube
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/position -m "x:1; y:2; z:3;"
 ```
 #### Rotate
-rotate the already drawn cube
+rotate the already drawn cube; these are A-frame rotations in degrees
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/cube_1/rotation -m "x:1; y:2; z:3;"
 ```
+the quaternion (native) representation of rotation is a bit more tricky. The 4 parameters are X,Y,Z,W. Here are some simple examples:
+  - `1,0,0,0`: rotate 180 degrees around X axis
+  - `0,0.7,0,0.7`: rotate 90 degrees around Y axis
+  - `0,0,-0.7,0.7`: rotate -90 degrees around Z axis
 #### Animate
 animate rotation of the already drawn cube
 ```
@@ -142,6 +151,12 @@ mosquitto_pub -t /topic/piano/box_3/sound -m "src:url(http://xr.andrew.cmu.edu/a
 This lets only you hear the piano. To share the piano click events with others viewing the scene, add an event-listener Component:
 ```
 mosquitto_pub -t /topic/piano/box_3/click_listener -n -r
+```
+#### 360 Video
+First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/waterfall/sphere_2 -m "sphere_2,0,0,0,0,0,0,1,200,200,200,white,on" -r
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/waterfall/sphere_2/material -m "src:images/360falls.mp4; side: back" -r
 ```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
