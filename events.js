@@ -17,10 +17,10 @@ AFRAME.registerComponent('pose-listener', {
 	const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
 	
 	var newPose = rotationCoords+" "+positionCoords;
-	//	if (this.lastPose !== newPose) {
+	if (this.lastPose !== newPose) {
 	    this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
 	    this.lastPose = newPose;
-	//	}
+	}
     })
 });
 
@@ -92,6 +92,10 @@ AFRAME.registerComponent('click-listener', {
 
 		// do the event handling for MQTT event; this is just an example
 		//this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+		if (evt.currentTarget.id.includes("Earth")) {
+		    this.setAttribute('animation__2', "");
+		    this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate");
+		}
 		var clicker = evt.detail.clicker;
 
 		var sceney = this.sceneEl;
@@ -118,6 +122,7 @@ AFRAME.registerComponent('click-listener', {
 		// do the event handling for MQTT event; this is just an example
 		//		this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
 		// this example pushes the object with 50 in the +Y direction
+		// mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
 		if (this.body) {
 		    foo = new THREE.Vector3(1,50,1);
 		    bod = new THREE.Vector3(1,1,1);

@@ -22,7 +22,7 @@ function getUrlParam(parameter, defaultvalue){
 
 var renderParam=getUrlParam('scene','render');
 var userParam=getUrlParam('name','X');
-var themeParam=getUrlParam('theme','japan');
+var themeParam=getUrlParam('theme','starry');
 var weatherParam=getUrlParam('weather','none');
 var mqttParamZ=getUrlParam('mqttServer','oz.andrew.cmu.edu');
 var mqttParam='wss://'+mqttParamZ+'/mqtt';
@@ -51,8 +51,6 @@ var date = new Date();
 
 // Rate limiting variables
 var oldMsg = "";
-var oldMsgLeft = "";
-var oldMsgRight = "";
 var lastUpdate = date.getTime();
 var lastUpdateLeft = lastUpdate;
 var lastUpdateRight = lastUpdate;
@@ -74,6 +72,11 @@ client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
 idTag = timeID + "_" + userParam; // e.g. 1234_eric
+// set initial position of vive controllers (not yet used) to zero
+// the comparison against this will, at startup, emit no 'changed' message
+// but rather the message will only appear if/when an actual controller moves
+var oldMsgLeft = "viveLeft_"+idTag+",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
+var oldMsgRight = "viveRight_"+idTag+",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
 
 if (fixedCamera !== '') {
     camName = "camera_" + fixedCamera + "_" + fixedCamera;
@@ -135,6 +138,7 @@ function onConnect() {
     sceneObjects['Scene'] = Scene;
     sceneObjects['fallBox'] = fallBox;
     sceneObjects['fallBox2'] = fallBox2;
+    sceneObjects['my-camera'] = my_camera;
 
     console.log('my-camera: ',camName);
     console.log('cameraRig: ', cameraRig);
@@ -167,10 +171,11 @@ function onConnect() {
 	if (true) {
 	    // rate limit
 	    //date = new Date();
-	    stamp = date.getTime();
+	    //stamp = date.getTime();
 	    //if ((stamp - lastUpdate) >= updateMillis) {
 
-		publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
+	    //		publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
+	    publish(outputTopic+camName, msg ); // extra timestamp info at end for debugging
 		oldMsg = msg;
 		lastUpdate = stamp;
 		//console.log("cam moved: ",outputTopic+camName, msg);
@@ -187,7 +192,7 @@ function onConnect() {
 			rot.y.toFixed(3)+","+
 			rot.z.toFixed(3)+","+
 			rot.w.toFixed(3)+
-			",0,0,0,"+color+",on";
+			",0,0,0,#000000,on";
 
 		    publish(vioTopic+camName, viomsg);
 		}
@@ -207,7 +212,7 @@ function onConnect() {
 	    e.detail._y.toFixed(3)+","+
 	    e.detail._z.toFixed(3)+","+
 	    e.detail._w.toFixed(3)+
-	    ",0,0,0,"+color+",on";
+	    ",0,0,0,#000000,on";
 
 	// suppress duplicates
 	if (msg !== oldMsgLeft) {
@@ -237,7 +242,7 @@ function onConnect() {
 	    e.detail._y.toFixed(3)+","+
 	    e.detail._z.toFixed(3)+","+
 	    e.detail._w.toFixed(3)+
-	    ",0,0,0,"+color+",on";
+	    ",0,0,0,#000000,on";
 
 	// suppress duplicates
 	if (msg !== oldMsgRight) {
@@ -567,7 +572,12 @@ function onMessageArrived(message) {
 		    entityEl = document.createElement('a-entity');
 		    entityEl.setAttribute('id', name);
 		    entityEl.setAttribute('rotation.order' , "YXZ");
-		    entityEl.setAttribute('obj-model', "obj: #viveControl-obj; mtl: #viveControl-mtl");
+		    //entityEl.setAttribute('obj-model', "obj: #viveControl-obj; mtl: #viveControl-mtl");
+		    if (type === "viveLeft")
+			entityEl.setAttribute("gltf-model", "url(models/valve_index_left.gltf)");
+		    else
+			entityEl.setAttribute("gltf-model", "url(models/valve_index_right.gltf)");
+		   
 		    entityEl.object3D.position.set(0,0,0);
 		    entityEl.object3D.rotation.set(0,0,0);
 
