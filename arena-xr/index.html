@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">    
     <meta charset="utf-8">
     <title>ARENA-XR</title>
     <meta name="description" content="ARENA for WebXR on iOS">
@@ -9,7 +10,12 @@
 <!--    <script src='vendor/aframe-master.js'></script> <!-- this version draws everything at 0,0,0 -->
     <script src='vendor/three.xr.js'></script>
     <script src='dist/aframe-xr-dev.js'></script>
-    
+<!--    
+    <script src="https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.js"></script>
+    -->
+    <!-- thick lines  - seems to have bugs     -->
+    <script src="https://rawgit.com/andreasplesch/aframe-meshline-component/master/dist/aframe-meshline-component.min.js"></script>
+
     <!-- these look useful but also incomprehensible documentation
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.min.js"></script>
  -->
@@ -61,6 +67,15 @@
 
   <a-entity xr="ar: true; vr: false; magicwindow: false"></a-entity>
 
+  <!-- physics test stuff
+  <a-plane static-body position="0 -0.1 0" id="groundPlane" color="FFAAEE" height="30" width="30" rotation="-90 0 0"></a-plane>
+
+  <a-entity click-listener dynamic-body="type: dynamic"  position="0 4 -4" rotation="0 0 0" scale="0.5 0.5 0.5" id="fallBox" name="afallBox" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+  </a-entity>
+  <a-entity click-listener dynamic-body="type: dynamic"  position="0.1 4.5 -4" rotation="0 0 0" scale="0.5 0.5 0.5" id="fallBox2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+  </a-entity>
+-->
+
 <!--  
 <a-sky radius="5000" color="#000000"></a-sky> 
 <a-entity environment="preset: starry; groundTexture: 'none';"></a-entity>
@@ -68,12 +83,16 @@
 
 -->
 
-  <a-entity position="0 0 0" id="CameraRig">
+  <a-entity position="0 0 0" id="CameraRig" movement-controls="fli: true; speed=0.3">
     <a-entity position="0 0 0.001" id="CameraWrapper" name="PerspectiveCamera" tag="MainCamera">
-      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener>
+      <!--
+      <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
+	-->
+	  <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true" look-controls pose-listener mouse-cursor>      
 	<!--
         <a-cursor fuse="False" max-distance="1000" timeout="1500"></a-cursor>
 	-->
+	<a-entity id="mouseCursor" cursor="rayOrigin: mouse"></a-entity>
       </a-camera>
     </a-entity>
   </a-entity>
