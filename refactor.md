@@ -1,5 +1,9 @@
 #### Scratch document for talking about ARENA refactor
 
+### idea
+  create test JSON format MQTT messages for each example in https://github.com/conix-center/ARENA/blob/master/README.md  
+  use this to debug a JSON parsing algorithm to handle below cases
+  
 ### onMessageArrived(message) algorithm
 
   1. Message arrives, this function gets called with 2 parts: message.destinationName (topic) and message.payloadString.  
