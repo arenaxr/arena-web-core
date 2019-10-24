@@ -3,22 +3,24 @@
   <head>
     <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
     <meta charset="utf-8">
-    <title>ARENA</title>
-    <meta name="description" content="Augmented Reality Edge Networking Architecture">
+    <title>ARENA2</title>
+    <meta name="description" content="Refactoring the ARENA">
     <!-- the AFrame script library (minified) -->
     <script src="aframe/dist/aframe-v0.9.2.js"></script>
-    <!-- these look useful but also incomprehensible documentation -->
 
     <!-- possibly not needed
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script> 
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.js"></script>
     <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
     -->
-    
-    <script src="https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.js"></script>
 
-    <!-- thick lines  - seems to have bugs     -->
-    <script src="https://rawgit.com/andreasplesch/aframe-meshline-component/master/dist/aframe-meshline-component.min.js"></script>
+    <!-- from https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.js -->
+    <script src="vendor/aframe-physics-system.js"></script>
+
+    <!-- thick lines  - seems to have bugs 
+	 from https://rawgit.com/andreasplesch/aframe-meshline-component/master/dist/aframe-meshline-component.min.js
+      -->
+    <script src="vendor/aframe-meshline-component.min.js"></script>
 
     <!-- pretty backgrounds -->
     <script src="aframe-environment-component.min.js"></script>

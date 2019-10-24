@@ -20,7 +20,7 @@ function getUrlParam(parameter, defaultvalue){
     return urlparameter;
 }
 
-var renderParam=getUrlParam('scene','render');
+var renderParam=getUrlParam('scene','render'); // scene name
 var userParam=getUrlParam('name','X');
 var themeParam=getUrlParam('theme','starry');
 var weatherParam=getUrlParam('weather','none');
@@ -31,7 +31,7 @@ var fixedCamera=getUrlParam('fixedCamera','');
 
 console.log(renderParam, userParam, themeParam);
 
-outputTopic = "/topic/"+renderParam+"/";
+outputTopic = "realm/s/"+renderParam+"/";
 vioTopic = "/topic/vio/";
 renderTopic = outputTopic+"#";
 
@@ -148,21 +148,21 @@ function onConnect() {
 
     // Publish initial camera presence
     var color = '#'+Math.floor(Math.random()*16777215).toString(16);
-    var mymsg = camName+",0,1.6,0,0,0,0,0,0,0,0,"+color+",on";
+    var mymsg = '{"object_id": "'+camName+'", "action": "create", "data": {"object_type": "camera, "position": {"x":0, "y":1.6, "z":0}, "rotation": {"x":0, "y":0, "z":0, "w":0}}}';
     publish(outputTopic+camName, mymsg);
     console.log("my-camera element", my_camera);
 
     my_camera.addEventListener('poseChanged', e => {
-	//console.log(e.detail);	
-	var msg = camName+","+
-	    e.detail.x.toFixed(3)+","+
-	    e.detail.y.toFixed(3)+","+
-	    e.detail.z.toFixed(3)+","+
-	    e.detail._x.toFixed(3)+","+
-	    e.detail._y.toFixed(3)+","+
-	    e.detail._z.toFixed(3)+","+
-	    e.detail._w.toFixed(3)+
-	    ",0,0,0,"+color+",on";
+	//console.log(e.detail);
+
+	var msg = '{"object_id": "'+camName+'", "action": "update", "data": {"object_type": "camera", "position": {"x":'+
+	    e.detail.x.toFixed(3)+', "y":'+
+	    e.detail.y.toFixed(3)+', "z":'+
+	    e.detail.z.toFixed(3)+'}, "rotation": {"x":'+
+	    e.detail._x.toFixed(3)+', "y":'+
+	    e.detail._y.toFixed(3)+', "z":'+
+	    e.detail._z.toFixed(3)+', "w":'+
+	    e.detail._w.toFixed(3)+'}, "color": "'+color+'"}}';
 
 	// rig updates for VIO
 
@@ -184,6 +184,8 @@ function onConnect() {
 		    
 		    pos= my_camera.object3D.position
 		    rot = my_camera.object3D.quaternion
+
+		    // JSONIFY this
 		    var viomsg = camName+","+
 			pos.x.toFixed(3)+","+
 			pos.y.toFixed(3)+","+
@@ -204,6 +206,7 @@ function onConnect() {
     vive_leftHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
 	var objName="viveLeft_"+idTag;
+	// JSONIFY this
 	var msg = objName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
@@ -234,6 +237,7 @@ function onConnect() {
     vive_rightHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
 	var objName="viveRight_"+idTag;
+	// JSONIFY this
 	var msg = objName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
@@ -261,6 +265,7 @@ function onConnect() {
         
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
+	// JSONIFY this
 	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
 	publish_retained(outputTopic+camName, ""); // no longer needed, don't retain head pose
 	publish(outputTopic+camName, viveLName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
@@ -294,6 +299,15 @@ const publish = (dest, msg) => {
     client.send(message);
 }
 
+function isJson(str) {
+    try {
+	JSON.parse(str);
+    } catch (e) {
+	return false;
+    }
+    return true;
+}
+
 function onMessageArrived(message) {
 
     // parse topic
@@ -304,10 +318,119 @@ function onMessageArrived(message) {
     }
     const topic = dest.split("/");
     
-    //console.log(message.payloadString);
-    //console.log (topic.length, "<- topic.length");
-    
-    switch (topic.length) {
+    console.log(topic, message.payloadString);
+
+    var theMessage = JSON.parse(message.payloadString);
+    console.log(theMessage.object_id);
+
+    switch (theMessage.action) {
+
+    case "create":
+	// parse out JSON
+	var x = theMessage.data.position.x;
+	var y = theMessage.data.position.y;
+	var z = theMessage.data.position.z;
+	var xrot = theMessage.data.rotation.x;
+	var yrot = theMessage.data.rotation.y;
+	var zrot = theMessage.data.rotation.z;
+	var wrot = theMessage.data.rotation.w;
+	var xscale = theMessage.data.scale.x;
+	var yscale = theMessage.data.scale.y;
+	var zscale = theMessage.data.scale.z;
+	var color = theMessage.data.color;
+	var object_id = theMessage.object_id;
+	var type = theMessage.data.object_type;
+	if (type === "cube") {type = "box"}; // different name in Unity
+	if (type === "quad") {type = "plane"}; // also different
+
+	//var name = type+"_"+theMessage.object_id;
+	var name = theMessage.object_id;
+	var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
+	var euler = new THREE.Euler();
+	var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
+	var vec = foo.toVector3();
+
+	entityEl = document.createElement('a-entity');
+	entityEl.setAttribute('id', name);
+	entityEl.setAttribute('rotation.order' , "YXZ");
+
+	Scene.appendChild(entityEl);
+	// Add it to our dictionary of scene objects
+	sceneObjects[name] = entityEl;
+
+	switch(type) {
+	case "light":
+	    entityEl.setAttribute('light', 'type', 'ambient');
+	    // does this work for light a-entities ?
+	    entityEl.setAttribute('light', 'color', color);
+	    break;
+	case "camera":
+	    //console.log("Camera update", entityEl);
+	    //console.log(entityEl.getAttribute('position'));
+	    break;
+	case "viveLeft":
+	    break;
+	case "viveRight":
+	    break;
+	case "image": // use the color slot for URL (like gltf-models do)
+	    entityEl.setAttribute('geometry', 'primitive', 'plane');
+	    entityEl.setAttribute('material', 'src', color);
+	    entityEl.setAttribute('material', 'shader', 'flat');
+	    entityEl.object3D.scale.set(xscale,yscale,zscale);
+	    break;
+	case "line":
+	    entityEl.setAttribute('line', 'start', x + ' ' + y + ' ' + z);
+	    entityEl.setAttribute('line', 'end', xrot + ' ' + yrot + ' ' + zrot);
+	    entityEl.setAttribute('line', 'color', color);
+	    break;
+	case "thickline":
+	    entityEl.setAttribute('meshline', "lineWidth: "+xscale);
+	    entityEl.setAttribute('meshline', 'path: '+x+' '+y+' '+z+","+xrot+" "+yrot+" "+zrot);
+	    entityEl.setAttribute('meshline', 'color', color);
+	    break;
+	case "particle":
+	    // two part operation: part 1, create an entity at a position /topic/render/particle_1 -m "particle_1,1,1,1,0,0,0,1,1,1,1,#abcdef,on"
+	    // then set it's particle-system attribute later e.g. /topic/render/particle_1/particle-system -m "preset: snow"
+	    entityEl.object3D.position.set(x, y, z);
+	    break;		
+	case "gltf-model":
+	    // overload: store URL in #color field
+	    //entityEl.object3D.scale.set(xscale, yscale, zscale);
+	    entityEl.setAttribute('scale', xscale+' '+ yscale+' '+ zscale);
+	    entityEl.setAttribute("gltf-model", color);		
+	    break;
+	case "text":
+	    // use color field for text string
+	    if (entityEl.hasChildNodes()) // assume only one we added
+		entityEl.removeChild(entityEl.childNodes[0]);
+	    textEl = document.createElement('a-text');
+	    textEl.setAttribute('value', color);
+	    textEl.setAttribute('side', "double");
+	    textEl.setAttribute('align', "center");
+	    textEl.setAttribute('anchor', "center");
+	    entityEl.appendChild(textEl);
+	    break;
+	default:
+	    entityEl.setAttribute('geometry', 'primitive', type);
+	    entityEl.object3D.scale.set(xscale,yscale,zscale);
+	    entityEl.setAttribute('material', 'color', color);
+	    break;
+	}
+
+	if (type !== 'line' && type !== 'thickline') {
+	    // Common for all but lines: set position & rotation
+	    entityEl.object3D.position.set(x,y,z);
+	    entityEl.object3D.rotation.set(vec.x,vec.y,vec.z);
+	}
+	break;
+
+    case "delete":
+	var name = theMessage.object_id;
+	if (sceneObjects[name]) {
+	    Scene.removeChild(sceneObjects[name]);
+	    delete sceneObjects[name];
+	}
+	break;
 
     case topicMultiProperty:
 	// Multi-property component update, e.g: topic/render/cube_1/material/color "#FFFFFF"

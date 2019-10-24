@@ -57,6 +57,10 @@ scene.bin  scene.gltf  textures
 ```
 mosquitto_pub -r -h oz.andrew.cmu.edu -t /topic/render/cube_1 -m "cube_1,0,0,0,0,0,0,0,1,1,1,#FFEEAA,on"
 ```
+refactored:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "1", "action": "create", "data": {"object_type": "cube", "position": {"x": 1, "y": -1, "z": 0}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}'
+```
 #### Color
 change only the color of the already-drawn cube
 ```
