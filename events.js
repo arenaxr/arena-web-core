@@ -54,7 +54,6 @@ function updateConixBox(eventName, coordsText, myThis) {
 }
 
 function eventAction(evt, eventName, myThis) {
-    //	    var newRotation = this.el.object3D.quaternion;
     var newPosition = myThis.object3D.position;
     //this.emit('viveChanged', Object.assign(newPosition, newRotation));
     //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
@@ -82,7 +81,7 @@ function setCoordsText(evt) {
 
 function setClickText(evt) {
     var str = '"x": '+ evt.detail.intersection.point.x.toFixed(3)+
-	',"y": '+evt.detail.intersection.point.y.toFixed(3)+","+
+	',"y": '+evt.detail.intersection.point.y.toFixed(3)+
 	',"z": '+evt.detail.intersection.point.z.toFixed(3);
     
     return str;
@@ -121,7 +120,7 @@ AFRAME.registerComponent('click-listener', {
 	
 	this.el.addEventListener('mouseup', function (evt) {
 
-	    var coordsText = setClickText(evt);	    
+	    var coordsText = setClickText(evt);
 	    
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT

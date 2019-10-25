@@ -169,12 +169,7 @@ function onConnect() {
 	// suppress duplicates
 	//if (msg !== oldMsg) {
 	if (true) {
-	    // rate limit
-	    //date = new Date();
-	    //stamp = date.getTime();
-	    //if ((stamp - lastUpdate) >= updateMillis) {
-
-	    //		publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
+	    //publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
 	    publish(outputTopic+camName, msg ); // extra timestamp info at end for debugging
 		oldMsg = msg;
 		lastUpdate = stamp;
@@ -185,8 +180,7 @@ function onConnect() {
 		    pos= my_camera.object3D.position
 		    rot = my_camera.object3D.quaternion
 
-		    // JSONIFY this
-		    var viomsg = camName+","+
+/*		    var viomsg = camName+","+
 			pos.x.toFixed(3)+","+
 			pos.y.toFixed(3)+","+
 			pos.z.toFixed(3)+","+
@@ -194,7 +188,16 @@ function onConnect() {
 			rot.y.toFixed(3)+","+
 			rot.z.toFixed(3)+","+
 			rot.w.toFixed(3)+
-			",0,0,0,#000000,on";
+			",0,0,0,#000000,on"; */
+
+		    var viomsg = '{"object_id": "'+camName+'", "action": "update", "data": {"object_type": "camera", "position": {"x":'+
+			pos.x.toFixed(3)+', "y":'+
+			pos.y.toFixed(3)+', "z":'+
+			pos.z.toFixed(3)+'}, "rotation": {"x":'+
+			rot.x.toFixed(3)+', "y":'+
+			rot.y.toFixed(3)+', "z":'+
+			rot.z.toFixed(3)+', "w":'+
+			rot.w.toFixed(3)+'}}}';
 
 		    publish(vioTopic+camName, viomsg);
 		}
@@ -206,7 +209,7 @@ function onConnect() {
     vive_leftHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
 	var objName="viveLeft_"+idTag;
-	// JSONIFY this
+/*
 	var msg = objName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
@@ -216,19 +219,22 @@ function onConnect() {
 	    e.detail._z.toFixed(3)+","+
 	    e.detail._w.toFixed(3)+
 	    ",0,0,0,#000000,on";
+*/
+
+	var msg = '{"object_id": "'+objName+'", "action": "update", "data": {"object_type": "viveLeft", "position": {"x":'+
+	    e.detail.x.toFixed(3)+', "y":'+
+	    e.detail.y.toFixed(3)+', "z":'+
+	    e.detail.z.toFixed(3)+'}, "rotation": {"x":'+
+	    e.detail._x.toFixed(3)+', "y":'+
+	    e.detail._y.toFixed(3)+', "z":'+
+	    e.detail._z.toFixed(3)+', "w":'+
+	    e.detail._w.toFixed(3)+'}}}';
 
 	// suppress duplicates
 	if (msg !== oldMsgLeft) {
-	    // rate limiting is now handled in vive-pose-listener
-	    //date = new Date();
-	    //stampLeft = date.getTime();
-	    //if ((stampLeft - lastUpdateLeft) >= updateMillis) {
-
-		publish(outputTopic+objName, msg);
-		oldMsgLeft = msg;
-		//lastUpdateLeft = stampLeft;
-		//console.log("viveLeft moved: ",outputTopic+objName, msg);
-	    //}
+	    // rate limiting is handled in vive-pose-listener
+	    publish(outputTopic+objName, msg);
+	    oldMsgLeft = msg;
 	}
     });
 
@@ -237,7 +243,7 @@ function onConnect() {
     vive_rightHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
 	var objName="viveRight_"+idTag;
-	// JSONIFY this
+/*
 	var msg = objName+","+
 	    e.detail.x.toFixed(3)+","+
 	    e.detail.y.toFixed(3)+","+
@@ -246,7 +252,16 @@ function onConnect() {
 	    e.detail._y.toFixed(3)+","+
 	    e.detail._z.toFixed(3)+","+
 	    e.detail._w.toFixed(3)+
-	    ",0,0,0,#000000,on";
+	    ",0,0,0,#000000,on";*/
+
+	var msg = '{"object_id": "'+objName+'", "action": "update", "data": {"object_type": "viveRight", "position": {"x":'+
+	    e.detail.x.toFixed(3)+', "y":'+
+	    e.detail.y.toFixed(3)+', "z":'+
+	    e.detail.z.toFixed(3)+'}, "rotation": {"x":'+
+	    e.detail._x.toFixed(3)+', "y":'+
+	    e.detail._y.toFixed(3)+', "z":'+
+	    e.detail._z.toFixed(3)+', "w":'+
+	    e.detail._w.toFixed(3)+'}}}';
 
 	// suppress duplicates
 	if (msg !== oldMsgRight) {
@@ -265,11 +280,10 @@ function onConnect() {
         
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
     window.onbeforeunload = function(){
-	// JSONIFY this
-	publish(outputTopic+camName, camName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
-	publish_retained(outputTopic+camName, ""); // no longer needed, don't retain head pose
-	publish(outputTopic+camName, viveLName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
-	publish(outputTopic+camName, viveRName+",0,0,0,0,0,0,0,0,0,0,#000000,off");
+	publish(outputTopic+camName, '{"object_id": "'+camName+'", "action": "delete"');
+	publish_retained(outputTopic+camName, ""); // no longer needed, don't retain head position
+	publish(outputTopic+viveLName, '{"object_id": "'+viveLName+'", "action": "delete"');
+	publish(outputTopic+viveRName, '{"object_id": "'+viveRName+'", "action": "delete"');
     }
 
     // ok NOW start listening for MQTT messages
@@ -325,6 +339,95 @@ function onMessageArrived(message) {
 
     switch (theMessage.action) {
 
+    case "clientEvent":
+	var entityEl = sceneObjects[theMessage.object_id];
+	switch (theMessage.type) {
+	case "mousedown":
+
+	    var myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
+					    parseFloat(theMessage.data.position.y),
+					    parseFloat(theMessage.data.position.z));
+	    var clicker = theMessage.data.source;
+
+	    // emit a synthetic click event with ugly data syntax
+	    entityEl.emit('mousedown', { "clicker": clicker, intersection:
+					 {
+					     point: myPoint }
+				       }, true);
+	    break;
+	case "mouseup":
+
+	    var myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
+					    parseFloat(theMessage.data.position.y),
+					    parseFloat(theMessage.data.position.z));
+	    var clicker = theMessage.data.source;
+
+	    // emit a synthetic click event with ugly data syntax
+	    entityEl.emit('mouseup', { "clicker": clicker, intersection:
+				       {
+					   point: myPoint }
+				     }, true);
+	    break;
+	}	
+	break;
+
+    case "delete":
+	// An empty message after an object_id means remove it
+	var name = theMessage.object_id;
+	//console.log(message.payloadString, topic, name);
+
+	if (sceneObjects[name]) {
+	    Scene.removeChild(sceneObjects[name]);
+	    delete sceneObjects[name];
+	    return;
+	} else
+	    console.log("Warning: " + name + " not in sceneObjects");
+	break;
+
+    case "update":
+	// special case camera (rig) updates
+	var name = theMessage.object_id;
+	if (name === camName && theMessage.type == "rig") { // our Rig
+	    console.log("moving our camera rig, sceneObject: " + name);
+	    
+	    var x = theMessage.data.position.x;
+	    var y = theMessage.data.position.y;
+	    var z = theMessage.data.position.z;
+	    var xrot = theMessage.data.rotation.x;
+	    var yrot = theMessage.data.rotation.y;
+	    var zrot = theMessage.data.rotation.z;
+	    var wrot = theMessage.data.rotation.w;
+
+	    var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
+	    var euler = new THREE.Euler();
+	    var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
+	    var vec = foo.toVector3();
+
+	    cameraRig.object3D.position.set(x,y,z);
+	    cameraRig.object3D.rotation.set(vec.x,vec.y,vec.z);
+	    //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
+
+	    break;
+	}
+
+	// our own camera/controllers: bail, this message is meant for all other viewers
+	if (name === camName)
+	    return;
+	if (name === viveLName)
+	    return;
+	if (name === viveRName)
+	    return;
+
+	// just setAttribute()
+	var entityEl = sceneObjects[theMessage.object_id];
+	if (entityEl) {
+	    entityEl.setAttribute(theMessage.attribute, theMessage.data);
+	}
+	else
+	    console.log("Warning: " + sceneObject + " not in sceneObjects");
+	
+	break;
+	
     case "create":
 	// parse out JSON
 	var x = theMessage.data.position.x;
@@ -350,66 +453,84 @@ function onMessageArrived(message) {
 	var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
 	var vec = foo.toVector3();
 
-	entityEl = document.createElement('a-entity');
-	entityEl.setAttribute('id', name);
-	entityEl.setAttribute('rotation.order' , "YXZ");
+	// Reduce, reuse, recycle!
+	var entityEl;
+	if (name in sceneObjects) {
+	    entityEl = sceneObjects[name];
+	    entityEl.setAttribute('visible', true); // might have been set invisible with 'off' earlier
+	    //console.log("existing object: ", name);
+	    //console.log(entityEl);
+	} else { // CREATE NEW SCENE OBJECT		
 
-	Scene.appendChild(entityEl);
-	// Add it to our dictionary of scene objects
-	sceneObjects[name] = entityEl;
+	    entityEl = document.createElement('a-entity');
+	    entityEl.setAttribute('id', name);
+	    entityEl.setAttribute('rotation.order' , "YXZ");
+	    Scene.appendChild(entityEl);
+	    // Add it to our dictionary of scene objects
+	    sceneObjects[name] = entityEl;
+	}
 
 	switch(type) {
+
 	case "light":
 	    entityEl.setAttribute('light', 'type', 'ambient');
 	    // does this work for light a-entities ?
 	    entityEl.setAttribute('light', 'color', color);
 	    break;
+
 	case "camera":
 	    //console.log("Camera update", entityEl);
 	    //console.log(entityEl.getAttribute('position'));
 	    break;
+
 	case "viveLeft":
 	    break;
 	case "viveRight":
 	    break;
-	case "image": // use the color slot for URL (like gltf-models do)
+
+	case "image": // use special 'url' slot for URL (like gltf-models do)
 	    entityEl.setAttribute('geometry', 'primitive', 'plane');
-	    entityEl.setAttribute('material', 'src', color);
+	    entityEl.setAttribute('material', 'src', theMessage.data.url);
 	    entityEl.setAttribute('material', 'shader', 'flat');
 	    entityEl.object3D.scale.set(xscale,yscale,zscale);
 	    break;
+
 	case "line":
 	    entityEl.setAttribute('line', 'start', x + ' ' + y + ' ' + z);
 	    entityEl.setAttribute('line', 'end', xrot + ' ' + yrot + ' ' + zrot);
 	    entityEl.setAttribute('line', 'color', color);
 	    break;
+
 	case "thickline":
 	    entityEl.setAttribute('meshline', "lineWidth: "+xscale);
 	    entityEl.setAttribute('meshline', 'path: '+x+' '+y+' '+z+","+xrot+" "+yrot+" "+zrot);
 	    entityEl.setAttribute('meshline', 'color', color);
 	    break;
+
 	case "particle":
 	    // two part operation: part 1, create an entity at a position /topic/render/particle_1 -m "particle_1,1,1,1,0,0,0,1,1,1,1,#abcdef,on"
 	    // then set it's particle-system attribute later e.g. /topic/render/particle_1/particle-system -m "preset: snow"
 	    entityEl.object3D.position.set(x, y, z);
 	    break;		
+
 	case "gltf-model":
-	    // overload: store URL in #color field
 	    //entityEl.object3D.scale.set(xscale, yscale, zscale);
 	    entityEl.setAttribute('scale', xscale+' '+ yscale+' '+ zscale);
-	    entityEl.setAttribute("gltf-model", color);		
+	    entityEl.setAttribute("gltf-model", theMessage.data.url);
 	    break;
+
 	case "text":
-	    // use color field for text string
 	    if (entityEl.hasChildNodes()) // assume only one we added
 		entityEl.removeChild(entityEl.childNodes[0]);
 	    textEl = document.createElement('a-text');
-	    textEl.setAttribute('value', color);
+	    textEl.setAttribute('value', theMessage.data.text);
+	    textEl.setAttribute('text', 'color', color);
 	    textEl.setAttribute('side', "double");
 	    textEl.setAttribute('align', "center");
 	    textEl.setAttribute('anchor', "center");
 	    entityEl.appendChild(textEl);
 	    break;
+
 	default:
 	    entityEl.setAttribute('geometry', 'primitive', type);
 	    entityEl.object3D.scale.set(xscale,yscale,zscale);
@@ -421,14 +542,6 @@ function onMessageArrived(message) {
 	    // Common for all but lines: set position & rotation
 	    entityEl.object3D.position.set(x,y,z);
 	    entityEl.object3D.rotation.set(vec.x,vec.y,vec.z);
-	}
-	break;
-
-    case "delete":
-	var name = theMessage.object_id;
-	if (sceneObjects[name]) {
-	    Scene.removeChild(sceneObjects[name]);
-	    delete sceneObjects[name];
 	}
 	break;
 
@@ -464,48 +577,6 @@ function onMessageArrived(message) {
 	//console.log("sceneObject", sceneObject);
 
 	// Camera Rig updates
-	if (sceneObject === camName) { // our Rig
-	    console.log("moving our camera rig, sceneObject: " + sceneObject);
-	    
-	    var coords = message.payloadString.split(",");
-
-	    var x    = coords[0]; var y    = coords[1]; var z    = coords[2];
-	    var xrot = coords[3]; var yrot = coords[4]; var zrot = coords[5]; var wrot = coords[6];
-
-	    var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
-	    var euler = new THREE.Euler();
-	    var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
-	    var vec = foo.toVector3();
-
-	    cameraRig.object3D.position.set(x,y,z);
-	    cameraRig.object3D.rotation.set(vec.x,vec.y,vec.z);
-//	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
-
-	    break;
-	} else { // others' Rigs
-	    /*
-	    if (componentName === "rig") { // warp others' camera Rigs
-		console.log("moving other-persons' camera sceneObject: " + sceneObject);
-
-		var rigEl = sceneObjects[sceneObject];
-		
-		var coords = message.payloadString.split(",");
-
-		var x    = coords[0]; var y    = coords[1]; var z    = coords[2];
-		var xrot = coords[3]; var yrot = coords[4]; var zrot = coords[5]; var wrot = coords[6];
-
-		var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
-		var euler = new THREE.Euler();
-		var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
-		var vec = foo.toVector3();
-		
-		rigEl.object3D.position.set(x,y,z);
-		rigEl.object3D.rotation.set(vec.x,vec.y,vec.z);
-
-		break;
-	    }
-*/
-	}
 
 	var entityEl = sceneObjects[sceneObject];
 	
@@ -528,8 +599,8 @@ function onMessageArrived(message) {
 
 		    // emit a synthetic click event with ugly data syntax
 		    entityEl.emit('mousedown', { "clicker": clicker, intersection:
-					     {
-						 point: myPoint }
+						 {
+						     point: myPoint }
 					       }, true);
 		    break;
 		case "mouseup":
@@ -541,8 +612,8 @@ function onMessageArrived(message) {
 
 		    // emit a synthetic click event with ugly data syntax
 		    entityEl.emit('mouseup', { "clicker": clicker, intersection:
-					     {
-						 point: myPoint }
+					       {
+						   point: myPoint }
 					     }, true);
 		    break;
 		case "child": // parent/child relationship e.g. /topic/render/parent_id/child -m "child_id"
@@ -700,7 +771,7 @@ function onMessageArrived(message) {
 			entityEl.setAttribute("gltf-model", "url(models/valve_index_left.gltf)");
 		    else
 			entityEl.setAttribute("gltf-model", "url(models/valve_index_right.gltf)");
-		   
+		    
 		    entityEl.object3D.position.set(0,0,0);
 		    entityEl.object3D.rotation.set(0,0,0);
 
@@ -843,4 +914,3 @@ function onMessageArrived(message) {
 	break;
     }
 }
-
