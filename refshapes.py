@@ -55,4 +55,4 @@ while (True):
         theId = json.loads(theMess)["object_id"]
         newMess = '{"object_id" : "'+theId+'", "action": "delete"}'
         publish.single(TOPIC+'/'+theId, newMess, hostname=HOST, retain=False)
-    time.sleep(0.5)
+    time.sleep(0.1)

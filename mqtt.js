@@ -148,14 +148,14 @@ function onConnect() {
 
     // Publish initial camera presence
     var color = '#'+Math.floor(Math.random()*16777215).toString(16);
-    var mymsg = '{"object_id": "'+camName+'", "action": "create", "data": {"object_type": "camera, "position": {"x":0, "y":1.6, "z":0}, "rotation": {"x":0, "y":0, "z":0, "w":0}}}';
+    var mymsg = '{"object_id": "'+camName+'", "action": "create", "data": {"object_type": "camera", "position": {"x":0, "y":1.6, "z":0}, "rotation": {"x":0, "y":0, "z":0, "w":0}}}';
     publish(outputTopic+camName, mymsg);
     console.log("my-camera element", my_camera);
 
     my_camera.addEventListener('poseChanged', e => {
 	//console.log(e.detail);
 
-	var msg = '{"object_id": "'+camName+'", "action": "update", "data": {"object_type": "camera", "position": {"x":'+
+	var msg = '{"object_id": "'+camName+'", "action": "update", "type": "object", "data": {"object_type": "camera", "position": {"x":'+
 	    e.detail.x.toFixed(3)+', "y":'+
 	    e.detail.y.toFixed(3)+', "z":'+
 	    e.detail.z.toFixed(3)+'}, "rotation": {"x":'+
@@ -180,17 +180,7 @@ function onConnect() {
 		    pos= my_camera.object3D.position
 		    rot = my_camera.object3D.quaternion
 
-/*		    var viomsg = camName+","+
-			pos.x.toFixed(3)+","+
-			pos.y.toFixed(3)+","+
-			pos.z.toFixed(3)+","+
-			rot.x.toFixed(3)+","+
-			rot.y.toFixed(3)+","+
-			rot.z.toFixed(3)+","+
-			rot.w.toFixed(3)+
-			",0,0,0,#000000,on"; */
-
-		    var viomsg = '{"object_id": "'+camName+'", "action": "update", "data": {"object_type": "camera", "position": {"x":'+
+		    var viomsg = '{"object_id": "'+camName+'", "action": "update", "type": "object", "data": {"object_type": "camera", "position": {"x":'+
 			pos.x.toFixed(3)+', "y":'+
 			pos.y.toFixed(3)+', "z":'+
 			pos.z.toFixed(3)+'}, "rotation": {"x":'+
@@ -209,19 +199,8 @@ function onConnect() {
     vive_leftHand.addEventListener('viveChanged', e => {
 	//console.log(e.detail);
 	var objName="viveLeft_"+idTag;
-/*
-	var msg = objName+","+
-	    e.detail.x.toFixed(3)+","+
-	    e.detail.y.toFixed(3)+","+
-	    e.detail.z.toFixed(3)+","+
-	    e.detail._x.toFixed(3)+","+
-	    e.detail._y.toFixed(3)+","+
-	    e.detail._z.toFixed(3)+","+
-	    e.detail._w.toFixed(3)+
-	    ",0,0,0,#000000,on";
-*/
 
-	var msg = '{"object_id": "'+objName+'", "action": "update", "data": {"object_type": "viveLeft", "position": {"x":'+
+	var msg = '{"object_id": "'+objName+'", "action": "update", "type": "object", "data": {"object_type": "viveLeft", "position": {"x":'+
 	    e.detail.x.toFixed(3)+', "y":'+
 	    e.detail.y.toFixed(3)+', "z":'+
 	    e.detail.z.toFixed(3)+'}, "rotation": {"x":'+
@@ -254,7 +233,7 @@ function onConnect() {
 	    e.detail._w.toFixed(3)+
 	    ",0,0,0,#000000,on";*/
 
-	var msg = '{"object_id": "'+objName+'", "action": "update", "data": {"object_type": "viveRight", "position": {"x":'+
+	var msg = '{"object_id": "'+objName+'", "action": "update", "type": "object", "data": {"object_type": "viveRight", "position": {"x":'+
 	    e.detail.x.toFixed(3)+', "y":'+
 	    e.detail.y.toFixed(3)+', "z":'+
 	    e.detail.z.toFixed(3)+'}, "rotation": {"x":'+
@@ -385,62 +364,84 @@ function onMessageArrived(message) {
 	break;
 
     case "update":
-	// special case camera (rig) updates
+	// special case camera (rig), text updates
 	var name = theMessage.object_id;
-	if (name === camName && theMessage.type == "rig") { // our Rig
-	    console.log("moving our camera rig, sceneObject: " + name);
+	switch (theMessage.type) {
+	case "rig": 
+	    if (name === camName) { // our camera Rig
+		console.log("moving our camera rig, sceneObject: " + name);
+		
+		var x = theMessage.data.position.x;
+		var y = theMessage.data.position.y;
+		var z = theMessage.data.position.z;
+		var xrot = theMessage.data.rotation.x;
+		var yrot = theMessage.data.rotation.y;
+		var zrot = theMessage.data.rotation.z;
+		var wrot = theMessage.data.rotation.w;
+
+		var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
+		var euler = new THREE.Euler();
+		var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
+		var vec = foo.toVector3();
+
+		cameraRig.object3D.position.set(x,y,z);
+		cameraRig.object3D.rotation.set(vec.x,vec.y,vec.z);
+		//	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
+	    }
+	    break;
+
+	case "object":
+	    // our own camera/controllers: bail, this message is meant for all other viewers
+	    if (name === camName)
+		return;
+	    if (name === viveLName)
+		return;
+	    if (name === viveRName)
+		return;
+
+	    // just setAttribute() - data can contain multiple attribute-value pairs
+	    // e.g: { ... "action": "update", "attribute": "animation", "data": {"property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}' ... }
+
+	    var entityEl = sceneObjects[theMessage.object_id];
+	    if (entityEl) {
+		entityEl.setAttribute(theMessage.attribute, theMessage.data);
+	    }
+	    else
+		console.log("Warning: " + sceneObject + " not in sceneObjects");
 	    
-	    var x = theMessage.data.position.x;
-	    var y = theMessage.data.position.y;
-	    var z = theMessage.data.position.z;
-	    var xrot = theMessage.data.rotation.x;
-	    var yrot = theMessage.data.rotation.y;
-	    var zrot = theMessage.data.rotation.z;
-	    var wrot = theMessage.data.rotation.w;
-
-	    var quat = new THREE.Quaternion(xrot,yrot,zrot,wrot);
-	    var euler = new THREE.Euler();
-	    var foo = euler.setFromQuaternion(quat.normalize(),"YXZ");
-	    var vec = foo.toVector3();
-
-	    cameraRig.object3D.position.set(x,y,z);
-	    cameraRig.object3D.rotation.set(vec.x,vec.y,vec.z);
-	    //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
-
 	    break;
 	}
-
-	// our own camera/controllers: bail, this message is meant for all other viewers
-	if (name === camName)
-	    return;
-	if (name === viveLName)
-	    return;
-	if (name === viveRName)
-	    return;
-
-	// just setAttribute()
-	var entityEl = sceneObjects[theMessage.object_id];
-	if (entityEl) {
-	    entityEl.setAttribute(theMessage.attribute, theMessage.data);
-	}
-	else
-	    console.log("Warning: " + sceneObject + " not in sceneObjects");
-	
 	break;
 	
     case "create":
+	var x,y,z,xrot,yrot,zrot,wrot,xscale,yscale,zscale,color;
 	// parse out JSON
-	var x = theMessage.data.position.x;
-	var y = theMessage.data.position.y;
-	var z = theMessage.data.position.z;
-	var xrot = theMessage.data.rotation.x;
-	var yrot = theMessage.data.rotation.y;
-	var zrot = theMessage.data.rotation.z;
-	var wrot = theMessage.data.rotation.w;
-	var xscale = theMessage.data.scale.x;
-	var yscale = theMessage.data.scale.y;
-	var zscale = theMessage.data.scale.z;
-	var color = theMessage.data.color;
+	if (theMessage.data.position) {
+	    x = theMessage.data.position.x; y = theMessage.data.position.y; z = theMessage.data.position.z;
+	}
+	else { // useful defaults if unspecified
+	    x = 0; y = 0; z = 0;
+	}
+
+	if (theMessage.data.rotation) {
+	    xrot = theMessage.data.rotation.x; yrot = theMessage.data.rotation.y; zrot = theMessage.data.rotation.z; wrot = theMessage.data.rotation.w;
+	}
+	else { // useful defaults
+	    xrot = 0; yrot = 0; zrot = 0; wrot = 1;
+	}
+
+	if (theMessage.data.scale) {
+	    xscale = theMessage.data.scale.x; yscale = theMessage.data.scale.y; zscale = theMessage.data.scale.z;
+	}
+	else { // useful defaults
+	    xscale = 1; yscale = 1; zscale = 1;
+	}
+	
+	if (theMessage.data.color)
+	    color = theMessage.data.color;
+	else
+	    color = "white";
+
 	var object_id = theMessage.object_id;
 	var type = theMessage.data.object_type;
 	if (type === "cube") {type = "box"}; // different name in Unity
@@ -462,12 +463,77 @@ function onMessageArrived(message) {
 	    //console.log(entityEl);
 	} else { // CREATE NEW SCENE OBJECT		
 
-	    entityEl = document.createElement('a-entity');
-	    entityEl.setAttribute('id', name);
-	    entityEl.setAttribute('rotation.order' , "YXZ");
-	    Scene.appendChild(entityEl);
-	    // Add it to our dictionary of scene objects
-	    sceneObjects[name] = entityEl;
+	    if (type === "viveLeft" || type === "viveRight") {
+		// create vive controller for 'other persons controller'
+		entityEl = document.createElement('a-entity');
+		entityEl.setAttribute('id', name);
+		entityEl.setAttribute('rotation.order' , "YXZ");
+		//entityEl.setAttribute('obj-model', "obj: #viveControl-obj; mtl: #viveControl-mtl");
+		if (type === "viveLeft")
+		    entityEl.setAttribute("gltf-model", "url(models/valve_index_left.gltf)");
+		else
+		    entityEl.setAttribute("gltf-model", "url(models/valve_index_right.gltf)");
+		
+		entityEl.object3D.position.set(0,0,0);
+		entityEl.object3D.rotation.set(0,0,0);
+
+		// Add it to our dictionary of scene objects
+		Scene.appendChild(entityEl);
+		sceneObjects[name] = entityEl;
+	    }
+	    else if (type === "camera") {
+		entityEl = document.createElement('a-entity');
+		entityEl.setAttribute('id', name+"_rigChild");
+		entityEl.setAttribute('rotation.order' , "YXZ");
+		entityEl.object3D.position.set(0,0,0);
+		entityEl.object3D.rotation.set(0,0,0);
+		
+		var rigEl;
+		rigEl = document.createElement('a-entity');
+		rigEl.setAttribute('id', name);
+		rigEl.setAttribute('rotation.order' , "YXZ");
+		rigEl.object3D.position.set(0,0,0);
+		rigEl.object3D.rotation.set(0,0,0);
+		
+		// this is the head 3d model
+		childEl = document.createElement('a-entity');
+		childEl.setAttribute('rotation', 0+' '+180+' '+0);
+		childEl.object3D.scale.set(4,4,4);
+		childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
+
+		// place a colored text above the head
+		var headtext = document.createElement('a-text');
+		var personName = name.split('_')[2];
+		
+		headtext.setAttribute('value', personName);
+		headtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
+		headtext.setAttribute('side', "double");
+		headtext.setAttribute('align', "center");
+		headtext.setAttribute('anchor', "center");
+		headtext.setAttribute('width', 5);
+		headtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
+		headtext.setAttribute('color', color); // color
+		entityEl.appendChild(headtext);
+		entityEl.appendChild(childEl);
+
+		rigEl.appendChild(entityEl);
+		
+		Scene.appendChild(rigEl);
+		sceneObjects[name] = rigEl;
+
+		entityEl = rigEl;
+
+		console.log("their camera:", rigEl);
+	    }
+	    else {
+
+		entityEl = document.createElement('a-entity');
+		entityEl.setAttribute('id', name);
+		entityEl.setAttribute('rotation.order' , "YXZ");
+		Scene.appendChild(entityEl);
+		// Add it to our dictionary of scene objects
+		sceneObjects[name] = entityEl;
+	    }
 	}
 
 	switch(type) {
@@ -488,7 +554,7 @@ function onMessageArrived(message) {
 	case "viveRight":
 	    break;
 
-	case "image": // use special 'url' slot for URL (like gltf-models do)
+	case "image": // use special 'url' data slot for bitmap URL (like gltf-models do)
 	    entityEl.setAttribute('geometry', 'primitive', 'plane');
 	    entityEl.setAttribute('material', 'src', theMessage.data.url);
 	    entityEl.setAttribute('material', 'shader', 'flat');
@@ -496,21 +562,18 @@ function onMessageArrived(message) {
 	    break;
 
 	case "line":
-	    entityEl.setAttribute('line', 'start', x + ' ' + y + ' ' + z);
-	    entityEl.setAttribute('line', 'end', xrot + ' ' + yrot + ' ' + zrot);
-	    entityEl.setAttribute('line', 'color', color);
+	    delete theMessage['object_type']; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
+	    entityEl.setAttribute('line', theMessage.data);
 	    break;
 
 	case "thickline":
-	    entityEl.setAttribute('meshline', "lineWidth: "+xscale);
-	    entityEl.setAttribute('meshline', 'path: '+x+' '+y+' '+z+","+xrot+" "+yrot+" "+zrot);
-	    entityEl.setAttribute('meshline', 'color', color);
+	    delete theMessage['object_type']; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
+	    entityEl.setAttribute('meshline', theMessage.data);
 	    break;
 
 	case "particle":
-	    // two part operation: part 1, create an entity at a position /topic/render/particle_1 -m "particle_1,1,1,1,0,0,0,1,1,1,1,#abcdef,on"
-	    // then set it's particle-system attribute later e.g. /topic/render/particle_1/particle-system -m "preset: snow"
-	    entityEl.object3D.position.set(x, y, z);
+	    delete theMessage['object_type']; // pass only A-Frame digestible key-values to setAttribute()
+	    entityEl.setAttribute('particle-system', theMessage.data);
 	    break;		
 
 	case "gltf-model":
@@ -520,18 +583,17 @@ function onMessageArrived(message) {
 	    break;
 
 	case "text":
-	    if (entityEl.hasChildNodes()) // assume only one we added
-		entityEl.removeChild(entityEl.childNodes[0]);
-	    textEl = document.createElement('a-text');
-	    textEl.setAttribute('value', theMessage.data.text);
-	    textEl.setAttribute('text', 'color', color);
-	    textEl.setAttribute('side', "double");
-	    textEl.setAttribute('align', "center");
-	    textEl.setAttribute('anchor', "center");
-	    entityEl.appendChild(textEl);
+	    // set a bunch of defaults
+	    entityEl.setAttribute('text', 'value', theMessage.data.text);
+	    entityEl.setAttribute('text', 'color', color);
+	    entityEl.setAttribute('side', "double");
+	    entityEl.setAttribute('align', "center");
+	    entityEl.setAttribute('anchor', "center");
+	    entityEl.setAttribute('width', 5); // the default for <a-text>
 	    break;
 
 	default:
+	    // handle arbitrary A-Frame geometry primitive types
 	    entityEl.setAttribute('geometry', 'primitive', type);
 	    entityEl.object3D.scale.set(xscale,yscale,zscale);
 	    entityEl.setAttribute('material', 'color', color);
@@ -616,69 +678,6 @@ function onMessageArrived(message) {
 						   point: myPoint }
 					     }, true);
 		    break;
-		case "child": // parent/child relationship e.g. /topic/render/parent_id/child -m "child_id"
-
-		    var res = message.payloadString.split(",");
-		    var childName = res[0];
-		    var parentEl = sceneObjects[sceneObject]; // scene object_id
-		    var childEl  = sceneObjects[message.payloadString];
-
-		    // error checks
-		    if (!parentEl) {
-			console.log("Warning: " + parentEl + " not in sceneObjects");
-			return;
-		    }
-		    if (!childEl) {
-			console.log("Warning: " + childEl + " not in sceneObjects");
-			return;
-		    }
-
-		    console.log("parent", parentEl);
-		    console.log("child", childEl);
-
-		    childEl.flushToDOM();
-		    var copy = childEl.cloneNode(true);
-		    copy.setAttribute("name", "copy");
-		    copy.flusToDOM();
-		    parentEl.appendChild(copy);
-		    sceneObjects[childName] = copy;
-		    // remove from scene
-		    childEl.parentNode.removeChild(childEl);
-		    
-		    console.log("parent", parentEl);
-		    console.log("child", childEl);
-		    break;
-		case "parent": // parent/child relationship e.g. /topic/render/child_id/parent -m "parent_id"
-
-		    var res = message.payloadString.split(",");
-		    var parentName = res[0];
-		    var childEl = sceneObjects[sceneObject]; // scene object_id
-		    var parentEl  = sceneObjects[message.payloadString];
-
-		    // error checks
-		    if (!parentEl) {
-			console.log("Warning: " + parentEl + " not in sceneObjects");
-			return;
-		    }
-		    if (!childEl) {
-			console.log("Warning: " + childEl + " not in sceneObjects");
-			return;
-		    }
-
-		    console.log("parent", parentEl);
-		    console.log("child", childEl);
-
-		    childEl.flushToDOM();
-		    var copy = childEl.cloneNode(true);
-		    copy.setAttribute("name", "copy");
-		    copy.flushToDOM();
-		    parentEl.appendChild(copy);
-		    sceneObjects[childName] = copy;
-		    childEl.parentNode.removeChild(childEl);
-		    
-		    console.log("parent", parentEl);
-		    console.log("child", childEl);
-		    break;
 		case "dynamic-body":
 		    console.log("dynamic-body");
 		    entityEl.setAttribute(componentName, message.payloadString);
@@ -692,7 +691,7 @@ function onMessageArrived(message) {
 	else
 	    console.log("Warning: " + sceneObject + " not in sceneObjects");
 	break;
-
+/*
     case topicAtomicUpdate:
 
 	// These are 'long' messages like -t /topic/render/obj_id -m "obj_id,0,0,0,0,0,0,0,0,0,0,#000000,off"
@@ -909,6 +908,7 @@ function onMessageArrived(message) {
 	    //console.log("scale: ",entityEl.getAttribute('scale'));
 	}
 	break;
+*/
     default:
 	console.log("EMPTY MESSAGE?", dest, message.payloadstring);
 	break;
