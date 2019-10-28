@@ -4,6 +4,7 @@
 
 import socket,threading,SocketServer,time,random,os,sys,json
 import paho.mqtt.publish as publish
+import json
 
 HOST="oz.andrew.cmu.edu"
 TOPIC="realm/s/refactor"
@@ -34,7 +35,7 @@ def randobj():
         return "quad"
     return "cube"
 
-messages = []
+messages = []  # This is now an array of dicts
 counter=0
 while (True):
     obj_type = randobj()
@@ -42,17 +43,41 @@ while (True):
     name = obj_type+'_'+obj_id
     counter+=1
 
-    MESSAGE='{"object_id" : "'+name+'", "action": "create", "data": {"object_type": "'+obj_type+'", "position": {"x": '+"{0:0.3f}".format(randmove()) +', "y": '+"{0:0.3f}".format(randmove()+5) +', "z": '+"{0:0.3f}".format(randmove()-5) +'}, "rotation": {"x": '+randrot() +', "y": '+ randrot()+', "z": '+randrot() +', "w": '+randrot() +'}, "scale": {"x": '+rando(2) +', "y": '+rando(2) +', "z": '+rando(2) +'}, "color": "#'+randcolor()+'"}}'
+    MESSAGE = {
+        "object_id": name,
+        "action": "create",
+        "data": {
+            "object_type": obj_type,
+            "position": {
+                "x": "{0:0.3f}".format(randmove()),
+                "y": "{0:0.3f}".format(randmove()+5)
+                "z": "{0:0.3f}".format(randmove()-5)
+            },
+            "rotation": {
+                "x": randrot(),
+                "y": randrot(),
+                "z": randrot(),
+                "w": randrot()
+            },
+            "scale": {
+                "x": rando(2),
+                "y": rando(2),
+                "z": rando(2)
+            }
+            "color": "#" + randcolor()
+        }
+    }
+
     messages.append(MESSAGE)
     print(MESSAGE)
 
     #os.system("mosquitto_pub -h " + HOST + " -t " + TOPIC + "/" + name + " -m " + MESSAGE + " -r");
-    publish.single(TOPIC+'/'+name, MESSAGE, hostname=HOST, retain=False)
+    publish.single(TOPIC+'/'+name, json.dumps(MESSAGE), hostname=HOST, retain=False)
 
 # REMOVE
     if (len(messages) >= 25):
         theMess = messages.pop(0)
-        theId = json.loads(theMess)["object_id"]
-        newMess = '{"object_id" : "'+theId+'", "action": "delete"}'
-        publish.single(TOPIC+'/'+theId, newMess, hostname=HOST, retain=False)
+        theId = theMess["object_id"]
+        newMess = {"object_id": theId, "action": "delete"}
+        publish.single(TOPIC+'/'+theId, json.dumps(newMess), hostname=HOST, retain=False)
     time.sleep(0.1)
