@@ -220,5 +220,3 @@ AFRAME.registerComponent('vive-listener', {
 	    eventAction(evt, 'trackpaddown', this)});
     }
 });
-
-
