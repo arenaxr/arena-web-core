@@ -396,8 +396,8 @@ function onMessageArrived(message) {
 
         case "clientEvent":
             var entityEl = sceneObjects[theMessage.object_id];
-            switch (theMessage.type) {
 
+            switch (theMessage.type) {
                 case "mousedown":
                     var myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
                         parseFloat(theMessage.data.position.y),
@@ -645,7 +645,7 @@ function onMessageArrived(message) {
                     entityEl.object3D.scale.set(xscale, yscale, zscale);
                     entityEl.setAttribute('material', 'color', color);
                     break;
-            }
+            } // switch(type)
 
             if (type !== 'line' && type !== 'thickline') {
                 // Common for all but lines: set position & rotation
@@ -760,7 +760,7 @@ function onMessageArrived(message) {
 
                     console.log("parent", parentEl);
                     console.log("child", childEl);
-                    break; // case "update"
+                    break; // case "setParent"
 
                 default:
                     console.log("EMPTY MESSAGE?", message.destinationName, message.payloadstring);
