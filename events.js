@@ -99,7 +99,7 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		// SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mousedown", "data": {"position": {'+coordsText+'}}}');
+		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mousedown", "data": {"position": {'+coordsText+'}, "source": "'+camName+'"}}');
 		//publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
 		console.log(this.id+' mousedown at: ', evt.detail.intersection.point, 'by', camName);
 	    } else {
@@ -125,8 +125,7 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		//publish(outputTopic+this.id+"/mouseup", coordsText+","+camName);
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseup", "data": {"position": {'+coordsText+'}}}');
-
+		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseup", "data": {"position": {'+coordsText+'}, "source": "'+camName+'"}}');
 		console.log(this.id+' mouseup at: ', evt.detail.intersection.point, 'by', camName);
 		// example of warping to a URL
 		//if (this.id === "Box-obj")
@@ -156,7 +155,7 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		// SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseenter", "data": {"position": {'+coordsText+'}}}');
+		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseenter", "data": {"position": {'+coordsText+'}, "source": "'+camName+'"}}');
 		console.log(this.id+' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', camName);
 	    } else {
 
@@ -177,7 +176,7 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		// SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseleave", "data": {"position": {'+coordsText+'}}}');
+		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseleave", "data": {"position": {'+coordsText+'}, "source": "'+camName+'"}}');
 		//publish(outputTopic+this.id+"/mouseleave", coordsText+","+camName);
 		console.log(this.id+' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', camName);
 	    } else {

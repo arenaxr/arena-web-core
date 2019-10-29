@@ -312,6 +312,7 @@ function onMessageArrived(message) {
 
     case "clientEvent":
 	var entityEl = sceneObjects[theMessage.object_id];
+	
 	switch (theMessage.type) {
 
 	case "mousedown":
@@ -341,9 +342,10 @@ function onMessageArrived(message) {
 	    break;
 
 	default: // handle others here like mouseenter / mouseleave
-	    return;
 	    break; // never gets here haha
 	}
+	return;
+	
     case "delete":
 	// An empty message after an object_id means remove it
 	var name = theMessage.object_id;
@@ -355,6 +357,7 @@ function onMessageArrived(message) {
 	    return;
 	} else
 	    console.log("Warning: " + name + " not in sceneObjects");
+	return;
 	break;
 
     case "create":
@@ -542,13 +545,14 @@ function onMessageArrived(message) {
 	    entityEl.object3D.scale.set(xscale,yscale,zscale);
 	    entityEl.setAttribute('material', 'color', color);
 	    break;
-	}
+	} // switch(type)
 
 	if (type !== 'line' && type !== 'thickline') {
 	    // Common for all but lines: set position & rotation
 	    entityEl.object3D.position.set(x,y,z);
 	    entityEl.object3D.rotation.set(vec.x,vec.y,vec.z);
 	}
+	return;
 	break;
 	
     case "update":
@@ -658,7 +662,7 @@ function onMessageArrived(message) {
 	    
 	    console.log("parent", parentEl);
 	    console.log("child", childEl);
-	    break; // case "update"
+	    break; // case "setParent"
 
 	default:
 	    console.log("EMPTY MESSAGE?", message.destinationName, message.payloadstring);
