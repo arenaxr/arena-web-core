@@ -1,19 +1,19 @@
 const timeID = new Date().getTime() % 10000;
-var sceneObjects = new Object(); // This will be an associative array of strings and objects
+const sceneObjects = new Map(); // This will be an associative array of strings and objects
 
 // rate limit camera position updates
 const updateMillis = 100;
 
 function getUrlVars() {
-    var vars = {};
-    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+    const vars = {};
+    const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
         vars[key] = value;
     });
     return vars;
 }
 
 function getUrlParam(parameter, defaultvalue) {
-    var urlparameter = defaultvalue;
+    let urlparameter = defaultvalue;
     if (window.location.href.indexOf(parameter) > -1) {
         urlparameter = getUrlVars()[parameter];
     }
@@ -21,14 +21,14 @@ function getUrlParam(parameter, defaultvalue) {
     return urlparameter;
 }
 
-var renderParam = getUrlParam('scene', 'render'); // scene name
-var userParam = getUrlParam('name', 'X');
-var themeParam = getUrlParam('theme', 'starry');
-var weatherParam = getUrlParam('weather', 'none');
-var mqttParamZ = getUrlParam('mqttServer', 'oz.andrew.cmu.edu');
-var mqttParam = 'wss://' + mqttParamZ + '/mqtt';
+const renderParam = getUrlParam('scene', 'render'); // scene name
+const userParam = getUrlParam('name', 'X');
+const themeParam = getUrlParam('theme', 'starry');
+const weatherParam = getUrlParam('weather', 'none');
+const mqttParamZ = getUrlParam('mqttServer', 'oz.andrew.cmu.edu');
+const mqttParam = 'wss://' + mqttParamZ + '/mqtt';
 // var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
-var fixedCamera = getUrlParam('fixedCamera', '');
+const fixedCamera = getUrlParam('fixedCamera', '');
 
 console.log(renderParam, userParam, themeParam);
 
@@ -39,31 +39,31 @@ renderTopic = outputTopic + "#";
 console.log(renderTopic);
 console.log(outputTopic);
 
-var camName = "";
+let camName = "";
 
-var fallBox;
-var fallBox2;
-var cameraRig;
-var my_camera;
-var vive_leftHand;
-var vive_rightHand;
-var weather;
-var date = new Date();
+let fallBox;
+let fallBox2;
+let cameraRig;
+let my_camera;
+let vive_leftHand;
+let vive_rightHand;
+let weather;
+const date = new Date();
 
 // Rate limiting variables
-var oldMsg = "";
-var lastUpdate = date.getTime();
-var lastUpdateLeft = lastUpdate;
-var lastUpdateRight = lastUpdate;
-var stamp = lastUpdate;
-var stampLeft = lastUpdate;
-var stampRight = lastUpdate;
+let oldMsg = "";
+let lastUpdate = date.getTime();
+const lastUpdateLeft = lastUpdate;
+const lastUpdateRight = lastUpdate;
+const stamp = lastUpdate;
+const stampLeft = lastUpdate;
+const stampRight = lastUpdate;
 
 // Depending on topic depth, four message categories
-var topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
-var topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
-var topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
-var topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
+const topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
+const topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
+const topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
+const topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
 
 
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
@@ -76,8 +76,8 @@ idTag = timeID + "_" + userParam; // e.g. 1234_eric
 // set initial position of vive controllers (not yet used) to zero
 // the comparison against this will, at startup, emit no 'changed' message
 // but rather the message will only appear if/when an actual controller moves
-var oldMsgLeft = "viveLeft_" + idTag + ",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
-var oldMsgRight = "viveRight_" + idTag + ",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
+let oldMsgLeft = "viveLeft_" + idTag + ",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
+let oldMsgRight = "viveRight_" + idTag + ",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
 
 if (fixedCamera !== '') {
     camName = "camera_" + fixedCamera + "_" + fixedCamera;
@@ -90,7 +90,7 @@ viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
 viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 
 // Last Will and Testament message sent to subscribers if this client loses connection
-var lwt = new Paho.MQTT.Message("");
+const lwt = new Paho.MQTT.Message("");
 lwt.destinationName = outputTopic + camName;
 lwt.qos = 0;
 lwt.retained = true;
@@ -147,7 +147,7 @@ function onConnect() {
     //lwt.destinationName = outputTopic+camName;
 
     // Publish initial camera presence
-    var color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+    const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
     let mymsg = {
         object_id: camName,
         action: 'create',
@@ -213,7 +213,7 @@ function onConnect() {
                 ",0,0,0,#000000,on";
                  */
 
-                var viomsg = {
+                const viomsg = {
                     object_id: camName,
                     action: 'update',
                     type: 'object',
@@ -242,7 +242,7 @@ function onConnect() {
     if (vive_leftHand) {
         vive_leftHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
-            var objName = "viveLeft_" + idTag;
+            const objName = "viveLeft_" + idTag;
             /*
                 var msg = objName+","+
                     e.detail.x.toFixed(3)+","+
@@ -288,7 +288,7 @@ function onConnect() {
     if (vive_rightHand) {
         vive_rightHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
-            var objName = "viveRight_" + idTag;
+            const objName = "viveRight_" + idTag;
             /*
                 var msg = objName+","+
                     e.detail.x.toFixed(3)+","+
@@ -364,7 +364,7 @@ const publish_retained = (dest, msg) => {
     message.retained = true;
     // message.qos = 2;
     client.send(message);
-}
+};
 
 const publish = (dest, msg) => {
     if (typeof msg === 'object') {
@@ -374,7 +374,7 @@ const publish = (dest, msg) => {
     let message = new Paho.MQTT.Message(msg);
     message.destinationName = dest;
     client.send(message);
-}
+};
 
 function isJson(str) {
     try {
@@ -389,7 +389,7 @@ function onMessageArrived(message) {
 
     console.log(message.destinationName, message.payloadString);
 
-    var theMessage = JSON.parse(message.payloadString);
+    const theMessage = JSON.parse(message.payloadString);
     console.log(theMessage.object_id);
 
     switch (theMessage.action) {
@@ -429,9 +429,9 @@ function onMessageArrived(message) {
                     break;
 
                 default: // handle others here like mouseenter / mouseleave
-                    return;
                     break; // never gets here haha
             }
+            break;
         case "delete":
             // An empty message after an object_id means remove it
             var name = theMessage.object_id;
@@ -485,16 +485,16 @@ function onMessageArrived(message) {
             else
                 color = "white";
 
-            var object_id = theMessage.object_id;
-            var type = theMessage.data.object_type;
+            const object_id = theMessage.object_id;
+            let type = theMessage.data.object_type;
             if (type === "cube") {
-                type = "box"
+                type = "box";
             }
-            ; // different name in Unity
+            // different name in Unity
             if (type === "quad") {
-                type = "plane"
+                type = "plane";
             }
-            ; // also different
+            // also different
 
             //var name = type+"_"+theMessage.object_id;
             var name = theMessage.object_id;
@@ -536,7 +536,7 @@ function onMessageArrived(message) {
                     entityEl.object3D.position.set(0, 0, 0);
                     entityEl.object3D.rotation.set(0, 0, 0);
 
-                    var rigEl;
+                    let rigEl;
                     rigEl = document.createElement('a-entity');
                     rigEl.setAttribute('id', name);
                     rigEl.setAttribute('rotation.order', "YXZ");
@@ -550,8 +550,8 @@ function onMessageArrived(message) {
                     childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
 
                     // place a colored text above the head
-                    var headtext = document.createElement('a-text');
-                    var personName = name.split('_')[2];
+                    const headtext = document.createElement('a-text');
+                    const personName = name.split('_')[2];
 
                     headtext.setAttribute('value', personName);
                     headtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
