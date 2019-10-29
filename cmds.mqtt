@@ -3,11 +3,11 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 
 # set the color of cube_1 to green
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1/material/color -m '#00AA00'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "material", "data": {"color": "#00FF00"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "material", "data": {"color": "#00FF00"}}'
 
 # set the material of cube_1 to be 50% transparent
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1/material -m "transparent: true; opacity: 0.5"
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "material", "data": {"transparent": true, "opacity": 0.5}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "material", "data": {"transparent": true, "opacity": 0.5}}'
 
 # update cube_1 position to 2,2,-1
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1/position -m "x:2; y:2; z:-1;"
@@ -15,11 +15,11 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 
 # rotate the cube x,y,z degrees
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1/rotation -m "x:60; y:2; z:3;"
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "rotation", "data": {"x": 60, "y": 2, "z": 3}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "rotation", "data": {"x": 60, "y": 2, "z": 3}}'
 
 # play a rotation animation
 ##mosquitto_pub -r -t realm/s/refactor/cube_1/animation -h oz.andrew.cmu.edu -m "property: rotation; to: 0 360 0; loop: true; dur: 10000"
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "animation", "data": {"property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "animation", "data": {"property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}'
 
 # delete the cube
 ##mosquitto_pub -r -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -n
@@ -31,12 +31,12 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" 
 
 # change the tiling of an image; DOES set the A-Frame attributes, does NOT always display correctly
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2/material -m "src:images/2.png; repeat: 4 4" -r
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "attribute": "material", "data": {"repeat": "4 4"}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "attribute": "material", "data": {"repeat": {"x":4, "y":4}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"repeat": "4 4"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"repeat": {"x":4, "y":4}}}'
 
 # change the image, use a URL (https please)
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2/material -m "src: http://xr.andrew.cmu.edu/abstract/downtown.png"
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "attribute": "material", "data": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}'
 
 # A-Frame specific geometry e.g. a red "torusKnot"
 ##mosquitto_pub -r -h oz -t realm/s/refactor/torusKnot_1 -m "torusKnot_1,0,1,-4,0,0,0,0,1,1,1,#FFEEAA,on"
@@ -44,7 +44,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_
 
 # now turn the color blue
 ##mosquitto_pub -h oz -t realm/s/refactor/torusKnot_1/material/color -m '#0000FF'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "attribute": "material", "data": {"color": "blue"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "type": "object", "attribute": "material", "data": {"color": "blue"}}'
 
 # GLTF 3d models
 ##mosquitto_pub -r -h oz -t realm/s/refactor/gltf-model_1 -m "gltf-model_1,0,0,0,0,0,0,0,1,1,1,url(models/Duck.glb),on"
@@ -60,7 +60,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" :
 
 # no longer necessary: setting text color can happen in 1 command. Modify existing text_3 object to change it's color to green
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_1/material -m "color: blue"
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" : "text_3", "action": "update", "attribute": "text", "data": {"color": "green"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" : "text_3", "action": "update", "type": "object", "attribute": "text", "data": {"color": "green"}}'
 
 # create a red light at 1,1,1
 ##mosquitto_pub -t realm/s/refactor/light_3 -r -h oz.andrew.cmu.edu -m "light_3,1,1,1,0.25,0.25,0,1,1,1,1,#FF0000,on"
@@ -68,21 +68,21 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" 
 
 # set type of light to directional
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/nick/light_1234/light -m "type: directional" -r
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" : "light_3", "action": "update", "attribute": "light", "data": {"type": "directional"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" : "light_3", "action": "update", "type": "object", "attribute": "light", "data": {"type": "directional"}}'
 
 # localized audio: piano cube
 ##mosquitto_pub -t realm/s/refactor/box_3 -m "box_3,2,0,-4,0,0,0,0,1,1,1,#33AAEE,on" -r
 ##mosquitto_pub -t realm/s/refactor/box_3/sound -m "src:url(http://xr.andrew.cmu.edu/audio/toypiano/A1.wav); on: mousedown" -r
 ##mosquitto_pub -t realm/s/refactor/box_3/click_listener -n -r
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "create", "data": {"object_type": "cube", "position": {"x": 2, "y": 0, "z": -4}, "color": "#33AAEE"}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "attribute": "sound", "data": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "attribute": "click-listener"}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "attribute": "sound", "data": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "attribute": "click-listener"}'
 
 # 360 surround videosphere
-##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_2 -m "sphere_2,0,0,0,0,0,0,1,200,200,200,white,on" -r
-##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_2/material -m "src:images/360falls.mp4; side: back" -r
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_2 -m '{"object_id" : "sphere_2", "action": "create", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_2 -m '{"object_id" : "sphere_2", "action": "update", "attribute": "material", "data": {"src": "images/360falls.mp4", "side": "back"}}'
+##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m "sphere_vid,0,0,0,0,0,0,1,200,200,200,white,on" -r
+##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid/material -m "src:images/360falls.mp4; side: back" -r
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "create", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "update", "type": "object", "attribute": "material", "data": {"src": "images/360falls.mp4", "side": "back"}}'
 
 # lines
 ##mosquitto_pub -t realm/s/refactor/line_1 -r -h oz.andrew.cmu.edu -m "line_1,2,2,2,3,3,3,0,0,0,0,#CE00FF,on"
@@ -96,22 +96,23 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/thickline_8 -m '{"object_
 
 # click listener enable
 ##mosquitto_pub -t realm/s/refactor/cube_1/click-listener -n
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "click-listener"}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "click-listener"}'
 
 # environment object
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/env/environment -m "preset: XXX"
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/env -m '{"object_id" : "env", "action": "update", "attribute": "environment", "data": {"preset": "arches"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/env -m '{"object_id" : "env", "action": "update", "type": "object", "attribute": "environment", "data": {"preset": "arches"}}'
 
 # particles
 ##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/particle_1 -m "particle_1,0,0,0,0,0,0,1,1,1,1,#FFEEAA,on"
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/particle_1 -m '{"object_id" : "particle_1", "action": "create", "attribute": "particle-system", "data": {"object_type": "particle", "preset": "snow"}}'
 
 # physics
-#mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3/dynamic-body -n
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "attribute": "dynamic-body", "data": {"dynamic-body": "true"}}' 
+##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3/dynamic-body -n
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "attribute": "dynamic-body", "data": {"dynamic-body": "true"}}' 
 
 # parent/child
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_1/child -m "sphere_2"
+##mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1/child -m "sphere_2"
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "setChild", "data": {"child": "sphere_2"}}' 
 
 # misc. Scene settings
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/Scene/stats -m "true"
@@ -122,7 +123,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/Scene/vr-mode-ui -m "enab
 
 # make cube_1 listen to vive events
 ##mosquitto_pub -t realm/s/refactor/cube_1/vive-listener -n
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "vive-listener"}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "vive-listener"}'
 
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_3 -n -r
 
