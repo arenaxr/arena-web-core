@@ -173,7 +173,7 @@ function onConnect() {
                 position: {
                     x: e.detail.x.toFixed(3),
                     y: e.detail.y.toFixed(3),
-                    z: e.detail.y.toFixed(3),
+                    z: e.detail.z.toFixed(3),
                 },
                 rotation: {
                     x: e.detail._x.toFixed(3),
@@ -220,8 +220,8 @@ function onConnect() {
                     data: {
                         position: {
                             x: pos.x.toFixed(3),
-                            y: pos.toFixed(3),
-                            z: pos.toFixed(3),
+                            y: pos.y.toFixed(3),
+                            z: pos.z.toFixed(3),
                         },
                         rotation: {
                             x: rot.x.toFixed(3),
