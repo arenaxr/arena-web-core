@@ -58,14 +58,20 @@ function eventAction(evt, eventName, myThis) {
     //this.emit('viveChanged', Object.assign(newPosition, newRotation));
     //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
     //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-    
-    var coordsText = newPosition.x.toFixed(3)+","+
-	newPosition.y.toFixed(3)+","+
-	newPosition.z.toFixed(3);
+
+	let coordsData = {
+		x: newPosition.x.toFixed(3),
+		y: newPosition.y.toFixed(3),
+		z: newPosition.z.toFixed(3)
+	};
+
+	var coordsText = newPosition.x.toFixed(3)+","+
+		newPosition.y.toFixed(3)+","+
+		newPosition.z.toFixed(3);
 
     // publish to MQTT
     var objName=myThis.id+"_"+idTag;
-    publish(outputTopic+objName+"/"+eventName, coordsText+","+objName);
+    publish(outputTopic+objName, { object_id: objName, action: "clientEvent", type: eventName, data: { position: coordsData, source: camName }});
     console.log(myThis.id+' '+eventName+' at: ', coordsText, 'by', objName);
 
     updateConixBox(eventName, coordsText, myThis);
@@ -74,8 +80,8 @@ function eventAction(evt, eventName, myThis) {
 function setCoordsText(evt) {
     var str = '"x": '+parseFloat(evt.currentTarget.object3D.position.x).toFixed(3)+
 	',"y": '+parseFloat(evt.currentTarget.object3D.position.y).toFixed(3)+
-	',"z": '+parseFloat(evt.currentTarget.object3D.position.z).toFixed(3);    
-    
+	',"z": '+parseFloat(evt.currentTarget.object3D.position.z).toFixed(3);
+
     return str;
 }
 
@@ -83,7 +89,7 @@ function setClickText(evt) {
     var str = '"x": '+ evt.detail.intersection.point.x.toFixed(3)+
 	',"y": '+evt.detail.intersection.point.y.toFixed(3)+
 	',"z": '+evt.detail.intersection.point.z.toFixed(3);
-    
+
     return str;
 }
 
@@ -99,9 +105,10 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		// SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mousedown", "data": {"position": {'+coordsText+'}}}');
-		//publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-		console.log(this.id+' mousedown at: ', evt.detail.intersection.point, 'by', camName);
+			let thisMsg = {object_id: this.id, action: "clientEvent", type: "mousedown", data: { position: coordsData, source: camName }};
+			publish(outputTopic+this.id, thisMsg);
+			//publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
+			console.log(this.id+' mousedown at: ', evt.detail.intersection.point, 'by', camName);
 	    } else {
 
 		// do the event handling for MQTT event; this is just an example
@@ -125,7 +132,8 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		//publish(outputTopic+this.id+"/mouseup", coordsText+","+camName);
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseup", "data": {"position": {'+coordsText+'}}}');
+			let thisMsg = {object_id: this.id, action: "clientEvent", type: "mouseup", data: { position: coordsData, source: camName }};
+			publish(outputTopic+this.id, thisMsg);
 
 		console.log(this.id+' mouseup at: ', evt.detail.intersection.point, 'by', camName);
 		// example of warping to a URL
@@ -156,8 +164,9 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		// SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseenter", "data": {"position": {'+coordsText+'}}}');
-		console.log(this.id+' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', camName);
+			let thisMsg = {object_id: this.id, action: "clientEvent", type: "mouseenter", data: { position: coordsData, source: camName }};
+			publish(outputTopic+this.id, thisMsg);
+			console.log(this.id+' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', camName);
 	    } else {
 
 		// do the event handling for MQTT event; this is just an example
@@ -177,9 +186,9 @@ AFRAME.registerComponent('click-listener', {
 	    if ('cursorEl' in evt.detail) {
 		// original click event; simply publish to MQTT
 		// SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
-		publish(outputTopic+this.id, '{"object_id": "'+this.id+'", "action": "clientEvent", "type": "mouseleave", "data": {"position": {'+coordsText+'}}}');
-		//publish(outputTopic+this.id+"/mouseleave", coordsText+","+camName);
-		console.log(this.id+' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', camName);
+			let thisMsg = {object_id: this.id, action: "clientEvent", type: "mouseleave", data: { position: coordsData, source: camName }};
+			publish(outputTopic+this.id, thisMsg);
+			console.log(this.id+' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', camName);
 	    } else {
 
 		// do the event handling for MQTT event; this is just an example
