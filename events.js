@@ -81,20 +81,20 @@ function eventAction(evt, eventName, myThis) {
     updateConixBox(eventName, coordsText, myThis);
 }
 
-function setCoordsText(evt) {
-    var str = '"x": ' + parseFloat(evt.currentTarget.object3D.position.x).toFixed(3) +
-        ',"y": ' + parseFloat(evt.currentTarget.object3D.position.y).toFixed(3) +
-        ',"z": ' + parseFloat(evt.currentTarget.object3D.position.z).toFixed(3);
-
-    return str;
+function setCoordsData(evt) {
+    return {
+        x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
+        y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
+        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
+    };
 }
 
-function setClickText(evt) {
-    var str = '"x": ' + evt.detail.intersection.point.x.toFixed(3) +
-        ',"y": ' + evt.detail.intersection.point.y.toFixed(3) +
-        ',"z": ' + evt.detail.intersection.point.z.toFixed(3);
-
-    return str;
+function setClickData(evt) {
+    return {
+        x: evt.detail.intersection.point.x.toFixed(3),
+        y: evt.detail.intersection.point.y.toFixed(3),
+        z: evt.detail.intersection.point.z.toFixed(3)
+    };
 }
 
 
@@ -104,7 +104,7 @@ AFRAME.registerComponent('click-listener', {
     init: function () {
         this.el.addEventListener('mousedown', function (evt) {
 
-            var coordsText = setClickText(evt);
+            const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -136,7 +136,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseup', function (evt) {
 
-            var coordsText = setClickText(evt);
+            const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -173,7 +173,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseenter', function (evt) {
 
-            var coordsText = setCoordsText(evt);
+            var coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -200,7 +200,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseleave', function (evt) {
 
-            var coordsText = setCoordsText(evt);
+            var coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
