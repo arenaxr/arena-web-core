@@ -11,7 +11,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 
 # update cube_1 position to 2,2,-1
 
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "attribute": "position", "data": {"x": 2, "y": 2, "z": -1}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "position", "data": {"x": 2, "y": 2, "z": -1}}'
 
 # rotate the cube x,y,z degrees
 
