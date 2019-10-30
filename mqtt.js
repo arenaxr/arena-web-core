@@ -187,8 +187,8 @@ function onConnect() {
                     y: e.detail._y.toFixed(3),
                     z: e.detail._z.toFixed(3),
                     w: e.detail._w.toFixed(3),
-                    color: color
-                }
+                },
+                color: color,
             }
         };
 
@@ -235,8 +235,8 @@ function onConnect() {
                             y: rot.y.toFixed(3),
                             z: rot.z.toFixed(3),
                             w: rot.w.toFixed(3),
-                            color: color
-                        }
+                        },
+                        color: color,
                     }
                 };
 
@@ -278,8 +278,8 @@ function onConnect() {
                         y: e.detail._y.toFixed(3),
                         z: e.detail._z.toFixed(3),
                         w: e.detail._w.toFixed(3),
-                        color: color
-                    }
+                    },
+                    color: color,
                 }
             };
 
@@ -324,8 +324,8 @@ function onConnect() {
                         y: e.detail._y.toFixed(3),
                         z: e.detail._z.toFixed(3),
                         w: e.detail._w.toFixed(3),
-                        color: color
-                    }
+                    },
+                    color: color,
                 }
             };
 
