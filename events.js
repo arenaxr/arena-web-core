@@ -1,3 +1,5 @@
+'use strict';
+
 AFRAME.registerComponent('pose-listener', {
     init: function () {
         // Set up the tick throttling.
@@ -7,15 +9,15 @@ AFRAME.registerComponent('pose-listener', {
     tick: (function (t, dt) {
         //	var newRotation = this.el.object3D.quaternion;
         //	var newPosition = this.el.object3D.position;
-        var newPosition = new THREE.Vector3();
-        var newRotation = new THREE.Quaternion();
+        const newPosition = new THREE.Vector3();
+        const newRotation = new THREE.Quaternion();
         this.el.object3D.getWorldQuaternion(newRotation);
         this.el.object3D.getWorldPosition(newPosition);
 
         const rotationCoords = newRotation.x + ' ' + newRotation.y + ' ' + newRotation.z + ' ' + newRotation.w;
         const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
 
-        var newPose = rotationCoords + " " + positionCoords;
+        const newPose = rotationCoords + " " + positionCoords;
         if (this.lastPose !== newPose) {
             this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
             this.lastPose = newPose;
@@ -30,13 +32,13 @@ AFRAME.registerComponent('vive-pose-listener', {
     },
 
     tick: (function (t, dt) {
-        var newRotation = this.el.object3D.quaternion;
-        var newPosition = this.el.object3D.position;
+        const newRotation = this.el.object3D.quaternion;
+        const newPosition = this.el.object3D.position;
 
         const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
         const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 
-        var newPose = rotationCoords + " " + positionCoords;
+        const newPose = rotationCoords + " " + positionCoords;
         if (this.lastPose !== newPose) {
             this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
             this.lastPose = newPose;
@@ -46,14 +48,14 @@ AFRAME.registerComponent('vive-pose-listener', {
 
 // gets camName as a global from mqtt.js - Javascript lets you :-/
 function updateConixBox(eventName, coordsData, myThis) {
-    var sceney = myThis.sceneEl;
-    var textEl = sceney.querySelector('#conix-text');
+    const sceney = myThis.sceneEl;
+    const textEl = sceney.querySelector('#conix-text');
     textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
     console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', camName);
 }
 
 function eventAction(evt, eventName, myThis) {
-    var newPosition = myThis.object3D.position;
+    const newPosition = myThis.object3D.position;
     //this.emit('viveChanged', Object.assign(newPosition, newRotation));
     //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
     //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
@@ -65,7 +67,7 @@ function eventAction(evt, eventName, myThis) {
     };
 
     // publish to MQTT
-    var objName = myThis.id + "_" + idTag;
+    const objName = myThis.id + "_" + idTag;
     publish(outputTopic + objName, {
         object_id: objName,
         action: "clientEvent",
@@ -126,10 +128,10 @@ AFRAME.registerComponent('click-listener', {
                     this.setAttribute('animation__2', "");
                     this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate");
                 }
-                var clicker = evt.detail.clicker;
+                const clicker = evt.detail.clicker;
 
-                var sceney = this.sceneEl;
-                var textEl = sceney.querySelector('#conix-text');
+                const sceney = this.sceneEl;
+                const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
@@ -160,20 +162,20 @@ AFRAME.registerComponent('click-listener', {
                 // this example pushes the object with 50 in the +Y direction
                 // mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
                 if (this.body) {
-                    foo = new THREE.Vector3(1, 50, 1);
-                    bod = new THREE.Vector3(1, 1, 1);
+                    const foo = new THREE.Vector3(1, 50, 1);
+                    const bod = new THREE.Vector3(1, 1, 1);
                     this.body.applyImpulse(foo, bod);
                 }
-                var clicker = evt.detail.clicker;
-                var sceney = this.sceneEl;
-                var textEl = sceney.querySelector('#conix-text');
+                const clicker = evt.detail.clicker;
+                const sceney = this.sceneEl;
+                const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
 
         this.el.addEventListener('mouseenter', function (evt) {
 
-            var coordsData = setCoordsData(evt);
+            const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -190,17 +192,17 @@ AFRAME.registerComponent('click-listener', {
 
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-                var clicker = evt.detail.clicker;
+                const clicker = evt.detail.clicker;
 
-                var sceney = this.sceneEl;
-                var textEl = sceney.querySelector('#conix-text');
+                const sceney = this.sceneEl;
+                const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
 
         this.el.addEventListener('mouseleave', function (evt) {
 
-            var coordsData = setCoordsData(evt);
+            const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -217,10 +219,10 @@ AFRAME.registerComponent('click-listener', {
 
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-                var clicker = evt.detail.clicker;
+                const clicker = evt.detail.clicker;
 
-                var sceney = this.sceneEl;
-                var textEl = sceney.querySelector('#conix-text');
+                const sceney = this.sceneEl;
+                const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });

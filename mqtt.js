@@ -1,3 +1,5 @@
+'use strict';
+
 const timeID = new Date().getTime() % 10000;
 const sceneObjects = new Map(); // This will be an associative array of strings and objects
 
@@ -17,7 +19,9 @@ function getUrlParam(parameter, defaultvalue) {
     if (window.location.href.indexOf(parameter) > -1) {
         urlparameter = getUrlVars()[parameter];
     }
-    if (urlparameter === "") return defaultvalue;
+    if (urlparameter === "") {
+        return defaultvalue;
+    }
     return urlparameter;
 }
 
@@ -32,9 +36,9 @@ const fixedCamera = getUrlParam('fixedCamera', '');
 
 console.log(renderParam, userParam, themeParam);
 
-outputTopic = "realm/s/" + renderParam + "/";
-vioTopic = "/topic/vio/";
-renderTopic = outputTopic + "#";
+const outputTopic = "realm/s/" + renderParam + "/";
+const vioTopic = "/topic/vio/";
+const renderTopic = outputTopic + "#";
 
 console.log(renderTopic);
 console.log(outputTopic);
@@ -48,6 +52,9 @@ let my_camera;
 let vive_leftHand;
 let vive_rightHand;
 let weather;
+let conixBox;
+let environs;
+let Scene;
 const date = new Date();
 
 // Rate limiting variables
@@ -72,7 +79,7 @@ const client = new Paho.MQTT.Client(mqttParam, "myClientId" + timeID);
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
-idTag = timeID + "_" + userParam; // e.g. 1234_eric
+const idTag = timeID + "_" + userParam; // e.g. 1234_eric
 // set initial position of vive controllers (not yet used) to zero
 // the comparison against this will, at startup, emit no 'changed' message
 // but rather the message will only appear if/when an actual controller moves
@@ -86,8 +93,8 @@ if (fixedCamera !== '') {
 }
 console.log("camName: ", camName);
 
-viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
-viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
+const viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
+const viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 
 // Last Will and Testament message sent to subscribers if this client loses connection
 const lwt = new Paho.MQTT.Message("");
@@ -198,8 +205,8 @@ function onConnect() {
 
             if (fixedCamera !== '') {
 
-                pos = my_camera.object3D.position;
-                rot = my_camera.object3D.quaternion;
+                const pos = my_camera.object3D.position;
+                const rot = my_camera.object3D.quaternion;
 
                 /*
                 var viomsg = camName+","+
@@ -350,13 +357,6 @@ function onConnect() {
 }
 
 
-function onConnectionLost(responseObject) {
-    if (responseObject.errorCode !== 0) {
-        console.log(responseObject.errorMessage);
-    } // reconnect
-    client.connect({onSuccess: onConnect});
-}
-
 const publish_retained = (dest, msg) => {
     //console.log('desint :', dest, 'msggg', msg)
     let message = new Paho.MQTT.Message(msg);
@@ -393,17 +393,14 @@ function onMessageArrived(message) {
     console.log(theMessage.object_id);
 
     switch (theMessage.action) {
-
-        case "clientEvent":
-            var entityEl = sceneObjects[theMessage.object_id];
-
+        case "clientEvent": {
+            const entityEl = sceneObjects[theMessage.object_id];
+            const myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
+                parseFloat(theMessage.data.position.y),
+                parseFloat(theMessage.data.position.z));
+            const clicker = theMessage.data.source;
             switch (theMessage.type) {
                 case "mousedown":
-                    var myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
-                        parseFloat(theMessage.data.position.y),
-                        parseFloat(theMessage.data.position.z));
-                    var clicker = theMessage.data.source;
-
                     // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mousedown', {
                         "clicker": clicker, intersection:
@@ -412,13 +409,7 @@ function onMessageArrived(message) {
                             }
                     }, true);
                     break;
-
                 case "mouseup":
-                    var myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
-                        parseFloat(theMessage.data.position.y),
-                        parseFloat(theMessage.data.position.z));
-                    var clicker = theMessage.data.source;
-
                     // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mouseup', {
                         "clicker": clicker, intersection:
@@ -427,26 +418,27 @@ function onMessageArrived(message) {
                             }
                     }, true);
                     break;
-
                 default: // handle others here like mouseenter / mouseleave
                     break; // never gets here haha
             }
             break;
-        case "delete":
+        }
+        case "delete": {
             // An empty message after an object_id means remove it
-            var name = theMessage.object_id;
+            const name = theMessage.object_id;
             //console.log(message.payloadString, topic, name);
 
             if (sceneObjects[name]) {
                 Scene.removeChild(sceneObjects[name]);
                 delete sceneObjects[name];
                 return;
-            } else
+            } else {
                 console.log("Warning: " + name + " not in sceneObjects");
+            }
             break;
-
-        case "create":
-            var x, y, z, xrot, yrot, zrot, wrot, xscale, yscale, zscale, color;
+        }
+        case "create": {
+            let x, y, z, xrot, yrot, zrot, wrot, xscale, yscale, zscale, color;
             // parse out JSON
             if (theMessage.data.position) {
                 x = theMessage.data.position.x;
@@ -480,10 +472,11 @@ function onMessageArrived(message) {
                 zscale = 1;
             }
 
-            if (theMessage.data.color)
+            if (theMessage.data.color) {
                 color = theMessage.data.color;
-            else
+            } else {
                 color = "white";
+            }
 
             const object_id = theMessage.object_id;
             let type = theMessage.data.object_type;
@@ -497,31 +490,31 @@ function onMessageArrived(message) {
             // also different
 
             //var name = type+"_"+theMessage.object_id;
-            var name = theMessage.object_id;
-            var quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
-            var euler = new THREE.Euler();
-            var foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
-            var vec = foo.toVector3();
+            const name = theMessage.object_id;
+            const quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
+            const euler = new THREE.Euler();
+            const foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
+            const vec = foo.toVector3();
+            let entityEl;
 
             // Reduce, reuse, recycle!
-            var entityEl;
             if (name in sceneObjects) {
                 entityEl = sceneObjects[name];
                 entityEl.setAttribute('visible', true); // might have been set invisible with 'off' earlier
                 //console.log("existing object: ", name);
                 //console.log(entityEl);
             } else { // CREATE NEW SCENE OBJECT
-
+                entityEl = document.createElement('a-entity');
                 if (type === "viveLeft" || type === "viveRight") {
                     // create vive controller for 'other persons controller'
-                    entityEl = document.createElement('a-entity');
                     entityEl.setAttribute('id', name);
                     entityEl.setAttribute('rotation.order', "YXZ");
                     //entityEl.setAttribute('obj-model', "obj: #viveControl-obj; mtl: #viveControl-mtl");
-                    if (type === "viveLeft")
+                    if (type === "viveLeft") {
                         entityEl.setAttribute("gltf-model", "url(models/valve_index_left.gltf)");
-                    else
+                    } else {
                         entityEl.setAttribute("gltf-model", "url(models/valve_index_right.gltf)");
+                    }
 
                     entityEl.object3D.position.set(0, 0, 0);
                     entityEl.object3D.rotation.set(0, 0, 0);
@@ -530,7 +523,6 @@ function onMessageArrived(message) {
                     Scene.appendChild(entityEl);
                     sceneObjects[name] = entityEl;
                 } else if (type === "camera") {
-                    entityEl = document.createElement('a-entity');
                     entityEl.setAttribute('id', name + "_rigChild");
                     entityEl.setAttribute('rotation.order', "YXZ");
                     entityEl.object3D.position.set(0, 0, 0);
@@ -544,7 +536,7 @@ function onMessageArrived(message) {
                     rigEl.object3D.rotation.set(0, 0, 0);
 
                     // this is the head 3d model
-                    childEl = document.createElement('a-entity');
+                    let childEl = document.createElement('a-entity');
                     childEl.setAttribute('rotation', 0 + ' ' + 180 + ' ' + 0);
                     childEl.object3D.scale.set(4, 4, 4);
                     childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
@@ -573,8 +565,6 @@ function onMessageArrived(message) {
 
                     console.log("their camera:", rigEl);
                 } else {
-
-                    entityEl = document.createElement('a-entity');
                     entityEl.setAttribute('id', name);
                     entityEl.setAttribute('rotation.order', "YXZ");
                     Scene.appendChild(entityEl);
@@ -584,7 +574,6 @@ function onMessageArrived(message) {
             }
 
             switch (type) {
-
                 case "light":
                     entityEl.setAttribute('light', 'type', 'ambient');
                     // does this work for light a-entities ?
@@ -653,57 +642,60 @@ function onMessageArrived(message) {
                 entityEl.object3D.rotation.set(vec.x, vec.y, vec.z);
             }
             break;
-
-        case "update":
-            var name = theMessage.object_id;
+        }
+        case "update": {
+            const name = theMessage.object_id;
             switch (theMessage.type) { // "object", "setParent", "setChild"
-                case "rig":
+                case "rig": {
                     if (name === camName) { // our camera Rig
                         console.log("moving our camera rig, sceneObject: " + name);
 
-                        var x = theMessage.data.position.x;
-                        var y = theMessage.data.position.y;
-                        var z = theMessage.data.position.z;
-                        var xrot = theMessage.data.rotation.x;
-                        var yrot = theMessage.data.rotation.y;
-                        var zrot = theMessage.data.rotation.z;
-                        var wrot = theMessage.data.rotation.w;
+                        let x = theMessage.data.position.x;
+                        let y = theMessage.data.position.y;
+                        let z = theMessage.data.position.z;
+                        let xrot = theMessage.data.rotation.x;
+                        let yrot = theMessage.data.rotation.y;
+                        let zrot = theMessage.data.rotation.z;
+                        let wrot = theMessage.data.rotation.w;
 
-                        var quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
-                        var euler = new THREE.Euler();
-                        var foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
-                        var vec = foo.toVector3();
+                        let quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
+                        let euler = new THREE.Euler();
+                        let foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
+                        let vec = foo.toVector3();
 
                         cameraRig.object3D.position.set(x, y, z);
                         cameraRig.object3D.rotation.set(vec.x, vec.y, vec.z);
                         //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
                     }
                     break;
-
-                case "object":
+                }
+                case "object": {
                     // our own camera/controllers: bail, this message is meant for all other viewers
-                    if (name === camName)
+                    if (name === camName) {
                         return;
-                    if (name === viveLName)
+                    }
+                    if (name === viveLName) {
                         return;
-                    if (name === viveRName)
+                    }
+                    if (name === viveRName) {
                         return;
-
+                    }
                     // just setAttribute() - data can contain multiple attribute-value pairs
                     // e.g: { ... "action": "update", "attribute": "animation", "data": {"property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}' ... }
 
-                    var entityEl = sceneObjects[theMessage.object_id];
+                    let entityEl = sceneObjects[theMessage.object_id];
                     if (entityEl) {
                         entityEl.setAttribute(theMessage.attribute, theMessage.data);
-                    } else
-                        console.log("Warning: " + sceneObject + " not in sceneObjects");
+                    } else {
+                        console.log("Warning: " + theMessage.object_id + " not in sceneObjects");
+                    }
                     break;
+                }
+                case "setChild": {// parent/child relationship e.g. /topic/render/parent_id/child -m "child_id"
 
-                case "setChild": // parent/child relationship e.g. /topic/render/parent_id/child -m "child_id"
-
-                    var parentEl = sceneObjects[theMessage.object_id];
-                    var childName = theMessage.data.child;
-                    var childEl = sceneObjects[theMessage.data.child];
+                    const parentEl = sceneObjects[theMessage.object_id];
+                    const childName = theMessage.data.child;
+                    const childEl = sceneObjects[theMessage.data.child];
 
                     // error checks
                     if (!parentEl) {
@@ -719,7 +711,7 @@ function onMessageArrived(message) {
                     console.log("child", childEl);
 
                     childEl.flushToDOM();
-                    var copy = childEl.cloneNode(true);
+                    const copy = childEl.cloneNode(true);
                     copy.setAttribute("name", "copy");
                     copy.flushToDOM();
                     parentEl.appendChild(copy);
@@ -730,12 +722,12 @@ function onMessageArrived(message) {
                     console.log("parent", parentEl);
                     console.log("child", childEl);
                     break;
+                }
+                case "setParent": {// parent/child relationship e.g. /topic/render/child_id/parent -m "parent_id"
 
-                case "setParent": // parent/child relationship e.g. /topic/render/child_id/parent -m "parent_id"
-
-                    var childEl = sceneObjects[theMessage.object_id]; // scene object_id
-                    var parentEl = sceneObjects[theMessage.data.parent];
-                    var childName = theMessage.object_id;
+                    const childEl = sceneObjects[theMessage.object_id]; // scene object_id
+                    const parentEl = sceneObjects[theMessage.data.parent];
+                    const childName = theMessage.object_id;
 
                     // error checks
                     if (!parentEl) {
@@ -751,7 +743,7 @@ function onMessageArrived(message) {
                     console.log("child", childEl);
 
                     childEl.flushToDOM();
-                    var copy = childEl.cloneNode(true);
+                    const copy = childEl.cloneNode(true);
                     copy.setAttribute("name", "copy");
                     copy.flushToDOM();
                     parentEl.appendChild(copy);
@@ -761,10 +753,11 @@ function onMessageArrived(message) {
                     console.log("parent", parentEl);
                     console.log("child", childEl);
                     break; // case "setParent"
-
+                }
                 default:
                     console.log("EMPTY MESSAGE?", message.destinationName, message.payloadstring);
                     break;
             }
+        }
     }
 }
