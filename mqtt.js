@@ -357,6 +357,13 @@ function onConnect() {
 }
 
 
+function onConnectionLost(responseObject) {
+    if (responseObject.errorCode !== 0) {
+        console.log(responseObject.errorMessage);
+    } // reconnect
+    client.connect({onSuccess: onConnect});
+}
+
 const publish_retained = (dest, msg) => {
     //console.log('desint :', dest, 'msggg', msg)
     let message = new Paho.MQTT.Message(msg);
