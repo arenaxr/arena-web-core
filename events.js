@@ -47,12 +47,9 @@ AFRAME.registerComponent('vive-pose-listener', {
 // gets camName as a global from mqtt.js - Javascript lets you :-/
 function updateConixBox(eventName, coordsData, myThis) {
     var sceney = myThis.sceneEl;
-    var coordsText = coordsData.x + "," +
-        coordsData.y + "," +
-        coordsData.z;    
     var textEl = sceney.querySelector('#conix-text');
-    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsText);
-    console.log(myThis.id + ' was clicked at: ', coordsText, ' by', camName);
+    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
+    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', camName);
 }
 
 function eventAction(evt, eventName, myThis) {
@@ -67,10 +64,6 @@ function eventAction(evt, eventName, myThis) {
         z: newPosition.z.toFixed(3)
     };
 
-    var coordsText = coordsData.x + "," +
-        coordsData.y + "," +
-        coordsData.z;    
-
     // publish to MQTT
     var objName = myThis.id + "_" + idTag;
     publish(outputTopic + objName, {
@@ -79,7 +72,7 @@ function eventAction(evt, eventName, myThis) {
         type: eventName,
         data: {position: coordsData, source: camName}
     });
-    console.log(myThis.id + ' ' + eventName + ' at: ', coordsText, 'by', objName);
+    console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
 
     updateConixBox(eventName, coordsData, myThis);
 }
@@ -92,12 +85,8 @@ function setCoordsData(evt) {
     };
 }
 
-function setCoordsText(evt) {
-    return {
-        x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
-        y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
-        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
-    };
+function coordsToText(c) {
+    return `${c.x},${c.y},${c.z}`;
 }
 
 function setClickData(evt) {
@@ -141,10 +130,7 @@ AFRAME.registerComponent('click-listener', {
 
                 var sceney = this.sceneEl;
                 var textEl = sceney.querySelector('#conix-text');
-		var coordsText = coordsData.x + "," +
-		    coordsData.y + "," +
-		    coordsData.z;    
-                textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsText + '\n' + clicker);
+                textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
 
@@ -181,10 +167,7 @@ AFRAME.registerComponent('click-listener', {
                 var clicker = evt.detail.clicker;
                 var sceney = this.sceneEl;
                 var textEl = sceney.querySelector('#conix-text');
-		var coordsText = coordsData.x + "," +
-		    coordsData.y + "," +
-		    coordsData.z;    
-                textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsText + '\n' + clicker);
+                textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
 
@@ -211,10 +194,7 @@ AFRAME.registerComponent('click-listener', {
 
                 var sceney = this.sceneEl;
                 var textEl = sceney.querySelector('#conix-text');
-		var coordsText = coordsData.x + "," +
-		    coordsData.y + "," +
-		    coordsData.z;    
-                textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsText + '\n' + clicker);
+                textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
 
@@ -241,10 +221,7 @@ AFRAME.registerComponent('click-listener', {
 
                 var sceney = this.sceneEl;
                 var textEl = sceney.querySelector('#conix-text');
-		var coordsText = coordsData.x + "," +
-		    coordsData.y + "," +
-		    coordsData.z;    
-                textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsText + '\n' + clicker);
+                textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
             }
         });
     }
