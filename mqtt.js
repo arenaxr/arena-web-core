@@ -89,6 +89,9 @@ const loadArena = () => {
             let arenaObjects = xhr.response;
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
+                if (arenaObjects[i].object_id === camName) {
+                    continue;
+                }
                 let msg = {
                     object_id: arenaObjects[i].object_id,
                     action: 'create',
