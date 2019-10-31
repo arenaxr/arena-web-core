@@ -7,7 +7,7 @@ import paho.mqtt.publish as publish
 import json
 
 HOST="oz.andrew.cmu.edu"
-TOPIC="realm/s/refactor"
+TOPIC="realm/s/render"
 
 def randmove():
     rando=random.random() * 10 - 5
@@ -50,7 +50,7 @@ while (True):
             "object_type": obj_type,
             "position": {
                 "x": "{0:0.3f}".format(randmove()),
-                "y": "{0:0.3f}".format(randmove()+5)
+                "y": "{0:0.3f}".format(randmove()+5),
                 "z": "{0:0.3f}".format(randmove()-5)
             },
             "rotation": {
@@ -63,7 +63,7 @@ while (True):
                 "x": rando(2),
                 "y": rando(2),
                 "z": rando(2)
-            }
+            },
             "color": "#" + randcolor()
         }
     }
