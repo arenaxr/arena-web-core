@@ -191,7 +191,8 @@ function onConnect() {
         data: {
             object_type: 'camera',
             position: {x: 0, y: 1.6, z: 0},
-            rotation: {x: 0, y: 0, z: 0, w: 0}
+            rotation: {x: 0, y: 0, z: 0, w: 0},
+            color: color
         }
     };
 
@@ -557,8 +558,8 @@ function onMessageArrived(message, jsonMessage) {
                         entityEl.setAttribute("gltf-model", "url(models/valve_index_right.gltf)");
                     }
 
-                    entityEl.object3D.position.set(0, 0, 0);
-                    entityEl.object3D.rotation.set(0, 0, 0);
+                    entityEl.object3D.position.set(x, y, z);
+                    entityEl.object3D.rotation.set(xrot, yrot, zrot);
 
                     // Add it to our dictionary of scene objects
                     Scene.appendChild(entityEl);
@@ -573,8 +574,8 @@ function onMessageArrived(message, jsonMessage) {
                     rigEl = document.createElement('a-entity');
                     rigEl.setAttribute('id', name);
                     rigEl.setAttribute('rotation.order', "YXZ");
-                    rigEl.object3D.position.set(0, 0, 0);
-                    rigEl.object3D.rotation.set(0, 0, 0);
+                    rigEl.object3D.position.set(x, y, z);
+                    rigEl.object3D.rotation.set(xrot, yrot, zrot);
 
                     // this is the head 3d model
                     let childEl = document.createElement('a-entity');
@@ -727,7 +728,17 @@ function onMessageArrived(message, jsonMessage) {
                     let entityEl = sceneObjects[theMessage.object_id];
                     if (entityEl) {
                         for (const [attribute, value] of Object.entries(theMessage.data)) {
-                            entityEl.setAttribute(attribute, value);
+                            if (attribute === "rotation") {
+                                let quat = new THREE.Quaternion(value.x, value.y, value.z, value.w);
+                                let euler = new THREE.Euler();
+                                let foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
+                                let vec = foo.toVector3();
+                                entityEl.object3D.rotation.set(vec.x, vec.y, vec.z);
+                            } else if (attribute === "position") {
+                                entityEl.object3D.position.set(value.x, value.y, value.z);
+                            } else {
+                                entityEl.setAttribute(attribute, value);
+                            }
                         }
                     } else {
                         console.log("Warning: " + theMessage.object_id + " not in sceneObjects");
