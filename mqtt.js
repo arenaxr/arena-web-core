@@ -216,7 +216,7 @@ function onConnect() {
                 rotation: {
                     x: e.detail._x.toFixed(3),
                     y: e.detail._y.toFixed(3),
-                    z: e.detail._z.toFixed(3),
+                    z: -e.detail._z.toFixed(3),
                     w: e.detail._w.toFixed(3),
                 },
                 color: color,
