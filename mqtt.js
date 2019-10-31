@@ -424,6 +424,9 @@ function onMessageArrived(message, jsonMessage) {
     let theMessage = {};
     if (message) {
         console.log(message.destinationName, message.payloadString);
+        if (!isJson(message.payloadString)) {
+            return;
+        }
         theMessage = JSON.parse(message.payloadString);
     } else if (jsonMessage) {
         theMessage = jsonMessage;
