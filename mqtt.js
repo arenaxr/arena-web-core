@@ -719,11 +719,13 @@ function onMessageArrived(message, jsonMessage) {
                         return;
                     }
                     // just setAttribute() - data can contain multiple attribute-value pairs
-                    // e.g: { ... "action": "update", "attribute": "animation", "data": {"property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}' ... }
+                    // e.g: { ... "action": "update", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... }
 
                     let entityEl = sceneObjects[theMessage.object_id];
                     if (entityEl) {
-                        entityEl.setAttribute(theMessage.attribute, theMessage.data);
+                        for (const [attribute, value] of Object.entries(theMessage.data)) {
+                            entityEl.setAttribute(attribute, value);
+                        }
                     } else {
                         console.log("Warning: " + theMessage.object_id + " not in sceneObjects");
                     }
