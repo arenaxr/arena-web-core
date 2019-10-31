@@ -30,6 +30,7 @@ const userParam = getUrlParam('name', 'X');
 const themeParam = getUrlParam('theme', 'starry');
 const weatherParam = getUrlParam('weather', 'none');
 const mqttParamZ = getUrlParam('mqttServer', 'oz.andrew.cmu.edu');
+const persistenceUrl = '//' + mqttParamZ + '/' + renderParam;
 const mqttParam = 'wss://' + mqttParamZ + '/mqtt';
 // var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
 const fixedCamera = getUrlParam('fixedCamera', '');
@@ -75,6 +76,32 @@ const topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/r
 
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
 const client = new Paho.MQTT.Client(mqttParam, "myClientId" + timeID);
+
+const loadArena = () => {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', persistenceUrl );
+    xhr.responseType = 'json';
+    xhr.send();
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
+        } else {
+            let arenaObjects = xhr.response;
+            let l = arenaObjects.length;
+            for (let i = 0; i < l; i++) {
+                let msg = {
+                    object_id: arenaObjects[i].object_id,
+                    action: 'create',
+                    data: arenaObjects[i].attributes
+                };
+                onMessageArrived(undefined, msg);
+            }
+        }
+        // ok NOW start listening for MQTT messages
+        client.subscribe(renderTopic);
+    };
+};
+
 
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
@@ -351,9 +378,7 @@ function onConnect() {
         publish(outputTopic + viveLName, {object_id: viveLName, action: "delete"});
         publish(outputTopic + viveRName, {object_id: viveRName, action: "delete"});
     };
-
-    // ok NOW start listening for MQTT messages
-    client.subscribe(renderTopic);
+    loadArena();
 }
 
 
@@ -392,11 +417,14 @@ function isJson(str) {
     return true;
 }
 
-function onMessageArrived(message) {
-
-    console.log(message.destinationName, message.payloadString);
-
-    const theMessage = JSON.parse(message.payloadString);
+function onMessageArrived(message, jsonMessage) {
+    let theMessage = {};
+    if (message) {
+        console.log(message.destinationName, message.payloadString);
+        theMessage = JSON.parse(message.payloadString);
+    } else if (jsonMessage) {
+        theMessage = jsonMessage;
+    }
     console.log(theMessage.object_id);
 
     switch (theMessage.action) {
