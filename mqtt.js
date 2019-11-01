@@ -188,6 +188,7 @@ function onConnect() {
     let mymsg = {
         object_id: camName,
         action: 'create',
+        persist: true,
         data: {
             object_type: 'camera',
             position: {x: 0, y: 1.6, z: 0},
