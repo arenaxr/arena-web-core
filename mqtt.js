@@ -129,7 +129,7 @@ const viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 // Last Will and Testament message sent to subscribers if this client loses connection
 const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: camName, action: "delete"}));
 lwt.destinationName = outputTopic + camName;
-lwt.qos = 2;
+lwt.qos = 1;
 lwt.retained = false;
 
 client.connect({
