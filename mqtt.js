@@ -127,10 +127,10 @@ const viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
 const viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 
 // Last Will and Testament message sent to subscribers if this client loses connection
-const lwt = new Paho.MQTT.Message("");
+const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: camName, action: "delete"}));
 lwt.destinationName = outputTopic + camName;
-lwt.qos = 0;
-lwt.retained = true;
+lwt.qos = 2;
+lwt.retained = false;
 
 client.connect({
     onSuccess: onConnect,
@@ -376,12 +376,14 @@ function onConnect() {
         });
     }
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
+    /*
     window.onbeforeunload = function () {
         publish(outputTopic + camName, {object_id: camName, action: "delete"});
         publish_retained(outputTopic + camName, ""); // no longer needed, don't retain head position
         publish(outputTopic + viveLName, {object_id: viveLName, action: "delete"});
         publish(outputTopic + viveRName, {object_id: viveRName, action: "delete"});
     };
+    */
     loadArena();
 }
 
