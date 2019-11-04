@@ -1,85 +1,11 @@
 'use strict';
 
-const timeID = new Date().getTime() % 10000;
-const sceneObjects = new Map(); // This will be an associative array of strings and objects
-
-// rate limit camera position updates
-const updateMillis = 100;
-
-function getUrlVars() {
-    const vars = {};
-    const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
-        vars[key] = value;
-    });
-    return vars;
-}
-
-function getUrlParam(parameter, defaultvalue) {
-    let urlparameter = defaultvalue;
-    if (window.location.href.indexOf(parameter) > -1) {
-        urlparameter = getUrlVars()[parameter];
-    }
-    if (urlparameter === "") {
-        return defaultvalue;
-    }
-    return urlparameter;
-}
-
-const renderParam = getUrlParam('scene', 'render'); // scene name
-const userParam = getUrlParam('name', 'X');
-const themeParam = getUrlParam('theme', 'starry');
-const weatherParam = getUrlParam('weather', 'none');
-const mqttParamZ = getUrlParam('mqttServer', 'oz.andrew.cmu.edu');
-const persistenceUrl = '//' + mqttParamZ + '/' + renderParam;
-const mqttParam = 'wss://' + mqttParamZ + '/mqtt';
-// var mqttParam='ws://'+mqttParamZ+':9001/mqtt';
-const fixedCamera = getUrlParam('fixedCamera', '');
-
-console.log(renderParam, userParam, themeParam);
-
-const outputTopic = "realm/s/" + renderParam + "/";
-const vioTopic = "/topic/vio/";
-const renderTopic = outputTopic + "#";
-
-console.log(renderTopic);
-console.log(outputTopic);
-
-let camName = "";
-
-let fallBox;
-let fallBox2;
-let cameraRig;
-let my_camera;
-let vive_leftHand;
-let vive_rightHand;
-let weather;
-let conixBox;
-let environs;
-let Scene;
-const date = new Date();
-
-// Rate limiting variables
-let oldMsg = "";
-let lastUpdate = date.getTime();
-const lastUpdateLeft = lastUpdate;
-const lastUpdateRight = lastUpdate;
-const stamp = lastUpdate;
-const stampLeft = lastUpdate;
-const stampRight = lastUpdate;
-
-// Depending on topic depth, four message categories
-const topicChildObject = renderTopic.split("/").length + 3;     // e.g: /topic/render/cube_1/sphere_2
-const topicMultiProperty = renderTopic.split("/").length + 2;   // e.g: /topic/render/cube_1/material/color
-const topicSingleComponent = renderTopic.split("/").length + 1; // e.g: /topic/render/cube_1/position
-const topicAtomicUpdate = renderTopic.split("/").length;        // e.g: /topic/render/cube_1
-
-
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-const client = new Paho.MQTT.Client(mqttParam, "myClientId" + timeID);
+const client = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
 
 const loadArena = () => {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', persistenceUrl );
+    xhr.open('GET', globals.persistenceUrl );
     xhr.responseType = 'json';
     xhr.send();
     xhr.onload = () => {
@@ -89,7 +15,7 @@ const loadArena = () => {
             let arenaObjects = xhr.response;
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
-                if (arenaObjects[i].object_id === camName) {
+                if (arenaObjects[i].object_id === globals.camName) {
                     continue;
                 }
                 let msg = {
@@ -101,7 +27,7 @@ const loadArena = () => {
             }
         }
         // ok NOW start listening for MQTT messages
-        client.subscribe(renderTopic);
+        client.subscribe(globals.renderTopic);
     };
 };
 
@@ -109,26 +35,10 @@ const loadArena = () => {
 client.onConnectionLost = onConnectionLost;
 client.onMessageArrived = onMessageArrived;
 
-const idTag = timeID + "_" + userParam; // e.g. 1234_eric
-// set initial position of vive controllers (not yet used) to zero
-// the comparison against this will, at startup, emit no 'changed' message
-// but rather the message will only appear if/when an actual controller moves
-let oldMsgLeft = "viveLeft_" + idTag + ",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
-let oldMsgRight = "viveRight_" + idTag + ",0.000,0.000,0.000,0.000,0.000,0.000,1.000,0,0,0,#000000,on";
-
-if (fixedCamera !== '') {
-    camName = "camera_" + fixedCamera + "_" + fixedCamera;
-} else {
-    camName = "camera_" + idTag;      // e.g. camera_1234_eric
-}
-console.log("camName: ", camName);
-
-const viveLName = "viveLeft_" + idTag;  // e.g. viveLeft_9240_X
-const viveRName = "viveRight_" + idTag; // e.g. viveRight_9240_X
 
 // Last Will and Testament message sent to subscribers if this client loses connection
-const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: camName, action: "delete"}));
-lwt.destinationName = outputTopic + camName;
+const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: globals.camName, action: "delete"}));
+lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
@@ -145,48 +55,37 @@ function onConnect() {
     // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
     // add event listener for camera moved ("poseChanged") event
 
-    vive_leftHand = document.getElementById('vive-leftHand');
-    vive_rightHand = document.getElementById('vive-rightHand');
-
-    my_camera = document.getElementById('my-camera');     // this is an <a-camera>
-    cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
-    conixBox = document.getElementById('Box-obj');
-    environs = document.getElementById('env');
-    weather = document.getElementById('weather');
-    Scene = document.querySelector('a-scene');
-    fallBox = document.getElementById('fallBox');
-    fallBox2 = document.getElementById('fallBox2');
-
-    if (environs) {
-        environs.setAttribute('environment', 'preset', themeParam);
-    }
-    if (weatherParam !== "none") {
-        weather.setAttribute('particle-system', 'preset', weatherParam);
-        weather.setAttribute('particle-system', 'enabled', 'true');
-    } else if (weather) {
-        weather.setAttribute('particle-system', 'enabled', 'false');
-    }
 
     // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
     // Add them to our dictionary of scene objects
-    sceneObjects['Scene'] = Scene;
-    sceneObjects['env'] = environs;
-    sceneObjects['Box-obj'] = conixBox;
-    sceneObjects['Scene'] = Scene;
-    sceneObjects['fallBox'] = fallBox;
-    sceneObjects['fallBox2'] = fallBox2;
-    sceneObjects['my-camera'] = my_camera;
+    let sceneObjects = globals.sceneObjects;
 
-    console.log('my-camera: ', camName);
-    console.log('cameraRig: ', cameraRig);
-    console.log('fallBox: ', sceneObjects[fallBox]);
+    sceneObjects.vive_leftHand = document.getElementById('vive-leftHand');
+    sceneObjects.vive_rightHand = document.getElementById('vive-rightHand');
 
-    //lwt.destinationName = outputTopic+camName;
+    sceneObjects.cameraRig = document.getElementById('cameraRig'); // this is an <a-entity>
+    sceneObjects.weather = document.getElementById('weather');
+    sceneObjects.scene = document.querySelector('a-scene');
+    sceneObjects.env = document.getElementById('env');
+    sceneObjects.boxObj = document.getElementById('boxObj');
+    sceneObjects.fallBox = document.getElementById('fallBox');
+    sceneObjects.fallBox2 = document.getElementById('fallBox2');
+    sceneObjects.myCamera = document.getElementById('my-camera');
+
+    if (sceneObjects.env) {
+        sceneObjects.env.setAttribute('environment', 'preset', globals.themeParam);
+    }
+    if (globals.weatherParam !== "none") {
+        sceneObjects.weather.setAttribute('particle-system', 'preset', globals.weatherParam);
+        sceneObjects.weather.setAttribute('particle-system', 'enabled', 'true');
+    } else if (sceneObjects.weather) {
+        sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
+    }
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-    let mymsg = {
-        object_id: camName,
+    let myMsg = {
+        object_id: globals.camName,
         action: 'create',
         persist: true,
         data: {
@@ -197,14 +96,14 @@ function onConnect() {
         }
     };
 
-    publish(outputTopic + camName, mymsg);
-    console.log("my-camera element", my_camera);
+    publish(globals.outputTopic + globals.camName, myMsg);
+    console.log("my-camera element", sceneObjects.myCamera);
 
-    my_camera.addEventListener('poseChanged', e => {
+    sceneObjects.myCamera.addEventListener('poseChanged', e => {
         //console.log(e.detail);
 
         let msg = {
-            object_id: camName,
+            object_id: globals.camName,
             action: 'update',
             type: 'object',
             data: {
@@ -230,15 +129,15 @@ function onConnect() {
         //if (msg !== oldMsg) {
         if (true) {
             //publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
-            publish(outputTopic + camName, msg); // extra timestamp info at end for debugging
-            oldMsg = msg;
-            lastUpdate = stamp;
+            publish(globals.outputTopic + globals.camName, msg); // extra timestamp info at end for debugging
+            // oldMsg = msg;
+            // lastUpdate = stamp;
             //console.log("cam moved: ",outputTopic+camName, msg);
 
-            if (fixedCamera !== '') {
+            if (globals.fixedCamera !== '') {
 
-                const pos = my_camera.object3D.position;
-                const rot = my_camera.object3D.quaternion;
+                const pos = sceneObjects.myCamera.object3D.position;
+                const rot = sceneObjects.myCamera.object3D.quaternion;
 
                 /*
                 var viomsg = camName+","+
@@ -252,8 +151,8 @@ function onConnect() {
                 ",0,0,0,#000000,on";
                  */
 
-                const viomsg = {
-                    object_id: camName,
+                const vioMsg = {
+                    object_id: globals.camName,
                     action: 'update',
                     type: 'object',
                     data: {
@@ -272,16 +171,16 @@ function onConnect() {
                     }
                 };
 
-                publish(vioTopic + camName, viomsg);
+                publish(globals.vioTopic + globals.camName, vioMsg);
             }
             //}
         }
     });
 
-    if (vive_leftHand) {
-        vive_leftHand.addEventListener('viveChanged', e => {
+    if (sceneObjects.vive_leftHand) {
+        sceneObjects.vive_leftHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
-            const objName = "viveLeft_" + idTag;
+            const objName = "viveLeft_" + globals.idTag;
             /*
                 var msg = objName+","+
                     e.detail.x.toFixed(3)+","+
@@ -315,19 +214,16 @@ function onConnect() {
                 }
             };
 
-            // suppress duplicates
-            if (msg !== oldMsgLeft) {
-                // rate limiting is handled in vive-pose-listener
-                publish(outputTopic + objName, msg);
-                oldMsgLeft = msg;
-            }
+            // rate limiting is handled in vive-pose-listener
+            publish(globals.outputTopic + objName, msg);
+
         });
     }
     // realtime position tracking of right hand controller
-    if (vive_rightHand) {
-        vive_rightHand.addEventListener('viveChanged', e => {
+    if (sceneObjects.vive_rightHand) {
+        sceneObjects.vive_rightHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
-            const objName = "viveRight_" + idTag;
+            const objName = "viveRight_" + globals.idTag;
             /*
                 var msg = objName+","+
                     e.detail.x.toFixed(3)+","+
@@ -360,20 +256,7 @@ function onConnect() {
                     color: color,
                 }
             };
-
-            // suppress duplicates
-            if (msg !== oldMsgRight) {
-                // rate limit
-                //date = new Date();
-                //stampRight = date.getTime();
-                //if ((stampRight - lastUpdateRight) >= updateMillis) {
-
-                publish(outputTopic + objName, msg);
-                oldMsgRight = msg;
-                //lastUpdateRight = stampRight;
-                //console.log("viveRight moved: ",outputTopic+objName, msg);
-                //}
-            }
+            publish(globals.outputTopic + objName, msg);
         });
     }
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
@@ -425,6 +308,7 @@ function isJson(str) {
 }
 
 function onMessageArrived(message, jsonMessage) {
+    let sceneObjects = globals.sceneObjects;
     let theMessage = {};
     if (message) {
         console.log(message.destinationName, message.payloadString);
@@ -474,7 +358,7 @@ function onMessageArrived(message, jsonMessage) {
             //console.log(message.payloadString, topic, name);
 
             if (sceneObjects[name]) {
-                Scene.removeChild(sceneObjects[name]);
+                sceneObjects.scene.removeChild(sceneObjects[name]);
                 delete sceneObjects[name];
                 return;
             } else {
@@ -523,7 +407,6 @@ function onMessageArrived(message, jsonMessage) {
                 color = "white";
             }
 
-            const object_id = theMessage.object_id;
             let type = theMessage.data.object_type;
             if (type === "cube") {
                 type = "box";
@@ -565,7 +448,7 @@ function onMessageArrived(message, jsonMessage) {
                     entityEl.object3D.rotation.set(xrot, yrot, zrot);
 
                     // Add it to our dictionary of scene objects
-                    Scene.appendChild(entityEl);
+                    sceneObjects.scene.appendChild(entityEl);
                     sceneObjects[name] = entityEl;
                 } else if (type === "camera") {
                     entityEl.setAttribute('id', name + "_rigChild");
@@ -603,7 +486,7 @@ function onMessageArrived(message, jsonMessage) {
 
                     rigEl.appendChild(entityEl);
 
-                    Scene.appendChild(rigEl);
+                    sceneObjects.scene.appendChild(rigEl);
                     sceneObjects[name] = rigEl;
 
                     entityEl = rigEl;
@@ -612,7 +495,7 @@ function onMessageArrived(message, jsonMessage) {
                 } else {
                     entityEl.setAttribute('id', name);
                     entityEl.setAttribute('rotation.order', "YXZ");
-                    Scene.appendChild(entityEl);
+                    sceneObjects.scene.appendChild(entityEl);
                     // Add it to our dictionary of scene objects
                     sceneObjects[name] = entityEl;
                 }
@@ -643,17 +526,17 @@ function onMessageArrived(message, jsonMessage) {
                     break;
 
                 case "line":
-                    delete theMessage['object_type']; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
+                    delete theMessage.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
                     entityEl.setAttribute('line', theMessage.data);
                     break;
 
                 case "thickline":
-                    delete theMessage['object_type']; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
+                    delete theMessage.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
                     entityEl.setAttribute('meshline', theMessage.data);
                     break;
 
                 case "particle":
-                    delete theMessage['object_type']; // pass only A-Frame digestible key-values to setAttribute()
+                    delete theMessage.object_type; // pass only A-Frame digestible key-values to setAttribute()
                     entityEl.setAttribute('particle-system', theMessage.data);
                     break;
 
@@ -692,7 +575,7 @@ function onMessageArrived(message, jsonMessage) {
             const name = theMessage.object_id;
             switch (theMessage.type) { // "object", "setParent", "setChild"
                 case "rig": {
-                    if (name === camName) { // our camera Rig
+                    if (name === globals.camName) { // our camera Rig
                         console.log("moving our camera rig, sceneObject: " + name);
 
                         let x = theMessage.data.position.x;
@@ -708,21 +591,21 @@ function onMessageArrived(message, jsonMessage) {
                         let foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
                         let vec = foo.toVector3();
 
-                        cameraRig.object3D.position.set(x, y, z);
-                        cameraRig.object3D.rotation.set(vec.x, vec.y, vec.z);
+                        sceneObjects.cameraRig.object3D.position.set(x, y, z);
+                        sceneObjects.cameraRig.object3D.rotation.set(vec.x, vec.y, vec.z);
                         //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
                     }
                     break;
                 }
                 case "object": {
                     // our own camera/controllers: bail, this message is meant for all other viewers
-                    if (name === camName) {
+                    if (name === globals.camName) {
                         return;
                     }
-                    if (name === viveLName) {
+                    if (name === globals.viveLName) {
                         return;
                     }
-                    if (name === viveRName) {
+                    if (name === globals.viveRName) {
                         return;
                     }
                     // just setAttribute() - data can contain multiple attribute-value pairs

@@ -1,9 +1,59 @@
 'use strict';
 
+
+function getUrlVars() {
+    const vars = {};
+    const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+        vars[key] = value;
+    });
+    return vars;
+}
+
+function getUrlParam(parameter, defaultValue) {
+    let urlParameter = defaultValue;
+    if (window.location.href.indexOf(parameter) > -1) {
+        urlParameter = getUrlVars()[parameter];
+    }
+    if (urlParameter === "") {
+        return defaultValue;
+    }
+    return urlParameter;
+}
+
+let globals = {
+    timeID: new Date().getTime() % 10000,
+    sceneObjects: new Map(),
+    updateMillis: 100,
+    renderParam: getUrlParam('scene', 'render'), //scene
+    userParam: getUrlParam('name', 'X'),
+    themeParam: getUrlParam('theme', 'starry'),
+    weatherParam: getUrlParam('weather', 'none'),
+    mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
+    fixedCamera: getUrlParam('fixedCamera', ''),
+    vioTopic: "/topic/vio/",
+};
+
+globals.persistenceUrl = '//' + globals.mqttParamZ + '/' + globals.renderParam;
+globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
+globals.outputTopic = "realm/s/" + globals.renderParam + "/";
+globals.renderTopic = globals.outputTopic + "#";
+globals.camName = "";
+globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
+
+if (globals.fixedCamera !== '') {
+    globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
+} else {
+    globals.camName = "camera_" + globals.idTag;      // e.g. camera_1234_eric
+}
+
+globals.viveLName = "viveLeft_" + globals.idTag;  // e.g. viveLeft_9240_X
+globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+
+
 AFRAME.registerComponent('pose-listener', {
     init: function () {
         // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, updateMillis, this); // ugly hack: updateMillis is a global in mqtt.js
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this); // ugly hack: updateMillis is a global in mqtt.js
     },
 
     tick: (function (t, dt) {
@@ -28,7 +78,7 @@ AFRAME.registerComponent('pose-listener', {
 AFRAME.registerComponent('vive-pose-listener', {
     init: function () {
         // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, updateMillis, this); // ugly hack: updateMillis is a global in mqtt.js
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this); // ugly hack: updateMillis is a global in mqtt.js
     },
 
     tick: (function (t, dt) {
@@ -51,7 +101,7 @@ function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
     const textEl = sceney.querySelector('#conix-text');
     textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
-    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', camName);
+    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
 }
 
 function eventAction(evt, eventName, myThis) {
@@ -67,12 +117,12 @@ function eventAction(evt, eventName, myThis) {
     };
 
     // publish to MQTT
-    const objName = myThis.id + "_" + idTag;
-    publish(outputTopic + objName, {
+    const objName = myThis.id + "_" + globals.idTag;
+    publish(globals.outputTopic + objName, {
         object_id: objName,
         action: "clientEvent",
         type: eventName,
-        data: {position: coordsData, source: camName}
+        data: {position: coordsData, source: globals.camName}
     });
     console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
 
@@ -115,11 +165,11 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mousedown",
-                    data: {position: coordsData, source: camName}
+                    data: {position: coordsData, source: globals.camName}
                 };
-                publish(outputTopic + this.id, thisMsg);
+                publish(globals.outputTopic + this.id, thisMsg);
                 //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-                console.log(this.id + ' mousedown at: ', evt.detail.intersection.point, 'by', camName);
+                console.log(this.id + ' mousedown at: ', evt.detail.intersection.point, 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
@@ -147,11 +197,11 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mouseup",
-                    data: {position: coordsData, source: camName}
+                    data: {position: coordsData, source: globals.camName}
                 };
-                publish(outputTopic + this.id, thisMsg);
+                publish(globals.outputTopic + this.id, thisMsg);
 
-                console.log(this.id + ' mouseup at: ', evt.detail.intersection.point, 'by', camName);
+                console.log(this.id + ' mouseup at: ', evt.detail.intersection.point, 'by', globals.camName);
                 // example of warping to a URL
                 //if (this.id === "Box-obj")
                 //    window.location.href = 'http://conix.io/';
@@ -184,10 +234,10 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mouseenter",
-                    data: {position: coordsData, source: camName}
+                    data: {position: coordsData, source: globals.camName}
                 };
-                publish(outputTopic + this.id, thisMsg);
-                console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', camName);
+                publish(globals.outputTopic + this.id, thisMsg);
+                console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
@@ -211,10 +261,10 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mouseleave",
-                    data: {position: coordsData, source: camName}
+                    data: {position: coordsData, source: globals.camName}
                 };
-                publish(outputTopic + this.id, thisMsg);
-                console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', camName);
+                publish(globals.outputTopic + this.id, thisMsg);
+                console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
