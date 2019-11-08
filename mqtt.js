@@ -116,7 +116,7 @@ function onConnect() {
                 rotation: {
                     x: e.detail._x.toFixed(3),
                     y: e.detail._y.toFixed(3),
-                    z: -e.detail._z.toFixed(3),
+                    z: e.detail._z.toFixed(3),
                     w: e.detail._w.toFixed(3),
                 },
                 color: color,
@@ -138,18 +138,6 @@ function onConnect() {
 
                 const pos = sceneObjects.myCamera.object3D.position;
                 const rot = sceneObjects.myCamera.object3D.quaternion;
-
-                /*
-                var viomsg = camName+","+
-                pos.x.toFixed(3)+","+
-                pos.y.toFixed(3)+","+
-                pos.z.toFixed(3)+","+
-                rot.x.toFixed(3)+","+
-                rot.y.toFixed(3)+","+
-                rot.z.toFixed(3)+","+
-                rot.w.toFixed(3)+
-                ",0,0,0,#000000,on";
-                 */
 
                 const vioMsg = {
                     object_id: globals.camName,
@@ -181,17 +169,6 @@ function onConnect() {
         sceneObjects.vive_leftHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
             const objName = "viveLeft_" + globals.idTag;
-            /*
-                var msg = objName+","+
-                    e.detail.x.toFixed(3)+","+
-                    e.detail.y.toFixed(3)+","+
-                    e.detail.z.toFixed(3)+","+
-                    e.detail._x.toFixed(3)+","+
-                    e.detail._y.toFixed(3)+","+
-                    e.detail._z.toFixed(3)+","+
-                    e.detail._w.toFixed(3)+
-                    ",0,0,0,#000000,on";
-            */
 
             let msg = {
                 object_id: objName,
@@ -202,7 +179,7 @@ function onConnect() {
                     position: {
                         x: e.detail.x.toFixed(3),
                         y: e.detail.y.toFixed(3),
-                        z: e.detail.y.toFixed(3),
+                        z: e.detail.z.toFixed(3),
                     },
                     rotation: {
                         x: e.detail._x.toFixed(3),
@@ -224,17 +201,6 @@ function onConnect() {
         sceneObjects.vive_rightHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
             const objName = "viveRight_" + globals.idTag;
-            /*
-                var msg = objName+","+
-                    e.detail.x.toFixed(3)+","+
-                    e.detail.y.toFixed(3)+","+
-                    e.detail.z.toFixed(3)+","+
-                    e.detail._x.toFixed(3)+","+
-                    e.detail._y.toFixed(3)+","+
-                    e.detail._z.toFixed(3)+","+
-                    e.detail._w.toFixed(3)+
-                    ",0,0,0,#000000,on";
-            */
 
             let msg = {
                 object_id: objName,
@@ -245,7 +211,7 @@ function onConnect() {
                     position: {
                         x: e.detail.x.toFixed(3),
                         y: e.detail.y.toFixed(3),
-                        z: e.detail.y.toFixed(3),
+                        z: e.detail.z.toFixed(3),
                     },
                     rotation: {
                         x: e.detail._x.toFixed(3),
