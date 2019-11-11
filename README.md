@@ -84,7 +84,7 @@ the quaternion (native) representation of rotation is a bit more tricky. The 4 p
 #### Animate
 animate rotation of the already drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "animation", "data": {"property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}} }'
 ```
 #### Remove
 remove the cube (-n means send a null message)
@@ -100,19 +100,19 @@ Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modificatio
  shows modified tiling
 )))
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"repeat": "4 4"}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"repeat": {"x":4, "y":4}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": "4 4"}}}' # this sets the repeat values but they don't seem to show up in viewer
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": {"x":4, "y":4}}}}'
 ```
 URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
 To update the image of a named image already in the scene, use this syntax:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": {"material": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}}'
 ```
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "create", "data": {"object_type": "torusKnot", "color": "red", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "type": "object", "attribute": "material", "data": {"color": "blue"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "type": "object", "data": {"material": {"color": "blue"}}}'
 ```
 #### Models
 Instantiate a glTF v2.0 binary model (file extension .glb) from a URL. 
@@ -131,7 +131,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" :
 ```
 Change text color properties ( https://aframe.io/docs/0.9.0/components/text.html#properties )
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" : "text_3", "action": "update", "type": "object", "attribute": "text", "data": {"color": "green"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" : "text_3", "action": "update", "type": "object", "data": {"text": {"color": "green"}}}'
 ```
 #### Lights
 Persist a red light to the scene
@@ -140,7 +140,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" 
 ```
 Default is ambient light. To change type, or other light ( https://aframe.io/docs/0.9.0/components/light.html ) parameters, example: change to directional. Options: ambient, directional, hemisphere, point, spot
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" : "light_3", "action": "update", "type": "object", "attribute": "light", "data": {"type": "directional"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" : "light_3", "action": "update", "type": "object", "data": {"light": {"type": "directional"}}}'
 ```
 #### Sound
 Play toy piano sound from a URL when you click a cube: first draw the cube
@@ -149,11 +149,11 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" :
 ```
 then add sound with click event listener:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "attribute": "sound", "data": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}}'
 ```
 This lets only you hear the piano. To share the piano click events with others viewing the scene, add an event-listener Component:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "attribute": "click-listener"}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"click-listener": "ok"}}'
 ```
 #### 360 Video
 First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
