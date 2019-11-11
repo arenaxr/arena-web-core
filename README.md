@@ -65,7 +65,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 #### Transparency
 Say the cube has already been drawn. In a second command, something like this sets 50% transparency:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "material", "data": {"transparent": true, "opacity": 0.5}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"material": {"transparent": true, "opacity": 0.5}}}'
 ```
 #### Move
 move the position of the already drawn cube
@@ -96,8 +96,9 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "create", "data": {"object_type": "image", "position": {"x": 0, "y": 2, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "url": "images/north.png"}}'
 ```
 Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modifications to materials that have the same bitmap ("src") parameter as some kind of performance boost. But a message like this (after one like the previous) can set the tiling (repeat 4 times along X and Y axes), if you maybe play with the bitmap:
-# we think maybe have to respecify the bitmap in same message??? subsequent replace img from new URL
-# shows modified tiling
+((( we think maybe have to respecify the bitmap in same message??? subsequent replace img from new URL
+ shows modified tiling
+)))
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"repeat": "4 4"}}'
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "attribute": "material", "data": {"repeat": {"x":4, "y":4}}}'
