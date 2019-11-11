@@ -1,0 +1,3 @@
+[submodule "aframe"]
+	path = aframe
+	url = git@github.com:aframevr/aframe.git
