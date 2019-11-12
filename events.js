@@ -53,7 +53,7 @@ globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
 AFRAME.registerComponent('pose-listener', {
     init: function () {
         // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this); // ugly hack: updateMillis is a global in mqtt.js
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
     },
 
     tick: (function (t, dt) {
@@ -78,7 +78,7 @@ AFRAME.registerComponent('pose-listener', {
 AFRAME.registerComponent('vive-pose-listener', {
     init: function () {
         // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this); // ugly hack: updateMillis is a global in mqtt.js
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
     },
 
     tick: (function (t, dt) {
@@ -96,7 +96,6 @@ AFRAME.registerComponent('vive-pose-listener', {
     })
 });
 
-// gets camName as a global from mqtt.js - Javascript lets you :-/
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
     const textEl = sceney.querySelector('#conix-text');
@@ -160,7 +159,6 @@ AFRAME.registerComponent('click-listener', {
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
-                // SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
                 let thisMsg = {
                     object_id: this.id,
                     action: "clientEvent",
@@ -229,7 +227,6 @@ AFRAME.registerComponent('click-listener', {
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
-                // SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
                 let thisMsg = {
                     object_id: this.id,
                     action: "clientEvent",
@@ -256,7 +253,6 @@ AFRAME.registerComponent('click-listener', {
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
-                // SO HACKY: camName is in global space in mqtt.js - it is "my camera name" = my userID
                 let thisMsg = {
                     object_id: this.id,
                     action: "clientEvent",
