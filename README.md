@@ -73,7 +73,7 @@ move the position of the already drawn cube
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"position": {"x": 2, "y": 2, "z": -1}}}'
 ```
 #### Rotate
-rotate the already drawn cube; these are A-frame rotations in degrees
+rotate the already drawn cube; these are in quaternions, not A-Frame degrees
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"rotation": {"x": 60, "y": 2, "z": 3}}}'
 ```
