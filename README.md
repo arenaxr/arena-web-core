@@ -122,7 +122,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/gltf-model_1 -m '{"object
 #### Relocalize Camera
 Warp the camera with ID camera_5432 to a new coordinate (system). Values are x,y,z, (meters) x,y,z,w (quaternions)
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/ -m '{"object_id" : "camera_er1k_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 1, "y":1, "z":1, "w":1} }}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/ -m '{"object_id" : "camera_er1k_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 0.1, "y":0, "z":0, "w":1} }}'
 ```
 #### Text
 Add some red text that says "Hello World"
@@ -168,14 +168,15 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/line_1 -m '{"object_id" :
 ```
 Extend the line with a new segment, colored green
 ```
-mosquitto_pub -t /topic/render/line_1/line__2 -r -h oz.andrew.cmu.edu -m "start: 3 3 3; end: 4 4 4; color: #00FF00"
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/line_1 -m '{"object_id" : "line_1", "action": "update", "type": "object", "data": {"line__2": {"start": {"x": 3, "y": 3, "z": 3}, "end": {"x": 4, "
+y": 4, "z": 4}, "color": "#00FF00"}}}'
 ```
 #### Thicklines
-"thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the first scale value specifies thickness, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,0,0 to 1,1,0 to 1,1,1
+"thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the lineWidth value specifies thickness, and multiple points can be specified at once, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,0,0 to 1,1,0 to 1,1,1
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/thickline_8 -m '{"object_id" : "thickline_8", "action": "create", "data": {"object_type": "thickline", "lineWidth": 11, "color": "#FF88EE", "path": "0 0 0, 1 0 0, 1 1 0, 1 1 1"}}'
 ```
-You might be wondering, why can't normal line just use the scale value to specify thickness? But this one goes to eleven! (really though, normal lines perform faster)
+You might be wondering, why can't normal lines just use the scale value to specify thickness? But this one goes to eleven! (really though, normal lines perform faster)
 #### Events
 Add the "click-listener" event to a scene object; click-listener is a Component defined in `events.js`. This works for adding other, arbitrary Components. A non-empty message gets sent to the Component's `init:` function
 ```
