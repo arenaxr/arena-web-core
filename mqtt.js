@@ -26,8 +26,6 @@ const loadArena = () => {
                 onMessageArrived(undefined, msg);
             }
         }
-        // ok NOW start listening for MQTT messages
-        client.subscribe(globals.renderTopic);
     };
 };
 
@@ -63,7 +61,7 @@ function onConnect() {
     sceneObjects.vive_leftHand = document.getElementById('vive-leftHand');
     sceneObjects.vive_rightHand = document.getElementById('vive-rightHand');
 
-    sceneObjects.cameraRig = document.getElementById('cameraRig'); // this is an <a-entity>
+    sceneObjects.cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     sceneObjects.weather = document.getElementById('weather');
     sceneObjects.scene = document.querySelector('a-scene');
     sceneObjects.env = document.getElementById('env');
@@ -235,6 +233,9 @@ function onConnect() {
     };
     */
     loadArena();
+    // ok NOW start listening for MQTT messages
+    // * moved this out of loadArena() since it is conceptually a different thing
+    client.subscribe(globals.renderTopic);
 }
 
 
@@ -444,9 +445,9 @@ function onMessageArrived(message, jsonMessage) {
                     headtext.setAttribute('side', "double");
                     headtext.setAttribute('align', "center");
                     headtext.setAttribute('anchor', "center");
-                    headtext.setAttribute('width', 5);
                     headtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
                     headtext.setAttribute('color', color); // color
+                    headtext.setAttribute('width', 5); // try setting last
                     entityEl.appendChild(headtext);
                     entityEl.appendChild(childEl);
 
@@ -468,66 +469,66 @@ function onMessageArrived(message, jsonMessage) {
             }
 
             switch (type) {
-                case "light":
-                    entityEl.setAttribute('light', 'type', 'ambient');
-                    // does this work for light a-entities ?
-                    entityEl.setAttribute('light', 'color', color);
-                    break;
+            case "light":
+                entityEl.setAttribute('light', 'type', 'ambient');
+                // does this work for light a-entities ?
+                entityEl.setAttribute('light', 'color', color);
+                break;
 
-                case "camera":
-                    //console.log("Camera update", entityEl);
-                    //console.log(entityEl.getAttribute('position'));
-                    break;
+            case "camera":
+                //console.log("Camera update", entityEl);
+                //console.log(entityEl.getAttribute('position'));
+                break;
 
-                case "viveLeft":
-                    break;
-                case "viveRight":
-                    break;
+            case "viveLeft":
+                break;
+            case "viveRight":
+                break;
 
-                case "image": // use special 'url' data slot for bitmap URL (like gltf-models do)
-                    entityEl.setAttribute('geometry', 'primitive', 'plane');
-                    entityEl.setAttribute('material', 'src', theMessage.data.url);
-                    entityEl.setAttribute('material', 'shader', 'flat');
-                    entityEl.object3D.scale.set(xscale, yscale, zscale);
-                    break;
+            case "image": // use special 'url' data slot for bitmap URL (like gltf-models do)
+                entityEl.setAttribute('geometry', 'primitive', 'plane');
+                entityEl.setAttribute('material', 'src', theMessage.data.url);
+                entityEl.setAttribute('material', 'shader', 'flat');
+                entityEl.object3D.scale.set(xscale, yscale, zscale);
+                break;
 
-                case "line":
-                    delete theMessage.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
-                    entityEl.setAttribute('line', theMessage.data);
-                    break;
+            case "line":
+                delete theMessage.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
+                entityEl.setAttribute('line', theMessage.data);
+                break;
 
-                case "thickline":
-                    delete theMessage.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
-                    entityEl.setAttribute('meshline', theMessage.data);
-                    break;
+            case "thickline":
+                delete theMessage.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
+                entityEl.setAttribute('meshline', theMessage.data);
+                break;
 
-                case "particle":
-                    delete theMessage.object_type; // pass only A-Frame digestible key-values to setAttribute()
-                    entityEl.setAttribute('particle-system', theMessage.data);
-                    break;
+            case "particle":
+                delete theMessage.object_type; // pass only A-Frame digestible key-values to setAttribute()
+                entityEl.setAttribute('particle-system', theMessage.data);
+                break;
 
-                case "gltf-model":
-                    //entityEl.object3D.scale.set(xscale, yscale, zscale);
-                    entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
-                    entityEl.setAttribute("gltf-model", theMessage.data.url);
-                    break;
+            case "gltf-model":
+                //entityEl.object3D.scale.set(xscale, yscale, zscale);
+                entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
+                entityEl.setAttribute("gltf-model", theMessage.data.url);
+                break;
 
-                case "text":
-                    // set a bunch of defaults
-                    entityEl.setAttribute('text', 'value', theMessage.data.text);
-                    entityEl.setAttribute('text', 'color', color);
-                    entityEl.setAttribute('side', "double");
-                    entityEl.setAttribute('align', "center");
-                    entityEl.setAttribute('anchor', "center");
-                    entityEl.setAttribute('width', 5); // the default for <a-text>
-                    break;
+            case "text":
+                // set a bunch of defaults
+                entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
+                entityEl.setAttribute('text', 'value', theMessage.data.text);
+                entityEl.setAttribute('text', 'color', color);
+                entityEl.setAttribute('text', 'side', "double");
+                entityEl.setAttribute('text', 'align', "center");
+                entityEl.setAttribute('text', 'anchor', "center");
+                break;
 
-                default:
-                    // handle arbitrary A-Frame geometry primitive types
-                    entityEl.setAttribute('geometry', 'primitive', type);
-                    entityEl.object3D.scale.set(xscale, yscale, zscale);
-                    entityEl.setAttribute('material', 'color', color);
-                    break;
+            default:
+                // handle arbitrary A-Frame geometry primitive types
+                entityEl.setAttribute('geometry', 'primitive', type);
+                entityEl.object3D.scale.set(xscale, yscale, zscale);
+                entityEl.setAttribute('material', 'color', color);
+                break;
             } // switch(type)
 
             if (type !== 'line' && type !== 'thickline') {
