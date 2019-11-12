@@ -60,7 +60,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 #### Color
 change only the color of the already-drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "material", "data": {"color": "#00FF00"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"material": {"color": "#00FF00"}}}'
 ```
 #### Transparency
 Say the cube has already been drawn. In a second command, something like this sets 50% transparency:
@@ -70,12 +70,12 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" :
 #### Move
 move the position of the already drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "position", "data": {"x": 2, "y": 2, "z": -1}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"position": {"x": 2, "y": 2, "z": -1}}}'
 ```
 #### Rotate
 rotate the already drawn cube; these are A-frame rotations in degrees
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "rotation", "data": {"x": 60, "y": 2, "z": 3}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"rotation": {"x": 60, "y": 2, "z": 3}}}'
 ```
 the quaternion (native) representation of rotation is a bit more tricky. The 4 parameters are X,Y,Z,W. Here are some simple examples:
   - `1,0,0,0`: rotate 180 degrees around X axis
@@ -159,7 +159,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" :
 First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "create", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "update", "type": "object", "attribute": "material", "data": {"src": "images/360falls.mp4", "side": "back"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "update", "type": "object", "data": {"material": {"src": "images/360falls.mp4", "side": "back"}}}'
 ```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
@@ -179,12 +179,12 @@ You might be wondering, why can't normal line just use the scale value to specif
 #### Events
 Add the "click-listener" event to a scene object; click-listener is a Component defined in `events.js`. This works for adding other, arbitrary Components. A non-empty message gets sent to the Component's `init:` function
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "attribute": "click-listener"}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"click-listener": "enable"}}'
 ```
 #### Background themes
 Adds one of many predefined backgrounds ( one of: [ none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris]) to the scene
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/env -m '{"object_id" : "env", "action": "update", "type": "object", "attribute": "environment", "data": {"preset": "arches"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/env -m '{"object_id" : "env", "action": "update", "type": "object", "data": {"environment": {"preset": "arches"}}}'
 ```
 #### Particles
 This requires importing yet another javascript code blob, see https://www.npmjs.com/package/aframe-particle-system-component  
@@ -196,7 +196,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/particle_1 -m '{"object_i
 #### Physics
 You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "attribute": "dynamic-body", "data": {"dynamic-body": "true"}}' 
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": "true"}}' 
 ```
 
 #### Parent/Child Linking (experimental)
