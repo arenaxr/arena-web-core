@@ -51,7 +51,8 @@ ls /var/www/html/models/nara
 scene.bin  scene.gltf  textures
 ``` 
  ## General Purpose AFrame using Subtopics
- Most of these take 10 comma separated digits which are x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%)
+ Most of these take JSON data where x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%).
+If you leave out any of these, defaults will be used: location(0,0,0), rotation(0,0,0,1), scale(1,1,1), color(white)
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
 ```
@@ -197,7 +198,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/particle_1 -m '{"object_i
 #### Physics
 You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": "true"}}' 
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": {"type": "dynamic"}}}' 
 ```
 
 #### Parent/Child Linking (experimental)
@@ -212,6 +213,7 @@ The naming convention for a scene object identifier such as `line_1` is that the
 It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
 Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth, but not necessarily in the right order. Maybe we use smaller property-update message format for only 'realtime' or 'live' viewers, rather than persist each and every update. This helps address a possible problem with single-property-update topic 'spam': don't retain -> no spam.
 
+## below have not been refactored for JSON pubsub topic/data format yet
 #### Scene (global) settings
 Some settings are available by setting attributes of the Scene element (see https://aframe.io/docs/0.9.0/core/scene.html) for example,
 turn on statistics:
