@@ -56,7 +56,7 @@ If you leave out any of these, defaults will be used: location(0,0,0), rotation(
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "create", "data": {"object_type": "cube", "position": {"x": 1, "y": 1, "z": -1}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}' -r
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "create", "type": "object", "data": {"object_type": "cube", "position": {"x": 1, "y": 1, "z": -1}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}' -r
 ```
 #### Color
 change only the color of the already-drawn cube
@@ -175,7 +175,7 @@ y": 4, "z": 4}, "color": "#00FF00"}}}'
 #### Thicklines
 "thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the lineWidth value specifies thickness, and multiple points can be specified at once, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,0,0 to 1,1,0 to 1,1,1
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/thickline_8 -m '{"object_id" : "thickline_8", "action": "create", "data": {"object_type": "thickline", "lineWidth": 11, "color": "#FF88EE", "path": "0 0 0, 1 0 0, 1 1 0, 1 1 1"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/thickline_8 -m '{"object_id" : "thickline_8", "action": "create", "type": "object", "data": {"object_type": "thickline", "lineWidth": 11, "color": "#FF88EE", "path": "0 0 0, 1 0 0, 1 1 0, 1 1 1"}}'
 ```
 You might be wondering, why can't normal lines just use the scale value to specify thickness? But this one goes to eleven! (really though, normal lines perform faster)
 #### Events
