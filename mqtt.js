@@ -493,17 +493,17 @@ function onMessageArrived(message, jsonMessage) {
                 break;
 
             case "line":
-                delete theMessage.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
+                delete theMessage.data.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
                 entityEl.setAttribute('line', theMessage.data);
                 break;
 
             case "thickline":
-                delete theMessage.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
+                delete theMessage.data.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
                 entityEl.setAttribute('meshline', theMessage.data);
                 break;
 
             case "particle":
-                delete theMessage.object_type; // pass only A-Frame digestible key-values to setAttribute()
+                delete theMessage.data.object_type; // pass only A-Frame digestible key-values to setAttribute()
                 entityEl.setAttribute('particle-system', theMessage.data);
                 break;
 
@@ -590,7 +590,7 @@ function onMessageArrived(message, jsonMessage) {
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-                                entityEl.setAttribute(attribute, value);
+                                entityEl.setAttribute(attribute, value, true);
                             }
                         }
                     } else {
@@ -662,7 +662,7 @@ function onMessageArrived(message, jsonMessage) {
                     break; // case "setParent"
                 }
                 default:
-                    console.log("EMPTY MESSAGE?", message.destinationName, message.payloadstring);
+                    console.log("EMPTY MESSAGE?", message.destinationName, message.payloadString);
                     break;
             }
         }
