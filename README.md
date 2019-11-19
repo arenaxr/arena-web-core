@@ -85,7 +85,7 @@ the quaternion (native) representation of rotation is a bit more tricky. The 4 p
 #### Animate
 animate rotation of the already drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}} }'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": true, "dur": 10000}} }'
 ```
 #### Remove
 remove the cube (-n means send a null message)
