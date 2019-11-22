@@ -58,27 +58,27 @@ If you leave out any of these, defaults will be used: location(0,0,0), rotation(
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "create", "type": "object", "data": {"object_type": "cube", "position": {"x": 1, "y": 1, "z": -1}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}' -r
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "create", "type": "object", "data": {"object_type": "cube", "position": {"x": 1, "y": 1, "z": -1}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}' -r
 ```
 #### Color
 change only the color of the already-drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"material": {"color": "#00FF00"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"material": {"color": "#00FF00"}}}'
 ```
 #### Transparency
 Say the cube has already been drawn. In a second command, something like this sets 50% transparency:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"material": {"transparent": true, "opacity": 0.5}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"material": {"transparent": true, "opacity": 0.5}}}'
 ```
 #### Move
 move the position of the already drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"position": {"x": 2, "y": 2, "z": -1}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"position": {"x": 2, "y": 2, "z": -1}}}'
 ```
 #### Rotate
 rotate the already drawn cube; these are in quaternions, not A-Frame degrees
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"rotation": {"x": 60, "y": 2, "z": 3}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"rotation": {"x": 60, "y": 2, "z": 3}}}'
 ```
 the quaternion (native) representation of rotation is a bit more tricky. The 4 parameters are X,Y,Z,W. Here are some simple examples:
   - `1,0,0,0`: rotate 180 degrees around X axis
@@ -87,129 +87,129 @@ the quaternion (native) representation of rotation is a bit more tricky. The 4 p
 #### Animate
 animate rotation of the already drawn cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": true, "dur": 10000}} }'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": true, "dur": 10000}} }'
 ```
 #### Remove
 remove the cube (-n means send a null message)
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "delete"}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "delete"}'
 ```
 #### Images
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "create", "data": {"object_type": "image", "position": {"x": 0, "y": 2, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "url": "images/north.png"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "create", "data": {"object_type": "image", "position": {"x": 0, "y": 2, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "url": "images/north.png"}}'
 ```
 Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modifications to materials that have the same bitmap ("src") parameter as some kind of performance boost. But a message like this (after one like the previous) can set the tiling (repeat 4 times along X and Y axes), if you maybe play with the bitmap:
 ((( we think maybe have to respecify the bitmap in same message??? subsequent replace img from new URL
  shows modified tiling
 )))
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": "4 4"}}}' # this sets the repeat values but they don't seem to show up in viewer
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": {"x":4, "y":4}}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": "4 4"}}}' # this sets the repeat values but they don't seem to show up in viewer
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": {"x":4, "y":4}}}}'
 ```
 URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
 To update the image of a named image already in the scene, use this syntax:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": {"material": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": {"material": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}}'
 ```
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "create", "data": {"object_type": "torusKnot", "color": "red", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "type": "object", "data": {"material": {"color": "blue"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "create", "data": {"object_type": "torusKnot", "color": "red", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "type": "object", "data": {"material": {"color": "blue"}}}'
 ```
 #### Models
 Instantiate a glTF v2.0 binary model (file extension .glb) from a URL. 
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/gltf-model_1 -m '{"object_id" : "gltf-model_1", "action": "create", "data": {"object_type": "gltf-model", "url": "models/Duck.glb", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/gltf-model_1 -m '{"object_id" : "gltf-model_1", "action": "create", "data": {"object_type": "gltf-model", "url": "models/Duck.glb", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
 ```
 #### Relocalize Camera
 Warp the camera with ID camera_5432 to a new coordinate (system). Values are x,y,z, (meters) x,y,z,w (quaternions)
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/ -m '{"object_id" : "camera_er1k_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 0.1, "y":0, "z":0, "w":1} }}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/ -m '{"object_id" : "camera_er1k_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 0.1, "y":0, "z":0, "w":1} }}'
 ```
 #### Text
 Add some red text that says "Hello World"
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" : "text_3", "action": "create", "data": {"color": "red", "text": "Hello world!", "object_type": "text", "position": {"x": 0, "y": 3, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/text_3 -m '{"object_id" : "text_3", "action": "create", "data": {"color": "red", "text": "Hello world!", "object_type": "text", "position": {"x": 0, "y": 3, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
 ```
 Change text color properties ( https://aframe.io/docs/0.9.0/components/text.html#properties )
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/text_3 -m '{"object_id" : "text_3", "action": "update", "type": "object", "data": {"text": {"color": "green"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/text_3 -m '{"object_id" : "text_3", "action": "update", "type": "object", "data": {"text": {"color": "green"}}}'
 ```
 #### Lights
 Persist a red light to the scene
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" : "light_3", "action": "create", "data": {"object_type": "light", "position": {"x": 1, "y": 1, "z": 1}, "rotation": {"x": 0.25, "y": 0.25, "z": 0, "w": 1}, "color": "#FF0000"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/light_3 -m '{"object_id" : "light_3", "action": "create", "data": {"object_type": "light", "position": {"x": 1, "y": 1, "z": 1}, "rotation": {"x": 0.25, "y": 0.25, "z": 0, "w": 1}, "color": "#FF0000"}}'
 ```
 Default is ambient light. To change type, or other light ( https://aframe.io/docs/0.9.0/components/light.html ) parameters, example: change to directional. Options: ambient, directional, hemisphere, point, spot
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/light_3 -m '{"object_id" : "light_3", "action": "update", "type": "object", "data": {"light": {"type": "directional"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/light_3 -m '{"object_id" : "light_3", "action": "update", "type": "object", "data": {"light": {"type": "directional"}}}'
 ```
 #### Sound
 Play toy piano sound from a URL when you click a cube: first draw the cube
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "create", "data": {"object_type": "cube", "position": {"x": 2, "y": 0, "z": -4}, "color": "#33AAEE"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_3 -m '{"object_id" : "cube_3", "action": "create", "data": {"object_type": "cube", "position": {"x": 2, "y": 0, "z": -4}, "color": "#33AAEE"}}'
 ```
 then add sound with click event listener:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}}'
 ```
 This lets only you hear the piano. To share the piano click events with others viewing the scene, add an event-listener Component:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"click-listener": "ok"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"click-listener": "ok"}}'
 ```
 #### 360 Video
 First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "create", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/sphere_vid -m '{"object_id" : "sphere_vid", "action": "update", "type": "object", "data": {"material": {"src": "images/360falls.mp4", "side": "back"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/sphere_vid -m '{"object_id" : "sphere_vid", "action": "create", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/sphere_vid -m '{"object_id" : "sphere_vid", "action": "update", "type": "object", "data": {"material": {"src": "images/360falls.mp4", "side": "back"}}}'
 ```
 #### Lines
 Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/line_1 -m '{"object_id" : "line_1", "action": "create", "data": {"object_type": "line", "start": {"x": 2, "y": 2, "z": 2}, "end": {"x": 3, "y": 3, "z": 3}, "color": "#CE00FF"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/line_1 -m '{"object_id" : "line_1", "action": "create", "data": {"object_type": "line", "start": {"x": 2, "y": 2, "z": 2}, "end": {"x": 3, "y": 3, "z": 3}, "color": "#CE00FF"}}'
 ```
 Extend the line with a new segment, colored green
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/line_1 -m '{"object_id" : "line_1", "action": "update", "type": "object", "data": {"line__2": {"start": {"x": 3, "y": 3, "z": 3}, "end": {"x": 4, "
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/line_1 -m '{"object_id" : "line_1", "action": "update", "type": "object", "data": {"line__2": {"start": {"x": 3, "y": 3, "z": 3}, "end": {"x": 4, "
 y": 4, "z": 4}, "color": "#00FF00"}}}'
 ```
 #### Thicklines
 "thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the lineWidth value specifies thickness, and multiple points can be specified at once, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,0,0 to 1,1,0 to 1,1,1
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/thickline_8 -m '{"object_id" : "thickline_8", "action": "create", "type": "object", "data": {"object_type": "thickline", "lineWidth": 11, "color": "#FF88EE", "path": "0 0 0, 1 0 0, 1 1 0, 1 1 1"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/thickline_8 -m '{"object_id" : "thickline_8", "action": "create", "type": "object", "data": {"object_type": "thickline", "lineWidth": 11, "color": "#FF88EE", "path": "0 0 0, 1 0 0, 1 1 0, 1 1 1"}}'
 ```
 You might be wondering, why can't normal lines just use the scale value to specify thickness? But this one goes to eleven! (really though, normal lines perform faster) To update a "thickline" takes a special syntax because thicklines are really "meshline"s:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/thickline_8 -m '{"object_id": "thickline_8", "action": "update", "type": "object", "data": {"meshline": {"lineWidth": 11, "color": "#FFFFFF", "path": "0 0 0, 0 0 1"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/thickline_8 -m '{"object_id": "thickline_8", "action": "update", "type": "object", "data": {"meshline": {"lineWidth": 11, "color": "#FFFFFF", "path": "0 0 0, 0 0 1"}}}'
 ```
 #### Events
 Add the "click-listener" event to a scene object; click-listener is a Component defined in `events.js`. This works for adding other, arbitrary Components. A non-empty message gets sent to the Component's `init:` function
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"click-listener": "enable"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"click-listener": "enable"}}'
 ```
 #### Background themes
 Adds one of many predefined backgrounds ( one of: [ none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris]) to the scene
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/env -m '{"object_id" : "env", "action": "update", "type": "object", "data": {"environment": {"preset": "arches"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/env -m '{"object_id" : "env", "action": "update", "type": "object", "data": {"environment": {"preset": "arches"}}}'
 ```
 #### Particles
 This requires importing yet another javascript code blob, see https://www.npmjs.com/package/aframe-particle-system-component  
 Done in two parts; first render the holder object for particles, then populate it
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/particle_1 -m '{"object_id" : "particle_1", "action": "create", "attribute": "particle-system", "data": {"object_type": "particle", "preset": "snow"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/particle_1 -m '{"object_id" : "particle_1", "action": "create", "attribute": "particle-system", "data": {"object_type": "particle", "preset": "snow"}}'
 ```
 
 #### Physics
 You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": {"type": "dynamic"}}}' 
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": {"type": "dynamic"}}}' 
 ```
 
 #### Parent/Child Linking (experimental)
 There's support to attach already-existing parent and child scene objects. For example if parent object is box_1 and child object is sphere_2, the command would look like:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/refactor/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "setChild", "data": {"child": "sphere_2"}}' 
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "setChild", "data": {"child": "sphere_2"}}' 
 ```
 But somehow attaching child objects seems to cause them to forget certain parameters, like scale. Also strangely, or maybe not, modifying parent parameters affects the child as well. Scaling the parent by 2 scales the child as well.
 
