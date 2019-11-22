@@ -96,15 +96,8 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "
 ```
 #### Images
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "create", "data": {"object_type": "image", "position": {"x": 0, "y": 2, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "url": "images/north.png"}}'
-```
-Tiling images is a bit tricky; a still-not-fixed A-Frame bug rejects modifications to materials that have the same bitmap ("src") parameter as some kind of performance boost. But a message like this (after one like the previous) can set the tiling (repeat 4 times along X and Y axes), if you maybe play with the bitmap:
-((( we think maybe have to respecify the bitmap in same message??? subsequent replace img from new URL
- shows modified tiling
-)))
-```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": "4 4"}}}' # this sets the repeat values but they don't seem to show up in viewer
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": { "material": {"repeat": {"x":4, "y":4}}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/drone/image_floor -m '{"object_id": "image_floor", "action": "create", "data": {"object_type": "image", "position": {"x":0, "y": 0, "z": 0.4}, "rotation": {"x": -0\
+.7, "y": 0, "z": 0, "w": 0.7}, "url": "images/floor.png", "scale": {"x":12, "y":12, "z": 2}, "material": {"repeat": {"x":4, "y":4}}}}' -r
 ```
 URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
 To update the image of a named image already in the scene, use this syntax:
@@ -146,17 +139,10 @@ Default is ambient light. To change type, or other light ( https://aframe.io/doc
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/light_3 -m '{"object_id" : "light_3", "action": "update", "type": "object", "data": {"light": {"type": "directional"}}}'
 ```
 #### Sound
-Play toy piano sound from a URL when you click a cube: first draw the cube
+Play toy piano sound from a URL when you click a cube. Sets click-listener Component, waveform URL, and sound attribute:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_3 -m '{"object_id" : "cube_3", "action": "create", "data": {"object_type": "cube", "position": {"x": 2, "y": 0, "z": -4}, "color": "#33AAEE"}}'
-```
-then add sound with click event listener:
-```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/A1.wav)", "on": "mousedown"}}}'
-```
-This lets only you hear the piano. To share the piano click events with others viewing the scene, add an event-listener Component:
-```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_3 -m '{"object_id" : "cube_3", "action": "update", "type": "object", "data": {"click-listener": "ok"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/piano/box_asharp -m '{"object_id" : "box_asharp", "action": "create", "data": {"object_type": "cube", "position": {"x": 2.5, "y": 0.25, "z": -5}, "scale": {"x": 0.\
+8, "y":1, "z":1}, "color": "#000000", "sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/Asharp1.wav)", "on": "mousedown"}, "click-listener": ""}}' -r
 ```
 #### 360 Video
 First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
