@@ -2,11 +2,11 @@
 #
 # MQTT message format: x,y,z,rotX,rotY,rotZ,rotW,scaleX,scaleY,scaleZ,#colorhex,on/off
 
-import socket,threading,SocketServer,time,random,os,sys
+import socket,threading,SocketServer,time,random,os,sys,json
 import paho.mqtt.publish as publish
 
 HOST="oz.andrew.cmu.edu"
-TOPIC="/topic/transCubes"
+TOPIC="realm/s/transCubes"
 
 def randmove():
     rando=random.random() * 10 - 5
@@ -56,15 +56,47 @@ def randobj():
     return "cube"
 
 def do(name, randx, randy, randz, scalex, scaley, scalez, color):
-    MESSAGE= name+","+"{0:0.3f}".format(randx)+','+"{0:0.3f}".format(randy)+','+"{0:0.3f}".format(randz)+",0,0,0,0,"+scalex+","+scaley+","+scalez+",#"+color
-    messages.append(MESSAGE)
+    #MESSAGE= name+","+"{0:0.3f}".format(randx)+','+"{0:0.3f}".format(randy)+','+"{0:0.3f}".format(randz)+",0,0,0,0,"+scalex+","+scaley+","+scalez+",#"+color
+    MESSAGE = {
+        "object_id": name,
+        "action": "create",
+        "data": {
+            "object_type": "cube",
+            "position": {
+                "x": "{0:0.3f}".format(randx),
+                "y": "{0:0.3f}".format(randy),
+                "z": "{0:0.3f}".format(randz)
+            },
+            "scale": {
+                "x": scalex,
+                "y": scaley,
+                "z": scalez
+            },
+            "color": "#" + color
+        }
+    }
+
+    MESSAGE2 = {
+        "object_id": name,
+        "action": "update",
+        "type": "object",
+#        "attribute": "material",
+        "data": {
+            "material": {"transparent": True, "opacity": 0.5}
+        }
+    }
+
     print(MESSAGE)
-    publish.single(TOPIC+'/'+name, MESSAGE+",on", hostname=HOST, retain=False)
-    publish.single(TOPIC+'/'+name+"/material", "transparent: true; opacity: 0.5", hostname=HOST, retain=False)
+    print(MESSAGE2)
+
+    messages.append(MESSAGE)
+    publish.single(TOPIC+'/'+name, json.dumps(MESSAGE), hostname=HOST, retain=False)
+    publish.single(TOPIC+'/'+name, json.dumps(MESSAGE2), hostname=HOST, retain=False)
 
 messages = []
 counter=0
 while (True):
+    # draw 4 symmetrical pieces
     name = "cube_"+str(counter)
     counter+=1
     randx = randmove()
@@ -87,22 +119,37 @@ while (True):
     do(name+'b', randx, -randy, randz, scalex, scaley, scalez, color)
     do(name+'c', -randx, -randy, randz, scalex, scaley, scalez, color)
 
-    #os.system("mosquitto_pub -h " + HOST + " -t " + TOPIC + "/" + name + " -m " + MESSAGE + " -r");
+    # delete 4 symmetrical pieces from history
     if (len(messages) >= 100):
         pop=messages.pop(0)
-        splits=pop.split(',')
-        name=splits[0]
-        publish.single(TOPIC+'/'+name, "",hostname=HOST, retain=False)
+        name=pop["object_id"]
+        MESSAGE = {
+            "object_id": name,
+            "action": "delete"
+            }
+        publish.single(TOPIC+'/'+name, json.dumps(MESSAGE),hostname=HOST, retain=False);
+
         pop=messages.pop(0)
-        splits=pop.split(',')
-        name=splits[0]
-        publish.single(TOPIC+'/'+name, "",hostname=HOST, retain=False)
+        name=pop["object_id"]
+        MESSAGE = {
+            "object_id": name,
+            "action": "delete"
+            }
+        publish.single(TOPIC+'/'+name, json.dumps(MESSAGE),hostname=HOST, retain=False);
+
         pop=messages.pop(0)
-        splits=pop.split(',')
-        name=splits[0]
-        publish.single(TOPIC+'/'+name, "",hostname=HOST, retain=False)
+        name=pop["object_id"]
+        MESSAGE = {
+            "object_id": name,
+            "action": "delete"
+            }
+        publish.single(TOPIC+'/'+name, json.dumps(MESSAGE),hostname=HOST, retain=False);
         pop=messages.pop(0)
-        splits=pop.split(',')
-        name=splits[0]
-        publish.single(TOPIC+'/'+name, "",hostname=HOST, retain=False)
+        name=pop["object_id"]
+        MESSAGE = {
+            "object_id": name,
+            "action": "delete"
+            }
+        publish.single(TOPIC+'/'+name, json.dumps(MESSAGE),hostname=HOST, retain=False);
+
     time.sleep(0.1)
