@@ -1,1 +1,0 @@
-../camcleanup.sh
