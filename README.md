@@ -11,6 +11,10 @@ A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose a
 
 ## INSTALLATION
 Step one is to clone this repo into the default web content folder on a linux machine runing Apache, e.g. in `/var/www/html`.
+**AFrame is added as a submodule, use the following command to clone:**
+
+`git clone --recurse-submodules git@github.com:conix-center/ARENA-core.git`
+
 Step two, you'll also probably want to be running the Mosquitto MQTT server. In addition, it should be a version that supports websockets. To get one with this feature, and without a known crash bug, we recommend using version 1.6.3 and building with websockets enabled, e.g. in `config.mk` set `WITH_WEBSOCKETS:=yes`.
 
 ### Local Instance Installation with docker
