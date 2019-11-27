@@ -85,7 +85,7 @@ function onConnect() {
     let myMsg = {
         object_id: globals.camName,
         action: 'create',
-        persist: true,
+        persist: false,
         data: {
             object_type: 'camera',
             position: {x: 0, y: 1.6, z: 0},
@@ -96,13 +96,14 @@ function onConnect() {
 
     publish(globals.outputTopic + globals.camName, myMsg);
     console.log("my-camera element", sceneObjects.myCamera);
+    console.log("my-camera name", globals.camName);
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
         //console.log(e.detail);
 
         let msg = {
             object_id: globals.camName,
-            action: 'update',
+            action: 'create',
             type: 'object',
             data: {
                 object_type: 'camera',
@@ -278,17 +279,19 @@ function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
     let theMessage = {};
     if (message) {
-        console.log(message.destinationName, message.payloadString);
+        //console.log(message.destinationName, message.payloadString);
         if (!isJson(message.payloadString)) {
             return;
         }
         theMessage = JSON.parse(message.payloadString);
     } else if (jsonMessage) {
         theMessage = jsonMessage;
+	if (theMessage.data.object_type == "camera") // cull deadheads: ignore camera messages from DB
+	    return;
     }
-    console.log(theMessage.object_id);
+    //console.log(theMessage.object_id);
 
-    switch (theMessage.action) {
+    switch (theMessage.action) { // clientEvent, create, delete, update
         case "clientEvent": {
             const entityEl = sceneObjects[theMessage.object_id];
             const myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
@@ -334,12 +337,21 @@ function onMessageArrived(message, jsonMessage) {
             break;
         }
         case "create": {
+            const name = theMessage.object_id;
+	    delete theMessage.object_id;
+
+            if (name === globals.camName) {
+                return;
+            }
+
             let x, y, z, xrot, yrot, zrot, wrot, xscale, yscale, zscale, color;
-            // parse out JSON
+	    // Strategy: remove JSON for core attributes (position, rotation, color, scale) after parsing
+	    // what remains are attribute-value pairs that can be set iteratively
             if (theMessage.data.position) {
                 x = theMessage.data.position.x;
                 y = theMessage.data.position.y;
                 z = theMessage.data.position.z;
+		delete theMessage.data.position;
             } else { // useful defaults if unspecified
                 x = 0;
                 y = 0;
@@ -351,6 +363,7 @@ function onMessageArrived(message, jsonMessage) {
                 yrot = theMessage.data.rotation.y;
                 zrot = theMessage.data.rotation.z;
                 wrot = theMessage.data.rotation.w;
+		delete theMessage.data.rotation;
             } else { // useful defaults
                 xrot = 0;
                 yrot = 0;
@@ -362,6 +375,7 @@ function onMessageArrived(message, jsonMessage) {
                 xscale = theMessage.data.scale.x;
                 yscale = theMessage.data.scale.y;
                 zscale = theMessage.data.scale.z;
+		delete theMessage.data.scale;
             } else { // useful defaults
                 xscale = 1;
                 yscale = 1;
@@ -370,11 +384,13 @@ function onMessageArrived(message, jsonMessage) {
 
             if (theMessage.data.color) {
                 color = theMessage.data.color;
+		delete theMessage.data.color;
             } else {
                 color = "white";
             }
 
             let type = theMessage.data.object_type;
+	    delete theMessage.data.object_type;
             if (type === "cube") {
                 type = "box";
             }
@@ -384,8 +400,6 @@ function onMessageArrived(message, jsonMessage) {
             }
             // also different
 
-            //var name = type+"_"+theMessage.object_id;
-            const name = theMessage.object_id;
             const quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
             const euler = new THREE.Euler();
             const foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
@@ -493,17 +507,15 @@ function onMessageArrived(message, jsonMessage) {
                 break;
 
             case "line":
-                delete theMessage.data.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
                 entityEl.setAttribute('line', theMessage.data);
                 break;
 
             case "thickline":
-                delete theMessage.data.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
                 entityEl.setAttribute('meshline', theMessage.data);
+		delete theMessage.data.thickline;
                 break;
 
             case "particle":
-                delete theMessage.data.object_type; // pass only A-Frame digestible key-values to setAttribute()
                 entityEl.setAttribute('particle-system', theMessage.data);
                 break;
 
@@ -517,6 +529,7 @@ function onMessageArrived(message, jsonMessage) {
                 // set a bunch of defaults
                 entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
                 entityEl.setAttribute('text', 'value', theMessage.data.text);
+		delete theMessage.data.text;
                 entityEl.setAttribute('text', 'color', color);
                 entityEl.setAttribute('text', 'side', "double");
                 entityEl.setAttribute('text', 'align', "center");
@@ -536,6 +549,13 @@ function onMessageArrived(message, jsonMessage) {
                 entityEl.object3D.position.set(x, y, z);
                 entityEl.object3D.rotation.set(vec.x, vec.y, vec.z);
             }
+
+	    // what remains are attributes for special cases; iteratively set them
+            for (const [attribute, value] of Object.entries(theMessage.data)) {
+		console.log("setting attr", attribute);
+                entityEl.setAttribute(attribute, value);
+	    }
+
             break;
         }
         case "update": {
@@ -582,15 +602,19 @@ function onMessageArrived(message, jsonMessage) {
                     if (entityEl) {
                         for (const [attribute, value] of Object.entries(theMessage.data)) {
                             if (attribute === "rotation") {
+
                                 let quat = new THREE.Quaternion(value.x, value.y, value.z, value.w);
                                 let euler = new THREE.Euler();
                                 let foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
                                 let vec = foo.toVector3();
                                 entityEl.object3D.rotation.set(vec.x, vec.y, vec.z);
+
+				// this SHOULD work entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w);
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-                                entityEl.setAttribute(attribute, value, true);
+				console.log("setting attribute: ", attribute);
+                                entityEl.setAttribute(attribute, value);
                             }
                         }
                     } else {
@@ -662,9 +686,9 @@ function onMessageArrived(message, jsonMessage) {
                     break; // case "setParent"
                 }
                 default:
-                    console.log("EMPTY MESSAGE?", message.destinationName, message.payloadString);
-                    break;
-            }
-        }
-    }
+                console.log("EMPTY MESSAGE?", message.destinationName, message.payloadString);
+                break;
+            } // switch (theMessage.type)
+        } // case "update":
+    } // switch (theMessage.action)
 }
