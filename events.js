@@ -149,6 +149,63 @@ function setClickData(evt) {
 }
 
 
+AFRAME.registerComponent('impulse', {
+    schema: {
+	on: {default: ''}, // event listener
+	force: {
+	    type: 'vec3',
+	    default: { x: 1, y: 1, z: 1 }
+	},
+	position: {
+	    type: 'vec3',
+	    default: { x: 1, y: 1, z: 1 }
+	}
+    },
+    
+    multiple: true,
+    
+    update: function(oldData) {
+	// this in fact only gets called when the component that it is - gets updated
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
+
+	if (data.on) { // we have an event?
+	    el.addEventListener(data.on, function () {
+                if (this.body) { // has physics
+		    const force = new THREE.Vector3(data.impulse.force);  // 1 50 1
+		    const pos = new THREE.Vector3(data.impulse.position); // 1 1 1
+		    this.body.applyImpulse(force, pos);
+                }
+	    });
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data.message);
+	}
+    },
+
+    init: function () {
+	console.log("init impulse component message:", this.data.message);
+	var self = this;
+    },
+    pause: function () {
+	//this.removeEventListeners()
+    },
+    play: function () {
+	//this.addEventListeners()
+    },
+    // handle component removal (why can't it just go away?)
+    remove: function () {
+	var data = this.data;
+	var el = this.el;
+
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
+    }
+})
+
+
 // Component: listen for clicks, call defined function on event evt
 
 AFRAME.registerComponent('click-listener', {
@@ -209,11 +266,14 @@ AFRAME.registerComponent('click-listener', {
                 //		this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
                 // this example pushes the object with 50 in the +Y direction
                 // mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
-                if (this.body) {
-                    const foo = new THREE.Vector3(1, 50, 1);
-                    const bod = new THREE.Vector3(1, 1, 1);
-                    this.body.applyImpulse(foo, bod);
-                }
+
+		/*
+                    if (this.body) { // has physics
+			const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
+			const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
+			this.body.applyImpulse(foo, bod);
+                    }
+*/
                 const clicker = evt.detail.clicker;
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
