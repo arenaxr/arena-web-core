@@ -58,7 +58,7 @@ scene.bin  scene.gltf  textures
 (See below for syntax for playing animations) Models with .gltf extension are text files that can be edited. If you search for 'animation' then search for 'name' you can see the names of animations available to use as arguments.
  ## General Purpose AFrame using Subtopics
  Most of these take JSON data where x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%).
-If you leave out any of these, defaults will be used: location(0,0,0), rotation(0,0,0,1), scale(1,1,1), color(white)
+If you leave out any of these, defaults will be used: location(0,0,0), rotation(0,0,0,1), scale(1,1,1), color(white). Another general setting is whether or not to persist an object to the ARENA scene database, determined by `"persist": true`
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
 ```
