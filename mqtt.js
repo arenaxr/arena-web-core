@@ -66,8 +66,6 @@ function onConnect() {
     sceneObjects.scene = document.querySelector('a-scene');
     sceneObjects.env = document.getElementById('env');
     sceneObjects.boxObj = document.getElementById('boxObj');
-    sceneObjects.fallBox = document.getElementById('fallBox');
-    sceneObjects.fallBox2 = document.getElementById('fallBox2');
     sceneObjects.myCamera = document.getElementById('my-camera');
 
     if (sceneObjects.env) {
@@ -95,8 +93,8 @@ function onConnect() {
     };
 
     publish(globals.outputTopic + globals.camName, myMsg);
-    console.log("my-camera element", sceneObjects.myCamera);
-    console.log("my-camera name", globals.camName);
+    //console.log("my-camera element", sceneObjects.myCamera);
+    //console.log("my-camera name", globals.camName);
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
         //console.log(e.detail);
@@ -294,9 +292,13 @@ function onMessageArrived(message, jsonMessage) {
     switch (theMessage.action) { // clientEvent, create, delete, update
         case "clientEvent": {
             const entityEl = sceneObjects[theMessage.object_id];
-            const myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
-                parseFloat(theMessage.data.position.y),
-                parseFloat(theMessage.data.position.z));
+	    let myPoint = '';
+	    if (theMessage.data.position)
+		myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
+					    parseFloat(theMessage.data.position.y),
+					    parseFloat(theMessage.data.position.z));
+	    else
+		console.log("Error: theMessage.data.position not defined", theMessage);
             const clicker = theMessage.data.source;
             switch (theMessage.type) {
                 case "mousedown":
@@ -523,6 +525,7 @@ function onMessageArrived(message, jsonMessage) {
                 //entityEl.object3D.scale.set(xscale, yscale, zscale);
                 entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
                 entityEl.setAttribute("gltf-model", theMessage.data.url);
+		delete theMessage.data.url;
                 break;
 
             case "text":
@@ -552,7 +555,7 @@ function onMessageArrived(message, jsonMessage) {
 
 	    // what remains are attributes for special cases; iteratively set them
             for (const [attribute, value] of Object.entries(theMessage.data)) {
-		console.log("setting attr", attribute);
+		//console.log("setting attr", attribute);
                 entityEl.setAttribute(attribute, value);
 	    }
 
@@ -613,7 +616,7 @@ function onMessageArrived(message, jsonMessage) {
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-				console.log("setting attribute: ", attribute);
+				//console.log("setting attribute: ", attribute);
                                 entityEl.setAttribute(attribute, value);
                             }
                         }

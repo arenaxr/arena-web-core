@@ -6,8 +6,8 @@
     <title>ARENA</title>
     <meta name="description" content="Refactoring the ARENA">
     <!-- the AFrame script library (minified) -->
-    <!--<script src="aframe/dist/aframe-master.js"></script>-->
-    <script src="aframe/dist/aframe-v0.9.2.js"></script>
+    <script src="aframe/dist/aframe-master.js"></script>
+    <!-- <script src="aframe/dist/aframe-v0.9.2.js"></script> -->
 
     <!-- aframe-extras gives ability to play other model formats
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script> 
@@ -59,13 +59,12 @@
 	<video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
       <!-- ground plane -->
       <a-plane static-body position="0 -0.1 0" id="groundPlane" color="#FFAAEE" transparent="true" opacity="0.01" height="30" width="30" rotation="-90 0 0"></a-plane>
-<!-- load these dynamically now from MQTT -->
-      <a-entity click-listener impulse="on: mousedown; force: 1 50 1; position: 1 1 1" dynamic-body="type: dynamic"  position="0 4 -4" rotation="0 0 0" scale="0.5 0.5 0.5" id="fallBox" name="afallBox" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+      <!-- load these dynamically now from MQTT -->
+      <!-- <a-entity click-listener id="fallBox" name="afallBox" impulse="on: mouseup; force: 1 50 1; position: 1 1 1" dynamic-body="type: dynamic" position="0 4 -4" rotation="0 0 0" scale="0.5 0.5 0.5" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"> 
       </a-entity>
-<!--
-      <a-entity click-listener dynamic-body="type: dynamic"  position="0.1 4.5 -4" rotation="0 0 0" scale="0.5 0.5 0.5" id="fallBox2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+      <a-entity click-listener id="fallBox2" impulse="on: mouseup; force: 1 50 1; position: 1 1 1" dynamic-body="type: dynamic"  position="0.1 4.5 -4" rotation="0 0 0" scale="0.5 0.5 0.5" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
       </a-entity>
--->
+      -->
 
       <!--  <a-sky radius="5000" color="#000000"></a-sky> -->
 
@@ -87,7 +86,8 @@
 	</a-entity>
       </a-entity>
 
-      <!-- commented out vive-listener component in below -->
+      <!-- vive-listener component (in events.js) gets all controller buttons as events -->
+      <!-- vive-pose-listener component (in events.js) gets controller pose in real time -->
       <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
       <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
 

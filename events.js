@@ -141,17 +141,26 @@ function coordsToText(c) {
 }
 
 function setClickData(evt) {
-    return {
-        x: evt.detail.intersection.point.x.toFixed(3),
-        y: evt.detail.intersection.point.y.toFixed(3),
-        z: evt.detail.intersection.point.z.toFixed(3)
-    };
+    if (evt.detail.intersection)
+	return {
+            x: evt.detail.intersection.point.x.toFixed(3),
+            y: evt.detail.intersection.point.y.toFixed(3),
+            z: evt.detail.intersection.point.z.toFixed(3)
+	}
+    else {
+	console.log("WARN: empty coords data");
+	return {
+	    x: 0,
+	    y: 0,
+	    z:0
+	}
+    }
 }
 
 
 AFRAME.registerComponent('impulse', {
     schema: {
-	on: {default: ''}, // event listener
+	on: {default: ''}, // event to listen 'on'
 	force: {
 	    type: 'vec3',
 	    default: { x: 1, y: 1, z: 1 }
@@ -163,30 +172,39 @@ AFRAME.registerComponent('impulse', {
     },
     
     multiple: true,
-    
+
+    init: function () {
+	console.log("init impulse component message:", this.data);
+	var self = this;
+    },
+
     update: function(oldData) {
+	console.log("impulse Component UPDATE CALLED");
 	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
 	var data = this.data; // Component property values.
 	var el = this.el;     // Reference to the component's entity.
 
 	if (data.on) { // we have an event?
-	    el.addEventListener(data.on, function () {
-                if (this.body) { // has physics
-		    const force = new THREE.Vector3(data.impulse.force);  // 1 50 1
-		    const pos = new THREE.Vector3(data.impulse.position); // 1 1 1
-		    this.body.applyImpulse(force, pos);
-                }
+	    el.addEventListener(data.on, function (args) {
+		console.log("args.detail:", args.detail);
+
+		if (args.detail.clicker) { // our synthetic event from MQTT
+                    if (el.body) { // has physics = dynamic-body Component
+			// e.g. <a-entity impulse="on: mouseup; force: 1 50 1; position: 1 1 1" ...>
+			const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
+			const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+			el.body.applyImpulse(force, pos);
+                    }
+		}
+
 	    });
 	} else {
 	    // `event` not specified, just log the message.
-	    console.log(data.message);
+	    console.log(data);
 	}
     },
-
-    init: function () {
-	console.log("init impulse component message:", this.data.message);
-	var self = this;
-    },
+    
     pause: function () {
 	//this.removeEventListeners()
     },
@@ -210,6 +228,8 @@ AFRAME.registerComponent('impulse', {
 
 AFRAME.registerComponent('click-listener', {
     init: function () {
+	console.log("click-listener Component init");
+	console.log("mousedown init");
         this.el.addEventListener('mousedown', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -224,7 +244,7 @@ AFRAME.registerComponent('click-listener', {
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
                 //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-                console.log(this.id + ' mousedown at: ', evt.detail.intersection.point, 'by', globals.camName);
+                console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
@@ -235,12 +255,15 @@ AFRAME.registerComponent('click-listener', {
                 }
                 const clicker = evt.detail.clicker;
 
+		/* Debug Conix Box
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
+		*/
             }
         });
 
+	console.log("mouseup init");
         this.el.addEventListener('mouseup', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -256,7 +279,7 @@ AFRAME.registerComponent('click-listener', {
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
 
-                console.log(this.id + ' mouseup at: ', evt.detail.intersection.point, 'by', globals.camName);
+                console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', globals.camName);
                 // example of warping to a URL
                 //if (this.id === "Box-obj")
                 //    window.location.href = 'http://conix.io/';
@@ -273,11 +296,14 @@ AFRAME.registerComponent('click-listener', {
 			const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
 			this.body.applyImpulse(foo, bod);
                     }
-*/
+		*/
+
+		/* DEBUG Conix box text
                 const clicker = evt.detail.clicker;
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
+		*/
             }
         });
 
@@ -294,16 +320,19 @@ AFRAME.registerComponent('click-listener', {
                     data: {position: coordsData, source: globals.camName}
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
-                console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
+                //console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+
+		/* Debug Conix box text
                 const clicker = evt.detail.clicker;
 
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
+		*/
             }
         });
 
@@ -320,16 +349,19 @@ AFRAME.registerComponent('click-listener', {
                     data: {position: coordsData, source: globals.camName}
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
-                console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
+                //console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+
+		/* DEBUG Conix box text
                 const clicker = evt.detail.clicker;
 
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
+		*/
             }
         });
     }
