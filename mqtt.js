@@ -510,10 +510,12 @@ function onMessageArrived(message, jsonMessage) {
 
             case "line":
                 entityEl.setAttribute('line', theMessage.data);
+                entityEl.setAttribute('meshline', 'color', color);
                 break;
 
             case "thickline":
                 entityEl.setAttribute('meshline', theMessage.data);
+                entityEl.setAttribute('meshline', 'color', color);
 		delete theMessage.data.thickline;
                 break;
 
