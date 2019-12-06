@@ -149,23 +149,21 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/piano/box_asharp -m '{"object_id" 
 8, "y":1, "z":1}, "color": "#000000", "sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/Asharp1.wav)", "on": "mousedown"}, "click-listener": ""}}' -r
 ```
 #### 360 Video
-First draw a sphere, then set the texture src to be an equirectangular video, on the 'back' (inside):
+Draw a sphere, set the texture src to be an equirectangular video, on the 'back' (inside):
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/sphere_vid -m '{"object_id" : "sphere_vid", "action": "create", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}}}'
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/sphere_vid -m '{"object_id" : "sphere_vid", "action": "update", "type": "object", "data": {"material": {"src": "images/360falls.mp4", "side": "back"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/waterfall/sphere_vid -m '{"object_id" : "sphere_vid", "action": "create", "type": "object", "data": {"object_type": "sphere", "scale": {"x": 200, "y": 200, "z": 200}, "rotation": {"x": 0, "y": 0.7, "z":0, "w": 0.7}, "color": "#808080", "material": {"src": "images/360falls.mp4", "side": "back"}}}'
 ```
 #### Lines
-Draw a purple line from (2,2,2) to (3,3,3); uses the first 6 parameters
+Draw a purple line from (2,2,2) to (3,3,3)
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/line_1 -m '{"object_id" : "line_1", "action": "create", "data": {"object_type": "line", "start": {"x": 2, "y": 2, "z": 2}, "end": {"x": 3, "y": 3, "z": 3}, "color": "#CE00FF"}}'
 ```
 Extend the line with a new segment, colored green
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/line_1 -m '{"object_id" : "line_1", "action": "update", "type": "object", "data": {"line__2": {"start": {"x": 3, "y": 3, "z": 3}, "end": {"x": 4, "
-y": 4, "z": 4}, "color": "#00FF00"}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/line_1 -m '{"object_id" : "line_1", "action": "update", "type": "object", "data": {"line__2": {"start": {"x": 3, "y": 3, "z": 3}, "end": {"x": 4, "y": 4, "z": 4}, "color": "#00FF00"}}}'
 ```
 #### Thicklines
-"thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the lineWidth value specifies thickness, and multiple points can be specified at once, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,0,0 to 1,1,0 to 1,1,1
+"thickline" (to improve openpose skeleton rendering visibility) - works like a line, but the lineWidth value specifies thickness, and multiple points can be specified at once, e.g. draw a pink line 11 pixels thick from 0,0,0 to 1,0,0 to 1,1,0 to 1,1,1. The shorthand syntax for coordinates is a bonus feature of lower level code; extending it for the rest of ARENA commands remains as an enhancement.
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/thickline_8 -m '{"object_id" : "thickline_8", "action": "create", "type": "object", "data": {"object_type": "thickline", "lineWidth": 11, "color": "#FF88EE", "path": "0 0 0, 1 0 0, 1 1 0, 1 1 1"}}'
 ```
@@ -184,10 +182,13 @@ Adds one of many predefined backgrounds ( one of: [ none, default, contact, egyp
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/env -m '{"object_id" : "env", "action": "update", "type": "object", "data": {"environment": {"preset": "arches"}}}'
 ```
 #### Particles
-This requires importing yet another javascript code blob, see https://www.npmjs.com/package/aframe-particle-system-component  
-Done in two parts; first render the holder object for particles, then populate it
+This requires importing yet another javascript code blob, see https://github.com/IdeaSpaceVR/aframe-particle-system-component  
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/particle_1 -m '{"object_id" : "particle_1", "action": "create", "attribute": "particle-system", "data": {"object_type": "particle", "preset": "snow"}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/er1k/particle_1 -m '{"object_id" : "particle_1", "action": "create", "data": {"object_type": "particle", "preset": "snow"}}'
+```
+Turn off:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/er1k/particle_1 -m '{"object_id" : "particle_1", "action": "create", "data": {"object_type": "particle", "preset": "snow", "enabled": false}}'
 ```
 
 #### Physics
