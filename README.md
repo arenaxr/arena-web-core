@@ -119,6 +119,12 @@ Instantiate a glTF v2.0 binary model (file extension .glb) from a URL.
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/gltf-model_1 -m '{"object_id" : "gltf-model_1", "action": "create", "data": {"object_type": "gltf-model", "url": "models/Duck.glb", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
 ```
+### Animating GLTF Models
+To animate a GLTF model (see above for how to find animation names), set the animation-mixer parameter, e.g:
+```
+mosquitto_pub -t realm/s/northstar/gltf-model_3-animation -h oz.andrew.cmu.edu -m '{"object_id": "gltf-model_3", "action": "update", "type": "object", "data": {"animation-mixer": {"clip": "*"}}}
+```
+The asterisk means play all animations, and works better in some situations, where other times the name of a specific animation in the GLTF file works (or maybe several in sequence).
 #### Relocalize Camera
 Warp the camera with ID camera_5432 to a new coordinate (system). Values are x,y,z, (meters) x,y,z,w (quaternions)
 ```
