@@ -7,7 +7,10 @@ It was then modified to do real-time updating of scene objects based on another 
 
 It now bears very little resemblance to the original, much commented out of `index.html`, and much added. The live ARENA site can be viewed at http://xr.andrew.cmu.edu on most devices. 
 
-A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such a `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`
+A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such as `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`. The `name` argument will appear above your head in the 3d world. If you don't specify a name, `X` will appear instead. 
+
+### User IDs 
+ARENA visitors are uniquely identified by their camera name, which is also their user name. As all 3D objects in the ARENA are identified by names, camera IDs have 3 underscore separated components, e.g: `camera_1234_er1k`. The last part is what appears above your head (representation in the 3D view), the middle part is a unique ID. If you want to override the random unique ID, you can specify on the URL parameter e.g. `&fixedCamera=er1k` which will ignore the `&name=` and so `er1k` will appear above your head and the camera ID will be `camera_er1k_er1k`. 
 
 ## INSTALLATION
 Step one is to clone this repo into the default web content folder on a linux machine runing Apache, e.g. in `/var/www/html`.
@@ -125,11 +128,12 @@ To animate a GLTF model (see above for how to find animation names), set the ani
 mosquitto_pub -t realm/s/northstar/gltf-model_3-animation -h oz.andrew.cmu.edu -m '{"object_id": "gltf-model_3", "action": "update", "type": "object", "data": {"animation-mixer": {"clip": "*"}}}
 ```
 The asterisk means play all animations, and works better in some situations, where other times the name of a specific animation in the GLTF file works (or maybe several in sequence).
-#### Relocalize Camera
-Warp the camera with ID camera_5432 to a new coordinate (system). Values are x,y,z, (meters) x,y,z,w (quaternions)
+#### Relocalize Camera (Rig)
+Move the camera rig (parent object of the camera) with ID camera_1234_er1k to a new coordinate (system). Values are x,y,z, (meters) x,y,z,w (quaternions)
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/ -m '{"object_id" : "camera_er1k_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 0.1, "y":0, "z":0, "w":1} }}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/ -m '{"object_id" : "camera_1234_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 0.1, "y":0, "z":0, "w":1} }}'
 ```
+This assumes we know our camera ID was assigned as `1234`. That might not be easily knowable without snooping MQTT messages, so the `&fixedCamera=er1k` URL parameter lets us choose manually the unique ID. If used in the URL, the `&name=` parameter is ignored, and the derived camera/user ID is based on fixedCamera, so would be in this case `camera_er1k_er1k` 
 #### Text
 Add some red text that says "Hello World"
 ```
