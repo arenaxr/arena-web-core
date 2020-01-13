@@ -206,18 +206,20 @@ You can enable physics (gravity) for a scene object by adding the dynamic-body C
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": {"type": "dynamic"}}}' 
 ```
-
+One physics feature is applying an impulse to an object to set it in motion. This happens in conjunction with an event. As an example, here are messages setting objects fallBox and fallBox2 to respond to mouseup and mousedown messages with an impulse with a certain force and position:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/fallBox2 {"object_id": "fallBox2", "action": "create", "data": {"object_type": "cube", "dynamic-body": {"type": "dynamic"}, "impulse": {"on": "mousedown", "force": "1 50 1", "position": "1 1 1"}, "click-listener": "", "position": {"x":0.1, "y": 4.5, "z": -4}, "scale": {"x":0.5, "y":0.5, "z": 0.5}}}
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/fallBox {"object_id": "fallBox", "action": "create", "data": {"object_type": "cube", "dynamic-body": {"type": "dynamic"}, "impulse": {"on": "mouseup", "force": "1 50 1", "position": "1 1 1"}, "click-listener": "", "position": {"x":0, "y": 4, "z": -4}, "scale": {"x":0.5, "y":0.5, "z": 0.5}}}
+```
 #### Parent/Child Linking (experimental)
-There's support to attach already-existing parent and child scene objects. For example if parent object is box_1 and child object is sphere_2, the command would look like:
+There's support to attach already-existing parent and child scene objects. For example if parent object is cube_1 and child object is sphere_2, the command would look like:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "setChild", "data": {"child": "sphere_2"}}' 
 ```
 But somehow attaching child objects seems to cause them to forget certain parameters, like scale. Also strangely, or maybe not, modifying parent parameters affects the child as well. Scaling the parent by 2 scales the child as well.
 
-This is general; any AFrame supported parameters should be able to be used in the topic hierarchy. Most are single valued (position) some are double (material.color)  
+### Naming Conventions
 The naming convention for a scene object identifier such as `line_1` is that the part before the underscore is the name of the A-Frame entity, and the part after the underscore is a unique identifier to differentiate from other entities (of the same type) in the scene.
-It's up to us whether to make lower level topics for sub-parameters `/material/color` or `material.color`
-Lastly, I'm not sure how this should work for retained PubSub messages: it would be possible that when subscribing to all topics of a scene, you will get multiple messages for an object: 1. Instantiation 2. Parameter A 3. Parameter B. and so forth, but not necessarily in the right order. Maybe we use smaller property-update message format for only 'realtime' or 'live' viewers, rather than persist each and every update. This helps address a possible problem with single-property-update topic 'spam': don't retain -> no spam.
 
 ## below have not been refactored for JSON pubsub topic/data format yet
 #### Scene (global) settings
