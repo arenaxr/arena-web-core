@@ -186,6 +186,11 @@ Add the "click-listener" event to a scene object; click-listener is a Component 
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": {"click-listener": "enable"}}'
 ```
+#### Temporary Objects: ttl
+It's desirable to have objects that don't last forever and pile up. For that there is the 'ttl' parameter that gives objects a lifetime, in seconds. Example usage for a sphere that disappears after 5 seconds (must also use persist=true):
+```
+ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/pool/Ball2 -m '{"object_id": "Ball2", "action": "create", "ttl": 5, "persist": true, "data": {"position": {"x": -1, "y": 1, "z": -1}, "color": "blue", "object_type": "sphere"}}'
+ ```
 #### Background themes
 Adds one of many predefined backgrounds ( one of: [ none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris]) to the scene
 ```
