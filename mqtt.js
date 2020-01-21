@@ -110,15 +110,15 @@ function onConnect() {
             data: {
                 object_type: 'camera',
                 position: {
-                    x: e.detail.x.toFixed(3),
-                    y: e.detail.y.toFixed(3),
-                    z: e.detail.z.toFixed(3),
+                    x: parseFloat(e.detail.x.toFixed(3)),
+                    y: parseFloat(e.detail.y.toFixed(3)),
+                    z: parseFloat(e.detail.z.toFixed(3)),
                 },
                 rotation: {
-                    x: e.detail._x.toFixed(3),
-                    y: e.detail._y.toFixed(3),
-                    z: e.detail._z.toFixed(3),
-                    w: e.detail._w.toFixed(3),
+                    x: parseFloat(e.detail._x.toFixed(3)),
+                    y: parseFloat(e.detail._y.toFixed(3)),
+                    z: parseFloat(e.detail._z.toFixed(3)),
+                    w: parseFloat(e.detail._w.toFixed(3)),
                 },
                 color: color,
             }
@@ -146,15 +146,15 @@ function onConnect() {
                     type: 'object',
                     data: {
                         position: {
-                            x: pos.x.toFixed(3),
-                            y: pos.y.toFixed(3),
-                            z: pos.z.toFixed(3),
+                            x: parseFloat(pos.x.toFixed(3)),
+                            y: parseFloat(pos.y.toFixed(3)),
+                            z: parseFloat(pos.z.toFixed(3)),
                         },
                         rotation: {
-                            x: rot.x.toFixed(3),
-                            y: rot.y.toFixed(3),
-                            z: rot.z.toFixed(3),
-                            w: rot.w.toFixed(3),
+                            x: parseFloat(rot.x.toFixed(3)),
+                            y: parseFloat(rot.y.toFixed(3)),
+                            z: parseFloat(rot.z.toFixed(3)),
+                            w: parseFloat(rot.w.toFixed(3)),
                         },
                         color: color,
                     }
@@ -178,15 +178,15 @@ function onConnect() {
                 data: {
                     object_type: 'viveLeft',
                     position: {
-                        x: e.detail.x.toFixed(3),
-                        y: e.detail.y.toFixed(3),
-                        z: e.detail.z.toFixed(3),
+                        x: parseFloat(e.detail.x.toFixed(3)),
+                        y: parseFloat(e.detail.y.toFixed(3)),
+                        z: parseFloat(e.detail.z.toFixed(3)),
                     },
                     rotation: {
-                        x: e.detail._x.toFixed(3),
-                        y: e.detail._y.toFixed(3),
-                        z: e.detail._z.toFixed(3),
-                        w: e.detail._w.toFixed(3),
+                        x: parseFloat(e.detail._x.toFixed(3)),
+                        y: parseFloat(e.detail._y.toFixed(3)),
+                        z: parseFloat(e.detail._z.toFixed(3)),
+                        w: parseFloat(e.detail._w.toFixed(3)),
                     },
                     color: color,
                 }
@@ -210,15 +210,15 @@ function onConnect() {
                 data: {
                     object_type: 'viveRight',
                     position: {
-                        x: e.detail.x.toFixed(3),
-                        y: e.detail.y.toFixed(3),
-                        z: e.detail.z.toFixed(3),
+                        x: parseFloat(e.detail.x.toFixed(3)),
+                        y: parseFloat(e.detail.y.toFixed(3)),
+                        z: parseFloat(e.detail.z.toFixed(3)),
                     },
                     rotation: {
-                        x: e.detail._x.toFixed(3),
-                        y: e.detail._y.toFixed(3),
-                        z: e.detail._z.toFixed(3),
-                        w: e.detail._w.toFixed(3),
+                        x: parseFloat(e.detail._x.toFixed(3)),
+                        y: parseFloat(e.detail._y.toFixed(3)),
+                        z: parseFloat(e.detail._z.toFixed(3)),
+                        w: parseFloat(e.detail._w.toFixed(3)),
                     },
                     color: color,
                 }

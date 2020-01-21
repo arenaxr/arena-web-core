@@ -49,6 +49,9 @@ if (globals.fixedCamera !== '') {
 globals.viveLName = "viveLeft_" + globals.idTag;  // e.g. viveLeft_9240_X
 globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
 
+// 'globals'
+var newRotation = new THREE.Vector3();
+var newPosition = new THREE.Vector3();
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
@@ -58,33 +61,22 @@ AFRAME.registerComponent('pose-listener', {
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
     },
 
-/* DEBUG shows frame counter basically
-    tock: function () {
-        if (!this.incrementingVector )
-	    this.incrementingVector = new THREE.Vector3();
-	else {
-            this.incrementingVector.x = this.incrementingVector.x + 0.001
-            this.incrementingVector.y = this.incrementingVector.y + 0.001
-            this.incrementingVector.z = this.incrementingVector.z + 0.001
-	}
-	    
-	debugConixText(this.incrementingVector);
-    },
-*/
-
     tick: (function (t, dt) {
-        var newRotation = this.el.object3D.quaternion;
-        var newPosition = this.el.object3D.position;
 	var cameraRig = this.el.parentNode.parentNode; // this gets the CameraWrapper's parent, the CameraRig
+	newRotation = this.el.object3D.quaternion;
+	newPosition = this.el.object3D.position;
 	
 	// This technique does not work in AR mode on A-Frame 1.0.x
-        //const testPosition = new THREE.Vector3();
-        //const testRotation = new THREE.Quaternion();
-        //this.el.object3D.getWorldQuaternion(testRotation);
-        //this.el.object3D.getWorldPosition(testPosition);
+        const testPosition = new THREE.Vector3();
+        const testRotation = new THREE.Quaternion();
+        this.el.object3D.getWorldQuaternion(testRotation);
+        this.el.object3D.getWorldPosition(testPosition);
 
-	newRotation.multiply(cameraRig.object3D.quaternion);
-	newPosition.add(cameraRig.object3D.position);
+	newRotation.multiply(cameraRig.object3D.quaternion); // add rig rotation (probably should not even use rig for rotations unless rig offset is 0 0 0)
+	newPosition.add(cameraRig.object3D.position);        // add rig position to get World position
+
+	console.log("worldPosition:", coordsToText(testPosition));
+	console.log("newPosition  :", coordsToText(newPosition));
 
         const rotationCoords = newRotation.x + ' ' + newRotation.y + ' ' + newRotation.z + ' ' + newRotation.w;
         const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
@@ -95,7 +87,7 @@ AFRAME.registerComponent('pose-listener', {
             this.lastPose = newPose;
 
 	    // DEBUG
-	    debugConixText(newPosition);
+	    //debugConixText(newPosition);
 	    //debugRaw(Coords);
         }
     })
@@ -147,9 +139,9 @@ function eventAction(evt, eventName, myThis) {
     //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 
     let coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3)
+        x: parseFloat(newPosition.x.toFixed(3)),
+        y: parseFloat(newPosition.y.toFixed(3)),
+        z: parseFloat(newPosition.z.toFixed(3))
     };
 
     // publish to MQTT
@@ -167,9 +159,9 @@ function eventAction(evt, eventName, myThis) {
 
 function setCoordsData(evt) {
     return {
-        x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
-        y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
-        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
+        x: parseFloat(evt.currentTarget.object3D.position.x.toFixed(3)),
+        y: parseFloat(evt.currentTarget.object3D.position.y.toFixed(3)),
+        z: parseFloat(evt.currentTarget.object3D.position.z.toFixed(3))
     };
 }
 
@@ -180,9 +172,9 @@ function coordsToText(c) {
 function setClickData(evt) {
     if (evt.detail.intersection)
 	return {
-            x: evt.detail.intersection.point.x.toFixed(3),
-            y: evt.detail.intersection.point.y.toFixed(3),
-            z: evt.detail.intersection.point.z.toFixed(3)
+            x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
+            y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
+            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
 	}
     else {
 	console.log("WARN: empty coords data");
