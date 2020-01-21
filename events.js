@@ -51,18 +51,40 @@ globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
 
 
 AFRAME.registerComponent('pose-listener', {
+    // if we want to make throttling settable at init time over mqtt,
+    // create a Component variable here & use instead of globals.updateMillis
     init: function () {
         // Set up the tick throttling.
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
     },
 
+/* DEBUG shows frame counter basically
+    tock: function () {
+        if (!this.incrementingVector )
+	    this.incrementingVector = new THREE.Vector3();
+	else {
+            this.incrementingVector.x = this.incrementingVector.x + 0.001
+            this.incrementingVector.y = this.incrementingVector.y + 0.001
+            this.incrementingVector.z = this.incrementingVector.z + 0.001
+	}
+	    
+	debugConixText(this.incrementingVector);
+    },
+*/
+
     tick: (function (t, dt) {
-        //	var newRotation = this.el.object3D.quaternion;
-        //	var newPosition = this.el.object3D.position;
-        const newPosition = new THREE.Vector3();
-        const newRotation = new THREE.Quaternion();
-        this.el.object3D.getWorldQuaternion(newRotation);
-        this.el.object3D.getWorldPosition(newPosition);
+        var newRotation = this.el.object3D.quaternion;
+        var newPosition = this.el.object3D.position;
+	var cameraRig = this.el.parentNode.parentNode; // this gets the CameraWrapper's parent, the CameraRig
+	
+	// This technique does not work in AR mode on A-Frame 1.0.x
+        //const testPosition = new THREE.Vector3();
+        //const testRotation = new THREE.Quaternion();
+        //this.el.object3D.getWorldQuaternion(testRotation);
+        //this.el.object3D.getWorldPosition(testPosition);
+
+	newRotation.multiply(cameraRig.object3D.quaternion);
+	newPosition.add(cameraRig.object3D.position);
 
         const rotationCoords = newRotation.x + ' ' + newRotation.y + ' ' + newRotation.z + ' ' + newRotation.w;
         const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
@@ -71,6 +93,10 @@ AFRAME.registerComponent('pose-listener', {
         if (this.lastPose !== newPose) {
             this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
             this.lastPose = newPose;
+
+	    // DEBUG
+	    debugConixText(newPosition);
+	    //debugRaw(Coords);
         }
     })
 });
@@ -98,9 +124,20 @@ AFRAME.registerComponent('vive-pose-listener', {
 
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
-    const textEl = sceney.querySelector('#conix-text');
+    const textEl = document.getElementById('conix-text');
     textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
     console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
+}
+
+function debugConixText(coordsData) {
+    const textEl = document.getElementById('conix-text');
+    textEl.setAttribute('value', 'pose: '+ coordsToText(coordsData));
+    console.log('pose: ', coordsToText(coordsData));
+}
+function debugRaw(debugMsg) {
+    const textEl = document.getElementById('conix-text');
+    textEl.setAttribute('value', debugMsg);
+    console.log('debug: ', debugMsg);
 }
 
 function eventAction(evt, eventName, myThis) {
@@ -123,7 +160,7 @@ function eventAction(evt, eventName, myThis) {
         type: eventName,
         data: {position: coordsData, source: globals.camName}
     });
-    console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
+    //console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
 
     updateConixBox(eventName, coordsData, myThis);
 }
@@ -137,7 +174,7 @@ function setCoordsData(evt) {
 }
 
 function coordsToText(c) {
-    return `${c.x},${c.y},${c.z}`;
+    return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
 }
 
 function setClickData(evt) {
@@ -174,12 +211,10 @@ AFRAME.registerComponent('impulse', {
     multiple: true,
 
     init: function () {
-	console.log("init impulse component message:", this.data);
 	var self = this;
     },
 
     update: function(oldData) {
-	console.log("impulse Component UPDATE CALLED");
 	// this in fact only gets called when the component that it is - gets updated
 	// unlike the update method in Unity that gets called every frame
 	var data = this.data; // Component property values.
@@ -187,7 +222,6 @@ AFRAME.registerComponent('impulse', {
 
 	if (data.on) { // we have an event?
 	    el.addEventListener(data.on, function (args) {
-		console.log("args.detail:", args.detail);
 
 		if (args.detail.clicker) { // our synthetic event from MQTT
                     if (el.body) { // has physics = dynamic-body Component
@@ -228,8 +262,8 @@ AFRAME.registerComponent('impulse', {
 
 AFRAME.registerComponent('click-listener', {
     init: function () {
-	console.log("click-listener Component init");
-	console.log("mousedown init");
+	//console.log("click-listener Component init");
+	//console.log("mousedown init");
         this.el.addEventListener('mousedown', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -263,7 +297,7 @@ AFRAME.registerComponent('click-listener', {
             }
         });
 
-	console.log("mouseup init");
+	//console.log("mouseup init");
         this.el.addEventListener('mouseup', function (evt) {
 
             const coordsData = setClickData(evt);

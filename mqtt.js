@@ -68,12 +68,16 @@ function onConnect() {
     sceneObjects.boxObj = document.getElementById('boxObj');
     sceneObjects.myCamera = document.getElementById('my-camera');
 
+    var oldMsg = '';
+
     if (sceneObjects.env) {
         sceneObjects.env.setAttribute('environment', 'preset', globals.themeParam);
     }
     if (globals.weatherParam !== "none") {
-        sceneObjects.weather.setAttribute('particle-system', 'preset', globals.weatherParam);
-        sceneObjects.weather.setAttribute('particle-system', 'enabled', 'true');
+	if (sceneObjects.weather) {
+            sceneObjects.weather.setAttribute('particle-system', 'preset', globals.weatherParam);
+            sceneObjects.weather.setAttribute('particle-system', 'enabled', 'true');
+	}
     } else if (sceneObjects.weather) {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
@@ -94,7 +98,7 @@ function onConnect() {
 
     publish(globals.outputTopic + globals.camName, myMsg);
     //console.log("my-camera element", sceneObjects.myCamera);
-    //console.log("my-camera name", globals.camName);
+    console.log("my-camera name", globals.camName);
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
         //console.log(e.detail);
@@ -121,13 +125,13 @@ function onConnect() {
         };
 
         // rig updates for VIO
-
+	
         // suppress duplicates
-        //if (msg !== oldMsg) {
-        if (true) {
+        if (msg !== oldMsg) {
+        //if (true) {
             //publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
             publish(globals.outputTopic + globals.camName, msg); // extra timestamp info at end for debugging
-            // oldMsg = msg;
+            oldMsg = msg;
             // lastUpdate = stamp;
             //console.log("cam moved: ",outputTopic+camName, msg);
 
@@ -474,7 +478,7 @@ function onMessageArrived(message, jsonMessage) {
 
                     entityEl = rigEl;
 
-                    console.log("their camera:", rigEl);
+                    //console.log("their camera:", rigEl);
                 } else {
                     entityEl.setAttribute('id', name);
                     entityEl.setAttribute('rotation.order', "YXZ");
@@ -510,7 +514,7 @@ function onMessageArrived(message, jsonMessage) {
 
             case "line":
                 entityEl.setAttribute('line', theMessage.data);
-                entityEl.setAttribute('meshline', 'color', color);
+                entityEl.setAttribute('line', 'color', color);
                 break;
 
             case "thickline":
@@ -570,13 +574,24 @@ function onMessageArrived(message, jsonMessage) {
                     if (name === globals.camName) { // our camera Rig
                         console.log("moving our camera rig, sceneObject: " + name);
 
-                        let x = theMessage.data.position.x;
-                        let y = theMessage.data.position.y;
-                        let z = theMessage.data.position.z;
-                        let xrot = theMessage.data.rotation.x;
-                        let yrot = theMessage.data.rotation.y;
-                        let zrot = theMessage.data.rotation.z;
-                        let wrot = theMessage.data.rotation.w;
+			// "I do declare!"
+			var x, y, z, xrot, yrot, zrot, wrot;
+			
+			if (theMessage.data.position) {
+                            x = theMessage.data.position.x;
+                            y = theMessage.data.position.y;
+                            z = theMessage.data.position.z;
+			} else {
+			    x = 0; y = 0; z = 0;
+			}
+			if (theMessage.data.rotation) {
+                            xrot = theMessage.data.rotation.x;
+                            yrot = theMessage.data.rotation.y;
+                            zrot = theMessage.data.rotation.z;
+                            wrot = theMessage.data.rotation.w;
+			} else {
+			    xrot = 0; yrot = 0; zrot = 0; wrot = 0;
+			}
 
                         let quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
                         let euler = new THREE.Euler();
