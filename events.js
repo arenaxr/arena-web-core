@@ -49,8 +49,7 @@ if (globals.fixedCamera !== '') {
 globals.viveLName = "viveLeft_" + globals.idTag;  // e.g. viveLeft_9240_X
 globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
 
-// 'globals'
-var newRotation = new THREE.Vector3();
+var newRotation = new THREE.Quaternion();
 var newPosition = new THREE.Vector3();
 
 AFRAME.registerComponent('pose-listener', {
@@ -63,23 +62,20 @@ AFRAME.registerComponent('pose-listener', {
 
     tick: (function (t, dt) {
 	var cameraRig = this.el.parentNode.parentNode; // this gets the CameraWrapper's parent, the CameraRig
-	newRotation = this.el.object3D.quaternion;
-	newPosition = this.el.object3D.position;
+	newRotation.copy(this.el.object3D.quaternion);
+	newPosition.copy(this.el.object3D.position);
 	
 	// This technique does not work in AR mode on A-Frame 1.0.x
-        const testPosition = new THREE.Vector3();
-        const testRotation = new THREE.Quaternion();
-        this.el.object3D.getWorldQuaternion(testRotation);
-        this.el.object3D.getWorldPosition(testPosition);
+	//const testPosition = new THREE.Vector3();
+	//const testRotation = new THREE.Quaternion();
+        //this.el.object3D.getWorldQuaternion(testRotation);
+        //this.el.object3D.getWorldPosition(testPosition);
 
 	newRotation.multiply(cameraRig.object3D.quaternion); // add rig rotation (probably should not even use rig for rotations unless rig offset is 0 0 0)
 	newPosition.add(cameraRig.object3D.position);        // add rig position to get World position
 
-	console.log("worldPosition:", coordsToText(testPosition));
-	console.log("newPosition  :", coordsToText(newPosition));
-
-        const rotationCoords = newRotation.x + ' ' + newRotation.y + ' ' + newRotation.z + ' ' + newRotation.w;
-        const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
+	const rotationCoords = rotToText(newRotation);
+	const positionCoords = coordsToText(newPosition);
 
         const newPose = rotationCoords + " " + positionCoords;
         if (this.lastPose !== newPose) {
@@ -166,7 +162,10 @@ function setCoordsData(evt) {
 }
 
 function coordsToText(c) {
-    return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
+    return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)}`;
+}
+function rotToText(c) {
+    return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
 }
 
 function setClickData(evt) {
