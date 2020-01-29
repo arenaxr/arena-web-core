@@ -226,6 +226,45 @@ But somehow attaching child objects seems to cause them to forget certain parame
 ### Naming Conventions
 The naming convention for a scene object identifier such as `line_1` is that the part before the underscore is the name of the A-Frame entity, and the part after the underscore is a unique identifier to differentiate from other entities (of the same type) in the scene.
 
+#### Vive (laser) controls
+We've noticed the controllers don't show up in the scene unless they both - and EVERYTHING else for SteamVR - are all working (headset, lighthouses). And sometimes you have to restart SteamVR for hand controllers to show up in the scene; even though SteamVR shows them as being working/on/available/etc., it's possible to open VR mode in an Arena scene and be missing the hand controls.
+
+By default we use A-Frame 'laser-controls' which default to showing Valve Index controller 3D models (gray, circular), even if we are using (equivalent) Vive controllers (black, paddle shaped, not included in the list of controllers known to A-Frame)
+#### EVENTS
+ * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above). Mouse events occur if you click in a browser, or tap on a touchscreen as well.
+  - mouseenter
+  - mouseleave
+  - mousedown 
+  - mouseup
+ * triggerdown / triggerup for left and right hand controllers  
+The MQTT topic name for viewing these events can be the standard prefix (e.g. realm/s/render/) concatenated with a string made up of object ID that generated the event. An example event MQTT:
+```
+realm/s/render/fallBox2 {"object_id":"fallBox2","action":"clientEvent","type":"mousedown","data":{"position":{"x":-0.993,"y":0.342,"z":-1.797},"source":"camera_8715_er"}}
+``` 
+Note the message itself will contain the originator of the event as a camera/"user" ID and other data like where the object was clicked (in world coordinates[?])
+
+* Full list of Vive controller event names:
+   - triggerdown
+   - triggerup
+   - gripdown
+   - gripup
+   - menudown
+   - menuup
+   - systemdown
+   - systemup
+   - trackpaddown
+   - trackpadup
+   
+Event listeners can be added directly in the hard coded index.html main Arena page, e.g:
+```
+<a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
+```
+or on demand from an MQTT message that enables click-listener when an object is created, or updated (see above)
+
+* 6dof pose events are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages, limited to 10 frames per second, much like the headset pose messages work. This supports the notion of tracking controller movement in real time, including direction (pose). These are enabled, much like the pose-listener Component (both defined in events.js) by adding the vive-pose-listener Component to a scene object directly, in the hard-coded index.html part of every Arena page e.g. `<a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>` 
+
+There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. The exception is that the laser-controls interface sends click events when the triggers are pressed, and click events ARE published to all scene subscribers. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
+
 ## below have not been refactored for JSON pubsub topic/data format yet
 #### Scene (global) settings
 Some settings are available by setting attributes of the Scene element (see https://aframe.io/docs/0.9.0/core/scene.html) for example,
@@ -243,47 +282,6 @@ remove the "enter VR" icon:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/vr-mode-ui -m "enabled: false"
 ```
-#### Vive (laser) controls
-I noticed the controllers don't show up in the scene unless they both - and EVERYTHING else for SteamVR - are all working (headset, lighthouses). And sometimes you have to restart SteamVR for hand controllers to show up in the scene; even though SteamVR shows them as being working/on/available/etc., it's possible to open VR mode in an Arena scene and be missing the hand controls.
- 
-#### EVENTS
- * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above). Mouse events occur if you click in a browser, or tap on a touchscreen as well.
-  - mouseenter
-  - mouseleave
-  - mousedown 
-  - mouseup
- * triggerdown / triggerup for left and right hand controllers  
-The MQTT topic name for these events will be the standard prefix (e.g. /topic/render/) concatenated with a string made up of camera name + an identifier +  eventID resulting in e.g.
-```
-/topic/render/vive-leftHand_1234_eric/triggerdown
-``` 
-or 
-```
-/topic/render/vive-rightHand_1234_eric/triggerup
-```
- * Full list of Vive controller event names:
-   - triggerdown
-   - triggerup
-   - gripdown
-   - gripup
-   - menudown
-   - menuup
-   - systemdown
-   - systemup
-   - trackpaddown
-   - trackpadup
-   
-The MQTT MESSAGE will be coordinates concatenated with that same identifier, e.g: `1.234,5.678,9.012,vive-leftHand_1234_eric` - the idea being that the identifier matches the camera ID of the person in the scene who did the clicking, or in this case pulled the Vive trigger buttons. The listener can be added directly in the hard coded index.html main Arena page, e.g:
-```
-<a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
-```
-or on demand from an MQTT message like click listeners, e.g:
-```
-mosquitto_pub -t /topic/render/cube_1/vive-listener -n
-```
- * 6dof pose events are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages, limited to 10 frames per second, much like the headset pose messages work. This supports the notion of tracking controller movement in real time, including direction (pose). These are enabled, much like the pose-listener Component (both defined in events.js) by adding the vive-pose-listener Component to a scene object directly, in the hard-coded index.html part of every Arena page e.g. `<a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>` 
-
-There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. The exception is that the laser-controls interface sends click events when the triggers are pressed, and click events ARE published to all scene subscribers. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
 
 ## Discussion
 ### Camera
