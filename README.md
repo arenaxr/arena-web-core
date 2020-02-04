@@ -65,7 +65,7 @@ If you leave out any of these, defaults will be used: location(0,0,0), rotation(
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "create", "type": "object", "data": {"object_type": "cube", "position": {"x": 1, "y": 1, "z": -1}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}' -r
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "create", "type": "object", "data": {"object_type": "cube", "position": {"x": 1, "y": 1, "z": -1}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}, "color": "#FF0000"}}'
 ```
 #### Color
 change only the color of the already-drawn cube
@@ -104,7 +104,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "
 #### Images
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/drone/image_floor -m '{"object_id": "image_floor", "action": "create", "data": {"object_type": "image", "position": {"x":0, "y": 0, "z": 0.4}, "rotation": {"x": -0\
-.7, "y": 0, "z": 0, "w": 0.7}, "url": "images/floor.png", "scale": {"x":12, "y":12, "z": 2}, "material": {"repeat": {"x":4, "y":4}}}}' -r
+.7, "y": 0, "z": 0, "w": 0.7}, "url": "images/floor.png", "scale": {"x":12, "y":12, "z": 2}, "material": {"repeat": {"x":4, "y":4}}}}'
 ```
 URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
 To update the image of a named image already in the scene, use this syntax:
@@ -156,7 +156,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/light_3 -m '{"object_id" : 
 Play toy piano sound from a URL when you click a cube. Sets click-listener Component, waveform URL, and sound attribute:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/piano/box_asharp -m '{"object_id" : "box_asharp", "action": "create", "data": {"object_type": "cube", "position": {"x": 2.5, "y": 0.25, "z": -5}, "scale": {"x": 0.\
-8, "y":1, "z":1}, "color": "#000000", "sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/Asharp1.wav)", "on": "mousedown"}, "click-listener": ""}}' -r
+8, "y":1, "z":1}, "color": "#000000", "sound": {"src": "url(https://xr.andrew.cmu.edu/audio/toypiano/Asharp1.wav)", "on": "mousedown"}, "click-listener": ""}}'
 ```
 #### 360 Video
 Draw a sphere, set the texture src to be an equirectangular video, on the 'back' (inside):
@@ -311,5 +311,5 @@ Some hard-coded things:
   2. Iterate through the ones you want to remove
   3. For each, issue a publish command to the object+topic, with retain set, and an empty message. This clears the topic. e.g:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/sphere_3 -n -r
+mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/sphere_3 -n
 ```
