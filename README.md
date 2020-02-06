@@ -265,22 +265,19 @@ or on demand from an MQTT message that enables click-listener when an object is 
 
 There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. The exception is that the laser-controls interface sends click events when the triggers are pressed, and click events ARE published to all scene subscribers. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
 
-## below have not been refactored for JSON pubsub topic/data format yet
 #### Scene (global) settings
 Some settings are available by setting attributes of the Scene element (see https://aframe.io/docs/0.9.0/core/scene.html) for example,
 turn on statistics:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/stats -m "true"
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render -m '{"object_id" : "scene",  "action": "update", "type": "object", "data": {"stats": true}}'
 ```
-customise the fog:
+customise the fog (notice 3 character hexadecimal color representation):
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/fog -m "type: linear; color: #AAA"
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/fog -m "type: linear; color: #FFF"
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/fog -m "type: linear; color: #000"
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render -m '{"object_id" : "scene",  "action": "update", "type": "object", "data": {"fog": {"type": "linear", "color": "#F00"}}}'
 ```
 remove the "enter VR" icon:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/Scene/vr-mode-ui -m "enabled: false"
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render -m '{"object_id" : "scene",  "action": "update", "type": "object", "data": {"vr-mode-ui": {"enabled": false}}}'
 ```
 
 ## Discussion
@@ -300,16 +297,4 @@ When moving or rotating the camera relative to the scene, use a camera rig. By d
 <a-entity id="rig" position="25 10 0">
   <a-entity id="camera" camera look-controls></a-entity>
 </a-entity>
-```
-Some hard-coded things:
- * MQTT broker running on `oz.andrew.cmu.edu` - runs with WebSockets enabled, because Paho MQTT needs to use WebSockets
- * MQTT topic structure is in flux. Used to be everything went to `/topic/render`, but this is definitely going to change. Each Object in the scene gets it's own topic, which is the 'name' of the object, e.g: `/topic/render/sphere_3` according to 
- * Naming convention: PrimitiveName_ID where Id is some unique identifier (integers for now), and PrimitiveName is something like 'sphere' 'cube' 'cylinder' etc.
- * MQTT draw messages set the 'Retain' flag such that new people visiting the page (example running at http://xr.andrew.cmu.edu/aframe) will see them. This is how to 'persist' things in the Scene. Otherwise set Retain to False or 'off' and the primitive gets drawn & seen only by those currently viewing the scene; a page re-load and they will disappear
- * Because of this, if you render a ton of retained things, there's a risk of spamming the scene. You might need to clean up by doing something like
-  1. Get all the retained objects by subscribing to /topic/render/#
-  2. Iterate through the ones you want to remove
-  3. For each, issue a publish command to the object+topic, with retain set, and an empty message. This clears the topic. e.g:
-```
-mosquitto_pub -h oz.andrew.cmu.edu -t /topic/render/sphere_3 -n
 ```
