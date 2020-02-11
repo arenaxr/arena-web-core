@@ -216,12 +216,13 @@ One physics feature is applying an impulse to an object to set it in motion. Thi
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/fallBox2 {"object_id": "fallBox2", "action": "create", "data": {"object_type": "cube", "dynamic-body": {"type": "dynamic"}, "impulse": {"on": "mousedown", "force": "1 50 1", "position": "1 1 1"}, "click-listener": "", "position": {"x":0.1, "y": 4.5, "z": -4}, "scale": {"x":0.5, "y":0.5, "z": 0.5}}}
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/fallBox {"object_id": "fallBox", "action": "create", "data": {"object_type": "cube", "dynamic-body": {"type": "dynamic"}, "impulse": {"on": "mouseup", "force": "1 50 1", "position": "1 1 1"}, "click-listener": "", "position": {"x":0, "y": 4, "z": -4}, "scale": {"x":0.5, "y":0.5, "z": 0.5}}}
 ```
-#### Parent/Child Linking (experimental)
-There's support to attach already-existing parent and child scene objects. For example if parent object is cube_1 and child object is sphere_2, the command would look like:
+#### Parent/Child Linking
+There's support to attach a child to an already-existing parent scene objects. For example if parent object is gltf-model_Earth and child object is gltf-model_Moon, the commands would look like:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "setChild", "data": {"child": "sphere_2"}}' 
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/earth -m '{"object_id": "gltf-model_Earth", "action": "create", "persist": true, "data": {"object_type": "gltf-model", "position": {"x":0, "y": 0.1, "z": 0}, "url": "models/Earth.glb", "scale": {"x": 5, "y": 5, "z": 5}}}'
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/earth -m '{"object_id": "gltf-model_Moon", "action": "create", "persist": true, "data": {"parent": "gltf-model_Earth", "object_type": "gltf-model", "position": {"x":0, "y": 0.05, "z": 0.6}, "scale": {"x":0.05, "y": 0.05, "z": 0.05}, "url": "models/Moon.glb" }}'
 ```
-But somehow attaching child objects seems to cause them to forget certain parameters, like scale. Also strangely, or maybe not, modifying parent parameters affects the child as well. Scaling the parent by 2 scales the child as well.
+Child objects inherit attributes of their parent, for example scale. Scale the parent, the child scales with it. If the parent is already scaled, the child scale will be reflected right away.
 
 ### Naming Conventions
 The naming convention for a scene object identifier such as `line_1` is that the part before the underscore is the name of the A-Frame entity, and the part after the underscore is a unique identifier to differentiate from other entities (of the same type) in the scene.
