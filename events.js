@@ -20,7 +20,7 @@ function getUrlParam(parameter, defaultValue) {
     return urlParameter;
 }
 
-let globals = {
+window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
     updateMillis: 100,
@@ -31,6 +31,7 @@ let globals = {
     mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
     fixedCamera: getUrlParam('fixedCamera', ''),
     vioTopic: "/topic/vio/",
+    frameCount: 0
 };
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/' + globals.renderParam;
@@ -42,15 +43,21 @@ globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
 
 if (globals.fixedCamera !== '') {
     globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
+    globals.idTag = globals.fixedCamera + "_" + globals.fixedCamera; // e.g. eric_eric
 } else {
     globals.camName = "camera_" + globals.idTag;      // e.g. camera_1234_eric
 }
 
-globals.viveLName = "viveLeft_" + globals.idTag;  // e.g. viveLeft_9240_X
-globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+globals.viveLName = "vive-leftHand_" + globals.idTag;  // e.g. viveLeft_9240_X
+globals.viveRName = "vive-rightHand_" + globals.idTag; // e.g. viveRight_9240_X
 
-var newRotation = new THREE.Quaternion();
-var newPosition = new THREE.Vector3();
+globals.newRotation = new THREE.Quaternion();
+globals.newPosition = new THREE.Vector3();
+globals.vioRotation = new THREE.Quaternion();
+globals.vioPosition = new THREE.Vector3();
+var camParent = new THREE.Matrix4();
+var cam       = new THREE.Matrix4();
+var cpi       = new THREE.Matrix4();
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
@@ -61,30 +68,30 @@ AFRAME.registerComponent('pose-listener', {
     },
 
     tick: (function (t, dt) {
-	var cameraRig = this.el.parentNode.parentNode; // this gets the CameraWrapper's parent, the CameraRig
-	newRotation.copy(this.el.object3D.quaternion);
-	newPosition.copy(this.el.object3D.position);
-	
-	// This technique does not work in AR mode on A-Frame 1.0.x
-	//const testPosition = new THREE.Vector3();
-	//const testRotation = new THREE.Quaternion();
-        //this.el.object3D.getWorldQuaternion(testRotation);
-        //this.el.object3D.getWorldPosition(testPosition);
+	globals.newRotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+	globals.newPosition.setFromMatrixPosition(this.el.object3D.matrixWorld);
 
-	newRotation.multiply(cameraRig.object3D.quaternion); // add rig rotation (probably should not even use rig for rotations unless rig offset is 0 0 0)
-	newPosition.add(cameraRig.object3D.position);        // add rig position to get World position
+	camParent = this.el.object3D.parent.matrixWorld;
+	cam = this.el.object3D.matrixWorld;
+	cpi.getInverse(camParent);
+	cpi.multiply(cam);
+	globals.vioRotation.setFromRotationMatrix(cpi);
+	globals.vioPosition.setFromMatrixPosition(cpi);
+	//console.log(cpi);
 
-	const rotationCoords = rotToText(newRotation);
-	const positionCoords = coordsToText(newPosition);
+	const rotationCoords = rotToText(globals.newRotation);
+	const positionCoords = coordsToText(globals.newPosition);
 
         const newPose = rotationCoords + " " + positionCoords;
         if (this.lastPose !== newPose) {
-            this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
+            this.el.emit('poseChanged', Object.assign(globals.newPosition, globals.newRotation));
+            this.el.emit('vioChanged', Object.assign(globals.vioPosition, globals.vioRotation));
             this.lastPose = newPose;
 
 	    // DEBUG
 	    //debugConixText(newPosition);
-	    //debugRaw(Coords);
+	    //debugRaw(this.el.object3D.matrixAutoUpdate + '\n' + this.el.object3D.matrixWorldNeedsUpdate +
+	    //	    '\n' + THREE.Object3D.DefaultMatrixAutoUpdate);
         }
     })
 });
@@ -125,7 +132,7 @@ function debugConixText(coordsData) {
 function debugRaw(debugMsg) {
     const textEl = document.getElementById('conix-text');
     textEl.setAttribute('value', debugMsg);
-    console.log('debug: ', debugMsg);
+    //console.log('debug: ', debugMsg);
 }
 
 function eventAction(evt, eventName, myThis) {
@@ -150,7 +157,8 @@ function eventAction(evt, eventName, myThis) {
     });
     //console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
 
-    updateConixBox(eventName, coordsData, myThis);
+    // DEBUG
+    //updateConixBox(eventName, coordsData, myThis);
 }
 
 function setCoordsData(evt) {
@@ -304,31 +312,14 @@ AFRAME.registerComponent('click-listener', {
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
 
-                console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', globals.camName);
+                //console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', globals.camName);
                 // example of warping to a URL
                 //if (this.id === "Box-obj")
                 //    window.location.href = 'http://conix.io/';
             } else {
-
-                // do the event handling for MQTT event; this is just an example
+                // hard coded event handlers can go here, for example:
                 //		this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
                 // this example pushes the object with 50 in the +Y direction
-                // mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
-
-		/*
-                    if (this.body) { // has physics
-			const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
-			const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
-			this.body.applyImpulse(foo, bod);
-                    }
-		*/
-
-		/* DEBUG Conix box text
-                const clicker = evt.detail.clicker;
-                const sceney = this.sceneEl;
-                const textEl = sceney.querySelector('#conix-text');
-                textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
             }
         });
 
@@ -347,17 +338,8 @@ AFRAME.registerComponent('click-listener', {
                 publish(globals.outputTopic + this.id, thisMsg);
                 //console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
             } else {
-
-                // do the event handling for MQTT event; this is just an example
+		// hard coded event handling goes here, for example:
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-
-		/* Debug Conix box text
-                const clicker = evt.detail.clicker;
-
-                const sceney = this.sceneEl;
-                const textEl = sceney.querySelector('#conix-text');
-                textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
             }
         });
 
@@ -376,17 +358,8 @@ AFRAME.registerComponent('click-listener', {
                 publish(globals.outputTopic + this.id, thisMsg);
                 //console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
             } else {
-
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-
-		/* DEBUG Conix box text
-                const clicker = evt.detail.clicker;
-
-                const sceney = this.sceneEl;
-                const textEl = sceney.querySelector('#conix-text');
-                textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
             }
         });
     }
