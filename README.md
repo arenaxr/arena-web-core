@@ -91,13 +91,14 @@ the quaternion (native) representation of rotation is a bit more tricky. The 4 p
   - `1,0,0,0`: rotate 180 degrees around X axis
   - `0,0.7,0,0.7`: rotate 90 degrees around Y axis
   - `0,0,-0.7,0.7`: rotate -90 degrees around Z axis
-#### Animate
+#### Animate (rotation, position)
 animate rotation of the already drawn cube
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": true, "dur": 10000}} }'
 ```
+other animations are available that resemble the `"data": {"animation": { "property": ... }}` blob above: see A-Frame documentation for more examples: https://aframe.io/docs/1.0.0/components/animation.html 
 #### Remove
-remove the cube (-n means send a null message)
+remove the cube
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "delete"}'
 ```
