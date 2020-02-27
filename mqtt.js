@@ -3,9 +3,13 @@
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
 window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
 
-const loadArena = () => {
+// loads scene objects from specified persistence URL if specified,
+// or globals.persistenceUrl if not
+const loadArena = (urlToLoad, position, rotation) => {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', globals.persistenceUrl );
+    if (urlToLoad) xhr.open('GET', urlToLoad );
+    else xhr.open('GET', globals.persistenceUrl );
+    
     xhr.responseType = 'json';
     xhr.send();
     let deferredObjects = [];
@@ -28,6 +32,21 @@ const loadArena = () => {
 			action: 'create',
 			data: obj.attributes
                     };
+		    if (position) {
+			msg.data.position.x = msg.data.position.x + position.x;
+			msg.data.position.y = msg.data.position.y + position.y;
+			msg.data.position.z = msg.data.position.z + position.z;
+		    }
+		    if (rotation) {
+			var r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y, msg.data.rotation.z, msg.data.rotation.w);
+			var q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+			r.multiply(q);
+			msg.data.rotation.x = r.x;
+			msg.data.rotation.y = r.y;
+			msg.data.rotation.z = r.z;
+			msg.data.rotation.w = r.w;
+		    }
+
                     onMessageArrived(undefined, msg);
 		}
 	    }
@@ -44,6 +63,39 @@ const loadArena = () => {
                 };
 		console.log("adding deferred object " + obj.object_id + " to parent " + obj.attributes.parent);
                 onMessageArrived(undefined, msg);
+	    }
+        }
+    };
+};
+
+// deletes scene objects from specified persistence URL if specified,
+// or globals.persistenceUrl if not
+const unloadArena = (urlToLoad) => {
+    let xhr = new XMLHttpRequest();
+    if (urlToLoad) xhr.open('GET', urlToLoad );
+    else xhr.open('GET', globals.persistenceUrl );
+    
+    xhr.responseType = 'json';
+    xhr.send();
+
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
+        } else {
+            let arenaObjects = xhr.response;
+            let l = arenaObjects.length;
+            for (let i = 0; i < l; i++) {
+		let obj = arenaObjects[i];
+                if (obj.object_id === globals.camName) {
+                    continue; // don't load our own camera/head assembly
+                }
+		else {
+                    let msg = {
+			object_id: obj.object_id,
+			action: 'delete',
+                    };
+                    onMessageArrived(undefined, msg);
+		}
 	    }
         }
     };
@@ -80,6 +132,8 @@ function onConnect() {
 
     sceneObjects.vive_leftHand = document.getElementById('vive-leftHand');
     sceneObjects.vive_rightHand = document.getElementById('vive-rightHand');
+
+    sceneObjects.groundPlane = document.getElementById('groundPlane'); // this is an <a-entity>
 
     sceneObjects.cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     sceneObjects.cameraSpinner = document.getElementById('CameraSpinner'); // this is an <a-entity>
@@ -331,6 +385,15 @@ function onMessageArrived(message, jsonMessage) {
 		console.log("Error: theMessage.data.position not defined", theMessage);
             const clicker = theMessage.data.source;
             switch (theMessage.type) {
+                case "collision":
+                    // emit a synthetic click event with ugly data syntax
+                    entityEl.emit('mousedown', {
+                        "clicker": clicker, intersection:
+                            {
+                                point: myPoint
+                            }
+                    }, false);
+                    break;
                 case "mousedown":
                     // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mousedown', {
@@ -338,7 +401,7 @@ function onMessageArrived(message, jsonMessage) {
                             {
                                 point: myPoint
                             }
-                    }, true);
+                    }, false);
                     break;
                 case "mouseup":
                     // emit a synthetic click event with ugly data syntax
@@ -347,7 +410,7 @@ function onMessageArrived(message, jsonMessage) {
                             {
                                 point: myPoint
                             }
-                    }, true);
+                    }, false);
                     break;
                 default: // handle others here like mouseenter / mouseleave
                     break; // never gets here haha
@@ -459,55 +522,50 @@ function onMessageArrived(message, jsonMessage) {
                     }
 
                     entityEl.object3D.position.set(x, y, z);
-                    entityEl.object3D.rotation.set(xrot, yrot, zrot);
+                    entityEl.object3D.quaternion.set(xrot, yrot, zrot, wrot);
 
                     // Add it to our dictionary of scene objects
                     sceneObjects.scene.appendChild(entityEl);
                     sceneObjects[name] = entityEl;
                 } else if (type === "camera") {
-                    entityEl.setAttribute('id', name + "_rigChild");
+                    entityEl.setAttribute('id', name ); // e.g. camera_1234_er1k
                     entityEl.setAttribute('rotation.order', "YXZ");
                     entityEl.object3D.position.set(0, 0, 0);
                     entityEl.object3D.rotation.set(0, 0, 0);
 
-                    let rigEl;
-                    rigEl = document.createElement('a-entity');
-                    rigEl.setAttribute('id', name);
-                    rigEl.setAttribute('rotation.order', "YXZ");
-                    rigEl.object3D.position.set(x, y, z);
-                    rigEl.object3D.rotation.set(xrot, yrot, zrot);
-
                     // this is the head 3d model
-                    let childEl = document.createElement('a-entity');
-		    childEl.setAttribute('id', "head-model_"+name);
-                    childEl.setAttribute('rotation', 0 + ' ' + 180 + ' ' + 0);
-                    childEl.object3D.scale.set(4, 4, 4);
-                    childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
+                    let headModelEl = document.createElement('a-entity');
+		    headModelEl.setAttribute('id', "head-model_"+name);
+                    headModelEl.setAttribute('rotation', '0 180 0');
+                    headModelEl.object3D.scale.set(1, 1, 1);
+		    headModelEl.setAttribute('dynamic-body', "type", "static");
+
+                    headModelEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
 
                     // place a colored text above the head
                     const headtext = document.createElement('a-text');
                     const personName = name.split('_')[2];
 
-                    headtext.setAttribute('id', "headtext");
+                    headtext.setAttribute('id', "headtext_"+name);
                     headtext.setAttribute('value', personName);
-                    headtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
+                    headtext.setAttribute('position', '0 0.2 0.05');
                     headtext.setAttribute('side', "double");
                     headtext.setAttribute('align', "center");
                     headtext.setAttribute('anchor', "center");
-                    headtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
+                    headtext.setAttribute('scale', '0.4 0.4 0.4');
+                    headtext.setAttribute('rotation', '0 180 0');
                     headtext.setAttribute('color', color); // color
                     headtext.setAttribute('width', 5); // try setting last
+		    
                     entityEl.appendChild(headtext);
-                    entityEl.appendChild(childEl);
+                    entityEl.appendChild(headModelEl);
+                    sceneObjects["head-text_"+name] = headtext;
+                    sceneObjects["head-model_"+name] = headModelEl;
 
-                    rigEl.appendChild(entityEl);
+                    sceneObjects.scene.appendChild(entityEl);
+                    sceneObjects[name] = entityEl;
 
-                    sceneObjects.scene.appendChild(rigEl);
-                    sceneObjects[name] = rigEl;
-
-                    entityEl = rigEl;
-
-                    //console.log("their camera:", rigEl);
+                    //console.log("their camera:", entityEl);
                 } else {
 		    entityEl.setAttribute('id', name);
 		    entityEl.setAttribute('rotation.order', "YXZ");
