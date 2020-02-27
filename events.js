@@ -1,5 +1,10 @@
-'use strict';
+// events.js
+//
+// Components and realtime event handlers
+// and globals
+// and utilities
 
+'use strict';
 
 function getUrlVars() {
     const vars = {};
@@ -20,19 +25,103 @@ function getUrlParam(parameter, defaultValue) {
     return urlParameter;
 }
 
+function getQueryParams(name, defaultValue) {
+    var qs = location.search;
+
+    var params = [];
+    var tokens;
+    var re = /[?&]?([^=]+)=([^&]*)/g;
+
+    while (tokens = re.exec(qs))
+    {
+	if (decodeURIComponent(tokens[1]) == name)
+	    params.push(decodeURIComponent(tokens[2]));
+    }
+
+    if (params === []) return defaultValue
+    else return params;
+}
+
+function getUrlParams(parameter, defaultValue) {
+    let urlParameter = defaultValue;
+    var indexes = [];
+    parameter = parameter+'=';
+    if (window.location.href.indexOf(parameter) > -1) {
+	var vars = getUrlVars();
+	for (var i=0; i<vars.length; i++) {
+	    if (vars[parameter] == parameter)
+		indexes.push(vars[i]);
+	}
+    } else
+	indexes.push(defaultValue);
+
+    return indexes;
+}
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
     updateMillis: 100,
     renderParam: getUrlParam('scene', 'render'), //scene
+    renderParams: getQueryParams('scene', 'render'), //scene
     userParam: getUrlParam('name', 'X'),
     themeParam: getUrlParam('theme', 'starry'),
     weatherParam: getUrlParam('weather', 'none'),
     mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
     fixedCamera: getUrlParam('fixedCamera', ''),
     vioTopic: "/topic/vio/",
-    frameCount: 0
+    frameCount: 0,
+    lastMouseTarget: undefined,
+    inAR: false,
+    isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
+    onEnterXR: function (xrType) {
+        if (xrType === 'ar') {
+            this.isAR = true;
+            if (this.isWebXRViewer) {
+                let base64script = document.createElement("script");
+                base64script.onload = async () => {
+                    await import('/apriltag/script.js');
+                };
+                base64script.src = '/apriltag/base64_binary.js';
+                document.head.appendChild(base64script);
+                document.addEventListener("mousedown", function (e) {
+                    if (window.globals.lastMouseTarget) {
+                        let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
+                        let elPos = el.object3D.position;
+                        let intersection = {x: elPos.x, y: elPos.y, z: elPos.z};
+                        el.emit("mousedown", {
+                            "clicker": window.globals.camName,
+                            intersection: {point: intersection},
+                            cursorEl: true
+                        }, false);
+                    }
+                });
+                document.addEventListener("mouseup", function (e) {
+                    if (window.globals.lastMouseTarget) {
+                        let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
+                        let elPos = el.object3D.position;
+                        let intersection = {x: elPos.x, y: elPos.y, z: elPos.z};
+                        el.emit("mouseup", {
+                            "clicker": window.globals.camName,
+                            intersection: {point: intersection},
+                            cursorEl: true
+                        }, false);
+                    }
+                });
+                document.getElementById('env').setAttribute('visible', false);
+                let cursor = document.getElementById('mouseCursor');
+                let cursorParent = cursor.parentNode;
+                cursorParent.removeChild(cursor);
+                cursor = document.createElement('a-cursor');
+                cursor.setAttribute('fuse', false);
+                cursor.setAttribute('max-distance', '1000');
+                cursor.setAttribute('id', 'fuse-cursor');
+                cursorParent.appendChild(cursor);
+            }
+        }
+    }
 };
+
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/' + globals.renderParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
@@ -58,6 +147,22 @@ globals.vioPosition = new THREE.Vector3();
 var camParent = new THREE.Matrix4();
 var cam       = new THREE.Matrix4();
 var cpi       = new THREE.Matrix4();
+
+globals.newViveLRotation = new THREE.Quaternion();
+globals.newViveLPosition = new THREE.Vector3();
+globals.vioViveLRotation = new THREE.Quaternion();
+globals.vioViveLPosition = new THREE.Vector3();
+var ViveLcamParent = new THREE.Matrix4();
+var ViveLcam       = new THREE.Matrix4();
+var ViveLcpi       = new THREE.Matrix4();
+
+globals.newViveRRotation = new THREE.Quaternion();
+globals.newViveRPosition = new THREE.Vector3();
+globals.vioViveRRotation = new THREE.Quaternion();
+globals.vioViveRPosition = new THREE.Vector3();
+var ViveRcamParent = new THREE.Matrix4();
+var ViveRcam       = new THREE.Matrix4();
+var ViveRcpi       = new THREE.Matrix4();
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
@@ -96,6 +201,7 @@ AFRAME.registerComponent('pose-listener', {
     })
 });
 
+
 AFRAME.registerComponent('vive-pose-listener', {
     init: function () {
         // Set up the tick throttling.
@@ -116,6 +222,43 @@ AFRAME.registerComponent('vive-pose-listener', {
         }
     })
 });
+
+/*
+AFRAME.registerComponent('vive-pose-listener', {
+    init: function () {
+        // Set up the tick throttling.
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+    },
+
+    tick: (function (t, dt) {
+	globals.newViveRRotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+	globals.newViveRPosition.setFromMatrixPosition(this.el.object3D.matrixWorld);
+
+	camParent = globals.sceneObjects.myCamera.object3D.parent.matrixWorld;
+	cam = globals.sceneObjects.myCamera.object3D.matrixWorld;
+	cpi.getInverse(ViveRcamParent);
+	cpi.multiply(ViveRcam);
+	globals.vioRotation.setFromRotationMatrix(cpi);
+	globals.vioPosition.setFromMatrixPosition(cpi);
+	//console.log(cpi);
+
+	const rotationCoords = rotToText(globals.newViveRRotation);
+	const positionCoords = coordsToText(globals.newViveRPosition);
+
+        const newPose = rotationCoords + " " + positionCoords;
+        if (this.lastPose !== newPose) {
+            this.el.emit('poseChanged', Object.assign(globals.newViveRPosition, globals.newViveRRotation));
+            this.el.emit('vioChanged', Object.assign(globals.vioViveRPosition, globals.vioViveRRotation));
+            this.lastPose = newPose;
+
+	    // DEBUG
+	    //debugConixText(newPosition);
+	    //debugRaw(this.el.object3D.matrixAutoUpdate + '\n' + this.el.object3D.matrixWorldNeedsUpdate +
+	    //	    '\n' + THREE.Object3D.DefaultMatrixAutoUpdate);
+        }
+    })
+});
+*/
 
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
@@ -228,6 +371,7 @@ AFRAME.registerComponent('impulse', {
 			const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
 			const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
 			el.body.applyImpulse(force, pos);
+			//console.log("element:", el, pos);
                     }
 		}
 
@@ -256,6 +400,218 @@ AFRAME.registerComponent('impulse', {
     }
 })
 
+// load new URL if clicked
+AFRAME.registerComponent('goto-url', {
+    schema: {
+	on: {default: ''}, // event to listen 'on'
+	url: {default: ''} // http:// style url
+    },
+    
+    multiple: true,
+
+    init: function () {
+	var self = this;
+    },
+
+    update: function(oldData) {
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
+
+	if (data.on) { // we have an event?
+	    el.addEventListener(data.on, function (args) {
+		console.log("goto-url url=" + data.url);
+		window.location.href = data.theUrl;
+	    });
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
+    },
+    
+    pause: function () {
+	//this.removeEventListeners()
+    },
+    play: function () {
+	//this.addEventListeners()
+    },
+    // handle component removal (why can't it just go away?)
+    remove: function () {
+	var data = this.data;
+	var el = this.el;
+
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
+    }
+})
+
+// load new URL if clicked
+AFRAME.registerComponent('prompt-box', {
+    schema: {
+	on: {default: ''}, // event to listen 'on'
+	prompt: {default: ''} // http:// style url
+    },
+    
+    multiple: true,
+
+    init: function () {
+	var self = this;
+    },
+
+    update: function(oldData) {
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
+
+	if (data.on) { // we have an event?
+	    console.log("adding prompt event listener");
+	    el.addEventListener(data.on, function (evt) {
+		if (!evt.detail.clicker) { // local event, not from MQTT
+		    console.log("called prompt listener");
+		    var person = prompt(data.prompt, "");
+		    var txt="";
+		    if (person == null || person == "") {
+			txt = "";
+		    } else {
+			txt = person;
+		    }
+		    const coordsData = setCoordsData(evt);
+		    const thisMsg = {
+			object_id: this.id,
+			action: "clientEvent",
+			type: "prompt-data",
+			data: {text: txt, source: this.id, position: coordsData}
+		    };
+		    publish(globals.outputTopic + this.id, thisMsg);
+
+		    console.log("prompt-box data: " + txt);
+		}
+	    });
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
+    },
+    
+    pause: function () {
+	//this.removeEventListeners()
+    },
+    play: function () {
+	//this.addEventListeners()
+    },
+    // handle component removal (why can't it just go away?)
+    remove: function () {
+	var data = this.data;
+	var el = this.el;
+
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
+    }
+})
+
+// load scene from persistence db
+AFRAME.registerComponent('load-scene', {
+    schema: {
+	on: {default: ''}, // event to listen 'on'
+	url: {default: ''}, // http:// style url
+	position: {
+	    type: 'vec3',
+	    default: { x: 0, y: 0, z: 0 }
+	},
+	rotation: {
+	    type: 'vec4',
+	    default: { x: 0, y: 0, z: 0, w: 1 }
+	}
+    },
+    
+    multiple: true,
+
+    init: function () {
+	var self = this;
+    },
+
+    update: function(oldData) {
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
+
+	if (data.on) { // we have an event?
+	    el.addEventListener(data.on, function (evt) {
+		if ('cursorEl' in evt.detail) {
+		    // internal click event, our scene only
+		} else {
+		    // MQTT click event that everyone gets
+		    console.log("load-scene url=" + data.url);
+		    if (!this.loaded) {
+			loadArena(data.url, data.position, data.rotation);
+			this.loaded = true;
+		    } else {
+			unloadArena(data.url);
+			this.loaded = false;
+		    }
+		}
+	    })
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
+    },
+    
+    pause: function () {
+	//this.removeEventListeners()
+    },
+    play: function () {
+	//this.addEventListeners()
+    },
+    // handle component removal (why can't it just go away?)
+    remove: function () {
+	var data = this.data;
+	var el = this.el;
+
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
+    }
+})
+
+// Component: listen for collisions, call defined function on event evt
+
+AFRAME.registerComponent('collision-listener', {
+    init: function () {
+	//console.log("collision-listener Component init");
+        this.el.addEventListener('collide', function (evt) {
+
+            //const coordsData = setClickData(evt);
+            const coordsData = {
+		x: 0,
+		y: 0,
+		z: 0
+	    };
+	    // colliding object
+	    const collider = evt.detail.body.el.id;
+	    const collideee = this.id;
+
+            // original click event; simply publish to MQTT
+            const thisMsg = {
+                object_id: this.id,
+                action: "clientEvent",
+                type: "collision",
+                data: {position: coordsData, source: collider}
+            };
+            publish(globals.outputTopic + this.id, thisMsg);
+            //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
+            //console.log(this.id + ' collision at: ', coordsToText(coordsData), 'by ', collider);
+        });
+    }});
+
 
 // Component: listen for clicks, call defined function on event evt
 
@@ -267,6 +623,7 @@ AFRAME.registerComponent('click-listener', {
 
             const coordsData = setClickData(evt);
 
+
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
                 let thisMsg = {
@@ -277,7 +634,7 @@ AFRAME.registerComponent('click-listener', {
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
                 //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-                console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
+                //console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
@@ -324,7 +681,7 @@ AFRAME.registerComponent('click-listener', {
         });
 
         this.el.addEventListener('mouseenter', function (evt) {
-
+            globals.lastMouseTarget = this.id;
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -344,7 +701,7 @@ AFRAME.registerComponent('click-listener', {
         });
 
         this.el.addEventListener('mouseleave', function (evt) {
-
+            globals.lastMouseTarget = undefined;
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
