@@ -253,53 +253,57 @@
 
             //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-      var objectName = document.getElementById("objectName").value
-      var objectType = document.getElementById("objectType").value
-      var mqttServer = document.getElementById("mqttServer").value
-      var selectedScene = document.getElementById("selectedScene").value
-      var gltfModel = document.getElementById("gltfUrl").value
-      var x = parseFloat(document.getElementById("x").value)
-      var y = parseFloat(document.getElementById("y").value)
-      var z = parseFloat(document.getElementById("z").value)
-      var qx = parseFloat(document.getElementById("qx").value)
-      var qy = parseFloat(document.getElementById("qy").value)
-      var qz = parseFloat(document.getElementById("qz").value)
-      var qw = parseFloat(document.getElementById("qw").value)
-      var sx = parseFloat(document.getElementById("sx").value)
-      var sy = parseFloat(document.getElementById("sy").value)
-      var sz = parseFloat(document.getElementById("sz").value)
-      var color = document.getElementById("color").value
-      var physics = document.getElementById("physics").value
-      var mypersist = document.getElementById("persist").checked
-      let ttl = parseInt(document.getElementById("ttl").value)
-      let parent = document.getElementById("parent").value
-      var clickable = document.getElementById("clickable").checked
-//      var json = document.getElementById("json").value
+            var objectName = document.getElementById("objectName").value;
+            var objectType = document.getElementById("objectType").value;
+            var mqttServer = document.getElementById("mqttServer").value;
+            var selectedScene = document.getElementById("selectedScene").value;
+            var gltfModel = document.getElementById("gltfUrl").value;
+            var x = parseFloat(document.getElementById("x").value);
+            var y = parseFloat(document.getElementById("y").value);
+            var z = parseFloat(document.getElementById("z").value);
+            var qx = parseFloat(document.getElementById("qx").value);
+            var qy = parseFloat(document.getElementById("qy").value);
+            var qz = parseFloat(document.getElementById("qz").value);
+            var qw = parseFloat(document.getElementById("qw").value);
+            var sx = parseFloat(document.getElementById("sx").value);
+            var sy = parseFloat(document.getElementById("sy").value);
+            var sz = parseFloat(document.getElementById("sz").value);
+            var color = document.getElementById("color").value;
+            var physics = document.getElementById("physics").value;
+            var mypersist = document.getElementById("persist").checked;
+            let ttl = parseInt(document.getElementById("ttl").value);
+            let parent = document.getElementById("parent").value;
+            let addJSON= document.getElementById("json").value;
+            var clickable = document.getElementById("clickable").checked;
+//      var json = document.getElementById("json").value;
 
-      let myMsg = {
-        object_id: objectName,
-        action: 'create',
-        type: 'object',
-        persist: mypersist,
-        data: {
-          object_type: objectType,
-          position: {x: x, y: y, z: z},
-          rotation: {x: qx, y: qy, z: qz, w: qw},
-          scale: {x: sx, y: sy, z: sz},
-          color: color,
-        }
-      };
-      if (!isNaN(ttl)) {
-        myMsg.ttl = ttl;
-      }
-      if (parent)
-        myMsg["data"]["parent"] = parent
-      if (objectType == 'gltf-model')
-        myMsg["data"]["url"] = gltfModel
-      if (physics!="none")
-        myMsg["data"]["dynamic-body"] = {'type': physics}
-      if (clickable)
-        myMsg["data"]["click-listener"] = ""
+            let myMsg = {
+                object_id: objectName,
+                action: 'create',
+                type: 'object',
+                persist: mypersist,
+                data: {
+                    object_type: objectType,
+                    position: {x: x, y: y, z: z},
+                    rotation: {x: qx, y: qy, z: qz, w: qw},
+                    scale: {x: sx, y: sy, z: sz},
+                    color: color,
+                }
+            };
+            if (!isNaN(ttl)) {
+                myMsg.ttl = ttl;
+            }
+            if (parent)
+                myMsg["data"]["parent"] = parent;
+            if (objectType == 'gltf-model')
+                myMsg["data"]["url"] = gltfModel;
+            if (physics != "none")
+                myMsg["data"]["dynamic-body"] = {'type': physics};
+            if (clickable)
+                myMsg["data"]["click-listener"] = "";
+            if (isJson(addJSON)) {
+              Object.assign(myMsg.data, addJSON)
+            }
 
             console.log(myMsg);
             var x = document.getElementById("rawjson");
@@ -313,46 +317,50 @@
 
             //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-      var objectName = document.getElementById("objectName").value
-      var objectType = document.getElementById("objectType").value
-      var mqttServer = document.getElementById("mqttServer").value
-      var selectedScene = document.getElementById("selectedScene").value
-      var gltfModel = document.getElementById("gltfUrl").value
-      var x = parseFloat(document.getElementById("x").value)
-      var y = parseFloat(document.getElementById("y").value)
-      var z = parseFloat(document.getElementById("z").value)
-      var qx = parseFloat(document.getElementById("qx").value)
-      var qy = parseFloat(document.getElementById("qy").value)
-      var qz = parseFloat(document.getElementById("qz").value)
-      var qw = parseFloat(document.getElementById("qw").value)
-      var sx = parseFloat(document.getElementById("sx").value)
-      var sy = parseFloat(document.getElementById("sy").value)
-      var sz = parseFloat(document.getElementById("sz").value)
-      var color = document.getElementById("color").value
-      var dychecked = document.getElementById("physics").checked
-      var mypersist = document.getElementById("persist").checked
-      var clickable = document.getElementById("clickable").checked
-//      var json = document.getElementById("json").value
+            var objectName = document.getElementById("objectName").value;
+            var objectType = document.getElementById("objectType").value;
+            var mqttServer = document.getElementById("mqttServer").value;
+            var selectedScene = document.getElementById("selectedScene").value;
+            var gltfModel = document.getElementById("gltfUrl").value;
+            var x = parseFloat(document.getElementById("x").value);
+            var y = parseFloat(document.getElementById("y").value);
+            var z = parseFloat(document.getElementById("z").value);
+            var qx = parseFloat(document.getElementById("qx").value);
+            var qy = parseFloat(document.getElementById("qy").value);
+            var qz = parseFloat(document.getElementById("qz").value);
+            var qw = parseFloat(document.getElementById("qw").value);
+            var sx = parseFloat(document.getElementById("sx").value);
+            var sy = parseFloat(document.getElementById("sy").value);
+            var sz = parseFloat(document.getElementById("sz").value);
+            var color = document.getElementById("color").value;
+            var dychecked = document.getElementById("physics").checked;
+            var mypersist = document.getElementById("persist").checked;
+            let addJSON= document.getElementById("json").value;
+            var clickable = document.getElementById("clickable").checked;
+//      var json = document.getElementById("json").value;
 
-      let myMsg = {
-        object_id: objectName,
-        action: 'update',
-        type: 'object',
-        persist: mypersist,
-        data: {
-          object_type: objectType,
-          position: {x: x, y: y, z: z},
-          rotation: {x: qx, y: qy, z: qz, w: qw},
-          scale: {x: sx, y: sy, z: sz},
-          color: color,
-        }
-      };
-      if (objectType == 'gltf-model')
-        myMsg["data"]["url"] = gltfModel
-      if (dychecked)
-        myMsg["data"]["dynamic-body"] = {'type': 'dynamic'}
-      if (clickable)
-        myMsg["data"]["click-listener"] = ""
+            let myMsg = {
+                object_id: objectName,
+                action: 'update',
+                type: 'object',
+                persist: mypersist,
+                data: {
+                    object_type: objectType,
+                    position: {x: x, y: y, z: z},
+                    rotation: {x: qx, y: qy, z: qz, w: qw},
+                    scale: {x: sx, y: sy, z: sz},
+                    color: color,
+                }
+            };
+            if (objectType == 'gltf-model')
+                myMsg["data"]["url"] = gltfModel;
+            if (dychecked)
+                myMsg["data"]["dynamic-body"] = {'type': 'dynamic'};
+            if (clickable)
+                myMsg["data"]["click-listener"] = "";
+            if (isJson(addJSON)) {
+              Object.assign(myMsg.data, addJSON)
+            }
 
             console.log(myMsg);
             var x = document.getElementById("rawjson");
