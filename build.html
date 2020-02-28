@@ -1,242 +1,257 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <font size=6>ARENA Build</font>
-    <img src="images/conix-face-white.jpg" align=center></img>
-    <br><br>
+<head>
     <meta charset="utf-8"/>
     <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
     <script src="vendor/mqttws31.js" type="text/javascript"></script>
     <script type="text/javascript">
-      'use strict';
+        'use strict';
 
-var timeID = new Date().getTime() % 10000
-//const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-const client = new Paho.MQTT.Client('wss://oz.andrew.cmu.edu/mqtt', timeID.toString());
+        var timeID = new Date().getTime() % 10000
+        //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
+        const client = new Paho.MQTT.Client('wss://oz.andrew.cmu.edu/mqtt', timeID.toString());
 
-client.onConnectionLost = onConnectionLost;
-client.onMessageArrived = onMessageArrived;
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
 
-function onMessageArrived(message, jsonMessage) {
-    console.log("Message arrived");
-}
+        function onMessageArrived(message, jsonMessage) {
+            console.log("Message arrived");
+        }
 
-client.connect({
-    onSuccess: onConnect
-});
+        client.connect({
+            onSuccess: onConnect
+        });
 
-// Callback for client.connect()
-function onConnect() {
-    console.log("Connection onSuccess");
-}
+        // Callback for client.connect()
+        function onConnect() {
+            console.log("Connection onSuccess");
+        }
 
-function onConnectionLost(responseObject) {
-    console.log("connection lost");
-    if (responseObject.errorCode !== 0) {
-        console.log(responseObject.errorMessage);
-    } // reconnect
-    //client.connect({onSuccess: onConnect});
-}
+        function onConnectionLost(responseObject) {
+            console.log("connection lost");
+            if (responseObject.errorCode !== 0) {
+                console.log(responseObject.errorMessage);
+            } // reconnect
+            //client.connect({onSuccess: onConnect});
+        }
 
-const publish_retained = (dest, msg) => {
-    //console.log('desint :', dest, 'msggg', msg)
-    let message = new Paho.MQTT.Message(msg);
-    message.destinationName = dest;
-    message.retained = true;
-    // message.qos = 2;
-    client.send(message);
-};
+        const publish_retained = (dest, msg) => {
+            //console.log('desint :', dest, 'msggg', msg)
+            let message = new Paho.MQTT.Message(msg);
+            message.destinationName = dest;
+            message.retained = true;
+            // message.qos = 2;
+            client.send(message);
+        };
 
-const publish = (dest, msg) => {
-    if (typeof msg === 'object') {
-        msg = JSON.stringify(msg);
-    }
-    //console.log('desint :', dest, 'msggg', msg)
-    let message = new Paho.MQTT.Message(msg);
-    message.destinationName = dest;
-    client.send(message);
-};
+        const publish = (dest, msg) => {
+            if (typeof msg === 'object') {
+                msg = JSON.stringify(msg);
+            }
+            //console.log('desint :', dest, 'msggg', msg)
+            let message = new Paho.MQTT.Message(msg);
+            message.destinationName = dest;
+            client.send(message);
+        };
 
-function isJson(str) {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
+        function isJson(str) {
+            try {
+                JSON.parse(str);
+            } catch (e) {
+                return false;
+            }
+            return true;
+        }
     </script>
 
     <style type="text/css">
-      body {
-      font-family: Arial, Helvetica, "Sans Serif";
-      }
-      h1 {
-      font-family: Helvetica, Geneva, Arial,
-      SunSans-Regular, sans-serif }
-      .json_div {
-      font-family: monospace;
-      }
-        </style>
-  </head>
-  <body>
+        body {
+            font-family: Arial, Helvetica, "Sans Serif";
+        }
 
+        h1 {
+            font-family: Helvetica, Geneva, Arial,
+            SunSans-Regular, sans-serif
+        }
+
+        .json_div {
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+<H1>ARENA Build</H1>
+<img src="images/conix-face-white.jpg" align=center/>
+<br><br>
 <table>
-<tr>
-  <td>object_id:</td>
-  <td>
-    <input type="text" size="20" id="objectName"></input>
-    </td>
-</tr>
-<tr>
-  <td>
-    object_type:
-  </td>
-  <td>
-    <select id="objectType">
-      <option value="cube">cube</option>
-      <option value="sphere">sphere</option>
-      <option value="circle">circle</option>
-      <option value="cone">cone</option>
-      <option value="cylinder">cylinder</option>
-      <option value="dodecahedron">dodecahedron</option>
-      <option value="icosahedron">icosahedron</option>
-      <option value="tetrahedron">tetrahedron</option>
-      <option value="octahedron">octahedron</option>
-      <option value="plane">plane</option>
-      <option value="ring">ring</option>
-      <option value="torus">torus</option>
-      <option value="torusKnot">torusKnot</option>
-      <option value="triangle">triangle</option>
-      <option value="gltf-model">gltf-model</option>
-    </select>
-  </td>
-</tr>
-<tr>
-  <td>
-    &nbsp;&nbsp;GLTF model URL:
-  </td>
-  <td>
-    &nbsp;&nbsp;<input type="text" size="30" id="gltfUrl" value=""></input>
-  </td>
-</tr>
+    <tr>
+        <td>object_id:</td>
+        <td>
+            <input type="text" size="20" id="objectName"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            object_type:
+        </td>
+        <td>
+            <select id="objectType">
+                <option value="cube">cube</option>
+                <option value="sphere">sphere</option>
+                <option value="circle">circle</option>
+                <option value="cone">cone</option>
+                <option value="cylinder">cylinder</option>
+                <option value="dodecahedron">dodecahedron</option>
+                <option value="icosahedron">icosahedron</option>
+                <option value="tetrahedron">tetrahedron</option>
+                <option value="octahedron">octahedron</option>
+                <option value="plane">plane</option>
+                <option value="ring">ring</option>
+                <option value="torus">torus</option>
+                <option value="torusKnot">torusKnot</option>
+                <option value="triangle">triangle</option>
+                <option value="gltf-model">gltf-model</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            &nbsp;&nbsp;GLTF model URL:
+        </td>
+        <td>
+            &nbsp;&nbsp;<input type="text" size="30" id="gltfUrl" value=""/>
+        </td>
+    </tr>
 
-<tr>
-  <td>
-    MQTT server:
-  </td>
-  <td>
-    <input type="text" size="20" id="mqttServer" value="oz.andrew.cmu.edu"></input>
-  </td>
-</tr>
-<tr>
-  <td>
-    scene:
-  </td>
-  <td>
-    <input type=text size="20" id="selectedScene" value="render"></input>
-  </td>
-</tr>
-<tr>
-  <td>
-    position (x y z):
-    </td>
-<td>
-  <input type=text size="5" id="x" value="0"></input><input type=text size="5" id="y" value="0"></input><input type=text size="5" id="z" value="0"></input>
-  </td>
-</tr>
-<tr>
-  <td>
-    rotation (x y z w):
-  </td>
-  <td>
-    <input type=text size="5" id="qx" value="0"></input><input type=text size="5" id="qy" value="0"></input><input type=text size="5" id="qz" value="0"></input><input type=text size="5" id="qw" value="1"></input>
-  </td>
-</tr>
-<tr>
-  <td>
-    scale (x y z):
-  </td>
-  <td>
-    <input type=text size="5" id="sx" value="1"></input><input type=text size="5" id="sy" value="1"></input><input type=text size="5" id="sz" value="1"></input><br>
-  </td>
-</tr>
-<tr>
-  <td>
-    color:
-  </td>
-  <td>
-    <input type=color id="color" value="#FFFFFF"></input>
-  </td>
-<tr>
-  <td>
-    physics:
-  </td>
-  <td>
-    <select id="physics">
-      <option value="none">none</option>
-      <option value="static">static</option>
-      <option value="dynamic">dynamic</option>
-    </select>
-  </td>
-</tr>
-<tr>
-  <td>
-    click-listener:
-  </td>
-  <td>
-    <input type=checkbox id="clickable"></input><br>
-  </td>
-</tr>
-<tr>
-  <td>
-    persist:
-  </td>
-  <td>
-    <input type=checkbox id="persist"></input>
-  </td>
-</tr>
-<tr>
-  <td>
-    ttl:
-  </td>
-  <td>
-    <input type="text" id="ttl"></input>
-  </td>
-</tr>
-<tr>
-  <td>
-    parent:
-  </td>
-  <td>
-    <input type="text" id="parent"></input>
-  </td>
-</tr>
-<!--
-<tr>
-  <td>
-    Raw JSON:
-  </td>
-  <td>
-    <input type=text size="35" id="json"></input>
-  </td>
-</tr>
--->
-<tr>
-<td>
-</td>
-  <td>
-    <button type="Button" onclick="goThere()">Create</button>
-    <button type="Button" onclick="doUpdate()">Update</button>
-    <button type="Button" onclick="dontGoThere()">Delete</button>
-  </td>
-</tr>
-<tr><td><hr></td><td><hr></td></tr>
+    <tr>
+        <td>
+            MQTT server:
+        </td>
+        <td>
+            <input type="text" size="20" id="mqttServer" value="oz.andrew.cmu.edu"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            scene:
+        </td>
+        <td>
+            <input type=text size="20" id="selectedScene" value="render"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            position (x y z):
+        </td>
+        <td>
+            <input type=text size="5" id="x" value="0"/>
+            <input type=text size="5" id="y" value="0"/>
+            <input type=text size="5" id="z" value="0"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            rotation (x y z w):
+        </td>
+        <td>
+            <input type=text size="5" id="qx" value="0"/>
+            <input type=text size="5" id="qy" value="0"/>
+            <input type=text size="5" id="qz" value="0"/>
+            <input type=text size="5" id="qw" value="1"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            scale (x y z):
+        </td>
+        <td>
+            <input type=text size="5" id="sx" value="1"/>
+            <input type=text size="5" id="sy" value="1"/>
+            <input type=text size="5" id="sz" value="1"/>
+            <br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            color:
+        </td>
+        <td>
+            <input type=color id="color" value="#FFFFFF"/>
+        </td>
+    <tr>
+        <td>
+            physics:
+        </td>
+        <td>
+            <select id="physics">
+                <option value="none">none</option>
+                <option value="static">static</option>
+                <option value="dynamic">dynamic</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            click-listener:
+        </td>
+        <td>
+            <input type=checkbox id="clickable"/><br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            persist:
+        </td>
+        <td>
+            <input type=checkbox id="persist"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            ttl:
+        </td>
+        <td>
+            <input type="text" id="ttl"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            parent:
+        </td>
+        <td>
+            <input type="text" id="parent"/>
+        </td>
+    </tr>
+    <tr>
+      <td>
+        Raw JSON:
+      </td>
+      <td>
+        <textarea type=text rows="4" cols="50" id="json"></textarea>
+      </td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+        <td>
+            <button type="Button" onclick="goThere()">Create</button>
+            <button type="Button" onclick="doUpdate()">Update</button>
+            <button type="Button" onclick="dontGoThere()">Delete</button>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <hr>
+        </td>
+        <td>
+            <hr>
+        </td>
+    </tr>
 
     <script type="text/javascript">
-      function goThere() {
+        function goThere() {
 
-      //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
       var objectName = document.getElementById("objectName").value
       var objectType = document.getElementById("objectType").value
@@ -286,17 +301,17 @@ function isJson(str) {
       if (clickable)
         myMsg["data"]["click-listener"] = ""
 
-      console.log(myMsg);
-      var x = document.getElementById("rawjson");
-      x.innerHTML=JSON.stringify(myMsg);
-      publish("realm/s/"+selectedScene, myMsg);
-      
-      //go to url window.location.href = theUrl;      
-      }
+            console.log(myMsg);
+            var x = document.getElementById("rawjson");
+            x.innerHTML = JSON.stringify(myMsg);
+            publish("realm/s/" + selectedScene, myMsg);
 
-      function doUpdate() {
+            //go to url window.location.href = theUrl;
+        }
 
-      //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+        function doUpdate() {
+
+            //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
       var objectName = document.getElementById("objectName").value
       var objectType = document.getElementById("objectType").value
@@ -339,202 +354,209 @@ function isJson(str) {
       if (clickable)
         myMsg["data"]["click-listener"] = ""
 
-      console.log(myMsg);
-      var x = document.getElementById("rawjson");
-      x.innerHTML=JSON.stringify(myMsg);
-      publish("realm/s/"+selectedScene, myMsg);
-      
-      //go to url window.location.href = theUrl;      
-      }
-      
-      function dontGoThere() {
+            console.log(myMsg);
+            var x = document.getElementById("rawjson");
+            x.innerHTML = JSON.stringify(myMsg);
+            publish("realm/s/" + selectedScene, myMsg);
 
-      //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-
-      var objectName = document.getElementById("objectName").value
-      var objectType = document.getElementById("objectType").value
-      var mqttServer = document.getElementById("mqttServer").value
-      var selectedScene = document.getElementById("selectedScene").value
-      var gltfModel = document.getElementById("gltfUrl").value
-      var x = parseFloat(document.getElementById("x").value)
-      var y = parseFloat(document.getElementById("y").value)
-      var z = parseFloat(document.getElementById("z").value)
-      var qx = parseFloat(document.getElementById("qx").value)
-      var qy = parseFloat(document.getElementById("qy").value)
-      var qz = parseFloat(document.getElementById("qz").value)
-      var qw = parseFloat(document.getElementById("qw").value)
-      var sx = parseFloat(document.getElementById("sx").value)
-      var sy = parseFloat(document.getElementById("sy").value)
-      var sz = parseFloat(document.getElementById("sz").value)
-      var color = document.getElementById("color").value
-      var dychecked = document.getElementById("physics").checked
-      var mypersist = document.getElementById("persist").checked
-
-      let myMsg = {
-        object_id: objectName,
-        action: 'delete',
-      };
-
-      console.log(myMsg);
-      var x = document.getElementById("rawjson");
-      x.innerHTML=JSON.stringify(myMsg);
-    
-      publish("realm/s/"+selectedScene, myMsg);
-      
-      //go to url window.location.href = theUrl;      
-      }
-      
-    </script>
-<tr>
-  <td>
-    thickline (x y z, x2 y2 z2, ...):
-  </td>
-  <td>
-    <input type=text size="20" id="thickline" value="0 0 0, 1 1 1"></input>
-  </td>
-<tr>
-  <td>
-    thickness:
-  </td>
-  <td>
-    <input type=text size="5" id="thickness" value="10"></input>
-  </td>
-</tr>
-<tr>
-<td>
-</td>
-  <td>
-    <button type="Button" onclick="doLine()">Create Line</button>
-    </td>
-    <script type="text/javascript">
-      function doLine() {
-
-      //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-
-      var objectName = document.getElementById("objectName").value
-      var objectType = document.getElementById("objectType").value
-      var mqttServer = document.getElementById("mqttServer").value
-      var selectedScene = document.getElementById("selectedScene").value
-      var color = document.getElementById("color").value
-      var thickness = document.getElementById("thickness").value
-      var thickpath = document.getElementById("thickline").value
-      var mypersist = document.getElementById("persist").checked
-
-      let myMsg = {
-      object_id: objectName,
-      action: 'create',
-      type: 'object',
-      persist: mypersist,
-      data: {
-        object_type: 'thickline',
-        lineWidth: thickness,
-        path: thickpath,
-        color: color,
-      }
-      };
-
-      console.log(myMsg);
-      var x = document.getElementById("rawjson");
-      x.innerHTML=JSON.stringify(myMsg);
-
-      publish("realm/s/"+selectedScene, myMsg);
-      
-      //go to url window.location.href = theUrl;      
-      }
-    </script>
-    </tr>
-<tr><td><hr></td><td><hr></td></tr>
-<tr>
-  <td>
-    light:
-  </td>
-  <td>
-    <select id="lightType">
-      <option value="ambient">ambient</option>
-      <option value="directional">directional</option>
-      <option value="hemisphere">hemisphere</option>
-      <option value="point">point</option>
-      <option value="spot">spot</option>
-    </select>
-  </td>
-</tr>
-<tr>
-<td>
-</td>
-  <td>
-    <button type="Button" onclick="doLight()">Create Light</button>
-    </td>
-    <script type="text/javascript">
-      function doLight() {
-
-      //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-
-      var objectName = document.getElementById("objectName").value
-      var objectType = document.getElementById("objectType").value
-      var mqttServer = document.getElementById("mqttServer").value
-      var selectedScene = document.getElementById("selectedScene").value
-      var color = document.getElementById("color").value
-      var thickness = document.getElementById("thickness").value
-      var thickpath = document.getElementById("thickline").value
-      var mypersist = document.getElementById("persist").checked
-      var lighttype = document.getElementById("lightType").value
-
-      let myMsg = {
-        object_id: objectName,
-        action: 'create',
-        persist: mypersist,
-        data: {
-          object_type: 'light',
-          position: {x: x, y: y, z: z},
-          rotation: {x: qx, y: qy, z: qz, w: qw},
-          scale: {x: sx, y: sy, z: sz},
-          color: color,
-          light: {'type': lighttype}
+            //go to url window.location.href = theUrl;
         }
-      };
 
-      console.log(myMsg);
-      var x = document.getElementById("rawjson");
-      x.innerHTML=JSON.stringify(myMsg);
-      publish("realm/s/"+selectedScene, myMsg);
-      }
+        function dontGoThere() {
+
+            //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
+            var objectName = document.getElementById("objectName").value;
+            var objectType = document.getElementById("objectType").value;
+            var mqttServer = document.getElementById("mqttServer").value;
+            var selectedScene = document.getElementById("selectedScene").value;
+            var gltfModel = document.getElementById("gltfUrl").value;
+            var x = parseFloat(document.getElementById("x").value);
+            var y = parseFloat(document.getElementById("y").value);
+            var z = parseFloat(document.getElementById("z").value);
+            var qx = parseFloat(document.getElementById("qx").value);
+            var qy = parseFloat(document.getElementById("qy").value);
+            var qz = parseFloat(document.getElementById("qz").value);
+            var qw = parseFloat(document.getElementById("qw").value);
+            var sx = parseFloat(document.getElementById("sx").value);
+            var sy = parseFloat(document.getElementById("sy").value);
+            var sz = parseFloat(document.getElementById("sz").value);
+            var color = document.getElementById("color").value;
+            var dychecked = document.getElementById("physics").checked;
+            var mypersist = document.getElementById("persist").checked;
+
+            let myMsg = {
+                object_id: objectName,
+                action: 'delete',
+            };
+
+            console.log(myMsg);
+            var x = document.getElementById("rawjson");
+            x.innerHTML = JSON.stringify(myMsg);
+
+            publish("realm/s/" + selectedScene, myMsg);
+
+            //go to url window.location.href = theUrl;
+        }
+
     </script>
-</tr>
-<tr>
-  <td>
-    <script type="text/javascript">
-function dumpJson() {
-    let xhr = new XMLHttpRequest();
-    var mqttServer = document.getElementById("mqttServer").value;
-    var sceneName = document.getElementById("selectedScene").value;
-    xhr.open('GET', '//' + mqttServer + '/' + sceneName);
-    xhr.responseType = 'json';
-    xhr.send();
-    var theMessage = '';
-    xhr.onload = () => {
-        console.log(xhr.status, xhr.statusText);
-        let arenaObjects = xhr.response;
-        let l = arenaObjects.length;
-        for(let i = 0; i < l; i++) {
-            let obj = arenaObjects[i];
-	    let msg = {
-		object_id: obj.object_id,
-		action: 'create',
-		persist: true,
-		data: obj.attributes
-	    }
-            theMessage = theMessage + '<br>\n' + JSON.stringify(msg);
-	}
-	var x = document.getElementById("rawjson");
-	x.innerHTML=theMessage;
-			   }
-}
-    </script>
-    <button type="Button" onclick="dumpJson()">Dump Scene JSON</button>
-  </td>
-</tr>
+    <tr>
+        <td>
+            thickline (x y z, x2 y2 z2, ...):
+        </td>
+        <td>
+            <input type=text size="20" id="thickline" value="0 0 0, 1 1 1"/>
+        </td>
+    <tr>
+        <td>
+            thickness:
+        </td>
+        <td>
+            <input type=text size="5" id="thickness" value="10"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+        <td>
+            <button type="Button" onclick="doLine()">Create Line</button>
+        </td>
+        <script type="text/javascript">
+            function doLine() {
+
+                //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
+                var objectName = document.getElementById("objectName").value;
+                var objectType = document.getElementById("objectType").value;
+                var mqttServer = document.getElementById("mqttServer").value;
+                var selectedScene = document.getElementById("selectedScene").value;
+                var color = document.getElementById("color").value;
+                var thickness = document.getElementById("thickness").value;
+                var thickpath = document.getElementById("thickline").value;
+                var mypersist = document.getElementById("persist").checked;
+
+                let myMsg = {
+                    object_id: objectName,
+                    action: 'create',
+                    type: 'object',
+                    persist: mypersist,
+                    data: {
+                        object_type: 'thickline',
+                        lineWidth: thickness,
+                        path: thickpath,
+                        color: color,
+                    }
+                };
+
+                console.log(myMsg);
+                var x = document.getElementById("rawjson");
+                x.innerHTML = JSON.stringify(myMsg);
+
+                publish("realm/s/" + selectedScene, myMsg);
+
+                //go to url window.location.href = theUrl;
+            }
+        </script>
+    </tr>
+    <tr>
+        <td>
+            <hr>
+        </td>
+        <td>
+            <hr>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            light:
+        </td>
+        <td>
+            <select id="lightType">
+                <option value="ambient">ambient</option>
+                <option value="directional">directional</option>
+                <option value="hemisphere">hemisphere</option>
+                <option value="point">point</option>
+                <option value="spot">spot</option>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>
+        </td>
+        <td>
+            <button type="Button" onclick="doLight()">Create Light</button>
+        </td>
+        <script type="text/javascript">
+            function doLight() {
+
+                //const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+
+                var objectName = document.getElementById("objectName").value;
+                var objectType = document.getElementById("objectType").value;
+                var mqttServer = document.getElementById("mqttServer").value;
+                var selectedScene = document.getElementById("selectedScene").value;
+                var color = document.getElementById("color").value;
+                var thickness = document.getElementById("thickness").value;
+                var thickpath = document.getElementById("thickline").value;
+                var mypersist = document.getElementById("persist").checked;
+                var lighttype = document.getElementById("lightType").value;
+
+                let myMsg = {
+                    object_id: objectName,
+                    action: 'create',
+                    persist: mypersist,
+                    data: {
+                        object_type: 'light',
+                        position: {x: x, y: y, z: z},
+                        rotation: {x: qx, y: qy, z: qz, w: qw},
+                        scale: {x: sx, y: sy, z: sz},
+                        color: color,
+                        light: {'type': lighttype}
+                    }
+                };
+
+                console.log(myMsg);
+                var x = document.getElementById("rawjson");
+                x.innerHTML = JSON.stringify(myMsg);
+                publish("realm/s/" + selectedScene, myMsg);
+            }
+        </script>
+    </tr>
+    <tr>
+        <td>
+            <script type="text/javascript">
+                function dumpJson() {
+                    let xhr = new XMLHttpRequest();
+                    var mqttServer = document.getElementById("mqttServer").value;
+                    var sceneName = document.getElementById("selectedScene").value;
+                    xhr.open('GET', '//' + mqttServer + '/' + sceneName);
+                    xhr.responseType = 'json';
+                    xhr.send();
+                    var theMessage = '';
+                    xhr.onload = () => {
+                        console.log(xhr.status, xhr.statusText);
+                        let arenaObjects = xhr.response;
+                        let l = arenaObjects.length;
+                        for (let i = 0; i < l; i++) {
+                            let obj = arenaObjects[i];
+                            let msg = {
+                                object_id: obj.object_id,
+                                action: 'create',
+                                persist: true,
+                                data: obj.attributes
+                            };
+                            theMessage = theMessage + '<br>\n' + JSON.stringify(msg);
+                        }
+                        var x = document.getElementById("rawjson");
+                        x.innerHTML = theMessage;
+                    }
+                }
+            </script>
+            <button type="Button" onclick="dumpJson()">Dump Scene JSON</button>
+        </td>
+    </tr>
 </table>
 raw JSON:
 <div class="json_div" id="rawjson" type="text" size="40" value=""></div>
-  </body>
+</body>
 </html>
