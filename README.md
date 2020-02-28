@@ -328,6 +328,15 @@ remove the "enter VR" icon:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render -m '{"object_id" : "scene",  "action": "update", "type": "object", "data": {"vr-mode-ui": {"enabled": false}}}'
 ```
+other 'global' ARENA objects, by object_id:
+ * **groundPlane** an invisible 40x40m plane with physics set to 'static' that prevents objects from falling through the floor, and receives collision events
+ * **cameraRig** access to the translational part of camera rig object (to set data attributes beyond what rig update messages do)
+ * **cameraSpinner** access the part of the rig that does only rotation
+ * **weather** (if enabled) simple weather using particles for snow, rain, dust
+ * **scene** the root entity, parent of all objects
+ * **env** environments (see "A-Frame environments"): ground, trees, pillars, background, sky etc.
+ * **boxObj** a hard-coded box used for debugging
+ * **conix-text** a fixed text object used for debugging
 
 ## Discussion
 ### Camera
