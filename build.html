@@ -302,7 +302,7 @@
             if (clickable)
                 myMsg["data"]["click-listener"] = "";
             if (isJson(addJSON)) {
-              Object.assign(myMsg.data, addJSON)
+              Object.assign(myMsg.data, JSON.parse(addJSON));
             }
 
             console.log(myMsg);
@@ -359,7 +359,7 @@
             if (clickable)
                 myMsg["data"]["click-listener"] = "";
             if (isJson(addJSON)) {
-              Object.assign(myMsg.data, addJSON)
+              Object.assign(myMsg.data, JSON.parse(addJSON));
             }
 
             console.log(myMsg);
