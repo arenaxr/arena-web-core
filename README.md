@@ -335,8 +335,8 @@ other 'global' ARENA objects, by object_id:
  * **weather** (if enabled) simple weather using particles for snow, rain, dust
  * **scene** the root entity, parent of all objects
  * **env** environments (see "A-Frame environments"): ground, trees, pillars, background, sky etc.
- * **boxObj** a hard-coded box used for debugging
- * **conix-text** a fixed text object used for debugging
+ * **conix_box** a hard-coded box used for debugging
+ * **conix_text** a fixed text object used for debugging
 
 ## Discussion
 ### Camera
