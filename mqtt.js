@@ -141,8 +141,11 @@ function onConnect() {
     sceneObjects.weather = document.getElementById('weather');
     sceneObjects.scene = document.querySelector('a-scene');
     sceneObjects.env = document.getElementById('env');
-    sceneObjects.boxObj = document.getElementById('boxObj');
     sceneObjects.myCamera = document.getElementById('my-camera');
+    sceneObjects.conix_box = document.getElementById('conix_box');
+    sceneObjects.env_box = document.getElementById('env_box');
+    sceneObjects.sound_box = document.getElementById('sound_box');
+    sceneObjects.conix_text = document.getElementById('conix_text');
 
     var oldMsg = '';
 

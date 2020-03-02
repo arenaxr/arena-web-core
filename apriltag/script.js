@@ -47,7 +47,7 @@ var fx=0, fy=0, cx=0, cy=0;
 
 window.processCV = async function(frame) {
     cvThrottle++;
-    if (cvThrottle % 30) { return; }
+    if (cvThrottle % 15) { return; }
 //    console.log(frame);
 
     let vio = JSON.stringify({ position: globals.vioPosition, rotation: globals.vioRotation }); // Save this first before  it updates async

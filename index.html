@@ -68,7 +68,7 @@
 	<video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
 	-->
       <!-- ground plane so falling objects don't fall through floor -->
-      <a-plane static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
+      <a-plane sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/snd_WoodWood.ogg); on: collide" static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
       <!-- walls so rolling objects don't roll off edge -->
       <a-box static-body position="-15 1 0" id="border1" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
       <a-box static-body position="15 1 0" id="border2" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
@@ -79,9 +79,9 @@
  -->
       <a-entity id="env" environment="preset: starry; groundTexture: checkerboard"></a-entity>
 
-      <!--
+<!--
       <a-entity position="0 2.25 -4" id="weather" particle-system="preset: snow; enabled: true"></a-entity>
-      -->
+-->
       <a-entity position="0 0 0" id="CameraRig"><!-- movement-controls="fly: true; speed=0.3"> -->
 	<a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
 	  <!-- this camera can 'fly': z axis follows pitch of head direction -->
@@ -90,7 +90,7 @@
 		<a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor> 
 		  <a-cursor fuse="true" max-distance="1000" timeout="1500"></a-cursor>
 		  -->
-	    <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects: [click-listener]"></a-entity>
+	    <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
 
 
 	  </a-camera>
@@ -108,19 +108,28 @@
       
       <!-- video example: may autoplay in Firefox, all black in Chrome :-/ 
 	   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
+
+
+      <a-box static-body collision-listener sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/toypiano/Gsharp1.wav); on: collide" id="sound_box" position="0 0.5 -2" scale="0.5 0.5 0.5" >
+      </a-box>      
 	   -->
-      <a-box click-listener collision-listener load-scene="on: mousedown; url://oz.andrew.cmu.edu/drone; position: 0 0 0" position="1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="boxObj" name="Box" material="src: images/conix-face-black.png">
+      
+      <a-box click-listener env sound id="env_box" position="-1.5 0.5 -2" scale="0.5 0.5 0.5" material="src: images/conix-face-white.jpg">
       </a-box>
+
+      <a-box click-listener collision-listener load-scene="on: mousedown; url://oz.andrew.cmu.edu/drone; position: 0 0 0" position="1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" material="src: images/conix-face-black.png">
+      </a-box>
+      
       <!-- demonstrate a clickable box that prompts for input & publishes entered text over MQTT
-      <a-box click-listener prompt-box="on: mousedown; prompt:name_please" position="-1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="boxObj" name="Box" material="src: images/conix-face-white.jpg">
+      <a-box click-listener prompt-box="on: mousedown; prompt:name_please" position="-1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" material="src: images/conix-face-white.jpg">
       </a-box>
 	-->
       <!-- CONIX cube for debugging click events 
-      <a-entity vive-listener click-listener position="1.5 0.5 1" rotation="0 0 0" scale="0.5 0.5 0.5" id="boxObj" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
+      <a-entity vive-listener click-listener position="1.5 0.5 1" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
       </a-entity>
-      <a-text id="conix-text" position="1.5 1.3 1" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
+      <a-text id="conix_text" position="1.5 1.3 1" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
       -->
-      <a-text id="conix-text" value="" position="0 1.3 -2" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
+      <a-text id="conix_text" value="" position="0 1.3 -2" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
       <!-- let there be LIGHTS -->
       <a-light position="-0.93 1.58 -1.14" name="PointLight 1" type="point" color="#9090AD" intensity="0.75"></a-light>
