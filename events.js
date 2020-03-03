@@ -123,7 +123,7 @@ window.globals = {
 };
 
 
-globals.persistenceUrl = '//' + globals.mqttParamZ + '/' + globals.renderParam;
+globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
 globals.outputTopic = "realm/s/" + globals.renderParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
@@ -778,33 +778,33 @@ AFRAME.registerComponent('click-toggle', {
 
 AFRAME.registerComponent('env', {
     schema: {
-	count: { type: 'int', default: 0},
-	count2: { type: 'int', default: 0}
+	theEnv: { type: 'int', default: 0},
+	theTune: { type: 'int', default: 0}
     },
     init: function () {
 	var self = this;
 	var el = this.el;
 	var data = this.data;
-	var names = ["none","osiris","default","contact","egypt","checkerboard","forest","goaland","yavapi","goldmine","threetowers","poison","arches","tron","japan","dream","volcano","starry"]
+	var envs = ["none","osiris","default","contact","egypt","checkerboard","forest","goaland","yavapai","goldmine","threetowers","poison","arches","tron","japan","dream","volcano","starry"]
 	var tunes = ["358232_j_s_song.mp3", "376737_Skullbeatz___Bad_Cat_Maste.mp3", "Bliss.ogg", "Celestial.ogg", "Counterpoint.ogg", "Harmonics.ogg", "Latin.ogg", "Marimbach.ogg", "Miami_Slice_Solid_Gold.mp3", "Project_Utopia.ogg", "Soul.ogg", "Sparkle.ogg", "Supreme.ogg", "Tours-Enthusiast.mp3", "Ubuntu.ogg", "avatar2.ogg", "avatar4.ogg", "earth.mp3", "save_and_checkout.mp3", "wendy.mp3"] 
 
         el.addEventListener('mousedown', function (evt) {
 	    //console.log(evt.detail.clicker)
 	    if (!evt.detail.clicker) { // mqtt event, not locally browser-generated
-		var count = data.count + 1;
-		if (count > names.length)
-		    count = 0;
-		//console.log("count: ",count);
+		var envIndex = data.theEnv + 1;
+		if (envIndex == envs.length)
+		    envIndex = 0;
+		console.log("envIndex: ",envIndex,envs[envIndex]);
 
-		var count2 = data.count2 + 1;
-		if (count2 > tunes.length)
-		    count2 = 0;
-		//console.log("count2: ",count2);
+		var tuneIndex = data.theTune + 1;
+		if (tuneIndex == tunes.length)
+		    tuneIndex = 0;
+		console.log("tuneIndex: ",tuneIndex,tunes[tuneIndex]);
+		el.setAttribute('env', { 'theEnv': envIndex});
+		el.setAttribute('env', { 'theTune': tuneIndex});
 		
-		globals.sceneObjects.env.setAttribute('environment','preset',names[count]);
-		el.setAttribute('sound', {"src": 'url(https://xr.andrew.cmu.edu/audio/'+tunes[count]+')', "autoplay": true, "positional": false });
-		el.setAttribute('env', { 'count': count});
-		el.setAttribute('env', { 'count2': count2});
+		globals.sceneObjects.env.setAttribute('environment','preset',envs[envIndex]);
+		el.setAttribute('sound', {"src": 'url(audio/'+tunes[tuneIndex]+')', "autoplay": true, "positional": false });
 	    }
         });
     },
