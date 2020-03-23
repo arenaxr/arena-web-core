@@ -221,7 +221,7 @@ To draw a shape that is transparent, but occludes other virtual objects behind i
 ```
 {"material":{"colorWrite": false}, "render-order": "0"}
 ```
-colorWrite is an attribute of the THREE.js Shader Material that, by exposing it, we make accessible like to the Material A-Frame Component, and is an alternative way of controlling visibility. render-order is a custom Component that controls which objects are drawn first (not necessarily the same as which are "in front of" others). All other ARENA objects are drawn with render-order of 1. Note: this does not occlude the far background A-Frame layer, like stars, but in AR that is not drawn anyway.
+colorWrite is an attribute of the THREE.js Shader Material that, by exposing it, we make accessible like others belonging to the Material A-Frame Component, and is an alternative way of controlling visibility. render-order is a custom Component that controls which objects are drawn first (not necessarily the same as which are "in front of" others). All other ARENA objects are drawn with render-order of 1. Note: this does not occlude the far background A-Frame layer (like environment component stars) but in AR that layer is not drawn anyway.
 #### Background themes
 Adds one of many predefined backgrounds ( one of: [ none, default, contact, egypt, checkerboard, forest, goaland, yavapai, goldmine, threetowers, poison, arches, tron, japan, dream, volcano, starry, osiris]) to the scene
 ```
