@@ -143,6 +143,7 @@ function onConnect() {
     sceneObjects.env = document.getElementById('env');
     sceneObjects.myCamera = document.getElementById('my-camera');
     sceneObjects.conix_box = document.getElementById('conix_box');
+    sceneObjects.conix_box3 = document.getElementById('dots_sphere');
     sceneObjects.env_box = document.getElementById('env_box');
     sceneObjects.sound_box = document.getElementById('sound_box');
     sceneObjects.conix_text = document.getElementById('conix_text');
@@ -163,6 +164,9 @@ function onConnect() {
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+    var thex = sceneObjects.myCamera.object3D.position.x;
+    var they = sceneObjects.myCamera.object3D.position.y;
+    var thez = sceneObjects.myCamera.object3D.position.z;
     let myMsg = {
         object_id: globals.camName,
         action: 'create',
@@ -170,7 +174,7 @@ function onConnect() {
 	ttl: 3000,
         data: {
             object_type: 'camera',
-            position: {x: 0, y: 1.6, z: 0},
+            position: {x: thex, y: they, z: thez},
             rotation: {x: 0, y: 0, z: 0, w: 0},
             color: color
         },
@@ -182,6 +186,7 @@ function onConnect() {
 
     //console.log("my-camera element", sceneObjects.myCamera);
     console.log("my-camera name", globals.camName);
+    sceneObjects.myCamera.setAttribute('position', globals.startCoords);
 
     sceneObjects.myCamera.addEventListener('vioChanged', e => {
         //console.log(e.detail);
@@ -513,6 +518,10 @@ function onMessageArrived(message, jsonMessage) {
                 //console.log(entityEl);
             } else { // CREATE NEW SCENE OBJECT
                 entityEl = document.createElement('a-entity');
+
+		// wacky idea: force render order
+		entityEl.object3D.renderOrder = 1;
+
                 if (type === "viveLeft" || type === "viveRight") {
                     // create vive controller for 'other persons controller'
                     entityEl.setAttribute('id', name);
