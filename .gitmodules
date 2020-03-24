@@ -1,3 +1,6 @@
 [submodule "aframe"]
 	path = aframe
 	url = git@github.com:aframevr/aframe.git
+[submodule "apriltag/emscripten/apriltag"]
+	path = apriltag/emscripten/apriltag
+	url = https://github.com/AprilRobotics/apriltag.git
