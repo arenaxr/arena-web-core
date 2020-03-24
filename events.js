@@ -65,6 +65,7 @@ window.globals = {
     renderParam: getUrlParam('scene', 'render'), //scene
     renderParams: getQueryParams('scene', 'render'), //scene
     userParam: getUrlParam('name', 'X'),
+    startCoords: getUrlParam('location', '0,1.6,0').replace(/,/g,' '),
     themeParam: getUrlParam('theme', 'starry'),
     weatherParam: getUrlParam('weather', 'none'),
     mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
@@ -108,7 +109,6 @@ window.globals = {
                         }, false);
                     }
                 });
-                document.getElementById('env').setAttribute('visible', false);
                 let cursor = document.getElementById('mouseCursor');
                 let cursorParent = cursor.parentNode;
                 cursorParent.removeChild(cursor);
@@ -117,7 +117,8 @@ window.globals = {
                 cursor.setAttribute('max-distance', '1000');
                 cursor.setAttribute('id', 'fuse-cursor');
                 cursorParent.appendChild(cursor);
-            }
+            }	
+            document.getElementById('env').setAttribute('visible', false);
         }
     }
 };
@@ -296,7 +297,13 @@ function eventAction(evt, eventName, myThis) {
         object_id: objName,
         action: "clientEvent",
         type: eventName,
-        data: {position: coordsData, source: globals.camName}
+        data: {
+	    position: coordsData,
+	    source: globals.camName
+	    clickPos: vec3ToObject(
+		globals.sceneObjects.myCamera.object3D.position
+	    ),
+	}
     });
     //console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
 
@@ -309,6 +316,14 @@ function setCoordsData(evt) {
         x: parseFloat(evt.currentTarget.object3D.position.x.toFixed(3)),
         y: parseFloat(evt.currentTarget.object3D.position.y.toFixed(3)),
         z: parseFloat(evt.currentTarget.object3D.position.z.toFixed(3))
+    };
+}
+
+function vec3ToObject(vec) {
+    return {
+        x: parseFloat(vec.x.toFixed(3)),
+        y: parseFloat(vec.y.toFixed(3)),
+        z: parseFloat(vec.z.toFixed(3))
     };
 }
 
@@ -623,14 +638,19 @@ AFRAME.registerComponent('click-listener', {
 
             const coordsData = setClickData(evt);
 
-
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
                 let thisMsg = {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mousedown",
-                    data: {position: coordsData, source: globals.camName}
+                    data: {
+			position: coordsData,
+			source: globals.camName,
+			clickPos: vec3ToObject(
+			    globals.sceneObjects.myCamera.object3D.position
+			),
+		    }
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
                 //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
@@ -665,7 +685,13 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mouseup",
-                    data: {position: coordsData, source: globals.camName}
+                    data: {
+			position: coordsData,
+			source: globals.camName,
+			clickPos: vec3ToObject(
+			    globals.sceneObjects.myCamera.object3D.position
+			),
+		    }
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
 
@@ -690,7 +716,13 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mouseenter",
-                    data: {position: coordsData, source: globals.camName}
+                    data: {
+			position: coordsData,
+			source: globals.camName,
+			clickPos: vec3ToObject(
+			    globals.sceneObjects.myCamera.object3D.position
+			),
+		    }
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
                 //console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
@@ -710,7 +742,13 @@ AFRAME.registerComponent('click-listener', {
                     object_id: this.id,
                     action: "clientEvent",
                     type: "mouseleave",
-                    data: {position: coordsData, source: globals.camName}
+                    data: {
+			position: coordsData,
+			source: globals.camName
+			clickPos: vec3ToObject(
+			    globals.sceneObjects.myCamera.object3D.position
+			),
+		    }
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
                 //console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
@@ -807,5 +845,88 @@ AFRAME.registerComponent('env', {
 		el.setAttribute('sound', {"src": 'url(audio/'+tunes[tuneIndex]+')', "autoplay": true, "positional": false });
 	    }
         });
+    },
+});
+
+AFRAME.registerComponent('wireframe', {
+    dependencies: ['material'],
+    schema: {
+      toggled: { type: 'boolean', default: true}
+    },
+    init: function () {
+	var self = this;
+	var el = this.el;
+	var data = this.data;
+	const object = this.el.getObject3D('mesh');
+	const material = this.material;
+
+        el.addEventListener('mousedown', function (evt) {
+
+	    if (!evt.detail.clicker) { // mqtt event not local browser generated
+		if (object) {
+		    object.traverse(function (node) {
+			if (node.isMesh)
+			    node.material.wireframe = data.toggled;
+		    });
+		}
+
+		el.setAttribute('wireframe', { 'toggled': !data.toggled});
+	    }
+        });
+    },
+});
+
+AFRAME.registerComponent('points', {
+    dependencies: ['material'],
+    schema: {
+      toggled: { type: 'boolean', default: true}
+    },
+    init: function () {
+	var self = this;
+	var el = this.el;
+	var data = this.data;
+	const object = this.el.getObject3D('mesh');
+	const material = this.material;
+
+        el.addEventListener('mousedown', function (evt) {
+
+	    if (!evt.detail.clicker) { // mqtt event not local browser generated
+		if (object) {
+
+		    let geometry = object.geometry.clone()
+		    let material = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.01 })
+		    let mesh = new THREE.Points(geometry, material)
+		    el.setObject3D('points', mesh);
+		    el.removeObject3D('mesh');
+
+//		    object.traverse(function (node) {
+//			if (node.isMesh)
+//			    node.material.wireframe = data.toggled;
+//		    });
+		}
+
+		el.setAttribute('points', { 'toggled': !data.toggled});
+	    }
+        });
+    },
+});
+
+AFRAME.registerComponent('pointed', {
+    dependencies: ['material'],
+    init: function () {
+	var self = this;
+	var el = this.el;
+	var data = this.data;
+	const object = this.el.getObject3D('mesh');
+	const material = this.material;
+
+	if (object) {
+
+	    let geometry = object.geometry.clone()
+	    let material = new THREE.PointsMaterial({ color: 0xFFFFFF, size: 0.01 })
+	    let mesh = new THREE.Points(geometry, material)
+	    el.setObject3D('pointed', mesh);
+	    el.removeObject3D('mesh');
+	}
     },
 });
