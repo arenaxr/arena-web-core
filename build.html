@@ -109,12 +109,13 @@
                 <option value="torusKnot">torusKnot</option>
                 <option value="triangle">triangle</option>
                 <option value="gltf-model">gltf-model</option>
+                <option value="image">image</option>
             </select>
         </td>
     </tr>
     <tr>
         <td>
-            &nbsp;&nbsp;GLTF model URL:
+            &nbsp;&nbsp;GLTF model or image URL:
         </td>
         <td>
             &nbsp;&nbsp;<input type="text" size="30" id="gltfUrl" value=""/>
@@ -293,6 +294,8 @@
             }
             if (parent)
                 myMsg["data"]["parent"] = parent;
+            if (objectType == 'image')
+                myMsg["data"]["url"] = gltfModel;
             if (objectType == 'gltf-model')
                 myMsg["data"]["url"] = gltfModel;
             if (physics != "none")
@@ -502,10 +505,15 @@
                 var mqttServer = document.getElementById("mqttServer").value;
                 var selectedScene = document.getElementById("selectedScene").value;
                 var color = document.getElementById("color").value;
-                var thickness = document.getElementById("thickness").value;
-                var thickpath = document.getElementById("thickline").value;
                 var mypersist = document.getElementById("persist").checked;
                 var lighttype = document.getElementById("lightType").value;
+            var x = parseFloat(document.getElementById("x").value);
+            var y = parseFloat(document.getElementById("y").value);
+            var z = parseFloat(document.getElementById("z").value);
+            var qx = parseFloat(document.getElementById("qx").value);
+            var qy = parseFloat(document.getElementById("qy").value);
+            var qz = parseFloat(document.getElementById("qz").value);
+            var qw = parseFloat(document.getElementById("qw").value);
 
                 let myMsg = {
                     object_id: objectName,
@@ -535,7 +543,7 @@
                     let xhr = new XMLHttpRequest();
                     var mqttServer = document.getElementById("mqttServer").value;
                     var sceneName = document.getElementById("selectedScene").value;
-                    xhr.open('GET', '//' + mqttServer + '/' + sceneName);
+                    xhr.open('GET', '//' + mqttServer + '/persist/' + sceneName);
                     xhr.responseType = 'json';
                     xhr.send();
                     var theMessage = '';
