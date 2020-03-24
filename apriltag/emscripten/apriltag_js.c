@@ -262,7 +262,7 @@ uint8_t * detect() {
       double pose_err;
       g_det_pose_info.det = det;
       pose_err = estimate_tag_pose(&g_det_pose_info, &pose);
-      c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[0], matd_get(pose.R, 0, 0),matd_get(pose.R, 0,1),matd_get(pose.R, 0, 2),matd_get(pose.R, 1, 0),matd_get(pose.R, 1, 1),matd_get(pose.R, 1, 2),matd_get(pose.R, 2, 0),matd_get(pose.R, 2, 1),matd_get(pose.R, 2, 2),matd_get(pose.t, 0, 0),matd_get(pose.t, 1, 0),matd_get(pose.t, 2, 0), pose_err);
+      c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[0], matd_get(pose.R, 0, 0),matd_get(pose.R, 1,0),matd_get(pose.R, 2, 0),matd_get(pose.R, 0, 1),matd_get(pose.R, 1, 1),matd_get(pose.R, 2, 1),matd_get(pose.R, 0, 2),matd_get(pose.R, 1, 2),matd_get(pose.R, 2, 2),matd_get(pose.t, 0, 0),matd_get(pose.t, 1, 0),matd_get(pose.t, 2, 0), pose_err);
       matd_destroy(pose.R);
       matd_destroy(pose.t);               
     }
