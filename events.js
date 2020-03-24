@@ -299,7 +299,7 @@ function eventAction(evt, eventName, myThis) {
         type: eventName,
         data: {
 	    position: coordsData,
-	    source: globals.camName
+	    source: globals.camName,
 	    clickPos: vec3ToObject(
 		globals.sceneObjects.myCamera.object3D.position
 	    ),
@@ -744,7 +744,7 @@ AFRAME.registerComponent('click-listener', {
                     type: "mouseleave",
                     data: {
 			position: coordsData,
-			source: globals.camName
+			source: globals.camName,
 			clickPos: vec3ToObject(
 			    globals.sceneObjects.myCamera.object3D.position
 			),
