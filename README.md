@@ -137,6 +137,11 @@ To update the image of a named image already in the scene, use this syntax:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": {"material": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}}'
 ```
+#### Images on Objects (e.g.cube)
+Use the `multisrc` A-Frame Component to specify different bitmaps for sides of a cube or other primitive shape, e.g:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/ -m '{"object_id":"die1","action":"create","type":"object","persist":true,"data":{"object_type":"cube","position":{"x":0,"y":0.5,"z":-2},"rotation":{"x":0,"y":0,"z":0,"w":1},"scale":{"x":1,"y":1,"z":1},"color":"#ffffff","dynamic-body":{"type":"dynamic"},"multisrc":{"srcspath":"images/dice/", "srcs":"side1.png,side2.png,side3.png,side4.png,side5.png,side6.png"}}}'
+```
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
@@ -337,10 +342,11 @@ other 'global' ARENA objects, by object_id:
  * **cameraRig** access to the translational part of camera rig object (to set data attributes beyond what rig update messages do)
  * **cameraSpinner** access the part of the rig that does only rotation
  * **weather** (if enabled) simple weather using particles for snow, rain, dust
- * **scene** the root entity, parent of all objects
+ * **sceneRoot** the root entity, parent of all objects
  * **env** environments (see "A-Frame environments"): ground, trees, pillars, background, sky etc.
  * **conix_box** a hard-coded box used for debugging
  * **conix_text** a fixed text object used for debugging
+ * **myCamera** to attach HUD objects visible to everyone's camera
 
 ## Discussion
 ### Camera
