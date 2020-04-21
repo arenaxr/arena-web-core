@@ -15,9 +15,15 @@ window.processCV = async function (frame) {
     if (cvThrottle % 20) {
         return;
     }
-//    console.log(frame);
-    vioMatrixCopy.copy(globals.vioMatrix);
-    let vio = JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation}); // Save this first before it updates async
+    // console.log(frame);
+
+    let vio;
+    // Save this first before it updates async
+    if (globals.mqttsolver) {
+        vio = JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation});
+    } else {
+        vioMatrixCopy.copy(globals.vioMatrix);
+    }
 
     if (frame._camera.cameraIntrinsics[0] != fx || frame._camera.cameraIntrinsics[4] != fy ||
         frame._camera.cameraIntrinsics[6] != cx || frame._camera.cameraIntrinsics[7] != cy) {
@@ -31,7 +37,6 @@ window.processCV = async function (frame) {
     let imgWidth = frame._buffers[bufIndex].size.width;
     let imgHeight = frame._buffers[bufIndex].size.height;
 
-
     let byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[bufIndex]._buffer);
     let grayscaleImg = new Uint8Array(byteArray.slice(0, imgWidth * imgHeight)); // cut u and v values; grayscale image is just the y values
 
@@ -41,30 +46,33 @@ window.processCV = async function (frame) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-
+        let jsonMsg = {scene: globals.renderParam};
         delete detections[0].corners;
         delete detections[0].center;
-        let jsonMsg = {scene: globals.renderParam};
-        /*
-        if (globals.aprilTags[detections[0].id] && globals.aprilTags[detections[0].id].pose) {
-            jsonMsg.refTag = globals.aprilTags[detections[0].id].pose;
-        } else {
-            //make one attempt to update it?
-                // jsonMsg.coords = { lat: globals.clientCoords.latitude, long: globals.clientCoords.longitude } ;
-
-        }
-        */
         let dtagid = detections[0].id;
-        if (globals.aprilTags[dtagid]) {
-            let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, globals.aprilTags[dtagid]);
-            globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
-            globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
-            jsonMsg.rigMatrix = rigPose.elements;
+        if (globals.mqttsolver) {
+            jsonMsg.vio = JSON.parse(vio);
+            jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
+
+            if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) {
+                jsonMsg.refTag = globals.aprilTags[dtagid].pose;
+            } else {
+                //make one attempt to update it?
+                // jsonMsg.coords = { lat: globals.clientCoords.latitude, long: globals.clientCoords.longitude } ;
+                () => {};
+            }
+        } else {
+            if (globals.aprilTags[dtagid]) {
+                let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, globals.aprilTags[dtagid]);
+                globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
+                globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+                jsonMsg.rigMatrix = rigPose.elements;
+            }
         }
-        if (globals.builder === true && detections[0] != 0) {
+        // Never localize tag 0
+        if (globals.builder === true && dtagid !== 0) {
             jsonMsg.localize_tag = true;
         }
-
 
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
     } // this is the resulting json with the detections
@@ -139,6 +147,9 @@ async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('builder')) {
         globals.builder = true;
+    }
+    if (urlParams.get('mqttsolver')) {
+        globals.mqttsolver = true;
     }
     // must call this to init apriltag detector; argument is a callback for when it is done loading
     window.aprilTag = await new Apriltag(Comlink.proxy(() => {
