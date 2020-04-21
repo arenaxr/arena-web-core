@@ -123,7 +123,37 @@ window.globals = {
     }
 };
 
-
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        globals.clientCoords = position.coords;
+	    fetch('https://atlas.conix.io/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + position.coords.latitude + '&long=' + position.coords.longitude)
+        .then(response => {
+            return response.json();
+        })
+        .then(data => {
+            let originMatrix = new THREE.Matrix4();
+            originMatrix.set(  // row-major
+                1, 0, 0, 0,
+                0, 0, 1, 0,
+                0, -1, 0, 0,
+                1, 0, 0, 1
+            );
+	        globals.aprilTags = {
+			    0: originMatrix
+            };
+            data.forEach((tag) => {
+                let tagid = tag.name.substring(9);
+                if (tagid !== 0) {
+                    let tagMatrix = new THREE.Matrix4();
+                    if (tag.pose && Array.isArray(tag.pose)) {
+                        tagMatrix.fromArray(tag.pose.flat());
+                        globals.aprilTags[tagid] = tagMatrix;
+                    }
+                }
+            });
+        });
+    })
+}
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
 globals.outputTopic = "realm/s/" + globals.renderParam + "/";
@@ -145,6 +175,7 @@ globals.newRotation = new THREE.Quaternion();
 globals.newPosition = new THREE.Vector3();
 globals.vioRotation = new THREE.Quaternion();
 globals.vioPosition = new THREE.Vector3();
+globals.vioMatrix = new THREE.Matrix4();
 var camParent = new THREE.Matrix4();
 var cam       = new THREE.Matrix4();
 var cpi       = new THREE.Matrix4();
@@ -181,6 +212,7 @@ AFRAME.registerComponent('pose-listener', {
 	cam = this.el.object3D.matrixWorld;
 	cpi.getInverse(camParent);
 	cpi.multiply(cam);
+	globals.vioMatrix.copy(cpi);
 	globals.vioRotation.setFromRotationMatrix(cpi);
 	globals.vioPosition.setFromMatrixPosition(cpi);
 	//console.log(cpi);
@@ -224,6 +256,40 @@ AFRAME.registerComponent('vive-pose-listener', {
     })
 });
 
+
+AFRAME.registerComponent('pose-publisher', {
+    init: function () {
+        // Set up the tick throttling.
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+    },
+
+    tick: (function (t, dt) {
+        const newRotation = this.el.object3D.quaternion;
+        const newPosition = this.el.object3D.position;
+
+        const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+        const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
+
+        const newPose = rotationCoords + " " + positionCoords;
+        if (this.lastPose !== newPose) {
+//            this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
+	    //            this.lastPose = newPose;
+
+	        const objName = this.id;
+            publish(globals.outputTopic + objName, {
+                object_id: objName,
+		        action: "update",
+                type: 'object',
+                data: {
+                    position: vec3ToObject(newPosition),
+                    rotation: quatToObject(newRotation),
+                }
+            });
+        }
+    })
+});
+
+
 /*
 AFRAME.registerComponent('vive-pose-listener', {
     init: function () {
@@ -262,7 +328,6 @@ AFRAME.registerComponent('vive-pose-listener', {
 */
 
 function updateConixBox(eventName, coordsData, myThis) {
-    const sceney = myThis.sceneEl;
     const textEl = document.getElementById('conix-text');
     textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
     console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
@@ -324,6 +389,15 @@ function vec3ToObject(vec) {
         x: parseFloat(vec.x.toFixed(3)),
         y: parseFloat(vec.y.toFixed(3)),
         z: parseFloat(vec.z.toFixed(3))
+    };
+}
+
+function quatToObject(q) {
+    return {
+        x: parseFloat(q.x.toFixed(3)),
+        y: parseFloat(q.y.toFixed(3)),
+        z: parseFloat(q.z.toFixed(3)),
+        w: parseFloat(q.w.toFixed(3))
     };
 }
 
@@ -418,7 +492,7 @@ AFRAME.registerComponent('impulse', {
 // load new URL if clicked
 AFRAME.registerComponent('goto-url', {
     schema: {
-	on: {default: ''}, // event to listen 'on'
+	on: {default: 'mousedown'}, // event to listen 'on'
 	url: {default: ''} // http:// style url
     },
     
@@ -435,9 +509,11 @@ AFRAME.registerComponent('goto-url', {
 	var el = this.el;     // Reference to the component's entity.
 
 	if (data.on) { // we have an event?
-	    el.addEventListener(data.on, function (args) {
-		console.log("goto-url url=" + data.url);
-		window.location.href = data.theUrl;
+	    el.addEventListener(data.on, function (evt) {
+		if (!evt.detail.clicker) { // local event, not from MQTT
+		    console.log("goto-url url=" + data.url);
+		    window.location.href = data.url;
+		}
 	    });
 	} else {
 	    // `event` not specified, just log the message.
@@ -653,8 +729,6 @@ AFRAME.registerComponent('click-listener', {
 		    }
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
-                //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-                //console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
             } else {
 
                 // do the event handling for MQTT event; this is just an example
@@ -664,12 +738,6 @@ AFRAME.registerComponent('click-listener', {
                     this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate");
                 }
                 const clicker = evt.detail.clicker;
-
-		/* Debug Conix Box
-                const sceney = this.sceneEl;
-                const textEl = sceney.querySelector('#conix-text');
-                textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
             }
         });
 
@@ -848,7 +916,7 @@ AFRAME.registerComponent('env', {
     },
 });
 
-AFRAME.registerComponent('wireframe', {
+AFRAME.registerComponent('attr-wireframe', {
     dependencies: ['material'],
     schema: {
       toggled: { type: 'boolean', default: true}

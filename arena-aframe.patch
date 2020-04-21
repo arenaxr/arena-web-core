@@ -1,21 +1,37 @@
-diff --git a/dist/aframe-master.js b/dist/aframe-master.js
-index bdbc51f4..91a9f7b3 100644
---- a/dist/aframe-master.js
-+++ b/dist/aframe-master.js
-@@ -79472,7 +79472,7 @@ module.exports.AScene = registerElement('a-scene', {
-             }
-             navigator.xr.requestSession(useAR ? 'immersive-ar' : 'immersive-vr', {
-               requiredFeatures: ['local-floor'],
--              optionalFeatures: ['bounded-floor']
-+              optionalFeatures: ['bounded-floor', 'computerVision']
-             }).then(function requestSuccess (xrSession) {
-               self.xrSession = xrSession;
-               vrManager.setSession(xrSession);
-@@ -79481,6 +79481,7 @@ module.exports.AScene = registerElement('a-scene', {
-                 self.addState('ar-mode');
-               }
-               enterVRSuccess();
-+              window.globals.onEnterXR(useAR ? 'ar' : 'vr');
-             });
+diff --git a/aframe/dist/aframe-master.js b/aframe/dist/aframe-master.js
+index e3aae55f..1c7e07f6 100644
+--- a/aframe/dist/aframe-master.js
++++ b/aframe/dist/aframe-master.js
+@@ -71042,6 +71042,7 @@ module.exports.Component = registerComponent('material', {
+     alphaTest: {default: 0.0, min: 0.0, max: 1.0},
+     depthTest: {default: true},
+     depthWrite: {default: true},
++    colorWrite: {default: true},
+     flatShading: {default: false},
+     npot: {default: false},
+     offset: {type: 'vec2', default: {x: 0, y: 0}},
+@@ -71152,6 +71153,7 @@ module.exports.Component = registerComponent('material', {
+     material.alphaTest = data.alphaTest;
+     material.depthTest = data.depthTest !== false;
+     material.depthWrite = data.depthWrite !== false;
++    material.colorWrite = data.colorWrite !== false;
+     material.opacity = data.opacity;
+     material.flatShading = data.flatShading;
+     material.side = parseSide(data.side);
+@@ -79726,6 +79728,7 @@ module.exports.AScene = registerElement('a-scene', {
+                     self.addState('ar-mode');
+                   }
+                   enterVRSuccess();
++                  window.globals.onEnterXR(useAR ? 'ar' : 'vr');
+                 });
            } else {
              vrDisplay = utils.device.getVRDisplay();
+@@ -83983,7 +83986,7 @@ module.exports.System = registerSystem('webxr', {
+   schema: {
+     referenceSpaceType: {type: 'string', default: 'local-floor'},
+     requiredFeatures: {type: 'array', default: ['local-floor']},
+-    optionalFeatures: {type: 'array', default: ['bounded-floor']},
++    optionalFeatures: {type: 'array', default: ['bounded-floor', 'computerVision']},
+     overlayElement: {type: 'selector'}
+   },
+ 
