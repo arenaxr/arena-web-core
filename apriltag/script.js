@@ -10,7 +10,7 @@ var vioMatrixCopy = new THREE.Matrix4();
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 var fx = 0, fy = 0, cx = 0, cy = 0;
 
-window.processCV = async function (frame) {
+window.processCV = async function (frame, frameVio) {
     cvThrottle++;
     if (cvThrottle % 20) {
         return;
@@ -20,7 +20,7 @@ window.processCV = async function (frame) {
     let vio;
     // Save this first before it updates async
     if (globals.mqttsolver) {
-        vio = JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation});
+        vio = {position: globals.vioPosition, rotation: globals.vioRotation};
     } else {
         vioMatrixCopy.copy(globals.vioMatrix);
     }
@@ -46,12 +46,12 @@ window.processCV = async function (frame) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-        let jsonMsg = {scene: globals.renderParam, frame_timestamp: frame.timestamp};
+        let jsonMsg = {scene: globals.renderParam, framevio: frameVio};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
         if (globals.mqttsolver) {
-            jsonMsg.vio = JSON.parse(vio);
+            jsonMsg.vio = vio;
             jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
 
             if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) {

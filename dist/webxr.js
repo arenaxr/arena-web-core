@@ -5,7 +5,7 @@
  *
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. 
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 /**
@@ -3038,6 +3038,9 @@ class ARKitWrapper extends EventTarget {
 			};
 		}
 		window['onComputerVisionData'] = (detail) => {
+		    if (window.globals && window.globals.vioPosition && window.globals.vioRotation) {
+		      detail.vio ={position: globals.vioPosition, rotation: globals.vioRotation};
+            }
 			this._onComputerVisionData(detail);
 		};
 		window['setNativeTime'] = (detail) => {
@@ -3320,7 +3323,8 @@ class ARKitWrapper extends EventTarget {
 					ARKitWrapper.COMPUTER_VISION_DATA,
 					{
 						source: this,
-						detail: xrVideoFrame
+						detail: xrVideoFrame,
+                        vio: detail.vio
 					}
 				)
 			);
@@ -3719,7 +3723,6 @@ class ARKitWrapper extends EventTarget {
 			this._deactivateDetectionImage(uid).then(detail => {
 				if (detail.error) {
 					reject(detail.error);
-					
 				}
 				const anchor = this._anchors.get(uid);
 				if (anchor) {
@@ -3861,10 +3864,10 @@ class ARKitWatcher {
 	handleARKitWindowResize() {}
 	handleOnError() {}
 	handleArTrackingChanged() {}
-	handleComputerVisionData(e) {
-             if (typeof window.processCV === "function") { 
-                 window.processCV(e.detail);
-	     }
+	handleComputerVisionData(e, vio) {
+        if (typeof window.processCV === "function") {
+            window.processCV(e.detail, vio);
+	    }
 	}
 	handleUserStoppedAR() {}
 }
