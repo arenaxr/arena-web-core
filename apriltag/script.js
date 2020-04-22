@@ -46,7 +46,7 @@ window.processCV = async function (frame) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-        let jsonMsg = {scene: globals.renderParam};
+        let jsonMsg = {scene: globals.renderParam, frame_timestamp: frame.timestamp};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
