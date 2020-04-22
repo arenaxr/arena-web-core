@@ -3038,9 +3038,6 @@ class ARKitWrapper extends EventTarget {
 			};
 		}
 		window['onComputerVisionData'] = (detail) => {
-		    if (window.globals && window.globals.vioPosition && window.globals.vioRotation) {
-		      detail.vio = JSON.parse(JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation}));
-            }
 			this._onComputerVisionData(detail);
 		};
 		window['setNativeTime'] = (detail) => {
@@ -3316,7 +3313,6 @@ class ARKitWrapper extends EventTarget {
 				break;
 		}
 		const xrVideoFrame = new XRVideoFrame(detail.frame.buffers, detail.frame.pixelFormat, this._adjustARKitTime(detail.frame.timestamp), detail.camera);
-		xrVideoFrame.vio = detail.vio;
 		try {
 			this.dispatchEvent(
 				ARKitWrapper.COMPUTER_VISION_DATA,

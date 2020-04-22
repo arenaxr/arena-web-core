@@ -6,6 +6,8 @@ var cvThrottle = 0;
 var dtagMatrix = new THREE.Matrix4();
 var rigMatrix = new THREE.Matrix4();
 var vioMatrixCopy = new THREE.Matrix4();
+var vioRot = new THREE.Quaternion();
+var vioPos = new THREE.Vector3();
 
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 var fx = 0, fy = 0, cx = 0, cy = 0;
@@ -17,13 +19,17 @@ window.processCV = async function (frame) {
     }
     // console.log(frame);
 
-    let vio;
-    // Save this first before it updates async
-    if (globals.mqttsolver) {
-        vio = JSON.parse(JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation}));
-    } else {
-        vioMatrixCopy.copy(globals.vioMatrix);
-    }
+    // Save vio before processing apriltag
+
+    let camParent = globals.sceneObjects.myCamera.object3D.parent.matrixWorld;
+    let cam = globals.sceneObjects.myCamera.object3D.matrixWorld;
+    vioMatrixCopy.getInverse(camParent);
+    vioMatrixCopy.multiply(cam);
+
+    vioRot.setFromRotationMatrix(vioMatrixCopy);
+    vioPos.setFromMatrixPosition(vioMatrixCopy);
+
+    let vio = {position: vioPos, rotation: vioRot};
 
     if (frame._camera.cameraIntrinsics[0] != fx || frame._camera.cameraIntrinsics[4] != fy ||
         frame._camera.cameraIntrinsics[6] != cx || frame._camera.cameraIntrinsics[7] != cy) {
@@ -46,7 +52,7 @@ window.processCV = async function (frame) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-        let jsonMsg = {scene: globals.renderParam, framevio: frame.vio};
+        let jsonMsg = {scene: globals.renderParam};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
