@@ -3039,7 +3039,7 @@ class ARKitWrapper extends EventTarget {
 		}
 		window['onComputerVisionData'] = (detail) => {
 		    if (window.globals && window.globals.vioPosition && window.globals.vioRotation) {
-		      detail.vio ={position: globals.vioPosition, rotation: globals.vioRotation};
+		      detail.vio = JSON.parse(JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation}));
             }
 			this._onComputerVisionData(detail);
 		};

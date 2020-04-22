@@ -20,7 +20,7 @@ window.processCV = async function (frame) {
     let vio;
     // Save this first before it updates async
     if (globals.mqttsolver) {
-        vio = {position: globals.vioPosition, rotation: globals.vioRotation};
+        vio = JSON.parse(JSON.stringify({position: globals.vioPosition, rotation: globals.vioRotation}));
     } else {
         vioMatrixCopy.copy(globals.vioMatrix);
     }
