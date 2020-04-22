@@ -3316,6 +3316,7 @@ class ARKitWrapper extends EventTarget {
 				break;
 		}
 		const xrVideoFrame = new XRVideoFrame(detail.frame.buffers, detail.frame.pixelFormat, this._adjustARKitTime(detail.frame.timestamp), detail.camera);
+		xrVideoFrame.vio = detail.vio;
 		try {
 			this.dispatchEvent(
 				ARKitWrapper.COMPUTER_VISION_DATA,
@@ -3324,7 +3325,6 @@ class ARKitWrapper extends EventTarget {
 					{
 						source: this,
 						detail: xrVideoFrame,
-                        vio: detail.vio
 					}
 				)
 			);
@@ -3864,9 +3864,9 @@ class ARKitWatcher {
 	handleARKitWindowResize() {}
 	handleOnError() {}
 	handleArTrackingChanged() {}
-	handleComputerVisionData(e, vio) {
+	handleComputerVisionData(e) {
         if (typeof window.processCV === "function") {
-            window.processCV(e.detail, vio);
+            window.processCV(e.detail);
 	    }
 	}
 	handleUserStoppedAR() {}

@@ -10,7 +10,7 @@ var vioMatrixCopy = new THREE.Matrix4();
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 var fx = 0, fy = 0, cx = 0, cy = 0;
 
-window.processCV = async function (frame, frameVio) {
+window.processCV = async function (frame) {
     cvThrottle++;
     if (cvThrottle % 20) {
         return;
@@ -46,7 +46,7 @@ window.processCV = async function (frame, frameVio) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-        let jsonMsg = {scene: globals.renderParam, framevio: frameVio};
+        let jsonMsg = {scene: globals.renderParam, framevio: frame.vio};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
