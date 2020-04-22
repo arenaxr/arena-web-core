@@ -20,7 +20,7 @@ window.processCV = async function (frame) {
     // console.log(frame);
 
     // Save vio before processing apriltag
-
+    let timestamp = new Date();
     let camParent = globals.sceneObjects.myCamera.object3D.parent.matrixWorld;
     let cam = globals.sceneObjects.myCamera.object3D.matrixWorld;
     vioMatrixCopy.getInverse(camParent);
@@ -52,7 +52,7 @@ window.processCV = async function (frame) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-        let jsonMsg = {scene: globals.renderParam};
+        let jsonMsg = {scene: globals.renderParam, timestamp: timestamp};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
