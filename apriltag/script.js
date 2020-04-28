@@ -77,6 +77,7 @@ window.processCV = async function (frame) {
         }
         // Never localize tag 0
         if (globals.builder === true && dtagid !== 0) {
+            jsonMsg.geolocation = globals.geolocation.coords;
             jsonMsg.localize_tag = true;
         }
 
