@@ -84,7 +84,7 @@ window.processCV = async function (frame) {
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
     } // this is the resulting json with the detections
     let ids = detections.map(tag => tag.id);
-    debugRaw('April Tag IDs Detected: ' + ids.join(', '));
+    console.log('April Tag IDs Detected: ' + ids.join(', '));
 };
 
 
