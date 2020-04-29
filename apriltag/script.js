@@ -172,7 +172,8 @@ async function updateAprilTags() {
                 let tagid = tag.name.substring(9);
                 if (tagid !== 0) {
                     if (tag.pose && Array.isArray(tag.pose)) {
-                        tagMatrix.fromArray(tag.pose.flat());
+                        tagMatrix.fromArray(tag.pose.flat()); // comes in row-major, loads col-major
+                        tagMatrix.transpose(); // flip properly to row-major
                         globals.aprilTags[tagid] = {
                             id: tagid,
                             uuid: tag.id,
