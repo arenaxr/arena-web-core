@@ -98,7 +98,7 @@ window.processCV = async function (frame) {
         }
         // Never localize tag 0
         if (globals.builder === true && dtagid !== 0) {
-            jsonMsg.geolocation = globals.geolocation.coords;
+            jsonMsg.geolocation = { latitude: globals.clientCoords.latitude, longitude: globals.clientCoords.longitude };
             jsonMsg.localize_tag = true;
         }
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
