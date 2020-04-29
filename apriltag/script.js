@@ -85,7 +85,7 @@ window.processCV = async function (frame) {
             jsonMsg.vio = vio;
             jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
             if (dtagid !== 0 && refTag) {  // No need to pass origin tag info
-                jsonMsg.refTag = refTag.elements; // Pass in col-major format
+                jsonMsg.refTag = refTag;
             }
         } else if (refTag) {  // Solve clientside, MUST have a reference tag though
             let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
