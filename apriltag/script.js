@@ -167,11 +167,11 @@ async function updateAprilTags() {
             globals.aprilTags = {
                 0: ORIGINTAG
             };
-            let tagMatrix = new THREE.Matrix4();
             data.forEach(tag => {
                 let tagid = tag.name.substring(9);
                 if (tagid !== 0) {
                     if (tag.pose && Array.isArray(tag.pose)) {
+                        let tagMatrix = new THREE.Matrix4();
                         tagMatrix.fromArray(tag.pose.flat()); // comes in row-major, loads col-major
                         tagMatrix.transpose(); // flip properly to row-major
                         globals.aprilTags[tagid] = {
