@@ -114,6 +114,11 @@ window.globals = {
                 cursorParent.removeChild(cursor);
                 cursor = document.createElement('a-cursor');
                 cursor.setAttribute('fuse', false);
+		// move reticle closer (side effect: bigger!) 
+		cursor.setAttribute('position', '0 0 -0.5');
+		cursor.setAttribute('animation', "startEvents: click; property: scale; dur: 150; from: 0.2 0.2 0.2; to: 1 1 1; fill: forwards; easing: easeIn; ");
+		//cursor.setAttribute('raycaster', 'showLine', 'true');
+		//
                 cursor.setAttribute('max-distance', '1000');
                 cursor.setAttribute('id', 'fuse-cursor');
                 cursorParent.appendChild(cursor);

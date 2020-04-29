@@ -138,9 +138,11 @@ function onConnect() {
     sceneObjects.cameraSpinner = document.getElementById('CameraSpinner'); // this is an <a-entity>
 
     sceneObjects.weather = document.getElementById('weather');
-    sceneObjects.scene = document.querySelector('a-scene');
+//    sceneObjects.scene = document.querySelector('a-scene');
+    sceneObjects.scene = document.getElementById('sceneRoot');
     sceneObjects.env = document.getElementById('env');
     sceneObjects.myCamera = document.getElementById('my-camera');
+    sceneObjects[globals.camName] = sceneObjects.myCamera;
     sceneObjects.conix_box = document.getElementById('conix_box');
     sceneObjects.conix_box3 = document.getElementById('dots_sphere');
     sceneObjects.env_box = document.getElementById('env_box');
@@ -169,8 +171,8 @@ function onConnect() {
     let myMsg = {
         object_id: globals.camName,
         action: 'create',
-        persist: true,
-        ttl: 3000,
+        // persist: true,
+        // ttl: 3000,
         data: {
             object_type: 'camera',
             position: {x: thex, y: they, z: thez},
@@ -375,8 +377,6 @@ function onMessageArrived(message, jsonMessage) {
         theMessage = JSON.parse(message.payloadString);
     } else if (jsonMessage) {
         theMessage = jsonMessage;
-//	if (theMessage.data.object_type == "camera") // cull deadheads: ignore camera messages from DB
-//	    return;
     }
 //    console.log(theMessage.object_id);
 
@@ -430,7 +430,8 @@ function onMessageArrived(message, jsonMessage) {
             //console.log(message.payloadString, topic, name);
 
             if (sceneObjects[name]) {
-                sceneObjects.scene.removeChild(sceneObjects[name]);
+		parentEl = sceneObjects[name].parentEl;
+                parentEl.removeChild(sceneObjects[name]);
                 delete sceneObjects[name];
                 return;
             } else {
@@ -445,11 +446,13 @@ function onMessageArrived(message, jsonMessage) {
             if (name === globals.camName) {
                 return;
             }
+            /* why not? needed for HUD text, attachments to head 3d model
             if (theMessage.data.parent) {
                 // Don't attach to our own camera
                 if (theMessage.data.parent == globals.camName)
                     return;
             }
+            */
 
             let x, y, z, xrot, yrot, zrot, wrot, xscale, yscale, zscale, color;
             // Strategy: remove JSON for core attributes (position, rotation, color, scale) after parsing
@@ -655,6 +658,7 @@ function onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('text', 'side', "double");
                     entityEl.setAttribute('text', 'align', "center");
                     entityEl.setAttribute('text', 'anchor', "center");
+                    entityEl.object3D.scale.set(xscale, yscale, zscale);
                     break;
 
                 default:
