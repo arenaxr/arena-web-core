@@ -70,6 +70,7 @@ window.globals = {
     weatherParam: getUrlParam('weather', 'none'),
     mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
     fixedCamera: getUrlParam('fixedCamera', ''),
+    ATLASurl: getUrlParam('ATLASurl', '//atlas.conix.io'),
     vioTopic: "/topic/vio/",
     frameCount: 0,
     lastMouseTarget: undefined,
@@ -129,36 +130,11 @@ window.globals = {
 };
 
 if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
+    navigator.geolocation.getCurrentPosition((position) => {
         globals.clientCoords = position.coords;
-        fetch('https://atlas.conix.io/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + position.coords.latitude + '&long=' + position.coords.longitude)
-            .then(response => {
-                return response.json();
-            })
-            .then(data => {
-                let originMatrix = new THREE.Matrix4();
-                originMatrix.set(  // row-major
-                    1, 0, 0, 0,
-                    0, 0, 1, 0,
-                    0, -1, 0, 0,
-                    1, 0, 0, 1
-                );
-                globals.aprilTags = {
-                    0: originMatrix
-                };
-                data.forEach((tag) => {
-                    let tagid = tag.name.substring(9);
-                    if (tagid !== 0) {
-                        let tagMatrix = new THREE.Matrix4();
-                        if (tag.pose && Array.isArray(tag.pose)) {
-                            tagMatrix.fromArray(tag.pose.flat());
-                            globals.aprilTags[tagid] = tagMatrix;
-                        }
-                    }
-                });
-            });
-    })
+    });
 }
+
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
 globals.outputTopic = "realm/s/" + globals.renderParam + "/";
