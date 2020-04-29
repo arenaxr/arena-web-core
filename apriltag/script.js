@@ -102,9 +102,9 @@ window.processCV = async function (frame) {
             jsonMsg.localize_tag = true;
         }
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
+        let ids = detections.map(tag => tag.id);
+        console.log('April Tag IDs Detected: ' + ids.join(', '));
     } // this is the resulting json with the detections
-    let ids = detections.map(tag => tag.id);
-    console.log('April Tag IDs Detected: ' + ids.join(', '));
 };
 
 
@@ -153,9 +153,9 @@ async function updateAprilTags() {
     if (globals.clientCoords === undefined) {
         return false;
     }
-    let position = globals.geolocation;
+    let position = globals.clientCoords;
     // limit to 3s update interval
-    if (new Date() - globals.lastAprilTagUpdate > 3 * 1000 === false) {
+    if (new Date() - globals.lastAprilTagUpdate < 3 * 1000 !== false) {
         return false;
     }
     fetch(globals.ATLASurl + '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + position.latitude + '&long=' + position.longitude)
