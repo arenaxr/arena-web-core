@@ -1,3 +1,5 @@
+'use strict';
+
 /* this is an example of processCV() that calls the wasm apriltag implementation */
 import * as Comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 
@@ -9,17 +11,33 @@ var vioMatrixCopy = new THREE.Matrix4();
 var vioRot = new THREE.Quaternion();
 var vioPos = new THREE.Vector3();
 
+let originMatrix = new THREE.Matrix4();
+originMatrix.set(  // row-major
+    1, 0, 0, 0,
+    0, 0, 1, 0,
+    0, -1, 0, 0,
+    1, 0, 0, 1
+);
+var ORIGINTAG = {
+    id: 'ORIGIN',
+    uuid: 'ORIGIN',
+    pose: originMatrix
+};
+const FLIPMATRIX = new THREE.Matrix4();
+FLIPMATRIX.set(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
+
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 var fx = 0, fy = 0, cx = 0, cy = 0;
 
 window.processCV = async function (frame) {
+    let globals = window.globals;
     cvThrottle++;
     if (cvThrottle % 20) {
         return;
     }
     // console.log(frame);
 
-    // Save vio before processing apriltag
+    // Save vio before processing apriltag. Don't touch global though
     let timestamp = new Date();
     let camParent = globals.sceneObjects.myCamera.object3D.parent.matrixWorld;
     let cam = globals.sceneObjects.myCamera.object3D.matrixWorld;
@@ -56,40 +74,39 @@ window.processCV = async function (frame) {
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
-        if (globals.mqttsolver) {
+        let refTag;
+        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) {
+            refTag = globals.aprilTags[dtagid];
+        } else if (await updateAprilTags()) { // No known result, try once to query server
+            refTag = globals.aprilTags[dtagid];
+        }
+
+        if (globals.mqttsolver || globals.builder) {
             jsonMsg.vio = vio;
             jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
-
-            if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) {
-                jsonMsg.refTag = globals.aprilTags[dtagid].pose;
-            } else {
-                //make one attempt to update it?
-                // jsonMsg.coords = { lat: globals.clientCoords.latitude, long: globals.clientCoords.longitude } ;
-                () => {};
+            if (dtagid !== 0 && refTag) {  // No need to pass origin tag info
+                jsonMsg.refTag = refTag;
             }
-        } else {
-            if (globals.aprilTags[dtagid]) {
-                let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, globals.aprilTags[dtagid]);
-                globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
-                globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
-                jsonMsg.rigMatrix = rigPose.elements;
-            }
+        } else if (refTag) {  // Solve clientside, MUST have a reference tag though
+            let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
+            globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
+            globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+            rigPose.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
+            jsonMsg.rigMatrix = rigPose.elements; // Make sure networked solver still has latest rig for reference
+        } else { // No reference tag, not networked/builder mode, nothing to do
+            return;
         }
         // Never localize tag 0
         if (globals.builder === true && dtagid !== 0) {
             jsonMsg.geolocation = globals.geolocation.coords;
             jsonMsg.localize_tag = true;
         }
-
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
     } // this is the resulting json with the detections
     let ids = detections.map(tag => tag.id);
     console.log('April Tag IDs Detected: ' + ids.join(', '));
 };
 
-
-const FLIPMATRIX = new THREE.Matrix4();
-FLIPMATRIX.set(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
 
 function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
     let r = dtag.R;
@@ -120,7 +137,7 @@ function showGrayscaleImage(canvasid, pixeldata, imgWidth, imgHeight) {
         let yv = pixeldata[i / 4]; // get pixel value
 
         // Modify pixel data
-        imageData.data[i + 0] = yv; // R value
+        imageData.data[i] = yv; // R value
         imageData.data[i + 1] = yv; // G value
         imageData.data[i + 2] = yv; // B value
         imageData.data[i + 3] = 255; // A value
@@ -131,24 +148,45 @@ function showGrayscaleImage(canvasid, pixeldata, imgWidth, imgHeight) {
 }
 
 
-function debugRaw2(debugMsg) {
-    const textEl = document.getElementById('conix-text2');
-    if (textEl) {
-        textEl.setAttribute('value', debugMsg);
+async function updateAprilTags() {
+    let globals = window.globals;
+    if (globals.clientCoords === undefined) {
+        return false;
     }
+    let position = globals.geolocation;
+    // limit to 3s update interval
+    if (new Date() - globals.lastAprilTagUpdate > 3 * 1000 === false) {
+        return false;
+    }
+    fetch(globals.ATLASurl + '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + position.latitude + '&long=' + position.longitude)
+        .then(response => {
+            window.globals.lastAprilTagUpdate = new Date();
+            return response.json();
+        })
+        .then(data => {
+            globals.aprilTags = {
+                0: ORIGINTAG
+            };
+            let tagMatrix = new THREE.Matrix4();
+            data.forEach(tag => {
+                let tagid = tag.name.substring(9);
+                if (tagid !== 0) {
+                    if (tag.pose && Array.isArray(tag.pose)) {
+                        tagMatrix.fromArray(tag.pose.flat());
+                        globals.aprilTags[tagid] = {
+                            id: tagid,
+                            uuid: tag.id,
+                            pose: tagMatrix
+                        };
+                    }
+                }
+            });
+        });
+    return true;
 }
 
-
-AFRAME.registerComponent('a-fps', {
-    init: function () {
-        var self = this;
-    },
-    tick: (function (t, dt) {
-        window.globals.frameCount++;
-    }),
-});
-
 async function init() {
+    let globals = window.globals;
     // WebWorkers use `postMessage` and therefore work with Comlink.
     const Apriltag = Comlink.wrap(new Worker("/apriltag/apriltag.js"));
     const urlParams = new URLSearchParams(window.location.search);
@@ -158,19 +196,11 @@ async function init() {
     if (urlParams.get('mqttsolver')) {
         globals.mqttsolver = true;
     }
+    await updateAprilTags();
     // must call this to init apriltag detector; argument is a callback for when it is done loading
     window.aprilTag = await new Apriltag(Comlink.proxy(() => {
         //pass
     }));
-    var lastFrameCount = 0;
-    window.globals.frameCount = 0;
-    window.setInterval(() => {
-        debugRaw2("FPS: " + (window.globals.frameCount - lastFrameCount));
-        lastFrameCount = window.globals.frameCount;
-    }, 1000);
 }
 
 init();
-
-
-
