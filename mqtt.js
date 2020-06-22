@@ -13,6 +13,7 @@ const loadArena = (urlToLoad, position, rotation) => {
     xhr.responseType = 'json';
     xhr.send();
     let deferredObjects = [];
+    let Parents = {};
     xhr.onload = () => {
         if (xhr.status !== 200) {
             alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
@@ -24,8 +25,10 @@ const loadArena = (urlToLoad, position, rotation) => {
                 if (obj.object_id === globals.camName) {
                     continue; // don't load our own camera/head assembly
                 }
-                if (obj.attributes.parent)
+                if (obj.attributes.parent) {
                     deferredObjects.push(obj);
+		    Parents[obj.attributes.parent] = obj.attributes.parent;
+		}
                 else {
                     let msg = {
                         object_id: obj.object_id,
@@ -61,9 +64,46 @@ const loadArena = (urlToLoad, position, rotation) => {
                     action: 'create',
                     data: obj.attributes
                 };
-                console.log("adding deferred object " + obj.object_id + " to parent " + obj.attributes.parent);
+                //console.log("adding deferred object " + obj.object_id + " to parent " + obj.attributes.parent);
                 onMessageArrived(undefined, msg);
             }
+	    /*
+	    var par;
+	    var parEl;
+	    // sneakery: re-apply location,rotation,scale to parents such that children inherit
+	    for (par in Parents) {
+		console.log("par: " + par);
+		if (par === globals.camName) continue;
+		if (par === 'myCamera') continue;
+		parEl = globals.sceneObjects[par];
+		if (parEl == undefined) continue;
+                let msg = {
+                    object_id: par,
+                    action: 'update',
+		    type: 'object',
+                    data: {
+			position: {
+			    x: parEl.object3D.position.x,
+			    y: parEl.object3D.position.y,
+			    z: parEl.object3D.position.z
+			},
+			rotation: {
+			    x: parEl.object3D.quaternion.x,
+			    y: parEl.object3D.quaternion.y,
+			    z: parEl.object3D.quaternion.z,
+			    w: parEl.object3D.quaternion.w
+			},
+			scale: {
+			    x: parEl.object3D.scale.x,
+			    y: parEl.object3D.scale.y,
+			    z: parEl.object3D.scale.z
+			}
+		    }
+                };
+		//console.log(msg);
+                onMessageArrived(undefined, msg);
+	    }
+*/
         }
     };
 };
@@ -138,8 +178,8 @@ function onConnect() {
     sceneObjects.cameraSpinner = document.getElementById('CameraSpinner'); // this is an <a-entity>
 
     sceneObjects.weather = document.getElementById('weather');
-//    sceneObjects.scene = document.querySelector('a-scene');
-    sceneObjects.scene = document.getElementById('sceneRoot');
+    sceneObjects.scene = document.querySelector('a-scene');
+    //sceneObjects.scene = document.getElementById('sceneRoot');
     sceneObjects.env = document.getElementById('env');
     sceneObjects.myCamera = document.getElementById('my-camera');
     sceneObjects[globals.camName] = sceneObjects.myCamera;
@@ -194,7 +234,7 @@ function onConnect() {
 
         if (globals.fixedCamera !== '') {
             let msg = {
-                object_id: globals.camName,
+                object_id: globals.camName+"_local",
                 action: 'create',
                 type: 'object',
                 data: {
@@ -378,11 +418,16 @@ function onMessageArrived(message, jsonMessage) {
     } else if (jsonMessage) {
         theMessage = jsonMessage;
     }
-//    console.log(theMessage.object_id);
+    //console.log(theMessage);
 
     switch (theMessage.action) { // clientEvent, create, delete, update
         case "clientEvent": {
             const entityEl = sceneObjects[theMessage.object_id];
+	    if (entityEl == undefined) {
+		console.log("clientEvent without object ID: "+message.payloadString);
+		return;
+	    }
+
             let myPoint = '';
             if (theMessage.data.position)
                 myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
@@ -412,6 +457,8 @@ function onMessageArrived(message, jsonMessage) {
                     break;
                 case "mouseup":
                     // emit a synthetic click event with ugly data syntax
+		if (entityEl == undefined)
+		    console.log("mysterious error, entityEl undefined on mouseup, msg: "+message.payloadString);
                     entityEl.emit('mouseup', {
                         "clicker": clicker, intersection:
                             {
@@ -430,9 +477,12 @@ function onMessageArrived(message, jsonMessage) {
             //console.log(message.payloadString, topic, name);
 
             if (sceneObjects[name]) {
-		parentEl = sceneObjects[name].parentEl;
-                parentEl.removeChild(sceneObjects[name]);
-                delete sceneObjects[name];
+                parentEl = sceneObjects[name].parentEl;
+		if (parentEl) {
+                    parentEl.removeChild(sceneObjects[name]);
+                    delete sceneObjects[name];
+		} else
+		    console.log("Error: cannot remove child from missing parent " + name);
                 return;
             } else {
                 console.log("Warning: " + name + " not in sceneObjects");
@@ -662,7 +712,8 @@ function onMessageArrived(message, jsonMessage) {
                     break;
 
                 default:
-                    // handle arbitrary A-Frame geometry primitive types
+                // handle arbitrary A-Frame geometry primitive types
+		// why type sometimes undefined??
                     entityEl.setAttribute('geometry', 'primitive', type);
                     entityEl.object3D.scale.set(xscale, yscale, zscale);
                     entityEl.setAttribute('material', 'color', color);

@@ -16,7 +16,7 @@ originMatrix.set(  // row-major
     1, 0, 0, 0,
     0, 0, 1, 0,
     0, -1, 0, 0,
-    1, 0, 0, 1
+    0, 0, 0, 1
 );
 var ORIGINTAG = {
     id: 'ORIGIN',
@@ -63,6 +63,96 @@ window.processCV = async function (frame) {
 
     let byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[bufIndex]._buffer);
     let grayscaleImg = new Uint8Array(byteArray.slice(0, imgWidth * imgHeight)); // cut u and v values; grayscale image is just the y values
+
+    let detections = await aprilTag.detect(grayscaleImg, imgWidth, imgHeight);
+
+    if (detections.length) {
+        //let detectMsg = JSON.stringify(detections);
+        //console.log(detectMsg);
+
+        let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
+        delete detections[0].corners;
+        delete detections[0].center;
+        let dtagid = detections[0].id;
+        let refTag;
+        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) {
+            refTag = globals.aprilTags[dtagid];
+        } else if (await updateAprilTags()) { // No known result, try once to query server
+            refTag = globals.aprilTags[dtagid];
+        }
+
+        if (globals.mqttsolver || globals.builder) {
+            jsonMsg.vio = vio;
+            jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
+            if (dtagid !== 0 && refTag) {  // No need to pass origin tag info
+                jsonMsg.refTag = refTag;
+            }
+        } else if (refTag) {  // Solve clientside, MUST have a reference tag though
+            let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
+            globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
+            globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+            rigPose.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
+            jsonMsg.rigMatrix = rigPose.elements; // Make sure networked solver still has latest rig for reference
+        } else { // No reference tag, not networked/builder mode, nothing to do
+            return;
+        }
+        // Never localize tag 0
+        if (globals.builder === true && dtagid !== 0) {
+            jsonMsg.geolocation = { latitude: globals.clientCoords.latitude, longitude: globals.clientCoords.longitude };
+            jsonMsg.localize_tag = true;
+        }
+        publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
+        let ids = detections.map(tag => tag.id);
+        console.log('April Tag IDs Detected: ' + ids.join(', '));
+    } // this is the resulting json with the detections
+};
+
+
+const camMatrix0 = [ 528.84234161914062, 0, 0, 0, 528.8423461914062, 0 , 318.3243017578125, 178.80670166015625, 1]; 
+
+window.processCV2 = async function (frame) {
+    let globals = window.globals;
+    cvThrottle++;
+    if (cvThrottle % 20) {
+        return;
+    }
+    // console.log(frame);
+
+    // Save vio before processing apriltag. Don't touch global though
+    let timestamp = new Date();
+    let camParent = globals.sceneObjects.myCamera.object3D.parent.matrixWorld;
+    let cam = globals.sceneObjects.myCamera.object3D.matrixWorld;
+    vioMatrixCopy.getInverse(camParent);
+    vioMatrixCopy.multiply(cam);
+
+    vioRot.setFromRotationMatrix(vioMatrixCopy);
+    vioPos.setFromMatrixPosition(vioMatrixCopy);
+
+    let vio = {position: vioPos, rotation: vioRot};
+
+    frame._camera.cameraIntrinsics = camMatrix0;
+
+    if (frame._camera.cameraIntrinsics[0] != fx || frame._camera.cameraIntrinsics[4] != fy ||
+        frame._camera.cameraIntrinsics[6] != cx || frame._camera.cameraIntrinsics[7] != cy) {
+        fx = frame._camera.cameraIntrinsics[0];
+        fy = frame._camera.cameraIntrinsics[4];
+        cx = frame._camera.cameraIntrinsics[6];
+        cy = frame._camera.cameraIntrinsics[7];
+        aprilTag.set_camera_info(fx, fy, cx, cy); // set camera intrinsics for pose detection
+    }
+
+    let imgWidth = frame._buffers[bufIndex].size.width;
+    let imgHeight = frame._buffers[bufIndex].size.height;
+
+    let pixelData = frame._buffers[bufIndex]._buffer;
+    let grayscaleImg = new Uint8Array(imgWidth * imgHeight);
+    for (var i = 0; i < pixelData.length; i += 4 ) {
+        var r = pixelData[i];
+        var g = pixelData[i+1];
+        var b = pixelData[i+2];
+        var averageColour = (r + g + b) / 3;
+        grayscaleImg[i/4] = averageColour;
+    }
 
     let detections = await aprilTag.detect(grayscaleImg, imgWidth, imgHeight);
 
