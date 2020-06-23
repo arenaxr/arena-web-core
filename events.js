@@ -42,19 +42,18 @@ function getQueryParams(name, defaultValue) {
 }
 
 function getUrlParams(parameter, defaultValue) {
-    let urlParameter = defaultValue;
-    var indexes = [];
+    let indexes = [];
     parameter = parameter + '=';
     if (window.location.href.indexOf(parameter) > -1) {
         let vars = getUrlVars();
-        for (var i = 0; i < vars.length; i++) {
-            if (vars[parameter] == parameter) {
+        for (let i = 0; i < vars.length; i++) {
+            if (vars[parameter] === parameter) {
                 indexes.push(vars[i]);
             }
         }
-    } else
+    } else {
         indexes.push(defaultValue);
-
+    }
     return indexes;
 }
 
@@ -115,7 +114,7 @@ window.globals = {
                 cursorParent.removeChild(cursor);
                 cursor = document.createElement('a-cursor');
                 cursor.setAttribute('fuse', false);
-		// move reticle closer (side effect: bigger!) 
+		// move reticle closer (side effect: bigger!)
 		cursor.setAttribute('position', '0 0 -0.5');
 		cursor.setAttribute('animation', "startEvents: click; property: scale; dur: 150; from: 0.2 0.2 0.2; to: 1 1 1; fill: forwards; easing: easeIn; ");
 		//cursor.setAttribute('raycaster', 'showLine', 'true');
@@ -129,10 +128,19 @@ window.globals = {
     }
 };
 
-if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-        globals.clientCoords = position.coords;
-    });
+let urlLat = getUrlParams('lat');
+let urlLong = getUrlParams('long');
+if (urlLat && urlLong) {
+    globals.clientCoords = {
+        latitude: urlLat,
+        longitude: urlLong
+    };
+} else {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            globals.clientCoords = position.coords;
+        });
+    }
 }
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
