@@ -128,8 +128,8 @@ window.globals = {
     }
 };
 
-let urlLat = getUrlParams('lat');
-let urlLong = getUrlParams('long');
+let urlLat = getUrlParam('lat');
+let urlLong = getUrlParam('long');
 if (urlLat && urlLong) {
     globals.clientCoords = {
         latitude: urlLat,
