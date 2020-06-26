@@ -137,6 +137,11 @@ To update the image of a named image already in the scene, use this syntax:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": {"material": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}}'
 ```
+#### Images on Objects (e.g.cube)
+Use the `multisrc` A-Frame Component to specify different bitmaps for sides of a cube or other primitive shape, e.g:
+```
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/ -m '{"object_id":"die1","action":"create","type":"object","persist":true,"data":{"object_type":"cube","position":{"x":0,"y":0.5,"z":-2},"rotation":{"x":0,"y":0,"z":0,"w":1},"scale":{"x":1,"y":1,"z":1},"color":"#ffffff","dynamic-body":{"type":"dynamic"},"multisrc":{"srcspath":"images/dice/", "srcs":"side1.png,side2.png,side3.png,side4.png,side5.png,side6.png"}}}'
+```
 #### Other Primitives: TorusKnot
 Instantiate a wacky torusKnot, then turn it blue. (look for other primitive types in A-Frame docs; here's a brief list: box circle cone cylinder dodecahedron icosahedron tetrahedron octahedron plane ring sphere torus torusKnot triangle)
 ```
@@ -227,15 +232,6 @@ Adds one of many predefined backgrounds ( one of: [ none, default, contact, egyp
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/env -m '{"object_id" : "env", "action": "update", "type": "object", "data": {"environment": {"preset": "arches"}}}'
 ```
-#### Particles
-This requires importing yet another javascript code blob, see https://github.com/IdeaSpaceVR/aframe-particle-system-component  
-```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/er1k/particle_1 -m '{"object_id" : "particle_1", "action": "create", "data": {"object_type": "particle", "preset": "snow"}}'
-```
-Turn off:
-```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/er1k/particle_1 -m '{"object_id" : "particle_1", "action": "create", "data": {"object_type": "particle", "preset": "snow", "enabled": false}}'
-```
 
 #### Physics
 You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
@@ -277,6 +273,17 @@ as html
 ```
 <a-entity goto-url="on: mousedown; url://oz.andrew.cmu.edu/drone;</a-entity>
 ```
+#### Particles
+Particles are based on https://github.com/harlyq/aframe-spe-particles-component, javascript loaded from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js 
+For now not directly supported, but rather by passing JSON inside the `data{}` element. The syntax for parameter names has been updated so instead of a name like this that is `space-separated` it becomes `spaceSeparated` (camel case). Three examples here have been created starting with the examples in view-source:https://harlyq.github.io/aframe-spe-particles-component/ then reformulating to ARENA JSON syntax:
+```
+{"object_id":"smoke","action":"create","persist":true,"data":{"object_type":"cube","position":{"x":0,"y":1,"z":-3.9},"rotation":{"x":0,"y":0,"z":0,"w":1},"scale":{"x":0.01,"y":0.01,"z":0.01},"color":"#ffffff","spe-particles":{"texture":"textures/fog.png","velocity":"1 30 0","velocitySpread":"2 1 0.2","particleCount":50,"maxAge":4,"size":"3,8","opacity":"0,1,0","color":"#aaa,#222"}}}
+
+{"object_id":"flames","action":"create","persist":true,"data":{"object_type":"cube","position":{"x":0,"y":1,"z":-3.8},"rotation":{"x":0,"y":0,"z":0,"w":1},"scale":{"x":0.01,"y":0.01,"z":0.01},"color":"#ffffff","spe-particles":{"texture":"textures/explosion_sheet.png","textureFrames":"5 5","velocity":"4 100 0","acceleration":"0 10 0","accelerationSpread":"0 10 0","velocitySpread":"4 0 4","particleCount":15,"maxAge":1,"size":"4,8","sizeSpread":2,"opacity":"1,0","wiggle":"0 1 0","blending":"additive"}}}
+
+{"object_id":"sparks","action":"create","persist":true,"data":{"object_type":"cube","position":{"x":0,"y":1,"z":-4},"rotation":{"x":0,"y":0,"z":0,"w":1},"scale":{"x":0.01,"y":0.01,"z":0.01},"color":"#ffffff","spe-particles":{"texture":"textures/square.png","color":"yellow,red","particleCount":3,"maxAge":0.5,"maxAgeSpread":1,"velocity":"40 200 40","velocitySpread":"10 3 10","wiggle":"50 0 50","wiggleSpread":"15 0 15","emitterScale":8,"sizeSpread":10,"randomizeVelocity":true}}}
+```
+Particles are very complicated and take a lot of parameters. It would not make sense to translate all of them into explicit ARENA types, thus this flexible 'raw JSON' format is used.
 #### 3d Head Model
 By default the ARENA shows your location as a 3d model of a head, with your nose at your location coordinates. If you want to change this, it is available in the scene addressable by an object_id based on your (camera) name, e.g `head-model_camera_1234_er1k` or if you set your name manually in the URL parameter `&fixedCamera=name` as `head-model_camera_name_name`. You can also change the text above your head, which defaults to the last part of your automatically assigned or fixedCamera name (after the underscore). So by default it would appear as `er1k` in the examples above, but can be modified by MQTT message addressed to object_id `head-text_camera_er1k_er1k`.
 #### Vive (laser) controls
@@ -337,10 +344,11 @@ other 'global' ARENA objects, by object_id:
  * **cameraRig** access to the translational part of camera rig object (to set data attributes beyond what rig update messages do)
  * **cameraSpinner** access the part of the rig that does only rotation
  * **weather** (if enabled) simple weather using particles for snow, rain, dust
- * **scene** the root entity, parent of all objects
+ * **sceneRoot** the root entity, parent of all objects
  * **env** environments (see "A-Frame environments"): ground, trees, pillars, background, sky etc.
  * **conix_box** a hard-coded box used for debugging
  * **conix_text** a fixed text object used for debugging
+ * **myCamera** to attach HUD objects visible to everyone's camera
 
 ## Discussion
 ### Camera
