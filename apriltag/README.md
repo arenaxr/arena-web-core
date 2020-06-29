@@ -1,4 +1,4 @@
-# Apriltag detector
+# Apriltag detector (tag36h11 family only)
 
 Apriltag detector using the C implementation at [ https://github.com/AprilRobotics/apriltag ](https://github.com/AprilRobotics/apriltag), and compiled to WASM using emscripten.
 
@@ -11,7 +11,18 @@ Tag ID Range | Tag Size (mm)
 ]300,450] | 50
 ]450,587] | 20
 
-Example detection array (with pose):
+## Javascript Detector API
+
+The detector API is implemented in [apriltag.js](https://github.com/conix-center/ARENA-core/blob/master/apriltag/apriltag.js):
+* ```detect(grayscaleImg, imgWidth, imgHeight)``` - Detect tag given a grayscale image of size *imgWidth*, *imgHeight* in pixels
+
+* ```set_camera_info(fx, fy, cx, cy)``` - Set camera intrinsics for tag pose estimation, where
+  * *fx*, *fy* is the focal lenght, in pixels 
+  * *cx*, *cy* is the principal point offset, in pixels 
+
+Calling ```detect()``` will return an array of JSON objects with information about the tags detected. 
+
+Example detection array:
 ```
 [ {
       "id":586,
@@ -38,7 +49,7 @@ Where:
 * *id* is the tag id, 
 * *corners* are x and y corners of the tag (in fractional pixel coordinates) 
 * *center* is the center of the tag (in fractional pixel coordinates) 
-* *pose* is an optional object, returned when detector options are set to return pose
+* *pose*:
   * *R* is the rotation matrix (**column major**)
   * *t* is the translation 
   * *e* is the object-space error of the pose estimation
