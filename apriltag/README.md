@@ -1,0 +1,45 @@
+# Apriltag detector
+
+Apriltag detector using the C implementation at [ https://github.com/AprilRobotics/apriltag ](https://github.com/AprilRobotics/apriltag), and compiled to WASM using emscripten.
+
+The apriltag dectector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family. For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
+
+Tag ID Range | Tag Size (mm)
+------------ | -------------
+[0,150] | 150
+]150,300] | 100
+]300,450] | 50
+]450,587] | 20
+
+Example detection array (with pose):
+```
+[ {
+      "id":586,
+      "corners":[ 
+         { "x":282.96, "y":1106.22 },
+         { "x":936.90, "y":1105.88 },
+         { "x":937.11, "y":452.49 },
+         { "x":282.96, "y":452.50 }
+      ],
+      "center":{ "x":610.07, "y":610.07 },
+      "pose":{ 
+         "R”:[  
+                  [ 1.000000,-0.000313,-0.000000 ],
+                  [ 0.000313, 1.000000, 0.000001 ],
+                  [ 0.000000, -0.000001, 1.000000 ]  
+          ],
+         "t":[ 0.186246, 0.238048, 0.000306 ],
+         "e": 0.0001,
+         "s": 1
+      }
+} ]
+```
+Where:
+* *id* is the tag id, 
+* *corners* are x and y corners of the tag (in fractional pixel coordinates) 
+* *center* is the center of the tag (in fractional pixel coordinates) 
+* *pose* is an optional object, returned when detector options are set to return pose
+  * *R* is the rotation matrix (**column major**)
+  * *t* is the translation 
+  * *e* is the object-space error of the pose estimation
+  * *s* is the solution returned (1=homography method; 2=potential second local minima; see: [apriltag_pose.h](https://github.com/AprilRobotics/apriltag/blob/master/apriltag_pose.h))
