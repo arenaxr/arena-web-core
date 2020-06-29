@@ -2,14 +2,14 @@
 
 Apriltag detector using the C implementation at [ https://github.com/AprilRobotics/apriltag ](https://github.com/AprilRobotics/apriltag), and compiled to WASM using emscripten.
 
-The apriltag dectector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family. For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
+The apriltag dectector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family ([pre-generated tags](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)). For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
 
 Tag ID Range | Tag Size (mm)
 ------------ | -------------
 [0,150] | 150
 ]150,300] | 100
 ]300,450] | 50
-]450,587] | 20
+]450,586] | 20
 
 ## Javascript Detector API
 
