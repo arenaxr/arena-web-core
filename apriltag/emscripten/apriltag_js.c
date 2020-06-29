@@ -71,9 +71,7 @@ const char fmt_det_point_pose[] = "{\"id\":%d, \"corners\": [{\"x\":%.2f,\"y\":%
 apriltag_family_t *g_tf=NULL;
 apriltag_detector_t *g_td;
 
-enum tag_family {tag36h11=0, tag25h9, tag16h5, tagCircle21h7, tagStandard41h12}; 
-
-// size oand stride f the image to process
+// size and stride f the image to process
 int g_width;
 int g_height;
 int g_stride;
@@ -81,12 +79,16 @@ int g_stride;
 // pointer to the image grayscale pixes
 uint8_t *g_img_buf = NULL;
 
-// if we are returning pose (=0 does not output pose; putput pose otherwise)
-int g_bool_return_pose = 0;
+// max number of detections returned (0=no max)
+int g_max_detections=1;
 
-// defaults to a 64mm tag and camera intrinsics of a MacBook Pro (13-inch, 2018) 
+// if we are returning pose (=0 does not output pose; putput pose otherwise)
+int g_return_pose = 0;
+
+// defaults to a 150mm tag and camera intrinsics of a MacBook Pro (13-inch, 2018) 
 // apriltag_detection_info_t: {apriltag_detection_t*, tagsize_meters, fx, fy, cx, cy}
-apriltag_detection_info_t g_det_pose_info = {NULL, 0.064, 1027.566807, 1027.448541, 650.232144, 358.974551}; 
+// NOTE: tag size is assumed according to the tag id:[0,150]=150mm;  ]150,300]=100mm; ]300,450]=50mm; ]450,587]=20mm;
+apriltag_detection_info_t g_det_pose_info = {NULL, 0.150, 1027.566807, 1027.448541, 650.232144, 358.974551}; 
 
 /**
  * @brief Init the apriltag detector with given family and default options 
@@ -96,21 +98,8 @@ apriltag_detection_info_t g_det_pose_info = {NULL, 0.064, 1027.566807, 1027.4485
  * @return 0=success; -1 on failure
  */
 EMSCRIPTEN_KEEPALIVE
-int init(int tag_family) {
-  if (tag_family == tag36h11) {
-      g_tf = tag36h11_create();
-  } else if (tag_family == tag25h9) {
-      g_tf = tag25h9_create();
-  } else if (tag_family == tag16h5) {
-      g_tf = tag16h5_create();
-  } else if (tag_family == tagCircle21h7) {
-      g_tf = tagCircle21h7_create();
-  } else if (tag_family == tagStandard41h12) {
-      g_tf = tagStandard41h12_create();
-  } else {
-      printf("Unrecognized tag family.\n");
-      return -1;
-  }
+int init() {
+  g_tf = tag36h11_create();
   if (g_tf == NULL) {
       printf("Error initializing tag family.");
       return -1;
@@ -126,7 +115,7 @@ int init(int tag_family) {
   g_td->nthreads = 1; 
   g_td->debug = 0; // Enable debugging output (slow)
   g_td->refine_edges = 1;
-  g_bool_return_pose = 1; 
+  g_return_pose = 1; 
   return 0;
 }
 
@@ -150,24 +139,25 @@ int destroy() {
  * @param sigma Apply low-pass blur to input; negative sharpens
  * @param nthreads Use this many CPU threads
  * @param refine_edges Spend more time trying to align edges of tags
- * @param return_pose Detect returns pose of detected tags (0=does no return pose; returns pose otherwise)
+ * @param max_detections Maximum number of detections to return (0=no max)
+ * @param return_pose Detect returns pose of detected tags (0=does not return pose; returns pose otherwise)
  * 
  * @return 0=success
  */
 EMSCRIPTEN_KEEPALIVE
-int set_detector_options(float decimate, float sigma, int nthreads, int refine_edges, int return_pose) {
+int set_detector_options(float decimate, float sigma, int nthreads, int refine_edges, int max_detections, int return_pose) {
   g_td->quad_decimate = decimate; 
   g_td->quad_sigma = sigma; 
   g_td->nthreads = nthreads; 
   g_td->refine_edges = refine_edges; 
-  g_bool_return_pose = return_pose; 
+  g_max_detections = max_detections;
+  g_return_pose = return_pose; 
   return 0;
 }
 
 /**
- * @brief Sets the tag size (meters) and camera intrinsics (in pixels) for tag pose estimation
+ * @brief Sets camera intrinsics (in pixels) for tag pose estimation
  *
- * @param tagsize tagsize in meters
  * @param fx x focal lenght in pixels
  * @param fy y focal lenght in pixels
  * @param cx x principal point in pixels
@@ -176,8 +166,7 @@ int set_detector_options(float decimate, float sigma, int nthreads, int refine_e
  * @return 0=success
  */
 EMSCRIPTEN_KEEPALIVE
-int set_pose_info(double tagsize, double fx, double fy, double cx, double cy) {
-  g_det_pose_info.tagsize = tagsize;
+int set_pose_info(double fx, double fy, double cx, double cy) {
   g_det_pose_info.fx = fx;
   g_det_pose_info.fy = fy;
   g_det_pose_info.cx = cx;
@@ -212,6 +201,38 @@ uint8_t * set_img_buffer(int width, int height, int stride) {
     g_img_buf = (uint8_t *) malloc(width * height);
   }
   return g_img_buf;
+}
+
+/**
+ * Our implementation of estimate tag pose to return the solution selected (1=homography method; 2=potential second local minima; see: apriltag_pose.h)
+ *
+ * @param info detection info 
+ * @param pose where to return the pose estimation 
+ * @param s the solution selected (1=homography method; 2=potential second local minima; see: apriltag_pose.h)
+ *
+ * return the object-space error of the pose estimation
+ */
+double estimate_tag_pose_with_solution(apriltag_detection_info_t* info, apriltag_pose_t* pose, int *s) {
+    double err1, err2;
+    apriltag_pose_t pose1, pose2;
+    estimate_tag_pose_orthogonal_iteration(info, &err1, &pose1, &err2, &pose2, 50);
+    if (err1 <= err2) {
+        pose->R = pose1.R;
+        pose->t = pose1.t;
+        if (pose2.R) {
+            matd_destroy(pose2.t);
+        }
+        matd_destroy(pose2.R);
+        *s=1;
+        return err1;
+    } else {
+        pose->R = pose2.R;
+        pose->t = pose2.t;
+        matd_destroy(pose1.R);
+        matd_destroy(pose1.t);
+        *s=2;
+        return err2;
+    }
 }
 
 /**
@@ -250,20 +271,34 @@ uint8_t * detect() {
   int llen = str_det_len - 1;
   strcpy(str_det, "[ ");
   llen -= 2; //"[ "
-  for (int i = 0; i < zarray_size(detections); i++) {
+  int n = zarray_size(detections);
+  if (g_max_detections > 0 && g_max_detections < n) n = g_max_detections; // limit detections returned to g_max_detections
+  for (int i = 0; i < n; i++) {
     apriltag_detection_t * det;
     zarray_get(detections, i, & det);
     int c;
-    if (g_bool_return_pose == 0) {
+    if (g_return_pose == 0) {
       c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[0]);
     } else {
       // return pose ..
       apriltag_pose_t pose;
       double pose_err;
       g_det_pose_info.det = det;
+      // size of the tag is determined from its id:
+      // [0,150]=150mm;  ]150,300]=100mm; ]300,450]=50mm; ]450,587]=20mm;
+      if (det->id <= 150) {
+        g_det_pose_info.tagsize = 0.150;
+      } else if (det->id <= 300) {
+        g_det_pose_info.tagsize = 0.100;
+      } else if (det->id <= 450) {
+        g_det_pose_info.tagsize = 0.050;
+      } else {
+        g_det_pose_info.tagsize = 0.20;
+      } 
       int s=0;
-      pose_err = estimate_tag_pose(&g_det_pose_info, &pose, &s);
-      //c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[1], matd_get(pose.R, 0, 0),matd_get(pose.R, 0,1),matd_get(pose.R, 0, 2),matd_get(pose.R, 1, 0),matd_get(pose.R, 1, 1),matd_get(pose.R, 1, 2),matd_get(pose.R, 2, 0),matd_get(pose.R, 2, 1),matd_get(pose.R, 2, 2),matd_get(pose.t, 0, 0),matd_get(pose.t, 1, 0),matd_get(pose.t, 2, 0), pose_err);
+      pose_err = estimate_tag_pose_with_solution(&g_det_pose_info, &pose, &s);
+      // row major R: c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[1], matd_get(pose.R, 0, 0),matd_get(pose.R, 0,1),matd_get(pose.R, 0, 2),matd_get(pose.R, 1, 0),matd_get(pose.R, 1, 1),matd_get(pose.R, 1, 2),matd_get(pose.R, 2, 0),matd_get(pose.R, 2, 1),matd_get(pose.R, 2, 2),matd_get(pose.t, 0, 0),matd_get(pose.t, 1, 0),matd_get(pose.t, 2, 0), pose_err);
+      // column major R:
       c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[1], matd_get(pose.R, 0, 0),matd_get(pose.R, 1, 0),matd_get(pose.R, 2, 0),matd_get(pose.R, 0, 1),matd_get(pose.R, 1, 1),matd_get(pose.R, 2, 1),matd_get(pose.R, 0, 2),matd_get(pose.R, 1, 2),matd_get(pose.R, 2, 2),matd_get(pose.t, 0, 0),matd_get(pose.t, 1, 0),matd_get(pose.t, 2, 0), pose_err, s);
       matd_destroy(pose.R);
       matd_destroy(pose.t);               
@@ -309,3 +344,4 @@ EMSCRIPTEN_KEEPALIVE
 void destroy_buffer(uint8_t * p) {
   free(p);
 }
+
