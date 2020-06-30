@@ -6,10 +6,10 @@ The apriltag dectector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII
 
 Tag ID Range | Tag Size (mm)
 ------------ | -------------
-[0,150] | 150
-]150,300] | 100
-]300,450] | 50
-]450,586] | 20
+[0,150] | 150 ([example tag 100](tag36h11_100.pdf))
+]150,300] | 100 ([example tag 200](tag36h11_200.pdf))
+]300,450] | 50 ([example tag 400](tag36h11_400.pdf))
+]450,586] | 20 ([example tag 500](tag36h11_500.pdf))
 
 ## Javascript Detector API
 
@@ -22,7 +22,7 @@ The detector API is implemented in [apriltag.js](https://github.com/conix-center
 
 Calling ```detect()``` will return an array of JSON objects with information about the tags detected. 
 
-Example detection array:
+Example detection:
 ```
 [ {
       "id":586,
@@ -34,7 +34,7 @@ Example detection array:
       ],
       "center":{ "x":610.07, "y":610.07 },
       "pose":{ 
-         "R”:[  
+         "R":[  
                   [ 1.000000,-0.000313,-0.000000 ],
                   [ 0.000313, 1.000000, 0.000001 ],
                   [ 0.000000, -0.000001, 1.000000 ]  
