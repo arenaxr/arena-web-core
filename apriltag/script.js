@@ -104,31 +104,28 @@ window.processCV = async function (frame) {
         delete detections[0].center;
         let dtagid = detections[0].id;
         let refTag;
-        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) {
+        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes tag 0)
             refTag = globals.aprilTags[dtagid];
-        } else if (await updateAprilTags()) { // No known result, try once to query server
+        } else if (globals.localsolver && await updateAprilTags()) { // No known result, try query if local solver
             refTag = globals.aprilTags[dtagid];
         }
-
-        if (globals.mqttsolver || globals.builder) {
-            jsonMsg.vio = vio;
-            jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
-            if (dtagid !== 0 && refTag) {  // No need to pass origin tag info
-                jsonMsg.refTag = refTag;
-            }
-        } else if (refTag) {  // Solve clientside, MUST have a reference tag though
+        if (refTag && globals.localsolver) { // If reference tag pose is known to solve locally
             let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
             globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
             globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
             rigPose.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
             jsonMsg.rigMatrix = rigPose.elements; // Make sure networked solver still has latest rig for reference
-        } else { // No reference tag, not networked/builder mode, nothing to do
-            return;
+        } else { // Pass vio and detection to network solver
+            jsonMsg.vio = vio;
+            jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
+            if (dtagid !== 0 && refTag) {  // No need to pass origin tag info
+                jsonMsg.refTag = refTag;
+            }
         }
-        // Never localize tag 0
+        // Never build tag 0
         if (globals.builder === true && dtagid !== 0) {
             jsonMsg.geolocation = { latitude: globals.clientCoords.latitude, longitude: globals.clientCoords.longitude };
-            jsonMsg.localize_tag = true;
+            jsonMsg.builder = true;
         }
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
         let ids = detections.map(tag => tag.id);
@@ -223,8 +220,8 @@ async function init() {
     if (urlParams.get('builder')) {
         globals.builder = true;
     }
-    if (urlParams.get('mqttsolver')) {
-        globals.mqttsolver = true;
+    if (urlParams.get('localsolver')) {
+        globals.localsolver = true;
     }
     await updateAprilTags();
     // must call this to init apriltag detector; argument is a callback for when it is done loading
