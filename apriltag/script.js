@@ -103,7 +103,7 @@ window.processCV = async function (frame) {
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
-        let refTag;
+        let refTag = null;
         if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes tag 0)
             refTag = globals.aprilTags[dtagid];
         } else if (globals.localsolver && await updateAprilTags()) { // No known result, try query if local solver
@@ -118,8 +118,8 @@ window.processCV = async function (frame) {
         } else { // Pass vio and detection to network solver
             jsonMsg.vio = vio;
             jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
-            if (dtagid !== 0 && refTag) {  // No need to pass origin tag info
-                jsonMsg.refTag = refTag;
+            if (dtagid !== 0) {  // No need to pass origin tag info
+                jsonMsg.refTag = refTag;  // Pass null if unknown
             }
         }
         // Never build tag 0
