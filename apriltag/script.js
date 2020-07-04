@@ -154,7 +154,7 @@ window.processCV = async function (frame) {
                             },
                         }
                     };
-                    publish('realm/s/' + globals.renderParam, JSON.stringify(jsonMsg));
+                    publish('realm/s/' + globals.renderParam + '/apriltag_' + dtagid, JSON.stringify(jsonMsg));
                     return;
                 }
             } else {  // Nothing else to go on, defer to network solver
@@ -305,7 +305,7 @@ function getTagPoseFromRig(vioMatrix, dtag) {
     dtagMatrix.multiply(FLIPMATRIX);
 
     // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
-
+    tagPoseMatrix.copy(rigMatrix);
     tagPoseMatrix.multiply(vioMatrixCopy);
     tagPoseMatrix.multiply(dtagMatrix);
 
