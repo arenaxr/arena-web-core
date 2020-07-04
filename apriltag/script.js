@@ -158,10 +158,11 @@ window.processCV = async function (frame) {
                 }
             } else {  // Nothing else to go on, defer to network solver
                 jsonMsg.vio = vio;
-                jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
+                jsonMsg.detections = [detections[0]];  // Only pass first detection for now, later handle multiple
                 if (dtagid !== 0) {  // No need to pass origin tag info
                     jsonMsg.refTag = refTag;  // Pass null if unknown
                 }
+            }
         }
         // Never build tag 0
         if (globals.builder === true && dtagid !== 0) {
