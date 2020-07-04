@@ -7,16 +7,20 @@ var bufIndex = 0;
 var cvThrottle = 0;
 var dtagMatrix = new THREE.Matrix4();
 var rigMatrix = new THREE.Matrix4();
+var rigMatrixT = new THREE.Matrix4();
 var vioMatrixCopy = new THREE.Matrix4();
+var tagPoseMatrix = new THREE.Matrix4();
+var identityMatrix = new THREE.Matrix4();
 var vioRot = new THREE.Quaternion();
 var vioPos = new THREE.Vector3();
+var tagPoseRot = new THREE.Quaternion();
 
 let originMatrix = new THREE.Matrix4();
 originMatrix.set(  // row-major
     1, 0, 0, 0,
     0, 0, 1, 0,
     0, -1, 0, 0,
-    1, 0, 0, 1
+    0, 0, 0, 1
 );
 var ORIGINTAG = {
     id: 'ORIGIN',
@@ -24,7 +28,12 @@ var ORIGINTAG = {
     pose: originMatrix
 };
 const FLIPMATRIX = new THREE.Matrix4();
-FLIPMATRIX.set(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
+FLIPMATRIX.set(
+    1, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, -1, 0,
+    0, 0, 0, 1
+);
 
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 var fx = 0, fy = 0, cx = 0, cy = 0;
@@ -106,21 +115,53 @@ window.processCV = async function (frame) {
         let refTag = null;
         if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes tag 0)
             refTag = globals.aprilTags[dtagid];
-        } else if (globals.localsolver && await updateAprilTags()) { // No known result, try query if local solver
+        /*
+        } else if (globals.localTagSolver && await updateAprilTags()) { // No known result, try query if local solver
             refTag = globals.aprilTags[dtagid];
         }
-        if (refTag && globals.localsolver) { // If reference tag pose is known to solve locally
+        */
+        if (dtagid === 0 || (refTag && globals.localTagSolver)) { // If reference tag pose is known to solve locally
             let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
             globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
             globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
-            rigPose.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
-            jsonMsg.rigMatrix = rigPose.elements; // Make sure networked solver still has latest rig for reference
-        } else { // Pass vio and detection to network solver
-            jsonMsg.vio = vio;
-            jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
-            if (dtagid !== 0) {  // No need to pass origin tag info
-                jsonMsg.refTag = refTag;  // Pass null if unknown
-            }
+            rigMatrixT.copy(rigPose);
+            rigMatrixT.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
+            jsonMsg.rigMatrix = rigMatrixT.elements; // Make sure networked solver still has latest rig for reference
+        } else {
+            if (globals.localTagSolver) { // Unknown tag in builder mode, consider it dynamic
+                if (rigMatrix.equals(identityMatrix)) {
+                    console.log("Client apriltag solver no calcualted rigMatrix, zero on origin tag first");
+                } else {
+                    let tagPose = getTagPoseFromRig(vioMatrixCopy, detections[0].pose, rigMatrix);
+                    tagPoseRot.setFromRotationMatrix(tagPose);
+                    // Send update directly to scene
+                    jsonMsg = {
+                        object_id: "apriltag_" + dtagid,
+                        action: "update",
+                        type: "object",
+                        data: {
+                            "position": {
+                                "x": tagPose.elements[12],
+                                "y": tagPose.elements[13],
+                                "z": tagPose.elements[14],
+                            },
+                            "rotation": {
+                                "x": tagPoseRot.x,
+                                "y": tagPoseRot.y,
+                                "z": tagPoseRot.z,
+                                "w": tagPoseRot.w,
+                            },
+                        }
+                    };
+                    publish('realm/s/' + globals.renderParam, JSON.stringify(jsonMsg));
+                    return;
+                }
+            } else {  // Nothing else to go on, defer to network solver
+                jsonMsg.vio = vio;
+                jsonMsg.detections = [ detections[0] ];  // Only pass first detection for now, later handle multiple
+                if (dtagid !== 0) {  // No need to pass origin tag info
+                    jsonMsg.refTag = refTag;  // Pass null if unknown
+                }
         }
         // Never build tag 0
         if (globals.builder === true && dtagid !== 0) {
@@ -137,6 +178,7 @@ window.processCV = async function (frame) {
 function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
     let r = dtag.R;
     let t = dtag.t;
+
     dtagMatrix.set(    // Transposed rotation
         r[0][0], r[1][0], r[2][0], t[0],
         r[0][1], r[1][1], r[2][1], t[1],
@@ -145,11 +187,34 @@ function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
     );
     dtagMatrix.premultiply(FLIPMATRIX);
     dtagMatrix.multiply(FLIPMATRIX);
+
+    // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
     dtagMatrix.getInverse(dtagMatrix);
     vioMatrixCopy.getInverse(vioMatrixCopy);
     rigMatrix.multiplyMatrices(refTag, dtagMatrix);
     rigMatrix.multiply(vioMatrixCopy);
+
     return rigMatrix;
+}
+
+function getTagPoseFromRig(vioMatrix, dtag) {
+    let r = dtag.R;
+    let t = dtag.t;
+    dtagMatrix.set(    // Transposed rotation
+        r[0][0], r[1][0], r[2][0], t[0],
+        r[0][1], r[1][1], r[2][1], t[1],
+        r[0][2], r[1][2], r[2][2], t[2],
+        0, 0, 0, 1
+    );
+    dtagMatrix.premultiply(FLIPMATRIX);
+    dtagMatrix.multiply(FLIPMATRIX);
+
+    // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
+
+    tagPoseMatrix.multiply(vioMatrixCopy);
+    tagPoseMatrix.multiply(dtagMatrix);
+
+    return tagPoseMatrix;
 }
 
 // show the image on a canvas; just for debug
@@ -220,8 +285,8 @@ async function init() {
     if (urlParams.get('builder')) {
         globals.builder = true;
     }
-    if (urlParams.get('localsolver')) {
-        globals.localsolver = true;
+    if (urlParams.get('localTagSolver')) {
+        globals.localTagSolver = true;
     }
     await updateAprilTags();
     // must call this to init apriltag detector; argument is a callback for when it is done loading
