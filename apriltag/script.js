@@ -115,11 +115,12 @@ window.processCV = async function (frame) {
         let refTag = null;
         if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes tag 0)
             refTag = globals.aprilTags[dtagid];
-        /*
-        } else if (globals.localTagSolver && await updateAprilTags()) { // No known result, try query if local solver
-            refTag = globals.aprilTags[dtagid];
+            /*
+            } else if (globals.localTagSolver && await updateAprilTags()) { // No known result, try query if local solver
+                refTag = globals.aprilTags[dtagid];
+            }
+            */
         }
-        */
         if (dtagid === 0 || (refTag && globals.localTagSolver)) { // If reference tag pose is known to solve locally
             let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
             globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
@@ -166,7 +167,10 @@ window.processCV = async function (frame) {
         }
         // Never build tag 0
         if (globals.builder === true && dtagid !== 0) {
-            jsonMsg.geolocation = { latitude: globals.clientCoords.latitude, longitude: globals.clientCoords.longitude };
+            jsonMsg.geolocation = {
+                latitude: globals.clientCoords.latitude,
+                longitude: globals.clientCoords.longitude
+            };
             jsonMsg.builder = true;
         }
         publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
