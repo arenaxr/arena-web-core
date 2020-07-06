@@ -70,7 +70,7 @@ var example_frame = {
 window.processCV = async function (frame) {
     let globals = window.globals;
     cvThrottle++;
-    if (cvThrottle % 20) {
+    if (cvThrottle % globals.cvRate) {
         return;
     }
     // console.log(frame);
@@ -105,15 +105,12 @@ window.processCV = async function (frame) {
     let detections = await aprilTag.detect(grayscaleImg, imgWidth, imgHeight);
 
     if (detections.length) {
-        //let detectMsg = JSON.stringify(detections);
-        //console.log(detectMsg);
-
         let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
         let refTag = null;
-        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes tag 0)
+        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes Origin tag)
             refTag = globals.aprilTags[dtagid];
             /*
             } else if (globals.localTagSolver && await updateAprilTags()) { // No known result, try query if local solver
@@ -121,22 +118,37 @@ window.processCV = async function (frame) {
             }
             */
         }
-        if (dtagid === 0 || (refTag && globals.localTagSolver)) { // If reference tag pose is known to solve locally
-            let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
-            globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
-            globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
-            rigMatrixT.copy(rigPose);
-            rigMatrixT.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
-            jsonMsg.rigMatrix = rigMatrixT.elements; // Make sure networked solver still has latest rig for reference
-        } else {
-            if (globals.localTagSolver) { // Unknown tag in builder mode, consider it dynamic
+        if (globals.networkedTagSolver) {
+            jsonMsg.vio = vio;
+            jsonMsg.detections = [detections[0]];  // Only pass first detection for now, later handle multiple
+            if (dtagid !== 0) {  // No need to pass origin tag info
+                jsonMsg.refTag = refTag;  // Pass null if unknown
+            }
+            if (globals.builder && dtagid !== 0) {
+                jsonMsg.geolocation = {
+                    latitude: globals.clientCoords.latitude,
+                    longitude: globals.clientCoords.longitude
+                };
+                jsonMsg.localize_tag = true;
+            }
+            publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
+        } else { // Solve locally (default)
+            if (refTag) { // If reference tag pose is known to solve locally, solve for rig offset
+                let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
+                globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
+                globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+                /* ** Rig update for networked solver, disable for now
+                rigMatrixT.copy(rigPose);
+                rigMatrixT.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
+                 */
+            } else { // Unknown tag, dynamic place it
                 if (rigMatrix.equals(identityMatrix)) {
-                    console.log("Client apriltag solver no calcualted rigMatrix, zero on origin tag first");
+                    console.log("Client apriltag solver no calculated rigMatrix yet, zero on origin tag first");
                 } else {
                     let tagPose = getTagPoseFromRig(vioMatrixCopy, detections[0].pose, rigMatrix);
                     tagPoseRot.setFromRotationMatrix(tagPose);
                     // Send update directly to scene
-                    jsonMsg = {
+                    Object.assign(jsonMsg, {
                         object_id: "apriltag_" + dtagid,
                         action: "update",
                         type: "object",
@@ -153,30 +165,15 @@ window.processCV = async function (frame) {
                                 "w": tagPoseRot.w,
                             },
                         }
-                    };
+                    });
                     publish('realm/s/' + globals.renderParam + '/apriltag_' + dtagid, JSON.stringify(jsonMsg));
                     return;
                 }
-            } else {  // Nothing else to go on, defer to network solver
-                jsonMsg.vio = vio;
-                jsonMsg.detections = [detections[0]];  // Only pass first detection for now, later handle multiple
-                if (dtagid !== 0) {  // No need to pass origin tag info
-                    jsonMsg.refTag = refTag;  // Pass null if unknown
-                }
             }
         }
-        // Never build tag 0
-        if (globals.builder === true && dtagid !== 0) {
-            jsonMsg.geolocation = {
-                latitude: globals.clientCoords.latitude,
-                longitude: globals.clientCoords.longitude
-            };
-            jsonMsg.builder = true;
-        }
-        publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
         let ids = detections.map(tag => tag.id);
         console.log('April Tag IDs Detected: ' + ids.join(', '));
-    } // this is the resulting json with the detections
+    }
 };
 
 
@@ -379,10 +376,11 @@ async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('builder')) {
         globals.builder = true;
+        globals.networkedTagSolver = true;
+    } else {
+        globals.networkedTagSolver = !!urlParams.get('networkedTagSolver'); // Force into boolean
     }
-    if (urlParams.get('localTagSolver')) {
-        globals.localTagSolver = true;
-    }
+    globals.cvRate = urlParams.get('cvRate') ? Math.round(60 / parseInt(urlParams.get('cvRate'))): 20;
     await updateAprilTags();
     // must call this to init apriltag detector; argument is a callback for when it is done loading
     window.aprilTag = await new Apriltag(Comlink.proxy(() => {
