@@ -4,12 +4,14 @@ Apriltag detector using the C implementation at [ https://github.com/AprilRoboti
 
 The apriltag dectector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family ([pre-generated tags](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)). For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
 
-Tag ID Range | Tag Size (mm)| Example tag
------------- | -------------| -------------
-[0,150] | 150 | [tag id 100](tag36h11_100.pdf)
-]150,300] | 100 | [tag id 200](tag36h11_200.pdf)
-]300,450] | 50 | [tag id 400](tag36h11_400.pdf)
-]450,586] | 20 | [tag id 500](tag36h11_500.pdf)
+Tag ID Range | Tag Size (mm) 
+------------ | ------------- 
+[0,150] | 150 | [tag id 100]
+]150,300] | 100 | [tag id 200]
+]300,450] | 50 | [tag id 400]
+]450,586] | 20 | [tag id 500]
+
+See tags with the right size here: https://github.com/conix-center/apriltag-gen
 
 ## Javascript Detector API
 
