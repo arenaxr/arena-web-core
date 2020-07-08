@@ -56,6 +56,7 @@
   </head>
   <body>
 <!--    <a-scene name="MQTTScene"> -->
+<a-entity id="sceneRoot">
     <a-scene name="MQTTScene" background="color: black">  <!-- stats physics -->
 
       <a-assets>
@@ -67,7 +68,7 @@
 	<a-asset-item id="viveControl-mtl" src="./models/vr_controller_vive.mtl"></a-asset-item>	
       </a-assets>
 
-      <a-entity id="sceneRoot"></a-entity>
+
 	<!-- BG music 
 	<video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
 	-->
@@ -150,6 +151,7 @@
             <a-box position='1 1 0' material='color: yellow;' emiteevents='true' smooth='true'></a-box>
         </a-marker>
 	-->
+      </a-entity>
     </a-scene>
     <script type="text/javascript">
 	    /*
