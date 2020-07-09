@@ -1,6 +1,6 @@
 # Apriltag (tag36h11 family only) detection for localization
 
-This feature currently requires a custom build of iOS XRViewer (firefox-ios/webxr)
+**This feature currently requires a custom build of iOS XRViewer (firefox-ios/webxr)**
 
 With the WebXR browser, Apriltag detection is automatically enabled when entering AR mode.
 

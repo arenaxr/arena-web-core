@@ -57,6 +57,10 @@ function getUrlParams(parameter, defaultValue) {
     return indexes;
 }
 
+function debug(msg) {
+    publish(globals.outputTopic, '{"object_id":"debug","message":"'+msg+'"}');
+}
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
@@ -76,32 +80,54 @@ window.globals = {
     inAR: false,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
     onEnterXR: function (xrType) {
+	//debug("ENTERING XR");
+
         if (xrType === 'ar') {
+
+	    //debug("xrType is ar");
+
             this.isAR = true;
             if (this.isWebXRViewer) {
+
+		//debug("isWebXRViewer = true");
+
                 let base64script = document.createElement("script");
                 base64script.onload = async () => {
                     await import('/apriltag/script.js');
                 };
                 base64script.src = '/apriltag/base64_binary.js';
                 document.head.appendChild(base64script);
+
                 document.addEventListener("mousedown", function (e) {
+
+		    //debug("MOUSEDOWN");
+
                     if (window.globals.lastMouseTarget) {
+
+			//debug("has target: "+window.globals.lastMouseTarget);
+
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
-                        let elPos = el.object3D.position;
+                        let elPos = new THREE.Vector3();
+			el.object3D.getWorldPosition(elPos);
+			//debug("worldPosition is:");
+			//debug(elPos.x.toString()+","+elPos.x.toString()+","+elPos.x.toString());
                         let intersection = {x: elPos.x, y: elPos.y, z: elPos.z};
                         el.emit("mousedown", {
                             "clicker": window.globals.camName,
                             intersection: {point: intersection},
                             cursorEl: true
                         }, false);
-                    }
+                    } else {
+			//debug("no lastMouseTarget");
+		    }
                 });
                 document.addEventListener("mouseup", function (e) {
                     if (window.globals.lastMouseTarget) {
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
-                        let elPos = el.object3D.position;
+			let elPos = new THREE.Vector3();
+                        el.object3D.getWorldPosition(elPos);
                         let intersection = {x: elPos.x, y: elPos.y, z: elPos.z};
+			//debug(elPos.x);
                         el.emit("mouseup", {
                             "clicker": window.globals.camName,
                             intersection: {point: intersection},
@@ -116,7 +142,8 @@ window.globals = {
                 cursor.setAttribute('fuse', false);
 		// move reticle closer (side effect: bigger!)
 		cursor.setAttribute('position', '0 0 -0.5');
-		cursor.setAttribute('animation', "startEvents: click; property: scale; dur: 150; from: 0.2 0.2 0.2; to: 1 1 1; fill: forwards; easing: easeIn; ");
+		//cursor.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+		cursor.setAttribute('animation__22', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
 		//cursor.setAttribute('raycaster', 'showLine', 'true');
 		//
                 cursor.setAttribute('max-distance', '1000');
@@ -356,7 +383,8 @@ function eventAction(evt, eventName, myThis) {
             position: coordsData,
             source: globals.camName,
             clickPos: vec3ToObject(
-                globals.sceneObjects.myCamera.object3D.position
+                //globals.sceneObjects.myCamera.object3D.position
+		new THREE.Vector3().setFromMatrixPosition(globals.sceneObjects.myCamera.object3D.matrixWorld)
             ),
         }
     });
@@ -400,13 +428,19 @@ function rotToText(c) {
 }
 
 function setClickData(evt) {
-    if (evt.detail.intersection)
+    //debug("in setClickData")
+    if (evt.detail.intersection) {
+	//debug("evt.detail.intersection");
+	//debug(evt.detail.intersection.point.x.toFixed(3));
+	//debug("nope");
         return {
             x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
             y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
             z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
         }
+    }
     else {
+	//debug("empty coords data");
         console.log("WARN: empty coords data");
         return {
             x: 0,
@@ -703,10 +737,11 @@ AFRAME.registerComponent('click-listener', {
         //console.log("click-listener Component init");
         //console.log("mousedown init");
         this.el.addEventListener('mousedown', function (evt) {
-
+	    //debug("click-listener got mousedown");
             const coordsData = setClickData(evt);
-
+	    //debug("checking evt.detail");
             if ('cursorEl' in evt.detail) {
+		//debug("cursorEl was in evt.detail; publishing to MQTT");
                 // original click event; simply publish to MQTT
                 let thisMsg = {
                     object_id: this.id,
@@ -716,12 +751,14 @@ AFRAME.registerComponent('click-listener', {
                         position: coordsData,
                         source: globals.camName,
                         clickPos: vec3ToObject(
-                            globals.sceneObjects.myCamera.object3D.position
+                            //globals.sceneObjects.myCamera.object3D.position
+			    new THREE.Vector3().setFromMatrixPosition(globals.sceneObjects.myCamera.object3D.matrixWorld)
                         ),
                     }
                 };
                 publish(globals.outputTopic + this.id, thisMsg);
             } else {
+		//debug("cursorEl NOT in evt.detail. Deal.");
 
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
@@ -749,7 +786,8 @@ AFRAME.registerComponent('click-listener', {
                         position: coordsData,
                         source: globals.camName,
                         clickPos: vec3ToObject(
-                            globals.sceneObjects.myCamera.object3D.position
+                            //globals.sceneObjects.myCamera.object3D.position
+			    new THREE.Vector3().setFromMatrixPosition(globals.sceneObjects.myCamera.object3D.matrixWorld)
                         ),
                     }
                 };
@@ -780,7 +818,8 @@ AFRAME.registerComponent('click-listener', {
                         position: coordsData,
                         source: globals.camName,
                         clickPos: vec3ToObject(
-                            globals.sceneObjects.myCamera.object3D.position
+                            //globals.sceneObjects.myCamera.object3D.position
+			    new THREE.Vector3().setFromMatrixPosition(globals.sceneObjects.myCamera.object3D.matrixWorld)
                         ),
                     }
                 };
@@ -806,7 +845,8 @@ AFRAME.registerComponent('click-listener', {
                         position: coordsData,
                         source: globals.camName,
                         clickPos: vec3ToObject(
-                            globals.sceneObjects.myCamera.object3D.position
+                            //globals.sceneObjects.myCamera.object3D.position
+			    new THREE.Vector3().setFromMatrixPosition(globals.sceneObjects.myCamera.object3D.matrixWorld)
                         ),
                     }
                 };

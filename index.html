@@ -9,16 +9,16 @@
     <!-- master version: cutting edge but may have bugs -->
 
     <script src="aframe/dist/aframe-master.js"></script> 
-    <!-- stable version; works with particles & environment (fog)  -->
-<!--
-    <script src="http://xr.andrew.cmu.edu/refactor/aframe/dist/aframe-v0.9.2.js"></script>
--->
     <!-- aframe-extras gives ability to play other model formats
     <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script> 
     <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
     -->
     <!-- from https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.js -->
     <script src="vendor/aframe-extras.js"></script>
+
+    <!-- from https://cdn.rawgit.com/elbobo/aframe-multisrc-component/b6d23310/dist/0.3/aframe-multisrc-component.js -->
+    <!-- multisrc component: multiple texture sides for e.g. dice -->
+    <script src="vendor/aframe-multisrc-component.js"></script>
 
     <!-- from https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.js -->
     <script src="vendor/aframe-physics-system.js"></script>
@@ -31,14 +31,16 @@
     <!-- pretty backgrounds  -->
     <script src="vendor/aframe-environment-component.min.js"></script>
 
+    <script src="transparent-occlude.js"></script>
+    
     <!-- our camera change and other event listener Components -->
     <script src="events.js"></script>
     <!-- V3.1 of the Paho MQTT.js library -->
     <script src="vendor/mqttws31.js" type="text/javascript"></script>
     <!-- our mqtt.js (main) script -->
     <script src="./mqtt.js" type="text/javascript"></script>
-    <!-- particles dude -->
-    <script src="vendor/aframe-particle-system-component.min.js"></script>
+
+    <script src="https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js"></script>
     <!-- from https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.js -->
     <script src="vendor/webxr-polyfill.js"></script>
 
@@ -64,11 +66,14 @@
 	<a-asset-item id="viveControl-obj" src="./models/vr_controller_vive.obj"></a-asset-item>
 	<a-asset-item id="viveControl-mtl" src="./models/vr_controller_vive.mtl"></a-asset-item>	
       </a-assets>
+      <a-entity id="sceneRoot">
+
+
 	<!-- BG music 
 	<video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
 	-->
       <!-- ground plane so falling objects don't fall through floor -->
-      <a-plane sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/snd_WoodWood.ogg); on: collide" static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
+      <a-plane sound="poolSize: 8; src: url(audio/snd_WoodWood.ogg); on: collide" static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
       <!-- walls so rolling objects don't roll off edge -->
       <a-box static-body position="-15 1 0" id="border1" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
       <a-box static-body position="15 1 0" id="border2" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
@@ -77,7 +82,7 @@
       <!-- 
  <a-sky radius="5000" color="#100030"></a-sky>
  -->
-      <a-entity id="env" environment="preset: starry; groundTexture: checkerboard"></a-entity>
+      <a-entity id="env" environment="preset: starry; fog: 0; groundTexture: checkerboard"></a-entity>
 
 <!--
       <a-entity position="0 2.25 -4" id="weather" particle-system="preset: snow; enabled: true"></a-entity>
@@ -85,7 +90,7 @@
       <a-entity position="0 0 0" id="CameraRig"><!-- movement-controls="fly: true; speed=0.3"> -->
 	<a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
 	  <!-- this camera can 'fly': z axis follows pitch of head direction -->
-	  <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true" look-controls pose-listener mouse-cursor>
+	  <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true; acceleration: 10" look-controls pose-listener mouse-cursor>
 	    <!--
 		<a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor> 
 		  <a-cursor fuse="true" max-distance="1000" timeout="1500"></a-cursor>
@@ -113,13 +118,16 @@
       <a-box static-body collision-listener sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/toypiano/Gsharp1.wav); on: collide" id="sound_box" position="0 0.5 -2" scale="0.5 0.5 0.5" >
       </a-box>      
 	   -->
-      
-      <a-box click-listener env sound id="env_box" position="-1.5 0.5 -2" scale="0.5 0.5 0.5" material="src: images/conix-face-white.jpg">
-      </a-box>
 
-      <a-box click-listener collision-listener load-scene="on: mousedown; url://oz.andrew.cmu.edu/drone; position: 0 0 0" position="1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" material="src: images/conix-face-black.png">
+<!--  CONIX BOXES
+      <a-box click-listener env sound id="env_box" position="-1.5 0.5 -2" scale="0.5 0.5 0.5" material="src: images/conix-face-white.jpg; wireframe: true">
       </a-box>
-      
+      <a-box wireframe click-listener collision-listener load-scene="on: mousedown; url://oz.andrew.cmu.edu/persist/drone; position: 0 0 0" position="1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" material="src: images/conix-face-black.png">
+      </a-box>
+      <a-sphere pointed position="2.5 0.5 -2" rotation="15 15 15" scale="0.5 0.5 0.5" animation="property: rotation; to: 0 360 0; loop:true; dur:10000; easing:linear" id="dots_sphere">
+      </a-sphere>
+-->
+
       <!-- demonstrate a clickable box that prompts for input & publishes entered text over MQTT
       <a-box click-listener prompt-box="on: mousedown; prompt:name_please" position="-1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" material="src: images/conix-face-white.jpg">
       </a-box>
@@ -142,7 +150,8 @@
         <a-marker pose-printer preset="hiro">
             <a-box position='1 1 0' material='color: yellow;' emiteevents='true' smooth='true'></a-box>
         </a-marker>
-	  -->
+	-->
+      </a-entity>
     </a-scene>
     <script type="text/javascript">
 	    /*

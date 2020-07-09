@@ -7,16 +7,20 @@ var bufIndex = 0;
 var cvThrottle = 0;
 var dtagMatrix = new THREE.Matrix4();
 var rigMatrix = new THREE.Matrix4();
+var rigMatrixT = new THREE.Matrix4();
 var vioMatrixCopy = new THREE.Matrix4();
+var tagPoseMatrix = new THREE.Matrix4();
+var identityMatrix = new THREE.Matrix4();
 var vioRot = new THREE.Quaternion();
 var vioPos = new THREE.Vector3();
+var tagPoseRot = new THREE.Quaternion();
 
 let originMatrix = new THREE.Matrix4();
 originMatrix.set(  // row-major
     1, 0, 0, 0,
     0, 0, 1, 0,
     0, -1, 0, 0,
-    1, 0, 0, 1
+    0, 0, 0, 1
 );
 var ORIGINTAG = {
     id: 'ORIGIN',
@@ -24,7 +28,12 @@ var ORIGINTAG = {
     pose: originMatrix
 };
 const FLIPMATRIX = new THREE.Matrix4();
-FLIPMATRIX.set(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
+FLIPMATRIX.set(
+    1, 0, 0, 0,
+    0, -1, 0, 0,
+    0, 0, -1, 0,
+    0, 0, 0, 1
+);
 
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 var fx = 0, fy = 0, cx = 0, cy = 0;
@@ -61,7 +70,7 @@ var example_frame = {
 window.processCV = async function (frame) {
     let globals = window.globals;
     cvThrottle++;
-    if (cvThrottle % 20) {
+    if (cvThrottle % globals.cvRate) {
         return;
     }
     // console.log(frame);
@@ -96,10 +105,131 @@ window.processCV = async function (frame) {
     let detections = await aprilTag.detect(grayscaleImg, imgWidth, imgHeight);
 
     if (detections.length) {
+        let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
+        delete detections[0].corners;
+        delete detections[0].center;
+        let dtagid = detections[0].id;
+        let refTag = null;
+        if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes Origin tag)
+            refTag = globals.aprilTags[dtagid];
+            /*
+            } else if (globals.localTagSolver && await updateAprilTags()) { // No known result, try query if local solver
+                refTag = globals.aprilTags[dtagid];
+            }
+            */
+        }
+        if (globals.networkedTagSolver) {
+            jsonMsg.vio = vio;
+            jsonMsg.detections = [detections[0]];  // Only pass first detection for now, later handle multiple
+            if (dtagid !== 0) {  // No need to pass origin tag info
+                jsonMsg.refTag = refTag;  // Pass null if unknown
+            }
+            if (globals.builder && dtagid !== 0) {
+                jsonMsg.geolocation = {
+                    latitude: globals.clientCoords.latitude,
+                    longitude: globals.clientCoords.longitude
+                };
+                jsonMsg.localize_tag = true;
+            }
+            publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
+        } else { // Solve locally (default)
+            if (refTag) { // If reference tag pose is known to solve locally, solve for rig offset
+                let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
+                globals.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
+                globals.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+                /* ** Rig update for networked solver, disable for now
+                rigMatrixT.copy(rigPose);
+                rigMatrixT.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
+                 */
+            } else { // Unknown tag, dynamic place it
+                if (rigMatrix.equals(identityMatrix)) {
+                    console.log("Client apriltag solver no calculated rigMatrix yet, zero on origin tag first");
+                } else {
+                    let tagPose = getTagPoseFromRig(vioMatrixCopy, detections[0].pose, rigMatrix);
+                    tagPoseRot.setFromRotationMatrix(tagPose);
+                    // Send update directly to scene
+                    Object.assign(jsonMsg, {
+                        object_id: "apriltag_" + dtagid,
+                        action: "update",
+                        type: "object",
+                        data: {
+                            "position": {
+                                "x": tagPose.elements[12],
+                                "y": tagPose.elements[13],
+                                "z": tagPose.elements[14],
+                            },
+                            "rotation": {
+                                "x": tagPoseRot.x,
+                                "y": tagPoseRot.y,
+                                "z": tagPoseRot.z,
+                                "w": tagPoseRot.w,
+                            },
+                        }
+                    });
+                    publish('realm/s/' + globals.renderParam + '/apriltag_' + dtagid, JSON.stringify(jsonMsg));
+                    return;
+                }
+            }
+        }
+        let ids = detections.map(tag => tag.id);
+        console.log('April Tag IDs Detected: ' + ids.join(', '));
+    }
+};
+
+
+const camMatrix0 = [ 528.84234161914062, 0, 0, 0, 528.8423461914062, 0 , 318.3243017578125, 178.80670166015625, 1]; 
+
+window.processCV2 = async function (frame) {
+    let globals = window.globals;
+    cvThrottle++;
+    if (cvThrottle % 20) {
+        return;
+    }
+    // console.log(frame);
+
+    // Save vio before processing apriltag. Don't touch global though
+    let timestamp = new Date();
+    let camParent = globals.sceneObjects.myCamera.object3D.parent.matrixWorld;
+    let cam = globals.sceneObjects.myCamera.object3D.matrixWorld;
+    vioMatrixCopy.getInverse(camParent);
+    vioMatrixCopy.multiply(cam);
+
+    vioRot.setFromRotationMatrix(vioMatrixCopy);
+    vioPos.setFromMatrixPosition(vioMatrixCopy);
+
+    let vio = {position: vioPos, rotation: vioRot};
+
+    frame._camera.cameraIntrinsics = camMatrix0;
+
+    if (frame._camera.cameraIntrinsics[0] != fx || frame._camera.cameraIntrinsics[4] != fy ||
+        frame._camera.cameraIntrinsics[6] != cx || frame._camera.cameraIntrinsics[7] != cy) {
+        fx = frame._camera.cameraIntrinsics[0];
+        fy = frame._camera.cameraIntrinsics[4];
+        cx = frame._camera.cameraIntrinsics[6];
+        cy = frame._camera.cameraIntrinsics[7];
+        aprilTag.set_camera_info(fx, fy, cx, cy); // set camera intrinsics for pose detection
+    }
+
+    let imgWidth = frame._buffers[bufIndex].size.width;
+    let imgHeight = frame._buffers[bufIndex].size.height;
+
+    let pixelData = frame._buffers[bufIndex]._buffer;
+    let grayscaleImg = new Uint8Array(imgWidth * imgHeight);
+    for (var i = 0; i < pixelData.length; i += 4 ) {
+        var r = pixelData[i];
+        var g = pixelData[i+1];
+        var b = pixelData[i+2];
+        var averageColour = (r + g + b) / 3;
+        grayscaleImg[i/4] = averageColour;
+    }
+
+    let detections = await aprilTag.detect(grayscaleImg, imgWidth, imgHeight);
+
+    if (detections.length) {
         //let detectMsg = JSON.stringify(detections);
         //console.log(detectMsg);
 
-        let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
+        let jsonMsg = {scene: globals.renderParam, timestamp: timestamp};
         delete detections[0].corners;
         delete detections[0].center;
         let dtagid = detections[0].id;
@@ -140,6 +270,7 @@ window.processCV = async function (frame) {
 function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
     let r = dtag.R;
     let t = dtag.t;
+
     dtagMatrix.set(    // Transposed rotation
         r[0][0], r[1][0], r[2][0], t[0],
         r[0][1], r[1][1], r[2][1], t[1],
@@ -148,11 +279,34 @@ function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
     );
     dtagMatrix.premultiply(FLIPMATRIX);
     dtagMatrix.multiply(FLIPMATRIX);
+
+    // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
     dtagMatrix.getInverse(dtagMatrix);
     vioMatrixCopy.getInverse(vioMatrixCopy);
     rigMatrix.multiplyMatrices(refTag, dtagMatrix);
     rigMatrix.multiply(vioMatrixCopy);
+
     return rigMatrix;
+}
+
+function getTagPoseFromRig(vioMatrix, dtag) {
+    let r = dtag.R;
+    let t = dtag.t;
+    dtagMatrix.set(    // Transposed rotation
+        r[0][0], r[1][0], r[2][0], t[0],
+        r[0][1], r[1][1], r[2][1], t[1],
+        r[0][2], r[1][2], r[2][2], t[2],
+        0, 0, 0, 1
+    );
+    dtagMatrix.premultiply(FLIPMATRIX);
+    dtagMatrix.multiply(FLIPMATRIX);
+
+    // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
+    tagPoseMatrix.copy(rigMatrix);
+    tagPoseMatrix.multiply(vioMatrixCopy);
+    tagPoseMatrix.multiply(dtagMatrix);
+
+    return tagPoseMatrix;
 }
 
 // show the image on a canvas; just for debug
@@ -222,10 +376,11 @@ async function init() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('builder')) {
         globals.builder = true;
+        globals.networkedTagSolver = true;
+    } else {
+        globals.networkedTagSolver = !!urlParams.get('networkedTagSolver'); // Force into boolean
     }
-    if (urlParams.get('mqttsolver')) {
-        globals.mqttsolver = true;
-    }
+    globals.cvRate = urlParams.get('cvRate') ? Math.round(60 / parseInt(urlParams.get('cvRate'))): 20;
     await updateAprilTags();
     // must call this to init apriltag detector; argument is a callback for when it is done loading
     window.aprilTag = await new Apriltag(Comlink.proxy(() => {
