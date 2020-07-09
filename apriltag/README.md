@@ -1,8 +1,26 @@
-# Apriltag detector (tag36h11 family only)
+# Apriltag (tag36h11 family only) detection for localization
+
+This feature currently requires a custom build of iOS XRViewer (firefox-ios/webxr)
+
+With the WebXR browser, Apriltag detection is automatically enabled when entering AR mode.
+
+Tag ID 0 is hardcoded as the Origin tag, placed facing upwards on the ground at 0, 0, 0
+
+By default, the client will localize off the origin tag and apriltag ids it pulls from the ATLAS near to its geolocation.
+
+The client will also dynamically update positions of objectID apriltag_N of tag ids it does not have reference poses for from the above.
+
+**Optional URL param flags**:
+
+* cvRate (int) - Frequency up to 60 for how often to process the frames.
+* networkedTagSolver (bool) - Defers all tag solving of client camera to a solver sitting on pubsub
+* builder (bool) - Will localize origin tag from a networked solver on pubsub, and all other tags that it finds with will be updated or created in the ATLAS
+
+# Apriltag Detector Details
 
 Apriltag detector using the C implementation at [ https://github.com/AprilRobotics/apriltag ](https://github.com/AprilRobotics/apriltag), and compiled to WASM using emscripten.
 
-The apriltag dectector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family ([pre-generated tags](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)). For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
+The apriltag detector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family ([pre-generated tags](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)). For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
 
 Tag ID Range | Tag Size (mm) 
 ------------ | ------------- 
