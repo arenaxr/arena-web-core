@@ -64,7 +64,7 @@ function debug(msg) {
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
-    updateMillis: 100,
+    updateMillis: getUrlParam('camUpdateRate', 100),
     renderParam: getUrlParam('scene', 'render'), //scene
     renderParams: getQueryParams('scene', 'render'), //scene
     userParam: getUrlParam('name', 'X'),
