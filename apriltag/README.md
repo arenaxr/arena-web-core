@@ -44,29 +44,32 @@ Calling ```detect()``` will return an array of JSON objects with information abo
 
 Example detection:
 ```
-[ {
-      "id":586,
-      "corners":[ 
-         { "x":282.96, "y":1106.22 },
-         { "x":936.90, "y":1105.88 },
-         { "x":937.11, "y":452.49 },
-         { "x":282.96, "y":452.50 }
-      ],
-      "center":{ "x":610.07, "y":610.07 },
-      "pose":{ 
-         "R":[  
-                  [ 1.000000,-0.000313,-0.000000 ],
-                  [ 0.000313, 1.000000, 0.000001 ],
-                  [ 0.000000, -0.000001, 1.000000 ]  
-          ],
-         "t":[ 0.186246, 0.238048, 0.000306 ],
-         "e": 0.0001,
-         "s": 1
-      }
-} ]
+[
+  {
+    "id": 151,
+    "size": 0.1,
+    "corners": [
+      { "x": 777.52, "y": 735.39},
+      { "x": 766.05, "y": 546.94},
+      { "x": 578.36, "y": 587.88},
+      { "x": 598, "y": 793.42}
+    ],
+    "center": { "x": 684.52, "y": 666.51 },
+    "pose": {
+      "R": [
+        [ 0.91576, -0.385813, 0.111941 ],
+        [ -0.335306, -0.887549, -0.315954 ],
+        [ -0.221252, -0.251803, 0.942148 ] ],
+      "t": [ 0.873393, 0.188183, 0.080928 ],
+      "e": 0.000058,
+      "s": 2
+    }
+  }
+]
 ```
 Where:
 * *id* is the tag id, 
+* *size* is the tag size in meters (based on the tag id) 
 * *corners* are x and y corners of the tag (in fractional pixel coordinates) 
 * *center* is the center of the tag (in fractional pixel coordinates) 
 * *pose*:
