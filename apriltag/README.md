@@ -20,7 +20,7 @@ The client will also dynamically update positions of objectID apriltag_N of tag 
 
 Apriltag detector using the C implementation at [ https://github.com/AprilRobotics/apriltag ](https://github.com/AprilRobotics/apriltag), and compiled to WASM using emscripten.
 
-The apriltag detector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family ([pre-generated tags](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11)). For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
+The apriltag detector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/ptII11.0/ptII/doc/codeDoc/edu/umich/eecs/april/tag/Tag36h11.html) family ([pre-generated tags](https://github.com/conix-center/apriltag-gen)). For tag pose estimation, tag sizes are assumed to be fixed, according to the tag id, as shown in the table.
 
 Tag ID Range | Tag Size (mm) 
 ------------ | ------------- 
@@ -29,7 +29,7 @@ Tag ID Range | Tag Size (mm)
 ]300,450] | 50 | [tag id 400]
 ]450,586] | 20 | [tag id 500]
 
-See tags with the right size here: https://github.com/conix-center/apriltag-gen
+See pre-generated tags with the right size here: https://github.com/conix-center/apriltag-gen
 
 ## Javascript Detector API
 
