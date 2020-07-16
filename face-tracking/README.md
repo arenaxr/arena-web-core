@@ -4,14 +4,14 @@ JSON format:
 
 ```
 {
-"object_id": "face_<camera id>",
-"hasFace": true/false,              # if there is a face detected/valid data
-"imFlipped": true/false,            # if image is flipped or not, set as URL param
-"imWidth": <src image width>,
-"imHeight": <src image height>,
-"landmarks": [x1,y1,x2,y2.....],    # flattened array of face landmarks as normalized points with image center as origin
-"bbox": [x1,y1,x2,y2]               # (x1,y1) is upper left and (x2,y2) is lower right
-"timestamp":
+    "object_id": "face_<camera id>",
+    "hasFace": <bool>,                  # if there is a face detected/valid data
+    "imFlipped": <bool>,                # if image is flipped or not, set as URL param
+    "imWidth": <src image width>,
+    "imHeight": <src image height>,
+    "landmarks": [x1,y1,x2,y2.....],    # flattened array of face landmarks as normalized points with image center as origin
+    "bbox": [x1,y1,x2,y2]               # (x1,y1) is upper left and (x2,y2) is lower right
+    "timestamp": <time>
 }
 ```
 

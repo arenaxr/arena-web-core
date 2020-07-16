@@ -1,2 +1,4 @@
 build/
 emsdk/
+.DS_Store
+emsdk_set_env.sh
