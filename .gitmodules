@@ -4,6 +4,9 @@
 [submodule "apriltag/emscripten/apriltag"]
 	path = apriltag/emscripten/apriltag
 	url = https://github.com/AprilRobotics/apriltag.git
+[submodule "dlib"]
+	path = dlib
+	url = https://github.com/davisking/dlib.git
 [submodule "face-tracking/dlib"]
 	path = face-tracking/dlib
 	url = https://github.com/davisking/dlib.git

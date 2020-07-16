@@ -5,7 +5,7 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_transforms.h>
 
-#define UPSAMPLE_RATIO    1
+#define DOWNSAMPLE_RATIO    2
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +41,7 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
 
     array2d<uint8_t> gray, gray_small;
     gray.set_size(srcRows, srcCols);
-    gray_small.set_size(srcRows / UPSAMPLE_RATIO, srcCols / UPSAMPLE_RATIO);
+    gray_small.set_size(srcRows / DOWNSAMPLE_RATIO, srcCols / DOWNSAMPLE_RATIO);
 
     uint32_t idx;
     for (int i = 0; i < srcRows; ++i) {
@@ -63,10 +63,10 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
 
     d = detector(gray_small);
 
-    left = d[0].left() * UPSAMPLE_RATIO;
-    top = d[0].top() * UPSAMPLE_RATIO;
-    right = d[0].right() * UPSAMPLE_RATIO;
-    bottom = d[0].bottom() * UPSAMPLE_RATIO;
+    left = d[0].left() * DOWNSAMPLE_RATIO;
+    top = d[0].top() * DOWNSAMPLE_RATIO;
+    right = d[0].right() * DOWNSAMPLE_RATIO;
+    bottom = d[0].bottom() * DOWNSAMPLE_RATIO;
 
     dlib::rectangle rect(
         (long)(left),
