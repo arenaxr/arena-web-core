@@ -61,6 +61,8 @@ function debug(msg) {
     publish(globals.outputTopic, '{"object_id":"debug","message":"'+msg+'"}');
 }
 
+import('/x/face/script.js');
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
