@@ -1,4 +1,4 @@
-# Face Detection using dlib
+# ARENA Face Detection and Tracking
 
 ## JSON format:
 
@@ -15,6 +15,8 @@
 }
 ```
 
+![landmarks](readme/landmarks.jpg)
+
 ## URL params:
 
 - trackface (bool)      Enables face detection. Default is 0!
@@ -26,6 +28,10 @@
 - frameSkip (int)       How many frames should be skipped. default is 1 (no frames skipped).
 - vidWidth (int)        Sets the width of the video window in pixels, height is scaled by aspect ratio. Rhe larger the width, the slower the face detection will take. Default is 320.
 
-## Building
+## Building:
 
 Run ```build.sh``` to build. Optional flag ```--force```.
+
+## Citations:
+
+![https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/](https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/)
