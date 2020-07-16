@@ -5,7 +5,7 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_transforms.h>
 
-#define DOWNSAMPLE_RATIO    2
+// #define DOWNSAMPLE_RATIO    1
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,7 +41,7 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
 
     array2d<uint8_t> gray, gray_small;
     gray.set_size(srcRows, srcCols);
-    gray_small.set_size(srcRows / DOWNSAMPLE_RATIO, srcCols / DOWNSAMPLE_RATIO);
+    // gray_small.set_size(srcRows / DOWNSAMPLE_RATIO, srcCols / DOWNSAMPLE_RATIO);
 
     uint32_t idx;
     for (int i = 0; i < srcRows; ++i) {
@@ -59,14 +59,14 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
         }
     }
 
-    resize_image(gray, gray_small);
+    // resize_image(gray, gray_small);
 
-    d = detector(gray_small);
+    d = detector(gray);
 
-    left = d[0].left() * DOWNSAMPLE_RATIO;
-    top = d[0].top() * DOWNSAMPLE_RATIO;
-    right = d[0].right() * DOWNSAMPLE_RATIO;
-    bottom = d[0].bottom() * DOWNSAMPLE_RATIO;
+    left = d[0].left(); // * DOWNSAMPLE_RATIO;
+    top = d[0].top(); // * DOWNSAMPLE_RATIO;
+    right = d[0].right(); // * DOWNSAMPLE_RATIO;
+    bottom = d[0].bottom(); // * DOWNSAMPLE_RATIO;
 
     dlib::rectangle rect(
         (long)(left),

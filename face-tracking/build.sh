@@ -13,4 +13,4 @@ else
     make
 fi
 
-cp detect_face_wasm.* ..
+mv detect_face_wasm.* ..
