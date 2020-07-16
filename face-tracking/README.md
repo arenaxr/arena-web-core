@@ -15,7 +15,7 @@
 }
 ```
 
-![landmarks](readme/landmarks.jpg)
+![landmarks](./readme/face_landmarks.jpg)
 
 ## URL params:
 
