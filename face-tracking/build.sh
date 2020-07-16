@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
-if [ -d "./build" ]
+if [ ! -d "./build" ] || [ "$1" == "--force" ]
 then
     rm -rf build
-fi
-mkdir build
-cd build
+    mkdir build
+    cd build
 
-emcmake cmake -DLIB_NO_GUI_SUPPORT=ON ..
-emmake make
+    emcmake cmake -DLIB_NO_GUI_SUPPORT=ON ..
+    emmake make
+else
+    cd build
+    make
+fi
 
 cp detect_face_wasm.* ..

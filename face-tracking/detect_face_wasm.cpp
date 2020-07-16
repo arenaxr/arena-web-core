@@ -59,7 +59,6 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
         }
     }
 
-    // optimization: shrink image but grow output
     resize_image(gray, gray_small);
 
     d = detector(gray_small);
