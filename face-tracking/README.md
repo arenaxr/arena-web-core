@@ -34,4 +34,4 @@ Run ```build.sh``` to build. Optional flag ```--force```.
 
 ## Citations:
 
-![https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/](https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/)
+[https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/](https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/)
