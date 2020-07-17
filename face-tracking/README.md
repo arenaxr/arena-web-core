@@ -6,15 +6,21 @@
 {
     "object_id": "face_<camera id>",
     "hasFace": <bool>,                  # if there is a face detected/valid data.
-    "imFlipped": <bool>,                # if image is flipped or not, set as URL param.
-    "imWidth": <src image width>,
-    "imHeight": <src image height>,
-    "landmarks": [x1,y1,x2,y2.....],    # flattened array of face landmarks as normalized points with image center as origin.
-    "bbox": [x1,y1,x2,y2]               # (x1,y1) is upper left and (x2,y2) is lower right.
+    "face": {
+        "flipped": <bool>,              # if image is flipped or not, can be set as URL param.
+        "width": <src image width>,
+        "height": <src image height>,
+    },
+    "pose": {
+        "quaternions": [x, y, z, w],    # rotation in quaternions
+        "translation": [x, y, z]        # may need to be scaled and adjusted. z = 0 is when your face is at the screen.
+    },
+    "landmarks": [x1, y1, x2, y2, ...], # flattened array of face landmarks as normalized points with image center as origin.
+    "bbox": [x1, y1, x2, y2]            # (x1,y1) is upper left and (x2,y2) is lower right.
     "timestamp": <time>
 }
 ```
-
+## Landmark locations for reference
 ![landmarks](./readme/face_landmarks.jpg)
 
 ## URL params:
@@ -29,6 +35,8 @@
 - vidWidth (int)        Sets the width of the video window in pixels, height is scaled by aspect ratio. Rhe larger the width, the slower the face detection will take. Default is 320.
 
 ## Building:
+
+Install emsdk, opencv, dlib. Download and activate emsdk and build WASM for opencv_js.
 
 Run ```build.sh``` to build. Optional flag ```--force```.
 

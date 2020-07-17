@@ -7,3 +7,6 @@
 [submodule "face-tracking/dlib"]
 	path = face-tracking/dlib
 	url = https://github.com/davisking/dlib.git
+[submodule "face-tracking/opencv"]
+	path = face-tracking/opencv
+	url = https://github.com/opencv/opencv.git

@@ -182,15 +182,31 @@ function round3(num) {
     return parseFloat(num.toFixed(3));
 }
 
-function createFaceJSON(landmarksRaw, bbox, width, height) {
+function createFaceJSON(landmarksRaw, bbox, quat, trans, width, height) {
     let landmarksJSON = {};
     landmarksJSON["object_id"] = "face_" + globals.idTag;
 
     landmarksJSON["hasFace"] = hasFace(landmarksRaw);
 
-    landmarksJSON["imFlipped"] = flipped;
-    landmarksJSON["imWidth"] = width;
-    landmarksJSON["imHeight"] = height;
+    landmarksJSON["image"] = {};
+    landmarksJSON["image"]["flipped"] = flipped;
+    landmarksJSON["image"]["width"] = width;
+    landmarksJSON["image"]["height"] = height;
+
+    landmarksJSON["pose"] = {};
+    let quatAdjusted = []
+    for (let i = 0; i < 4; i++) {
+        const adjustedQuat = landmarksJSON["hasFace"] ? round3(quat[i]) : 0;
+        quatAdjusted.push(adjustedQuat);
+    }
+    landmarksJSON["pose"]["quaternions"] = quatAdjusted;
+
+    let transAdjusted = []
+    for (let i = 0; i < 3; i++) {
+        const adjustedTrans = landmarksJSON["hasFace"] ? round3(trans[i]) : 0;
+        transAdjusted.push(adjustedTrans);
+    }
+    landmarksJSON["pose"]["translation"] = transAdjusted;
 
     // landmarksJSON["frame"] = frame;
 
@@ -217,7 +233,7 @@ function createFaceJSON(landmarksRaw, bbox, width, height) {
 }
 
 window.detectFace = async function(frame, width, height) {
-    let landmarksRaw = [], bbox = [];
+    let landmarksRaw = [], bbox = [], quat = [], trans = [];
 
     if (window.faceDetector !== undefined) {
         if (debugFace) console.time("detect_face_features");
@@ -225,9 +241,13 @@ window.detectFace = async function(frame, width, height) {
         // console.log(JSON.stringify(landmarksRaw))
         if (debugFace) console.timeEnd("detect_face_features");
 
+        if (debugFace) console.time("get_pose");
+        [quat, trans] = await window.faceDetector.getPose(landmarksRaw, window.width, window.height);
+        if (debugFace) console.time("get_pose");
+
         if (debugFace) console.time("pub_to_broker");
         const globals = window.globals;
-        const landmarksJSON = createFaceJSON(landmarksRaw, bbox, width, height);
+        const landmarksJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
         publish("realm/s/" + globals.renderParam + "/face_" + globals.idTag, landmarksJSON);
         // console.log(JSON.stringify(landmarksJSON))
         if (debugFace) console.timeEnd("pub_to_broker");

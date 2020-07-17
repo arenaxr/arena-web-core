@@ -46,34 +46,74 @@ class FaceDetector {
     }
 
     detect(im_arr, width, height) {
-        if (!this.ready) return [];
+        if (!this.ready) return [[], []];
 
         const im_ptr = this._Module._malloc(im_arr.length);
         this._Module.HEAPU8.set(im_arr, im_ptr);
 
-        let ptr = this._Module.ccall(
+        const ptr = this._Module.ccall(
             "detect_face_features",
             "number",
             ["number", "number", "number"],
             [im_ptr, width, height]
-        ) / Uint16Array.BYTES_PER_ELEMENT;
+        );
+        const ptrU16 = ptr / Uint16Array.BYTES_PER_ELEMENT
 
-        const len = this._Module.HEAPU16[ptr];
+        const len = this._Module.HEAPU16[ptrU16];
+
+        let i = 1;
 
         let bbox = [];
-        for (let i = 1; i < 5; i++) {
-            bbox.push(this._Module.HEAPU16[ptr+i]);
+        for (; i < 5; i++) {
+            bbox.push(this._Module.HEAPU16[ptrU16+i]);
         }
 
         let landmarksRaw = [];
-        for (let i = 5; i < len; i++) {
-            landmarksRaw.push(this._Module.HEAPU16[ptr+i]);
+        for (; i < len; i++) {
+            landmarksRaw.push(this._Module.HEAPU16[ptrU16+i]);
         }
 
         this._Module._free(ptr);
         this._Module._free(im_ptr);
 
         return [landmarksRaw, bbox];
+    }
+
+    getPose(parts_arr, width, height) {
+        if (!this.ready || !parts_arr) return [[], []];
+
+        const parts_ptr = this._Module._malloc(parts_arr.length);
+        this._Module.HEAPU8.set(parts_arr, parts_ptr);
+
+        const ptr = this._Module.ccall(
+            "get_pose",
+            "number",
+            ["number", "number", "number"],
+            [parts_ptr, width, height]
+        );
+        const ptrF64 = ptr / Float64Array.BYTES_PER_ELEMENT;
+
+        const len = this._Module.HEAPF64[ptrF64];
+
+        let i = 1;
+
+        let quat = [];
+        for (; i < 5; i++) {
+            quat.push(this._Module.HEAPF64[ptrF64+i]);
+        }
+        quat[1] = -quat[1];
+        quat[2] = -quat[2];
+
+        let trans = [];
+        for (; i < len; i++) {
+            trans.push(this._Module.HEAPF64[ptrF64+i]);
+        }
+        trans[0] = -trans[0];
+
+        this._Module._free(ptr);
+        this._Module._free(parts_ptr);
+
+        return [quat, trans];
     }
 }
 
