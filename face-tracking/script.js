@@ -248,7 +248,7 @@ window.detectFace = async function(frame, width, height) {
         if (debugFace) console.time("pub_to_broker");
         const globals = window.globals;
         const landmarksJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
-        publish("realm/s/" + globals.renderParam + "/face_" + globals.idTag, landmarksJSON);
+        publish("realm/s/" + globals.renderParam + "/" + globals.idTag + "/face", landmarksJSON);
         // console.log(JSON.stringify(landmarksJSON))
         if (debugFace) console.timeEnd("pub_to_broker");
     }

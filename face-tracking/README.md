@@ -2,6 +2,8 @@
 
 ## JSON format:
 
+To get face data, subscribe to topic ```realm/s/<scene>/<id>/face```
+
 ```
 {
     "object_id": "face_<camera id>",
@@ -32,7 +34,7 @@
 - bboxOn (bool)         Show the bbox in the video window.
 - flipped (bool)        Flip source image.
 - frameSkip (int)       How many frames should be skipped. default is 1 (no frames skipped).
-- vidWidth (int)        Sets the width of the video window in pixels, height is scaled by aspect ratio. Rhe larger the width, the slower the face detection will take. Default is 320.
+- vidWidth (int)        Sets the width of the video window in pixels, height is scaled by aspect ratio. The larger the width, the slower the face detection will take. Default is 320.
 
 ## Building:
 
