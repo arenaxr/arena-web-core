@@ -14,6 +14,14 @@ var identityMatrix = new THREE.Matrix4();
 var vioRot = new THREE.Quaternion();
 var vioPos = new THREE.Vector3();
 var tagPoseRot = new THREE.Quaternion();
+var cvPerfTrack = Array(10).fill(16.66, 0, 10);
+// Updates CV throttle from rolling avg of last 10 frame processing intervals in ms. min rate 1fps, max 60
+let updateAvgCVRate = (lastInterval) => {
+    cvPerfTrack.shift();
+    cvPerfTrack.push(lastInterval);
+    let avg = cvPerfTrack.reduce((a, c) => a + c) / cvPerfTrack.length;
+    window.globals.cvRate = Math.ceil(60 / Math.max(1, Math.min(60, 1000 / avg)));
+};
 
 let originMatrix = new THREE.Matrix4();
 originMatrix.set(  // row-major
@@ -73,6 +81,8 @@ window.processCV = async function (frame) {
     if (cvThrottle % globals.cvRate) {
         return;
     }
+    let start = Date.now();
+
     // console.log(frame);
 
     // Save vio before processing apriltag. Don't touch global though
@@ -167,17 +177,17 @@ window.processCV = async function (frame) {
                         }
                     });
                     publish('realm/s/' + globals.renderParam + '/apriltag_' + dtagid, JSON.stringify(jsonMsg));
-                    return;
                 }
             }
         }
         let ids = detections.map(tag => tag.id);
         console.log('April Tag IDs Detected: ' + ids.join(', '));
     }
+    updateAvgCVRate(Date.now() - start);
 };
 
 
-const camMatrix0 = [ 528.84234161914062, 0, 0, 0, 528.8423461914062, 0 , 318.3243017578125, 178.80670166015625, 1]; 
+const camMatrix0 = [ 528.84234161914062, 0, 0, 0, 528.8423461914062, 0 , 318.3243017578125, 178.80670166015625, 1];
 
 window.processCV2 = async function (frame) {
     let globals = window.globals;
