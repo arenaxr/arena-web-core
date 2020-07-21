@@ -114,7 +114,6 @@ window.processCV = async function (frame) {
 
     let detections = await aprilTag.detect(grayscaleImg, imgWidth, imgHeight);
 
-    let localizerTag;
     if (detections.length) {
         if (globals.networkedTagSolver) {
             let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
@@ -139,6 +138,7 @@ window.processCV = async function (frame) {
             }
             publish('realm/g/a/' + globals.camName, JSON.stringify(jsonMsg));
         } else {
+            let localizerTag;
             for (let detection of detections) {
                 let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
                 delete detection.corners;
@@ -155,7 +155,7 @@ window.processCV = async function (frame) {
                 }
                 if (refTag) { // If reference tag pose is known to solve locally, solve for rig offset
                     if (localizerTag) {
-                        true;
+                        continue;
                         // Reconcile which localizer tag is better based on error?
                     } else {
                         let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detection.pose, refTag.pose);
@@ -168,7 +168,7 @@ window.processCV = async function (frame) {
                          */
                     }
                 } else { // Unknown tag, dynamic place it
-                    if (!localizerTag) {
+                    if (rigMatrix.equals(identityMatrix)) {
                         console.log("Client apriltag solver no calculated rigMatrix yet, zero on origin tag first");
                     } else {
                         let tagPose = getTagPoseFromRig(vioMatrixCopy, detection.pose, rigMatrix);
