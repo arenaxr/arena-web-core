@@ -7,8 +7,9 @@ var bufIndex = 0;
 var cvThrottle = 0;
 var dtagMatrix = new THREE.Matrix4();
 var rigMatrix = new THREE.Matrix4();
-var rigMatrixT = new THREE.Matrix4();
+// var rigMatrixT = new THREE.Matrix4();
 var vioMatrixCopy = new THREE.Matrix4();
+var vioMatrixCopyT = new THREE.Matrix4();
 var tagPoseMatrix = new THREE.Matrix4();
 var identityMatrix = new THREE.Matrix4();
 var vioRot = new THREE.Quaternion();
@@ -142,7 +143,7 @@ window.processCV = async function (frame) {
             for (let detection of detections) {
                 let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
                 delete detection.corners;
-                delete detection.center;
+                delete detection.center;7
                 let dtagid = detection.id;
                 let refTag = null;
                 if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes Origin tag)
@@ -309,9 +310,10 @@ function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
 
     // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
     dtagMatrix.getInverse(dtagMatrix);
-    vioMatrixCopy.getInverse(vioMatrixCopy);
+    vioMatrixCopyT.getInverse(vioMatrixCopy);
+    rigMatrix.identity();
     rigMatrix.multiplyMatrices(refTag, dtagMatrix);
-    rigMatrix.multiply(vioMatrixCopy);
+    rigMatrix.multiply(vioMatrixCopyT);
 
     return rigMatrix;
 }
