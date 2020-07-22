@@ -49,6 +49,10 @@ class Apriltag {
         // inits detector with given family and default options: quad_decimate=2.0; quad_sigma=0.0; nthreads=1; refine_edges=1; return_pose=1
         this._init(); // NOTE: no need to set_detector_options() if javascript options are *not* different from default..
 
+        // set max_detections = 0, meaning no max; will return all detections
+        //options: float decimate, float sigma, int nthreads, int refine_edges, int max_detections, int return_pose
+        this._set_detector_options(2.0, 0.0, 1, 1, 0, 1);
+
         this.onWasmLoadedCallback();
     }
 
