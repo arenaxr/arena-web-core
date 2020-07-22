@@ -199,8 +199,8 @@ window.processCV = async function (frame) {
         }
         let ids = detections.map(tag => tag.id);
         console.log('April Tag IDs Detected: ' + ids.join(', '));
-        updateAvgCVRate(Date.now() - start);
     }
+    updateAvgCVRate(Date.now() - start);
 };
 
 
