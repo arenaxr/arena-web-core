@@ -25,9 +25,9 @@ The apriltag detector uses the [tag36h11](http://ptolemy.berkeley.edu/ptolemyII/
 Tag ID Range | Tag Size (mm) 
 ------------ | ------------- 
 [0,150] | 150 | [tag id 100]
-]150,300] | 100 | [tag id 200]
-]300,450] | 50 | [tag id 400]
-]450,586] | 20 | [tag id 500]
+[151,300] | 100 | [tag id 200]
+[301,450] | 50 | [tag id 400]
+[451,586] | 20 | [tag id 500]
 
 See pre-generated tags with the right size here: https://github.com/conix-center/apriltag-gen
 
