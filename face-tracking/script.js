@@ -1,8 +1,8 @@
 import * as Comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 
 let frames = 0;
-let frameSkip = 2;
-let width = 320;
+let frameSkip = null;
+let width = null;
 let debugFace = false, vidOff = false, overlayOff = false, bboxOn = false, flipped = false;
 
 function setVideoStyle(elem) {
@@ -13,6 +13,9 @@ function setVideoStyle(elem) {
 
 function setupVideo(displayCanv, displayOverlay, setupCallback) {
     window.videoElem = document.createElement("video");
+    window.videoElem.setAttribute("autoplay", "");
+    window.videoElem.setAttribute("muted", "");
+    window.videoElem.setAttribute("playsinline", "");
 
     navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" },
@@ -132,7 +135,7 @@ function drawOverlay(landmarksRaw, bbox) {
     if (!landmarksRaw || landmarksRaw.length == 0) {
         overlayCtx.font = "20px Arial";
         overlayCtx.textAlign = "center";
-        overlayCtx.fillText("Initalizing face detection...", window.overlayCanv.width/2, window.overlayCanv.height/2);
+        overlayCtx.fillText("Initalizing face detection...", window.overlayCanv.width/2, window.overlayCanv.height/8);
         return;
     }
 
@@ -284,7 +287,7 @@ async function init() {
 
         frameSkip = urlParams.get("frameSkip") ? parseInt(urlParams.get("frameSkip")) : 1;
 
-        width = urlParams.get("vidWidth") ? parseInt(urlParams.get("vidWidth")) : 320;
+        width = urlParams.get("vidWidth") ? parseInt(urlParams.get("vidWidth")) : window.innerWidth / 4;
 
         window.faceDetector = await new FaceDetector(Comlink.proxy(() => {
             setupVideo(!vidOff, !overlayOff, () => {
