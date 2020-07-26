@@ -287,7 +287,7 @@ async function init() {
 
         frameSkip = urlParams.get("frameSkip") ? parseInt(urlParams.get("frameSkip")) : 1;
 
-        width = urlParams.get("vidWidth") ? parseInt(urlParams.get("vidWidth")) : window.innerWidth / 4;
+        width = urlParams.get("vidWidth") ? parseInt(urlParams.get("vidWidth")) : 320;
 
         window.faceDetector = await new FaceDetector(Comlink.proxy(() => {
             setupVideo(!vidOff, !overlayOff, () => {

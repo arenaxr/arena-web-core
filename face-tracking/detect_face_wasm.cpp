@@ -12,7 +12,6 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_transforms.h>
 
-// #define DOWNSAMPLE_RATIO    1
 #define PI  3.14159265
 
 #ifdef __cplusplus
@@ -65,9 +64,8 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
     uint16_t *parts;
     uint16_t left, top, right, bottom;
 
-    array2d<uint8_t> gray, gray_small;
+    array2d<uint8_t> gray;
     gray.set_size(srcRows, srcCols);
-    // gray_small.set_size(srcRows / DOWNSAMPLE_RATIO, srcCols / DOWNSAMPLE_RATIO);
 
     uint32_t idx;
     for (int i = 0; i < srcRows; ++i) {
@@ -85,14 +83,12 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
         }
     }
 
-    // resize_image(gray, gray_small);
-
     d = detector(gray);
 
-    left = d[0].left(); // * DOWNSAMPLE_RATIO;
-    top = d[0].top(); // * DOWNSAMPLE_RATIO;
-    right = d[0].right(); // * DOWNSAMPLE_RATIO;
-    bottom = d[0].bottom(); // * DOWNSAMPLE_RATIO;
+    left = d[0].left();
+    top = d[0].top();
+    right = d[0].right();
+    bottom = d[0].bottom();
 
     dlib::rectangle rect(
         (long)(left),
@@ -134,7 +130,7 @@ double *get_pose(unsigned char landmarks[], size_t srcCols, size_t srcRows) {
     static std::vector<Point2d> image_pts;
 
     uint8_t result_len;
-    double *result, *quat;
+    double *result;
     double x, y, z;
 
     if (first_iter) {
@@ -176,20 +172,14 @@ double *get_pose(unsigned char landmarks[], size_t srcCols, size_t srcRows) {
     y = euler_angle.at<double>(1) * PI / 180.0;
     z = euler_angle.at<double>(2) * PI / 180.0;
 
-    result[1] = sin(x/2) * cos(y/2) * cos(z/2) - cos(x/2) * sin(y/2) * sin(z/2);
-    result[2] = cos(x/2) * sin(y/2) * cos(z/2) + sin(x/2) * cos(y/2) * sin(z/2);
-    result[3] = cos(x/2) * cos(y/2) * sin(z/2) - sin(x/2) * sin(y/2) * cos(z/2);
-    result[4] = cos(x/2) * cos(y/2) * cos(z/2) + sin(x/2) * sin(y/2) * sin(z/2);
-
-    delete [] quat;
+    result[1] = sin(x/2)*cos(y/2)*cos(z/2) - cos(x/2)*sin(y/2)*sin(z/2);
+    result[2] = cos(x/2)*sin(y/2)*cos(z/2) + sin(x/2)*cos(y/2)*sin(z/2);
+    result[3] = cos(x/2)*cos(y/2)*sin(z/2) - sin(x/2)*sin(y/2)*cos(z/2);
+    result[4] = cos(x/2)*cos(y/2)*cos(z/2) + sin(x/2)*sin(y/2)*sin(z/2);
 
     result[5] = trans_vec.at<double>(0);
     result[6] = trans_vec.at<double>(1);
     result[7] = trans_vec.at<double>(2);
-
-    // printf("%f %f %f\n", euler_angle.at<double>(0), euler_angle.at<double>(1), euler_angle.at<double>(2));
-    // printf("%f %f %f\n", rot_vec.at<double>(0), rot_vec.at<double>(1), rot_vec.at<double>(2));
-    // printf("%f %f %f\n", trans_vec.at<double>(0), trans_vec.at<double>(1), trans_vec.at<double>(2));
 
     return result;
 }
