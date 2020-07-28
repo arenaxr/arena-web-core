@@ -116,7 +116,7 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
 }
 
 EMSCRIPTEN_KEEPALIVE
-double *get_pose(unsigned char landmarks[], size_t srcCols, size_t srcRows) {
+double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
     static bool first_iter = true;
 
     static Mat camera_matrix, distortion;

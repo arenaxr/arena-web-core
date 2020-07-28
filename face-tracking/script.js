@@ -135,7 +135,7 @@ function drawOverlay(landmarksRaw, bbox) {
     if (!landmarksRaw || landmarksRaw.length == 0) {
         overlayCtx.font = "20px Arial";
         overlayCtx.textAlign = "center";
-        overlayCtx.fillText("Initalizing face detection...", window.overlayCanv.width/2, window.overlayCanv.height/8);
+        overlayCtx.fillText("Initializing face detection...", window.overlayCanv.width/2, window.overlayCanv.height/8);
         return;
     }
 

@@ -80,10 +80,10 @@ class FaceDetector {
     }
 
     getPose(parts_arr, width, height) {
-        if (!this.ready || !parts_arr) return [[], []];
+        if (!this.ready) return [null, null];
 
-        const parts_ptr = this._Module._malloc(parts_arr.length);
-        this._Module.HEAPU8.set(parts_arr, parts_ptr);
+        const parts_ptr = this._Module._malloc(parts_arr.length * Uint16Array.BYTES_PER_ELEMENT);
+        this._Module.HEAPU16.set(parts_arr, parts_ptr / Uint16Array.BYTES_PER_ELEMENT);
 
         const ptr = this._Module.ccall(
             "get_pose",
