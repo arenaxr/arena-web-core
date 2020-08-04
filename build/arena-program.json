@@ -1,0 +1,177 @@
+{
+   "definitions":{
+      "program":{
+         "type":"object",
+         "title":"Program Data",
+         "properties":{
+            "name":{
+               "type":"string",
+               "description": "Name of the program in the format namespace/program-name",
+               "minLength": 5,
+               "pattern": "[0-9a-zA-Z]+\/[0-9a-zA-Z]+"
+            },
+            "filename":{
+               "type":"string",
+               "description": "Filename of the entry binary",
+               "minLength": 5
+            },
+            "filetype":{
+               "type":"string",
+               "description": "Type of the program (WA=WASM or PY=Python)",
+               "enum":[
+                  "WA",
+                  "PY"
+               ],
+               "default": [ "WA" ]
+            },
+            "args":{
+               "type":"array",
+               "description": "Command-line arguments (passed in argv)",
+               "uniqueItems":false,
+               "items":{
+                  "type":"string",
+                  "title":"args"
+               },
+               "default":[
+                  "--client",
+                  "client1"
+               ]
+            },
+            "env":{
+               "type":"array",
+               "description": "Environment variables",
+               "uniqueItems":false,
+               "items":{
+                  "type":"string",
+                  "title":"args"
+               },
+               "default":[
+                  "--client",
+                  "client1"
+               ]
+            },
+            "channels":{
+               "type":"array",
+               "description": "Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future).",
+               "uniqueItems":false,
+               "items":{
+                  "type":"object",
+                  "title":"Channels",
+                  "properties":{
+                     "path":{
+                        "type":"string",
+                        "description": "Folder visible by the program."
+                     },
+                     "type":{
+                        "type":"string",
+                        "description": "Pubsub or client socket",
+                        "enum":[
+                           "pubsub",
+                           "client"
+                        ],
+                        "default":"pubsub"
+
+                     },
+                     "mode":{
+                        "type":"string",
+                        "description": "Access mode",
+                        "enum":[
+                           "r",
+                           "w",
+                           "rw"
+                        ]
+                     },
+                     "params":{
+                        "type":"object",
+                        "title":"Parameters",
+                        "description": "Type (i.e. pubsub/client)-specific parameters",
+                        "properties":{
+                           "topic":{
+                              "type":"string",
+                              "description": "Pubsub topic (pubsub)"
+                           },
+                           "host":{
+                              "type":"string",
+                              "description": "Destination host address (client socket)"
+                           },
+                           "port":{
+                              "type":"number",
+                              "description": "Destination port (client socket)"
+                           }
+                        }
+                     }
+                  }
+               },
+               "default":[
+                  {
+                     "path":"/ch/light",
+                     "type":"pubsub",
+                     "mode":"rw",
+                     "params":{
+                        "topic":"kitchen/light"
+                     }
+                  }
+               ]
+            }
+         },
+         "required":[ "name", "filename", "filetype"]
+      },
+      "arenaobj":{
+         "type":"object",
+         "title":"ARENA Object",
+         "properties":{
+            "object_id":{
+               "type":"string",
+               "description": "Object identifier; Must be a valid UUID.",
+               "minLength": 36,
+               "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+            },
+            "action":{
+               "type":"string",
+               "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+               "enum":[
+                  "create",
+                  "delete",
+                  "update",
+                  "clientEvent"
+               ],
+               "default":"create"
+            },
+            "persist":{
+               "type":"boolean",
+               "description": "Persist this object in the database"
+            }
+         },
+         "required":[
+            "object_id",
+            "action",
+            "persist"
+         ]
+      }
+   },
+   "type":"object",
+   "title":"Program",
+   "allOf":[
+      {
+         "$ref":"#/definitions/arenaobj"
+      },
+      {
+         "properties":{
+            "type":{
+               "type":"string",
+               "enum":[
+                  "program"
+               ]
+            },
+            "data":{
+               "$ref":"#/definitions/program",
+               "description": "Object data payload; Program config data"
+            }
+         },
+         "required":[
+            "type",
+            "data"
+         ]
+      }
+   ]
+}
