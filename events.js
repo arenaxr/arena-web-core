@@ -173,7 +173,7 @@ if (urlLat && urlLong) {
 }
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
-globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
+globals.mqttParam = 'wss://' + globals.mqttParamZ + '/xmqtt';
 globals.outputTopic = "realm/s/" + globals.renderParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
