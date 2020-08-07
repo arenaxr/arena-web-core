@@ -23,7 +23,7 @@ To get face data, subscribe to topic ```realm/s/<scene>/<id>/face```
 }
 ```
 ## Landmark locations for reference
-![landmarks](./readme/face_landmarks.jpg)
+![landmarks](./img/face_landmarks.jpg)
 
 ## URL params:
 

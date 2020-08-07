@@ -3,7 +3,36 @@ import * as Comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 let frames = 0;
 let frameSkip = null;
 let width = null;
-let debugFace = false, vidOff = false, overlayOff = false, bboxOn = false, flipped = false;
+let trackFace = false, debugFace = false, vidOff = false, overlayOff = false, bboxOn = false, flipped = false;
+let prevJSON = null;
+let vidStream = null;
+
+function trackFaceOn() {
+    trackFace = true;
+    setupVideo(!vidOff, !overlayOff, () => {
+        requestAnimationFrame(processVideo);
+    });
+}
+
+function trackFaceOff() {
+    trackFace = false;
+    if (!vidOff) {
+        document.body.removeChild(window.videoCanv);
+        window.videoCanv = null;
+    }
+
+    if (!overlayOff) {
+        document.body.removeChild(window.overlayCanv);
+        window.overlayCanv = null;
+    }
+
+    const tracks = vidStream.getTracks();
+    tracks.forEach(function(track) {
+       track.stop();
+    });
+    window.videoElem.srcObject = null;
+    window.videoElem = undefined;
+}
 
 function setVideoStyle(elem) {
     elem.style.position = "absolute";
@@ -22,6 +51,7 @@ function setupVideo(displayCanv, displayOverlay, setupCallback) {
         audio: false
     })
     .then(stream => {
+        vidStream = stream;
         const videoSettings = stream.getVideoTracks()[0].getSettings();
         window.videoElem.srcObject = stream;
         window.videoElem.play();
@@ -131,6 +161,7 @@ function drawPolyline(landmarks, start, end, closed) {
 }
 
 function drawOverlay(landmarksRaw, bbox) {
+    if (!window.overlayCanv) return;
     const overlayCtx = window.overlayCanv.getContext("2d");
     if (!landmarksRaw || landmarksRaw.length == 0) {
         overlayCtx.font = "20px Arial";
@@ -186,53 +217,53 @@ function round3(num) {
 }
 
 function createFaceJSON(landmarksRaw, bbox, quat, trans, width, height) {
-    let landmarksJSON = {};
-    landmarksJSON["object_id"] = "face_" + globals.idTag;
+    let faceJSON = {};
+    faceJSON["object_id"] = "face_" + globals.idTag;
 
-    landmarksJSON["hasFace"] = hasFace(landmarksRaw);
+    faceJSON["hasFace"] = hasFace(landmarksRaw);
 
-    landmarksJSON["image"] = {};
-    landmarksJSON["image"]["flipped"] = flipped;
-    landmarksJSON["image"]["width"] = width;
-    landmarksJSON["image"]["height"] = height;
+    faceJSON["image"] = {};
+    faceJSON["image"]["flipped"] = flipped;
+    faceJSON["image"]["width"] = width;
+    faceJSON["image"]["height"] = height;
 
-    landmarksJSON["pose"] = {};
+    faceJSON["pose"] = {};
     let quatAdjusted = []
     for (let i = 0; i < 4; i++) {
-        const adjustedQuat = landmarksJSON["hasFace"] ? round3(quat[i]) : 0;
+        const adjustedQuat = faceJSON["hasFace"] ? round3(quat[i]) : 0;
         quatAdjusted.push(adjustedQuat);
     }
-    landmarksJSON["pose"]["quaternions"] = quatAdjusted;
+    faceJSON["pose"]["quaternions"] = quatAdjusted;
 
     let transAdjusted = []
     for (let i = 0; i < 3; i++) {
-        const adjustedTrans = landmarksJSON["hasFace"] ? round3(trans[i]) : 0;
+        const adjustedTrans = faceJSON["hasFace"] ? round3(trans[i]) : 0;
         transAdjusted.push(adjustedTrans);
     }
-    landmarksJSON["pose"]["translation"] = transAdjusted;
+    faceJSON["pose"]["translation"] = transAdjusted;
 
-    // landmarksJSON["frame"] = frame;
+    // faceJSON["frame"] = frame;
 
     let landmarksAdjusted = [];
     let maxX = 0, minX = window.width, maxY = 0, minY = window.height;
     for (let i = 0; i < 68*2; i += 2) {
-        const adjustedX = landmarksJSON["hasFace"] ? round3((landmarksRaw[i]-width/2)/width) : 0;
-        const adjustedY = landmarksJSON["hasFace"] ? round3((height/2-landmarksRaw[i+1])/height): 0 ;
+        const adjustedX = faceJSON["hasFace"] ? round3((landmarksRaw[i]-width/2)/width) : 0;
+        const adjustedY = faceJSON["hasFace"] ? round3((height/2-landmarksRaw[i+1])/height): 0 ;
         landmarksAdjusted.push(adjustedX);
         landmarksAdjusted.push(adjustedY);
     }
-    landmarksJSON["landmarks"] = landmarksAdjusted;
+    faceJSON["landmarks"] = landmarksAdjusted;
 
     let bboxAdjusted = [];
     for (let i = 0; i < 4; i += 2) {
-        const adjustedX = landmarksJSON["hasFace"] ? round3((bbox[i]-width/2)/width) : 0;
-        const adjustedY = landmarksJSON["hasFace"] ? round3((height/2-bbox[i+1])/height): 0 ;
+        const adjustedX = faceJSON["hasFace"] ? round3((bbox[i]-width/2)/width) : 0;
+        const adjustedY = faceJSON["hasFace"] ? round3((height/2-bbox[i+1])/height): 0 ;
         bboxAdjusted.push(adjustedX);
         bboxAdjusted.push(adjustedY);
     }
-    landmarksJSON["bbox"] = bboxAdjusted;
+    faceJSON["bbox"] = bboxAdjusted;
 
-    return landmarksJSON;
+    return faceJSON;
 }
 
 window.detectFace = async function(frame, width, height) {
@@ -250,9 +281,12 @@ window.detectFace = async function(frame, width, height) {
 
         if (debugFace) console.time("pub_to_broker");
         const globals = window.globals;
-        const landmarksJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
-        publish("realm/s/" + globals.renderParam + "/" + globals.idTag + "/face", landmarksJSON);
-        // console.log(JSON.stringify(landmarksJSON))
+        const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
+        if (faceJSON != prevJSON) {
+            publish("realm/s/" + globals.renderParam + "/" + globals.idTag + "/face", faceJSON);
+            prevJSON = faceJSON
+        }
+        // console.log(JSON.stringify(faceJSON))
         if (debugFace) console.timeEnd("pub_to_broker");
     }
 
@@ -260,23 +294,26 @@ window.detectFace = async function(frame, width, height) {
 }
 
 async function processVideo() {
-    if (frames % frameSkip == 0) {
-        const [landmarksRaw, bbox] = await window.detectFace(getFrame(), window.width, window.height);
-        if (!overlayOff) {
-            if (debugFace && landmarksRaw && landmarksRaw.length > 0) console.log(landmarksRaw);
-            drawOverlay(landmarksRaw, bbox);
+    if (trackFace) {
+        if (frames % frameSkip == 0) {
+            const [landmarksRaw, bbox] = await window.detectFace(getFrame(), window.width, window.height);
+            if (!overlayOff) {
+                if (debugFace && landmarksRaw && landmarksRaw.length > 0) console.log(landmarksRaw);
+                drawOverlay(landmarksRaw, bbox);
+            }
         }
-    }
-    frames++;
+        frames++;
 
-    requestAnimationFrame(processVideo);
+        requestAnimationFrame(processVideo);
+    }
 }
 
 async function init() {
     const globals = window.globals;
     const urlParams = new URLSearchParams(window.location.search);
 
-    if (!!urlParams.get("trackFace")) {
+    trackFace = !!urlParams.get("trackFace");
+    if (trackFace) {
         const FaceDetector = Comlink.wrap(new Worker("/x/face/faceDetector.js"));
 
         flipped = !!urlParams.get("flipped");
@@ -290,10 +327,9 @@ async function init() {
         width = urlParams.get("vidWidth") ? parseInt(urlParams.get("vidWidth")) : 320;
 
         window.faceDetector = await new FaceDetector(Comlink.proxy(() => {
-            setupVideo(!vidOff, !overlayOff, () => {
-                requestAnimationFrame(processVideo);
-            });
+            trackFaceOn();
         }));
+
     }
 }
 
