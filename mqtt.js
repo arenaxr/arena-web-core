@@ -151,9 +151,12 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
+var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjb25peCIsImlhdCI6MTU5Njg3NDA4OCwiZXhwIjoxNjI4NDEwMDg4fQ.6Z_zmxmQDw7WTdtXa6MtHa7isMlJ1YOyIv_nwpmfRO4"
 mqttClient.connect({
     onSuccess: onConnect,
-    willMessage: lwt
+    willMessage: lwt,
+    userName: "conix",
+    password: token
 });
 
 // Callback for client.connect()
