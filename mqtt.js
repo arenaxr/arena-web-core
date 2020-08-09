@@ -162,6 +162,7 @@ xhr.onload = () => {
     } else {
         var token = xhr.response;
         var user = "conix";
+        console.log("mqtt connect", "user:", user, "token:", token);
         mqttClient.connect({
             onSuccess: onConnect,
             willMessage: lwt,
