@@ -151,13 +151,25 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
-var token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjb25peCIsImlhdCI6MTU5Njg3NDA4OCwiZXhwIjoxNjI4NDEwMDg4fQ.6Z_zmxmQDw7WTdtXa6MtHa7isMlJ1YOyIv_nwpmfRO4"
-mqttClient.connect({
-    onSuccess: onConnect,
-    willMessage: lwt,
-    userName: "conix",
-    password: token
-});
+// Request JWT before connection
+let xhr = new XMLHttpRequest();
+xhr.open('GET', "http://xr.andrew.cmu.edu:8888";
+xhr.responseType = 'string';
+xhr.send();
+xhr.onload = () => {
+    if (xhr.status !== 200) {
+        alert(`Error loading token: ${xhr.status}: ${xhr.statusText}`);
+    } else {
+        var token = xhr.response;
+        var user = "conix";
+        mqttClient.connect({
+            onSuccess: onConnect,
+            willMessage: lwt,
+            userName: user,
+            password: token
+        });
+    }
+};
 
 // Callback for client.connect()
 function onConnect() {
