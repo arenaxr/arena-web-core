@@ -2,13 +2,14 @@
 # example:
 #  ./auth-test.sh conix
 
+USER=$1
+
 function get_token
 {
-  \curl -s 'http://xr.andrew.cmu.edu:8888'  2>&1
+  \curl -s -x GET -d 'username=$USER' 'https://xr.andrew.cmu.edu:8888' 2>&1 | \
+    python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 
 }
-
 TOKEN=$(get_token)
-USER=$1
 
 # publish cube using token
 echo "calling mosquitto_pub, user: $USER, token: $TOKEN"

@@ -1,3 +1,4 @@
 models/
 .DS_Store
 auth-test/config.json
+node_modules
