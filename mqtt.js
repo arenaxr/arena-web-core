@@ -153,7 +153,7 @@ lwt.retained = false;
 
 // Request JWT before connection
 let xhr = new XMLHttpRequest();
-xhr.open('GET', "http://xr.andrew.cmu.edu:8888";
+xhr.open('GET', "http://xr.andrew.cmu.edu:8888");
 xhr.responseType = 'string';
 xhr.send();
 xhr.onload = () => {
