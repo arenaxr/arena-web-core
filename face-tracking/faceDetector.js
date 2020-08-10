@@ -2,15 +2,15 @@ importScripts("/x/face/detect_face_wasm.js");
 importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 
 class FaceDetector {
-    constructor(callback) {
+    constructor(callbacks) {
         let _this = this;
         this.ready = false;
         FaceDetectorWasm().then(function (Module) {
             console.log("Face Detector WASM module loaded.");
             _this.onWasmInit(Module);
-            _this.getPoseModel();
-            if (callback) {
-                callback();
+            _this.getPoseModel(callbacks[1]);
+            if (callbacks[0]) {
+                callbacks[0]();
             }
         });
     }
@@ -19,13 +19,14 @@ class FaceDetector {
         this._Module = Module;
     }
 
-    getPoseModel(Module) {
+    getPoseModel(req_callback) {
         const req = new XMLHttpRequest();
         req.open("GET", "/x/face/shape_predictor_68_face_landmarks.dat", true);
         req.responseType = "arraybuffer";
         req.onload = (e) => {
             const payload = req.response;
             if (payload) {
+                req_callback();
                 this.poseModelInit(payload);
                 this.ready = true;
             }

@@ -6,24 +6,33 @@ let width = null;
 let trackFace = false, debugFace = false, vidOff = false, overlayOff = false, bboxOn = false, flipped = false;
 let prevJSON = null;
 let vidStream = null;
+let loading = null;
 
-function trackFaceOn() {
+window.trackFaceOn = function() {
+    if (trackFace) return;
     trackFace = true;
+
     setupVideo(!vidOff, !overlayOff, () => {
+        if (!overlayOff) {
+            writeOverlayText("Downloading Face Model: 100MB");
+        }
         requestAnimationFrame(processVideo);
     });
 }
 
-function trackFaceOff() {
+window.trackFaceOff = function() {
+    if (!trackFace) return;
+
     trackFace = false;
-    if (!vidOff) {
-        document.body.removeChild(window.videoCanv);
-        window.videoCanv = null;
-    }
 
     if (!overlayOff) {
         document.body.removeChild(window.overlayCanv);
         window.overlayCanv = null;
+    }
+
+    if (!vidOff) {
+        document.body.removeChild(window.videoCanv);
+        window.videoCanv = null;
     }
 
     const tracks = vidStream.getTracks();
@@ -32,6 +41,20 @@ function trackFaceOff() {
     });
     window.videoElem.srcObject = null;
     window.videoElem = undefined;
+}
+
+function writeOverlayText(text) {
+    if (!overlayOff) {
+        const overlayCtx = window.overlayCanv.getContext("2d");
+        overlayCtx.clearRect(
+            0, 0,
+            window.width,
+            window.height
+        );
+        overlayCtx.font = "17px Arial";
+        overlayCtx.textAlign = "center";
+        overlayCtx.fillText(text, window.overlayCanv.width/2, window.overlayCanv.height/8);
+    }
 }
 
 function setVideoStyle(elem) {
@@ -62,7 +85,7 @@ function setupVideo(displayCanv, displayOverlay, setupCallback) {
 
     window.videoCanv = document.createElement("canvas");
     setVideoStyle(window.videoCanv);
-    window.videoCanv.style.zIndex = 10;
+    window.videoCanv.style.zIndex = 2;
     if (displayCanv) {
         document.body.appendChild(window.videoCanv);
     }
@@ -70,7 +93,7 @@ function setupVideo(displayCanv, displayOverlay, setupCallback) {
     if (displayOverlay) {
         window.overlayCanv = document.createElement("canvas");
         setVideoStyle(window.overlayCanv);
-        window.overlayCanv.style.zIndex = 20;
+        window.overlayCanv.style.zIndex = 3;
         document.body.appendChild(window.overlayCanv);
     }
 
@@ -130,7 +153,7 @@ function drawBbox(bbox) {
 
     overlayCtx.beginPath();
     overlayCtx.strokeStyle = "red";
-    overlayCtx.lineWidth = 2;
+    overlayCtx.lineWidth = 1;
 
     // [x1,y1,x2,y2]
     overlayCtx.moveTo(bbox[0], bbox[1]);
@@ -147,7 +170,7 @@ function drawPolyline(landmarks, start, end, closed) {
 
     overlayCtx.beginPath();
     overlayCtx.strokeStyle = "blue";
-    overlayCtx.lineWidth = 2;
+    overlayCtx.lineWidth = 1;
 
     overlayCtx.moveTo(landmarks[start][0], landmarks[start][1]);
     for (let i = start + 1; i <= end; i++) {
@@ -162,13 +185,10 @@ function drawPolyline(landmarks, start, end, closed) {
 
 function drawOverlay(landmarksRaw, bbox) {
     if (!window.overlayCanv) return;
+    if (!landmarksRaw || landmarksRaw.length == 0) return;
+    if (loading) clearInterval(loading);
+
     const overlayCtx = window.overlayCanv.getContext("2d");
-    if (!landmarksRaw || landmarksRaw.length == 0) {
-        overlayCtx.font = "20px Arial";
-        overlayCtx.textAlign = "center";
-        overlayCtx.fillText("Initializing face detection...", window.overlayCanv.width/2, window.overlayCanv.height/8);
-        return;
-    }
 
     let landmarks = [];
     let face = hasFace(landmarksRaw);
@@ -283,7 +303,7 @@ window.detectFace = async function(frame, width, height) {
         const globals = window.globals;
         const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
         if (faceJSON != prevJSON) {
-            publish("realm/s/" + globals.renderParam + "/" + globals.idTag + "/face", faceJSON);
+            publish("realm/s/" + globals.renderParam + "/camera_" + globals.idTag + "/face", faceJSON);
             prevJSON = faceJSON
         }
         // console.log(JSON.stringify(faceJSON))
@@ -326,9 +346,20 @@ async function init() {
 
         width = urlParams.get("vidWidth") ? parseInt(urlParams.get("vidWidth")) : 320;
 
-        window.faceDetector = await new FaceDetector(Comlink.proxy(() => {
-            trackFaceOn();
-        }));
+        window.faceDetector = await new FaceDetector(
+            Comlink.proxy([() => {
+                trackFaceOn();
+            },
+            () => {
+                if (!overlayOff) {
+                    let i = 0;
+                    loading = setInterval(() => {
+                        writeOverlayText("Initializing Face Tracking" + ".".repeat(i%4));
+                        i++;
+                    }, 500);
+                }
+            }])
+        );
 
     }
 }
