@@ -9,7 +9,7 @@ let vidStream = null;
 let loading = null;
 
 window.trackFaceOn = function() {
-    if (trackFace) return;
+    if (!window.faceDetector.ready) return;
     trackFace = true;
 
     setupVideo(!vidOff, !overlayOff, () => {
@@ -21,8 +21,7 @@ window.trackFaceOn = function() {
 }
 
 window.trackFaceOff = function() {
-    if (!trackFace) return;
-
+    if (!window.faceDetector.ready) return;
     trackFace = false;
 
     if (!overlayOff) {
