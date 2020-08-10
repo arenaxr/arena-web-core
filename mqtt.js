@@ -153,15 +153,15 @@ lwt.retained = false;
 
 // Request JWT before connection
 let xhr = new XMLHttpRequest();
-xhr.open('GET', "http://xr.andrew.cmu.edu:8888");
-xhr.responseType = 'string';
+xhr.open('GET', "https://xr.andrew.cmu.edu:8888/?username=conix");
+xhr.responseType = 'json';
 xhr.send();
 xhr.onload = () => {
     if (xhr.status !== 200) {
         alert(`Error loading token: ${xhr.status}: ${xhr.statusText}`);
     } else {
-        var token = xhr.response;
-        var user = "conix";
+        var token = xhr.response.token;
+        var user = xhr.response.username;
         console.log("mqtt connect", "user:", user, "token:", token);
         mqttClient.connect({
             onSuccess: onConnect,
