@@ -3,11 +3,11 @@
 #  ./auth-test.sh conix
 
 USER=$1
+URL="https://xr.andrew.cmu.edu:8888/?username=$USER"
 
 function get_token
 {
-  \curl -s -x GET -d 'username=$USER' 'https://xr.andrew.cmu.edu:8888' 2>&1 | \
-    python3 -c "import sys, json; print(json.load(sys.stdin)['token'])" 
+	curl -s $URL | jq -r '.token' 2>&1
 }
 TOKEN=$(get_token)
 
