@@ -1,0 +1,6 @@
+{
+	"schema_file": "arena-obj3d.json",
+	"scene": "render",
+	"arena_url": "https://xr.andrew.cmu.edu/",
+	"mqtthost": "oz.andrew.cmu.edu"
+}

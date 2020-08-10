@@ -61,11 +61,11 @@ either expressed or implied, of the Regents of The University of Michigan.
 #include "emscripten.h"
 
 // maximum size of string for each detection
-#define STR_DET_LEN 350
+#define STR_DET_LEN 1500
 
 // json format string for the 4 points
 const char fmt_det_point[] = "{\"id\":%d, \"size\":%.2f, \"corners\": [{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f}], \"center\": {\"x\":%.2f,\"y\":%.2f} }";
-const char fmt_det_point_pose[] = "{\"id\":%d, \"size\":%.2f, \"corners\": [{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f}], \"center\": {\"x\":%.2f,\"y\":%.2f}, \"pose\": { \"R\": [[%f,%f,%f],[%f,%f,%f],[%f,%f,%f]], \"t\": [%f,%f,%f], \"e\": %f, \"s\": %d } }";
+const char fmt_det_point_pose[] = "{\"id\":%d, \"size\":%.2f, \"corners\": [{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f},{\"x\":%.2f,\"y\":%.2f}], \"center\": {\"x\":%.2f,\"y\":%.2f}, \"pose\": { \"R\": [[%f,%f,%f],[%f,%f,%f],[%f,%f,%f]], \"t\": [%f,%f,%f], \"e\": %f, %s } }";
 
 // global pointers to the tag family and detector
 apriltag_family_t *g_tf = NULL;
@@ -85,10 +85,9 @@ int g_max_detections = 1;
 // if we are returning pose (=0 does not output pose; putput pose otherwise)
 int g_return_pose = 0;
 
-// defaults to a 150mm tag and camera intrinsics of a MacBook Pro (13-inch, 2018)
-// apriltag_detection_info_t: {apriltag_detection_t*, tagsize_meters, fx, fy, cx, cy}
+// apriltag_detection_info
 // NOTE: tag size is assumed according to the tag id:[0,150]=150mm;  ]150,300]=100mm; ]300,450]=50mm; ]450,587]=20mm;
-apriltag_detection_info_t g_det_pose_info = {NULL, 0.150, 1027.566807, 1027.448541, 650.232144, 358.974551};
+apriltag_detection_info_t g_det_pose_info;
 
 /**
  * @brief Init the apriltag detector with given family and default options 
@@ -174,10 +173,12 @@ int set_detector_options(float decimate, float sigma, int nthreads, int refine_e
 EMSCRIPTEN_KEEPALIVE
 int set_pose_info(double fx, double fy, double cx, double cy)
 {
+    printf("set_pose_info: fx:%f\n", g_det_pose_info.fx);
     g_det_pose_info.fx = fx;
     g_det_pose_info.fy = fy;
     g_det_pose_info.cx = cx;
     g_det_pose_info.cy = cy;
+    printf("set_pose_info: fx:%f\n", g_det_pose_info.fx);
     return 0;
 }
 
@@ -224,21 +225,29 @@ uint8_t *set_img_buffer(int width, int height, int stride)
  *
  * return the object-space error of the pose estimation
  */
-double estimate_tag_pose_with_solution(apriltag_detection_info_t *info, apriltag_pose_t *pose, int *s)
+double estimate_tag_pose_with_solution(apriltag_detection_info_t *info, apriltag_pose_t *pose, char *s)
 {
     double err1, err2;
     apriltag_pose_t pose1, pose2;
     estimate_tag_pose_orthogonal_iteration(info, &err1, &pose1, &err2, &pose2, 50);
+
+    snprintf(s, STR_DET_LEN, "\"cx1\":%f, \"cy\":%f, \"fx\":%f, \"fy\":%f", g_det_pose_info.cx, g_det_pose_info.cy, g_det_pose_info.fx, g_det_pose_info.fy);
+
     if (err1 <= err2)
     {
         pose->R = pose1.R;
         pose->t = pose1.t;
+//        if (pose2.R != NULL && pose2.t !=  NULL) {
+//            snprintf(s, STR_DET_LEN, "\"fx\":%f, \"fy\":%f, \"cx\":%f, \"cy\":%f, \"s2\": {\"R\": [[%f,%f,%f],[%f,%f,%f],[%f,%f,%f]], \"t\": [%f,%f,%f], \"e\": %f}", g_det_pose_info.fx, g_det_pose_info.fy, g_det_pose_info.cx, g_det_pose_info.cy,
+//                matd_get(pose2.R, 0, 0), matd_get(pose2.R, 1, 0), matd_get(pose2.R, 2, 0), matd_get(pose2.R, 0, 1), matd_get(pose2.R, 1, 1), matd_get(pose2.R, 2, 1), matd_get(pose2.R, 0, 2), matd_get(pose2.R, 1, 2), matd_get(pose2.R, 2, 2), matd_get(pose2.t, 0, 0), matd_get(pose2.t, 1, 0), matd_get(pose2.t, 2, 0), err2);
+//
+//        } else snprintf(s, STR_DET_LEN, "\"s2\": \"undefined\"");
         if (pose2.R)
         {
             matd_destroy(pose2.t);
         }
         matd_destroy(pose2.R);
-        *s = 1;
+        snprintf(s, STR_DET_LEN, "\"s\": \"1\"");
         return err1;
     }
     else
@@ -247,7 +256,9 @@ double estimate_tag_pose_with_solution(apriltag_detection_info_t *info, apriltag
         pose->t = pose2.t;
         matd_destroy(pose1.R);
         matd_destroy(pose1.t);
-        *s = 2;
+//      snprintf(s, STR_DET_LEN, "\"fx\":%f, \"fy\":%f, \"cx\":%f, \"cy\":%f, \"s1\": {\"R\": [[%f,%f,%f],[%f,%f,%f],[%f,%f,%f]], \"t\": [%f,%f,%f], \"e\": %f}", g_det_pose_info.fx, g_det_pose_info.fy, g_det_pose_info.cx, g_det_pose_info.cy,
+//         matd_get(pose1.R, 0, 0), matd_get(pose1.R, 1, 0), matd_get(pose1.R, 2, 0), matd_get(pose1.R, 0, 1), matd_get(pose1.R, 1, 1), matd_get(pose1.R, 2, 1), matd_get(pose1.R, 0, 2), matd_get(pose1.R, 1, 2), matd_get(pose1.R, 2, 2), matd_get(pose1.t, 0, 0), matd_get(pose1.t, 1, 0), matd_get(pose1.t, 2, 0), err1);
+        snprintf(s, STR_DET_LEN, "\"s\": \"2\"");
         return err2;
     }
 }
@@ -263,6 +274,7 @@ double estimate_tag_pose_with_solution(apriltag_detection_info_t *info, apriltag
 EMSCRIPTEN_KEEPALIVE
 uint8_t *detect()
 {
+    printf("detect: fx:%f\n", g_det_pose_info.fx);
 
     if (g_tf == NULL || g_td == NULL)
     {
@@ -290,11 +302,14 @@ uint8_t *detect()
     int llen = str_det_len - 1;
     strcpy(str_det, "[ ");
     llen -= 2; //"[ "
+    if (llen<0) llen=0;
     int n = zarray_size(detections);
     if (g_max_detections > 0 && g_max_detections < n)
         n = g_max_detections; // limit detections returned to g_max_detections
     for (int i = 0; i < n; i++)
     {
+        printf("fx1:%f\n", g_det_pose_info.fx);
+
         apriltag_detection_t *det;
         zarray_get(detections, i, &det);
         int c;
@@ -319,7 +334,7 @@ uint8_t *detect()
         }
         if (g_return_pose == 0)
         {
-            c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point, det->id, tagsize, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[0]);
+            c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point, det->id, tagsize, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[1]);
         }
         else
         {
@@ -328,25 +343,32 @@ uint8_t *detect()
             double pose_err;
             g_det_pose_info.det = det;
             g_det_pose_info.tagsize = tagsize;
-            int s = 0;
-            pose_err = estimate_tag_pose_with_solution(&g_det_pose_info, &pose, &s);
+            //int s = 0;
+            char *s = malloc(STR_DET_LEN);
+            printf("fx2:%f\n", g_det_pose_info.fx);
+            pose_err = estimate_tag_pose_with_solution(&g_det_pose_info, &pose, s);
             // row major R: c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[1], matd_get(pose.R, 0, 0),matd_get(pose.R, 0,1),matd_get(pose.R, 0, 2),matd_get(pose.R, 1, 0),matd_get(pose.R, 1, 1),matd_get(pose.R, 1, 2),matd_get(pose.R, 2, 0),matd_get(pose.R, 2, 1),matd_get(pose.R, 2, 2),matd_get(pose.t, 0, 0),matd_get(pose.t, 1, 0),matd_get(pose.t, 2, 0), pose_err);
             // column major R:
             c = snprintf(str_tmp_det, STR_DET_LEN, fmt_det_point_pose, det->id, tagsize, det->p[0][0], det->p[0][1], det->p[1][0], det->p[1][1], det->p[2][0], det->p[2][1], det->p[3][0], det->p[3][1], det->c[0], det->c[1], matd_get(pose.R, 0, 0), matd_get(pose.R, 1, 0), matd_get(pose.R, 2, 0), matd_get(pose.R, 0, 1), matd_get(pose.R, 1, 1), matd_get(pose.R, 2, 1), matd_get(pose.R, 0, 2), matd_get(pose.R, 1, 2), matd_get(pose.R, 2, 2), matd_get(pose.t, 0, 0), matd_get(pose.t, 1, 0), matd_get(pose.t, 2, 0), pose_err, s);
             matd_destroy(pose.R);
             matd_destroy(pose.t);
+            printf("fx3:%f\n", g_det_pose_info.fx);
+            free(s);
         }
         if (i > 0)
         {
             strncat(str_det, ", ", llen);
             llen -= 2;
+            if (llen<0) llen = 0;
             strncat(str_det, str_tmp_det, llen);
             llen -= c;
+            if (llen<0) llen = 0;
         }
         else
         {
             strncat(str_det, str_tmp_det, llen);
             llen -= c;
+            if (llen<0) llen = 0;
         }
     }
     free(str_tmp_det);
