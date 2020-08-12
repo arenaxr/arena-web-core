@@ -13,4 +13,4 @@ TOKEN=$(get_token)
 
 # subscribe for one message
 echo "connect mosquitto_sub, user: $USER, token: $TOKEN"
-mosquitto_sub -h oz.andrew.cmu.edu -t 'realm/s/auth-test/#' -p 1884 -u $USER -P $TOKEN -d &
+mosquitto_sub -h oz.andrew.cmu.edu -t 'realm/s/auth-test/#' -d -p 1884 -u $USER -P $TOKEN
