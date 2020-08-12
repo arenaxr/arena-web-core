@@ -8,9 +8,9 @@
     <!-- the AFrame script library (minified) -->
     <!-- master version: cutting edge but may have bugs -->
 
-    <script src="aframe/dist/aframe-master.js"></script> 
+    <script src="aframe/dist/aframe-master.js"></script>
     <!-- aframe-extras gives ability to play other model formats
-    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script> 
+    <script src="//cdn.rawgit.com/donmccurdy/aframe-extras/v6.0.0/dist/aframe-extras.js"></script>
     <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
     -->
     <!-- from https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.js -->
@@ -23,7 +23,7 @@
     <!-- from https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.js -->
     <script src="vendor/aframe-physics-system.js"></script>
 
-    <!-- thick lines  - seems to have bugs 
+    <!-- thick lines  - seems to have bugs
 	 from https://rawgit.com/andreasplesch/aframe-meshline-component/master/dist/aframe-meshline-component.min.js
       -->
     <script src="vendor/aframe-meshline-component.js"></script>
@@ -32,7 +32,7 @@
     <script src="vendor/aframe-environment-component.min.js"></script>
 
     <script src="transparent-occlude.js"></script>
-    
+
     <!-- our camera change and other event listener Components -->
     <script src="events.js"></script>
     <!-- V3.1 of the Paho MQTT.js library -->
@@ -44,12 +44,14 @@
     <!-- from https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.js -->
     <script src="vendor/webxr-polyfill.js"></script>
 
+    <script src="runtime-mngr/index.js"></script>
+
     <!--    <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script> -->
 
     <!-- TO WORK WITH WebXR Viewer, uncomment below and add 'ar' component to a-scene tag e.g. "a-scene ar ..." -->
     <!-- include three.ar.js; add the speech recognition polyfill if you want. -->
 <!--    <script src="https://rawgit.com/google-ar/three.ar.js/master/dist/three.ar.js"></script>
-    <!-- include aframe-ar.    
+    <!-- include aframe-ar.
     <script src="https://rawgit.com/chenzlabs/aframe-ar/master/dist/aframe-ar.js"></script>
 -->
 
@@ -61,15 +63,15 @@
       <a-assets>
 	<a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
 	<a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
-	
+
 	<!-- Vive controller 3d model -->
 	<a-asset-item id="viveControl-obj" src="./models/vr_controller_vive.obj"></a-asset-item>
-	<a-asset-item id="viveControl-mtl" src="./models/vr_controller_vive.mtl"></a-asset-item>	
+	<a-asset-item id="viveControl-mtl" src="./models/vr_controller_vive.mtl"></a-asset-item>
       </a-assets>
       <a-entity id="sceneRoot">
 
 
-	<!-- BG music 
+	<!-- BG music
 	<video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
 	-->
       <!-- ground plane so falling objects don't fall through floor -->
@@ -79,7 +81,7 @@
       <a-box static-body position="15 1 0" id="border2" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
       <a-box static-body position="0 1 15" id="border3" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5" ></a-box>
       <a-box static-body position="0 1 -15" id="border4" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5" ></a-box>
-      <!-- 
+      <!--
  <a-sky radius="5000" color="#100030"></a-sky>
  -->
       <a-entity id="env" environment="preset: starry; fog: 0; groundTexture: checkerboard"></a-entity>
@@ -92,7 +94,7 @@
 	  <!-- this camera can 'fly': z axis follows pitch of head direction -->
 	  <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true; acceleration: 10" look-controls pose-listener mouse-cursor>
 	    <!--
-		<a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor> 
+		<a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
 		  <a-cursor fuse="true" max-distance="1000" timeout="1500"></a-cursor>
 		  -->
 	    <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
@@ -110,13 +112,13 @@
       -->
       <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
       <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
-      
-      <!-- video example: may autoplay in Firefox, all black in Chrome :-/ 
+
+      <!-- video example: may autoplay in Firefox, all black in Chrome :-/
 	   <a-video src="#vrvideo" position="-3 2 -6"></a-video>
 
 
       <a-box static-body collision-listener sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/toypiano/Gsharp1.wav); on: collide" id="sound_box" position="0 0.5 -2" scale="0.5 0.5 0.5" >
-      </a-box>      
+      </a-box>
 	   -->
 
 <!--  CONIX BOXES
@@ -132,7 +134,7 @@
       <a-box click-listener prompt-box="on: mousedown; prompt:name_please" position="-1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" material="src: images/conix-face-white.jpg">
       </a-box>
 	-->
-      <!-- CONIX cube for debugging click events 
+      <!-- CONIX cube for debugging click events
       <a-entity vive-listener click-listener position="1.5 0.5 1" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
       </a-entity>
       <a-text id="conix_text" position="1.5 1.3 1" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
