@@ -2,7 +2,7 @@
 
 ## JSON format:
 
-To get face data, subscribe to topic ```realm/s/<scene>/<id>/face```
+To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
 
 ```
 {
@@ -27,7 +27,7 @@ To get face data, subscribe to topic ```realm/s/<scene>/<id>/face```
 
 ## URL params:
 
-- trackface (bool)      - Enables face detection. Default is 0!
+- trackFace (bool)      - Enables face detection. Default is 0!
 - debugFace (bool)      - Enables printing of JSON output and execution time for face detection, pose estimation, and MQTT pub + JSON creation.
 - vidOff (bool)         - Removes live video window
 - overlayOff (bool)     - Removes overlaying the face wire frame from the video window and the "initializing face detection" text.

@@ -14,7 +14,7 @@ window.trackFaceOn = function() {
 
     setupVideo(!vidOff, !overlayOff, () => {
         if (!overlayOff) {
-            writeOverlayText("Downloading Face Model: 100MB");
+            writeOverlayText("Downloading Face Model: 72MB");
         }
         requestAnimationFrame(processVideo);
     });
