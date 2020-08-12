@@ -73,7 +73,7 @@ window.globals = {
     startCoords: getUrlParam('location', '0,1.6,0').replace(/,/g, ' '),
     themeParam: getUrlParam('theme', 'starry'),
     weatherParam: getUrlParam('weather', 'none'),
-    mqttParamZ: getUrlParam('mqttServer', location.hostname+(location.port ? ':'+location.port : '')), // PATCH: changed default mqqtserver to equal webserver hostname
+    mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
     fixedCamera: getUrlParam('fixedCamera', ''),
     ATLASurl: getUrlParam('ATLASurl', '//atlas.conix.io'),
     vioTopic: "/topic/vio/",
@@ -173,7 +173,7 @@ if (urlLat && urlLong) {
 }
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
-globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt/'; // PATCH!!
+globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
 globals.outputTopic = "realm/s/" + globals.renderParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
