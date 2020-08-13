@@ -286,6 +286,18 @@ For now not directly supported, but rather by passing JSON inside the `data{}` e
 Particles are very complicated and take a lot of parameters. It would not make sense to translate all of them into explicit ARENA types, thus this flexible 'raw JSON' format is used.
 #### 3d Head Model
 By default the ARENA shows your location as a 3d model of a head, with your nose at your location coordinates. If you want to change this, it is available in the scene addressable by an object_id based on your (camera) name, e.g `head-model_camera_1234_er1k` or if you set your name manually in the URL parameter `&fixedCamera=name` as `head-model_camera_name_name`. You can also change the text above your head, which defaults to the last part of your automatically assigned or fixedCamera name (after the underscore). So by default it would appear as `er1k` in the examples above, but can be modified by MQTT message addressed to object_id `head-text_camera_er1k_er1k`.
+
+Much more now available in e.g. https://xr.andrew.cmu.edu/x/face/
+#### Jitsi meet: share desktop window
+Main documentation of Jitsi video conference integration with ARENA needs to be added, but can be found at https://xr.andrew.cmu.edu/x/jitsi/.
+What is documented here is how to share screens from web browser visit to Jitsi server on https://mr.andrew.cmu.edu/<meeting room name>.
+ 
+    Jitsi Meet URL https://mr.andrew.cmu.edu/arena-conference-<scenename>
+    Jitsi Meet screen share Settings->Profile->display name: arena_screen_share_<unique id>
+    plane Object in scene: arena_screen_share_<unique id>
+    
+The plane object of course is up to creator to decide size, location, rotation, needs to be added as a persisted plane object
+
 #### Vive (laser) controls
 We've noticed the controllers don't show up in the scene unless they both - and EVERYTHING else for SteamVR - are all working (headset, lighthouses). And sometimes you have to restart SteamVR for hand controllers to show up in the scene; even though SteamVR shows them as being working/on/available/etc., it's possible to open VR mode in an Arena scene and be missing the hand controls.
 
