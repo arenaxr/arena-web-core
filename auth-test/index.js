@@ -31,9 +31,9 @@ app.use(function (req, res, next) {
 });
 
 app.get('/', (req, res) => {
-    scene = req.query.scene
-    sobj = "realm/s/" + scene + "/#";
-    sadm = "realm/admin/s/" + scene + "/#";
+    var scene = req.query.scene
+    var s_obj = "realm/s/" + scene + "/#";
+    var s_adm = "realm/admin/s/" + scene + "/#";
     switch (req.query.username) {
         case 'persistdb':
             // persistance service subs all, pubs none
@@ -43,17 +43,17 @@ app.get('/', (req, res) => {
         case 'admin':
             // admin is normal scene pub/sub, plus admin tasks
             jwt = generateToken(req.query.username, '1 day',
-                [sadm, sobj], [sadm, sobj]);
+                [s_adm, s_obj], [s_adm, s_obj]);
             break;
         case 'editor':
             // editor is normal scene pub/sub
             jwt = generateToken(req.query.username, '1 day',
-                [sobj], [sobj]);
+                [s_obj], [s_obj]);
             break;
         case 'viewer':
             // viewer is just sub
             jwt = generateToken(req.query.username, '1 day',
-                [sobj], null);
+                [s_obj], null);
             break;
         default:
             jwt = null;
@@ -63,5 +63,6 @@ app.get('/', (req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`Auth test app listening at https://xr.andrew.cmu.edu:${port}`)
+    console.log(`Auth test app listening at port ${port}.`)
+    console.log(`Try hitting https://xr.andrew.cmu.edu:${port}/?scene=auth-test&username=admin`)
 });
