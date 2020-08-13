@@ -1,9 +1,10 @@
 #!/bin/bash
 # example:
-#  ./auth-test.sh conix
+#  ./auth-test-sub.sh scene username
 
-USER=$1
-URL="https://xr.andrew.cmu.edu:8888/?username=$USER"
+SCENE=$1
+USER=$2
+URL="https://xr.andrew.cmu.edu:8888/?scene=$SCENE&username=$USER"
 
 function get_token
 {
@@ -11,6 +12,6 @@ function get_token
 }
 TOKEN=$(get_token)
 
-# subscribe for one message
-echo "connect mosquitto_sub, user: $USER, token: $TOKEN"
-mosquitto_sub -h oz.andrew.cmu.edu -t 'realm/s/auth-test/#' -d -p 1884 -u $USER -P $TOKEN
+# subscribe for all messages
+echo "connect mosquitto_sub, scene: $SCENE, user: $USER, token: $TOKEN"
+mosquitto_sub -h oz.andrew.cmu.edu -t "realm/s/$SCENE/#" -d -p 1884 -u $USER -P $TOKEN

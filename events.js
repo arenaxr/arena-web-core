@@ -81,6 +81,7 @@ window.globals = {
     lastMouseTarget: undefined,
     inAR: false,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
+    username: getUrlParam('username', ''), // username auth-test
     onEnterXR: function (xrType) {
 	//debug("ENTERING XR");
 
