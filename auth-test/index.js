@@ -20,8 +20,8 @@ function generateToken(user = null, exp = '1 hour', sub = null, pub = null) {
     if (pub) {
         claims.publ = pub;
     }
-    now = new Date(new Date - 5000); // allow for 5 sec of clock skew between issuer and broker
-    return JWT.sign(claims, jwk, { "alg": "HS256", "expiresIn": exp, "now": now });
+    iat = new Date(new Date - 20000); // allow for clock skew between issuer and broker
+    return JWT.sign(claims, jwk, { "alg": "HS256", "expiresIn": exp, "now": iat });
 }
 
 app.use(function (req, res, next) {
