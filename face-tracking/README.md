@@ -28,13 +28,13 @@ To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
 ## URL params:
 
 - trackFace (bool)      - Enables face detection. Default is 0!
-- debugFace (bool)      - Enables printing of JSON output and execution time for face detection, pose estimation, and MQTT pub + JSON creation.
-- vidOff (bool)         - Removes live video window
-- overlayOff (bool)     - Removes overlaying the face wire frame from the video window and the "initializing face detection" text.
+- debugFace (bool)      - Enables console logging of JSON output and execution time for face detection, pose estimation, and MQTT pub + JSON creation.
+- vidWidth (int)        - Sets the width of the video window in pixels, height is scaled by aspect ratio. The larger the width, the slower the face detection will take. Default is 320.
+- vidOff (bool)         - Removes live video window.
+- overlayOff (bool)     - Removes overlaying the face wire frame on the video window and the "initializing face detection" texts.
 - bboxOn (bool)         - Show the bbox in the video window.
 - flipped (bool)        - Flip source image.
 - frameSkip (int)       - How many frames should be skipped. default is 1 (no frames skipped).
-- vidWidth (int)        - Sets the width of the video window in pixels, height is scaled by aspect ratio. The larger the width, the slower the face detection will take. Default is 320.
 
 ## Building:
 
