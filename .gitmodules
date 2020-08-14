@@ -10,3 +10,6 @@
 [submodule "face-tracking/opencv"]
 	path = face-tracking/opencv
 	url = https://github.com/opencv/opencv.git
+[submodule "face-tracking/zlib"]
+	path = face-tracking/zlib
+	url = https://github.com/madler/zlib
