@@ -24,7 +24,7 @@
       "rot3d":{
          "type":"object",
          "title":"x, y ,z",
-         "description":"3D rot",
+         "description":"3D rotation",
          "required":[
             "x",
             "y",
@@ -87,6 +87,12 @@
                "format":"color",
                "title":"color",
                "default":"#ffa500"
+            },
+            "url":{
+               "type":"string",
+               "format":"uri",
+               "title":"url",
+               "description": "Model URL"
             },
             "dynamic-body":{
                "type":"object",
