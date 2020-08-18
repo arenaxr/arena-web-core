@@ -10,8 +10,7 @@ function get_token
 {
 	curl -s $URL | jq -r '.token' 2>&1
 }
-#TOKEN="$(get_token)"
-TOKEN="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZGl0b3IiLCJzdWJzIjpbInJlYWxtL3MvYXV0aC10ZXN0LyMiXSwicHVibCI6WyJyZWFsbS9zL2F1dGgtdGVzdC8jIl0sImlhdCI6MTU5Njg3NDA4OCwiZXhwIjoxNjI4NDEwMDg4fQ.yPe9TFzsgAIJ3sSPu5LHfSDOR19JoSsbBL1G05Ph7Ms"
+TOKEN="$(get_token)"
 
 # subscribe for all messages
 echo "connect mosquitto_sub, scene: $SCENE, user: $USER, token: $TOKEN"
