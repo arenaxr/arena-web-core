@@ -9,6 +9,9 @@ endif(NOT CMAKE_BUILD_TYPE)
 
 set( CMAKE_CXX_FLAGS_RELEASE "-O3" )
 
+# file( GLOB zlib_include "zlib" )
+# include_directories( ${zlib_include} )
+
 add_subdirectory( dlib/dlib )
 
 set( DLIB_NO_GUI_SUPPORT ON )

@@ -8,7 +8,7 @@ import MqttClient from "./mqtt-client.js";
 var persist;
 
 /**
- * 
+ *
  */
 export async function init(settings) {
     if (settings.obj_list == undefined) throw "Must provide a list element";
@@ -17,8 +17,10 @@ export async function init(settings) {
     persist = {
         mqtt_host: settings.mqtt_host !== undefined ? settings.mqtt_host : "spatial.andrew.cmu.edu",
         mqtt_port: settings.mqtt_port !== undefined ? settings.mqtt_port : 8083,
-        persist_url: settings.persist_url !== undefined ? settings.persist_url : "https://spatial.andrew.cmu.edu:4443/persist/",
+        persist_url: settings.persist_url !== undefined ? settings.persist_url : location.hostname+(location.port ? ':'+location.port : '')+"/persist/",
         obj_list: settings.obj_list,
+        scene_list: settings.scene_list,
+        scene_textbox: settings.scene_textbox,
         log_panel: settings.log_panel,
         editobj_handler: settings.editobj_handler
     }
@@ -44,6 +46,7 @@ export async function init(settings) {
         persist.mc.connect();
     } catch (error) {
         console.log(error) // Failure!
+        displayAlert(error, "error", 2000);
         return;
     }
 
@@ -58,6 +61,8 @@ export async function set_options(settings) {
     persist = {
         persist_url: settings.persist_url !== undefined ? settings.persist_url : persist.persist_url,
         obj_list: settings.obj_list !== undefined ? settings.obj_list : persist.obj_list,
+        scene_list: settings.scene_list !== undefined ? settings.scene_list : persist.scene_list,
+        scene_textbox: settings.scene_textbox !== undefined ? settings.scene_textbox : persist.scene_textbox,
         log_panel: settings.log_panel !== undefined ? settings.log_panel : persist.log_panel,
         editobj_handler: settings.editobj_handler !== undefined ? settings.editobj_handler : persist.editobj_handler
     }
@@ -74,6 +79,7 @@ export function log(message) {
 // try to find the right persist db url by fetching a "known" scene
 export async function fetchPersistURL(urls) {
     var knownScene = 'render';
+
     persist.persist_url = undefined;
     for (var i = 0; i < urls.length; i++) {
         var url = urls[i];
@@ -86,26 +92,61 @@ export async function fetchPersistURL(urls) {
         if (response) {
             if (response.ok) {
                 persist.persist_url = url;
-                console.log("Persist fetch success:", url);
+                //console.log("Persist fetch success:", url);
+                displayAlert("Persist at:" + url, "success", 2000);
                 break;
             }
         }
     }
 
     if (persist.persist_url == undefined) {
-        alert("Failed to find persist DB URL.");
+      displayAlert("Failed to find persist DB URL!", "error", 2000);
     }
 }
 
 export async function populateList(scene, editobjhandler) {
     if (persist.persist_url == undefined) {
-        console.log("Persist DB URL not defined.");
+        displayAlert("Persist DB URL not defined.", "error", 2000);
         return;
-
     }
-    console.log("Fetch: ", persist.persist_url + scene);
-    var data = await fetch(persist.persist_url + scene);
-    var sceneobjs = await data.json();
+
+    // scene list
+    //console.log("Fetch: ", persist.persist_url + "!allscenes");
+    try {
+        var data = await fetch(persist.persist_url + "!allscenes");
+        var scenes = await data.json();
+    } catch (err) {
+        console.log(err);
+        return;
+    }
+    while (persist.scene_list.firstChild) {
+        persist.scene_list.removeChild(persist.scene_list.firstChild);
+    }
+
+    if (scenes.length == 0) {
+      var option = document.createElement("option");
+      option.text = "No scenes found.";
+      persist.scene_list.add(option);
+    } else {
+      let exists = false;
+      for (let i = 0; i < scenes.length; i++) {
+        var option = document.createElement("option");
+        option.text = scenes[i];
+        persist.scene_list.add(option);
+        if (scenes[i] == persist.scene_textbox.value) exists = true;
+      }
+      if (exists) persist.scene_list.value = persist.scene_textbox.value;
+    }
+
+    // object list
+    //console.log("Fetch: ", persist.persist_url + scene);
+    try {
+        var data = await fetch(persist.persist_url + scene);
+        var sceneobjs = await data.json();
+    } catch (err) {
+        displayAlert(err, "error", 5000);
+        return;
+    }
     while (persist.obj_list.firstChild) {
         persist.obj_list.removeChild(persist.obj_list.firstChild);
     }
@@ -118,7 +159,7 @@ export async function populateList(scene, editobjhandler) {
         return;
     }
 
-    for (var i = 0; i < sceneobjs.length; i++) {
+    for (let i = 0; i < sceneobjs.length; i++) {
         var li = document.createElement("li");
         var span = document.createElement("span");
         var img = document.createElement("img");
@@ -138,12 +179,11 @@ export async function populateList(scene, editobjhandler) {
         var t = document.createTextNode(inputValue);
         li.appendChild(t);
 
-        // add image 
+        // add image
         img.width = 16;
         span.className = "objtype";
         span.appendChild(img);
         li.appendChild(span);
-
 
         // add edit "button"
         var editspan = document.createElement("span");
@@ -155,7 +195,7 @@ export async function populateList(scene, editobjhandler) {
 
         editspan.onclick = (function() {
           var obj = sceneobjs[i];
-          return function() { 
+          return function() {
             persist.editobj_handler(obj);
         }})();
 
@@ -168,15 +208,14 @@ export function deleteSelected(scene) {
     for (var i = 0; i < items.length; i++) {
         if (items[i].classList.contains('checked')) {
             var object_id = items[i].getAttribute("data-objid");
-            console.log(object_id);
+            //console.log(object_id);
             var delJson = JSON.stringify({
                 object_id: object_id,
                 action: "delete"
             });
             var topic = 'realm/s/' + scene;
-            console.log("Publish [ " + topic + "]: " + delJson);
+            log("Publish [ " + topic + "]: " + delJson);
             persist.mc.publish(topic, delJson);
-
         }
     }
 }
@@ -189,7 +228,7 @@ export function clearSelected() {
 }
 
 export function addObject(objJson, scene) {
-    console.log(objJson);
+    //console.log(objJson);
     var obj = JSON.parse(objJson);
     // make sure persist is true
     obj.persist = true;
@@ -221,7 +260,7 @@ export function mqttReconnect(settings) {
     try {
         persist.mc.connect();
     } catch (error) {
-        console.log(error) // Failure!
+        displayAlert(error, "error", 5000);
         return;
     }
 

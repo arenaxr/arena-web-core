@@ -2,15 +2,15 @@ importScripts("/x/face/detect_face_wasm.js");
 importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 
 class FaceDetector {
-    constructor(callback) {
+    constructor(callbacks) {
         let _this = this;
         this.ready = false;
         FaceDetectorWasm().then(function (Module) {
             console.log("Face Detector WASM module loaded.");
             _this.onWasmInit(Module);
-            _this.getPoseModel();
-            if (callback) {
-                callback();
+            _this.getPoseModel(callbacks[1]);
+            if (callbacks[0]) {
+                callbacks[0]();
             }
         });
     }
@@ -19,13 +19,14 @@ class FaceDetector {
         this._Module = Module;
     }
 
-    getPoseModel(Module) {
+    getPoseModel(req_callback) {
         const req = new XMLHttpRequest();
-        req.open("GET", "/x/face/shape_predictor_68_face_landmarks.dat", true);
+        req.open("GET", "/x/face/face_landmarks_68_compressed.dat", true);
         req.responseType = "arraybuffer";
         req.onload = (e) => {
             const payload = req.response;
             if (payload) {
+                req_callback();
                 this.poseModelInit(payload);
                 this.ready = true;
             }
@@ -80,10 +81,10 @@ class FaceDetector {
     }
 
     getPose(parts_arr, width, height) {
-        if (!this.ready || !parts_arr) return [[], []];
+        if (!this.ready) return [null, null];
 
-        const parts_ptr = this._Module._malloc(parts_arr.length);
-        this._Module.HEAPU8.set(parts_arr, parts_ptr);
+        const parts_ptr = this._Module._malloc(parts_arr.length * Uint16Array.BYTES_PER_ELEMENT);
+        this._Module.HEAPU16.set(parts_arr, parts_ptr / Uint16Array.BYTES_PER_ELEMENT);
 
         const ptr = this._Module.ccall(
             "get_pose",

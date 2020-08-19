@@ -12,8 +12,10 @@
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_transforms.h>
 
-// #define DOWNSAMPLE_RATIO    1
-#define PI  3.14159265
+#include <dlib/external/zlib/zlib.h>
+
+#define PI          3.14159265
+#define MODEL_SIZE  99693937
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,7 +34,22 @@ EMSCRIPTEN_KEEPALIVE
 void pose_model_init(char buf[], size_t buf_len) {
     detector = get_frontal_face_detector();
 
-    std::string model(buf, buf_len);
+    char *decompressed = new char[MODEL_SIZE];
+
+    z_stream stream;
+    stream.zalloc = Z_NULL;
+    stream.zfree = Z_NULL;
+    stream.opaque = Z_NULL;
+    stream.avail_in = buf_len;
+    stream.next_in = (Bytef *)buf;
+    stream.avail_out = MODEL_SIZE;
+    stream.next_out = (Bytef *)decompressed;
+
+    inflateInit(&stream);
+    inflate(&stream, Z_NO_FLUSH);
+    inflateEnd(&stream);
+
+    std::string model(decompressed, stream.total_out);
     std::istringstream model_istringstream(model);
     deserialize(pose_model, model_istringstream);
 
@@ -57,17 +74,17 @@ void pose_model_init(char buf[], size_t buf_len) {
 }
 
 EMSCRIPTEN_KEEPALIVE
-uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t srcRows) {
-    static std::vector<dlib::rectangle> d;
-    static full_object_detection shape;
+uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) {
+    static correlation_tracker tracker;
+    static bool track = false;
+    static uint32_t frames = 0;
 
-    uint8_t parts_len;
-    uint16_t *parts;
+    const uint8_t parts_len = 5 + 2 * 68;
+    uint16_t *parts = new uint16_t[parts_len];
     uint16_t left, top, right, bottom;
 
-    array2d<uint8_t> gray, gray_small;
+    array2d<uint8_t> gray;
     gray.set_size(srcRows, srcCols);
-    // gray_small.set_size(srcRows / DOWNSAMPLE_RATIO, srcCols / DOWNSAMPLE_RATIO);
 
     uint32_t idx;
     for (int i = 0; i < srcRows; ++i) {
@@ -75,52 +92,76 @@ uint16_t *detect_face_features(unsigned char srcData[], size_t srcCols, size_t s
             idx = (i * srcCols * 4) + j * 4;
 
             // rgba to rgb
-            unsigned char r = srcData[idx];
-            unsigned char g = srcData[idx + 1];
-            unsigned char b = srcData[idx + 2];
-            // unsigned char a = srcData[idx + 3];
+            uchar r = srcData[idx];
+            uchar g = srcData[idx + 1];
+            uchar b = srcData[idx + 2];
+            // uchar a = srcData[idx + 3];
 
             // turn src image to gray scale
             gray[i][j] = (0.30 * r) + (0.59 * g) + (0.11 * b);
         }
     }
 
-    // resize_image(gray, gray_small);
+    dlib::rectangle face_rect;
+    if (!track) {
+        std::vector<dlib::rectangle> face_rects;
+        face_rects = detector(gray);
+        face_rect = face_rects[0];
+    }
+    else {
+        const double psr = tracker.update(gray); // "Peak-to-Sidelobe Ratio"
+        if (0 < psr && psr < 30) {
+            face_rect = tracker.get_position();
+        }
+        else {
+            track = false;
+        }
+    }
 
-    d = detector(gray);
+    left = face_rect.left();
+    top = face_rect.top();
+    right = face_rect.right();
+    bottom = face_rect.bottom();
 
-    left = d[0].left(); // * DOWNSAMPLE_RATIO;
-    top = d[0].top(); // * DOWNSAMPLE_RATIO;
-    right = d[0].right(); // * DOWNSAMPLE_RATIO;
-    bottom = d[0].bottom(); // * DOWNSAMPLE_RATIO;
+    if (left >= 0 && top < srcRows && right < srcCols && bottom >= 0) {
+        dlib::rectangle face_rect(
+            (long)(left),
+            (long)(top),
+            (long)(right),
+            (long)(bottom)
+        );
 
-    dlib::rectangle rect(
-        (long)(left),
-        (long)(top),
-        (long)(right),
-        (long)(bottom)
-    );
+        full_object_detection shape = pose_model(gray, face_rect);
 
-    shape = pose_model(gray, rect);
+        if (!track) {
+            track = true;
+            tracker.start_track(gray, face_rect);
+        }
 
-    parts_len = 5 + shape.num_parts() * 2;
-    parts = new uint16_t[parts_len];
+        parts[1] = left;
+        parts[2] = top;
+        parts[3] = right;
+        parts[4] = bottom;
+        for (uint8_t i = 0, j = 5; i < shape.num_parts(); i += 1, j += 2) {
+            parts[j]   = shape.part(i).x();
+            parts[j+1] = shape.part(i).y();
+        }
+    }
+    else {
+        track = false; // detect again if bbox is out of bounds
+    }
+
     parts[0] = parts_len; // set first idx to len when passed to js
-    parts[1] = left;
-    parts[2] = top;
-    parts[3] = right;
-    parts[4] = bottom;
 
-    for (uint8_t i = 0, j = 5; i < shape.num_parts(); i += 1, j += 2) {
-        parts[j] = shape.part(i).x();
-        parts[j + 1] = shape.part(i).y();
+    if (++frames % 30 == 0) {
+        track = false;
     }
 
     return parts;
 }
 
 EMSCRIPTEN_KEEPALIVE
-double *get_pose(unsigned char landmarks[], size_t srcCols, size_t srcRows) {
+double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
     static bool first_iter = true;
 
     static Mat camera_matrix, distortion;
@@ -134,7 +175,7 @@ double *get_pose(unsigned char landmarks[], size_t srcCols, size_t srcRows) {
     static std::vector<Point2d> image_pts;
 
     uint8_t result_len;
-    double *result, *quat;
+    double *result;
     double x, y, z;
 
     if (first_iter) {
@@ -176,20 +217,14 @@ double *get_pose(unsigned char landmarks[], size_t srcCols, size_t srcRows) {
     y = euler_angle.at<double>(1) * PI / 180.0;
     z = euler_angle.at<double>(2) * PI / 180.0;
 
-    result[1] = sin(x/2) * cos(y/2) * cos(z/2) - cos(x/2) * sin(y/2) * sin(z/2);
-    result[2] = cos(x/2) * sin(y/2) * cos(z/2) + sin(x/2) * cos(y/2) * sin(z/2);
-    result[3] = cos(x/2) * cos(y/2) * sin(z/2) - sin(x/2) * sin(y/2) * cos(z/2);
-    result[4] = cos(x/2) * cos(y/2) * cos(z/2) + sin(x/2) * sin(y/2) * sin(z/2);
-
-    delete [] quat;
+    result[1] = sin(x/2)*cos(y/2)*cos(z/2) - cos(x/2)*sin(y/2)*sin(z/2);
+    result[2] = cos(x/2)*sin(y/2)*cos(z/2) + sin(x/2)*cos(y/2)*sin(z/2);
+    result[3] = cos(x/2)*cos(y/2)*sin(z/2) - sin(x/2)*sin(y/2)*cos(z/2);
+    result[4] = cos(x/2)*cos(y/2)*cos(z/2) + sin(x/2)*sin(y/2)*sin(z/2);
 
     result[5] = trans_vec.at<double>(0);
     result[6] = trans_vec.at<double>(1);
     result[7] = trans_vec.at<double>(2);
-
-    // printf("%f %f %f\n", euler_angle.at<double>(0), euler_angle.at<double>(1), euler_angle.at<double>(2));
-    // printf("%f %f %f\n", rot_vec.at<double>(0), rot_vec.at<double>(1), rot_vec.at<double>(2));
-    // printf("%f %f %f\n", trans_vec.at<double>(0), trans_vec.at<double>(1), trans_vec.at<double>(2));
 
     return result;
 }
