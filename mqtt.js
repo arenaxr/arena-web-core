@@ -153,7 +153,17 @@ lwt.retained = false;
 
 // Request JWT before connection
 let xhr = new XMLHttpRequest();
-xhr.open('GET', "https://xr.andrew.cmu.edu:8888/?scene=" + globals.renderParam + "&username=" + globals.username);
+var url = "https://xr.andrew.cmu.edu:8888/?scene=" + globals.renderParam + "&username=" + globals.username;
+if (globals.camName) {
+    url += "&camid=" + globals.camName
+}
+if (globals.viveLName) {
+    url += "&ctrlid1=" + globals.viveLName
+}
+if (globals.viveRName) {
+    url += "&ctrlid2=" + globals.viveRName
+}
+xhr.open('GET', url);
 xhr.responseType = 'json';
 xhr.send();
 xhr.onload = () => {

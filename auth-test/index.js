@@ -14,10 +14,10 @@ const server = https.createServer({ key: key, cert: cert }, app);
 
 function generateToken(user = null, exp = '1 hour', sub = null, pub = null) {
     claims = { "sub": user };
-    if (sub) {
+    if (sub && sub.length > 0) {
         claims.subs = sub;
     }
-    if (pub) {
+    if (pub && pub.length > 0) {
         claims.publ = pub;
     }
     iat = new Date(new Date - 20000); // allow for clock skew between issuer and broker
@@ -31,38 +31,69 @@ app.use(function (req, res, next) {
 });
 
 app.get('/', (req, res) => {
+    var realm = config.realm
     var scene = req.query.scene
-    var s_obj = "realm/s/" + scene + "/#";
-    var s_adm = "realm/admin/s/" + scene + "/#";
-    switch (req.query.username) {
+    var authname = req.query.username
+    var scene_obj = realm + "/s/" + scene + "/#";
+    var scene_admin = realm + "/admin/s/" + scene + "/#";
+    switch (authname) {
+        // service-level scenarios
         case 'persistdb':
-            // persistance service subs all, pubs none
-            jwt = generateToken(req.query.username, '1 year',
-                ["#"], null);
+            // persistance service subs all scene, pubs status
+            jwt = generateToken(authname, '1 year',
+                [realm + "/s/#", realm + "/admin/s/#"], ["service_status"]);
+            break;
+        case 'sensorthing':
+            // realm/g/<session>/uwb or realm/g/<session>/vio (global data)
+            jwt = generateToken(authname, '1 year',
+                [realm + "/g/#"], [realm + "/g/#"]);
+            break;
+        case 'sensorcamera':
+            // realm/g/a/<cameras> (g=global, a=anchors)
+            jwt = generateToken(authname, '1 year',
+                [realm + "/g/a/#"], [realm + "/g/a/#"]);
+            break;
+
+        // user-level scenarios
+        case 'graphview':
+            // graph viewer
+            jwt = generateToken(authname, '1 day',
+                ["$GRAPH"], null);
             break;
         case 'admin':
             // admin is normal scene pub/sub, plus admin tasks
-            jwt = generateToken(req.query.username, '1 day',
-                [s_adm, s_obj], [s_adm, s_obj]);
+            jwt = generateToken(authname, '1 day',
+                [scene_admin, scene_obj], [scene_admin, scene_obj]);
             break;
         case 'editor':
             // editor is normal scene pub/sub
-            jwt = generateToken(req.query.username, '1 day',
-                [s_obj], [s_obj]);
+            jwt = generateToken(authname, '1 day',
+                [scene_obj], [scene_obj]);
             break;
         case 'viewer':
-            // viewer is just sub
-            jwt = generateToken(req.query.username, '1 day',
-                [s_obj], null);
+            var user_objs = [];
+            if (req.query.camid != undefined) {
+                user_objs.push(realm + "/s/" + scene + "/" + req.query.camid);
+                user_objs.push(realm + "/s/" + scene + "/arena-face-tracker");
+            }
+            if (req.query.ctrlid1 != undefined) {
+                user_objs.push(realm + "/s/" + scene + "/" + req.query.ctrlid1);
+            }
+            if (req.query.ctrlid2 != undefined) {
+                user_objs.push(realm + "/s/" + scene + "/" + req.query.ctrlid2);
+            }
+            // viewer is sub scene, pub cam/controllers
+            jwt = generateToken(authname, '1 day',
+                [scene_obj], user_objs);
             break;
         default:
             jwt = null;
             break;
     }
-    res.json({ username: req.query.username, token: jwt });
+    res.json({ username: authname, token: jwt });
 });
 
 server.listen(port, () => {
     console.log(`Auth test app listening at port ${port}.`)
-    console.log(`Try hitting https://xr.andrew.cmu.edu:${port}/?scene=auth-test&username=admin`)
+    console.log(`Try hitting https://xr.andrew.cmu.edu:${port}/?username=editor&scene=auth-test`)
 });
