@@ -153,7 +153,7 @@ lwt.retained = false;
 
 // Request JWT before connection
 let xhr = new XMLHttpRequest();
-var url = "https://xr.andrew.cmu.edu:8888/?scene=" + globals.renderParam + "&username=" + globals.username;
+var url = "https://xr.andrew.cmu.edu:8888/?scene=" + globals.scenenameParam + "&username=" + globals.username;
 if (globals.camName) {
     url += "&camid=" + globals.camName
 }
