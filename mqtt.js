@@ -151,6 +151,7 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
+
 // startup authentication context
 var auth2;
 var googleUser;
@@ -159,14 +160,18 @@ gapi.load('auth2', function () {
         // test CONIX Research Center ARENA auth id for xr
         client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
     });
-    // auto sign in 
-    auth2.signIn().then(function () {
+    if (!auth2.isSignedIn.get()) {
+        // auto sign in
+        auth2.signIn().then(function () {
+            googleUser = auth2.currentUser.get();
+            onSignIn(googleUser);
+        });
+    } else {
         googleUser = auth2.currentUser.get();
-        onSignIn();
-    });
+    }
 });
 
-function onSignIn() {
+function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
     console.log('ID: ' + profile.getId());
     console.log('Full Name: ' + profile.getName());
@@ -232,6 +237,7 @@ function mqttConnect() {
         password: mqttToken
     });
 }
+
 
 // Callback for client.connect()
 function onConnect() {
