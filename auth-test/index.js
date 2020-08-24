@@ -3,6 +3,7 @@ const express = require('express')
 const https = require('https')
 const fs = require('fs')
 const { JWT, JWK } = require('jose')
+const bodyParser = require('body-parser');
 const app = express()
 const port = 8888
 
@@ -24,12 +25,15 @@ function generateToken(user = null, exp = '1 hour', sub = null, pub = null) {
     return JWT.sign(claims, jwk, { "alg": "HS256", "expiresIn": exp, "now": iat });
 }
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 
+// TODO: later use POST for the id_token and req.body.foo
 app.get('/', (req, res) => {
     var realm = config.realm
     var scene = req.query.scene

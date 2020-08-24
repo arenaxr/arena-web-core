@@ -151,36 +151,87 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
-// Request JWT before connection
-let xhr = new XMLHttpRequest();
-var url = "https://xr.andrew.cmu.edu:8888/?scene=" + globals.scenenameParam + "&username=" + globals.username;
-if (globals.camName) {
-    url += "&camid=" + globals.camName
+// startup authentication context
+var auth2;
+var googleUser;
+gapi.load('auth2', function () {
+    auth2 = gapi.auth2.init({
+        // test CONIX Research Center ARENA auth id for xr
+        client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
+    });
+    // auto sign in 
+    auth2.signIn().then(function () {
+        googleUser = auth2.currentUser.get();
+        onSignIn();
+    });
+});
+
+function onSignIn() {
+    var profile = googleUser.getBasicProfile();
+    console.log('ID: ' + profile.getId());
+    console.log('Full Name: ' + profile.getName());
+    console.log('Given Name: ' + profile.getGivenName());
+    console.log('Family Name: ' + profile.getFamilyName());
+    console.log('Image URL: ' + profile.getImageUrl());
+    console.log('Email: ' + profile.getEmail());
+
+    // TODO: might be early enough to reset cam name?
+    // var cam = globals.camName.split('_');
+    // cam[2] = profile.getName().replace(/\s+/g, '');
+    // globals.camName = cam.join('_');
+
+    var id_token = googleUser.getAuthResponse().id_token;
+    requestMqttToken(id_token);
 }
-if (globals.viveLName) {
-    url += "&ctrlid1=" + globals.viveLName
+
+function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+        console.log('User signed out.');
+    });
 }
-if (globals.viveRName) {
-    url += "&ctrlid2=" + globals.viveRName
-}
-xhr.open('GET', url);
-xhr.responseType = 'json';
-xhr.send();
-xhr.onload = () => {
-    if (xhr.status !== 200) {
-        alert(`Error loading token: ${xhr.status}: ${xhr.statusText}`);
-    } else {
-        var token = xhr.response.token;
-        var user = xhr.response.username;
-        console.log("mqtt connect", "user:", user, "token:", token);
-        mqttClient.connect({
-            onSuccess: onConnect,
-            willMessage: lwt,
-            userName: user,
-            password: token
-        });
+
+var mqttToken;
+function requestMqttToken(id_token) {
+    // Request JWT before connection
+    let xhr = new XMLHttpRequest();
+    var url = "https://xr.andrew.cmu.edu:8888";
+    var params = "scene=" + globals.scenenameParam + "&username=" + globals.username;
+    if (globals.camName) {
+        params += "&camid=" + globals.camName
     }
-};
+    if (globals.viveLName) {
+        params += "&ctrlid1=" + globals.viveLName
+    }
+    if (globals.viveRName) {
+        params += "&ctrlid2=" + globals.viveRName
+    }
+    // if (id_token) {
+    //     params += "&id_token=" + id_token
+    // }
+    xhr.open('GET', url + '/?' + params); // TODO: xhr.open('POST', url);
+    // TODO: xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(); // TODO: xhr.send(params);
+    xhr.responseType = 'json';
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            alert(`Error loading token: ${xhr.status}: ${xhr.statusText}`);
+        } else {
+            mqttToken = xhr.response.token;
+            mqttConnect();
+        }
+    };
+}
+
+function mqttConnect() {
+    console.log("mqtt connect", "user:", globals.username, "token:", mqttToken);
+    mqttClient.connect({
+        onSuccess: onConnect,
+        willMessage: lwt,
+        userName: globals.username,
+        password: mqttToken
+    });
+}
 
 // Callback for client.connect()
 function onConnect() {
@@ -393,7 +444,7 @@ function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-    mqttClient.connect({onSuccess: onConnect});
+    mqttConnect();
 }
 
 const publish_retained = (dest, msg) => {
