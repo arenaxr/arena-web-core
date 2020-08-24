@@ -219,10 +219,12 @@ function onSignIn(googleUser) {
 }
 
 function signOut() {
+    mqttClient.disconnect();
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
         console.log('User signed out.');
     });
+    auth2.disconnect();
 }
 
 var mqttToken;
@@ -480,11 +482,10 @@ function setupIcons() {
         settingsBtn.not_toggled = !auth2.isSignedIn.get();
         if (!settingsBtn.not_toggled) {
             settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/roundedsettings.png')";
-            signIn();
-        }
-        else {
-            settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/slashroundedsettings.png')";
             signOut();
+        } else {
+            settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/slashroundedsettings.png')";
+            signIn();
         }
     });
 
@@ -496,7 +497,7 @@ function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-    mqttConnect();
+    // TODO: mqttConnect();
 }
 
 const publish_retained = (dest, msg) => {
