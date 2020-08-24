@@ -176,9 +176,9 @@ function onSignIn() {
     console.log('Email: ' + profile.getEmail());
 
     // TODO: might be early enough to reset cam name?
-    // var cam = globals.camName.split('_');
-    // cam[2] = profile.getName().replace(/\s+/g, '');
-    // globals.camName = cam.join('_');
+    var cam = globals.camName.split('_');
+    cam[2] = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
+    globals.camName = cam.join('_');
 
     var id_token = googleUser.getAuthResponse().id_token;
     requestMqttToken(id_token);
