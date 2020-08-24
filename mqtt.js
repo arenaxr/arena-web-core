@@ -166,13 +166,6 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
-
-// Last Will and Testament message sent to subscribers if this client loses connection
-const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: globals.camName, action: "delete"}));
-lwt.destinationName = globals.outputTopic + globals.camName;
-lwt.qos = 2;
-lwt.retained = false;
-
 // startup authentication context
 var auth2;
 var googleUser;
@@ -182,7 +175,10 @@ gapi.load('auth2', function () {
         client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
     }).then(function () {
         auth2 = gapi.auth2.getAuthInstance();
-        if (!auth2.isSignedIn.get()) {
+        
+	setupIcons(); // don't regen on mqtt reconnect
+
+	if (!auth2.isSignedIn.get()) {
             // auto sign in?
             signIn();
         } else {
@@ -261,6 +257,13 @@ function requestMqttToken(id_token) {
 
 function mqttConnect() {
     console.log("mqtt connect", "user:", globals.username, "token:", mqttToken);
+
+    // Last Will and Testament message sent to subscribers if this client loses connection
+    let lwt = new Paho.MQTT.Message(JSON.stringify({object_id: globals.camName, action: "delete"}));
+    lwt.destinationName = globals.outputTopic + globals.camName;
+    lwt.qos = 2;
+    lwt.retained = false;
+
     mqttClient.connect({
         onSuccess: onConnect,
         willMessage: lwt,
@@ -316,7 +319,7 @@ function onConnect() {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
 
-    setupIcons();
+    //setupIcons();
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -479,13 +482,13 @@ function onConnect() {
 
 function setupIcons() {
     var settingsBtn = createIconButton("roundedsettings", () => {
-        settingsBtn.not_toggled = !auth2.isSignedIn.get();
+        settingsBtn.not_toggled = !settingsBtn.not_toggled;
         if (!settingsBtn.not_toggled) {
             settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/roundedsettings.png')";
-            signOut();
+            signIn();
         } else {
             settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/slashroundedsettings.png')";
-            signIn();
+            signOut();
         }
     });
 
