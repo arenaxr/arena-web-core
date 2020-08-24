@@ -215,7 +215,11 @@ function onSignIn(googleUser) {
 }
 
 function signOut() {
+    // disconnect does not use LWT, so delete manual
+    let msg = { object_id: globals.camName, action: "delete" };
+    publish(globals.outputTopic + globals.camName, msg);
     mqttClient.disconnect();
+    // logout, and dissassociate user
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
         console.log('User signed out.');
