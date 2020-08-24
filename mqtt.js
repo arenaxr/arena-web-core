@@ -3,6 +3,28 @@
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
 window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
 
+var ICON_BTN_CLASS = 'arena-icon-button';
+
+function createIconButton(img, onClick) {
+    var iconButton;
+    var wrapper;
+
+    // Create elements.
+    wrapper = document.createElement('div');
+    iconButton = document.createElement('button');
+    iconButton.style.backgroundImage = `url('../jitsi/images/icons/${img}.png')`;
+    iconButton.className = ICON_BTN_CLASS;
+
+    // Insert elements.
+    wrapper.appendChild(iconButton);
+    iconButton.addEventListener('click', function (evt) {
+        onClick();
+        evt.stopPropagation();
+    });
+
+    return wrapper;
+}
+
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
 const loadArena = (urlToLoad, position, rotation) => {
@@ -151,7 +173,6 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
-
 // startup authentication context
 var auth2;
 var googleUser;
@@ -160,19 +181,24 @@ gapi.load('auth2', function () {
         // test CONIX Research Center ARENA auth id for xr
         client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
     }).then(function () {
-	auth2 = gapi.auth2.getAuthInstance();
+        auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
             // auto sign in?
-            auth2.signIn().then(function () {
-                googleUser = auth2.currentUser.get();
-                onSignIn(googleUser);
-            });
+            signIn();
         } else {
             googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
-	}
+        }
     });
 });
+
+function signIn() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signIn().then(function () {
+        googleUser = auth2.currentUser.get();
+        onSignIn(googleUser);
+    });
+}
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
@@ -241,7 +267,6 @@ function mqttConnect() {
     });
 }
 
-
 // Callback for client.connect()
 function onConnect() {
     //console.log("onConnect");
@@ -288,6 +313,8 @@ function onConnect() {
     } else if (sceneObjects.weather) {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
+
+    setupIcons();
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -448,6 +475,22 @@ function onConnect() {
     mqttClient.subscribe(globals.renderTopic);
 }
 
+function setupIcons() {
+    var settingsBtn = createIconButton("roundedsettings", () => {
+        settingsBtn.not_toggled = !auth2.isSignedIn.get();
+        if (!settingsBtn.not_toggled) {
+            settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/roundedsettings.png')";
+            signIn();
+        }
+        else {
+            settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/slashroundedsettings.png')";
+            signOut();
+        }
+    });
+
+    var iconsDiv = document.getElementById('iconsDiv');
+    iconsDiv.appendChild(settingsBtn);
+}
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
