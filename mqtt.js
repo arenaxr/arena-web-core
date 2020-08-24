@@ -160,6 +160,7 @@ gapi.load('auth2', function () {
         // test CONIX Research Center ARENA auth id for xr
         client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
     }).then(function () {
+	auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
             // auto sign in?
             auth2.signIn().then(function () {
@@ -168,7 +169,8 @@ gapi.load('auth2', function () {
             });
         } else {
             googleUser = auth2.currentUser.get();
-        }
+            onSignIn(googleUser);
+	}
     });
 });
 
