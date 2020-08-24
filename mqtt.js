@@ -175,10 +175,10 @@ gapi.load('auth2', function () {
         client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
     }).then(function () {
         auth2 = gapi.auth2.getAuthInstance();
-        
-	setupIcons(); // don't regen on mqtt reconnect
 
-	if (!auth2.isSignedIn.get()) {
+        setupIcons(); // don't regen on mqtt reconnect
+
+        if (!auth2.isSignedIn.get()) {
             // auto sign in?
             signIn();
         } else {
@@ -259,7 +259,7 @@ function mqttConnect() {
     console.log("mqtt connect", "user:", globals.username, "token:", mqttToken);
 
     // Last Will and Testament message sent to subscribers if this client loses connection
-    let lwt = new Paho.MQTT.Message(JSON.stringify({object_id: globals.camName, action: "delete"}));
+    let lwt = new Paho.MQTT.Message(JSON.stringify({ object_id: globals.camName, action: "delete" }));
     lwt.destinationName = globals.outputTopic + globals.camName;
     lwt.qos = 2;
     lwt.retained = false;
@@ -318,8 +318,6 @@ function onConnect() {
     } else if (sceneObjects.weather) {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
-
-    //setupIcons();
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
