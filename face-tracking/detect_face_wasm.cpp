@@ -81,7 +81,7 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
 
     const uint8_t parts_len = 5 + 2 * 68;
     uint16_t *parts = new uint16_t[parts_len];
-    uint16_t left, top, right, bottom;
+    int left, top, right, bottom;
 
     array2d<uint8_t> gray;
     gray.set_size(srcRows, srcCols);
@@ -123,7 +123,9 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
     right = face_rect.right();
     bottom = face_rect.bottom();
 
+    cout << left << endl;
     if (left >= 0 && top < srcRows && right < srcCols && bottom >= 0) {
+        cout << left << endl;
         dlib::rectangle face_rect(
             (long)(left),
             (long)(top),
@@ -153,7 +155,7 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
 
     parts[0] = parts_len; // set first idx to len when passed to js
 
-    if (++frames % 30 == 0) {
+    if (++frames % 15 == 0) {
         track = false;
     }
 
