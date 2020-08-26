@@ -15,7 +15,7 @@ ul li {
   background: #eee;
   font-size: 12px;
   transition: 0.2s;
-  
+
   /* make the list items unselectable */
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -96,15 +96,15 @@ ul li.checked::before {
 }
 
 .objlist {
-  overflow: auto; 
-  background: red; 
+  overflow: auto;
+  background: red;
   max-height: 200px;
 }
 
 .infopanel {
-  width: 100%; 
-  height: 100px; 
-  font-family: monospace; 
+  width: 100%;
+  height: 100px;
+  font-family: monospace;
   font-size: 10px;
   line-height: 90%;
 }
@@ -114,9 +114,9 @@ ul li.checked::before {
 }
 
 .objjson {
-  width: 100%; 
-  height: 300px; 
+  width: 100%;
+  height: 300px;
   font-family: monospace;
   font-size: 11px;
-  line-height: 95%;  
+  line-height: 95%;
 }

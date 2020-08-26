@@ -6,53 +6,70 @@
          "properties":{
             "name":{
                "type":"string",
-               "description": "Name of the program in the format namespace/program-name",
-               "minLength": 5,
-               "pattern": "[0-9a-zA-Z]+\/[0-9a-zA-Z]+"
+               "description":"Name of the program in the format namespace/program-name",
+               "minLength":5,
+               "pattern":"[0-9a-zA-Z]+\/[0-9a-zA-Z]+"
+            },
+            "affinity":{
+               "type":"string",
+               "description":"Indicates the module affinity (client=client's runtime; none or empty=any suitable/available runtime)",
+               "enum":[
+                  "client",
+                  "none"
+               ],
+               "default":"client"
+            },
+            "instantiate":{
+               "type":"string",
+               "description":"Single instance of the program (=single), or let every client create a program instance (=client). Per client instance will create new uuid for each program.",
+               "enum":[
+                  "single",
+                  "client"
+               ],
+               "default":"client"
             },
             "filename":{
                "type":"string",
-               "description": "Filename of the entry binary",
-               "minLength": 5
+               "description":"Filename of the entry binary",
+               "minLength":5
             },
             "filetype":{
                "type":"string",
-               "description": "Type of the program (WA=WASM or PY=Python)",
+               "description":"Type of the program (WA=WASM or PY=Python)",
                "enum":[
                   "WA",
                   "PY"
                ],
-               "default": [ "WA" ]
+               "default":[
+                  "WA"
+               ]
             },
             "args":{
                "type":"array",
-               "description": "Command-line arguments (passed in argv)",
+               "description":"Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${query-string-key}",
                "uniqueItems":false,
                "items":{
                   "type":"string",
                   "title":"args"
-               },
-               "default":[
-                  "--client",
-                  "client1"
-               ]
+               }
             },
             "env":{
                "type":"array",
-               "description": "Environment variables",
+               "description":"Environment variables. Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${query-string-key}",
                "uniqueItems":false,
                "items":{
                   "type":"string",
                   "title":"args"
                },
                "default":[
-                  "--client",
-                  "client1"
+                  "SCENE=${scene}",
+                  "MQTTH=${mqtth}",
+                  "REALM=realm"
                ]
             },
             "channels":{
                "type":"array",
-               "description": "Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future).",
+               "description":"Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future).",
                "uniqueItems":false,
                "items":{
                   "type":"object",
@@ -60,21 +77,20 @@
                   "properties":{
                      "path":{
                         "type":"string",
-                        "description": "Folder visible by the program."
+                        "description":"Folder visible by the program."
                      },
                      "type":{
                         "type":"string",
-                        "description": "Pubsub or client socket",
+                        "description":"Pubsub or client socket",
                         "enum":[
                            "pubsub",
                            "client"
                         ],
                         "default":"pubsub"
-
                      },
                      "mode":{
                         "type":"string",
-                        "description": "Access mode",
+                        "description":"Access mode",
                         "enum":[
                            "r",
                            "w",
@@ -84,37 +100,45 @@
                      "params":{
                         "type":"object",
                         "title":"Parameters",
-                        "description": "Type (i.e. pubsub/client)-specific parameters",
+                        "description":"Type (i.e. pubsub/client)-specific parameters",
                         "properties":{
                            "topic":{
                               "type":"string",
-                              "description": "Pubsub topic (pubsub)"
+                              "description":"Pubsub topic (pubsub)"
                            },
                            "host":{
                               "type":"string",
-                              "description": "Destination host address (client socket)"
+                              "description":"Destination host address (client socket; ignored for now)"
                            },
                            "port":{
                               "type":"number",
-                              "description": "Destination port (client socket)"
+                              "description":"Destination port (client socket; ignored for now)"
                            }
                         }
                      }
                   }
                },
+               "required":[ "path", "type", "mode" ],
                "default":[
                   {
-                     "path":"/ch/light",
+                     "path":"/ch/${scene}",
                      "type":"pubsub",
                      "mode":"rw",
                      "params":{
-                        "topic":"kitchen/light"
+                        "topic":"realm/s/${scene}"
                      }
                   }
                ]
             }
          },
-         "required":[ "name", "filename", "filetype"]
+         "required":[
+            "name",
+            "filename",
+            "filetype",
+            "instantiate",
+            "env",
+            "channels"
+         ]
       },
       "arenaobj":{
          "type":"object",
@@ -122,13 +146,13 @@
          "properties":{
             "object_id":{
                "type":"string",
-               "description": "Object identifier; Must be a valid UUID.",
-               "minLength": 36,
-               "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+               "description":"Object identifier; Must be a valid UUID.",
+               "minLength":36,
+               "pattern":"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
             },
             "action":{
                "type":"string",
-               "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+               "description":"One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
                "enum":[
                   "create",
                   "delete",
@@ -139,7 +163,7 @@
             },
             "persist":{
                "type":"boolean",
-               "description": "Persist this object in the database"
+               "description":"Persist this object in the database"
             }
          },
          "required":[
@@ -165,7 +189,7 @@
             },
             "data":{
                "$ref":"#/definitions/program",
-               "description": "Object data payload; Program config data"
+               "description":"Object data payload; Program config data"
             }
          },
          "required":[
