@@ -8,7 +8,7 @@ To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
 {
     "object_id": "face_<camera id>",
     "hasFace": <bool>,                  # if there is a face detected/valid data.
-    "face": {
+    "image": {
         "flipped": <bool>,              # if image is flipped or not, can be set as URL param.
         "width": <src image width>,
         "height": <src image height>,
