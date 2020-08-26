@@ -54,6 +54,7 @@ void pose_model_init(char buf[], size_t buf_len) {
     deserialize(pose_model, model_istringstream);
 
     delete [] buf;
+    delete [] decompressed;
 
     model_points.push_back( Point3d(6.825897, 6.760612, 4.402142) );
     model_points.push_back( Point3d(1.330353, 7.122144, 6.903745) );
@@ -70,7 +71,7 @@ void pose_model_init(char buf[], size_t buf_len) {
     model_points.push_back( Point3d(0.000000, -3.116408, 6.097667) );
     model_points.push_back( Point3d(0.000000, -7.415691, 4.070434) );
 
-    cout << "Ready to detect!\n";
+    cout << "Ready to detect!" << endl;
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -123,9 +124,7 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
     right = face_rect.right();
     bottom = face_rect.bottom();
 
-    cout << left << endl;
     if (left >= 0 && top < srcRows && right < srcCols && bottom >= 0) {
-        cout << left << endl;
         dlib::rectangle face_rect(
             (long)(left),
             (long)(top),
@@ -219,10 +218,10 @@ double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
     y = euler_angle.at<double>(1) * PI / 180.0;
     z = euler_angle.at<double>(2) * PI / 180.0;
 
-    result[1] = sin(x/2)*cos(y/2)*cos(z/2) - cos(x/2)*sin(y/2)*sin(z/2);
-    result[2] = cos(x/2)*sin(y/2)*cos(z/2) + sin(x/2)*cos(y/2)*sin(z/2);
-    result[3] = cos(x/2)*cos(y/2)*sin(z/2) - sin(x/2)*sin(y/2)*cos(z/2);
-    result[4] = cos(x/2)*cos(y/2)*cos(z/2) + sin(x/2)*sin(y/2)*sin(z/2);
+    result[1] = sin(x/2) * cos(y/2) * cos(z/2) - cos(x/2) * sin(y/2) * sin(z/2);
+    result[2] = cos(x/2) * sin(y/2) * cos(z/2) + sin(x/2) * cos(y/2) * sin(z/2);
+    result[3] = cos(x/2) * cos(y/2) * sin(z/2) - sin(x/2) * sin(y/2) * cos(z/2);
+    result[4] = cos(x/2) * cos(y/2) * cos(z/2) + sin(x/2) * sin(y/2) * sin(z/2);
 
     result[5] = trans_vec.at<double>(0);
     result[6] = trans_vec.at<double>(1);
