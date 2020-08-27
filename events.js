@@ -6,6 +6,30 @@
 
 'use strict';
 
+// usage:
+//   importScript('./path/to/script.js').then((allExports) => { .... }));
+function importScript(path) {
+  let entry = window.importScript.__db[path];
+  if (entry === undefined) {
+    const escape = path.replace(`'`, `\\'`);
+    const script = Object.assign(document.createElement('script'), {
+      type: 'module',
+      textContent: `import * as x from '${escape}'; importScript.__db['${escape}'].resolve(x);`,
+    });
+    entry = importScript.__db[path] = {};
+    entry.promise = new Promise((resolve, reject) => {
+      entry.resolve = resolve;
+      script.onerror = reject;
+    });
+    document.head.appendChild(script);
+    script.remove();
+  }
+  return entry.promise;
+}
+importScript.__db = {};
+window['importScript'] = importScript;  // needed if we ourselves are in a module
+
+
 function getUrlVars() {
     const vars = {};
     const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
@@ -34,8 +58,8 @@ function getQueryParams(name, defaultValue) {
 
     while (tokens = re.exec(qs))
     {
-	if (decodeURIComponent(tokens[1]) == name)
-	    params.push(decodeURIComponent(tokens[2]));
+    if (decodeURIComponent(tokens[1]) == name)
+        params.push(decodeURIComponent(tokens[2]));
     }
 
     if (params === []) return defaultValue
@@ -47,21 +71,25 @@ function getUrlParams(parameter, defaultValue) {
     var indexes = [];
     parameter = parameter+'=';
     if (window.location.href.indexOf(parameter) > -1) {
-	var vars = getUrlVars();
-	for (var i=0; i<vars.length; i++) {
-	    if (vars[parameter] == parameter)
-		indexes.push(vars[i]);
-	}
+    var vars = getUrlVars();
+    for (var i=0; i<vars.length; i++) {
+        if (vars[parameter] == parameter)
+        indexes.push(vars[i]);
+    }
     } else
-	indexes.push(defaultValue);
+    indexes.push(defaultValue);
 
     return indexes;
+}
+
+function debug(msg) {
+    publish(globals.outputTopic, '{"object_id":"debug","message":"'+msg+'"}');
 }
 
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
-    updateMillis: 100,
+    updateMillis: getUrlParam('camUpdateRate', 100),
     scenenameParam: getUrlParam('scene', 'render'), //scene
     userParam: getUrlParam('name', 'X'),
     startCoords: getUrlParam('location', '0,1.6,0').replace(/,/g, ' '),
@@ -76,27 +104,51 @@ window.globals = {
     vidconf: true,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
     onEnterXR: function (xrType) {
+        //debug("ENTERING XR");
+
         if (xrType === 'ar') {
+            //debug("xrType is ar");
+
             this.isAR = true;
-            //if (this.isWebXRViewer) {
-	    if (true) {
+            if (this.isWebXRViewer) {
+                //debug("isWebXRViewer = true");
+
+                let base64script = document.createElement("script");
+                base64script.onload = async () => {
+                    await importScript('/apriltag/script.js');
+                };
+                base64script.src = '/apriltag/base64_binary.js';
+                document.head.appendChild(base64script);
+
                 document.addEventListener("mousedown", function (e) {
+                    //debug("MOUSEDOWN");
+
                     if (window.globals.lastMouseTarget) {
+
+                        //debug("has target: "+window.globals.lastMouseTarget);
+
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
-                        let elPos = el.object3D.position;
+                        let elPos = new THREE.Vector3();
+                        el.object3D.getWorldPosition(elPos);
+                        //debug("worldPosition is:");
+                        //debug(elPos.x.toString()+","+elPos.x.toString()+","+elPos.x.toString());
                         let intersection = {x: elPos.x, y: elPos.y, z: elPos.z};
                         el.emit("mousedown", {
                             "clicker": window.globals.camName,
                             intersection: {point: intersection},
                             cursorEl: true
                         }, false);
+                    } else {
+                        //debug("no lastMouseTarget");
                     }
                 });
                 document.addEventListener("mouseup", function (e) {
                     if (window.globals.lastMouseTarget) {
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
-                        let elPos = el.object3D.position;
+                        let elPos = new THREE.Vector3();
+                        el.object3D.getWorldPosition(elPos);
                         let intersection = {x: elPos.x, y: elPos.y, z: elPos.z};
+                        //debug(elPos.x);
                         el.emit("mouseup", {
                             "clicker": window.globals.camName,
                             intersection: {point: intersection},
@@ -104,23 +156,40 @@ window.globals = {
                         }, false);
                     }
                 });
-                /*
                 let cursor = document.getElementById('mouseCursor');
                 let cursorParent = cursor.parentNode;
                 cursorParent.removeChild(cursor);
                 cursor = document.createElement('a-cursor');
-                cursor.setAttribute('fuse', true);
+                cursor.setAttribute('fuse', false);
+                // move reticle closer (side effect: bigger!)
+                cursor.setAttribute('position', '0 0 -0.5');
+                //cursor.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+                cursor.setAttribute('animation__22', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+                //cursor.setAttribute('raycaster', 'showLine', 'true');
+
                 cursor.setAttribute('max-distance', '1000');
                 cursor.setAttribute('id', 'fuse-cursor');
-                cursor.setAttribute('position', '0 0 -0.5');
-                cursor.setAttribute('animation', "startEvents: click; property: scale; dur: 150; from: 0.2 0.2 0.2; to: 1 1 1; easing: easeIn; ");
                 cursorParent.appendChild(cursor);
-                */
             }
-            // document.getElementById('env').setAttribute('visible', false);
+            document.getElementById('env').setAttribute('visible', false);
         }
     }
 };
+
+let urlLat = getUrlParam('lat');
+let urlLong = getUrlParam('long');
+if (urlLat && urlLong) {
+    globals.clientCoords = {
+        latitude: urlLat,
+        longitude: urlLong
+    };
+} else {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            globals.clientCoords = position.coords;
+        });
+    }
+}
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
@@ -144,7 +213,32 @@ if (globals.fixedCamera !== '') {
 globals.viveLName = "viveLeft_" + globals.idTag;  // e.g. viveLeft_9240_X
 globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
 
-import('/x/face/script.js');
+globals.newRotation = new THREE.Quaternion();
+globals.newPosition = new THREE.Vector3();
+globals.vioRotation = new THREE.Quaternion();
+globals.vioPosition = new THREE.Vector3();
+globals.vioMatrix = new THREE.Matrix4();
+var camParent = new THREE.Matrix4();
+var cam = new THREE.Matrix4();
+var cpi = new THREE.Matrix4();
+
+globals.newViveLRotation = new THREE.Quaternion();
+globals.newViveLPosition = new THREE.Vector3();
+globals.vioViveLRotation = new THREE.Quaternion();
+globals.vioViveLPosition = new THREE.Vector3();
+var ViveLcamParent = new THREE.Matrix4();
+var ViveLcam = new THREE.Matrix4();
+var ViveLcpi = new THREE.Matrix4();
+
+globals.newViveRRotation = new THREE.Quaternion();
+globals.newViveRPosition = new THREE.Vector3();
+globals.vioViveRRotation = new THREE.Quaternion();
+globals.vioViveRPosition = new THREE.Vector3();
+var ViveRcamParent = new THREE.Matrix4();
+var ViveRcam = new THREE.Matrix4();
+var ViveRcpi = new THREE.Matrix4();
+
+importScript('/x/face/script.js');
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
@@ -157,23 +251,31 @@ AFRAME.registerComponent('pose-listener', {
     },
 
     tick: (function (t, dt) {
-        //	var newRotation = this.el.object3D.quaternion;
-        //	var newPosition = this.el.object3D.position;
-        const newPosition = new THREE.Vector3();
-        const newRotation = new THREE.Quaternion();
-        this.el.object3D.getWorldQuaternion(newRotation);
-        this.el.object3D.getWorldPosition(newPosition);
+        globals.newRotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+        globals.newPosition.setFromMatrixPosition(this.el.object3D.matrixWorld);
 
-        const rotationCoords = newRotation.x + ' ' + newRotation.y + ' ' + newRotation.z + ' ' + newRotation.w;
-        const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
+        camParent = this.el.object3D.parent.matrixWorld;
+        cam = this.el.object3D.matrixWorld;
+        cpi.getInverse(camParent);
+        cpi.multiply(cam);
+        globals.vioMatrix.copy(cpi);
+        globals.vioRotation.setFromRotationMatrix(cpi);
+        globals.vioPosition.setFromMatrixPosition(cpi);
+        //console.log(cpi);
+
+        const rotationCoords = rotToText(globals.newRotation);
+        const positionCoords = coordsToText(globals.newPosition);
 
         const newPose = rotationCoords + " " + positionCoords;
-        if (this.lastPose !== newPose || this.heartBeatCounter % (1000/globals.updateMillis) == 0) {
-            this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
+        if (this.lastPose !== newPose|| this.heartBeatCounter % (1000/globals.updateMillis) == 0) {
+            this.el.emit('poseChanged', Object.assign(globals.newPosition, globals.newRotation));
+            this.el.emit('vioChanged', Object.assign(globals.vioPosition, globals.vioRotation));
             this.lastPose = newPose;
 
-	    // DEBUG
-	    //debugConixText(newRotation);
+            // DEBUG
+            //debugConixText(newPosition);
+            //debugRaw(this.el.object3D.matrixAutoUpdate + '\n' + this.el.object3D.matrixWorldNeedsUpdate +
+            //      '\n' + THREE.Object3D.DefaultMatrixAutoUpdate);
         }
         this.heartBeatCounter++;
     })
@@ -204,16 +306,6 @@ AFRAME.registerComponent('vive-pose-listener', {
 
 AFRAME.registerComponent('pose-publisher', {
     init: function () {
-	// All this is to not publish initial pose
-        // const newRotation = this.el.object3D.quaternion;
-        // const newPosition = this.el.object3D.position;
-
-        // const rotationCoords = rotToText(newRotation);
-        // const positionCoords = coordsToText(newPosition);
-
-        // const newPose = rotationCoords + " " + positionCoords;
-	// this.lastPose = newPose;
-
         // Set up the tick throttling.
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
     },
@@ -227,22 +319,21 @@ AFRAME.registerComponent('pose-publisher', {
 
         const newPose = rotationCoords + " " + positionCoords;
         if (this.lastPose !== newPose) {
-//            this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
-	    this.lastPose = newPose;
+        // this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
+        this.lastPose = newPose;
 
-	    console.log(".");
-	    const objName = this.el.id;
-	    publish(globals.outputTopic + objName, {
-	    	object_id: objName,
-	    	action: "update",
-		persist: false,
-	    	type: 'object',
-	    	data: {
-		    source: globals.camName,
-	    	    position: vec3ToObject(newPosition),
-	    	    rotation: quatToObject(newRotation),
-	    	}
-	    });
+        const objName = this.el.id;
+        publish(globals.outputTopic + objName, {
+            object_id: objName,
+            action: "update",
+            persist: false,
+            type: 'object',
+            data: {
+            source: globals.camName,
+                position: vec3ToObject(newPosition),
+                rotation: quatToObject(newRotation),
+            }
+        });
 
         }
     })
@@ -271,7 +362,7 @@ function debugRaw(debugMsg) {
 function eventAction(evt, eventName, myThis) {
     const newPosition = myThis.object3D.position;
     //this.emit('viveChanged', Object.assign(newPosition, newRotation));
-    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+    //      const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
     //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 
     let coordsData = {
@@ -330,263 +421,263 @@ function rotToText(c) {
 // my crap, this returns strings, not numbers
 function setClickData(evt) {
     if (evt.detail.intersection)
-	return {
+    return {
             x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
             y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
             z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
-	}
+    }
     else {
-	console.log("WARN: empty coords data");
-	return {
-	    x: 0,
-	    y: 0,
-	    z:0
-	}
+    console.log("WARN: empty coords data");
+    return {
+        x: 0,
+        y: 0,
+        z:0
+    }
     }
 }
 
 
 AFRAME.registerComponent('impulse', {
     schema: {
-	on: {default: ''}, // event to listen 'on'
-	force: {
-	    type: 'vec3',
-	    default: { x: 1, y: 1, z: 1 }
-	},
-	position: {
-	    type: 'vec3',
-	    default: { x: 1, y: 1, z: 1 }
-	}
+    on: {default: ''}, // event to listen 'on'
+    force: {
+        type: 'vec3',
+        default: { x: 1, y: 1, z: 1 }
+    },
+    position: {
+        type: 'vec3',
+        default: { x: 1, y: 1, z: 1 }
+    }
     },
 
     multiple: true,
 
     init: function () {
-	var self = this;
+    var self = this;
     },
 
     update: function(oldData) {
-	// this in fact only gets called when the component that it is - gets updated
-	// unlike the update method in Unity that gets called every frame
-	var data = this.data; // Component property values.
-	var el = this.el;     // Reference to the component's entity.
+    // this in fact only gets called when the component that it is - gets updated
+    // unlike the update method in Unity that gets called every frame
+    var data = this.data; // Component property values.
+    var el = this.el;     // Reference to the component's entity.
 
-	if (data.on) { // we have an event?
-	    el.addEventListener(data.on, function (args) {
+    if (data.on) { // we have an event?
+        el.addEventListener(data.on, function (args) {
 
-		if (args.detail.clicker) { // our synthetic event from MQTT
+        if (args.detail.clicker) { // our synthetic event from MQTT
                     if (el.body) { // has physics = dynamic-body Component
-			// e.g. <a-entity impulse="on: mouseup; force: 1 50 1; position: 1 1 1" ...>
-			const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
-			const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
-			el.body.applyImpulse(force, pos);
+            // e.g. <a-entity impulse="on: mouseup; force: 1 50 1; position: 1 1 1" ...>
+            const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
+            const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+            el.body.applyImpulse(force, pos);
                     }
-		}
+        }
 
-	    });
-	} else {
-	    // `event` not specified, just log the message.
-	    console.log(data);
-	}
+        });
+    } else {
+        // `event` not specified, just log the message.
+        console.log(data);
+    }
     },
 
     pause: function () {
-	//this.removeEventListeners()
+    //this.removeEventListeners()
     },
     play: function () {
-	//this.addEventListeners()
+    //this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-	var data = this.data;
-	var el = this.el;
+    var data = this.data;
+    var el = this.el;
 
-	// remove event listener
-	if (data.event) {
-	    el.removeEventListener(data.event, this.eventHandlerFn);
-	}
+    // remove event listener
+    if (data.event) {
+        el.removeEventListener(data.event, this.eventHandlerFn);
+    }
     }
 })
 
 // load new URL if clicked
 AFRAME.registerComponent('goto-url', {
     schema: {
-	on: {default: ''}, // event to listen 'on'
-	url: {default: ''} // http:// style url
+    on: {default: ''}, // event to listen 'on'
+    url: {default: ''} // http:// style url
     },
 
     multiple: true,
 
     init: function () {
-	var self = this;
+    var self = this;
     },
 
     update: function(oldData) {
-	// this in fact only gets called when the component that it is - gets updated
-	// unlike the update method in Unity that gets called every frame
-	var data = this.data; // Component property values.
-	var el = this.el;     // Reference to the component's entity.
+    // this in fact only gets called when the component that it is - gets updated
+    // unlike the update method in Unity that gets called every frame
+    var data = this.data; // Component property values.
+    var el = this.el;     // Reference to the component's entity.
 
-	if (data.on) { // we have an event?
-	    el.addEventListener(data.on, function (args) {
-		console.log("goto-url url=" + data.url);
-		window.location.href = data.theUrl;
-	    });
-	} else {
-	    // `event` not specified, just log the message.
-	    console.log(data);
-	}
+    if (data.on) { // we have an event?
+        el.addEventListener(data.on, function (args) {
+        console.log("goto-url url=" + data.url);
+        window.location.href = data.theUrl;
+        });
+    } else {
+        // `event` not specified, just log the message.
+        console.log(data);
+    }
     },
 
     pause: function () {
-	//this.removeEventListeners()
+    //this.removeEventListeners()
     },
     play: function () {
-	//this.addEventListeners()
+    //this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-	var data = this.data;
-	var el = this.el;
+    var data = this.data;
+    var el = this.el;
 
-	// remove event listener
-	if (data.event) {
-	    el.removeEventListener(data.event, this.eventHandlerFn);
-	}
+    // remove event listener
+    if (data.event) {
+        el.removeEventListener(data.event, this.eventHandlerFn);
+    }
     }
 })
 
 // load new URL if clicked
 AFRAME.registerComponent('prompt-box', {
     schema: {
-	on: {default: ''}, // event to listen 'on'
-	prompt: {default: ''} // http:// style url
+    on: {default: ''}, // event to listen 'on'
+    prompt: {default: ''} // http:// style url
     },
 
     multiple: true,
 
     init: function () {
-	var self = this;
+    var self = this;
     },
 
     update: function(oldData) {
-	// this in fact only gets called when the component that it is - gets updated
-	// unlike the update method in Unity that gets called every frame
-	var data = this.data; // Component property values.
-	var el = this.el;     // Reference to the component's entity.
+    // this in fact only gets called when the component that it is - gets updated
+    // unlike the update method in Unity that gets called every frame
+    var data = this.data; // Component property values.
+    var el = this.el;     // Reference to the component's entity.
 
-	if (data.on) { // we have an event?
-	    console.log("adding prompt event listener");
-	    el.addEventListener(data.on, function (evt) {
-		if (!evt.detail.clicker) { // local event, not from MQTT
-		    console.log("called prompt listener");
-		    var person = prompt(data.prompt, "");
-		    var txt="";
-		    if (person == null || person == "") {
-			txt = "";
-		    } else {
-			txt = person;
-		    }
-		    const coordsData = setCoordsData(evt);
-		    const thisMsg = {
-			object_id: this.id,
-			action: "clientEvent",
-			type: "prompt-data",
-			data: {text: txt, source: this.id, position: coordsData}
-		    };
-		    publish(globals.outputTopic + this.id, thisMsg);
+    if (data.on) { // we have an event?
+        console.log("adding prompt event listener");
+        el.addEventListener(data.on, function (evt) {
+        if (!evt.detail.clicker) { // local event, not from MQTT
+            console.log("called prompt listener");
+            var person = prompt(data.prompt, "");
+            var txt="";
+            if (person == null || person == "") {
+            txt = "";
+            } else {
+            txt = person;
+            }
+            const coordsData = setCoordsData(evt);
+            const thisMsg = {
+            object_id: this.id,
+            action: "clientEvent",
+            type: "prompt-data",
+            data: {text: txt, source: this.id, position: coordsData}
+            };
+            publish(globals.outputTopic + this.id, thisMsg);
 
-		    console.log("prompt-box data: " + txt);
-		}
-	    });
-	} else {
-	    // `event` not specified, just log the message.
-	    console.log(data);
-	}
+            console.log("prompt-box data: " + txt);
+        }
+        });
+    } else {
+        // `event` not specified, just log the message.
+        console.log(data);
+    }
     },
 
     pause: function () {
-	//this.removeEventListeners()
+    //this.removeEventListeners()
     },
     play: function () {
-	//this.addEventListeners()
+    //this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-	var data = this.data;
-	var el = this.el;
+    var data = this.data;
+    var el = this.el;
 
-	// remove event listener
-	if (data.event) {
-	    el.removeEventListener(data.event, this.eventHandlerFn);
-	}
+    // remove event listener
+    if (data.event) {
+        el.removeEventListener(data.event, this.eventHandlerFn);
+    }
     }
 })
 
 // load scene from persistence db
 AFRAME.registerComponent('load-scene', {
     schema: {
-	on: {default: ''}, // event to listen 'on'
-	url: {default: ''}, // http:// style url
-	position: {
-	    type: 'vec3',
-	    default: { x: 0, y: 0, z: 0 }
-	},
-	rotation: {
-	    type: 'vec4',
-	    default: { x: 0, y: 0, z: 0, w: 1 }
-	}
+    on: {default: ''}, // event to listen 'on'
+    url: {default: ''}, // http:// style url
+    position: {
+        type: 'vec3',
+        default: { x: 0, y: 0, z: 0 }
+    },
+    rotation: {
+        type: 'vec4',
+        default: { x: 0, y: 0, z: 0, w: 1 }
+    }
     },
 
     multiple: true,
 
     init: function () {
-	var self = this;
+    var self = this;
     },
 
     update: function(oldData) {
-	// this in fact only gets called when the component that it is - gets updated
-	// unlike the update method in Unity that gets called every frame
-	var data = this.data; // Component property values.
-	var el = this.el;     // Reference to the component's entity.
+    // this in fact only gets called when the component that it is - gets updated
+    // unlike the update method in Unity that gets called every frame
+    var data = this.data; // Component property values.
+    var el = this.el;     // Reference to the component's entity.
 
-	if (data.on) { // we have an event?
-	    el.addEventListener(data.on, function (evt) {
-		if ('cursorEl' in evt.detail) {
-		    // internal click event, our scene only
-		} else {
-		    // MQTT click event that everyone gets
-		    console.log("load-scene url=" + data.url);
-		    if (!this.loaded) {
-			loadArena(data.url, data.position, data.rotation);
-			this.loaded = true;
-		    } else {
-			unloadArena(data.url);
-			this.loaded = false;
-		    }
-		}
-	    })
-	} else {
-	    // `event` not specified, just log the message.
-	    console.log(data);
-	}
+    if (data.on) { // we have an event?
+        el.addEventListener(data.on, function (evt) {
+        if ('cursorEl' in evt.detail) {
+            // internal click event, our scene only
+        } else {
+            // MQTT click event that everyone gets
+            console.log("load-scene url=" + data.url);
+            if (!this.loaded) {
+            loadArena(data.url, data.position, data.rotation);
+            this.loaded = true;
+            } else {
+            unloadArena(data.url);
+            this.loaded = false;
+            }
+        }
+        })
+    } else {
+        // `event` not specified, just log the message.
+        console.log(data);
+    }
     },
 
     pause: function () {
-	//this.removeEventListeners()
+    //this.removeEventListeners()
     },
     play: function () {
-	//this.addEventListeners()
+    //this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-	var data = this.data;
-	var el = this.el;
+    var data = this.data;
+    var el = this.el;
 
-	// remove event listener
-	if (data.event) {
-	    el.removeEventListener(data.event, this.eventHandlerFn);
-	}
+    // remove event listener
+    if (data.event) {
+        el.removeEventListener(data.event, this.eventHandlerFn);
+    }
     }
 })
 
@@ -594,18 +685,18 @@ AFRAME.registerComponent('load-scene', {
 
 AFRAME.registerComponent('collision-listener', {
     init: function () {
-	//console.log("collision-listener Component init");
+    //console.log("collision-listener Component init");
         this.el.addEventListener('collide', function (evt) {
 
             //const coordsData = setClickData(evt);
             const coordsData = {
-		x: 0,
-		y: 0,
-		z: 0
-	    };
-	    // colliding object
-	    const collider = evt.detail.body.el.id;
-	    const collideee = this.id;
+        x: 0,
+        y: 0,
+        z: 0
+        };
+        // colliding object
+        const collider = evt.detail.body.el.id;
+        const collideee = this.id;
 
             // original click event; simply publish to MQTT
             const thisMsg = {
@@ -625,8 +716,8 @@ AFRAME.registerComponent('collision-listener', {
 
 AFRAME.registerComponent('click-listener', {
     init: function () {
-	//console.log("click-listener Component init");
-	//console.log("mousedown init");
+    //console.log("click-listener Component init");
+    //console.log("mousedown init");
         this.el.addEventListener('mousedown', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -652,15 +743,15 @@ AFRAME.registerComponent('click-listener', {
                 }
                 const clicker = evt.detail.clicker;
 
-		/* Debug Conix Box
+        /* Debug Conix Box
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
+        */
             }
         });
 
-	//console.log("mouseup init");
+    //console.log("mouseup init");
         this.el.addEventListener('mouseup', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -683,24 +774,24 @@ AFRAME.registerComponent('click-listener', {
             } else {
 
                 // do the event handling for MQTT event; this is just an example
-                //		this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
+                //      this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
                 // this example pushes the object with 50 in the +Y direction
                 // mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
 
-		/*
+        /*
                     if (this.body) { // has physics
-			const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
-			const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
-			this.body.applyImpulse(foo, bod);
+            const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
+            const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
+            this.body.applyImpulse(foo, bod);
                     }
-		*/
+        */
 
-		/* DEBUG Conix box text
+        /* DEBUG Conix box text
                 const clicker = evt.detail.clicker;
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
+        */
             }
         });
 
@@ -723,13 +814,13 @@ AFRAME.registerComponent('click-listener', {
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
 
-		/* Debug Conix box text
+        /* Debug Conix box text
                 const clicker = evt.detail.clicker;
 
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
+        */
             }
         });
 
@@ -752,13 +843,13 @@ AFRAME.registerComponent('click-listener', {
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
 
-		/* DEBUG Conix box text
+        /* DEBUG Conix box text
                 const clicker = evt.detail.clicker;
 
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-		*/
+        */
             }
         });
     }
@@ -806,12 +897,12 @@ AFRAME.registerComponent('click-toggle', {
       toggled: { type: 'boolean', default: false}
     },
     init: function () {
-	var self = this;
-	var el = this.el;
-	var data = this.data;
+    var self = this;
+    var el = this.el;
+    var data = this.data;
 
         el.addEventListener('mousedown', function (evt) {
-	    var dummy = 1
+        var dummy = 1
             el.setAttribute('click-toggle', { 'toggled': !data.toggled});
         });
     },
@@ -906,10 +997,10 @@ AFRAME.registerComponent('points', {
                     el.setObject3D('points', mesh);
                     el.removeObject3D('mesh');
 
-//		    object.traverse(function (node) {
-//			if (node.isMesh)
-//			    node.material.wireframe = data.toggled;
-//		    });
+//          object.traverse(function (node) {
+//          if (node.isMesh)
+//              node.material.wireframe = data.toggled;
+//          });
                 }
 
                 el.setAttribute('points', {'toggled': !data.toggled});
@@ -947,30 +1038,29 @@ AFRAME.registerComponent('modify-materials', {
 
         var texture = THREE.ImageUtils.loadTexture(this.data.url);
 
-	texture.wrapS = THREE.RepeatWrapping;
-	texture.wrapT = THREE.RepeatWrapping;
-	texture.repeat.set( 0.5, 0.5 );
-	texture.offset.set( 4, 4 );
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set( 0.5, 0.5 );
+    texture.offset.set( 4, 4 );
 
-	//texture.repeat.x = 1;
-	//texture.repeat.y = 1;
+    //texture.repeat.x = 1;
+    //texture.repeat.y = 1;
 
-	// Wait for model to load.
-	this.el.addEventListener('model-loaded', () => {
+    // Wait for model to load.
+    this.el.addEventListener('model-loaded', () => {
             // Grab the mesh / scene.
             const obj = this.el.getObject3D('mesh');
             // Go over the submeshes and modify materials we want.
             obj.traverse(node => {
-		node.material = new THREE.MeshLambertMaterial(
-		    {
-			map: texture,
-//			needsUpdate: true
-		    });;
-	    })
-	})
+        node.material = new THREE.MeshLambertMaterial(
+            {
+            map: texture,
+//          needsUpdate: true
+            });;
+        })
+    })
     },
 })
-
 
 // TODO: fix this. kinda hacky to have this as global var, but this.longTouch doesnt seem to work...
 window.longTouch = false;

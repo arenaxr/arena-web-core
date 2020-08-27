@@ -13,6 +13,7 @@ const loadArena = (urlToLoad, position, rotation) => {
     xhr.responseType = 'json';
     xhr.send();
     let deferredObjects = [];
+    let Parents = {};
     xhr.onload = () => {
         if (xhr.status !== 200) {
             alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
@@ -24,8 +25,10 @@ const loadArena = (urlToLoad, position, rotation) => {
                 if (obj.object_id === globals.camName) {
                     continue; // don't load our own camera/head assembly
                 }
-                if (obj.attributes.parent)
+                if (obj.attributes.parent) {
                     deferredObjects.push(obj);
+                    Parents[obj.attributes.parent] = obj.attributes.parent;
+                }
                 else {
                     let msg = {
                         object_id: obj.object_id,
@@ -161,6 +164,7 @@ function onConnect() {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
 
+    // video window for jitsi
     const videoPlane = document.createElement('a-plane');
     videoPlane.setAttribute('id', "arena-vid-plane");
     videoPlane.setAttribute('scale', '0.33 0.22 0.1');
@@ -227,14 +231,14 @@ function onConnect() {
     });
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
-//        console.log("poseChanged", e.detail);
+    // console.log("poseChanged", e.detail);
 
         let msg = {
             object_id: globals.camName,
-	    jitsiId: globals.jitsiId,
-	    hasVideo: globals.hasVideo,
-//	    hasAudio: globals.hasAudio,
-//	    activeSpeaker: globals.activeSpeaker,
+    	    jitsiId: globals.jitsiId,
+    	    hasVideo: globals.hasVideo,
+            // hasAudio: globals.hasAudio,
+            // activeSpeaker: globals.activeSpeaker,
             action: 'create',
             type: 'object',
             data: {
@@ -432,9 +436,9 @@ function drawVideoCube(entityEl, slot, audioStream) {
 }
 
 function highlightVideoCube(entityEl, oldEl, slot) {
-//    var theslot = "#wallbox"+(slot).toString();
-    //console.log("highlightVideoCube: " + theslot);
-//    var wallBox = document.querySelector(theslot);
+    // var theslot = "#wallbox"+(slot).toString();
+    // console.log("highlightVideoCube: " + theslot);
+    // var wallBox = document.querySelector(theslot);
 
     // var videoCube = document.querySelector("#videoWallHighlightBox");
     // if (!videoCube) {
@@ -446,34 +450,32 @@ function highlightVideoCube(entityEl, oldEl, slot) {
     //     globals.sceneObjects.scene.appendChild(videoCube);
     // }
 
-//    var thex = wallBox.object3D.position.x;
-//    var they = wallBox.object3D.position.y;
-//    var thez = wallBox.object3D.position.z;
-//    videoCube.object3D.position.set(thex, they, thez - 0.03);
+    // var thex = wallBox.object3D.position.x;
+    // var they = wallBox.object3D.position.y;
+    // var thez = wallBox.object3D.position.z;
+    // videoCube.object3D.position.set(thex, they, thez - 0.03);
 
     // entityEl is the head
     var videoHat = document.querySelector("#videoHatHighlightBox");
     if (!videoHat) {
-	videoHat = document.createElement('a-box');
-	videoHat.setAttribute('scale', '0.8 0.05 0.8');
+    	videoHat = document.createElement('a-box');
+    	videoHat.setAttribute('scale', '0.8 0.05 0.8');
         videoHat.setAttribute('color', "green");
-	videoHat.setAttribute('position', '0 0.325 0');
+    	videoHat.setAttribute('position', '0 0.325 0');
         videoHat.setAttribute('material', 'shader', 'flat');
-	videoHat.setAttribute('id', "videoHatHighlightBox");
-        //globals.sceneObjects.scene.appendChild(videoCube);
-
+    	videoHat.setAttribute('id', "videoHatHighlightBox");
+        // globals.sceneObjects.scene.appendChild(videoCube);
     }
     // remove old
     if (oldEl) {
-	var parentEl = videoHat.parentEl;
-	if (parentEl)
-	    parentEl.removeChild(videoHat);
+    	var parentEl = videoHat.parentEl;
+    	if (parentEl) {
+    	    parentEl.removeChild(videoHat);
+        }
     }
     // add new
     entityEl.appendChild(videoHat);
-
 }
-
 
 function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
