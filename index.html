@@ -18,7 +18,7 @@
     <script src="https://rawgit.com/donmccurdy/aframe-extras/master/dist/aframe-extras.loaders.min.js"></script>
     -->
     <!-- from https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.0.1/dist/aframe-extras.js -->
-    <!-- <script src="vendor/aframe-extras.js"></script> -->
+    <script src="vendor/aframe-extras.js"></script>
 
     <!-- from https://cdn.rawgit.com/elbobo/aframe-multisrc-component/b6d23310/dist/0.3/aframe-multisrc-component.js -->
     <!-- multisrc component: multiple texture sides for e.g. dice -->
@@ -42,8 +42,8 @@
     <script src="vendor/morphTarget.js"></script>
 
     <!-- icons -->
-    <link rel="stylesheet" href="icons.css">
-    <script src="icons.js"></script>
+    <link rel="stylesheet" href="icons/icons.css">
+    <script src="icons/icons.js"></script>
 
     <!-- our camera change and other event listener Components -->
     <script src="events.js"></script>
@@ -105,7 +105,7 @@
         <a-entity position="0 0 0" id="CameraRig"><!-- movement-controls="fly: true; speed=0.3"> -->
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
-            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true; acceleration: 30" look-controls pose-listener mouse-cursor touch-controls>
+            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move>
               <!--
               <a-camera id="my-camera" far="10000" near="0.1" look-controls-enabled="true" wasd-controls-enabled="true" pose-listener mouse-cursor>
               <a-cursor fuse="true" max-distance="1000" timeout="1500"></a-cursor>

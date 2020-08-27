@@ -124,7 +124,6 @@ window.globals = {
                     //debug("MOUSEDOWN");
 
                     if (window.globals.lastMouseTarget) {
-
                         //debug("has target: "+window.globals.lastMouseTarget);
 
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
@@ -338,7 +337,6 @@ AFRAME.registerComponent('pose-publisher', {
         }
     })
 });
-
 
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
@@ -1064,19 +1062,16 @@ AFRAME.registerComponent('modify-materials', {
 
 // TODO: fix this. kinda hacky to have this as global var, but this.longTouch doesnt seem to work...
 window.longTouch = false;
-AFRAME.registerComponent("touch-controls", {
+AFRAME.registerComponent("press-and-move", {
     init: function() {
         this.timer = null;
         this.drag = false;
-        this.baz = "hello"
-        this.camera = globals.sceneObjects.myCamera;
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
         window.addEventListener("touchstart", this.touchstart);
         window.addEventListener("touchend", this.touchend);
         window.addEventListener("touchmove", this.touchmove);
     },
     touchstart: function (evt) {
-        this.baz = "bye"
         evt.preventDefault();
         if (!this.timer) {
             this.timer = window.setTimeout(() => {
@@ -1100,15 +1095,15 @@ AFRAME.registerComponent("touch-controls", {
             this.timer = null;
             if (!this.drag) {
                 const SPEED = 0.3;
-                let eulerRot = this.camera.getAttribute("rotation");
+                let eulerRot = globals.sceneObjects.myCamera.getAttribute("rotation");
                 let dx = SPEED * Math.cos(eulerRot.y * Math.PI / 180);
                 let dy = SPEED * Math.sin(eulerRot.y * Math.PI / 180);
                 let dz = SPEED * Math.sin(eulerRot.x * Math.PI / 180);
-                let newPosition = this.camera.getAttribute("position");
+                let newPosition = globals.sceneObjects.myCamera.getAttribute("position");
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
                 newPosition.y += dz;
-                this.camera.setAttribute("position", newPosition);
+                globals.sceneObjects.myCamera.setAttribute("position", newPosition);
             }
         }
     })
