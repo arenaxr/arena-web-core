@@ -24,6 +24,7 @@ function getUrlParam(parameter, defaultValue) {
     }
     return urlParameter;
 }
+
 function getQueryParams(name, defaultValue) {
     var qs = location.search;
 
@@ -33,8 +34,8 @@ function getQueryParams(name, defaultValue) {
 
     while (tokens = re.exec(qs))
     {
-    if (decodeURIComponent(tokens[1]) == name)
-        params.push(decodeURIComponent(tokens[2]));
+	if (decodeURIComponent(tokens[1]) == name)
+	    params.push(decodeURIComponent(tokens[2]));
     }
 
     if (params === []) return defaultValue
@@ -46,18 +47,16 @@ function getUrlParams(parameter, defaultValue) {
     var indexes = [];
     parameter = parameter+'=';
     if (window.location.href.indexOf(parameter) > -1) {
-    var vars = getUrlVars();
-    for (var i=0; i<vars.length; i++) {
-        if (vars[parameter] == parameter)
-        indexes.push(vars[i]);
-    }
+	var vars = getUrlVars();
+	for (var i=0; i<vars.length; i++) {
+	    if (vars[parameter] == parameter)
+		indexes.push(vars[i]);
+	}
     } else
-    indexes.push(defaultValue);
+	indexes.push(defaultValue);
 
     return indexes;
 }
-
-import('/x/face/script.js');
 
 window.globals = {
     timeID: new Date().getTime() % 10000,
@@ -74,12 +73,13 @@ window.globals = {
     vioTopic: "/topic/vio/",
     lastMouseTarget: undefined,
     inAR: false,
+    vidconf: true,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
     onEnterXR: function (xrType) {
         if (xrType === 'ar') {
             this.isAR = true;
             //if (this.isWebXRViewer) {
-        if (true) {
+	    if (true) {
                 document.addEventListener("mousedown", function (e) {
                     if (window.globals.lastMouseTarget) {
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
@@ -144,6 +144,7 @@ if (globals.fixedCamera !== '') {
 globals.viveLName = "viveLeft_" + globals.idTag;  // e.g. viveLeft_9240_X
 globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
 
+import('/x/face/script.js');
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
@@ -151,11 +152,13 @@ AFRAME.registerComponent('pose-listener', {
     init: function () {
         // Set up the tick throttling.
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+        this.heartBeatCounter = 1;  // updates position every 1 sec.
+                                    // starts at 1 so camera doesnt immediately send a message at startup
     },
 
     tick: (function (t, dt) {
-        //  var newRotation = this.el.object3D.quaternion;
-        //  var newPosition = this.el.object3D.position;
+        //	var newRotation = this.el.object3D.quaternion;
+        //	var newPosition = this.el.object3D.position;
         const newPosition = new THREE.Vector3();
         const newRotation = new THREE.Quaternion();
         this.el.object3D.getWorldQuaternion(newRotation);
@@ -165,13 +168,14 @@ AFRAME.registerComponent('pose-listener', {
         const positionCoords = newPosition.x + ' ' + newPosition.y + ' ' + newPosition.z;
 
         const newPose = rotationCoords + " " + positionCoords;
-        if (this.lastPose !== newPose) {
+        if (this.lastPose !== newPose || this.heartBeatCounter % (1000/globals.updateMillis) == 0) {
             this.el.emit('poseChanged', Object.assign(newPosition, newRotation));
             this.lastPose = newPose;
 
-        // DEBUG
-        //debugConixText(newRotation);
+	    // DEBUG
+	    //debugConixText(newRotation);
         }
+        this.heartBeatCounter++;
     })
 });
 
@@ -200,7 +204,7 @@ AFRAME.registerComponent('vive-pose-listener', {
 
 AFRAME.registerComponent('pose-publisher', {
     init: function () {
-    // All this is to not publish initial pose
+	// All this is to not publish initial pose
         // const newRotation = this.el.object3D.quaternion;
         // const newPosition = this.el.object3D.position;
 
@@ -208,7 +212,7 @@ AFRAME.registerComponent('pose-publisher', {
         // const positionCoords = coordsToText(newPosition);
 
         // const newPose = rotationCoords + " " + positionCoords;
-    // this.lastPose = newPose;
+	// this.lastPose = newPose;
 
         // Set up the tick throttling.
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
@@ -224,21 +228,21 @@ AFRAME.registerComponent('pose-publisher', {
         const newPose = rotationCoords + " " + positionCoords;
         if (this.lastPose !== newPose) {
 //            this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
-        this.lastPose = newPose;
+	    this.lastPose = newPose;
 
-        console.log(".");
-        const objName = this.el.id;
-        publish(globals.outputTopic + objName, {
-            object_id: objName,
-            action: "update",
-        persist: false,
-            type: 'object',
-            data: {
-            source: globals.camName,
-                position: vec3ToObject(newPosition),
-                rotation: quatToObject(newRotation),
-            }
-        });
+	    console.log(".");
+	    const objName = this.el.id;
+	    publish(globals.outputTopic + objName, {
+	    	object_id: objName,
+	    	action: "update",
+		persist: false,
+	    	type: 'object',
+	    	data: {
+		    source: globals.camName,
+	    	    position: vec3ToObject(newPosition),
+	    	    rotation: quatToObject(newRotation),
+	    	}
+	    });
 
         }
     })
@@ -267,7 +271,7 @@ function debugRaw(debugMsg) {
 function eventAction(evt, eventName, myThis) {
     const newPosition = myThis.object3D.position;
     //this.emit('viveChanged', Object.assign(newPosition, newRotation));
-    //      const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+    //	    const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
     //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
 
     let coordsData = {
@@ -326,263 +330,263 @@ function rotToText(c) {
 // my crap, this returns strings, not numbers
 function setClickData(evt) {
     if (evt.detail.intersection)
-    return {
+	return {
             x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
             y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
             z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
-    }
+	}
     else {
-    console.log("WARN: empty coords data");
-    return {
-        x: 0,
-        y: 0,
-        z:0
-    }
+	console.log("WARN: empty coords data");
+	return {
+	    x: 0,
+	    y: 0,
+	    z:0
+	}
     }
 }
 
 
 AFRAME.registerComponent('impulse', {
     schema: {
-    on: {default: ''}, // event to listen 'on'
-    force: {
-        type: 'vec3',
-        default: { x: 1, y: 1, z: 1 }
-    },
-    position: {
-        type: 'vec3',
-        default: { x: 1, y: 1, z: 1 }
-    }
+	on: {default: ''}, // event to listen 'on'
+	force: {
+	    type: 'vec3',
+	    default: { x: 1, y: 1, z: 1 }
+	},
+	position: {
+	    type: 'vec3',
+	    default: { x: 1, y: 1, z: 1 }
+	}
     },
 
     multiple: true,
 
     init: function () {
-    var self = this;
+	var self = this;
     },
 
     update: function(oldData) {
-    // this in fact only gets called when the component that it is - gets updated
-    // unlike the update method in Unity that gets called every frame
-    var data = this.data; // Component property values.
-    var el = this.el;     // Reference to the component's entity.
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
 
-    if (data.on) { // we have an event?
-        el.addEventListener(data.on, function (args) {
+	if (data.on) { // we have an event?
+	    el.addEventListener(data.on, function (args) {
 
-        if (args.detail.clicker) { // our synthetic event from MQTT
+		if (args.detail.clicker) { // our synthetic event from MQTT
                     if (el.body) { // has physics = dynamic-body Component
-            // e.g. <a-entity impulse="on: mouseup; force: 1 50 1; position: 1 1 1" ...>
-            const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
-            const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
-            el.body.applyImpulse(force, pos);
+			// e.g. <a-entity impulse="on: mouseup; force: 1 50 1; position: 1 1 1" ...>
+			const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
+			const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
+			el.body.applyImpulse(force, pos);
                     }
-        }
+		}
 
-        });
-    } else {
-        // `event` not specified, just log the message.
-        console.log(data);
-    }
+	    });
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
     },
 
     pause: function () {
-    //this.removeEventListeners()
+	//this.removeEventListeners()
     },
     play: function () {
-    //this.addEventListeners()
+	//this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-    var data = this.data;
-    var el = this.el;
+	var data = this.data;
+	var el = this.el;
 
-    // remove event listener
-    if (data.event) {
-        el.removeEventListener(data.event, this.eventHandlerFn);
-    }
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
     }
 })
 
 // load new URL if clicked
 AFRAME.registerComponent('goto-url', {
     schema: {
-    on: {default: ''}, // event to listen 'on'
-    url: {default: ''} // http:// style url
+	on: {default: ''}, // event to listen 'on'
+	url: {default: ''} // http:// style url
     },
 
     multiple: true,
 
     init: function () {
-    var self = this;
+	var self = this;
     },
 
     update: function(oldData) {
-    // this in fact only gets called when the component that it is - gets updated
-    // unlike the update method in Unity that gets called every frame
-    var data = this.data; // Component property values.
-    var el = this.el;     // Reference to the component's entity.
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
 
-    if (data.on) { // we have an event?
-        el.addEventListener(data.on, function (args) {
-        console.log("goto-url url=" + data.url);
-        window.location.href = data.theUrl;
-        });
-    } else {
-        // `event` not specified, just log the message.
-        console.log(data);
-    }
+	if (data.on) { // we have an event?
+	    el.addEventListener(data.on, function (args) {
+		console.log("goto-url url=" + data.url);
+		window.location.href = data.theUrl;
+	    });
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
     },
 
     pause: function () {
-    //this.removeEventListeners()
+	//this.removeEventListeners()
     },
     play: function () {
-    //this.addEventListeners()
+	//this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-    var data = this.data;
-    var el = this.el;
+	var data = this.data;
+	var el = this.el;
 
-    // remove event listener
-    if (data.event) {
-        el.removeEventListener(data.event, this.eventHandlerFn);
-    }
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
     }
 })
 
 // load new URL if clicked
 AFRAME.registerComponent('prompt-box', {
     schema: {
-    on: {default: ''}, // event to listen 'on'
-    prompt: {default: ''} // http:// style url
+	on: {default: ''}, // event to listen 'on'
+	prompt: {default: ''} // http:// style url
     },
 
     multiple: true,
 
     init: function () {
-    var self = this;
+	var self = this;
     },
 
     update: function(oldData) {
-    // this in fact only gets called when the component that it is - gets updated
-    // unlike the update method in Unity that gets called every frame
-    var data = this.data; // Component property values.
-    var el = this.el;     // Reference to the component's entity.
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
 
-    if (data.on) { // we have an event?
-        console.log("adding prompt event listener");
-        el.addEventListener(data.on, function (evt) {
-        if (!evt.detail.clicker) { // local event, not from MQTT
-            console.log("called prompt listener");
-            var person = prompt(data.prompt, "");
-            var txt="";
-            if (person == null || person == "") {
-            txt = "";
-            } else {
-            txt = person;
-            }
-            const coordsData = setCoordsData(evt);
-            const thisMsg = {
-            object_id: this.id,
-            action: "clientEvent",
-            type: "prompt-data",
-            data: {text: txt, source: this.id, position: coordsData}
-            };
-            publish(globals.outputTopic + this.id, thisMsg);
+	if (data.on) { // we have an event?
+	    console.log("adding prompt event listener");
+	    el.addEventListener(data.on, function (evt) {
+		if (!evt.detail.clicker) { // local event, not from MQTT
+		    console.log("called prompt listener");
+		    var person = prompt(data.prompt, "");
+		    var txt="";
+		    if (person == null || person == "") {
+			txt = "";
+		    } else {
+			txt = person;
+		    }
+		    const coordsData = setCoordsData(evt);
+		    const thisMsg = {
+			object_id: this.id,
+			action: "clientEvent",
+			type: "prompt-data",
+			data: {text: txt, source: this.id, position: coordsData}
+		    };
+		    publish(globals.outputTopic + this.id, thisMsg);
 
-            console.log("prompt-box data: " + txt);
-        }
-        });
-    } else {
-        // `event` not specified, just log the message.
-        console.log(data);
-    }
+		    console.log("prompt-box data: " + txt);
+		}
+	    });
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
     },
 
     pause: function () {
-    //this.removeEventListeners()
+	//this.removeEventListeners()
     },
     play: function () {
-    //this.addEventListeners()
+	//this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-    var data = this.data;
-    var el = this.el;
+	var data = this.data;
+	var el = this.el;
 
-    // remove event listener
-    if (data.event) {
-        el.removeEventListener(data.event, this.eventHandlerFn);
-    }
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
     }
 })
 
 // load scene from persistence db
 AFRAME.registerComponent('load-scene', {
     schema: {
-    on: {default: ''}, // event to listen 'on'
-    url: {default: ''}, // http:// style url
-    position: {
-        type: 'vec3',
-        default: { x: 0, y: 0, z: 0 }
-    },
-    rotation: {
-        type: 'vec4',
-        default: { x: 0, y: 0, z: 0, w: 1 }
-    }
+	on: {default: ''}, // event to listen 'on'
+	url: {default: ''}, // http:// style url
+	position: {
+	    type: 'vec3',
+	    default: { x: 0, y: 0, z: 0 }
+	},
+	rotation: {
+	    type: 'vec4',
+	    default: { x: 0, y: 0, z: 0, w: 1 }
+	}
     },
 
     multiple: true,
 
     init: function () {
-    var self = this;
+	var self = this;
     },
 
     update: function(oldData) {
-    // this in fact only gets called when the component that it is - gets updated
-    // unlike the update method in Unity that gets called every frame
-    var data = this.data; // Component property values.
-    var el = this.el;     // Reference to the component's entity.
+	// this in fact only gets called when the component that it is - gets updated
+	// unlike the update method in Unity that gets called every frame
+	var data = this.data; // Component property values.
+	var el = this.el;     // Reference to the component's entity.
 
-    if (data.on) { // we have an event?
-        el.addEventListener(data.on, function (evt) {
-        if ('cursorEl' in evt.detail) {
-            // internal click event, our scene only
-        } else {
-            // MQTT click event that everyone gets
-            console.log("load-scene url=" + data.url);
-            if (!this.loaded) {
-            loadArena(data.url, data.position, data.rotation);
-            this.loaded = true;
-            } else {
-            unloadArena(data.url);
-            this.loaded = false;
-            }
-        }
-        })
-    } else {
-        // `event` not specified, just log the message.
-        console.log(data);
-    }
+	if (data.on) { // we have an event?
+	    el.addEventListener(data.on, function (evt) {
+		if ('cursorEl' in evt.detail) {
+		    // internal click event, our scene only
+		} else {
+		    // MQTT click event that everyone gets
+		    console.log("load-scene url=" + data.url);
+		    if (!this.loaded) {
+			loadArena(data.url, data.position, data.rotation);
+			this.loaded = true;
+		    } else {
+			unloadArena(data.url);
+			this.loaded = false;
+		    }
+		}
+	    })
+	} else {
+	    // `event` not specified, just log the message.
+	    console.log(data);
+	}
     },
 
     pause: function () {
-    //this.removeEventListeners()
+	//this.removeEventListeners()
     },
     play: function () {
-    //this.addEventListeners()
+	//this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
     remove: function () {
-    var data = this.data;
-    var el = this.el;
+	var data = this.data;
+	var el = this.el;
 
-    // remove event listener
-    if (data.event) {
-        el.removeEventListener(data.event, this.eventHandlerFn);
-    }
+	// remove event listener
+	if (data.event) {
+	    el.removeEventListener(data.event, this.eventHandlerFn);
+	}
     }
 })
 
@@ -590,18 +594,18 @@ AFRAME.registerComponent('load-scene', {
 
 AFRAME.registerComponent('collision-listener', {
     init: function () {
-    //console.log("collision-listener Component init");
+	//console.log("collision-listener Component init");
         this.el.addEventListener('collide', function (evt) {
 
             //const coordsData = setClickData(evt);
             const coordsData = {
-        x: 0,
-        y: 0,
-        z: 0
-        };
-        // colliding object
-        const collider = evt.detail.body.el.id;
-        const collideee = this.id;
+		x: 0,
+		y: 0,
+		z: 0
+	    };
+	    // colliding object
+	    const collider = evt.detail.body.el.id;
+	    const collideee = this.id;
 
             // original click event; simply publish to MQTT
             const thisMsg = {
@@ -621,8 +625,8 @@ AFRAME.registerComponent('collision-listener', {
 
 AFRAME.registerComponent('click-listener', {
     init: function () {
-    //console.log("click-listener Component init");
-    //console.log("mousedown init");
+	//console.log("click-listener Component init");
+	//console.log("mousedown init");
         this.el.addEventListener('mousedown', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -648,15 +652,15 @@ AFRAME.registerComponent('click-listener', {
                 }
                 const clicker = evt.detail.clicker;
 
-        /* Debug Conix Box
+		/* Debug Conix Box
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-        */
+		*/
             }
         });
 
-    //console.log("mouseup init");
+	//console.log("mouseup init");
         this.el.addEventListener('mouseup', function (evt) {
 
             const coordsData = setClickData(evt);
@@ -679,24 +683,24 @@ AFRAME.registerComponent('click-listener', {
             } else {
 
                 // do the event handling for MQTT event; this is just an example
-                //      this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
+                //		this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
                 // this example pushes the object with 50 in the +Y direction
                 // mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
 
-        /*
+		/*
                     if (this.body) { // has physics
-            const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
-            const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
-            this.body.applyImpulse(foo, bod);
+			const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
+			const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
+			this.body.applyImpulse(foo, bod);
                     }
-        */
+		*/
 
-        /* DEBUG Conix box text
+		/* DEBUG Conix box text
                 const clicker = evt.detail.clicker;
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-        */
+		*/
             }
         });
 
@@ -719,13 +723,13 @@ AFRAME.registerComponent('click-listener', {
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
 
-        /* Debug Conix box text
+		/* Debug Conix box text
                 const clicker = evt.detail.clicker;
 
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-        */
+		*/
             }
         });
 
@@ -748,13 +752,13 @@ AFRAME.registerComponent('click-listener', {
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
 
-        /* DEBUG Conix box text
+		/* DEBUG Conix box text
                 const clicker = evt.detail.clicker;
 
                 const sceney = this.sceneEl;
                 const textEl = sceney.querySelector('#conix-text');
                 textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-        */
+		*/
             }
         });
     }
@@ -802,12 +806,12 @@ AFRAME.registerComponent('click-toggle', {
       toggled: { type: 'boolean', default: false}
     },
     init: function () {
-    var self = this;
-    var el = this.el;
-    var data = this.data;
+	var self = this;
+	var el = this.el;
+	var data = this.data;
 
         el.addEventListener('mousedown', function (evt) {
-        var dummy = 1
+	    var dummy = 1
             el.setAttribute('click-toggle', { 'toggled': !data.toggled});
         });
     },
@@ -902,10 +906,10 @@ AFRAME.registerComponent('points', {
                     el.setObject3D('points', mesh);
                     el.removeObject3D('mesh');
 
-//          object.traverse(function (node) {
-//          if (node.isMesh)
-//              node.material.wireframe = data.toggled;
-//          });
+//		    object.traverse(function (node) {
+//			if (node.isMesh)
+//			    node.material.wireframe = data.toggled;
+//		    });
                 }
 
                 el.setAttribute('points', {'toggled': !data.toggled});
@@ -924,170 +928,12 @@ AFRAME.registerComponent('pointed', {
         const material = this.material;
 
         if (object) {
-
             let geometry = object.geometry.clone()
             let material = new THREE.PointsMaterial({color: 0xFFFFFF, size: 0.01})
             let mesh = new THREE.Points(geometry, material)
             el.setObject3D('pointed', mesh);
             el.removeObject3D('mesh');
         }
-    },
-});
-
-AFRAME.registerComponent('videoconf-mic', {
-    dependencies: ['material'],
-    schema: {
-        microphone_toggled: {type: 'boolean', default: true},
-    },
-
-    init: function () {
-        var self = this;
-        var el = this.el;
-        var data = this.data;
-        //const object = this.el.getObject3D('mesh');
-        const material = this.material;
-
-    //default: ON
-    // assumes the object this is attached to has a material.src
-        el.setAttribute('material', 'src', 'images/icons/roundedaudio.png');
-
-        el.addEventListener('mousedown', function (evt) {
-
-        if (jitsiAudioTrack) {
-        if (!evt.detail.clicker) { // local browser generated event
-
-            var toggled = !data.microphone_toggled;
-            // microphone
-                    el.setAttribute('videoconf-mic', {'microphone_toggled': toggled}); // this toggles 'toggled'!
-            if (toggled) {
-            jitsiAudioTrack.unmute();
-            el.setAttribute('material', 'src', 'images/icons/roundedaudio.png');
-            }
-            else {
-            jitsiAudioTrack.mute();
-            el.setAttribute('material', 'src', 'images/icons/slashroundedaudio.png');
-            }
-        }
-        }
-        });
-    },
-});
-
-AFRAME.registerComponent('videoconf-cam', {
-    dependencies: ['material'],
-    schema: {
-        video_toggled: {type: 'boolean', default: true}
-    },
-
-    init: function () {
-        var self = this;
-        var el = this.el;
-        var data = this.data;
-        //const object = this.el.getObject3D('mesh');
-        const material = this.material;
-
-    //default: ON
-    // assumes the object this is attached to has a material.src
-        el.setAttribute('material', 'src', 'images/icons/roundedvideo.png');
-
-        el.addEventListener('mousedown', function (evt) {
-
-            if (!evt.detail.clicker) { // local browser generated event
-
-        if (jitsiVideoTrack) {
-            var toggled = !data.video_toggled;
-            // camera
-                    el.setAttribute('videoconf-cam', {'video_toggled': toggled}); // this toggles 'toggled'!
-            if (toggled) {
-            jitsiVideoTrack.unmute();
-            el.setAttribute('material', 'src', 'images/icons/roundedvideo.png');
-            }
-            else {
-            jitsiVideoTrack.mute();
-            el.setAttribute('material', 'src', 'images/icons/slashroundedvideo.png');
-            }
-        }
-            }
-        });
-    },
-});
-
-AFRAME.registerComponent('face-tracker', {
-    dependencies: ['material'],
-    schema: {
-        tracker_toggled: {type: 'boolean', default: true}
-    },
-
-    init: function () {
-        var self = this;
-        var el = this.el;
-        var data = this.data;
-        //const object = this.el.getObject3D('mesh');
-        const material = this.material;
-
-    //default: ON
-    // assumes the object this is attached to has a material.src
-//  trackFaceOn();
-        el.setAttribute('material', 'src', 'images/icons/roundedavatar.png');
-
-        el.addEventListener('mousedown', function (evt) {
-
-            if (!evt.detail.clicker) { // local browser generated event
-
-        if (true) {
-            var toggled = !data.tracker_toggled;
-            // camera
-                    el.setAttribute('face-tracker', {'tracker_toggled': toggled}); // this toggles 'toggled'!
-            if (toggled) {
-            // turn on face tracker
-//          trackFaceOn();
-            el.setAttribute('material', 'src', 'images/icons/roundedavatar.png');
-            }
-            else {
-            // turn off face tracker
-//          trackFAceOff();
-            el.setAttribute('material', 'src', 'images/icons/slashroundedavatar.png');
-            }
-        }
-            }
-        });
-    },
-});
-
-AFRAME.registerComponent('settings-button', {
-    dependencies: ['material'],
-    schema: {
-        settings_toggled: {type: 'boolean', default: true}
-    },
-
-    init: function () {
-        var self = this;
-        var el = this.el;
-        var data = this.data;
-        //const object = this.el.getObject3D('mesh');
-        const material = this.material;
-
-    //default: ON
-    // assumes the object this is attached to has a material.src
-        el.setAttribute('material', 'src', 'images/icons/roundedsettings.png');
-
-        el.addEventListener('mousedown', function (evt) {
-
-            if (!evt.detail.clicker) { // local browser generated event
-
-        if (true) {
-            var toggled = !data.settings_toggled;
-            // camera
-                    el.setAttribute('settings-button', {'settings_toggled': toggled}); // this toggles 'toggled'!
-            if (toggled) {
-            el.setAttribute('material', 'src', 'images/icons/roundedsettings.png');
-            }
-            else {
-            el.setAttribute('material', 'src', 'images/icons/slashroundedsettings.png');
-            }
-        }
-            }
-        });
     },
 });
 
@@ -1101,26 +947,79 @@ AFRAME.registerComponent('modify-materials', {
 
         var texture = THREE.ImageUtils.loadTexture(this.data.url);
 
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set( 0.5, 0.5 );
-    texture.offset.set( 4, 4 );
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set( 0.5, 0.5 );
+	texture.offset.set( 4, 4 );
 
-    //texture.repeat.x = 1;
-    //texture.repeat.y = 1;
+	//texture.repeat.x = 1;
+	//texture.repeat.y = 1;
 
-    // Wait for model to load.
-    this.el.addEventListener('model-loaded', () => {
+	// Wait for model to load.
+	this.el.addEventListener('model-loaded', () => {
             // Grab the mesh / scene.
             const obj = this.el.getObject3D('mesh');
             // Go over the submeshes and modify materials we want.
             obj.traverse(node => {
-        node.material = new THREE.MeshLambertMaterial(
-            {
-            map: texture,
-//          needsUpdate: true
-            });;
-        })
-    })
+		node.material = new THREE.MeshLambertMaterial(
+		    {
+			map: texture,
+//			needsUpdate: true
+		    });;
+	    })
+	})
     },
+})
+
+
+// TODO: fix this. kinda hacky to have this as global var, but this.longTouch doesnt seem to work...
+window.longTouch = false;
+AFRAME.registerComponent("touch-controls", {
+    init: function() {
+        this.timer = null;
+        this.drag = false;
+        this.baz = "hello"
+        this.camera = globals.sceneObjects.myCamera;
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+        window.addEventListener("touchstart", this.touchstart);
+        window.addEventListener("touchend", this.touchend);
+        window.addEventListener("touchmove", this.touchmove);
+    },
+    touchstart: function (evt) {
+        this.baz = "bye"
+        evt.preventDefault();
+        if (!this.timer) {
+            this.timer = window.setTimeout(() => {
+                window.longTouch = true;
+            }, 500);
+        }
+    },
+    touchend: function () {
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
+        window.longTouch = false;
+        this.drag = false;
+    },
+    touchmove: function(evt) {
+        this.drag = true;
+    },
+    tick: (function (t, dt) {
+        if (window.longTouch) {
+            this.timer = null;
+            if (!this.drag) {
+                const SPEED = 0.3;
+                let eulerRot = this.camera.getAttribute("rotation");
+                let dx = SPEED * Math.cos(eulerRot.y * Math.PI / 180);
+                let dy = SPEED * Math.sin(eulerRot.y * Math.PI / 180);
+                let dz = SPEED * Math.sin(eulerRot.x * Math.PI / 180);
+                let newPosition = this.camera.getAttribute("position");
+                newPosition.x -= dy; // subtract b/c negative is forward
+                newPosition.z -= dx;
+                newPosition.y += dz;
+                this.camera.setAttribute("position", newPosition);
+            }
+        }
+    })
 })
