@@ -28,8 +28,7 @@ const loadArena = (urlToLoad, position, rotation) => {
                 if (obj.attributes.parent) {
                     deferredObjects.push(obj);
                     Parents[obj.attributes.parent] = obj.attributes.parent;
-                }
-                else {
+                } else {
                     let msg = {
                         object_id: obj.object_id,
                         action: 'create',
@@ -107,7 +106,10 @@ mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
 // Last Will and Testament message sent to subscribers if this client loses connection
-const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: globals.camName, action: "delete"}));
+const lwt = new Paho.MQTT.Message(JSON.stringify({
+    object_id: globals.camName,
+    action: "delete"
+}));
 lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
@@ -188,11 +190,20 @@ function onConnect() {
         // ttl: 3000,
         data: {
             object_type: 'camera',
-            position: {x: thex, y: they, z: thez},
-            rotation: {x: 0, y: 0, z: 0, w: 0},
+            position: {
+                x: thex,
+                y: they,
+                z: thez
+            },
+            rotation: {
+                x: 0,
+                y: 0,
+                z: 0,
+                w: 0
+            },
             color: color
         },
-//	user_agent: navigator.userAgent
+        //  user_agent: navigator.userAgent
     };
     console.log(navigator.userAgent);
 
@@ -203,7 +214,7 @@ function onConnect() {
     sceneObjects.myCamera.setAttribute('position', globals.startCoords);
 
     sceneObjects.myCamera.addEventListener('vioChanged', e => {
-//        console.log("vioChanged", e.detail);
+        //        console.log("vioChanged", e.detail);
 
         if (globals.fixedCamera !== '') {
             let msg = {
@@ -231,12 +242,12 @@ function onConnect() {
     });
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
-    // console.log("poseChanged", e.detail);
+        // console.log("poseChanged", e.detail);
 
         let msg = {
             object_id: globals.camName,
-    	    jitsiId: globals.jitsiId,
-    	    hasVideo: globals.hasVideo,
+            jitsiId: globals.jitsiId,
+            hasVideo: globals.hasVideo,
             // hasAudio: globals.hasAudio,
             // activeSpeaker: globals.activeSpeaker,
             action: 'create',
@@ -245,7 +256,7 @@ function onConnect() {
                 object_type: 'camera',
                 position: {
                     x: parseFloat(e.detail.x.toFixed(3)),
-		            y: parseFloat(e.detail.y.toFixed(3)),
+                    y: parseFloat(e.detail.y.toFixed(3)),
                     z: parseFloat(e.detail.z.toFixed(3)),
                 },
                 rotation: {
@@ -343,7 +354,9 @@ function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-    mqttClient.connect({onSuccess: onConnect});
+    mqttClient.connect({
+        onSuccess: onConnect
+    });
 }
 
 const publish_retained = (dest, msg) => {
@@ -383,47 +396,47 @@ function isJson(str) {
 }
 
 function drawVideoCube(entityEl, slot, audioStream) {
-    var theslot = "#box"+(slot).toString();
+    var theslot = "#box" + (slot).toString();
     //console.log("theslot: " + theslot);
 
     // attach video to head
     const videoCube = document.createElement('a-box');
-    videoCube.setAttribute('id',       "videoCube"+theslot);
+    videoCube.setAttribute('id', "videoCube" + theslot);
     videoCube.setAttribute('position', '0 0 0');
-    videoCube.setAttribute('scale',    '0.8 0.6 0.8');
+    videoCube.setAttribute('scale', '0.8 0.6 0.8');
     videoCube.setAttribute('material', 'shader', 'flat');
-//    videoCube.setAttribute('multisrc', "src4:"+theslot); // horrible bug crashes ARENA - why?!
+    //    videoCube.setAttribute('multisrc', "src4:"+theslot); // horrible bug crashes ARENA - why?!
     videoCube.setAttribute('src', theslot); // video only (!audio)
 
     const videoCube2 = document.createElement('a-box');
-    videoCube2.setAttribute('id',       "videoCube2"+theslot);
+    videoCube2.setAttribute('id', "videoCube2" + theslot);
     videoCube2.setAttribute('position', '0 0 0.01');
-    videoCube2.setAttribute('scale',    '0.81 0.61 0.8');
+    videoCube2.setAttribute('scale', '0.81 0.61 0.8');
     videoCube2.setAttribute('material', 'shader', 'flat');
     videoCube2.setAttribute("transparent", "true");
     videoCube2.setAttribute('color', 'black');
     videoCube2.setAttribute("opacity", "0.8");
 
     let sceneEl = globals.sceneObjects.scene;
-//    if (sceneEl.audioListener)
-//	console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
+    //    if (sceneEl.audioListener)
+    //  console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
 
     let listener = null;
     if (sceneEl.audioListener) {
-    	console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
-    	listener = sceneEl.audioListener;
+        console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
+        listener = sceneEl.audioListener;
     } else {
-    	listener = new THREE.AudioListener();
-    	console.log("NEW HEAD AUDIO LISTENER:", listener);
-    	let camEl = globals.sceneObjects.myCamera.object3D;
-    	console.log("children:", camEl.children);
-    	camEl.add(listener);
-    	globals.audioListener = listener;
-    	sceneEl.audioListener = listener;
+        listener = new THREE.AudioListener();
+        console.log("NEW HEAD AUDIO LISTENER:", listener);
+        let camEl = globals.sceneObjects.myCamera.object3D;
+        console.log("children:", camEl.children);
+        camEl.add(listener);
+        globals.audioListener = listener;
+        sceneEl.audioListener = listener;
     }
 
-//    var listener = sceneEl.audioListener || new THREE.AudioListener();
-//    sceneEl.audioListener = listener;
+    //    var listener = sceneEl.audioListener || new THREE.AudioListener();
+    //    sceneEl.audioListener = listener;
 
     let audioSource = new THREE.PositionalAudio(listener);
     audioSource.setMediaStreamSource(audioStream);
@@ -442,10 +455,10 @@ function highlightVideoCube(entityEl, oldEl, slot) {
 
     // var videoCube = document.querySelector("#videoWallHighlightBox");
     // if (!videoCube) {
-    // 	videoCube = document.createElement('a-box');
-    // 	videoCube.setAttribute('scale', '1 0.8 0.05');
+    //  videoCube = document.createElement('a-box');
+    //  videoCube.setAttribute('scale', '1 0.8 0.05');
     //     videoCube.setAttribute('color', "green");
-    // 	videoCube.setAttribute('id', "videoWallHighlightBox");
+    //  videoCube.setAttribute('id', "videoWallHighlightBox");
     //     videoCube.setAttribute('material', 'shader', 'flat');
     //     globals.sceneObjects.scene.appendChild(videoCube);
     // }
@@ -458,19 +471,19 @@ function highlightVideoCube(entityEl, oldEl, slot) {
     // entityEl is the head
     var videoHat = document.querySelector("#videoHatHighlightBox");
     if (!videoHat) {
-    	videoHat = document.createElement('a-box');
-    	videoHat.setAttribute('scale', '0.8 0.05 0.8');
+        videoHat = document.createElement('a-box');
+        videoHat.setAttribute('scale', '0.8 0.05 0.8');
         videoHat.setAttribute('color', "green");
-    	videoHat.setAttribute('position', '0 0.325 0');
+        videoHat.setAttribute('position', '0 0.325 0');
         videoHat.setAttribute('material', 'shader', 'flat');
-    	videoHat.setAttribute('id', "videoHatHighlightBox");
+        videoHat.setAttribute('id', "videoHatHighlightBox");
         // globals.sceneObjects.scene.appendChild(videoCube);
     }
     // remove old
     if (oldEl) {
-    	var parentEl = videoHat.parentEl;
-    	if (parentEl) {
-    	    parentEl.removeChild(videoHat);
+        var parentEl = videoHat.parentEl;
+        if (parentEl) {
+            parentEl.removeChild(videoHat);
         }
     }
     // add new
@@ -489,7 +502,7 @@ function onMessageArrived(message, jsonMessage) {
     } else if (jsonMessage) {
         theMessage = jsonMessage;
     }
-//    console.log(theMessage.object_id);
+    //    console.log(theMessage.object_id);
 
     switch (theMessage.action) { // clientEvent, create, delete, update
         case "clientEvent": {
@@ -503,37 +516,37 @@ function onMessageArrived(message, jsonMessage) {
                 console.log("Error: theMessage.data.position not defined", theMessage);
             const clicker = theMessage.data.source;
 
-		if (entityEl == undefined) {
-		    console.log(message.payloadString);
-		    return;
-		}
+            if (entityEl == undefined) {
+                console.log(message.payloadString);
+                return;
+            }
 
             switch (theMessage.type) {
                 case "collision":
-                // emit a synthetic click event with ugly data syntax
+                    // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mousedown', {
-                        "clicker": clicker, intersection:
-                            {
-                                point: myPoint
-                            }
+                        "clicker": clicker,
+                        intersection: {
+                            point: myPoint
+                        }
                     }, false);
                     break;
                 case "mousedown":
                     // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mousedown', {
-                        "clicker": clicker, intersection:
-                            {
-                                point: myPoint
-                            }
+                        "clicker": clicker,
+                        intersection: {
+                            point: myPoint
+                        }
                     }, false);
                     break;
                 case "mouseup":
                     // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mouseup', {
-                        "clicker": clicker, intersection:
-                            {
-                                point: myPoint
-                            }
+                        "clicker": clicker,
+                        intersection: {
+                            point: myPoint
+                        }
                     }, false);
                     break;
                 default: // handle others here like mouseenter / mouseleave
@@ -671,7 +684,7 @@ function onMessageArrived(message, jsonMessage) {
                     headModelEl.object3D.scale.set(1, 1, 1);
                     headModelEl.setAttribute('dynamic-body', "type", "static");
 
-                    headModelEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
+                    headModelEl.setAttribute("gltf-model", "url(models/Head.gltf)"); // actually a face mesh
 
                     // place a colored text above the head
                     const headtext = document.createElement('a-text');
@@ -721,76 +734,75 @@ function onMessageArrived(message, jsonMessage) {
             }
 
             switch (type) {
-            case "light":
-                entityEl.setAttribute('light', 'type', 'ambient');
-                // does this work for light a-entities ?
-                entityEl.setAttribute('light', 'color', color);
-                break;
+                case "light":
+                    entityEl.setAttribute('light', 'type', 'ambient');
+                    // does this work for light a-entities ?
+                    entityEl.setAttribute('light', 'color', color);
+                    break;
 
-	    case "videoconf":
-		// handle changes to other users audio/video status
-		console.log("got videoconf");
+                case "videoconf":
+                    // handle changes to other users audio/video status
+                    console.log("got videoconf");
 
-		if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
-		    // possibly change active speaker
+                    if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
+                        // possibly change active speaker
 
-		    let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-		    //console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
+                        let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+                        //console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
 
-		    if (globals.activeSpeaker != globals.previousSpeakerId) {
-			highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
-			globals.previousSpeakerId = theMessage.jitsiId;
-			globals.previousSpeakerEl = entityEl;
-		    }
+                        if (globals.activeSpeaker != globals.previousSpeakerId) {
+                            highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
+                            globals.previousSpeakerId = theMessage.jitsiId;
+                            globals.previousSpeakerEl = entityEl;
+                        }
+                    }
 
-		}
+                    return;
+                    break;
 
-		return;
-		break;
+                case "camera":
+                    // decide if we need draw or delete videoBox around head
+                    // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
 
-            case "camera":
-		// decide if we need draw or delete videoBox around head
-		//console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
+                    if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
+                        if (!entityEl.hasAttribute('videoCubeDrawn')) {
+                            // console.log("draw videoCube: " + theMessage.jitsiId);
 
-		if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
-		    if (!entityEl.hasAttribute('videoCubeDrawn')) {
-//			console.log("draw videoCube: " + theMessage.jitsiId);
+                            // call function in jitsi-arena.js
+                            let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+                            if (slot == -1) {
+                                console.log("not a caller (yet)");
+                                return;
+                            }
 
-			// call function in jitsi-arena.js
-			let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-			if (slot == -1) {
-			    console.log("not a caller (yet)");
-			    return;
-			}
+                            if (theMessage.jitsiId == "") {
+                                console.log("jitsiId empty");
+                                break; // other-person has no camera ... yet
+                            }
+                            // assume jitsi remoteTracks[0] is audio and [1] video
+                            let audioStream = new MediaStream();
+                            audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
 
-			if (theMessage.jitsiId == "") {
-			    console.log("jitsiId empty");
-			    break; // other-person has no camera ... yet
-			}
-			// assume jitsi remoteTracks[0] is audio and [1] video
-			let audioStream = new MediaStream();
-			audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
+                            // console.log("slot ", slot, "ID ", theMessage.jitsiId);
+                            // console.log("SLOT: " + slot);
 
-//			console.log("slot ", slot, "ID ", theMessage.jitsiId);
-//			console.log("SLOT: " + slot);
+                            drawVideoCube(entityEl, slot, audioStream);
+                            entityEl.setAttribute('videoCubeDrawn', true);
+                        }
+                        // else {
+                        //  // possibly change active speaker
 
-			drawVideoCube(entityEl, slot, audioStream);
-			entityEl.setAttribute('videoCubeDrawn', true);
-		    }
-		    // else {
-		    // 	// possibly change active speaker
+                        //  let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+                        //  //console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
 
-		    // 	let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-		    // 	//console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
-
-		    // 	if (globals.activeSpeaker != globals.previousSpeakerId) {
-		    // 	    highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
-		    // 	    globals.previousSpeakerId = theMessage.jitsiId;
-		    // 	    globals.previousSpeakerEl = entityEl;
-		    // 	}
-		    // }
-		}
-                break;
+                        //  if (globals.activeSpeaker != globals.previousSpeakerId) {
+                        //      highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
+                        //      globals.previousSpeakerId = theMessage.jitsiId;
+                        //      globals.previousSpeakerEl = entityEl;
+                        //  }
+                        // }
+                    }
+                    break;
 
                 case "viveLeft":
                     break;
@@ -853,16 +865,16 @@ function onMessageArrived(message, jsonMessage) {
             }
 
             // what remains are attributes for special cases; iteratively set them
-// BUG
-//            for (const [attribute, value] of Object.entries(theMessage.data)) {
-                //console.log("setting attr", attribute);
-//                entityEl.setAttribute(attribute, value);
-//            }
-	    const thing = Object.entries(theMessage.data);
-	    const len = thing.length;
-            for (let i = 0; i <  len; i++) {
-		const theattr = thing[i][0]; // attribute
-		const thevalue = thing[i][1]; // value
+            // BUG
+            //            for (const [attribute, value] of Object.entries(theMessage.data)) {
+            //console.log("setting attr", attribute);
+            //                entityEl.setAttribute(attribute, value);
+            //            }
+            const thing = Object.entries(theMessage.data);
+            const len = thing.length;
+            for (let i = 0; i < len; i++) {
+                const theattr = thing[i][0]; // attribute
+                const thevalue = thing[i][1]; // value
                 entityEl.setAttribute(theattr, thevalue);
             }
 

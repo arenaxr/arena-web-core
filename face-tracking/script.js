@@ -28,7 +28,8 @@ window.trackFaceOn = function() {
 }
 
 window.trackFaceOff = function() {
-    if (!window.faceDetector || !window.faceDetector.ready) return;
+    if (!window.faceDetector || !window.faceDetector.ready ||
+        !window.overlayCanv || !window.videoCanv || !window.videoElem) return;
     trackFace = false;
 
     if (window.overlayCanv && !overlayOff) {
