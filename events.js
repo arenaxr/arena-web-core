@@ -99,6 +99,7 @@ window.globals = {
     fixedCamera: getUrlParam('fixedCamera', ''),
     ATLASurl: getUrlParam('ATLASurl', '//atlas.conix.io'),
     vioTopic: "/topic/vio/",
+    graphTopic: "$GRAPH/latency",
     lastMouseTarget: undefined,
     inAR: false,
     vidconf: true,
@@ -245,8 +246,7 @@ AFRAME.registerComponent('pose-listener', {
     init: function () {
         // Set up the tick throttling.
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
-        this.heartBeatCounter = 1;  // updates position every 1 sec.
-                                    // starts at 1 so camera doesnt immediately send a message at startup
+        this.heartBeatCounter = 1;
     },
 
     tick: (function (t, dt) {
@@ -266,6 +266,8 @@ AFRAME.registerComponent('pose-listener', {
         const positionCoords = coordsToText(globals.newPosition);
 
         const newPose = rotationCoords + " " + positionCoords;
+
+        // update position every 1 sec
         if (this.lastPose !== newPose|| this.heartBeatCounter % (1000/globals.updateMillis) == 0) {
             this.el.emit('poseChanged', Object.assign(globals.newPosition, globals.newRotation));
             this.el.emit('vioChanged', Object.assign(globals.vioPosition, globals.vioRotation));
@@ -1106,5 +1108,19 @@ AFRAME.registerComponent("press-and-move", {
                 globals.sceneObjects.myCamera.setAttribute("position", newPosition);
             }
         }
+    })
+})
+
+// publish with qos of 2 for network graph to update latency
+// updates every 10s
+AFRAME.registerComponent("network-latency", {
+    init: function() {
+        this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this);
+    },
+    tick: (function (t, dt) {
+        let message = new Paho.MQTT.Message("");
+        message.destinationName = globals.graphTopic;
+        message.qos = 2;
+        mqttClient.send(message);
     })
 })
