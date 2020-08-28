@@ -237,7 +237,7 @@ var ViveRcamParent = new THREE.Matrix4();
 var ViveRcam = new THREE.Matrix4();
 var ViveRcpi = new THREE.Matrix4();
 
-importScript('/x/face/script.js');
+importScript('/face-tracking/script.js');
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,

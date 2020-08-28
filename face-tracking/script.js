@@ -343,7 +343,7 @@ async function init() {
 
     trackFace = !!urlParams.get("trackFace");
     if (!mobileOrTablet() && (trackFace || globals.vidconf)) {
-        const FaceDetector = Comlink.wrap(new Worker("/x/face/faceDetector.js"));
+        const FaceDetector = Comlink.wrap(new Worker("/face-tracking/faceDetector.js"));
 
         flipped = !!urlParams.get("flipped");
         debugFace = !!urlParams.get("debugFace");
