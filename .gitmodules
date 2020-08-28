@@ -1,3 +1,16 @@
 [submodule "aframe"]
 	path = aframe
-	url = git@github.com:aframevr/aframe.git
+	url = https://github.com/conix-center/aframe
+[submodule "apriltag/emscripten/apriltag"]
+	path = apriltag/emscripten/apriltag
+	url = https://github.com/AprilRobotics/apriltag.git
+[submodule "face-tracking/dlib"]
+	path = face-tracking/dlib
+	url = https://github.com/davisking/dlib.git
+[submodule "face-tracking/opencv"]
+	path = face-tracking/opencv
+	url = https://github.com/opencv/opencv.git
+[submodule "face-tracking/zlib"]
+	path = face-tracking/zlib
+	url = https://github.com/madler/zlib
+

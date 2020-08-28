@@ -1,13 +1,19 @@
 'use strict';
 
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-const client = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
+window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
 
-const loadArena = () => {
+// loads scene objects from specified persistence URL if specified,
+// or globals.persistenceUrl if not
+const loadArena = (urlToLoad, position, rotation) => {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', globals.persistenceUrl );
+    if (urlToLoad) xhr.open('GET', urlToLoad);
+    else xhr.open('GET', globals.persistenceUrl);
+
     xhr.responseType = 'json';
     xhr.send();
+    let deferredObjects = [];
+    let Parents = {};
     xhr.onload = () => {
         if (xhr.status !== 200) {
             alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
@@ -15,24 +21,90 @@ const loadArena = () => {
             let arenaObjects = xhr.response;
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
-                if (arenaObjects[i].object_id === globals.camName) {
-                    continue;
+                let obj = arenaObjects[i];
+                if (obj.object_id === globals.camName) {
+                    continue; // don't load our own camera/head assembly
+                }
+                if (obj.attributes.parent) {
+                    deferredObjects.push(obj);
+                    Parents[obj.attributes.parent] = obj.attributes.parent;
+                }
+                else {
+                    let msg = {
+                        object_id: obj.object_id,
+                        action: 'create',
+                        data: obj.attributes
+                    };
+                    if (position) {
+                        msg.data.position.x = msg.data.position.x + position.x;
+                        msg.data.position.y = msg.data.position.y + position.y;
+                        msg.data.position.z = msg.data.position.z + position.z;
+                    }
+                    if (rotation) {
+                        var r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y, msg.data.rotation.z, msg.data.rotation.w);
+                        var q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+                        r.multiply(q);
+                        msg.data.rotation.x = r.x;
+                        msg.data.rotation.y = r.y;
+                        msg.data.rotation.z = r.z;
+                        msg.data.rotation.w = r.w;
+                    }
+
+                    onMessageArrived(undefined, msg);
+                }
+            }
+            let l2 = deferredObjects.length;
+            for (let i = 0; i < l2; i++) {
+                let obj = deferredObjects[i];
+                if (obj.attributes.parent === globals.camName) {
+                    continue; // don't load our own camera/head assembly
                 }
                 let msg = {
-                    object_id: arenaObjects[i].object_id,
+                    object_id: obj.object_id,
                     action: 'create',
-                    data: arenaObjects[i].attributes
+                    data: obj.attributes
                 };
+                console.log("adding deferred object " + obj.object_id + " to parent " + obj.attributes.parent);
                 onMessageArrived(undefined, msg);
             }
         }
     };
 };
 
+// deletes scene objects from specified persistence URL if specified,
+// or globals.persistenceUrl if not
+const unloadArena = (urlToLoad) => {
+    let xhr = new XMLHttpRequest();
+    if (urlToLoad) xhr.open('GET', urlToLoad);
+    else xhr.open('GET', globals.persistenceUrl);
 
-client.onConnectionLost = onConnectionLost;
-client.onMessageArrived = onMessageArrived;
+    xhr.responseType = 'json';
+    xhr.send();
 
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
+        } else {
+            let arenaObjects = xhr.response;
+            let l = arenaObjects.length;
+            for (let i = 0; i < l; i++) {
+                let obj = arenaObjects[i];
+                if (obj.object_id === globals.camName) {
+                    // don't load our own camera/head assembly
+                } else {
+                    let msg = {
+                        object_id: obj.object_id,
+                        action: 'delete',
+                    };
+                    onMessageArrived(undefined, msg);
+                }
+            }
+        }
+    };
+};
+
+mqttClient.onConnectionLost = onConnectionLost;
+mqttClient.onMessageArrived = onMessageArrived;
 
 // Last Will and Testament message sent to subscribers if this client loses connection
 const lwt = new Paho.MQTT.Message(JSON.stringify({object_id: globals.camName, action: "delete"}));
@@ -40,10 +112,12 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
-client.connect({
+mqttClient.connect({
     onSuccess: onConnect,
     willMessage: lwt
 });
+
+var oldMsg = '';
 
 // Callback for client.connect()
 function onConnect() {
@@ -61,136 +135,163 @@ function onConnect() {
     sceneObjects.vive_leftHand = document.getElementById('vive-leftHand');
     sceneObjects.vive_rightHand = document.getElementById('vive-rightHand');
 
+    sceneObjects.groundPlane = document.getElementById('groundPlane'); // this is an <a-entity>
+
     sceneObjects.cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
+    sceneObjects.cameraSpinner = document.getElementById('CameraSpinner'); // this is an <a-entity>
+
     sceneObjects.weather = document.getElementById('weather');
     sceneObjects.scene = document.querySelector('a-scene');
+    //sceneObjects.scene = document.getElementById('sceneRoot');
     sceneObjects.env = document.getElementById('env');
-    sceneObjects.boxObj = document.getElementById('boxObj');
-    sceneObjects.fallBox = document.getElementById('fallBox');
-    sceneObjects.fallBox2 = document.getElementById('fallBox2');
     sceneObjects.myCamera = document.getElementById('my-camera');
+    sceneObjects[globals.camName] = sceneObjects.myCamera;
+    sceneObjects.conix_box = document.getElementById('conix_box');
+    sceneObjects.conix_box3 = document.getElementById('dots_sphere');
+    sceneObjects.env_box = document.getElementById('env_box');
+    sceneObjects.sound_box = document.getElementById('sound_box');
+    sceneObjects.conix_text = document.getElementById('conix_text');
 
     if (sceneObjects.env) {
         sceneObjects.env.setAttribute('environment', 'preset', globals.themeParam);
     }
     if (globals.weatherParam !== "none") {
-        sceneObjects.weather.setAttribute('particle-system', 'preset', globals.weatherParam);
-        sceneObjects.weather.setAttribute('particle-system', 'enabled', 'true');
+        if (sceneObjects.weather) {
+            sceneObjects.weather.setAttribute('particle-system', 'preset', globals.weatherParam);
+            sceneObjects.weather.setAttribute('particle-system', 'enabled', 'true');
+        }
     } else if (sceneObjects.weather) {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
 
+    // video window for jitsi
+    const videoPlane = document.createElement('a-plane');
+    videoPlane.setAttribute('id', "arena-vid-plane");
+    videoPlane.setAttribute('scale', '0.33 0.22 0.1');
+    videoPlane.setAttribute('src', "#localvidbox");
+    videoPlane.setAttribute("click-listener", "");
+    videoPlane.setAttribute("material", "shader", "flat");
+    videoPlane.setAttribute("transparent", "true");
+    videoPlane.setAttribute('position', '-0.58, 0.295, -0.5');
+    globals.sceneObjects.myCamera.appendChild(videoPlane);
+    globals.sceneObjects["arena-vid-plane"] = videoPlane;
+
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+    var thex = sceneObjects.myCamera.object3D.position.x;
+    var they = sceneObjects.myCamera.object3D.position.y;
+    var thez = sceneObjects.myCamera.object3D.position.z;
     let myMsg = {
         object_id: globals.camName,
         action: 'create',
-        persist: true,
+        // persist: true,
+        // ttl: 3000,
         data: {
             object_type: 'camera',
-            position: {x: 0, y: 1.6, z: 0},
+            position: {x: thex, y: they, z: thez},
             rotation: {x: 0, y: 0, z: 0, w: 0},
             color: color
-        }
+        },
+//	user_agent: navigator.userAgent
     };
+    console.log(navigator.userAgent);
 
     publish(globals.outputTopic + globals.camName, myMsg);
-    console.log("my-camera element", sceneObjects.myCamera);
+
+    //console.log("my-camera element", sceneObjects.myCamera);
+    console.log("my-camera name", globals.camName);
+    sceneObjects.myCamera.setAttribute('position', globals.startCoords);
+
+    sceneObjects.myCamera.addEventListener('vioChanged', e => {
+//        console.log("vioChanged", e.detail);
+
+        if (globals.fixedCamera !== '') {
+            let msg = {
+                object_id: globals.camName,
+                action: 'create',
+                type: 'object',
+                data: {
+                    object_type: 'camera',
+                    position: {
+                        x: parseFloat(e.detail.x.toFixed(3)),
+                        y: parseFloat(e.detail.y.toFixed(3)),
+                        z: parseFloat(e.detail.z.toFixed(3)),
+                    },
+                    rotation: {
+                        x: parseFloat(e.detail._x.toFixed(3)),
+                        y: parseFloat(e.detail._y.toFixed(3)),
+                        z: parseFloat(e.detail._z.toFixed(3)),
+                        w: parseFloat(e.detail._w.toFixed(3)),
+                    },
+                    color: color,
+                }
+            };
+            publish(globals.vioTopic + globals.camName, msg); // extra timestamp info at end for debugging
+        }
+    });
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
-        //console.log(e.detail);
+    // console.log("poseChanged", e.detail);
 
         let msg = {
             object_id: globals.camName,
-            action: 'update',
+    	    jitsiId: globals.jitsiId,
+    	    hasVideo: globals.hasVideo,
+            // hasAudio: globals.hasAudio,
+            // activeSpeaker: globals.activeSpeaker,
+            action: 'create',
             type: 'object',
             data: {
                 object_type: 'camera',
                 position: {
-                    x: e.detail.x.toFixed(3),
-                    y: e.detail.y.toFixed(3),
-                    z: e.detail.z.toFixed(3),
+                    x: parseFloat(e.detail.x.toFixed(3)),
+		            y: parseFloat(e.detail.y.toFixed(3)),
+                    z: parseFloat(e.detail.z.toFixed(3)),
                 },
                 rotation: {
-                    x: e.detail._x.toFixed(3),
-                    y: e.detail._y.toFixed(3),
-                    z: e.detail._z.toFixed(3),
-                    w: e.detail._w.toFixed(3),
+                    x: parseFloat(e.detail._x.toFixed(3)),
+                    y: parseFloat(e.detail._y.toFixed(3)),
+                    z: parseFloat(e.detail._z.toFixed(3)),
+                    w: parseFloat(e.detail._w.toFixed(3)),
                 },
                 color: color,
             }
         };
 
-        // rig updates for VIO
-
-        // suppress duplicates
-        //if (msg !== oldMsg) {
-        if (true) {
-            //publish(outputTopic+camName, msg + "," + stamp / 1000); // extra timestamp info at end for debugging
+        //if (true) { // Publish camera coordinates with great vigor
+        if (msg !== oldMsg) { // suppress duplicates
             publish(globals.outputTopic + globals.camName, msg); // extra timestamp info at end for debugging
-            // oldMsg = msg;
-            // lastUpdate = stamp;
-            //console.log("cam moved: ",outputTopic+camName, msg);
-
-            if (globals.fixedCamera !== '') {
-
-                const pos = sceneObjects.myCamera.object3D.position;
-                const rot = sceneObjects.myCamera.object3D.quaternion;
-
-                const vioMsg = {
-                    object_id: globals.camName,
-                    action: 'update',
-                    type: 'object',
-                    data: {
-                        position: {
-                            x: pos.x.toFixed(3),
-                            y: pos.y.toFixed(3),
-                            z: pos.z.toFixed(3),
-                        },
-                        rotation: {
-                            x: rot.x.toFixed(3),
-                            y: rot.y.toFixed(3),
-                            z: rot.z.toFixed(3),
-                            w: rot.w.toFixed(3),
-                        },
-                        color: color,
-                    }
-                };
-
-                publish(globals.vioTopic + globals.camName, vioMsg);
-            }
-            //}
+            oldMsg = msg;
         }
     });
 
     if (sceneObjects.vive_leftHand) {
         sceneObjects.vive_leftHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
-            const objName = "viveLeft_" + globals.idTag;
 
             let msg = {
-                object_id: objName,
+                object_id: globals.viveLName,
                 action: 'update',
                 type: 'object',
                 data: {
                     object_type: 'viveLeft',
                     position: {
-                        x: e.detail.x.toFixed(3),
-                        y: e.detail.y.toFixed(3),
-                        z: e.detail.z.toFixed(3),
+                        x: parseFloat(e.detail.x.toFixed(3)),
+                        y: parseFloat(e.detail.y.toFixed(3)),
+                        z: parseFloat(e.detail.z.toFixed(3)),
                     },
                     rotation: {
-                        x: e.detail._x.toFixed(3),
-                        y: e.detail._y.toFixed(3),
-                        z: e.detail._z.toFixed(3),
-                        w: e.detail._w.toFixed(3),
+                        x: parseFloat(e.detail._x.toFixed(3)),
+                        y: parseFloat(e.detail._y.toFixed(3)),
+                        z: parseFloat(e.detail._z.toFixed(3)),
+                        w: parseFloat(e.detail._w.toFixed(3)),
                     },
                     color: color,
                 }
             };
 
             // rate limiting is handled in vive-pose-listener
-            publish(globals.outputTopic + objName, msg);
+            publish(globals.outputTopic + globals.viveLName, msg);
 
         });
     }
@@ -198,29 +299,29 @@ function onConnect() {
     if (sceneObjects.vive_rightHand) {
         sceneObjects.vive_rightHand.addEventListener('viveChanged', e => {
             //console.log(e.detail);
-            const objName = "viveRight_" + globals.idTag;
 
             let msg = {
-                object_id: objName,
+                object_id: globals.viveRName, // e.g. viveRight_9240_X or viveRight_eric_eric
                 action: 'update',
                 type: 'object',
                 data: {
                     object_type: 'viveRight',
                     position: {
-                        x: e.detail.x.toFixed(3),
-                        y: e.detail.y.toFixed(3),
-                        z: e.detail.z.toFixed(3),
+                        x: parseFloat(e.detail.x.toFixed(3)),
+                        y: parseFloat(e.detail.y.toFixed(3)),
+                        z: parseFloat(e.detail.z.toFixed(3)),
                     },
                     rotation: {
-                        x: e.detail._x.toFixed(3),
-                        y: e.detail._y.toFixed(3),
-                        z: e.detail._z.toFixed(3),
-                        w: e.detail._w.toFixed(3),
+                        x: parseFloat(e.detail._x.toFixed(3)),
+                        y: parseFloat(e.detail._y.toFixed(3)),
+                        z: parseFloat(e.detail._z.toFixed(3)),
+                        w: parseFloat(e.detail._w.toFixed(3)),
                     },
                     color: color,
                 }
             };
-            publish(globals.outputTopic + objName, msg);
+            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric_eric
+            publish(globals.outputTopic + globals.viveRName, msg);
         });
     }
     // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
@@ -235,15 +336,14 @@ function onConnect() {
     loadArena();
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
-    client.subscribe(globals.renderTopic);
+    mqttClient.subscribe(globals.renderTopic);
 }
-
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-    client.connect({onSuccess: onConnect});
+    mqttClient.connect({onSuccess: onConnect});
 }
 
 const publish_retained = (dest, msg) => {
@@ -252,33 +352,136 @@ const publish_retained = (dest, msg) => {
     message.destinationName = dest;
     message.retained = true;
     // message.qos = 2;
-    client.send(message);
+    mqttClient.send(message);
 };
 
-const publish = (dest, msg) => {
+window.publish = (dest, msg) => {
     if (typeof msg === 'object') {
+
+        // add timestamp to all published messages
+        var d = new Date();
+        var n = d.toISOString();
+        msg["timestamp"] = n;
+
         msg = JSON.stringify(msg);
     }
     //console.log('desint :', dest, 'msggg', msg)
     let message = new Paho.MQTT.Message(msg);
     message.destinationName = dest;
-    client.send(message);
+    mqttClient.send(message);
 };
 
 function isJson(str) {
     try {
         JSON.parse(str);
     } catch (e) {
+        console.log(str);
+        console.log(e.message);
         return false;
     }
     return true;
+}
+
+function drawVideoCube(entityEl, slot, audioStream) {
+    var theslot = "#box"+(slot).toString();
+    //console.log("theslot: " + theslot);
+
+    // attach video to head
+    const videoCube = document.createElement('a-box');
+    videoCube.setAttribute('id',       "videoCube"+theslot);
+    videoCube.setAttribute('position', '0 0 0');
+    videoCube.setAttribute('scale',    '0.8 0.6 0.8');
+    videoCube.setAttribute('material', 'shader', 'flat');
+//    videoCube.setAttribute('multisrc', "src4:"+theslot); // horrible bug crashes ARENA - why?!
+    videoCube.setAttribute('src', theslot); // video only (!audio)
+
+    const videoCube2 = document.createElement('a-box');
+    videoCube2.setAttribute('id',       "videoCube2"+theslot);
+    videoCube2.setAttribute('position', '0 0 0.01');
+    videoCube2.setAttribute('scale',    '0.81 0.61 0.8');
+    videoCube2.setAttribute('material', 'shader', 'flat');
+    videoCube2.setAttribute("transparent", "true");
+    videoCube2.setAttribute('color', 'black');
+    videoCube2.setAttribute("opacity", "0.8");
+
+    let sceneEl = globals.sceneObjects.scene;
+//    if (sceneEl.audioListener)
+//	console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
+
+    let listener = null;
+    if (sceneEl.audioListener) {
+    	console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
+    	listener = sceneEl.audioListener;
+    } else {
+    	listener = new THREE.AudioListener();
+    	console.log("NEW HEAD AUDIO LISTENER:", listener);
+    	let camEl = globals.sceneObjects.myCamera.object3D;
+    	console.log("children:", camEl.children);
+    	camEl.add(listener);
+    	globals.audioListener = listener;
+    	sceneEl.audioListener = listener;
+    }
+
+//    var listener = sceneEl.audioListener || new THREE.AudioListener();
+//    sceneEl.audioListener = listener;
+
+    let audioSource = new THREE.PositionalAudio(listener);
+    audioSource.setMediaStreamSource(audioStream);
+    audioSource.setRefDistance(1); // L-R panning
+    audioSource.setRolloffFactor(0.5);
+    videoCube.object3D.add(audioSource);
+
+    entityEl.appendChild(videoCube);
+    entityEl.appendChild(videoCube2);
+}
+
+function highlightVideoCube(entityEl, oldEl, slot) {
+    // var theslot = "#wallbox"+(slot).toString();
+    // console.log("highlightVideoCube: " + theslot);
+    // var wallBox = document.querySelector(theslot);
+
+    // var videoCube = document.querySelector("#videoWallHighlightBox");
+    // if (!videoCube) {
+    // 	videoCube = document.createElement('a-box');
+    // 	videoCube.setAttribute('scale', '1 0.8 0.05');
+    //     videoCube.setAttribute('color', "green");
+    // 	videoCube.setAttribute('id', "videoWallHighlightBox");
+    //     videoCube.setAttribute('material', 'shader', 'flat');
+    //     globals.sceneObjects.scene.appendChild(videoCube);
+    // }
+
+    // var thex = wallBox.object3D.position.x;
+    // var they = wallBox.object3D.position.y;
+    // var thez = wallBox.object3D.position.z;
+    // videoCube.object3D.position.set(thex, they, thez - 0.03);
+
+    // entityEl is the head
+    var videoHat = document.querySelector("#videoHatHighlightBox");
+    if (!videoHat) {
+    	videoHat = document.createElement('a-box');
+    	videoHat.setAttribute('scale', '0.8 0.05 0.8');
+        videoHat.setAttribute('color', "green");
+    	videoHat.setAttribute('position', '0 0.325 0');
+        videoHat.setAttribute('material', 'shader', 'flat');
+    	videoHat.setAttribute('id', "videoHatHighlightBox");
+        // globals.sceneObjects.scene.appendChild(videoCube);
+    }
+    // remove old
+    if (oldEl) {
+    	var parentEl = videoHat.parentEl;
+    	if (parentEl) {
+    	    parentEl.removeChild(videoHat);
+        }
+    }
+    // add new
+    entityEl.appendChild(videoHat);
 }
 
 function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
     let theMessage = {};
     if (message) {
-        console.log(message.destinationName, message.payloadString);
+        //console.log(message.destinationName, message.payloadString);
         if (!isJson(message.payloadString)) {
             return;
         }
@@ -286,16 +489,35 @@ function onMessageArrived(message, jsonMessage) {
     } else if (jsonMessage) {
         theMessage = jsonMessage;
     }
-    console.log(theMessage.object_id);
+//    console.log(theMessage.object_id);
 
-    switch (theMessage.action) {
+    switch (theMessage.action) { // clientEvent, create, delete, update
         case "clientEvent": {
             const entityEl = sceneObjects[theMessage.object_id];
-            const myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
-                parseFloat(theMessage.data.position.y),
-                parseFloat(theMessage.data.position.z));
+            let myPoint = '';
+            if (theMessage.data.position)
+                myPoint = new THREE.Vector3(parseFloat(theMessage.data.position.x),
+                    parseFloat(theMessage.data.position.y),
+                    parseFloat(theMessage.data.position.z));
+            else
+                console.log("Error: theMessage.data.position not defined", theMessage);
             const clicker = theMessage.data.source;
+
+		if (entityEl == undefined) {
+		    console.log(message.payloadString);
+		    return;
+		}
+
             switch (theMessage.type) {
+                case "collision":
+                // emit a synthetic click event with ugly data syntax
+                    entityEl.emit('mousedown', {
+                        "clicker": clicker, intersection:
+                            {
+                                point: myPoint
+                            }
+                    }, false);
+                    break;
                 case "mousedown":
                     // emit a synthetic click event with ugly data syntax
                     entityEl.emit('mousedown', {
@@ -303,7 +525,7 @@ function onMessageArrived(message, jsonMessage) {
                             {
                                 point: myPoint
                             }
-                    }, true);
+                    }, false);
                     break;
                 case "mouseup":
                     // emit a synthetic click event with ugly data syntax
@@ -312,7 +534,7 @@ function onMessageArrived(message, jsonMessage) {
                             {
                                 point: myPoint
                             }
-                    }, true);
+                    }, false);
                     break;
                 default: // handle others here like mouseenter / mouseleave
                     break; // never gets here haha
@@ -325,7 +547,8 @@ function onMessageArrived(message, jsonMessage) {
             //console.log(message.payloadString, topic, name);
 
             if (sceneObjects[name]) {
-                sceneObjects.scene.removeChild(sceneObjects[name]);
+                parentEl = sceneObjects[name].parentEl;
+                parentEl.removeChild(sceneObjects[name]);
                 delete sceneObjects[name];
                 return;
             } else {
@@ -334,12 +557,28 @@ function onMessageArrived(message, jsonMessage) {
             break;
         }
         case "create": {
+            const name = theMessage.object_id;
+            delete theMessage.object_id;
+
+            if (name === globals.camName) {
+                return;
+            }
+            /* why not? needed for HUD text, attachments to head 3d model
+            if (theMessage.data.parent) {
+                // Don't attach to our own camera
+                if (theMessage.data.parent == globals.camName)
+                    return;
+            }
+            */
+
             let x, y, z, xrot, yrot, zrot, wrot, xscale, yscale, zscale, color;
-            // parse out JSON
+            // Strategy: remove JSON for core attributes (position, rotation, color, scale) after parsing
+            // what remains are attribute-value pairs that can be set iteratively
             if (theMessage.data.position) {
                 x = theMessage.data.position.x;
                 y = theMessage.data.position.y;
                 z = theMessage.data.position.z;
+                delete theMessage.data.position;
             } else { // useful defaults if unspecified
                 x = 0;
                 y = 0;
@@ -351,6 +590,7 @@ function onMessageArrived(message, jsonMessage) {
                 yrot = theMessage.data.rotation.y;
                 zrot = theMessage.data.rotation.z;
                 wrot = theMessage.data.rotation.w;
+                delete theMessage.data.rotation;
             } else { // useful defaults
                 xrot = 0;
                 yrot = 0;
@@ -362,6 +602,7 @@ function onMessageArrived(message, jsonMessage) {
                 xscale = theMessage.data.scale.x;
                 yscale = theMessage.data.scale.y;
                 zscale = theMessage.data.scale.z;
+                delete theMessage.data.scale;
             } else { // useful defaults
                 xscale = 1;
                 yscale = 1;
@@ -370,11 +611,13 @@ function onMessageArrived(message, jsonMessage) {
 
             if (theMessage.data.color) {
                 color = theMessage.data.color;
+                delete theMessage.data.color;
             } else {
                 color = "white";
             }
 
             let type = theMessage.data.object_type;
+            delete theMessage.data.object_type;
             if (type === "cube") {
                 type = "box";
             }
@@ -384,12 +627,6 @@ function onMessageArrived(message, jsonMessage) {
             }
             // also different
 
-            //var name = type+"_"+theMessage.object_id;
-            const name = theMessage.object_id;
-            const quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
-            const euler = new THREE.Euler();
-            const foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
-            const vec = foo.toVector3();
             let entityEl;
 
             // Reduce, reuse, recycle!
@@ -400,6 +637,10 @@ function onMessageArrived(message, jsonMessage) {
                 //console.log(entityEl);
             } else { // CREATE NEW SCENE OBJECT
                 entityEl = document.createElement('a-entity');
+
+                // wacky idea: force render order
+                entityEl.object3D.renderOrder = 1;
+
                 if (type === "viveLeft" || type === "viveRight") {
                     // create vive controller for 'other persons controller'
                     entityEl.setAttribute('id', name);
@@ -412,59 +653,70 @@ function onMessageArrived(message, jsonMessage) {
                     }
 
                     entityEl.object3D.position.set(x, y, z);
-                    entityEl.object3D.rotation.set(xrot, yrot, zrot);
+                    entityEl.object3D.quaternion.set(xrot, yrot, zrot, wrot);
 
                     // Add it to our dictionary of scene objects
                     sceneObjects.scene.appendChild(entityEl);
                     sceneObjects[name] = entityEl;
                 } else if (type === "camera") {
-                    entityEl.setAttribute('id', name + "_rigChild");
+                    entityEl.setAttribute('id', name); // e.g. camera_1234_er1k
                     entityEl.setAttribute('rotation.order', "YXZ");
                     entityEl.object3D.position.set(0, 0, 0);
                     entityEl.object3D.rotation.set(0, 0, 0);
 
-                    let rigEl;
-                    rigEl = document.createElement('a-entity');
-                    rigEl.setAttribute('id', name);
-                    rigEl.setAttribute('rotation.order', "YXZ");
-                    rigEl.object3D.position.set(x, y, z);
-                    rigEl.object3D.rotation.set(xrot, yrot, zrot);
-
                     // this is the head 3d model
-                    let childEl = document.createElement('a-entity');
-                    childEl.setAttribute('rotation', 0 + ' ' + 180 + ' ' + 0);
-                    childEl.object3D.scale.set(4, 4, 4);
-                    childEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
+                    let headModelEl = document.createElement('a-entity');
+                    headModelEl.setAttribute('id', "head-model_" + name);
+                    headModelEl.setAttribute('rotation', '0 180 0');
+                    headModelEl.object3D.scale.set(1, 1, 1);
+                    headModelEl.setAttribute('dynamic-body', "type", "static");
+
+                    headModelEl.setAttribute("gltf-model", "url(models/Head.gltf)");  // actually a face mesh
 
                     // place a colored text above the head
                     const headtext = document.createElement('a-text');
                     const personName = name.split('_')[2];
 
+                    headtext.setAttribute('id', "headtext_" + name);
                     headtext.setAttribute('value', personName);
-                    headtext.setAttribute('position', 0 + ' ' + 0.6 + ' ' + 0.25);
+                    headtext.setAttribute('position', '0 0.45 0.05');
                     headtext.setAttribute('side', "double");
                     headtext.setAttribute('align', "center");
                     headtext.setAttribute('anchor', "center");
-                    headtext.setAttribute('scale', 0.8 + ' ' + 0.8 + ' ' + 0.8);
+                    headtext.setAttribute('scale', '0.4 0.4 0.4');
+                    headtext.setAttribute('rotation', '0 180 0');
                     headtext.setAttribute('color', color); // color
                     headtext.setAttribute('width', 5); // try setting last
+
                     entityEl.appendChild(headtext);
-                    entityEl.appendChild(childEl);
+                    entityEl.appendChild(headModelEl);
+                    sceneObjects["head-text_" + name] = headtext;
+                    sceneObjects["head-model_" + name] = headModelEl;
 
-                    rigEl.appendChild(entityEl);
+                    sceneObjects.scene.appendChild(entityEl);
+                    sceneObjects[name] = entityEl;
 
-                    sceneObjects.scene.appendChild(rigEl);
-                    sceneObjects[name] = rigEl;
-
-                    entityEl = rigEl;
-
-                    console.log("their camera:", rigEl);
+                    //console.log("their camera:", entityEl);
                 } else {
                     entityEl.setAttribute('id', name);
                     entityEl.setAttribute('rotation.order', "YXZ");
-                    sceneObjects.scene.appendChild(entityEl);
-                    // Add it to our dictionary of scene objects
-                    sceneObjects[name] = entityEl;
+
+                    // Parent/Child handling
+                    if (theMessage.data.parent) {
+                        var parentEl = sceneObjects[theMessage.data.parent];
+                        if (parentEl) {
+                            entityEl.flushToDOM();
+                            parentEl.appendChild(entityEl);
+                            // Add it to our dictionary of scene objects
+                            sceneObjects[name] = entityEl;
+                        } else {
+                            console.log("orphaned; parent " + name + " cannot find " + theMessage.data.parent + " yet");
+                        }
+                    } else {
+                        sceneObjects.scene.appendChild(entityEl);
+                        // Add it to our dictionary of scene objects
+                        sceneObjects[name] = entityEl;
+                    }
                 }
             }
 
@@ -475,92 +727,181 @@ function onMessageArrived(message, jsonMessage) {
                 entityEl.setAttribute('light', 'color', color);
                 break;
 
+	    case "videoconf":
+		// handle changes to other users audio/video status
+		console.log("got videoconf");
+
+		if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
+		    // possibly change active speaker
+
+		    let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+		    //console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
+
+		    if (globals.activeSpeaker != globals.previousSpeakerId) {
+			highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
+			globals.previousSpeakerId = theMessage.jitsiId;
+			globals.previousSpeakerEl = entityEl;
+		    }
+
+		}
+
+		return;
+		break;
+
             case "camera":
-                //console.log("Camera update", entityEl);
-                //console.log(entityEl.getAttribute('position'));
+		// decide if we need draw or delete videoBox around head
+		//console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
+
+		if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
+		    if (!entityEl.hasAttribute('videoCubeDrawn')) {
+//			console.log("draw videoCube: " + theMessage.jitsiId);
+
+			// call function in jitsi-arena.js
+			let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+			if (slot == -1) {
+			    console.log("not a caller (yet)");
+			    return;
+			}
+
+			if (theMessage.jitsiId == "") {
+			    console.log("jitsiId empty");
+			    break; // other-person has no camera ... yet
+			}
+			// assume jitsi remoteTracks[0] is audio and [1] video
+			let audioStream = new MediaStream();
+			audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
+
+//			console.log("slot ", slot, "ID ", theMessage.jitsiId);
+//			console.log("SLOT: " + slot);
+
+			drawVideoCube(entityEl, slot, audioStream);
+			entityEl.setAttribute('videoCubeDrawn', true);
+		    }
+		    // else {
+		    // 	// possibly change active speaker
+
+		    // 	let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+		    // 	//console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
+
+		    // 	if (globals.activeSpeaker != globals.previousSpeakerId) {
+		    // 	    highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
+		    // 	    globals.previousSpeakerId = theMessage.jitsiId;
+		    // 	    globals.previousSpeakerEl = entityEl;
+		    // 	}
+		    // }
+		}
                 break;
 
-            case "viveLeft":
-                break;
-            case "viveRight":
-                break;
+                case "viveLeft":
+                    break;
+                case "viveRight":
+                    break;
 
-            case "image": // use special 'url' data slot for bitmap URL (like gltf-models do)
-                entityEl.setAttribute('geometry', 'primitive', 'plane');
-                entityEl.setAttribute('material', 'src', theMessage.data.url);
-                entityEl.setAttribute('material', 'shader', 'flat');
-                entityEl.object3D.scale.set(xscale, yscale, zscale);
-                break;
+                case "image": // use special 'url' data slot for bitmap URL (like gltf-models do)
+                    entityEl.setAttribute('geometry', 'primitive', 'plane');
+                    entityEl.setAttribute('material', 'src', theMessage.data.url);
+                    entityEl.setAttribute('material', 'shader', 'flat');
+                    entityEl.object3D.scale.set(xscale, yscale, zscale);
+                    break;
 
-            case "line":
-                delete theMessage.data.object_type; // guaranteed to be "line", but: pass only A-Frame digestible key-values to setAttribute()
-                entityEl.setAttribute('line', theMessage.data);
-                break;
+                case "line":
+                    entityEl.setAttribute('line', theMessage.data);
+                    entityEl.setAttribute('line', 'color', color);
+                    break;
 
-            case "thickline":
-                delete theMessage.data.object_type; // guaranteed to be "thickline" but pass only A-Frame digestible key-values to setAttribute()
-                entityEl.setAttribute('meshline', theMessage.data);
-                break;
+                case "thickline":
+                    entityEl.setAttribute('meshline', theMessage.data);
+                    entityEl.setAttribute('meshline', 'color', color);
+                    delete theMessage.data.thickline;
+                    break;
 
-            case "particle":
-                delete theMessage.data.object_type; // pass only A-Frame digestible key-values to setAttribute()
-                entityEl.setAttribute('particle-system', theMessage.data);
-                break;
+                case "particle":
+                    entityEl.setAttribute('particle-system', theMessage.data);
+                    break;
 
-            case "gltf-model":
-                //entityEl.object3D.scale.set(xscale, yscale, zscale);
-                entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
-                entityEl.setAttribute("gltf-model", theMessage.data.url);
-                break;
+                case "gltf-model":
+                    //entityEl.object3D.scale.set(xscale, yscale, zscale);
+                    entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
+                    entityEl.setAttribute("gltf-model", theMessage.data.url);
+                    delete theMessage.data.url;
+                    break;
 
-            case "text":
-                // set a bunch of defaults
-                entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
-                entityEl.setAttribute('text', 'value', theMessage.data.text);
-                entityEl.setAttribute('text', 'color', color);
-                entityEl.setAttribute('text', 'side', "double");
-                entityEl.setAttribute('text', 'align', "center");
-                entityEl.setAttribute('text', 'anchor', "center");
-                break;
+                case "text":
+                    // set a bunch of defaults
+                    entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
+                    entityEl.setAttribute('text', 'value', theMessage.data.text);
+                    delete theMessage.data.text;
+                    entityEl.setAttribute('text', 'color', color);
+                    entityEl.setAttribute('text', 'side', "double");
+                    entityEl.setAttribute('text', 'align', "center");
+                    entityEl.setAttribute('text', 'anchor', "center");
+                    entityEl.object3D.scale.set(xscale, yscale, zscale);
+                    break;
 
-            default:
-                // handle arbitrary A-Frame geometry primitive types
-                entityEl.setAttribute('geometry', 'primitive', type);
-                entityEl.object3D.scale.set(xscale, yscale, zscale);
-                entityEl.setAttribute('material', 'color', color);
-                break;
+                default:
+                    // handle arbitrary A-Frame geometry primitive types
+                    entityEl.setAttribute('geometry', 'primitive', type);
+                    entityEl.object3D.scale.set(xscale, yscale, zscale);
+                    entityEl.setAttribute('material', 'color', color);
+                    break;
             } // switch(type)
 
             if (type !== 'line' && type !== 'thickline') {
                 // Common for all but lines: set position & rotation
                 entityEl.object3D.position.set(x, y, z);
-                entityEl.object3D.rotation.set(vec.x, vec.y, vec.z);
+                entityEl.object3D.quaternion.set(xrot, yrot, zrot, wrot);
             }
+
+            // what remains are attributes for special cases; iteratively set them
+// BUG
+//            for (const [attribute, value] of Object.entries(theMessage.data)) {
+                //console.log("setting attr", attribute);
+//                entityEl.setAttribute(attribute, value);
+//            }
+	    const thing = Object.entries(theMessage.data);
+	    const len = thing.length;
+            for (let i = 0; i <  len; i++) {
+		const theattr = thing[i][0]; // attribute
+		const thevalue = thing[i][1]; // value
+                entityEl.setAttribute(theattr, thevalue);
+            }
+
             break;
         }
         case "update": {
             const name = theMessage.object_id;
-            switch (theMessage.type) { // "object", "setParent", "setChild"
+            switch (theMessage.type) { // "object", "rig"
                 case "rig": {
                     if (name === globals.camName) { // our camera Rig
                         console.log("moving our camera rig, sceneObject: " + name);
 
-                        let x = theMessage.data.position.x;
-                        let y = theMessage.data.position.y;
-                        let z = theMessage.data.position.z;
-                        let xrot = theMessage.data.rotation.x;
-                        let yrot = theMessage.data.rotation.y;
-                        let zrot = theMessage.data.rotation.z;
-                        let wrot = theMessage.data.rotation.w;
+                        // "I do declare!"
+                        var x, y, z, xrot, yrot, zrot, wrot;
 
-                        let quat = new THREE.Quaternion(xrot, yrot, zrot, wrot);
-                        let euler = new THREE.Euler();
-                        let foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
-                        let vec = foo.toVector3();
+                        if (theMessage.data.position) {
+                            x = theMessage.data.position.x;
+                            y = theMessage.data.position.y;
+                            z = theMessage.data.position.z;
+                        } else {
+                            x = 0;
+                            y = 0;
+                            z = 0;
+                        }
+                        if (theMessage.data.rotation) {
+                            xrot = theMessage.data.rotation.x;
+                            yrot = theMessage.data.rotation.y;
+                            zrot = theMessage.data.rotation.z;
+                            wrot = theMessage.data.rotation.w;
+                        } else {
+                            xrot = 0;
+                            yrot = 0;
+                            zrot = 0;
+                            wrot = 1;
+                        }
 
                         sceneObjects.cameraRig.object3D.position.set(x, y, z);
-                        sceneObjects.cameraRig.object3D.rotation.set(vec.x, vec.y, vec.z);
-                        //	    cameraRig.rotation.order = "YXZ"; // John this doesn't work here :(
+                        sceneObjects.cameraSpinner.object3D.quaternion.set(xrot, yrot, zrot, wrot);
+                        console.log(xrot, yrot, zrot, wrot);
                     }
                     break;
                 }
@@ -582,15 +923,12 @@ function onMessageArrived(message, jsonMessage) {
                     if (entityEl) {
                         for (const [attribute, value] of Object.entries(theMessage.data)) {
                             if (attribute === "rotation") {
-                                let quat = new THREE.Quaternion(value.x, value.y, value.z, value.w);
-                                let euler = new THREE.Euler();
-                                let foo = euler.setFromQuaternion(quat.normalize(), "YXZ");
-                                let vec = foo.toVector3();
-                                entityEl.object3D.rotation.set(vec.x, vec.y, vec.z);
+                                entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w);
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-                                entityEl.setAttribute(attribute, value, true);
+                                //console.log("setting attribute: ", attribute);
+                                entityEl.setAttribute(attribute, value);
                             }
                         }
                     } else {
@@ -598,73 +936,10 @@ function onMessageArrived(message, jsonMessage) {
                     }
                     break;
                 }
-                case "setChild": {// parent/child relationship e.g. /topic/render/parent_id/child -m "child_id"
-
-                    const parentEl = sceneObjects[theMessage.object_id];
-                    const childName = theMessage.data.child;
-                    const childEl = sceneObjects[theMessage.data.child];
-
-                    // error checks
-                    if (!parentEl) {
-                        console.log("Warning: " + parentEl + " not in sceneObjects");
-                        return;
-                    }
-                    if (!childEl) {
-                        console.log("Warning: " + childEl + " not in sceneObjects");
-                        return;
-                    }
-
-                    console.log("parent", parentEl);
-                    console.log("child", childEl);
-
-                    childEl.flushToDOM();
-                    const copy = childEl.cloneNode(true);
-                    copy.setAttribute("name", "copy");
-                    copy.flushToDOM();
-                    parentEl.appendChild(copy);
-                    sceneObjects[childName] = copy;
-                    // remove from scene
-                    childEl.parentNode.removeChild(childEl);
-
-                    console.log("parent", parentEl);
-                    console.log("child", childEl);
-                    break;
-                }
-                case "setParent": {// parent/child relationship e.g. /topic/render/child_id/parent -m "parent_id"
-
-                    const childEl = sceneObjects[theMessage.object_id]; // scene object_id
-                    const parentEl = sceneObjects[theMessage.data.parent];
-                    const childName = theMessage.object_id;
-
-                    // error checks
-                    if (!parentEl) {
-                        console.log("Warning: " + parentEl + " not in sceneObjects");
-                        return;
-                    }
-                    if (!childEl) {
-                        console.log("Warning: " + childEl + " not in sceneObjects");
-                        return;
-                    }
-
-                    console.log("parent", parentEl);
-                    console.log("child", childEl);
-
-                    childEl.flushToDOM();
-                    const copy = childEl.cloneNode(true);
-                    copy.setAttribute("name", "copy");
-                    copy.flushToDOM();
-                    parentEl.appendChild(copy);
-                    sceneObjects[childName] = copy;
-                    childEl.parentNode.removeChild(childEl);
-
-                    console.log("parent", parentEl);
-                    console.log("child", childEl);
-                    break; // case "setParent"
-                }
                 default:
                     console.log("EMPTY MESSAGE?", message.destinationName, message.payloadString);
                     break;
-            }
-        }
-    }
+            } // switch (theMessage.type)
+        } // case "update":
+    } // switch (theMessage.action)
 }

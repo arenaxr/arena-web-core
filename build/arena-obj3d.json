@@ -1,0 +1,160 @@
+{
+   "definitions":{
+      "coord3d":{
+         "type":"object",
+         "title":"x, y ,z",
+         "description":"3D point",
+         "required":[
+            "x",
+            "y",
+            "z"
+         ],
+         "properties":{
+            "x":{
+               "type":"number"
+            },
+            "y":{
+               "type":"number"
+            },
+            "z":{
+               "type":"number"
+            }
+         }
+      },
+      "rot3d":{
+         "type":"object",
+         "title":"x, y ,z",
+         "description":"3D rotation",
+         "required":[
+            "x",
+            "y",
+            "z",
+            "w"
+         ],
+         "properties":{
+            "x":{
+               "type":"number"
+            },
+            "y":{
+               "type":"number"
+            },
+            "z":{
+               "type":"number"
+            },
+            "w":{
+               "type":"number"
+            }
+         }
+      },
+      "obj3d":{
+         "type":"object",
+         "title":"3D Object Data",
+         "properties":{
+            "object_type":{
+               "type":"string",
+               "enum":[
+                  "cube",
+                  "sphere",
+                  "circle",
+                  "cone",
+                  "cylinder",
+                  "dodecahedron",
+                  "icosahedron",
+                  "tetrahedron",
+                  "octahedron",
+                  "plane",
+                  "ring",
+                  "torus",
+                  "torusKnot",
+                  "triangle",
+                  "gltf-model",
+                  "image",
+                  "text"
+               ],
+               "default":"cube"
+            },
+            "position":{
+               "$ref":"#/definitions/coord3d"
+            },
+            "rotation":{
+               "$ref":"#/definitions/rot3d"
+            },
+            "scale":{
+               "$ref":"#/definitions/coord3d"
+            },
+            "color":{
+               "type":"string",
+               "format":"color",
+               "title":"color",
+               "default":"#ffa500"
+            },
+            "url":{
+               "type":"string",
+               "format":"uri",
+               "title":"url",
+               "description": "Model URL"
+            },
+            "dynamic-body":{
+               "type":"object",
+               "title":"physics",
+               "properties":{
+                  "type":{
+                     "type":"string",
+                     "enum":[
+                        "static",
+                        "dynamic"
+                     ]
+                  }
+               },
+               "required":[ "type"]
+            },
+            "click-listener":{
+                  "type":"boolean"
+            }
+         },
+         "required":[ "object_type"]
+      }
+   },
+   "type":"object",
+   "title":"3D Object",
+   "properties":{
+      "object_id":{
+         "type":"string",
+         "minLength": 5,
+         "description": "A uuid or otherwise unique identifier for this object"
+      },
+      "action":{
+         "type":"string",
+         "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+         "enum":[
+            "create",
+            "delete",
+            "update",
+            "clientEvent"
+         ],
+         "default":"create"
+      },
+      "type":{
+         "type":"string",
+         "enum":[
+            "object"
+         ]
+      },
+      "persist":{
+         "type":"boolean",
+         "default": "false",
+         "description": "Persist this object in the database (default false = do not persist)"
+      },
+      "data":{
+         "$ref":"#/definitions/obj3d",
+         "description": "Object data payload; 3D Object data"
+      }
+   },
+   "required":[
+      "object_id",
+      "action",
+      "type",
+      "data",
+      "persist"
+   ]
+}
