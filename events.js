@@ -1213,11 +1213,13 @@ AFRAME.registerComponent("press-and-move", {
 AFRAME.registerComponent("network-latency", {
     init: function() {
         this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this);
+        this.message = new Paho.MQTT.Message("");
+        this.message.destinationName = globals.graphTopic;
+        this.message.qos = 2;
     },
     tick: (function(t, dt) {
-        let message = new Paho.MQTT.Message("");
-        message.destinationName = globals.graphTopic;
-        message.qos = 2;
-        mqttClient.send(message);
+        if (window.mqttClient.isConnected()) {
+            window.mqttClient.send(this.message);
+        }
     })
 })

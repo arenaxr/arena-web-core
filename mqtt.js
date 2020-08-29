@@ -369,6 +369,8 @@ const publish_retained = (dest, msg) => {
 };
 
 window.publish = (dest, msg) => {
+    if (!window.mqttClient.isConnected()) return;
+
     if (typeof msg === 'object') {
 
         // add timestamp to all published messages
@@ -395,7 +397,7 @@ function isJson(str) {
     return true;
 }
 
-function drawVideoCube(entityEl, slot, audioStream) {
+function drawVideoCube(entityEl, slot) {
     var theslot = "#box" + (slot).toString();
     //console.log("theslot: " + theslot);
 
@@ -416,33 +418,6 @@ function drawVideoCube(entityEl, slot, audioStream) {
     videoCube2.setAttribute("transparent", "true");
     videoCube2.setAttribute('color', 'black');
     videoCube2.setAttribute("opacity", "0.8");
-
-    let sceneEl = globals.sceneObjects.scene;
-    //    if (sceneEl.audioListener)
-    //  console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
-
-    let listener = null;
-    if (sceneEl.audioListener) {
-        console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
-        listener = sceneEl.audioListener;
-    } else {
-        listener = new THREE.AudioListener();
-        console.log("NEW HEAD AUDIO LISTENER:", listener);
-        let camEl = globals.sceneObjects.myCamera.object3D;
-        console.log("children:", camEl.children);
-        camEl.add(listener);
-        globals.audioListener = listener;
-        sceneEl.audioListener = listener;
-    }
-
-    //    var listener = sceneEl.audioListener || new THREE.AudioListener();
-    //    sceneEl.audioListener = listener;
-
-    let audioSource = new THREE.PositionalAudio(listener);
-    audioSource.setMediaStreamSource(audioStream);
-    audioSource.setRefDistance(1); // L-R panning
-    audioSource.setRolloffFactor(0.5);
-    videoCube.object3D.add(audioSource);
 
     entityEl.appendChild(videoCube);
     entityEl.appendChild(videoCube2);
@@ -764,43 +739,75 @@ function onMessageArrived(message, jsonMessage) {
                     // decide if we need draw or delete videoBox around head
                     // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
 
-                    if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
-                        if (!entityEl.hasAttribute('videoCubeDrawn')) {
-                            // console.log("draw videoCube: " + theMessage.jitsiId);
+                    if (theMessage.hasOwnProperty("jitsiId")) {
+                        if (theMessage.hasVideo) {
+                            if (!(entityEl.getAttribute('videoCubeDrawn')=='true')) {
+                                // console.log("draw videoCube: " + theMessage.jitsiId);
 
-                            // call function in jitsi-arena.js
-                            let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-                            if (slot == -1) {
-                                console.log("not a caller (yet)");
-                                return;
+                                // call function in jitsi-arena.js
+                                let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+                                if (slot == -1) {
+                                    console.log("not a caller (yet)");
+                                    return;
+                                }
+
+                                if (theMessage.jitsiId == "") {
+                                    console.log("jitsiId empty");
+                                    break; // other-person has no camera ... yet
+                                }
+
+                                // console.log("slot ", slot, "ID ", theMessage.jitsiId);
+                                // console.log("SLOT: " + slot);
+
+                                // set up positional audio, but only once per camera
+                                if (!entityEl.hasAttribute('posAudioAdded')) {
+                                    // assume jitsi remoteTracks[0] is audio and [1] video
+                                    let audioStream = new MediaStream();
+                                    audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
+
+                                    let sceneEl = globals.sceneObjects.scene;
+                                    // if (sceneEl.audioListener)
+                                    //      console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
+
+                                    let listener = null;
+                                    if (sceneEl.audioListener) {
+                                        console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
+                                        listener = sceneEl.audioListener;
+                                    } else {
+                                        listener = new THREE.AudioListener();
+                                        console.log("NEW HEAD AUDIO LISTENER:", listener);
+                                        let camEl = globals.sceneObjects.myCamera.object3D;
+                                        console.log("children:", camEl.children);
+                                        camEl.add(listener);
+                                        globals.audioListener = listener;
+                                        sceneEl.audioListener = listener;
+                                    }
+
+                                    // var listener = sceneEl.audioListener || new THREE.AudioListener();
+                                    // sceneEl.audioListener = listener;
+
+                                    let audioSource = new THREE.PositionalAudio(listener);
+                                    audioSource.setMediaStreamSource(audioStream);
+                                    audioSource.setRefDistance(1); // L-R panning
+                                    audioSource.setRolloffFactor(0.5);
+                                    entityEl.object3D.add(audioSource);
+
+                                    entityEl.setAttribute('posAudioAdded', true);
+                                }
+
+                                drawVideoCube(entityEl, slot);
+                                entityEl.setAttribute('videoCubeDrawn', true);
                             }
-
-                            if (theMessage.jitsiId == "") {
-                                console.log("jitsiId empty");
-                                break; // other-person has no camera ... yet
-                            }
-                            // assume jitsi remoteTracks[0] is audio and [1] video
-                            let audioStream = new MediaStream();
-                            audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
-
-                            // console.log("slot ", slot, "ID ", theMessage.jitsiId);
-                            // console.log("SLOT: " + slot);
-
-                            drawVideoCube(entityEl, slot, audioStream);
-                            entityEl.setAttribute('videoCubeDrawn', true);
                         }
-                        // else {
-                        //  // possibly change active speaker
-
-                        //  let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-                        //  //console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
-
-                        //  if (globals.activeSpeaker != globals.previousSpeakerId) {
-                        //      highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
-                        //      globals.previousSpeakerId = theMessage.jitsiId;
-                        //      globals.previousSpeakerEl = entityEl;
-                        //  }
-                        // }
+                        else {
+                            for (let child of entityEl.children) {
+                                if (child.getAttribute("id").includes("videoCube") ||
+                                    child.getAttribute("id").includes("videoHat")) {
+                                    entityEl.removeChild(child);
+                                }
+                            }
+                            entityEl.setAttribute('videoCubeDrawn', false);
+                        }
                     }
                     break;
 

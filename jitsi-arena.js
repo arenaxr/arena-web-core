@@ -50,7 +50,6 @@ function getSlotOfCaller(participantId) {
     return (callers.indexOf(participantId)); // might be -1
 }
 
-
 function connectArena(participantId, trackType) {
     if (trackType === 'audio') {
         globals.hasAudio = true;
@@ -61,40 +60,7 @@ function connectArena(participantId, trackType) {
 
     globals.jitsiId = participantId;
     console.log("connectArena: " + participantId, trackType);
-    /*
-        // add HUD audio, video controls
-        if (trackType === 'audio') {
-        const audioButton = document.createElement('a-plane');
-        audioButton.setAttribute('id', "arena-videoconf-controls-mic");
-        audioButton.setAttribute('scale', '0.09 0.09 0.1');
-        //audioButton.setAttribute('src', "images/micON.png");
-        // automatically added when setting videoconf Component below
-        audioButton.setAttribute("click-listener", "");
-        audioButton.setAttribute("videoconf-mic", "");
-        audioButton.setAttribute("material", "shader", "flat");
-        //    audioButton.setAttribute("alphaTest", "0.5");
-        audioButton.setAttribute("transparent", "true");
-        audioButton.setAttribute('position', '0.65 0.25 -0.5');
-        globals.sceneObjects.myCamera.appendChild(audioButton);
-        globals.sceneObjects["arena-videoconf-controls-mic"] = audioButton;
-        }
-        if (trackType === 'video') {
-        const videoButton = document.createElement('a-plane');
-        videoButton.setAttribute('id', "arena-videoconf-controls-vid");
-        videoButton.setAttribute('scale', '0.09 0.09 0.1');
-        videoButton.setAttribute('src', "images/micOFF.png");
-        videoButton.setAttribute("click-listener", "");
-        videoButton.setAttribute("videoconf-cam", "");
-        videoButton.setAttribute("material", "shader", "flat");
-        //    videoButton.setAttribute("alphaTest", "0.5");
-        videoButton.setAttribute("transparent", "true");
-        videoButton.setAttribute('position', '0.65, 0.35, -0.5');
-        globals.sceneObjects.myCamera.appendChild(videoButton);
-        globals.sceneObjects["arena-videoconf-controls-vid"] = videoButton;
-        }
-    */
 }
-
 
 /**
  * Handles local tracks.
