@@ -28,7 +28,6 @@ function importScript(path) {
 importScript.__db = {};
 window['importScript'] = importScript; // needed if we ourselves are in a module
 
-
 function getUrlVars() {
     const vars = {};
     const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {

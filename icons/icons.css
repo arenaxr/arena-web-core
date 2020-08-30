@@ -25,10 +25,10 @@
     touch-action: manipulation; /* Prevent iOS double tap zoom on the button */
     opacity: 0;
 
-    animation: fadein 0.5s;
-    -moz-animation: fadein 0.5s; /* Firefox */
-    -webkit-animation: fadein 0.5s; /* Safari and Chrome */
-    -o-animation: fadein 0.5s; /* Opera */
+    animation: fadein 1.0s;
+    -moz-animation: fadein 1.0s; /* Firefox */
+    -webkit-animation: fadein 1.0s; /* Safari and Chrome */
+    -o-animation: fadein 1.0s; /* Opera */
     animation-fill-mode: forwards;
 }
 
@@ -37,7 +37,20 @@
     background-color: #ef2d5e;
 }
 
+@media screen and (max-height: 640px) {
+    #iconsDiv {
+        top: 20px;
+        right: 20px;
+    }
+
+    .arena-icon-button {
+        min-width: 45px;
+        min-height: 45px;
+        margin-bottom: 5px;
+    }
+}
+
 @keyframes fadein {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { opacity: 0.0; }
+    100% { opacity: 1.0; }
 }

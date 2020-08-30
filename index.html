@@ -1,8 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
+
+    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
+
     <title>ARENA</title>
     <meta name="description" content="Augmented Reality Edge Networking Architecture">
     <!-- the AFrame script library (minified) -->
@@ -82,7 +87,7 @@
       </a-assets>
 
       <a-entity id="sceneRoot">
-        <video src="" id="localvidbox" muted="muted" volume="0"  autoplay="true" playsinline="true" crossorigin="anonymous"></video>
+        <video src="" id="localvidbox" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
 
         <!-- BG music
         <video id="vrvideo" autoplay loop="false" src="audio.mp4"></video>
@@ -165,7 +170,7 @@
         -->
       </a-entity>
 
-      <a-plane id="localwallbox" visible="false" src="#localvidbox" scale="0.96 0.72 0.01" material="shader: flat; side: double"   position="0    4 -4"   autoplay="true" playsinline="true" ></a-plane>
+      <a-plane id="localwallbox" visible="false" src="#localvidbox" scale="0.96 0.72 0.01" material="shader: flat; side: double" position="0 4 -4" autoplay="true" playsinline="true"></a-plane>
     </a-scene>
 
     <div id="iconsDiv"></div>

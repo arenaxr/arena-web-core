@@ -197,7 +197,6 @@ function onRemoteTrack(track) {
             }
 
             let audioSource = new THREE.PositionalAudio(listener);
-
             audioSource.setMediaStreamSource(audioStream);
             audioSource.setRefDistance(1); // L-R panning
             audioSource.setRolloffFactor(1);
@@ -236,6 +235,7 @@ function onRemoteTrack(track) {
             globals.sceneObjects.scene.appendChild(planeElement);
 
             planeElement.object3D.add(audioSource);
+            // audioSource.context.resume();
         } // displayname.includes(DISPLAYNAME)
     } else {
 
@@ -285,7 +285,7 @@ function onRemoteTrack(track) {
                 globals.sceneObjects.scene.appendChild(vidBox);
             }
             vidBox.setAttribute("src", "#" + videoBox);
-            console.log("added src", videoBox);
+            // console.log("added src", videoBox);
         } else { // 'audio'
             //$('body').append(
             //    `<audio autoplay='1' id='${participant}audio${idx}' />`);
@@ -347,8 +347,9 @@ function onUserLeft(id) {
             tracks[i].detach($(`#${boxid}`)[0]);
         }
     }
-    if (listIdx != -1)
+    if (listIdx != -1) {
         callers[listIdx] = "empty"; // puts a hole in the callers array
+    }
     delete remoteTracks[id];
 }
 
@@ -429,7 +430,7 @@ function onDeviceListChanged(devices) {
  * This function is called when we disconnect.
  */
 function disconnect() {
-    console.log('disconnect!');
+    console.log('disconnected!');
     connection.removeEventListener(
         JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
         onConnectionSuccess);
