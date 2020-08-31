@@ -899,13 +899,15 @@ function onMessageArrived(message, jsonMessage) {
                             }
                         }
                         else {
-                            for (let child of entityEl.children) {
-                                if (child.getAttribute("id").includes("videoCube") ||
-                                    child.getAttribute("id").includes("videoHat")) {
-                                    entityEl.removeChild(child);
+                            if (entityEl) {
+                                for (let child of entityEl.children) {
+                                    if (child.getAttribute("id").includes("videoCube") ||
+                                        child.getAttribute("id").includes("videoHat")) {
+                                        entityEl.removeChild(child);
+                                    }
                                 }
+                                entityEl.setAttribute('videoCubeDrawn', false);
                             }
-                            entityEl.setAttribute('videoCubeDrawn', false);
                         }
                     }
                     break;
