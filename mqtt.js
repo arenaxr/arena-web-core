@@ -358,7 +358,8 @@ function onConnectionLost(responseObject) {
         console.log(responseObject.errorMessage);
     } // reconnect
     mqttClient.connect({
-        onSuccess: onConnect
+        onSuccess: onConnect,
+        willMessage: lwt // ensure 2nd disconnect will not leave head in scene
     });
 }
 
