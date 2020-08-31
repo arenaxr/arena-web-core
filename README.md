@@ -380,3 +380,4 @@ When moving or rotating the camera relative to the scene, use a camera rig. By d
   <a-entity id="camera" camera look-controls></a-entity>
 </a-entity>
 ```
+

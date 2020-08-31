@@ -28,7 +28,8 @@ window.trackFaceOn = function() {
 }
 
 window.trackFaceOff = function() {
-    if (!window.faceDetector || !window.faceDetector.ready) return;
+    if (!window.faceDetector || !window.faceDetector.ready ||
+        !window.overlayCanv || !window.videoCanv || !window.videoElem) return;
     trackFace = false;
 
     if (window.overlayCanv && !overlayOff) {
@@ -343,7 +344,7 @@ async function init() {
 
     trackFace = !!urlParams.get("trackFace");
     if (!mobileOrTablet() && (trackFace || globals.vidconf)) {
-        const FaceDetector = Comlink.wrap(new Worker("/x/face/faceDetector.js"));
+        const FaceDetector = Comlink.wrap(new Worker("/face-tracking/faceDetector.js"));
 
         flipped = !!urlParams.get("flipped");
         debugFace = !!urlParams.get("debugFace");
