@@ -22,6 +22,18 @@ const loadArena = (urlToLoad, position, rotation) => {
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
                 let obj = arenaObjects[i];
+                // program ? TODO: check object type instead
+                if (obj.attributes.filename) {
+                    let pobj = {
+                        "object_id": obj.object_id,
+                        "action": "create",
+                        "type": "program",
+                        "data": obj.attributes
+                    }
+
+                    window.pendingModules.push(pobj);
+                    continue;
+                }                
                 if (obj.object_id === globals.camName) {
                     continue; // don't load our own camera/head assembly
                 }
