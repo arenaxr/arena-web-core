@@ -45,19 +45,22 @@ function setupIcons() {
         videoBtn.not_toggled = !videoBtn.not_toggled;
         if (jitsiVideoTrack) {
             if (!videoBtn.not_toggled) { // toggled
-                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedvideo.png')";
-                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedavatar.png')";
-                jitsiVideoTrack.unmute();
-                avatarBtn.toggled = false;
-                globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
-                window.trackFaceOff();
-                publishAvatarMsg(false);
-                globals.hasVideo = true;
+                jitsiVideoTrack.unmute().then(_ => {
+                    setupCornerVideo();
+                    videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedvideo.png')";
+                    avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedavatar.png')";
+                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
+                    window.trackFaceOff();
+                    publishAvatarMsg(false);
+                    globals.hasVideo = true;
+                    avatarBtn.toggled = false;
+                })
             } else {
                 videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedvideo.png')";
-                jitsiVideoTrack.mute();
-                globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
-                globals.hasVideo = false;
+                jitsiVideoTrack.mute().then(_ => {
+                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                    globals.hasVideo = false;
+                })
             }
         }
     });
@@ -66,18 +69,20 @@ function setupIcons() {
         if (AFRAME.utils.device.isMobile()) return;
         avatarBtn.toggled = !avatarBtn.toggled;
         if (avatarBtn.toggled) { // toggled
-            avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedavatar.png')";
-            videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedvideo.png')";
-            jitsiVideoTrack.mute();
-            videoBtn.not_toggled = true;
-            globals.hasVideo = false;
-            globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
-            window.trackFaceOn();
-            publishAvatarMsg(true);
+            jitsiVideoTrack.mute().then(_ => {
+                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedavatar.png')";
+                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedvideo.png')";
+                globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                videoBtn.not_toggled = true;
+                globals.hasVideo = false;
+                window.trackFaceOn();
+                publishAvatarMsg(true);
+            })
         } else {
             avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedavatar.png')";
-            window.trackFaceOff();
-            publishAvatarMsg(false);
+            window.trackFaceOff().then(_ => {
+                publishAvatarMsg(false);
+            })
         }
     });
 

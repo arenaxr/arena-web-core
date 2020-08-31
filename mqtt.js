@@ -166,31 +166,13 @@ function onConnect() {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
 
-    // set up corner video window
-    const localvidbox = document.getElementById("localvidbox");
-    navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
-        audio: false
-    })
-    .then(stream => {
-        const videoSettings = stream.getVideoTracks()[0].getSettings();
-        localvidbox.srcObject = stream;
-        localvidbox.play();
-    })
-    .catch(function(err) {
-        console.log("ERROR: " + err);
-    });
-
-    const width = 320;
-    const height = 240;
-    localvidbox.setAttribute("width", width);
-    localvidbox.setAttribute("height", height);
+    setupCornerVideo();
 
     // video window for jitsi
     const videoPlane = document.createElement('a-video');
     videoPlane.setAttribute('id', "arena-vid-plane");
-    videoPlane.setAttribute('width', width/1000);
-    videoPlane.setAttribute('height', height/1000);
+    videoPlane.setAttribute('width', globals.localvidboxWidth/1000);
+    videoPlane.setAttribute('height', globals.localvidboxHeight/1000);
     videoPlane.setAttribute('src', "#localvidbox");
     videoPlane.setAttribute("click-listener", "");
     videoPlane.setAttribute("material", "shader", "flat");
@@ -486,6 +468,31 @@ function highlightVideoCube(entityEl, oldEl, slot) {
     entityEl.appendChild(videoHat);
 }
 
+// set up local corner video window
+function setupCornerVideo() {
+    const localvidbox = document.getElementById("localvidbox");
+    navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false
+    })
+    .then(stream => {
+        const videoSettings = stream.getVideoTracks()[0].getSettings();
+        if (localvidbox) {
+            localvidbox.srcObject = stream;
+            localvidbox.play();
+        }
+    })
+    .catch(function(err) {
+        console.log("ERROR: " + err);
+    });
+
+    if (localvidbox) {
+        localvidbox.setAttribute("width", globals.localvidboxWidth);
+        localvidbox.setAttribute("height", globals.localvidboxHeight);
+    }
+}
+
+// slightly modified from:
 // https://github.com/mozilla/hubs/blob/0c26af207bbbc3983409cdab7210b219b53449ca/src/systems/audio-system.js
 async function enableChromeAEC(gainNode) {
     /**
@@ -525,7 +532,7 @@ async function enableChromeAEC(gainNode) {
     });
 
     gainNode.disconnect();
-    gainNode.connect(loopbackDestination);
+    gainNode.connect(context.destination);
 
     loopbackDestination.stream.getTracks().forEach(track => {
         outboundPeerConnection.addTrack(track, loopbackDestination.stream);
@@ -864,16 +871,17 @@ function onMessageArrived(message, jsonMessage) {
                                     let audioSource = new THREE.PositionalAudio(listener);
                                     audioSource.setMediaStreamSource(audioStream);
                                     audioSource.setRefDistance(1); // L-R panning
-                                    audioSource.setRolloffFactor(0.5);
+                                    audioSource.setRolloffFactor(1);
+                                    entityEl.object3D.add(audioSource);
 
                                     // https://github.com/mozilla/hubs/blob/0c26af207bbbc3983409cdab7210b219b53449ca/src/systems/audio-system.js
-                                    const ctx = THREE.AudioContext.getContext();
+                                    const audioCtx = THREE.AudioContext.getContext();
                                     const resume = () => {
-                                        ctx.resume();
+                                        audioCtx.resume();
                                         setTimeout(function() {
-                                            if (ctx.state === "running") {
+                                            if (audioCtx.state === "running") {
                                                 if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-                                                    enableChromeAEC(sceneEl.audioListener.gain);
+                                                    enableChromeAEC(listener.gain);
                                                 }
                                                 document.body.removeEventListener("touchend", resume, false);
                                                 document.body.removeEventListener("mouseup", resume, false);
@@ -883,7 +891,6 @@ function onMessageArrived(message, jsonMessage) {
                                     document.body.addEventListener("touchend", resume, false);
                                     document.body.addEventListener("mouseup", resume, false);
 
-                                    entityEl.object3D.add(audioSource);
                                     entityEl.setAttribute('posAudioAdded', true);
                                 }
 

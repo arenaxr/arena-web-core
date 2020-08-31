@@ -95,6 +95,8 @@ window.globals = {
     mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
     fixedCamera: getUrlParam('fixedCamera', ''),
     ATLASurl: getUrlParam('ATLASurl', '//atlas.conix.io'),
+    localvidboxWidth: 320,
+    localvidboxHeight: 240,
     vioTopic: "/topic/vio/",
     graphTopic: "$GRAPH/latency",
     lastMouseTarget: undefined,
