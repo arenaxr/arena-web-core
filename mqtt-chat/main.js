@@ -1,4 +1,4 @@
-import MQTTChat from 'mqtt-chat/mqtt-chat.js';
+import MQTTChat from './mqtt-chat.js';
 
 window.addEventListener('load', (event) => {
     console.log("Loading MQTTChat");
