@@ -85,20 +85,20 @@ function onLocalTracks(tracks) {
             // instead use already defined e.g. <video id="localvidbox" ...>
             track.attach($(`#localvidbox`)[0]);
             jitsiVideoTrack = track;
-            jitsiVideoTrack.mute();
         } else if (track.getType() === 'audio') {
             //$('body').append(`<audio autoplay='1' muted='true' id='localAudio${i}' />`);
 
             // instead use already defined in index.html <audio id="aud0" ...>
             //            track.attach($(`#aud0`)[0]);
             jitsiAudioTrack = track;
-            jitsiAudioTrack.mute();
         }
         if (isJoined) { // mobile only?
             conference.addTrack(track);
             connectArena(conference.myUserId(), track.getType());
         }
     }
+    if (jitsiAudioTrack) jitsiAudioTrack.mute();
+    if (jitsiVideoTrack) jitsiVideoTrack.mute();
 }
 
 /**
