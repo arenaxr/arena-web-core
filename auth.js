@@ -7,35 +7,16 @@
 
 // startup authentication context
 var auth2;
-//var googleUser;
 var urlMqttAuth = "https://xr.andrew.cmu.edu:8888";
 
-window.globals.username = undefined;
-window.globals.mqttToken = undefined;
+var username = undefined;
+var mqttToken = undefined;
 
-async function operation() {
-    return new Promise(function(resolve, reject) {
-        var a = 0;
-        var b = 1;
-        a = a + b;
-        a = 5;
-
-        // may be a heavy db call or http request?
-
-	gapi.load('auth2', function () {
-            auth2 = gapi.auth2.init({
-                // test CONIX Research Center ARENA auth id for xr
-                client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
-            });
-        });
-    
-        resolve(a) // successfully fill promise
-    })
-}
-
-async function app() {
-    var a = await operation() // a is 5
-
+gapi.load('auth2', function () {
+    auth2 = gapi.auth2.init({
+        // test CONIX Research Center ARENA auth id for xr
+        client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
+    }).then(function () {
         auth2 = gapi.auth2.getAuthInstance();
 
         //setupIcons(); // don't regen on mqtt reconnect
@@ -51,35 +32,8 @@ async function app() {
             googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
-}
-
-app()
-
-//gapi.load('auth2', function () {
-//    auth2 = gapi.auth2.init({
-//        // test CONIX Research Center ARENA auth id for xr
-//        client_id: '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
-//    }).then(function () {
-//        auth2 = gapi.auth2.getAuthInstance();
-//
- //       //setupIcons(); // don't regen on mqtt reconnect
-//
- //       if (!auth2.isSignedIn.get()) {
-//            console.log("User is not logged in.");
-//            // auto sign in?
-//            //signIn();
-//            location.href = "./signin";
-//            // TODO: send login with redirection url from this page
-//	} else {
-//	    console.log("User is already logged in.");
- //           googleUser = auth2.currentUser.get();
-//            onSignIn(googleUser);
-//        }
-//    });
-//});
-
-
-//checkAuth();
+    });
+});
 
 function signIn() {
     var auth2 = gapi.auth2.getAuthInstance();
@@ -109,8 +63,8 @@ function onSignIn(googleUser) {
 
 function signOut() {
     // disconnect does not use LWT, so delete manual
-//    let msg = { object_id: globals.camName, action: "delete" };
-//    publish(globals.outputTopic + globals.camName, msg);
+    //    let msg = { object_id: globals.camName, action: "delete" };
+    //    publish(globals.outputTopic + globals.camName, msg);
     mqttClient.disconnect();
     // logout, and dissassociate user
     var auth2 = gapi.auth2.getAuthInstance();
@@ -145,8 +99,8 @@ function requestMqttToken(id_token) {
             alert(`Error loading token: ${xhr.status}: ${xhr.statusText}`);
         } else {
             console.log("got user/token:", xhr.response.username, xhr.response.token);
-	    // token must be set to authorize acccess to MQTT broker
-            globals.mqttToken = xhr.response.token;
+            // token must be set to authorize acccess to MQTT broker
+            onAuthenticationComplete(xhr.response.username, xhr.response.token);
         }
     };
 }
