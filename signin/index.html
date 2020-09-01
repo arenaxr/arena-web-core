@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Sign In to the ARENA</title>
+    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" type="text/css" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com">
+</head>
+
+<body>
+    <div class="bg-img login-form">
+        <form method="post" action="" class="container">
+            <h1>Sign In to the ARENA</h1>
+            <input type="email" placeholder="Username or email id" name="username" required>
+            <input type="password" placeholder="Enter password" name="psw" required>
+            <button type="submit">Login</button>
+
+            <label class="remember-me"><input type="checkbox" name="remember">Remember me</label>
+            <span class="forget-psw">Forgot <a href="#">password?</a></span>
+
+            <div class="social-btn">
+                <div class="g-signin2" data-onsuccess="onGoogleSignIn"></div>
+                <!-- <button type="submit" class="google-btn"><i class="fa fa-google" aria-hidden="true"></i> Login with
+                    Google</button> -->
+                <button type="submit" class="github-btn"><i class="fa fa-github" aria-hidden="true"></i> Login with
+                    Github</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function onGoogleSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            console.log('Name: ' + profile.getName());
+            console.log('Image URL: ' + profile.getImageUrl());
+            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+        }
+    </script>
+</body>
+
+</html>

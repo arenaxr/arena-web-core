@@ -76,7 +76,9 @@ export default class MqttClient {
         onFailure: () => { 
           throw new Error('Could not connect!')
         },
-        useSSL: _this.settings.useSSL
+        useSSL: _this.settings.useSSL,
+        userName: globals.username,
+        password: globals.mqttToken
       });
     });
   }
