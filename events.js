@@ -83,22 +83,23 @@ function debug(msg) {
     publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
+console.log(defaults);
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
-    updateMillis: getUrlParam('camUpdateRate', 100),
-    scenenameParam: getUrlParam('scene', 'render'), //scene
-    userParam: getUrlParam('name', 'X'),
-    startCoords: getUrlParam('location', '0,1.6,0').replace(/,/g, ' '),
-    themeParam: getUrlParam('theme', 'starry'),
-    weatherParam: getUrlParam('weather', 'none'),
-    mqttParamZ: getUrlParam('mqttServer', 'oz.andrew.cmu.edu'),
-    fixedCamera: getUrlParam('fixedCamera', ''),
-    ATLASurl: getUrlParam('ATLASurl', '//atlas.conix.io'),
-    localvidboxWidth: 320,
-    localvidboxHeight: 240,
-    vioTopic: "/topic/vio/",
-    graphTopic: "$GRAPH/latency",
+    updateMillis: getUrlParam('camUpdateRate', defaults.updateMillis),
+    scenenameParam: getUrlParam('scene', defaults.scenenameParam), //scene
+    userParam: getUrlParam('name', defaults.userParam),
+    startCoords: getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
+    themeParam: getUrlParam('theme', defaults.themeParam),
+    weatherParam: getUrlParam('weather', defaults.weatherParam),
+    mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
+    fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
+    ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
+    localvidboxWidth: defaults.localvidboxWidth,
+    localvidboxHeight: defaults.localvidboxHeight,
+    vioTopic: defaults.vioTopic,
+    graphTopic: defaults.graphTopic,
     lastMouseTarget: undefined,
     inAR: false,
     vidconf: true,
@@ -186,6 +187,7 @@ window.globals = {
         }
     }
 };
+console.log(window.globals);
 
 let urlLat = getUrlParam('lat');
 let urlLong = getUrlParam('long');
