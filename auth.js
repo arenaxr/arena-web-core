@@ -9,7 +9,7 @@
 var auth2;
 var urlMqttAuth = "https://xr.andrew.cmu.edu:8888";
 
-var username = undefined;
+var username = 'admin'; //TODO: implement username from auth2
 var mqttToken = undefined;
 
 gapi.load('auth2', function () {
@@ -77,7 +77,7 @@ function signOut() {
 function requestMqttToken(id_token) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    var params = "scene=" + globals.scenenameParam + "&username=" + globals.username;
+    var params = "scene=" + globals.scenenameParam + "&username=" + username;
     if (globals.camName) {
         params += "&camid=" + globals.camName
     }
