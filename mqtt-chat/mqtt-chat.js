@@ -246,6 +246,25 @@ export default class MQTTChat {
             }
         }
 
+        // process commands
+        if (msg.type == "chat-cmd"){
+          if (msg.text == "sound:off") {
+            let abtn = document.getElementById('btn-roundedaudio');
+            if (abtn == undefined) {
+              console.log("Could not find audio button");
+              return;
+            }
+            //abtn.dispatchEvent(new MouseEvent('mousedown'));
+            //abtn.dispatchEvent(new MouseEvent('mouseup'));
+            //if (!abtn.not_toggled) abtn.childNodes[0].click();
+            console.log("**Sent click!",abtn.style.backgroundImage);
+            if (abtn.style.backgroundImage.includes('slash') == false) {
+              abtn.click();
+            }
+          }
+          return;
+        }
+
         // ignore our messages
         if (msg.from_uid == this.settings.userid) return;
 
@@ -286,17 +305,31 @@ export default class MQTTChat {
             uli.innerHTML = _this.liveUsers[key].scene + "/" + _this.liveUsers[key].un + ((key == _this.settings.userid) ? " (me)" : "");
             //uli.setAttribute("cameraid", _this.liveUsers[key].cid);
 
-            if (key !== _this.settings.userid && _this.liveUsers[key].scene == _this.settings.scene) {
-                let uspan = document.createElement("span");
-                uspan.className = "users-list-btn";
-                uspan.title = "Find User";
-                uli.appendChild(uspan);
+            let uBtnCtnr = document.createElement("div");
+            //uBtnCtnr.innerHTML='bla';
+            uBtnCtnr.className="users-list-btn-ctnr";
+            uli.appendChild(uBtnCtnr);
 
-                console.log("**", _this.liveUsers[key].cid);
+            if (key !== _this.settings.userid && _this.liveUsers[key].scene == _this.settings.scene) {
+                let fuspan = document.createElement("span");
+                fuspan.className = "users-list-btn fu";
+                fuspan.title = "Find User";
+                uBtnCtnr.appendChild(fuspan);
 
                 // span click event (move us to be in front of another clicked user)
-                uspan.onclick = function() {
+                fuspan.onclick = function() {
                     _this.moveToFrontOfCamera(_this.liveUsers[key].cid);
+                }
+
+                let sspan = document.createElement("span");
+                sspan.className = "users-list-btn s";
+                sspan.title = "Mute User";
+                uBtnCtnr.appendChild(sspan);
+
+                // span click event (send sound on/off msg to ussr)
+                sspan.onclick = function() {
+                    let utopic = _this.settings.realm + "/g/c/" + key;
+                    _this.cmdMsg(utopic, "sound:off");
                 }
 
                 let op = document.createElement("option");
@@ -337,6 +370,18 @@ export default class MQTTChat {
         this.mqttc.send(this.settings.atopic, JSON.stringify(msg), 0, false);
     }
 
+    cmdMsg(toTopic, text, tryconnect = false) {
+        // re-establish connection, in case client disconnected
+        if (tryconnect) this.connect();
+
+        let msg = {
+            type: "chat-cmd",
+            text: text
+        }
+        //console.log("cmd", msg, "to", toTopic);
+        this.mqttc.send(toTopic, JSON.stringify(msg), 0, false);
+    }
+
     userCleanup() {
         let now = new Date().getTime();
         let _this = this;
@@ -356,15 +401,17 @@ export default class MQTTChat {
             return;
         }
         let toCam = sceneEl.querySelector('#' + cameraId);
-        //let cameraRig = sceneEl.querySelector('#CameraRig');
-        let myCamera = document.getElementById('my-camera'); // TODO: change to use settings.cameraid
-        //let cameraSpinner = sceneEl.querySelector('#CameraSpinner');
 
-        var direction = new THREE.Vector3();
-		    toCam.object3D.getWorldDirection( direction );
-        let distance = 1; // distance to put you
-        myCamera.object3D.position.copy( toCam.object3D.position.clone() ).add( direction.multiplyScalar( -distance ) );
-        myCamera.object3D.lookAt(toCam.object3D.position);
-        // TODO: find a way to rotate the camera!
+        let cameraRig = sceneEl.querySelector('#CameraRig');
+        let myCamera = document.getElementById('my-camera');
+
+        let cameraSpinner = sceneEl.querySelector('#CameraSpinner');
+
+        let distance = 0.1;
+        let pos = toCam.object3D.position.clone() //.negate().multiplyScalar(distance);
+
+        //myCamera.object3D.position.copy(toCam.object3D.position.clone());
+        myCamera.object3D.position.copy(pos);
+        //sceneObjects.cameraSpinner.object3D.quaternion.set(xrot, yrot, zrot, wrot);
     }
 }
