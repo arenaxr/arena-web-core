@@ -9,6 +9,7 @@ function createIconButton(img, onClick) {
     iconButton = document.createElement('button');
     iconButton.style.backgroundImage = `url('images/icons/${img}.png')`;
     iconButton.className = ICON_BTN_CLASS;
+    iconButton.setAttribute("id", "btn-"+img);
 
     // Insert elements.
     wrapper.appendChild(iconButton);
