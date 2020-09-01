@@ -83,7 +83,6 @@ function debug(msg) {
     publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
-console.log(defaults);
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
@@ -205,7 +204,7 @@ if (urlLat && urlLong) {
 }
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.scenenameParam;
-globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
+globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt/';
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
