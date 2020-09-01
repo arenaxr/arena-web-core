@@ -51,13 +51,6 @@ function getSlotOfCaller(participantId) {
 }
 
 function connectArena(participantId, trackType) {
-    if (trackType === 'audio') {
-        globals.hasAudio = true;
-    }
-    if (trackType === 'video') {
-        globals.hasVideo = true;
-    }
-
     globals.jitsiId = participantId;
     console.log("connectArena: " + participantId, trackType);
 }
@@ -76,7 +69,7 @@ function onLocalTracks(tracks) {
             audioLevel => console.log(`Audio Level local: ${audioLevel}`));
         track.addEventListener(
             JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-            () => console.log('local track muted'));
+            () => console.log('local track state changed'));
         track.addEventListener(
             JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
             () => console.log('local track stopped'));
@@ -92,12 +85,14 @@ function onLocalTracks(tracks) {
             // instead use already defined e.g. <video id="localvidbox" ...>
             track.attach($(`#localvidbox`)[0]);
             jitsiVideoTrack = track;
+            jitsiVideoTrack.mute();
         } else if (track.getType() === 'audio') {
             //$('body').append(`<audio autoplay='1' muted='true' id='localAudio${i}' />`);
 
             // instead use already defined in index.html <audio id="aud0" ...>
             //            track.attach($(`#aud0`)[0]);
             jitsiAudioTrack = track;
+            jitsiAudioTrack.mute();
         }
         if (isJoined) { // mobile only?
             conference.addTrack(track);
@@ -471,7 +466,7 @@ function switchVideo() { // eslint-disable-line no-unused-vars
             localTracks.push(tracks[0]);
             localTracks[1].addEventListener(
                 JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-                () => console.log('local track muted'));
+                () => console.log('local track state changed'));
             localTracks[1].addEventListener(
                 JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
                 () => console.log('local track stopped'));

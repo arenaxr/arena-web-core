@@ -33,7 +33,7 @@ const loadArena = (urlToLoad, position, rotation) => {
 
                     window.pendingModules.push(pobj);
                     continue;
-                }                
+                }
                 if (obj.object_id === globals.camName) {
                     continue; // don't load our own camera/head assembly
                 }
@@ -190,6 +190,7 @@ function onConnect() {
     videoPlane.setAttribute("material", "shader", "flat");
     videoPlane.setAttribute("transparent", "true");
     videoPlane.setAttribute('position', '-0.585, 0.287, -0.5');
+    videoPlane.setAttribute("visible", "false");
     globals.sceneObjects.myCamera.appendChild(videoPlane);
     globals.sceneObjects["arena-vid-plane"] = videoPlane;
 
@@ -263,7 +264,7 @@ function onConnect() {
             object_id: globals.camName,
             jitsiId: globals.jitsiId,
             hasVideo: globals.hasVideo,
-            // hasAudio: globals.hasAudio,
+            hasAudio: globals.hasAudio,
             // activeSpeaker: globals.activeSpeaker,
             action: 'create',
             type: 'object',
@@ -493,16 +494,13 @@ function setupCornerVideo() {
         if (localvidbox) {
             localvidbox.srcObject = stream;
             localvidbox.play();
+            localvidbox.setAttribute("width", globals.localvidboxWidth);
+            localvidbox.setAttribute("height", globals.localvidboxHeight);
         }
     })
     .catch(function(err) {
         console.log("ERROR: " + err);
     });
-
-    if (localvidbox) {
-        localvidbox.setAttribute("width", globals.localvidboxWidth);
-        localvidbox.setAttribute("height", globals.localvidboxHeight);
-    }
 }
 
 // slightly modified from:
