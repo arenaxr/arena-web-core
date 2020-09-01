@@ -389,6 +389,8 @@ function onConnect() {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     mqttClient.subscribe(globals.renderTopic);
+	
+    setupIcons();
 }
 
 function setupIcons() {
