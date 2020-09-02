@@ -52,13 +52,15 @@
         </div>
 
         <script>
-            'use strict';
-            
+            "use strict";
+
             function onGoogleSignIn(googleUser) {
                 var profile = googleUser.getBasicProfile();
                 console.log("Signed In:: " + profile.getEmail());
-		
-		let urlParams = new URLSearchParams(document.location.search.substring(1));
+
+                let urlParams = new URLSearchParams(
+                    document.location.search.substring(1)
+                );
                 var encodedUri = urlParams.get("redirect_uri");
                 if (encodedUri) {
                     //redirect user to orginally requested page
