@@ -35,7 +35,7 @@ gapi.load('auth2', function () {
             location.href = "./signin?redirect_uri=" + encodeURI(location.href);;
         } else {
             console.log("User is already logged in.");
-            googleUser = auth2.currentUser.get();
+            var googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
     });
@@ -45,7 +45,7 @@ function signIn() {
     // currently unused, old way
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signIn().then(function () {
-        googleUser = auth2.currentUser.get();
+        var googleUser = auth2.currentUser.get();
         onSignIn(googleUser);
     });
 }
@@ -85,7 +85,7 @@ function signOut() {
 function requestMqttToken(mqtt_username, id_token) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    var params = + "&username=" + mqtt_username + "&id_token=" + id_token;
+    var params = "username=" + mqtt_username + "&id_token=" + id_token;
     params += "&id_auth=google";
     if (globals) {
         if (globals.scenenameParam) {
@@ -101,7 +101,7 @@ function requestMqttToken(mqtt_username, id_token) {
             params += "&ctrlid2=" + globals.viveRName;
         }
     }
-    xhr.open('POST', url);
+    xhr.open('POST', urlMqttAuth);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send(params);
     xhr.responseType = 'json';
@@ -113,7 +113,7 @@ function requestMqttToken(mqtt_username, id_token) {
             // token must be set to authorize acccess to MQTT broker
             onAuthenticationComplete(xhr.response.username, xhr.response.token);
         }
-    };s
+    };
 }
 
 
