@@ -203,8 +203,13 @@ if (urlLat && urlLong) {
     }
 }
 
+<<<<<<< HEAD
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + '/xmqtt/';
+=======
+globals.persistenceUrl = '//' + globals.mqttParamZ + defaults.persistPath + globals.scenenameParam;
+globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqqtPath;
+>>>>>>> master
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
