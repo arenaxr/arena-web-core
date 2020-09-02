@@ -117,11 +117,16 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
-function onAuthenticationComplete(u,t) {
-    globals.username = u;
-    globals.mqttToken = t;
+// function onAuthenticationComplete(u,t) {
+//     globals.username = u;
+//     globals.mqttToken = t;
+//     mqttConnect();
+// }
+window.addEventListener('onauth', function (e) {
+    globals.username = e.mqtt_username;
+    globals.mqttToken = e.mqtt_token;
     mqttConnect();
-}
+});
 
 function mqttConnect() {
     // TODO: remove token logging, or at least log token contents?

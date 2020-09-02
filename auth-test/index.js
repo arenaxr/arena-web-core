@@ -1,7 +1,7 @@
 'use strict';
 
 const args = require('minimist')(process.argv.slice(2));
-const config = require(args.c); // use arg '-c path/config.json' for confile file
+const config = require(args.c); // use arg '-c path/config.json' for config file
 const express = require('express')
 const https = require('https')
 const fs = require('fs')

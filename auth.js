@@ -112,7 +112,12 @@ function requestMqttToken(mqtt_username, id_token) {
         } else {
             console.log("got user/token:", xhr.response.username, xhr.response.token);
             // token must be set to authorize acccess to MQTT broker
-            onAuthenticationComplete(xhr.response.username, xhr.response.token);
+            //onAuthenticationComplete(xhr.response.username, xhr.response.token);
+            const authCompleteEvent = new CustomEvent('onauth', {
+                mqtt_username: xhr.response.username,
+                mqtt_token: xhr.response.token
+            });
+            window.dispatchEvent(authCompleteEvent);
         }
     };
 }
