@@ -34,10 +34,10 @@ app.use(function (req, res, next) {
 });
 
 // TODO: later use POST for the id_token and req.body.foo
-app.get('/', (req, res) => {
+app.post('/', (req, res) => {
     var realm = config.realm
-    var scene = req.query.scene
-    var authname = req.query.username
+    var scene = req.body.scene
+    var authname = req.body.username
     var scene_obj = realm + "/s/" + scene + "/#";
     var scene_admin = realm + "/admin/s/" + scene + "/#";
     switch (authname) {
@@ -76,22 +76,25 @@ app.get('/', (req, res) => {
             break;
         case 'viewer':
             var user_objs = [];
-            if (req.query.camid != undefined) {
-                user_objs.push(realm + "/s/" + scene + "/" + req.query.camid);
+            if (req.body.camid != undefined) {
+                user_objs.push(realm + "/s/" + scene + "/" + req.body.camid);
                 user_objs.push(realm + "/s/" + scene + "/arena-face-tracker");
             }
-            if (req.query.ctrlid1 != undefined) {
-                user_objs.push(realm + "/s/" + scene + "/" + req.query.ctrlid1);
+            if (req.body.ctrlid1 != undefined) {
+                user_objs.push(realm + "/s/" + scene + "/" + req.body.ctrlid1);
             }
-            if (req.query.ctrlid2 != undefined) {
-                user_objs.push(realm + "/s/" + scene + "/" + req.query.ctrlid2);
+            if (req.body.ctrlid2 != undefined) {
+                user_objs.push(realm + "/s/" + scene + "/" + req.body.ctrlid2);
             }
             // viewer is sub scene, pub cam/controllers
             jwt = generateToken(authname, '1 day',
                 [scene_obj], user_objs);
             break;
         default:
-            jwt = null;
+            // TODO: hook into authorization ACL, for now allow all pub/sub for 1 day
+            //jwt = null;
+            jwt = generateToken(authname, '1 day',
+                ["#"], ["#"]);
             break;
     }
     res.json({ username: authname, token: jwt });
