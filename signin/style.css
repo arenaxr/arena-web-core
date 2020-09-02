@@ -1,42 +1,43 @@
-body, html {
+body,
+html {
     height: 100%;
-  }
-  
-  * {
+}
+
+* {
     box-sizing: border-box;
-  }
-  
-  .bg-img {
+}
+
+.bg-img {
     /* The image used */
     background-image: url("https://xr.andrew.cmu.edu/images/home.png");
-  
+
     /* Control the height of the image */
     min-height: 1000px;
-  
+
     /* Center and scale the image nicely */
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     position: relative;
-  }
-  
-  /* Add styles to the form container */
-  .container {
+}
+
+/* Add styles to the form container */
+.container {
     position: absolute;
     right: 0;
     margin: 20px;
     max-width: 300px;
     padding: 16px;
     background-color: white;
-  }
+}
 
-  body {
+body {
     background-color: #fbfbfb;
 }
 .login-form {
     font-family: arial;
     color: #333;
-} 
+}
 .login-form form {
     width: 500px;
     margin: 0 auto;
@@ -66,14 +67,14 @@ body, html {
     display: table;
     font-size: 20px;
     padding: 10px 30px;
-    background-color: #4CAF50;
+    background-color: #4caf50;
     border: none;
     color: #fff;
     border-radius: 4px;
     cursor: pointer;
 }
-.login-form button:hover{
-  opacity: 0.8;
+.login-form button:hover {
+    opacity: 0.8;
 }
 .login-form input[type="checkbox"] {
     height: 16px;
@@ -85,19 +86,20 @@ body, html {
     float: right;
 }
 .login-form .forget-psw a {
-    color: #2196F3;
+    color: #2196f3;
     text-decoration: none;
 }
-.social-btn button.google-btn, .social-btn button.github-btn {
+.social-btn button.google-btn,
+.social-btn button.github-btn {
     width: 100%;
     font-size: 18px;
     margin: 0px 0px 10px;
 }
-.social-btn button.google-btn{
-  background-color: #4285F4;
+.social-btn button.google-btn {
+    background-color: #4285f4;
 }
-.social-btn button.github-btn{
-  background-color: #000000;
+.social-btn button.github-btn {
+    background-color: #000000;
 }
 .social-btn {
     border-top: 1px solid #ddd;
@@ -108,12 +110,13 @@ body, html {
     margin-right: 5px;
     font-size: 20px;
 }
-@media (max-width: 767px){
-.login-form form {
-    width: 90%;
-    padding: 20px 15px 20px;
+@media (max-width: 767px) {
+    .login-form form {
+        width: 90%;
+        padding: 20px 15px 20px;
+    }
+    .social-btn button.google-btn,
+    .social-btn button.github-btn {
+        font-size: 15px;
+    }
 }
-.social-btn button.google-btn, .social-btn button.github-btn {
-    font-size: 15px;
-}
-} 
