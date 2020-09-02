@@ -1,7 +1,7 @@
 import MQTTChat from './mqtt-chat.js';
 
 window.addEventListener('onauth', function (e) {
-    window.addEventListener('load', (event) => {
+//    window.addEventListener('load', (event) => {
         console.log("Loading MQTTChat");
         let mqttChat = new MQTTChat({
             cameraid: window.globals.camName,
@@ -15,5 +15,5 @@ window.addEventListener('onauth', function (e) {
         });
     
         mqttChat.connect();
-    });
+//    });
 });
