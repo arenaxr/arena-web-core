@@ -31,6 +31,8 @@ export default class MqttClient {
       onMessageCallback: st.onMessageCallback,
       useSSL: st.useSSL !== undefined ? st.useSSL : true,     
       dbg: st.dbg !== undefined ? st.dbg : false,
+      mqtt_username: st.mqtt_username,
+      mqtt_token: st.mqtt_token,
     };
 
     if (this.settings.dbg == true) console.log(this.settings);
@@ -77,8 +79,8 @@ export default class MqttClient {
           throw new Error('Could not connect!')
         },
         useSSL: _this.settings.useSSL,
-        userName: globals.username,
-        password: globals.mqttToken
+        userName: _this.settings.mqtt_username,
+        password: _this.settings.mqtt_token
       });
     });
   }

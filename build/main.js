@@ -26,6 +26,8 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 
 }
 
+function onAuthenticationComplete(u,t) {
+
 document.addEventListener("DOMContentLoaded", async function() {
 
     var schema;
@@ -64,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     var data = await fetch("dft-config.json");
     var dfts = await data.json();
 
-    // load values from fedaults or local storage, if they exist
+    // load values from defaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
@@ -230,7 +232,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         scene_list: document.getElementById("scenelist"),
         scene_textbox: document.getElementById("arena_scene"),
         log_panel: document.getElementById("logpanel"),
-        editobj_handler: editobjHandler
+        editobj_handler: editobjHandler,
+        mqtt_username: u,
+        mqtt_token: p,
     });
 
     // update options (including persist_url) from inputs
@@ -303,5 +307,6 @@ document.addEventListener("DOMContentLoaded", async function() {
         updateHost();
     });
 });
+}
 
 displayAlert("Loading..", "info", 3000);
