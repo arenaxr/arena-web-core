@@ -123,8 +123,8 @@ mqttClient.onMessageArrived = onMessageArrived;
 //     mqttConnect();
 // }
 window.addEventListener('onauth', function (e) {
-    globals.username = e.mqtt_username;
-    globals.mqttToken = e.mqtt_token;
+    globals.username = e.detail.mqtt_username;
+    globals.mqttToken = e.detail.mqtt_token;
     mqttConnect();
 });
 

@@ -10,8 +10,8 @@ window.addEventListener('onauth', function (e) {
             scene: window.globals.scenenameParam,
             ping_interval_ms: 30000,
             mqtt_host: window.globals.mqttParam,
-            mqtt_username: e.mqtt_username,
-            mqtt_token: e.mqtt_token,
+            mqtt_username: e.detail.mqtt_username,
+            mqtt_token: e.detail.mqtt_token,
         });
     
         mqttChat.connect();
