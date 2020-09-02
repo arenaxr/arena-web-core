@@ -57,7 +57,8 @@ function onSignIn(googleUser) {
     console.log('Email: ' + profile.getEmail());
 
     // early enough to reset cam name
-    if (globals && globals.camName) {
+    if (typeof globals !== 'undefined' && globals.camName) {
+	
         var cam = globals.camName.split('_');
         cam[2] = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
         globals.camName = cam.join('_');
@@ -87,7 +88,7 @@ function requestMqttToken(mqtt_username, id_token) {
     let xhr = new XMLHttpRequest();
     var params = "username=" + mqtt_username + "&id_token=" + id_token;
     params += "&id_auth=google";
-    if (globals) {
+    if (typeof globals !== 'undefined') {
         if (globals.scenenameParam) {
             params += "&scene=" + globals.scenenameParam;
         }

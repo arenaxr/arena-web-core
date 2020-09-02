@@ -3,28 +3,6 @@
 //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
 window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
 
-var ICON_BTN_CLASS = 'arena-icon-button';
-
-function createIconButton(img, onClick) {
-    var iconButton;
-    var wrapper;
-
-    // Create elements.
-    wrapper = document.createElement('div');
-    iconButton = document.createElement('button');
-    iconButton.style.backgroundImage = `url('../jitsi/images/icons/${img}.png')`;
-    iconButton.className = ICON_BTN_CLASS;
-
-    // Insert elements.
-    wrapper.appendChild(iconButton);
-    iconButton.addEventListener('click', function (evt) {
-        onClick();
-        evt.stopPropagation();
-    });
-
-    return wrapper;
-}
-
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
 const loadArena = (urlToLoad, position, rotation) => {
@@ -395,8 +373,6 @@ function onConnect() {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     mqttClient.subscribe(globals.renderTopic);
-	
-    setupIcons();
 }
 
 function setupIcons() {
