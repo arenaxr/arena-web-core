@@ -139,7 +139,6 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
-<<<<<<< HEAD
 function onAuthenticationComplete(u,t) {
     globals.username = u;
     globals.mqttToken = t;
@@ -163,21 +162,6 @@ function mqttConnect() {
         password: globals.mqttToken
     });
 }
-=======
-// Last Will and Testament message sent to subscribers if this client loses connection
-const lwt = new Paho.MQTT.Message(JSON.stringify({
-    object_id: globals.camName,
-    action: "delete"
-}));
-lwt.destinationName = globals.outputTopic + globals.camName;
-lwt.qos = 2;
-lwt.retained = false;
-
-mqttClient.connect({
-    onSuccess: onConnect,
-    willMessage: lwt
-});
->>>>>>> master
 
 var oldMsg = '';
 
@@ -415,7 +399,6 @@ function onConnect() {
     setupIcons();
 }
 
-<<<<<<< HEAD
 function setupIcons() {
     var settingsBtn = createIconButton("roundedsettings", () => {
         settingsBtn.not_toggled = !settingsBtn.not_toggled;
@@ -432,20 +415,11 @@ function setupIcons() {
     iconsDiv.appendChild(settingsBtn);
 }
 
-=======
->>>>>>> master
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-<<<<<<< HEAD
     // TODO: mqttConnect();
-=======
-    mqttClient.connect({
-        onSuccess: onConnect,
-        willMessage: lwt // ensure 2nd disconnect will not leave head in scene
-    });
->>>>>>> master
 }
 
 const publish_retained = (dest, msg) => {

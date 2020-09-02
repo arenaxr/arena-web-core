@@ -416,11 +416,6 @@
         }
 
     </script>
-
-    <!-- login auth check after mqtt.js to auth and call onAuthenticationComplete(u,t) -->
-    <script src="https://apis.google.com/js/platform.js"></script>
-    <script src="./auth.js" type="text/javascript"></script>
-
     <tr>
         <td>
             thickline (x y z, x2 y2 z2, ...):
@@ -588,5 +583,9 @@
 </div>
 <p>raw JSON:</p>
 <div class="json_div" id="rawjson" type="text" size="40" value=""></div>
+
+<!-- login auth check with calls to mqtt connect in onAuthenticationComplete(u,t) -->
+<script src="https://apis.google.com/js/platform.js"></script>
+<script src="./auth.js" type="text/javascript"></script>
 </body>
 </html>
