@@ -1,4 +1,4 @@
-importScripts("/x/face/detect_face_wasm.js");
+importScripts("/face-tracking/detect_face_wasm.js");
 importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 
 class FaceDetector {
@@ -21,7 +21,7 @@ class FaceDetector {
 
     getPoseModel(req_callback) {
         const req = new XMLHttpRequest();
-        req.open("GET", "/x/face/face_landmarks_68_compressed.dat", true);
+        req.open("GET", "/face-tracking/face_landmarks_68_compressed.dat", true);
         req.responseType = "arraybuffer";
         req.onload = (e) => {
             const payload = req.response;

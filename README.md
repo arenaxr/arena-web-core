@@ -3,14 +3,14 @@ Render 3d content in AFrame from MQTT messages
 
 ## References
 This code originated as a clone of the demo for a tool that exports a Unity scene as an A-Frame page https://github.com/if1live/unity-scene-web-exporter .
-It was then modified to do real-time updating of scene objects based on another demo ("networked AFrame" https://github.com/networked-aframe/networked-aframe) and using MQTT in a browser https://github.com/reese-long/mqtt-browser-demo 
+It was then modified to do real-time updating of scene objects based on another demo ("networked AFrame" https://github.com/networked-aframe/networked-aframe) and using MQTT in a browser https://github.com/reese-long/mqtt-browser-demo
 
-It now bears very little resemblance to the original, much commented out of `index.html`, and much added. The live ARENA site can be viewed at http://xr.andrew.cmu.edu on most devices. 
+It now bears very little resemblance to the original, much commented out of `index.html`, and much added. The live ARENA site can be viewed at http://xr.andrew.cmu.edu on most devices.
 
-A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such as `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`. The `name` argument will appear above your head in the 3d world. If you don't specify a name, `X` will appear instead. 
+A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such as `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`. The `name` argument will appear above your head in the 3d world. If you don't specify a name, `X` will appear instead.
 
-### User IDs 
-ARENA visitors are uniquely identified by their camera name, which is also their user name. As all 3D objects in the ARENA are identified by names, camera IDs have 3 underscore separated components, e.g: `camera_1234_er1k`. The last part is what appears above your head (representation in the 3D view), the middle part is a unique ID. If you want to override the random unique ID, you can specify on the URL parameter e.g. `&fixedCamera=er1k` which will ignore the `&name=` and so `er1k` will appear above your head and the camera ID will be `camera_er1k_er1k`. 
+### User IDs
+ARENA visitors are uniquely identified by their camera name, which is also their user name. As all 3D objects in the ARENA are identified by names, camera IDs have 3 underscore separated components, e.g: `camera_1234_er1k`. The last part is what appears above your head (representation in the 3D view), the middle part is a unique ID. If you want to override the random unique ID, you can specify on the URL parameter e.g. `&fixedCamera=er1k` which will ignore the `&name=` and so `er1k` will appear above your head and the camera ID will be `camera_er1k_er1k`.
 
 ## INSTALLATION
 Step one is to clone this repo into the default web content folder on a linux machine runing Apache, e.g. in `/var/www/html`.
@@ -21,10 +21,7 @@ Step one is to clone this repo into the default web content folder on a linux ma
 Step two, you'll also probably want to be running the Mosquitto MQTT server. In addition, it should be a version that supports websockets. To get one with this feature, and without a known crash bug, we recommend using version 1.6.3 and building with websockets enabled, e.g. in `config.mk` set `WITH_WEBSOCKETS:=yes`.
 
 ### Local Instance Installation with docker
-1. Clone this repo
-2. Run docker compose inside the repo: ```docker-compose up```
-3. This will start an MQTT server (ports 1883 and 9001) and a webserver (port 8080) on your local machine. The webserver is configured to serve the files in the current folder (the repo folder)
-4. Open your browser at ```http://localhost:8080/go/``` and make sure to change the **MQTT Server** to the name/IP of the machine running docker (```localhost``` will work for the browser on the machine running docker)
+See [docker compose repository](https://github.com/conix-center/arena-services-docker).
 
 ## Files
  * `mqtt.js` - Javascript to subscribe to MQTT topic(s) via wildcard, parse primitive-object messages, and add/remove AFrame Elements to the scene accordingly.
@@ -37,7 +34,7 @@ https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FS
  * `CONIX.png` - a bitmap so we can draw the Conix logo on things (support for bitmaps on primitives is a TODO) that should really be in:
  * `images/` - a better place to store bitmaps :)
  * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
- 
+
  ### 3D models/
  Here are some ready-to-use models on the xr.andrew.cmu.edu server, accessible with the models/modelname.glb path:
 ```
@@ -82,7 +79,7 @@ Sketchfab GLTF models don't always come in convenient single .glb files. Sometim
 ```
 ls /var/www/html/models/nara
 scene.bin  scene.gltf  textures
-``` 
+```
 ##### Animated GLTF models
 (See below for syntax for playing animations) Models with .gltf extension are text files that can be edited. If you search for 'animation' then search for 'name' you can see the names of animations available to use as arguments.
  ## General Purpose AFrame using Subtopics
@@ -122,7 +119,7 @@ animate rotation of the already drawn cube
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "cube_1", "action": "update", "type": "object", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": true, "dur": 10000}} }'
 ```
-other animations are available that resemble the `"data": {"animation": { "property": ... }}` blob above: see A-Frame documentation for more examples: https://aframe.io/docs/1.0.0/components/animation.html 
+other animations are available that resemble the `"data": {"animation": { "property": ... }}` blob above: see A-Frame documentation for more examples: https://aframe.io/docs/1.0.0/components/animation.html
 #### Remove
 remove the cube
 ```
@@ -149,7 +146,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/torusKnot_1 -m '{"object_id
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/torusKnot_1 -m '{"object_id" : "torusKnot_1", "action": "update", "type": "object", "data": {"material": {"color": "blue"}}}'
 ```
 #### Models
-Instantiate a glTF v2.0 binary model (file extension .glb) from a URL. 
+Instantiate a glTF v2.0 binary model (file extension .glb) from a URL.
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/gltf-model_1 -m '{"object_id" : "gltf-model_1", "action": "create", "data": {"object_type": "gltf-model", "url": "https://xr.andrew.cmu.edu/models/Duck.glb", "position": {"x": 0, "y": 1, "z": -4}, "rotation": {"x": 0, "y": 0, "z": 0, "w": 1}, "scale": {"x": 1, "y": 1, "z": 1}}}'
 ```
@@ -164,7 +161,7 @@ Move the camera rig (parent object of the camera) with ID camera_1234_er1k to a 
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/ -m '{"object_id" : "camera_1234_er1k", "action": "update", "type": "rig", "data": {"position": {"x": 1, "y":1, "z":1}, "rotation": {"x": 0.1, "y":0, "z":0, "w":1} }}'
 ```
-This assumes we know our camera ID was assigned as `1234`. One way to find out your camera ID is, automatically assigned ones get printed on web browsers' Developer Tools Console in a message like `my-camera name camera_1329_X`. That might not be easily knowable without snooping MQTT messages, so the `&fixedCamera=er1k` URL parameter lets us choose manually the unique ID. If used in the URL, the `&name=` parameter is ignored, and the derived camera/user ID is based on fixedCamera, so would be in this case `camera_er1k_er1k` 
+This assumes we know our camera ID was assigned as `1234`. One way to find out your camera ID is, automatically assigned ones get printed on web browsers' Developer Tools Console in a message like `my-camera name camera_1329_X`. That might not be easily knowable without snooping MQTT messages, so the `&fixedCamera=er1k` URL parameter lets us choose manually the unique ID. If used in the URL, the `&name=` parameter is ignored, and the derived camera/user ID is based on fixedCamera, so would be in this case `camera_er1k_er1k`
 #### Text
 Add some red text that says "Hello World"
 ```
@@ -236,7 +233,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/env -m '{"object_id" : "env
 #### Physics
 You can enable physics (gravity) for a scene object by adding the dynamic-body Component e.g for box_3:
 ```
-mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": {"type": "dynamic"}}}' 
+mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/box_3 -m '{"object_id" : "box_3", "action": "update", "type": "object", "data": {"dynamic-body": {"type": "dynamic"}}}'
 ```
 One physics feature is applying an impulse to an object to set it in motion. This happens in conjunction with an event. As an example, here are messages setting objects fallBox and fallBox2 to respond to mouseup and mousedown messages with an impulse with a certain force and position:
 ```
@@ -274,7 +271,7 @@ as html
 <a-entity goto-url="on: mousedown; url://oz.andrew.cmu.edu/drone;</a-entity>
 ```
 #### Particles
-Particles are based on https://github.com/harlyq/aframe-spe-particles-component, javascript loaded from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js 
+Particles are based on https://github.com/harlyq/aframe-spe-particles-component, javascript loaded from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js
 For now not directly supported, but rather by passing JSON inside the `data{}` element. The syntax for parameter names has been updated so instead of a name like this that is `space-separated` it becomes `spaceSeparated` (camel case). Three examples here have been created starting with the examples in view-source:https://harlyq.github.io/aframe-spe-particles-component/ then reformulating to ARENA JSON syntax:
 ```
 {"object_id":"smoke","action":"create","persist":true,"data":{"object_type":"cube","position":{"x":0,"y":1,"z":-3.9},"rotation":{"x":0,"y":0,"z":0,"w":1},"scale":{"x":0.01,"y":0.01,"z":0.01},"color":"#ffffff","spe-particles":{"texture":"textures/fog.png","velocity":"1 30 0","velocitySpread":"2 1 0.2","particleCount":50,"maxAge":4,"size":"3,8","opacity":"0,1,0","color":"#aaa,#222"}}}
@@ -291,11 +288,11 @@ Much more now available in e.g. https://xr.andrew.cmu.edu/x/face/
 #### Jitsi meet: share desktop window
 Main documentation of Jitsi video conference integration with ARENA needs to be added, but can be found at https://xr.andrew.cmu.edu/x/jitsi/.
 What is documented here is how to share screens from web browser visit to Jitsi server on https://mr.andrew.cmu.edu/<meeting room name>.
- 
+
     Jitsi Meet URL https://mr.andrew.cmu.edu/arena-conference-<scenename>
     Jitsi Meet screen share Settings->Profile->display name: arena_screen_share_<unique id>
     plane Object in scene: arena_screen_share_<unique id>
-    
+
 The plane object of course is up to creator to decide size, location, rotation, needs to be added as a persisted plane object
 
 #### Vive (laser) controls
@@ -306,13 +303,13 @@ By default we use A-Frame 'laser-controls' which default to showing Valve Index 
  * click events are generated as part of the laser-controls A-Frame entity; you get the events if you click the lasers on scene entities that have click-listener Component in their HTML declaration (see index.html), or have later had click-listener enabled via an MQTT message (see above). Mouse events occur if you click in a browser, or tap on a touchscreen as well.
   - mouseenter
   - mouseleave
-  - mousedown 
+  - mousedown
   - mouseup
  * triggerdown / triggerup for left and right hand controllers  
 The MQTT topic name for viewing these events can be the standard prefix (e.g. realm/s/render/) concatenated with a string made up of object ID that generated the event. An example event MQTT:
 ```
 realm/s/render/fallBox2 {"object_id":"fallBox2","action":"clientEvent","type":"mousedown","data":{"position":{"x":-0.993,"y":0.342,"z":-1.797},"source":"camera_8715_er"}}
-``` 
+```
 Note the message itself will contain the originator of the event as a camera/"user" ID and other data like where the object was clicked (in world coordinates[?])
 
 * Full list of Vive controller event names:
@@ -326,14 +323,14 @@ Note the message itself will contain the originator of the event as a camera/"us
    - systemup
    - trackpaddown
    - trackpadup
-   
+
 Event listeners can be added directly in the hard coded index.html main Arena page, e.g:
 ```
 <a-entity vive-listener position="2 0.5 -4" id="ViveListenBox" name="Box2" obj-model="obj: #Cube-obj; mtl: #Cube-mtl"></a-entity>
 ```
 or on demand from an MQTT message that enables click-listener when an object is created, or updated (see above)
 
-* 6dof pose events are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages, limited to 10 frames per second, much like the headset pose messages work. This supports the notion of tracking controller movement in real time, including direction (pose). These are enabled, much like the pose-listener Component (both defined in events.js) by adding the vive-pose-listener Component to a scene object directly, in the hard-coded index.html part of every Arena page e.g. `<a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>` 
+* 6dof pose events are realtime events for movement of the Vive controls themselves in 3d space. These are kind of verbose in terms of MQTT messages, limited to 10 frames per second, much like the headset pose messages work. This supports the notion of tracking controller movement in real time, including direction (pose). These are enabled, much like the pose-listener Component (both defined in events.js) by adding the vive-pose-listener Component to a scene object directly, in the hard-coded index.html part of every Arena page e.g. `<a-entity vive-pose-listener vive-listener id="vive-leftHand" laser-controls="hand:left"></a-entity>`
 
 There is nothing coded yet in ARENA to fire events based on Vive control trigger presses in *other peoples viewers* ... the events go to MQTT, and that's all. This is opposed to the way click events work, where all click events are first broadcast over MQTT, then those messages are received and interpreted by viewers, and turned into local, synthetic click events. The exception is that the laser-controls interface sends click events when the triggers are pressed, and click events ARE published to all scene subscribers. Handling of hand control pose information is for now limited to programs subscribing to MQTT.
 

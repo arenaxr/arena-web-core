@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     var mqtthost = document.getElementById("mqtt_host");
     var arena_url = document.getElementById("arena_url");
     var editmsg = document.getElementById("editmsg");
+    var scene_url = document.getElementById("scene_url");
 
     // Buttons/Selects
     var set_value_button = document.getElementById("setvalue");
@@ -62,7 +63,6 @@ document.addEventListener("DOMContentLoaded", async function() {
 
     var data = await fetch("dft-config.json");
     var dfts = await data.json();
-    console.log(dfts);
 
     // load values from fedaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
@@ -78,8 +78,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     }
 
     var updateLink = function() {
-        var scene_url = arena_url.value.replace(/\/+/, "") + "?scene=" + scene.value /*+ "&mqttServer=" + mqtthost.value;*/
-        document.getElementById("scene_url").href = scene_url;
+        scene_url.href = arena_url.value + "?scene=" + scene.value /*+ "&mqttServer=" + mqtthost.value;*/
     };
 
     // when a host addr is changed; update settings
@@ -89,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async function() {
             location.protocol + "//"+ location.hostname + (location.port ? ":" + location.port : "") + "/persist/"
         ]
 
-        console.log("Trying persist at", persist_urls);
+        console.log("Trying persist at (you might see related fetch errors)", persist_urls);
         await PersistObjects.fetchPersistURL(persist_urls);
 
         await PersistObjects.populateList(scene.value);
@@ -260,50 +259,19 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
     });
 
-/*
-    // on focus/focus out
-    let prev_scene;
-    scene.addEventListener("focus", function() {
-        prev_scene = scene.value;
-        scene.value = "";
-    });
-    scene.addEventListener("focusout", function() {
-        scene.value = prev_scene;
-    });
-*/
     // Change listener for arena URL
     arena_url.addEventListener("change", async function() {
         updateHost();
         localStorage.setItem("arena_url", arena_url.value);
     });
-/*
-    // on focus/focus out
-    let prev_arena_url;
-    arena_url.addEventListener("focus", function() {
-        prev_arena_url = arena_url.value;
-        arena_url.value = "";
-    });
-    arena_url.addEventListener("focusout", function() {
-        arena_url.value = prev_arena_url;
-    });
-*/
+
     // Change listener for arena mqtt host
     mqtthost.addEventListener("change", async function() {
         updateHost();
         PersistObjects.log("MQTT host changed; Press refresh to apply them.");
         localStorage.setItem("mqtthost", mqtthost.value);
     });
-/*
-    // on focus/focus out
-    let prev_mqtthost;
-    mqtthost.addEventListener("focus", function() {
-        prev_mqtthost = mqtthost.value;
-        mqtthost.value = "";
-    });
-    mqtthost.addEventListener("focusout", function() {
-        mqtthost.value = prev_mqtthost;
-    });
-*/
+
     // listners for buttons
     clear_button.addEventListener("click", function() {
         PersistObjects.clearSelected();

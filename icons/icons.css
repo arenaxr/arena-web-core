@@ -1,0 +1,56 @@
+#iconsDiv {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    position: absolute;
+    top: 50px;
+    right: 50px;
+}
+
+.arena-icon-button {
+    background: rgba(0, 0, 0, 0.20) 50% 50% no-repeat;
+    background-size: 90% 90%;
+    border: 0;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    min-width: 55px;
+    min-height: 55px;
+    padding-right: 0;
+    padding-top: 0;
+    transition: background-color .25s ease;
+    -webkit-transition: background-color .25s ease;
+    z-index: 9999;
+    border-radius: 10px;
+    touch-action: manipulation; /* Prevent iOS double tap zoom on the button */
+    opacity: 0;
+
+    animation: fadein 1.0s;
+    -moz-animation: fadein 1.0s; /* Firefox */
+    -webkit-animation: fadein 1.0s; /* Safari and Chrome */
+    -o-animation: fadein 1.0s; /* Opera */
+    animation-fill-mode: forwards;
+}
+
+.arena-icon-button:active,
+.arena-icon-button:hover {
+    background-color: #ef2d5e;
+}
+
+@media screen and (max-height: 640px) {
+    #iconsDiv {
+        top: 20px;
+        right: 20px;
+    }
+
+    .arena-icon-button {
+        min-width: 45px;
+        min-height: 45px;
+        margin-bottom: 5px;
+    }
+}
+
+@keyframes fadein {
+    0% { opacity: 0.0; }
+    100% { opacity: 1.0; }
+}

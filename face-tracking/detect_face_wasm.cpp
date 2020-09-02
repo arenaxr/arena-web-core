@@ -54,6 +54,7 @@ void pose_model_init(char buf[], size_t buf_len) {
     deserialize(pose_model, model_istringstream);
 
     delete [] buf;
+    delete [] decompressed;
 
     model_points.push_back( Point3d(6.825897, 6.760612, 4.402142) );
     model_points.push_back( Point3d(1.330353, 7.122144, 6.903745) );
@@ -70,7 +71,7 @@ void pose_model_init(char buf[], size_t buf_len) {
     model_points.push_back( Point3d(0.000000, -3.116408, 6.097667) );
     model_points.push_back( Point3d(0.000000, -7.415691, 4.070434) );
 
-    cout << "Ready to detect!\n";
+    cout << "Ready to detect!" << endl;
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -81,7 +82,7 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
 
     const uint8_t parts_len = 5 + 2 * 68;
     uint16_t *parts = new uint16_t[parts_len];
-    uint16_t left, top, right, bottom;
+    int left, top, right, bottom;
 
     array2d<uint8_t> gray;
     gray.set_size(srcRows, srcCols);
@@ -153,7 +154,7 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
 
     parts[0] = parts_len; // set first idx to len when passed to js
 
-    if (++frames % 30 == 0) {
+    if (++frames % 15 == 0) {
         track = false;
     }
 
@@ -217,10 +218,10 @@ double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
     y = euler_angle.at<double>(1) * PI / 180.0;
     z = euler_angle.at<double>(2) * PI / 180.0;
 
-    result[1] = sin(x/2)*cos(y/2)*cos(z/2) - cos(x/2)*sin(y/2)*sin(z/2);
-    result[2] = cos(x/2)*sin(y/2)*cos(z/2) + sin(x/2)*cos(y/2)*sin(z/2);
-    result[3] = cos(x/2)*cos(y/2)*sin(z/2) - sin(x/2)*sin(y/2)*cos(z/2);
-    result[4] = cos(x/2)*cos(y/2)*cos(z/2) + sin(x/2)*sin(y/2)*sin(z/2);
+    result[1] = sin(x/2) * cos(y/2) * cos(z/2) - cos(x/2) * sin(y/2) * sin(z/2);
+    result[2] = cos(x/2) * sin(y/2) * cos(z/2) + sin(x/2) * cos(y/2) * sin(z/2);
+    result[3] = cos(x/2) * cos(y/2) * sin(z/2) - sin(x/2) * sin(y/2) * cos(z/2);
+    result[4] = cos(x/2) * cos(y/2) * cos(z/2) + sin(x/2) * sin(y/2) * sin(z/2);
 
     result[5] = trans_vec.at<double>(0);
     result[6] = trans_vec.at<double>(1);
