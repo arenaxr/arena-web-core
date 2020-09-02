@@ -4,6 +4,9 @@ const https = require('https')
 const fs = require('fs')
 const { JWT, JWK } = require('jose')
 const bodyParser = require('body-parser');
+const { OAuth2Client } = require('google-auth-library');
+const CLIENT_ID = '58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com';
+const client = new OAuth2Client(CLIENT_ID);
 const app = express()
 const port = 8888
 
@@ -33,8 +36,44 @@ app.use(function (req, res, next) {
     next();
 });
 
-// TODO: later use POST for the id_token and req.body.foo
+async function verify(username, token) {
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: CLIENT_ID,  // Specify the CLIENT_ID of the app that accesses the backend
+        // Or, if multiple clients access the backend:
+        //[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+    });
+    const payload = ticket.getPayload();
+    const userid = payload['sub'];
+    // If request specified a G Suite domain:
+    // const domain = payload['hd'];
+    console.log("Verfied Google", "username", username, "userid", userid)
+}
+
+// main auth endpoint
 app.post('/', (req, res) => {
+    console.log("Request:", req.body.username)
+    // TODO: setup logfile for these accesses
+
+    // first, verify the id-token
+    switch (req.body.id_auth) {
+        case "google":
+            verify(req.body.username, req.body.id_token).catch((error) => {
+                console.error(error);
+                res.json({});
+                return;
+            });
+            break;
+        default:
+            console.error("Invalid authorization provider name:", req.body.id_auth);
+            res.json({});
+            return;
+            break;
+    }
+
+    // TODO: second, pull/create user record and accociate id from token with it
+
+    // third, generate mqtt-token with ACL-level permissions
     var realm = config.realm
     var scene = req.body.scene
     var authname = req.body.username
@@ -101,6 +140,5 @@ app.post('/', (req, res) => {
 });
 
 server.listen(port, () => {
-    console.log(`Auth test app listening at port ${port}.`)
-    console.log(`Try hitting https://xr.andrew.cmu.edu:${port}/?username=editor&scene=auth-test`)
+    console.log(`MQTT-Auth app listening at port ${port}.`)
 });
