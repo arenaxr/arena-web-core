@@ -1,4 +1,7 @@
-const config = require('./config.json');
+'use strict';
+
+const args = require('minimist')(process.argv.slice(2));
+const config = require(args.c); // use arg '-c path/config.json' for confile file
 const express = require('express')
 const https = require('https')
 const fs = require('fs')
@@ -17,14 +20,14 @@ const jwk = JWK.asKey({ kty: 'oct', k: config.secret });
 const server = https.createServer({ key: key, cert: cert }, app);
 
 function generateToken(user = null, exp = '1 hour', sub = null, pub = null) {
-    claims = { "sub": user };
+    var claims = { "sub": user };
     if (sub && sub.length > 0) {
         claims.subs = sub;
     }
     if (pub && pub.length > 0) {
         claims.publ = pub;
     }
-    iat = new Date(new Date - 20000); // allow for clock skew between issuer and broker
+    var iat = new Date(new Date - 20000); // allow for clock skew between issuer and broker
     return JWT.sign(claims, jwk, { "alg": "HS256", "expiresIn": exp, "now": iat });
 }
 
@@ -79,6 +82,7 @@ app.post('/', (req, res) => {
     var authname = req.body.username
     var scene_obj = realm + "/s/" + scene + "/#";
     var scene_admin = realm + "/admin/s/" + scene + "/#";
+    var jwt;
     switch (authname) {
         // service-level scenarios
         case 'persistdb':
