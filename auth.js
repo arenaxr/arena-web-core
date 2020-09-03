@@ -68,7 +68,7 @@ function onSignIn(googleUser) {
     requestMqttToken(profile.getEmail(), id_token);
 }
 
-function signOut() {
+function signOut(rootPath) {
     // TODO: disconnect does not use LWT, so delete manual
     //    let msg = { object_id: globals.camName, action: "delete" };
     //    publish(globals.outputTopic + globals.camName, msg);
@@ -80,7 +80,7 @@ function signOut() {
     });
     auth2.disconnect();
     // back to signin page
-    location.href = "./signin?redirect_uri=" + encodeURI(location.href);
+    location.href = rootPath + "/signin?redirect_uri=" + encodeURI(location.href);
 }
 
 function requestMqttToken(mqtt_username, id_token) {

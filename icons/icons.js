@@ -94,7 +94,7 @@ function setupIcons() {
             signIn();
         } else {
             settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedsettings.png')";
-            signOut();
+            signOut('.');
         }
     });
 
