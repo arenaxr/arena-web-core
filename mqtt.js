@@ -375,22 +375,6 @@ function onConnect() {
     mqttClient.subscribe(globals.renderTopic);
 }
 
-function setupIcons() {
-    var settingsBtn = createIconButton("roundedsettings", () => {
-        settingsBtn.not_toggled = !settingsBtn.not_toggled;
-        if (!settingsBtn.not_toggled) {
-            settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/roundedsettings.png')";
-            signIn();
-        } else {
-            settingsBtn.childNodes[0].style.backgroundImage = "url('../jitsi/images/icons/slashroundedsettings.png')";
-            signOut();
-        }
-    });
-
-    var iconsDiv = document.getElementById('iconsDiv');
-    iconsDiv.appendChild(settingsBtn);
-}
-
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);

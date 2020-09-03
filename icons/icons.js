@@ -88,13 +88,14 @@ function setupIcons() {
     });
 
     const settingsBtn = createIconButton("roundedsettings", () => {
-        // settingsBtn.not_toggled = !settingsBtn.not_toggled;
-        // if (!settingsBtn.not_toggled) { // toggled
-        //   settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedsettings.png')";
-        // }
-        // else {
-        //   settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedsettings.png')";
-        // }
+        settingsBtn.not_toggled = !settingsBtn.not_toggled;
+        if (!settingsBtn.not_toggled) {
+            settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedsettings.png')";
+            signIn();
+        } else {
+            settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedsettings.png')";
+            signOut();
+        }
     });
 
     var iconsDiv = document.getElementById('iconsDiv');
