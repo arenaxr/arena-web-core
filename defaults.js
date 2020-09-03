@@ -13,5 +13,7 @@ const defaults = {
      vioTopic:"/topic/vio/",
      graphTopic:"$NETWORK/latency",
      mqqtPath:"/xmqtt/",
-     persistPath:"/persist/"
+     persistPath:"/persist/",
+     urlMqttAuth:"https://xr.andrew.cmu.edu:8888",
+     gAuthClientId:'58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
 };
