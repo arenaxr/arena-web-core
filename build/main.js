@@ -28,7 +28,7 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 
 window.addEventListener('onauth', function (e) {
 
-document.addEventListener("DOMContentLoaded", async function() {
+//document.addEventListener("DOMContentLoaded", async function() {
 
     var schema;
     var jsoneditor;
@@ -306,7 +306,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         PersistObjects.mqttReconnect(mqttConnData);
         updateHost();
     });
-});
+//});
 
 });
 
