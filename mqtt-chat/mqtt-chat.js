@@ -253,7 +253,7 @@ export default class MQTTChat {
         // process commands
         if (msg.type == "chat-cmd"){
           if (msg.text == "sound:off") {
-            let abtn = document.getElementById('btn-roundedaudio');
+            let abtn = document.getElementById('btn-slashroundedaudio');
             if (abtn == undefined) {
               console.log("Could not find audio button");
               return;

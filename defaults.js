@@ -11,7 +11,7 @@ const defaults = {
      localvidboxWidth:320,
      localvidboxHeight:240,
      vioTopic:"/topic/vio/",
-     graphTopic:"$GRAPH/latency",
+     graphTopic:"$NETWORK/latency",
      mqqtPath:"/xmqtt/",
      persistPath:"/persist/"
 };

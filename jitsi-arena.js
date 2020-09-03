@@ -51,13 +51,6 @@ function getSlotOfCaller(participantId) {
 }
 
 function connectArena(participantId, trackType) {
-    if (trackType === 'audio') {
-        globals.hasAudio = true;
-    }
-    if (trackType === 'video') {
-        globals.hasVideo = true;
-    }
-
     globals.jitsiId = participantId;
     console.log("connectArena: " + participantId, trackType);
 }
@@ -76,7 +69,7 @@ function onLocalTracks(tracks) {
             audioLevel => console.log(`Audio Level local: ${audioLevel}`));
         track.addEventListener(
             JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-            () => console.log('local track muted'));
+            () => console.log('local track state changed'));
         track.addEventListener(
             JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
             () => console.log('local track stopped'));
@@ -104,6 +97,8 @@ function onLocalTracks(tracks) {
             connectArena(conference.myUserId(), track.getType());
         }
     }
+    if (jitsiAudioTrack) jitsiAudioTrack.mute();
+    if (jitsiVideoTrack) jitsiVideoTrack.mute();
 }
 
 /**
@@ -156,7 +151,7 @@ function onRemoteTrack(track) {
     const displayName = conference.getParticipantById(participant)._displayName;
     //    console.log("onRemoteTrack() conference.getParticipantById(participant)._displayName ", participant, displayName);
 
-    if (displayName.includes(DISPLAYNAME)) { // "arena_screen_share_0" Jitsi screen sharer user name
+    if (displayName && displayName.includes(DISPLAYNAME)) { // "arena_screen_share_0" Jitsi screen sharer user name
         if (track.getType() === 'video') {
 
             let screenName = "screenVideo_" + displayName; // "screenVideo_arena_screen_share_0
@@ -301,7 +296,6 @@ function onRemoteTrack(track) {
     }
     //track.attach($(`#${id}`)[0]);
 }
-
 
 /**
  * That function is executed when the conference is joined
@@ -471,7 +465,7 @@ function switchVideo() { // eslint-disable-line no-unused-vars
             localTracks.push(tracks[0]);
             localTracks[1].addEventListener(
                 JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-                () => console.log('local track muted'));
+                () => console.log('local track state changed'));
             localTracks[1].addEventListener(
                 JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
                 () => console.log('local track stopped'));
