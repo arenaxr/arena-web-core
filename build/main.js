@@ -307,6 +307,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         updateHost();
     });
 });
-}
+
+});
 
 displayAlert("Loading..", "info", 3000);
