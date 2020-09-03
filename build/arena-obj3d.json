@@ -77,7 +77,7 @@
                "$ref":"#/definitions/coord3d"
             },
             "rotation":{
-               "title":"Position",
+               "title":"Rotation",
                "description":"3D object rotation",
                "$ref":"#/definitions/rot3d"
             },
