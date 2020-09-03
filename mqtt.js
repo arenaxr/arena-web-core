@@ -117,11 +117,6 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
-// function onAuthenticationComplete(u,t) {
-//     globals.username = u;
-//     globals.mqttToken = t;
-//     mqttConnect();
-// }
 window.addEventListener('onauth', function (e) {
     globals.username = e.detail.mqtt_username;
     globals.mqttToken = e.detail.mqtt_token;

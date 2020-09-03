@@ -7,13 +7,13 @@
 // the MQTT broker so that authentication and access tokens can be present when making
 // a broker connection which will need username (email) and password (access token).
 //
-// function onAuthenticationComplete(mqtt_username, mqtt_token) {
-//     mqttClient.connect({
+// window.addEventListener('onauth', function (e) {
+//     client.connect({
 //         onSuccess: onConnect,
-//         userName: mqtt_username,
-//         password: mqtt_token
+//         userName: e.detail.mqtt_username,
+//         password: e.detail.mqtt_token
 //     });
-// }
+// });
 
 'use strict';
 
@@ -112,7 +112,6 @@ function requestMqttToken(mqtt_username, id_token) {
         } else {
             console.log("got user/token:", xhr.response.username, xhr.response.token);
             // token must be set to authorize acccess to MQTT broker
-            //onAuthenticationComplete(xhr.response.username, xhr.response.token);
             const authCompleteEvent = new CustomEvent('onauth', {
                 detail: {
                     mqtt_username: xhr.response.username,

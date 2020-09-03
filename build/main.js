@@ -26,7 +26,7 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 
 }
 
-function onAuthenticationComplete(u,t) {
+window.addEventListener('onauth', function (e) {
 
 document.addEventListener("DOMContentLoaded", async function() {
 
@@ -233,8 +233,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         scene_textbox: document.getElementById("arena_scene"),
         log_panel: document.getElementById("logpanel"),
         editobj_handler: editobjHandler,
-        mqtt_username: u,
-        mqtt_token: p,
+        mqtt_username: e.detail.mqtt_username,
+        mqtt_token: e.detail.mqtt_token,
     });
 
     // update options (including persist_url) from inputs
