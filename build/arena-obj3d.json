@@ -101,7 +101,7 @@
             "dynamic-body":{
                "type":"object",
                "title":"Physics",
-               "description": "Physics type attached to the object."
+               "description": "Physics type attached to the object.",
                "properties":{
                   "type":{
                      "type":"string",
