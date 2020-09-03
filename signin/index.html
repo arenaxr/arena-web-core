@@ -15,12 +15,13 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
         />
-
         <script
             src="https://apis.google.com/js/platform.js"
             async
             defer
         ></script>
+        <!-- our default configs -->
+        <script src="../defaults.js"></script>
     </head>
 
     <body>
@@ -47,11 +48,8 @@
                 <span class="forget-psw">Forgot <a href="#">password?</a></span> -->
 
                 <!-- <div class="social-btn"> -->
-                    <div
-                        class="fa g-signin2"
-                        data-onsuccess="onGoogleSignIn"
-                    ></div>
-                    <!-- <button type="submit" class="google-btn">
+                <div class="fa g-signin2" data-onsuccess="onGoogleSignIn"></div>
+                <!-- <button type="submit" class="google-btn">
                         <i class="fa fa-google" aria-hidden="true"></i> Login
                         with Google
                     </button>
