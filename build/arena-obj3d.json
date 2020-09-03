@@ -2,8 +2,6 @@
    "definitions":{
       "coord3d":{
          "type":"object",
-         "title":"x, y ,z",
-         "description":"3D point",
          "required":[
             "x",
             "y",
@@ -23,8 +21,6 @@
       },
       "rot3d":{
          "type":"object",
-         "title":"x, y ,z",
-         "description":"3D rotation",
          "required":[
             "x",
             "y",
@@ -52,6 +48,8 @@
          "properties":{
             "object_type":{
                "type":"string",
+               "title":"Object Type",
+               "description":"The object type.",
                "enum":[
                   "cube",
                   "sphere",
@@ -74,29 +72,36 @@
                "default":"cube"
             },
             "position":{
+              "title":"Position",
+              "description":"3D object position",
                "$ref":"#/definitions/coord3d"
             },
             "rotation":{
+               "title":"Position",
+               "description":"3D object rotation",
                "$ref":"#/definitions/rot3d"
             },
             "scale":{
+              "title":"Scale",
+              "description":"3D object scale",
                "$ref":"#/definitions/coord3d"
             },
             "color":{
                "type":"string",
                "format":"color",
-               "title":"color",
+               "title":"Color",
                "default":"#ffa500"
             },
             "url":{
                "type":"string",
                "format":"uri",
-               "title":"url",
-               "description": "Model URL"
+               "title":"Url",
+               "description": "Model URL (store files under: store/users/<username>)"
             },
             "dynamic-body":{
                "type":"object",
-               "title":"physics",
+               "title":"Physics",
+               "description": "Physics type attached to the object."
                "properties":{
                   "type":{
                      "type":"string",
@@ -109,6 +114,7 @@
                "required":[ "type"]
             },
             "click-listener":{
+                  "title":"Click Listner",
                   "type":"boolean"
             }
          },
