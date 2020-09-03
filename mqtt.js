@@ -820,25 +820,21 @@ function onMessageArrived(message, jsonMessage) {
                     // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
 
                     if (theMessage.hasOwnProperty("jitsiId")) {
+                        // call function in jitsi-arena.js
+                        let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+                        if (slot == -1) {
+                            console.log("not a caller (yet)");
+                            return;
+                        }
+
+                        if (theMessage.jitsiId == "") {
+                            console.log("jitsiId empty");
+                            break; // other-person has no camera ... yet
+                        }
+
                         if (theMessage.hasVideo) {
                             if (!(entityEl.getAttribute('videoCubeDrawn')=='true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
-
-                                // call function in jitsi-arena.js
-                                let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-                                if (slot == -1) {
-                                    console.log("not a caller (yet)");
-                                    return;
-                                }
-
-                                if (theMessage.jitsiId == "") {
-                                    console.log("jitsiId empty");
-                                    break; // other-person has no camera ... yet
-                                }
-
-                                // console.log("slot ", slot, "ID ", theMessage.jitsiId);
-                                // console.log("SLOT: " + slot);
-
                                 drawVideoCube(entityEl, slot);
                                 entityEl.setAttribute('videoCubeDrawn', true);
                             }
@@ -857,10 +853,10 @@ function onMessageArrived(message, jsonMessage) {
 
                         if (theMessage.hasAudio) {
                             // set up positional audio, but only once per camera
-                            if (!entityEl.hasAttribute('posAudioAdded')) {
+                            if (!entityEl.hasAttribute("posAudioAdded")) {
                                 // assume jitsi remoteTracks[0] is audio and [1] video
                                 let audioStream = new MediaStream();
-                                audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
+                                audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track.clone());
 
                                 let sceneEl = globals.sceneObjects.scene;
                                 // if (sceneEl.audioListener)
@@ -906,7 +902,7 @@ function onMessageArrived(message, jsonMessage) {
                                 document.body.addEventListener("touchend", resume, false);
                                 document.body.addEventListener("mouseup", resume, false);
 
-                                entityEl.setAttribute('posAudioAdded', true);
+                                entityEl.setAttribute("posAudioAdded", true);
                             }
                         }
                     }

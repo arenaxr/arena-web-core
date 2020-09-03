@@ -151,7 +151,7 @@ function onRemoteTrack(track) {
     const displayName = conference.getParticipantById(participant)._displayName;
     //    console.log("onRemoteTrack() conference.getParticipantById(participant)._displayName ", participant, displayName);
 
-    if (displayName.includes(DISPLAYNAME)) { // "arena_screen_share_0" Jitsi screen sharer user name
+    if (displayName && displayName.includes(DISPLAYNAME)) { // "arena_screen_share_0" Jitsi screen sharer user name
         if (track.getType() === 'video') {
 
             let screenName = "screenVideo_" + displayName; // "screenVideo_arena_screen_share_0
@@ -296,7 +296,6 @@ function onRemoteTrack(track) {
     }
     //track.attach($(`#${id}`)[0]);
 }
-
 
 /**
  * That function is executed when the conference is joined
