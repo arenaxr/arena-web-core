@@ -211,6 +211,7 @@ globals.camName = "";
 globals.jitsiId = "";
 globals.hasVideo = false;
 globals.hasAudio = false;
+globals.hasAvatar = false;
 globals.activeSpeaker = "";
 globals.previousSpeakerId = "";
 globals.previousSpeakerEl = "";

@@ -24,43 +24,43 @@ function createIconButton(img, onClick) {
 function publishAvatarMsg(avatarOn) {
     publish("realm/s/" + globals.scenenameParam + "/camera_" + globals.idTag + "/face/avatarStatus", {
         "object_id": "face_" + globals.idTag,
-        "avatar": avatarOn
+        "avatar": globals.hasAvatar
     });
 }
 
 function setupIcons() {
-    const audioBtn = createIconButton("roundedaudio", () => {
-        audioBtn.not_toggled = !audioBtn.not_toggled;
+    const audioBtn = createIconButton("slashroundedaudio", () => {
         if (jitsiAudioTrack) {
-            if (!audioBtn.not_toggled) {
-                audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedaudio.png')";
-                jitsiAudioTrack.unmute();
+            globals.hasAudio = !globals.hasAudio;
+            if (globals.hasAudio) {
+                jitsiAudioTrack.unmute().then(_ => {
+                    audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedaudio.png')";
+                })
             } else {
-                audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedaudio.png')";
-                jitsiAudioTrack.mute();
+                jitsiAudioTrack.mute().then(_ => {
+                    audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedaudio.png')";
+                })
             }
         }
     });
 
-    const videoBtn = createIconButton("roundedvideo", () => {
-        videoBtn.not_toggled = !videoBtn.not_toggled;
+    const videoBtn = createIconButton("slashroundedvideo", () => {
         if (jitsiVideoTrack) {
-            if (!videoBtn.not_toggled) { // toggled
+            globals.hasVideo = !globals.hasVideo;
+            if (globals.hasVideo) { // toggled
                 jitsiVideoTrack.unmute().then(_ => {
                     setupCornerVideo();
                     videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedvideo.png')";
                     avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedavatar.png')";
                     globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
                     window.trackFaceOff();
-                    publishAvatarMsg(false);
-                    globals.hasVideo = true;
-                    avatarBtn.toggled = false;
+                    globals.hasAvatar = false;
+                    publishAvatarMsg();
                 })
             } else {
                 videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedvideo.png')";
                 jitsiVideoTrack.mute().then(_ => {
                     globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
-                    globals.hasVideo = false;
                 })
             }
         }
@@ -68,33 +68,27 @@ function setupIcons() {
 
     const avatarBtn = createIconButton("slashroundedavatar", () => {
         if (AFRAME.utils.device.isMobile()) return;
-        avatarBtn.toggled = !avatarBtn.toggled;
-        if (avatarBtn.toggled) { // toggled
-            jitsiVideoTrack.mute().then(_ => {
-                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedavatar.png')";
-                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedvideo.png')";
-                globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
-                videoBtn.not_toggled = true;
-                globals.hasVideo = false;
-                window.trackFaceOn();
-                publishAvatarMsg(true);
-            })
-        } else {
-            avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedavatar.png')";
-            window.trackFaceOff().then(_ => {
-                publishAvatarMsg(false);
-            })
+        if (jitsiVideoTrack) {
+            globals.hasAvatar = !globals.hasAvatar;
+            if (globals.hasAvatar) { // toggled
+                jitsiVideoTrack.mute().then(_ => {
+                    avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedavatar.png')";
+                    videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedvideo.png')";
+                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                    globals.hasVideo = false;
+                    window.trackFaceOn();
+                    publishAvatarMsg();
+                })
+            } else {
+                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedavatar.png')";
+                window.trackFaceOff();
+                publishAvatarMsg();
+            }
         }
     });
 
     const settingsBtn = createIconButton("roundedsettings", () => {
-        // settingsBtn.not_toggled = !settingsBtn.not_toggled;
-        // if (!settingsBtn.not_toggled) { // toggled
-        //   settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedsettings.png')";
-        // }
-        // else {
-        //   settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedsettings.png')";
-        // }
+        console.log("clicked settings");
     });
 
     var iconsDiv = document.getElementById('iconsDiv');

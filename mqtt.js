@@ -33,7 +33,7 @@ const loadArena = (urlToLoad, position, rotation) => {
 
                     window.pendingModules.push(pobj);
                     continue;
-                }                
+                }
                 if (obj.object_id === globals.camName) {
                     continue; // don't load our own camera/head assembly
                 }
@@ -178,8 +178,6 @@ function onConnect() {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
 
-    setupCornerVideo();
-
     // video window for jitsi
     const videoPlane = document.createElement('a-video');
     videoPlane.setAttribute('id', "arena-vid-plane");
@@ -190,6 +188,7 @@ function onConnect() {
     videoPlane.setAttribute("material", "shader", "flat");
     videoPlane.setAttribute("transparent", "true");
     videoPlane.setAttribute('position', '-0.585, 0.287, -0.5');
+    videoPlane.setAttribute("visible", "false");
     globals.sceneObjects.myCamera.appendChild(videoPlane);
     globals.sceneObjects["arena-vid-plane"] = videoPlane;
 
@@ -263,7 +262,7 @@ function onConnect() {
             object_id: globals.camName,
             jitsiId: globals.jitsiId,
             hasVideo: globals.hasVideo,
-            // hasAudio: globals.hasAudio,
+            hasAudio: globals.hasAudio,
             // activeSpeaker: globals.activeSpeaker,
             action: 'create',
             type: 'object',
@@ -484,24 +483,10 @@ function highlightVideoCube(entityEl, oldEl, slot) {
 // set up local corner video window
 function setupCornerVideo() {
     const localvidbox = document.getElementById("localvidbox");
-    navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user" },
-        audio: false
-    })
-    .then(stream => {
-        const videoSettings = stream.getVideoTracks()[0].getSettings();
-        if (localvidbox) {
-            localvidbox.srcObject = stream;
-            localvidbox.play();
-        }
-    })
-    .catch(function(err) {
-        console.log("ERROR: " + err);
-    });
-
-    if (localvidbox) {
-        localvidbox.setAttribute("width", globals.localvidboxWidth);
-        localvidbox.setAttribute("height", globals.localvidboxHeight);
+    localvidbox.setAttribute("width", globals.localvidboxWidth);
+    localvidbox.setAttribute("height", globals.localvidboxHeight);
+    if (localvidbox.srcObject) {
+        localvidbox.play();
     }
 }
 
@@ -835,78 +820,21 @@ function onMessageArrived(message, jsonMessage) {
                     // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
 
                     if (theMessage.hasOwnProperty("jitsiId")) {
+                        // call function in jitsi-arena.js
+                        let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
+                        if (slot == -1) {
+                            console.log("not a caller (yet)");
+                            return;
+                        }
+
+                        if (theMessage.jitsiId == "") {
+                            console.log("jitsiId empty");
+                            break; // other-person has no camera ... yet
+                        }
+
                         if (theMessage.hasVideo) {
                             if (!(entityEl.getAttribute('videoCubeDrawn')=='true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
-
-                                // call function in jitsi-arena.js
-                                let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-                                if (slot == -1) {
-                                    console.log("not a caller (yet)");
-                                    return;
-                                }
-
-                                if (theMessage.jitsiId == "") {
-                                    console.log("jitsiId empty");
-                                    break; // other-person has no camera ... yet
-                                }
-
-                                // console.log("slot ", slot, "ID ", theMessage.jitsiId);
-                                // console.log("SLOT: " + slot);
-
-                                // set up positional audio, but only once per camera
-                                if (!entityEl.hasAttribute('posAudioAdded')) {
-                                    // assume jitsi remoteTracks[0] is audio and [1] video
-                                    let audioStream = new MediaStream();
-                                    audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track);
-
-                                    let sceneEl = globals.sceneObjects.scene;
-                                    // if (sceneEl.audioListener)
-                                    //      console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
-
-                                    let listener = null;
-                                    if (sceneEl.audioListener) {
-                                        // console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
-                                        listener = sceneEl.audioListener;
-                                    } else {
-                                        listener = new THREE.AudioListener();
-                                        // console.log("NEW HEAD AUDIO LISTENER:", listener);
-                                        let camEl = globals.sceneObjects.myCamera.object3D;
-                                        // console.log("children:", camEl.children);
-                                        camEl.add(listener);
-                                        globals.audioListener = listener;
-                                        sceneEl.audioListener = listener;
-                                    }
-
-                                    // var listener = sceneEl.audioListener || new THREE.AudioListener();
-                                    // sceneEl.audioListener = listener;
-
-                                    let audioSource = new THREE.PositionalAudio(listener);
-                                    audioSource.setMediaStreamSource(audioStream);
-                                    audioSource.setRefDistance(1); // L-R panning
-                                    audioSource.setRolloffFactor(1);
-                                    entityEl.object3D.add(audioSource);
-
-                                    // https://github.com/mozilla/hubs/blob/0c26af207bbbc3983409cdab7210b219b53449ca/src/systems/audio-system.js
-                                    const audioCtx = THREE.AudioContext.getContext();
-                                    const resume = () => {
-                                        audioCtx.resume();
-                                        setTimeout(function() {
-                                            if (audioCtx.state === "running") {
-                                                if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-                                                    enableChromeAEC(listener.gain);
-                                                }
-                                                document.body.removeEventListener("touchend", resume, false);
-                                                document.body.removeEventListener("mouseup", resume, false);
-                                            }
-                                        }, 0);
-                                    };
-                                    document.body.addEventListener("touchend", resume, false);
-                                    document.body.addEventListener("mouseup", resume, false);
-
-                                    entityEl.setAttribute('posAudioAdded', true);
-                                }
-
                                 drawVideoCube(entityEl, slot);
                                 entityEl.setAttribute('videoCubeDrawn', true);
                             }
@@ -920,6 +848,61 @@ function onMessageArrived(message, jsonMessage) {
                                     }
                                 }
                                 entityEl.setAttribute('videoCubeDrawn', false);
+                            }
+                        }
+
+                        if (theMessage.hasAudio) {
+                            // set up positional audio, but only once per camera
+                            if (!entityEl.hasAttribute("posAudioAdded")) {
+                                // assume jitsi remoteTracks[0] is audio and [1] video
+                                let audioStream = new MediaStream();
+                                audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track.clone());
+
+                                let sceneEl = globals.sceneObjects.scene;
+                                // if (sceneEl.audioListener)
+                                //      console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
+
+                                let listener = null;
+                                if (sceneEl.audioListener) {
+                                    // console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
+                                    listener = sceneEl.audioListener;
+                                } else {
+                                    listener = new THREE.AudioListener();
+                                    // console.log("NEW HEAD AUDIO LISTENER:", listener);
+                                    let camEl = globals.sceneObjects.myCamera.object3D;
+                                    // console.log("children:", camEl.children);
+                                    camEl.add(listener);
+                                    globals.audioListener = listener;
+                                    sceneEl.audioListener = listener;
+                                }
+
+                                // var listener = sceneEl.audioListener || new THREE.AudioListener();
+                                // sceneEl.audioListener = listener;
+
+                                let audioSource = new THREE.PositionalAudio(listener);
+                                audioSource.setMediaStreamSource(audioStream);
+                                audioSource.setRefDistance(1); // L-R panning
+                                audioSource.setRolloffFactor(1);
+                                entityEl.object3D.add(audioSource);
+
+                                // https://github.com/mozilla/hubs/blob/0c26af207bbbc3983409cdab7210b219b53449ca/src/systems/audio-system.js
+                                const audioCtx = THREE.AudioContext.getContext();
+                                const resume = () => {
+                                    audioCtx.resume();
+                                    setTimeout(function() {
+                                        if (audioCtx.state === "running") {
+                                            if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+                                                enableChromeAEC(listener.gain);
+                                            }
+                                            document.body.removeEventListener("touchend", resume, false);
+                                            document.body.removeEventListener("mouseup", resume, false);
+                                        }
+                                    }, 0);
+                                };
+                                document.body.addEventListener("touchend", resume, false);
+                                document.body.addEventListener("mouseup", resume, false);
+
+                                entityEl.setAttribute("posAudioAdded", true);
                             }
                         }
                     }
