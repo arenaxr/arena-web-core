@@ -117,29 +117,25 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
+// Last Will and Testament message sent to subscribers if this client loses connection
+const lwt = new Paho.MQTT.Message(JSON.stringify({
+    object_id: globals.camName,
+    action: "delete"
+}));
+lwt.destinationName = globals.outputTopic + globals.camName;
+lwt.qos = 2;
+lwt.retained = false;
+
 window.addEventListener('onauth', function (e) {
     globals.username = e.detail.mqtt_username;
     globals.mqttToken = e.detail.mqtt_token;
-    mqttConnect();
-});
-
-function mqttConnect() {
-    // TODO: remove token logging, or at least log token contents?
-    console.log("mqtt auth", "user:", globals.username, "token:", globals.mqttToken);
-
-    // Last Will and Testament message sent to subscribers if this client loses connection
-    let lwt = new Paho.MQTT.Message(JSON.stringify({ object_id: globals.camName, action: "delete" }));
-    lwt.destinationName = globals.outputTopic + globals.camName;
-    lwt.qos = 2;
-    lwt.retained = false;
-
     mqttClient.connect({
         onSuccess: onConnect,
         willMessage: lwt,
         userName: globals.username,
         password: globals.mqttToken
     });
-}
+});
 
 var oldMsg = '';
 
@@ -378,7 +374,12 @@ function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-    // TODO: mqttConnect();
+    mqttClient.connect({
+        onSuccess: onConnect,
+        willMessage: lwt, // ensure 2nd disconnect will not leave head in scene
+        userName: globals.username,
+        password: globals.mqttToken
+    });
 }
 
 const publish_retained = (dest, msg) => {
