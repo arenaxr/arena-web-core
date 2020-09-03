@@ -58,9 +58,9 @@ function onSignIn(googleUser) {
 
     // early enough to reset cam name
     if (typeof globals !== 'undefined' && globals.camName) {
-
         var cam = globals.camName.split('_');
-        cam[2] = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
+        globals.userParam = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
+        cam[2] = globals.userParam;
         globals.camName = cam.join('_');
     }
     // request mqtt-auth
