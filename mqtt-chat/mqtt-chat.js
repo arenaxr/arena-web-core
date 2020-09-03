@@ -405,13 +405,19 @@ export default class MQTTChat {
         let cameraRig = sceneEl.querySelector('#CameraRig');
         let myCamera = document.getElementById('my-camera');
 
-        let cameraSpinner = sceneEl.querySelector('#CameraSpinner');
+        var direction = new THREE.Vector3();
+        toCam.object3D.getWorldDirection( direction );
+        let distance = 1; // distance to put you
+        myCamera.object3D.position.copy( toCam.object3D.position.clone() ).add( direction.multiplyScalar( -distance ) );
+        myCamera.object3D.lookAt(toCam.object3D.position);
 
+/*
         let distance = 0.1;
         let pos = toCam.object3D.position.clone() //.negate().multiplyScalar(distance);
 
         //myCamera.object3D.position.copy(toCam.object3D.position.clone());
         myCamera.object3D.position.copy(pos);
         //sceneObjects.cameraSpinner.object3D.quaternion.set(xrot, yrot, zrot, wrot);
-    }
+*/
+   }
 }
