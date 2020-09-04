@@ -26,7 +26,7 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 
 }
 
-window.addEventListener('onauth', function (e) {
+window.addEventListener('onauth', async function (e) {
 
 //document.addEventListener("DOMContentLoaded", async function() {
 
