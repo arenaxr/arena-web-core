@@ -1,6 +1,7 @@
 import MQTTChat from './mqtt-chat.js';
 
-window.addEventListener('load', (event) => {
+window.addEventListener('onauth', (e) => {
+    //    window.addEventListener('load', (event) => {
     console.log("Loading MQTTChat");
     let mqttChat = new MQTTChat({
         cameraid: window.globals.camName,
@@ -9,7 +10,10 @@ window.addEventListener('load', (event) => {
         scene: window.globals.scenenameParam,
         ping_interval_ms: 30000,
         mqtt_host: window.globals.mqttParam,
+        mqtt_username: e.detail.mqtt_username,
+        mqtt_token: e.detail.mqtt_token,
     });
 
     mqttChat.connect();
+    //    });
 });

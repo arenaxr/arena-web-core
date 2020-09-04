@@ -22,7 +22,9 @@ export async function init(settings) {
         scene_list: settings.scene_list,
         scene_textbox: settings.scene_textbox,
         log_panel: settings.log_panel,
-        editobj_handler: settings.editobj_handler
+        editobj_handler: settings.editobj_handler,
+        mqtt_username: settings.mqtt_username,
+        mqtt_token: settings.mqtt_token,
     }
 
     // Add a "checked" symbol when clicking on a list item
@@ -36,7 +38,9 @@ export async function init(settings) {
     persist.mc = new MqttClient({
         host: persist.mqtt_host,
         port: persist.mqtt_port,
-        onMessageCallback: onMqttMessage
+        onMessageCallback: onMqttMessage,
+        mqtt_username: persist.mqtt_username,
+        mqtt_token: persist.mqtt_token,
     });
 
     log("Starting connection to " + persist.mqtt_host + ":" + persist.mqtt_port + "...");
@@ -248,13 +252,15 @@ export function mqttReconnect(settings) {
     if (persist.mc)
         persist.mc.disconnect();
 
-    log("Disconected.");
+    log("Disconnected.");
 
     // start mqtt client
     persist.mc = new MqttClient({
         host: persist.mqtt_host,
         port: persist.mqtt_port,
-        onMessageCallback: onMqttMessage
+        onMessageCallback: onMqttMessage,
+        mqtt_username: persist.mqtt_username,
+        mqtt_token: persist.mqtt_token,
     });
 
     try {
