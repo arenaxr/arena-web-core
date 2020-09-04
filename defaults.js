@@ -14,6 +14,6 @@ const defaults = {
      graphTopic:"$NETWORK/latency",
      mqqtPath:"/xmqtt/",
      persistPath:"/persist/",
-     urlMqttAuth:"https://xr.andrew.cmu.edu:8888",
-     gAuthClientId:'58999217485-jjkjk88jcl2gfdr45p31p9imbl1uv1iq.apps.googleusercontent.com'
+     urlMqttAuth:"https://oz.andrew.cmu.edu:8888",
+     gAuthClientId:'173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com'
 };

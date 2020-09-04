@@ -4,7 +4,7 @@
 
 SCENE=$1
 USER=$2
-URL="https://xr.andrew.cmu.edu:8888/?scene=$SCENE&username=$USER"
+URL="https://oz.andrew.cmu.edu:8888/?scene=$SCENE&username=$USER"
 
 function get_token
 {
