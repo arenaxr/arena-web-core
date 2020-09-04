@@ -1,7 +1,5 @@
 window.addEventListener('load', (event) => {
 
-  console.log("Intro!");
-
   let modal = document.createElement("div");
   modal.className = "modal";
 
@@ -45,6 +43,6 @@ window.addEventListener('load', (event) => {
   }
 
   const noshow = localStorage.getItem('arena_intro_noshow');
-  if (noshow==undefined)
+  if (noshow==null)
     modal.style.display = "block";
 });
