@@ -26,7 +26,8 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 
 }
 
-document.addEventListener("DOMContentLoaded", async function() {
+window.addEventListener('onauth', async function (e) {
+//document.addEventListener("DOMContentLoaded", async function() {
 
     var schema;
     var jsoneditor;
@@ -64,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async function() {
     var data = await fetch("dft-config.json");
     var dfts = await data.json();
 
-    // load values from fedaults or local storage, if they exist
+    // load values from defaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
@@ -230,7 +231,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         scene_list: document.getElementById("scenelist"),
         scene_textbox: document.getElementById("arena_scene"),
         log_panel: document.getElementById("logpanel"),
-        editobj_handler: editobjHandler
+        editobj_handler: editobjHandler,
+        mqtt_username: e.detail.mqtt_username,
+        mqtt_token: e.detail.mqtt_token,
     });
 
     // update options (including persist_url) from inputs
@@ -272,7 +275,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         localStorage.setItem("mqtthost", mqtthost.value);
     });
 
-    // listners for buttons
+    // listeners for buttons
     clear_button.addEventListener("click", function() {
         PersistObjects.clearSelected();
     });
@@ -302,6 +305,7 @@ document.addEventListener("DOMContentLoaded", async function() {
         PersistObjects.mqttReconnect(mqttConnData);
         updateHost();
     });
+//});
 });
 
 displayAlert("Loading..", "info", 3000);

@@ -126,9 +126,15 @@ lwt.destinationName = globals.outputTopic + globals.camName;
 lwt.qos = 2;
 lwt.retained = false;
 
-mqttClient.connect({
-    onSuccess: onConnect,
-    willMessage: lwt
+window.addEventListener('onauth', function (e) {
+    globals.username = e.detail.mqtt_username;
+    globals.mqttToken = e.detail.mqtt_token;
+    mqttClient.connect({
+        onSuccess: onConnect,
+        willMessage: lwt,
+        userName: globals.username,
+        password: globals.mqttToken
+    });
 });
 
 var oldMsg = '';
@@ -370,7 +376,9 @@ function onConnectionLost(responseObject) {
     } // reconnect
     mqttClient.connect({
         onSuccess: onConnect,
-        willMessage: lwt // ensure 2nd disconnect will not leave head in scene
+        willMessage: lwt, // ensure 2nd disconnect will not leave head in scene
+        userName: globals.username,
+        password: globals.mqttToken
     });
 }
 

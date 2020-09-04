@@ -19,7 +19,9 @@ export default class MQTTChat {
             realm: st.realm !== undefined ? st.chat_topic : "realm",
             scene: st.scene !== undefined ? st.scene : "render",
             keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
-            mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://spatial.andrew.cmu.edu/mqtt/"
+            mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://spatial.andrew.cmu.edu/mqtt/",
+            mqtt_username:  st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
+            mqtt_token:  st.mqtt_token,
         }
 
         // users list
@@ -197,6 +199,8 @@ export default class MQTTChat {
                 this.connected = false;
             },
             willMessage: willMessage,
+            userName: this.settings.mqtt_username,
+            password: this.settings.mqtt_token
         });
     }
 

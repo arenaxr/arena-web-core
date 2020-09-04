@@ -19,8 +19,12 @@
             console.log("Message arrived");
         }
 
-        client.connect({
-            onSuccess: onConnect
+        window.addEventListener('onauth', function (e) {
+            client.connect({
+                onSuccess: onConnect,
+                userName: e.detail.mqtt_username,
+                password: e.detail.mqtt_token
+            });
         });
 
         // Callback for client.connect()
@@ -78,9 +82,14 @@
         .json_div {
             font-family: monospace;
         }
+
+        #logout {
+            float: right;
+        }
     </style>
 </head>
 <body>
+<a id="logout" href="#" onclick="signOut('.');">Logout</a>
 <br><br>
 <table style="display:inline-block">
     <tr>
@@ -578,5 +587,10 @@
 </div>
 <p>raw JSON:</p>
 <div class="json_div" id="rawjson" type="text" size="40" value=""></div>
+
+<!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
+<script src="https://apis.google.com/js/platform.js"></script>
+<script src="./defaults.js"></script>
+<script src="./auth.js"></script>
 </body>
 </html>
