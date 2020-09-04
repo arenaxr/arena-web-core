@@ -88,20 +88,18 @@ function setupIcons() {
     });
 
     const settingsBtn = createIconButton("roundedsettings", () => {
-        settingsBtn.not_toggled = !settingsBtn.not_toggled;
-        if (!settingsBtn.not_toggled) {
-            settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/roundedsettings.png')";
-            signIn();
-        } else {
-            settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/slashroundedsettings.png')";
-            signOut('.');
-        }
+        // TODO(mwfarb) add settings dialog
+    });
+
+    const logoutBtn = createIconButton("roundedlogout", () => {
+        signOut('.');
     });
 
     var iconsDiv = document.getElementById('iconsDiv');
     iconsDiv.appendChild(audioBtn);
     iconsDiv.appendChild(videoBtn);
     iconsDiv.appendChild(avatarBtn);
+    iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
 }
 
