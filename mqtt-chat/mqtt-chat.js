@@ -152,6 +152,14 @@ export default class MQTTChat {
                 _this.msgTxt.value = "";
             }
         });
+
+        const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
+        console.log(moveToCamera);
+        if (moveToCamera !== null) {
+            localStorage.removeItem('moveToFrontOfCamera');
+            this.moveToFrontOfCamera(moveToCamera, this.settings.scene);
+        }
+
     }
 
     async connect(force = false) {
@@ -314,15 +322,17 @@ export default class MQTTChat {
             uBtnCtnr.className="users-list-btn-ctnr";
             uli.appendChild(uBtnCtnr);
 
-            if (key !== _this.settings.userid && _this.liveUsers[key].scene == _this.settings.scene) {
+            if (key !== _this.settings.userid) {
                 let fuspan = document.createElement("span");
                 fuspan.className = "users-list-btn fu";
                 fuspan.title = "Find User";
                 uBtnCtnr.appendChild(fuspan);
 
                 // span click event (move us to be in front of another clicked user)
+                let cid = _this.liveUsers[key].cid;
+                let scene = _this.liveUsers[key].scene;
                 fuspan.onclick = function() {
-                    _this.moveToFrontOfCamera(_this.liveUsers[key].cid);
+                    _this.moveToFrontOfCamera(cid, scene);
                 }
 
                 let sspan = document.createElement("span");
@@ -396,8 +406,15 @@ export default class MQTTChat {
         });
     }
 
-    moveToFrontOfCamera(cameraId) {
+    moveToFrontOfCamera(cameraId, scene) {
         //console.log("Move to near camera:", cameraId);
+
+        if (scene !== this.settings.scene) {
+            localStorage.setItem('moveToFrontOfCamera', cameraId);
+            var href = new URL(document.location.href);
+            href.searchParams.set('scene', scene);
+            document.location.href = href.toString();
+        }
 
         let sceneEl = document.querySelector('a-scene');
         if (!sceneEl) {
