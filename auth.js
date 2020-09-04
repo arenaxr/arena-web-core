@@ -3,9 +3,18 @@
 // Authentication and Authorization for the following ARENA assets:
 // - MQTT broker
 //
-// Implement the following method and use it to start code that autimatically connects to 
-// the MQTT broker so that authentication and access tokens can be present when making
-// a broker connection which will need username (email) and password (access token).
+// Required:
+//  <script src="https://apis.google.com/js/platform.js"></script>
+//  <script src="./defaults.js"></script>  <!-- for window.defaults -->
+//  <script src="./auth.js"></script>  <!-- browser authorization flow -->
+//
+// Optional:
+//  <script src="./events.js"></script>  <!-- for window.globals -->
+//
+// Implement the following 'onauth' event handler and use it to start code that would
+// automatically connects to the MQTT broker so that authentication and access tokens
+// can be present when making a broker connection which will need username (email) and
+// password (access token).
 //
 // window.addEventListener('onauth', function (e) {
 //     client.connect({
@@ -36,22 +45,13 @@ gapi.load('auth2', function () {
     });
 });
 
-function signIn() {
-    // currently unused, old way
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signIn().then(function () {
-        var googleUser = auth2.currentUser.get();
-        onSignIn(googleUser);
-    });
-}
-
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
     console.log('ID: ' + profile.getId());
     console.log('Full Name: ' + profile.getName());
     console.log('Email: ' + profile.getEmail());
 
-    // add auth name when user has not defined their name
+    // add auth name to objects when user has not defined their name
     if (typeof globals !== 'undefined') {
         if (typeof defaults !== 'undefined' && globals.userParam == defaults.userParam) {
             var cam = globals.camName.split('_');
@@ -66,11 +66,7 @@ function onSignIn(googleUser) {
 }
 
 function signOut(rootPath) {
-    // TODO: disconnect does not use LWT, so delete manual
-    //    let msg = { object_id: globals.camName, action: "delete" };
-    //    publish(globals.outputTopic + globals.camName, msg);
-    // mqttClient.disconnect();
-    // logout, and dissassociate user
+    // logout, and disassociate user
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
         console.log('User signed out.');
@@ -85,6 +81,7 @@ function requestMqttToken(mqtt_username, id_token) {
     let xhr = new XMLHttpRequest();
     var params = "username=" + mqtt_username + "&id_token=" + id_token;
     params += "&id_auth=google";
+    // provide user control topics for token construction
     if (typeof globals !== 'undefined') {
         if (globals.scenenameParam) {
             params += "&scene=" + globals.scenenameParam;
@@ -108,7 +105,7 @@ function requestMqttToken(mqtt_username, id_token) {
             alert(`Error loading token: ${xhr.status}: ${xhr.statusText}`);
         } else {
             console.log("got user/token:", xhr.response.username, xhr.response.token);
-            // token must be set to authorize acccess to MQTT broker
+            // token must be set to authorize access to MQTT broker
             const authCompleteEvent = new CustomEvent('onauth', {
                 detail: {
                     mqtt_username: xhr.response.username,
@@ -119,5 +116,3 @@ function requestMqttToken(mqtt_username, id_token) {
         }
     };
 }
-
-
