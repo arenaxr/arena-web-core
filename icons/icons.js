@@ -9,11 +9,11 @@ function createIconButton(img, onClick) {
     iconButton = document.createElement('button');
     iconButton.style.backgroundImage = `url('images/icons/${img}.png')`;
     iconButton.className = ICON_BTN_CLASS;
-    iconButton.setAttribute("id", "btn-"+img);
+    iconButton.setAttribute("id", "btn-" + img);
 
     // Insert elements.
     wrapper.appendChild(iconButton);
-    iconButton.addEventListener('click', function(evt) {
+    iconButton.addEventListener('click', function (evt) {
         onClick();
         evt.stopPropagation();
     });
@@ -88,11 +88,11 @@ function setupIcons() {
     });
 
     const settingsBtn = createIconButton("roundedsettings", () => {
-        // TODO(mwfarb) add settings dialog
+        console.log("clicked settings");
     });
 
     const logoutBtn = createIconButton("roundedlogout", () => {
-        signOut('.');
+        signOut('.'); // --> ./auth.js
     });
 
     var iconsDiv = document.getElementById('iconsDiv');
@@ -104,7 +104,7 @@ function setupIcons() {
 }
 
 AFRAME.registerComponent('iconsinit', {
-    init: function() {
+    init: function () {
         setupIcons();
     }
 });

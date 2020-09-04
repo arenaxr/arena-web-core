@@ -156,7 +156,7 @@ function doCursor() {
 }
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + '/persist/' + globals.renderParam;
-globals.mqttParam = 'wss://' + globals.mqttParamZ + '/xmqtt';
+globals.mqttParam = 'wss://' + globals.mqttParamZ + '/mqtt';
 globals.outputTopic = "realm/s/" + globals.renderParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";

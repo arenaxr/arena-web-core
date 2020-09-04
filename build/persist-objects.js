@@ -252,7 +252,7 @@ export function mqttReconnect(settings) {
     if (persist.mc)
         persist.mc.disconnect();
 
-    log("Disconected.");
+    log("Disconnected.");
 
     // start mqtt client
     persist.mc = new MqttClient({

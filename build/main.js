@@ -27,7 +27,6 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 }
 
 window.addEventListener('onauth', async function (e) {
-
 //document.addEventListener("DOMContentLoaded", async function() {
 
     var schema;
@@ -276,7 +275,7 @@ window.addEventListener('onauth', async function (e) {
         localStorage.setItem("mqtthost", mqtthost.value);
     });
 
-    // listners for buttons
+    // listeners for buttons
     clear_button.addEventListener("click", function() {
         PersistObjects.clearSelected();
     });
@@ -307,7 +306,6 @@ window.addEventListener('onauth', async function (e) {
         updateHost();
     });
 //});
-
 });
 
 displayAlert("Loading..", "info", 3000);

@@ -1,3 +1,10 @@
+/*
+    signin/style.css
+
+    Styling for the ARENA sign in page. Inspiration from:
+    - https://codepen.io/Thibaut/pen/CiDkc
+*/
+
 body,
 html {
     height: 100%;
@@ -8,7 +15,7 @@ html {
 }
 
 .bg-img {
-    background-image: url("https://xr.andrew.cmu.edu/images/home.png");
+    background-image: url("../images/home.png");
     height: 100%;
     overflow: hidden;
     background-position: center;

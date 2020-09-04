@@ -10,7 +10,7 @@
 
         var timeID = new Date().getTime() % 10000
         //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-        const client = new Paho.MQTT.Client('wss://oz.andrew.cmu.edu/xmqtt', timeID.toString());
+        const client = new Paho.MQTT.Client('wss://oz.andrew.cmu.edu/mqtt', timeID.toString());
 
         client.onConnectionLost = onConnectionLost;
         client.onMessageArrived = onMessageArrived;

@@ -75,7 +75,7 @@
                 );
                 var encodedUri = urlParams.get("redirect_uri");
                 if (encodedUri) {
-                    //redirect user to orginally requested page
+                    //redirect user to originally requested page
                     location.href = decodeURI(encodedUri);
                 } else {
                     location.href = ".."; // back to main ARENA
