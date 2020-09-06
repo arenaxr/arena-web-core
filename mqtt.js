@@ -791,7 +791,8 @@ function onMessageArrived(message, jsonMessage) {
                 case "camera":
                     // decide if we need draw or delete videoCube around head
                     if (theMessage.hasOwnProperty("jitsiId")) {
-                        if (theMessage.jitsiId == "") {
+                        if (theMessage.jitsiId == "" || !remoteTracks[theMessage.jitsiId] ||
+                            !remoteTracks[theMessage.jitsiId][0]) {
                             console.log("jitsiId empty");
                             break; // other-person has no camera ... yet
                         }
@@ -846,7 +847,16 @@ function onMessageArrived(message, jsonMessage) {
                                 // sceneEl.audioListener = listener;
 
                                 let audioSource = new THREE.PositionalAudio(listener);
-                                audioSource.setMediaStreamSource(audioStream);
+                                if (globals.spatialAudioOn) {
+                                    audioSource.setMediaStreamSource(audioStream);
+                                }
+                                else {
+                                    const audioEl = document.createElement("audio")
+                                    audioEl.setAttribute("autoplay", "autoplay");
+                                    audioEl.setAttribute("playsinline", "playsinline");
+                                    audioEl.srcObject = audioStream
+                                    audioSource.setMediaElementSource(audioEl);
+                                }
                                 audioSource.setRefDistance(1); // L-R panning
                                 audioSource.setRolloffFactor(1);
                                 entityEl.object3D.add(audioSource);

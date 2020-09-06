@@ -24,6 +24,11 @@ const confOptions = {
     //    disableAudioLevels: true
 };
 
+const headphonesWarning =
+`[Warning] No headphones detected!
+Spatial audio is disabled on Chrome when using speakers.
+If you would like spatial audio, please connect headphones and reload the page.`
+
 var remoteAudioTracks = {};
 
 // Jitsi globals
@@ -308,7 +313,6 @@ function onUserLeft(id) {
     delete remoteTracks[id];
 }
 
-
 function publishJitsiArenaMessage() {
     let msg = {
         object_id: globals.camName,
@@ -364,6 +368,21 @@ function onConnectionSuccess() {
     // set the (unique) ARENA user's name
     conference.setDisplayName(globals.camName);
     conference.join(); // conference.join(password);
+
+    JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
+        // spatial audio should be enabled if not chrome
+        globals.spatialAudioOn = false;
+        const audioOutputDevices = devices;
+        for (let i = 0; i < audioOutputDevices.length; i++) {
+            // if there is an external audio input (like headphones), enable spatial audio
+            console.log(audioOutputDevices[i].label, audioOutputDevices[i].label.includes("External"))
+            if (audioOutputDevices[i].label.includes("External")) {
+                globals.spatialAudioOn = true;
+                break;
+            }
+        }
+        if (!globals.spatialAudioOn) alert(headphonesWarning);
+    });
 }
 
 /**
@@ -483,20 +502,3 @@ JitsiMeetJS.createLocalTracks({
 .catch(error => {
     throw error;
 });
-
-if (JitsiMeetJS.mediaDevices.isDeviceChangeAvailable('output')) {
-    JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
-        const audioOutputDevices = devices.filter(d => d.kind === 'audiooutput');
-
-        if (audioOutputDevices.length > 1) {
-            $('#audioOutputSelect').html(
-                audioOutputDevices
-                .map(
-                    d =>
-                    `<option value="${d.deviceId}">${d.label}</option>`)
-                .join('\n'));
-
-            $('#audioOutputSelectWrapper').show();
-        }
-    });
-}
