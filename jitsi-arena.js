@@ -26,7 +26,7 @@ const confOptions = {
 
 const headphonesWarning =
 `[Warning] No headphones detected!
-Spatial audio is disabled on Chrome when using speakers.
+Spatial audio is disabled when using speakers.
 If you would like spatial audio, please connect headphones and reload the page.`
 
 var remoteAudioTracks = {};
