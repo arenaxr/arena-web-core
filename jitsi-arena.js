@@ -24,11 +24,14 @@ const confOptions = {
     //    disableAudioLevels: true
 };
 
+const headphonesWarning =
+`[Warning] No headphones detected!
+Spatial audio is disabled when using speakers.
+If you would like spatial audio, please connect headphones and reload the page.`
+
 var remoteAudioTracks = {};
-//var selfParticipantId = "";
 
 // Jitsi globals
-
 let connection = null;
 let isJoined = false;
 let conference = null;
@@ -38,17 +41,6 @@ let listener = null;
 
 let localTracks = []; // just our set of audio,video tracks
 const remoteTracks = {}; // it's a map of arrays of tracks
-// list of participant (callr) IDs, not just any list
-let MAXCALLERS = 120
-var callers = [];
-
-function getSlotOfCaller(participantId) {
-    //for (let i = 0; i < callers.length; i++) {
-    //  console.log("CALLERS: ["+i.toString()+"]: ", callers[i]);
-    //}
-
-    return (callers.indexOf(participantId)); // might be -1
-}
 
 function connectArena(participantId, trackType) {
     globals.jitsiId = participantId;
@@ -114,22 +106,8 @@ function onRemoteTrack(track) {
     if (!remoteTracks[participant]) { // new participant
         remoteTracks[participant] = []; // create array to hold their tracks
     }
-    if (!callers.includes(participant)) { // new participant
-        hole = callers.indexOf("empty");
-        if (hole != -1) {
-            callers[hole] = participant;
-        } else if (callers.length < MAXCALLERS) {
-            callers.push(participant); // add them to participants list
-        }
-        //  console.log("  jitsi Participant:" , participant);
-        //  console.log("  at slot:" , callers.length);
-    }
 
-    const listIdx = callers.indexOf(participant);
-    if (listIdx == -1) // not enough slots
-        return;
     const idx = remoteTracks[participant].push(track);
-    //    console.log("remoteTracks indexed by ", participant, "at listIdx: ", listIdx);
 
     track.addEventListener(
         JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
@@ -173,8 +151,9 @@ function onRemoteTrack(track) {
             //      let vidBox = document.getElementById(BIGSCREEN);
             let vidBox = document.getElementById(displayName); // "arena_screen_share_0"
             vidBox.setAttribute("src", "#" + screenName); // set src to "#screenVideo" in <a-plane> with id="bigscreen"
-            console.log("added src", vidBox);
-        } else if (track.getType() === 'audio') {
+            // console.log("added src", vidBox);
+        }
+        else if (track.getType() === 'audio') {
 
             let audioStream = new MediaStream();
             audioStream.addTrack(remoteTracks[participant][0].track);
@@ -232,60 +211,48 @@ function onRemoteTrack(track) {
             planeElement.object3D.add(audioSource);
             // audioSource.context.resume();
         } // displayname.includes(DISPLAYNAME)
-    } else {
-
+    }
+    else {
         if (track.getType() === 'video') {
-            // $('body').append(
-            //    `<video autoplay='1' id='${participant}video${idx}' />`);
-            // instead use already existing e.g. box1
-
-            const videoBox = "box" + listIdx;
-            var boxid2 = document.getElementById(videoBox); // "box0"
-            if (!boxid2) { // create
-                boxid2 = document.createElement('video');
-                //boxid2.setAttribute("id", "screenVideo");
-                boxid2.setAttribute("id", videoBox);
-                boxid2.setAttribute("muted", "false");
-                boxid2.setAttribute("autoplay", "true");
-                boxid2.setAttribute("playsinline", "true");
-                boxid2.setAttribute("crossorigin", "anonymous");
-                // add to scene
-                globals.sceneObjects.scene.appendChild(boxid2);
+            // use already existing video element e.g. video<jitsi_id>
+            const videoID = `video${participant}`;
+            if (!document.getElementById(videoID)) { // create
+                $('a-assets').append(
+                    `<video autoplay='1' id='${videoID}'/>` );
             }
-            track.attach($(`#${videoBox}`)[0]);
+            track.attach($(`#${videoID}`)[0]);
 
-            let row = listIdx % 3;
-            let column = Math.floor(listIdx / 3);
-
-            var wallboxid = "wallbox" + listIdx;
-            let vidBox = document.getElementById(wallboxid);
-
-            if (!vidBox) { // create
-                vidBox = document.createElement('a-plane');
-                vidBox.setAttribute("id", wallboxid);
-                vidBox.setAttribute("muted", "false");
-                vidBox.setAttribute("autoplay", "true");
-                vidBox.setAttribute("playsinline", "true");
-                vidBox.setAttribute("scale", "0.96 0.72 0.01");
-                vidBox.setAttribute("material", "shader: flat; side: double");
+            let row = 0;
+            let column = 0;
+            var wallboxid = "wallbox" + participant;
+            let wallbox = document.getElementById(wallboxid);
+            if (!wallbox) { // create
+                wallbox = document.createElement('a-plane');
+                wallbox.setAttribute("id", wallboxid);
+                wallbox.setAttribute("muted", "false");
+                wallbox.setAttribute("autoplay", "true");
+                wallbox.setAttribute("playsinline", "true");
+                wallbox.setAttribute("scale", "0.96 0.72 0.01");
+                wallbox.setAttribute("material", "shader: flat; side: double");
                 var xCoord = (-1.5 + column).toString();
                 var yCoord = (row + 1).toString();
                 var posString = xCoord + ", " + yCoord + ", -4";
-                vidBox.setAttribute("position", posString);
+                wallbox.setAttribute("position", posString);
 
                 // make it invisible?
-                vidBox.setAttribute("visible", "false");
+                wallbox.setAttribute("visible", "false");
 
                 // add to scene
-                globals.sceneObjects.scene.appendChild(vidBox);
+                globals.sceneObjects.scene.appendChild(wallbox);
             }
-            vidBox.setAttribute("src", "#" + videoBox);
-            // console.log("added src", videoBox);
+            wallbox.setAttribute("src", `#${videoID}`);
+
+            console.log("added src", videoID);
         } else { // 'audio'
             //$('body').append(
             //    `<audio autoplay='1' id='${participant}audio${idx}' />`);
 
-            const audid = "aud" + listIdx;
+            // const audid = "aud" + listIdx;
             //      console.log("audio skip -> positional", audid);
             // play track full volume mono
             // commented out to play positionally from 'avatar' cube
@@ -328,25 +295,23 @@ function onUserLeft(id) {
         return;
     }
     const tracks = remoteTracks[id];
-    const listIdx = callers.indexOf(id);
 
     for (let i = 0; i < tracks.length; i++) {
         //        tracks[i].detach($(`#${id}${tracks[i].getType()}`));
         // need to detach from ARENA things
         let track = tracks[i];
         if (track.getType() == 'video') {
-            const boxid = "wallbox" + listIdx;
+            const boxid = "wallbox" + id;
             let vidBox = document.getElementById(boxid);
             vidBox.setAttribute("src", "");
             tracks[i].detach($(`#${boxid}`)[0]);
         }
     }
-    if (listIdx != -1) {
-        callers[listIdx] = "empty"; // puts a hole in the callers array
-    }
+
+    $(`#video${id}`).remove();
+
     delete remoteTracks[id];
 }
-
 
 function publishJitsiArenaMessage() {
     let msg = {
@@ -379,7 +344,6 @@ function onConnectionSuccess() {
         onConferenceJoined);
     conference.on(JitsiMeetJS.events.conference.USER_JOINED, id => {
         console.log('remote user join   : ', id);
-        //getSlotOfCaller('');
         remoteTracks[id] = []; // create an array to hold tracks of new user
     });
     conference.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
@@ -404,6 +368,21 @@ function onConnectionSuccess() {
     // set the (unique) ARENA user's name
     conference.setDisplayName(globals.camName);
     conference.join(); // conference.join(password);
+
+    JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
+        // spatial audio should be enabled if not chrome
+        globals.spatialAudioOn = false;
+        const audioOutputDevices = devices;
+        for (let i = 0; i < audioOutputDevices.length; i++) {
+            // if there is an external audio input (like headphones), enable spatial audio
+            console.log(audioOutputDevices[i].label, audioOutputDevices[i].label.includes("External"))
+            if (audioOutputDevices[i].label.includes("External")) {
+                globals.spatialAudioOn = true;
+                break;
+            }
+        }
+        if (!globals.spatialAudioOn) alert(headphonesWarning);
+    });
 }
 
 /**
@@ -517,26 +496,9 @@ JitsiMeetJS.mediaDevices.addEventListener(
 connection.connect();
 
 JitsiMeetJS.createLocalTracks({
-        devices: ['audio', 'video']
-    })
-    .then(onLocalTracks)
-    .catch(error => {
-        throw error;
-    });
-
-if (JitsiMeetJS.mediaDevices.isDeviceChangeAvailable('output')) {
-    JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
-        const audioOutputDevices = devices.filter(d => d.kind === 'audiooutput');
-
-        if (audioOutputDevices.length > 1) {
-            $('#audioOutputSelect').html(
-                audioOutputDevices
-                .map(
-                    d =>
-                    `<option value="${d.deviceId}">${d.label}</option>`)
-                .join('\n'));
-
-            $('#audioOutputSelectWrapper').show();
-        }
-    });
-}
+    devices: ['audio', 'video']
+})
+.then(onLocalTracks)
+.catch(error => {
+    throw error;
+});
