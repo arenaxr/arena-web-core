@@ -55,7 +55,7 @@ function onSignIn(googleUser) {
     if (typeof globals !== 'undefined') {
         if (typeof defaults !== 'undefined' && globals.userParam == defaults.userParam) {
             var cam = globals.camName.split('_');
-            globals.userParam = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
+            globals.userParam = encodeURI(profile.getName());
             cam[2] = globals.userParam;
             globals.camName = cam.join('_');
         }
