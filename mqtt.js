@@ -420,52 +420,29 @@ function isJson(str) {
     return true;
 }
 
-function drawVideoCube(entityEl, slot) {
-    var theslot = "#box" + (slot).toString();
-    //console.log("theslot: " + theslot);
-
+function drawVideoCube(entityEl, videoID) {
     // attach video to head
     const videoCube = document.createElement('a-box');
-    videoCube.setAttribute('id', "videoCube" + theslot);
+    videoCube.setAttribute('id', videoID+"cube");
     videoCube.setAttribute('position', '0 0 0');
     videoCube.setAttribute('scale', '0.8 0.6 0.8');
     videoCube.setAttribute('material', 'shader', 'flat');
-    //    videoCube.setAttribute('multisrc', "src4:"+theslot); // horrible bug crashes ARENA - why?!
-    videoCube.setAttribute('src', theslot); // video only (!audio)
+    videoCube.setAttribute('src', `#${videoID}`); // video only (!audio)
 
-    const videoCube2 = document.createElement('a-box');
-    videoCube2.setAttribute('id', "videoCube2" + theslot);
-    videoCube2.setAttribute('position', '0 0 0.01');
-    videoCube2.setAttribute('scale', '0.81 0.61 0.8');
-    videoCube2.setAttribute('material', 'shader', 'flat');
-    videoCube2.setAttribute("transparent", "true");
-    videoCube2.setAttribute('color', 'black');
-    videoCube2.setAttribute("opacity", "0.8");
+    const videoCubeDark = document.createElement('a-box');
+    videoCubeDark.setAttribute('id', videoID+"cubeDark");
+    videoCubeDark.setAttribute('position', '0 0 0.01');
+    videoCubeDark.setAttribute('scale', '0.81 0.61 0.8');
+    videoCubeDark.setAttribute('material', 'shader', 'flat');
+    videoCubeDark.setAttribute("transparent", "true");
+    videoCubeDark.setAttribute('color', 'black');
+    videoCubeDark.setAttribute("opacity", "0.75");
 
     entityEl.appendChild(videoCube);
-    entityEl.appendChild(videoCube2);
+    entityEl.appendChild(videoCubeDark);
 }
 
-function highlightVideoCube(entityEl, oldEl, slot) {
-    // var theslot = "#wallbox"+(slot).toString();
-    // console.log("highlightVideoCube: " + theslot);
-    // var wallBox = document.querySelector(theslot);
-
-    // var videoCube = document.querySelector("#videoWallHighlightBox");
-    // if (!videoCube) {
-    //  videoCube = document.createElement('a-box');
-    //  videoCube.setAttribute('scale', '1 0.8 0.05');
-    //     videoCube.setAttribute('color', "green");
-    //  videoCube.setAttribute('id', "videoWallHighlightBox");
-    //     videoCube.setAttribute('material', 'shader', 'flat');
-    //     globals.sceneObjects.scene.appendChild(videoCube);
-    // }
-
-    // var thex = wallBox.object3D.position.x;
-    // var they = wallBox.object3D.position.y;
-    // var thez = wallBox.object3D.position.z;
-    // videoCube.object3D.position.set(thex, they, thez - 0.03);
-
+function highlightVideoCube(entityEl, oldEl) {
     // entityEl is the head
     var videoHat = document.querySelector("#videoHatHighlightBox");
     if (!videoHat) {
@@ -809,12 +786,8 @@ function onMessageArrived(message, jsonMessage) {
 
                     if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
                         // possibly change active speaker
-
-                        let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-                        //console.log("SPEAKER, slot: ", theMessage.jitsiId, slot);
-
                         if (globals.activeSpeaker != globals.previousSpeakerId) {
-                            highlightVideoCube(entityEl, globals.previousSpeakerEl, slot);
+                            highlightVideoCube(entityEl, globals.previousSpeakerEl);
                             globals.previousSpeakerId = theMessage.jitsiId;
                             globals.previousSpeakerEl = entityEl;
                         }
@@ -824,34 +797,28 @@ function onMessageArrived(message, jsonMessage) {
                     break;
 
                 case "camera":
-                    // decide if we need draw or delete videoBox around head
-                    // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
-
+                    // decide if we need draw or delete videoCube around head
                     if (theMessage.hasOwnProperty("jitsiId")) {
-                        // call function in jitsi-arena.js
-                        let slot = getSlotOfCaller(theMessage.jitsiId); // 0 indexed
-                        if (slot == -1) {
-                            console.log("not a caller (yet)");
-                            return;
-                        }
-
-                        if (theMessage.jitsiId == "") {
+                        if (theMessage.jitsiId == "" || !remoteTracks[theMessage.jitsiId] ||
+                            !remoteTracks[theMessage.jitsiId][0]) {
                             console.log("jitsiId empty");
                             break; // other-person has no camera ... yet
                         }
 
                         if (theMessage.hasVideo) {
-                            if (!(entityEl.getAttribute('videoCubeDrawn')=='true')) {
+                            const videoID = `video${theMessage.jitsiId}`;
+                            if (document.getElementById(videoID) &&
+                                !(entityEl.getAttribute('videoCubeDrawn')=='true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
-                                drawVideoCube(entityEl, slot);
+                                drawVideoCube(entityEl, videoID);
                                 entityEl.setAttribute('videoCubeDrawn', true);
                             }
                         }
                         else {
                             if (entityEl) {
                                 for (let child of entityEl.children) {
-                                    if (child.getAttribute("id").includes("videoCube") ||
-                                        child.getAttribute("id").includes("videoHat")) {
+                                    if (child.getAttribute("id").includes("cube") ||
+                                        child.getAttribute("id").includes("hat")) {
                                         entityEl.removeChild(child);
                                     }
                                 }
@@ -888,7 +855,16 @@ function onMessageArrived(message, jsonMessage) {
                                 // sceneEl.audioListener = listener;
 
                                 let audioSource = new THREE.PositionalAudio(listener);
-                                audioSource.setMediaStreamSource(audioStream);
+                                if (globals.spatialAudioOn) {
+                                    audioSource.setMediaStreamSource(audioStream);
+                                }
+                                else {
+                                    const audioEl = document.createElement("audio")
+                                    audioEl.setAttribute("autoplay", "autoplay");
+                                    audioEl.setAttribute("playsinline", "playsinline");
+                                    audioEl.srcObject = audioStream
+                                    audioSource.setMediaElementSource(audioEl);
+                                }
                                 audioSource.setRefDistance(1); // L-R panning
                                 audioSource.setRolloffFactor(1);
                                 entityEl.object3D.add(audioSource);
@@ -902,18 +878,20 @@ function onMessageArrived(message, jsonMessage) {
                                             if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
                                                 enableChromeAEC(listener.gain);
                                             }
-                                            document.body.removeEventListener("touchend", resume, false);
-                                            document.body.removeEventListener("mouseup", resume, false);
+                                            document.body.removeEventListener("touchmove", resume, false);
+                                            document.body.removeEventListener("mousemove", resume, false);
                                         }
                                     }, 0);
                                 };
-                                document.body.addEventListener("touchend", resume, false);
-                                document.body.addEventListener("mouseup", resume, false);
+                                document.body.addEventListener("touchmove", resume, false);
+                                document.body.addEventListener("mousemove", resume, false);
 
                                 entityEl.setAttribute("posAudioAdded", true);
                             }
                         }
                     }
+
+                    // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
                     break;
 
                 case "viveLeft":
