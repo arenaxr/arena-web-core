@@ -213,9 +213,9 @@ export default class MQTTChat {
         let msg = {
             type: "chat",
             from_uid: this.settings.userid,
-            from_un: this.settings.username,
+            from_un: decodeURI(this.settings.username),
             from_scene: this.settings.scene,
-            from_desc: this.settings.username + " (" + this.toSel.options[this.toSel.selectedIndex].text + ") " + new Date().toLocaleTimeString(),
+            from_desc: decodeURI(this.settings.username) + " (" + this.toSel.options[this.toSel.selectedIndex].text + ") " + new Date().toLocaleTimeString(),
             cameraid: this.settings.cameraid,
             text: msgTxt
         }
@@ -314,7 +314,7 @@ export default class MQTTChat {
         Object.keys(this.liveUsers).forEach(function(key) {
             let uli = document.createElement("li");
 
-            uli.innerHTML = _this.liveUsers[key].scene + "/" + _this.liveUsers[key].un + ((key == _this.settings.userid) ? " (me)" : "");
+            uli.innerHTML = _this.liveUsers[key].scene + "/" + decodeURI(_this.liveUsers[key].un) + ((key == _this.settings.userid) ? " (me)" : "");
             //uli.setAttribute("cameraid", _this.liveUsers[key].cid);
 
             let uBtnCtnr = document.createElement("div");
@@ -348,7 +348,7 @@ export default class MQTTChat {
 
                 let op = document.createElement("option");
                 op.value = key;
-                op.innerHTML = "to user: " + _this.liveUsers[key].un;
+                op.innerHTML = "to user: " + decodeURI(_this.liveUsers[key].un);
                 _this.toSel.appendChild(op);
             }
             _this.usersList.appendChild(uli);
@@ -421,7 +421,8 @@ export default class MQTTChat {
             console.log("Could not find aframe scene");
             return;
         }
-        let toCam = sceneEl.querySelector('#' + cameraId);
+        //TODO(mwfarb): handle case when other chat user has not moved and is not in a-scene yet
+        let toCam = sceneEl.querySelector('[id="' + cameraId + '"]');
 
         let cameraRig = sceneEl.querySelector('#CameraRig');
         let myCamera = document.getElementById('my-camera');
