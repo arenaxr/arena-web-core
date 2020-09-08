@@ -1,6 +1,6 @@
 const ICON_BTN_CLASS = 'arena-icon-button';
 
-function createIconButton(img, onClick) {
+function createIconButton(img, tooltip, onClick) {
     var iconButton;
     var wrapper;
 
@@ -10,6 +10,7 @@ function createIconButton(img, onClick) {
     iconButton.style.backgroundImage = `url('images/icons/${img}.png')`;
     iconButton.className = ICON_BTN_CLASS;
     iconButton.setAttribute("id", "btn-" + img);
+    iconButton.setAttribute("title", tooltip);
 
     // Insert elements.
     wrapper.appendChild(iconButton);
@@ -29,7 +30,7 @@ function publishAvatarMsg(avatarOn) {
 }
 
 function setupIcons() {
-    const audioBtn = createIconButton("slashroundedaudio", () => {
+    const audioBtn = createIconButton("slashroundedaudio", "Microphone on/off.", () => {
         if (jitsiAudioTrack) {
             globals.hasAudio = !globals.hasAudio;
             if (globals.hasAudio) {
@@ -44,7 +45,7 @@ function setupIcons() {
         }
     });
 
-    const videoBtn = createIconButton("slashroundedvideo", () => {
+    const videoBtn = createIconButton("slashroundedvideo", "Camera on/off. You appear as a video box.", () => {
         if (jitsiVideoTrack) {
             globals.hasVideo = !globals.hasVideo;
             if (globals.hasVideo) { // toggled
@@ -66,7 +67,7 @@ function setupIcons() {
         }
     });
 
-    const avatarBtn = createIconButton("slashroundedavatar", () => {
+    const avatarBtn = createIconButton("slashroundedavatar", "Face-recognition avatar on/off. You appear as a 3d-animated face.", () => {
         if (AFRAME.utils.device.isMobile()) return;
         if (jitsiVideoTrack) {
             globals.hasAvatar = !globals.hasAvatar;
@@ -87,11 +88,11 @@ function setupIcons() {
         }
     });
 
-    const settingsBtn = createIconButton("roundedsettings", () => {
+    const settingsBtn = createIconButton("roundedsettings", "Settings (WIP)", () => {
         console.log("clicked settings");
     });
 
-    const logoutBtn = createIconButton("roundedlogout", () => {
+    const logoutBtn = createIconButton("roundedlogout", "Sign out of the ARENA", () => {
         signOut('.'); // --> ./auth.js
     });
 
