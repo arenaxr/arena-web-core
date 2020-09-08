@@ -819,7 +819,7 @@ function onMessageArrived(message, jsonMessage) {
                             if (entityEl) {
                                 for (let child of entityEl.children) {
                                     if (child.getAttribute("id").includes("cube") ||
-                                        child.getAttribute("id").includes("hat")) {
+                                        child.getAttribute("id").includes("Hat")) {
                                         entityEl.removeChild(child);
                                     }
                                 }

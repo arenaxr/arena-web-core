@@ -83,6 +83,10 @@ function debug(msg) {
     publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
+defaults.userParam = prompt(
+  `Enter a name to identify your client\n`
+);
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
