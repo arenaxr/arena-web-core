@@ -15,7 +15,7 @@ html {
 }
 
 .bg-img {
-    background-image: url("../images/home.png");
+    background-image: url("../images/intro_dialog_animation.gif");
     height: 100%;
     overflow: hidden;
     background-position: center;
@@ -24,7 +24,7 @@ html {
     position: relative;
 }
 
-/* 
+/*
 .login {
     position: absolute;
     right: 0;
