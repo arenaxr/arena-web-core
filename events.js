@@ -188,6 +188,21 @@ window.globals = {
 };
 console.log(window.globals);
 
+let urlLat = getUrlParam('lat');
+let urlLong = getUrlParam('long');
+if (urlLat && urlLong) {
+    globals.clientCoords = {
+        latitude: urlLat,
+        longitude: urlLong
+    };
+} else {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            globals.clientCoords = position.coords;
+        });
+    }
+}
+
 globals.persistenceUrl = '//' + globals.mqttParamZ + defaults.persistPath + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath;
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
@@ -235,126 +250,6 @@ globals.vioViveRPosition = new THREE.Vector3();
 var ViveRcamParent = new THREE.Matrix4();
 var ViveRcam = new THREE.Matrix4();
 var ViveRcpi = new THREE.Matrix4();
-
-
-function updateConixBox(eventName, coordsData, myThis) {
-    const sceney = myThis.sceneEl;
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
-    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
-}
-
-function debugConixText(coordsData) {
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', 'pose: ' + coordsToText(coordsData));
-    console.log('pose: ', coordsToText(coordsData));
-}
-
-function debugRaw(debugMsg) {
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', debugMsg);
-    //console.log('debug: ', debugMsg);
-}
-
-
-function eventAction(evt, eventName, myThis) {
-    const newPosition = myThis.object3D.position;
-    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
-    //      const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
-    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-
-    let coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3)
-    };
-
-    // publish to MQTT
-    const objName = myThis.id + "_" + globals.idTag;
-    publish(globals.outputTopic + objName, {
-        object_id: objName,
-        action: "clientEvent",
-        type: eventName,
-        data: {
-            position: coordsData,
-            source: globals.camName
-        }
-    });
-    //console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
-
-    // DEBUG
-    //updateConixBox(eventName, coordsData, myThis);
-}
-
-function setCoordsData(evt) {
-    return {
-        x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
-        y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
-        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
-    };
-}
-
-function vec3ToObject(vec) {
-    return {
-        x: parseFloat(vec.x.toFixed(3)),
-        y: parseFloat(vec.y.toFixed(3)),
-        z: parseFloat(vec.z.toFixed(3))
-    };
-}
-
-function quatToObject(q) {
-    return {
-        x: parseFloat(q.x.toFixed(3)),
-        y: parseFloat(q.y.toFixed(3)),
-        z: parseFloat(q.z.toFixed(3)),
-        w: parseFloat(q.w.toFixed(3))
-    };
-}
-
-function coordsToText(c) {
-    return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
-}
-
-function rotToText(c) {
-    return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
-}
-
-
-// my crap, this returns strings, not numbers
-function setClickData(evt) {
-    if (evt.detail.intersection)
-        return {
-            x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
-            y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
-            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
-        }
-    else {
-        console.log("WARN: empty coords data");
-        return {
-            x: 0,
-            y: 0,
-            z: 0
-        }
-    }
-}
-
-
-window.addEventListener('onauth', function (e) {
-
-let urlLat = getUrlParam('lat');
-let urlLong = getUrlParam('long');
-if (urlLat && urlLong) {
-    globals.clientCoords = {
-        latitude: urlLat,
-        longitude: urlLong
-    };
-} else {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            globals.clientCoords = position.coords;
-        });
-    }
-}
 
 importScript('/face-tracking/script.js');
 
@@ -457,6 +352,107 @@ AFRAME.registerComponent('pose-publisher', {
         }
     })
 });
+
+function updateConixBox(eventName, coordsData, myThis) {
+    const sceney = myThis.sceneEl;
+    const textEl = document.getElementById('conix-text');
+    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
+    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
+}
+
+function debugConixText(coordsData) {
+    const textEl = document.getElementById('conix-text');
+    textEl.setAttribute('value', 'pose: ' + coordsToText(coordsData));
+    console.log('pose: ', coordsToText(coordsData));
+}
+
+function debugRaw(debugMsg) {
+    const textEl = document.getElementById('conix-text');
+    textEl.setAttribute('value', debugMsg);
+    //console.log('debug: ', debugMsg);
+}
+
+
+function eventAction(evt, eventName, myThis) {
+    const newPosition = myThis.object3D.position;
+    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
+    //      const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
+
+    let coordsData = {
+        x: newPosition.x.toFixed(3),
+        y: newPosition.y.toFixed(3),
+        z: newPosition.z.toFixed(3)
+    };
+
+    // publish to MQTT
+    const objName = myThis.id + "_" + globals.idTag;
+    publish(globals.outputTopic + objName, {
+        object_id: objName,
+        action: "clientEvent",
+        type: eventName,
+        data: {
+            position: coordsData,
+            source: globals.camName
+        }
+    });
+    //console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
+
+    // DEBUG
+    //updateConixBox(eventName, coordsData, myThis);
+}
+
+function setCoordsData(evt) {
+    return {
+        x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
+        y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
+        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
+    };
+}
+
+function vec3ToObject(vec) {
+    return {
+        x: parseFloat(vec.x.toFixed(3)),
+        y: parseFloat(vec.y.toFixed(3)),
+        z: parseFloat(vec.z.toFixed(3))
+    };
+}
+
+function quatToObject(q) {
+    return {
+        x: parseFloat(q.x.toFixed(3)),
+        y: parseFloat(q.y.toFixed(3)),
+        z: parseFloat(q.z.toFixed(3)),
+        w: parseFloat(q.w.toFixed(3))
+    };
+}
+
+function coordsToText(c) {
+    return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
+}
+
+function rotToText(c) {
+    return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
+}
+
+
+// my crap, this returns strings, not numbers
+function setClickData(evt) {
+    if (evt.detail.intersection)
+        return {
+            x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
+            y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
+            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
+        }
+    else {
+        console.log("WARN: empty coords data");
+        return {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+    }
+}
 
 AFRAME.registerComponent('impulse', {
     schema: {
@@ -1230,7 +1226,3 @@ AFRAME.registerComponent("network-latency", {
         }
     })
 })
-
-const aframeCompleteEvent = new CustomEvent('onaframe', e);
-window.dispatchEvent(aframeCompleteEvent);
-});
