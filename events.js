@@ -188,25 +188,6 @@ window.globals = {
 };
 console.log(window.globals);
 
-window.addEventListener('onauth', function (e) {
-
-let urlLat = getUrlParam('lat');
-let urlLong = getUrlParam('long');
-if (urlLat && urlLong) {
-    globals.clientCoords = {
-        latitude: urlLat,
-        longitude: urlLong
-    };
-} else {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            globals.clientCoords = position.coords;
-        });
-    }
-}
-
-});
-
 globals.persistenceUrl = '//' + globals.mqttParamZ + defaults.persistPath + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath;
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
@@ -255,111 +236,6 @@ var ViveRcamParent = new THREE.Matrix4();
 var ViveRcam = new THREE.Matrix4();
 var ViveRcpi = new THREE.Matrix4();
 
-window.addEventListener('onauth', function (e) {
-
-importScript('/face-tracking/script.js');
-
-AFRAME.registerComponent('pose-listener', {
-    // if we want to make throttling settable at init time over mqtt,
-    // create a Component variable here & use instead of globals.updateMillis
-    init: function() {
-        // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
-        this.heartBeatCounter = 1;
-    },
-
-    tick: (function(t, dt) {
-        globals.newRotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
-        globals.newPosition.setFromMatrixPosition(this.el.object3D.matrixWorld);
-
-        camParent = this.el.object3D.parent.matrixWorld;
-        cam = this.el.object3D.matrixWorld;
-        cpi.getInverse(camParent);
-        cpi.multiply(cam);
-        globals.vioMatrix.copy(cpi);
-        globals.vioRotation.setFromRotationMatrix(cpi);
-        globals.vioPosition.setFromMatrixPosition(cpi);
-        //console.log(cpi);
-
-        const rotationCoords = rotToText(globals.newRotation);
-        const positionCoords = coordsToText(globals.newPosition);
-
-        const newPose = rotationCoords + " " + positionCoords;
-
-        // update position every 1 sec
-        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / globals.updateMillis) == 0) {
-            this.el.emit('poseChanged', Object.assign(globals.newPosition, globals.newRotation));
-            this.el.emit('vioChanged', Object.assign(globals.vioPosition, globals.vioRotation));
-            this.lastPose = newPose;
-
-            // DEBUG
-            //debugConixText(newPosition);
-            //debugRaw(this.el.object3D.matrixAutoUpdate + '\n' + this.el.object3D.matrixWorldNeedsUpdate +
-            //      '\n' + THREE.Object3D.DefaultMatrixAutoUpdate);
-        }
-        this.heartBeatCounter++;
-    })
-});
-
-
-AFRAME.registerComponent('vive-pose-listener', {
-    init: function() {
-        // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
-    },
-
-    tick: (function(t, dt) {
-        const newRotation = this.el.object3D.quaternion;
-        const newPosition = this.el.object3D.position;
-
-        const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
-        const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-
-        const newPose = rotationCoords + " " + positionCoords;
-        if (this.lastPose !== newPose) {
-            this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
-            this.lastPose = newPose;
-        }
-    })
-});
-
-
-AFRAME.registerComponent('pose-publisher', {
-    init: function() {
-        // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
-    },
-
-    tick: (function(t, dt) {
-        const newRotation = this.el.object3D.quaternion;
-        const newPosition = this.el.object3D.position;
-
-        const rotationCoords = rotToText(newRotation);
-        const positionCoords = coordsToText(newPosition);
-
-        const newPose = rotationCoords + " " + positionCoords;
-        if (this.lastPose !== newPose) {
-            // this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
-            this.lastPose = newPose;
-
-            const objName = this.el.id;
-            publish(globals.outputTopic + objName, {
-                object_id: objName,
-                action: "update",
-                persist: false,
-                type: 'object',
-                data: {
-                    source: globals.camName,
-                    position: vec3ToObject(newPosition),
-                    rotation: quatToObject(newRotation),
-                }
-            });
-
-        }
-    })
-});
-
-});
 
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
@@ -462,7 +338,125 @@ function setClickData(evt) {
     }
 }
 
+
 window.addEventListener('onauth', function (e) {
+
+let urlLat = getUrlParam('lat');
+let urlLong = getUrlParam('long');
+if (urlLat && urlLong) {
+    globals.clientCoords = {
+        latitude: urlLat,
+        longitude: urlLong
+    };
+} else {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            globals.clientCoords = position.coords;
+        });
+    }
+}
+
+importScript('/face-tracking/script.js');
+
+AFRAME.registerComponent('pose-listener', {
+    // if we want to make throttling settable at init time over mqtt,
+    // create a Component variable here & use instead of globals.updateMillis
+    init: function() {
+        // Set up the tick throttling.
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+        this.heartBeatCounter = 1;
+    },
+
+    tick: (function(t, dt) {
+        globals.newRotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+        globals.newPosition.setFromMatrixPosition(this.el.object3D.matrixWorld);
+
+        camParent = this.el.object3D.parent.matrixWorld;
+        cam = this.el.object3D.matrixWorld;
+        cpi.getInverse(camParent);
+        cpi.multiply(cam);
+        globals.vioMatrix.copy(cpi);
+        globals.vioRotation.setFromRotationMatrix(cpi);
+        globals.vioPosition.setFromMatrixPosition(cpi);
+        //console.log(cpi);
+
+        const rotationCoords = rotToText(globals.newRotation);
+        const positionCoords = coordsToText(globals.newPosition);
+
+        const newPose = rotationCoords + " " + positionCoords;
+
+        // update position every 1 sec
+        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / globals.updateMillis) == 0) {
+            this.el.emit('poseChanged', Object.assign(globals.newPosition, globals.newRotation));
+            this.el.emit('vioChanged', Object.assign(globals.vioPosition, globals.vioRotation));
+            this.lastPose = newPose;
+
+            // DEBUG
+            //debugConixText(newPosition);
+            //debugRaw(this.el.object3D.matrixAutoUpdate + '\n' + this.el.object3D.matrixWorldNeedsUpdate +
+            //      '\n' + THREE.Object3D.DefaultMatrixAutoUpdate);
+        }
+        this.heartBeatCounter++;
+    })
+});
+
+
+AFRAME.registerComponent('vive-pose-listener', {
+    init: function() {
+        // Set up the tick throttling.
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+    },
+
+    tick: (function(t, dt) {
+        const newRotation = this.el.object3D.quaternion;
+        const newPosition = this.el.object3D.position;
+
+        const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
+        const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
+
+        const newPose = rotationCoords + " " + positionCoords;
+        if (this.lastPose !== newPose) {
+            this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
+            this.lastPose = newPose;
+        }
+    })
+});
+
+
+AFRAME.registerComponent('pose-publisher', {
+    init: function() {
+        // Set up the tick throttling.
+        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+    },
+
+    tick: (function(t, dt) {
+        const newRotation = this.el.object3D.quaternion;
+        const newPosition = this.el.object3D.position;
+
+        const rotationCoords = rotToText(newRotation);
+        const positionCoords = coordsToText(newPosition);
+
+        const newPose = rotationCoords + " " + positionCoords;
+        if (this.lastPose !== newPose) {
+            // this.el.emit('viveChanged', Object.assign(newPosition, newRotation));
+            this.lastPose = newPose;
+
+            const objName = this.el.id;
+            publish(globals.outputTopic + objName, {
+                object_id: objName,
+                action: "update",
+                persist: false,
+                type: 'object',
+                data: {
+                    source: globals.camName,
+                    position: vec3ToObject(newPosition),
+                    rotation: quatToObject(newRotation),
+                }
+            });
+
+        }
+    })
+});
 
 AFRAME.registerComponent('impulse', {
     schema: {
