@@ -311,6 +311,16 @@ function onConnectionSuccess() {
     // set the (unique) ARENA user's name
     conference.setDisplayName(globals.camName);
     conference.join(); // conference.join(password);
+
+    globals.chromeSpatialAudioOn = false;
+    // only tested and working on mac on chrome
+    navigator.mediaDevices.enumerateDevices()
+        .then(function(devices) {
+            const headphonesConnected = devices
+                .filter(device => /audio\w+/.test(device.kind))
+                .find(device => device.label.toLowerCase().includes('head'));
+            globals.chromeSpatialAudioOn = !!headphonesConnected;
+    });
 }
 
 /**
