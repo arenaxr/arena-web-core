@@ -16,7 +16,7 @@ export default class MQTTChat {
             userid: st.userid !== undefined ? st.userid : uuidv4(),
             cameraid: st.cameraid !== undefined ? st.cameraid : "camera_auser",
             username: st.username !== undefined ? st.username : "auser",
-            realm: st.realm !== undefined ? st.chat_topic : "realm",
+            realm: st.realm !== undefined ? st.realm : "realm",
             scene: st.scene !== undefined ? st.scene : "render",
             keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
             mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://spatial.andrew.cmu.edu/mqtt/",
