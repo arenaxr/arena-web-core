@@ -475,60 +475,65 @@ function setupCornerVideo() {
     }
 }
 
-// slightly modified from:
-// https://github.com/mozilla/hubs/blob/0c26af207bbbc3983409cdab7210b219b53449ca/src/systems/audio-system.js
+// https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
 async function enableChromeAEC(gainNode) {
-    /**
-    *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-    *  1. grab the GainNode from the scene's THREE.AudioListener
-    *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
-    *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-    *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-    *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-    *  6. connect the other RTCPeerConnection's stream to a new audio element.
-    *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
-    */
+  /**
+   *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
+   *  1. grab the GainNode from the scene's THREE.AudioListener
+   *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
+   *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+   *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
+   *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
+   *  6. connect the other RTCPeerConnection's stream to a new audio element.
+   *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
+   */
 
-    const audioEl = new Audio();
-    audioEl.setAttribute("autoplay", "autoplay");
-    audioEl.setAttribute("playsinline", "playsinline");
+  const audioEl = new Audio();
+  audioEl.setAttribute("autoplay", "autoplay");
+  audioEl.setAttribute("playsinline", "playsinline");
 
-    const context = THREE.AudioContext.getContext();
-    const loopbackDestination = context.createMediaStreamDestination();
-    const outboundPeerConnection = new RTCPeerConnection();
-    const inboundPeerConnection = new RTCPeerConnection();
+  const context = THREE.AudioContext.getContext();
+  const loopbackDestination = context.createMediaStreamDestination();
+  const outboundPeerConnection = new RTCPeerConnection();
+  const inboundPeerConnection = new RTCPeerConnection();
 
-    const onError = e => {
-        console.error("RTCPeerConnection loopback initialization error", e);
-    };
+  const onError = e => {
+    console.error("RTCPeerConnection loopback initialization error", e);
+  };
 
-    outboundPeerConnection.addEventListener("icecandidate", e => {
-        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
+  outboundPeerConnection.addEventListener("icecandidate", e => {
+    inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+  });
 
-    inboundPeerConnection.addEventListener("icecandidate", e => {
-        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
+  inboundPeerConnection.addEventListener("icecandidate", e => {
+    outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+  });
 
-    inboundPeerConnection.addEventListener("track", e => {
-        audioEl.srcObject = e.streams[0];
-    });
+  inboundPeerConnection.addEventListener("track", e => {
+    audioEl.srcObject = e.streams[0];
+  });
 
-    gainNode.disconnect();
-    gainNode.connect(context.destination);
-
+  try {
+    //The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
     loopbackDestination.stream.getTracks().forEach(track => {
-        outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+      outboundPeerConnection.addTrack(track, loopbackDestination.stream);
     });
 
-    const offer = await outboundPeerConnection.createOffer().catch(onError);
-    outboundPeerConnection.setLocalDescription(offer).catch(onError);
-    await inboundPeerConnection.setRemoteDescription(offer).catch(onError);
+    const offer = await outboundPeerConnection.createOffer();
+    outboundPeerConnection.setLocalDescription(offer);
+    await inboundPeerConnection.setRemoteDescription(offer);
 
     const answer = await inboundPeerConnection.createAnswer();
-    inboundPeerConnection.setLocalDescription(answer).catch(onError);
-    outboundPeerConnection.setRemoteDescription(answer).catch(onError);
+    inboundPeerConnection.setLocalDescription(answer);
+    outboundPeerConnection.setRemoteDescription(answer);
+
+    gainNode.disconnect();
+    gainNode.connect(loopbackDestination);
+  } catch (e) {
+    onError(e);
+  }
 }
+
 
 function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
@@ -856,21 +861,11 @@ function onMessageArrived(message, jsonMessage) {
                                 // sceneEl.audioListener = listener;
 
                                 let audioSource = new THREE.PositionalAudio(listener);
-                                if (globals.spatialAudioOn) {
-                                    audioSource.setMediaStreamSource(audioStream);
-                                }
-                                else {
-                                    const audioEl = document.createElement("audio")
-                                    audioEl.setAttribute("autoplay", "autoplay");
-                                    audioEl.setAttribute("playsinline", "playsinline");
-                                    audioEl.srcObject = audioStream
-                                    audioSource.setMediaElementSource(audioEl);
-                                }
+                                audioSource.setMediaStreamSource(audioStream);
                                 audioSource.setRefDistance(1); // L-R panning
                                 audioSource.setRolloffFactor(1);
                                 entityEl.object3D.add(audioSource);
 
-                                // https://github.com/mozilla/hubs/blob/0c26af207bbbc3983409cdab7210b219b53449ca/src/systems/audio-system.js
                                 const audioCtx = THREE.AudioContext.getContext();
                                 const resume = () => {
                                     audioCtx.resume();

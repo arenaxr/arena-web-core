@@ -1,4 +1,5 @@
 window.addEventListener('load', (event) => {
+  if (AFRAME.utils.device.isMobile()) return;
 
   let modal = document.createElement("div");
   modal.className = "modal";

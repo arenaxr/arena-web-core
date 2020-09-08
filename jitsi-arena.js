@@ -24,11 +24,6 @@ const confOptions = {
     //    disableAudioLevels: true
 };
 
-const headphonesWarning =
-`[Warning] No headphones detected!
-Spatial audio is disabled when using speakers.
-If you would like spatial audio, please connect headphones and reload the page.`
-
 var remoteAudioTracks = {};
 
 // Jitsi globals
@@ -207,9 +202,7 @@ function onRemoteTrack(track) {
             }
             // add to scene
             globals.sceneObjects.scene.appendChild(planeElement);
-
             planeElement.object3D.add(audioSource);
-            // audioSource.context.resume();
         } // displayname.includes(DISPLAYNAME)
     }
     else {
@@ -221,47 +214,13 @@ function onRemoteTrack(track) {
                     `<video autoplay='1' id='${videoID}'/>` );
             }
             track.attach($(`#${videoID}`)[0]);
-
-            let row = 0;
-            let column = 0;
-            var wallboxid = "wallbox" + participant;
-            let wallbox = document.getElementById(wallboxid);
-            if (!wallbox) { // create
-                wallbox = document.createElement('a-plane');
-                wallbox.setAttribute("id", wallboxid);
-                wallbox.setAttribute("muted", "false");
-                wallbox.setAttribute("autoplay", "true");
-                wallbox.setAttribute("playsinline", "true");
-                wallbox.setAttribute("scale", "0.96 0.72 0.01");
-                wallbox.setAttribute("material", "shader: flat; side: double");
-                var xCoord = (-1.5 + column).toString();
-                var yCoord = (row + 1).toString();
-                var posString = xCoord + ", " + yCoord + ", -4";
-                wallbox.setAttribute("position", posString);
-
-                // make it invisible?
-                wallbox.setAttribute("visible", "false");
-
-                // add to scene
-                globals.sceneObjects.scene.appendChild(wallbox);
-            }
-            wallbox.setAttribute("src", `#${videoID}`);
-
-            console.log("added src", videoID);
+            // console.log("added src", videoID);
         } else { // 'audio'
             //$('body').append(
             //    `<audio autoplay='1' id='${participant}audio${idx}' />`);
-
-            // const audid = "aud" + listIdx;
-            //      console.log("audio skip -> positional", audid);
-            // play track full volume mono
-            // commented out to play positionally from 'avatar' cube
-            // in mqtt.js drawVideoCube()
-            //  track.attach($(`#${audid}`)[0]);
         }
 
     }
-    //track.attach($(`#${id}`)[0]);
 }
 
 /**
@@ -282,7 +241,6 @@ function onConferenceJoined() {
             connectArena(conference.myUserId(), track.getType()); // desktop only?
         }
     }
-
 }
 
 /**
@@ -294,22 +252,7 @@ function onUserLeft(id) {
     if (!remoteTracks[id]) {
         return;
     }
-    const tracks = remoteTracks[id];
-
-    for (let i = 0; i < tracks.length; i++) {
-        //        tracks[i].detach($(`#${id}${tracks[i].getType()}`));
-        // need to detach from ARENA things
-        let track = tracks[i];
-        if (track.getType() == 'video') {
-            const boxid = "wallbox" + id;
-            let vidBox = document.getElementById(boxid);
-            vidBox.setAttribute("src", "");
-            tracks[i].detach($(`#${boxid}`)[0]);
-        }
-    }
-
     $(`#video${id}`).remove();
-
     delete remoteTracks[id];
 }
 
@@ -368,21 +311,6 @@ function onConnectionSuccess() {
     // set the (unique) ARENA user's name
     conference.setDisplayName(globals.camName);
     conference.join(); // conference.join(password);
-
-    JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
-        // spatial audio should be enabled if not chrome
-        globals.spatialAudioOn = false;
-        const audioOutputDevices = devices;
-        for (let i = 0; i < audioOutputDevices.length; i++) {
-            // if there is an external audio input (like headphones), enable spatial audio
-            console.log(audioOutputDevices[i].label, audioOutputDevices[i].label.includes("External"))
-            if (audioOutputDevices[i].label.includes("External")) {
-                globals.spatialAudioOn = true;
-                break;
-            }
-        }
-        if (!globals.spatialAudioOn) alert(headphonesWarning);
-    });
 }
 
 /**
