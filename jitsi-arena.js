@@ -312,21 +312,15 @@ function onConnectionSuccess() {
     conference.setDisplayName(globals.camName);
     conference.join(); // conference.join(password);
 
-    if (/chrome/i.test(navigator.userAgent)) {
-        JitsiMeetJS.mediaDevices.enumerateDevices(devices => {
-            // spatial audio should be enabled if not chrome
-            globals.chromeSpatialAudioOn = false;
-            const audioOutputDevices = devices;
-            for (let i = 0; i < audioOutputDevices.length; i++) {
-                // if there is an external audio input (like headphones), enable spatial audio
-                console.log(audioOutputDevices[i].label, audioOutputDevices[i].label.includes("External"))
-                if (audioOutputDevices[i].label.includes("External")) {
-                    globals.chromeSpatialAudioOn = true;
-                    break;
-                }
-            }
-        });
-    }
+    globals.chromeSpatialAudioOn = false;
+    // only tested and working on mac on chrome
+    navigator.mediaDevices.enumerateDevices()
+        .then(function(devices) {
+            const headphonesConnected = devices
+                .filter(device => /audio\w+/.test(device.kind))
+                .find(device => device.label.toLowerCase().includes('head'));
+            globals.chromeSpatialAudioOn = !!headphonesConnected;
+    });
 }
 
 /**

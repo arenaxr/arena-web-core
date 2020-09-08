@@ -506,7 +506,7 @@ async function enableChromeAEC(gainNode) {
   });
 
   try {
-    //The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
+    // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
     loopbackDestination.stream.getTracks().forEach(track => {
       outboundPeerConnection.addTrack(track, loopbackDestination.stream);
     });
