@@ -188,6 +188,8 @@ window.globals = {
 };
 console.log(window.globals);
 
+window.addEventListener('onauth', function (e) {
+
 let urlLat = getUrlParam('lat');
 let urlLong = getUrlParam('long');
 if (urlLat && urlLong) {
@@ -202,6 +204,8 @@ if (urlLat && urlLong) {
         });
     }
 }
+
+});
 
 globals.persistenceUrl = '//' + globals.mqttParamZ + defaults.persistPath + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath;
@@ -250,6 +254,8 @@ globals.vioViveRPosition = new THREE.Vector3();
 var ViveRcamParent = new THREE.Matrix4();
 var ViveRcam = new THREE.Matrix4();
 var ViveRcpi = new THREE.Matrix4();
+
+window.addEventListener('onauth', function (e) {
 
 importScript('/face-tracking/script.js');
 
@@ -353,6 +359,8 @@ AFRAME.registerComponent('pose-publisher', {
     })
 });
 
+});
+
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
     const textEl = document.getElementById('conix-text');
@@ -453,6 +461,8 @@ function setClickData(evt) {
         }
     }
 }
+
+window.addEventListener('onauth', function (e) {
 
 AFRAME.registerComponent('impulse', {
     schema: {
@@ -1226,3 +1236,5 @@ AFRAME.registerComponent("network-latency", {
         }
     })
 })
+
+});

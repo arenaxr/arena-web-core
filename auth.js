@@ -58,6 +58,18 @@ function onSignIn(googleUser) {
             globals.userParam = encodeURI(profile.getName());
             cam[2] = globals.userParam;
             globals.camName = cam.join('_');
+
+            // replay global id setup from events.js
+            globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
+
+            if (globals.fixedCamera !== '') {
+                globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
+            } else {
+                globals.camName = "camera_" + globals.idTag; // e.g. camera_1234_eric
+            }
+
+            globals.viveLName = "viveLeft_" + globals.idTag; // e.g. viveLeft_9240_X
+            globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
         }
     }
     // request mqtt-auth
