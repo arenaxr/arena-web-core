@@ -520,12 +520,16 @@ async function enableChromeAEC(gainNode) {
     outboundPeerConnection.setRemoteDescription(answer);
 
     gainNode.disconnect();
-    gainNode.connect(loopbackDestination);
+    if (globals.chromeSpatialAudioOn) {
+        gainNode.connect(context.destination);
+    }
+    else {
+        gainNode.connect(loopbackDestination);
+    }
   } catch (e) {
     onError(e);
   }
 }
-
 
 function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
