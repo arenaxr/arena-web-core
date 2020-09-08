@@ -339,7 +339,7 @@ function setClickData(evt) {
 }
 
 
-//window.addEventListener('onauth', function (e) {
+window.addEventListener('onauth', function (e) {
 
 let urlLat = getUrlParam('lat');
 let urlLong = getUrlParam('long');
@@ -1231,4 +1231,6 @@ AFRAME.registerComponent("network-latency", {
     })
 })
 
-//});
+const aframeCompleteEvent = new CustomEvent('onaframe', e);
+window.dispatchEvent(aframeCompleteEvent);
+});

@@ -19,7 +19,7 @@
             console.log("Message arrived");
         }
 
-        window.addEventListener('onauth', function (e) {
+        window.addEventListener('onaframe', function (e) {
             client.connect({
                 onSuccess: onConnect,
                 userName: e.detail.mqtt_username,
