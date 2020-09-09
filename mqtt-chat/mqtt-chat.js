@@ -50,7 +50,7 @@ export default class MQTTChat {
 
         this.usersBtn = document.createElement("button");
         this.usersBtn.className = "users-button";
-        this.chatBtn.setAttribute("title", "User List");
+        this.usersBtn.setAttribute("title", "User List");
         btnGroup.appendChild(this.usersBtn);
 
         this.chatDot = document.createElement("span");
