@@ -10,6 +10,7 @@ const loadArena = (urlToLoad, position, rotation) => {
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
+    window.pendingModules = [];
     xhr.responseType = 'json';
     xhr.send();
     let deferredObjects = [];
@@ -829,7 +830,7 @@ function onMessageArrived(message, jsonMessage) {
                             if (entityEl) {
                                 for (let child of entityEl.children) {
                                     if (child.getAttribute("id").includes("cube") ||
-                                        child.getAttribute("id").includes("hat")) {
+                                        child.getAttribute("id").includes("Hat")) {
                                         entityEl.removeChild(child);
                                     }
                                 }
