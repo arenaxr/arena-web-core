@@ -143,7 +143,7 @@ window.processCV = async function (frame) {
             for (let detection of detections) {
                 let jsonMsg = {scene: globals.renderParam, timestamp: timestamp, camera_id: globals.camName};
                 delete detection.corners;
-                delete detection.center;7
+                delete detection.center;
                 let dtagid = detection.id;
                 let refTag = null;
                 if (globals.aprilTags[dtagid] && globals.aprilTags[dtagid].pose) { // Known tag from ATLAS (includes Origin tag)
