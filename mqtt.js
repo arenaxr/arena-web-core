@@ -119,7 +119,7 @@ mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
 // Last Will and Testament message sent to subscribers if this client loses connection
-lwt = new Paho.MQTT.Message(JSON.stringify({
+let lwt = new Paho.MQTT.Message(JSON.stringify({
     object_id: globals.camName,
     action: "delete"
 }));
