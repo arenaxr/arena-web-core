@@ -96,12 +96,14 @@ function setupIcons() {
         signOut('.'); // --> ./auth.js
     });
 
-    var iconsDiv = document.getElementById('iconsDiv');
+    var iconsDiv = document.createElement('div');
+    iconsDiv.setAttribute("id", "iconsDiv");
     iconsDiv.appendChild(audioBtn);
     iconsDiv.appendChild(videoBtn);
     iconsDiv.appendChild(avatarBtn);
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
+    document.body.appendChild(iconsDiv);
 }
 
 AFRAME.registerComponent('iconsinit', {

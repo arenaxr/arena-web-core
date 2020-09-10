@@ -3,7 +3,7 @@
 // These match config info on Jitsi Meet server (oz.andrew.cmu.edu)
 // in lines 7-37 of file /etc/jitsi/meet/oz.andrew.cmu.edu-config.js
 const jitsi_server = 'mr.andrew.cmu.edu';
-const arena_conference = 'arena-conference-' + globals.scenenameParam;
+const arena_conference = globals.scenenameParam.toLowerCase();
 
 const BIGSCREEN = "bigscreen"
 const DISPLAYNAME = "arena_screen_share"
@@ -21,7 +21,6 @@ const options = {
 
 const confOptions = {
     openBridgeChannel: true,
-    //    disableAudioLevels: true
 };
 
 var remoteAudioTracks = {};
@@ -99,10 +98,16 @@ function onRemoteTrack(track) {
     const participant = track.getParticipantId();
 
     if (!remoteTracks[participant]) { // new participant
-        remoteTracks[participant] = []; // create array to hold their tracks
+        remoteTracks[participant] = [null, null]; // create array to hold their tracks
     }
 
-    const idx = remoteTracks[participant].push(track);
+    // remoteTracks[participant].push(track)
+    if (track.getType() == "audio") {
+        remoteTracks[participant][0] = track;
+    }
+    else if (track.getType() == "video" && !remoteTracks[participant][1]) {
+        remoteTracks[participant][1] = track;
+    }
 
     track.addEventListener(
         JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
@@ -119,7 +124,6 @@ function onRemoteTrack(track) {
         deviceId =>
         console.log(
             `track audio output device was changed to ${deviceId}`));
-    const id = participant + track.getType() + idx;
 
     const displayName = conference.getParticipantById(participant)._displayName;
     //    console.log("onRemoteTrack() conference.getParticipantById(participant)._displayName ", participant, displayName);
@@ -287,7 +291,7 @@ function onConnectionSuccess() {
         onConferenceJoined);
     conference.on(JitsiMeetJS.events.conference.USER_JOINED, id => {
         console.log('remote user join   : ', id);
-        remoteTracks[id] = []; // create an array to hold tracks of new user
+        remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
     });
     conference.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
     conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, track => {
@@ -407,9 +411,7 @@ const initOptions = {
     disableAudioLevels: true
 };
 
-
 // MAIN START
-
 JitsiMeetJS.init(initOptions);
 
 connection = new JitsiMeetJS.JitsiConnection(null, null, options);

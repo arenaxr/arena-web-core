@@ -430,18 +430,18 @@ function drawVideoCube(entityEl, videoID) {
     const videoCube = document.createElement('a-box');
     videoCube.setAttribute('id', videoID+"cube");
     videoCube.setAttribute('position', '0 0 0');
-    videoCube.setAttribute('scale', '0.8 0.6 0.8');
+    videoCube.setAttribute('scale', '0.6 0.4 0.6');
     videoCube.setAttribute('material', 'shader', 'flat');
     videoCube.setAttribute('src', `#${videoID}`); // video only (!audio)
 
     const videoCubeDark = document.createElement('a-box');
     videoCubeDark.setAttribute('id', videoID+"cubeDark");
     videoCubeDark.setAttribute('position', '0 0 0.01');
-    videoCubeDark.setAttribute('scale', '0.81 0.61 0.8');
+    videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
     videoCubeDark.setAttribute('material', 'shader', 'flat');
     videoCubeDark.setAttribute("transparent", "true");
     videoCubeDark.setAttribute('color', 'black');
-    videoCubeDark.setAttribute("opacity", "0.75");
+    videoCubeDark.setAttribute("opacity", "0.7");
 
     entityEl.appendChild(videoCube);
     entityEl.appendChild(videoCubeDark);
@@ -814,8 +814,7 @@ function onMessageArrived(message, jsonMessage) {
                 case "camera":
                     // decide if we need draw or delete videoCube around head
                     if (theMessage.hasOwnProperty("jitsiId")) {
-                        if (theMessage.jitsiId == "" || !remoteTracks[theMessage.jitsiId] ||
-                            !remoteTracks[theMessage.jitsiId][0]) {
+                        if (theMessage.jitsiId == "" || !remoteTracks[theMessage.jitsiId]) {
                             console.log("jitsiId empty");
                             break; // other-person has no camera ... yet
                         }
@@ -833,7 +832,7 @@ function onMessageArrived(message, jsonMessage) {
                             if (entityEl) {
                                 for (let child of entityEl.children) {
                                     if (child.getAttribute("id").includes("cube") ||
-                                        child.getAttribute("id").includes("Hat")) {
+                                        child.getAttribute("id") == "videoHatHighlightBox") {
                                         entityEl.removeChild(child);
                                     }
                                 }
@@ -843,37 +842,38 @@ function onMessageArrived(message, jsonMessage) {
 
                         if (theMessage.hasAudio) {
                             // set up positional audio, but only once per camera
-                            if (!entityEl.hasAttribute("posAudioAdded")) {
+                            if (!remoteTracks[theMessage.jitsiId][0]) return;
+
+                            let oldAudioTrack = entityEl.audioTrack;
+                            entityEl.audioTrack = remoteTracks[theMessage.jitsiId][0].track;
+                            if (entityEl.audioTrack != oldAudioTrack) {
                                 // assume jitsi remoteTracks[0] is audio and [1] video
                                 let audioStream = new MediaStream();
-                                audioStream.addTrack(remoteTracks[theMessage.jitsiId][0].track.clone());
+                                audioStream.addTrack(entityEl.audioTrack);
 
                                 let sceneEl = globals.sceneObjects.scene;
-                                // if (sceneEl.audioListener)
-                                //      console.log("VERY WEIRD SCENE ALREADY HAS audioListener");
-
                                 let listener = null;
                                 if (sceneEl.audioListener) {
-                                    // console.log("EXISTING (camera) sceneEl.audioListener:", sceneEl.audioListener);
                                     listener = sceneEl.audioListener;
                                 } else {
                                     listener = new THREE.AudioListener();
-                                    // console.log("NEW HEAD AUDIO LISTENER:", listener);
                                     let camEl = globals.sceneObjects.myCamera.object3D;
-                                    // console.log("children:", camEl.children);
                                     camEl.add(listener);
                                     globals.audioListener = listener;
                                     sceneEl.audioListener = listener;
                                 }
 
-                                // var listener = sceneEl.audioListener || new THREE.AudioListener();
-                                // sceneEl.audioListener = listener;
-
-                                let audioSource = new THREE.PositionalAudio(listener);
-                                audioSource.setMediaStreamSource(audioStream);
-                                audioSource.setRefDistance(1); // L-R panning
-                                audioSource.setRolloffFactor(1);
-                                entityEl.object3D.add(audioSource);
+                                if (!entityEl.positionalAudio) {
+                                    let audioSource = new THREE.PositionalAudio(listener);
+                                    audioSource.setMediaStreamSource(audioStream);
+                                    audioSource.setRefDistance(1); // L-R panning
+                                    audioSource.setRolloffFactor(1);
+                                    entityEl.positionalAudio = audioSource;
+                                    entityEl.object3D.add(audioSource);
+                                }
+                                else {
+                                    entityEl.positionalAudio.setMediaStreamSource(audioStream);
+                                }
 
                                 const audioCtx = THREE.AudioContext.getContext();
                                 const resume = () => {
@@ -890,8 +890,6 @@ function onMessageArrived(message, jsonMessage) {
                                 };
                                 document.body.addEventListener("touchmove", resume, false);
                                 document.body.addEventListener("mousemove", resume, false);
-
-                                entityEl.setAttribute("posAudioAdded", true);
                             }
                         }
                     }
