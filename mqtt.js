@@ -470,16 +470,6 @@ function highlightVideoCube(entityEl, oldEl) {
     entityEl.appendChild(videoHat);
 }
 
-// set up local corner video window
-function setupCornerVideo() {
-    const localvidbox = document.getElementById("localvidbox");
-    localvidbox.setAttribute("width", globals.localvidboxWidth);
-    localvidbox.setAttribute("height", globals.localvidboxHeight);
-    if (localvidbox.srcObject) {
-        localvidbox.play();
-    }
-}
-
 // https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
 async function enableChromeAEC(gainNode) {
   /**

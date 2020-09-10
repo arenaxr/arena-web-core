@@ -105,7 +105,7 @@ function onRemoteTrack(track) {
     if (track.getType() == "audio") {
         remoteTracks[participant][0] = track;
     }
-    else if (track.getType() == "video" && !remoteTracks[participant][1]) {
+    else if (track.getType() == "video") {
         remoteTracks[participant][1] = track;
     }
 
