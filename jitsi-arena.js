@@ -103,9 +103,11 @@ function onRemoteTrack(track) {
 
     // remoteTracks[participant].push(track)
     if (track.getType() == "audio") {
+        if (remoteTracks[participant][0]) remoteTracks[participant][0].dispose();
         remoteTracks[participant][0] = track;
     }
-    else if (track.getType() == "video" && !remoteTracks[participant][1]) {
+    else if (track.getType() == "video") {
+        if (remoteTracks[participant][1]) remoteTracks[participant][1].dispose();
         remoteTracks[participant][1] = track;
     }
 
@@ -248,7 +250,6 @@ function onConferenceJoined() {
 }
 
 /**
- *
  * @param id
  */
 function onUserLeft(id) {
@@ -394,13 +395,6 @@ function switchVideo() { // eslint-disable-line no-unused-vars
             conference.addTrack(localTracks[1]);
         })
         .catch(error => console.log(error));
-}
-
-/**
- * @param selected
- */
-function changeAudioOutput(selected) { // eslint-disable-line no-unused-vars
-    JitsiMeetJS.mediaDevices.setAudioOutputDevice(selected.value);
 }
 
 $(window).bind('beforeunload', unload);
