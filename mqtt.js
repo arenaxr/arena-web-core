@@ -117,22 +117,19 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
-// Last Will and Testament message sent to subscribers if this client loses connection
-let lwt = new Paho.MQTT.Message(JSON.stringify({
-    object_id: globals.camName,
-    action: "delete"
-}));
-lwt.destinationName = globals.outputTopic + globals.camName;
-lwt.qos = 2;
-lwt.retained = false;
-
+let lwt;
 window.addEventListener('onauth', function (e) {
     globals.username = e.detail.mqtt_username;
     globals.mqttToken = e.detail.mqtt_token;
 
-    // update lwt with updated global auth name
-    lwt.object_id = globals.camName;
+    // Last Will and Testament message sent to subscribers if this client loses connection
+    lwt = new Paho.MQTT.Message(JSON.stringify({
+        object_id: globals.camName,
+        action: "delete"
+    }));
     lwt.destinationName = globals.outputTopic + globals.camName;
+    lwt.qos = 2;
+    lwt.retained = false;
     mqttClient.connect({
         onSuccess: onConnect,
         willMessage: lwt,
