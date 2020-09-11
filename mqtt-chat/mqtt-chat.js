@@ -27,7 +27,7 @@ export default class MQTTChat {
         // users list
         this.liveUsers = [];
 
-        // cleanup userlist every minute
+        // cleanup userlist periodically
         setInterval(this.userCleanup.bind(this), this.settings.keepalive_interval_ms * 3);
 
         // scene chat topic from realm and scene
@@ -156,7 +156,7 @@ export default class MQTTChat {
         });
 
         const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
-        console.log(moveToCamera);
+        //console.log(moveToCamera);
         if (moveToCamera !== null) {
             localStorage.removeItem('moveToFrontOfCamera');
             this.moveToFrontOfCamera(moveToCamera, this.settings.scene);
@@ -197,7 +197,7 @@ export default class MQTTChat {
                 this.connected = true;
             },
             onFailure: () => {
-                console.log("Chat failed to connect.");
+                console.error("Chat failed to connect.");
                 this.connected = false;
             },
             willMessage: willMessage,
@@ -207,7 +207,7 @@ export default class MQTTChat {
     }
 
     onConnectionLost(message) {
-        console.log("Chat disconnect.");
+        console.error("Chat disconnect.");
         this.connected = false;
     }
 
@@ -233,7 +233,7 @@ export default class MQTTChat {
         try {
             msg = JSON.parse(mqttMsg.payloadString);
         } catch (err) {
-            console.log("Error parsing chat msg.");
+            console.error("Error parsing chat msg.");
         }
 
         // save user data and timestamp
@@ -265,13 +265,9 @@ export default class MQTTChat {
           if (msg.text == "sound:off") {
             let abtn = document.getElementById('btn-slashroundedaudio');
             if (abtn == undefined) {
-              console.log("Could not find audio button");
+              console.error("Could not find audio button");
               return;
             }
-            //abtn.dispatchEvent(new MouseEvent('mousedown'));
-            //abtn.dispatchEvent(new MouseEvent('mouseup'));
-            //if (!abtn.not_toggled) abtn.childNodes[0].click();
-            console.log("**Sent click!",abtn.style.backgroundImage);
             if (abtn.style.backgroundImage.includes('slash') == false) {
               abtn.click();
             }
@@ -409,39 +405,44 @@ export default class MQTTChat {
     }
 
     moveToFrontOfCamera(cameraId, scene) {
-        //console.log("Move to near camera:", cameraId);
+        console.log("Move to near camera:", cameraId);
 
         if (scene !== this.settings.scene) {
             localStorage.setItem('moveToFrontOfCamera', cameraId);
             var href = new URL(document.location.href);
             href.searchParams.set('scene', scene);
             document.location.href = href.toString();
+            return;
         }
 
         let sceneEl = document.querySelector('a-scene');
         if (!sceneEl) {
-            console.log("Could not find aframe scene");
+            console.error("Could not find aframe scene");
             return;
         }
-        //TODO(mwfarb): handle case when other chat user has not moved and is not in a-scene yet
+
         let toCam = sceneEl.querySelector('[id="' + cameraId + '"]');
+
+        if (!toCam) {
+            // TODO: find a better way to do this
+            // when we jump to a scene, the "to" user needs to move for us to be able to find his camera
+            console.error("Could not find destination user camera", cameraId);
+            return;
+        }
 
         let cameraRig = sceneEl.querySelector('#CameraRig');
         let myCamera = document.getElementById('my-camera');
+
+        if (!cameraRig || !myCamera) {
+          console.error("Could not find our camera");
+          return;
+        }
 
         var direction = new THREE.Vector3();
         toCam.object3D.getWorldDirection( direction );
         let distance = 1; // distance to put you
         myCamera.object3D.position.copy( toCam.object3D.position.clone() ).add( direction.multiplyScalar( -distance ) );
         myCamera.object3D.lookAt(toCam.object3D.position);
-
-/*
-        let distance = 0.1;
-        let pos = toCam.object3D.position.clone() //.negate().multiplyScalar(distance);
-
-        //myCamera.object3D.position.copy(toCam.object3D.position.clone());
-        myCamera.object3D.position.copy(pos);
-        //sceneObjects.cameraSpinner.object3D.quaternion.set(xrot, yrot, zrot, wrot);
-*/
+        // TODO: rotate our camera to face the other user
    }
 }
