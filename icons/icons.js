@@ -88,37 +88,6 @@ function setupIcons() {
         }
     });
 
-    let settingsPopup = document.createElement("div");
-    settingsPopup.className = "chat-popup settings-popup";
-    document.body.appendChild(settingsPopup);
-
-    let closeSettingsBtn = document.createElement("span");
-    closeSettingsBtn.className = "close";
-    closeSettingsBtn.innerHTML = "&times";
-    settingsPopup.appendChild(closeSettingsBtn);
-
-    let label = document.createElement("span");
-    label.innerHTML = "<br/><br/>&nbspSettings";
-    label.style.fontSize = "small";
-    settingsPopup.appendChild(label);
-
-    let formDiv = document.createElement("div");
-    formDiv.className = "form-container";
-    settingsPopup.appendChild(formDiv);
-
-    let usernameInput = document.createElement("textarea");
-    usernameInput.setAttribute("rows", "1");
-    usernameInput.setAttribute("placeholder", "Preferred user name");
-    settingsPopup.appendChild(usernameInput);
-
-    let saveSettingsBtn = document.createElement("button");
-    saveSettingsBtn.innerHTML = "Save";
-    document.body.appendChild(saveSettingsBtn);
-
-    closeSettingsBtn.onclick = function () {
-        settingsPopup.style.display = 'none'; // close settings panel
-    };
-
     const settingsBtn = createIconButton("roundedsettings", "Settings (WIP)", () => {
         console.log("clicked settings");
         settingsPopup.style.display = 'block'; // open settings panel
@@ -136,6 +105,44 @@ function setupIcons() {
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
     document.body.appendChild(iconsDiv);
+
+    // Add settings panel
+    let settingsPopup = document.createElement("div");
+    settingsPopup.className = "chat-popup settings-popup"; // inherit some chat css
+    document.body.appendChild(settingsPopup);
+
+    let closeSettingsBtn = document.createElement("span");
+    closeSettingsBtn.className = "close";
+    closeSettingsBtn.innerHTML = "&times";
+    settingsPopup.appendChild(closeSettingsBtn);
+
+    let label = document.createElement("span");
+    label.innerHTML = "<br/>Settings";
+    settingsPopup.appendChild(label);
+
+    let formDiv = document.createElement("div");
+    formDiv.className = "form-container";
+    settingsPopup.appendChild(formDiv);
+
+    label = document.createElement("span");
+    label.innerHTML = "Display Name";
+    label.style.fontSize = "small";
+    formDiv.appendChild(label);
+
+    let usernameInput = document.createElement("textarea");
+    usernameInput.setAttribute("rows", "1");
+    usernameInput.setAttribute("placeholder", "Display Name");
+    usernameInput.value = globals.displayName;
+    formDiv.appendChild(usernameInput);
+
+    let saveSettingsBtn = document.createElement("button");
+    saveSettingsBtn.innerHTML = "Save";
+    formDiv.appendChild(saveSettingsBtn);
+
+    closeSettingsBtn.onclick = function () {
+        settingsPopup.style.display = 'none'; // close settings panel
+    };
+
 }
 
 AFRAME.registerComponent('iconsinit', {

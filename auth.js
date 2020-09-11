@@ -54,11 +54,10 @@ function onSignIn(googleUser) {
     // add auth name to objects when user has not defined their name
     if (typeof globals !== 'undefined') {
         if (typeof defaults !== 'undefined' && globals.userParam == defaults.userParam) {
-            var cam = globals.camName.split('_');
+            // Use auth name to create human-readable name
+            globals.displayName = profile.getName();
             // globals.userParam = encodeURI(profile.getName());
             globals.userParam = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
-            cam[2] = globals.userParam;
-            globals.camName = cam.join('_');
 
             // replay global id setup from events.js
             globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric

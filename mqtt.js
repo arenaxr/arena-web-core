@@ -742,9 +742,8 @@ function onMessageArrived(message, jsonMessage) {
 
                     // place a colored text above the head
                     const headtext = document.createElement('a-text');
-                    var decodeName = decodeURI(name.split('_')[2]);
                     // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
-                    const personName = decodeName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    const personName = globals.displayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     headtext.setAttribute('id', "headtext_" + name);
                     headtext.setAttribute('value', personName);
                     headtext.setAttribute('position', '0 0.45 0.05');
