@@ -33,6 +33,7 @@ function publishHeadText(displayName) {
     publish("realm/s/" + globals.scenenameParam + "/headtext_" + globals.camName, {
         "object_id": "headtext_" + globals.camName,
         "action": "update",
+        "type": "object",
         "data": { "text": displayName },
     });
 }
