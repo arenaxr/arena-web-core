@@ -274,7 +274,7 @@ function onConnect() {
             jitsiId: globals.jitsiId,
             hasVideo: globals.hasVideo,
             hasAudio: globals.hasAudio,
-            // activeSpeaker: globals.activeSpeaker,
+            hasAvatar: globals.hasAvatar,
             action: 'create',
             type: 'object',
             data: {
@@ -452,9 +452,9 @@ function highlightVideoCube(entityEl, oldEl) {
     var videoHat = document.querySelector("#videoHatHighlightBox");
     if (!videoHat) {
         videoHat = document.createElement('a-box');
-        videoHat.setAttribute('scale', '0.8 0.05 0.8');
+        videoHat.setAttribute('scale', '0.6 0.05 0.6');
         videoHat.setAttribute('color', "green");
-        videoHat.setAttribute('position', '0 0.325 0');
+        videoHat.setAttribute('position', '0 0.25 0');
         videoHat.setAttribute('material', 'shader', 'flat');
         videoHat.setAttribute('id', "videoHatHighlightBox");
         // globals.sceneObjects.scene.appendChild(videoCube);
@@ -819,15 +819,13 @@ function onMessageArrived(message, jsonMessage) {
                             }
                         }
                         else {
-                            if (entityEl) {
-                                for (let child of entityEl.children) {
-                                    if (child.getAttribute("id").includes("cube") ||
-                                        child.getAttribute("id") == "videoHatHighlightBox") {
-                                        entityEl.removeChild(child);
-                                    }
+                            for (let child of entityEl.children) {
+                                if (child.getAttribute("id").includes("cube") ||
+                                    child.getAttribute("id") === "videoHatHighlightBox") {
+                                    entityEl.removeChild(child);
                                 }
-                                entityEl.setAttribute('videoCubeDrawn', false);
                             }
+                            entityEl.setAttribute('videoCubeDrawn', false);
                         }
 
                         if (theMessage.hasAudio) {

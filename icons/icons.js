@@ -78,7 +78,6 @@ function setupIcons() {
     });
 
     const avatarBtn = createIconButton("avatar3-off", "Face-recognition avatar on/off. You appear as a 3d-animated face.", () => {
-        if (AFRAME.utils.device.isMobile()) return; // no avatar on mobile, face model is too large
         if (jitsiVideoTrack) {
             globals.hasAvatar = !globals.hasAvatar;
             if (globals.hasAvatar) { // toggled
@@ -140,7 +139,9 @@ function setupIcons() {
     iconsDiv.setAttribute("id", "iconsDiv");
     iconsDiv.appendChild(audioBtn);
     iconsDiv.appendChild(videoBtn);
-    iconsDiv.appendChild(avatarBtn);
+    if (!AFRAME.utils.device.isMobile()) {
+        iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
+    }
     iconsDiv.appendChild(flyingBtn);
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);

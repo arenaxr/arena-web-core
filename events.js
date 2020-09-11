@@ -921,7 +921,6 @@ AFRAME.registerComponent('click-listener', {
     }
 });
 
-
 AFRAME.registerComponent('vive-listener', {
     init: function() {
 
