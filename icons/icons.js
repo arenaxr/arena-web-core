@@ -29,6 +29,14 @@ function publishAvatarMsg(avatarOn) {
     });
 }
 
+function publishHeadText(displayName) {
+    publish("realm/s/" + globals.scenenameParam + "/headtext_" + globals.camName, {
+        "object_id": "headtext_" + globals.camName,
+        "action": "update",
+        "data": { "text": displayName },
+    });
+}
+
 function setupIcons() {
     const audioBtn = createIconButton("slashroundedaudio", "Microphone on/off.", () => {
         if (jitsiAudioTrack) {
@@ -91,6 +99,8 @@ function setupIcons() {
     const settingsBtn = createIconButton("roundedsettings", "Settings (WIP)", () => {
         console.log("clicked settings");
         settingsPopup.style.display = 'block'; // open settings panel
+        // load settings
+        usernameInput.value = globals.displayName;
     });
 
     const logoutBtn = createIconButton("roundedlogout", "Sign out of the ARENA", () => {
@@ -132,7 +142,6 @@ function setupIcons() {
     let usernameInput = document.createElement("textarea");
     usernameInput.setAttribute("rows", "1");
     usernameInput.setAttribute("placeholder", "Display Name");
-    usernameInput.value = globals.displayName;
     formDiv.appendChild(usernameInput);
 
     let saveSettingsBtn = document.createElement("button");
@@ -141,8 +150,18 @@ function setupIcons() {
 
     closeSettingsBtn.onclick = function () {
         settingsPopup.style.display = 'none'; // close settings panel
+        saveSettings();
     };
 
+    saveSettingsBtn.onclick = function () {
+        saveSettings();
+    };
+}
+
+function saveSettings() {
+    globals.displayName = usernameInput.value;
+    // publish name for all
+    publishHeadText(globals.displayName);
 }
 
 AFRAME.registerComponent('iconsinit', {
