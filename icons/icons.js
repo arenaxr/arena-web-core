@@ -156,12 +156,12 @@ function setupIcons() {
     saveSettingsBtn.onclick = function () {
         saveSettings();
     };
-}
 
-function saveSettings() {
-    globals.displayName = usernameInput.value;
-    // publish name for all
-    publishHeadText(globals.displayName);
+    function saveSettings() {
+        globals.displayName = usernameInput.value;
+        // publish name for all
+        publishHeadText(globals.displayName);
+    }
 }
 
 AFRAME.registerComponent('iconsinit', {
