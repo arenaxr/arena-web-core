@@ -1,7 +1,6 @@
 'use strict';
 
-//const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
+window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "webClient-" + globals.timeID);
 
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not

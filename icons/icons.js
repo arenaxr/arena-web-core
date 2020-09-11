@@ -116,6 +116,12 @@ function setupIcons() {
     flyingBtn.style.display = "none";
     settingsButtons.push(flyingBtn);
 
+    const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
+        window.open(`${defaults.screenShareUrl}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
+    });
+    screenShareButton.style.display = "none";
+    settingsButtons.push(screenShareButton);
+
     const logoutBtn = createIconButton("logout-on", "Sign out of the ARENA", () => {
         signOut('.'); // --> ./auth.js
     });
@@ -143,6 +149,7 @@ function setupIcons() {
         iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
     }
     iconsDiv.appendChild(flyingBtn);
+    iconsDiv.appendChild(screenShareButton);
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
     document.body.appendChild(iconsDiv);
