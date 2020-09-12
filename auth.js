@@ -132,6 +132,7 @@ function requestMqttToken(mqtt_username, id_token) {
 }
 
 function getAuthStatus() {
+    var googleUser = auth2.currentUser.get();
     var profile = googleUser.getBasicProfile();
     return {
         type: "Google",
