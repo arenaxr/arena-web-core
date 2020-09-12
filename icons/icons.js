@@ -30,8 +30,8 @@ function publishAvatarMsg(avatarOn) {
 }
 
 function publishHeadText(displayName) {
-    publish("realm/s/" + globals.scenenameParam + "/headtext_" + globals.camName, {
-        "object_id": "headtext_" + globals.camName,
+    publish("realm/s/" + globals.scenenameParam + "/head-text_" + globals.camName, {
+        "object_id": "head-text_" + globals.camName,
         "action": "update",
         "type": "object",
         "data": { "text": displayName },
