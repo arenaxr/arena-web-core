@@ -788,7 +788,7 @@ function onMessageArrived(message, jsonMessage) {
                         // update head text
                         for (let child of entityEl.children) {
                             if (child.getAttribute("id").includes("headtext_")) {
-                                child.value = theMessage.displayName;
+                                child.setAttribute('value', theMessage.displayName);
                             }
                         }
                     }
