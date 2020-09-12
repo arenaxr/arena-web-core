@@ -271,6 +271,7 @@ function onConnect() {
             hasVideo: globals.hasVideo,
             hasAudio: globals.hasAudio,
             hasAvatar: globals.hasAvatar,
+            displayName: globals.displayName,
             action: 'create',
             type: 'object',
             data: {

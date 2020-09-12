@@ -120,7 +120,7 @@ function setupIcons() {
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }
-        globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"fly": flying});
+        globals.sceneObjects.myCamera.setAttribute("wasd-controls", { "fly": flying });
     });
     flyingBtn.style.display = "none";
     settingsButtons.push(flyingBtn);
@@ -146,14 +146,15 @@ function setupIcons() {
                 settingsButtons[i].style.display = "block";
             }
             settingsPopup.style.display = 'block'; // open settings panel
-            // load settings
-            usernameInput.value = globals.displayName;
+            loadSettings();
         }
         else {
             settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/more.png')";
             for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = "none";
             }
+            settingsPopup.style.display = 'none'; // close settings panel
+            saveSettings();
         }
     });
 
@@ -174,7 +175,7 @@ function setupIcons() {
 
     // Add settings panel
     let settingsPopup = document.createElement("div");
-    settingsPopup.className = "chat-popup settings-popup"; // inherit some chat css
+    settingsPopup.className = "settings-popup";
     document.body.appendChild(settingsPopup);
 
     let closeSettingsBtn = document.createElement("span");
@@ -182,17 +183,33 @@ function setupIcons() {
     closeSettingsBtn.innerHTML = "&times";
     settingsPopup.appendChild(closeSettingsBtn);
 
-    let label = document.createElement("span");
-    label.innerHTML = "<br/>Settings";
-    settingsPopup.appendChild(label);
-
     let formDiv = document.createElement("div");
     formDiv.className = "form-container";
     settingsPopup.appendChild(formDiv);
 
+    let label = document.createElement("span");
+    label.innerHTML = "Settings</br></br>";
+    label.style.fontSize = "medium";
+    formDiv.appendChild(label);
+
+    formDiv.append("Authenticator: ");
+    let authType = document.createElement("span");
+    formDiv.appendChild(authType);
+    formDiv.appendChild(document.createElement("br"));
+
+    formDiv.append("Email: ");
+    let authEmail = document.createElement("span");
+    formDiv.appendChild(authEmail);
+    formDiv.appendChild(document.createElement("br"));
+
+    formDiv.append("Name: ");
+    let authName = document.createElement("span");
+    formDiv.appendChild(authName);
+    formDiv.appendChild(document.createElement("br"));
+    formDiv.appendChild(document.createElement("br"));
+
     label = document.createElement("span");
     label.innerHTML = "Display Name";
-    label.style.fontSize = "small";
     formDiv.appendChild(label);
 
     let usernameInput = document.createElement("textarea");
@@ -213,9 +230,16 @@ function setupIcons() {
         saveSettings();
     };
 
+    function loadSettings() {
+        usernameInput.value = globals.displayName;
+        auth = getAuthStatus();
+        authType.innerHTML = auth.type;
+        authName.innerHTML = auth.name;
+        authEmail.innerHTML = auth.email;
+    }
+
     function saveSettings() {
         globals.displayName = usernameInput.value;
-        // publish name for all
         publishHeadText(globals.displayName);
     }
 }

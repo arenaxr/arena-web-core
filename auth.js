@@ -26,6 +26,8 @@
 
 'use strict';
 
+//window.dispatchEvent(new CustomEvent('onauth'));
+
 var auth2;
 // check if the current user is already signed in
 gapi.load('auth2', function () {
@@ -126,5 +128,14 @@ function requestMqttToken(mqtt_username, id_token) {
             });
             window.dispatchEvent(authCompleteEvent);
         }
+    };
+}
+
+function getAuthStatus() {
+    var profile = googleUser.getBasicProfile();
+    return {
+        type: "Google",
+        name: profile.getName(),
+        email: profile.getEmail(),
     };
 }

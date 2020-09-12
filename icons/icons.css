@@ -56,10 +56,15 @@
 }
 
 .settings-popup {
-    bottom: auto; /* unset */
-    left: auto; /* unset */
+    display: none; 
     width: 310px;
+    position: fixed;
     top: 10px;
-    right: 70px;
-    height: 330px;
+    right: 100px;
+    margin: 0 auto;
+    border: 3px solid #646464;
+    z-index: 9999;
+    height: 200px;
+    background-color: rgba(255, 255, 255, 0.7);
+    font-size: small;
 }
