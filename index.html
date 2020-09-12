@@ -114,7 +114,7 @@
         <a-entity position="0 0 0" id="CameraRig"> <!-- movement-controls="fly: true; speed=0.3"> -->
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
-            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move>
+            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move>
               <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
             </a-camera>
           </a-entity>
