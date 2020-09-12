@@ -99,8 +99,8 @@ function setupIcons() {
 
     let settingsButtons = []
 
-    let flying = true;
-    const flyingBtn = createIconButton("flying-on", "Flying on/off", () => {
+    let flying = false;
+    const flyingBtn = createIconButton("flying-off", "Flying on/off", () => {
         flying = !flying;
         if (flying) { // toggled
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-on.png')";
@@ -117,7 +117,7 @@ function setupIcons() {
     settingsButtons.push(flyingBtn);
 
     const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
-        window.open(`${defaults.screenShareUrl}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
+        window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
     });
     screenShareButton.style.display = "none";
     settingsButtons.push(screenShareButton);
@@ -128,14 +128,18 @@ function setupIcons() {
     logoutBtn.style.display = "none";
     settingsButtons.push(logoutBtn);
 
-    let settingsOn = false;
-    const settingsBtn = createIconButton("settings-on", "Settings", () => {
-        settingsOn = !settingsOn;
-        for (let i = 0; i < settingsButtons.length; i++) {
-            if (settingsOn) { // toggled
+    let expanded = false;
+    const settingsBtn = createIconButton("more", "Additional settings", () => {
+        expanded = !expanded;
+        if (expanded) { // toggled
+            settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/less.png')";
+            for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = "block";
             }
-            else {
+        }
+        else {
+            settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/more.png')";
+            for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = "none";
             }
         }
@@ -149,7 +153,9 @@ function setupIcons() {
         iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
     }
     iconsDiv.appendChild(flyingBtn);
-    iconsDiv.appendChild(screenShareButton);
+    if (!AFRAME.utils.device.isMobile()) {
+        iconsDiv.appendChild(screenShareButton);
+    }
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
     document.body.appendChild(iconsDiv);

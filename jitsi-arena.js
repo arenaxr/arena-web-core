@@ -87,6 +87,7 @@ function onLocalTracks(tracks) {
     if (jitsiVideoTrack) jitsiVideoTrack.mute();
 }
 
+let leftRightToggle = true, screenPlaneLeftIdx = 0, screenPlaneRightIdx = 0;
 function createScreenSharePlane(id) {
     let planeElement = document.createElement('a-plane');
     planeElement.setAttribute("id", id);
@@ -95,7 +96,15 @@ function createScreenSharePlane(id) {
     planeElement.setAttribute("playsinline", "true");
     planeElement.setAttribute("material", "shader: flat; side: double");
     planeElement.setAttribute("scale", "8 6 0.01");
-    planeElement.setAttribute("position", "-6 3 -4");
+    if (leftRightToggle) {
+        planeElement.setAttribute("position", 8.1*screenPlaneRightIdx+" 3.1 -3");
+        screenPlaneRightIdx++;
+    }
+    else {
+        planeElement.setAttribute("position", 8.1*-screenPlaneLeftIdx+" 3.1 -3");
+        screenPlaneLeftIdx++;
+    }
+    leftRightToggle = !leftRightToggle;
     globals.sceneObjects.scene.appendChild(planeElement);
     return planeElement;
 }
@@ -144,7 +153,7 @@ function onRemoteTrack(track) {
     //    console.log("onRemoteTrack() conference.getParticipantById(participant)._displayName ", participant, displayName);
 
     if (track.getType() === 'audio') {
-        if (displayName && displayName.includes(DISPLAYNAME) && !displayName.includes(globals.camName)) {
+        if (displayName && displayName.includes(DISPLAYNAME)) {
             let audioStream = new MediaStream();
             audioStream.addTrack(remoteTracks[participant][0].track);
 
@@ -165,14 +174,15 @@ function onRemoteTrack(track) {
             audioSource.setRefDistance(1); // L-R panning
             audioSource.setRolloffFactor(1);
 
-            let planeElement = document.getElementById(displayName);
+            const screenShareID = displayName+participant;
+            let planeElement = document.getElementById(screenShareID);
             if (!planeElement) {
-                planeElement = createScreenSharePlane(displayName);
+                planeElement = createScreenSharePlane(screenShareID);
             }
 
             // add to scene
             planeElement.object3D.add(audioSource);
-            remoteTracks[participant].screenShareID = displayName;
+            remoteTracks[participant].screenShareID = screenShareID;
         }
     }
     else { // video
@@ -185,9 +195,10 @@ function onRemoteTrack(track) {
         track.attach($(`#${videoID}`)[0]);
 
         if (displayName && displayName.includes(DISPLAYNAME)) {
-            let planeElement = document.getElementById(displayName);
+            const screenShareID = displayName+participant;
+            let planeElement = document.getElementById(screenShareID);
             if (!planeElement) {
-                planeElement = createScreenSharePlane(displayName);
+                planeElement = createScreenSharePlane(screenShareID);
             }
             planeElement.setAttribute("src", "#"+videoID);
         }
@@ -220,7 +231,7 @@ function onConferenceJoined() {
 function onUserLeft(id) {
     console.log('user left:', id);
     if (!remoteTracks[id]) return;
-    if (remoteTracks[id].screenShareID) { // TODO: this doesnt work, for some reason the id's are different/change
+    if (remoteTracks[id].screenShareID) {
         $(`#${remoteTracks[id].screenShareID}`).remove();
     }
     $(`#video${id}`).remove();
