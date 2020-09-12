@@ -31,10 +31,11 @@ function publishAvatarMsg(avatarOn) {
 
 function publishHeadText(displayName) {
     publish("realm/s/" + globals.scenenameParam + "/head-text_" + globals.camName, {
-        "object_id": "head-text_" + globals.camName,
-        "action": "update",
+        "object_id": globals.camName,
+        "action": "create",
         "type": "object",
-        "data": { "text": displayName },
+        "displayName": displayName,
+        "data": { "object_type": "headtext", }
     });
 }
 
@@ -206,6 +207,7 @@ function setupIcons() {
     let authName = document.createElement("span");
     formDiv.appendChild(authName);
     formDiv.appendChild(document.createElement("br"));
+
     formDiv.appendChild(document.createElement("br"));
 
     label = document.createElement("span");
