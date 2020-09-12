@@ -1,7 +1,6 @@
 'use strict';
 
-//const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "myClientId" + globals.timeID);
+window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "webClient-" + globals.timeID);
 
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
@@ -118,22 +117,19 @@ const unloadArena = (urlToLoad) => {
 mqttClient.onConnectionLost = onConnectionLost;
 mqttClient.onMessageArrived = onMessageArrived;
 
-// Last Will and Testament message sent to subscribers if this client loses connection
-let lwt = new Paho.MQTT.Message(JSON.stringify({
-    object_id: globals.camName,
-    action: "delete"
-}));
-lwt.destinationName = globals.outputTopic + globals.camName;
-lwt.qos = 2;
-lwt.retained = false;
-
+let lwt;
 window.addEventListener('onauth', function (e) {
     globals.username = e.detail.mqtt_username;
     globals.mqttToken = e.detail.mqtt_token;
 
-    // update lwt with updated global auth name
-    lwt.object_id = globals.camName;
+    // Last Will and Testament message sent to subscribers if this client loses connection
+    lwt = new Paho.MQTT.Message(JSON.stringify({
+        object_id: globals.camName,
+        action: "delete"
+    }));
     lwt.destinationName = globals.outputTopic + globals.camName;
+    lwt.qos = 2;
+    lwt.retained = false;
     mqttClient.connect({
         onSuccess: onConnect,
         willMessage: lwt,
@@ -274,7 +270,7 @@ function onConnect() {
             jitsiId: globals.jitsiId,
             hasVideo: globals.hasVideo,
             hasAudio: globals.hasAudio,
-            // activeSpeaker: globals.activeSpeaker,
+            hasAvatar: globals.hasAvatar,
             action: 'create',
             type: 'object',
             data: {
@@ -452,9 +448,9 @@ function highlightVideoCube(entityEl, oldEl) {
     var videoHat = document.querySelector("#videoHatHighlightBox");
     if (!videoHat) {
         videoHat = document.createElement('a-box');
-        videoHat.setAttribute('scale', '0.8 0.05 0.8');
+        videoHat.setAttribute('scale', '0.6 0.05 0.6');
         videoHat.setAttribute('color', "green");
-        videoHat.setAttribute('position', '0 0.325 0');
+        videoHat.setAttribute('position', '0 0.25 0');
         videoHat.setAttribute('material', 'shader', 'flat');
         videoHat.setAttribute('id', "videoHatHighlightBox");
         // globals.sceneObjects.scene.appendChild(videoCube);
@@ -468,16 +464,6 @@ function highlightVideoCube(entityEl, oldEl) {
     }
     // add new
     entityEl.appendChild(videoHat);
-}
-
-// set up local corner video window
-function setupCornerVideo() {
-    const localvidbox = document.getElementById("localvidbox");
-    localvidbox.setAttribute("width", globals.localvidboxWidth);
-    localvidbox.setAttribute("height", globals.localvidboxHeight);
-    if (localvidbox.srcObject) {
-        localvidbox.play();
-    }
 }
 
 // https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
@@ -828,15 +814,13 @@ function onMessageArrived(message, jsonMessage) {
                             }
                         }
                         else {
-                            if (entityEl) {
-                                for (let child of entityEl.children) {
-                                    if (child.getAttribute("id").includes("cube") ||
-                                        child.getAttribute("id") == "videoHatHighlightBox") {
-                                        entityEl.removeChild(child);
-                                    }
+                            for (let child of entityEl.children) {
+                                if (child.getAttribute("id").includes("cube") ||
+                                    child.getAttribute("id") === "videoHatHighlightBox") {
+                                    entityEl.removeChild(child);
                                 }
-                                entityEl.setAttribute('videoCubeDrawn', false);
                             }
+                            entityEl.setAttribute('videoCubeDrawn', false);
                         }
 
                         if (theMessage.hasAudio) {

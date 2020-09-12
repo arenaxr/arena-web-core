@@ -98,23 +98,23 @@
         <a-asset-item id="viveControl-mtl" src="./models/vr_controller_vive.mtl"></a-asset-item>
       </a-assets>
 
-      <a-entity id="sceneRoot" iconsinit>
+      <a-entity id="sceneRoot">
         <video src="" id="localvidbox" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
 
         <!-- ground plane so falling objects don't fall through floor -->
         <a-plane sound="poolSize: 8; src: url(audio/snd_WoodWood.ogg); on: collide" static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
         <!-- walls so rolling objects don't roll off edge -->
-        <a-box static-body position="-15 1 0" id="border1" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
-        <a-box static-body position="15 1 0" id="border2" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30" ></a-box>
-        <a-box static-body position="0 1 15" id="border3" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5" ></a-box>
-        <a-box static-body position="0 1 -15" id="border4" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5" ></a-box>
+        <a-box static-body position="-15 1 0" id="border1" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30"></a-box>
+        <a-box static-body position="15 1 0" id="border2" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30"></a-box>
+        <a-box static-body position="0 1 15" id="border3" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
+        <a-box static-body position="0 1 -15" id="border4" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
 
         <a-entity id="env" environment="preset: starry; fog: 0; groundTexture: checkerboard"></a-entity>
 
         <a-entity position="0 0 0" id="CameraRig"> <!-- movement-controls="fly: true; speed=0.3"> -->
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
-            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: true; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move>
+            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move>
               <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
             </a-camera>
           </a-entity>
@@ -154,7 +154,7 @@
           </a-entity>
           <a-text id="conix_text" position="1.5 1.3 1" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
         -->
-        <a-text id="conix_text" value="" position="0 1.3 -1" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
+        <a-text id="conix_text" value="" position="0 1.3 -1" side="double" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
         <!-- let there be LIGHTS -->
         <a-light position="-0.93 1.58 -1.14" name="PointLight1" type="point" color="#9090AD" intensity="0.75"></a-light>

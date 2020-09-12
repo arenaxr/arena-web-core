@@ -544,16 +544,16 @@ AFRAME.registerComponent('goto-url', {
         var self = this;
     },
 
-    update: function(oldData) {
+    update: function() {
         // this in fact only gets called when the component that it is - gets updated
         // unlike the update method in Unity that gets called every frame
         var data = this.data; // Component property values.
         var el = this.el; // Reference to the component's entity.
-
+        console.log(data)
         if (data.on) { // we have an event?
-            el.addEventListener(data.on, function(args) {
+            el.addEventListener(data.on, function() {
                 console.log("goto-url url=" + data.url);
-                window.location.href = data.theUrl;
+                window.location.href = data.url;
             });
         } else {
             // `event` not specified, just log the message.
@@ -882,7 +882,6 @@ AFRAME.registerComponent('click-listener', {
 
                 /* Debug Conix box text
                         const clicker = evt.detail.clicker;
-
                         const sceney = this.sceneEl;
                         const textEl = sceney.querySelector('#conix-text');
                         textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
@@ -914,7 +913,6 @@ AFRAME.registerComponent('click-listener', {
 
                 /* DEBUG Conix box text
                         const clicker = evt.detail.clicker;
-
                         const sceney = this.sceneEl;
                         const textEl = sceney.querySelector('#conix-text');
                         textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
@@ -923,7 +921,6 @@ AFRAME.registerComponent('click-listener', {
         });
     }
 });
-
 
 AFRAME.registerComponent('vive-listener', {
     init: function() {
@@ -1179,7 +1176,7 @@ AFRAME.registerComponent("press-and-move", {
         if (!this.timer) {
             this.timer = window.setTimeout(() => {
                 window.longTouch = true;
-            }, 500);
+            }, 750);
         }
     },
     touchend: function() {
@@ -1197,11 +1194,11 @@ AFRAME.registerComponent("press-and-move", {
         if (window.longTouch) {
             this.timer = null;
             if (!this.drag) {
-                const SPEED = 0.3;
+                const SPEED = 2.5;
                 let eulerRot = globals.sceneObjects.myCamera.getAttribute("rotation");
-                let dx = SPEED * Math.cos(eulerRot.y * Math.PI / 180);
-                let dy = SPEED * Math.sin(eulerRot.y * Math.PI / 180);
-                let dz = SPEED * Math.sin(eulerRot.x * Math.PI / 180);
+                let dx = SPEED * (dt/1000) * Math.cos(eulerRot.y * Math.PI / 180);
+                let dy = SPEED * (dt/1000) * Math.sin(eulerRot.y * Math.PI / 180);
+                let dz = SPEED * (dt/1000) * Math.sin(eulerRot.x * Math.PI / 180);
                 let newPosition = globals.sceneObjects.myCamera.getAttribute("position");
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
@@ -1213,10 +1210,9 @@ AFRAME.registerComponent("press-and-move", {
 })
 
 // publish with qos of 2 for network graph to update latency
-// updates every 10s
 AFRAME.registerComponent("network-latency", {
     init: function() {
-        this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this); // updates every 10s
         this.message = new Paho.MQTT.Message("");
         this.message.destinationName = globals.graphTopic;
         this.message.qos = 2;

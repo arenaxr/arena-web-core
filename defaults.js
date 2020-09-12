@@ -8,6 +8,7 @@ const defaults = {
      mqttParamZ:"oz.andrew.cmu.edu",
      fixedCamera:"",
      ATLASurl:"//atlas.conix.io",
+     screenSharePath:"screenshare",
      localvidboxWidth:320,
      localvidboxHeight:240,
      vioTopic:"/topic/vio/",

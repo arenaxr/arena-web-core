@@ -2,18 +2,18 @@
 
 // These match config info on Jitsi Meet server (oz.andrew.cmu.edu)
 // in lines 7-37 of file /etc/jitsi/meet/oz.andrew.cmu.edu-config.js
-const jitsi_server = 'mr.andrew.cmu.edu';
-const arena_conference = globals.scenenameParam.toLowerCase();
+const jitsiServer = 'mr.andrew.cmu.edu';
+const arenaConference = globals.scenenameParam.toLowerCase();
 
 const BIGSCREEN = "bigscreen"
 const DISPLAYNAME = "arena_screen_share"
 
 const options = {
     hosts: {
-        domain: jitsi_server,
-        muc: 'conference.' + jitsi_server // FIXME: use XEP-0030
+        domain: jitsiServer,
+        muc: 'conference.' + jitsiServer // FIXME: use XEP-0030
     },
-    bosh: '//' + jitsi_server + '/http-bind', // FIXME: use xep-0156 for that
+    bosh: '//' + jitsiServer + '/http-bind', // FIXME: use xep-0156 for that
 
     // The name of client node advertised in XEP-0115 'c' stanza
     clientNode: 'http://jitsi.org/jitsimeet'
@@ -87,6 +87,28 @@ function onLocalTracks(tracks) {
     if (jitsiVideoTrack) jitsiVideoTrack.mute();
 }
 
+let leftRightToggle = true, screenPlaneLeftIdx = 0, screenPlaneRightIdx = 0;
+function createScreenSharePlane(id) {
+    let planeElement = document.createElement('a-plane');
+    planeElement.setAttribute("id", id);
+    planeElement.setAttribute("muted", "false");
+    planeElement.setAttribute("autoplay", "true");
+    planeElement.setAttribute("playsinline", "true");
+    planeElement.setAttribute("material", "shader: flat; side: double");
+    planeElement.setAttribute("scale", "8 6 0.01");
+    if (leftRightToggle) {
+        planeElement.setAttribute("position", 8.1*screenPlaneRightIdx+" 3.1 -3");
+        screenPlaneRightIdx++;
+    }
+    else {
+        planeElement.setAttribute("position", 8.1*-screenPlaneLeftIdx+" 3.1 -3");
+        screenPlaneLeftIdx++;
+    }
+    leftRightToggle = !leftRightToggle;
+    globals.sceneObjects.scene.appendChild(planeElement);
+    return planeElement;
+}
+
 /**
  * Handles remote tracks
  * @param track JitsiTrack object
@@ -103,9 +125,11 @@ function onRemoteTrack(track) {
 
     // remoteTracks[participant].push(track)
     if (track.getType() == "audio") {
+        if (remoteTracks[participant][0]) remoteTracks[participant][0].dispose();
         remoteTracks[participant][0] = track;
     }
-    else if (track.getType() == "video" && !remoteTracks[participant][1]) {
+    else if (track.getType() == "video") {
+        if (remoteTracks[participant][1]) remoteTracks[participant][1].dispose();
         remoteTracks[participant][1] = track;
     }
 
@@ -128,45 +152,21 @@ function onRemoteTrack(track) {
     const displayName = conference.getParticipantById(participant)._displayName;
     //    console.log("onRemoteTrack() conference.getParticipantById(participant)._displayName ", participant, displayName);
 
-    if (displayName && displayName.includes(DISPLAYNAME)) { // "arena_screen_share_0" Jitsi screen sharer user name
-        if (track.getType() === 'video') {
-
-            let screenName = "screenVideo_" + displayName; // "screenVideo_arena_screen_share_0
-            let boxid = document.getElementById(screenName);
-            if (!boxid) { // create
-                boxid = document.createElement('video');
-                //boxid.setAttribute("id", "screenVideo");
-                boxid.setAttribute("id", screenName);
-                boxid.setAttribute("muted", "false");
-                boxid.setAttribute("autoplay", "true");
-                boxid.setAttribute("playsinline", "true");
-                boxid.setAttribute("crossorigin", "anonymous");
-                // add to scene
-                globals.sceneObjects.scene.appendChild(boxid);
-            }
-            console.log("screenName:", screenName); // <video>  "screenVideo" -> screenVideo_arena_screen_share_0
-            track.attach($(`#${screenName}`)[0]);
-
-            //      let vidBox = document.getElementById(BIGSCREEN);
-            let vidBox = document.getElementById(displayName); // "arena_screen_share_0"
-            vidBox.setAttribute("src", "#" + screenName); // set src to "#screenVideo" in <a-plane> with id="bigscreen"
-            // console.log("added src", vidBox);
-        }
-        else if (track.getType() === 'audio') {
-
+    if (track.getType() === 'audio') {
+        if (displayName && displayName.includes(DISPLAYNAME)) {
             let audioStream = new MediaStream();
             audioStream.addTrack(remoteTracks[participant][0].track);
 
-            let camEl = globals.sceneObjects.myCamera.object3D;
-
-            if (globals.audioListener) {
-                console.log("EXISTING BIGSCREEN AUDIO LISTENER:", globals.audioListener);
-                listener = globals.audioListener;
+            let sceneEl = globals.sceneObjects.scene;
+            let listener = null;
+            if (sceneEl.audioListener) {
+                listener = sceneEl.audioListener;
             } else {
-                console.log("NEW BIGSCREEN AUDIO LISTENER:", camEl.audioListener);
                 listener = new THREE.AudioListener();
-                globals.audioListener = listener;
+                let camEl = globals.sceneObjects.myCamera.object3D;
                 camEl.add(listener);
+                globals.audioListener = listener;
+                sceneEl.audioListener = listener;
             }
 
             let audioSource = new THREE.PositionalAudio(listener);
@@ -174,56 +174,34 @@ function onRemoteTrack(track) {
             audioSource.setRefDistance(1); // L-R panning
             audioSource.setRolloffFactor(1);
 
-            //      let planeSceneElement = document.getElementById(BIGSCREEN);
-            let planeSceneElement = document.getElementById(displayName);
-            var position;
-            var scale;
-            var rotation;
-            if (planeSceneElement) {
-                scale = planeSceneElement.getAttribute('scale');
-                position = planeSceneElement.getAttribute('position');
-                rotation = planeSceneElement.getAttribute('rotation');
+            const screenShareID = displayName+participant;
+            let planeElement = document.getElementById(screenShareID);
+            if (!planeElement) {
+                planeElement = createScreenSharePlane(screenShareID);
             }
 
-            let planeElement = document.createElement('a-plane');
-            //planeElement.setAttribute("id", BIGSCREEN);
-            planeElement.setAttribute("id", displayName);
-            planeElement.setAttribute("muted", "false");
-            planeElement.setAttribute("autoplay", "true");
-            planeElement.setAttribute("playsinline", "true");
-            planeElement.setAttribute("material", "shader: flat; side: double");
-
-            if (planeSceneElement) {
-                planeElement.setAttribute("position", position);
-                planeElement.setAttribute("scale", scale);
-                planeElement.setAttribute("rotation", rotation);
-                var parentEl = planeSceneElement.parentEl;
-                if (parentEl)
-                    parentEl.removeChild(planeSceneElement);
-            } else {
-                planeElement.setAttribute("scale", "8 6 0.01");
-                planeElement.setAttribute("position", "-6 3 -4");
-            }
             // add to scene
-            globals.sceneObjects.scene.appendChild(planeElement);
             planeElement.object3D.add(audioSource);
-        } // displayname.includes(DISPLAYNAME)
-    }
-    else {
-        if (track.getType() === 'video') {
-            // use already existing video element e.g. video<jitsi_id>
-            const videoID = `video${participant}`;
-            if (!document.getElementById(videoID)) { // create
-                $('a-assets').append(
-                    `<video autoplay='1' id='${videoID}'/>` );
-            }
-            track.attach($(`#${videoID}`)[0]);
-            // console.log("added src", videoID);
-        } else { // 'audio'
-            //$('body').append(
-            //    `<audio autoplay='1' id='${participant}audio${idx}' />`);
+            remoteTracks[participant].screenShareID = screenShareID;
         }
+    }
+    else { // video
+        // use already existing video element e.g. video<jitsi_id>
+        const videoID = `video${participant}`;
+        if (!document.getElementById(videoID)) { // create
+            $('a-assets').append(
+                `<video autoplay='1' id='${videoID}'/>` );
+        }
+        track.attach($(`#${videoID}`)[0]);
 
+        if (displayName && displayName.includes(DISPLAYNAME)) {
+            const screenShareID = displayName+participant;
+            let planeElement = document.getElementById(screenShareID);
+            if (!planeElement) {
+                planeElement = createScreenSharePlane(screenShareID);
+            }
+            planeElement.setAttribute("src", "#"+videoID);
+        }
     }
 }
 
@@ -248,13 +226,13 @@ function onConferenceJoined() {
 }
 
 /**
- *
  * @param id
  */
 function onUserLeft(id) {
     console.log('user left:', id);
-    if (!remoteTracks[id]) {
-        return;
+    if (!remoteTracks[id]) return;
+    if (remoteTracks[id].screenShareID) {
+        $(`#${remoteTracks[id].screenShareID}`).remove();
     }
     $(`#video${id}`).remove();
     delete remoteTracks[id];
@@ -281,7 +259,7 @@ function publishJitsiArenaMessage() {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    conference = connection.initJitsiConference(arena_conference, confOptions);
+    conference = connection.initJitsiConference(arenaConference, confOptions);
     conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteTrack);
     conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, track => {
         console.log(`track removed!!!${track}`);
@@ -394,13 +372,6 @@ function switchVideo() { // eslint-disable-line no-unused-vars
             conference.addTrack(localTracks[1]);
         })
         .catch(error => console.log(error));
-}
-
-/**
- * @param selected
- */
-function changeAudioOutput(selected) { // eslint-disable-line no-unused-vars
-    JitsiMeetJS.mediaDevices.setAudioOutputDevice(selected.value);
 }
 
 $(window).bind('beforeunload', unload);
