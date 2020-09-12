@@ -1193,11 +1193,11 @@ AFRAME.registerComponent("press-and-move", {
         if (window.longTouch) {
             this.timer = null;
             if (!this.drag) {
-                const SPEED = 0.3;
+                const SPEED = 2.5;
                 let eulerRot = globals.sceneObjects.myCamera.getAttribute("rotation");
-                let dx = SPEED * Math.cos(eulerRot.y * Math.PI / 180);
-                let dy = SPEED * Math.sin(eulerRot.y * Math.PI / 180);
-                let dz = SPEED * Math.sin(eulerRot.x * Math.PI / 180);
+                let dx = SPEED * (dt/1000) * Math.cos(eulerRot.y * Math.PI / 180);
+                let dy = SPEED * (dt/1000) * Math.sin(eulerRot.y * Math.PI / 180);
+                let dz = SPEED * (dt/1000) * Math.sin(eulerRot.x * Math.PI / 180);
                 let newPosition = globals.sceneObjects.myCamera.getAttribute("position");
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
