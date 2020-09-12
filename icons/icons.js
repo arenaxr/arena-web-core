@@ -36,6 +36,7 @@ function publishHeadText(displayName) {
         "type": "object",
         "data": { "text": displayName },
     });
+}
 
 // set up local corner video window
 function startCornerVideo() {
