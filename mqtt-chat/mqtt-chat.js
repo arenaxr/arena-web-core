@@ -18,7 +18,7 @@ export default class MQTTChat {
         this.settings = {
             userid: st.userid !== undefined ? st.userid : uuidv4(),
             cameraid: st.cameraid !== undefined ? st.cameraid : "camera_auser",
-            username: st.username !== undefined ? st.username : "auser",
+            username: st.username !== undefined ? st.username : "chat-dft-username",
             realm: st.realm !== undefined ? st.realm : "realm",
             scene: st.scene !== undefined ? st.scene : "render",
             keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
@@ -298,7 +298,9 @@ export default class MQTTChat {
 
         let msgSpan = document.createElement("span");
         msgSpan.className = "msg " + whoClass // "self" | "other"
-        msgSpan.innerHTML = msg.linkify();
+        msgSpan.innerHTML = msg.linkify({
+            target: "_blank"
+        });
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
