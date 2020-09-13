@@ -1,5 +1,5 @@
-import '/mqtt-chat/linkify.min.js';
-import '/mqtt-chat/linkify-string.min.js';
+import './linkify.min.js';
+import './linkify-string.min.js';
 
 var mqttc;
 

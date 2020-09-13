@@ -95,7 +95,7 @@ window.globals = {
     mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
     fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
-    localVideoWidth: Number(window.innerWidth / 5),
+    localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
     vioTopic: defaults.vioTopic,
     graphTopic: defaults.graphTopic,
     lastMouseTarget: undefined,

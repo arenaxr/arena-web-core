@@ -201,7 +201,7 @@ function onConnect() {
         globals.localJitsiVideo.style.borderRadius = "10px";
         // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
     }
-    globals.localJitsiVideo.addEventListener('canplay', setupCornerVideo, false);
+    globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
     window.addEventListener('orientationchange', () => { // mobile only
         globals.localVideoWidth = Number(window.innerWidth / 5);
         jitsiVideoTrack.mute()
