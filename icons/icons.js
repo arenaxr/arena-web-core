@@ -214,8 +214,8 @@ function setupIcons() {
     label.innerHTML = "Display Name";
     formDiv.appendChild(label);
 
-    let usernameInput = document.createElement("textarea");
-    usernameInput.setAttribute("rows", "1");
+    let usernameInput = document.createElement("input");
+    usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");
     formDiv.appendChild(usernameInput);
 
