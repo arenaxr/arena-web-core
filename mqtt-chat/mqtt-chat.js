@@ -1,3 +1,6 @@
+import '/mqtt-chat/linkify.min.js';
+import '/mqtt-chat/linkify-string.min.js';
+
 var mqttc;
 
 // generate an uuid
@@ -295,7 +298,7 @@ export default class MQTTChat {
 
         let msgSpan = document.createElement("span");
         msgSpan.className = "msg " + whoClass // "self" | "other"
-        msgSpan.innerHTML = msg;
+        msgSpan.innerHTML = msg.linkify();
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
