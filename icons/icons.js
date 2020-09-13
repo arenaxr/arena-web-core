@@ -29,6 +29,16 @@ function publishAvatarMsg(avatarOn) {
     });
 }
 
+function publishHeadText(displayName) {
+    publish("realm/s/" + globals.scenenameParam + "/head-text_" + globals.camName, {
+        "object_id": globals.camName,
+        "action": "create",
+        "type": "object",
+        "displayName": displayName,
+        "data": { "object_type": "headtext", }
+    });
+}
+
 // set up local corner video window
 function startCornerVideo() {
     const localvidbox = document.getElementById("localvidbox");
@@ -111,7 +121,7 @@ function setupIcons() {
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }
-        globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"fly": flying});
+        globals.sceneObjects.myCamera.setAttribute("wasd-controls", { "fly": flying });
     });
     flyingBtn.style.display = "none";
     settingsButtons.push(flyingBtn);
@@ -136,12 +146,16 @@ function setupIcons() {
             for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = "block";
             }
+            settingsPopup.style.display = 'block'; // open settings panel
+            loadSettings();
         }
         else {
             settingsBtn.childNodes[0].style.backgroundImage = "url('images/icons/more.png')";
             for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = "none";
             }
+            settingsPopup.style.display = 'none'; // close settings panel
+            saveSettings();
         }
     });
 
@@ -159,6 +173,77 @@ function setupIcons() {
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
     document.body.appendChild(iconsDiv);
+
+    // Add settings panel
+    let settingsPopup = document.createElement("div");
+    settingsPopup.className = "settings-popup";
+    document.body.appendChild(settingsPopup);
+
+    let closeSettingsBtn = document.createElement("span");
+    closeSettingsBtn.className = "close";
+    closeSettingsBtn.innerHTML = "&times";
+    settingsPopup.appendChild(closeSettingsBtn);
+
+    let formDiv = document.createElement("div");
+    formDiv.className = "form-container";
+    settingsPopup.appendChild(formDiv);
+
+    let label = document.createElement("span");
+    label.innerHTML = "Settings</br></br>";
+    label.style.fontSize = "medium";
+    formDiv.appendChild(label);
+
+    formDiv.append("Authenticator: ");
+    let authType = document.createElement("span");
+    formDiv.appendChild(authType);
+    formDiv.appendChild(document.createElement("br"));
+
+    formDiv.append("Email: ");
+    let authEmail = document.createElement("span");
+    formDiv.appendChild(authEmail);
+    formDiv.appendChild(document.createElement("br"));
+
+    formDiv.append("Name: ");
+    let authName = document.createElement("span");
+    formDiv.appendChild(authName);
+    formDiv.appendChild(document.createElement("br"));
+
+    formDiv.appendChild(document.createElement("br"));
+
+    label = document.createElement("span");
+    label.innerHTML = "Display Name";
+    formDiv.appendChild(label);
+
+    let usernameInput = document.createElement("input");
+    usernameInput.setAttribute("type", "text");
+    usernameInput.setAttribute("placeholder", "Display Name");
+    formDiv.appendChild(usernameInput);
+
+    let saveSettingsBtn = document.createElement("button");
+    saveSettingsBtn.innerHTML = "Save";
+    formDiv.appendChild(saveSettingsBtn);
+
+    closeSettingsBtn.onclick = function () {
+        settingsPopup.style.display = 'none'; // close settings panel
+        saveSettings();
+    };
+
+    saveSettingsBtn.onclick = function () {
+        saveSettings();
+    };
+
+    function loadSettings() {
+        usernameInput.value = globals.displayName;
+        auth = getAuthStatus();
+        authType.innerHTML = auth.type;
+        authName.innerHTML = auth.name;
+        authEmail.innerHTML = auth.email;
+    }
+
+    function saveSettings() {
+        globals.displayName = usernameInput.value;
+        publishHeadText(globals.displayName);
+    }
 }
 
 window.addEventListener('onauth', setupIcons);

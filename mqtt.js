@@ -271,6 +271,7 @@ function onConnect() {
             hasVideo: globals.hasVideo,
             hasAudio: globals.hasAudio,
             hasAvatar: globals.hasAvatar,
+            displayName: globals.displayName,
             action: 'create',
             type: 'object',
             data: {
@@ -780,6 +781,20 @@ function onMessageArrived(message, jsonMessage) {
                     // does this work for light a-entities ?
                     entityEl.setAttribute('light', 'color', color);
                     break;
+
+                case "headtext":
+                    // handle changes to other users head text
+                    if (theMessage.hasOwnProperty("displayName")) {
+                        // update head text
+                        for (let child of entityEl.children) {
+                            if (child.getAttribute("id").includes("headtext_")) {
+                                // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
+                                let name = theMessage.displayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                                child.setAttribute('value', name);
+                            }
+                        }
+                    }
+                    return;
 
                 case "videoconf":
                     // handle changes to other users audio/video status
