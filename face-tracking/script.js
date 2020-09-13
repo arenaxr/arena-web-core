@@ -76,8 +76,8 @@ function setupVideo(setupCallback) {
 
     function setVideoStyle(elem) {
         elem.style.position = "absolute";
-        elem.style.top = "10px";
-        elem.style.left = "10px";
+        elem.style.top = "15px";
+        elem.style.left = "15px";
         elem.style.borderRadius = "10px";
     }
 

@@ -187,8 +187,8 @@ function onConnect() {
 
     // video window for jitsi
     globals.localJitsiVideo = document.getElementById("localVideo");
+    globals.localJitsiVideo.style.display = "none";
     function setupCornerVideo() {
-        globals.localVideoWidth = Number(window.innerWidth / 5);
         globals.localVideoHeight = globals.localJitsiVideo.videoHeight / (globals.localJitsiVideo.videoWidth / globals.localVideoWidth);
 
         globals.localJitsiVideo.setAttribute("width", globals.localVideoWidth);
@@ -196,13 +196,18 @@ function onConnect() {
         globals.localJitsiVideo.play();
 
         globals.localJitsiVideo.style.position = "absolute";
-        globals.localJitsiVideo.style.top = "10px";
-        globals.localJitsiVideo.style.left = "10px";
+        globals.localJitsiVideo.style.top = "15px";
+        globals.localJitsiVideo.style.left = "15px";
         globals.localJitsiVideo.style.borderRadius = "10px";
         // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
     }
-    globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
-    // window.addEventListener('resize', setupCornerVideo, false);
+    globals.localJitsiVideo.addEventListener('canplay', setupCornerVideo, false);
+    window.addEventListener('orientationchange', () => { // mobile only
+        globals.localVideoWidth = Number(window.innerWidth / 5);
+        jitsiVideoTrack.mute()
+        setupCornerVideo();
+        jitsiVideoTrack.unmute()
+    }, false);
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);

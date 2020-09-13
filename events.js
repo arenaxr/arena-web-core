@@ -95,6 +95,7 @@ window.globals = {
     mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
     fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
+    localVideoWidth: Number(window.innerWidth / 5),
     vioTopic: defaults.vioTopic,
     graphTopic: defaults.graphTopic,
     lastMouseTarget: undefined,
