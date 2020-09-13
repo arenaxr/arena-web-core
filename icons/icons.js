@@ -147,11 +147,7 @@ function setupIcons() {
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }
-<<<<<<< HEAD
         globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"fly": globals.flying});
-=======
-        globals.sceneObjects.myCamera.setAttribute("wasd-controls", { "fly": flying });
->>>>>>> 300cd8bdd536559f4376e316b970f09a03b5bd35
     });
     flyingBtn.style.display = "none";
     settingsButtons.push(flyingBtn);
