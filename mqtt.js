@@ -188,8 +188,8 @@ function onConnect() {
     // video window for jitsi
     const videoPlane = document.createElement('a-video');
     videoPlane.setAttribute('id', "arena-vid-plane");
-    videoPlane.setAttribute('width', globals.localvidboxWidth/1000);
-    videoPlane.setAttribute('height', globals.localvidboxHeight/1000);
+    videoPlane.setAttribute('width', globals.localvidboxWidth / 1000);
+    videoPlane.setAttribute('height', globals.localvidboxHeight / 1000);
     videoPlane.setAttribute('src', "#localvidbox");
     videoPlane.setAttribute("click-listener", "");
     videoPlane.setAttribute("material", "shader", "flat");
@@ -425,14 +425,14 @@ function isJson(str) {
 function drawVideoCube(entityEl, videoID) {
     // attach video to head
     const videoCube = document.createElement('a-box');
-    videoCube.setAttribute('id', videoID+"cube");
+    videoCube.setAttribute('id', videoID + "cube");
     videoCube.setAttribute('position', '0 0 0');
     videoCube.setAttribute('scale', '0.6 0.4 0.6');
     videoCube.setAttribute('material', 'shader', 'flat');
     videoCube.setAttribute('src', `#${videoID}`); // video only (!audio)
 
     const videoCubeDark = document.createElement('a-box');
-    videoCubeDark.setAttribute('id', videoID+"cubeDark");
+    videoCubeDark.setAttribute('id', videoID + "cubeDark");
     videoCubeDark.setAttribute('position', '0 0 0.01');
     videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
     videoCubeDark.setAttribute('material', 'shader', 'flat');
@@ -469,66 +469,66 @@ function highlightVideoCube(entityEl, oldEl) {
 
 // https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
 async function enableChromeAEC(gainNode) {
-  /**
-   *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-   *  1. grab the GainNode from the scene's THREE.AudioListener
-   *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
-   *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-   *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-   *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-   *  6. connect the other RTCPeerConnection's stream to a new audio element.
-   *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
-   */
+    /**
+     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
+     *  1. grab the GainNode from the scene's THREE.AudioListener
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
+     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
+     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
+     *  6. connect the other RTCPeerConnection's stream to a new audio element.
+     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
+     */
 
-  const audioEl = new Audio();
-  audioEl.setAttribute("autoplay", "autoplay");
-  audioEl.setAttribute("playsinline", "playsinline");
+    const audioEl = new Audio();
+    audioEl.setAttribute("autoplay", "autoplay");
+    audioEl.setAttribute("playsinline", "playsinline");
 
-  const context = THREE.AudioContext.getContext();
-  const loopbackDestination = context.createMediaStreamDestination();
-  const outboundPeerConnection = new RTCPeerConnection();
-  const inboundPeerConnection = new RTCPeerConnection();
+    const context = THREE.AudioContext.getContext();
+    const loopbackDestination = context.createMediaStreamDestination();
+    const outboundPeerConnection = new RTCPeerConnection();
+    const inboundPeerConnection = new RTCPeerConnection();
 
-  const onError = e => {
-    console.error("RTCPeerConnection loopback initialization error", e);
-  };
+    const onError = e => {
+        console.error("RTCPeerConnection loopback initialization error", e);
+    };
 
-  outboundPeerConnection.addEventListener("icecandidate", e => {
-    inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-  });
-
-  inboundPeerConnection.addEventListener("icecandidate", e => {
-    outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-  });
-
-  inboundPeerConnection.addEventListener("track", e => {
-    audioEl.srcObject = e.streams[0];
-  });
-
-  try {
-    // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
-    loopbackDestination.stream.getTracks().forEach(track => {
-      outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+    outboundPeerConnection.addEventListener("icecandidate", e => {
+        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
     });
 
-    const offer = await outboundPeerConnection.createOffer();
-    outboundPeerConnection.setLocalDescription(offer);
-    await inboundPeerConnection.setRemoteDescription(offer);
+    inboundPeerConnection.addEventListener("icecandidate", e => {
+        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+    });
 
-    const answer = await inboundPeerConnection.createAnswer();
-    inboundPeerConnection.setLocalDescription(answer);
-    outboundPeerConnection.setRemoteDescription(answer);
+    inboundPeerConnection.addEventListener("track", e => {
+        audioEl.srcObject = e.streams[0];
+    });
 
-    gainNode.disconnect();
-    if (globals.chromeSpatialAudioOn) {
-        gainNode.connect(context.destination);
+    try {
+        // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
+        loopbackDestination.stream.getTracks().forEach(track => {
+            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+        });
+
+        const offer = await outboundPeerConnection.createOffer();
+        outboundPeerConnection.setLocalDescription(offer);
+        await inboundPeerConnection.setRemoteDescription(offer);
+
+        const answer = await inboundPeerConnection.createAnswer();
+        inboundPeerConnection.setLocalDescription(answer);
+        outboundPeerConnection.setRemoteDescription(answer);
+
+        gainNode.disconnect();
+        if (globals.chromeSpatialAudioOn) {
+            gainNode.connect(context.destination);
+        }
+        else {
+            gainNode.connect(loopbackDestination);
+        }
+    } catch (e) {
+        onError(e);
     }
-    else {
-        gainNode.connect(loopbackDestination);
-    }
-  } catch (e) {
-    onError(e);
-  }
 }
 
 function onMessageArrived(message, jsonMessage) {
@@ -788,7 +788,9 @@ function onMessageArrived(message, jsonMessage) {
                         // update head text
                         for (let child of entityEl.children) {
                             if (child.getAttribute("id").includes("headtext_")) {
-                                child.setAttribute('value', theMessage.displayName);
+                                // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
+                                let name = theMessage.displayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                                child.setAttribute('value', name);
                             }
                         }
                     }
@@ -821,7 +823,7 @@ function onMessageArrived(message, jsonMessage) {
                         if (theMessage.hasVideo) {
                             const videoID = `video${theMessage.jitsiId}`;
                             if (document.getElementById(videoID) &&
-                                !(entityEl.getAttribute('videoCubeDrawn')=='true')) {
+                                !(entityEl.getAttribute('videoCubeDrawn') == 'true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
                                 drawVideoCube(entityEl, videoID);
                                 entityEl.setAttribute('videoCubeDrawn', true);
@@ -875,7 +877,7 @@ function onMessageArrived(message, jsonMessage) {
                                 const audioCtx = THREE.AudioContext.getContext();
                                 const resume = () => {
                                     audioCtx.resume();
-                                    setTimeout(function() {
+                                    setTimeout(function () {
                                         if (audioCtx.state === "running") {
                                             if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
                                                 enableChromeAEC(listener.gain);
