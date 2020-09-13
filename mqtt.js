@@ -186,23 +186,23 @@ function onConnect() {
     }
 
     // video window for jitsi
-    const video = document.getElementById("localvidbox")
-    const videoPlane = document.createElement('a-video');
-    videoPlane.setAttribute('id', "arena-vid-plane");
-    videoPlane.setAttribute('width', globals.localvidboxWidth/1000);
-    videoPlane.setAttribute('height', globals.localvidboxHeight/1000);
-    videoPlane.setAttribute('color', 'black');
-    video.addEventListener('loadeddata', (e) => {
-        videoPlane.setAttribute('color', '');
-        videoPlane.setAttribute('src', "#localvidbox");
-    });
-    videoPlane.setAttribute("click-listener", "");
-    videoPlane.setAttribute("material", "shader", "flat");
-    videoPlane.setAttribute("transparent", "true");
-    videoPlane.setAttribute('position', '-0.585, 0.287, -0.5');
-    videoPlane.setAttribute("visible", "false");
-    globals.sceneObjects.myCamera.appendChild(videoPlane);
-    globals.sceneObjects["arena-vid-plane"] = videoPlane;
+    globals.localJitsiVideo = document.getElementById("localVideo");
+    function setupCornerVideo() {
+        globals.localVideoWidth = Number(window.innerWidth / 5);
+        globals.localVideoHeight = globals.localJitsiVideo.videoHeight / (globals.localJitsiVideo.videoWidth / globals.localVideoWidth);
+
+        globals.localJitsiVideo.setAttribute("width", globals.localVideoWidth);
+        globals.localJitsiVideo.setAttribute("height", globals.localVideoHeight);
+        globals.localJitsiVideo.play();
+
+        globals.localJitsiVideo.style.position = "absolute";
+        globals.localJitsiVideo.style.top = "10px";
+        globals.localJitsiVideo.style.left = "10px";
+        globals.localJitsiVideo.style.borderRadius = "10px";
+        // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
+    }
+    globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
+    // window.addEventListener('resize', setupCornerVideo, false);
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);

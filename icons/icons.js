@@ -29,16 +29,6 @@ function publishAvatarMsg() {
     });
 }
 
-// set up local corner video window
-function startCornerVideo() {
-    const localvidbox = document.getElementById("localvidbox");
-    localvidbox.setAttribute("width", globals.localvidboxWidth);
-    localvidbox.setAttribute("height", globals.localvidboxHeight);
-    if (localvidbox.srcObject) {
-        localvidbox.play();
-    }
-}
-
 function setupIcons() {
     const audioBtn = createIconButton("audio-off", "Microphone on/off.", () => {
         if (jitsiAudioTrack) {
@@ -61,10 +51,11 @@ function setupIcons() {
             globals.hasVideo = !globals.hasVideo;
             if (globals.hasVideo) { // toggled
                 jitsiVideoTrack.unmute().then(_ => {
-                    startCornerVideo();
                     videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-on.png')";
                     avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
-                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
+                    if (globals.localJitsiVideo)
+                        globals.localJitsiVideo.style.display = "block"
+                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
                     window.trackFaceOff();
                     globals.hasAvatar = false;
                     publishAvatarMsg();
@@ -73,7 +64,9 @@ function setupIcons() {
              else {
                 videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
                 jitsiVideoTrack.mute().then(_ => {
-                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                    if (globals.localJitsiVideo)
+                        globals.localJitsiVideo.style.display = "none"
+                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
                 })
             }
         }
@@ -86,7 +79,9 @@ function setupIcons() {
                 jitsiVideoTrack.mute().then(_ => {
                     avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-on.png')";
                     videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
-                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                    if (globals.localJitsiVideo)
+                        globals.localJitsiVideo.style.display = "none"
+                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
                     globals.hasVideo = false;
                     window.trackFaceOn();
                     publishAvatarMsg();
@@ -130,10 +125,10 @@ function setupIcons() {
     speedBtn.style.display = "none";
     settingsButtons.push(speedBtn);
 
-    let flying = false;
+    globals.flying = false;
     const flyingBtn = createIconButton("flying-off", "Flying on/off", () => {
-        flying = !flying;
-        if (flying) { // toggled
+        globals.flying = !globals.flying;
+        if (globals.flying) { // toggled
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-on.png')";
         }
         else {
@@ -142,7 +137,7 @@ function setupIcons() {
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }
-        globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"fly": flying});
+        globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"fly": globals.flying});
     });
     flyingBtn.style.display = "none";
     settingsButtons.push(flyingBtn);

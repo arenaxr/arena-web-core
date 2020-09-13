@@ -46,8 +46,8 @@ function writeOverlayText(text) {
     const overlayCtx = window.overlayCanv.getContext("2d");
     overlayCtx.clearRect(
         0, 0,
-        globals.localvidboxWidth,
-        globals.localvidboxHeight
+        globals.localVideoWidth,
+        globals.localVideoHeight
     );
     overlayCtx.font = "17px Arial";
     overlayCtx.textAlign = "center";
@@ -84,7 +84,7 @@ function setupVideo(setupCallback) {
     window.videoCanv = document.createElement("canvas");
     setVideoStyle(window.videoCanv);
     window.videoCanv.style.zIndex = 9998;
-    window.videoCanv.style.opacity = 0.3;
+    window.videoCanv.style.opacity = 0.1;
     document.body.appendChild(window.videoCanv);
 
     window.overlayCanv = document.createElement("canvas");
@@ -93,20 +93,20 @@ function setupVideo(setupCallback) {
     document.body.appendChild(window.overlayCanv);
 
     window.videoElem.addEventListener("canplay", function(e) {
-        globals.localvidboxHeight = window.videoElem.videoHeight / (window.videoElem.videoWidth / globals.localvidboxWidth);
+        globals.localVideoHeight = window.videoElem.videoHeight / (window.videoElem.videoWidth / globals.localVideoWidth);
 
-        window.videoElem.setAttribute("width", globals.localvidboxWidth);
-        window.videoElem.setAttribute("height", globals.localvidboxHeight);
+        window.videoElem.setAttribute("width", globals.localVideoWidth);
+        window.videoElem.setAttribute("height", globals.localVideoHeight);
 
-        window.videoCanv.width = globals.localvidboxWidth;
-        window.videoCanv.height = globals.localvidboxHeight;
+        window.videoCanv.width = globals.localVideoWidth;
+        window.videoCanv.height = globals.localVideoHeight;
         if (flipped) {
-            window.videoCanv.getContext('2d').translate(globals.localvidboxWidth, 0);
+            window.videoCanv.getContext('2d').translate(globals.localVideoWidth, 0);
             window.videoCanv.getContext('2d').scale(-1, 1);
         }
 
-        window.overlayCanv.width = globals.localvidboxWidth;
-        window.overlayCanv.height = globals.localvidboxHeight;
+        window.overlayCanv.width = globals.localVideoWidth;
+        window.overlayCanv.height = globals.localVideoHeight;
 
         if (setupCallback) setupCallback();
     }, false);
@@ -117,10 +117,10 @@ function getFrame() {
     videoCanvCtx.drawImage(
         window.videoElem,
         0, 0,
-        globals.localvidboxWidth,
-        globals.localvidboxHeight
+        globals.localVideoWidth,
+        globals.localVideoHeight
     );
-    return videoCanvCtx.getImageData(0, 0, globals.localvidboxWidth, globals.localvidboxHeight).data;
+    return videoCanvCtx.getImageData(0, 0, globals.localVideoWidth, globals.localVideoHeight).data;
 }
 
 function hasFace(landmarks) {
@@ -128,8 +128,8 @@ function hasFace(landmarks) {
 
     let zeros = 0;
     for (let i = 0; i < landmarks.length; i++) {
-        if (i % 2 == 0 && landmarks[i] > globals.localvidboxWidth) return false;
-        if (i % 2 == 1 && landmarks[i] > globals.localvidboxHeight) return false;
+        if (i % 2 == 0 && landmarks[i] > globals.localVideoWidth) return false;
+        if (i % 2 == 1 && landmarks[i] > globals.localVideoHeight) return false;
         if (landmarks[i] == 0) zeros++;
     }
     // if there are many 0's (>2/3) then assume there is no face
@@ -176,7 +176,7 @@ function drawLandmarks(landmarksRaw, bbox) {
     if (loading) clearInterval(loading);
 
     const overlayCtx = window.overlayCanv.getContext("2d");
-    overlayCtx.clearRect(0, 0, globals.localvidboxWidth, globals.localvidboxHeight);
+    overlayCtx.clearRect(0, 0, globals.localVideoWidth, globals.localVideoHeight);
 
     let landmarks = [];
     let face = hasFace(landmarksRaw);
@@ -258,7 +258,7 @@ async function detectFace(frame, width, height) {
     let landmarksRaw = [], bbox = [], quat = [], trans = [];
     if (globals.faceDetector && ready) {
         [landmarksRaw, bbox] = await globals.faceDetector.detect(frame, width, height);
-        [quat, trans] = await globals.faceDetector.getPose(landmarksRaw, globals.localvidboxWidth, globals.localvidboxHeight);
+        [quat, trans] = await globals.faceDetector.getPose(landmarksRaw, globals.localVideoWidth, globals.localVideoHeight);
         const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
         if (faceJSON != prevJSON) {
             publish(globals.outputTopic + globals.camName + "/face", faceJSON);
@@ -271,7 +271,7 @@ async function detectFace(frame, width, height) {
 async function processVideo() {
     if (globals.hasAvatar) {
         if (frames % framesToSkip == 0) {
-            const [landmarksRaw, bbox, quat, trans] = await detectFace(getFrame(), globals.localvidboxWidth, globals.localvidboxHeight);
+            const [landmarksRaw, bbox, quat, trans] = await detectFace(getFrame(), globals.localVideoWidth, globals.localVideoHeight);
             drawLandmarks(landmarksRaw, bbox);
         }
         frames++;

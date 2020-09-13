@@ -95,8 +95,6 @@ window.globals = {
     mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
     fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
-    localvidboxWidth: defaults.localvidboxWidth,
-    localvidboxHeight: defaults.localvidboxHeight,
     vioTopic: defaults.vioTopic,
     graphTopic: defaults.graphTopic,
     lastMouseTarget: undefined,
@@ -185,7 +183,7 @@ window.globals = {
         }
     }
 };
-console.log(window.globals);
+// console.log(window.globals);
 
 let urlLat = getUrlParam('lat');
 let urlLong = getUrlParam('long');
@@ -1216,7 +1214,7 @@ AFRAME.registerComponent("press-and-move", {
                 let newPosition = globals.sceneObjects.myCamera.getAttribute("position");
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
-                newPosition.y += dz;
+                newPosition.y += globals.flying ? dz : 0;
                 globals.sceneObjects.myCamera.setAttribute("position", newPosition);
             }
         }

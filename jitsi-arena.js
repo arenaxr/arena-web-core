@@ -68,8 +68,8 @@ function onLocalTracks(tracks) {
         if (track.getType() === 'video') {
             //$('body').append(`<video autoplay='1' id='localVideo${i}' />`);
 
-            // instead use already defined e.g. <video id="localvidbox" ...>
-            track.attach($(`#localvidbox`)[0]);
+            // instead use already defined e.g. <video id="localVideo" ...>
+            track.attach($(`#localVideo`)[0]);
             jitsiVideoTrack = track;
         } else if (track.getType() === 'audio') {
             //$('body').append(`<audio autoplay='1' muted='true' id='localAudio${i}' />`);
@@ -373,7 +373,7 @@ function switchVideo() { // eslint-disable-line no-unused-vars
             localTracks[1].addEventListener(
                 JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
                 () => console.log('local track stopped'));
-            localTracks[1].attach($('#localvidbox')[0]);
+            localTracks[1].attach($('#localVideo')[0]);
             conference.addTrack(localTracks[1]);
         })
         .catch(error => console.log(error));

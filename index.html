@@ -99,8 +99,6 @@
       </a-assets>
 
       <a-entity id="sceneRoot">
-        <video src="" id="localvidbox" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
-
         <!-- ground plane so falling objects don't fall through floor -->
         <a-plane sound="poolSize: 8; src: url(audio/snd_WoodWood.ogg); on: collide" static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
         <!-- walls so rolling objects don't roll off edge -->
@@ -170,6 +168,7 @@
         -->
       </a-entity>
     </a-scene>
+    <video src="" id="localVideo" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="https://apis.google.com/js/platform.js"></script>
