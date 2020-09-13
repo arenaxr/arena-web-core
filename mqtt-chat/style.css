@@ -94,6 +94,7 @@ body {
 	background-color: rgba(255, 255, 255, 0.7);
 	/*left: 50%;
   transform: translate(-50%, 0%);*/
+	border-radius: 10px;
 }
 
 
@@ -231,7 +232,7 @@ body {
 	float: left;
 	clear: both;
 	border-top-left-radius: 0px;
-  background-color: rgba(100, 100, 100, 0.5);
+  background-color: rgba(80, 180, 180, 0.5);
   color: #3c3c3c;
 }
 
@@ -240,7 +241,7 @@ body {
 	clear: both;
 	border-top-right-radius: 0px;
 	/*background: #00D025;*/
-  background-color: rgba(200, 200, 200, 0.5);
+  background-color: rgba(80, 180, 80, 0.5);
   color: #3c3c3c;
 }
 
@@ -319,35 +320,4 @@ body {
 	position: absolute;
 	left: 10px;
 	top: 2px;
-}
-
-
-/* intro modal */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
-}
-
-/* intro modal Content */
-.modal-content {
-  background-color: rgba(30, 30, 30, 0.8); /* Black w/ opacity */
-  margin: auto;
-  border: 1px solid #888;
-  width: 700px;
-  text-align: center;
-  color: #ffffff;
-}
-
-.intro_img {
-  padding: 20px 20px 20px 5px;
-  margin 0 auto 0 auto;
 }
