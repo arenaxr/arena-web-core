@@ -213,6 +213,7 @@ globals.hasAvatar = false;
 globals.activeSpeaker = "";
 globals.previousSpeakerId = "";
 globals.previousSpeakerEl = "";
+globals.displayName = decodeURI(globals.userParam); // set initial name
 globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
 
 if (globals.fixedCamera !== '') {

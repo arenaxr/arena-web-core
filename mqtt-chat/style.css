@@ -94,6 +94,7 @@ body {
 	background-color: rgba(255, 255, 255, 0.7);
 	/*left: 50%;
   transform: translate(-50%, 0%);*/
+	border-radius: 10px;
 }
 
 
@@ -111,7 +112,8 @@ body {
 
 /* Full-width textarea */
 
-.form-container textarea {
+.form-container textarea,
+.form-container input {
 	width: 100%;
 	margin: 0px 0 0px 0;
 	border: none;
@@ -123,7 +125,8 @@ body {
 
 /* When the textarea gets focus, do something */
 
-.form-container textarea:focus {
+.form-container textarea:focus,
+.form-container input:focus  {
 	background-color: rgba(200, 200, 200, 0.5);
   border: 1px solid #646464;
 	outline: none;
@@ -132,15 +135,21 @@ body {
 
 /* Set a style for the submit/send button */
 
-.form-container .btn {
-	padding: 15px 25px;
-	border: none;
+.form-container .btn,
+.form-container button  {
 	cursor: pointer;
 	opacity: 0.8;
 }
 
 .form-container .btn {
+	border: none;
+	padding: 15px 25px;
 	background: rgba(100, 100, 100, 0.5) url("data:image/svg+xml;utf8,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 512 512' style='enable-background:new 0 0 512 512;' xml:space='preserve'%3E%3Cg%3E%3Cg%3E%3Cpath d='M174.545,302.545H81.455c-6.982,0-11.636,4.655-11.636,11.636s4.655,11.636,11.636,11.636h93.091 c6.982,0,11.636-4.655,11.636-11.636S181.527,302.545,174.545,302.545z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M139.636,244.364H46.545c-6.982,0-11.636,4.655-11.636,11.636s4.655,11.636,11.636,11.636h93.091 c6.982,0,11.636-4.655,11.636-11.636S146.618,244.364,139.636,244.364z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M104.727,186.182H11.636C4.655,186.182,0,190.836,0,197.818s4.655,11.636,11.636,11.636h93.091 c6.982,0,11.636-4.655,11.636-11.636S111.709,186.182,104.727,186.182z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M463.127,155.927c-3.491-4.655-11.636-5.818-16.291-2.327l-123.345,94.255c-12.8,9.309-30.255,9.309-43.055,0 L157.091,153.6c-4.655-3.491-12.8-3.491-16.291,2.327c-3.491,4.655-3.491,12.8,2.327,16.291l124.509,94.255 c10.473,8.145,23.273,11.636,34.909,11.636s25.6-3.491,34.909-11.636L460.8,172.218 C465.455,168.727,466.618,160.582,463.127,155.927z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M477.091,104.727H104.727c-6.982,0-11.636,4.655-11.636,11.636S97.745,128,104.727,128h372.364 c6.982,0,11.636,4.655,11.636,11.636v232.727c0,6.982-4.655,11.636-11.636,11.636H104.727c-6.982,0-11.636,4.655-11.636,11.636 c0,6.982,4.655,11.636,11.636,11.636h372.364c19.782,0,34.909-15.127,34.909-34.909V139.636 C512,119.855,496.873,104.727,477.091,104.727z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M461.964,340.945l-69.818-69.818c-4.655-4.655-11.636-4.655-16.291,0s-4.655,11.636,0,16.291l69.818,69.818 c2.327,2.327,5.818,3.491,8.145,3.491s5.818-1.164,8.146-3.491C466.618,352.582,466.618,345.6,461.964,340.945z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") 50% 50% no-repeat;
+}
+
+.form-container button {
+	padding: 5px 5px;
+	background: rgba(100, 100, 100, 0.5)
 }
 
 .form-container .sel {
@@ -231,7 +240,7 @@ body {
 	float: left;
 	clear: both;
 	border-top-left-radius: 0px;
-  background-color: rgba(100, 100, 100, 0.5);
+  background-color: rgba(80, 180, 180, 0.5);
   color: #3c3c3c;
 }
 
@@ -240,7 +249,7 @@ body {
 	clear: both;
 	border-top-right-radius: 0px;
 	/*background: #00D025;*/
-  background-color: rgba(200, 200, 200, 0.5);
+  background-color: rgba(80, 180, 80, 0.5);
   color: #3c3c3c;
 }
 
@@ -319,35 +328,4 @@ body {
 	position: absolute;
 	left: 10px;
 	top: 2px;
-}
-
-
-/* intro modal */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  padding-top: 100px; /* Location of the box */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
-}
-
-/* intro modal Content */
-.modal-content {
-  background-color: rgba(30, 30, 30, 0.8); /* Black w/ opacity */
-  margin: auto;
-  border: 1px solid #888;
-  width: 700px;
-  text-align: center;
-  color: #ffffff;
-}
-
-.intro_img {
-  padding: 20px 20px 20px 5px;
-  margin 0 auto 0 auto;
 }
