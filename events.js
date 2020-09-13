@@ -101,7 +101,6 @@ window.globals = {
     graphTopic: defaults.graphTopic,
     lastMouseTarget: undefined,
     inAR: false,
-    vidconf: true,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
     onEnterXR: function(xrType) {
         //debug("ENTERING XR");
@@ -1159,9 +1158,26 @@ AFRAME.registerComponent('modify-materials', {
     },
 })
 
-// TODO: fix this. kinda hacky to have this as global var, but this.longTouch doesnt seem to work...
-window.longTouch = false;
+// publish with qos of 2 for network graph to update latency
+AFRAME.registerComponent("network-latency", {
+    init: function() {
+        this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this); // updates every 10s
+        this.message = new Paho.MQTT.Message("");
+        this.message.destinationName = globals.graphTopic;
+        this.message.qos = 2;
+    },
+    tick: (function(t, dt) {
+        if (window.mqttClient.isConnected()) {
+            window.mqttClient.send(this.message);
+        }
+    })
+})
+
+window.longTouch = false; // TODO: fix this. shouldnt be a global, but this.longTouch doesnt work
 AFRAME.registerComponent("press-and-move", {
+    schema: {
+        speed: {type: 'number', default: 5.0},
+    },
     init: function() {
         this.timer = null;
         this.drag = false;
@@ -1193,32 +1209,16 @@ AFRAME.registerComponent("press-and-move", {
         if (window.longTouch) {
             this.timer = null;
             if (!this.drag) {
-                const SPEED = 2.5;
                 let eulerRot = globals.sceneObjects.myCamera.getAttribute("rotation");
-                let dx = SPEED * (dt/1000) * Math.cos(eulerRot.y * Math.PI / 180);
-                let dy = SPEED * (dt/1000) * Math.sin(eulerRot.y * Math.PI / 180);
-                let dz = SPEED * (dt/1000) * Math.sin(eulerRot.x * Math.PI / 180);
+                let dx = this.data.speed * (dt/1000) * Math.cos(eulerRot.y * Math.PI / 180);
+                let dy = this.data.speed * (dt/1000) * Math.sin(eulerRot.y * Math.PI / 180);
+                let dz = this.data.speed * (dt/1000) * Math.sin(eulerRot.x * Math.PI / 180);
                 let newPosition = globals.sceneObjects.myCamera.getAttribute("position");
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
                 newPosition.y += dz;
                 globals.sceneObjects.myCamera.setAttribute("position", newPosition);
             }
-        }
-    })
-})
-
-// publish with qos of 2 for network graph to update latency
-AFRAME.registerComponent("network-latency", {
-    init: function() {
-        this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this); // updates every 10s
-        this.message = new Paho.MQTT.Message("");
-        this.message.destinationName = globals.graphTopic;
-        this.message.qos = 2;
-    },
-    tick: (function(t, dt) {
-        if (window.mqttClient.isConnected()) {
-            window.mqttClient.send(this.message);
         }
     })
 })

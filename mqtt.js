@@ -186,11 +186,16 @@ function onConnect() {
     }
 
     // video window for jitsi
+    const video = document.getElementById("localvidbox")
     const videoPlane = document.createElement('a-video');
     videoPlane.setAttribute('id', "arena-vid-plane");
     videoPlane.setAttribute('width', globals.localvidboxWidth/1000);
     videoPlane.setAttribute('height', globals.localvidboxHeight/1000);
-    videoPlane.setAttribute('src', "#localvidbox");
+    videoPlane.setAttribute('color', 'black');
+    video.addEventListener('loadeddata', (e) => {
+        videoPlane.setAttribute('color', '');
+        videoPlane.setAttribute('src', "#localvidbox");
+    });
     videoPlane.setAttribute("click-listener", "");
     videoPlane.setAttribute("material", "shader", "flat");
     videoPlane.setAttribute("transparent", "true");
@@ -369,6 +374,7 @@ function onConnect() {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     mqttClient.subscribe(globals.renderTopic);
+    if (!AFRAME.utils.device.isMobile()) faceTrackerInit();
 }
 
 function onConnectionLost(responseObject) {
@@ -805,8 +811,8 @@ function onMessageArrived(message, jsonMessage) {
                             break; // other-person has no camera ... yet
                         }
 
+                        const videoID = `video${theMessage.jitsiId}`;
                         if (theMessage.hasVideo) {
-                            const videoID = `video${theMessage.jitsiId}`;
                             if (document.getElementById(videoID) &&
                                 !(entityEl.getAttribute('videoCubeDrawn')=='true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
@@ -815,11 +821,17 @@ function onMessageArrived(message, jsonMessage) {
                             }
                         }
                         else {
-                            for (let child of entityEl.children) {
-                                if (child.getAttribute("id").includes("cube") ||
-                                    child.getAttribute("id") === "videoHatHighlightBox") {
-                                    entityEl.removeChild(child);
-                                }
+                            const vidHat = document.getElementById("videoHatHighlightBox");
+                            if (entityEl.contains(vidHat)) {
+                                entityEl.removeChild(vidHat);
+                            }
+                            const vidCube = document.getElementById(videoID+"cube");
+                            if (entityEl.contains(vidCube)) {
+                                entityEl.removeChild(vidCube);
+                            }
+                            const vidCubeDark = document.getElementById(videoID+"cubeDark");
+                            if (entityEl.contains(vidCubeDark)) {
+                                entityEl.removeChild(vidCubeDark);
                             }
                             entityEl.setAttribute('videoCubeDrawn', false);
                         }

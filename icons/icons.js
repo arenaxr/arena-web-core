@@ -22,8 +22,8 @@ function createIconButton(initialImage, tooltip, onClick) {
     return wrapper;
 }
 
-function publishAvatarMsg(avatarOn) {
-    publish("realm/s/" + globals.scenenameParam + "/camera_" + globals.idTag + "/face/avatarStatus", {
+function publishAvatarMsg() {
+    publish(globals.outputTopic + globals.camName + "/face/avatarStatus", {
         "object_id": "face_" + globals.idTag,
         "avatar": globals.hasAvatar
     });
@@ -47,7 +47,8 @@ function setupIcons() {
                 jitsiAudioTrack.unmute().then(_ => {
                     audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-on.png')";
                 })
-            } else {
+            }
+             else {
                 jitsiAudioTrack.mute().then(_ => {
                     audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-off.png')";
                 })
@@ -68,7 +69,8 @@ function setupIcons() {
                     globals.hasAvatar = false;
                     publishAvatarMsg();
                 })
-            } else {
+            }
+             else {
                 videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
                 jitsiVideoTrack.mute().then(_ => {
                     globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
@@ -89,7 +91,8 @@ function setupIcons() {
                     window.trackFaceOn();
                     publishAvatarMsg();
                 })
-            } else {
+            }
+             else {
                 avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
                 window.trackFaceOff();
                 publishAvatarMsg();
@@ -98,6 +101,34 @@ function setupIcons() {
     });
 
     let settingsButtons = []
+
+    let speedState = 0;
+    const speedBtn = createIconButton("speed-medium", "Sign out of the ARENA", () => {
+        speedState = (speedState + 1) % 3;
+        if (speedState == 0) { // medium
+            speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-medium.png')";
+            if (!AFRAME.utils.device.isMobile())
+                globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"acceleration": 30});
+            else
+                globals.sceneObjects.myCamera.setAttribute("press-and-move", {"speed": 5.0});
+        }
+        else if (speedState == 1) { // fast
+            speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-fast.png')";
+            if (!AFRAME.utils.device.isMobile())
+                globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"acceleration": 60});
+            else
+                globals.sceneObjects.myCamera.setAttribute("press-and-move", {"speed": 10.0});
+        }
+        else if (speedState == 2) { // slow
+            speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-slow.png')";
+            if (!AFRAME.utils.device.isMobile())
+                globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"acceleration": 15});
+            else
+                globals.sceneObjects.myCamera.setAttribute("press-and-move", {"speed": 2.5});
+        }
+    });
+    speedBtn.style.display = "none";
+    settingsButtons.push(speedBtn);
 
     let flying = false;
     const flyingBtn = createIconButton("flying-off", "Flying on/off", () => {
@@ -128,6 +159,7 @@ function setupIcons() {
     logoutBtn.style.display = "none";
     settingsButtons.push(logoutBtn);
 
+
     let expanded = false;
     const settingsBtn = createIconButton("more", "Additional settings", () => {
         expanded = !expanded;
@@ -152,9 +184,10 @@ function setupIcons() {
     if (!AFRAME.utils.device.isMobile()) {
         iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
     }
+    iconsDiv.appendChild(speedBtn);
     iconsDiv.appendChild(flyingBtn);
     if (!AFRAME.utils.device.isMobile()) {
-        iconsDiv.appendChild(screenShareButton);
+        iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
     }
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
