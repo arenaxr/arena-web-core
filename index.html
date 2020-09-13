@@ -99,8 +99,6 @@
       </a-assets>
 
       <a-entity id="sceneRoot">
-        <video src="" id="localvidbox" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
-
         <!-- ground plane so falling objects don't fall through floor -->
         <a-plane sound="poolSize: 8; src: url(audio/snd_WoodWood.ogg); on: collide" static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
         <!-- walls so rolling objects don't roll off edge -->
@@ -109,7 +107,7 @@
         <a-box static-body position="0 1 15" id="border3" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
         <a-box static-body position="0 1 -15" id="border4" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
 
-        <a-entity id="env" environment="preset: starry; fog: 0; groundTexture: checkerboard"></a-entity>
+        <a-entity id="env" environment="preset: starry; seed: 5; fog: 0; flatShading: true; groundTexture: squares; grid: none;"></a-entity>
 
         <a-entity position="0 0 0" id="CameraRig"> <!-- movement-controls="fly: true; speed=0.3"> -->
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
@@ -159,7 +157,7 @@
         <!-- let there be LIGHTS -->
         <a-light position="-0.93 1.58 -1.14" name="PointLight1" type="point" color="#9090AD" intensity="0.75"></a-light>
         <a-light position="-0.272 0.39 1.25" name="PointLight2" type="point" color="#C2E6C7"></a-light>
-        <a-light name="AmbientLight" type="ambient" color="#363942"></a-light> <!-- FFFFE0 -->
+        <a-light name="AmbientLight" type="ambient" color="#363942"></a-light>
         <!--
         <a-entity light="type: ambient; color: #BBB"></a-entity>
         <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
@@ -170,6 +168,7 @@
         -->
       </a-entity>
     </a-scene>
+    <video src="" id="localVideo" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="https://apis.google.com/js/platform.js"></script>

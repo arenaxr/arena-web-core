@@ -22,8 +22,8 @@ function createIconButton(initialImage, tooltip, onClick) {
     return wrapper;
 }
 
-function publishAvatarMsg(avatarOn) {
-    publish("realm/s/" + globals.scenenameParam + "/camera_" + globals.idTag + "/face/avatarStatus", {
+function publishAvatarMsg() {
+    publish(globals.outputTopic + globals.camName + "/face/avatarStatus", {
         "object_id": "face_" + globals.idTag,
         "avatar": globals.hasAvatar
     });
@@ -39,16 +39,6 @@ function publishHeadText(displayName) {
     });
 }
 
-// set up local corner video window
-function startCornerVideo() {
-    const localvidbox = document.getElementById("localvidbox");
-    localvidbox.setAttribute("width", globals.localvidboxWidth);
-    localvidbox.setAttribute("height", globals.localvidboxHeight);
-    if (localvidbox.srcObject) {
-        localvidbox.play();
-    }
-}
-
 function setupIcons() {
     const audioBtn = createIconButton("audio-off", "Microphone on/off.", () => {
         if (jitsiAudioTrack) {
@@ -57,7 +47,8 @@ function setupIcons() {
                 jitsiAudioTrack.unmute().then(_ => {
                     audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-on.png')";
                 })
-            } else {
+            }
+             else {
                 jitsiAudioTrack.mute().then(_ => {
                     audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-off.png')";
                 })
@@ -70,18 +61,22 @@ function setupIcons() {
             globals.hasVideo = !globals.hasVideo;
             if (globals.hasVideo) { // toggled
                 jitsiVideoTrack.unmute().then(_ => {
-                    startCornerVideo();
                     videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-on.png')";
                     avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
-                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
+                    if (globals.localJitsiVideo)
+                        globals.localJitsiVideo.style.display = "block"
+                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
                     window.trackFaceOff();
                     globals.hasAvatar = false;
                     publishAvatarMsg();
                 })
-            } else {
+            }
+             else {
                 videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
                 jitsiVideoTrack.mute().then(_ => {
-                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                    if (globals.localJitsiVideo)
+                        globals.localJitsiVideo.style.display = "none"
+                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
                 })
             }
         }
@@ -94,12 +89,15 @@ function setupIcons() {
                 jitsiVideoTrack.mute().then(_ => {
                     avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-on.png')";
                     videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
-                    globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
+                    if (globals.localJitsiVideo)
+                        globals.localJitsiVideo.style.display = "none"
+                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
                     globals.hasVideo = false;
                     window.trackFaceOn();
                     publishAvatarMsg();
                 })
-            } else {
+            }
+             else {
                 avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
                 window.trackFaceOff();
                 publishAvatarMsg();
@@ -109,10 +107,38 @@ function setupIcons() {
 
     let settingsButtons = []
 
-    let flying = false;
+    let speedState = 0;
+    const speedBtn = createIconButton("speed-medium", "Sign out of the ARENA", () => {
+        speedState = (speedState + 1) % 3;
+        if (speedState == 0) { // medium
+            speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-medium.png')";
+            if (!AFRAME.utils.device.isMobile())
+                globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"acceleration": 30});
+            else
+                globals.sceneObjects.myCamera.setAttribute("press-and-move", {"speed": 5.0});
+        }
+        else if (speedState == 1) { // fast
+            speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-fast.png')";
+            if (!AFRAME.utils.device.isMobile())
+                globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"acceleration": 60});
+            else
+                globals.sceneObjects.myCamera.setAttribute("press-and-move", {"speed": 10.0});
+        }
+        else if (speedState == 2) { // slow
+            speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-slow.png')";
+            if (!AFRAME.utils.device.isMobile())
+                globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"acceleration": 15});
+            else
+                globals.sceneObjects.myCamera.setAttribute("press-and-move", {"speed": 2.5});
+        }
+    });
+    speedBtn.style.display = "none";
+    settingsButtons.push(speedBtn);
+
+    globals.flying = false;
     const flyingBtn = createIconButton("flying-off", "Flying on/off", () => {
-        flying = !flying;
-        if (flying) { // toggled
+        globals.flying = !globals.flying;
+        if (globals.flying) { // toggled
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-on.png')";
         }
         else {
@@ -121,7 +147,7 @@ function setupIcons() {
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }
-        globals.sceneObjects.myCamera.setAttribute("wasd-controls", { "fly": flying });
+        globals.sceneObjects.myCamera.setAttribute("wasd-controls", {"fly": globals.flying});
     });
     flyingBtn.style.display = "none";
     settingsButtons.push(flyingBtn);
@@ -137,6 +163,7 @@ function setupIcons() {
     });
     logoutBtn.style.display = "none";
     settingsButtons.push(logoutBtn);
+
 
     let expanded = false;
     const settingsBtn = createIconButton("more", "Additional settings", () => {
@@ -166,9 +193,10 @@ function setupIcons() {
     if (!AFRAME.utils.device.isMobile()) {
         iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
     }
+    iconsDiv.appendChild(speedBtn);
     iconsDiv.appendChild(flyingBtn);
     if (!AFRAME.utils.device.isMobile()) {
-        iconsDiv.appendChild(screenShareButton);
+        iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
     }
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);

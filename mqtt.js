@@ -186,18 +186,28 @@ function onConnect() {
     }
 
     // video window for jitsi
-    const videoPlane = document.createElement('a-video');
-    videoPlane.setAttribute('id', "arena-vid-plane");
-    videoPlane.setAttribute('width', globals.localvidboxWidth/1000);
-    videoPlane.setAttribute('height', globals.localvidboxHeight/1000);
-    videoPlane.setAttribute('src', "#localvidbox");
-    videoPlane.setAttribute("click-listener", "");
-    videoPlane.setAttribute("material", "shader", "flat");
-    videoPlane.setAttribute("transparent", "true");
-    videoPlane.setAttribute('position', '-0.585, 0.287, -0.5');
-    videoPlane.setAttribute("visible", "false");
-    globals.sceneObjects.myCamera.appendChild(videoPlane);
-    globals.sceneObjects["arena-vid-plane"] = videoPlane;
+    globals.localJitsiVideo = document.getElementById("localVideo");
+    globals.localJitsiVideo.style.display = "none";
+    function setupCornerVideo() {
+        globals.localVideoHeight = globals.localJitsiVideo.videoHeight / (globals.localJitsiVideo.videoWidth / globals.localVideoWidth);
+
+        globals.localJitsiVideo.setAttribute("width", globals.localVideoWidth);
+        globals.localJitsiVideo.setAttribute("height", globals.localVideoHeight);
+        globals.localJitsiVideo.play();
+
+        globals.localJitsiVideo.style.position = "absolute";
+        globals.localJitsiVideo.style.top = "15px";
+        globals.localJitsiVideo.style.left = "15px";
+        globals.localJitsiVideo.style.borderRadius = "10px";
+        // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
+    }
+    globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
+    window.addEventListener('orientationchange', () => { // mobile only
+        globals.localVideoWidth = Number(window.innerWidth / 5);
+        jitsiVideoTrack.mute()
+        setupCornerVideo();
+        jitsiVideoTrack.unmute()
+    }, false);
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -370,6 +380,7 @@ function onConnect() {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     mqttClient.subscribe(globals.renderTopic);
+    if (!AFRAME.utils.device.isMobile()) faceTrackerInit();
 }
 
 function onConnectionLost(responseObject) {
@@ -820,8 +831,8 @@ function onMessageArrived(message, jsonMessage) {
                             break; // other-person has no camera ... yet
                         }
 
+                        const videoID = `video${theMessage.jitsiId}`;
                         if (theMessage.hasVideo) {
-                            const videoID = `video${theMessage.jitsiId}`;
                             if (document.getElementById(videoID) &&
                                 !(entityEl.getAttribute('videoCubeDrawn')=='true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
@@ -830,11 +841,17 @@ function onMessageArrived(message, jsonMessage) {
                             }
                         }
                         else {
-                            for (let child of entityEl.children) {
-                                if (child.getAttribute("id").includes("cube") ||
-                                    child.getAttribute("id") === "videoHatHighlightBox") {
-                                    entityEl.removeChild(child);
-                                }
+                            const vidHat = document.getElementById("videoHatHighlightBox");
+                            if (entityEl.contains(vidHat)) {
+                                entityEl.removeChild(vidHat);
+                            }
+                            const vidCube = document.getElementById(videoID+"cube");
+                            if (entityEl.contains(vidCube)) {
+                                entityEl.removeChild(vidCube);
+                            }
+                            const vidCubeDark = document.getElementById(videoID+"cubeDark");
+                            if (entityEl.contains(vidCubeDark)) {
+                                entityEl.removeChild(vidCubeDark);
                             }
                             entityEl.setAttribute('videoCubeDrawn', false);
                         }

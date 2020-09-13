@@ -2,16 +2,13 @@ importScripts("/face-tracking/detect_face_wasm.js");
 importScripts("https://unpkg.com/comlink/dist/umd/comlink.js");
 
 class FaceDetector {
-    constructor(callbacks) {
+    constructor(callback) {
         let _this = this;
         this.ready = false;
         FaceDetectorWasm().then(function (Module) {
             console.log("Face Detector WASM module loaded.");
             _this.onWasmInit(Module);
-            _this.getPoseModel(callbacks[1]);
-            if (callbacks[0]) {
-                callbacks[0]();
-            }
+            _this.getPoseModel(callback);
         });
     }
 

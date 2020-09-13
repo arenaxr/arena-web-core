@@ -68,8 +68,8 @@ function onLocalTracks(tracks) {
         if (track.getType() === 'video') {
             //$('body').append(`<video autoplay='1' id='localVideo${i}' />`);
 
-            // instead use already defined e.g. <video id="localvidbox" ...>
-            track.attach($(`#localvidbox`)[0]);
+            // instead use already defined e.g. <video id="localVideo" ...>
+            track.attach($(`#localVideo`)[0]);
             jitsiVideoTrack = track;
         } else if (track.getType() === 'audio') {
             //$('body').append(`<audio autoplay='1' muted='true' id='localAudio${i}' />`);
@@ -150,8 +150,8 @@ function onRemoteTrack(track) {
             `track audio output device was changed to ${deviceId}`));
 
     const displayName = conference.getParticipantById(participant)._displayName;
-    //    console.log("onRemoteTrack() conference.getParticipantById(participant)._displayName ", participant, displayName);
 
+    const videoID = `video${participant}`;
     if (track.getType() === 'audio') {
         if (displayName && displayName.includes(DISPLAYNAME)) {
             let audioStream = new MediaStream();
@@ -174,20 +174,22 @@ function onRemoteTrack(track) {
             audioSource.setRefDistance(1); // L-R panning
             audioSource.setRolloffFactor(1);
 
-            const screenShareID = displayName+participant;
-            let planeElement = document.getElementById(screenShareID);
-            if (!planeElement) {
-                planeElement = createScreenSharePlane(screenShareID);
-            }
+            const video = $(`#${videoID}`);
+            video.on('loadeddata', (e) => {
+                const screenShareID = displayName+participant;
+                let planeElement = document.getElementById(screenShareID);
+                if (!planeElement) {
+                    planeElement = createScreenSharePlane(screenShareID);
+                }
 
-            // add to scene
-            planeElement.object3D.add(audioSource);
-            remoteTracks[participant].screenShareID = screenShareID;
+                // add to scene
+                planeElement.object3D.add(audioSource);
+                remoteTracks[participant].screenShareID = screenShareID;
+            });
         }
     }
     else { // video
         // use already existing video element e.g. video<jitsi_id>
-        const videoID = `video${participant}`;
         if (!document.getElementById(videoID)) { // create
             $('a-assets').append(
                 `<video autoplay='1' id='${videoID}'/>` );
@@ -195,12 +197,15 @@ function onRemoteTrack(track) {
         track.attach($(`#${videoID}`)[0]);
 
         if (displayName && displayName.includes(DISPLAYNAME)) {
-            const screenShareID = displayName+participant;
-            let planeElement = document.getElementById(screenShareID);
-            if (!planeElement) {
-                planeElement = createScreenSharePlane(screenShareID);
-            }
-            planeElement.setAttribute("src", "#"+videoID);
+            const video = $(`#${videoID}`);
+            video.on('loadeddata', (e) => {
+                const screenShareID = displayName+participant;
+                let planeElement = document.getElementById(screenShareID);
+                if (!planeElement) {
+                    planeElement = createScreenSharePlane(screenShareID);
+                }
+                planeElement.setAttribute("src", "#"+videoID);
+            });
         }
     }
 }
@@ -268,7 +273,7 @@ function onConnectionSuccess() {
         JitsiMeetJS.events.conference.CONFERENCE_JOINED,
         onConferenceJoined);
     conference.on(JitsiMeetJS.events.conference.USER_JOINED, id => {
-        console.log('remote user join   : ', id);
+        console.log('New user joined:', id);
         remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
     });
     conference.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
@@ -368,7 +373,7 @@ function switchVideo() { // eslint-disable-line no-unused-vars
             localTracks[1].addEventListener(
                 JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
                 () => console.log('local track stopped'));
-            localTracks[1].attach($('#localvidbox')[0]);
+            localTracks[1].attach($('#localVideo')[0]);
             conference.addTrack(localTracks[1]);
         })
         .catch(error => console.log(error));
