@@ -242,9 +242,11 @@ function setupIcons() {
     label.innerHTML = "Display Name";
     formDiv.appendChild(label);
 
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
     let usernameInput = document.createElement("input");
     usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");
+    usernameInput.setAttribute("pattern", nameRegex);
     formDiv.appendChild(usernameInput);
 
     let saveSettingsBtn = document.createElement("button");
@@ -269,8 +271,14 @@ function setupIcons() {
     }
 
     function saveSettings() {
-        globals.displayName = usernameInput.value;
-        publishHeadText(globals.displayName);
+        var re = new RegExp(nameRegex);
+        // if name has at least one alpha char
+        if (re.test(usernameInput.value)) {
+            // remove extra spaces
+            globals.displayName = usernameInput.value.replace(/\s+/g," ").trim();
+            localStorage.setItem("display_name", globals.displayName);
+            publishHeadText(globals.displayName);
+        }
     }
 }
 

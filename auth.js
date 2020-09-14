@@ -57,7 +57,8 @@ function onSignIn(googleUser) {
     if (typeof globals !== 'undefined') {
         if (typeof defaults !== 'undefined' && globals.userParam == defaults.userParam) {
             // Use auth name to create human-readable name
-            globals.displayName = profile.getName();
+            globals.displayName = localStorage.getItem("display_name") === null ? profile.getName() : localStorage.getItem("display_name");
+            localStorage.setItem("display_name", globals.displayName);
             // globals.userParam = encodeURI(profile.getName());
             globals.userParam = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
 
