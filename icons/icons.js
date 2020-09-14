@@ -242,7 +242,7 @@ function setupIcons() {
     label.innerHTML = "Display Name";
     formDiv.appendChild(label);
 
-    const nameRegex = /^(?=[^A-Za-z]*[A-Za-z])[ -~]*$/;
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
     let usernameInput = document.createElement("input");
     usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");
@@ -271,7 +271,7 @@ function setupIcons() {
     }
 
     function saveSettings() {
-        if (nameRegex.test(usernameInput.value)) {
+        if (nameRegex.match(usernameInput.value)) {
             globals.displayName = usernameInput.value.trim();
             localStorage.setItem("display_name", globals.displayName);
             publishHeadText(globals.displayName);
