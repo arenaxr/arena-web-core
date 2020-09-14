@@ -245,6 +245,8 @@ function setupIcons() {
     let usernameInput = document.createElement("input");
     usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");
+    usernameInput.setAttribute("pattern", "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$");
+    usernameInput.required = true;
     formDiv.appendChild(usernameInput);
 
     let saveSettingsBtn = document.createElement("button");
@@ -269,7 +271,8 @@ function setupIcons() {
     }
 
     function saveSettings() {
-        globals.displayName = usernameInput.value;
+        globals.displayName = usernameInput.value.trim();
+        localStorage.setItem("display_name", globals.displayName);
         publishHeadText(globals.displayName);
     }
 }

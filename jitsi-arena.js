@@ -250,6 +250,7 @@ function publishJitsiArenaMessage() {
         hasVideo: globals.hasVideo,
         hasAudio: globals.hasAudio,
         activeSpeaker: globals.activeSpeaker,
+        displayName: globals.displayName,
         action: 'create',
         type: 'object',
         data: {

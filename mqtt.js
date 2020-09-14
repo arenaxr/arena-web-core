@@ -910,6 +910,17 @@ function onMessageArrived(message, jsonMessage) {
                         }
                     }
 
+                    if (theMessage.hasOwnProperty("displayName")) {
+                        // update head text
+                        for (let child of entityEl.children) {
+                            if (child.getAttribute("id").includes("headtext_")) {
+                                // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
+                                let name = theMessage.displayName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                                child.setAttribute('value', name);
+                            }
+                        }
+                    }
+
                     // console.log("camera: audio, video", theMessage.hasAudio, theMessage.hasVideo);
                     break;
 
