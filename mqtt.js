@@ -481,13 +481,12 @@ function highlightVideoCube(entityEl, oldEl) {
 function drawMicrophoneState(entityEl, hasAudio) {
     // entityEl is the head
     let name = "muted_" + entityEl.id;
-    var micIconEl = document.querySelector(name);
+    var micIconEl = document.querySelector('#' + name);
     if (!micIconEl && !hasAudio) {
         micIconEl = document.createElement('a-image');
         micIconEl.setAttribute('id', name);
-        micIconEl.setAttribute('scale', '1 1 1');
-        micIconEl.setAttribute('position', '1 1 1');
-        micIconEl.setAttribute('rotation', '0 180 0');
+        micIconEl.setAttribute('scale', '0.2 0.2 0.2');
+        micIconEl.setAttribute('position', '0 0.3 0.045');
         micIconEl.setAttribute('src', "url(images/micOFF.png)");
         entityEl.appendChild(micIconEl);
     } else if (micIconEl && hasAudio) {
@@ -836,7 +835,9 @@ function onMessageArrived(message, jsonMessage) {
                             globals.previousSpeakerEl = entityEl;
                         }
                     }
-
+                    if (theMessage.hasOwnProperty("jitsiId")) {
+			drawMicrophoneState(entityEl, theMessage.hasAudio);
+                    }
                     return;
                     break;
 
