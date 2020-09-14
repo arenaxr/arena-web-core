@@ -271,8 +271,11 @@ function setupIcons() {
     }
 
     function saveSettings() {
-        if (nameRegex.match(usernameInput.value)) {
-            globals.displayName = usernameInput.value.trim();
+        var re = new RegExp(nameRegex);
+        // if name has at least one alpha char
+        if (re.test(usernameInput.value)) {
+            // remove extra spaces
+            globals.displayName = usernameInput.value.replace(/\s+/g," ").trim();
             localStorage.setItem("display_name", globals.displayName);
             publishHeadText(globals.displayName);
         }
