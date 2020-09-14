@@ -478,6 +478,22 @@ function highlightVideoCube(entityEl, oldEl) {
     entityEl.appendChild(videoHat);
 }
 
+function drawMicrophoneState(entityEl, hasAudio) {
+    // entityEl is the head
+    let name = "muted_" + entityEl.id;
+    var micIconEl = document.querySelector('#' + name);
+    if (!micIconEl && !hasAudio) {
+        micIconEl = document.createElement('a-image');
+        micIconEl.setAttribute('id', name);
+        micIconEl.setAttribute('scale', '0.2 0.2 0.2');
+        micIconEl.setAttribute('position', '0 0.3 0.045');
+        micIconEl.setAttribute('src', "url(images/micOFF.png)");
+        entityEl.appendChild(micIconEl);
+    } else if (micIconEl && hasAudio) {
+        entityEl.removeChild(micIconEl);
+    }
+}
+
 // https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
 async function enableChromeAEC(gainNode) {
   /**
@@ -819,7 +835,9 @@ function onMessageArrived(message, jsonMessage) {
                             globals.previousSpeakerEl = entityEl;
                         }
                     }
-
+                    if (theMessage.hasOwnProperty("jitsiId")) {
+			drawMicrophoneState(entityEl, theMessage.hasAudio);
+                    }
                     return;
                     break;
 
@@ -830,6 +848,8 @@ function onMessageArrived(message, jsonMessage) {
                             console.log("jitsiId empty");
                             break; // other-person has no camera ... yet
                         }
+
+                        drawMicrophoneState(entityEl, theMessage.hasAudio);
 
                         const videoID = `video${theMessage.jitsiId}`;
                         if (theMessage.hasVideo) {
