@@ -108,7 +108,7 @@ function setupIcons() {
     let settingsButtons = []
 
     let speedState = 0;
-    const speedBtn = createIconButton("speed-medium", "Sign out of the ARENA", () => {
+    const speedBtn = createIconButton("speed-medium", "Change your movement speed.", () => {
         speedState = (speedState + 1) % 3;
         if (speedState == 0) { // medium
             speedBtn.childNodes[0].style.backgroundImage = "url('images/icons/speed-medium.png')";
