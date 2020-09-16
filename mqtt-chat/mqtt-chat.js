@@ -297,7 +297,8 @@ export default class MQTTChat {
 
         let msgSpan = document.createElement("span");
         msgSpan.className = "msg " + whoClass // "self" | "other"
-        let pattern = "arena\.andrew\.cmu\.edu(\/.*scene=.*|\/\n|\/$)"
+        let host = window.location.host.replace(".", "\\.");
+        let pattern = `${host}(.*scene=.*|\\/\n|\\/$)`;
         let regex = new RegExp(pattern);
         if (msg.match(regex)) {
           // no new tab if we have a link to an arena scene
