@@ -81,7 +81,8 @@ body {
 /* The popup chat - hidden by default */
 
 .users-popup,
-.chat-popup {
+.chat-popup,
+.settings-popup {
 	display: none;
 	width: 310px;
 	position: fixed;

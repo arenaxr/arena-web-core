@@ -199,6 +199,7 @@ function onConnect() {
         globals.localJitsiVideo.style.top = "15px";
         globals.localJitsiVideo.style.left = "15px";
         globals.localJitsiVideo.style.borderRadius = "10px";
+        globals.localJitsiVideo.style.opacity = "0.5";
         // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
     }
     globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
@@ -455,28 +456,6 @@ function drawVideoCube(entityEl, videoID) {
     entityEl.appendChild(videoCubeDark);
 }
 
-function highlightVideoCube(entityEl, oldEl) {
-    // entityEl is the head
-    var videoHat = document.querySelector("#videoHatHighlightBox");
-    if (!videoHat) {
-        videoHat = document.createElement('a-box');
-        videoHat.setAttribute('scale', '0.6 0.05 0.6');
-        videoHat.setAttribute('color', "green");
-        videoHat.setAttribute('position', '0 0.25 0');
-        videoHat.setAttribute('material', 'shader', 'flat');
-        videoHat.setAttribute('id', "videoHatHighlightBox");
-        // globals.sceneObjects.scene.appendChild(videoCube);
-    }
-    // remove old
-    if (oldEl) {
-        var parentEl = videoHat.parentEl;
-        if (parentEl) {
-            parentEl.removeChild(videoHat);
-        }
-    }
-    // add new
-    entityEl.appendChild(videoHat);
-}
 
 function drawMicrophoneState(entityEl, hasAudio) {
     // entityEl is the head
@@ -830,13 +809,12 @@ function onMessageArrived(message, jsonMessage) {
                     if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
                         // possibly change active speaker
                         if (globals.activeSpeaker != globals.previousSpeakerId) {
-                            highlightVideoCube(entityEl, globals.previousSpeakerEl);
                             globals.previousSpeakerId = theMessage.jitsiId;
                             globals.previousSpeakerEl = entityEl;
                         }
                     }
                     if (theMessage.hasOwnProperty("jitsiId")) {
-			drawMicrophoneState(entityEl, theMessage.hasAudio);
+                        drawMicrophoneState(entityEl, theMessage.hasAudio);
                     }
                     return;
                     break;
