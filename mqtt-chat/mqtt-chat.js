@@ -297,9 +297,18 @@ export default class MQTTChat {
 
         let msgSpan = document.createElement("span");
         msgSpan.className = "msg " + whoClass // "self" | "other"
-        msgSpan.innerHTML = msg.linkify({
-            target: "_blank"
-        });
+        let pattern = "arena\.andrew\.cmu\.edu(\/.*scene=.*|\/\n|\/$)"
+        let regex = new RegExp(pattern);
+        if (msg.match(regex)) {
+          // no new tab if we have a link to an arena scene
+          msgSpan.innerHTML = msg.linkify({
+              target: "_parent"
+          });
+        } else {
+          msgSpan.innerHTML = msg.linkify({
+              target: "_blank"
+          });
+        }
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
