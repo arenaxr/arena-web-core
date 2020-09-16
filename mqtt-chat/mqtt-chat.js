@@ -240,8 +240,7 @@ export default class MQTTChat {
         }
 
         // save user data and timestamp
-        if (this.liveUsers[msg.from_uid] == undefined) {
-            let _this = this;
+        if (this.liveUsers[msg.from_uid] == undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
             this.liveUsers[msg.from_uid] = {
                 un: msg.from_un,
                 scene: msg.from_scene,
@@ -250,7 +249,7 @@ export default class MQTTChat {
             };
             this.populateUserList();
             this.keepalive(); // let this user know about us
-        } else {
+        } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
             this.liveUsers[msg.from_uid].un = msg.from_un;
             this.liveUsers[msg.from_uid].scene = msg.from_scene;
             this.liveUsers[msg.from_uid].cid = msg.cameraid;
@@ -263,10 +262,13 @@ export default class MQTTChat {
             }
         }
 
+        // ignore our messages
+        if (msg.from_uid == this.settings.userid) return;
+
         // process commands
         if (msg.type == "chat-cmd"){
           if (msg.text == "sound:off") {
-            let abtn = document.getElementById('btn-slashroundedaudio');
+            let abtn = document.getElementById('btn-audio-off');
             if (abtn == undefined) {
               console.error("Could not find audio button");
               return;
@@ -277,9 +279,6 @@ export default class MQTTChat {
           }
           return;
         }
-
-        // ignore our messages
-        if (msg.from_uid == this.settings.userid) return;
 
         // only proceed for chat messages
         if (msg.type !== "chat") return;
@@ -345,14 +344,26 @@ export default class MQTTChat {
 
                 // span click event (send sound on/off msg to ussr)
                 sspan.onclick = function() {
-                    let utopic = _this.settings.realm + "/g/c/" + key;
-                    _this.cmdMsg(utopic, "sound:off");
+                    // target user topic
+                    let tutopic = _this.settings.realm + "/g/c/" + key;
+                    _this.cmdMsg(tutopic, "sound:off");
                 }
 
                 let op = document.createElement("option");
                 op.value = key;
                 op.innerHTML = "to user: " + decodeURI(_this.liveUsers[key].un);
                 _this.toSel.appendChild(op);
+            } else {
+              let maspan = document.createElement("span");
+              maspan.className = "users-list-btn ma";
+              maspan.title = "Silence (Mute Everyone)";
+              uBtnCtnr.appendChild(maspan);
+
+              // span click event (send sound on/off msg to all)
+              maspan.onclick = function() {
+                // send to all topic
+                _this.cmdMsg(_this.settings.atopic, "sound:off");
+              }
             }
             _this.usersList.appendChild(uli);
         });
