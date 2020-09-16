@@ -22,13 +22,6 @@ function createIconButton(initialImage, tooltip, onClick) {
     return wrapper;
 }
 
-function publishAvatarMsg() {
-    publish(globals.outputTopic + globals.camName + "/face/avatarStatus", {
-        "object_id": "face_" + globals.idTag,
-        "avatar": globals.hasAvatar
-    });
-}
-
 function publishHeadText(displayName) {
     publish("realm/s/" + globals.scenenameParam + "/head-text_" + globals.camName, {
         "object_id": globals.camName,
@@ -68,7 +61,6 @@ function setupIcons() {
                     // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
                     window.trackFaceOff();
                     globals.hasAvatar = false;
-                    publishAvatarMsg();
                 })
             }
              else {
@@ -94,7 +86,6 @@ function setupIcons() {
                     // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
                     globals.hasVideo = false;
                     window.trackFaceOn();
-                    publishAvatarMsg();
                 })
             }
              else {

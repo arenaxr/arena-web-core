@@ -87,7 +87,7 @@ function onLocalTracks(tracks) {
     if (jitsiVideoTrack) jitsiVideoTrack.mute();
 }
 
-let leftRightToggle = true, screenPlaneLeftIdx = 0, screenPlaneRightIdx = 0;
+let leftRightToggle = true, screenPlaneLeftIdx = 1, screenPlaneRightIdx = 0;
 function createScreenSharePlane(id) {
     let planeElement = document.createElement('a-plane');
     planeElement.setAttribute("id", id);
