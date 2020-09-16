@@ -199,7 +199,7 @@ function onConnect() {
         globals.localJitsiVideo.style.top = "15px";
         globals.localJitsiVideo.style.left = "15px";
         globals.localJitsiVideo.style.borderRadius = "10px";
-        globals.localJitsiVideo.style.opacity = "0.7";
+        globals.localJitsiVideo.style.opacity = "0.5";
         // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
     }
     globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
