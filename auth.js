@@ -26,7 +26,7 @@
 
 'use strict';
 
-//window.dispatchEvent(new CustomEvent('onauth'));
+window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
 
 var auth2;
 // check if the current user is already signed in

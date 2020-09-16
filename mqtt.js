@@ -184,6 +184,12 @@ function onConnect() {
     } else if (sceneObjects.weather) {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
     }
+    if (globals.gndScaleParam !== "") {
+        //TODO(mwfarb): all these env settings should move into a per-scene object with defaults
+        var ground = document.querySelector(".environmentGround");
+        var scale = [globals.gndScaleParam, globals.gndScaleParam, globals.gndScaleParam];
+        ground.setAttribute('scale', scale.join(" "));
+    }
 
     // video window for jitsi
     globals.localJitsiVideo = document.getElementById("localVideo");
@@ -839,10 +845,6 @@ function onMessageArrived(message, jsonMessage) {
                             }
                         }
                         else {
-                            const vidHat = document.getElementById("videoHatHighlightBox");
-                            if (entityEl.contains(vidHat)) {
-                                entityEl.removeChild(vidHat);
-                            }
                             const vidCube = document.getElementById(videoID+"cube");
                             if (entityEl.contains(vidCube)) {
                                 entityEl.removeChild(vidCube);
