@@ -84,7 +84,7 @@ function setupVideo(setupCallback) {
     window.videoCanv = document.createElement("canvas");
     setVideoStyle(window.videoCanv);
     window.videoCanv.style.zIndex = 9998;
-    window.videoCanv.style.opacity = 0.1;
+    window.videoCanv.style.opacity = 0.25;
     document.body.appendChild(window.videoCanv);
 
     window.overlayCanv = document.createElement("canvas");
