@@ -86,6 +86,7 @@ function debug(msg) {
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
+    // TODO(mwfarb): push per scene themes/styles into json scene object
     updateMillis: getUrlParam('camUpdateRate', defaults.updateMillis),
     scenenameParam: getUrlParam('scene', defaults.scenenameParam), //scene
     userParam: getUrlParam('name', defaults.userParam),
@@ -95,6 +96,7 @@ window.globals = {
     mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
     fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
+    gndScaleParam: getUrlParam('groundScale', ""),
     localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
     vioTopic: defaults.vioTopic,
     graphTopic: defaults.graphTopic,
