@@ -38,7 +38,7 @@ gapi.load('auth2', function () {
         if (!auth2.isSignedIn.get()) {
             console.log("User is not signed in.");
             // send login with redirection url from this page
-            location.href = "./signin?redirect_uri=" + encodeURI(location.href);;
+            location.href = "./signin?redirect_uri=" + encodeURIComponent(location.href);;
         } else {
             console.log("User is already signed in.");
             var googleUser = auth2.currentUser.get();
