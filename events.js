@@ -632,12 +632,6 @@ AFRAME.registerComponent('click-listener', {
                     this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate");
                 }
                 const clicker = evt.detail.clicker;
-
-                /* Debug Conix Box
-                        const sceney = this.sceneEl;
-                        const textEl = sceney.querySelector('#conix-text');
-                        textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-                */
             }
         });
 

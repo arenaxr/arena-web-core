@@ -391,6 +391,7 @@ ARENA.JitsiAPI = (function () {
         ready: function() {
             return isJoined && jitsiAudioTrack && jitsiVideoTrack;
         },
+
         setupLocalVideo: function() {
             // video window for jitsi
             jitsiVideoElem = document.getElementById("localVideo");
@@ -417,21 +418,27 @@ ARENA.JitsiAPI = (function () {
                 this.startVideo();
             }, false);
         },
+
         showVideo: function() {
             if (jitsiVideoElem) jitsiVideoElem.style.display = "block";
         },
+
         hideVideo: function() {
             if (jitsiVideoElem) jitsiVideoElem.style.display = "none";
         },
+
         getJitsiId: function() {
             return jitsiId;
         },
+
         activeSpeakerChanged: function() {
             return prevActiveSpeaker !== activeSpeaker;
         },
+
         chromeSpatialAudioOn: function() {
             return chromeSpatialAudioOn;
         },
+
         unmuteAudio: function () {
             jitsiAudioTrack.unmute();
             hasAudio = true;
@@ -439,6 +446,7 @@ ARENA.JitsiAPI = (function () {
                 resolve()
             });
         },
+
         muteAudio: function () {
             jitsiAudioTrack.mute();
             hasAudio = false;
@@ -446,6 +454,7 @@ ARENA.JitsiAPI = (function () {
                 resolve()
             });
         },
+
         startVideo: function () {
             jitsiVideoTrack.unmute();
             hasVideo = true;
@@ -453,6 +462,7 @@ ARENA.JitsiAPI = (function () {
                 resolve()
             });
         },
+
         stopVideo: function () {
             jitsiVideoTrack.mute();
             hasVideo = false;
@@ -460,18 +470,23 @@ ARENA.JitsiAPI = (function () {
                 resolve()
             });
         },
+
         hasAudio: function () {
             return hasAudio;
         },
+
         hasVideo: function () {
             return hasVideo;
         },
+
         getAudioTrack: function(jitsiId) {
             return remoteTracks[jitsiId][0];
         },
+
         getVideoTrack: function(jitsiId) {
             return remoteTracks[jitsiId][1];
         },
+
         leave: function () {
             disconnect();
             return new Promise(function(resolve,reject) {

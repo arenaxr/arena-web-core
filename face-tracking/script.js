@@ -277,9 +277,11 @@ ARENA.FaceTracker = (function () {
                 Comlink.proxy(displayInitialization) // input is a callback
             );
         },
+
         hasAvatar: function() {
             return hasAvatar;
         },
+
         trackFaceOn: function() {
             if (!faceDetector || !faceDetector.ready) return;
 
@@ -295,6 +297,7 @@ ARENA.FaceTracker = (function () {
                 resolve();
             });
         },
+
         trackFaceOff: function() {
             if (!faceDetector || !faceDetector.ready ||
                 !overlayCanv || !videoCanv || !videoElem) return;
