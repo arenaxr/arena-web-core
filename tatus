@@ -1,0 +1,520 @@
+[33m4867284[m[33m ([m[1;36mHEAD -> [m[1;32mrefactor[m[33m, [m[1;31morigin/refactor[m[33m)[m rm vscode
+[33me26063e[m final refactoring before push
+[33mb90dc59[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into refactor
+[33m96994f2[m further refactor
+[33mf23ab93[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m Add newsettings event (#59)
+[33me630b56[m code reorganization and screenshare fixes
+[33md6e8536[m Merge pull request #52 from conix-center/refactor
+[33m153efdf[m fixed slot for screenshare, increase opacity for avatar video
+[33ma9eb301[m Fix #50
+[33mf160173[m Links to ARENA open in same window
+[33md73702e[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33m48efce8[m Fix sound button; Add mute all button
+[33m69d883a[m Fixed stripped login params (#47)
+[33mcc06f5c[m Adding ground scale param (#46)
+[33m3022073[m Videohat removal (#45)
+[33mb56bf9c[m Add mute icon above head (#42)
+[33mcbf039d[m Movement speed tooltip
+[33m4247ad0[m Save display name and validate (#41)
+[33m96b0eda[m Merge pull request #40 from conix-center/refactor
+[33mdfadc3c[m fix video not showing up
+[33m16f2feb[m fix merge issue
+[33m2891122[m fix merge issue
+[33m300cd8b[m Add settings panel / Draft head-text update (#39)
+[33m9ef01eb[m Chat colors
+[33m88612c5[m Added light object type
+[33md9e3dad[m small env edits
+[33mbaa701e[m better video (WIP)
+[33m73c9c49[m fixed dead screenshares; added speed buttons; further integrate face tracking
+[33m2fe5e95[m Open chat link in new window; Move chat css
+[33m6aa67f3[m Links in chat
+[33mf66ecf1[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33m2d9f60d[m Adding runtime mngr back
+[33m0f94a2a[m Merge pull request #38 from conix-center/refactor
+[33m1cedf43[m allow for multiple screenshares and default to not flying
+[33m6484ec3[m fixed dead heads LWT scope (#37)
+[33m8c466c1[m Added screenshare files from xr
+[33mfb97ba3[m Merge pull request #36 from conix-center/refactor
+[33ma3f3bb8[m more streamlined screensharing (still WIP, tho)
+[33mf352faf[m Fixes #28; Partially; We need to find a better way
+[33ma6fe5e6[m Added store to gitignore
+[33maadec4d[m Merge pull request #35 from conix-center/refactor
+[33m6117037[m small updates before merge
+[33m79e02c6[m bug fix with icons
+[33m5109376[m settings button hides flying and logout
+[33mc709d3c[m Merge pull request #34 from conix-center/refactor
+[33md559fdb[m remove name prompt
+[33m3b8e259[m fixed p2p audio in 2 person meetings
+[33md936b3e[m fixed p2p audio in 2 person meetings
+[33ma5d5939[m[33m ([m[1;32mmaster[m[33m)[m do not URI encode google auth names
+[33m5d1e00d[m Remove aframe patch, per forked arena-aframe
+[33m4e57f72[m Add optional xr features inc `computerVision`
+[33m371baab[m Remove typo
+[33m5592de8[m Fix onConnectionLost missing lwt (#32)
+[33m6a9e7ba[m Fix chat button tooltips
+[33md0ea58c[m Latest runtime manager; Fixing pending modules error
+[33m9d020c9[m Added name prompt
+[33m4bf998c[m Merge branch 'master' of https://github.com/conix-center/arena-core
+[33med1c6d0[m allow events.js to load at will
+[33mb6d51c6[m Fixed realm from default
+[33m0a5288c[m chain auth then aframe then mqtt
+[33mfea409e[m revert events without onauth
+[33m107894a[m preserve order of a-frame elements loading
+[33m3bae808[m wrap events load after auth and fix all IDs
+[33m26c07c9[m Typo fix
+[33ma5616e5[m Button tooltip (#24)
+[33mff29955[m restore auth
+[33m1b94479[m Merge pull request #23 from conix-center/refactor
+[33m746b161[m better headphone check
+[33m2d4cab3[m Consolidate intro and signin
+[33m2732b09[m added back headphone check
+[33mfccc787[m Merge pull request #22 from conix-center/refactor
+[33mec775fb[m fix audio on chrome, but no rot spatial audio
+[33m21e8159[m Allow spaces and special characters in names (#21)
+[33m1c11e4d[m Merge pull request #20 from conix-center/refactor
+[33me9ddbc1[m removed chrome specific message on alert
+[33m07361f0[m spatial audio is turned off when on speakers - fixes echo on chrome
+[33m9536eef[m better way to assign videos +os + fixed audio stopping on chrome?
+[33ma5a4a96[m gitignore vim/linux/mac/windows non-source files (#19)
+[33m0849aa6[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33mfb44e67[m Latest runtime mngr
+[33ma529e56[m Start runtime manager onauth
+[33m73504c2[m Adding ARENA Auth 1 (of 3): auth-server and browser flow (#18)
+[33m179cd96[m Find users in different scenes
+[33m6d5c460[m Added missing labels to fields; Minor fix
+[33m88ebeed[m Added missing labels to fields
+[33m79fc012[m Added missing labels to fields
+[33m6b4dd72[m Merge pull request #17 from conix-center/refactor
+[33m2ffd4c9[m somehow fixed chrome audio
+[33m605f195[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into refactor
+[33m2fd986a[m Setting right position
+[33m1ecf03d[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into refactor
+[33mc52b0bb[m Mqtt and persist paths in defaults
+[33m962c56c[m more elegant way of doing video plane and audio
+[33m2093fe0[m start as muted w/ vid off
+[33mbbd026e[m Added muted button; minor re-styling of buttons
+[33mfd6550a[m Added id attribute to buttons
+[33m091d456[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33m21ce544[m Latest runtime manager
+[33m6eaa9ad[m Editing path.
+[33m19fc40a[m Adding correct relative path.
+[33mce2b9ef[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33m4cd8636[m Changed absolute path
+[33ma52cb68[m No absolute path.
+[33mae2f12b[m Latest runtime manager
+[33m9d66646[m Adding missing file; Minor fixes
+[33m4da4ea9[m Added missing models
+[33m4d39411[m Reference docker compose repo
+[33m1689457[m Merging stylesheets
+[33macc5b92[m Separate default config file
+[33m66e4e0a[m Adding runtime manager.
+[33m09f12f9[m Loading program objects.
+[33m31051e3[m Merge pull request #16 from conix-center/runtime-manager
+[33m76e2a70[m Adding latest of conflicting files
+[33mea0ca1a[m Removing conflicting files
+[33mad1f55d[m Added intro dialog and chat.
+[33m2f7559b[m Merge pull request #15 from conix-center/weekend-project
+[33mb3cef95[m Intro dialog and chat
+[33mef18890[m Merge pull request #14 from conix-center/reconnect-orphan-fix
+[33m684a4eb[m LWT for 2nd dropped connection
+[33mbb2e2ec[m Merge pull request #13 from conix-center/refactor
+[33me72774c[m misc fixes
+[33mdfeeaec[m fixed spatial audio on chrome and various bug fixes
+[33me6e0931[m possibly fix audio and video on chrome
+[33m3f40c22[m added latency updates for network graph
+[33m479630c[m Lastest runtime mngr
+[33mf921784[m prettified js code
+[33m4fb253a[m added latency updates for network graph
+[33m4428fdd[m Removing references to /x/face; Added face landmarks file
+[33mb1524a8[m Resolving conflict
+[33m676e82a[m add fork of aframe as submod
+[33m5cbc4d2[m remove aframe
+[33m50afcf7[m fix ar
+[33m64f4f6b[m further merging with main branch
+[33mfa97a4e[m merged with master
+[33mc37d8bf[m fix git issues
+[33m3fa175b[m Merge pull request #12 from conix-center/face-tracking
+[33m7a2d4e4[m bug fix with face tracker
+[33m117aec7[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into face-tracking
+[33me70bc19[m Added mqtth variable
+[33md40e9e8[m bug fixes and jitsi integration
+[33ma5154c0[m Added favicon; Fixed arena link
+[33me18c850[m Latest Apriltag detector
+[33m4955c0d[m List scenes; other minor improvements
+[33m53a3e7a[m Merge pull request #11 from conix-center/face-tracking
+[33m45acd11[m update readme
+[33mfbef8d6[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into face-tracking
+[33mce3f0da[m Update README.md
+[33md45d0bf[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into face-tracking
+[33m64ab2bd[m Reference the apriltag-js-standalone repo
+[33m7b13eb6[m Back to original events.js
+[33mc725b2d[m Adding runtime manager files
+[33mb75c6e4[m fix bugs
+[33mdc32e59[m bug fixes
+[33m3b40be3[m merge
+[33meb9eb37[m Merge branch 'master' of https://github.com/conix-center/ARENA-core into face-tracking
+[33medff97b[m add actual face tracking
+[33m866408c[m added way to turn on/off face detection
+[33m36a49a1[m Merge pull request #10 from conix-center/scene-builder
+[33m9a9e347[m Fix to maximum detection string length check.
+[33mae785e8[m fixed bug where pose breaks down due to overflow
+[33mfc4bc7f[m New scene builder with support for programs.
+[33mcbbd392[m reverted width back to 320px
+[33mbef43cb[m made width window.width/4
+[33m5a9e9fd[m Update README.md
+[33m1f9d25d[m Fix mutations on reused Matrix4's
+[33m42c4f4d[m Set detector to return all detections
+[33m8551e3f[m Restore apriltag cvrate update regardless of detections
+[33mcdc8625[m Revert check for rigMatrix localized
+[33m008c1d6[m Handle multiple apriltags (but only first localizer)
+[33macf162b[m Add dynamic CV rate throttle based on avg last 10 frame times
+[33mbcff5b4[m Merge pull request #9 from conix-center/face-tracking
+[33m98d5ac9[m update readme
+[33mff0b813[m update readme and topic for face
+[33m411606d[m add face pose estimation & tracking
+[33md802ed0[m remove dup dlib
+[33m4870d66[m remove sample ratio
+[33m27e3ae0[m downsample im a bit
+[33m2b5c354[m Merge branch 'face-tracking' of https://github.com/conix-center/ARENA-core into face-tracking
+[33m60ed8cc[m lowered pyramid down
+[33mb7215fd[m Update README.md
+[33m84ac318[m update readme
+[33m05fb1f0[m Update README.md
+[33m14e3b96[m update readme
+[33m73a4c69[m update build.sh
+[33m188765b[m Delete .DS_Store
+[33mb2389b0[m add make script
+[33m62db07a[m add readme
+[33m27002d0[m add face tracking
+[33m041525c[m Added size to detected tag info; Pushing updated .wasm
+[33m8a279b9[m Output detected tag size
+[33ma3e793d[m Update README.md
+[33md1502c3[m Add  URL param
+[33me60574f[m Merge pull request #8 from conix-center/tag_size_from_id
+[33mdd58738[m Merge branch 'master' into tag_size_from_id
+[33m6f77b05[m Merged READMEs
+[33m55a7344[m swap a-scene and sceneRoot
+[33m09fd165[m add sceneRoot around all scene Objects
+[33m007e5a0[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m2a79f3d[m Delete tag36h11_500.pdf
+[33m4599f0e[m Delete tag36h11_400.pdf
+[33m07244cc[m Delete tag36h11_200.pdf
+[33mae64dab[m Delete tag36h11_100.pdf
+[33mf651206[m Update README.md
+[33m3fe6331[m Add basic README for apriltag scripts
+[33mccff65d[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m41b3008[m Update tag solving default behavior to local
+[33m6ddb197[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m11bcaab[m Fix rigMatrix offsetting tagsolver, subtopic
+[33m8c5f623[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m76a6e18[m Fix missing bracket in apriltag script.js
+[33m0dbc966[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m09253d8[m Fix typo in apriltag script.js
+[33mde66018[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33mca42cbb[m Add clientside dynamic tag solving
+[33m667b56f[m Include network-solver `refTag` as null for unknown
+[33m9bbbb30[m Use network tagsolver by default
+[33m1a814ff[m Added Dockerfile; Removed compose file (compose will be done in another repo)
+[33m596b861[m Update README.md
+[33ma9267d3[m Merge branch 'tag_size_from_id' of github.com:conix-center/ARENA-core into tag_size_from_id
+[33m87102ce[m Added example tags.
+[33mde4e79e[m Update README.md
+[33mbf6572c[m Added example tags.
+[33mf6ac7d8[m Tag id ranges implicitly define tag size; Added documentation
+[33m3ee78e0[m Delete README.md
+[33m0344dd6[m Update README.md
+[33m7160729[m Update README.md
+[33mc1caa95[m Create README.md
+[33m54dc80c[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33me6fa51a[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33m5fedf9f[m Added solution info, for debug
+[33m9ad4f1a[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m553ec54[m Fix getUrlParam function typo
+[33medc8adc[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m9d51f7c[m Add URL param override of `lat`, `long` coords
+[33m21e46d5[m merge commit
+[33m06a98f0[m snapshot: ARENA bugfixes
+[33md59a91a[m Add camera_id to apriltag mqtt message as well
+[33m4813be4[m Once more with feeling
+[33m12f572a[m document particles
+[33mb3d1f24[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m0f0d304[m Revert elements only pass of refTag
+[33mfd1d289[m Typo fix
+[33m196ef84[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33me826100[m pass elements of matrix4 for refTag (colmaj)
+[33m02174b1[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m946c5bd[m Ensure new matrix is created per logged tag
+[33mfd677c5[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33meae648b[m Fix row/col major load of pose from tags
+[33mbd747cd[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33mbb166ee[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m88d2fc7[m Fix geolocation msg to solver buildmode
+[33ma19a952[m Fix typo geo coords, equals logic
+[33m7a0d42d[m Move apriltag fetch to apriltag script.js
+[33m8d4f4a4[m Fix typo geo coords, equals logic
+[33m416ca3c[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33ma831aff[m Update fuse cursor appearance, scene id
+[33m1fe4350[m Move apriltag fetch to apriltag script.js
+[33m852bcf1[m Console.log detections instead of text render
+[33m471e7f2[m Include geolocation coords in apriltag builder message
+[33med450da[m Add datetime timestamp to processCV
+[33mc0a7d1d[m Calculate actual vio from matrixWorld during processCV
+[33m07f54ca[m Lock in vio by value not reference
+[33mcd06e30[m Pass frame vio along frame object
+[33m5ca41ad[m Attempt save vio immediately on ios cv callback
+[33mf0c0545[m Add frame timestamp to apriltag mqtt msg
+[33m7df3973[m Restore mqtt-based apriltag solver option
+[33mb53e7d4[m Apply formatting to js code
+[33mcb395c7[m Bump jshint version to es9
+[33mb2dfb37[m Update aframe
+[33m99c4772[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m3c6f095[m Maint. commit
+[33mede29e8[m add sceneRoot, multi textures
+[33m8abe87e[m Merge branch 'master' of github.com:conix-center/ARENA-core
+[33mb7631bc[m Apriltag detector testing
+[33m0bb4491[m fix syntax error
+[33ma7aec92[m set location for lights
+[33m293d04b[m render order, start position
+[33m11c69dc[m add clickPos to mouse events
+[33mee0b110[m development arena
+[33m58b2f8c[m Apriltag detector returning column major matrix
+[33m75ace9b[m Apriltag detector returning column major matrix
+[33mf0c17fc[m Fixed some issues with previous commit; Switch to column major
+[33ma01c1a2[m Added error to pose output; added c source to repo
+[33m09cb2e7[m fix grammar
+[33mfa46835[m remove backslashes, document transparent occlude
+[33m09a6dd0[m fix env bugs
+[33m1d63aca[m images
+[33m7b85ddd[m merge commit
+[33m87a3df5[m add audio
+[33m4335110[m snapshot 3/2/2020
+[33mf854632[m Add files via upload
+[33m8174644[m Layout build page
+[33m187c0c9[m Add gitignore for model directory
+[33mefe2108[m Include patch for aframe, adds callback
+[33m120940e[m Add custom webxr shim
+[33m239b952[m Add apriltag scripts
+[33m1107d5e[m Fix missing parse
+[33m38e0c4c[m Build page allow merge optional JSON to data
+[33mdc33945[m Format build page
+[33md4d7692[m stupid Javascript prevents underscore var names
+[33m5f7f18d[m add global scene objects
+[33m0136938[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33mbc71d29[m committing for better or worse
+[33m8e9bbe8[m format models/ list
+[33md789679[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33m83fb52c[m Consolidate xr code to dynamic load on enter
+[33m078b140[m Update aframe
+[33m8e5da2c[m update models list
+[33me725428[m loadArena, head cleanup
+[33m99f4f17[m move build.html here from /x/build/
+[33m4745814[m add pointer to A-Frame animations
+[33m7d75d13[m document head text/model, load-scene, goto-url
+[33m9a90d25[m serve local copies, not from https
+[33m99d59a2[m Merge branch 'master' of https://github.com/conix-center/ARENA-core
+[33mde622d5[m cleanup
+[33mc85960c[m checkpoint: parent/child, world matrix
+[33mbb30b99[m Update README.md
+[33m37059ad[m Document child/parent setting & example
+[33mf6e1a2b[m document refactored stats, fog, enter VR
+[33m9ec67cc[m remove -r flags
+[33m7f512ac[m update controller/events docs for refactor->JSON
+[33m2e06038[m convert GLTF URL example to https
+[33m4023cb7[m Update aframe
+[33mca0ba35[m fix pose-listener string bugs
+[33mee2a707[m make sure numbers aren't quoted in json
+[33mefb906e[m restore rig & pose functionality wrt A-Frame 1.0
+[33m34c270b[m add TTL documentation & example
+[33m2ad5e48[m Update README.md
+[33me813b12[m impulse events examples, trim obsolete verbiage
+[33m7303c3d[m spell out camera IDs & fixedCamera & rig updates
+[33mb548772[m Update aframe 1.0.3
+[33m34fc5d1[m bump Aframe to 1.0+
+[33m0f67e3d[m Document animation-mixer example
+[33m4330c7c[m Update README.md
+[33ma75fc0e[m Update AFRAME @ d0d979a
+[33m9db82cf[m restore line colors
+[33mcd2f7a6[m fix impulse Component double events
+[33ma1bb6d2[m document "persist"
+[33m81a6d9b[m Update aframe
+[33mdf72970[m new commits
+[33mbffe527[m new Impulse component
+[33m510c433[m Update aframe submodule
+[33m99a0f6f[m Update README.md
+[33m432945d[m Remove old arena-xr
+[33mf1cd3d6[m Add info on cloning with submodule
+[33mac31b92[m Merge pull request #6 from conix-center/refactor
+[33m321e14c[m Document setting all attributes in 'create'
+[33m6ee7887[m default scene 'refactor'->'render'
+[33m3e57421[m document gltf animation
+[33mdb4c18b[m format JSON boolean 'true' no quotes
+[33m71007fb[m document thickline update syntax
+[33mf72a664[m thickline fixes
+[33m09c7592[m add missing "type" to JSON examples
+[33m63f7591[m Update README.md
+[33m96199e5[m merge commit
+[33m0aed9f6[m 0.9.2 aframe.js fixes env,physics
+[33mdb1e3cd[m rotation updates are back to quaternions again
+[33m50008fe[m fix wrong globals comments
+[33m529af1a[m refactor to use json
+[33m68043f2[m sync xr.andrew changes
+[33mee8eaa2[m fix text size bug & more
+[33m5ede2ea[m keep updating syntax of examples
+[33m9aa5c6e[m more "update" example message syntax mods
+[33m74a265a[m reword almost all the 'update' messages
+[33md4992cd[m change example set-transparency syntax
+[33m655bef2[m Re-add Aframe as submodule for now
+[33mda70e69[m Remove aframe copied files
+[33mfc651b2[m[33m ([m[1;31morigin/mqtt-webworker[m[33m)[m fix head rotation, delete commented out blocks
+[33m073c7c7[m Begin reorganizing global variables into a global dict
+[33m666dd5b[m Try QoS2 for client lastwill for non-clean persist
+[33maaada68[m Set QoS for lastwill to level 1, dupes not fatal for persist or clients
+[33mee32f74[m Set persist key in cam create message
+[33m54bc45d[m Move delete msg for cam (there is no create for viveL/R) to lastwill
+[33m70157be[m Fix typos and sync sceneid in refshapes
+[33m027d7ff[m Invert Z axis of camera
+[33m9efd205[m Set initial rotation of cameras and update all attributes
+[33m32774c4[m Ignore non-json messages (TODO: handle in worker)
+[33m4ce6dc0[m Set all key-value attribute from updates
+[33m6687083[m Ignore load of own camera data from persistence
+[33m90c54a1[m Add loading of persistence data on mqtt connect, before sub
+[33m0662819[m Fix typo'd attribute
+[33m4404b2f[m Restore accidental function del
+[33m7f942d2[m Cleanup code
+[33m8a23fd8[m Set jshint es6
+[33m8b54330[m Light refactor of printing coords
+[33mef7c5b2[m fix coords text
+[33m8630550[m Fix bad merge for coords and click data
+[33maf7f922[m Add .jshintrc
+[33m992b645[m Merge branch 'refactor' of github.com:conix-center/ARENA into refactor
+[33m798355a[m Fix additional lint issues
+[33m5c5c8c1[m fix disappearing box bug, event sources
+[33m247b041[m Format js code
+[33mb052ce8[m Convert example python to use json.dumps(dict) instead of string concat
+[33me7e39b8[m Add eventaction events, add source to all events
+[33m7810df0[m Convert string concat to object stringify for mqtt publish
+[33m4823e39[m delete
+[33m1d60e61[m capitalized filename clash resolved
+[33m4e225a7[m add small drone model
+[33ma8b763e[m update to new message JSON protocol
+[33m0fbd034[m fix position update
+[33m1bf3a04[m clean up cmds.mqtt
+[33m56df6d3[m add object type to update events
+[33m5fc1f07[m fix switch/case hierarchy
+[33m68657ed[m 90% done refactor
+[33mb1eea2e[m example json MQTT commands that work
+[33m962621e[m halfway refactored JSON & examples
+[33mf3f8f31[m Merge branch 'refactor' of http://github.com/conix-center/arena into refactor
+[33mc5ce765[m shapes test / self contained js libs
+[33m3cef827[m first round: primitives, events
+[33m2e95404[m Update refactor.md
+[33m0a7d378[m Update refactor.md
+[33m942dd5e[m Create refactor.md
+[33m7247345[m local copy aframe
+[33m0ee8b56[m valve controller models
+[33ma2f4fa0[m vr background videos
+[33m1e238be[m helios statue 3d model
+[33m3618d62[m more arena-xr additons
+[33m37fa964[m various XR fixes
+[33m1caba44[m Merge branch 'master' of http://github.com/conix-center/ARENA
+[33m3c84482[m example sketchfab glTF model folder
+[33m6d7b174[m add presets
+[33m5af5920[m no spurious vive controllers at startup
+[33m93f145f[m add local copy of vive controller models
+[33m234e707[m Update README.md
+[33m7a31c65[m document sketchfab models
+[33m9d73c5e[m document 360 video
+[33m55b1205[m Merge branch 'master' of http://github.com/conix-center/ARENA
+[33mdea8be0[m rate limit cleanup / publish world cam coords
+[33m9faa20d[m artsy transparency demo
+[33mdcc7f88[m update to new topic format
+[33m11c1417[m Update README.md
+[33md22ebec[m document Camera quirks
+[33mb4295a6[m Update README.md
+[33me313ef2[m document transparency, image URLs
+[33m833c65b[m Update README.md
+[33mdb8f26b[m get all .js locally vs internet
+[33mc01109b[m add Scene / support https
+[33m327330e[m add arena-xr/
+[33m322292e[m add/document Scene options (stats, fog, vr-mode-ui)
+[33m49f22c5[m add thickline, support onoff
+[33mf1af0cf[m document thickline, list primitives
+[33md89bf12[m fix fixedCamera, add physics
+[33m5704bb2[m add earth/moon/statue models
+[33mb38c9d8[m simplify object deletion / clarify vive controllers
+[33m50df21c[m Update README.md
+[33ma1322f6[m update syntax of child linking
+[33m04c8321[m document Physics, Parent/Child links
+[33mdad9eb5[m Update README.md
+[33m837efd6[m ws: url, fixedCamera, ConixBox
+[33mb1ac001[m Merge branch 'master' of http://github.com/conix-center/ARENA
+[33mda23b13[m other people's vive controllers
+[33m79bee89[m More details about Vive control events
+[33m1a348ed[m Update README.md
+[33ma43d1ca[m Merge branch 'master' of http://github.com/conix-center/ARENA
+[33m6333ff5[m document Vive (laser) controls
+[33m9fd48b8[m add Vive controls support
+[33m96d0262[m prettify Conix block
+[33mb9bd10f[m rate limit vive controllers
+[33me27a8f0[m Added mosquitto conf; Removed references to xr.andrew.cmu.edu from the code
+[33me647251[m better Conix logo
+[33m7c458cb[m fix bug2
+[33m4e72e61[m fix bug, add models
+[33m0cb36ce[m merge edits
+[33me028618[m support MQTT broker alternatives
+[33m399aeda[m Update README.md
+[33me1cc15e[m Update README.md
+[33m346e1f1[m Update README.md
+[33mb6a5359[m Update README.md
+[33mdd1804a[m Update README.md
+[33m7ebada5[m Added docker compose to start a web and mqtt server serving the ARENA files
+[33m94fb424[m Add Mosquitto MQTT & install info
+[33m7d59ce1[m audio samples
+[33m96776b1[m toy piano audio
+[33m4d60958[m more models
+[33m50e7ee9[m add Vive event support, child objects
+[33m3261f90[m finish documenting sounds
+[33m9439ec4[m play a sound when clicked
+[33m04f53f6[m start page
+[33mcc9fed7[m support images, up/down mouse events w. clicker IDs
+[33mb10f6ce[m Update README.md
+[33m4276966[m Update README.md
+[33m484fa1f[m Update README.md
+[33mdafd2a9[m Update README.md
+[33m453f302[m List builtin models/
+[33m5ba77d0[m add light type & color examples
+[33m477511a[m support particles, speed up
+[33mfea3ce6[m Merge branch 'master' of https://github.com/WiseLabCMU/AframeSandbox
+[33mb4e1372[m Update README.md
+[33m564cc2b[m Update README.md
+[33m9520145[m MQTT clicks, line offset fix
+[33m6751e8f[m Update README.md
+[33me896c43[m face models
+[33md0e70aa[m audio, favicon
+[33m4587929[m lines, environment, clicks
+[33m3c7df03[m Update README.md
+[33mde4280e[m Update README.md
+[33m88ee93a[m Update README.md
+[33m5b9cb86[m merge commit
+[33m8c3bf7e[m freeze for WASM workshop
+[33m996c724[m Update README.md
+[33me0926d9[m Update README.md
+[33m01e0d78[m Update README.md
+[33m004e283[m Merge branch 'master' of https://github.com/WiseLabCMU/AframeSandbox
+[33mdf27a39[m color code visitor cameras
+[33m91b1ae8[m Update README.md
+[33m635af7a[m Update README.md
+[33m806af2a[m bugfix: cameras, models
+[33m6493ed4[m merge commit
+[33mb588ef3[m get models from URL
+[33m58c3af8[m correct instantiate syntax
+[33mea3afc3[m remove prompts from example mosquitto_pub
+[33m9d92fec[m Update README.md
+[33m86e066e[m Update README.md
+[33m12f15d5[m stupid merge conflict
+[33m71aef93[m MQTT subtopics support general purpose AFrame
+[33m30e10f7[m remove snark
+[33m4755878[m Update README.md
+[33m494a047[m Update README.md
+[33ma766e31[m write README
+[33m8420f4b[m first commit
