@@ -1,10 +1,9 @@
 /* global $, JitsiMeetJS */
 
-var ARENAJitsiAPI = (function () {
+ARENA.JitsiAPI = (function () {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================
-    const globals = window.globals;
     const SCREENSHARE = "arena_screen_share";
 
     // These match config info on Jitsi Meet server (oz.andrew.cmu.edu)
@@ -44,6 +43,9 @@ var ARENAJitsiAPI = (function () {
 
     let jitsiAudioTrack = null, jitsiVideoTrack = null;
     let jitsiVideoElem = null;
+    let prevActiveSpeaker = null, activeSpeaker = null;
+
+    let hasAudio = false, hasVideo = false;
 
     // ==================================================
     // PRIVATE FUNCTIONS
@@ -246,7 +248,7 @@ var ARENAJitsiAPI = (function () {
     function onUserLeft(id) {
         console.log('user left:', id);
         if (!remoteTracks[id]) return;
-        if (currScreenId.includes(id)) {
+        if (currScreenId && currScreenId.includes(id)) {
             globals.sceneObjects.scene.removeChild(document.getElementById(currScreenId));
         }
         $(`#video${id}`).remove();
@@ -274,8 +276,9 @@ var ARENAJitsiAPI = (function () {
         // conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, track => {
         // });
         conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, id => {
-            console.log(`(conference) Dominant Speaker ID: ${id}`)
-            globals.activeSpeaker = id;
+            console.log(`(conference) Dominant Speaker ID: ${id}`);
+            prevActiveSpeaker = activeSpeaker;
+            activeSpeaker = id;
         });
         conference.on(
             JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED,
@@ -423,32 +426,51 @@ var ARENAJitsiAPI = (function () {
         getJitsiId: function() {
             return jitsiId;
         },
+        activeSpeakerChanged: function() {
+            return prevActiveSpeaker !== activeSpeaker;
+        },
         chromeSpatialAudioOn: function() {
             return chromeSpatialAudioOn;
         },
         unmuteAudio: function () {
             jitsiAudioTrack.unmute();
+            hasAudio = true;
             return new Promise(function(resolve,reject) {
                 resolve()
             });
         },
         muteAudio: function () {
             jitsiAudioTrack.mute();
+            hasAudio = false;
             return new Promise(function(resolve,reject) {
                 resolve()
             });
         },
         startVideo: function () {
             jitsiVideoTrack.unmute();
+            hasVideo = true;
             return new Promise(function(resolve,reject) {
                 resolve()
             });
         },
         stopVideo: function () {
             jitsiVideoTrack.mute();
+            hasVideo = false;
             return new Promise(function(resolve,reject) {
                 resolve()
             });
+        },
+        hasAudio: function () {
+            return hasAudio;
+        },
+        hasVideo: function () {
+            return hasVideo;
+        },
+        getAudioTrack: function(jitsiId) {
+            return remoteTracks[jitsiId][0];
+        },
+        getVideoTrack: function(jitsiId) {
+            return remoteTracks[jitsiId][1];
         },
         leave: function () {
             disconnect();

@@ -34,60 +34,52 @@ function publishHeadText(displayName) {
 
 function setupIcons() {
     const audioBtn = createIconButton("audio-off", "Microphone on/off.", () => {
-        if (ARENAJitsiAPI.ready()) {
-            globals.hasAudio = !globals.hasAudio;
-            if (globals.hasAudio) { // toggled
-                ARENAJitsiAPI.unmuteAudio().then(_ => {
-                    audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-on.png')";
-                })
-            }
-             else {
-                ARENAJitsiAPI.muteAudio().then(_ => {
-                    audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-off.png')";
-                })
-            }
+        if (!ARENA.JitsiAPI.ready()) return;
+        if (!ARENA.JitsiAPI.hasAudio()) { // toggled
+            ARENA.JitsiAPI.unmuteAudio().then(_ => {
+                audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-on.png')";
+            })
+        }
+        else {
+            ARENA.JitsiAPI.muteAudio().then(_ => {
+                audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-off.png')";
+            })
         }
     });
 
     const videoBtn = createIconButton("video-off", "Camera on/off. You appear as a video box.", () => {
-        if (ARENAJitsiAPI.ready()) {
-            globals.hasVideo = !globals.hasVideo;
-            if (globals.hasVideo) { // toggled
-                ARENAJitsiAPI.startVideo().then(_ => {
-                    videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-on.png')";
-                    avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
-                    ARENAJitsiAPI.showVideo();
-                    FaceTracker.trackFaceOff();
-                    globals.hasAvatar = false;
-                })
-            }
-             else {
-                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
-                ARENAJitsiAPI.stopVideo().then(_ => {
-                    ARENAJitsiAPI.hideVideo();
-                })
-            }
+        if (!ARENA.JitsiAPI.ready()) return;
+        if (!ARENA.JitsiAPI.hasVideo()) { // toggled
+            ARENA.JitsiAPI.startVideo().then(_ => {
+                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-on.png')";
+                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
+                ARENA.JitsiAPI.showVideo();
+                ARENA.FaceTracker.trackFaceOff();
+            })
+        }
+        else {
+            videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
+            ARENA.JitsiAPI.stopVideo().then(_ => {
+                ARENA.JitsiAPI.hideVideo();
+            })
         }
     });
 
     const avatarBtn = createIconButton("avatar3-off", "Face-recognition avatar on/off. You appear as a 3d-animated face.", () => {
-        if (ARENAJitsiAPI.ready()) {
-            globals.hasAvatar = !globals.hasAvatar;
-            if (globals.hasAvatar) { // toggled
-                ARENAJitsiAPI.stopVideo().then(_ => {
-                    FaceTracker.trackFaceOn().then(_ => {
-                        avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-on.png')";
-                        videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
-                        ARENAJitsiAPI.hideVideo();
-                        globals.hasVideo = false;
-                    });
-                })
-            }
-             else {
-                FaceTracker.trackFaceOff().then(_ => {
-                    avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
+        if (!ARENA.FaceTracker.hasAvatar()) { // toggled
+            ARENA.FaceTracker.trackFaceOn().then(_ => {
+                if (!ARENA.JitsiAPI.ready()) return;
+                ARENA.JitsiAPI.stopVideo().then(_ => {
+                    avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-on.png')";
+                    videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
+                    ARENA.JitsiAPI.hideVideo();
                 });
-            }
+            })
+        }
+        else {
+            ARENA.FaceTracker.trackFaceOff().then(_ => {
+                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
+            });
         }
     });
 

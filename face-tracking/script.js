@@ -1,6 +1,6 @@
 import * as Comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 
-window.FaceTracker = (function () {
+ARENA.FaceTracker = (function () {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================
@@ -16,6 +16,7 @@ window.FaceTracker = (function () {
     let videoElem = null, videoCanv = null, overlayCanv = null;
 
     let faceDetector = null;
+    let hasAvatar = false;
 
     // ==================================================
     // PRIVATE FUNCTIONS
@@ -248,7 +249,7 @@ window.FaceTracker = (function () {
     }
 
     async function processVideo() {
-        if (globals.hasAvatar) {
+        if (hasAvatar) {
             if (frames % framesToSkip == 0) {
                 const [landmarksRaw, bbox, quat, trans] = await detectFace(getFrame(), globals.localVideoWidth, videoHeight);
                 drawLandmarks(landmarksRaw, bbox);
@@ -276,6 +277,9 @@ window.FaceTracker = (function () {
                 Comlink.proxy(displayInitialization) // input is a callback
             );
         },
+        hasAvatar: function() {
+            return hasAvatar;
+        },
         trackFaceOn: function() {
             if (!faceDetector || !faceDetector.ready) return;
 
@@ -285,6 +289,8 @@ window.FaceTracker = (function () {
                 }
                 requestAnimationFrame(processVideo);
             });
+
+            hasAvatar = true;
             return new Promise(function(resolve,reject) {
                 resolve();
             });
@@ -309,6 +315,8 @@ window.FaceTracker = (function () {
             });
             videoElem.srcObject = null;
             videoElem = undefined;
+
+            hasAvatar = false;
             return new Promise(function(resolve,reject) {
                 resolve();
             });

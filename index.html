@@ -95,12 +95,12 @@
   <body>
   <a-scene background="color: black" name="MQTTScene" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">  <!-- stats physics -->
       <a-assets>
-        <a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
-        <a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
+        <a-asset-item id="Cube-obj" src="models/Cube.obj"></a-asset-item>
+        <a-asset-item id="Cube-mtl" src="models/Cube.mtl"></a-asset-item>
 
         <!-- Vive controller 3d model -->
-        <a-asset-item id="viveControl-obj" src="./models/vr_controller_vive.obj"></a-asset-item>
-        <a-asset-item id="viveControl-mtl" src="./models/vr_controller_vive.mtl"></a-asset-item>
+        <a-asset-item id="viveControl-obj" src="models/vr_controller_vive.obj"></a-asset-item>
+        <a-asset-item id="viveControl-mtl" src="models/vr_controller_vive.mtl"></a-asset-item>
       </a-assets>
 
       <a-entity id="sceneRoot">
@@ -114,7 +114,7 @@
 
         <a-entity id="env" environment="preset: starry; seed: 5; fog: 0; flatShading: true; groundTexture: squares; grid: none;"></a-entity>
 
-        <a-entity position="0 0 0" id="CameraRig"> <!-- movement-controls="fly: true; speed=0.3"> -->
+        <a-entity position="0 0 0" id="CameraRig">
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
             <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move network-latency>
@@ -163,20 +163,12 @@
         <a-light position="-0.93 1.58 -1.14" name="PointLight1" type="point" color="#9090AD" intensity="0.75"></a-light>
         <a-light position="-0.272 0.39 1.25" name="PointLight2" type="point" color="#C2E6C7"></a-light>
         <a-light name="AmbientLight" type="ambient" color="#363942"></a-light>
-        <!--
-        <a-entity light="type: ambient; color: #BBB"></a-entity>
-        <a-entity light="type: directional; color: #FFF; intensity: 0.6" position="-0.5 1 1"></a-entity>
-
-        <a-marker pose-printer preset="hiro">
-            <a-box position='1 1 0' material='color: yellow;' emiteevents='true' smooth='true'></a-box>
-        </a-marker>
-        -->
       </a-entity>
     </a-scene>
     <video src="" id="localVideo" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="https://apis.google.com/js/platform.js"></script>
-    <script src="./auth.js"></script>
+    <script src="auth.js"></script>
   </body>
 </html>

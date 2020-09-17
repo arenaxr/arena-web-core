@@ -128,10 +128,6 @@ globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath;
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
-globals.jitsiId = "";
-globals.hasVideo = false;
-globals.hasAudio = false;
-globals.hasAvatar = false;
 globals.activeSpeaker = "";
 globals.previousSpeakerId = "";
 globals.previousSpeakerEl = "";
@@ -1003,8 +999,8 @@ AFRAME.registerComponent("network-latency", {
         this.message.qos = 2;
     },
     tick: (function(t, dt) {
-        if (window.mqttClient.isConnected()) {
-            window.mqttClient.send(this.message);
+        if (ARENA.mqttClient.isConnected()) {
+            ARENA.mqttClient.send(this.message);
         }
     })
 })
