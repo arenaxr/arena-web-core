@@ -267,8 +267,11 @@ function setupIcons() {
         if (re.test(usernameInput.value)) {
             // remove extra spaces
             globals.displayName = usernameInput.value.replace(/\s+/g," ").trim();
-            localStorage.setItem("display_name", globals.displayName);
-            publishHeadText(globals.displayName);
+            localStorage.setItem("display_name", globals.displayName);  // save for next use
+            publishHeadText(globals.displayName);  // push to other users' views
+            const nameChangedEvent = new CustomEvent('name_changed', {  // push to local listeners
+                detail: {name: globals.displayName}});
+            window.dispatchEvent(nameChangedEvent);
         }
     }
 }
