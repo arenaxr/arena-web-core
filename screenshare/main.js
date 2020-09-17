@@ -204,6 +204,7 @@ function unload() {
     }
     room.leave();
     connection.disconnect();
+    window.close();
 }
 
 $(window).bind('beforeunload', unload);

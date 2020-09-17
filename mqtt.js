@@ -191,31 +191,6 @@ function onConnect() {
         ground.setAttribute('scale', scale.join(" "));
     }
 
-    // video window for jitsi
-    globals.localJitsiVideo = document.getElementById("localVideo");
-    globals.localJitsiVideo.style.display = "none";
-    function setupCornerVideo() {
-        globals.localVideoHeight = globals.localJitsiVideo.videoHeight / (globals.localJitsiVideo.videoWidth / globals.localVideoWidth);
-
-        globals.localJitsiVideo.setAttribute("width", globals.localVideoWidth);
-        globals.localJitsiVideo.setAttribute("height", globals.localVideoHeight);
-        globals.localJitsiVideo.play();
-
-        globals.localJitsiVideo.style.position = "absolute";
-        globals.localJitsiVideo.style.top = "15px";
-        globals.localJitsiVideo.style.left = "15px";
-        globals.localJitsiVideo.style.borderRadius = "10px";
-        globals.localJitsiVideo.style.opacity = "0.5";
-        // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
-    }
-    globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
-    window.addEventListener('orientationchange', () => { // mobile only
-        globals.localVideoWidth = Number(window.innerWidth / 5);
-        jitsiVideoTrack.mute()
-        setupCornerVideo();
-        jitsiVideoTrack.unmute()
-    }, false);
-
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
     var thex = sceneObjects.myCamera.object3D.position.x;
@@ -281,10 +256,9 @@ function onConnect() {
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
         // console.log("poseChanged", e.detail);
-
         let msg = {
             object_id: globals.camName,
-            jitsiId: globals.jitsiId,
+            jitsiId: ARENAJitsiAPI.getJitsiId(),
             hasVideo: globals.hasVideo,
             hasAudio: globals.hasAudio,
             hasAvatar: globals.hasAvatar,
@@ -387,7 +361,12 @@ function onConnect() {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     mqttClient.subscribe(globals.renderTopic);
-    if (!AFRAME.utils.device.isMobile()) faceTrackerInit();
+
+    ARENAJitsiAPI.setupLocalVideo();
+
+    importScript("./face-tracking/script.js").then(() => {
+        if (!AFRAME.utils.device.isMobile()) FaceTracker.init();
+    })
 }
 
 function onConnectionLost(responseObject) {
@@ -532,7 +511,7 @@ async function enableChromeAEC(gainNode) {
     outboundPeerConnection.setRemoteDescription(answer);
 
     gainNode.disconnect();
-    if (globals.chromeSpatialAudioOn) {
+    if (ARENAJitsiAPI.chromeSpatialAudioOn()) {
         gainNode.connect(context.destination);
     }
     else {

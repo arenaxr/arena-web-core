@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no,user-scalable=no,maximum-scale=1">
 
-    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png">
+    <link rel="icon" type="image/png" href="images/conix-x.png">
 
     <title>ARENA</title>
     <meta name="description" content="Augmented Reality Edge Networking Architecture">
@@ -34,6 +34,11 @@
     <!-- from https://rawgit.com/andreasplesch/aframe-meshline-component/master/dist/aframe-meshline-component.min.js -->
     <script src="vendor/aframe-meshline-component.js"></script>
 
+    <!-- from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js -->
+    <script src="vendor/aframe-spe-particles-component.min.js"></script>
+    <!-- from https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.js -->
+    <script src="vendor/webxr-polyfill.js"></script>
+
     <!-- pretty backgrounds  -->
     <script src="vendor/aframe-environment-component.min.js"></script>
 
@@ -43,28 +48,8 @@
     <!-- gltf animations -->
     <script src="vendor/morphTarget.js"></script>
 
-    <!-- icons -->
-    <link rel="stylesheet" href="icons/icons.css">
-    <script src="icons/icons.js"></script>
-
-    <!-- our default configs -->
-    <script src="defaults.js"></script>
-    <!-- our camera change and other event listener Components -->
-    <script src="events.js"></script>
     <!-- V3.1 of the Paho MQTT.js library -->
     <script src="vendor/mqttws31.js" type="text/javascript"></script>
-
-    <!-- our mqtt.js (main) script -->
-    <script src="mqtt.js" type="text/javascript"></script>
-
-    <!-- from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js -->
-    <script src="vendor/aframe-spe-particles-component.min.js"></script>
-    <!-- from https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.js -->
-    <script src="vendor/webxr-polyfill.js"></script>
-
-    <!-- jitsi -->
-    <script src="libs/lib-jitsi-meet.min.js"></script>
-    <script src="jitsi-arena.js"></script>
 
     <!-- <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script> -->
 
@@ -78,6 +63,26 @@
     <!-- intro dialog -->
     <!-- <script src="intro-dialog/intro_dialog.js"></script> -->
 
+    <!-- useful utility funcs -->
+    <script src="utils.js"></script>
+
+    <!-- our default configs -->
+    <script src="defaults.js"></script>
+
+    <!-- our camera change and other event listener Components -->
+    <script src="events.js"></script>
+
+    <!-- our mqtt.js (main) script -->
+    <script src="mqtt.js" type="text/javascript"></script>
+
+    <!-- jitsi -->
+    <script src="libs/lib-jitsi-meet.min.js"></script>
+    <script src="jitsi-arena.js"></script>
+
+    <!-- icons -->
+    <link rel="stylesheet" href="icons/icons.css">
+    <script src="icons/icons.js"></script>
+
     <!-- mqtt chat dialog -->
     <script src="mqtt-chat/main.js" type="module"></script>
 
@@ -88,7 +93,7 @@
     <link rel="stylesheet" href="mqtt-chat/style.css">
   </head>
   <body>
-  <a-scene background="color: black" name="MQTTScene" network-latency webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">  <!-- stats physics -->
+  <a-scene background="color: black" name="MQTTScene" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">  <!-- stats physics -->
       <a-assets>
         <a-asset-item id="Cube-obj" src="./models/Cube.obj"></a-asset-item>
         <a-asset-item id="Cube-mtl" src="./models/Cube.mtl"></a-asset-item>
@@ -112,7 +117,7 @@
         <a-entity position="0 0 0" id="CameraRig"> <!-- movement-controls="fly: true; speed=0.3"> -->
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
-            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move>
+            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move network-latency>
               <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
             </a-camera>
           </a-entity>
