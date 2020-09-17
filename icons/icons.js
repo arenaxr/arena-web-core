@@ -266,11 +266,12 @@ function setupIcons() {
         // if name has at least one alpha char
         if (re.test(usernameInput.value)) {
             // remove extra spaces
-            globals.displayName = usernameInput.value.replace(/\s+/g," ").trim();
+            globals.displayName = usernameInput.value.replace(/\s+/g, " ").trim();
             localStorage.setItem("display_name", globals.displayName);  // save for next use
             publishHeadText(globals.displayName);  // push to other users' views
-            const nameChangedEvent = new CustomEvent('name_changed', {  // push to local listeners
-                detail: {name: globals.displayName}});
+            const nameChangedEvent = new CustomEvent('newsettings', {  // push to local listeners
+                detail: { name: globals.displayName }
+            });
             window.dispatchEvent(nameChangedEvent);
         }
     }
