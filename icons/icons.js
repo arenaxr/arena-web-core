@@ -269,10 +269,10 @@ function setupIcons() {
             globals.displayName = usernameInput.value.replace(/\s+/g, " ").trim();
             localStorage.setItem("display_name", globals.displayName);  // save for next use
             publishHeadText(globals.displayName);  // push to other users' views
-            const nameChangedEvent = new CustomEvent('newsettings', {  // push to local listeners
+            const newSettingsEvent = new CustomEvent('newsettings', {  // push to local listeners
                 detail: { name: globals.displayName }
             });
-            window.dispatchEvent(nameChangedEvent);
+            window.dispatchEvent(newSettingsEvent);
         }
     }
 }
