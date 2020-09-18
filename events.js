@@ -2,86 +2,7 @@
 //
 // Components and realtime event handlers
 // and globals
-// and utilities
 'use strict';
-
-// usage:
-//   importScript('./path/to/script.js').then((allExports) => { .... }));
-function importScript(path) {
-    let entry = window.importScript.__db[path];
-    if (entry === undefined) {
-        const escape = path.replace(`'`, `\\'`);
-        const script = Object.assign(document.createElement('script'), {
-            type: 'module',
-            textContent: `import * as x from '${escape}'; importScript.__db['${escape}'].resolve(x);`,
-        });
-        entry = importScript.__db[path] = {};
-        entry.promise = new Promise((resolve, reject) => {
-            entry.resolve = resolve;
-            script.onerror = reject;
-        });
-        document.head.appendChild(script);
-        script.remove();
-    }
-    return entry.promise;
-}
-importScript.__db = {};
-window['importScript'] = importScript; // needed if we ourselves are in a module
-
-function getUrlVars() {
-    const vars = {};
-    const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
-        vars[key] = value;
-    });
-    return vars;
-}
-
-function getUrlParam(parameter, defaultValue) {
-    let urlParameter = defaultValue;
-    if (window.location.href.indexOf(parameter) > -1) {
-        urlParameter = getUrlVars()[parameter];
-    }
-    if (urlParameter === "") {
-        return defaultValue;
-    }
-    return urlParameter;
-}
-
-function getQueryParams(name, defaultValue) {
-    var qs = location.search;
-
-    var params = [];
-    var tokens;
-    var re = /[?&]?([^=]+)=([^&]*)/g;
-
-    while (tokens = re.exec(qs)) {
-        if (decodeURIComponent(tokens[1]) == name)
-            params.push(decodeURIComponent(tokens[2]));
-    }
-
-    if (params === []) return defaultValue
-    else return params;
-}
-
-function getUrlParams(parameter, defaultValue) {
-    let urlParameter = defaultValue;
-    var indexes = [];
-    parameter = parameter + '=';
-    if (window.location.href.indexOf(parameter) > -1) {
-        var vars = getUrlVars();
-        for (var i = 0; i < vars.length; i++) {
-            if (vars[parameter] == parameter)
-                indexes.push(vars[i]);
-        }
-    } else
-        indexes.push(defaultValue);
-
-    return indexes;
-}
-
-function debug(msg) {
-    publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
-}
 
 window.globals = {
     timeID: new Date().getTime() % 10000,
@@ -186,7 +107,6 @@ window.globals = {
         }
     }
 };
-// console.log(window.globals);
 
 let urlLat = getUrlParam('lat');
 let urlLong = getUrlParam('long');
@@ -208,10 +128,6 @@ globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath;
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
-globals.jitsiId = "";
-globals.hasVideo = false;
-globals.hasAudio = false;
-globals.hasAvatar = false;
 globals.activeSpeaker = "";
 globals.previousSpeakerId = "";
 globals.previousSpeakerEl = "";
@@ -251,8 +167,6 @@ globals.vioViveRPosition = new THREE.Vector3();
 var ViveRcamParent = new THREE.Matrix4();
 var ViveRcam = new THREE.Matrix4();
 var ViveRcpi = new THREE.Matrix4();
-
-importScript('/face-tracking/script.js');
 
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
@@ -353,107 +267,6 @@ AFRAME.registerComponent('pose-publisher', {
         }
     })
 });
-
-function updateConixBox(eventName, coordsData, myThis) {
-    const sceney = myThis.sceneEl;
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
-    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
-}
-
-function debugConixText(coordsData) {
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', 'pose: ' + coordsToText(coordsData));
-    console.log('pose: ', coordsToText(coordsData));
-}
-
-function debugRaw(debugMsg) {
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', debugMsg);
-    //console.log('debug: ', debugMsg);
-}
-
-
-function eventAction(evt, eventName, myThis) {
-    const newPosition = myThis.object3D.position;
-    //this.emit('viveChanged', Object.assign(newPosition, newRotation));
-    //      const rotationCoords = AFRAME.utils.coordinates.stringify(newRotation);
-    //const positionCoords = AFRAME.utils.coordinates.stringify(newPosition);
-
-    let coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3)
-    };
-
-    // publish to MQTT
-    const objName = myThis.id + "_" + globals.idTag;
-    publish(globals.outputTopic + objName, {
-        object_id: objName,
-        action: "clientEvent",
-        type: eventName,
-        data: {
-            position: coordsData,
-            source: globals.camName
-        }
-    });
-    //console.log(myThis.id + ' ' + eventName + ' at: ', coordsToText(coordsData), 'by', objName);
-
-    // DEBUG
-    //updateConixBox(eventName, coordsData, myThis);
-}
-
-function setCoordsData(evt) {
-    return {
-        x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
-        y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
-        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
-    };
-}
-
-function vec3ToObject(vec) {
-    return {
-        x: parseFloat(vec.x.toFixed(3)),
-        y: parseFloat(vec.y.toFixed(3)),
-        z: parseFloat(vec.z.toFixed(3))
-    };
-}
-
-function quatToObject(q) {
-    return {
-        x: parseFloat(q.x.toFixed(3)),
-        y: parseFloat(q.y.toFixed(3)),
-        z: parseFloat(q.z.toFixed(3)),
-        w: parseFloat(q.w.toFixed(3))
-    };
-}
-
-function coordsToText(c) {
-    return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
-}
-
-function rotToText(c) {
-    return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
-}
-
-
-// my crap, this returns strings, not numbers
-function setClickData(evt) {
-    if (evt.detail.intersection)
-        return {
-            x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
-            y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
-            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
-        }
-    else {
-        console.log("WARN: empty coords data");
-        return {
-            x: 0,
-            y: 0,
-            z: 0
-        }
-    }
-}
 
 AFRAME.registerComponent('impulse', {
     schema: {
@@ -777,6 +590,7 @@ AFRAME.registerComponent('click-listener', {
         //console.log("mousedown init");
         this.el.addEventListener('mousedown', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -786,6 +600,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mousedown",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -794,7 +609,6 @@ AFRAME.registerComponent('click-listener', {
                 //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
                 console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
             } else {
-
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
                 if (evt.currentTarget.id.includes("Earth")) {
@@ -802,18 +616,13 @@ AFRAME.registerComponent('click-listener', {
                     this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate");
                 }
                 const clicker = evt.detail.clicker;
-
-                /* Debug Conix Box
-                        const sceney = this.sceneEl;
-                        const textEl = sceney.querySelector('#conix-text');
-                        textEl.setAttribute('value', this.id + " mousedown" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-                */
             }
         });
 
         //console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -824,6 +633,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mouseup",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -860,6 +670,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseenter', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -869,6 +680,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mouseenter",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -891,6 +703,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseleave', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -900,6 +713,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mouseleave",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -1169,13 +983,12 @@ AFRAME.registerComponent("network-latency", {
         this.message.qos = 2;
     },
     tick: (function(t, dt) {
-        if (window.mqttClient.isConnected()) {
-            window.mqttClient.send(this.message);
+        if (ARENA.mqttClient.isConnected()) {
+            ARENA.mqttClient.send(this.message);
         }
     })
 })
 
-window.longTouch = false; // TODO: fix this. shouldnt be a global, but this.longTouch doesnt work
 AFRAME.registerComponent("press-and-move", {
     schema: {
         speed: {type: 'number', default: 5.0},
@@ -1183,32 +996,33 @@ AFRAME.registerComponent("press-and-move", {
     init: function() {
         this.timer = null;
         this.drag = false;
+        this.longTouch = false;
+
         this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
-        window.addEventListener("touchstart", this.touchstart);
-        window.addEventListener("touchend", this.touchend);
-        window.addEventListener("touchmove", this.touchmove);
-    },
-    touchstart: function(evt) {
-        evt.preventDefault();
-        if (!this.timer) {
-            this.timer = window.setTimeout(() => {
-                window.longTouch = true;
-            }, 750);
-        }
-    },
-    touchend: function() {
-        if (this.timer) {
-            clearTimeout(this.timer);
-            this.timer = null;
-        }
-        window.longTouch = false;
-        this.drag = false;
-    },
-    touchmove: function(evt) {
-        this.drag = true;
+
+        let self = this;
+        window.addEventListener("touchstart", function(evt) {
+            evt.preventDefault();
+            if (!self.timer) {
+                self.timer = window.setTimeout(() => {
+                    self.longTouch = true;
+                }, 700); // press for 700ms counts as long press
+            }
+        });
+        window.addEventListener("touchend", function(evt) {
+            if (self.timer) {
+                clearTimeout(self.timer);
+                self.timer = null;
+            }
+            self.longTouch = false;
+            self.drag = false;
+        });
+        window.addEventListener("touchmove", function(evt) {
+            // self.drag = true; // might be better without drag detection
+        });
     },
     tick: (function(t, dt) {
-        if (window.longTouch) {
+        if (this.longTouch) {
             this.timer = null;
             if (!this.drag) {
                 let eulerRot = globals.sceneObjects.myCamera.getAttribute("rotation");

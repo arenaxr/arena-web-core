@@ -1,6 +1,8 @@
 'use strict';
 
-window.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "webClient-" + globals.timeID);
+window.ARENA = {};
+
+ARENA.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "webClient-" + globals.timeID);
 
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
@@ -114,8 +116,8 @@ const unloadArena = (urlToLoad) => {
     };
 };
 
-mqttClient.onConnectionLost = onConnectionLost;
-mqttClient.onMessageArrived = onMessageArrived;
+ARENA.mqttClient.onConnectionLost = onConnectionLost;
+ARENA.mqttClient.onMessageArrived = onMessageArrived;
 
 let lwt;
 window.addEventListener('onauth', function (e) {
@@ -130,7 +132,7 @@ window.addEventListener('onauth', function (e) {
     lwt.destinationName = globals.outputTopic + globals.camName;
     lwt.qos = 2;
     lwt.retained = false;
-    mqttClient.connect({
+    ARENA.mqttClient.connect({
         onSuccess: onConnect,
         willMessage: lwt,
         userName: globals.username,
@@ -190,31 +192,6 @@ function onConnect() {
         var scale = [globals.gndScaleParam, globals.gndScaleParam, globals.gndScaleParam];
         ground.setAttribute('scale', scale.join(" "));
     }
-
-    // video window for jitsi
-    globals.localJitsiVideo = document.getElementById("localVideo");
-    globals.localJitsiVideo.style.display = "none";
-    function setupCornerVideo() {
-        globals.localVideoHeight = globals.localJitsiVideo.videoHeight / (globals.localJitsiVideo.videoWidth / globals.localVideoWidth);
-
-        globals.localJitsiVideo.setAttribute("width", globals.localVideoWidth);
-        globals.localJitsiVideo.setAttribute("height", globals.localVideoHeight);
-        globals.localJitsiVideo.play();
-
-        globals.localJitsiVideo.style.position = "absolute";
-        globals.localJitsiVideo.style.top = "15px";
-        globals.localJitsiVideo.style.left = "15px";
-        globals.localJitsiVideo.style.borderRadius = "10px";
-        globals.localJitsiVideo.style.opacity = "0.5";
-        // globals.localJitsiVideo.removeEventListener('loadeddata', setupCornerVideo, false);
-    }
-    globals.localJitsiVideo.addEventListener('loadeddata', setupCornerVideo, false);
-    window.addEventListener('orientationchange', () => { // mobile only
-        globals.localVideoWidth = Number(window.innerWidth / 5);
-        jitsiVideoTrack.mute()
-        setupCornerVideo();
-        jitsiVideoTrack.unmute()
-    }, false);
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -281,13 +258,12 @@ function onConnect() {
 
     sceneObjects.myCamera.addEventListener('poseChanged', e => {
         // console.log("poseChanged", e.detail);
-
         let msg = {
             object_id: globals.camName,
-            jitsiId: globals.jitsiId,
-            hasVideo: globals.hasVideo,
-            hasAudio: globals.hasAudio,
-            hasAvatar: globals.hasAvatar,
+            jitsiId: ARENA.JitsiAPI.getJitsiId(),
+            hasAudio: ARENA.JitsiAPI.hasAudio(),
+            hasVideo: ARENA.JitsiAPI.hasVideo(),
+            hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.hasAvatar(),
             displayName: globals.displayName,
             action: 'create',
             type: 'object',
@@ -386,15 +362,20 @@ function onConnect() {
     loadArena();
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
-    mqttClient.subscribe(globals.renderTopic);
-    if (!AFRAME.utils.device.isMobile()) faceTrackerInit();
+    ARENA.mqttClient.subscribe(globals.renderTopic);
+
+    ARENA.JitsiAPI.setupLocalVideo();
+
+    importScript("./face-tracking/script.js").then(() => {
+        if (!AFRAME.utils.device.isMobile()) ARENA.FaceTracker.init();
+    })
 }
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.log(responseObject.errorMessage);
     } // reconnect
-    mqttClient.connect({
+    ARENA.mqttClient.connect({
         onSuccess: onConnect,
         willMessage: lwt, // ensure 2nd disconnect will not leave head in scene
         userName: globals.username,
@@ -408,11 +389,11 @@ const publish_retained = (dest, msg) => {
     message.destinationName = dest;
     message.retained = true;
     // message.qos = 2;
-    mqttClient.send(message);
+    ARENA.mqttClient.send(message);
 };
 
 window.publish = (dest, msg) => {
-    if (!window.mqttClient.isConnected()) return;
+    if (!ARENA.mqttClient.isConnected()) return;
 
     if (typeof msg === 'object') {
 
@@ -426,7 +407,7 @@ window.publish = (dest, msg) => {
     //console.log('desint :', dest, 'msggg', msg)
     let message = new Paho.MQTT.Message(msg);
     message.destinationName = dest;
-    mqttClient.send(message);
+    ARENA.mqttClient.send(message);
 };
 
 function isJson(str) {
@@ -532,7 +513,7 @@ async function enableChromeAEC(gainNode) {
     outboundPeerConnection.setRemoteDescription(answer);
 
     gainNode.disconnect();
-    if (globals.chromeSpatialAudioOn) {
+    if (ARENA.JitsiAPI.chromeSpatialAudioOn()) {
         gainNode.connect(context.destination);
     }
     else {
@@ -810,16 +791,11 @@ function onMessageArrived(message, jsonMessage) {
 
                 case "videoconf":
                     // handle changes to other users audio/video status
-                    // console.log("got videoconf");
-
-                    if (theMessage.hasOwnProperty("jitsiId") && theMessage.hasVideo) {
+                    if (theMessage.hasOwnProperty("jitsiId")) {
                         // possibly change active speaker
-                        if (globals.activeSpeaker != globals.previousSpeakerId) {
-                            globals.previousSpeakerId = theMessage.jitsiId;
+                        if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
                             globals.previousSpeakerEl = entityEl;
                         }
-                    }
-                    if (theMessage.hasOwnProperty("jitsiId")) {
                         drawMicrophoneState(entityEl, theMessage.hasAudio);
                     }
                     return;
@@ -828,7 +804,7 @@ function onMessageArrived(message, jsonMessage) {
                 case "camera":
                     // decide if we need draw or delete videoCube around head
                     if (theMessage.hasOwnProperty("jitsiId")) {
-                        if (theMessage.jitsiId == "" || !remoteTracks[theMessage.jitsiId]) {
+                        if (theMessage.jitsiId == "" || !ARENA.JitsiAPI.ready()) {
                             console.log("jitsiId empty");
                             break; // other-person has no camera ... yet
                         }
@@ -858,12 +834,14 @@ function onMessageArrived(message, jsonMessage) {
 
                         if (theMessage.hasAudio) {
                             // set up positional audio, but only once per camera
-                            if (!remoteTracks[theMessage.jitsiId][0]) return;
+                            const audioTrack = ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId);
+                            if (!audioTrack) return;
 
+                            // check if audio track changed since last update
                             let oldAudioTrack = entityEl.audioTrack;
-                            entityEl.audioTrack = remoteTracks[theMessage.jitsiId][0].track;
-                            if (entityEl.audioTrack != oldAudioTrack) {
-                                // assume jitsi remoteTracks[0] is audio and [1] video
+                            entityEl.audioTrack = audioTrack.track;
+                            if (entityEl.audioTrack !== oldAudioTrack) {
+                                // set up and attach positional audio
                                 let audioStream = new MediaStream();
                                 audioStream.addTrack(entityEl.audioTrack);
 
@@ -891,6 +869,7 @@ function onMessageArrived(message, jsonMessage) {
                                     entityEl.positionalAudio.setMediaStreamSource(audioStream);
                                 }
 
+                                // fixes chrome echo bug
                                 const audioCtx = THREE.AudioContext.getContext();
                                 const resume = () => {
                                     audioCtx.resume();

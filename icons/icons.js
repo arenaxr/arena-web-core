@@ -34,65 +34,52 @@ function publishHeadText(displayName) {
 
 function setupIcons() {
     const audioBtn = createIconButton("audio-off", "Microphone on/off.", () => {
-        if (jitsiAudioTrack) {
-            globals.hasAudio = !globals.hasAudio;
-            if (globals.hasAudio) { // toggled
-                jitsiAudioTrack.unmute().then(_ => {
-                    audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-on.png')";
-                })
-            }
-             else {
-                jitsiAudioTrack.mute().then(_ => {
-                    audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-off.png')";
-                })
-            }
+        if (!ARENA.JitsiAPI.ready()) return;
+        if (!ARENA.JitsiAPI.hasAudio()) { // toggled
+            ARENA.JitsiAPI.unmuteAudio().then(_ => {
+                audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-on.png')";
+            })
+        }
+        else {
+            ARENA.JitsiAPI.muteAudio().then(_ => {
+                audioBtn.childNodes[0].style.backgroundImage = "url('images/icons/audio-off.png')";
+            })
         }
     });
 
     const videoBtn = createIconButton("video-off", "Camera on/off. You appear as a video box.", () => {
-        if (jitsiVideoTrack) {
-            globals.hasVideo = !globals.hasVideo;
-            if (globals.hasVideo) { // toggled
-                jitsiVideoTrack.unmute().then(_ => {
-                    videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-on.png')";
-                    avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
-                    if (globals.localJitsiVideo)
-                        globals.localJitsiVideo.style.display = "block"
-                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "true");
-                    window.trackFaceOff();
-                    globals.hasAvatar = false;
-                })
-            }
-             else {
-                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
-                jitsiVideoTrack.mute().then(_ => {
-                    if (globals.localJitsiVideo)
-                        globals.localJitsiVideo.style.display = "none"
-                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
-                })
-            }
+        if (!ARENA.JitsiAPI.ready()) return;
+        if (!ARENA.JitsiAPI.hasVideo()) { // toggled
+            ARENA.JitsiAPI.startVideo().then(_ => {
+                videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-on.png')";
+                avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
+                ARENA.JitsiAPI.showVideo();
+                ARENA.FaceTracker.trackFaceOff();
+            })
+        }
+        else {
+            videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
+            ARENA.JitsiAPI.stopVideo().then(_ => {
+                ARENA.JitsiAPI.hideVideo();
+            })
         }
     });
 
     const avatarBtn = createIconButton("avatar3-off", "Face-recognition avatar on/off. You appear as a 3d-animated face.", () => {
-        if (jitsiVideoTrack) {
-            globals.hasAvatar = !globals.hasAvatar;
-            if (globals.hasAvatar) { // toggled
-                jitsiVideoTrack.mute().then(_ => {
+        if (!ARENA.FaceTracker.hasAvatar()) { // toggled
+            ARENA.FaceTracker.trackFaceOn().then(_ => {
+                if (!ARENA.JitsiAPI.ready()) return;
+                ARENA.JitsiAPI.stopVideo().then(_ => {
                     avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-on.png')";
                     videoBtn.childNodes[0].style.backgroundImage = "url('images/icons/video-off.png')";
-                    if (globals.localJitsiVideo)
-                        globals.localJitsiVideo.style.display = "none"
-                    // globals.sceneObjects["arena-vid-plane"].setAttribute("visible", "false");
-                    globals.hasVideo = false;
-                    window.trackFaceOn();
-                })
-            }
-             else {
+                    ARENA.JitsiAPI.hideVideo();
+                });
+            })
+        }
+        else {
+            ARENA.FaceTracker.trackFaceOff().then(_ => {
                 avatarBtn.childNodes[0].style.backgroundImage = "url('images/icons/avatar3-off.png')";
-                window.trackFaceOff();
-                publishAvatarMsg();
-            }
+            });
         }
     });
 
@@ -134,7 +121,7 @@ function setupIcons() {
         }
         else {
             let groundedPos = globals.sceneObjects.myCamera.getAttribute("position");
-            groundedPos.y = parseFloat(defaults.startCoords.split(",")[1]);
+            groundedPos.y = parseFloat(globals.startCoords.split(" ")[1]);
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }
