@@ -129,6 +129,23 @@ function setCoordsData(evt) {
     };
 }
 
+function setClickData(evt) {
+    if (evt.detail.intersection)
+        return {
+            x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
+            y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
+            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
+        }
+    else {
+        console.log("WARN: empty coords data");
+        return {
+            x: 0,
+            y: 0,
+            z: 0
+        }
+    }
+}
+
 function vec3ToObject(vec) {
     return {
         x: parseFloat(vec.x.toFixed(3)),

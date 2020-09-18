@@ -268,23 +268,6 @@ AFRAME.registerComponent('pose-publisher', {
     })
 });
 
-function setClickData(evt) {
-    if (evt.detail.intersection)
-        return {
-            x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
-            y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
-            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
-        }
-    else {
-        console.log("WARN: empty coords data");
-        return {
-            x: 0,
-            y: 0,
-            z: 0
-        }
-    }
-}
-
 AFRAME.registerComponent('impulse', {
     schema: {
         on: {
@@ -607,6 +590,7 @@ AFRAME.registerComponent('click-listener', {
         //console.log("mousedown init");
         this.el.addEventListener('mousedown', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -616,6 +600,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mousedown",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -624,7 +609,6 @@ AFRAME.registerComponent('click-listener', {
                 //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
                 console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
             } else {
-
                 // do the event handling for MQTT event; this is just an example
                 //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
                 if (evt.currentTarget.id.includes("Earth")) {
@@ -638,6 +622,7 @@ AFRAME.registerComponent('click-listener', {
         //console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -648,6 +633,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mouseup",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -684,6 +670,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseenter', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -693,6 +680,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mouseenter",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }
@@ -715,6 +703,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseleave', function(evt) {
 
+            const clickPos = vec3ToObject(globals.newPosition);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -724,6 +713,7 @@ AFRAME.registerComponent('click-listener', {
                     action: "clientEvent",
                     type: "mouseleave",
                     data: {
+                        clickPos: clickPos,
                         position: coordsData,
                         source: globals.camName
                     }

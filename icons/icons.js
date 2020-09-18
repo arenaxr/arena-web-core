@@ -121,7 +121,7 @@ function setupIcons() {
         }
         else {
             let groundedPos = globals.sceneObjects.myCamera.getAttribute("position");
-            groundedPos.y = parseFloat(defaults.startCoords.split(",")[1]);
+            groundedPos.y = parseFloat(globals.startCoords.split(" ")[1]);
             globals.sceneObjects.myCamera.setAttribute("position", groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = "url('images/icons/flying-off.png')";
         }

@@ -719,6 +719,9 @@ function onMessageArrived(message, jsonMessage) {
                     headModelEl.setAttribute('dynamic-body', "type", "static");
 
                     headModelEl.setAttribute("gltf-model", "url(models/Head.gltf)"); // actually a face mesh
+                    headModelEl.addEventListener("model-progress", e => {
+                        console.log("***", e.detail.progress)
+                      })
 
                     // place a colored text above the head
                     const headtext = document.createElement('a-text');
