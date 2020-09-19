@@ -89,9 +89,6 @@
     <!-- runtime manager -->
     <script src="runtime-mngr/index.js"></script>
 
-    <!-- camera not penetrate objects -->
-    <script src="vendor/kinema.js"></script>
-
     <!-- import stylesheet (used in chat) -->
     <link rel="stylesheet" href="mqtt-chat/style.css">
   </head>
@@ -117,18 +114,12 @@
 
         <a-entity id="env" environment="preset: starry; seed: 5; fog: 0; flatShading: true; groundTexture: squares; grid: none;"></a-entity>
 
-	<!--        <a-entity position="0 0 0" id="CameraRig"> -->
-	<a-entity kinema-body="radius: 0.8" movement-controls="fly: false" position="0 0 0" id="CameraRig">
+        <a-entity position="0 0 0" id="CameraRig">
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
-
-	    <!--
-            <a-entity camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move network-latency>
-	      -->
-	    <a-entity camera id="my-camera" position="0 1.6 0" look-controls pose-listener >
-
+            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move network-latency>
               <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
-            </a-entity>
+            </a-camera>
           </a-entity>
         </a-entity>
 
@@ -141,7 +132,8 @@
         <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
         <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
 
-        <!--
+        <!-- video example: may autoplay in Firefox, all black in Chrome :-/
+        <a-video src="#vrvideo" position="-3 2 -6"></a-video>
         <a-box static-body collision-listener sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/toypiano/Gsharp1.wav); on: collide" id="sound_box" position="0 0.5 -2" scale="0.5 0.5 0.5" >
         </a-box>
         -->
