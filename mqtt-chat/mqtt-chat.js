@@ -167,6 +167,7 @@ export default class MQTTChat {
 
         window.addEventListener('newsettings', e => {
           _this.settings.username=e.detail.name;
+          _this.keepalive(); // let other users know
           _this.populateUserList();
         });
     }
@@ -220,6 +221,7 @@ export default class MQTTChat {
 
     sendMsg(msgTxt) {
         let msg = {
+            object_id: uuidv4(),
             type: "chat",
             from_uid: this.settings.userid,
             from_un: decodeURI(this.settings.username),
@@ -401,6 +403,7 @@ export default class MQTTChat {
         if (tryconnect) this.connect();
 
         let msg = {
+            object_id: uuidv4(),
             type: "chat-ctrl",
             from_uid: this.settings.userid,
             from_un: this.settings.username,
@@ -417,6 +420,7 @@ export default class MQTTChat {
         if (tryconnect) this.connect();
 
         let msg = {
+            object_id: uuidv4(),
             type: "chat-cmd",
             text: text
         }
