@@ -165,6 +165,10 @@ export default class MQTTChat {
             this.moveToFrontOfCamera(moveToCamera, this.settings.scene);
         }
 
+        window.addEventListener('newsettings', e => {
+          _this.settings.username=e.detail.name;
+          _this.populateUserList();
+        });
     }
 
     async connect(force = false) {

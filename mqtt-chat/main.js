@@ -5,7 +5,7 @@ window.addEventListener('onauth', (e) => {
     console.log("Loading MQTTChat");
     let mqttChat = new MQTTChat({
         cameraid: window.globals.camName,
-        username: window.globals.userParam,
+        username: window.globals.displayName,
         realm: "realm",
         scene: window.globals.scenenameParam,
         ping_interval_ms: 30000,
