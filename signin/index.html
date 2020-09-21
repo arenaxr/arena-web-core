@@ -92,6 +92,10 @@
 <script>
     "use strict";
 
+    if (window.navigator.userAgent.includes('WebXRViewer')) {
+        alert('Your user-agent may not work: ' + window.navigator.userAgent);
+    }   
+
     var auth2;
     var googleUser = {};
     var startAuthSignin = function () {
