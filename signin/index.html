@@ -97,16 +97,21 @@
     //    alert('Your user-agent may not work: ' + window.navigator.userAgent);
     //}
 
+    const popupConfig = {
+        client_id: defaults.gAuthClientId,
+    };
+    const redirectConfig = {
+        client_id: defaults.gAuthClientId,
+        ux_mode: 'redirect',
+        redirect_uri: location.href + 'google/',
+    };
+    const gapiInitConfig = isSafari() ? popupConfig : redirectConfig;
     var auth2;
     var googleUser = {};
+
     var startAuthSignin = function () {
         gapi.load('auth2', function () {
-            auth2 = gapi.auth2.init({
-                client_id: defaults.gAuthClientId,
-                ux_mode: 'redirect',
-                redirect_uri: location.href + 'google/',
-		// Safari requires trailing '/' to not strip tokens after '#' in callbacks
-	    });
+            auth2 = gapi.auth2.init(gapiInitConfig);
             attachSignin(document.getElementById('customBtn'));
             auth2 = gapi.auth2.getAuthInstance();
             if (auth2.isSignedIn.get()) {
@@ -137,6 +142,13 @@
         } else {
             location.href = ".."; // back to main ARENA
         }
+    }
+
+    function isSafari() {
+        return navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+            navigator.userAgent &&
+            navigator.userAgent.indexOf('CriOS') == -1 &&
+            navigator.userAgent.indexOf('FxiOS') == -1;
     }
 
     startAuthSignin();
