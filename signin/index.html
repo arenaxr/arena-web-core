@@ -1,86 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <title>Sign In to the ARENA</title>
-        <link
-            rel="icon"
-            type="image/png"
-            href="//xr.andrew.cmu.edu/conix-x.png"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <link rel="stylesheet" type="text/css" href="./style.css" />
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
-        />
-        <script
-            src="https://apis.google.com/js/platform.js"
-            async
-            defer
-        ></script>
-        <meta
-            name="google-signin-client_id"
-            content="173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com"
-        />
-    </head>
+<head>
+    <meta charset="utf-8" />
+    <title>Sign In to the ARENA</title>
+    <link rel="icon" type="image/png" href="//xr.andrew.cmu.edu/conix-x.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <body>
-        <div class="bg-img">
-            <form method="post" action="" class="login login-form">
-                <h1>Sign In to the ARENA</h1>
-                <!-- <input
-                    type="text"
-                    placeholder="Username or email id"
-                    name="login"
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Enter password"
-                    name="psw"
-                    required
-                />
-                <button type="submit">Login</button>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <script src="../defaults.js"></script>
 
-                <label class="remember-me"
-                    ><input type="checkbox" name="remember" />Remember me</label
-                >
-                <span class="forget-psw">Forgot <a href="#">password?</a></span> -->
+    <style type="text/css">
+        #customBtn {
+            display: inline-block;
+            background: white;
+            color: #444;
+            width: 190px;
+            border-radius: 5px;
+            border: thin solid #888;
+            box-shadow: 1px 1px 1px grey;
+            white-space: nowrap;
+        }
 
-                <!-- <div class="social-btn"> -->
-                <div class="fa g-signin2" data-onsuccess="onGoogleSignIn"></div>
-                <!-- <button type="submit" class="google-btn">
-                        <i class="fa fa-google" aria-hidden="true"></i> Login
-                        with Google
-                    </button>
-                    <button type="submit" class="github-btn">
-                        <i class="fa fa-github" aria-hidden="true"></i> Login
-                        with Github
-                    </button> -->
-                <!-- </div> -->
-            </form>
-        </div>
+        #customBtn:hover {
+            cursor: pointer;
+        }
 
-        <script>
-            "use strict";
+        span.label {
+            font-family: serif;
+            font-weight: normal;
+        }
 
-            function onGoogleSignIn(googleUser) {
-                var profile = googleUser.getBasicProfile();
-                console.log("Signed In:: " + profile.getEmail());
+        span.icon {
+            background: url('./google/g-normal.png') transparent 5px 50% no-repeat;
+            display: inline-block;
+            vertical-align: middle;
+            width: 42px;
+            height: 42px;
+        }
 
-                let urlParams = new URLSearchParams(
-                    document.location.search.substring(1)
-                );
-                var encodedUri = urlParams.get("redirect_uri");
-                if (encodedUri) {
-                    //redirect user to originally requested page
-                    location.href = decodeURIComponent(encodedUri);
-                } else {
-                    location.href = ".."; // back to main ARENA
-                }
+        span.buttonText {
+            display: inline-block;
+            vertical-align: middle;
+            padding-left: 42px;
+            padding-right: 42px;
+            font-size: 14px;
+            font-weight: bold;
+            /* font-family: 'Roboto', sans-serif; */
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="bg-img">
+        <form method="post" action="" class="login login-form">
+            <h1>Sign In to the ARENA</h1>
+            <!-- <input type="text" placeholder="Username or email id" name="login" required />
+            <input type="password" placeholder="Enter password" name="psw" required />
+            <button type="submit">Login</button>
+
+            <label class="remember-me"><input type="checkbox" name="remember" />Remember me</label>
+            <span class="forget-psw">Forgot <a href="#">password?</a></span> -->
+
+            <!-- <div class="social-btn"> -->
+            <!-- <div class="fa g-signin2" data-onsuccess="onGoogleSignIn"></div> -->
+            <div id="gSignInWrapper">
+                <!-- <span class="label">Sign in with:</span> -->
+                <div id="customBtn" class="customGPlusSignIn">
+                    <span class="icon"></span>
+                    <span class="buttonText">Google Sign In</span>
+                </div>
+            </div>
+
+            <!-- <button type="submit" class="google-btn">
+                <i class="fa fa-google" aria-hidden="true"></i> Login
+                with Google
+            </button>
+            <button type="submit" class="github-btn">
+                <i class="fa fa-github" aria-hidden="true"></i> Login
+                with Github
+            </button> -->
+
+            <!-- </div> -->
+        </form>
+    </div>
+</body>
+
+<script>
+    "use strict";
+
+    var auth2;
+    var googleUser = {};
+    var startAuthSignin = function () {
+        gapi.load('auth2', function () {
+            auth2 = gapi.auth2.init({
+                client_id: defaults.gAuthClientId,
+                ux_mode: 'redirect',
+                redirect_uri: location.href + 'google',
+            });
+            attachSignin(document.getElementById('customBtn'));
+            auth2 = gapi.auth2.getAuthInstance();
+            if (auth2.isSignedIn.get()) {
+                console.log("User is already signed in.");
+                var googleUser = auth2.currentUser.get();
+                onGoogleSignIn(googleUser);
             }
-        </script>
-    </body>
+        });
+    };
+
+    function attachSignin(element) {
+        console.log(element.id);
+        auth2.attachClickHandler(element, {},
+            function (googleUser) {
+                document.getElementById('name').innerText = "Signed in: " +
+                    googleUser.getBasicProfile().getName();
+            }, function (error) {
+                alert(JSON.stringify(error, undefined, 2));
+            });
+    }
+
+    function onGoogleSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        console.log("Signed In:: " + profile.getEmail());
+        if (localStorage.getItem("request_uri")) {
+            //redirect user to originally requested page
+            location.href = localStorage.getItem("request_uri");
+        } else {
+            location.href = ".."; // back to main ARENA
+        }
+    }
+
+    startAuthSignin();
+</script>
+
 </html>

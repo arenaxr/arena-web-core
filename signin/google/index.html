@@ -1,0 +1,35 @@
+<!-- Google OAuth2 authentication callback -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <script src="../../defaults.js"></script>
+</head>
+<script>
+    var auth2;
+    gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+            client_id: defaults.gAuthClientId
+        }).then(function () {
+            let googleUser = gapi.auth2.getAuthInstance().currentUser.get();
+            if (googleUser) {
+                let profile = googleUser.getBasicProfile();
+                if (profile) {
+                    // if user signed in, then give them requested page with parameters
+                    if (localStorage.getItem("request_uri")) {
+                        //redirect user to originally requested page
+                        location.href = localStorage.getItem("request_uri");
+                    } else {
+                        location.href = ".."; // back to main ARENA
+                    }
+                }
+
+            }
+        });
+    });
+
+</script>
+
+</html>
