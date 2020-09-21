@@ -13,19 +13,19 @@
         auth2 = gapi.auth2.init({
             client_id: defaults.gAuthClientId
         }).then(function () {
-            let googleUser = gapi.auth2.getAuthInstance().currentUser.get();
-            if (googleUser) {
-                let profile = googleUser.getBasicProfile();
-                if (profile) {
-                    // if user signed in, then give them requested page with parameters
-                    if (localStorage.getItem("request_uri")) {
-                        //redirect user to originally requested page
-                        location.href = localStorage.getItem("request_uri");
-                    } else {
-                        location.href = ".."; // back to main ARENA
-                    }
+            auth2 = gapi.auth2.getAuthInstance();
+            if (!auth2.isSignedIn.get()) {
+                console.log("User is not signed in.");
+                //location.href = "./signin";
+            } else {
+                console.log("User is already signed in.");
+                // if user signed in, then give them requested page with parameters
+                if (localStorage.getItem("request_uri")) {
+                    //redirect user to originally requested page
+                    location.href = localStorage.getItem("request_uri");
+                } else {
+                    location.href = ".."; // back to main ARENA
                 }
-
             }
         });
     });
