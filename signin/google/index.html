@@ -8,15 +8,18 @@
     <script src="../../defaults.js"></script>
 </head>
 <script>
-    //alert(location.href)
     var auth2;
     gapi.load('auth2', function () {
         auth2 = gapi.auth2.init({
             client_id: defaults.gAuthClientId
         }).then(function () {
             auth2 = gapi.auth2.getAuthInstance();
+            console.log(gapi.auth2.getAuthInstance().isSignedIn.get());
             if (!auth2.isSignedIn.get()) {
                 console.log("User is not signed in.");
+
+                //TODO(mwfarb): propagate login flow error up to user
+
                 //location.href = "./signin";
             } else {
                 console.log("User is already signed in.");
