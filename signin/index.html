@@ -92,9 +92,10 @@
 <script>
     "use strict";
 
-    if (window.navigator.userAgent.includes('WebXRViewer')) {
-        alert('Your user-agent may not work: ' + window.navigator.userAgent);
-    }
+    // TODO(mwfarb): determine what exactly in some WebXRViewer UAs allow gAuth success
+    //if (window.navigator.userAgent.includes('WebXRViewer')) {
+    //    alert('Your user-agent may not work: ' + window.navigator.userAgent);
+    //}
 
     var auth2;
     var googleUser = {};
@@ -103,8 +104,9 @@
             auth2 = gapi.auth2.init({
                 client_id: defaults.gAuthClientId,
                 ux_mode: 'redirect',
-                redirect_uri: location.href + 'google',
-            });
+                redirect_uri: location.href + 'google/',
+		// Safari requires trailing '/' to not strip tokens after '#' in callbacks
+	    });
             attachSignin(document.getElementById('customBtn'));
             auth2 = gapi.auth2.getAuthInstance();
             if (auth2.isSignedIn.get()) {
