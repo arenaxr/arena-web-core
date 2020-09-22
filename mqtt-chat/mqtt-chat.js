@@ -178,6 +178,7 @@ export default class MQTTChat {
 
         var _this = this;
         let msg = {
+            object_id: uuidv4(),
             type: "chat-ctrl",
             from_uid: this.settings.userid,
             from_un: this.settings.username,
