@@ -131,7 +131,10 @@ function setupIcons() {
     settingsButtons.push(flyingBtn);
 
     const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
-        window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
+        var confirmation = confirm("In order to share your screen, ARENA will open up a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!");
+        if (confirmation) {
+            window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
+        }
     });
     screenShareButton.style.display = "none";
     settingsButtons.push(screenShareButton);
@@ -165,7 +168,7 @@ function setupIcons() {
     });
 
     var iconsDiv = document.createElement('div');
-    iconsDiv.setAttribute("id", "iconsDiv");
+    iconsDiv.setAttribute("id", "icons-div");
     iconsDiv.appendChild(audioBtn);
     iconsDiv.appendChild(videoBtn);
     if (!AFRAME.utils.device.isMobile()) {

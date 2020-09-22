@@ -1,4 +1,4 @@
-#iconsDiv {
+#icons-div {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -25,10 +25,10 @@
     touch-action: manipulation; /* Prevent iOS double tap zoom on the button */
     opacity: 0;
 
-    animation: fadein 1.0s;
-    -moz-animation: fadein 1.0s; /* Firefox */
-    -webkit-animation: fadein 1.0s; /* Safari and Chrome */
-    -o-animation: fadein 1.0s; /* Opera */
+    animation: iconfadein 1.0s;
+    -moz-animation: iconfadein 1.0s; /* Firefox */
+    -webkit-animation: iconfadein 1.0s; /* Safari and Chrome */
+    -o-animation: iconfadein 1.0s; /* Opera */
     animation-fill-mode: forwards;
 }
 
@@ -38,7 +38,7 @@
 }
 
 @media screen and (max-height: 640px) {
-    #iconsDiv {
+    #icons-div {
         top: 20px;
         right: 20px;
     }
@@ -50,7 +50,7 @@
     }
 }
 
-@keyframes fadein {
+@keyframes iconfadein {
     0% { opacity: 0.0; }
     100% { opacity: 1.0; }
 }
@@ -63,4 +63,50 @@
     top: 10px;
     right: 100px;
     font-size: small;
+}
+
+#gltf-loading {
+    visibility: hidden;
+    left: 50%;
+    width: 200px;
+    margin-left: -100px;
+    background-color: white;
+    text-align: center;
+    border-radius: 10px;
+    padding: 15px;
+    position: fixed;
+    z-index: 9999;
+    bottom: 20px;
+    font-size: 15px;
+}
+
+#gltf-loading.show {
+    visibility: visible;
+    -webkit-animation: gltffadein 1.0s;
+    animation: gltffadein 1.0s;
+}
+
+#gltf-loading.hide {
+    -webkit-animation: gltffadeout 1.0s;
+    animation: gltffadeout 1.0s;
+}
+
+@-webkit-keyframes gltffadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes gltffadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes gltffadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0; visibility: hidden;}
+}
+
+@keyframes gltffadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0; visibility: hidden;}
 }

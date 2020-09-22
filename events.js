@@ -366,7 +366,10 @@ AFRAME.registerComponent('goto-url', {
         if (data.on) { // we have an event?
             el.addEventListener(data.on, function() {
                 console.log("goto-url url=" + data.url);
-                window.location.href = data.url;
+                var confirmation = confirm("Are you sure you want to go to "+data.url+"?");
+                if (confirmation) {
+                    window.location.href = data.url;
+                }
             });
         } else {
             // `event` not specified, just log the message.
@@ -988,6 +991,30 @@ AFRAME.registerComponent("network-latency", {
         }
     })
 })
+
+// emit model onProgress (loading) event
+AFRAME.components['gltf-model'].Component.prototype.update = function () {
+    var self = this;
+    var el = this.el;
+    var src = this.data;
+
+    if (!src) { return; }
+
+    this.remove();
+
+    this.loader.load(src, function gltfLoaded (gltfModel) {
+        self.model = gltfModel.scene || gltfModel.scenes[0];
+        self.model.animations = gltfModel.animations;
+        el.setObject3D('mesh', self.model);
+        el.emit('model-loaded', {format: 'gltf', model: self.model});
+    }, function gltfProgress(xhr) {
+        el.emit("model-progress", {src: src, progress: (xhr.loaded / xhr.total * 100) })
+    }, function gltfFailed (error) {
+        var message = (error && error.message) ? error.message : 'Failed to load glTF model';
+        warn(message);
+        el.emit('model-error', {format: 'gltf', src: src});
+    });
+}
 
 AFRAME.registerComponent("press-and-move", {
     schema: {
