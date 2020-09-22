@@ -245,7 +245,7 @@ function setupIcons() {
 
     function loadSettings() {
         usernameInput.value = globals.displayName;
-        auth = getAuthStatus();
+        var auth = getAuthStatus();
         authType.innerHTML = auth.type;
         authName.innerHTML = auth.name;
         authEmail.innerHTML = auth.email;

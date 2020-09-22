@@ -7,6 +7,7 @@
 //  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
+//  <script type="text/javascript">AUTH.check({ signInPath: "./signin" });</script>
 //
 // Optional:
 //  <script src="./events.js"></script>  <!-- for window.globals -->
@@ -26,15 +27,25 @@
 
 'use strict';
 
-//window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
+var AUTH = AUTH || (function () {
+    var _args = {};
+    return {
+        check: function (Args) {
+            _args = Args;
+            gapi.load('auth2', initSigninV2(_args.signInPath));
+        }
+    };
+}());
 
 if (!storageAvailable('localStorage')) {
     alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
 
+//window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
+
 var auth2;
 // check if the current user is already signed in
-gapi.load('auth2', function () {
+var initSigninV2 = function (signInPath) {
     auth2 = gapi.auth2.init({
         client_id: defaults.gAuthClientId
     }).then(function () {
@@ -43,14 +54,14 @@ gapi.load('auth2', function () {
             console.log("User is not signed in.");
             // send login with redirection url from this page
             localStorage.setItem("request_uri", location.href);
-            location.href = "./signin";
+            location.href = signInPath;
         } else {
             console.log("User is already signed in.");
             var googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
     });
-});
+};
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
