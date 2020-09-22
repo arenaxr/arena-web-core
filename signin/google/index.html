@@ -17,10 +17,8 @@
             console.log(gapi.auth2.getAuthInstance().isSignedIn.get());
             if (!auth2.isSignedIn.get()) {
                 console.log("User is not signed in.");
-
-                //TODO(mwfarb): propagate login flow error up to user
-
-                //location.href = "./signin";
+                alert('QUACK!\n\nGoogle sign-in callback should be complete, but is unrecognized. ' +
+                    ' User-agent: "' + navigator.userAgent + '"');
             } else {
                 console.log("User is already signed in.");
                 // if user signed in, then give them requested page with parameters

@@ -29,8 +29,7 @@
 //window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
 
 if (!storageAvailable('localStorage')) {
-    alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Perhaps you have disabled cookies?');
-    stop(); // critical error, stop execution
+    alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
 
 var auth2;
