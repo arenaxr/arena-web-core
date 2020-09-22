@@ -78,6 +78,7 @@
     z-index: 9999;
     bottom: 20px;
     font-size: 15px;
+    word-wrap: break-word;
 }
 
 #gltf-loading.show {

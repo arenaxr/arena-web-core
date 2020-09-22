@@ -366,7 +366,7 @@ AFRAME.registerComponent('goto-url', {
         if (data.on) { // we have an event?
             el.addEventListener(data.on, function() {
                 console.log("goto-url url=" + data.url);
-                var confirmation = confirm("Are you sure you want to go to "+data.url+"?");
+                var confirmation = confirm("Are you sure you want to go to\n["+data.url+"]?");
                 if (confirmation) {
                     window.location.href = data.url;
                 }
