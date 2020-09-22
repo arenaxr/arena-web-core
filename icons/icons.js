@@ -137,7 +137,7 @@ function setupIcons() {
     settingsButtons.push(screenShareButton);
 
     const logoutBtn = createIconButton("logout-on", "Sign out of the ARENA", () => {
-        signOut(); // --> ./auth.js
+        signOut('.'); // --> ./auth.js
     });
     logoutBtn.style.display = "none";
     settingsButtons.push(logoutBtn);
