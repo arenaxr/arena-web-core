@@ -1,0 +1,37 @@
+<!-- Google OAuth2 authentication callback -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="../../defaults.js"></script>
+</head>
+<script>
+    var auth2;
+    gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+            client_id: defaults.gAuthClientId
+        }).then(function () {
+            auth2 = gapi.auth2.getAuthInstance();
+            console.log(gapi.auth2.getAuthInstance().isSignedIn.get());
+            if (!auth2.isSignedIn.get()) {
+                console.log("User is not signed in.");
+                alert('QUACK!\n\nGoogle sign-in callback should be complete, but is unrecognized. ' +
+                    ' User-agent: "' + navigator.userAgent + '"');
+            } else {
+                console.log("User is already signed in.");
+                // if user signed in, then give them requested page with parameters
+                if (localStorage.getItem("request_uri")) {
+                    //redirect user to originally requested page
+                    location.href = localStorage.getItem("request_uri");
+                } else {
+                    location.href = ".."; // back to main ARENA
+                }
+            }
+        });
+    });
+
+</script>
+
+</html>
