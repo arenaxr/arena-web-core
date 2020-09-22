@@ -7,7 +7,7 @@
 //  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
-//  <script type="text/javascript">AUTH.check({ signInPath: "./signin" });</script>
+//  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
 //
 // Optional:
 //  <script src="./events.js"></script>  <!-- for window.globals -->
@@ -27,16 +27,6 @@
 
 'use strict';
 
-var AUTH = AUTH || (function () {
-    var _args = {};
-    return {
-        check: function (Args) {
-            _args = Args;
-            gapi.load('auth2', initSigninV2(_args.signInPath));
-        }
-    };
-}());
-
 if (!storageAvailable('localStorage')) {
     alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
@@ -45,21 +35,23 @@ if (!storageAvailable('localStorage')) {
 
 var auth2;
 // check if the current user is already signed in
-var initSigninV2 = function (signInPath) {
-    auth2 = gapi.auth2.init({
-        client_id: defaults.gAuthClientId
-    }).then(function () {
-        auth2 = gapi.auth2.getAuthInstance();
-        if (!auth2.isSignedIn.get()) {
-            console.log("User is not signed in.");
-            // send login with redirection url from this page
-            localStorage.setItem("request_uri", location.href);
-            location.href = signInPath;
-        } else {
-            console.log("User is already signed in.");
-            var googleUser = auth2.currentUser.get();
-            onSignIn(googleUser);
-        }
+var authCheck = function (args) {
+    gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+            client_id: defaults.gAuthClientId
+        }).then(function () {
+            auth2 = gapi.auth2.getAuthInstance();
+            if (!auth2.isSignedIn.get()) {
+                console.log("User is not signed in.");
+                // send login with redirection url from this page
+                localStorage.setItem("request_uri", location.href);
+                location.href = args.signInPath;
+            } else {
+                console.log("User is already signed in.");
+                var googleUser = auth2.currentUser.get();
+                onSignIn(googleUser);
+            }
+        });
     });
 };
 
