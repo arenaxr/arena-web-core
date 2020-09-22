@@ -42,8 +42,10 @@ gapi.load('auth2', function () {
         if (!auth2.isSignedIn.get()) {
             console.log("User is not signed in.");
             // send login with redirection url from this page
+            var urlParts = location.href.split("/");
+            var rootPath = urlParts[0] + "//" + urlParts[2]
             localStorage.setItem("request_uri", location.href);
-            location.href = "./signin";
+            location.href = rootPath + "/signin";
         } else {
             console.log("User is already signed in.");
             var googleUser = auth2.currentUser.get();
@@ -85,7 +87,10 @@ function onSignIn(googleUser) {
     requestMqttToken(profile.getEmail(), id_token);
 }
 
-function signOut(rootPath) {
+function signOut() {
+    var urlParts = location.href.split("/");
+    var rootPath = urlParts[0] + "//" + urlParts[2]
+
     // logout, and disassociate user
     var auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(function () {
