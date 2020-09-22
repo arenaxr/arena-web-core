@@ -100,13 +100,12 @@
     var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
     var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
     var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
+    var is_edge = navigator.userAgent.indexOf('Edg') > -1;
     var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
+    if ((is_edge) && (is_safari)) { is_safari = false; }
     if ((is_firefox) && (is_safari)) { is_safari = false; }
     if ((is_chrome) && (is_safari)) { is_safari = false; }
     if ((is_chrome) && (is_opera)) { is_chrome = false; }
-
-    // TODO(mwfarb): remove debug
-    alert(is_safari + " " + is_chrome + " " + is_firefox + " " + is_webxrv + " " + is_explorer + " " + is_opera + " " + window.navigator.userAgent);
 
     const popupConfig = {
         client_id: defaults.gAuthClientId,
