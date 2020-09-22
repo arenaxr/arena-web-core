@@ -66,13 +66,16 @@
     if ((is_chrome) && (is_safari)) { is_safari = false; }
     if ((is_chrome) && (is_opera)) { is_chrome = false; }
 
+    var urlParts = location.href.split("/");
+    var rootPath = urlParts[0] + "//" + urlParts[2];
+
     const popupConfig = {
         client_id: defaults.gAuthClientId,
     };
     const redirectConfig = {
         client_id: defaults.gAuthClientId,
         ux_mode: 'redirect',
-        redirect_uri: location.href + 'google/',
+        redirect_uri: rootPath + '/signin/google/',
     };
     const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
     var auth2;
