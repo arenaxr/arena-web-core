@@ -92,19 +92,20 @@
 <script>
     "use strict";
 
-    // TODO(mwfarb): determine what exactly in some WebXRViewer UAs allow gAuth success
-    //if (window.navigator.userAgent.includes('WebXRViewer')) {
-    //    alert('Your user-agent may not work: ' + window.navigator.userAgent);
-    //}
+    // TODO(mwfarb): stock iOS build of WebXRViewer UA rejects the UA with 403
 
-    var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
-    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
-    var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
-    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
+    // browser detection is not fun...
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('ChiOS') > -1;
+    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
+    var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
+    var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
     var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
     if ((is_chrome) && (is_safari)) { is_safari = false; }
     if ((is_chrome) && (is_opera)) { is_chrome = false; }
+
+    // TODO(mwfarb): remove debug
+    alert(is_safari + " " + is_chrome + " " + is_firefox + " " + is_webxrv + " " + is_explorer + " " + is_opera + " " + window.navigator.userAgent);
 
     const popupConfig = {
         client_id: defaults.gAuthClientId,
@@ -117,9 +118,6 @@
     const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
     var auth2;
     var googleUser = {};
-
-    alert(is_safari + " " + window.navigator.userAgent);
-
     var startAuthSignin = function () {
         gapi.load('auth2', function () {
             auth2 = gapi.auth2.init(gapiInitConfig);
