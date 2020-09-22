@@ -97,6 +97,15 @@
     //    alert('Your user-agent may not work: ' + window.navigator.userAgent);
     //}
 
+    var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
+    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
+    var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
+    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
+    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
+    var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
+    if ((is_chrome) && (is_safari)) { is_safari = false; }
+    if ((is_chrome) && (is_opera)) { is_chrome = false; }
+
     const popupConfig = {
         client_id: defaults.gAuthClientId,
     };
@@ -105,9 +114,11 @@
         ux_mode: 'redirect',
         redirect_uri: location.href + 'google/',
     };
-    const gapiInitConfig = isSafari() ? popupConfig : redirectConfig;
+    const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
     var auth2;
     var googleUser = {};
+
+    alert(is_safari + " " + window.navigator.userAgent);
 
     var startAuthSignin = function () {
         gapi.load('auth2', function () {
@@ -138,19 +149,6 @@
         } else {
             location.href = ".."; // back to main ARENA
         }
-    }
-
-    var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
-    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1;
-    var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
-    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1;
-    var is_safari = navigator.userAgent.indexOf("Safari") > -1;
-    var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
-    if ((is_chrome) && (is_safari)) { is_safari = false; }
-    if ((is_chrome) && (is_opera)) { is_chrome = false; }
-
-    function isSafari() {
-        return is_safari;
     }
 
     startAuthSignin();
