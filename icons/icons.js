@@ -165,7 +165,7 @@ function setupIcons() {
     });
 
     var iconsDiv = document.createElement('div');
-    iconsDiv.setAttribute("id", "iconsDiv");
+    iconsDiv.setAttribute("id", "icons-div");
     iconsDiv.appendChild(audioBtn);
     iconsDiv.appendChild(videoBtn);
     if (!AFRAME.utils.device.isMobile()) {

@@ -931,9 +931,23 @@ function onMessageArrived(message, jsonMessage) {
                     break;
 
                 case "gltf-model":
-                    //entityEl.object3D.scale.set(xscale, yscale, zscale);
                     entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
-                    entityEl.setAttribute("gltf-model", theMessage.data.url);
+                    entityEl.setAttribute('gltf-model', theMessage.data.url);
+
+                    function updateProgress(innerHTML, evt) {
+                        const gltfProgressEl = document.getElementById("gltf-loading");
+                        gltfProgressEl.innerHTML = innerHTML;
+                        gltfProgressEl.className = "show";
+                        if (evt.detail.progress == 100) setTimeout(() => { gltfProgressEl.className = "hide"; }, 1000);
+                    }
+                    entityEl.addEventListener('model-progress', evt => {
+                        const text = "Loading 3D model:<br/>" + "\""+evt.detail.src+"\"" + "<br/>" + parseFloat(evt.detail.progress.toFixed(1))+"%";
+                        updateProgress(text, evt);
+                    });
+                    entityEl.addEventListener('model-error', evt => {
+                        const text = "Failed to load 3D model:<br/>" + "\""+evt.detail.src+"\"!";
+                        updateProgress(text, evt);
+                    });
                     delete theMessage.data.url;
                     break;
 
