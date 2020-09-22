@@ -7,6 +7,7 @@
 //  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
+//  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
 //
 // Optional:
 //  <script src="./events.js"></script>  <!-- for window.globals -->
@@ -26,31 +27,33 @@
 
 'use strict';
 
-//window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
-
 if (!storageAvailable('localStorage')) {
     alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
 
+//window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
+
 var auth2;
 // check if the current user is already signed in
-gapi.load('auth2', function () {
-    auth2 = gapi.auth2.init({
-        client_id: defaults.gAuthClientId
-    }).then(function () {
-        auth2 = gapi.auth2.getAuthInstance();
-        if (!auth2.isSignedIn.get()) {
-            console.log("User is not signed in.");
-            // send login with redirection url from this page
-            localStorage.setItem("request_uri", location.href);
-            location.href = "./signin";
-        } else {
-            console.log("User is already signed in.");
-            var googleUser = auth2.currentUser.get();
-            onSignIn(googleUser);
-        }
+var authCheck = function (args) {
+    gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+            client_id: defaults.gAuthClientId
+        }).then(function () {
+            auth2 = gapi.auth2.getAuthInstance();
+            if (!auth2.isSignedIn.get()) {
+                console.log("User is not signed in.");
+                // send login with redirection url from this page
+                localStorage.setItem("request_uri", location.href);
+                location.href = args.signInPath;
+            } else {
+                console.log("User is already signed in.");
+                var googleUser = auth2.currentUser.get();
+                onSignIn(googleUser);
+            }
+        });
     });
-});
+};
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
