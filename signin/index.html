@@ -101,6 +101,7 @@
     var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
     var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
     var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
+    if ((is_firefox) && (is_safari)) { is_safari = false; }
     if ((is_chrome) && (is_safari)) { is_safari = false; }
     if ((is_chrome) && (is_opera)) { is_chrome = false; }
 
