@@ -8,6 +8,10 @@ var schema_files = {
     "program": {
         file: "arena-program.json",
         description: "Program"
+    },
+    "scene-options": {
+        file: "arena-scene-options.json",
+        description: "Scene Options"
     }
 };
 

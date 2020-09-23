@@ -46,7 +46,7 @@
             },
             "args":{
                "type":"array",
-               "description":"Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${query-string-key}",
+               "description":"Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
                "uniqueItems":false,
                "items":{
                   "type":"string",
@@ -55,13 +55,14 @@
             },
             "env":{
                "type":"array",
-               "description":"Environment variables. Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${query-string-key}",
+               "description":"Environment variables. Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
                "uniqueItems":false,
                "items":{
                   "type":"string",
-                  "title":"args"
+                  "title":"env"
                },
                "default":[
+                  "MID=${moduleid}",
                   "SCENE=${scene}",
                   "MQTTH=${mqtth}",
                   "REALM=realm"
@@ -69,7 +70,7 @@
             },
             "channels":{
                "type":"array",
-               "description":"Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future).",
+               "description":"Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future; currently only supported for WASM programs).",
                "uniqueItems":false,
                "items":{
                   "type":"object",
@@ -136,8 +137,7 @@
             "filename",
             "filetype",
             "instantiate",
-            "env",
-            "channels"
+            "env"
          ]
       },
       "arenaobj":{
