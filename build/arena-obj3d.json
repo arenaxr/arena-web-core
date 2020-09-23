@@ -150,7 +150,7 @@
       },
       "persist":{
          "type":"boolean",
-         "default": "false",
+         "default": "true",
          "description": "Persist this object in the database (default false = do not persist)"
       },
       "data":{
