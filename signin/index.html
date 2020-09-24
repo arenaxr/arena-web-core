@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <script src="https://apis.google.com/js/api:client.js"></script>
     <script src="../defaults.js"></script>
+    <script src="../auth.js"></script>
 </head>
 
 <body>
@@ -46,7 +47,7 @@
             </div>
             <!-- </div> -->
             <div hidden id="anonNameWrapper">Great! Your preferred name is...<input type="text"
-                    placeholder="Hi! My name is..." id="usernameInput" pattern="^(?=[^A-Za-z]*[A-Za-z])[ -~]*$" />
+                    placeholder="Hi! My name is..." id="usernameInput" />
                 <button id="btnAnonName" type="button">Enter</button>
             </div>
         </form>
@@ -55,10 +56,6 @@
 
 <script>
     "use strict";
-
-    if (!storageAvailable('localStorage')) {
-        alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
-    }
 
     // TODO(mwfarb): App Store iOS build of WebXRViewer, G-Auth rejects the UA with 403
 
@@ -103,7 +100,6 @@
     };
 
     function attachGoogleSignin(element) {
-        console.log(element.id);
         auth2.attachClickHandler(element, {}, onGoogleSignIn, function (error) {
             alert(JSON.stringify(error, undefined, 2));
         });
