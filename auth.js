@@ -36,6 +36,23 @@ if (!storageAvailable('localStorage')) {
 var auth2;
 // check if the current user is already signed in
 var authCheck = function (args) {
+    // handle restricted anonymous user
+    if (localStorage.getItem("auth_choice") === "anonymous") {
+        localStorage.removeItem("auth_choice"); // TODO(mwfarb): verify: unset anon, don't persist
+        var savedName = localStorage.getItem("display_name");
+        // prefix all anon users with "anon-"
+        var userParam = `anon-${savedName}`;
+        if (typeof globals !== 'undefined') {
+            setGlobalUserIds(userParam);
+            requestMqttToken("anonymous", globals.userParam);
+        } else {
+            requestMqttToken("anonymous", userParam);
+        }
+        return;
+        //TODO(mwfarb): handle case of room-hopping without anon-auth-button
+    }
+
+    // normal check for google auth2
     gapi.load('auth2', function () {
         auth2 = gapi.auth2.init({
             client_id: defaults.gAuthClientId
@@ -48,12 +65,30 @@ var authCheck = function (args) {
                 location.href = args.signInPath;
             } else {
                 console.log("User is already signed in.");
+                localStorage.setItem("auth_choice", "google");
                 var googleUser = auth2.currentUser.get();
                 onSignIn(googleUser);
             }
         });
     });
 };
+
+function setGlobalUserIds(userParam) {
+    // globals.userParam = encodeURI(userParam);
+    globals.userParam = userParam.replace(/[^a-zA-Z0-9]/g, '');
+
+    // replay global id setup from events.js
+    globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
+
+    if (globals.fixedCamera !== '') {
+        globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
+    } else {
+        globals.camName = "camera_" + globals.idTag; // e.g. camera_1234_eric
+    }
+
+    globals.viveLName = "viveLeft_" + globals.idTag; // e.g. viveLeft_9240_X
+    globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+}
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
@@ -67,25 +102,12 @@ function onSignIn(googleUser) {
             // Use auth name to create human-readable name
             globals.displayName = localStorage.getItem("display_name") === null ? profile.getName() : localStorage.getItem("display_name");
             localStorage.setItem("display_name", globals.displayName);
-            // globals.userParam = encodeURI(profile.getName());
-            globals.userParam = profile.getName().replace(/[^a-zA-Z0-9]/g, '');
-
-            // replay global id setup from events.js
-            globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
-
-            if (globals.fixedCamera !== '') {
-                globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
-            } else {
-                globals.camName = "camera_" + globals.idTag; // e.g. camera_1234_eric
-            }
-
-            globals.viveLName = "viveLeft_" + globals.idTag; // e.g. viveLeft_9240_X
-            globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+            setGlobalUserIds(profile.getName());
         }
     }
     // request mqtt-auth
     var id_token = googleUser.getAuthResponse().id_token;
-    requestMqttToken(profile.getEmail(), id_token);
+    requestMqttToken("google", profile.getEmail(), id_token);
 }
 
 function signOut(rootPath) {
@@ -100,11 +122,11 @@ function signOut(rootPath) {
     location.href = rootPath + "/signin";
 }
 
-function requestMqttToken(mqtt_username, id_token) {
+function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
     var params = "username=" + mqtt_username + "&id_token=" + id_token;
-    params += "&id_auth=google";
+    params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
     if (typeof globals !== 'undefined') {
         if (globals.scenenameParam) {

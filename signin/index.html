@@ -46,8 +46,8 @@
             </div>
             <!-- </div> -->
             <div hidden id="anonNameWrapper">Great! Your preferred name is...<input type="text"
-                    placeholder="Hi! My name is..." id="anon-name" pattern="^(?=[^A-Za-z]*[A-Za-z])[ -~]*$" />
-                <button type="submit">Enter</button>
+                    placeholder="Hi! My name is..." id="usernameInput" pattern="^(?=[^A-Za-z]*[A-Za-z])[ -~]*$" />
+                <button id="btnAnonName" type="button">Enter</button>
             </div>
         </form>
     </div>
@@ -55,6 +55,10 @@
 
 <script>
     "use strict";
+
+    if (!storageAvailable('localStorage')) {
+        alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
+    }
 
     // TODO(mwfarb): App Store iOS build of WebXRViewer, G-Auth rejects the UA with 403
 
@@ -107,7 +111,11 @@
 
     function onGoogleSignIn(googleUser) {
         var profile = googleUser.getBasicProfile();
-        console.log("Signed In:: " + profile.getEmail());
+        console.log("Signed In: " + profile.getEmail());
+        returnToRequestedPage();
+    }
+
+    function returnToRequestedPage() {
         if (localStorage.getItem("request_uri")) {
             //redirect user to originally requested page
             location.href = localStorage.getItem("request_uri");
@@ -116,23 +124,37 @@
         }
     }
 
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
     var initAnonAuth = function () {
+        var re = new RegExp(nameRegex);
         var anonBtn = document.getElementById('customBtnAnon');
         if (typeof anonBtn != 'undefined') {
             anonBtn.addEventListener('click', function (event) {
-                // check for saved name, if passable, use it
-                //var savedName = localStorage.getItem("display_name") === null ? profile.getName() : localStorage.getItem("display_name");
-                 
-
-                // if no passable name, ask for one, validate
-                var anEl = document.getElementById('anonNameWrapper');
-                anEl.hidden = false;
-
-                // continue to anonymous mqtt auth request
-                //TODO(mwfarb): handle case of room hopping without anon-auth-button?
+                // check for saved name, use it
+                var savedName = localStorage.getItem("display_name");
+                if (savedName !== null && re.test(savedName)) {
+                    localStorage.setItem("auth_choice", "anonymous");
+                    returnToRequestedPage();
+                } else { // if no passable name, ask for one
+                    var anEl = document.getElementById('anonNameWrapper');
+                    anEl.hidden = false;
+                }
             });
         }
-    };
+        var usernameInput = document.getElementById('usernameInput');
+        usernameInput.setAttribute("pattern", nameRegex);
+        var nameBtn = document.getElementById('btnAnonName');
+        nameBtn.addEventListener('click', function (event) {
+            // validate
+            if (re.test(usernameInput.value)) {
+                // remove extra spaces
+                globals.displayName = usernameInput.value.replace(/\s+/g, " ").trim();
+                localStorage.setItem("display_name", globals.displayName);  // save for next use
+                localStorage.setItem("auth_choice", "anonymous");
+                returnToRequestedPage();
+            }
+        });
+    }
 
     initGoogleAuth();
     initAnonAuth();
