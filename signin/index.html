@@ -27,23 +27,28 @@
             <!-- <div class="social-btn"> -->
             <!-- <div class="fa g-signin2" data-onsuccess="onGoogleSignIn"></div> -->
             <div id="gSignInWrapper">
-                <!-- <span class="label">Sign in with:</span> -->
-                <div id="customBtn" class="customGPlusSignIn">
+                <div id="customBtnGoogle" class="customBtn">
                     <span class="icon"></span>
-                    <span class="buttonText">Google Sign In</span>
+                    <span class="buttonText">Google</span>
                 </div>
             </div>
-
-            <!-- <button type="submit" class="google-btn">
-                <i class="fa fa-google" aria-hidden="true"></i> Login
-                with Google
-            </button>
-            <button type="submit" class="github-btn">
-                <i class="fa fa-github" aria-hidden="true"></i> Login
-                with Github
-            </button> -->
-
+            <!-- <button type="submit" class="github-btn">
+                    <i class="fab fa-github" aria-hidden="true"></i> Login
+                    with Github
+                </button> -->
+            <div id="anonSignInWrapper">
+                <div id="customBtnAnon" class="customBtn">
+                    <span class="icon">
+                        <i class="fa fa-user-secret"></i>
+                    </span>
+                    <span class="buttonText">Anonymously</span>
+                </div>
+            </div>
             <!-- </div> -->
+            <div hidden id="anonNameWrapper">Great! Your preferred name is...<input type="text"
+                    placeholder="Hi! My name is..." id="anon-name" pattern="^(?=[^A-Za-z]*[A-Za-z])[ -~]*$" />
+                <button type="submit">Enter</button>
+            </div>
         </form>
     </div>
 </body>
@@ -57,7 +62,7 @@
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('ChiOS') > -1;
     var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
-    var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
+    var is_webxrviewer = navigator.userAgent.indexOf('WebXRViewer') > -1;
     var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
     var is_edge = navigator.userAgent.indexOf('Edg') > -1;
     var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
@@ -80,10 +85,10 @@
     const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
     var auth2;
     var googleUser = {};
-    var startAuthSignin = function () {
+    var initGoogleAuth = function () {
         gapi.load('auth2', function () {
             auth2 = gapi.auth2.init(gapiInitConfig);
-            attachSignin(document.getElementById('customBtn'));
+            attachGoogleSignin(document.getElementById('customBtnGoogle'));
             auth2 = gapi.auth2.getAuthInstance();
             if (auth2.isSignedIn.get()) {
                 console.log("User is already signed in.");
@@ -93,7 +98,7 @@
         });
     };
 
-    function attachSignin(element) {
+    function attachGoogleSignin(element) {
         console.log(element.id);
         auth2.attachClickHandler(element, {}, onGoogleSignIn, function (error) {
             alert(JSON.stringify(error, undefined, 2));
@@ -111,7 +116,26 @@
         }
     }
 
-    startAuthSignin();
+    var initAnonAuth = function () {
+        var anonBtn = document.getElementById('customBtnAnon');
+        if (typeof anonBtn != 'undefined') {
+            anonBtn.addEventListener('click', function (event) {
+                // check for saved name, if passable, use it
+                //var savedName = localStorage.getItem("display_name") === null ? profile.getName() : localStorage.getItem("display_name");
+                 
+
+                // if no passable name, ask for one, validate
+                var anEl = document.getElementById('anonNameWrapper');
+                anEl.hidden = false;
+
+                // continue to anonymous mqtt auth request
+                //TODO(mwfarb): handle case of room hopping without anon-auth-button?
+            });
+        }
+    };
+
+    initGoogleAuth();
+    initAnonAuth();
 </script>
 
 </html>
