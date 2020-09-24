@@ -244,7 +244,7 @@ function setupIcons() {
     };
 
     function loadSettings() {
-        usernameInput.value = globals.displayName;
+        usernameInput.value = localStorage.getItem("display_name");
         var auth = getAuthStatus();
         authType.innerHTML = auth.type;
         authName.innerHTML = auth.name;

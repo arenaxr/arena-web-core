@@ -132,8 +132,8 @@
                     localStorage.setItem("auth_choice", "anonymous");
                     returnToRequestedPage();
                 } else { // if no passable name, ask for one
-                    var anEl = document.getElementById('anonNameWrapper');
-                    anEl.hidden = false;
+                    var namePanel = document.getElementById('anonNameWrapper');
+                    namePanel.hidden = false;
                 }
             });
         }

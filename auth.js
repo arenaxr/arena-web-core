@@ -41,21 +41,15 @@ var authCheck = function (args) {
 
     //TODO(mwfarb): also verify valid unexpired stored mqtt-token
 
-    // handle restricted anonymous user
+    // prefix all anon users with "anon-"
     if (localStorage.getItem("auth_choice") === "anonymous") {
         //localStorage.removeItem("auth_choice"); // TODO(mwfarb): verify: unset anon, don't persist
-        var savedName = localStorage.getItem("display_name");
-        // prefix all anon users with "anon-"
-        var userParam = `anon-${savedName}`;
-        if (typeof globals !== 'undefined') {
-            setGlobalUserIds(userParam);
-            requestMqttToken("anonymous", globals.userParam);
-        } else {
-            requestMqttToken("anonymous", userParam);
-        }
+        var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
+        requestMqttToken("anonymous", anonName);
         return;
-        //TODO(mwfarb): handle case of scene-hopping without anon-auth-button
     }
+
+    //TODO(mwfarb): handle case of scene-hopping without anon-auth-button
 
     // normal check for google auth2
     gapi.load('auth2', function () {
@@ -78,30 +72,41 @@ var authCheck = function (args) {
     });
 };
 
-function setGlobalUserIds(displayName) {
-    // add auth name to objects when user has not defined their name
-    if (typeof globals !== 'undefined') {
-        if (typeof defaults !== 'undefined' && globals.userParam == defaults.userParam) {
-            // Use auth name to create human-readable name
-            globals.displayName = localStorage.getItem("display_name") === null ? displayName : localStorage.getItem("display_name");
-            localStorage.setItem("display_name", globals.displayName);
-
-            // globals.userParam = encodeURI(displayName);
-            globals.userParam = displayName.replace(/[^a-zA-Z0-9-]/g, '');
-
-            // replay global id setup from events.js
-            globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
-
-            if (globals.fixedCamera !== '') {
-                globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
-            } else {
-                globals.camName = "camera_" + globals.idTag; // e.g. camera_1234_eric
-            }
-
-            globals.viveLName = "viveLeft_" + globals.idTag; // e.g. viveLeft_9240_X
-            globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+/**
+ * Processes name sources from auth for downstream use.
+ * @param {string} authName - Preferred name from auth source.
+ * @return {string} A username suitable for auth requests.
+ */
+function processUserNames(authName, prefix = null) {
+    // var processedName = encodeURI(authName);
+    var processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
+    if (typeof globals !== 'undefined' && typeof defaults !== 'undefined') {
+        // userParam set? persist to storage
+        if (globals.userParam !== defaults.userParam) {
+            localStorage.setItem("display_name", decodeURI(globals.userParam));
+            processedName = globals.userParam;
         }
     }
+    // Use auth name to create human-readable name
+    if (localStorage.getItem("display_name") === null) {
+        localStorage.setItem("display_name", authName);
+    }
+    if (prefix !== null) {
+        processedName = `${prefix}${processedName}`;
+    }
+    if (typeof globals !== 'undefined') {
+        globals.userParam = processedName;
+        // replay global id setup from events.js
+        globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
+        if (globals.fixedCamera !== '') {
+            globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
+        } else {
+            globals.camName = "camera_" + globals.idTag; // e.g. camera_1234_eric
+        }
+        globals.viveLName = "viveLeft_" + globals.idTag; // e.g. viveLeft_9240_X
+        globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+    }
+    return processedName;
 }
 
 function onSignIn(googleUser) {
@@ -109,7 +114,7 @@ function onSignIn(googleUser) {
     console.log('ID: ' + profile.getId());
     console.log('Full Name: ' + profile.getName());
     console.log('Email: ' + profile.getEmail());
-    setGlobalUserIds(profile.getName());
+    processUserNames(profile.getName());
     // request mqtt-auth
     var id_token = googleUser.getAuthResponse().id_token;
     requestMqttToken("google", profile.getEmail(), id_token);
@@ -191,7 +196,7 @@ function getAuthStatus() {
         default:
             return {
                 type: "Anonymous",
-                name: globals.displayName,
+                name: localStorage.getItem("display_name"),
                 email: "N/A",
             };
     }
