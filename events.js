@@ -363,12 +363,21 @@ AFRAME.registerComponent('goto-url', {
         var data = this.data; // Component property values.
         var el = this.el; // Reference to the component's entity.
         console.log(data)
+        let fired = false;
         if (data.on) { // we have an event?
-            el.addEventListener(data.on, function() {
+            el.addEventListener(data.on, function(evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
                 console.log("goto-url url=" + data.url);
-                var confirmation = confirm("Are you sure you want to go to\n["+data.url+"]?");
-                if (confirmation) {
-                    window.location.href = data.url;
+                if (!fired) {
+                    fired = true;
+                    var confirmation = confirm("Are you sure you want to go to\n["+data.url+"]?");
+                    if (confirmation) {
+                        window.location.href = data.url;
+                    }
+                    window.setTimeout(() => { // prevents event from firing twice after one event
+                        fired = false;
+                    }, 500);
                 }
             });
         } else {
