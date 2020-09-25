@@ -7,6 +7,7 @@
 //  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
+//  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
 //
 // Optional:
 //  <script src="./events.js"></script>  <!-- for window.globals -->
@@ -26,26 +27,33 @@
 
 'use strict';
 
+if (!storageAvailable('localStorage')) {
+    alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
+}
+
 //window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
 
 var auth2;
 // check if the current user is already signed in
-gapi.load('auth2', function () {
-    auth2 = gapi.auth2.init({
-        client_id: defaults.gAuthClientId
-    }).then(function () {
-        auth2 = gapi.auth2.getAuthInstance();
-        if (!auth2.isSignedIn.get()) {
-            console.log("User is not signed in.");
-            // send login with redirection url from this page
-            location.href = "./signin?redirect_uri=" + encodeURIComponent(location.href);;
-        } else {
-            console.log("User is already signed in.");
-            var googleUser = auth2.currentUser.get();
-            onSignIn(googleUser);
-        }
+var authCheck = function (args) {
+    gapi.load('auth2', function () {
+        auth2 = gapi.auth2.init({
+            client_id: defaults.gAuthClientId
+        }).then(function () {
+            auth2 = gapi.auth2.getAuthInstance();
+            if (!auth2.isSignedIn.get()) {
+                console.log("User is not signed in.");
+                // send login with redirection url from this page
+                localStorage.setItem("request_uri", location.href);
+                location.href = args.signInPath;
+            } else {
+                console.log("User is already signed in.");
+                var googleUser = auth2.currentUser.get();
+                onSignIn(googleUser);
+            }
+        });
     });
-});
+};
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
@@ -88,7 +96,8 @@ function signOut(rootPath) {
     });
     auth2.disconnect();
     // back to signin page
-    location.href = rootPath + "/signin?redirect_uri=" + encodeURI(location.href);
+    localStorage.setItem("request_uri", location.href);
+    location.href = rootPath + "/signin";
 }
 
 function requestMqttToken(mqtt_username, id_token) {
@@ -140,4 +149,30 @@ function getAuthStatus() {
         name: profile.getName(),
         email: profile.getEmail(),
     };
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+function storageAvailable(type) {
+    var storage;
+    try {
+        storage = window[type];
+        var x = '__storage_test__';
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+    }
+    catch (e) {
+        return e instanceof DOMException && (
+            // everything except Firefox
+            e.code === 22 ||
+            // Firefox
+            e.code === 1014 ||
+            // test name field too, because code might not be present
+            // everything except Firefox
+            e.name === 'QuotaExceededError' ||
+            // Firefox
+            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+            // acknowledge QuotaExceededError only if there's something already stored
+            (storage && storage.length !== 0);
+    }
 }

@@ -97,7 +97,7 @@
                "type":"string",
                "format":"uri",
                "title":"Url",
-               "description": "Model URL (store files under: store/users/<username>)"
+               "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)"
             },
             "dynamic-body":{
                "type":"object",
@@ -116,6 +116,7 @@
             },
             "click-listener":{
                   "title":"Click Listner",
+                  "description": "Object will listen for clicks",
                   "type":"boolean"
             }
          },
@@ -149,7 +150,7 @@
       },
       "persist":{
          "type":"boolean",
-         "default": "false",
+         "default": "true",
          "description": "Persist this object in the database (default false = do not persist)"
       },
       "data":{
