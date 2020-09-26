@@ -163,8 +163,7 @@
             },
             "persist":{
                "type":"boolean",
-               "description":"Persist this object in the database",
-               "default": "true"
+               "description":"Persist this object in the database"
             }
          },
          "required":[

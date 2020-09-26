@@ -97,7 +97,7 @@
                "type":"string",
                "format":"uri",
                "title":"Url",
-               "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)"
+               "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://d3903i1s9danuh.cloudfront.net/' (e.g. https://d3903i1s9danuh.cloudfront.net/store/users/wiselab/models/factory_robot_arm/scene.gltf)"
             },
             "dynamic-body":{
                "type":"object",
@@ -150,7 +150,7 @@
       },
       "persist":{
          "type":"boolean",
-         "default": "true",
+         "default": "false",
          "description": "Persist this object in the database (default false = do not persist)"
       },
       "data":{

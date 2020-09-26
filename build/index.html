@@ -7,8 +7,8 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <title>Scene Config Editor</title>
   <!-- placeholders for the theme switcher -->
-  <link rel='stylesheet' id='theme_stylesheet'>
-  <link rel='stylesheet' id='icon_stylesheet'>
+  <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
   <link rel="stylesheet" type="text/css" href="list.css">
   <style>
     [class*="foundicon-"] {
@@ -32,7 +32,7 @@
         <h2>Scene Editor</h2>
 
         <a id="logout" href="#" onclick="signOut('..');">Logout</a>
-  
+
         <div id="alert" class="alert alert-error" style="z-index:1000; position: fixed; top: 1em; left: 1em; opacity: 0.9; width: 400px; display: none">
           Alert Message.
         </div>
@@ -44,10 +44,6 @@
             <option value="render">render</option>
           </select>
 
-          <datalist id="scenename" autocomplete="off">
-            <option value="render">
-            <option value="hello">
-          </datalist>
         </div>
         <p />
         <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in ARENA (new Window)</a>
@@ -70,23 +66,9 @@
         <p />
         <div class="input-prepend">
           <span class="add-on" style="width:80px">ARENA Host</span>
-          <input type="text" id='arena_url' list='arena_url_list' value="https://oz.andrew.cmu.edu/">
-          <datalist id="arena_url_list">
-            <option value="https://xr.andrew.cmu.edu/">
-            <option value="https://oz.andrew.cmu.edu/">
-            <option value="https://spatial.andrew.cmu.edu:4443/">
+          <input type="text" id='arena_host' list='arena_host_list' value="oz.andrew.cmu.edu">
+          <datalist id="arena_host_list">
           </datalist>
-        </div>
-        <p />
-
-        <div class="input-prepend input-append">
-          <span class="add-on" style="width:80px">MQTT Host</span>
-          <input type="text" id='mqtt_host' list='mqtt_host_list' value="oz.andrew.cmu.edu">
-          <datalist id="mqtt_host_list">
-            <option value="oz.andrew.cmu.edu">
-            <option value="spatial.andrew.cmu.edu:8083">
-          </datalist>
-          <a class="btn " href="#" id='mqtt_reconnect'><i class="icon-refresh"></i></a>
         </div>
         <p />
         <textarea id='logpanel' class='infopanel' readonly disabled class='form-control'></textarea>
@@ -124,11 +106,11 @@
       </div>
     </div>
 
-  <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-  <script src="https://apis.google.com/js/platform.js"></script>
-  <script src="../defaults.js"></script>
-  <script src="../auth.js"></script>
-  <script type="text/javascript">authCheck({ signInPath: "../signin" });</script>
-</body>
+    <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="../defaults.js"></script>
+    <script src="../auth.js"></script>
+    <script type="text/javascript">authCheck({ signInPath: "../signin" });</script>
+  </body>
 
 </html>

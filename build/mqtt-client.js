@@ -19,8 +19,10 @@ export default class MqttClient {
     // handle default this.settings
     st = st || {};
     this.settings = {
-      host: st.host !== undefined ? st.host : "spatial.andrew.cmu.edu",
+      uri: st.uri !== undefined ? st.uri : "wss://arena.andrew.cmu.edu/mqtt/",
+      host: st.host !== undefined ? st.host : "arena.andrew.cmu.edu",
       port: st.port !== undefined ? st.port : 8083,
+      path: st.path !== undefined ? st.path : "/mqtt/",
       clientid:
         st.clientid !== undefined
           ? st.clientid
@@ -29,11 +31,13 @@ export default class MqttClient {
       onConnectCallback: st.onConnectCallback,
       onConnectCallbackContext: st.onConnectCallbackContext,
       onMessageCallback: st.onMessageCallback,
-      useSSL: st.useSSL !== undefined ? st.useSSL : true,     
+      useSSL: st.useSSL !== undefined ? st.useSSL : true,
       dbg: st.dbg !== undefined ? st.dbg : false,
       mqtt_username: st.mqtt_username,
       mqtt_token: st.mqtt_token,
     };
+
+    console.log(st.mqtt_username);
 
     if (this.settings.dbg == true) console.log(this.settings);
 
@@ -41,13 +45,24 @@ export default class MqttClient {
   }
 
   async connect() {
-    // init Paho client connection
-    this.mqttc = new Paho.MQTT.Client(
-      this.settings.host,
-      Number(this.settings.port),
-      this.settings.clientid
-    );
-
+    if (this.settings.uri) {
+      if (this.settings.dbg == true)  console.log("Connecting [uri]: ", this.settings.uri);
+        // init Paho client connection
+      this.mqttc = new Paho.MQTT.Client(
+          this.settings.uri,
+          this.settings.clientid
+      );
+    } else {
+      let wss = this.settings.useSSL == true ? "wss://": "ws://";
+      console.log("Connecting [host,port,path]: " + wss + this.settings.host + ":" + this.settings.port + this.settings.path);
+      // init Paho client connection
+      this.mqttc = new Paho.MQTT.Client(
+        this.settings.host,
+        Number(this.settings.port),
+        this.settings.path,
+        this.settings.clientid
+      );
+    }
     // callback handlers
     this.mqttc.onConnectionLost = this.onConnectionLost.bind(this);
     this.mqttc.onMessageArrived = this.onMessageArrived.bind(this);
@@ -75,7 +90,7 @@ export default class MqttClient {
             );
           resolve();
         },
-        onFailure: () => { 
+        onFailure: () => {
           throw new Error('Could not connect!')
         },
         useSSL: _this.settings.useSSL,
@@ -97,7 +112,7 @@ export default class MqttClient {
     try {
       this.mqttc.disconnect();
     } catch (err) {
-      if (this.settings.dbg == true) console.log("MQTT Disconnected.");
+      if (this.settings.dbg == true) console.error("MQTT Disconnected.");
     }
   }
 
@@ -109,7 +124,7 @@ export default class MqttClient {
 
     if (responseObject.errorCode !== 0) {
       if (this.settings.dbg == true)
-        console.log("Mqtt ERROR: " + responseObject.errorMessage + "\n");
+        console.error("Mqtt ERROR: " + responseObject.errorMessage + "\n");
     }
   }
 
@@ -147,5 +162,3 @@ export default class MqttClient {
     this.mqttc.unsubscribe(topic);
   }
 }
-
-//module.exports = MqttClient;
