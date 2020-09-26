@@ -15,9 +15,8 @@ export async function init(settings) {
     // handle default settings
     settings = settings || {};
     persist = {
-        mqtt_host: settings.mqtt_host !== undefined ? settings.mqtt_host : "spatial.andrew.cmu.edu",
-        mqtt_port: settings.mqtt_port !== undefined ? settings.mqtt_port : 8083,
-        persist_url: settings.persist_url !== undefined ? settings.persist_url : location.hostname+(location.port ? ':'+location.port : '')+"/persist/",
+        mqtt_uri: settings.mqtt_uri !== undefined ? settings.mqtt_uri : "wss://arena.andrew.cmu.edu/mqtt/",
+        persist_uri: settings.persist_uri !== undefined ? settings.persist_uri : location.hostname+(location.port ? ":"+location.port : "")+"/persist/",
         obj_list: settings.obj_list,
         scene_list: settings.scene_list,
         scene_textbox: settings.scene_textbox,
@@ -27,7 +26,7 @@ export async function init(settings) {
         mqtt_token: settings.mqtt_token,
     }
 
-    // Add a "checked" symbol when clicking on a list item
+    // set select when clicking on a list item
     persist.obj_list.addEventListener('click', function(ev) {
         if (ev.target.tagName === 'LI') {
             ev.target.classList.toggle('checked');
@@ -36,21 +35,20 @@ export async function init(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        host: persist.mqtt_host,
-        port: persist.mqtt_port,
+        uri: persist.mqtt_uri,
         onMessageCallback: onMqttMessage,
         mqtt_username: persist.mqtt_username,
         mqtt_token: persist.mqtt_token,
     });
 
-    log("Starting connection to " + persist.mqtt_host + ":" + persist.mqtt_port + "...");
+    log("Starting connection to " + persist.mqtt_uri + "...");
 
     // connect
     try {
         persist.mc.connect();
     } catch (error) {
-        console.log(error) // Failure!
-        displayAlert(error, "error", 2000);
+        console.error(error) // Failure!
+        displayAlert("Error connecting to MQTT: " + error, "error", 2000);
         return;
     }
 
@@ -62,67 +60,46 @@ export async function init(settings) {
 export async function set_options(settings) {
     // handle default settings
     settings = settings || {};
-    persist = {
-        persist_url: settings.persist_url !== undefined ? settings.persist_url : persist.persist_url,
-        obj_list: settings.obj_list !== undefined ? settings.obj_list : persist.obj_list,
-        scene_list: settings.scene_list !== undefined ? settings.scene_list : persist.scene_list,
-        scene_textbox: settings.scene_textbox !== undefined ? settings.scene_textbox : persist.scene_textbox,
-        log_panel: settings.log_panel !== undefined ? settings.log_panel : persist.log_panel,
-        editobj_handler: settings.editobj_handler !== undefined ? settings.editobj_handler : persist.editobj_handler
-    }
+    persist.persist_uri = settings.persist_uri !== undefined ? settings.persist_uri : persist.persist_uri,
+    persist.obj_list = settings.obj_list !== undefined ? settings.obj_list : persist.obj_list,
+    persist.scene_list = settings.scene_list !== undefined ? settings.scene_list : persist.scene_list,
+    persist.scene_textbox = settings.scene_textbox !== undefined ? settings.scene_textbox : persist.scene_textbox,
+    persist.log_panel = settings.log_panel !== undefined ? settings.log_panel : persist.log_panel,
+    persist.editobj_handler = settings.editobj_handler !== undefined ? settings.editobj_handler : persist.editobj_handler
 }
 
 // log a message
 export function log(message) {
     if (persist.log_panel !== undefined) {
-        persist.log_panel.value += message + '\n';
+        persist.log_panel.value += message + "\n";
         persist.log_panel.scrollTop = persist.log_panel.scrollHeight;
     }
 }
 
-// try to find the right persist db url by fetching a "known" scene
-export async function fetchPersistURL(urls) {
-    var knownScene = 'render';
-
-    persist.persist_url = undefined;
-    for (var i = 0; i < urls.length; i++) {
-        var url = urls[i];
-        if (url.slice(-1) != '/') url += '/';
-        try {
-            var response = await fetch(url + knownScene);
-        } catch (err) {
-            continue;
-        };
-        if (response) {
-            if (response.ok) {
-                persist.persist_url = url;
-                //console.log("Persist fetch success:", url);
-                displayAlert("Persist at:" + url, "success", 2000);
-                break;
-            }
-        }
-    }
-
-    if (persist.persist_url == undefined) {
-      displayAlert("Failed to find persist DB URL!", "error", 2000);
-    }
-}
-
 export async function populateList(scene, editobjhandler) {
-    if (persist.persist_url == undefined) {
-        displayAlert("Persist DB URL not defined.", "error", 2000);
+    if (persist.persist_uri == undefined) {
+        console.error("Persist DB URL not defined."); // populate list should be called after persist_url is set
         return;
     }
 
-    // scene list
-    //console.log("Fetch: ", persist.persist_url + "!allscenes");
     try {
-        var data = await fetch(persist.persist_url + "!allscenes");
+        var data = await fetch(persist.persist_uri + "!allscenes");
+        if (!data) {
+          displayAlert("Error fetching scene list from database.", "error", 5000);
+          return;
+        }
+        if (!data.ok) {
+          displayAlert("Error fetching scene list from database.", "error", 5000);
+          return;
+        }
         var scenes = await data.json();
+
     } catch (err) {
+        displayAlert("Error fetching scene list from database: " + err, "error", 5000);
         console.log(err);
         return;
     }
+
     while (persist.scene_list.firstChild) {
         persist.scene_list.removeChild(persist.scene_list.firstChild);
     }
@@ -140,24 +117,34 @@ export async function populateList(scene, editobjhandler) {
         if (scenes[i] == persist.scene_textbox.value) exists = true;
       }
       if (exists) persist.scene_list.value = persist.scene_textbox.value;
+      else {
+        persist.scene_textbox.value = persist.scene_list.value = scenes[0];
+      }
     }
 
-    // object list
-    //console.log("Fetch: ", persist.persist_url + scene);
     try {
-        var data = await fetch(persist.persist_url + scene);
+        var data = await fetch(persist.persist_uri + scene);
+        if (!data) {
+          displayAlert("Error fetching scene from database.", "error", 5000);
+          return;
+        }
+        if (!data.ok) {
+          displayAlert("Error fetching scene from database.", "error", 5000);
+          return;
+        }
         var sceneobjs = await data.json();
     } catch (err) {
-        displayAlert(err, "error", 5000);
+        displayAlert("Error fetching scene from database: " + err, "error", 5000);
         return;
     }
+    persist.currentSceneObjs = sceneobjs;
     while (persist.obj_list.firstChild) {
         persist.obj_list.removeChild(persist.obj_list.firstChild);
     }
     //console.log(sceneobjs);
     if (sceneobjs.length == 0) {
         var li = document.createElement("li");
-        var t = document.createTextNode('No objects in the scene');
+        var t = document.createTextNode("No objects in the scene");
         li.appendChild(t);
         persist.obj_list.appendChild(li);
         return;
@@ -169,15 +156,18 @@ export async function populateList(scene, editobjhandler) {
         var img = document.createElement("img");
         // save obj id so we can use in delete later
         li.setAttribute("data-objid", sceneobjs[i].object_id);
-        var inputValue = sceneobjs[i].object_id;
+        var inputValue = "";
         if (sceneobjs[i].attributes) {
-            if (sceneobjs[i].attributes.object_type) {
-                inputValue += ' (' + sceneobjs[i].attributes.object_type + ')';
+            if (sceneobjs[i].type == "object") {
+                inputValue = sceneobjs[i].object_id + " ( " + sceneobjs[i].attributes.object_type + " )";
                 img.src = "assets/3dobj-icon.png";
-            } else if (sceneobjs[i].attributes.filetype) {
-                let ptype = sceneobjs[i].attributes.filetype == "WA" ? "WASM Program" : "Python Program";
-                inputValue += ' (' + ptype + ')';
+            } else if (sceneobjs[i].type == "program") {
+                var ptype = sceneobjs[i].attributes.filetype == "WA" ? "WASM program" : "python program";
+                inputValue =  sceneobjs[i].object_id + " ( " + ptype + ": "+ sceneobjs[i].attributes.filename +" )";
                 img.src = "assets/program-icon.png";
+            } else if (sceneobjs[i].type == "scene-options") {
+                inputValue = sceneobjs[i].object_id + " ( scene options )";
+                img.src = "assets/options-icon.png";
             }
         }
         var t = document.createTextNode(inputValue);
@@ -210,16 +200,21 @@ export async function populateList(scene, editobjhandler) {
 export function deleteSelected(scene) {
     var items = persist.obj_list.getElementsByTagName("li");
     for (var i = 0; i < items.length; i++) {
-        if (items[i].classList.contains('checked')) {
+        if (items[i].classList.contains("checked")) {
             var object_id = items[i].getAttribute("data-objid");
             //console.log(object_id);
             var delJson = JSON.stringify({
                 object_id: object_id,
                 action: "delete"
             });
-            var topic = 'realm/s/' + scene;
+            var topic = "realm/s/" + scene;
             log("Publish [ " + topic + "]: " + delJson);
-            persist.mc.publish(topic, delJson);
+            try {
+                persist.mc.publish(topic, delJson);
+            } catch (error) {
+                displayAlert("Error deleting: " + error, "error", 5000);
+                return;
+            }
         }
     }
 }
@@ -227,27 +222,44 @@ export function deleteSelected(scene) {
 export function clearSelected() {
     var items = persist.obj_list.getElementsByTagName("li");
     for (var i = 0; i < items.length; i++) {
-        items[i].classList.remove('checked');
+        items[i].classList.remove("checked");
     }
 }
 
 export function addObject(objJson, scene) {
-    //console.log(objJson);
+
     var obj = JSON.parse(objJson);
+    
     // make sure persist is true
     obj.persist = true;
     objJson = JSON.stringify(obj);
-    var topic = 'realm/s/' + scene;
+    var topic = "realm/s/" + scene;
     log("Publish [ " + topic + "]: " + objJson);
-    persist.mc.publish(topic, objJson);
+    try {
+      persist.mc.publish(topic, objJson);
+    } catch (error) {
+        displayAlert("Error adding object: " + error, "error", 5000);
+        return;
+    }
+
+    if (obj.action == "update") {
+      var found = false;
+      for (let i = 0; i < persist.currentSceneObjs.length; i++) {
+        if (persist.currentSceneObjs[i].object_id == obj.object_id) {
+          found = true;
+          break;
+        }
+      }
+      if (found==false ) displayAlert("Update to new object id; Are you sure you don't want action=create ?", "info", 5000);
+      else displayAlert("Object update published.", "info", 5000);
+    } else displayAlert("Object create published.", "info", 5000);
     populateList(scene);
 }
 
 export function mqttReconnect(settings) {
     settings = settings || {};
 
-    persist.mqtt_host = settings.mqtt_host !== undefined ? settings.mqtt_host : "spatial.andrew.cmu.edu";
-    persist.mqtt_port = settings.mqtt_port !== undefined ? settings.mqtt_port : 8083;
+    persist.mqtt_uri = settings.mqtt_uri !== undefined ? settings.mqtt_uri : "wss://arena.andrew.cmu.edu/mqtt/";
 
     if (persist.mc)
         persist.mc.disconnect();
@@ -256,8 +268,7 @@ export function mqttReconnect(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        host: persist.mqtt_host,
-        port: persist.mqtt_port,
+        uri: persist.mqtt_uri,
         onMessageCallback: onMqttMessage,
         mqtt_username: persist.mqtt_username,
         mqtt_token: persist.mqtt_token,
@@ -266,11 +277,11 @@ export function mqttReconnect(settings) {
     try {
         persist.mc.connect();
     } catch (error) {
-        displayAlert(error, "error", 5000);
+        displayAlert("Error connecting to MQTT: " + error, "error", 5000);
         return;
     }
 
-    log("Connected to " + persist.mqtt_host + ":" + persist.mqtt_port);
+    log("Connected to " + persist.mqtt_uri );
 }
 
 // callback from mqttclient; on reception of message
