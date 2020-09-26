@@ -156,6 +156,16 @@
                   "noise"
                ]
             },
+            "groundScale":{
+              "$ref":"#/definitions/coord3d",
+              "default":{
+                 "x":1,
+                 "y":1,
+                 "z":1
+              },
+               "title":"Ground Dimentions",
+               "description":"Ground dimentions (in meters)."
+            },
             "groundYScale":{
                "type":"number",
                "default":3,
@@ -343,7 +353,8 @@
             },
             "persist":{
                "type":"boolean",
-               "description":"Persist this object in the database"
+               "description":"Persist this object in the database",
+               "default": "true"
             }
          },
          "required":[
@@ -368,7 +379,7 @@
                ]
             },
             "data":{
-              "title":"Scene Config Data",              
+              "title":"Scene Config Data",
                "properties":{
                   "env-presets":{
                      "$ref":"#/definitions/environment-presets",
