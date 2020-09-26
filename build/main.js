@@ -151,14 +151,14 @@ window.addEventListener('onauth', async function (e) {
     // we indicate this function as the edit handler to persist
     var editobjHandler = async function(obj) {
         // derive objtype from existence of attribute; TODO: save type in persit?
-        var objtype = "object";
-        if (obj.attributes.filename) objtype = "program";
+        //var objtype = "object";
+        //if (obj.attributes.filename) objtype = "program";
 
         var updateobj = {
             object_id: obj.object_id,
             action: "update",
             persist: true,
-            type: objtype,
+            type: obj.type,
             data: obj.attributes
         };
 
