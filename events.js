@@ -369,25 +369,14 @@ AFRAME.registerComponent('goto-url', {
                     swal({
                         title: "You clicked on a URL attached to an ARENA object!",
                         text: "Are you sure you want to go to\n["+data.url+"]?",
-                        buttons: {
-			    cancel: "cancel", 
-			    sameTab: "open in same tab",
-			    newTab: "open in new tab"
-			}
+                        buttons: ["cancel", "yes"]
                     })
-                    .then((val) => {
-                        switch (val) {
-			    case "sameTab":
-                            	window.location.href = data.url;
-				break;
-			    case "newTab":
-				window.open(data.url, "_blank");
-				break;
-			    default:
-				break;
+                    .then((confirmed) => {
+                        if (confirmed) {
+                            window.location.href = data.url;
                         }
-                    });
-                    window.setTimeout(() => { // prevents event from firing twice after one event
+                    }); 
+		    window.setTimeout(() => { // prevents event from firing twice after one event
                         fired = false;
                     }, 100);
                 }
