@@ -118,7 +118,12 @@
                   "title":"Click Listner",
                   "description": "Object will listen for clicks",
                   "type":"boolean"
-            }
+            },
+            "parent":{
+                  "title":"Parent",
+                  "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
+                  "type":"string"
+            }            
          },
          "required":[ "object_type"]
       }
