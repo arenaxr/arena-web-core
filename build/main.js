@@ -93,7 +93,7 @@ window.addEventListener('onauth', async function (e) {
     }
 
     var updateLink = function() {
-        scene_url.href = arena_host.value + "?scene=" + scene.value /*+ "&mqttServer=" + mqtthost.value;*/
+        scene_url.href = 'https://' + arena_host.value + "?scene=" + scene.value
     };
 
     // when a host addr is changed; update settings
@@ -239,6 +239,7 @@ window.addEventListener('onauth', async function (e) {
     });
 
     reload();
+    updateLink();
 
     PersistObjects.populateList(scene.value);
 
