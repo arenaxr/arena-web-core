@@ -1,6 +1,6 @@
 /* global $, JitsiMeetJS */
 
-ARENA.JitsiAPI = (function () {
+var ARENAJitsiAPI = (function (jitsiServer) {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================
@@ -8,8 +8,8 @@ ARENA.JitsiAPI = (function () {
 
     // These match config info on Jitsi Meet server (oz.andrew.cmu.edu)
     // in lines 7-37 of file /etc/jitsi/meet/oz.andrew.cmu.edu-config.js
-    let jitsiServer = 'mr.andrew.cmu.edu';
-    let arenaConference = globals.scenenameParam.toLowerCase();
+    // let jitsiServer = 'mr.andrew.cmu.edu';
+    const arenaConferenceName = globals.scenenameParam.toLowerCase();
 
     const connectOptions = {
         hosts: {
@@ -259,7 +259,7 @@ ARENA.JitsiAPI = (function () {
      * That function is called when connection is established successfully
      */
     function onConnectionSuccess() {
-        conference = connection.initJitsiConference(arenaConference, confOptions);
+        conference = connection.initJitsiConference(arenaConferenceName, confOptions);
 
         conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteTrack);
         conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, track => {
@@ -351,6 +351,10 @@ ARENA.JitsiAPI = (function () {
 
     JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
+    JitsiMeetJS.mediaDevices.addEventListener(
+        JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
+        onDeviceListChanged);
+
     // ==================================================
     // MAIN START
     // ==================================================
@@ -369,11 +373,6 @@ ARENA.JitsiAPI = (function () {
     connection.addEventListener(
         JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED,
         disconnect);
-
-    JitsiMeetJS.mediaDevices.addEventListener(
-        JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
-        onDeviceListChanged);
-
     connection.connect();
 
     JitsiMeetJS.createLocalTracks({
@@ -381,42 +380,48 @@ ARENA.JitsiAPI = (function () {
     })
     .then(onLocalTracks)
     .catch(error => {
-        throw error;
+        console.warn(error)
+        isJoined = false;
     });
+
+    setupLocalVideo();
+
+    function setupLocalVideo() {
+        // video window for jitsi
+        jitsiVideoElem = document.getElementById("localVideo");
+        jitsiVideoElem.style.display = "none";
+        jitsiVideoElem.style.position = "absolute";
+        jitsiVideoElem.style.top = "15px";
+        jitsiVideoElem.style.left = "15px";
+        jitsiVideoElem.style.borderRadius = "10px";
+        jitsiVideoElem.style.opacity = 0.95; // slightly see through
+
+        function setupCornerVideo() {
+            const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
+            jitsiVideoElem.setAttribute("width", globals.localVideoWidth);
+            jitsiVideoElem.setAttribute("height", videoHeight);
+            // jitsiVideoElem.play();
+            // jitsiVideoElem.removeEventListener('loadeddata', setupCornerVideo);
+        }
+        jitsiVideoElem.addEventListener('loadeddata', setupCornerVideo);
+        window.addEventListener('orientationchange', () => { // mobile only
+            globals.localVideoWidth = Number(window.innerWidth / 5);
+            this.stopVideo();
+            setupCornerVideo();
+            this.startVideo();
+        });
+    }
 
     return {
         // ==================================================
         // PUBLIC
         // ==================================================
+        // init: function() {
+
+        // },
+
         ready: function() {
             return isJoined && jitsiAudioTrack && jitsiVideoTrack;
-        },
-
-        setupLocalVideo: function() {
-            // video window for jitsi
-            jitsiVideoElem = document.getElementById("localVideo");
-            jitsiVideoElem.style.display = "none";
-            jitsiVideoElem.style.position = "absolute";
-            jitsiVideoElem.style.top = "15px";
-            jitsiVideoElem.style.left = "15px";
-            jitsiVideoElem.style.borderRadius = "10px";
-            jitsiVideoElem.style.opacity = 0.8;
-
-            function setupCornerVideo() {
-                const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
-                jitsiVideoElem.setAttribute("width", globals.localVideoWidth);
-                jitsiVideoElem.setAttribute("height", videoHeight);
-                jitsiVideoElem.play();
-                // jitsiVideoElem.removeEventListener('loadeddata', setupCornerVideo, false);
-            }
-
-            jitsiVideoElem.addEventListener('loadeddata', setupCornerVideo, false);
-            window.addEventListener('orientationchange', () => { // mobile only
-                globals.localVideoWidth = Number(window.innerWidth / 5);
-                this.stopVideo();
-                setupCornerVideo();
-                this.startVideo();
-            }, false);
         },
 
         showVideo: function() {
@@ -494,4 +499,4 @@ ARENA.JitsiAPI = (function () {
             });
         }
     }
-})();
+});
