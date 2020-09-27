@@ -65,7 +65,7 @@ window.addEventListener('onauth', async function (e) {
     }
 
     try {
-      var data = await fetch("dft-config.json");
+      var data = await fetch("./dft-config.json");
       var dfts = await data.json();
     } catch (err) {
       console.error("Error loading defaults:", err.message);

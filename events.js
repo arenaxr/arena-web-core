@@ -12,12 +12,10 @@ window.globals = {
     scenenameParam: getUrlParam('scene', defaults.scenenameParam), //scene
     userParam: getUrlParam('name', defaults.userParam),
     startCoords: getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
-    themeParam: getUrlParam('theme', defaults.themeParam),
     weatherParam: getUrlParam('weather', defaults.weatherParam),
     mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
     fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
-    gndScaleParam: getUrlParam('groundScale', ""),
     localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
     vioTopic: defaults.vioTopic,
     graphTopic: defaults.graphTopic,
@@ -362,22 +360,25 @@ AFRAME.registerComponent('goto-url', {
         // unlike the update method in Unity that gets called every frame
         var data = this.data; // Component property values.
         var el = this.el; // Reference to the component's entity.
-        console.log(data)
         let fired = false;
         if (data.on) { // we have an event?
             el.addEventListener(data.on, function(evt) {
-                evt.preventDefault();
-                evt.stopPropagation();
                 console.log("goto-url url=" + data.url);
                 if (!fired) {
                     fired = true;
-                    var confirmation = confirm("Are you sure you want to go to\n["+data.url+"]?");
-                    if (confirmation) {
-                        window.location.href = data.url;
-                    }
+                    swal({
+                        title: "You clicked on a URL attached to an ARENA object!",
+                        text: "Are you sure you want to go to\n["+data.url+"]?",
+                        buttons: ["cancel", "yes"]
+                    })
+                    .then((confirmed) => {
+                        if (confirmed) {
+                            window.location.href = data.url;
+                        }
+                    });
                     window.setTimeout(() => { // prevents event from firing twice after one event
                         fired = false;
-                    }, 500);
+                    }, 100);
                 }
             });
         } else {
@@ -1001,7 +1002,7 @@ AFRAME.registerComponent("network-latency", {
     })
 })
 
-// emit model onProgress (loading) event
+// emit model onProgress (loading) event for gltf models
 AFRAME.components['gltf-model'].Component.prototype.update = function () {
     var self = this;
     var el = this.el;
@@ -1020,7 +1021,7 @@ AFRAME.components['gltf-model'].Component.prototype.update = function () {
         el.emit("model-progress", {src: src, progress: (xhr.loaded / xhr.total * 100) })
     }, function gltfFailed (error) {
         var message = (error && error.message) ? error.message : 'Failed to load glTF model';
-        warn(message);
+        console.warn(message);
         el.emit('model-error', {format: 'gltf', src: src});
     });
 }

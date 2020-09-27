@@ -3,6 +3,8 @@
 window.ARENA = {};
 
 ARENA.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "webClient-" + globals.timeID);
+ARENA.mqttClient.onConnectionLost = onConnectionLost;
+ARENA.mqttClient.onMessageArrived = onMessageArrived;
 
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
@@ -116,8 +118,43 @@ const unloadArena = (urlToLoad) => {
     };
 };
 
-ARENA.mqttClient.onConnectionLost = onConnectionLost;
-ARENA.mqttClient.onMessageArrived = onMessageArrived;
+const loadScene = () => {
+    globals.sceneObjects.env = document.createElement("a-entity");
+    globals.sceneObjects.env.id = "env";
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", globals.persistenceUrl+"?type=scene-options");
+    xhr.responseType = "json";
+    xhr.send();
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            console.log("Error loading scene-options");
+        } else {
+            const payload = xhr.response[xhr.response.length-1];
+            if (payload) {
+                const options = payload["attributes"];
+                const sceneOptions = options["scene-options"];
+                for (const [attribute, value] of Object.entries(sceneOptions)) {
+                    globals[attribute] = value;
+                }
+                const envPresets = options["env-presets"];
+                for (const [attribute, value] of Object.entries(envPresets)) {
+                    globals.sceneObjects.env.setAttribute('environment', attribute, value);
+                }
+                document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
+            }
+            else {
+                // set defaults
+                globals.sceneObjects.env.setAttribute('environment', "preset", "starry");
+                globals.sceneObjects.env.setAttribute('environment', "seed", 5);
+                globals.sceneObjects.env.setAttribute('environment', "flatShading", true);
+                globals.sceneObjects.env.setAttribute('environment', "groundTexture", "squares");
+                globals.sceneObjects.env.setAttribute('environment', "grid", "none");
+                document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
+            }
+        }
+    }
+}
 
 let lwt;
 window.addEventListener('onauth', function (e) {
@@ -166,7 +203,7 @@ function onConnect() {
     sceneObjects.weather = document.getElementById('weather');
     sceneObjects.scene = document.querySelector('a-scene');
     //sceneObjects.scene = document.getElementById('sceneRoot');
-    sceneObjects.env = document.getElementById('env');
+    // sceneObjects.env = document.getElementById('env');
     sceneObjects.myCamera = document.getElementById('my-camera');
     sceneObjects[globals.camName] = sceneObjects.myCamera;
     sceneObjects.conix_box = document.getElementById('conix_box');
@@ -175,9 +212,6 @@ function onConnect() {
     sceneObjects.sound_box = document.getElementById('sound_box');
     sceneObjects.conix_text = document.getElementById('conix_text');
 
-    if (sceneObjects.env) {
-        sceneObjects.env.setAttribute('environment', 'preset', globals.themeParam);
-    }
     if (globals.weatherParam !== "none") {
         if (sceneObjects.weather) {
             sceneObjects.weather.setAttribute('particle-system', 'preset', globals.weatherParam);
@@ -185,12 +219,6 @@ function onConnect() {
         }
     } else if (sceneObjects.weather) {
         sceneObjects.weather.setAttribute('particle-system', 'enabled', 'false');
-    }
-    if (globals.gndScaleParam !== "") {
-        //TODO(mwfarb): all these env settings should move into a per-scene object with defaults
-        var ground = document.querySelector(".environmentGround");
-        var scale = [globals.gndScaleParam, globals.gndScaleParam, globals.gndScaleParam];
-        ground.setAttribute('scale', scale.join(" "));
     }
 
     // Publish initial camera presence
@@ -260,9 +288,9 @@ function onConnect() {
         // console.log("poseChanged", e.detail);
         let msg = {
             object_id: globals.camName,
-            jitsiId: ARENA.JitsiAPI.getJitsiId(),
-            hasAudio: ARENA.JitsiAPI.hasAudio(),
-            hasVideo: ARENA.JitsiAPI.hasVideo(),
+            jitsiId: ARENA.JitsiAPI ? ARENA.JitsiAPI.getJitsiId() : null,
+            hasAudio: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasAudio() : false,
+            hasVideo: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasVideo() : false,
             hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.hasAvatar(),
             displayName: globals.displayName,
             action: 'create',
@@ -350,22 +378,19 @@ function onConnect() {
             publish(globals.outputTopic + globals.viveRName, msg);
         });
     }
-    // VERY IMPORTANT: remove retained camera topic so future visitors don't see it
-    /*
-    window.onbeforeunload = function () {
-        publish(outputTopic + camName, {object_id: camName, action: "delete"});
-        publish_retained(outputTopic + camName, ""); // no longer needed, don't retain head position
-        publish(outputTopic + viveLName, {object_id: viveLName, action: "delete"});
-        publish(outputTopic + viveRName, {object_id: viveRName, action: "delete"});
-    };
-    */
+
+    globals.jitsiServer = 'mr.andrew.cmu.edu';
+    loadScene();
     loadArena();
+
+    // intialize Jitsi videoconferencing
+    ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
+
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     ARENA.mqttClient.subscribe(globals.renderTopic);
 
-    ARENA.JitsiAPI.setupLocalVideo();
-
+    // download and initialize face tracking code
     importScript("./face-tracking/script.js").then(() => {
         if (!AFRAME.utils.device.isMobile()) ARENA.FaceTracker.init();
     })
@@ -610,13 +635,10 @@ function onMessageArrived(message, jsonMessage) {
             if (name === globals.camName) {
                 return;
             }
-            /* why not? needed for HUD text, attachments to head 3d model
-            if (theMessage.data.parent) {
-                // Don't attach to our own camera
-                if (theMessage.data.parent == globals.camName)
-                    return;
+
+            if (theMessage.type === "scene-options") {
+                return; // don't create another env
             }
-            */
 
             let x, y, z, xrot, yrot, zrot, wrot, xscale, yscale, zscale, color;
             // Strategy: remove JSON for core attributes (position, rotation, color, scale) after parsing
@@ -934,19 +956,19 @@ function onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
                     entityEl.setAttribute('gltf-model', theMessage.data.url);
 
-                    function updateProgress(innerHTML, evt) {
+                    function updateProgress(failed, innerHTML, evt) {
                         const gltfProgressEl = document.getElementById("gltf-loading");
                         gltfProgressEl.innerHTML = innerHTML;
                         gltfProgressEl.className = "show";
-                        if (evt.detail.progress == 100) setTimeout(() => { gltfProgressEl.className = "hide"; }, 1000);
+                        if (evt.detail.progress == 100 || failed) setTimeout(() => { gltfProgressEl.className = "hide"; }, 3000);
                     }
                     entityEl.addEventListener('model-progress', evt => {
                         const text = "Loading 3D model:<br/>" + "\""+evt.detail.src+"\"" + "<br/>" + parseFloat(evt.detail.progress.toFixed(1))+"%";
-                        updateProgress(text, evt);
+                        updateProgress(false, text, evt);
                     });
                     entityEl.addEventListener('model-error', evt => {
-                        const text = "Failed to load 3D model:<br/>" + "\""+evt.detail.src+"\"!";
-                        updateProgress(text, evt);
+                        const text = "<b>Failed to load 3D model:<br/>" + "\""+evt.detail.src+"\"!</b>";
+                        updateProgress(true, text, evt);
                     });
                     delete theMessage.data.url;
                     break;
