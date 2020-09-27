@@ -131,16 +131,33 @@ function setupIcons() {
     settingsButtons.push(flyingBtn);
 
     const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
-        var confirmation = confirm("In order to share your screen, ARENA will open up a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!");
-        if (confirmation) {
-            window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
-        }
+        swal({
+            title: "You clicked on screen share!",
+            text: "In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!",
+            icon: "warning",
+            buttons: ["cancel", "yes"]
+        })
+        .then((confirmed) => {
+            if (confirmed) {
+                window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
+            }
+        });
     });
     screenShareButton.style.display = "none";
     settingsButtons.push(screenShareButton);
 
     const logoutBtn = createIconButton("logout-on", "Sign out of the ARENA", () => {
-        signOut('.'); // --> ./auth.js
+        swal({
+            title: "You are about to sign out of the ARENA!",
+            text: "Are you are you want to sign out?",
+            icon: "warning",
+            buttons: ["cancel", "yes"]
+        })
+        .then((confirmed) => {
+            if (confirmed) {
+                signOut('.'); // --> ./auth.js
+            }
+        });
     });
     logoutBtn.style.display = "none";
     settingsButtons.push(logoutBtn);

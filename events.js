@@ -366,10 +366,16 @@ AFRAME.registerComponent('goto-url', {
                 console.log("goto-url url=" + data.url);
                 if (!fired) {
                     fired = true;
-                    var confirmation = confirm("Are you sure you want to go to\n["+data.url+"]?");
-                    if (confirmation) {
-                        window.location.href = data.url;
-                    }
+                    swal({
+                        title: "You clicked on a URL attached to an ARENA object!",
+                        text: "Are you sure you want to go to\n["+data.url+"]?",
+                        buttons: ["cancel", "yes"]
+                    })
+                    .then((confirmed) => {
+                        if (confirmed) {
+                            window.location.href = data.url;
+                        }
+                    });
                     window.setTimeout(() => { // prevents event from firing twice after one event
                         fired = false;
                     }, 100);

@@ -131,20 +131,17 @@ const loadScene = () => {
             console.log("Error loading scene-options");
         } else {
             const payload = xhr.response[xhr.response.length-1];
-            let env;
             if (payload) {
                 const options = payload["attributes"];
-
+                const sceneOptions = options["scene-options"];
+                for (const [attribute, value] of Object.entries(sceneOptions)) {
+                    globals[attribute] = value;
+                }
                 const envPresets = options["env-presets"];
                 for (const [attribute, value] of Object.entries(envPresets)) {
                     globals.sceneObjects.env.setAttribute('environment', attribute, value);
                 }
                 document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
-
-                const sceneOptions = options["scene-options"];
-                for (const [attribute, value] of Object.entries(sceneOptions)) {
-                    globals[attribute] = value;
-                }
             }
             else {
                 // set defaults
