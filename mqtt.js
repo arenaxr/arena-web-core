@@ -964,7 +964,7 @@ function onMessageArrived(message, jsonMessage) {
                             if (progress === "failed") {
                                 innerHTML += "<b>\"" + src + "\"" + "<br/>" + "Failed!</b>" + "<br/>";
                             } else {
-                                innerHTML += "\"" + src + "\"" + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
+                                innerHTML += src.split("/").pop() + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
                             }
                         }
                         gltfProgressEl.innerHTML = innerHTML;
