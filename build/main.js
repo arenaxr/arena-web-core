@@ -31,8 +31,6 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
 }
 
 window.addEventListener('onauth', async function (e) {
-//document.addEventListener("DOMContentLoaded", async function() {
-
     var schema;
     var jsoneditor;
 
@@ -44,11 +42,11 @@ window.addEventListener('onauth', async function (e) {
     var scene = document.getElementById("arena_scene");
     var scenelist = document.getElementById("scenelist");
     var mqtthost = document.getElementById("mqtt_host");
-    var arena_url = document.getElementById("arena_url");
+    var arena_host = document.getElementById("arena_host");
     var editmsg = document.getElementById("editmsg");
     var scene_url = document.getElementById("scene_url");
 
-    // Buttons/Selects
+    // Buttons/s
     var set_value_button = document.getElementById("setvalue");
     var select_schema = document.getElementById("objtype");
     var genid_button = document.getElementById("genid");
@@ -58,7 +56,7 @@ window.addEventListener('onauth', async function (e) {
     var refresh_button = document.getElementById("refreshlist");
     var mqtt_reconnect = document.getElementById("mqtt_reconnect");
 
-    // add schema files to select
+    // add schema files to
     for (var objtype in schema_files) {
         var ofile = document.createElement("option");
         ofile.value = schema_files[objtype].file;
@@ -66,15 +64,27 @@ window.addEventListener('onauth', async function (e) {
         select_schema.appendChild(ofile);
     }
 
-    var data = await fetch("dft-config.json");
-    var dfts = await data.json();
+    try {
+      var data = await fetch("./dft-config.json");
+      var dfts = await data.json();
+    } catch (err) {
+      console.error("Error loading defaults:", err.message);
+      return;
+    }
+
+    // load host values
+    var arena_host_list = document.getElementById('arena_host_list');
+    dfts.hosts.forEach(function(host) {
+       var option = document.createElement('option');
+       option.value = host.name;
+       arena_host_list.appendChild(option);
+    });
 
     // load values from defaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
-    arena_url.value = localStorage.getItem("arena_url") === null ? dfts.arena_url : localStorage.getItem("arena_url");
-    mqtthost.value = localStorage.getItem("mqtthost") === null ? dfts.mqtthost : localStorage.getItem("mqtthost");
+    arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
 
     // Scene config schema
     if (!schema) {
@@ -83,39 +93,33 @@ window.addEventListener('onauth', async function (e) {
     }
 
     var updateLink = function() {
-        scene_url.href = arena_url.value + "?scene=" + scene.value /*+ "&mqttServer=" + mqtthost.value;*/
+        scene_url.href = 'https://' + arena_host.value + "?scene=" + scene.value
     };
 
     // when a host addr is changed; update settings
     var updateHost = async function() {
-        // persist db might be at ARENA web host or mqtt host, depending on the deployment; try both
-        var persist_urls = ["https://" + mqtthost.value.replace(/\/+/, "") + "/persist/",
-            location.protocol + "//"+ location.hostname + (location.port ? ":" + location.port : "") + "/persist/"
-        ]
-
-        console.log("Trying persist at (you might see related fetch errors)", persist_urls);
-        await PersistObjects.fetchPersistURL(persist_urls);
-
+        var hostData = mqttAndPersistURI(arena_host.value);
+        PersistObjects.set_options({ persist_uri: hostData.persist_uri });
+        PersistObjects.mqttReconnect({ mqtt_uri: hostData.mqtt_uri});
         await PersistObjects.populateList(scene.value);
         reload();
         updateLink();
     }
 
-    // try to split mqtt host from port
-    var mqttHostAndPort = function(mqttHostStr) {
-        var port = 443; // default value
-        var host = mqttHostStr;
-        var n = mqttHostStr.lastIndexOf(":");
-        if (n > -1) {
-            var p = parseInt(mqttHostStr.substring(n + 1, mqttHostStr.length));
-            if (p != NaN) {
-                port = parseInt(p);
-                host = mqttHostStr.substring(0, n);
-            }
+    // find host in defaults; otherwise return uris assuming persist and mqqt are accessed through the webhost
+    var mqttAndPersistURI = function(hn) {
+        var puri, muri, r;
+        for (var i=0; i<dfts.hosts.length; i++) {
+          if (hn === dfts.hosts[i].name) {
+            return {
+                persist_uri: dfts.hosts[i].persist_uri,
+                mqtt_uri: dfts.hosts[i].mqtt_uri
+            };
+          }
         }
         return {
-            mqtt_host: host,
-            mqtt_port: port
+            persist_uri: location.protocol + "//"+ location.hostname + (location.port ? ":" + location.port : "") + "/persist/",
+            mqtt_uri: "wss://"+ location.hostname + (location.port ? ":" + location.port : "") + "/mqtt/"
         };
     };
 
@@ -150,23 +154,19 @@ window.addEventListener('onauth', async function (e) {
 
     // we indicate this function as the edit handler to persist
     var editobjHandler = async function(obj) {
-        // derive objtype from existence of attribute; TODO: save type in persit?
-        var objtype = "object";
-        if (obj.attributes.filename) objtype = "program";
-
         var updateobj = {
             object_id: obj.object_id,
             action: "update",
             persist: true,
-            type: objtype,
+            type: obj.type,
             data: obj.attributes
         };
 
-        var schemaFile = schema_files[objtype].file;
+        var schemaFile = schema_files[obj.type].file;
         var data = await fetch(schemaFile);
         schema = await data.json();
         for (var opt, j = 0; opt = select_schema[j]; j++) {
-            if (opt.value == schema_files[objtype].file) {
+            if (opt.value == schema_files[obj.type].file) {
                 select_schema.selectedIndex = j;
                 break;
             }
@@ -194,9 +194,7 @@ window.addEventListener('onauth', async function (e) {
     JSONEditor.defaults.options.display_required_only = true;
     JSONEditor.defaults.options.required_by_default = false;
     JSONEditor.defaults.options.theme = "bootstrap2";
-    document.getElementById("theme_stylesheet").href = "//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css";
     JSONEditor.defaults.options.iconlib = "fontawesome4";
-    document.getElementById("icon_stylesheet").href = "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css";
     JSONEditor.defaults.options.object_layout = "normal";
     JSONEditor.defaults.options.show_errors = "interaction";
 
@@ -225,12 +223,12 @@ window.addEventListener('onauth', async function (e) {
         reload();
     });
 
-    var mqttConnData = mqttHostAndPort(mqtthost.value);
+    var hostData = mqttAndPersistURI(arena_host.value);
 
     // start persist object mngr
     PersistObjects.init({
-        mqtt_host: mqttConnData.mqtt_host,
-        mqtt_port: mqttConnData.mqtt_port,
+        persist_uri: hostData.persist_uri,
+        mqtt_uri: hostData.mqtt_uri,
         obj_list: document.getElementById("objlist"),
         scene_list: document.getElementById("scenelist"),
         scene_textbox: document.getElementById("arena_scene"),
@@ -240,8 +238,8 @@ window.addEventListener('onauth', async function (e) {
         mqtt_token: e.detail.mqtt_token,
     });
 
-    // update options (including persist_url) from inputs
-    await updateHost();
+    reload();
+    updateLink();
 
     PersistObjects.populateList(scene.value);
 
@@ -256,7 +254,6 @@ window.addEventListener('onauth', async function (e) {
 
     // Change listener for scene list
     scenelist.addEventListener("change", async function() {
-        console.log(scenelist.value);
         if (scenelist.value !== "No scenes found.") {
           scene.value = scenelist.value;
           PersistObjects.populateList(scene.value);
@@ -267,25 +264,14 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // Change listener for arena URL
-    arena_url.addEventListener("change", async function() {
+    arena_host.addEventListener("change", async function() {
         updateHost();
-        localStorage.setItem("arena_url", arena_url.value);
-    });
-
-    // Change listener for arena mqtt host
-    mqtthost.addEventListener("change", async function() {
-        updateHost();
-        PersistObjects.log("MQTT host changed; Press refresh to apply them.");
-        localStorage.setItem("mqtthost", mqtthost.value);
+        localStorage.setItem("arena_host", arena_host.value);
     });
 
     // listeners for buttons
     clear_button.addEventListener("click", function() {
-        PersistObjects.clearSelected();
-    });
-
-    refresh_button.addEventListener("click", function() {
-        PersistObjects.populateList(scene.value);
+        PersistObjects.cleared();
     });
 
     del_button.addEventListener("click", function() {
@@ -304,11 +290,6 @@ window.addEventListener('onauth', async function (e) {
         PersistObjects.addObject(output.value, scene.value);
     });
 
-    mqtt_reconnect.addEventListener("click", function() {
-        mqttConnData = mqttHostAndPort(mqtthost.value);
-        PersistObjects.mqttReconnect(mqttConnData);
-        updateHost();
-    });
 //});
 });
 

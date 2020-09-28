@@ -1,5 +1,12 @@
+# private repos
 models/
 store
+# arena test versions
+*dev.*
+*dev2.*
+*dummy.*
+*er1k*
+
 # https://github.com/github/gitignore/blob/master/Global/Linux.gitignore
 *~
 

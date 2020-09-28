@@ -1,6 +1,19 @@
 {
 	"schema_file": "arena-obj3d.json",
 	"scene": "render",
-	"arena_url": "https://xr.andrew.cmu.edu/",
-	"mqtthost": "oz.andrew.cmu.edu"
+	"arena_host": "arena.andrew.cmu.edu",
+	"hosts": [
+		{
+			 "name": "arena.andrew.cmu.edu",
+	     "arena_uri": "https://arena.andrew.cmu.edu/",
+			 "persist_uri": "https://arena.andrew.cmu.edu/persist/",
+	     "mqtt_uri": "wss://arena.andrew.cmu.edu/mqtt/"
+	  },
+		{
+			"name": "xr.andrew.cmu.edu",
+			"arena_uri": "https://xr.andrew.cmu.edu/",
+			"persist_uri": "https://oz.andrew.cmu.edu/persist/",
+			"mqtt_uri": "wss://oz.andrew.cmu.edu/mqtt/"
+	  }
+  ]
 }
