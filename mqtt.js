@@ -549,6 +549,7 @@ async function enableChromeAEC(gainNode) {
   }
 }
 
+var progMsgs = {};
 function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
     let theMessage = {};
@@ -956,19 +957,27 @@ function onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
                     entityEl.setAttribute('gltf-model', theMessage.data.url);
 
-                    function updateProgress(failed, innerHTML, evt) {
+                    function updateProgress(failed, evt) {
                         const gltfProgressEl = document.getElementById("gltf-loading");
+                        var innerHTML = "Loading 3D model:<br/>";
+                        for (const [src, progress] of Object.entries(progMsgs)) {
+                            if (progress === "failed") {
+                                innerHTML += "<b>\"" + src + "\"" + "<br/>" + "Failed!</b>" + "<br/>";
+                            } else {
+                                innerHTML += "\"" + src + "\"" + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
+                            }
+                        }
                         gltfProgressEl.innerHTML = innerHTML;
                         gltfProgressEl.className = "show";
-                        if (evt.detail.progress == 100 || failed) setTimeout(() => { gltfProgressEl.className = "hide"; }, 3000);
+                        if (evt.detail.progress == 100 || failed) setTimeout(() => { progMsgs = {}; gltfProgressEl.className = "hide"; }, 3000);
                     }
                     entityEl.addEventListener('model-progress', evt => {
-                        const text = "Loading 3D model:<br/>" + "\""+evt.detail.src+"\"" + "<br/>" + parseFloat(evt.detail.progress.toFixed(1))+"%";
-                        updateProgress(false, text, evt);
+                        progMsgs[evt.detail.src] = evt.detail.progress;
+                        updateProgress(false, evt);
                     });
                     entityEl.addEventListener('model-error', evt => {
-                        const text = "<b>Failed to load 3D model:<br/>" + "\""+evt.detail.src+"\"!</b>";
-                        updateProgress(true, text, evt);
+                        progMsgs[evt.detail.src] = "failed";
+                        updateProgress(true, evt);
                     });
                     delete theMessage.data.url;
                     break;
