@@ -37,39 +37,45 @@ var signInPath;
 // check if the current user is already signed in
 var authCheck = function (args) {
     signInPath = args.signInPath;
-
-    //TODO(mwfarb): also verify valid unexpired stored mqtt-token
-
-    // prefix all anon users with "anon-"
-    if (localStorage.getItem("auth_choice") === "anonymous") {
-        //localStorage.removeItem("auth_choice"); // TODO(mwfarb): verify: unset anon, don't persist
-        var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
-        requestMqttToken("anonymous", anonName);
-        return;
+    switch (localStorage.getItem("auth_choice")) {
+        case "anonymous":
+            window.addEventListener('load', checkAnonAuth);
+            break;
+        case "google":
+            // normal check for google auth2
+            gapi.load('auth2', checkGoogleAuth);
+            break;
     }
+};
 
+function checkAnonAuth(event) {
+    //TODO(mwfarb): also verify valid unexpired stored mqtt-token
     //TODO(mwfarb): handle case of scene-hopping without anon-auth-button
 
-    // normal check for google auth2
-    gapi.load('auth2', function () {
-        auth2 = gapi.auth2.init({
-            client_id: defaults.gAuthClientId
-        }).then(function () {
-            auth2 = gapi.auth2.getAuthInstance();
-            if (!auth2.isSignedIn.get()) {
-                console.log("User is not signed in.");
-                // send login with redirection url from this page
-                localStorage.setItem("request_uri", location.href);
-                location.href = signInPath;
-            } else {
-                console.log("User is already signed in.");
-                localStorage.setItem("auth_choice", "google");
-                var googleUser = auth2.currentUser.get();
-                onSignIn(googleUser);
-            }
-        });
+    //localStorage.removeItem("auth_choice"); // TODO(mwfarb): verify: unset anon, don't persist
+    // prefix all anon users with "anon-"
+    var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
+    requestMqttToken("anonymous", anonName);
+}
+
+function checkGoogleAuth() {
+    auth2 = gapi.auth2.init({
+        client_id: defaults.gAuthClientId
+    }).then(function () {
+        auth2 = gapi.auth2.getAuthInstance();
+        if (!auth2.isSignedIn.get()) {
+            console.log("User is not signed in.");
+            // send login with redirection url from this page
+            localStorage.setItem("request_uri", location.href);
+            location.href = signInPath;
+        } else {
+            console.log("User is already signed in.");
+            localStorage.setItem("auth_choice", "google");
+            var googleUser = auth2.currentUser.get();
+            onSignIn(googleUser);
+        }
     });
-};
+}
 
 /**
  * Processes name sources from auth for downstream use.
