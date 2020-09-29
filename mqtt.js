@@ -963,9 +963,10 @@ function onMessageArrived(message, jsonMessage) {
                         for (const [src, progress] of Object.entries(progMsgs)) {
                             if (progress === "failed") {
                                 innerHTML += "<b>\"" + src + "\"" + "<br/>" + "Failed!</b>" + "<br/>";
-                            } else {
-                                var shortName = src.length < 15 ? src : "…" + src.substring(src.length - 15)
-                                innerHTML += shortName + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";                            }
+                            } else if (progress < 100) {
+                                var shortName = src.length < 15 ? src : "…" + src.substring(src.length - 15);
+                                innerHTML += shortName + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
+                            }
                         }
                         gltfProgressEl.innerHTML = innerHTML;
                         gltfProgressEl.className = "show";
