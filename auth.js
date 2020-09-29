@@ -80,6 +80,11 @@ function checkGoogleAuth() {
             var googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
+    }, function (error) {
+        console.error(error);
+        // send login with redirection url from this page
+        localStorage.setItem("request_uri", location.href);
+        location.href = signInPath;
     });
 }
 
