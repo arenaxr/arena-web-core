@@ -59,7 +59,7 @@
 
     // TODO(mwfarb): App Store iOS build of WebXRViewer, G-Auth rejects the UA with 403
 
-    //localStorage.removeItem("display_name");
+    localStorage.removeItem("display_name");
 
     // browser detection is not fun...
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
@@ -110,6 +110,7 @@
     function onGoogleSignIn(googleUser) {
         var profile = googleUser.getBasicProfile();
         console.log("Signed In: " + profile.getEmail());
+        localStorage.setItem("auth_choice", "google");
         returnToRequestedPage();
     }
 
@@ -122,7 +123,7 @@
         }
     }
 
-    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$";
     var initAnonAuth = function () {
         var re = new RegExp(nameRegex);
         var anonBtn = document.getElementById('customBtnAnon');

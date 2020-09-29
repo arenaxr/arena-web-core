@@ -240,7 +240,7 @@ function setupIcons() {
     label.innerHTML = "Display Name";
     formDiv.appendChild(label);
 
-    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$";
     let usernameInput = document.createElement("input");
     usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");

@@ -42,6 +42,7 @@ var authCheck = function (args) {
             window.addEventListener('load', checkAnonAuth);
             break;
         case "google":
+        default:
             // normal check for google auth2
             gapi.load('auth2', checkGoogleAuth);
             break;
@@ -86,15 +87,15 @@ function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
     var processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
     if (typeof globals !== 'undefined' && typeof defaults !== 'undefined') {
-        // userParam set? persist to storage
         if (globals.userParam !== defaults.userParam) {
+            // userParam set? persist to storage
             localStorage.setItem("display_name", decodeURI(globals.userParam));
             processedName = globals.userParam;
+        } else if (localStorage.getItem("display_name") === null) {
+            // Use auth name to create human-readable name
+            localStorage.setItem("display_name", authName);
         }
-    }
-    // Use auth name to create human-readable name
-    if (localStorage.getItem("display_name") === null) {
-        localStorage.setItem("display_name", authName);
+        globals.displayName = localStorage.getItem("display_name");
     }
     if (prefix !== null) {
         processedName = `${prefix}${processedName}`;
