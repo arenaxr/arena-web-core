@@ -49,10 +49,11 @@ var authCheck = function (args) {
 };
 
 function checkAnonAuth(event) {
-    //TODO(mwfarb): also verify valid unexpired stored mqtt-token
-
-    // prefix all anon users with "anon-"
+    // prefix all anon users with "anonymous-"
     var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
+
+    //TODO(mwfarb): anon verify valid unexpired stored mqtt-token
+
     requestMqttToken("anonymous", anonName);
 }
 
@@ -121,6 +122,9 @@ function onSignIn(googleUser) {
     processUserNames(profile.getName());
     // request mqtt-auth
     var id_token = googleUser.getAuthResponse().id_token;
+
+    //TODO(mwfarb): google verify valid unexpired stored mqtt-token
+
     requestMqttToken("google", profile.getEmail(), id_token);
 }
 
@@ -137,8 +141,9 @@ function signOut() {
         default:
             break;
     }
-    //TODO(mwfarb): also remove stored mqtt-token
     localStorage.removeItem("auth_choice");
+    localStorage.removeItem("mqtt_username");
+    localStorage.removeItem("mqtt_token");
     // back to signin page
     localStorage.setItem("request_uri", location.href);
     location.href = signInPath;
@@ -173,8 +178,9 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
-            //TODO(mwfarb): also store mqtt-token
             console.log("got mqtt-user/mqtt-token:", xhr.response.username, xhr.response.token);
+            localStorage.setItem("mqtt_username", xhr.response.username);
+            localStorage.setItem("mqtt_token", xhr.response.token);
             // mqtt-token must be set to authorize access to MQTT broker
             const authCompleteEvent = new CustomEvent('onauth', {
                 detail: {
