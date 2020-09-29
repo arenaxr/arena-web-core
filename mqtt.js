@@ -963,8 +963,8 @@ function onMessageArrived(message, jsonMessage) {
                         for (const [src, progress] of Object.entries(progMsgs)) {
                             if (progress === "failed") {
                                 innerHTML += "<b>\"" + src + "\"" + "<br/>" + "Failed!</b>" + "<br/>";
-                            } else if (progress < 100) {
-                                var shortName = src.length < 15 ? src : "…" + src.substring(src.length - 15);
+                            } else {
+                                var shortName = src.length < 20 ? src : "…" + src.substring(src.length - 20);
                                 innerHTML += shortName + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
                             }
                         }
@@ -975,6 +975,9 @@ function onMessageArrived(message, jsonMessage) {
                     entityEl.addEventListener('model-progress', evt => {
                         progMsgs[evt.detail.src] = evt.detail.progress;
                         updateProgress(false, evt);
+                        if (evt.detail.progress === 100) {
+                            delete progMsgs[evt.detail.src];
+                        }
                     });
                     entityEl.addEventListener('model-error', evt => {
                         progMsgs[evt.detail.src] = "failed";
