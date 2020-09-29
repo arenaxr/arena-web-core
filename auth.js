@@ -30,7 +30,6 @@
 if (!storageAvailable('localStorage')) {
     alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
-//window.dispatchEvent(new CustomEvent('onauth', { detail: { mqtt_username: "test", mqtt_token: "test" } }));
 
 var auth2;
 var signInPath;
@@ -51,9 +50,7 @@ var authCheck = function (args) {
 
 function checkAnonAuth(event) {
     //TODO(mwfarb): also verify valid unexpired stored mqtt-token
-    //TODO(mwfarb): handle case of scene-hopping without anon-auth-button
 
-    //localStorage.removeItem("auth_choice"); // TODO(mwfarb): verify: unset anon, don't persist
     // prefix all anon users with "anon-"
     var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
     requestMqttToken("anonymous", anonName);
@@ -86,12 +83,13 @@ function checkGoogleAuth() {
 function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
     var processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
-    if (typeof globals !== 'undefined' && typeof defaults !== 'undefined') {
-        if (globals.userParam !== defaults.userParam) {
+    if (typeof globals !== 'undefined') {
+        if (typeof defaults !== 'undefined' && globals.userParam !== defaults.userParam) {
             // userParam set? persist to storage
             localStorage.setItem("display_name", decodeURI(globals.userParam));
             processedName = globals.userParam;
-        } else if (localStorage.getItem("display_name") === null) {
+        }
+        if (localStorage.getItem("display_name") === null) {
             // Use auth name to create human-readable name
             localStorage.setItem("display_name", authName);
         }
