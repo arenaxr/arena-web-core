@@ -98,7 +98,11 @@
                 }
             }, function (error) {
                 console.error(error);
-                // TODO(mwfarb): gray out google button?
+                // gray out google button?
+                var nodes = document.getElementById("customBtnGoogle").getElementsByTagName('*');
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].disabled = true;
+                }
             });
         });
     };
