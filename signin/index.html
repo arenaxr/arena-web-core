@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
     <script src="https://apis.google.com/js/api:client.js"></script>
     <script src="../defaults.js"></script>
+    <script src="../auth.js"></script>
 </head>
 
 <body>
@@ -27,23 +28,28 @@
             <!-- <div class="social-btn"> -->
             <!-- <div class="fa g-signin2" data-onsuccess="onGoogleSignIn"></div> -->
             <div id="gSignInWrapper">
-                <!-- <span class="label">Sign in with:</span> -->
-                <div id="customBtn" class="customGPlusSignIn">
+                <div id="customBtnGoogle" class="customBtn">
                     <span class="icon"></span>
-                    <span class="buttonText">Google Sign In</span>
+                    <span class="buttonText">Google</span>
                 </div>
             </div>
-
-            <!-- <button type="submit" class="google-btn">
-                <i class="fa fa-google" aria-hidden="true"></i> Login
-                with Google
-            </button>
-            <button type="submit" class="github-btn">
-                <i class="fa fa-github" aria-hidden="true"></i> Login
-                with Github
-            </button> -->
-
+            <!-- <button type="submit" class="github-btn">
+                    <i class="fab fa-github" aria-hidden="true"></i> Login
+                    with Github
+                </button> -->
+            <div id="anonSignInWrapper">
+                <div id="customBtnAnon" class="customBtn">
+                    <span class="icon">
+                        <i class="fa fa-user-secret"></i>
+                    </span>
+                    <span class="buttonText">Anonymously</span>
+                </div>
+            </div>
             <!-- </div> -->
+            <div hidden id="anonNameWrapper">Great! Your preferred name is...<input type="text"
+                    placeholder="Hi! My name is..." id="usernameInput" />
+                <button id="btnAnonName" type="button">Enter</button>
+            </div>
         </form>
     </div>
 </body>
@@ -57,7 +63,7 @@
     var is_safari = navigator.userAgent.indexOf("Safari") > -1;
     var is_chrome = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('ChiOS') > -1;
     var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
-    var is_webxrv = navigator.userAgent.indexOf('WebXRViewer') > -1;
+    var is_webxrviewer = navigator.userAgent.indexOf('WebXRViewer') > -1;
     var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
     var is_edge = navigator.userAgent.indexOf('Edg') > -1;
     var is_opera = navigator.userAgent.toLowerCase().indexOf("op") > -1;
@@ -80,10 +86,10 @@
     const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
     var auth2;
     var googleUser = {};
-    var startAuthSignin = function () {
+    var initGoogleAuth = function () {
         gapi.load('auth2', function () {
             auth2 = gapi.auth2.init(gapiInitConfig);
-            attachSignin(document.getElementById('customBtn'));
+            attachGoogleSignin(document.getElementById('customBtnGoogle'));
             auth2 = gapi.auth2.getAuthInstance();
             if (auth2.isSignedIn.get()) {
                 console.log("User is already signed in.");
@@ -93,8 +99,7 @@
         });
     };
 
-    function attachSignin(element) {
-        console.log(element.id);
+    function attachGoogleSignin(element) {
         auth2.attachClickHandler(element, {}, onGoogleSignIn, function (error) {
             alert(JSON.stringify(error, undefined, 2));
         });
@@ -102,7 +107,12 @@
 
     function onGoogleSignIn(googleUser) {
         var profile = googleUser.getBasicProfile();
-        console.log("Signed In:: " + profile.getEmail());
+        console.log("Signed In: " + profile.getEmail());
+        localStorage.setItem("auth_choice", "google");
+        returnToRequestedPage();
+    }
+
+    function returnToRequestedPage() {
         if (localStorage.getItem("request_uri")) {
             //redirect user to originally requested page
             location.href = localStorage.getItem("request_uri");
@@ -111,7 +121,40 @@
         }
     }
 
-    startAuthSignin();
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$";
+    var initAnonAuth = function () {
+        var re = new RegExp(nameRegex);
+        var anonBtn = document.getElementById('customBtnAnon');
+        if (typeof anonBtn != 'undefined') {
+            anonBtn.addEventListener('click', function (event) {
+                // check for saved name, use it
+                var savedName = localStorage.getItem("display_name");
+                if (savedName !== null && re.test(savedName)) {
+                    localStorage.setItem("auth_choice", "anonymous");
+                    returnToRequestedPage();
+                } else { // if no passable name, ask for one
+                    var namePanel = document.getElementById('anonNameWrapper');
+                    namePanel.hidden = false;
+                }
+            });
+        }
+        var usernameInput = document.getElementById('usernameInput');
+        usernameInput.setAttribute("pattern", nameRegex);
+        var nameBtn = document.getElementById('btnAnonName');
+        nameBtn.addEventListener('click', function (event) {
+            // validate
+            if (re.test(usernameInput.value)) {
+                // remove extra spaces
+                var displayName = usernameInput.value.replace(/\s+/g, " ").trim();
+                localStorage.setItem("display_name", displayName);  // save for next use
+                localStorage.setItem("auth_choice", "anonymous");
+                returnToRequestedPage();
+            }
+        });
+    }
+
+    initGoogleAuth();
+    initAnonAuth();
 </script>
 
 </html>

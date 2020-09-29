@@ -155,7 +155,7 @@ function setupIcons() {
         })
         .then((confirmed) => {
             if (confirmed) {
-                signOut('.'); // --> ./auth.js
+                signOut(); // --> ./auth.js
             }
         });
     });
@@ -240,7 +240,7 @@ function setupIcons() {
     label.innerHTML = "Display Name";
     formDiv.appendChild(label);
 
-    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$";
     let usernameInput = document.createElement("input");
     usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");
@@ -261,7 +261,7 @@ function setupIcons() {
     };
 
     function loadSettings() {
-        usernameInput.value = globals.displayName;
+        usernameInput.value = localStorage.getItem("display_name");
         var auth = getAuthStatus();
         authType.innerHTML = auth.type;
         authName.innerHTML = auth.name;
