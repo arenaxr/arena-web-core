@@ -41,9 +41,16 @@ var authCheck = function (args) {
             window.addEventListener('load', checkAnonAuth);
             break;
         case "google":
-        default:
+        default: // default = can mean private browser
             // normal check for google auth2
-            gapi.load('auth2', checkGoogleAuth);
+            try {
+                gapi.load('auth2', checkGoogleAuth);
+            } catch (e) {
+                console.error(e);
+                // send login with redirection url from this page
+                localStorage.setItem("request_uri", location.href);
+                location.href = signInPath;
+            }
             break;
     }
 };
