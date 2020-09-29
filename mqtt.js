@@ -964,8 +964,8 @@ function onMessageArrived(message, jsonMessage) {
                             if (progress === "failed") {
                                 innerHTML += "<b>\"" + src + "\"" + "<br/>" + "Failed!</b>" + "<br/>";
                             } else {
-                                innerHTML += "\"" + src + "\"" + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
-                            }
+                                var shortName = src.length < 15 ? src : "…" + src.substring(src.length - 15)
+                                innerHTML += shortName + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";                            }
                         }
                         gltfProgressEl.innerHTML = innerHTML;
                         gltfProgressEl.className = "show";
