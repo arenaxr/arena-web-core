@@ -117,9 +117,6 @@ export async function populateList(scene, editobjhandler) {
         if (scenes[i] == persist.scene_textbox.value) exists = true;
       }
       if (exists) persist.scene_list.value = persist.scene_textbox.value;
-      else {
-        persist.scene_textbox.value = persist.scene_list.value = scenes[0];
-      }
     }
 
     try {
@@ -229,7 +226,7 @@ export function clearSelected() {
 export function addObject(objJson, scene) {
 
     var obj = JSON.parse(objJson);
-    
+
     // make sure persist is true
     obj.persist = true;
     objJson = JSON.stringify(obj);
