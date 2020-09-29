@@ -88,14 +88,22 @@
     var googleUser = {};
     var initGoogleAuth = function () {
         gapi.load('auth2', function () {
-            auth2 = gapi.auth2.init(gapiInitConfig);
-            attachGoogleSignin(document.getElementById('customBtnGoogle'));
-            auth2 = gapi.auth2.getAuthInstance();
-            if (auth2.isSignedIn.get()) {
-                console.log("User is already signed in.");
-                var googleUser = auth2.currentUser.get();
-                onGoogleSignIn(googleUser);
-            }
+            auth2 = gapi.auth2.init(gapiInitConfig).then(function () {
+                attachGoogleSignin(document.getElementById('customBtnGoogle'));
+                auth2 = gapi.auth2.getAuthInstance();
+                if (auth2.isSignedIn.get()) {
+                    console.log("User is already signed in.");
+                    var googleUser = auth2.currentUser.get();
+                    onGoogleSignIn(googleUser);
+                }
+            }, function (error) {
+                console.error(error);
+                // gray out google button?
+                var nodes = document.getElementById("customBtnGoogle").getElementsByTagName('*');
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].disabled = true;
+                }
+            });
         });
     };
 
