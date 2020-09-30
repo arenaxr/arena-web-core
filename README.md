@@ -1,6 +1,9 @@
 # ARENA
 Render 3d content in AFrame from MQTT messages
 
+## Documentation
+The ARENA MQTT Messaging user guide and tutorials: [ARENA Documentation: Messaging](https://conix-center.github.io/ARENA/content/messaging/).
+
 ## References
 This code originated as a clone of the demo for a tool that exports a Unity scene as an A-Frame page https://github.com/if1live/unity-scene-web-exporter .
 It was then modified to do real-time updating of scene objects based on another demo ("networked AFrame" https://github.com/networked-aframe/networked-aframe) and using MQTT in a browser https://github.com/reese-long/mqtt-browser-demo
