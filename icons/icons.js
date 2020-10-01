@@ -135,7 +135,7 @@ function setupIcons() {
             title: "You clicked on screen share!",
             text: "In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!",
             icon: "warning",
-            buttons: ["cancel", "yes"]
+            buttons: ["Cancel", "Yes"]
         })
         .then((confirmed) => {
             if (confirmed) {
@@ -149,13 +149,13 @@ function setupIcons() {
     const logoutBtn = createIconButton("logout-on", "Sign out of the ARENA", () => {
         swal({
             title: "You are about to sign out of the ARENA!",
-            text: "Are you are you want to sign out?",
+            text: "Are you sure you want to sign out?",
             icon: "warning",
-            buttons: ["cancel", "yes"]
+            buttons: ["Cancel", "Yes"]
         })
         .then((confirmed) => {
             if (confirmed) {
-                signOut(); // --> ./auth.js
+                signOut('.'); // --> ./auth.js
             }
         });
     });
@@ -240,7 +240,7 @@ function setupIcons() {
     label.innerHTML = "Display Name";
     formDiv.appendChild(label);
 
-    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$";
+    const nameRegex = "^(?=[^A-Za-z]*[A-Za-z])[ -~]*$";
     let usernameInput = document.createElement("input");
     usernameInput.setAttribute("type", "text");
     usernameInput.setAttribute("placeholder", "Display Name");
@@ -261,7 +261,7 @@ function setupIcons() {
     };
 
     function loadSettings() {
-        usernameInput.value = localStorage.getItem("display_name");
+        usernameInput.value = globals.displayName;
         var auth = getAuthStatus();
         authType.innerHTML = auth.type;
         authName.innerHTML = auth.name;

@@ -349,7 +349,7 @@ AFRAME.registerComponent('goto-url', {
         } // http:// style url
     },
 
-    multiple: true,
+    // multiple: true,
 
     init: function() {
         var self = this;
@@ -367,16 +367,15 @@ AFRAME.registerComponent('goto-url', {
                 if (!fired) {
                     fired = true;
                     swal({
-                        title: "You clicked on a URL attached to an ARENA object!",
+                        title: "You clicked on a URL!",
                         text: "Are you sure you want to go to\n["+data.url+"]?",
-                        buttons: ["cancel", "yes"]
+                        buttons: ["Cancel", "Yes"]
                     })
                     .then((confirmed) => {
-                        if (confirmed) {
+                        if (confirmed)
                             window.location.href = data.url;
-                        }
-                    }); 
-		    window.setTimeout(() => { // prevents event from firing twice after one event
+                    });
+                    window.setTimeout(() => { // prevents event from firing twice after one event
                         fired = false;
                     }, 100);
                 }
@@ -573,9 +572,9 @@ AFRAME.registerComponent('collision-listener', {
                 y: 0,
                 z: 0
             };
+
             // colliding object
             const collider = evt.detail.body.el.id;
-            const collideee = this.id;
 
             // original click event; simply publish to MQTT
             const thisMsg = {
@@ -588,8 +587,6 @@ AFRAME.registerComponent('collision-listener', {
                 }
             };
             publish(globals.outputTopic + this.id, thisMsg);
-            //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-            //console.log(this.id + ' collision at: ', coordsToText(coordsData), 'by ', collider);
         });
     }
 });
@@ -599,8 +596,8 @@ AFRAME.registerComponent('collision-listener', {
 
 AFRAME.registerComponent('click-listener', {
     init: function() {
-        //console.log("click-listener Component init");
-        //console.log("mousedown init");
+        let self = this;
+
         this.el.addEventListener('mousedown', function(evt) {
 
             const clickPos = vec3ToObject(globals.newPosition);
@@ -618,17 +615,9 @@ AFRAME.registerComponent('click-listener', {
                         source: globals.camName
                     }
                 };
-                publish(globals.outputTopic + this.id, thisMsg);
-                //publish(outputTopic+this.id+"/mousedown", coordsText+","+camName);
-                console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
-            } else {
-                // do the event handling for MQTT event; this is just an example
-                //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-                if (evt.currentTarget.id.includes("Earth")) {
-                    this.setAttribute('animation__2', "");
-                    this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate");
-                }
-                const clicker = evt.detail.clicker;
+                if (!self.el.getAttribute("goto-url"))
+                    publish(globals.outputTopic + this.id, thisMsg);
+                // console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
             }
         });
 
@@ -640,7 +629,6 @@ AFRAME.registerComponent('click-listener', {
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
-                //publish(outputTopic+this.id+"/mouseup", coordsText+","+camName);
                 let thisMsg = {
                     object_id: this.id,
                     action: "clientEvent",
@@ -651,33 +639,9 @@ AFRAME.registerComponent('click-listener', {
                         source: globals.camName
                     }
                 };
-                publish(globals.outputTopic + this.id, thisMsg);
-
-                console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', globals.camName);
-                // example of warping to a URL
-                //if (this.id === "Box-obj")
-                //    window.location.href = 'http://conix.io/';
-            } else {
-
-                // do the event handling for MQTT event; this is just an example
-                //      this.setAttribute('animation__2', "startEvents: click; property: scale; dur: 10000; easing: linear; to: 10 10 10; direction: alternate-reverse");
-                // this example pushes the object with 50 in the +Y direction
-                // mosquitto_pub -t /topic/earth/gltf-model_Earth/animation__2 -m "property: scale; dur: 1000; from: 10 10 10; to: 5 5 5; easing: easeInOutCirc; loop: 5; dir: alternate"
-
-                /*
-                            if (this.body) { // has physics
-                    const foo = new THREE.Vector3(this.impulse.from); // 1 50 1
-                    const bod = new THREE.Vector3(this.impulse.to);   // 1 1 1
-                    this.body.applyImpulse(foo, bod);
-                            }
-                */
-
-                /* DEBUG Conix box text
-                        const clicker = evt.detail.clicker;
-                        const sceney = this.sceneEl;
-                        const textEl = sceney.querySelector('#conix-text');
-                        textEl.setAttribute('value', this.id + " mouseup" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-                */
+                if (!self.el.getAttribute("goto-url"))
+                    publish(globals.outputTopic + this.id, thisMsg);
+                // console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', globals.camName);
             }
         });
 
@@ -698,19 +662,8 @@ AFRAME.registerComponent('click-listener', {
                         source: globals.camName
                     }
                 };
-                publish(globals.outputTopic + this.id, thisMsg);
-                //console.log(this.id + ' got mouseenter at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
-            } else {
-
-                // do the event handling for MQTT event; this is just an example
-                //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-
-                /* Debug Conix box text
-                        const clicker = evt.detail.clicker;
-                        const sceney = this.sceneEl;
-                        const textEl = sceney.querySelector('#conix-text');
-                        textEl.setAttribute('value', this.id + " mouseenter" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-                */
+                if (!self.el.getAttribute("goto-url"))
+                    publish(globals.outputTopic + this.id, thisMsg);
             }
         });
 
@@ -731,19 +684,8 @@ AFRAME.registerComponent('click-listener', {
                         source: globals.camName
                     }
                 };
-                publish(globals.outputTopic + this.id, thisMsg);
-                //console.log(this.id + ' got mouseleave at: ', evt.currentTarget.object3D.position, 'by', globals.camName);
-            } else {
-
-                // do the event handling for MQTT event; this is just an example
-                //this.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-
-                /* DEBUG Conix box text
-                        const clicker = evt.detail.clicker;
-                        const sceney = this.sceneEl;
-                        const textEl = sceney.querySelector('#conix-text');
-                        textEl.setAttribute('value', this.id + " mouseleave" + '\n' + coordsToText(coordsData) + '\n' + clicker);
-                */
+                if (!self.el.getAttribute("goto-url"))
+                    publish(globals.outputTopic + this.id, thisMsg);
             }
         });
     }
