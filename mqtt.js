@@ -549,7 +549,6 @@ async function enableChromeAEC(gainNode) {
   }
 }
 
-var progMsgs = {};
 function onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
     let theMessage = {};
@@ -957,31 +956,19 @@ function onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
                     entityEl.setAttribute('gltf-model', theMessage.data.url);
 
-                    function updateProgress(failed, evt) {
+                    function updateProgress(failed, innerHTML, evt) {
                         const gltfProgressEl = document.getElementById("gltf-loading");
-                        var innerHTML = "Loading 3D model:<br/>";
-                        for (const [src, progress] of Object.entries(progMsgs)) {
-                            if (progress === "failed") {
-                                innerHTML += "<b>\"" + src + "\"" + "<br/>" + "Failed!</b>" + "<br/>";
-                            } else {
-                                var shortName = src.length < 20 ? src : "…" + src.substring(src.length - 20);
-                                innerHTML += shortName + "<br/>" + parseFloat(progress.toFixed(1)) + "%" + "<br/>";
-                            }
-                        }
                         gltfProgressEl.innerHTML = innerHTML;
                         gltfProgressEl.className = "show";
-                        if (evt.detail.progress == 100 || failed) setTimeout(() => { progMsgs = {}; gltfProgressEl.className = "hide"; }, 3000);
+                        if (evt.detail.progress == 100 || failed) setTimeout(() => { gltfProgressEl.className = "hide"; }, 3000);
                     }
                     entityEl.addEventListener('model-progress', evt => {
-                        progMsgs[evt.detail.src] = evt.detail.progress;
-                        updateProgress(false, evt);
-                        if (evt.detail.progress === 100) {
-                            delete progMsgs[evt.detail.src];
-                        }
+                        const text = "Loading 3D model:<br/>" + "\""+evt.detail.src+"\"" + "<br/>" + parseFloat(evt.detail.progress.toFixed(1))+"%";
+                        updateProgress(false, text, evt);
                     });
                     entityEl.addEventListener('model-error', evt => {
-                        progMsgs[evt.detail.src] = "failed";
-                        updateProgress(true, evt);
+                        const text = "<b>Failed to load 3D model:<br/>" + "\""+evt.detail.src+"\"!</b>";
+                        updateProgress(true, text, evt);
                     });
                     delete theMessage.data.url;
                     break;
@@ -1087,7 +1074,6 @@ function onMessageArrived(message, jsonMessage) {
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-                                //console.log("setting attribute: ", attribute);
                                 entityEl.setAttribute(attribute, value);
                             }
                         }

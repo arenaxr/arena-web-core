@@ -346,10 +346,13 @@ AFRAME.registerComponent('goto-url', {
         }, // event to listen 'on'
         url: {
             default: ''
-        } // http:// style url
+        }, // http:// style url
+        newTab: {
+            default: false
+        } // newtab
     },
 
-    // multiple: true,
+    multiple: true,
 
     init: function() {
         var self = this;
@@ -361,19 +364,24 @@ AFRAME.registerComponent('goto-url', {
         var data = this.data; // Component property values.
         var el = this.el; // Reference to the component's entity.
         let fired = false;
-        if (data.on) { // we have an event?
+        if (data.on && data.url) { // we have an event?
             el.addEventListener(data.on, function(evt) {
-                console.log("goto-url url=" + data.url);
+                // console.log("goto-url url=" + data.url);
                 if (!fired) {
                     fired = true;
                     swal({
                         title: "You clicked on a URL!",
-                        text: "Are you sure you want to go to\n["+data.url+"]?",
+                        text: !data.newTab ? "Are you sure you want to open \n["+data.url+"]?" :
+                                             "Are you sure you want to open\n["+data.url+"] in a new tab?",
                         buttons: ["Cancel", "Yes"]
                     })
                     .then((confirmed) => {
-                        if (confirmed)
-                            window.location.href = data.url;
+                        if (confirmed) {
+                            if (!data.newTab)
+                                window.location.href = data.url;
+                            else
+                                window.open(data.url, '_blank');
+                        }
                     });
                     window.setTimeout(() => { // prevents event from firing twice after one event
                         fired = false;
