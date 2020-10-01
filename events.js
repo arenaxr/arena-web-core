@@ -347,8 +347,8 @@ AFRAME.registerComponent('goto-url', {
         url: {
             default: ''
         }, // http:// style url
-        newTab: {
-            default: false
+        dest: {
+            default: 'sametab'
         } // newtab
     },
 
@@ -371,16 +371,23 @@ AFRAME.registerComponent('goto-url', {
                     fired = true;
                     swal({
                         title: "You clicked on a URL!",
-                        text: !data.newTab ? "Are you sure you want to open \n["+data.url+"]?" :
-                                             "Are you sure you want to open\n["+data.url+"] in a new tab?",
+                        text: "Are you sure you want to open \n["+data.url+"]?",
                         buttons: ["Cancel", "Yes"]
                     })
                     .then((confirmed) => {
                         if (confirmed) {
-                            if (!data.newTab)
-                                window.location.href = data.url;
-                            else
-                                window.open(data.url, '_blank');
+                            switch (data.dest) {
+                                case 'popup':
+                                    window.open(data.url, 'popup', 'width=500,height=500');
+                                    break;
+                                case 'newtab':
+                                    window.open(data.url, '_blank');
+                                    break;
+                                case 'sametab':
+                                default:
+                                    window.location.href = data.url;
+                                    break;
+                            }
                         }
                     });
                     window.setTimeout(() => { // prevents event from firing twice after one event
