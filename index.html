@@ -54,6 +54,9 @@
     <!-- custom alerts -->
     <script src="vendor/sweetalert.min.js"></script>
 
+    <!-- aframe component modifications -->
+    <script src="arena-aframe-mods.js"></script>
+
     <!-- <script src="https://jeromeetienne.github.io/AR.js/aframe/build/aframe-ar.js"></script> -->
 
     <!-- TO WORK WITH WebXR Viewer, uncomment below and add 'ar' component to a-scene tag e.g. "a-scene ar ..." -->
@@ -120,7 +123,7 @@
         <a-entity position="0 0 0" id="CameraRig">
           <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
-            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls pose-listener mouse-cursor press-and-move network-latency>
+            <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls look-controls-arrow pose-listener mouse-cursor press-and-move network-latency>
               <a-entity id="mouseCursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>
             </a-camera>
           </a-entity>
