@@ -325,12 +325,19 @@ body {
 }
 
 .dot {
-	height: 10px;
-	width: 10px;
+	margin: auto;
+	height: 13px;
+	width: 13px;
 	background-color: #e81a39;
-	border-radius: 50%;
-	display: none;
+	border-radius: 100%;
 	position: absolute;
-	left: 10px;
+	left: 5px;
 	top: 2px;
+	font-size: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  display:none;
 }
