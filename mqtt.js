@@ -128,7 +128,8 @@ const loadScene = () => {
     xhr.send();
     xhr.onload = () => {
         if (xhr.status !== 200) {
-            console.error("Error loading scene-options");
+            // not every scene will have scene-objects
+            console.log("No scene-options object found");
         } else {
             const payload = xhr.response[xhr.response.length-1];
             if (payload) {
