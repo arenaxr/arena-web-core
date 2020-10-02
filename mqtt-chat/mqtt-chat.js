@@ -477,7 +477,7 @@ export default class MQTTChat {
         toCam.object3D.getWorldDirection( direction );
         let distance = 1; // distance to put you
         myCamera.object3D.position.copy( toCam.object3D.position.clone() ).add( direction.multiplyScalar( -distance ) );
-        myCamera.object3D.lookAt(toCam.object3D.position);
-        // TODO: rotate our camera to face the other user
+        // rotate our camera to face the other user
+        myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2( ( myCamera.object3D.position.x - toCam.object3D.position.x ), ( myCamera.object3D.position.z - toCam.object3D.position.z ) );
    }
 }

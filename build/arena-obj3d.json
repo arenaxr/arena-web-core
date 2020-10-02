@@ -29,16 +29,20 @@
          ],
          "properties":{
             "x":{
-               "type":"number"
+               "type":"number",
+               "default": 0
             },
             "y":{
-               "type":"number"
+               "type":"number",
+               "default": 0
             },
             "z":{
-               "type":"number"
+               "type":"number",
+               "default": 0
             },
             "w":{
-               "type":"number"
+               "type":"number",
+               "default": 1
             }
          }
       },
@@ -85,7 +89,8 @@
             "scale":{
               "title":"Scale",
               "description":"3D object scale",
-               "$ref":"#/definitions/coord3d"
+               "$ref":"#/definitions/coord3d",
+               "default": { "x": 1, "y": 1, "z": 1 }
             },
             "color":{
                "type":"string",
@@ -112,7 +117,7 @@
                      ]
                   }
                },
-               "required":[ "type"]
+               "required":[ "type" ]
             },
             "click-listener":{
                   "title":"Click Listner",
@@ -123,9 +128,9 @@
                   "title":"Parent",
                   "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
                   "type":"string"
-            }            
+            }
          },
-         "required":[ "object_type"]
+         "required":[ "object_type", "position", "scale", "rotation" ]
       }
    },
    "type":"object",
