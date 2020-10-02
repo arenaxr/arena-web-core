@@ -51,8 +51,8 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
     }
     if (data.wsEnabled) {
         wsSign = data.wsInverted ? -1 : 1;
-        if (keys.KeyW) { velocity[wsAxis] -= wsSign * acceleration * delta; }
-        if (keys.KeyS) { velocity[wsAxis] += wsSign * acceleration * delta; }
+        if (keys.KeyW || keys.ArrowUp) { velocity[wsAxis] -= wsSign * acceleration * delta; }
+        if (keys.KeyS || keys.ArrowDown) { velocity[wsAxis] += wsSign * acceleration * delta; }
     }
 }
 
@@ -85,14 +85,15 @@ AFRAME.registerComponent("look-controls-arrow", {
 
     tick: function (time, delta) {
         if (!globals || !globals.sceneObjects.myCamera) return;
+
         const keys = keysPressed;
         if (keys['ArrowLeft']) globals.sceneObjects.myCamera.components['look-controls'].yawObject.rotation.y += MAX_DELTA_LOOK;
         if (keys['ArrowRight']) globals.sceneObjects.myCamera.components['look-controls'].yawObject.rotation.y -= MAX_DELTA_LOOK;
-        if (keys['ArrowUp']) globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x += MAX_DELTA_LOOK;
-        if (keys['ArrowDown']) globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x -= MAX_DELTA_LOOK;
 
-        globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x =
-            Math.max(-PI_2, Math.min(PI_2, globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x));
+        // if (keys['ArrowUp']) globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x += MAX_DELTA_LOOK;
+        // if (keys['ArrowDown']) globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x -= MAX_DELTA_LOOK;
+        // globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x =
+        //     Math.max(-PI_2, Math.min(PI_2, globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x));
     }
 });
 
