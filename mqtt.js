@@ -128,7 +128,7 @@ const loadScene = () => {
     xhr.send();
     xhr.onload = () => {
         if (xhr.status !== 200) {
-            console.log("Error loading scene-options");
+            console.error("Error loading scene-options");
         } else {
             const payload = xhr.response[xhr.response.length-1];
             if (payload) {
@@ -398,10 +398,11 @@ function onConnect() {
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.log(responseObject.errorMessage);
+        console.error(responseObject.errorMessage);
     } // reconnect
     ARENA.mqttClient.connect({
-        onSuccess: onConnect,
+        // For reconnect, do not call onConnect(), that will warp user back and lose
+        // current state. Instead, reconnect with proper LWT and Auth only.
         willMessage: lwt, // ensure 2nd disconnect will not leave head in scene
         userName: globals.username,
         password: globals.mqttToken
@@ -573,7 +574,7 @@ function onMessageArrived(message, jsonMessage) {
                     parseFloat(theMessage.data.position.y),
                     parseFloat(theMessage.data.position.z));
             else
-                console.log("Error: theMessage.data.position not defined", theMessage);
+                console.error("Error: theMessage.data.position not defined", theMessage);
             const clicker = theMessage.data.source;
 
             if (entityEl == undefined) {

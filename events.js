@@ -978,7 +978,7 @@ AFRAME.components['gltf-model'].Component.prototype.update = function () {
         el.emit("model-progress", {src: src, progress: (xhr.loaded / xhr.total * 100) })
     }, function gltfFailed (error) {
         var message = (error && error.message) ? error.message : 'Failed to load glTF model';
-        console.warn(message);
+        console.error(message);
         el.emit('model-error', {format: 'gltf', src: src});
     });
 }
