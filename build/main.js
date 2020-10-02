@@ -52,6 +52,7 @@ window.addEventListener('onauth', async function (e) {
     var genid_button = document.getElementById("genid");
     var add_button = document.getElementById("addobj");
     var del_button = document.getElementById("delobj");
+    var all_button = document.getElementById("selectall");
     var clear_button = document.getElementById("clearlist");
     var refresh_button = document.getElementById("refreshlist");
     var mqtt_reconnect = document.getElementById("mqtt_reconnect");
@@ -270,8 +271,12 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // listeners for buttons
+    all_button.addEventListener("click", function() {
+        PersistObjects.selectAll();
+    });
+
     clear_button.addEventListener("click", function() {
-        PersistObjects.cleared();
+        PersistObjects.clearSelected();
     });
 
     del_button.addEventListener("click", function() {

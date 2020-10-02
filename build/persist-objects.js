@@ -216,6 +216,13 @@ export function deleteSelected(scene) {
     }
 }
 
+export function selectAll() {
+    var items = persist.obj_list.getElementsByTagName("li");
+    for (var i = 0; i < items.length; i++) {
+        items[i].classList.add("checked");
+    }
+}
+
 export function clearSelected() {
     var items = persist.obj_list.getElementsByTagName("li");
     for (var i = 0; i < items.length; i++) {
