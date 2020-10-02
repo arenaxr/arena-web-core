@@ -107,7 +107,7 @@ export default class MQTTChat {
 		this.usersPopup.appendChild(this.closeUsersBtn);
 
 		let label = document.createElement("span");
-		label.innerHTML = "<br/><br/> ";
+		label.innerHTML = "<br/><br/>&nbsp";
 		label.style.fontSize = "small";
 		this.usersPopup.appendChild(label);
 
@@ -380,8 +380,8 @@ export default class MQTTChat {
 
   	// span click event (send sound on/off msg to all)
   	maspan.onclick = function () {
-  		// send to all topic
-  		_this.cmdMsg(_this.settings.atopic, "sound:off");
+  		// send to scene topic
+  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
   	}
 
   	// other users
@@ -466,7 +466,7 @@ export default class MQTTChat {
 			type: "chat-cmd",
 			text: text
 		}
-		//console.log("cmd", msg, "to", toTopic);
+		console.log("cmd", msg, "to", toTopic);
 		this.mqttc.send(toTopic, JSON.stringify(msg), 0, false);
 	}
 
