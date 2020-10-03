@@ -188,7 +188,7 @@ export default class MQTTChat {
 
 	async connect(force = false) {
 		if (this.connected == true && force == false) return;
-		this.mqttc = new Paho.MQTT.Client(this.settings.mqtt_host, "chat-" + this.settings.userid);
+		this.mqttc = new Paho.Client(this.settings.mqtt_host, "chat-" + this.settings.userid);
 
 		var _this = this;
 		let msg = {
@@ -199,7 +199,7 @@ export default class MQTTChat {
 			from_scene: this.settings.scene,
 			text: "left"
 		}
-		let willMessage = new Paho.MQTT.Message(JSON.stringify(msg));
+		let willMessage = new Paho.Message(JSON.stringify(msg));
 		willMessage.destinationName = this.settings.atopic;
 		this.mqttc.connect({
 			onSuccess: () => {
