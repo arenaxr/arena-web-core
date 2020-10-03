@@ -172,8 +172,8 @@ window.addEventListener('onauth', function (e) {
     lwt.qos = 2;
     lwt.retained = false;
     ARENA.mqttClient.connect({
-        onSuccess: onSuccessConnect,
-        onFailure: onFailedConnect,
+        onSuccess: function () { console.log("MQTT scene connection success."); },
+        onFailure: function (res) { console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`); },
         reconnect: true,
         willMessage: lwt,
         userName: globals.username,
@@ -406,16 +406,6 @@ function onConnected(reconnect, uri) {
     importScript("./face-tracking/script.js").then(() => {
         if (!AFRAME.utils.device.isMobile()) ARENA.FaceTracker.init();
     })
-}
-
-// Callback for successful connection
-function onSuccessConnect() {
-    console.log("MQTT scene connection success.");
-}
-
-// Callback for failed connection
-function onFailedConnect() {
-    console.error("MQTT scene connection failed!");
 }
 
 function onConnectionLost(responseObject) {
