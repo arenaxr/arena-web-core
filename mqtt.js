@@ -2,7 +2,8 @@
 
 window.ARENA = {};
 
-ARENA.mqttClient = new Paho.MQTT.Client(globals.mqttParam, "webClient-" + globals.timeID);
+ARENA.mqttClient = new Paho.Client(globals.mqttParam, "webClient-" + globals.timeID);
+ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
 ARENA.mqttClient.onMessageArrived = onMessageArrived;
 
@@ -163,7 +164,7 @@ window.addEventListener('onauth', function (e) {
     globals.mqttToken = e.detail.mqtt_token;
 
     // Last Will and Testament message sent to subscribers if this client loses connection
-    lwt = new Paho.MQTT.Message(JSON.stringify({
+    lwt = new Paho.Message(JSON.stringify({
         object_id: globals.camName,
         action: "delete"
     }));
@@ -171,7 +172,9 @@ window.addEventListener('onauth', function (e) {
     lwt.qos = 2;
     lwt.retained = false;
     ARENA.mqttClient.connect({
-        onSuccess: onConnect,
+        onSuccess: onSuccessConnect,
+        onFailure: onFailedConnect,
+        reconnect: true,
         willMessage: lwt,
         userName: globals.username,
         password: globals.mqttToken
@@ -180,14 +183,22 @@ window.addEventListener('onauth', function (e) {
 
 var oldMsg = '';
 
-// Callback for client.connect()
-function onConnect() {
-    //console.log("onConnect");
+function onConnected(reconnect, uri) {
+    if (reconnect) {
+        // For reconnect, do not reinitialize user state, that will warp user back and lose
+        // current state. Instead, reconnection should naturally allow messages to continue.
+        console.warn(`MQTT scene reconnected to ${uri}`);
+        // need to resubscribe however, to keep receiving messages
+        ARENA.mqttClient.subscribe(globals.renderTopic);
+        return; // do not continue!
+    }
+
+    // first connection for this client
+    console.log(`MQTT scene init user state, connected to ${uri}`);
 
     // Let's get the camera and publish it's presence over MQTT
     // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
     // add event listener for camera moved ("poseChanged") event
-
 
     // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
     // Add them to our dictionary of scene objects
@@ -384,7 +395,7 @@ function onConnect() {
     loadScene();
     loadArena();
 
-    // intialize Jitsi videoconferencing
+    // initialize Jitsi videoconferencing
     ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
 
     // ok NOW start listening for MQTT messages
@@ -397,22 +408,28 @@ function onConnect() {
     })
 }
 
+// Callback for successful connection
+function onSuccessConnect() {
+    console.log("MQTT scene connection success.");
+}
+
+// Callback for failed connection
+function onFailedConnect() {
+    console.error("MQTT scene connection failed!");
+}
+
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.error(responseObject.errorMessage);
-    } // reconnect
-    ARENA.mqttClient.connect({
-        // For reconnect, do not call onConnect(), that will warp user back and lose
-        // current state. Instead, reconnect with proper LWT and Auth only.
-        willMessage: lwt, // ensure 2nd disconnect will not leave head in scene
-        userName: globals.username,
-        password: globals.mqttToken
-    });
+        console.error("MQTT scene connection lost, code:", responseObject.errorCode,
+            "reason", responseObject.errorMessage);
+    }
+    console.warn("MQTT scene automatically reconnecting...");
+    // no need to connect manually here, "reconnect: true" already set
 }
 
 const publish_retained = (dest, msg) => {
     //console.log('desint :', dest, 'msggg', msg)
-    let message = new Paho.MQTT.Message(msg);
+    let message = new Paho.Message(msg);
     message.destinationName = dest;
     message.retained = true;
     // message.qos = 2;
@@ -432,7 +449,7 @@ window.publish = (dest, msg) => {
         msg = JSON.stringify(msg);
     }
     //console.log('desint :', dest, 'msggg', msg)
-    let message = new Paho.MQTT.Message(msg);
+    let message = new Paho.Message(msg);
     message.destinationName = dest;
     ARENA.mqttClient.send(message);
 };

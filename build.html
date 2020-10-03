@@ -9,8 +9,8 @@
         'use strict';
 
         var timeID = new Date().getTime() % 10000
-        //const client = new Paho.MQTT.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
-        const client = new Paho.MQTT.Client('wss://oz.andrew.cmu.edu/mqtt', timeID.toString());
+        //const client = new Paho.Client(mqttParam, 9001, "/mqtt", "myClientId" + timeID);
+        const client = new Paho.Client('wss://oz.andrew.cmu.edu/mqtt', timeID.toString());
 
         client.onConnectionLost = onConnectionLost;
         client.onMessageArrived = onMessageArrived;
@@ -42,7 +42,7 @@
 
         const publish_retained = (dest, msg) => {
             //console.log('desint :', dest, 'msggg', msg)
-            let message = new Paho.MQTT.Message(msg);
+            let message = new Paho.Message(msg);
             message.destinationName = dest;
             message.retained = true;
             // message.qos = 2;
@@ -54,7 +54,7 @@
                 msg = JSON.stringify(msg);
             }
             //console.log('desint :', dest, 'msggg', msg)
-            let message = new Paho.MQTT.Message(msg);
+            let message = new Paho.Message(msg);
             message.destinationName = dest;
             client.send(message);
         };

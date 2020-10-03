@@ -948,7 +948,7 @@ AFRAME.registerComponent('modify-materials', {
 AFRAME.registerComponent("network-latency", {
     init: function() {
         this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this); // updates every 10s
-        this.message = new Paho.MQTT.Message("");
+        this.message = new Paho.Message("");
         this.message.destinationName = globals.graphTopic;
         this.message.qos = 2;
     },
