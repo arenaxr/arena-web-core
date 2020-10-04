@@ -152,6 +152,7 @@ const loadScene = () => {
                 globals.sceneObjects.env.setAttribute('environment', "flatShading", true);
                 globals.sceneObjects.env.setAttribute('environment', "groundTexture", "squares");
                 globals.sceneObjects.env.setAttribute('environment', "grid", "none");
+                globals.sceneObjects.env.setAttribute('environment', "fog", 0);
                 document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
             }
         }
@@ -403,9 +404,12 @@ function onConnected(reconnect, uri) {
     ARENA.mqttClient.subscribe(globals.renderTopic);
 
     // download and initialize face tracking code
-    importScript("./face-tracking/script.js").then(() => {
-        if (!AFRAME.utils.device.isMobile()) ARENA.FaceTracker.init();
-    })
+    //
+    if (!AFRAME.utils.device.isMobile()) {
+        importScript("./face-tracking/script.js").then(() => {
+            ARENA.FaceTracker.init();
+        })
+    }
 }
 
 function onConnectionLost(responseObject) {

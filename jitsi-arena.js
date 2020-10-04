@@ -294,15 +294,17 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         conference.setDisplayName(globals.camName);
         conference.join(); // conference.join(password);
 
-        chromeSpatialAudioOn = false;
-        // only tested and working on mac on chrome
-        navigator.mediaDevices.enumerateDevices()
-            .then(function(devices) {
-                const headphonesConnected = devices
-                    .filter(device => /audio\w+/.test(device.kind))
-                    .find(device => device.label.toLowerCase().includes('head'));
-                chromeSpatialAudioOn = !!headphonesConnected;
-        });
+        chromeSpatialAudioOn = AFRAME.utils.device.isMobile();
+        if (!chromeSpatialAudioOn) {
+            // only tested and working on mac on chrome
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    const headphonesConnected = devices
+                        .filter(device => /audio\w+/.test(device.kind))
+                        .find(device => device.label.toLowerCase().includes('head'));
+                    chromeSpatialAudioOn = !!headphonesConnected;
+            });
+        }
     }
 
     /**
