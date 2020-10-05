@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 
 window.ARENA = {};
 
@@ -418,8 +418,7 @@ function onConnected(reconnect, uri) {
 
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.error("MQTT scene connection lost, code:", responseObject.errorCode,
-            "reason", responseObject.errorMessage);
+        console.error(`MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`);
     }
     console.warn("MQTT scene automatically reconnecting...");
     // no need to connect manually here, "reconnect: true" already set
@@ -566,8 +565,17 @@ async function enableChromeAEC(gainNode) {
   }
 }
 
-var progMsgs = {};
 function onMessageArrived(message, jsonMessage) {
+    try {
+        _onMessageArrived(message, jsonMessage);
+    }
+    catch (err) {
+        console.error("onMessageArrived Error!", message.payloadString, jsonMessage);
+    }
+}
+
+var progMsgs = {};
+function _onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
     let theMessage = {};
     if (message) {

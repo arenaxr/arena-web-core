@@ -2,7 +2,7 @@
 //
 // Components and realtime event handlers
 // and globals
-'use strict';
+//'use strict';
 
 window.globals = {
     timeID: new Date().getTime() % 10000,
