@@ -570,7 +570,7 @@ function onMessageArrived(message, jsonMessage) {
         _onMessageArrived(message, jsonMessage);
     }
     catch (err) {
-        console.error("onMessageArrived Error!", message.payloadString, jsonMessage);
+        console.error("onMessageArrived Error!", err, message.payloadString, jsonMessage);
     }
 }
 
