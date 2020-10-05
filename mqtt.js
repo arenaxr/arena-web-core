@@ -188,9 +188,13 @@ function onConnected(reconnect, uri) {
     if (reconnect) {
         // For reconnect, do not reinitialize user state, that will warp user back and lose
         // current state. Instead, reconnection should naturally allow messages to continue.
-        console.warn(`MQTT scene reconnected to ${uri}`);
         // need to resubscribe however, to keep receiving messages
+        if (!ARENA.JitsiAPI.ready()) {
+            ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
+            console.warn(`ARENA Jitsi restarting...`);
+        }
         ARENA.mqttClient.subscribe(globals.renderTopic);
+        console.warn(`MQTT scene reconnected to ${uri}`);
         return; // do not continue!
     }
 
