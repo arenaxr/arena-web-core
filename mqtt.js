@@ -156,6 +156,8 @@ const loadScene = () => {
                 document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
             }
         }
+        // initialize Jitsi videoconferencing
+        ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
     }
 }
 
@@ -399,10 +401,7 @@ function onConnected(reconnect, uri) {
     globals.jitsiServer = 'mr.andrew.cmu.edu';
     loadScene();
     loadArena();
-
-    // initialize Jitsi videoconferencing
-    ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
-
+    
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     ARENA.mqttClient.subscribe(globals.renderTopic);
