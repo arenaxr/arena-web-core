@@ -19,7 +19,9 @@ body {
   padding: 20px;
   font-family: "Trebuchet MS", Helvetica, sans-serif;
   font-size: 15px;
-  display: none;
+	left: 50%;
+  transform: translate(-50%, 0%);
+	display: none;	
 }
 
 /* Button used to open the chat form - fixed at the bottom of the page */
