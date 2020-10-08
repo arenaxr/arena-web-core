@@ -40,10 +40,10 @@ window.globals = {
                 document.head.appendChild(base64script);
 
                 document.addEventListener("mousedown", function(e) {
-                    //debug("MOUSEDOWN");
+                    debug("MOUSEDOWN " + window.globals.lastMouseTarget);
 
                     if (window.globals.lastMouseTarget) {
-                        //debug("has target: "+window.globals.lastMouseTarget);
+                        debug("has target: "+window.globals.lastMouseTarget);
 
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
                         let elPos = new THREE.Vector3();
@@ -91,13 +91,11 @@ window.globals = {
                 cursorParent.removeChild(cursor);
                 cursor = document.createElement('a-cursor');
                 cursor.setAttribute('fuse', false);
-                // move reticle closer (side effect: bigger!)
-                cursor.setAttribute('position', '0 0 -0.5');
-                //cursor.setAttribute('animation', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-                cursor.setAttribute('animation__22', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
-                //cursor.setAttribute('raycaster', 'showLine', 'true');
-
-                cursor.setAttribute('max-distance', '1000');
+                cursor.setAttribute('scale', '0.1 0.1 0.1');
+                cursor.setAttribute('position', '0 0 -0.1'); // move reticle closer (side effect: bigger!)
+                // cursor.setAttribute('animation__22', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
+                cursor.setAttribute('color', '#333');
+                cursor.setAttribute('max-distance', '10000');
                 cursor.setAttribute('id', 'fuse-cursor');
                 cursorParent.appendChild(cursor);
             }
@@ -679,6 +677,7 @@ AFRAME.registerComponent('click-listener', {
                 };
                 if (!self.el.getAttribute("goto-url"))
                     publish(globals.outputTopic + this.id, thisMsg);
+                window.globals.lastMouseTarget = this.id;
             }
         });
 
@@ -701,6 +700,7 @@ AFRAME.registerComponent('click-listener', {
                 };
                 if (!self.el.getAttribute("goto-url"))
                     publish(globals.outputTopic + this.id, thisMsg);
+                window.globals.lastMouseTarget = undefined;
             }
         });
     }
