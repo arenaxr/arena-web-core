@@ -21,7 +21,7 @@ body {
   font-size: 15px;
 	left: 50%;
   transform: translate(-50%, 0%);
-	display: none;	
+	display: none;
 }
 
 /* Button used to open the chat form - fixed at the bottom of the page */
@@ -209,8 +209,12 @@ body {
   cursor: pointer;
 }
 
-.test {
-	background: #000;
+.mute-all {
+	padding-right: 8px;
+	padding-top: 15px;
+	color: #000;
+	float: right;
+  font-size: 10px;
 }
 
 .user-list,

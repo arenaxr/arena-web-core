@@ -111,6 +111,15 @@ export default class MQTTChat {
 		this.closeUsersBtn.innerHTML = "×";
 		this.usersPopup.appendChild(this.closeUsersBtn);
 
+		let muteAllDiv = document.createElement("div");
+		muteAllDiv.className = "mute-all";
+		this.usersPopup.appendChild(muteAllDiv);
+
+		this.silenceAllBtn = document.createElement("span");
+		this.silenceAllBtn.className = "users-list-btn ma";
+		this.silenceAllBtn.title = "Silence (Mute Everyone)";
+		muteAllDiv.appendChild(this.silenceAllBtn);
+
 		let label = document.createElement("span");
 		label.innerHTML = "<br/><br/>&nbsp";
 		label.style.fontSize = "small";
@@ -178,6 +187,23 @@ export default class MQTTChat {
 				_this.msgTxt.value = "";
 			}
 		});
+
+		// send sound on/off msg to all
+  	this.silenceAllBtn.onclick = function () {
+			swal({
+			  title: "Are you sure?",
+			  text: "This will send a mute request to all users.",
+			  icon: "warning",
+			  buttons: true,
+			  dangerMode: true,
+			})
+			.then((sendMute) => {
+			  if (sendMute) {
+					// send to scene topic
+		  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
+			  }
+			});
+  	}
 
 		const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
 		//console.log(moveToCamera);
@@ -304,7 +330,7 @@ export default class MQTTChat {
 				}
 				if (abtn.style.backgroundImage.includes('audio-on.png') == true) {
 					abtn.click();
-					this.displayAlert("Sound muted. User " + msg.from_un + " requested silence.", 3000);
+					this.displayAlert("Sound muted. Requested by " + msg.from_un + ".", 3000);
 				}
 			}
 			return;
@@ -373,44 +399,13 @@ export default class MQTTChat {
 
   	userList.sort((a, b) => ('' + a.sort_key + a.scene + a.un).localeCompare(b.sort_key + b.scene + b.un));
 
-  	// user "line"
-  	let uli = document.createElement("li");
-  	uli.innerHTML = this.settings.scene + "/" + decodeURI(this.settings.username) + " (me)";
-
-  	let uBtnCtnr = document.createElement("div");
-  	uBtnCtnr.className = "users-list-btn-ctnr";
-  	uli.appendChild(uBtnCtnr);
-  	let maspan = document.createElement("span");
-  	maspan.className = "users-list-btn ma";
-  	maspan.title = "Silence (Mute Everyone)";
-  	uBtnCtnr.appendChild(maspan);
-  	this.usersList.appendChild(uli);
-
-  	// span click event (send sound on/off msg to all)
-  	maspan.onclick = function () {
-			swal({
-			  title: "Are you sure?",
-			  text: "This will send a mute request to all users.",
-			  icon: "warning",
-			  buttons: true,
-			  dangerMode: true,
-			})
-			.then((sendMute) => {
-			  if (sendMute) {
-					// send to scene topic
-		  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
-			  }
-			});
-  	}
-
-  	// other users
+  	// list users
   	userList.forEach(user => {
   		let uli = document.createElement("li");
 
-  		uli.innerHTML = user.scene + "/" + decodeURI(user.un) + ((user.uid == _this.settings.userid) ? " (me)" : "");
+  		uli.innerHTML = user.scene + "/" + decodeURI(user.un);
 
   		let uBtnCtnr = document.createElement("div");
-  		//uBtnCtnr.innerHTML='bla';
   		uBtnCtnr.className = "users-list-btn-ctnr";
   		uli.appendChild(uBtnCtnr);
 
@@ -426,18 +421,19 @@ export default class MQTTChat {
   			_this.moveToFrontOfCamera(cid, scene);
   		}
 
-  		let sspan = document.createElement("span");
-  		sspan.className = "users-list-btn s";
-  		sspan.title = "Mute User";
-  		uBtnCtnr.appendChild(sspan);
+			if (user.scene == _this.settings.scene) {
+	  		let sspan = document.createElement("span");
+	  		sspan.className = "users-list-btn s";
+	  		sspan.title = "Mute User";
+	  		uBtnCtnr.appendChild(sspan);
 
-  		// span click event (send sound on/off msg to ussr)
-  		sspan.onclick = function () {
-  			// target user topic
-  			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
-  			_this.cmdMsg(tutopic, "sound:off");
-  		}
-
+	  		// span click event (send sound on/off msg to ussr)
+	  		sspan.onclick = function () {
+	  			// target user topic
+	  			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
+	  			_this.cmdMsg(tutopic, "sound:off");
+	  		}
+			}
   		let op = document.createElement("option");
   		op.value = user.uid;
   		op.innerHTML = "to user: " + decodeURI(user.un);
