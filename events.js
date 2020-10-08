@@ -40,10 +40,10 @@ window.globals = {
                 document.head.appendChild(base64script);
 
                 document.addEventListener("mousedown", function(e) {
-                    debug("MOUSEDOWN " + window.globals.lastMouseTarget);
+                    //debug("MOUSEDOWN " + window.globals.lastMouseTarget);
 
                     if (window.globals.lastMouseTarget) {
-                        debug("has target: "+window.globals.lastMouseTarget);
+                        //debug("has target: "+window.globals.lastMouseTarget);
 
                         let el = window.globals.sceneObjects[window.globals.lastMouseTarget];
                         let elPos = new THREE.Vector3();
