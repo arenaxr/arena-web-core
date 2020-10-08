@@ -161,7 +161,7 @@ const loadScene = () => {
             }
         }
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = ARENAJitsiAPI(sceneOptions.jitsiServer);
+        ARENA.JitsiAPI = ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : "mr.andrew.cmu.edu");
     }
 }
 
