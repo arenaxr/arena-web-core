@@ -6,6 +6,21 @@ body {
 	box-sizing: border-box;
 }
 
+/* Alerts */
+
+.chat-alert-box {
+	position: fixed;
+	top: 21px;
+	z-index: 9999;
+	left: 10px;
+  border-radius: 20px;
+  border: 2px solid #1f7987;
+  background: #dbdbdb;
+  padding: 20px;
+  font-family: "Trebuchet MS", Helvetica, sans-serif;
+  font-size: 15px;
+  display: none;
+}
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
@@ -17,7 +32,6 @@ body {
 	/*left: 50%;
   transform: translate(-50%, 0%);*/
 }
-
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 

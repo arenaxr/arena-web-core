@@ -45,6 +45,11 @@ export default class MQTTChat {
 		// counter for unread msgs
 		this.unreadMsgs = 0;
 
+		this.alertBox = document.createElement("div");
+		this.alertBox.className = "chat-alert-box";
+		this.alertBox.innerHTML= "Muted by user xxx";
+		document.body.appendChild(this.alertBox);
+
 		let btnGroup = document.createElement("div");
 		btnGroup.className = "chat-button-group";
 		document.body.appendChild(btnGroup);
@@ -128,6 +133,8 @@ export default class MQTTChat {
 		userDiv.appendChild(this.usersList);
 
 		var _this = this;
+
+		this.displayAlert("Not sending audio or video. Use icons on the right to start.", 5000);
 
 		this.chatBtn.onclick = function () {
 			_this.chatPopup.style.display = 'block';
@@ -297,6 +304,7 @@ export default class MQTTChat {
 				}
 				if (abtn.style.backgroundImage.includes('audio-on.png') == true) {
 					abtn.click();
+					this.displayAlert("Sound muted. User " + msg.from_un + " requested silence.", 3000);
 				}
 			}
 			return;
@@ -464,6 +472,10 @@ export default class MQTTChat {
 		let msg = {
 			object_id: uuidv4(),
 			type: "chat-cmd",
+			from_uid: this.settings.userid,
+			from_un: this.settings.username,
+			from_scene: this.settings.scene,
+			cameraid: this.settings.cameraid,
 			text: text
 		}
 		console.log("cmd", msg, "to", toTopic);
@@ -478,6 +490,16 @@ export default class MQTTChat {
 				delete _this.liveUsers[key];
 			}
 		});
+	}
+
+	displayAlert(msg, timeMs) {
+	  let alert = document.getElementById("alert");
+
+	  this.alertBox.innerHTML = msg;
+	  this.alertBox.style.display = "block";
+	  setTimeout(() => {
+	      this.alertBox.style.display = "none";
+	  }, timeMs); // clear message in timeMs milliseconds
 	}
 
 	moveToFrontOfCamera(cameraId, scene) {
