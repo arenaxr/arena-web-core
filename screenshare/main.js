@@ -1,10 +1,9 @@
 /* global $, JitsiMeetJS */
 
-const jitsi_server = 'mr.andrew.cmu.edu';
-
 const urlParams = new URLSearchParams(window.location.search);
+const jitsi_server = urlParams.get("jitsiURL") ? urlParams.get("jitsiURL") : 'mr.andrew.cmu.edu';
 const scene = urlParams.get("scene") ? urlParams.get("scene") : "render";
-const cameraName = urlParams.get("cameraName") ? "arena_screen_share_"+urlParams.get("cameraName") : "arena_screen_share0";
+const objectId = urlParams.get("id") ? urlParams.get("id") : "screen_share";
 
 const options = {
     hosts: {
@@ -55,7 +54,7 @@ function onLocalTracks(tracks) {
             localTracks[i].attach($(`#localAudio${i}`)[0]);
         } else { // desktop
             $('body').append(
-                `<video autoplay='1' id='localScreenShare${i}' width="800" height="600" />`);
+                `<video autoplay='1' id='localScreenShare${i}' class="screen-share" width="1000" height="650" />`);
             localTracks[i].attach($(`#localScreenShare${i}`)[0]);
         }
         if (isJoined) {
@@ -136,7 +135,7 @@ function onUserLeft(id) {
  */
 function onConnectionSuccess() {
     room = connection.initJitsiConference(scene, confOptions);
-    room.setDisplayName(cameraName);
+    room.setDisplayName(objectId);
     // room.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteTrack);
     room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, track => {
         console.log(`track removed!!!${track}`);
@@ -235,7 +234,7 @@ JitsiMeetJS.mediaDevices.addEventListener(
 
 connection.connect();
 
-JitsiMeetJS.createLocalTracks({ devices: [ 'desktop' ] })
+JitsiMeetJS.createLocalTracks({ devices: ['desktop'] })
     .then(onLocalTracks)
     .catch(error => {
         throw error;

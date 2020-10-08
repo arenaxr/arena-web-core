@@ -131,15 +131,32 @@ function setupIcons() {
     settingsButtons.push(flyingBtn);
 
     const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
+        if (!ARENA.JitsiAPI) return;
+
+        const screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
         swal({
             title: "You clicked on screen share!",
-            text: "In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!",
+            text: `In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!`,
             icon: "warning",
             buttons: ["Cancel", "Yes"]
         })
         .then((confirmed) => {
             if (confirmed) {
-                window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&cameraName=${globals.camName}`, '_blank');
+                swal({
+                    title: "You clicked on screen share!",
+                    text: "Enter the name of an object you want to screenshare on:",
+                    content: {
+                        element: "input",
+                        attributes: {
+                            defaultValue: "screenshare",
+                        }
+                    }
+                })
+                .then((value) => {
+                    const serverName = ARENA.JitsiAPI.serverName;
+                    const id = value ? screenSharePrefix+value : screenSharePrefix;
+                    window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&jitsiURL=${serverName}&id=${id}`, "_blank");
+                })
             }
         });
     });
@@ -151,6 +168,7 @@ function setupIcons() {
             title: "You are about to sign out of the ARENA!",
             text: "Are you sure you want to sign out?",
             icon: "warning",
+            dangerMode: true,
             buttons: ["Cancel", "Yes"]
         })
         .then((confirmed) => {
