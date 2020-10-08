@@ -1,6 +1,6 @@
 import './linkify.min.js';
 import './linkify-string.min.js';
-
+import landmarks from './lm-list.js';
 var mqttc;
 
 // generate an uuid
@@ -45,9 +45,12 @@ export default class MQTTChat {
 		// counter for unread msgs
 		this.unreadMsgs = 0;
 
+		// get landmark list
+		this.landmarks = landmarks[this.settings.scene];
+
 		this.alertBox = document.createElement("div");
 		this.alertBox.className = "chat-alert-box";
-		this.alertBox.innerHTML= "Muted by user xxx";
+		this.alertBox.innerHTML= "";
 		document.body.appendChild(this.alertBox);
 
 		let btnGroup = document.createElement("div");
@@ -63,6 +66,12 @@ export default class MQTTChat {
 		this.usersBtn.className = "users-button";
 		this.usersBtn.setAttribute("title", "User List");
 		btnGroup.appendChild(this.usersBtn);
+
+		if (this.landmarks) {
+			this.lmBtn = document.createElement("button");
+			this.lmBtn.className = "landmarks-button";
+			btnGroup.appendChild(this.lmBtn);
+		}
 
 		this.chatDot = document.createElement("span");
 		this.chatDot.className = "dot";
@@ -141,6 +150,31 @@ export default class MQTTChat {
 		this.usersList = document.createElement("ul");
 		userDiv.appendChild(this.usersList);
 
+		if (this.landmarks) {
+          this.lmPopup = document.createElement("div");
+          this.lmPopup.className = "users-popup";
+          document.body.appendChild(this.lmPopup);
+
+          this.closeLmBtn = document.createElement("span");
+          this.closeLmBtn.className = "close";
+          this.closeLmBtn.innerHTML = "&times";
+          this.lmPopup.appendChild(this.closeLmBtn);
+
+          label = document.createElement("span");
+          label.innerHTML = "<br/><br/>&nbspLandmarks (buttons allow to find landmarks):";
+          label.style.fontSize = "small";
+          this.lmPopup.appendChild(label);
+
+          let lmDiv = document.createElement("div");
+          lmDiv.className = "user-list";
+          this.lmPopup.appendChild(lmDiv);
+
+          this.lmList = document.createElement("ul");
+          lmDiv.appendChild(this.lmList);
+
+          this.populateLandmarkList();
+    }
+
 		var _this = this;
 
 		this.displayAlert("Not sending audio or video. Use icons on the right to start.", 5000);
@@ -149,6 +183,7 @@ export default class MQTTChat {
 			_this.chatPopup.style.display = 'block';
 			_this.usersPopup.style.display = 'none';
 			_this.chatDot.style.display = 'none';
+			if (_this.landmarks) _this.lmPopup.style.display = 'none';
 			this.unreadMsgs = 0;
 
 			// scroll to bottom
@@ -164,6 +199,7 @@ export default class MQTTChat {
 		this.usersBtn.onclick = function () {
 			_this.chatPopup.style.display = 'none';
 			_this.usersPopup.style.display = 'block';
+			if (_this.landmarks) _this.lmPopup.style.display = 'none';
 			_this.populateUserList();
 		}
 
@@ -178,6 +214,17 @@ export default class MQTTChat {
 		this.msgBtn.onclick = function () {
 			if (_this.msgTxt.value.length > 0) _this.sendMsg(_this.msgTxt.value);
 			_this.msgTxt.value = "";
+		}
+
+		if (this.landmarks) {
+				this.lmBtn.onclick = function() {
+						_this.chatPopup.style.display = 'none';
+						_this.usersPopup.style.display = 'none';
+						_this.lmPopup.style.display = 'block';
+				}
+				this.closeLmBtn.onclick = function() {
+						_this.lmPopup.style.display = 'none';
+				}
 		}
 
 		this.msgTxt.addEventListener("keyup", function (event) {
@@ -443,6 +490,32 @@ export default class MQTTChat {
   	this.toSel.value = selVal; // preserve selected value
   }
 
+	populateLandmarkList() {
+		if (!this.landmarks) return;
+		let _this = this;
+		this.landmarks.forEach(lm => {
+			let uli = document.createElement("li");
+			uli.innerHTML = (lm.label.length > 45) ?  lm.label.substring(0, 45) + "...": lm.label;
+
+			let lmBtnCtnr = document.createElement("div");
+			lmBtnCtnr.className="lm-list-btn-ctnr";
+			uli.appendChild(lmBtnCtnr);
+
+			let lspan = document.createElement("span");
+			lspan.className = "lm-list-btn l";
+			lspan.title = "Move to Landmark";
+			lmBtnCtnr.appendChild(lspan);
+
+			// setup click event
+			lspan.onclick = function() {
+				_this.moveToLandmark(lm.object_id)
+			}
+
+			_this.lmList.appendChild(uli);
+		});
+
+	}
+
 	addToSelOptions() {
 		let op = document.createElement("option");
 		op.value = "scene";
@@ -509,6 +582,36 @@ export default class MQTTChat {
 	  }, timeMs); // clear message in timeMs milliseconds
 	}
 
+	moveToLandmark(objectId) {
+		let sceneEl = document.querySelector('a-scene');
+
+		if (!sceneEl) {
+			console.error("Could not find aframe scene");
+			return;
+		}
+
+		let landmarkObj = sceneEl.querySelector('[id="' + objectId + '"]');
+
+		let myCamera = document.getElementById('my-camera');
+
+		if (!myCamera) {
+			console.error("Could not find our camera");
+			return;
+		}
+
+		let direction = new THREE.Vector3();
+		landmarkObj.object3D.getWorldDirection(direction);
+		let distance = 3.5; // distance to put you
+		let pos = new THREE.Vector3();
+		landmarkObj.object3D.getWorldPosition(pos);
+		myCamera.object3D.position.copy(pos);
+		myCamera.object3D.position.add(direction.multiplyScalar(distance))
+		myCamera.object3D.position.y=1.6; // set at a fixed height
+
+		// rotate our camera to face the object
+		myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2((myCamera.object3D.position.x - pos.x), (myCamera.object3D.position.z - pos.z));
+	}
+
 	moveToFrontOfCamera(cameraId, scene) {
 		console.log("Move to near camera:", cameraId);
 
@@ -542,9 +645,9 @@ export default class MQTTChat {
 			return;
 		}
 
-		var direction = new THREE.Vector3();
+		let direction = new THREE.Vector3();
 		toCam.object3D.getWorldDirection(direction);
-		let distance = 1; // distance to put you
+		let distance = 3; // distance to put you
 		myCamera.object3D.position.copy(toCam.object3D.position.clone()).add(direction.multiplyScalar(-distance));
 		// rotate our camera to face the other user
 		myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2((myCamera.object3D.position.x - toCam.object3D.position.x), (myCamera.object3D.position.z - toCam.object3D.position.z));
