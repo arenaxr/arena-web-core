@@ -388,8 +388,19 @@ export default class MQTTChat {
 
   	// span click event (send sound on/off msg to all)
   	maspan.onclick = function () {
-  		// send to scene topic
-  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
+			swal({
+			  title: "Are you sure?",
+			  text: "This will send a mute request to all users.",
+			  icon: "warning",
+			  buttons: true,
+			  dangerMode: true,
+			})
+			.then((sendMute) => {
+			  if (sendMute) {
+					// send to scene topic
+		  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
+			  }
+			});
   	}
 
   	// other users
