@@ -5,7 +5,8 @@ ARENA.FaceTracker = (function () {
     // PRIVATE VARIABLES
     // ==================================================
     const OVERLAY_COLOR = "#ef2d5e";
-    let frames = 0, framesToSkip = 1;
+
+    let frames = 0, framesToSkip = 20;
     let bboxOn = false, flipped = false;
     let prevJSON = null;
     let vidStream = null;
@@ -21,6 +22,7 @@ ARENA.FaceTracker = (function () {
     // ==================================================
     // PRIVATE FUNCTIONS
     // ==================================================
+
     function writeOverlayText(text) {
         if (!overlayCanv) return;
         const overlayCtx = overlayCanv.getContext("2d");
@@ -211,6 +213,7 @@ ARENA.FaceTracker = (function () {
             transAdjusted.push(adjustedTrans);
         }
         faceJSON["pose"]["translation"] = transAdjusted;
+
         // faceJSON["frame"] = frame;
 
         let landmarksAdjusted = [];
@@ -239,11 +242,6 @@ ARENA.FaceTracker = (function () {
         if (faceDetector && ready) {
             [landmarksRaw, bbox] = await faceDetector.detect(frame, width, height);
             [quat, trans] = await faceDetector.getPose(landmarksRaw, globals.localVideoWidth, videoHeight);
-            const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
-            if (faceJSON != prevJSON) {
-                publish(globals.outputTopic + globals.camName + "/face", faceJSON);
-                prevJSON = faceJSON;
-            }
         }
         return [landmarksRaw, bbox, quat, trans];
     }
@@ -253,6 +251,12 @@ ARENA.FaceTracker = (function () {
             if (frames % framesToSkip == 0) {
                 const [landmarksRaw, bbox, quat, trans] = await detectFace(getFrame(), globals.localVideoWidth, videoHeight);
                 drawLandmarks(landmarksRaw, bbox);
+
+                const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, globals.localVideoWidth, videoHeight);
+                if (faceJSON != prevJSON) {
+                    publish(globals.outputTopic + globals.camName + "/face", faceJSON);
+                    prevJSON = faceJSON;
+                }
             }
             frames++;
             requestAnimationFrame(processVideo);
@@ -293,7 +297,7 @@ ARENA.FaceTracker = (function () {
             });
 
             hasAvatar = true;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function(resolve, reject) {
                 resolve();
             });
         },
@@ -320,7 +324,7 @@ ARENA.FaceTracker = (function () {
             videoElem = undefined;
 
             hasAvatar = false;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function(resolve, reject) {
                 resolve();
             });
         }

@@ -9,12 +9,12 @@ To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
     "object_id": "face_<camera id>",
     "hasFace": <bool>,                  # if there is a face detected/valid data.
     "image": {
-        "flipped": <bool>,              # if image is flipped or not, can be set as URL param.
+        "flipped": <bool>,              # if image is flipped or not.
         "width": <src image width>,
         "height": <src image height>,
     },
     "pose": {
-        "quaternions": [x, y, z, w],    # rotation in quaternions
+        "quaternions": [x, y, z, w],    # rotation in quaternions.
         "translation": [x, y, z]        # may need to be scaled and adjusted. z = 0 is when your face is at the screen.
     },
     "landmarks": [x1, y1, x2, y2, ...], # flattened array of face landmarks as normalized points with image center as origin.
@@ -38,7 +38,7 @@ To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
 
 ## Building:
 
-Install emsdk, opencv, dlib. Download and activate emsdk and build WASM for opencv_js.
+Download and install [emsdk](https://emscripten.org/docs/getting_started/downloads.html), [opencv](https://github.com/opencv/opencv), and [dlib](https://github.com/davisking/dlib). Build WASM for [opencv_js](https://docs.opencv.org/3.4/d4/da1/tutorial_js_setup.html).
 
 Run ```build.sh``` to build. Optional flag ```--force```.
 
