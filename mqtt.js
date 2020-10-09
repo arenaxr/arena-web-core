@@ -577,7 +577,15 @@ function onMessageArrived(message, jsonMessage) {
         _onMessageArrived(message, jsonMessage);
     }
     catch (err) {
-        console.error("onMessageArrived Error!", err, JSON.stringify(message), JSON.stringify(jsonMessage));
+        if (message) {
+            if (message.payloadString) {
+                console.error("onMessageArrived Error!", err, message.payloadString);
+            } else {
+                console.error("onMessageArrived Error!", err, new TextDecoder("utf-8").decode(message.payloadBytes), message.payloadBytes);
+            }
+        } else if (jsonMessage) {
+            console.error("onMessageArrived Error!", err, JSON.stringify(jsonMessage));
+        }
     }
 }
 
