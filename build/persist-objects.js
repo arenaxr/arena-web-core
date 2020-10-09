@@ -165,6 +165,9 @@ export async function populateList(scene, editobjhandler) {
             } else if (sceneobjs[i].type == "scene-options") {
                 inputValue = sceneobjs[i].object_id + " ( scene options )";
                 img.src = "assets/options-icon.png";
+            } else if (sceneobjs[i].type == "landmarks") {
+              inputValue = sceneobjs[i].object_id + " ( landmarks )";
+              img.src = "assets/map-icon.png";              
             }
         }
         var t = document.createTextNode(inputValue);
