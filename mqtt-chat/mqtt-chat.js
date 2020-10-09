@@ -231,6 +231,11 @@ export default class MQTTChat {
 
 		// send sound on/off msg to all
   	this.silenceAllBtn.onclick = function () {
+			if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+							_this.displayAlert("Anonymous users may not mute others.", 3000);
+							return;
+			}
+
 			swal({
 			  title: "Are you sure?",
 			  text: "This will send a mute request to all users.",
@@ -315,6 +320,10 @@ export default class MQTTChat {
 	onConnectionLost(message) {
 		console.error("Chat disconnect.");
 		this.connected = false;
+	}
+
+	isUserAuthenticated(cameraId) {
+		return !cameraId.includes("anonymous")
 	}
 
 	sendMsg(msgTxt) {
@@ -479,6 +488,10 @@ export default class MQTTChat {
 
 	  		// span click event (send sound on/off msg to ussr)
 	  		sspan.onclick = function () {
+					if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+									_this.displayAlert("Anonymous users may not mute others.", 3000);
+									return;
+					}
 	  			// target user topic
 	  			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
 	  			_this.cmdMsg(tutopic, "sound:off");

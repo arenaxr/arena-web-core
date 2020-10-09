@@ -328,7 +328,8 @@
          },
          "required":[
            "clickableOnlyEvents",
-           "privateScene"
+           "privateScene",
+           "jitsiServer"
          ]
       },
       "arenaobj":{

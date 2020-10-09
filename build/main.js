@@ -12,6 +12,10 @@ var schema_files = {
     "scene-options": {
         file: "arena-scene-options.json",
         description: "Scene Options"
+    },
+    "landmarks": {
+        file: "arena-landmarks.json",
+        description: "Scene Landmarks"
     }
 };
 

@@ -1,11 +1,14 @@
 //'use strict';
 
+
 window.ARENA = {};
 
 ARENA.mqttClient = new Paho.Client(globals.mqttParam, "webClient-" + globals.timeID);
 ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
 ARENA.mqttClient.onMessageArrived = onMessageArrived;
+
+let expireTimer;
 
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
@@ -23,6 +26,8 @@ const loadArena = (urlToLoad, position, rotation) => {
         if (xhr.status !== 200) {
             alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
         } else {
+            globals.expires = new Map();
+
             let arenaObjects = xhr.response;
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
@@ -120,6 +125,10 @@ const unloadArena = (urlToLoad) => {
 };
 
 const loadScene = () => {
+    let sceneOptions = {
+        jitsiServer: 'mr.andrew.cmu.edu'
+    };
+
     globals.sceneObjects.env = document.createElement("a-entity");
     globals.sceneObjects.env.id = "env";
 
@@ -135,7 +144,7 @@ const loadScene = () => {
             const payload = xhr.response[xhr.response.length-1];
             if (payload) {
                 const options = payload["attributes"];
-                const sceneOptions = options["scene-options"];
+                sceneOptions = options["scene-options"];
                 for (const [attribute, value] of Object.entries(sceneOptions)) {
                     globals[attribute] = value;
                 }
@@ -157,7 +166,7 @@ const loadScene = () => {
             }
         }
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
+        ARENA.JitsiAPI = ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : "mr.andrew.cmu.edu");
     }
 }
 
@@ -398,10 +407,9 @@ function onConnected(reconnect, uri) {
         });
     }
 
-    globals.jitsiServer = 'mr.andrew.cmu.edu';
     loadScene();
     loadArena();
-    
+
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     ARENA.mqttClient.subscribe(globals.renderTopic);
@@ -569,7 +577,15 @@ function onMessageArrived(message, jsonMessage) {
         _onMessageArrived(message, jsonMessage);
     }
     catch (err) {
-        console.error("onMessageArrived Error!", err, message.payloadString, jsonMessage);
+        if (message) {
+            if (message.payloadString) {
+                console.error("onMessageArrived Error!", err, message.payloadString);
+            } else {
+                console.error("onMessageArrived Error!", err, new TextDecoder("utf-8").decode(message.payloadBytes), message.payloadBytes);
+            }
+        } else if (jsonMessage) {
+            console.error("onMessageArrived Error!", err, JSON.stringify(jsonMessage));
+        }
     }
 }
 
@@ -585,6 +601,9 @@ function _onMessageArrived(message, jsonMessage) {
         theMessage = JSON.parse(message.payloadString);
     } else if (jsonMessage) {
         theMessage = jsonMessage;
+    }
+    if (message.ttl) {
+        globals.expires.set(theMessage.object_id, theMessage);
     }
     //    console.log(theMessage.object_id);
 
@@ -851,7 +870,7 @@ function _onMessageArrived(message, jsonMessage) {
                 case "camera":
                     // decide if we need draw or delete videoCube around head
                     if (theMessage.hasOwnProperty("jitsiId")) {
-                        if (theMessage.jitsiId == "" || !ARENA.JitsiAPI.ready()) {
+                        if (theMessage.jitsiId === "" || (ARENA.JitsiAPI && !ARENA.JitsiAPI.ready())) {
                             console.log("jitsiId empty");
                             break; // other-person has no camera ... yet
                         }
@@ -1013,8 +1032,12 @@ function _onMessageArrived(message, jsonMessage) {
                 case "text":
                     // set a bunch of defaults
                     entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
-                    entityEl.setAttribute('text', 'value', theMessage.data.text);
-                    delete theMessage.data.text;
+                    // Support legacy `data: { text: 'STRING TEXT' }`
+                    const theText = theMessage.data.text;
+                    if (typeof theText === 'string' || theText instanceof String) {
+                        entityEl.setAttribute('text', 'value', theMessage.data.text);
+                        delete theMessage.data.text;
+                    }
                     entityEl.setAttribute('text', 'color', color);
                     entityEl.setAttribute('text', 'side', "double");
                     entityEl.setAttribute('text', 'align', "center");
