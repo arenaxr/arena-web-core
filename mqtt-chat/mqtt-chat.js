@@ -21,6 +21,7 @@ export default class MQTTChat {
 			username: st.username !== undefined ? st.username : "chat-dft-username",
 			realm: st.realm !== undefined ? st.realm : "realm",
 			scene: st.scene !== undefined ? st.scene : "render",
+			persist_uri: st.persist_uri !== undefined ? st.persist_uri : location.protocol + '//' + location.hostname+(location.port ? ":"+location.port : "")+"/persist/",
 			keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
 			mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://spatial.andrew.cmu.edu/mqtt/",
 			mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
@@ -47,7 +48,7 @@ export default class MQTTChat {
 
 		this.alertBox = document.createElement("div");
 		this.alertBox.className = "chat-alert-box";
-		this.alertBox.innerHTML= "Muted by user xxx";
+		this.alertBox.innerHTML= "";
 		document.body.appendChild(this.alertBox);
 
 		let btnGroup = document.createElement("div");
@@ -64,11 +65,16 @@ export default class MQTTChat {
 		this.usersBtn.setAttribute("title", "User List");
 		btnGroup.appendChild(this.usersBtn);
 
+		this.lmBtn = document.createElement("button");
+		this.lmBtn.className = "landmarks-button";
+		btnGroup.appendChild(this.lmBtn);
+
 		this.chatDot = document.createElement("span");
 		this.chatDot.className = "dot";
 		this.chatDot.innerHTML = "0";
 		this.chatBtn.appendChild(this.chatDot);
 
+		// chat
 		this.chatPopup = document.createElement("div");
 		this.chatPopup.className = "chat-popup";
 		this.chatPopup.style.display = 'none';
@@ -102,6 +108,7 @@ export default class MQTTChat {
 		this.msgBtn.className = "btn";
 		formDiv.appendChild(this.msgBtn);
 
+		// users
 		this.usersPopup = document.createElement("div");
 		this.usersPopup.className = "users-popup";
 		document.body.appendChild(this.usersPopup);
@@ -110,6 +117,15 @@ export default class MQTTChat {
 		this.closeUsersBtn.className = "close";
 		this.closeUsersBtn.innerHTML = "×";
 		this.usersPopup.appendChild(this.closeUsersBtn);
+
+		let muteAllDiv = document.createElement("div");
+		muteAllDiv.className = "mute-all";
+		this.usersPopup.appendChild(muteAllDiv);
+
+		this.silenceAllBtn = document.createElement("span");
+		this.silenceAllBtn.className = "users-list-btn ma";
+		this.silenceAllBtn.title = "Silence (Mute Everyone)";
+		muteAllDiv.appendChild(this.silenceAllBtn);
 
 		let label = document.createElement("span");
 		label.innerHTML = "<br/><br/>&nbsp";
@@ -132,6 +148,28 @@ export default class MQTTChat {
 		this.usersList = document.createElement("ul");
 		userDiv.appendChild(this.usersList);
 
+		// landmarks
+		this.lmPopup = document.createElement("div");
+		this.lmPopup.className = "users-popup";
+		document.body.appendChild(this.lmPopup);
+
+		this.closeLmBtn = document.createElement("span");
+		this.closeLmBtn.className = "close";
+		this.closeLmBtn.innerHTML = "&times";
+		this.lmPopup.appendChild(this.closeLmBtn);
+
+		label = document.createElement("span");
+		label.innerHTML = "<br/><br/>&nbspLandmarks (buttons allow to find landmarks):";
+		label.style.fontSize = "small";
+		this.lmPopup.appendChild(label);
+
+		let lmDiv = document.createElement("div");
+		lmDiv.className = "user-list";
+		this.lmPopup.appendChild(lmDiv);
+
+		this.lmList = document.createElement("ul");
+		lmDiv.appendChild(this.lmList);
+
 		var _this = this;
 
 		this.displayAlert("Not sending audio or video. Use icons on the right to start.", 5000);
@@ -140,6 +178,7 @@ export default class MQTTChat {
 			_this.chatPopup.style.display = 'block';
 			_this.usersPopup.style.display = 'none';
 			_this.chatDot.style.display = 'none';
+			_this.lmPopup.style.display = 'none';
 			this.unreadMsgs = 0;
 
 			// scroll to bottom
@@ -155,6 +194,7 @@ export default class MQTTChat {
 		this.usersBtn.onclick = function () {
 			_this.chatPopup.style.display = 'none';
 			_this.usersPopup.style.display = 'block';
+			_this.lmPopup.style.display = 'none';
 			_this.populateUserList();
 		}
 
@@ -171,6 +211,16 @@ export default class MQTTChat {
 			_this.msgTxt.value = "";
 		}
 
+		this.lmBtn.onclick = function() {
+			_this.chatPopup.style.display = 'none';
+			_this.usersPopup.style.display = 'none';
+			_this.lmPopup.style.display = 'block';
+		}
+
+		this.closeLmBtn.onclick = function() {
+		  _this.lmPopup.style.display = 'none';
+		}
+
 		this.msgTxt.addEventListener("keyup", function (event) {
 			event.preventDefault();
 			if (event.keyCode === 13) {
@@ -178,6 +228,28 @@ export default class MQTTChat {
 				_this.msgTxt.value = "";
 			}
 		});
+
+		// send sound on/off msg to all
+  	this.silenceAllBtn.onclick = function () {
+			if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+							_this.displayAlert("Anonymous users may not mute others.", 3000);
+							return;
+			}
+
+			swal({
+			  title: "Are you sure?",
+			  text: "This will send a mute request to all users.",
+			  icon: "warning",
+			  buttons: true,
+			  dangerMode: true,
+			})
+			.then((sendMute) => {
+			  if (sendMute) {
+					// send to scene topic
+		  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
+			  }
+			});
+  	}
 
 		const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
 		//console.log(moveToCamera);
@@ -191,6 +263,15 @@ export default class MQTTChat {
 			_this.keepalive(); // let other users know
 			_this.populateUserList();
 		});
+	}
+
+	// perform some async startup tasks
+  async start(force = false) {
+		// connect mqtt
+		this.connect();
+
+		// populate landmark list
+		this.populateLandmarkList();
 	}
 
 	async connect(force = false) {
@@ -239,6 +320,10 @@ export default class MQTTChat {
 	onConnectionLost(message) {
 		console.error("Chat disconnect.");
 		this.connected = false;
+	}
+
+	isUserAuthenticated(cameraId) {
+		return !cameraId.includes("anonymous")
 	}
 
 	sendMsg(msgTxt) {
@@ -304,7 +389,7 @@ export default class MQTTChat {
 				}
 				if (abtn.style.backgroundImage.includes('audio-on.png') == true) {
 					abtn.click();
-					this.displayAlert("Sound muted. User " + msg.from_un + " requested silence.", 3000);
+					this.displayAlert("Sound muted. Requested by " + msg.from_un + ".", 3000);
 				}
 			}
 			return;
@@ -373,48 +458,13 @@ export default class MQTTChat {
 
   	userList.sort((a, b) => ('' + a.sort_key + a.scene + a.un).localeCompare(b.sort_key + b.scene + b.un));
 
-  	// user "line"
-  	let uli = document.createElement("li");
-  	uli.innerHTML = this.settings.scene + "/" + decodeURI(this.settings.username) + " (me)";
-
-  	let uBtnCtnr = document.createElement("div");
-  	uBtnCtnr.className = "users-list-btn-ctnr";
-  	uli.appendChild(uBtnCtnr);
-  	let maspan = document.createElement("span");
-  	maspan.className = "users-list-btn ma";
-  	maspan.title = "Silence (Mute Everyone)";
-  	uBtnCtnr.appendChild(maspan);
-  	this.usersList.appendChild(uli);
-
-	// span click event (send sound on/off msg to all)
-  	maspan.onclick = function () {
-			if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
-				_this.displayAlert("Anonymous users may not mute others.", 3000);
-				return;
-			}
-			swal({
-			  title: "Are you sure?",
-			  text: "This will send a mute request to all users.",
-			  icon: "warning",
-			  buttons: true,
-			  dangerMode: true,
-			})
-			.then((sendMute) => {
-			  if (sendMute) {
-					// send to scene topic
-		  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
-			  }
-			});
-  	}
-
-  	// other users
+  	// list users
   	userList.forEach(user => {
   		let uli = document.createElement("li");
 
-  		uli.innerHTML = user.scene + "/" + decodeURI(user.un) + ((user.uid == _this.settings.userid) ? " (me)" : "");
+  		uli.innerHTML = user.scene + "/" + decodeURI(user.un);
 
   		let uBtnCtnr = document.createElement("div");
-  		//uBtnCtnr.innerHTML='bla';
   		uBtnCtnr.className = "users-list-btn-ctnr";
   		uli.appendChild(uBtnCtnr);
 
@@ -430,22 +480,23 @@ export default class MQTTChat {
   			_this.moveToFrontOfCamera(cid, scene);
   		}
 
-  		let sspan = document.createElement("span");
-  		sspan.className = "users-list-btn s";
-  		sspan.title = "Mute User";
-  		uBtnCtnr.appendChild(sspan);
+			if (user.scene == _this.settings.scene) {
+	  		let sspan = document.createElement("span");
+	  		sspan.className = "users-list-btn s";
+	  		sspan.title = "Mute User";
+	  		uBtnCtnr.appendChild(sspan);
 
-		// span click event (send sound off msg to user)
-  		sspan.onclick = function () {
-			if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
-				_this.displayAlert("Anonymous users may not mute others.", 3000);
-				return;
+	  		// span click event (send sound on/off msg to ussr)
+	  		sspan.onclick = function () {
+					if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+									_this.displayAlert("Anonymous users may not mute others.", 3000);
+									return;
+					}
+	  			// target user topic
+	  			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
+	  			_this.cmdMsg(tutopic, "sound:off");
+	  		}
 			}
-  			// target user topic
-  			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
-  			_this.cmdMsg(tutopic, "sound:off");
-  		}
-
   		let op = document.createElement("option");
   		op.value = user.uid;
   		op.innerHTML = "to user: " + decodeURI(user.un);
@@ -454,6 +505,59 @@ export default class MQTTChat {
   	});
   	this.toSel.value = selVal; // preserve selected value
   }
+
+	async populateLandmarkList() {
+		try {
+        let data = await fetch(this.settings.persist_uri + this.settings.scene + "?type=landmarks");
+        if (!data) {
+          console.error("Could not fetch landmarks from persist!")
+          return;
+        }
+        if (!data.ok) {
+					console.error("Could not fetch landmarks from persist!")
+          return;
+        }
+        let persistRes = await data.json();
+				// support multiple landmark list objects; merge all into a single array
+				this.landmarks = [];
+				persistRes.forEach(lmObj => {
+					Array.prototype.push.apply(this.landmarks,lmObj.attributes.landmarks);
+				});
+
+    } catch (err) {
+			  console.error("Could not fetch landmarks from persist!")
+        console.log(err);
+        return;
+    }
+
+		if (this.landmarks.length == 0) {
+			this.lmBtn.style.display = "none"; // hide landmarks button
+			return;
+		}
+
+		let _this = this;
+		this.landmarks.forEach(lm => {
+			let uli = document.createElement("li");
+			uli.innerHTML = (lm.label.length > 45) ?  lm.label.substring(0, 45) + "...": lm.label;
+
+			let lmBtnCtnr = document.createElement("div");
+			lmBtnCtnr.className="lm-list-btn-ctnr";
+			uli.appendChild(lmBtnCtnr);
+
+			let lspan = document.createElement("span");
+			lspan.className = "lm-list-btn l";
+			lspan.title = "Move to Landmark";
+			lmBtnCtnr.appendChild(lspan);
+
+			// setup click event
+			lspan.onclick = function() {
+				_this.moveToLandmark(lm.object_id)
+			}
+
+			_this.lmList.appendChild(uli);
+		});
+
+	}
 
 	addToSelOptions() {
 		let op = document.createElement("option");
@@ -521,6 +625,36 @@ export default class MQTTChat {
 	  }, timeMs); // clear message in timeMs milliseconds
 	}
 
+	moveToLandmark(objectId) {
+		let sceneEl = document.querySelector('a-scene');
+
+		if (!sceneEl) {
+			console.error("Could not find aframe scene");
+			return;
+		}
+
+		let landmarkObj = sceneEl.querySelector('[id="' + objectId + '"]');
+
+		let myCamera = document.getElementById('my-camera');
+
+		if (!myCamera) {
+			console.error("Could not find our camera");
+			return;
+		}
+
+		let direction = new THREE.Vector3();
+		landmarkObj.object3D.getWorldDirection(direction);
+		let distance = 3.5; // distance to put you
+		let pos = new THREE.Vector3();
+		landmarkObj.object3D.getWorldPosition(pos);
+		myCamera.object3D.position.copy(pos);
+		myCamera.object3D.position.add(direction.multiplyScalar(distance))
+		myCamera.object3D.position.y=1.6; // set at a fixed height
+
+		// rotate our camera to face the object
+		myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2((myCamera.object3D.position.x - pos.x), (myCamera.object3D.position.z - pos.z));
+	}
+
 	moveToFrontOfCamera(cameraId, scene) {
 		console.log("Move to near camera:", cameraId);
 
@@ -554,13 +688,12 @@ export default class MQTTChat {
 			return;
 		}
 
-		var direction = new THREE.Vector3();
+		let direction = new THREE.Vector3();
 		toCam.object3D.getWorldDirection(direction);
-		let distance = 1; // distance to put you
+		let distance = 2; // distance to put you
 		myCamera.object3D.position.copy(toCam.object3D.position.clone()).add(direction.multiplyScalar(-distance));
+		myCamera.object3D.position.y = toCam.object3D.position.y;
 		// rotate our camera to face the other user
 		myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2((myCamera.object3D.position.x - toCam.object3D.position.x), (myCamera.object3D.position.z - toCam.object3D.position.z));
 	}
-
-	isUserAuthenticated(cameraId) { return !cameraId.includes("anonymous") }
 }

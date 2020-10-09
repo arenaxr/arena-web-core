@@ -14,6 +14,6 @@ window.addEventListener('onauth', (e) => {
         mqtt_token: e.detail.mqtt_token,
     });
 
-    mqttChat.connect();
-    //    });
+    mqttChat.start();
+
 });
