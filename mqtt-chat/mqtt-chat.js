@@ -386,8 +386,12 @@ export default class MQTTChat {
   	uBtnCtnr.appendChild(maspan);
   	this.usersList.appendChild(uli);
 
-  	// span click event (send sound on/off msg to all)
+	// span click event (send sound on/off msg to all)
   	maspan.onclick = function () {
+			if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+				_this.displayAlert("Anonymous users may not mute others.", 3000);
+				return;
+			}
 			swal({
 			  title: "Are you sure?",
 			  text: "This will send a mute request to all users.",
@@ -431,8 +435,12 @@ export default class MQTTChat {
   		sspan.title = "Mute User";
   		uBtnCtnr.appendChild(sspan);
 
-  		// span click event (send sound on/off msg to ussr)
+		// span click event (send sound off msg to user)
   		sspan.onclick = function () {
+			if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+				_this.displayAlert("Anonymous users may not mute others.", 3000);
+				return;
+			}
   			// target user topic
   			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
   			_this.cmdMsg(tutopic, "sound:off");
@@ -553,4 +561,6 @@ export default class MQTTChat {
 		// rotate our camera to face the other user
 		myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2((myCamera.object3D.position.x - toCam.object3D.position.x), (myCamera.object3D.position.z - toCam.object3D.position.z));
 	}
+
+	isUserAuthenticated(cameraId) { return !cameraId.includes("anonymous") }
 }
