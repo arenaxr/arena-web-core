@@ -1016,8 +1016,12 @@ function _onMessageArrived(message, jsonMessage) {
                 case "text":
                     // set a bunch of defaults
                     entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
-                    entityEl.setAttribute('text', 'value', theMessage.data.text);
-                    delete theMessage.data.text;
+                    // Support legacy `data: { text: 'STRING TEXT' }`
+                    const theText = theMessage.data.text;
+                    if (typeof theText === 'string' || theText instanceof String) {
+                        entityEl.setAttribute('text', 'value', theMessage.data.text);
+                        delete theMessage.data.text;
+                    }
                     entityEl.setAttribute('text', 'color', color);
                     entityEl.setAttribute('text', 'side', "double");
                     entityEl.setAttribute('text', 'align', "center");
