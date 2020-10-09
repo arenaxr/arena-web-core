@@ -1,14 +1,11 @@
 //'use strict';
 
-
 window.ARENA = {};
 
 ARENA.mqttClient = new Paho.Client(globals.mqttParam, "webClient-" + globals.timeID);
 ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
 ARENA.mqttClient.onMessageArrived = onMessageArrived;
-
-let expireTimer;
 
 // loads scene objects from specified persistence URL if specified,
 // or globals.persistenceUrl if not
@@ -26,8 +23,6 @@ const loadArena = (urlToLoad, position, rotation) => {
         if (xhr.status !== 200) {
             alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
         } else {
-            globals.expires = new Map();
-
             let arenaObjects = xhr.response;
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
@@ -601,9 +596,6 @@ function _onMessageArrived(message, jsonMessage) {
         theMessage = JSON.parse(message.payloadString);
     } else if (jsonMessage) {
         theMessage = jsonMessage;
-    }
-    if (message.ttl) {
-        globals.expires.set(theMessage.object_id, theMessage);
     }
     //    console.log(theMessage.object_id);
 
