@@ -452,11 +452,11 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         },
 
         getAudioTrack: function(jitsiId) {
-            return remoteTracks[jitsiId][0];
+            return remoteTracks[jitsiId] && remoteTracks[jitsiId][0];
         },
 
         getVideoTrack: function(jitsiId) {
-            return remoteTracks[jitsiId][1];
+            return remoteTracks[jitsiId] && remoteTracks[jitsiId][1];
         },
 
         leave: function () {
