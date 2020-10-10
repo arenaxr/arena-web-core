@@ -413,7 +413,8 @@ function onConnected(reconnect, uri) {
     //
     if (!AFRAME.utils.device.isMobile()) {
         importScript("./face-tracking/script.js").then(() => {
-            ARENA.FaceTracker.init();
+            const displayBbox = false, flipped = false;
+            ARENA.FaceTracker.init(displayBbox, flipped);
         })
     }
 }
