@@ -293,7 +293,7 @@ ARENA.FaceTracker = (function () {
 
             setupVideo(() => {
                 if (!ready) {
-                    writeOverlayText("DownloadingTimer Face Model: 72MB");
+                    writeOverlayText("Downloading Face Model: 72MB");
                 }
                 requestAnimationFrame(processVideo);
             });
