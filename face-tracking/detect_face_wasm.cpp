@@ -14,8 +14,8 @@
 
 #include <dlib/external/zlib/zlib.h>
 
-#define PI                  3.14159265
-#define MODEL_SIZE          99693937
+#define PI          3.14159265
+#define MODEL_SIZE  99693937
 
 #ifdef __cplusplus
 extern "C" {
@@ -76,6 +76,8 @@ void pose_model_init(char buf[], size_t buf_len) {
 
 EMSCRIPTEN_KEEPALIVE
 uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) {
+    static correlation_tracker tracker;
+    static bool track = false;
     static uint32_t frames = 0;
 
     const uint8_t parts_len = 5 + 2 * 68;
@@ -102,9 +104,20 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
     }
 
     dlib::rectangle face_rect;
-    std::vector<dlib::rectangle> face_rects;
-    face_rects = detector(gray);
-    face_rect = face_rects[0];
+    if (!track) {
+        std::vector<dlib::rectangle> face_rects;
+        face_rects = detector(gray);
+        face_rect = face_rects[0];
+    }
+    else {
+        const double psr = tracker.update(gray); // "Peak-to-Sidelobe Ratio"
+        if (0 < psr && psr < 30) {
+            face_rect = tracker.get_position();
+        }
+        else {
+            track = false;
+        }
+    }
 
     left = face_rect.left();
     top = face_rect.top();
@@ -121,6 +134,11 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
 
         full_object_detection shape = pose_model(gray, face_rect);
 
+        if (!track) {
+            track = true;
+            tracker.start_track(gray, face_rect);
+        }
+
         parts[1] = left;
         parts[2] = top;
         parts[3] = right;
@@ -130,8 +148,15 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
             parts[j+1] = shape.part(i).y();
         }
     }
+    else {
+        track = false; // detect again if bbox is out of bounds
+    }
 
     parts[0] = parts_len; // set first idx to len when passed to js
+
+    if (++frames % 15 == 0) {
+        track = false;
+    }
 
     return parts;
 }
