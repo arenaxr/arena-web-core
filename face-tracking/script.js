@@ -5,14 +5,16 @@ ARENA.FaceTracker = (function () {
     // PRIVATE VARIABLES
     // ==================================================
     const OVERLAY_COLOR = "#ef2d5e";
-    let frames = 0, framesToSkip = 1;
-    let bboxOn = false, flipped = false;
-    let prevJSON = null;
-    let vidStream = null;
-    let loading = null;
-    let ready = false;
-    let videoHeight = 0;
 
+    let prevJSON = null;
+
+    let frames = 0, framesToSkip = 15;
+    let displayBbox = false, flipped = false;
+    let vidStream = null;
+    let loadingTimer = null;
+    let ready = false;
+
+    let videoHeight = 0;
     let videoElem = null, videoCanv = null, overlayCanv = null;
 
     let faceDetector = null;
@@ -153,7 +155,7 @@ ARENA.FaceTracker = (function () {
     function drawLandmarks(landmarksRaw, bbox) {
         if (!overlayCanv) return;
         if (!landmarksRaw || landmarksRaw.length == 0) return;
-        if (loading) clearInterval(loading);
+        if (loadingTimer) clearInterval(loadingTimer);
 
         const overlayCtx = overlayCanv.getContext("2d");
         overlayCtx.clearRect(0, 0, globals.localVideoWidth, videoHeight);
@@ -170,7 +172,7 @@ ARENA.FaceTracker = (function () {
             }
         }
 
-        if (bboxOn) drawBbox(bbox);
+        if (displayBbox) drawBbox(bbox);
         drawPolyline(landmarks, 0,  16, false);   // Jaw line
         drawPolyline(landmarks, 17, 21, false);   // Left eyebrow
         drawPolyline(landmarks, 22, 26, false);   // Right eyebrow
@@ -211,6 +213,7 @@ ARENA.FaceTracker = (function () {
             transAdjusted.push(adjustedTrans);
         }
         faceJSON["pose"]["translation"] = transAdjusted;
+
         // faceJSON["frame"] = frame;
 
         let landmarksAdjusted = [];
@@ -239,11 +242,6 @@ ARENA.FaceTracker = (function () {
         if (faceDetector && ready) {
             [landmarksRaw, bbox] = await faceDetector.detect(frame, width, height);
             [quat, trans] = await faceDetector.getPose(landmarksRaw, globals.localVideoWidth, videoHeight);
-            const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, width, height);
-            if (faceJSON != prevJSON) {
-                publish(globals.outputTopic + globals.camName + "/face", faceJSON);
-                prevJSON = faceJSON;
-            }
         }
         return [landmarksRaw, bbox, quat, trans];
     }
@@ -253,6 +251,12 @@ ARENA.FaceTracker = (function () {
             if (frames % framesToSkip == 0) {
                 const [landmarksRaw, bbox, quat, trans] = await detectFace(getFrame(), globals.localVideoWidth, videoHeight);
                 drawLandmarks(landmarksRaw, bbox);
+
+                const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, globals.localVideoWidth, videoHeight);
+                if (faceJSON != prevJSON) {
+                    publish(globals.outputTopic + globals.camName + "/face", faceJSON);
+                    prevJSON = faceJSON;
+                }
             }
             frames++;
             requestAnimationFrame(processVideo);
@@ -261,7 +265,7 @@ ARENA.FaceTracker = (function () {
 
     function displayInitialization() {
         let i = 0;
-        loading = setInterval(() => {
+        loadingTimer = setInterval(() => {
             writeOverlayText("Initializing Face Tracking" + ".".repeat(i%4)); i++;
         }, 500);
         ready = true;
@@ -271,7 +275,9 @@ ARENA.FaceTracker = (function () {
         // ==================================================
         // PUBLIC
         // ==================================================
-        init: async function init() {
+        init: async function init(_displayBbox, _flipped) {
+            displayBbox = _displayBbox;
+            flipped = _flipped;
             const FaceDetector = Comlink.wrap(new Worker("./face-tracking/faceDetector.js"));
             faceDetector = await new FaceDetector(
                 Comlink.proxy(displayInitialization) // input is a callback
@@ -287,13 +293,13 @@ ARENA.FaceTracker = (function () {
 
             setupVideo(() => {
                 if (!ready) {
-                    writeOverlayText("Downloading Face Model: 72MB");
+                    writeOverlayText("DownloadingTimer Face Model: 72MB");
                 }
                 requestAnimationFrame(processVideo);
             });
 
             hasAvatar = true;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function(resolve, reject) {
                 resolve();
             });
         },
@@ -320,7 +326,7 @@ ARENA.FaceTracker = (function () {
             videoElem = undefined;
 
             hasAvatar = false;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function(resolve, reject) {
                 resolve();
             });
         }

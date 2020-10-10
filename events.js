@@ -976,7 +976,7 @@ AFRAME.registerComponent("press-and-move", {
             if (!self.timer) {
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;
-                }, 700); // press for 700ms counts as long press
+                }, 750); // press for 750ms counts as long press
             }
         });
         window.addEventListener("touchend", function(evt) {
