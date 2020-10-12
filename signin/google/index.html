@@ -21,17 +21,23 @@
                     ' User-agent: "' + navigator.userAgent + '"');
             } else {
                 console.log("User is already signed in.");
-                // if user signed in, then give them requested page with parameters
-                if (localStorage.getItem("request_uri")) {
-                    //redirect user to originally requested page
-                    location.href = localStorage.getItem("request_uri");
-                } else {
-                    location.href = ".."; // back to main ARENA
-                }
             }
+            returnToArena();
+        }, function (error) {
+            console.error(error);
+            returnToArena();
         });
     });
 
+    function returnToArena() {
+        // send login with redirection url from this page
+        if (localStorage.getItem("request_uri")) {
+            //redirect user to originally requested page
+            location.href = localStorage.getItem("request_uri");
+        } else {
+            location.href = "../.."; // back to main ARENA
+        }
+    }
 </script>
 
 </html>
