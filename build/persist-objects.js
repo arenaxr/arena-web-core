@@ -76,7 +76,7 @@ export function log(message) {
     }
 }
 
-export async function populateList(scene, editobjhandler) {
+export async function populateList(scene, filter='.*', chk_type={'object': true, 'program': true, 'scene-options': true, 'landmarks': true}) {
     if (persist.persist_uri == undefined) {
         console.error("Persist DB URL not defined."); // populate list should be called after persist_url is set
         return;
@@ -147,29 +147,44 @@ export async function populateList(scene, editobjhandler) {
         return;
     }
 
+
+    // create regex
+    let re;
+    try {
+      re = new RegExp(filter);
+    } catch (err) {
+        displayAlert("Invalid filter " + err + " (NOTE: '.*' matches all object ids)", "error", 5000);
+        return;
+    }
+
     for (let i = 0; i < sceneobjs.length; i++) {
         var li = document.createElement("li");
         var span = document.createElement("span");
         var img = document.createElement("img");
+
         // save obj id so we can use in delete later
         li.setAttribute("data-objid", sceneobjs[i].object_id);
         var inputValue = "";
-        if (sceneobjs[i].attributes) {
-            if (sceneobjs[i].type == "object") {
-                inputValue = sceneobjs[i].object_id + " ( " + sceneobjs[i].attributes.object_type + " )";
-                img.src = "assets/3dobj-icon.png";
-            } else if (sceneobjs[i].type == "program") {
-                var ptype = sceneobjs[i].attributes.filetype == "WA" ? "WASM program" : "python program";
-                inputValue =  sceneobjs[i].object_id + " ( " + ptype + ": "+ sceneobjs[i].attributes.filename +" )";
-                img.src = "assets/program-icon.png";
-            } else if (sceneobjs[i].type == "scene-options") {
-                inputValue = sceneobjs[i].object_id + " ( scene options )";
-                img.src = "assets/options-icon.png";
-            } else if (sceneobjs[i].type == "landmarks") {
-              inputValue = sceneobjs[i].object_id + " ( landmarks )";
-              img.src = "assets/map-icon.png";              
-            }
+
+        if (sceneobjs[i].attributes == undefined) continue;
+        if (chk_type[sceneobjs[i].type] == false) continue;
+        if (re.test(sceneobjs[i].object_id) == false) continue;
+
+        if (sceneobjs[i].type == "object") {
+            inputValue = sceneobjs[i].object_id + " ( " + sceneobjs[i].attributes.object_type + " )";
+            img.src = "assets/3dobj-icon.png";
+        } else if (sceneobjs[i].type == "program") {
+            var ptype = sceneobjs[i].attributes.filetype == "WA" ? "WASM program" : "python program";
+            inputValue =  sceneobjs[i].object_id + " ( " + ptype + ": "+ sceneobjs[i].attributes.filename +" )";
+            img.src = "assets/program-icon.png";
+        } else if (sceneobjs[i].type == "scene-options") {
+            inputValue = sceneobjs[i].object_id + " ( scene options )";
+            img.src = "assets/options-icon.png";
+        } else if (sceneobjs[i].type == "landmarks") {
+          inputValue = sceneobjs[i].object_id + " ( landmarks )";
+          img.src = "assets/map-icon.png";
         }
+
         var t = document.createTextNode(inputValue);
         li.appendChild(t);
 

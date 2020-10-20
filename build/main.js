@@ -49,24 +49,48 @@ window.addEventListener('onauth', async function (e) {
     var arena_host = document.getElementById("arena_host");
     var editmsg = document.getElementById("editmsg");
     var scene_url = document.getElementById("scene_url");
+    var objfilter = document.getElementById("objfilter");
 
     // Buttons/s
     var set_value_button = document.getElementById("setvalue");
     var select_schema = document.getElementById("objtype");
     var genid_button = document.getElementById("genid");
+    var clearform_button = document.getElementById("clearform");
     var add_button = document.getElementById("addobj");
     var del_button = document.getElementById("delobj");
     var all_button = document.getElementById("selectall");
-    var clear_button = document.getElementById("clearlist");
+    var clearsel_button = document.getElementById("clearlist");
     var refresh_button = document.getElementById("refreshlist");
     var mqtt_reconnect = document.getElementById("mqtt_reconnect");
+    var mqtt_reconnect = document.getElementById("mqtt_reconnect");
+    var mqtt_reconnect = document.getElementById("mqtt_reconnect");
 
-    // add schema files to
+
+    var typechkdiv =  document.getElementById("type_chk_div");
+    var type_chk = {};
+
     for (var objtype in schema_files) {
+        // add schema files to select
         var ofile = document.createElement("option");
         ofile.value = schema_files[objtype].file;
         ofile.appendChild(document.createTextNode(schema_files[objtype].description));
         select_schema.appendChild(ofile);
+
+        // add type checkboxes
+        var lbl = document.createElement("label");
+        lbl.className = "checkbox inline ";
+        var input = document.createElement("input");
+        input.type = "checkbox";
+        input.setAttribute("checked", "true");
+        input.setAttribute("value", objtype);
+        lbl.appendChild(input);
+        lbl.innerHTML += schema_files[objtype].description;
+        typechkdiv.appendChild(lbl);
+        type_chk[objtype] = true;
+        lbl.addEventListener( 'change', function(e) {
+              type_chk[e.target.value] = e.target.checked;
+              PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+        });
     }
 
     try {
@@ -106,7 +130,7 @@ window.addEventListener('onauth', async function (e) {
         var hostData = mqttAndPersistURI(arena_host.value);
         PersistObjects.set_options({ persist_uri: hostData.persist_uri });
         PersistObjects.mqttReconnect({ mqtt_uri: hostData.mqtt_uri});
-        await PersistObjects.populateList(scene.value);
+        await PersistObjects.populateList(scene.value, objfilter.value, type_chk);
         reload();
         updateLink();
     }
@@ -189,7 +213,7 @@ window.addEventListener('onauth', async function (e) {
 
         window.location.hash = "edit_section";
 
-        displayAlert("Object data loaded into the 'Add/Edit Object' form. <br />Press 'Add/Update Object' button at the bottom when done.", "info", 5000);
+        displayAlert("Object data loaded into the 'Add/Edit Object' form. <br />Press 'Add/Update Object' button when done.", "info", 5000);
     }
 
     // Start the output textarea empty
@@ -206,6 +230,11 @@ window.addEventListener('onauth', async function (e) {
     // When the "update form" button is clicked, set the editor"s value
     set_value_button.addEventListener("click", function() {
         jsoneditor.setValue(JSON.parse(output.value));
+    });
+
+    // clear form
+    clearform_button.addEventListener("click", function() {
+      reload();
     });
 
     // generate a random object_id
@@ -246,11 +275,11 @@ window.addEventListener('onauth', async function (e) {
     reload();
     updateLink();
 
-    PersistObjects.populateList(scene.value);
+    PersistObjects.populateList(scene.value, objfilter.value, type_chk);
 
     // Change listener for scene
     scene.addEventListener("change", async function() {
-        PersistObjects.populateList(scene.value);
+        PersistObjects.populateList(scene.value, objfilter.value, type_chk);
         reload();
         updateLink();
         localStorage.setItem("scene", scene.value);
@@ -261,11 +290,16 @@ window.addEventListener('onauth', async function (e) {
     scenelist.addEventListener("change", async function() {
         if (scenelist.value !== "No scenes found.") {
           scene.value = scenelist.value;
-          PersistObjects.populateList(scene.value);
+          PersistObjects.populateList(scene.value, objfilter.value, type_chk);
           reload();
           updateLink();
           localStorage.setItem("scene", scene.value);
         }
+    });
+
+    // Change listener for object id filter regex
+    objfilter.addEventListener("change", async function() {
+        PersistObjects.populateList(scene.value, objfilter.value, type_chk);
     });
 
     // Change listener for arena URL
@@ -279,14 +313,18 @@ window.addEventListener('onauth', async function (e) {
         PersistObjects.selectAll();
     });
 
-    clear_button.addEventListener("click", function() {
+    clearsel_button.addEventListener("click", function() {
         PersistObjects.clearSelected();
+    });
+
+    refresh_button.addEventListener("click", function() {
+        PersistObjects.populateList(scene.value, objfilter.value, type_chk);
     });
 
     del_button.addEventListener("click", function() {
         PersistObjects.deleteSelected(scene.value);
         setTimeout(() => {
-            PersistObjects.populateList(scene.value);
+            PersistObjects.populateList(scene.value, objfilter.value, type_chk);
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });

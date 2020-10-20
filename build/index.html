@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <title>Scene Config Editor</title>
+  <title>Scene Editor</title>
   <!-- placeholders for the theme switcher -->
   <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'>
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
@@ -39,8 +39,8 @@
 
         <div class="input-prepend">
           <span class="add-on">Scene</span>
-          <input type="text" id='arena_scene' class="input-xlarge">
-          <select id="scenelist">
+          <input type="text" id='arena_scene' class="input-large">
+          <select id="scenelist" class="input-medium">
             <option value="render">render</option>
           </select>
 
@@ -48,7 +48,26 @@
         <p />
         <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in ARENA (new Window)</a>
         <h4>Scene Objects</h4>
-
+         <div class="input-prepend">
+          <span class="add-on">Filter regex (object id)</span>
+          <input type="text" id='objfilter' class="input-medium" value=".*">
+        </div>
+        <div class="input-prepend controls controls-row" id="type_chk_div">
+          <!--
+          <label class="checkbox inline span1">
+            <input type="checkbox" id="chk_object" value="object" checked> 3D Objects
+          </label>
+          <label class="checkbox inline span1">
+            <input type="checkbox" id="chk_program" value="program" checked> Programs
+          </label>
+          <label class="checkbox inline span1">
+            <input type="checkbox" id="chk_sceneopt" value="scene-options" checked> Scene-Opt.
+          </label>
+          <label class="checkbox inline span1">
+            <input type="checkbox" id="chk_landmarks" value="landmarks" checked> Landmarks
+          </label>
+        -->
+        </div>
         <div class="objlist">
           <ul id="objlist">
             <li>No objects in the scene</li>
@@ -78,7 +97,6 @@
     <div class='row'>
       <div class='span8 col-md-8 columns eight large-8' id="edit_section">
         <h3>Add/Edit Object</h3>
-
         <form class="form-inline">
           <label class="checkbox">
             Type:
@@ -86,7 +104,11 @@
               <!-- schema files added by main.js -->
             </select>
           </label>
-          <button class="btn btn-mini" type="button" id='genid'><i class="icon-tag"></i> Gen object_id</a> </button>
+        </form>
+        <form class="form-inline">
+          <button class="btn" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
+          <button class="btn" type="button" id='genid'><i class="icon-tag"></i>Gen object_id</a> </button>
+          <button class="btn btn-primary" type="button" id='addobj'><i class="icon-plus"></i> Add/Update Object</a> </button>
         </form>
 
         <div id='editor'></div>
