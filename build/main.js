@@ -240,7 +240,7 @@ window.addEventListener('onauth', async function (e) {
     // When the "update form" button is clicked, set the editor"s value
     set_value_button.addEventListener("click", function() {
         let obj = JSON.parse(output.value)
-        editObject(obj, obj.action);
+        editObject(obj, obj.action, );
         //console.log(obj.type, select_schema);
         //if (select_schema.value
         //reload();
