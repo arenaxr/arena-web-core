@@ -252,8 +252,18 @@ export function addObject(objJson, scene) {
 
     var obj = JSON.parse(objJson);
 
-    // make sure persist is true
-    obj.persist = true;
+    var found = false;
+    for (let i = 0; i < persist.currentSceneObjs.length; i++) {
+        if (persist.currentSceneObjs[i].object_id == obj.object_id) {
+          found = true;
+          break;
+        }
+    }
+
+    // set overwrite to true so previous attributes are removed
+    if (obj.action == "update" && found) objJson.overwrite = true;
+
+    let persistAlert = (obj.persist == false) ? "<br/>This object will be added added to the scene, but not to the list of persisted objects. <br/><strong>Are you sure you don't want persist=true ?</strong>":'';
     objJson = JSON.stringify(obj);
     var topic = "realm/s/" + scene;
     log("Publish [ " + topic + "]: " + objJson);
@@ -265,16 +275,12 @@ export function addObject(objJson, scene) {
     }
 
     if (obj.action == "update") {
-      var found = false;
-      for (let i = 0; i < persist.currentSceneObjs.length; i++) {
-        if (persist.currentSceneObjs[i].object_id == obj.object_id) {
-          found = true;
-          break;
-        }
-      }
-      if (found==false ) displayAlert("Update to new object id; Are you sure you don't want action=create ?", "info", 5000);
-      else displayAlert("Object update published.", "info", 5000);
-    } else displayAlert("Object create published.", "info", 5000);
+      if (found==false) displayAlert("Sent update to new object id; Are you sure you don't want action=create ?" + persistAlert, "info", 5000);
+      else displayAlert("Object update published (previous attributes overwritten/deleted)." + persistAlert, "info", 5000);
+    } else {
+      if (found==false) displayAlert("Object create published." + persistAlert, "info", 5000);
+      else displayAlert("Sent create to existing object id; Previous attibutes not cleared. Are you sure you don't want action=update ?" + persistAlert, "info", 5000);
+    }
     populateList(scene);
 }
 

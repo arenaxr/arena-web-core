@@ -92,9 +92,9 @@
           </label>
         </form>
         <form class="form-inline">
-          <button class="btn btn-mini" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
-          <button class="btn btn-mini" type="button" id='genid' title="Generate a Random object_id"><i class="icon-tag"></i>Gen object_id</a> </button>
-          <button class="btn btn-primary btn-mini" type="button" id='addobj' title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
+          <button class="btn btn-small" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
+          <button class="btn btn-small" type="button" id='genid' title="Generate a Random object_id"><i class="icon-tag"></i>Gen object_id</a> </button>
+          <button class="btn btn-primary btn-small" type="button" id='addobj' title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
         </form>
 
         <div id='editor'></div>
@@ -106,9 +106,10 @@
         <h3>Object JSON</h3>
         <p>
           <a class="btn btn-small" href="#" id='setvalue' title="Update Form with JSON Data"><i class="icon-random"></i>Update form</a>
-          <a class="btn btn-small" href="#" data-clipboard-target="#output" title="Copy JSON to Clipboard"><i class="icon-share"></i>Copy JSON</a>
+          <a id='copy_json' class="btn btn-small" href="#" title="Copy JSON to Clipboard"><i class="icon-share"></i>Copy JSON</a>
         </p>
         <textarea id='output' class='form-control objjson'></textarea>
+        <a id='copy_json_oneline' class="btn btn-small" href="#" title="Copy one-liner JSON to Clipboard"><i class="icon-share"></i>Copy one-liner JSON</a>
         <h2>Validation</h2>
         <p>This will update whenever the form changes to show validation errors if there are any.</p>
         <textarea id='validate' class='infopanel' readonly disabled class='form-control'></textarea>

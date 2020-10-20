@@ -28,6 +28,7 @@ var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
   alert.innerHTML = msg;
   //alert.style = "position: fixed; top: 1em; left: 1em; opacity: 0.9; width: 400px; display: block";
   alert.style.display = "block";
+  if (timeMs == 0 ) return;
   setTimeout(() => {
       alert.style.display = "none";
   }, timeMs); // clear message in timeMs milliseconds
@@ -40,6 +41,7 @@ window.addEventListener('onauth', async function (e) {
 
     // Divs/textareas on the page
     var output = document.getElementById("output");
+    var output_oneline = document.getElementById("output_oneline");
     var editor = document.getElementById("editor");
     var validate = document.getElementById("validate");
     var objlist = document.getElementById("objlist");
@@ -65,7 +67,21 @@ window.addEventListener('onauth', async function (e) {
     var mqtt_reconnect = document.getElementById("mqtt_reconnect");
     var mqtt_reconnect = document.getElementById("mqtt_reconnect");
 
+    // copy to clipboard buttons
+    new ClipboardJS(document.querySelector("#copy_json"), {
+        text: function(trigger) {
+            return output.value;
+        }
+    });
+    
+    new ClipboardJS(document.querySelector("#copy_json_oneline"), {
+        text: function(trigger) {
+          var json = jsoneditor.getValue();
+          return JSON.stringify(json, null, 0);
+        }
+    });
 
+    // keep state of type checkboxes
     var typechkdiv =  document.getElementById("type_chk_div");
     var type_chk = {};
 
@@ -275,7 +291,8 @@ window.addEventListener('onauth', async function (e) {
     reload();
     updateLink();
 
-    PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+    await PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+    displayAlert("Done loading.", "info", 1000);
 
     // Change listener for scene
     scene.addEventListener("change", async function() {
@@ -340,4 +357,4 @@ window.addEventListener('onauth', async function (e) {
 //});
 });
 
-displayAlert("Loading..", "info", 3000);
+displayAlert("Loading..", "info", 0);
