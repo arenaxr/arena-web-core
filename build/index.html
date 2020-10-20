@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <title>Scene Config Editor</title>
+  <title>Scene Editor</title>
   <!-- placeholders for the theme switcher -->
   <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'>
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
@@ -39,16 +39,21 @@
 
         <div class="input-prepend">
           <span class="add-on">Scene</span>
-          <input type="text" id='arena_scene' class="input-xlarge">
-          <select id="scenelist">
+          <input type="text" id='arena_scene' class="input-large">
+          <select id="scenelist" class="input-medium">
             <option value="render">render</option>
           </select>
 
         </div>
         <p />
         <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in ARENA (new Window)</a>
-        <h4>Scene Objects</h4>
-
+        <h4>Scene Objects (Persisted)</h4>
+         <div class="input-prepend">
+          <span class="add-on">Filter object_id (regex)</span>
+          <input type="text" id='objfilter' class="input-medium" value=".*">
+        </div>
+        <div class="input-prepend controls controls-row" id="type_chk_div">
+        </div>
         <div class="objlist">
           <ul id="objlist">
             <li>No objects in the scene</li>
@@ -56,10 +61,10 @@
         </div>
         <p>
         <form class="form-inline">
-          <a class="btn btn-danger" href="#" id='delobj'><i class="icon-trash"></i> Delete Selected</a>
-          <a class="btn" href="#" id='selectall'><i class="icon-check"></i> Select All</a>
-          <a class="btn" href="#" id='clearlist'><i class="icon-remove"></i> Clear Selected</a>
-          <a class="btn" href="#" id='refreshlist'><i class="icon-refresh"></i></a>
+          <a class="btn btn-small btn-danger" href="#" id='delobj' title="Delete Selected Objects"><i class="icon-trash"></i> Delete Selected</a>
+          <a class="btn btn-small" href="#" id='selectall' title="Selected All Objects in the List"><i class="icon-check"></i> Select All</a>
+          <a class="btn btn-small" href="#" id='clearlist' title="Clear Selection"><i class="icon-remove"></i> Clear Selected</a>
+          <a class="btn btn-small" href="#" id='refreshlist' title="Refresh List from Database"><i class="icon-refresh"></i></a>
         </form>
         </p>
       </div>
@@ -78,7 +83,6 @@
     <div class='row'>
       <div class='span8 col-md-8 columns eight large-8' id="edit_section">
         <h3>Add/Edit Object</h3>
-
         <form class="form-inline">
           <label class="checkbox">
             Type:
@@ -86,21 +90,26 @@
               <!-- schema files added by main.js -->
             </select>
           </label>
-          <button class="btn btn-mini" type="button" id='genid'><i class="icon-tag"></i> Gen object_id</a> </button>
+        </form>
+        <form class="form-inline">
+          <button class="btn btn-small" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
+          <button class="btn btn-small" type="button" id='genid' title="Generate a Random object_id"><i class="icon-tag"></i>Gen object_id</a> </button>
+          <button class="btn btn-primary btn-small" type="button" id='addobj' title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
         </form>
 
         <div id='editor'></div>
-        <button class="btn btn-primary" type="button" id='addobj'><i class="icon-plus"></i> Add/Update Object</a> </button>
+        <button class="btn btn-primary" type="button" id='addobj' title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
         <br/>
         <br/>
       </div>
       <div class='span4 col-md-4 columns four large-4'>
         <h3>Object JSON</h3>
         <p>
-          <a class="btn btn-small" href="#" id='setvalue'><i class="icon-random"></i>Update form</a>
-          <a class="btn btn-small" href="#" data-clipboard-target="#output"><i class="icon-share"></i>Copy JSON</a>
+          <a class="btn btn-small" href="#" id='setvalue' title="Update Form with JSON Data"><i class="icon-random"></i>Update form</a>
+          <a id='copy_json' class="btn btn-small" href="#" title="Copy JSON to Clipboard"><i class="icon-share"></i>Copy JSON</a>
         </p>
         <textarea id='output' class='form-control objjson'></textarea>
+        <a id='copy_json_oneline' class="btn btn-small" href="#" title="Copy one-liner JSON to Clipboard"><i class="icon-share"></i>Copy one-liner JSON</a>
         <h2>Validation</h2>
         <p>This will update whenever the form changes to show validation errors if there are any.</p>
         <textarea id='validate' class='infopanel' readonly disabled class='form-control'></textarea>

@@ -306,12 +306,12 @@
                "minLength":5,
                "default":"mr.andrew.cmu.edu"
             },
-            "bigscreen":{
+            "screenshare":{
                "type":"string",
-               "title":"Bigscreen name",
-               "description":"Name of the 3D object used as a bigscreen when sharing desktop",
+               "title":"Screenshare object name",
+               "description":"Name of the 3D object used when sharing desktop",
                "minLength":5,
-               "default":"bigscreen"
+               "default":"screenshare"
             },
             "clickableOnlyEvents":{
                "type":"boolean",

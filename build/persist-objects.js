@@ -76,7 +76,7 @@ export function log(message) {
     }
 }
 
-export async function populateList(scene, editobjhandler) {
+export async function populateList(scene, filter='.*', chk_type={'object': true, 'program': true, 'scene-options': true, 'landmarks': true}) {
     if (persist.persist_uri == undefined) {
         console.error("Persist DB URL not defined."); // populate list should be called after persist_url is set
         return;
@@ -147,29 +147,44 @@ export async function populateList(scene, editobjhandler) {
         return;
     }
 
+
+    // create regex
+    let re;
+    try {
+      re = new RegExp(filter);
+    } catch (err) {
+        displayAlert("Invalid filter " + err + " (NOTE: '.*' matches all object ids)", "error", 5000);
+        return;
+    }
+
     for (let i = 0; i < sceneobjs.length; i++) {
         var li = document.createElement("li");
         var span = document.createElement("span");
         var img = document.createElement("img");
+
         // save obj id so we can use in delete later
         li.setAttribute("data-objid", sceneobjs[i].object_id);
         var inputValue = "";
-        if (sceneobjs[i].attributes) {
-            if (sceneobjs[i].type == "object") {
-                inputValue = sceneobjs[i].object_id + " ( " + sceneobjs[i].attributes.object_type + " )";
-                img.src = "assets/3dobj-icon.png";
-            } else if (sceneobjs[i].type == "program") {
-                var ptype = sceneobjs[i].attributes.filetype == "WA" ? "WASM program" : "python program";
-                inputValue =  sceneobjs[i].object_id + " ( " + ptype + ": "+ sceneobjs[i].attributes.filename +" )";
-                img.src = "assets/program-icon.png";
-            } else if (sceneobjs[i].type == "scene-options") {
-                inputValue = sceneobjs[i].object_id + " ( scene options )";
-                img.src = "assets/options-icon.png";
-            } else if (sceneobjs[i].type == "landmarks") {
-              inputValue = sceneobjs[i].object_id + " ( landmarks )";
-              img.src = "assets/map-icon.png";              
-            }
+
+        if (sceneobjs[i].attributes == undefined) continue;
+        if (chk_type[sceneobjs[i].type] == false) continue;
+        if (re.test(sceneobjs[i].object_id) == false) continue;
+
+        if (sceneobjs[i].type == "object") {
+            inputValue = sceneobjs[i].object_id + " ( " + sceneobjs[i].attributes.object_type + " )";
+            img.src = "assets/3dobj-icon.png";
+        } else if (sceneobjs[i].type == "program") {
+            var ptype = sceneobjs[i].attributes.filetype == "WA" ? "WASM program" : "python program";
+            inputValue =  sceneobjs[i].object_id + " ( " + ptype + ": "+ sceneobjs[i].attributes.filename +" )";
+            img.src = "assets/program-icon.png";
+        } else if (sceneobjs[i].type == "scene-options") {
+            inputValue = sceneobjs[i].object_id + " ( scene options )";
+            img.src = "assets/options-icon.png";
+        } else if (sceneobjs[i].type == "landmarks") {
+          inputValue = sceneobjs[i].object_id + " ( landmarks )";
+          img.src = "assets/map-icon.png";
         }
+
         var t = document.createTextNode(inputValue);
         li.appendChild(t);
 
@@ -237,8 +252,18 @@ export function addObject(objJson, scene) {
 
     var obj = JSON.parse(objJson);
 
-    // make sure persist is true
-    obj.persist = true;
+    var found = false;
+    for (let i = 0; i < persist.currentSceneObjs.length; i++) {
+        if (persist.currentSceneObjs[i].object_id == obj.object_id) {
+          found = true;
+          break;
+        }
+    }
+
+    // set overwrite to true so previous attributes are removed
+    if (obj.action == "update" && found) objJson.overwrite = true;
+
+    let persistAlert = (obj.persist == false) ? "<br/>This object will be added added to the scene, but not to the list of persisted objects. <br/><strong>Are you sure you don't want persist=true ?</strong>":'';
     objJson = JSON.stringify(obj);
     var topic = "realm/s/" + scene;
     log("Publish [ " + topic + "]: " + objJson);
@@ -250,16 +275,12 @@ export function addObject(objJson, scene) {
     }
 
     if (obj.action == "update") {
-      var found = false;
-      for (let i = 0; i < persist.currentSceneObjs.length; i++) {
-        if (persist.currentSceneObjs[i].object_id == obj.object_id) {
-          found = true;
-          break;
-        }
-      }
-      if (found==false ) displayAlert("Update to new object id; Are you sure you don't want action=create ?", "info", 5000);
-      else displayAlert("Object update published.", "info", 5000);
-    } else displayAlert("Object create published.", "info", 5000);
+      if (found==false) displayAlert("Sent update to new object id; Are you sure you don't want action=create ?" + persistAlert, "info", 5000);
+      else displayAlert("Object update published (previous attributes overwritten/deleted)." + persistAlert, "info", 5000);
+    } else {
+      if (found==false) displayAlert("Object create published." + persistAlert, "info", 5000);
+      else displayAlert("Sent create to existing object id; Previous attibutes not cleared. Are you sure you don't want action=update ?" + persistAlert, "info", 5000);
+    }
     populateList(scene);
 }
 
