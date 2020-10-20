@@ -47,26 +47,12 @@
         </div>
         <p />
         <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in ARENA (new Window)</a>
-        <h4>Scene Objects</h4>
+        <h4>Scene Objects (Persisted)</h4>
          <div class="input-prepend">
           <span class="add-on">Filter regex (object id)</span>
           <input type="text" id='objfilter' class="input-medium" value=".*">
         </div>
         <div class="input-prepend controls controls-row" id="type_chk_div">
-          <!--
-          <label class="checkbox inline span1">
-            <input type="checkbox" id="chk_object" value="object" checked> 3D Objects
-          </label>
-          <label class="checkbox inline span1">
-            <input type="checkbox" id="chk_program" value="program" checked> Programs
-          </label>
-          <label class="checkbox inline span1">
-            <input type="checkbox" id="chk_sceneopt" value="scene-options" checked> Scene-Opt.
-          </label>
-          <label class="checkbox inline span1">
-            <input type="checkbox" id="chk_landmarks" value="landmarks" checked> Landmarks
-          </label>
-        -->
         </div>
         <div class="objlist">
           <ul id="objlist">
@@ -75,10 +61,10 @@
         </div>
         <p>
         <form class="form-inline">
-          <a class="btn btn-danger" href="#" id='delobj'><i class="icon-trash"></i> Delete Selected</a>
-          <a class="btn" href="#" id='selectall'><i class="icon-check"></i> Select All</a>
-          <a class="btn" href="#" id='clearlist'><i class="icon-remove"></i> Clear Selected</a>
-          <a class="btn" href="#" id='refreshlist'><i class="icon-refresh"></i></a>
+          <a class="btn btn-danger" href="#" id='delobj' title="Delete Selected Objects"><i class="icon-trash"></i> Delete Selected</a>
+          <a class="btn" href="#" id='selectall' title="Selected All Objects in the List"><i class="icon-check"></i> Select All</a>
+          <a class="btn" href="#" id='clearlist' title="Clear Selection"><i class="icon-remove"></i> Clear Selected</a>
+          <a class="btn" href="#" id='refreshlist' title="Refresh List from Database"><i class="icon-refresh"></i></a>
         </form>
         </p>
       </div>
@@ -106,21 +92,21 @@
           </label>
         </form>
         <form class="form-inline">
-          <button class="btn" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
-          <button class="btn" type="button" id='genid'><i class="icon-tag"></i>Gen object_id</a> </button>
-          <button class="btn btn-primary" type="button" id='addobj'><i class="icon-plus"></i> Add/Update Object</a> </button>
+          <button class="btn btn-mini" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
+          <button class="btn btn-mini" type="button" id='genid' title="Generate a Random object_id"><i class="icon-tag"></i>Gen object_id</a> </button>
+          <button class="btn btn-primary btn-mini" type="button" id='addobj' title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
         </form>
 
         <div id='editor'></div>
-        <button class="btn btn-primary" type="button" id='addobj'><i class="icon-plus"></i> Add/Update Object</a> </button>
+        <button class="btn btn-primary" type="button" id='addobj' title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
         <br/>
         <br/>
       </div>
       <div class='span4 col-md-4 columns four large-4'>
         <h3>Object JSON</h3>
         <p>
-          <a class="btn btn-small" href="#" id='setvalue'><i class="icon-random"></i>Update form</a>
-          <a class="btn btn-small" href="#" data-clipboard-target="#output"><i class="icon-share"></i>Copy JSON</a>
+          <a class="btn btn-small" href="#" id='setvalue' title="Update Form with JSON Data"><i class="icon-random"></i>Update form</a>
+          <a class="btn btn-small" href="#" data-clipboard-target="#output" title="Copy JSON to Clipboard"><i class="icon-share"></i>Copy JSON</a>
         </p>
         <textarea id='output' class='form-control objjson'></textarea>
         <h2>Validation</h2>
