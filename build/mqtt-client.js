@@ -37,7 +37,7 @@ export default class MqttClient {
       mqtt_token: st.mqtt_token,
     };
 
-    console.log(st.mqtt_username);
+    //console.log(st.mqtt_username);
 
     if (this.settings.dbg == true) console.log(this.settings);
 

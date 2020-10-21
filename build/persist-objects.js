@@ -96,7 +96,7 @@ export async function populateList(scene, filter='.*', chk_type={'object': true,
 
     } catch (err) {
         displayAlert("Error fetching scene list from database: " + err, "error", 5000);
-        console.log(err);
+        console.error(err);
         return;
     }
 

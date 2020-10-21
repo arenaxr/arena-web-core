@@ -240,11 +240,7 @@ window.addEventListener('onauth', async function (e) {
     // When the "update form" button is clicked, set the editor"s value
     set_value_button.addEventListener("click", function() {
         let obj = JSON.parse(output.value)
-        editObject(obj, obj.action, );
-        //console.log(obj.type, select_schema);
-        //if (select_schema.value
-        //reload();
-        //jsoneditor.setValue(obj);
+        editObject(obj, obj.action);
     });
 
     // clear form
@@ -282,7 +278,7 @@ window.addEventListener('onauth', async function (e) {
         scene_list: document.getElementById("scenelist"),
         scene_textbox: document.getElementById("arena_scene"),
         log_panel: document.getElementById("logpanel"),
-        editObject_handler: editObject,
+        editobj_handler: editObject,
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
     });
