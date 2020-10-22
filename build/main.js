@@ -198,9 +198,16 @@ window.addEventListener('onauth', async function (e) {
     };
 
     // we indicate this function as the edit handler to persist
-    var editObject = async function(updateobj, action="update") {
-        // replace action
-        updateobj.action = action;
+    var editObject = async function(obj, action="update") {
+
+        // create updateobj, where data = attributes
+        var updateobj = {
+          object_id: obj.object_id,
+          action: action,
+          persist: true,
+          type: obj.type,
+          data: obj.attributes
+        };
 
         var schemaFile = schema_files[updateobj.type].file;
         var data = await fetch(schemaFile);
