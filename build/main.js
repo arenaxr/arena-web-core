@@ -58,7 +58,8 @@ window.addEventListener('onauth', async function (e) {
     var select_schema = document.getElementById("objtype");
     var genid_button = document.getElementById("genid");
     var clearform_button = document.getElementById("clearform");
-    var add_button = document.getElementById("addobj");
+    //var add_button = document.getElementById("addobj");
+    //var add_button_large = document.getElementById("addobjlarge");
     var del_button = document.getElementById("delobj");
     var all_button = document.getElementById("selectall");
     var clearsel_button = document.getElementById("clearlist");
@@ -348,15 +349,15 @@ window.addEventListener('onauth', async function (e) {
         }, 500); // refresh after a while, so that delete messages are processed
     });
 
-    add_button.addEventListener("click", function() {
-        if (validate.value != "valid") {
-            alert("Please check validation errors.");
-            return;
-        }
-        PersistObjects.addObject(output.value, scene.value);
+    document.querySelectorAll('.addobj').forEach(item => {
+      item.addEventListener("click", function() {
+          if (validate.value != "valid") {
+              alert("Please check validation errors.");
+              return;
+          }
+          PersistObjects.addObject(output.value, scene.value);
+      });
     });
-
-//});
 });
 
 displayAlert("Loading..", "info", 0);
