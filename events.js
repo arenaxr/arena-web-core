@@ -119,7 +119,7 @@ if (urlLat && urlLong) {
     }
 }
 
-globals.persistenceUrl = '//' + globals.mqttParamZ + defaults.persistPath + globals.scenenameParam;
+globals.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() *  defaults.mqttPath.length)];
 globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
