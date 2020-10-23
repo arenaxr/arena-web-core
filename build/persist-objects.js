@@ -261,7 +261,7 @@ export function addObject(objJson, scene) {
     }
 
     // set overwrite to true so previous attributes are removed
-    if (obj.action == "update" && found) objJson.overwrite = true;
+    if (obj.action == "update" && found) obj.overwrite = true;
 
     let persistAlert = (obj.persist == false) ? "<br/>This object will be added added to the scene, but not to the list of persisted objects. <br/><strong>Are you sure you don't want persist=true ?</strong>":'';
     objJson = JSON.stringify(obj);
