@@ -825,6 +825,9 @@ function _onMessageArrived(message, jsonMessage) {
                         sceneObjects[name] = entityEl;
                     }
                 }
+                if (theMessage.ttl !== undefined) {   // Allow falsy value of 0
+                    entityEl.setAttribute('ttl', {seconds: theMessage.ttl});
+                }
             }
 
             switch (type) {
