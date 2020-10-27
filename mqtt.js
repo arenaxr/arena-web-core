@@ -1127,8 +1127,11 @@ function _onMessageArrived(message, jsonMessage) {
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-                                //console.log("setting attribute: ", attribute);
-                                entityEl.setAttribute(attribute, value);
+                                if (value === null) {
+                                    entityEl.removeAttribute(attribute, value);
+                                } else {
+                                    entityEl.setAttribute(attribute, value);
+                                }
                             }
                         }
                     } else {
