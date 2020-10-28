@@ -152,7 +152,7 @@ window.addEventListener('onauth', async function (e) {
         updateLink();
     }
 
-    // find host in defaults; otherwise return uris assuming persist and mqqt are accessed through the webhost
+    // find host in defaults; otherwise return uris assuming persist and mqtt are accessed through the webhost
     var mqttAndPersistURI = function(hn) {
         var puri, muri, r;
         for (var i=0; i<dfts.hosts.length; i++) {
