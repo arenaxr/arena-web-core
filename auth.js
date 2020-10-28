@@ -58,10 +58,7 @@ var authCheck = function (args) {
 function checkAnonAuth(event) {
     // prefix all anon users with "anonymous-"
     var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
-
-    //TODO(mwfarb): anon verify valid unexpired stored mqtt-token
-
-    requestMqttToken("anonymous", anonName);
+    verifyMqttToken("anonymous", anonName);
 }
 
 function checkGoogleAuth() {
@@ -134,10 +131,7 @@ function onSignIn(googleUser) {
     processUserNames(profile.getName());
     // request mqtt-auth
     var id_token = googleUser.getAuthResponse().id_token;
-
-    //TODO(mwfarb): google verify valid unexpired stored mqtt-token
-
-    requestMqttToken("google", profile.getEmail(), id_token);
+    verifyMqttToken("google", profile.getEmail(), id_token);
 }
 
 function signOut() {
@@ -159,6 +153,28 @@ function signOut() {
     // back to signin page
     localStorage.setItem("request_uri", location.href);
     location.href = signInPath;
+}
+
+function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
+    // read current token if any and check
+    var mqtt_token = localStorage.getItem("mqtt_token");
+    var bad_token = typeof mqtt_token === 'undefined';
+    // low-security check for reusable token avoiding unneeded auth backend requests
+    if (!bad_token) {
+        var tokenObj = KJUR.jws.JWS.parse(mqtt_token);
+        // TODO (mwfarb): for now, new cam name requires new token, reevaluate later
+        if (typeof globals !== 'undefined' && globals.camName) {
+            bad_token = true;
+        } else {
+            var now = new Date().getTime() / 1000;
+            bad_token = tokenObj.payloadObj.exp < now;
+        }
+    }
+    if (bad_token) {
+        requestMqttToken(auth_type, mqtt_username, id_token);
+    } else {
+        completeAuth(mqtt_username, mqtt_token);
+    }
 }
 
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
@@ -190,19 +206,23 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
-            console.log("got mqtt-user/mqtt-token:", xhr.response.username, xhr.response.token);
-            localStorage.setItem("mqtt_username", xhr.response.username);
-            localStorage.setItem("mqtt_token", xhr.response.token);
-            // mqtt-token must be set to authorize access to MQTT broker
-            const authCompleteEvent = new CustomEvent('onauth', {
-                detail: {
-                    mqtt_username: xhr.response.username,
-                    mqtt_token: xhr.response.token
-                }
-            });
-            window.dispatchEvent(authCompleteEvent);
+            completeAuth(xhr.response.username, xhr.response.token);
         }
     };
+}
+
+function completeAuth(username, token) {
+    console.log("got mqtt-user/mqtt-token:", username, token);
+    localStorage.setItem("mqtt_username", username);
+    localStorage.setItem("mqtt_token", token);
+    // mqtt-token must be set to authorize access to MQTT broker
+    const authCompleteEvent = new CustomEvent('onauth', {
+        detail: {
+            mqtt_username: username,
+            mqtt_token: token
+        }
+    });
+    window.dispatchEvent(authCompleteEvent);
 }
 
 function getAuthStatus() {
