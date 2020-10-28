@@ -825,6 +825,9 @@ function _onMessageArrived(message, jsonMessage) {
                         sceneObjects[name] = entityEl;
                     }
                 }
+                if (theMessage.ttl !== undefined) {   // Allow falsy value of 0
+                    entityEl.setAttribute('ttl', {seconds: theMessage.ttl});
+                }
             }
 
             switch (type) {
@@ -1127,8 +1130,11 @@ function _onMessageArrived(message, jsonMessage) {
                             } else if (attribute === "position") {
                                 entityEl.object3D.position.set(value.x, value.y, value.z);
                             } else {
-                                //console.log("setting attribute: ", attribute);
-                                entityEl.setAttribute(attribute, value);
+                                if (value === null) {
+                                    entityEl.removeAttribute(attribute, value);
+                                } else {
+                                    entityEl.setAttribute(attribute, value);
+                                }
                             }
                         }
                     } else {
