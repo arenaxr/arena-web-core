@@ -157,13 +157,23 @@ function signOut() {
 
 function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
     // read current token if any and check
-    var sJWT = localStorage.getItem("mqtt_token");
-    var key = "";  // TODO (mwfarb) use secret
-    var isValid = KJUR.jws.JWS.verifyJWT(sJWT, key, { alg: ["HS256"] });
-    if (!isValid) {
+    var mqtt_token = localStorage.getItem("mqtt_token");
+    var bad_token = typeof mqtt_token === 'undefined';
+    // low-security check for reusable token avoiding unneeded auth backend requests
+    if (!bad_token) {
+        var tokenObj = KJUR.jws.JWS.parse(mqtt_token);
+        // TODO (mwfarb): for now, new cam name requires new token, reevaluate later
+        if (typeof globals !== 'undefined' && globals.camName) {
+            bad_token = true;
+        } else {
+            var now = new Date().getTime() / 1000;
+            bad_token = tokenObj.payloadObj.exp < now;
+        }
+    }
+    if (bad_token) {
         requestMqttToken(auth_type, mqtt_username, id_token);
     } else {
-        completeAuth(xhr.response.username, xhr.response.token);
+        completeAuth(mqtt_username, mqtt_token);
     }
 }
 
