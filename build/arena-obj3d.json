@@ -120,7 +120,7 @@
                "required":[ "type" ]
             },
             "click-listener":{
-                  "title":"Click Listner",
+                  "title":"Click Listener",
                   "description": "Object will listen for clicks",
                   "type":"boolean"
             },
