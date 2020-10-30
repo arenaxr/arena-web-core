@@ -1,5 +1,5 @@
 //document.addEventListener('DOMContentLoaded', function() {
-window.addEventListener('onauth', async function(e) {
+window.addEventListener('onauth', function(e) {
     var cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
         boxSelectionEnabled: false,
