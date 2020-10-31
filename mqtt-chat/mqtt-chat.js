@@ -25,7 +25,7 @@ export default class MQTTChat {
 			keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
 			mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://spatial.andrew.cmu.edu/mqtt/",
 			mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
-			mqtt_token: st.mqtt_token,
+			mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
 		}
 
 		// users list
