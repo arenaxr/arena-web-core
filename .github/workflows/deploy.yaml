@@ -12,7 +12,7 @@ jobs:
       - name: ssh deploy
         uses: appleboy/ssh-action@master
         env:
-          TARGET: ${{ secrets.secrets.DEPLOY_TARGET }}
+          TARGET: ${{ secrets.DEPLOY_TARGET }}
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
