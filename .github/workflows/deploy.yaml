@@ -1,17 +1,6 @@
 name: SSH Deploy
-
 on:
-  push:
-  pull_request:
   workflow_dispatch:
-    inputs:
-      name:
-        description: 'Person to greet'
-        required: true
-        default: 'Mona the Octocat'
-      home:
-        description: 'location'
-        required: false
 
 jobs:
   deploy:
@@ -19,7 +8,7 @@ jobs:
 
     steps:
       - name: ssh deploy
-        if: endsWith( github.ref, 'deploy') # run for branches or tags ending with 'deploy'
+        #if: endsWith( github.ref, 'deploy') # run for branches or tags ending with 'deploy'
         uses: appleboy/ssh-action@master
         env:
           TARGET: ${{ secrets.DEPLOY_TARGET }}
