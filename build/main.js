@@ -201,13 +201,13 @@ window.addEventListener('onauth', async function (e) {
     // we indicate this function as the edit handler to persist
     var editObject = async function(obj, action="update") {
 
-        // create updateobj, where data = attributes
+        // create updateobj, where data = attributes if object comes from persist
         var updateobj = {
           object_id: obj.object_id,
           action: action,
           persist: true,
           type: obj.type,
-          data: obj.attributes
+          data: (obj.attributes != undefined) ? obj.attributes : obj.data
         };
 
         var schemaFile = schema_files[updateobj.type].file;
@@ -247,7 +247,7 @@ window.addEventListener('onauth', async function (e) {
 
     // When the "update form" button is clicked, set the editor"s value
     set_value_button.addEventListener("click", function() {
-        let obj = JSON.parse(output.value)
+        let obj = JSON.parse(output.value);
         editObject(obj, obj.action);
     });
 
