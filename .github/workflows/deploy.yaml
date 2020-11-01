@@ -2,7 +2,24 @@ name: SSH Deploy
 
 on:
   push:
-    branches: [ deploy-workflow ]
+    branches:
+      # Push events on main branch
+      - main
+      # Push events on main branch
+      - deploy-workflow
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - v*-deploy             # Push events with deploy tags
+
+  pull-requests:
+    branches:
+      # Push events on main branch
+      - main
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - v*-deploy             # Push events with deploy tags
+
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -21,4 +38,4 @@ jobs:
           envs: TARGET
           script: |
              cd  $TARGET
-             ls
+             git pull
