@@ -1,6 +1,17 @@
 name: SSH Deploy
 
-on: [ push, pull_request, workflow_dispatch ]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      name:
+        description: 'Person to greet'
+        required: true
+        default: 'Mona the Octocat'
+      home:
+        description: 'location'
+        required: false
 
 jobs:
   deploy:
