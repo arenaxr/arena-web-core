@@ -11,7 +11,7 @@ on:
     tags:
       - v*-deploy             # Push events with deploy tags
 
-  pull-request:
+  pull_request:
     branches:
       # Push events on main branch
       - main
