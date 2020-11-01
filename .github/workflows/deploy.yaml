@@ -1,5 +1,7 @@
-name: SSH Deploy
-on: workflow_dispatch
+name:SSH Deploy
+on: 
+  push:
+  workflow_dispatch:
 
 jobs:
   deploy:
