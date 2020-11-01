@@ -8,7 +8,7 @@ jobs:
 
     steps:
       - name: ssh deploy
-        if: endsWith( github.ref, 'deploy') # only run for branches or tags ending with 'deploy'
+        if: endsWith( github.ref, 'deploy') # run for branches or tags ending with 'deploy'
         uses: appleboy/ssh-action@master
         env:
           TARGET: ${{ secrets.DEPLOY_TARGET }}
