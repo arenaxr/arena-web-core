@@ -158,7 +158,7 @@ function signOut() {
 function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
     // read current token if any and check
     var mqtt_token = localStorage.getItem("mqtt_token");
-    var bad_token = typeof mqtt_token === 'undefined';
+    var bad_token = mqtt_token == null;
     // low-security check for reusable token avoiding unneeded auth backend requests
     if (!bad_token) {
         var tokenObj = KJUR.jws.JWS.parse(mqtt_token);
