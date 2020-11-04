@@ -680,15 +680,16 @@ AFRAME.registerComponent('collision-listener', {
         //console.log("collision-listener Component init");
         this.el.addEventListener('collide', function(evt) {
 
+            // colliding object, only act if is clients' own
+            const collider = evt.detail.body.el.id;
+            if (collider !== 'my-camera') { return; }
+
             //const coordsData = setClickData(evt);
             const coordsData = {
                 x: 0,
                 y: 0,
                 z: 0
             };
-
-            // colliding object
-            const collider = evt.detail.body.el.id;
 
             // original click event; simply publish to MQTT
             const thisMsg = {
