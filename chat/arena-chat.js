@@ -1,5 +1,4 @@
-import './linkify.min.js';
-import './linkify-string.min.js';
+import * as linkify from 'linkifyjs';
 
 var mqttc;
 
@@ -10,7 +9,7 @@ function uuidv4() {
 	);
 }
 
-export default class MQTTChat {
+export default class ARENAChat {
 
 	constructor(st) {
 		// handle default this.settings
@@ -274,6 +273,10 @@ export default class MQTTChat {
 		this.populateLandmarkList();
 	}
 
+  getUserList() {
+		return this.liveUsers;
+	}
+
 	async connect(force = false) {
 		if (this.connected == true && force == false) return;
 		this.mqttc = new Paho.Client(this.settings.mqtt_host, "chat-" + this.settings.userid);
@@ -350,9 +353,11 @@ export default class MQTTChat {
 			msg = JSON.parse(mqttMsg.payloadString);
 		} catch (err) {
 			console.error("Error parsing chat msg.");
+			return;
 		}
 
-    // ignore our messages
+    // ignore invalid and our own messages
+		if (msg.from_uid == undefined) return;
 		if (msg.from_uid == this.settings.userid) return;
 
 		// save user data and timestamp
