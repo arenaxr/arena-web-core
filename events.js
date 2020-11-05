@@ -121,7 +121,7 @@ if (urlLat && urlLong) {
 
 globals.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + globals.scenenameParam;
 globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() *  defaults.mqttPath.length)];
-globals.outputTopic = "realm/s/" + globals.scenenameParam + "/";
+globals.outputTopic = defaults.realm + "/s/" + globals.scenenameParam + "/";
 globals.renderTopic = globals.outputTopic + "#";
 globals.camName = "";
 globals.activeSpeaker = "";
@@ -1041,4 +1041,3 @@ AFRAME.registerComponent("ttl", {
         }
     }
 })
-
