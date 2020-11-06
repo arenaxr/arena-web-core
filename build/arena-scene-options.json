@@ -163,8 +163,8 @@
                  "y":1,
                  "z":1
               },
-               "title":"Ground Dimentions",
-               "description":"Ground dimentions (in meters)."
+               "title":"Ground Dimensions",
+               "description":"Ground dimensions (in meters)."
             },
             "groundYScale":{
                "type":"number",
