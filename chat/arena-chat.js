@@ -62,10 +62,10 @@ export default class ARENAChat {
 		this.settings.subscribePublicTopic = this.settings.realm + this.publicTopicPrefix + "#";
 
 		// send private messages to a user (publish only)
-		this.settings.publishPrivateTopic = this.settings.realm + this.privateTopicPrefix + "{to_uid}/" + this.settings.userid + this.settings.username.replace(/[^0-9a-zA-Z]/g, "");
+		this.settings.publishPrivateTopic = this.settings.realm + this.privateTopicPrefix + "{to_uid}/" + this.settings.userid + btoa(this.settings.username);
 
 		// send open messages (chat keepalive, messages to all/scene) (publish only)
-		this.settings.publishPublicTopic = this.settings.realm + this.publicTopicPrefix + this.settings.userid + this.settings.username.replace(/[^0-9a-zA-Z]/g, "");
+		this.settings.publishPublicTopic = this.settings.realm + this.publicTopicPrefix + this.settings.userid + btoa(this.settings.username);
 
 		// counter for unread msgs
 		this.unreadMsgs = 0;
@@ -392,8 +392,8 @@ export default class ARENAChat {
 		if (msg.from_uid == this.settings.userid) return;
 
 		// ignore spoofed messages
-		if (!mqttMsg.destinationName === this.settings.realm + this.privateTopicPrefix + this.settings.userid + "/" + msg.from_uid + msg.from_un.replace(/[^0-9a-zA-Z]/g, ""))
-			if (!mqttMsg.destinationName === this.settings.realm + this.publicTopicPrefix + msg.from_uid + msg.from_un.replace(/[^0-9a-zA-Z]/g, "")) return;
+		if (!mqttMsg.destinationName === this.settings.realm + this.privateTopicPrefix + this.settings.userid + "/" + msg.from_uid + btoa(msg.from_un))
+			if (!mqttMsg.destinationName === this.settings.realm + this.publicTopicPrefix + msg.from_uid + btoa(msg.from_un)) return;
 
 		// save user data and timestamp
 		if (this.liveUsers[msg.from_uid] == undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
