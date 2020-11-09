@@ -1,0 +1,23 @@
+{
+  "name": "ARENAChat",
+  "version": "1.0.0",
+  "description": "ARENA VR Chat",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel index.html",
+    "build": "parcel build index.js --public-url ./chat",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "browserslist": [
+    "last 2 Chrome versions, last 2 Firefox versions, last 2 Safari versions, last 2 Edge versions"
+  ],
+  "dependencies": {
+    "jquery": "^3.5.1",
+    "linkifyjs": "^2.1.9",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  }
+}
