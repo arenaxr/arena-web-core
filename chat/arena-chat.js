@@ -12,6 +12,9 @@ function uuidv4() {
 
 export default class ARENAChat {
 
+  publicTopicPrefix="/g/c/o/";
+	privateTopicPrefix="/g/c/p/";
+
 	constructor(st) {
 		// handle default this.settings
 		st = st || {};
@@ -39,8 +42,8 @@ export default class ARENAChat {
 				- global public (*o*pen) topic (gtopic; realm/g/c/o/#)
 				- a user (*p*rivate) topic (utopic; realm/g/c/p/userid/#)
 			Clients write always to a topic with its own userid:
-  			 - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-userid]/userid)
-				 - a global topic (ugtopic; realm/g/c/o/userid);
+  			 - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-userid]/userid+username)
+				 - a global topic (ugtopic; realm/g/c/o/userid+username);
 
 			Note: topic must always end with userid and match from_uid in the message (check on client at receive, and/or on publish at pubsub server)
 			Note: scene-only messages are sent to public topic and filtered at the client
@@ -48,21 +51,21 @@ export default class ARENAChat {
 			Summary of topics/permissions:
 			 subscribePrivateTopic  - receive private messages (realm/g/c/p/userid/#): Read
 			 subscribePublicTopic  - receive open messages to everyone and/or scene (realm/g/c/o/#): Read
-			 publishPrivateTopic - send private messages to a user (realm/g/c/p/[regex-matching-any-userid]/userid): Write
-			 publishPublicTopic - send open messages (chat keepalive, messages to all/scene) (realm/g/c/o/userid): Write
+			 publishPrivateTopic - send private messages to a user (realm/g/c/p/[regex-matching-any-userid]/userid+username): Write
+			 publishPublicTopic - send open messages (chat keepalive, messages to all/scene) (realm/g/c/o/userid+username): Write
 		*/
 
 		// receive private messages  (subscribe only)
-		this.settings.subscribePrivateTopic = this.settings.realm + "/g/c/p/" + this.settings.userid + "/#";
+		this.settings.subscribePrivateTopic = this.settings.realm + this.privateTopicPrefix + this.settings.userid + "/#";
 
 		// receive open messages to everyone and/or scene (subscribe only)
-		this.settings.subscribePublicTopic = this.settings.realm + "/g/c/o/#";
+		this.settings.subscribePublicTopic = this.settings.realm + this.publicTopicPrefix + "#";
 
 		// send private messages to a user (publish only)
-		this.settings.publishPrivateTopic = this.settings.realm + "/g/c/p/{to_uid}/" + this.settings.userid;
+		this.settings.publishPrivateTopic = this.settings.realm + this.privateTopicPrefix + "{to_uid}/" + this.settings.userid + this.settings.username.replace(/[^0-9a-zA-Z]/g, "");
 
 		// send open messages (chat keepalive, messages to all/scene) (publish only)
-		this.settings.publishPublicTopic = this.settings.realm + "/g/c/o/" + this.settings.userid;
+		this.settings.publishPublicTopic = this.settings.realm + this.publicTopicPrefix + this.settings.userid + this.settings.username.replace(/[^0-9a-zA-Z]/g, "");
 
 		// counter for unread msgs
 		this.unreadMsgs = 0;
@@ -318,7 +321,7 @@ export default class ARENAChat {
 		else willMessage.destinationName = this.settings.subscribePublicTopic;
 		this.mqttc.connect({
 			onSuccess: () => {
-				console.info("Chat connected. Subscribing to:", this.settings.subscribePublicTopic, this.settings.subscribePrivateTopic);
+				console.info("Chat connected. Subscribing to:", this.settings.subscribePublicTopic, ";", this.settings.subscribePrivateTopic);
 				this.mqttc.subscribe(this.settings.subscribePublicTopic);
 				this.mqttc.subscribe(this.settings.subscribePrivateTopic);
 
@@ -361,7 +364,7 @@ export default class ARENAChat {
 			type: "chat",
 			to_uid: this.toSel.value,
 			from_uid: this.settings.userid,
-			from_un: decodeURI(this.settings.username),
+			from_un: this.settings.username,
 			from_scene: this.settings.scene,
 			from_desc: decodeURI(this.settings.username) + " (" + this.toSel.options[this.toSel.selectedIndex].text + ") " + new Date().toLocaleTimeString(),
 			cameraid: this.settings.cameraid,
@@ -389,7 +392,8 @@ export default class ARENAChat {
 		if (msg.from_uid == this.settings.userid) return;
 
 		// ignore spoofed messages
-		mqttMsg.destinationName.endsWith(msg.from_uid);
+		if (!mqttMsg.destinationName === this.settings.realm + this.privateTopicPrefix + this.settings.userid + "/" + msg.from_uid + msg.from_un.replace(/[^0-9a-zA-Z]/g, ""))
+			if (!mqttMsg.destinationName === this.settings.realm + this.publicTopicPrefix + msg.from_uid + msg.from_un.replace(/[^0-9a-zA-Z]/g, "")) return;
 
 		// save user data and timestamp
 		if (this.liveUsers[msg.from_uid] == undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
