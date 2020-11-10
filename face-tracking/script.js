@@ -8,7 +8,7 @@ ARENA.FaceTracker = (function () {
 
     let prevJSON = null;
 
-    let frames = 0, framesToSkip = 15;
+    let frames = 0, framesToSkip = 1;
     let displayBbox = false, flipped = false;
     let vidStream = null;
     let loadingTimer = null;

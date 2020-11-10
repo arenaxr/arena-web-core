@@ -1,5 +1,6 @@
 const defaults = {
-     updateMillis:100,
+     realm: "realm",
+     updateMillis:200,
      scenenameParam:"render",
      userParam:"X",
      startCoords:"0,1.6,0",

@@ -1,0 +1,28 @@
+name: SSH Deploy
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ssh deploy
+        #if: endsWith( github.ref, 'deploy') # run for branches or tags ending with 'deploy'
+        uses: appleboy/ssh-action@master
+        env:
+          TARGET: ${{ secrets.DEPLOY_TARGET }}
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          envs: TARGET
+          script: |
+             cd  $TARGET
+             git checkout master
+             git pull
+             cd ..
+             git add ARENA-core
+             git commit -m "Updated ARENA-core submodule to latest commit"
+             git push

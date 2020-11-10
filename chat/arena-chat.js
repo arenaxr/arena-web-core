@@ -1,5 +1,5 @@
-import './linkify.min.js';
-import './linkify-string.min.js';
+import linkify from 'linkifyjs';
+import linkifyStr from 'linkifyjs/string';
 
 var mqttc;
 
@@ -10,7 +10,10 @@ function uuidv4() {
 	);
 }
 
-export default class MQTTChat {
+export default class ARENAChat {
+
+  publicTopicPrefix="/g/c/o/";
+	privateTopicPrefix="/g/c/p/";
 
 	constructor(st) {
 		// handle default this.settings
@@ -21,9 +24,9 @@ export default class MQTTChat {
 			username: st.username !== undefined ? st.username : "chat-dft-username",
 			realm: st.realm !== undefined ? st.realm : "realm",
 			scene: st.scene !== undefined ? st.scene : "render",
-			persist_uri: st.persist_uri !== undefined ? st.persist_uri : location.protocol + '//' + location.hostname+(location.port ? ":"+location.port : "")+"/persist/",
+			persist_uri: st.persist_uri !== undefined ? st.persist_uri : location.protocol + '//' + location.hostname+(location.port ? ":"+location.port : "") + "/persist/",
 			keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
-			mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://spatial.andrew.cmu.edu/mqtt/",
+			mqtt_host: st.mqtt_host !== undefined ? st.mqtt_host : "wss://" + location.hostname+(location.port ? ":"+location.port : "") + "/mqtt/",
 			mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
 			mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
 		}
@@ -34,14 +37,35 @@ export default class MQTTChat {
 		// cleanup userlist periodically
 		setInterval(this.userCleanup.bind(this), this.settings.keepalive_interval_ms * 3);
 
-		// scene chat topic from realm and scene
-		this.settings.ctopic = this.settings.realm + "/s/" + this.settings.scene + "/c/";
+		/*
+	    Clients listen for chat messages on:
+				- global public (*o*pen) topic (gtopic; realm/g/c/o/#)
+				- a user (*p*rivate) topic (utopic; realm/g/c/p/userid/#)
+			Clients write always to a topic with its own userid:
+  			 - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-userid]/userid+username)
+				 - a global topic (ugtopic; realm/g/c/o/userid+username);
 
-		// "all"/global topic from realm
-		this.settings.atopic = this.settings.realm + "/g/c/";
+			Note: topic must always end with userid and match from_uid in the message (check on client at receive, and/or on publish at pubsub server)
+			Note: scene-only messages are sent to public topic and filtered at the client
 
-		// user topic from realm and user id
-		this.settings.utopic = this.settings.realm + "/g/c/" + this.settings.userid;
+			Summary of topics/permissions:
+			 subscribePrivateTopic  - receive private messages (realm/g/c/p/userid/#): Read
+			 subscribePublicTopic  - receive open messages to everyone and/or scene (realm/g/c/o/#): Read
+			 publishPrivateTopic - send private messages to a user (realm/g/c/p/[regex-matching-any-userid]/userid+username): Write
+			 publishPublicTopic - send open messages (chat keepalive, messages to all/scene) (realm/g/c/o/userid+username): Write
+		*/
+
+		// receive private messages  (subscribe only)
+		this.settings.subscribePrivateTopic = this.settings.realm + this.privateTopicPrefix + this.settings.userid + "/#";
+
+		// receive open messages to everyone and/or scene (subscribe only)
+		this.settings.subscribePublicTopic = this.settings.realm + this.publicTopicPrefix + "#";
+
+		// send private messages to a user (publish only)
+		this.settings.publishPrivateTopic = this.settings.realm + this.privateTopicPrefix + "{to_uid}/" + this.settings.userid + btoa(this.settings.username);
+
+		// send open messages (chat keepalive, messages to all/scene) (publish only)
+		this.settings.publishPublicTopic = this.settings.realm + this.publicTopicPrefix + this.settings.userid + btoa(this.settings.username);
 
 		// counter for unread msgs
 		this.unreadMsgs = 0;
@@ -245,8 +269,8 @@ export default class MQTTChat {
 			})
 			.then((sendMute) => {
 			  if (sendMute) {
-					// send to scene topic
-		  		_this.cmdMsg(_this.settings.ctopic, "sound:off");
+					// send to all scene topic
+		  		_this.ctrlMsg("scene", "sound:off");
 			  }
 			});
   	}
@@ -274,6 +298,10 @@ export default class MQTTChat {
 		this.populateLandmarkList();
 	}
 
+  getUserList() {
+		return this.liveUsers;
+	}
+
 	async connect(force = false) {
 		if (this.connected == true && force == false) return;
 		this.mqttc = new Paho.Client(this.settings.mqtt_host, "chat-" + this.settings.userid);
@@ -282,29 +310,33 @@ export default class MQTTChat {
 		let msg = {
 			object_id: uuidv4(),
 			type: "chat-ctrl",
+			to_uid: "all",
 			from_uid: this.settings.userid,
 			from_un: this.settings.username,
 			from_scene: this.settings.scene,
 			text: "left"
 		}
 		let willMessage = new Paho.Message(JSON.stringify(msg));
-		willMessage.destinationName = this.settings.atopic;
+		if (this.settings.subscribePublicTopic.slice(-1) == "#") willMessage.destinationName = this.settings.subscribePublicTopic.slice(0, -1); // remove final '#'
+		else willMessage.destinationName = this.settings.subscribePublicTopic;
 		this.mqttc.connect({
 			onSuccess: () => {
-				console.log("Chat connected.");
-				this.mqttc.subscribe(this.settings.ctopic);
-				this.mqttc.subscribe(this.settings.atopic);
-				this.mqttc.subscribe(this.settings.utopic);
+				console.info("Chat connected. Subscribing to:", this.settings.subscribePublicTopic, ";", this.settings.subscribePrivateTopic);
+				this.mqttc.subscribe(this.settings.subscribePublicTopic);
+				this.mqttc.subscribe(this.settings.subscribePrivateTopic);
 
 				this.mqttc.onConnectionLost = this.onConnectionLost.bind(_this);
 				this.mqttc.onMessageArrived = this.onMessageArrived.bind(_this);
 
+				// say hello to everyone
 				this.keepalive(false);
 
 				// periodically send a keep alive
-				setInterval(function () {
-					_this.keepalive(true);
+				if (this.keepaliveInterval != undefined) clearInterval(this.keepaliveInterval);
+				this.keepaliveInterval = setInterval(function () {
+						_this.keepalive(true);
 				}, this.settings.keepalive_interval_ms);
+
 				this.connected = true;
 			},
 			onFailure: () => {
@@ -330,14 +362,15 @@ export default class MQTTChat {
 		let msg = {
 			object_id: uuidv4(),
 			type: "chat",
+			to_uid: this.toSel.value,
 			from_uid: this.settings.userid,
-			from_un: decodeURI(this.settings.username),
+			from_un: this.settings.username,
 			from_scene: this.settings.scene,
 			from_desc: decodeURI(this.settings.username) + " (" + this.toSel.options[this.toSel.selectedIndex].text + ") " + new Date().toLocaleTimeString(),
 			cameraid: this.settings.cameraid,
 			text: msgTxt
 		}
-		let dstTopic = (this.toSel.value == "scene") ? this.settings.ctopic : (this.toSel.value == "all") ? this.settings.atopic : this.settings.realm + "/g/c/" + this.toSel.value;
+		let dstTopic = (this.toSel.value == "scene" || this.toSel.value == "all") ? this.settings.publishPublicTopic : this.settings.publishPrivateTopic.replace("{to_uid}", this.toSel.value);
 		//console.log("sending", msg, "to", dstTopic);
 		this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
 		this.txtAddMsg(msg.text, msg.from_desc, "self");
@@ -350,10 +383,17 @@ export default class MQTTChat {
 			msg = JSON.parse(mqttMsg.payloadString);
 		} catch (err) {
 			console.error("Error parsing chat msg.");
+			return;
 		}
 
-    // ignore our messages
+    // ignore invalid and our own messages
+		if (msg.from_uid == undefined) return;
+		if (msg.to_uid == undefined) return;
 		if (msg.from_uid == this.settings.userid) return;
+
+		// ignore spoofed messages
+		if (!mqttMsg.destinationName === this.settings.realm + this.privateTopicPrefix + this.settings.userid + "/" + msg.from_uid + btoa(msg.from_un))
+			if (!mqttMsg.destinationName === this.settings.realm + this.publicTopicPrefix + msg.from_uid + btoa(msg.from_un)) return;
 
 		// save user data and timestamp
 		if (this.liveUsers[msg.from_uid] == undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
@@ -369,7 +409,7 @@ export default class MQTTChat {
 			this.liveUsers[msg.from_uid].un = msg.from_un;
 			this.liveUsers[msg.from_uid].scene = msg.from_scene;
 			this.liveUsers[msg.from_uid].cid = msg.cameraid;
-			this.liveUsers[msg.from_uid].ts = new Date();
+			this.liveUsers[msg.from_uid].ts = new Date().getTime();
 			if (msg.text) {
 				if (msg.text == "left") {
 					delete this.liveUsers[msg.from_uid];
@@ -379,9 +419,9 @@ export default class MQTTChat {
 		}
 
 		// process commands
-		if (msg.type == "chat-cmd") {
+		if (msg.type == "chat-ctrl") {
 			if (msg.text == "sound:off") {
-        console.log("muteAudio");
+        //console.log("muteAudio");
 				let abtn = document.getElementById('btn-audio-off');
 				if (abtn == undefined) {
 					console.error("Could not find audio button");
@@ -395,8 +435,12 @@ export default class MQTTChat {
 			return;
 		}
 
-		// only proceed for chat messages
+		// only proceed for chat messages sent to us or to all
 		if (msg.type !== "chat") return;
+		if (msg.to_uid !== this.settings.userid && msg.to_uid !== "all" && msg.to_uid !== "scene") return;
+
+		// drop messages to scenes different from our scene
+		if (msg.to_uid === "scene" && msg.from_scene != this.settings.scene) return
 
 		this.txtAddMsg(msg.text, msg.from_desc, "other");
 
@@ -420,16 +464,18 @@ export default class MQTTChat {
 		let host = window.location.host.replace(".", "\\.");
 		let pattern = `${host}(.*scene=.*|\\/\n|\\/$)`;
 		let regex = new RegExp(pattern);
-		if (msg.match(regex)) {
+
+		if (msg.match(regex) != null) {
 			// no new tab if we have a link to an arena scene
-			msgSpan.innerHTML = msg.linkify({
+			msg = msg.linkify({
 				target: "_parent"
 			});
 		} else {
-			msgSpan.innerHTML = msg.linkify({
+			msg = msg.linkify({
 				target: "_blank"
 			});
 		}
+		msgSpan.innerHTML = msg;
 		this.msgList.appendChild(msgSpan);
 
 		// scroll to bottom
@@ -492,14 +538,13 @@ export default class MQTTChat {
 									_this.displayAlert("Anonymous users may not mute others.", 3000);
 									return;
 					}
-	  			// target user topic
-	  			let tutopic = _this.settings.realm + "/g/c/" + user.uid;
-	  			_this.cmdMsg(tutopic, "sound:off");
+	  			// message to target user
+	  			_this.ctrlMsg(user.uid, "sound:off");
 	  		}
 			}
   		let op = document.createElement("option");
   		op.value = user.uid;
-  		op.innerHTML = "to user: " + decodeURI(user.un);
+  		op.innerHTML = "to: " + decodeURI(user.un) + ((user.scene != _this.settings.scene) ? " ("+user.scene+")":"");
   		_this.toSel.appendChild(op);
   		_this.usersList.appendChild(uli);
   	});
@@ -526,7 +571,7 @@ export default class MQTTChat {
 
     } catch (err) {
 			  console.error("Could not fetch landmarks from persist!")
-        console.log(err);
+        console.error(err);
         return;
     }
 
@@ -556,53 +601,47 @@ export default class MQTTChat {
 
 			_this.lmList.appendChild(uli);
 		});
-
 	}
 
 	addToSelOptions() {
 		let op = document.createElement("option");
 		op.value = "scene";
-		op.innerHTML = "to scene: " + this.settings.scene;
+		op.innerHTML = "to: scene " + this.settings.scene;
 		this.toSel.appendChild(op);
 
 		op = document.createElement("option");
 		op.value = "all";
-		op.innerHTML = "to all scenes";
+		op.innerHTML = "to: all scenes";
 		this.toSel.appendChild(op);
 	}
 
 	keepalive(tryconnect = false) {
+		this.ctrlMsg("all", "keepalive", tryconnect);
+	}
+
+	ctrlMsg(to, text, tryconnect = false) {
 		// re-establish connection, in case client disconnected
 		if (tryconnect) this.connect();
 
+    let dstTopic;
+		if (to === "all" || to === "scene") {
+			dstTopic = this.settings.publishPublicTopic; // public messages
+		} else {
+			// replace '{to_uid}' for the 'to' value
+			dstTopic = this.settings.publishPrivateTopic.replace("{to_uid}", to);
+		}
 		let msg = {
 			object_id: uuidv4(),
 			type: "chat-ctrl",
-			from_uid: this.settings.userid,
-			from_un: this.settings.username,
-			from_scene: this.settings.scene,
-			cameraid: this.settings.cameraid,
-			text: "keepalive"
-		}
-		//console.log("keep alive:", msg, "to", this.settings.atopic);
-		this.mqttc.send(this.settings.atopic, JSON.stringify(msg), 0, false);
-	}
-
-	cmdMsg(toTopic, text, tryconnect = false) {
-		// re-establish connection, in case client disconnected
-		if (tryconnect) this.connect();
-
-		let msg = {
-			object_id: uuidv4(),
-			type: "chat-cmd",
+			to_uid: to,
 			from_uid: this.settings.userid,
 			from_un: this.settings.username,
 			from_scene: this.settings.scene,
 			cameraid: this.settings.cameraid,
 			text: text
 		}
-		console.log("cmd", msg, "to", toTopic);
-		this.mqttc.send(toTopic, JSON.stringify(msg), 0, false);
+		//console.log("ctrl", msg, "to", dstTopic);
+		this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
 	}
 
 	userCleanup() {
@@ -656,7 +695,7 @@ export default class MQTTChat {
 	}
 
 	moveToFrontOfCamera(cameraId, scene) {
-		console.log("Move to near camera:", cameraId);
+		//console.log("Move to near camera:", cameraId);
 
 		if (scene !== this.settings.scene) {
 			localStorage.setItem('moveToFrontOfCamera', cameraId);
