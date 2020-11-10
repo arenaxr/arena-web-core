@@ -14,7 +14,6 @@ const loadArena = (urlToLoad, position, rotation) => {
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
-    window.pendingModules = [];
     xhr.responseType = 'json';
     xhr.send();
     let deferredObjects = [];
@@ -27,16 +26,15 @@ const loadArena = (urlToLoad, position, rotation) => {
             let l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
                 let obj = arenaObjects[i];
-                // program ? TODO: check object type instead
-                if (obj.attributes.filename) {
+                if (obj.type == "program") {
                     let pobj = {
                         "object_id": obj.object_id,
                         "action": "create",
                         "type": "program",
                         "data": obj.attributes
                     }
-
-                    window.pendingModules.push(pobj);
+                    // ask runtime manager to start this program
+                    ARENA.RuntimeManager.createModule(pobj);
                     continue;
                 }
                 if (obj.object_id === globals.camName) {
@@ -200,6 +198,17 @@ window.addEventListener('onauth', function (e) {
         mqtt_username: globals.username,
         mqtt_token: globals.mqttToken
     });
+
+    // init runtime manager
+    ARENA.RuntimeManager.init({
+      mqtt_uri: globals.mqttParam ,
+      onInitCallback: function () {
+        console.log("Runtime init done.");
+      },
+      name: "rt-"+Math.round(Math.random() * 10000)+"-"+globals.username,
+      dbg: false
+    });
+
 });
 
 var oldMsg = '';
