@@ -1,0 +1,91 @@
+html,
+body {
+    font-family: "Lato", sans-serif;
+}
+
+#cy {
+    height: 100%;
+    width: 100%;
+    background-color: #111;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: -1;
+}
+
+#container {
+    overflow: hidden;
+}
+
+.timeButton {
+    margin: 5px;
+    width: 40px;
+    height: 40px;
+    padding: 5px 5px 5px 5px;
+    text-decoration: none;
+    font-size: 15px;
+    background-color: #bbbbbb;
+    text-align: center;
+    display: inline-block;
+    outline: none;
+    border-radius: 10px;
+    border: 0;
+    cursor: pointer;
+}
+
+.timeButton:active,
+.timeButton:hover {
+  background-color: #999999;
+}
+
+.info {
+    margin: 20px;
+    height: 50px;
+    text-align: center;
+    color: white;
+    position: fixed;
+}
+
+#uptodate {
+    display:none;
+}
+
+.refreshSpinner label {
+    display: block;
+}
+
+.refreshSpinner > div {
+    background-color: white;
+    height: 100%;
+    width: 6px;
+    display: inline-block;
+
+    -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+    animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+
+.refreshSpinner .rect2 {
+    -webkit-animation-delay: -1.1s;
+    animation-delay: -1.1s;
+}
+
+.refreshSpinner .rect3 {
+    -webkit-animation-delay: -1.0s;
+    animation-delay: -1.0s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+    0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+    20% { -webkit-transform: scaleY(1.0) }
+}
+
+@keyframes sk-stretchdelay {
+    0%, 40%, 100% {
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+        }
+    20% {
+        transform: scaleY(1.0);
+        -webkit-transform: scaleY(1.0);
+    }
+}
