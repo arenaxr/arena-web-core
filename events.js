@@ -179,6 +179,8 @@ AFRAME.registerComponent('video-control', {
 	var data = this.data;
 	var theID = data.video_object;
 	var videoPath = data.video_path;
+	var anyoneClicks = data.anyone_clicks;
+	var videoLoop = data.video_loop;
 	var frameSrc = "images/conix-face.white.jpg"; // default
 	if (data.frame_object)
 	    frameSrc = data.frame_object;
@@ -190,7 +192,7 @@ AFRAME.registerComponent('video-control', {
 	this.videoNum = this.el.id;
 	const videoId = this.videoNum+"_videoId";;
 	theAssets.append(
-	    `<video id='${videoId}' src='${videoPath}' autoplay loop='false'/>`
+	    `<video id='${videoId}' src='${videoPath}' autoplay loop='${videoLoop}'/>`
 	    //`<a-entity id='${videoId}' src='${videoPath}' muted='true' loop='false'/>`
 	);
 
@@ -210,7 +212,7 @@ AFRAME.registerComponent('video-control', {
 	thevideo.pause(); // start the video as paused initially or else audio will play when video is not shown!
 
 	this.el.addEventListener('mousedown', function(evt) {
-	    if (evt.detail.clicker == globals.camName) {
+	    if (evt.detail.clicker == globals.camName || anyoneClicks && evt.detail.clicker && (evt.detail.clicker != globals.camName)) {
 		var theSource = thePlayer.getAttribute('arenaVideo');
 		var theVideoId = thePlayer.getAttribute('videoId');
 		var theFrameId = thePlayer.getAttribute('frameId');
