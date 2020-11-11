@@ -16,6 +16,7 @@ const loadArena = (urlToLoad, position, rotation) => {
 
     window.pendingModules = [];
     xhr.responseType = 'json';
+    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
     let deferredObjects = [];
     let Parents = {};
@@ -95,6 +96,7 @@ const unloadArena = (urlToLoad) => {
     else xhr.open('GET', globals.persistenceUrl);
 
     xhr.responseType = 'json';
+    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
 
     xhr.onload = () => {
@@ -130,6 +132,7 @@ const loadScene = () => {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", globals.persistenceUrl+"?type=scene-options");
     xhr.responseType = "json";
+    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
     xhr.onload = () => {
         if (xhr.status !== 200) {
