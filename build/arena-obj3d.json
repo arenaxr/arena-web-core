@@ -567,9 +567,9 @@
                   }
                },
                "required":[
-                  "dest",
-                  "on",
-                  "url"
+                  "video_object",
+                  "frame_object",
+                  "video_path"
                ]
             },
             "parent":{
