@@ -6,4 +6,4 @@
 	url = https://github.com/AprilRobotics/apriltag.git
 [submodule "models"]
 	path = models
-	url = https://github.com/conix-center/ARENA-core-models/
+	url = git@github.com:conix-center/ARENA-core-models.git
