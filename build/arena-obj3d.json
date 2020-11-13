@@ -520,68 +520,80 @@
                "description":"Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
                "type":"string"
             },
-            "type":{
-               "title":"Light:Type",
-               "type":"string",
-               "enum":[
-                  "ambient",
-                  "directional",
-                  "hemisphere",
-                  "point",
-                  "spot"
-               ],
-               "description":"Applicable to objects of type 'light' only. One of ambient, directional, hemisphere, point, spot.",
-               "default":"directional"
-            },
-            "color":{
-               "title":"Light:Color",
-               "type":"string",
-               "format":"color",
-               "title":"color",
-               "default":"#ffffff",
-               "description":"Applicable to objects of type 'light' only. Light color."
-            },
-            "intensity":{
-               "title":"Light:Intensity",
-               "type":"number",
-               "description":"Applicable to objects of type 'light' only. Light strength."
-            },
-            "groundColor":{
-               "title":"Light:Ground Color",
-               "type":"string",
-               "format":"color",
-               "default":"#ffffff",
-               "description":"Applicable to objects of type 'light' only. Light color from below. NOTE: Hemisphere light only"
-            },
-            "decay":{
-               "title":"Light:Decay",
-               "type":"number",
-               "description":"Applicable to objects of type 'light' only. Amount the light dims along the distance of the light. NOTE: Point and Spot light only.",
-               "default":1.0
-            },
-            "distance":{
-               "title":"Light:Distance",
-               "type":"number",
-               "description":"Applicable to objects of type 'light' only. Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light only.",
-               "default":0.0
-            },
-            "angle":{
-               "title":"Light:Angle",
-               "type":"number",
-               "description":"Applicable to objects of type 'light' only. Maximum extent of spot light from its direction (in degrees). NOTE: Spot light only.",
-               "default":60
-            },
-            "penumbra":{
-               "title":"Light:Penumbra",
-               "type":"number",
-               "description":"Applicable to objects of type 'light' only. Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light only.",
-               "default":0.0
-            },
-            "target":{
-               "title":"Light:Target",
+            "light":{
                "type":"object",
-               "description":"Applicable to objects of type 'light' only. Element the spot should point to. Set to null to transform spotlight by orientation, pointing to it’s -Z axis. NOTE: Spot light type only.",
-               "default":null
+               "title":"Light",
+               "description":"Defines the entity as a source of light.",
+               "properties":{
+                  "type":{
+                     "title":"Type",
+                     "type":"string",
+                     "enum":[
+                        "ambient",
+                        "directional",
+                        "hemisphere",
+                        "point",
+                        "spot"
+                     ],
+                     "description":"One of ambient, directional, hemisphere, point, spot.",
+                     "default":"directional"
+                  },
+                  "color":{
+                     "title":"Color",
+                     "type":"string",
+                     "format":"color",
+                     "title":"color",
+                     "default":"#ffffff",
+                     "description":"Light color."
+                  },
+                  "intensity":{
+                     "title":"Intensity",
+                     "type":"number",
+                     "description":"Light strength."
+                  },
+                  "groundColor":{
+                     "title":"Ground Color",
+                     "type":"string",
+                     "format":"color",
+                     "title":"Ground color",
+                     "default":"#ffffff",
+                     "description":"Light color from below. NOTE: Hemisphere light type only"
+                  },
+                  "decay":{
+                     "title":"Decay",
+                     "type":"number",
+                     "description":"Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
+                     "default":1.0
+                  },
+                  "distance":{
+                     "title":"Distance",
+                     "type":"number",
+                     "description":"Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
+                     "default":0.0
+                  },
+                  "angle":{
+                     "title":"Angle",
+                     "type":"number",
+                     "description":"Maximum extent of spot light from its direction (in degrees). NOTE: Spot light type only.",
+                     "default":60
+                  },
+                  "penumbra":{
+                     "title":"Penumbra",
+                     "type":"number",
+                     "description":"Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
+                     "default":0.0
+                  },
+                  "target":{
+                     "title":"Target",
+                     "type":"object",
+                     "description":"element the spot should point to. set to null to transform spotlight by orientation, pointing to it’s -Z axis. NOTE: Spot light type only.",
+                     "default":null
+                  }
+               },
+               "required":[
+                  "type",
+                  "color"
+               ]
             }
          },
          "required":[
