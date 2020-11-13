@@ -156,8 +156,11 @@
                      "default":"front"
                   },
                   "color":{
-                     "type":"color",
-                     "description":"Base diffuse color."
+                    "type":"string",
+                    "format":"color",
+                    "title":"color",
+                    "default":"#ffffff",
+                    "description":"Base diffuse color."
                   },
                   "alphaTest":{
                      "type":"number",
@@ -296,7 +299,10 @@
                      "default":"directional"
                   },
                   "color":{
-                     "type":"color",
+                    "type":"string",
+                    "format":"color",
+                    "title":"color",
+                    "default":"#ffffff",
                      "description":"Light color."
                   },
                   "intensity":{
@@ -304,7 +310,10 @@
                      "description":"Light strength."
                   },
                   "groundColor":{
-                     "type":"color",
+                    "type":"string",
+                    "format":"color",
+                    "title":"Ground color",
+                    "default":"#ffffff",
                      "description":"Light color from below. NOTE: Hemisphere light type only"
                   },
                   "decay":{
@@ -407,8 +416,8 @@
             },
             "sound":{
                "type":"object",
-               "title":"The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the components-position.",
-               "descriptions":"Positional Sound.",
+               "title":"Positional Sound",
+               "description":"The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the components-position.",
                "properties":{
                   "autoplay":{
                      "type":"boolean",
