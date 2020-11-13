@@ -138,36 +138,8 @@
         <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
         <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
 
-        <!-- video example: may autoplay in Firefox, all black in Chrome :-/
-        <a-video src="#vrvideo" position="-3 2 -6"></a-video>
-        <a-box static-body collision-listener sound="poolSize: 8; src: url(https://xr.andrew.cmu.edu/audio/toypiano/Gsharp1.wav); on: collide" id="sound_box" position="0 0.5 -2" scale="0.5 0.5 0.5" >
-        </a-box>
-        -->
-
-        <!--  CONIX BOXES
-          <a-box click-listener env sound id="env_box" position="-1.5 0.5 -2" scale="0.5 0.5 0.5" material="src: images/conix-face-white.jpg; wireframe: true">
-          </a-box>
-          <a-box wireframe click-listener collision-listener load-scene="on: mousedown; url://oz.andrew.cmu.edu/persist/drone; position: 0 0 0" position="1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" material="src: images/conix-face-black.png">
-          </a-box>
-          <a-sphere pointed position="2.5 0.5 -2" rotation="15 15 15" scale="0.5 0.5 0.5" animation="property: rotation; to: 0 360 0; loop:true; dur:10000; easing:linear" id="dots_sphere">
-          </a-sphere>
-        -->
-
-        <!-- demonstrate a clickable box that prompts for input & publishes entered text over MQTT
-          <a-box click-listener prompt-box="on: mousedown; prompt:name_please" position="-1.5 0.5 -2" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" material="src: images/conix-face-white.jpg">
-          </a-box>
-        -->
-        <!-- CONIX cube for debugging click events
-          <a-entity vive-listener click-listener position="1.5 0.5 1" rotation="0 0 0" scale="0.5 0.5 0.5" id="conix_box" name="Box" obj-model="obj: #Cube-obj; mtl: #Cube-mtl">
-          </a-entity>
-          <a-text id="conix_text" position="1.5 1.3 1" side="double" align="center" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
-        -->
         <a-text id="conix_text" value="" position="0 1.3 -1" side="double" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
 
-        <!-- let there be LIGHTS -->
-        <a-light position="-0.93 1.58 -1.14" name="PointLight1" type="point" color="#9090AD" intensity="0.75"></a-light>
-        <a-light position="-0.272 0.39 1.25" name="PointLight2" type="point" color="#C2E6C7"></a-light>
-        <a-light name="AmbientLight" type="ambient" color="#363942"></a-light>
       </a-entity>
     </a-scene>
     <video src="" id="localVideo" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
