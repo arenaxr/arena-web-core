@@ -1,5 +1,4 @@
-//document.addEventListener('DOMContentLoaded', function() {
-window.addEventListener('onauth', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
     var cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
         boxSelectionEnabled: false,
@@ -11,7 +10,7 @@ window.addEventListener('onauth', function(e) {
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'text-wrap': 'wrap',
-                'font-family': 'Courier',
+                'font-family' : 'Courier',
                 'text-outline-width': 0.5
             }
         }, {
@@ -61,7 +60,7 @@ window.addEventListener('onauth', function(e) {
                 "font-size": 3.5,
                 'width': 1.0,
                 'arrow-scale': 0.5,
-                'font-family': 'Courier',
+                'font-family' : 'Courier',
                 'line-color': 'LightGray',
                 'target-arrow-color': 'LightGray',
                 'curve-style': 'bezier',
@@ -73,10 +72,6 @@ window.addEventListener('onauth', function(e) {
         }]
     });
 
-    const brokerAddr = "wss://oz.andrew.cmu.edu/mqtt/";
-    const client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
-    const graphTopic = "$NETWORK";
-
     let prevJSON = [];
     let currIdx = 0;
 
@@ -87,17 +82,29 @@ window.addEventListener('onauth', function(e) {
     let spinnerUpdate = true;
     let paused = false;
 
-    client.onConnectionLost = onConnectionLost;
-    client.onMessageArrived = onMessageArrived;
+    // read defaults from file
+    fetch("./dft-config.json")
+    .then(function (data) {
+        return data.json();
+    })
+    .then(function (json) {
+        var dfts = json;
+        const brokerAddr = dfts.brokerAddr;
+        window.client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
+        window.graphTopic = dfts.graphTopic;
 
-    client.connect({ onSuccess: onConnect });
+        window.client.onConnectionLost = onConnectionLost;
+        window.client.onMessageArrived = onMessageArrived;
+
+        window.client.connect({ onSuccess: onConnect });
+    });
 
     function onConnect() {
         console.log("Connected!");
-        client.subscribe(graphTopic);
-        publish(client, "$NETWORK/latency", "", 2);
+        window.client.subscribe(graphTopic);
+        publish(window.client, window.graphTopic + "/latency", "", 2);
         setInterval(() => {
-            publish(client, "$NETWORK/latency", "", 2);
+            publish(window.client, window.graphTopic + "/latency", "", 2);
         }, 10000);
     }
 
@@ -108,11 +115,7 @@ window.addEventListener('onauth', function(e) {
         spinner.style.display = "none";
         uptodate.style.display = "block";
         uptodate.innerText = "Connection lost. Refresh to try again.";
-        client.connect({
-            onSuccess: onConnect,
-            userName: e.detail.mqtt_username,
-            password: e.detail.mqtt_token,
-        });
+        client.connect({ onSuccess: onConnect });
     }
 
     function publish(client, dest, msg, qos) {
@@ -166,7 +169,7 @@ window.addEventListener('onauth', function(e) {
                     let pubEdge = client["published"][k];
                     let pubEdgeJSON = {};
                     pubEdgeJSON["data"] = {};
-                    pubEdgeJSON["data"]["id"] = "edge_" + (cnt++);
+                    pubEdgeJSON["data"]["id"] = "edge_"+(cnt++);
                     pubEdgeJSON["data"]["bps"] = pubEdge["bps"];
                     pubEdgeJSON["data"]["source"] = client["name"];
                     pubEdgeJSON["data"]["target"] = pubEdge["topic"];
@@ -189,7 +192,7 @@ window.addEventListener('onauth', function(e) {
                 let subEdge = topic["subscriptions"][j];
                 let subEdgeJSON = {};
                 subEdgeJSON["data"] = {};
-                subEdgeJSON["data"]["id"] = "edge_" + (cnt++);
+                subEdgeJSON["data"]["id"] = "edge_"+(cnt++);
                 subEdgeJSON["data"]["bps"] = subEdge["bps"];
                 subEdgeJSON["data"]["source"] = topic["name"];
                 subEdgeJSON["data"]["target"] = subEdge["client"];
@@ -250,8 +253,8 @@ window.addEventListener('onauth', function(e) {
 
     pauseBtn.addEventListener("click", function() {
         paused = !paused;
-        if (currIdx != prevJSON.length - 1) {
-            currIdx = prevJSON.length - 1;
+        if (currIdx != prevJSON.length-1) {
+            currIdx = prevJSON.length-1;
             updateCy(prevJSON[currIdx]);
         }
     });
@@ -261,7 +264,7 @@ window.addEventListener('onauth', function(e) {
         let prevIdx = currIdx;
         currIdx++;
         if (currIdx >= prevJSON.length) {
-            currIdx = prevJSON.length - 1;
+            currIdx = prevJSON.length-1;
             paused = false;
         }
         if (prevIdx != currIdx) {
