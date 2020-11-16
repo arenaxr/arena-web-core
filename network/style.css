@@ -29,6 +29,13 @@ body {
     display: inline-block;
     outline: none;
     border-radius: 10px;
+    border: 0;
+    cursor: pointer;
+}
+
+.timeButton:active,
+.timeButton:hover {
+    background-color: #999999;
 }
 
 .info {
