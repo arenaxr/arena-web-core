@@ -115,7 +115,11 @@ window.addEventListener('onauth', function(e) {
         spinner.style.display = "none";
         uptodate.style.display = "block";
         uptodate.innerText = "Connection lost. Refresh to try again.";
-        client.connect({ onSuccess: onConnect });
+        client.connect({
+            onSuccess: onConnect,
+            userName: e.detail.mqtt_username,
+            password: e.detail.mqtt_token,
+        });
     }
 
     function publish(client, dest, msg, qos) {
