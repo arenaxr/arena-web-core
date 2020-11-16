@@ -20,8 +20,10 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         clientNode: 'http://jitsi.org/jitsimeet'
     };
 
+    // TODO: is this how to p2p.enabled false? https://github.com/jitsi/lib-jitsi-meet/blob/master/doc/API.md
     const confOptions = {
         openBridgeChannel: true,
+        p2p: { enabled: false },
     };
 
     const initOptions = {
