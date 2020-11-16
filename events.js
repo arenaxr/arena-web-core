@@ -164,6 +164,107 @@ var ViveRcamParent = new THREE.Matrix4();
 var ViveRcam = new THREE.Matrix4();
 var ViveRcpi = new THREE.Matrix4();
 
+AFRAME.registerComponent('video-control', {
+    // e.g. <a-entity video-control="videoName: superVideo" ...>
+
+    schema: {
+        videoPath: {
+            type: 'string',
+            default: ""
+        }
+    },
+    multiple: true,
+
+    init: function () {
+	var data = this.data;
+	var theID = data.video_object;
+	var videoPath = data.video_path;
+	var anyoneClicks = data.anyone_clicks;
+	var videoLoop = data.video_loop;
+	var frameSrc = "images/conix-face.white.jpg"; // default
+	if (data.frame_object)
+	    frameSrc = data.frame_object;
+
+	var thePlayer = document.getElementById(theID);
+	var theAssets = $('a-assets');
+	var whoVideo = document.getElementById(videoPath);
+
+	this.videoNum = this.el.id;
+	const videoId = this.videoNum+"_videoId";;
+	theAssets.append(
+	    `<video id='${videoId}' src='${videoPath}' autoplay loop='${videoLoop}'/>`
+	    //`<a-entity id='${videoId}' src='${videoPath}' muted='true' loop='false'/>`
+	);
+
+	const frameId = this.videoNum+"_frameId";;
+	theAssets.append(
+	    `<image id='${frameId}' src='${frameSrc}'/>`
+	);
+	
+	thePlayer.setAttribute('material', 'src', `#${frameId}`);
+
+	// save the video or frozen frame URL as 'frameSrc'
+	thePlayer.setAttribute('arenaVideo', frameSrc);
+	thePlayer.setAttribute('videoId', videoId);
+	thePlayer.setAttribute('frameId', frameId);
+
+	var thevideo = document.getElementById(videoId);
+	thevideo.pause(); // start the video as paused initially or else audio will play when video is not shown!
+
+	this.el.addEventListener('mousedown', function(evt) {
+	    if (evt.detail.clicker == globals.camName || anyoneClicks && evt.detail.clicker && (evt.detail.clicker != globals.camName)) {
+		var theSource = thePlayer.getAttribute('arenaVideo');
+		var theVideoId = thePlayer.getAttribute('videoId');
+		var theFrameId = thePlayer.getAttribute('frameId');
+		//console.log(theSource)
+
+		if (theSource != frameSrc) {
+		    // FRAME
+		    thevideo.pause(); // pause the html video elem ==> pause aframe video elem
+
+		    //thePlayer.setAttribute('material', 'src', `#${frameId}`);
+		    thePlayer.setAttribute('material', 'src', `#${theFrameId}`);
+
+		    thePlayer.setAttribute('arenaVideo', frameSrc);
+		} else {
+		    // VIDEO
+		    //thePlayer.setAttribute('material', 'src', `#${videoId}`);
+		    thePlayer.setAttribute('material', 'src', `#${theVideoId}`);
+
+		    thePlayer.setAttribute('arenaVideo', videoPath);
+		    thevideo.volume = 1; // default is 1; this just demonstrates how to change
+
+		    thevideo.play(); // play the html video elem ==> play aframe video elem
+		}
+	    }
+	});
+    },
+
+    update: function(oldData) {
+        // this in fact only gets called when the component that it is - gets updated
+        // unlike the update method in Unity that gets called every frame
+        var data = this.data; // Component property values.
+        var el = this.el; // Reference to the component's entity.
+    },
+    pause: function() {
+        //this.removeEventListeners()
+    },
+    play: function() {
+        //this.addEventListeners()
+    },
+    // handle component removal (why can't it just go away?)
+    remove: function() {
+        var data = this.data;
+        var el = this.el;
+
+        // remove event listener
+        if (data.event) {
+            el.removeEventListener(data.event, this.eventHandlerFn);
+        }
+    }
+});
+
+
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
     // create a Component variable here & use instead of globals.updateMillis
@@ -579,15 +680,16 @@ AFRAME.registerComponent('collision-listener', {
         //console.log("collision-listener Component init");
         this.el.addEventListener('collide', function(evt) {
 
+            // colliding object, only act if is clients' own
+            const collider = evt.detail.body.el.id;
+            if (collider !== 'my-camera') { return; }
+
             //const coordsData = setClickData(evt);
             const coordsData = {
                 x: 0,
                 y: 0,
                 z: 0
             };
-
-            // colliding object
-            const collider = evt.detail.body.el.id;
 
             // original click event; simply publish to MQTT
             const thisMsg = {
