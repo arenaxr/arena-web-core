@@ -7,7 +7,7 @@
 // Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
 const getSceneName = () => {
     let path = window.location.pathname.substring(1);
-    if (path === '/' || path === '/index.html') {
+    if (path === '' || path === 'index.html') {
         return getUrlParam('scene', defaults.scenenameParam);
     }
     try {
