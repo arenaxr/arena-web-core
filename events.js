@@ -4,12 +4,25 @@
 // and globals
 //'use strict';
 
+// Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
+const getSceneName = () => {
+    let path = window.location.pathname.substring(1);
+    if (path === '/' || path === '/index.html') {
+        return getUrlParam('scene', defaults.scenenameParam);
+    }
+    try {
+        return path.match(/^[^\/]+(\/[^\/]+)?/g)[0];
+    } catch(e) {
+        return getUrlParam('scene', defaults.scenenameParam);
+    }
+};
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
     // TODO(mwfarb): push per scene themes/styles into json scene object
     updateMillis: getUrlParam('camUpdateRate', defaults.updateMillis),
-    scenenameParam: getUrlParam('scene', defaults.scenenameParam), //scene
+    scenenameParam: getSceneName(), //scene
     userParam: getUrlParam('name', defaults.userParam),
     startCoords: getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
     weatherParam: getUrlParam('weather', defaults.weatherParam),
@@ -200,7 +213,7 @@ AFRAME.registerComponent('video-control', {
 	theAssets.append(
 	    `<image id='${frameId}' src='${frameSrc}'/>`
 	);
-	
+
 	thePlayer.setAttribute('material', 'src', `#${frameId}`);
 
 	// save the video or frozen frame URL as 'frameSrc'
