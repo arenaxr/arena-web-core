@@ -34,23 +34,14 @@ if (!storageAvailable('localStorage')) {
 var auth2;
 var signInPath;
 // check if the current user is already signed in
-var authCheck = function (args) {
+var authCheck = function(args) {
     signInPath = args.signInPath;
     switch (localStorage.getItem("auth_choice")) {
         case "anonymous":
             window.addEventListener('load', checkAnonAuth);
             break;
-        case "google":
         default: // default = can mean private browser
-            // normal check for google auth2
-            try {
-                gapi.load('auth2', checkGoogleAuth);
-            } catch (e) {
-                console.error(e);
-                // send login with redirection url from this page
-                localStorage.setItem("request_uri", location.href);
-                location.href = signInPath;
-            }
+            window.addEventListener('load', checkAnonAuth);
             break;
     }
 };
@@ -64,7 +55,7 @@ function checkAnonAuth(event) {
 function checkGoogleAuth() {
     auth2 = gapi.auth2.init({
         client_id: defaults.gAuthClientId
-    }).then(function () {
+    }).then(function() {
         auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
             console.log("User is not signed in.");
@@ -77,7 +68,7 @@ function checkGoogleAuth() {
             var googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
-    }, function (error) {
+    }, function(error) {
         console.error(error);
         // send login with redirection url from this page
         localStorage.setItem("request_uri", location.href);
@@ -139,7 +130,7 @@ function signOut() {
     switch (localStorage.getItem("auth_choice")) {
         case "google":
             var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function () {
+            auth2.signOut().then(function() {
                 console.log('User signed out.');
             });
             auth2.disconnect();
@@ -177,6 +168,22 @@ function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
     }
 }
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
@@ -198,6 +205,8 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
         }
     }
     xhr.open('POST', defaults.urlMqttAuth);
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send(params);
     xhr.responseType = 'json';
