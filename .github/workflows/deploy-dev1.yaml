@@ -27,7 +27,3 @@ jobs:
              cd  $TARGET
              git checkout master
              git pull
-             cd ..
-             git add ARENA-core
-             git commit -m "Updated ARENA-core submodule to latest commit"
-             git push
