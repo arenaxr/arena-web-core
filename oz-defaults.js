@@ -15,6 +15,6 @@ const defaults = {
      mqttPath:["/mqtt/"],
      persistHost:"oz.andrew.cmu.edu",
      persistPath:"/persist/",
-     urlMqttAuth:"https://oz.andrew.cmu.edu:8888",
+     urlMqttAuth:"https://oz.andrew.cmu.edu/user/mqtt_auth",
      gAuthClientId:'173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com'
 };
