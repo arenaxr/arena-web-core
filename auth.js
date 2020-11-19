@@ -7,7 +7,7 @@
 //  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
-//  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
+//  <script type="text/javascript">authCheck({ signInPath: "./user" });</script>
 //
 // Optional:
 //  <script src="./events.js"></script>  <!-- for window.globals -->
