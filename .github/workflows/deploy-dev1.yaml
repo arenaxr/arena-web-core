@@ -27,3 +27,6 @@ jobs:
              cd  $TARGET
              git checkout master
              git pull
+             cd ..
+             ./staging.sh stop arena-web
+             ./staging.sh up --force-recreate -d arena-web
