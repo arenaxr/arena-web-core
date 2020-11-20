@@ -187,12 +187,19 @@ function getCookie(name) {
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    var params = "username=" + mqtt_username + "&id_token=" + id_token;
-    params += `&id_auth=${auth_type}`;
+    var params = "username=" + mqtt_username + `&id_auth=${auth_type}`;
     // provide user control topics for token construction
+    if (typeof defaults !== 'undefined') {
+        if (defaults.realm) {
+            params += "&realm=" + defaults.realm;
+        }
+    }
     if (typeof globals !== 'undefined') {
         if (globals.scenenameParam) {
             params += "&scene=" + globals.scenenameParam;
+        }
+        if (globals.idTag) {
+            params += "&userid=" + globals.idTag;
         }
         if (globals.camName) {
             params += "&camid=" + globals.camName;

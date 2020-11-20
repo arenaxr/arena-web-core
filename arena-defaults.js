@@ -7,6 +7,7 @@ const defaults = {
      themeParam:"starry",
      weatherParam:"none",
      mqttParamZ:"arena.andrew.cmu.edu",
+     screenSharePath:"screenshare",
      fixedCamera:"",
      ATLASurl:"//atlas.conix.io",
      screenSharePath:"screenshare",

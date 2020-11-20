@@ -1,5 +1,5 @@
 const defaults = {
-     realm: "realm",  
+     realm: "realm",
      updateMillis:100,
      scenenameParam:"render",
      userParam:"X",
@@ -7,6 +7,7 @@ const defaults = {
      themeParam:"starry",
      weatherParam:"none",
      mqttParamZ:"oz.andrew.cmu.edu",
+     screenSharePath:"screenshare",
      fixedCamera:"",
      ATLASurl:"//atlas.conix.io",
      screenSharePath:"screenshare",
