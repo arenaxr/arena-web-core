@@ -4,10 +4,9 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
-//  <script type="text/javascript">authCheck({ signInPath: "./user" });</script>
+//  <script type="text/javascript">authCheck({ userRoot: "./user" });</script>
 //
 // Optional:
 //  <script src="./events.js"></script>  <!-- for window.globals -->
@@ -32,10 +31,12 @@ if (!storageAvailable('localStorage')) {
 }
 
 var auth2;
-var signInPath;
+var signInPath, signOutPath;
 // check if the current user is already signed in
 var authCheck = function(args) {
-    signInPath = args.signInPath;
+    localStorage.removeItem("mqtt_token"); // localStorage deprecated for token
+    signInPath = `${args.userRoot}/login`;
+    signOutPath = `${args.userRoot}/logout`;
     switch (localStorage.getItem("auth_choice")) {
         case "anonymous":
             window.addEventListener('load', checkAnonAuth);
@@ -127,23 +128,12 @@ function onSignIn(googleUser) {
 
 function signOut() {
     // logout, and disassociate user
-    switch (localStorage.getItem("auth_choice")) {
-        case "google":
-            var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function() {
-                console.log('User signed out.');
-            });
-            auth2.disconnect();
-            break;
-        default:
-            break;
-    }
     localStorage.removeItem("auth_choice");
     localStorage.removeItem("mqtt_username");
     localStorage.removeItem("mqtt_token");
     // back to signin page
     localStorage.setItem("request_uri", location.href);
-    location.href = signInPath;
+    location.href = signOutPath;
 }
 
 function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
