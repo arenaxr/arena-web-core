@@ -26,17 +26,18 @@
 
 'use strict';
 
+window.AUTH = {}; // auth namespace
+
 if (!storageAvailable('localStorage')) {
     alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
 
-var auth2;
-var signInPath, signOutPath;
-// check if the current user is already signed in
+// check if the current user is already signed in.
 var authCheck = function(args) {
     localStorage.removeItem("mqtt_token"); // localStorage deprecated for token
-    signInPath = `${args.userRoot}/login`;
-    signOutPath = `${args.userRoot}/logout`;
+    requestAuthState(); // prep for later lookup
+    AUTH.signInPath = `${args.userRoot}/login`;
+    AUTH.signOutPath = `${args.userRoot}/logout`;
     switch (localStorage.getItem("auth_choice")) {
         case "anonymous":
             window.addEventListener('load', checkAnonAuth);
@@ -62,7 +63,7 @@ function checkGoogleAuth() {
             console.log("User is not signed in.");
             // send login with redirection url from this page
             localStorage.setItem("request_uri", location.href);
-            location.href = signInPath;
+            location.href = AUTH.signInPath;
         } else {
             console.log("User is already signed in.");
             localStorage.setItem("auth_choice", "google");
@@ -73,7 +74,7 @@ function checkGoogleAuth() {
         console.error(error);
         // send login with redirection url from this page
         localStorage.setItem("request_uri", location.href);
-        location.href = signInPath;
+        location.href = AUTH.signInPath;
     });
 }
 
@@ -117,13 +118,9 @@ function processUserNames(authName, prefix = null) {
 
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
-    console.log('ID: ' + profile.getId());
-    console.log('Full Name: ' + profile.getName());
-    console.log('Email: ' + profile.getEmail());
     processUserNames(profile.getName());
     // request mqtt-auth
-    var id_token = googleUser.getAuthResponse().id_token;
-    verifyMqttToken("google", profile.getEmail(), id_token);
+    verifyMqttToken("google", profile.getEmail());
 }
 
 function signOut() {
@@ -133,10 +130,10 @@ function signOut() {
     localStorage.removeItem("mqtt_token");
     // back to signin page
     localStorage.setItem("request_uri", location.href);
-    location.href = signOutPath;
+    location.href = AUTH.signOutPath;
 }
 
-function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
+function verifyMqttToken(auth_type, mqtt_username) {
     // read current token if any and check
     var mqtt_token = localStorage.getItem("mqtt_token");
     var bad_token = mqtt_token == null;
@@ -152,7 +149,7 @@ function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
         }
     }
     if (bad_token) {
-        requestMqttToken(auth_type, mqtt_username, id_token);
+        requestMqttToken(auth_type, mqtt_username);
     } else {
         completeAuth(mqtt_username, mqtt_token);
     }
@@ -174,7 +171,27 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function requestMqttToken(auth_type, mqtt_username, id_token = null) {
+function requestAuthState() {
+    let xhr = new XMLHttpRequest();
+    xhr.open('POST', `/user/user_state`);
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send();
+    xhr.responseType = 'json';
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            console.error(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+        } else {
+            AUTH.user_type = xhr.response.type;
+            AUTH.user_username = xhr.response.username;
+            AUTH.user_name = xhr.response.name;
+            AUTH.user_email = xhr.response.email;
+        }
+    };
+}
+
+function requestMqttToken(auth_type, mqtt_username) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
     var params = "username=" + mqtt_username + `&id_auth=${auth_type}`;
@@ -201,7 +218,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             params += "&ctrlid2=" + globals.viveRName;
         }
     }
-    xhr.open('POST', defaults.urlMqttAuth);
+    xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -218,7 +235,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
 }
 
 function completeAuth(username, token) {
-    console.log("got mqtt-user/mqtt-token:", username, token);
+    console.log("got mqtt-user/mqtt-token:", username, token); // TODO: remove
     localStorage.setItem("mqtt_username", username);
     localStorage.setItem("mqtt_token", token);
     // mqtt-token must be set to authorize access to MQTT broker
@@ -232,22 +249,12 @@ function completeAuth(username, token) {
 }
 
 function getAuthStatus() {
-    switch (localStorage.getItem("auth_choice")) {
-        case "google":
-            var googleUser = auth2.currentUser.get();
-            var profile = googleUser.getBasicProfile();
-            return {
-                type: "Google",
-                name: profile.getName(),
-                email: profile.getEmail(),
-            };
-        default:
-            return {
-                type: "Anonymous",
-                name: localStorage.getItem("display_name"),
-                email: "N/A",
-            };
-    }
+    return {
+        type: AUTH.user_type,
+        name: AUTH.user_username,
+        name2: AUTH.user_name, // TODO: rename full name
+        email: AUTH.user_email,
+    };
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
