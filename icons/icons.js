@@ -282,7 +282,7 @@ function setupIcons() {
         usernameInput.value = localStorage.getItem("display_name");
         var auth = getAuthStatus();
         authType.innerHTML = auth.type;
-        authName.innerHTML = auth.name;
+        authName.innerHTML = auth.username;
         authEmail.innerHTML = auth.email;
     }
 

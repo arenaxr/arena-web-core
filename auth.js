@@ -185,7 +185,7 @@ function requestAuthState() {
         } else {
             AUTH.user_type = xhr.response.type;
             AUTH.user_username = xhr.response.username;
-            AUTH.user_name = xhr.response.name;
+            AUTH.user_fullname = xhr.response.fullname;
             AUTH.user_email = xhr.response.email;
         }
     };
@@ -251,8 +251,8 @@ function completeAuth(username, token) {
 function getAuthStatus() {
     return {
         type: AUTH.user_type,
-        name: AUTH.user_username,
-        name2: AUTH.user_name, // TODO: rename full name
+        username: AUTH.user_username,
+        fullname: AUTH.user_fullname,
         email: AUTH.user_email,
     };
 }
