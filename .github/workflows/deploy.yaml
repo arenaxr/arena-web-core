@@ -1,4 +1,4 @@
-name: SSH Deploy
+name: ARENA Main SSH Deploy
 on:
   workflow_dispatch:
 
@@ -11,11 +11,11 @@ jobs:
         #if: endsWith( github.ref, 'deploy') # run for branches or tags ending with 'deploy'
         uses: appleboy/ssh-action@master
         env:
-          TARGET: ${{ secrets.DEPLOY_TARGET }}
+          TARGET: ${{ secrets.ARENA_MAIN_DEPLOY_TARGET }}
         with:
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_KEY }}
+          host: ${{ secrets.ARENA_MAIN_DEPLOY_HOST }}
+          username: ${{ secrets.ARENA_MAIN_DEPLOY_USER }}
+          key: ${{ secrets.ARENA_MAIN_DEPLOY_KEY }}
           port: ${{ secrets.DEPLOY_PORT }}
           envs: TARGET
           script: |
@@ -26,3 +26,6 @@ jobs:
              git add ARENA-core
              git commit -m "Updated ARENA-core submodule to latest commit"
              git push
+             ./prod.sh stop arena-web
+             ./prod.sh up --force-recreate -d arena-web
+

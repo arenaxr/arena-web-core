@@ -1,0 +1,32 @@
+name: ARENA Dev Staging SSH Deploy
+on:
+  # Trigger the workflow on push or pull request on master
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ssh deploy
+        uses: appleboy/ssh-action@master
+        env:
+          TARGET: ${{ secrets.ARENA_DEV1_DEPLOY_TARGET }}
+        with:
+          host: ${{ secrets.ARENA_DEV1_DEPLOY_HOST }}
+          username: ${{ secrets.ARENA_DEV1_DEPLOY_USER }}
+          key: ${{ secrets.ARENA_DEV1_DEPLOY_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          envs: TARGET
+          script: |
+             cd  $TARGET
+             git checkout master
+             git pull
+             cd ..
+             ./staging.sh stop arena-web
+             ./staging.sh up --force-recreate -d arena-web
