@@ -34,7 +34,8 @@ if (!storageAvailable('localStorage')) {
 var auth2;
 var signInPath;
 // check if the current user is already signed in
-var authCheck = function (args) {
+var authCheck = function(args) {
+    localStorage.removeItem("mqtt_token"); // deprecate local token storage
     signInPath = args.signInPath;
     switch (localStorage.getItem("auth_choice")) {
         case "anonymous":
@@ -58,13 +59,13 @@ var authCheck = function (args) {
 function checkAnonAuth(event) {
     // prefix all anon users with "anonymous-"
     var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
-    verifyMqttToken("anonymous", anonName);
+    requestMqttToken("anonymous", anonName);
 }
 
 function checkGoogleAuth() {
     auth2 = gapi.auth2.init({
         client_id: defaults.gAuthClientId
-    }).then(function () {
+    }).then(function() {
         auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
             console.log("User is not signed in.");
@@ -77,7 +78,7 @@ function checkGoogleAuth() {
             var googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
-    }, function (error) {
+    }, function(error) {
         console.error(error);
         // send login with redirection url from this page
         localStorage.setItem("request_uri", location.href);
@@ -131,7 +132,7 @@ function onSignIn(googleUser) {
     processUserNames(profile.getName());
     // request mqtt-auth
     var id_token = googleUser.getAuthResponse().id_token;
-    verifyMqttToken("google", profile.getEmail(), id_token);
+    requestMqttToken("google", profile.getEmail(), id_token);
 }
 
 function signOut() {
@@ -139,7 +140,7 @@ function signOut() {
     switch (localStorage.getItem("auth_choice")) {
         case "google":
             var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function () {
+            auth2.signOut().then(function() {
                 console.log('User signed out.');
             });
             auth2.disconnect();
@@ -149,32 +150,9 @@ function signOut() {
     }
     localStorage.removeItem("auth_choice");
     localStorage.removeItem("mqtt_username");
-    localStorage.removeItem("mqtt_token");
     // back to signin page
     localStorage.setItem("request_uri", location.href);
     location.href = signInPath;
-}
-
-function verifyMqttToken(auth_type, mqtt_username, id_token = null) {
-    // read current token if any and check
-    var mqtt_token = localStorage.getItem("mqtt_token");
-    var bad_token = mqtt_token == null;
-    // low-security check for reusable token avoiding unneeded auth backend requests
-    if (!bad_token) {
-        var tokenObj = KJUR.jws.JWS.parse(mqtt_token);
-        // TODO (mwfarb): for now, new cam name requires new token, reevaluate later
-        if (typeof globals !== 'undefined' && globals.camName) {
-            bad_token = true;
-        } else {
-            var now = new Date().getTime() / 1000;
-            bad_token = tokenObj.payloadObj.exp < now;
-        }
-    }
-    if (bad_token) {
-        requestMqttToken(auth_type, mqtt_username, id_token);
-    } else {
-        completeAuth(mqtt_username, mqtt_token);
-    }
 }
 
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
@@ -220,9 +198,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
 }
 
 function completeAuth(username, token) {
-    console.log("got mqtt-user/mqtt-token:", username, token);
     localStorage.setItem("mqtt_username", username);
-    localStorage.setItem("mqtt_token", token);
     // mqtt-token must be set to authorize access to MQTT broker
     const authCompleteEvent = new CustomEvent('onauth', {
         detail: {
