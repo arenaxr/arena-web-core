@@ -130,7 +130,11 @@ window.addEventListener('onauth', async function (e) {
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
-    arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
+    if (defaults && defaults.mqttParamZ) { // prefer deployed custom config
+        arena_host.value = defaults.mqttParamZ;
+    } else {
+        arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
+    }
 
     // Scene config schema
     if (!schema) {
