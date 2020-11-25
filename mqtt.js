@@ -11,11 +11,11 @@ ARENA.mqttClient.onMessageArrived = onMessageArrived;
 // or globals.persistenceUrl if not
 const loadArena = (urlToLoad, position, rotation) => {
     let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
     xhr.responseType = 'json';
-    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
     let deferredObjects = [];
     let Parents = {};
@@ -90,11 +90,11 @@ const loadArena = (urlToLoad, position, rotation) => {
 // or globals.persistenceUrl if not
 const unloadArena = (urlToLoad) => {
     let xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
     xhr.responseType = 'json';
-    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
 
     xhr.onload = () => {
@@ -128,9 +128,9 @@ const loadScene = () => {
     globals.sceneObjects.env.id = "env";
 
     const xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
     xhr.open("GET", globals.persistenceUrl+"?type=scene-options");
     xhr.responseType = "json";
-    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
     xhr.onload = () => {
         if (xhr.status !== 200) {
