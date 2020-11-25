@@ -183,18 +183,26 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     var params = "username=" + mqtt_username + "&id_token=" + id_token;
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
+    if (typeof defaults !== 'undefined') {
+        if (defaults.realm) {
+            params += `&realm=${defaults.realm}`;
+        }
+    }
     if (typeof globals !== 'undefined') {
         if (globals.scenenameParam) {
-            params += "&scene=" + globals.scenenameParam;
+            params += `&scene=${globals.scenenameParam}`;
+        }
+        if (globals.idTag) {
+            params += `&userid=${globals.idTag}`;
         }
         if (globals.camName) {
-            params += "&camid=" + globals.camName;
+            params += `&camid=${globals.camName}`;
         }
         if (globals.viveLName) {
-            params += "&ctrlid1=" + globals.viveLName;
+            params += `&ctrlid1=${globals.viveLName}`;
         }
         if (globals.viveRName) {
-            params += "&ctrlid2=" + globals.viveRName;
+            params += `&ctrlid2=${globals.viveRName}`;
         }
     }
     xhr.open('POST', defaults.urlMqttAuth);
