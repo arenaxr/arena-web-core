@@ -89,7 +89,12 @@ window.addEventListener('onauth', function(e) {
     })
     .then(function (json) {
         var dfts = json;
-        const brokerAddr = dfts.brokerAddr;
+        let brokerAddr;
+        if (defaults && defaults.mqttParamZ) { // prefer deployed custom config
+            brokerAddr = `wss://${defaults.mqttParamZ}${defaults.mqttPath[0]}`;
+        } else {
+            brokerAddr = dfts.brokerAddr;
+        }
         window.client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
         window.graphTopic = dfts.graphTopic;
 
