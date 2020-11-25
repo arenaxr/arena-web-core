@@ -83,7 +83,9 @@ export async function populateList(scene, filter='.*', chk_type={'object': true,
     }
 
     try {
-        var data = await fetch(persist.persist_uri + "!allscenes");
+        var data = await fetch(persist.persist_uri + "!allscenes", {
+            credentials: "include"
+        });
         if (!data) {
           displayAlert("Error fetching scene list from database.", "error", 5000);
           return;
@@ -120,7 +122,9 @@ export async function populateList(scene, filter='.*', chk_type={'object': true,
     }
 
     try {
-        var data = await fetch(persist.persist_uri + scene);
+        var data = await fetch(persist.persist_uri + scene, {
+            credentials: "include"
+        });
         if (!data) {
           displayAlert("Error fetching scene from database.", "error", 5000);
           return;
