@@ -12,9 +12,10 @@ const defaults = {
      screenSharePath:"screenshare",
      vioTopic:"/topic/vio/",
      graphTopic:"$NETWORK/latency",
-     mqttPath:["/mqtt/", "/mqtt1/", "/mqtt2/"],
+     mqttPath:["/mqtt/"],
      persistHost:"arena-dev1.conix.io",
      persistPath:"/persist/",
      urlMqttAuth:"https://arena-dev1.conix.io/auth/",
-     gAuthClientId:'173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com'
+     gAuthClientId:'173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com',
+     supportDevFolders:true
 };
