@@ -158,7 +158,7 @@ function signOut() {
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.withCredentials = defaults.includeJWT;
     var params = "username=" + mqtt_username + "&id_token=" + id_token;
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction

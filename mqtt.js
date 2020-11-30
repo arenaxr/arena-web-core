@@ -11,7 +11,7 @@ ARENA.mqttClient.onMessageArrived = onMessageArrived;
 // or globals.persistenceUrl if not
 const loadArena = (urlToLoad, position, rotation) => {
     let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true; // Include JWT cookie
+    xhr.withCredentials = defaults.includeJWT; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
@@ -90,7 +90,7 @@ const loadArena = (urlToLoad, position, rotation) => {
 // or globals.persistenceUrl if not
 const unloadArena = (urlToLoad) => {
     let xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.withCredentials = defaults.includeJWT;
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
@@ -128,7 +128,7 @@ const loadScene = () => {
     globals.sceneObjects.env.id = "env";
 
     const xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+    xhr.withCredentials = defaults.includeJWT;
     xhr.open("GET", globals.persistenceUrl+"?type=scene-options");
     xhr.responseType = "json";
     xhr.send();
