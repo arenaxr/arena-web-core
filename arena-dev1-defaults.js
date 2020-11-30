@@ -17,6 +17,5 @@ const defaults = {
      persistPath:"/persist/",
      urlMqttAuth:"https://arena-dev1.conix.io/auth/",
      gAuthClientId:'173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com',
-     includeJWT:true,
      supportDevFolders:true
 };
