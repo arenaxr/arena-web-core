@@ -143,12 +143,12 @@ window.addEventListener('onauth', async function (e) {
     }
 
     var updateLink = function() {
-        scene_url.href = 'https://' + arena_host.value + "?scene=" + scene.value
+        scene_url.href = 'https://' + location.hostname + "?scene=" + scene.value
     };
 
     // when a host addr is changed; update settings
     var updateHost = async function() {
-        var hostData = mqttAndPersistURI(arena_host.value);
+        var hostData = mqttAndPersistURI(location.hostname);
         PersistObjects.set_options({ persist_uri: hostData.persist_uri });
         PersistObjects.mqttReconnect({ mqtt_uri: hostData.mqtt_uri});
         await PersistObjects.populateList(scene.value, objfilter.value, type_chk);
@@ -280,7 +280,7 @@ window.addEventListener('onauth', async function (e) {
         reload();
     });
 
-    var hostData = mqttAndPersistURI(arena_host.value);
+    var hostData = mqttAndPersistURI(location.hostname);
 
     // start persist object mngr
     PersistObjects.init({
