@@ -12,7 +12,7 @@ The client will also dynamically update positions of objectID apriltag_N of tag 
 
 **Optional URL param flags**:
 
-* cvRate (int) - Frequency up to 60 for how often to process the frames.
+* cvRate (int) - Throttle rate between 1 and 60 of frame processing. **DEPRECATED** - cvRate will auto adjust based on rolling avg speed of last 10 frames processed
 * networkedTagSolver (bool) - Defers all tag solving of client camera to a solver sitting on pubsub
 * builder (bool) - Will localize origin tag from a networked solver on pubsub, and all other tags that it finds with will be updated or created in the ATLAS
 
