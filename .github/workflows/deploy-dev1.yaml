@@ -28,6 +28,3 @@ jobs:
              git checkout master
              git reset --hard HEAD
              git pull
-             cd ..
-             ./staging.sh down
-             ./staging.sh up --force-recreate -d
