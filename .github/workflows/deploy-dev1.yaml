@@ -26,6 +26,7 @@ jobs:
           script: |
              cd  $TARGET
              git checkout master
+             git reset --hard HEAD
              git pull
              cd ..
              ./staging.sh down
