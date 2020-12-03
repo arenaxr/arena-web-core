@@ -101,7 +101,11 @@ window.addEventListener('onauth', function(e) {
         window.client.onConnectionLost = onConnectionLost;
         window.client.onMessageArrived = onMessageArrived;
 
-        window.client.connect({ onSuccess: onConnect });
+        window.client.connect({
+            onSuccess: onConnect,
+            userName: e.detail.mqtt_username,
+            password: e.detail.mqtt_token,
+        });
     });
 
     function onConnect() {
