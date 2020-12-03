@@ -7,7 +7,7 @@
 // Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
 const getSceneName = () => {
     let path = window.location.pathname.substring(1);
-    if (defaults.supportDevFolders) {
+    if (defaults.supportDevFolders && path.length > 0) {
         path = path.replace(path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0], "");
     }
     if (path === '' || path === 'index.html') {
