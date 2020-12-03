@@ -204,12 +204,14 @@ window.addEventListener('onauth', function (e) {
 
     // init runtime manager
     ARENA.RuntimeManager.init({
-      mqtt_uri: globals.mqttParam ,
-      onInitCallback: function () {
-        console.log("Runtime init done.");
-      },
-      name: "rt-"+Math.round(Math.random() * 10000)+"-"+globals.username,
-      dbg: false
+        mqtt_uri: globals.mqttParam,
+        onInitCallback: function() {
+            console.log("Runtime init done.");
+        },
+        name: "rt-" + Math.round(Math.random() * 10000) + "-" + globals.username,
+        dbg: false,
+        mqtt_username: globals.username,
+        mqtt_token: globals.mqttToken
     });
 
 });
