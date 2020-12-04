@@ -82,21 +82,13 @@ window.addEventListener('onauth', function(e) {
     let spinnerUpdate = true;
     let paused = false;
 
-    // read defaults from file
-    fetch("./dft-config.json")
-    .then(function (data) {
-        return data.json();
-    })
-    .then(function (json) {
-        var dfts = json;
+    function init() {
         let brokerAddr;
         if (defaults && defaults.mqttParamZ) { // prefer deployed custom config
             brokerAddr = `wss://${defaults.mqttParamZ}${defaults.mqttPath[0]}`;
-        } else {
-            brokerAddr = dfts.brokerAddr;
         }
         window.client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
-        window.graphTopic = dfts.graphTopic;
+        window.graphTopic = defaults.graphTopic;
 
         window.client.onConnectionLost = onConnectionLost;
         window.client.onMessageArrived = onMessageArrived;
@@ -106,11 +98,12 @@ window.addEventListener('onauth', function(e) {
             userName: e.detail.mqtt_username,
             password: e.detail.mqtt_token,
         });
-    });
+    }
+    init();
 
     function onConnect() {
         console.log("Connected!");
-        window.client.subscribe(graphTopic);
+        window.client.subscribe(window.graphTopic);
         publish(window.client, window.graphTopic + "/latency", "", 2);
         setInterval(() => {
             publish(window.client, window.graphTopic + "/latency", "", 2);

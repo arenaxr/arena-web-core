@@ -153,13 +153,29 @@ const loadScene = () => {
             else {
                 // set defaults
                 globals.sceneObjects.env.setAttribute('environment', "preset", "starry");
-                globals.sceneObjects.env.setAttribute('environment', "seed", 5);
+                globals.sceneObjects.env.setAttribute('environment', "seed", 3);
                 globals.sceneObjects.env.setAttribute('environment', "flatShading", true);
                 globals.sceneObjects.env.setAttribute('environment', "groundTexture", "squares");
                 globals.sceneObjects.env.setAttribute('environment', "grid", "none");
                 globals.sceneObjects.env.setAttribute('environment', "fog", 0);
-                document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
-            }
+                globals.sceneObjects.env.setAttribute('environment', "fog", 0);
+		document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
+           	
+		// make default env have lights
+		let light = document.createElement("a-light");
+		light.id = "ambient-light";
+		light.setAttribute("type", "ambient");
+		light.setAttribute("color", "#363942");
+		
+		let light1 = document.createElement("a-light");
+		light1.id = "point-light";
+		light1.setAttribute("type", "point");
+		light1.setAttribute("position", "-0.272 0.39 1.25");
+		light1.setAttribute("color", "#C2E6C7");
+
+		document.getElementById("sceneRoot").appendChild(light);
+  		document.getElementById("sceneRoot").appendChild(light1);
+	    }
         }
         // initialize Jitsi videoconferencing
         ARENA.JitsiAPI = ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : "mr.andrew.cmu.edu");

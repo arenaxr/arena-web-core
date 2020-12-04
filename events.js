@@ -34,7 +34,7 @@ window.globals = {
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
     localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
     vioTopic: defaults.vioTopic,
-    graphTopic: defaults.graphTopic,
+    latencyTopic: defaults.latencyTopic,
     lastMouseTarget: undefined,
     inAR: false,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
@@ -1067,7 +1067,7 @@ AFRAME.registerComponent("network-latency", {
     init: function() {
         this.tick = AFRAME.utils.throttleTick(this.tick, 10000, this); // updates every 10s
         this.message = new Paho.Message("");
-        this.message.destinationName = globals.graphTopic;
+        this.message.destinationName = globals.latencyTopic;
         this.message.qos = 2;
     },
     tick: (function(t, dt) {

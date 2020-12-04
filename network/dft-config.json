@@ -1,4 +1,0 @@
-{
-	"brokerAddr": "wss://arena.andrew.cmu.edu/mqtt/",
-	"graphTopic": "$NETWORK"
-}
