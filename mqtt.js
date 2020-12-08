@@ -215,7 +215,8 @@ window.addEventListener('onauth', function (e) {
         keepalive_interval_ms: 30000,
         mqtt_host: globals.mqttParam,
         mqtt_username: globals.username,
-        mqtt_token: globals.mqttToken
+        mqtt_token: globals.mqttToken,
+        supportDevFolders: defaults.supportDevFolders
     });
 
     // init runtime manager
