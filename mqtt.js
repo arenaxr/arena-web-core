@@ -11,11 +11,11 @@ ARENA.mqttClient.onMessageArrived = onMessageArrived;
 // or globals.persistenceUrl if not
 const loadArena = (urlToLoad, position, rotation) => {
     let xhr = new XMLHttpRequest();
+    xhr.withCredentials = !defaults.disallowJWT; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
     xhr.responseType = 'json';
-    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
     let deferredObjects = [];
     let Parents = {};
@@ -90,11 +90,11 @@ const loadArena = (urlToLoad, position, rotation) => {
 // or globals.persistenceUrl if not
 const unloadArena = (urlToLoad) => {
     let xhr = new XMLHttpRequest();
+    xhr.withCredentials = !defaults.disallowJWT;
     if (urlToLoad) xhr.open('GET', urlToLoad);
     else xhr.open('GET', globals.persistenceUrl);
 
     xhr.responseType = 'json';
-    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
 
     xhr.onload = () => {
@@ -128,9 +128,9 @@ const loadScene = () => {
     globals.sceneObjects.env.id = "env";
 
     const xhr = new XMLHttpRequest();
+    xhr.withCredentials = !defaults.disallowJWT;
     xhr.open("GET", globals.persistenceUrl+"?type=scene-options");
     xhr.responseType = "json";
-    xhr.setRequestHeader('MQTT-TOKEN', localStorage.getItem('mqtt_token'));
     xhr.send();
     xhr.onload = () => {
         if (xhr.status !== 200) {
@@ -153,13 +153,29 @@ const loadScene = () => {
             else {
                 // set defaults
                 globals.sceneObjects.env.setAttribute('environment', "preset", "starry");
-                globals.sceneObjects.env.setAttribute('environment', "seed", 5);
+                globals.sceneObjects.env.setAttribute('environment', "seed", 3);
                 globals.sceneObjects.env.setAttribute('environment', "flatShading", true);
                 globals.sceneObjects.env.setAttribute('environment', "groundTexture", "squares");
                 globals.sceneObjects.env.setAttribute('environment', "grid", "none");
                 globals.sceneObjects.env.setAttribute('environment', "fog", 0);
-                document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
-            }
+                globals.sceneObjects.env.setAttribute('environment', "fog", 0);
+		document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
+           	
+		// make default env have lights
+		let light = document.createElement("a-light");
+		light.id = "ambient-light";
+		light.setAttribute("type", "ambient");
+		light.setAttribute("color", "#363942");
+		
+		let light1 = document.createElement("a-light");
+		light1.id = "point-light";
+		light1.setAttribute("type", "point");
+		light1.setAttribute("position", "-0.272 0.39 1.25");
+		light1.setAttribute("color", "#C2E6C7");
+
+		document.getElementById("sceneRoot").appendChild(light);
+  		document.getElementById("sceneRoot").appendChild(light1);
+	    }
         }
         // initialize Jitsi videoconferencing
         ARENA.JitsiAPI = ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : "mr.andrew.cmu.edu");
@@ -192,7 +208,7 @@ window.addEventListener('onauth', function (e) {
     ARENA.Chat.init({
         userid: globals.idTag,
         cameraid: globals.camName,
-        username: globals.displayName,
+        username: globals.username, // use auth username (email)
         realm: defaults.realm,
         scene: globals.scenenameParam,
         persist_uri: "https://" + defaults.persistHost + defaults.persistPath,
@@ -204,12 +220,14 @@ window.addEventListener('onauth', function (e) {
 
     // init runtime manager
     ARENA.RuntimeManager.init({
-      mqtt_uri: globals.mqttParam ,
-      onInitCallback: function () {
-        console.log("Runtime init done.");
-      },
-      name: "rt-"+Math.round(Math.random() * 10000)+"-"+globals.username,
-      dbg: false
+        mqtt_uri: globals.mqttParam,
+        onInitCallback: function() {
+            console.log("Runtime init done.");
+        },
+        name: "rt-" + Math.round(Math.random() * 10000) + "-" + globals.username,
+        dbg: false,
+        mqtt_username: globals.username,
+        mqtt_token: globals.mqttToken
     });
 
 });

@@ -4,7 +4,8 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="./defaults.js"></script>  <!-- for window.defaults -->
+//  <script src="https://apis.google.com/js/platform.js"></script>
+//  <script src="./conf/defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
 //  <script type="text/javascript">authCheck({ userRoot: "./user" });</script>
 //
@@ -109,6 +110,7 @@ function getCookie(name) {
 
 function requestAuthState() {
     let xhr = new XMLHttpRequest();
+    xhr.withCredentials = !defaults.disallowJWT;
     xhr.open('POST', `/user/user_state`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
@@ -138,7 +140,9 @@ function requestAuthState() {
 function requestMqttToken(auth_type, mqtt_username) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    var params = `username=${mqtt_username}`;
+    xhr.withCredentials = !defaults.disallowJWT;
+    var params = "username=" + mqtt_username + "&id_token=" + id_token;
+    params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
         if (defaults.realm) {

@@ -1,3 +1,5 @@
+defaults.js
+conf/
 # private repos
 models/
 store

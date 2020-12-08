@@ -379,9 +379,25 @@
                      "default":10000
                   },
                   "on":{
-                     "type":"object",
+                     "type":"string",
+                     "enum":[
+                        "mousedown",
+                        "mouseup",
+                        "mouseenter",
+                        "mouseleave",
+                        "triggerdown",
+                        "triggerup",
+                        "gripdown",
+                        "gripup",
+                        "menudown",
+                        "menuup",
+                        "systemdown",
+                        "systemup",
+                        "trackpaddown",
+                        "trackpadup"
+                     ],
                      "description":"An event for the entity to listen to before playing sound.",
-                     "default":null
+                     "default":"mousedown"
                   },
                   "poolSize":{
                      "type":"number",
@@ -406,7 +422,7 @@
                   "src":{
                      "type":"string",
                      "format":"uri",
-                     "description":"URL path to sound file e.g. “store/users/wiselab/sound/wave.mp3” ("
+                     "description":"URL path to sound file e.g. 'store/users/wiselab/sound/wave.mp3'"
                   },
                   "volume":{
                      "type":"number",
@@ -539,10 +555,9 @@
                      "default":"directional"
                   },
                   "color":{
-                     "title":"Color",
+                     "title":"Light Color",
                      "type":"string",
                      "format":"color",
-                     "title":"color",
                      "default":"#ffffff",
                      "description":"Light color."
                   },
@@ -555,7 +570,6 @@
                      "title":"Ground Color",
                      "type":"string",
                      "format":"color",
-                     "title":"Ground color",
                      "default":"#ffffff",
                      "description":"Light color from below. NOTE: Hemisphere light type only"
                   },

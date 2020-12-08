@@ -552,6 +552,7 @@
             <script type="text/javascript">
                 function dumpJson() {
                     let xhr = new XMLHttpRequest();
+                    xhr.withCredentials = !defaults.disallowJWT;
                     var mqttServer = document.getElementById("mqttServer").value;
                     var sceneName = document.getElementById("selectedScene").value;
                     xhr.open('GET', '//' + mqttServer + '/persist/' + sceneName);
