@@ -68,7 +68,7 @@ export default class ARENAChat {
   		    	 - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-userid]/userhandle)
 				 - a global topic (ugtopic; realm/g/c/o/userhandle);
 
-		    where userhandle = userid + btoa(username)
+		    where userhandle = userid + btoa(userid)
 
 			Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
 			Note: scene-only messages are sent to public topic and filtered at the client
@@ -97,14 +97,14 @@ export default class ARENAChat {
       this.privateTopicPrefix +
       "{to_uid}/" +
       this.settings.userid +
-      btoa(this.settings.username);
+      btoa(this.settings.userid);
 
     // send open messages (chat keepalive, messages to all/scene) (publish only)
     this.settings.publishPublicTopic =
       this.settings.realm +
       this.publicTopicPrefix +
       this.settings.userid +
-      btoa(this.settings.username);
+      btoa(this.settings.userid);
 
     // counter for unread msgs
     this.unreadMsgs = 0;
@@ -466,14 +466,14 @@ export default class ARENAChat {
         this.settings.userid +
         "/" +
         msg.from_uid +
-        btoa(msg.from_un)
+        btoa(msg.from_uid)
     )
       if (
         !mqttMsg.destinationName ===
         this.settings.realm +
           this.publicTopicPrefix +
           msg.from_uid +
-          btoa(msg.from_un)
+          btoa(msg.from_uid)
       )
         return;
 
