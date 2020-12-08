@@ -27,4 +27,4 @@ module.exports=require("./lib/linkify-string").default;
 },{"linkifyjs":"IvWR","linkifyjs/string":"cImA"}],"Focm":[function(require,module,exports) {
 "use strict";var t,e=n(require("./arena-chat.js"));function n(t){return t&&t.__esModule?t:{default:t}}ARENA.Chat={init:async function(n){console.log("Loading Chat"),(t=new e.default(n)).start()},userList:function(){return t.getUserList()}};
 },{"./arena-chat.js":"nBXP"}]},{},["Focm"], null)
-//# sourceMappingURL=chat/index.js.map
+//# sourceMappingURL=chat/dist/index.js.map
