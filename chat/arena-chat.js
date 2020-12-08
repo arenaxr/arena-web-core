@@ -48,6 +48,7 @@ export default class ARENAChat {
       mqtt_username:
         st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
       mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
+      supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false
     };
 
     // users list
@@ -809,11 +810,21 @@ export default class ARENAChat {
 
     if (scene !== this.settings.scene) {
       localStorage.setItem("moveToFrontOfCamera", cameraId);
-      var href = new URL(document.location.href);
-      href.searchParams.set("scene", scene);
+      let path = window.location.pathname.substring(1);
+      let devPath='';
+      if (this.settings.supportDevFolders && path.length > 0) {
+        try {
+          devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
+        } catch(e) {
+          // no devPath
+        }
+      }
+      console.log(devPath);
+      var href = new URL(document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene);
       document.location.href = href.toString();
       return;
     }
+
 
     let sceneEl = document.querySelector("a-scene");
     if (!sceneEl) {
