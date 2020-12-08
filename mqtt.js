@@ -208,7 +208,7 @@ window.addEventListener('onauth', function (e) {
     ARENA.Chat.init({
         userid: globals.idTag,
         cameraid: globals.camName,
-        username: globals.username, // use auth username (email)
+        username: globals.displayName, 
         realm: defaults.realm,
         scene: globals.scenenameParam,
         persist_uri: "https://" + defaults.persistHost + defaults.persistPath,
