@@ -48,6 +48,7 @@ export default class ARENAChat {
       mqtt_username:
         st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
       mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
+      supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false
     };
 
     // users list
@@ -68,7 +69,7 @@ export default class ARENAChat {
   		    	 - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-userid]/userhandle)
 				 - a global topic (ugtopic; realm/g/c/o/userhandle);
 
-		    where userhandle = userid + btoa(username)
+		    where userhandle = userid + btoa(userid)
 
 			Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
 			Note: scene-only messages are sent to public topic and filtered at the client
@@ -97,14 +98,14 @@ export default class ARENAChat {
       this.privateTopicPrefix +
       "{to_uid}/" +
       this.settings.userid +
-      btoa(this.settings.username);
+      btoa(this.settings.userid);
 
     // send open messages (chat keepalive, messages to all/scene) (publish only)
     this.settings.publishPublicTopic =
       this.settings.realm +
       this.publicTopicPrefix +
       this.settings.userid +
-      btoa(this.settings.username);
+      btoa(this.settings.userid);
 
     // counter for unread msgs
     this.unreadMsgs = 0;
@@ -466,14 +467,14 @@ export default class ARENAChat {
         this.settings.userid +
         "/" +
         msg.from_uid +
-        btoa(msg.from_un)
+        btoa(msg.from_uid)
     )
       if (
         !mqttMsg.destinationName ===
         this.settings.realm +
           this.publicTopicPrefix +
           msg.from_uid +
-          btoa(msg.from_un)
+          btoa(msg.from_uid)
       )
         return;
 
@@ -809,11 +810,21 @@ export default class ARENAChat {
 
     if (scene !== this.settings.scene) {
       localStorage.setItem("moveToFrontOfCamera", cameraId);
-      var href = new URL(document.location.href);
-      href.searchParams.set("scene", scene);
+      let path = window.location.pathname.substring(1);
+      let devPath='';
+      if (this.settings.supportDevFolders && path.length > 0) {
+        try {
+          devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
+        } catch(e) {
+          // no devPath
+        }
+      }
+      console.log(devPath);
+      var href = new URL(document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene);
       document.location.href = href.toString();
       return;
     }
+
 
     let sceneEl = document.querySelector("a-scene");
     if (!sceneEl) {

@@ -46,7 +46,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
 
     let hasAudio = false, hasVideo = false;
 
-    const SCREENSHARE = "screenshare";
+    const SCREENSHARE = "scr33nsh4r3"; // unique prefix for screenshare clients
     let screenShareDict = {};
 
     // ==================================================
@@ -105,11 +105,9 @@ var ARENAJitsiAPI = (function (jitsiServer) {
     }
 
     function updateScreenShareObject(screenShareId, videoId, participantId) {
-        console.log(screenShareId, SCREENSHARE)
-        if (screenShareId != SCREENSHARE)
-            screenShareId = screenShareId.replace(SCREENSHARE, "");
-
-        let screenShareEl = globals.sceneObjects[screenShareId];
+        if (!screenShareId) return;
+        screenShareId = screenShareId.replace(SCREENSHARE, ""); 
+	let screenShareEl = globals.sceneObjects[screenShareId];
         if (!screenShareEl) { // create if doesnt exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
@@ -169,8 +167,10 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         //     });
 
         const videoId = `video${participant}`;
-        const displayName = conference.getParticipantById(participant)._displayName;
+        const displayNames = conference.getParticipantById(participant)._displayName;
+	const objectIds = displayNames.split(",");
 
+                console.log(displayNames,objectIds)
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) { // create
             $('a-assets').append(
@@ -179,12 +179,14 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         track.attach($(`#${videoId}`)[0]);
 
         // handle screen share video
-        if (displayName && displayName.includes(SCREENSHARE)) {
-            const video = $(`#${videoId}`);
-            video.on('loadeddata', (e) => {
-                screenShareEl = updateScreenShareObject(displayName, videoId, participant);
-            });
-        }
+	for (let i = 0; i < objectIds.length; i++) {
+            if (objectIds[i] && objectIds[i].includes(SCREENSHARE)) {
+		const video = $(`#${videoId}`);
+                video.on('loadeddata', e => {
+                    screenShareEl = updateScreenShareObject(objectIds[i], videoId, participant);
+                });
+            }
+	}
     }
 
     /**
