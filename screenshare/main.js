@@ -1,9 +1,6 @@
 /* global $, JitsiMeetJS */
 
-const urlParams = new URLSearchParams(window.location.search);
-const jitsi_server = urlParams.get("jitsiURL") ? urlParams.get("jitsiURL") : 'mr.andrew.cmu.edu';
-const scene = urlParams.get("scene") ? urlParams.get("scene") : "render";
-const objectId = urlParams.get("id") ? urlParams.get("id") : "screen_share";
+const jitsi_server = window.jitsiURL;
 
 const options = {
     hosts: {
@@ -134,8 +131,8 @@ function onUserLeft(id) {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    room = connection.initJitsiConference(scene, confOptions);
-    room.setDisplayName(objectId);
+    room = connection.initJitsiConference(window.scene, confOptions);
+    room.setDisplayName(window.objectIds.join());
     // room.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteTrack);
     room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, track => {
         console.log(`track removed!!!${track}`);
@@ -146,7 +143,6 @@ function onConnectionSuccess() {
     room.on(JitsiMeetJS.events.conference.USER_JOINED, id => {
         console.log('user join');
         remoteTracks[id] = [];
-        console.log("***", room.getParticipantById(id)._displayName)
     });
     room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
     room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, track => {
