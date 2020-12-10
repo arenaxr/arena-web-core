@@ -109,7 +109,6 @@ function getCookie(name) {
 
 function requestAuthState() {
     let xhr = new XMLHttpRequest();
-    xhr.withCredentials = !defaults.disallowJWT;
     xhr.open('POST', `/user/user_state`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
@@ -139,7 +138,6 @@ function requestAuthState() {
 function requestMqttToken(auth_type, mqtt_username) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    xhr.withCredentials = !defaults.disallowJWT;
     var params = "username=" + mqtt_username; // + "&id_token=" + id_token;
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
