@@ -144,7 +144,7 @@ function setupIcons() {
             if (confirmed) {
                 swal({
                     title: "You clicked on screen share!",
-                    text: "Enter the name of an object you want to screenshare on:",
+                    text: "Enter the name(s) of the object(s) you want to screenshare on (use commas for multiple objects):",
                     content: {
                         element: "input",
                         attributes: {
@@ -154,9 +154,18 @@ function setupIcons() {
                 })
                 .then((value) => {
                     const serverName = ARENA.JitsiAPI.serverName;
-                    const id = value ? screenSharePrefix+value : screenSharePrefix;
-                    window.open(`${defaults.screenSharePath}?scene=${globals.scenenameParam}&jitsiURL=${serverName}&id=${id}`, "_blank");
-                })
+                    let objectIds = value ? value : "screenshare"; 
+		    objectIds = objectIds.replace(", ", ",").split(",");
+		    for (let i = 0; i < objectIds.length; i++) {
+			if (objectIds[i] && objectIds[i] != ARENA.JitsiAPI.screenSharePrefix)
+			    objectIds[i] = ARENA.JitsiAPI.screenSharePrefix+objectIds[i];
+		    }
+		    objectIds = objectIds.join();
+                    const screenshareWindow = window.open(`${defaults.screenSharePath}`, "_blank");
+                    screenshareWindow.scene = globals.scenenameParam;
+	 	    screenshareWindow.jitsiURL = serverName;
+		    screenshareWindow.objectIds = objectIds.split(",");
+		})
             }
         });
     });
