@@ -6,6 +6,7 @@ body {
 	box-sizing: border-box;
 }
 
+
 /* Alerts */
 
 .chat-alert-box {
@@ -13,27 +14,30 @@ body {
 	top: 21px;
 	z-index: 9999;
 	left: 10px;
-  border-radius: 20px;
-  border: 2px solid #1f7987;
-  background: #dbdbdb;
-  padding: 20px;
-  font-family: "Trebuchet MS", Helvetica, sans-serif;
-  font-size: 15px;
+	border-radius: 20px;
+	border: 2px solid #1f7987;
+	background: #dbdbdb;
+	padding: 20px;
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
+	font-size: 15px;
 	left: 50%;
-  transform: translate(-50%, 0%);
+	transform: translate(-50%, 0%);
 	display: none;
 }
+
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
 .chat-button-group {
 	position: fixed;
+	display: flex;
 	bottom: 21px;
 	z-index: 9999;
 	left: 10px;
 	/*left: 50%;
   transform: translate(-50%, 0%);*/
 }
+
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
@@ -76,7 +80,7 @@ body {
 	-webkit-transition: background-color .05s ease;
 	border: 5px solid white;
 	touch-action: manipulation;
-  border-radius: 10px;
+	border-radius: 10px;
 	/* Prevent iOS double tap zoom on the button */
 }
 
@@ -92,7 +96,7 @@ body {
 .chat-button:active,
 .chat-button:hover {
 	/*background-color: #ef2d5e;*/
-  border: 5px solid #ef2d5e;
+	border: 5px solid #ef2d5e;
 }
 
 .chat-button resethover {
@@ -153,9 +157,9 @@ body {
 /* When the textarea gets focus, do something */
 
 .form-container textarea:focus,
-.form-container input:focus  {
+.form-container input:focus {
 	background-color: rgba(200, 200, 200, 0.5);
-  border: 1px solid #646464;
+	border: 1px solid #646464;
 	outline: none;
 }
 
@@ -163,7 +167,7 @@ body {
 /* Set a style for the submit/send button */
 
 .form-container .btn,
-.form-container button  {
+.form-container button {
 	cursor: pointer;
 	opacity: 0.8;
 }
@@ -193,9 +197,10 @@ body {
 
 .form-container .sel:focus {
 	background-color: rgba(200, 200, 200, 0.5);
-  border: 1px solid #646464;
+	border: 1px solid #646464;
 	outline: none;
 }
+
 
 /* Add some hover effects to buttons */
 
@@ -214,9 +219,9 @@ body {
 
 .close:hover,
 .close:focus {
-  color: #c80000;
-  text-decoration: none;
-  cursor: pointer;
+	color: #c80000;
+	text-decoration: none;
+	cursor: pointer;
 }
 
 .mute-all {
@@ -224,7 +229,7 @@ body {
 	padding-top: 15px;
 	color: #000;
 	float: right;
-  font-size: 10px;
+	font-size: 10px;
 }
 
 .user-list,
@@ -234,7 +239,8 @@ body {
 	overflow-y: auto;
 	position: relative;
 	border: 1px solid #646464;
-	background-color: rgb(255, 255, 255); /* Fallback color */
+	background-color: rgb(255, 255, 255);
+	/* Fallback color */
 	background-color: rgba(255, 255, 255, 0);
 }
 
@@ -271,8 +277,8 @@ body {
 	float: left;
 	clear: both;
 	border-top-left-radius: 0px;
-  background-color: rgba(80, 180, 180, 0.5);
-  color: #3c3c3c;
+	background-color: rgba(80, 180, 180, 0.5);
+	color: #3c3c3c;
 }
 
 .msg.self {
@@ -280,8 +286,8 @@ body {
 	clear: both;
 	border-top-right-radius: 0px;
 	/*background: #00D025;*/
-  background-color: rgba(80, 180, 80, 0.5);
-  color: #3c3c3c;
+	background-color: rgba(80, 180, 80, 0.5);
+	color: #3c3c3c;
 }
 
 .status {
@@ -315,10 +321,11 @@ body {
 	color: black;
 	display: block;
 	position: relative;
-  height: 30px;
-  line-height: 30px;
+	height: 30px;
+	line-height: 30px;
 	background-color: rgba(240, 240, 240, 0.5);
 }
+
 
 /*.user-list ul li:hover {
 	background-color: #eee;
@@ -352,8 +359,8 @@ body {
 .users-list-btn {
 	cursor: pointer;
 	padding: 5px 11px;
-  top: 3px;
-  border: 2px solid #464646;
+	top: 3px;
+	border: 2px solid #464646;
 }
 
 .lm-list-btn:hover,
@@ -361,20 +368,27 @@ body {
 	background-color: #ef2d5e;
 }
 
-.dot {
-	margin: auto;
-	height: 13px;
-	width: 13px;
-	background-color: #e81a39;
-	border-radius: 100%;
+.chat-button .dot {
 	position: absolute;
-	left: 5px;
-	top: 2px;
+	top: -5px;
+	left: 2px;
+	padding: 5px 7px;
+	border-radius: 50%;
+	background: red;
+	color: white;
 	font-size: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
+	justify-content: center;
+	display: none;
+}
+
+.users-button .dot {
+  position: absolute;
+  top: -5px;
+  left: 52px;
+  padding: 5px 7px;
+  border-radius: 50%;
+  background: red;
   color: white;
-  display:none;
+  font-size: 10px;
+  justify-content: center;
 }
