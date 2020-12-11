@@ -136,7 +136,7 @@ export default class ARENAChat {
 
     this.usersDot = document.createElement("span");
     this.usersDot.className = "dot";
-    this.usersDot.innerHTML = "0";
+    this.usersDot.innerHTML = "1";
     this.usersBtn.appendChild(this.usersDot);
 
     this.lmBtn = document.createElement("div");
