@@ -119,24 +119,29 @@ export default class ARENAChat {
     btnGroup.className = "chat-button-group";
     document.body.appendChild(btnGroup);
 
-    this.chatBtn = document.createElement("button");
+    this.chatBtn = document.createElement("div");
     this.chatBtn.className = "chat-button";
     this.chatBtn.setAttribute("title", "Chat");
     btnGroup.appendChild(this.chatBtn);
 
-    this.usersBtn = document.createElement("button");
+    this.chatDot = document.createElement("span");
+    this.chatDot.className = "dot";
+    this.chatDot.innerHTML = "...";
+    this.chatBtn.appendChild(this.chatDot);
+
+    this.usersBtn = document.createElement("div");
     this.usersBtn.className = "users-button";
     this.usersBtn.setAttribute("title", "User List");
     btnGroup.appendChild(this.usersBtn);
 
-    this.lmBtn = document.createElement("button");
+    this.usersDot = document.createElement("span");
+    this.usersDot.className = "dot";
+    this.usersDot.innerHTML = "1";
+    this.usersBtn.appendChild(this.usersDot);
+
+    this.lmBtn = document.createElement("div");
     this.lmBtn.className = "landmarks-button";
     btnGroup.appendChild(this.lmBtn);
-
-    this.chatDot = document.createElement("span");
-    this.chatDot.className = "dot";
-    this.chatDot.innerHTML = "0";
-    this.chatBtn.appendChild(this.chatDot);
 
     // chat
     this.chatPopup = document.createElement("div");
@@ -363,13 +368,7 @@ export default class ARENAChat {
       text: "left",
     };
     let willMessage = new Paho.Message(JSON.stringify(msg));
-    if (this.settings.subscribePublicTopic.slice(-1) == "#")
-      willMessage.destinationName = this.settings.subscribePublicTopic.slice(
-        0,
-        -1
-      );
-    // remove final '#'
-    else willMessage.destinationName = this.settings.subscribePublicTopic;
+    willMessage.destinationName = this.settings.publishPublicTopic;
     this.mqttc.connect({
       onSuccess: () => {
         console.info(
@@ -490,7 +489,7 @@ export default class ARENAChat {
         cid: msg.cameraid,
         ts: new Date().getTime(),
       };
-      this.populateUserList();
+      this.populateUserList(msg.from_un);
       this.keepalive(); // let this user know about us
     } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
       this.liveUsers[msg.from_uid].un = msg.from_un;
@@ -577,13 +576,19 @@ export default class ARENAChat {
     this.msgList.scrollTop = this.msgList.scrollHeight;
   }
 
-  populateUserList() {
+  populateUserList(newUser=undefined) {
     this.usersList.innerHTML = "";
     let selVal = this.toSel.value;
     this.toSel.innerHTML = "";
     this.addToSelOptions();
 
-    this.nUserslabel.innerHTML = Object.keys(this.liveUsers).length;
+    let nUsers = Object.keys(this.liveUsers).length + 1; // +1 to include user himself
+    this.nUserslabel.innerHTML = nUsers;
+    this.usersDot.innerHTML = nUsers < 100 ? nUsers : "...";
+    if (newUser) this.displayAlert(
+      newUser + " joined.",
+      5000
+    );
 
     let _this = this;
     let userList = [];
@@ -603,6 +608,26 @@ export default class ARENAChat {
         b.sort_key + b.scene + b.un
       )
     );
+    
+    let uli = document.createElement("li"); 
+    uli.innerHTML = this.settings.username + " (Me)";
+    _this.usersList.appendChild(uli);
+    let uBtnCtnr = document.createElement("div");
+    uBtnCtnr.className = "users-list-btn-ctnr";
+    uli.appendChild(uBtnCtnr);
+    let sspan = document.createElement("span");
+    sspan.className = "users-list-btn s";
+    sspan.title = "Mute User";
+    uBtnCtnr.appendChild(sspan);
+    // span click event (send sound on/off msg to ussr)
+    sspan.onclick = function () {
+      let abtn = document.getElementById("btn-audio-off");
+      if (abtn == undefined) {
+        console.error("Could not find audio button");
+        return;
+      }
+      abtn.click();
+    };
 
     // list users
     userList.forEach((user) => {
@@ -791,7 +816,7 @@ export default class ARENAChat {
 
     let direction = new THREE.Vector3();
     landmarkObj.object3D.getWorldDirection(direction);
-    let distance = 3.5; // distance to put you
+    let distance = globals.landmarkTeleportDistance ? globals.landmarkTeleportDistance : 3.5; // distance to put you
     let pos = new THREE.Vector3();
     landmarkObj.object3D.getWorldPosition(pos);
     myCamera.object3D.position.copy(pos);
@@ -819,7 +844,6 @@ export default class ARENAChat {
           // no devPath
         }
       }
-      console.log(devPath);
       var href = new URL(document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene);
       document.location.href = href.toString();
       return;
@@ -850,7 +874,7 @@ export default class ARENAChat {
 
     let direction = new THREE.Vector3();
     toCam.object3D.getWorldDirection(direction);
-    let distance = 2; // distance to put you
+    let distance = globals.userTeleportDistance ? globals.userTeleportDistance : 2; // distance to put you
     myCamera.object3D.position
       .copy(toCam.object3D.position.clone())
       .add(direction.multiplyScalar(-distance));
