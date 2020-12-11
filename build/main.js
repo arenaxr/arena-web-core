@@ -143,7 +143,16 @@ window.addEventListener('onauth', async function (e) {
     }
 
     var updateLink = function() {
-        scene_url.href = 'https://' + location.hostname + "?scene=" + scene.value
+        let path = window.location.pathname.substring(1);
+        let devPath='';
+        if (defaults.supportDevFolders && path.length > 0) {
+          try {
+            devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
+          } catch(e) {
+            // no devPath
+          }
+        }  
+        scene_url.href = document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene.value;
     };
 
     // when a host addr is changed; update settings
