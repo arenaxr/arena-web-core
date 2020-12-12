@@ -326,10 +326,9 @@ body {
 	background-color: rgba(240, 240, 240, 0.5);
 }
 
-
-/*.user-list ul li:hover {
-	background-color: #eee;
-}*/
+.user-list .oscene {
+	background-color: rgb(179, 178, 178);
+}
 
 .lm-list-btn-ctnr,
 .users-list-btn-ctnr {
@@ -387,8 +386,8 @@ body {
   left: 52px;
   padding: 5px 7px;
   border-radius: 50%;
-  background: red;
-  color: white;
+  background:#c4c4c4;
+  color: black;
   font-size: 10px;
   justify-content: center;
 }
