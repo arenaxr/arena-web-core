@@ -489,7 +489,8 @@ export default class ARENAChat {
         cid: msg.cameraid,
         ts: new Date().getTime(),
       };
-      this.populateUserList(msg.from_un);
+      if (msg.from_scene === this.settings.scene) this.populateUserList(msg.from_un);
+      else this.populateUserList();
       this.keepalive(); // let this user know about us
     } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
       this.liveUsers[msg.from_uid].un = msg.from_un;
