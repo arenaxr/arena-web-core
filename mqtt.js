@@ -977,7 +977,9 @@ function _onMessageArrived(message, jsonMessage) {
 				    entityEl.positionalAudio.setRefDistance(globals.refDist); // L-R panning
                                 if (globals.rolloffFact)
 			      	    entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
-                                if (globals.maxDist)
+                                if (globals.distModel)
+				    entityEl.positionalAudio.setDistanceModel(globals.distModel);
+				if (globals.maxDist)
 				    entityEl.positionalAudio.setMaxDistance(globals.maxDist);
 				if (globals.volume)
 				    entityEl.positionalAudio.setVolume(globals.volume);
