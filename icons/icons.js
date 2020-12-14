@@ -132,7 +132,8 @@ function setupIcons() {
 
     const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
         if (!ARENA.JitsiAPI) return;
-
+	
+	const defaultScreenObj = globals.screenshare ? globals.screenshare : "screenshare";
         const screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
         swal({
             title: "You clicked on screen share!",
@@ -148,13 +149,13 @@ function setupIcons() {
                     content: {
                         element: "input",
                         attributes: {
-                            defaultValue: "screenshare",
+                            defaultValue: defaultScreenObj
                         }
                     }
                 })
                 .then((value) => {
                     const serverName = ARENA.JitsiAPI.serverName;
-                    let objectIds = value ? value : "screenshare"; 
+                    let objectIds = value ? value : defaultScreenObj; 
 		    objectIds = objectIds.replace(", ", ",").split(",");
 		    for (let i = 0; i < objectIds.length; i++) {
 			if (objectIds[i] && objectIds[i] != ARENA.JitsiAPI.screenSharePrefix)

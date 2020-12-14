@@ -336,7 +336,42 @@
                "title":"Landmark Teleport Distance",
                "description":"Distance to put user when teleporting to be in front of a landmark",
                "default": 3.5
-            }            
+            },
+	    "volume": {
+               "type":"number",
+               "title":"Positional Audio Volume",
+               "description":"Volume for users in a scene",
+               "default": 1
+            }, 
+	    "distModel": {
+               "type":"string",
+               "title":"Positional Audio Distance Model",
+               "description":"Algorithm to use to reduce the volume of the audio source as it moves away from the listener",
+               "enum": [
+		   "inverse",
+		   "linear",
+		   "exponential"
+	       ],
+	       "default":"inverse"
+            },
+	    "refDist": {
+               "type":"number",
+               "title":"Positional Audio Reference Distance",
+               "description":"Distance at which the volume reduction starts taking effect",
+               "default": 1
+            },
+	    "maxDist": {
+               "type":"number",
+               "title":"Positional Audio Maximum Distance",
+               "description":"Maximum distance between the audio source and the listener, after which the volume is not reduced any further. Note: only works with linear distance model!",
+               "default": 10000
+            },
+	    "rolloffFact": {
+               "type":"number",
+               "title":"Positional Audio Rolloff Factor",
+               "description":"How quickly the volume is reduced as the source moves away from the listener",
+               "default": 1
+            }
          },
          "required":[
            "clickableOnlyEvents",

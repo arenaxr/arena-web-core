@@ -489,7 +489,8 @@ export default class ARENAChat {
         cid: msg.cameraid,
         ts: new Date().getTime(),
       };
-      this.populateUserList(msg.from_un);
+      if (msg.from_scene === this.settings.scene) this.populateUserList(msg.from_un);
+      else this.populateUserList();
       this.keepalive(); // let this user know about us
     } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
       this.liveUsers[msg.from_uid].un = msg.from_un;
@@ -582,17 +583,11 @@ export default class ARENAChat {
     this.toSel.innerHTML = "";
     this.addToSelOptions();
 
-    let nUsers = Object.keys(this.liveUsers).length + 1; // +1 to include user himself
-    this.nUserslabel.innerHTML = nUsers;
-    this.usersDot.innerHTML = nUsers < 100 ? nUsers : "...";
-    if (newUser) this.displayAlert(
-      newUser + " joined.",
-      5000
-    );
-
     let _this = this;
     let userList = [];
+    let nUsers = 1;
     Object.keys(this.liveUsers).forEach(function (key) {
+      if (_this.liveUsers[key].scene == _this.settings.scene) nUsers++; // only count users in the same scene
       userList.push({
         uid: key,
         sort_key:
@@ -608,7 +603,14 @@ export default class ARENAChat {
         b.sort_key + b.scene + b.un
       )
     );
-    
+
+    this.nUserslabel.innerHTML = Object.keys(this.liveUsers).length + 1; // count all users
+    this.usersDot.innerHTML = nUsers < 100 ? nUsers : "...";
+    if (newUser) this.displayAlert(
+      newUser + " joined.",
+      5000
+    );
+
     let uli = document.createElement("li"); 
     uli.innerHTML = this.settings.username + " (Me)";
     _this.usersList.appendChild(uli);
@@ -666,6 +668,8 @@ export default class ARENAChat {
           // message to target user
           _this.ctrlMsg(user.uid, "sound:off");
         };
+      } else {
+        uli .className = "oscene";
       }
       let op = document.createElement("option");
       op.value = user.uid;

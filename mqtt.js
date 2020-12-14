@@ -967,14 +967,22 @@ function _onMessageArrived(message, jsonMessage) {
                                 if (!entityEl.positionalAudio) {
                                     let audioSource = new THREE.PositionalAudio(listener);
                                     audioSource.setMediaStreamSource(audioStream);
-                                    audioSource.setRefDistance(1); // L-R panning
-                                    audioSource.setRolloffFactor(1);
                                     entityEl.positionalAudio = audioSource;
                                     entityEl.object3D.add(audioSource);
                                 }
                                 else {
                                     entityEl.positionalAudio.setMediaStreamSource(audioStream);
                                 }
+                                if (globals.refDist) 
+				    entityEl.positionalAudio.setRefDistance(globals.refDist); // L-R panning
+                                if (globals.rolloffFact)
+			      	    entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
+                                if (globals.distModel)
+				    entityEl.positionalAudio.setDistanceModel(globals.distModel);
+				if (globals.maxDist)
+				    entityEl.positionalAudio.setMaxDistance(globals.maxDist);
+				if (globals.volume)
+				    entityEl.positionalAudio.setVolume(globals.volume);
 
                                 // fixes chrome echo bug
                                 const audioCtx = THREE.AudioContext.getContext();
