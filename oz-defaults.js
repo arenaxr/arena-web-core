@@ -17,6 +17,5 @@ const defaults = {
      persistPath:"/persist/",
      urlMqttAuth:"https://oz.andrew.cmu.edu:8888",
      gAuthClientId:'173603117246-7lehsb3tpq4i17e7sla5bue1an4ps9t6.apps.googleusercontent.com',
-     supportDevFolders:true,
-     disallowJWT:true
+     supportDevFolders:true
 };

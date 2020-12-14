@@ -155,10 +155,25 @@ function signOut() {
     location.href = signInPath;
 }
 
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
     let xhr = new XMLHttpRequest();
-    xhr.withCredentials = !defaults.disallowJWT;
     var params = "username=" + mqtt_username + "&id_token=" + id_token;
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
@@ -185,6 +200,8 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
         }
     }
     xhr.open('POST', defaults.urlMqttAuth);
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send(params);
     xhr.responseType = 'json';
