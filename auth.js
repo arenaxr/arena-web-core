@@ -5,6 +5,7 @@
 //
 // Required:
 //  <script src="https://apis.google.com/js/platform.js"></script>
+//  <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="./conf/defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
 //  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
@@ -27,16 +28,21 @@
 
 'use strict';
 
+window.AUTH = {}; // auth namespace
+
 if (!storageAvailable('localStorage')) {
     alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
 }
 
+window.onload = function() {
+    initAuthPanel(); // add auth details panel
+};
+
 var auth2;
-var signInPath;
 // check if the current user is already signed in
 var authCheck = function(args) {
     localStorage.removeItem("mqtt_token"); // deprecate local token storage
-    signInPath = args.signInPath;
+    AUTH.signInPath = args.signInPath;
     switch (localStorage.getItem("auth_choice")) {
         case "anonymous":
             window.addEventListener('load', checkAnonAuth);
@@ -50,7 +56,7 @@ var authCheck = function(args) {
                 console.error(e);
                 // send login with redirection url from this page
                 localStorage.setItem("request_uri", location.href);
-                location.href = signInPath;
+                location.href = AUTH.signInPath;
             }
             break;
     }
@@ -71,7 +77,7 @@ function checkGoogleAuth() {
             console.log("User is not signed in.");
             // send login with redirection url from this page
             localStorage.setItem("request_uri", location.href);
-            location.href = signInPath;
+            location.href = AUTH.signInPath;
         } else {
             console.log("User is already signed in.");
             localStorage.setItem("auth_choice", "google");
@@ -82,7 +88,7 @@ function checkGoogleAuth() {
         console.error(error);
         // send login with redirection url from this page
         localStorage.setItem("request_uri", location.href);
-        location.href = signInPath;
+        location.href = AUTH.signInPath;
     });
 }
 
@@ -152,7 +158,7 @@ function signOut() {
     localStorage.removeItem("mqtt_username");
     // back to signin page
     localStorage.setItem("request_uri", location.href);
-    location.href = signInPath;
+    location.href = AUTH.signInPath;
 }
 
 function getCookie(name) {
@@ -210,6 +216,9 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
+            // keep payload for later viewing
+            var tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
+            AUTH.token_payload = tokenObj.payloadObj;
             completeAuth(xhr.response.username, xhr.response.token);
         }
     };
@@ -244,6 +253,90 @@ function getAuthStatus() {
                 email: "N/A",
             };
     }
+}
+
+function formatPerms(perms) {
+    let lines = [];
+    if (perms.sub) {
+        lines.push(`User: ${perms.sub}`);
+    }
+    if (perms.exp) {
+        const date = new Date(perms.exp * 1000);
+        lines.push(`Expires: ${date.toLocaleString()}`);
+    }
+    lines.push(`<br>Publish topics:`);
+    if (perms.publ && perms.publ.length > 0) {
+        perms.publ.forEach(pub => {
+            lines.push(`- ${pub}`);
+        });
+    } else {
+        lines.push(`- `);
+    }
+    lines.push(`<br>Subscribe topics:`);
+    if (perms.subs && perms.subs.length > 0) {
+        perms.subs.forEach(sub => {
+            lines.push(`- ${sub}`);
+        });
+    } else {
+        lines.push(`- `);
+    }
+    return lines.join('<br>');
+}
+
+function showPerms() {
+    const overlayDiv = document.querySelector('#perms-overlay');
+    const dataDiv = document.querySelector('#perms-data');
+    dataDiv.innerHTML = `${formatPerms(AUTH.token_payload)}`;
+    overlayDiv.style.display = 'block';
+}
+
+function initAuthPanel() {
+    const body = document.querySelector('body');
+    const overlayDiv = document.createElement('div');
+    overlayDiv.id = 'perms-overlay';
+    overlayDiv.style.position = 'fixed';
+    overlayDiv.style.width = '100%';
+    overlayDiv.style.height = '100%';
+    overlayDiv.style.top = '0';
+    overlayDiv.style.left = '0';
+    overlayDiv.style.right = '0';
+    overlayDiv.style.bottom = '0';
+    overlayDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    overlayDiv.style.zIndex = '10';
+    overlayDiv.style.textAlign = '-webkit-center';
+    overlayDiv.style.display = 'none';
+    body.appendChild(overlayDiv);
+
+    const modalDiv = document.createElement('div');
+    modalDiv.style.textAlign = 'left';
+    modalDiv.style.marginTop = '27vh';
+    modalDiv.style.backgroundColor = 'white';
+    modalDiv.style.width = '50%';
+    modalDiv.style.height = '50%';
+    modalDiv.style.padding = '5px';
+    modalDiv.style.borderRadius = '5px';
+    overlayDiv.appendChild(modalDiv);
+
+    const title = document.createElement('h3');
+    title.style.textAlign = 'center';
+    title.innerHTML = 'MQTT Permissions';
+    modalDiv.appendChild(title);
+
+    const dataDiv = document.createElement('div');
+    dataDiv.id = 'perms-data';
+    dataDiv.style.height = '75%';
+    dataDiv.style.width = '100%';
+    dataDiv.style.overflow = 'auto';
+    dataDiv.style.overflowWrap = 'break-word';
+    dataDiv.style.font = '11px monospace';
+    modalDiv.appendChild(dataDiv);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = 'Close';
+    closeBtn.addEventListener('click', event => {
+        overlayDiv.style.display = 'none';
+    })
+    modalDiv.appendChild(closeBtn);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API

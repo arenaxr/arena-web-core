@@ -132,7 +132,7 @@ function setupIcons() {
 
     const screenShareButton = createIconButton("screen-on", "Share your screen in a new window", () => {
         if (!ARENA.JitsiAPI) return;
-	
+
 	const defaultScreenObj = globals.screenshare ? globals.screenshare : "screenshare";
         const screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
         swal({
@@ -155,7 +155,7 @@ function setupIcons() {
                 })
                 .then((value) => {
                     const serverName = ARENA.JitsiAPI.serverName;
-                    let objectIds = value ? value : defaultScreenObj; 
+                    let objectIds = value ? value : defaultScreenObj;
 		    objectIds = objectIds.replace(", ", ",").split(",");
 		    for (let i = 0; i < objectIds.length; i++) {
 			if (objectIds[i] && objectIds[i] != ARENA.JitsiAPI.screenSharePrefix)
@@ -246,6 +246,13 @@ function setupIcons() {
     label.innerHTML = "Settings</br></br>";
     label.style.fontSize = "medium";
     formDiv.appendChild(label);
+
+    let perms = document.createElement("a");
+    perms.href = "#";
+    perms.innerHTML = "MQTT Permissions";
+    perms.onclick = function() { showPerms(); };
+    formDiv.appendChild(perms);
+    formDiv.appendChild(document.createElement("br"));
 
     formDiv.append("Authenticator: ");
     let authType = document.createElement("span");
