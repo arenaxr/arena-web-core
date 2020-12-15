@@ -15,9 +15,6 @@
       font-family: GeneralFoundicons;
       font-style: normal;
     }
-    #logout {
-      float: right;
-    }
   </style>
   <script language="javascript" src="third-party/jsoneditor.min.js"></script>
   <script src="third-party/clipboard.min.js"></script>
@@ -31,7 +28,8 @@
       <div class='span8 col-md-8 columns eight large-8'>
         <h2>Scene Editor</h2>
 
-        <a id="logout" href="#" onclick="signOut();">Logout</a>
+        <a style="float: right;" href="#" onclick="signOut();">Logout</a>
+        <a style="float: right;" href="#" onclick="showPerms();">Perm/</a>
 
         <div id="alert" class="alert alert-error" style="z-index:1000; position: fixed; top: 1em; left: 1em; opacity: 0.9; width: 400px; display: none">
           Alert Message.
