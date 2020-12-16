@@ -129,15 +129,15 @@ const loadScene = () => {
 
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT;
-    xhr.open("GET", globals.persistenceUrl+"?type=scene-options");
+    xhr.open("GET", globals.persistenceUrl + "?type=scene-options");
     xhr.responseType = "json";
     xhr.send();
-    xhr.onload = () => {
+    xhr.onload = async () => {
         if (xhr.status !== 200) {
             // not every scene will have scene-objects
             console.log("No scene-options object found");
         } else {
-            const payload = xhr.response[xhr.response.length-1];
+            const payload = xhr.response[xhr.response.length - 1];
             if (payload) {
                 const options = payload["attributes"];
                 sceneOptions = options["scene-options"];
@@ -149,8 +149,7 @@ const loadScene = () => {
                     globals.sceneObjects.env.setAttribute('environment', attribute, value);
                 }
                 document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
-            }
-            else {
+            } else {
                 // set defaults
                 globals.sceneObjects.env.setAttribute('environment', "preset", "starry");
                 globals.sceneObjects.env.setAttribute('environment', "seed", 3);
@@ -159,26 +158,26 @@ const loadScene = () => {
                 globals.sceneObjects.env.setAttribute('environment', "grid", "none");
                 globals.sceneObjects.env.setAttribute('environment', "fog", 0);
                 globals.sceneObjects.env.setAttribute('environment', "fog", 0);
-		document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
-           	
-		// make default env have lights
-		let light = document.createElement("a-light");
-		light.id = "ambient-light";
-		light.setAttribute("type", "ambient");
-		light.setAttribute("color", "#363942");
-		
-		let light1 = document.createElement("a-light");
-		light1.id = "point-light";
-		light1.setAttribute("type", "point");
-		light1.setAttribute("position", "-0.272 0.39 1.25");
-		light1.setAttribute("color", "#C2E6C7");
+                document.getElementById("sceneRoot").appendChild(globals.sceneObjects.env);
 
-		document.getElementById("sceneRoot").appendChild(light);
-  		document.getElementById("sceneRoot").appendChild(light1);
-	    }
+                // make default env have lights
+                let light = document.createElement("a-light");
+                light.id = "ambient-light";
+                light.setAttribute("type", "ambient");
+                light.setAttribute("color", "#363942");
+
+                let light1 = document.createElement("a-light");
+                light1.id = "point-light";
+                light1.setAttribute("type", "point");
+                light1.setAttribute("position", "-0.272 0.39 1.25");
+                light1.setAttribute("color", "#C2E6C7");
+
+                document.getElementById("sceneRoot").appendChild(light);
+                document.getElementById("sceneRoot").appendChild(light1);
+            }
         }
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : "mr.andrew.cmu.edu");
+        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : "mr.andrew.cmu.edu");
     }
 }
 
@@ -196,8 +195,12 @@ window.addEventListener('onauth', function (e) {
     lwt.qos = 2;
     lwt.retained = false;
     ARENA.mqttClient.connect({
-        onSuccess: function () { console.log("MQTT scene connection success."); },
-        onFailure: function (res) { console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`); },
+        onSuccess: function () {
+            console.log("MQTT scene connection success.");
+        },
+        onFailure: function (res) {
+            console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
+        },
         reconnect: true,
         willMessage: lwt,
         userName: globals.username,
@@ -208,7 +211,7 @@ window.addEventListener('onauth', function (e) {
     ARENA.Chat.init({
         userid: globals.idTag,
         cameraid: globals.camName,
-        username: globals.displayName, 
+        username: globals.displayName,
         realm: defaults.realm,
         scene: globals.scenenameParam,
         persist_uri: "https://" + defaults.persistHost + defaults.persistPath,
@@ -222,7 +225,7 @@ window.addEventListener('onauth', function (e) {
     // init runtime manager
     ARENA.RuntimeManager.init({
         mqtt_uri: globals.mqttParam,
-        onInitCallback: function() {
+        onInitCallback: function () {
             console.log("Runtime init done.");
         },
         name: "rt-" + Math.round(Math.random() * 10000) + "-" + globals.username,
@@ -513,14 +516,14 @@ function isJson(str) {
 function drawVideoCube(entityEl, videoID) {
     // attach video to head
     const videoCube = document.createElement('a-box');
-    videoCube.setAttribute('id', videoID+"cube");
+    videoCube.setAttribute('id', videoID + "cube");
     videoCube.setAttribute('position', '0 0 0');
     videoCube.setAttribute('scale', '0.6 0.4 0.6');
     videoCube.setAttribute('material', 'shader', 'flat');
     videoCube.setAttribute('src', `#${videoID}`); // video only (!audio)
 
     const videoCubeDark = document.createElement('a-box');
-    videoCubeDark.setAttribute('id', videoID+"cubeDark");
+    videoCubeDark.setAttribute('id', videoID + "cubeDark");
     videoCubeDark.setAttribute('position', '0 0 0.01');
     videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
     videoCubeDark.setAttribute('material', 'shader', 'flat');
@@ -551,73 +554,71 @@ function drawMicrophoneState(entityEl, hasAudio) {
 
 // https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
 async function enableChromeAEC(gainNode) {
-  /**
-   *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-   *  1. grab the GainNode from the scene's THREE.AudioListener
-   *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
-   *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-   *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-   *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-   *  6. connect the other RTCPeerConnection's stream to a new audio element.
-   *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
-   */
+    /**
+     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
+     *  1. grab the GainNode from the scene's THREE.AudioListener
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
+     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
+     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
+     *  6. connect the other RTCPeerConnection's stream to a new audio element.
+     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
+     */
 
-  const audioEl = new Audio();
-  audioEl.setAttribute("autoplay", "autoplay");
-  audioEl.setAttribute("playsinline", "playsinline");
+    const audioEl = new Audio();
+    audioEl.setAttribute("autoplay", "autoplay");
+    audioEl.setAttribute("playsinline", "playsinline");
 
-  const context = THREE.AudioContext.getContext();
-  const loopbackDestination = context.createMediaStreamDestination();
-  const outboundPeerConnection = new RTCPeerConnection();
-  const inboundPeerConnection = new RTCPeerConnection();
+    const context = THREE.AudioContext.getContext();
+    const loopbackDestination = context.createMediaStreamDestination();
+    const outboundPeerConnection = new RTCPeerConnection();
+    const inboundPeerConnection = new RTCPeerConnection();
 
-  const onError = e => {
-    console.error("RTCPeerConnection loopback initialization error", e);
-  };
+    const onError = e => {
+        console.error("RTCPeerConnection loopback initialization error", e);
+    };
 
-  outboundPeerConnection.addEventListener("icecandidate", e => {
-    inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-  });
-
-  inboundPeerConnection.addEventListener("icecandidate", e => {
-    outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-  });
-
-  inboundPeerConnection.addEventListener("track", e => {
-    audioEl.srcObject = e.streams[0];
-  });
-
-  try {
-    // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
-    loopbackDestination.stream.getTracks().forEach(track => {
-      outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+    outboundPeerConnection.addEventListener("icecandidate", e => {
+        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
     });
 
-    const offer = await outboundPeerConnection.createOffer();
-    outboundPeerConnection.setLocalDescription(offer);
-    await inboundPeerConnection.setRemoteDescription(offer);
+    inboundPeerConnection.addEventListener("icecandidate", e => {
+        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+    });
 
-    const answer = await inboundPeerConnection.createAnswer();
-    inboundPeerConnection.setLocalDescription(answer);
-    outboundPeerConnection.setRemoteDescription(answer);
+    inboundPeerConnection.addEventListener("track", e => {
+        audioEl.srcObject = e.streams[0];
+    });
 
-    gainNode.disconnect();
-    if (ARENA.JitsiAPI.chromeSpatialAudioOn()) {
-        gainNode.connect(context.destination);
+    try {
+        // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
+        loopbackDestination.stream.getTracks().forEach(track => {
+            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+        });
+
+        const offer = await outboundPeerConnection.createOffer();
+        outboundPeerConnection.setLocalDescription(offer);
+        await inboundPeerConnection.setRemoteDescription(offer);
+
+        const answer = await inboundPeerConnection.createAnswer();
+        inboundPeerConnection.setLocalDescription(answer);
+        outboundPeerConnection.setRemoteDescription(answer);
+
+        gainNode.disconnect();
+        if (ARENA.JitsiAPI.chromeSpatialAudioOn()) {
+            gainNode.connect(context.destination);
+        } else {
+            gainNode.connect(loopbackDestination);
+        }
+    } catch (e) {
+        onError(e);
     }
-    else {
-        gainNode.connect(loopbackDestination);
-    }
-  } catch (e) {
-    onError(e);
-  }
 }
 
 function onMessageArrived(message, jsonMessage) {
     try {
         _onMessageArrived(message, jsonMessage);
-    }
-    catch (err) {
+    } catch (err) {
         if (message) {
             if (message.payloadString) {
                 console.error("onMessageArrived Error!", err, message.payloadString);
@@ -631,6 +632,7 @@ function onMessageArrived(message, jsonMessage) {
 }
 
 var progMsgs = {};
+
 function _onMessageArrived(message, jsonMessage) {
     let sceneObjects = globals.sceneObjects;
     let theMessage = {};
@@ -921,18 +923,17 @@ function _onMessageArrived(message, jsonMessage) {
                         const videoID = `video${theMessage.jitsiId}`;
                         if (theMessage.hasVideo) {
                             if (document.getElementById(videoID) &&
-                                !(entityEl.getAttribute('videoCubeDrawn')=='true')) {
+                                !(entityEl.getAttribute('videoCubeDrawn') == 'true')) {
                                 // console.log("draw videoCube: " + theMessage.jitsiId);
                                 drawVideoCube(entityEl, videoID);
                                 entityEl.setAttribute('videoCubeDrawn', true);
                             }
-                        }
-                        else {
-                            const vidCube = document.getElementById(videoID+"cube");
+                        } else {
+                            const vidCube = document.getElementById(videoID + "cube");
                             if (entityEl.contains(vidCube)) {
                                 entityEl.removeChild(vidCube);
                             }
-                            const vidCubeDark = document.getElementById(videoID+"cubeDark");
+                            const vidCubeDark = document.getElementById(videoID + "cubeDark");
                             if (entityEl.contains(vidCubeDark)) {
                                 entityEl.removeChild(vidCubeDark);
                             }
@@ -969,26 +970,25 @@ function _onMessageArrived(message, jsonMessage) {
                                     audioSource.setMediaStreamSource(audioStream);
                                     entityEl.positionalAudio = audioSource;
                                     entityEl.object3D.add(audioSource);
-                                }
-                                else {
+                                } else {
                                     entityEl.positionalAudio.setMediaStreamSource(audioStream);
                                 }
-                                if (globals.refDist) 
-				    entityEl.positionalAudio.setRefDistance(globals.refDist); // L-R panning
+                                if (globals.refDist)
+                                    entityEl.positionalAudio.setRefDistance(globals.refDist); // L-R panning
                                 if (globals.rolloffFact)
-			      	    entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
+                                    entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
                                 if (globals.distModel)
-				    entityEl.positionalAudio.setDistanceModel(globals.distModel);
-				if (globals.maxDist)
-				    entityEl.positionalAudio.setMaxDistance(globals.maxDist);
-				if (globals.volume)
-				    entityEl.positionalAudio.setVolume(globals.volume);
+                                    entityEl.positionalAudio.setDistanceModel(globals.distModel);
+                                if (globals.maxDist)
+                                    entityEl.positionalAudio.setMaxDistance(globals.maxDist);
+                                if (globals.volume)
+                                    entityEl.positionalAudio.setVolume(globals.volume);
 
                                 // fixes chrome echo bug
                                 const audioCtx = THREE.AudioContext.getContext();
                                 const resume = () => {
                                     audioCtx.resume();
-                                    setTimeout(function() {
+                                    setTimeout(function () {
                                         if (audioCtx.state === "running") {
                                             if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
                                                 enableChromeAEC(listener.gain);
@@ -1049,7 +1049,7 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
                     entityEl.setAttribute('gltf-model', theMessage.data.url);
 
-                    function updateProgress(failed, evt) {
+                    let updateProgress = (failed, evt) => {
                         const gltfProgressEl = document.getElementById("gltf-loading");
                         var innerHTML = "Loading 3D model:<br/>";
                         for (const [src, progress] of Object.entries(progMsgs)) {
@@ -1062,8 +1062,12 @@ function _onMessageArrived(message, jsonMessage) {
                         }
                         gltfProgressEl.innerHTML = innerHTML;
                         gltfProgressEl.className = "show";
-                        if (evt.detail.progress == 100 || failed) setTimeout(() => { progMsgs = {}; gltfProgressEl.className = "hide"; }, 3000);
-                    }
+                        if (evt.detail.progress == 100 || failed) setTimeout(() => {
+                            progMsgs = {};
+                            gltfProgressEl.className = "hide";
+                        }, 3000);
+                    };
+
                     entityEl.addEventListener('model-progress', evt => {
                         progMsgs[evt.detail.src] = evt.detail.progress;
                         updateProgress(false, evt);

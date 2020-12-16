@@ -1,6 +1,6 @@
 /* global $, JitsiMeetJS */
 
-var ARENAJitsiAPI = (function (jitsiServer) {
+var ARENAJitsiAPI = (async function (jitsiServer) {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================
@@ -23,7 +23,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
     // TODO: is this how to p2p.enabled false? https://github.com/jitsi/lib-jitsi-meet/blob/master/doc/API.md
     const confOptions = {
         openBridgeChannel: true,
-        p2p: { enabled: false },
+        p2p: {enabled: false},
     };
 
     const initOptions = {
@@ -78,8 +78,8 @@ var ARENAJitsiAPI = (function (jitsiServer) {
             track.addEventListener(
                 JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
                 deviceId =>
-                console.log(
-                    `track audio output device was changed to ${deviceId}`));
+                    console.log(
+                        `track audio output device was changed to ${deviceId}`));
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 //$('body').append(`<video autoplay='1' id='localVideo${i}' />`);
@@ -106,8 +106,8 @@ var ARENAJitsiAPI = (function (jitsiServer) {
 
     function updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
-        screenShareId = screenShareId.replace(SCREENSHARE, ""); 
-	let screenShareEl = globals.sceneObjects[screenShareId];
+        screenShareId = screenShareId.replace(SCREENSHARE, "");
+        let screenShareEl = globals.sceneObjects[screenShareId];
         if (!screenShareEl) { // create if doesnt exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
@@ -144,8 +144,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         if (track.getType() == "audio") {
             if (remoteTracks[participant][0]) remoteTracks[participant][0].dispose();
             remoteTracks[participant][0] = track;
-        }
-        else if (track.getType() == "video") {
+        } else if (track.getType() == "video") {
             if (remoteTracks[participant][1]) remoteTracks[participant][1].dispose();
             remoteTracks[participant][1] = track;
         }
@@ -158,8 +157,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
             () => console.log('remote track stopped'));
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
             deviceId =>
-            console.log(
-                `track audio output device was changed to ${deviceId}`));
+                console.log(`track audio output device was changed to ${deviceId}`));
         // track.addEventListener(
         //     JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
         //     () => {
@@ -168,25 +166,25 @@ var ARENAJitsiAPI = (function (jitsiServer) {
 
         const videoId = `video${participant}`;
         const displayNames = conference.getParticipantById(participant)._displayName;
-	const objectIds = displayNames.split(",");
+        const objectIds = displayNames.split(",");
 
-                console.log(displayNames,objectIds)
+        console.log(displayNames, objectIds)
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) { // create
             $('a-assets').append(
-                `<video autoplay='1' id='${videoId}'/>` );
+                `<video autoplay='1' id='${videoId}'/>`);
         }
         track.attach($(`#${videoId}`)[0]);
 
         // handle screen share video
-	for (let i = 0; i < objectIds.length; i++) {
+        for (let i = 0; i < objectIds.length; i++) {
             if (objectIds[i] && objectIds[i].includes(SCREENSHARE)) {
-		const video = $(`#${videoId}`);
+                const video = $(`#${videoId}`);
                 video.on('loadeddata', e => {
                     screenShareEl = updateScreenShareObject(objectIds[i], videoId, participant);
                 });
             }
-	}
+        }
     }
 
     /**
@@ -268,12 +266,12 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         if (!chromeSpatialAudioOn) {
             // only tested and working on mac on chrome
             navigator.mediaDevices.enumerateDevices()
-                .then(function(devices) {
+                .then(function (devices) {
                     const headphonesConnected = devices
                         .filter(device => /audio\w+/.test(device.kind))
                         .find(device => device.label.toLowerCase().includes('head'));
                     chromeSpatialAudioOn = !!headphonesConnected;
-            });
+                });
         }
     }
 
@@ -347,16 +345,24 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         disconnect);
     connection.connect();
 
-    JitsiMeetJS.createLocalTracks({
-        devices: ['audio', 'video']
-    })
-    .then(onLocalTracks)
-    .catch(error => {
-        console.warn(error)
-        isJoined = false;
-    });
-
-    setupLocalVideo();
+    const devices = ['audio'];
+    let withVideo = false;
+    try {
+        let stream = await navigator.mediaDevices.getUserMedia({video: true});
+        devices.push('video');
+        withVideo = true;
+    } catch (e) {
+        console.log("No permitted video device detected");
+        let vidbtn = document.getElementById("btn-video-off");
+        if (vidbtn) vidbtn.remove();
+    }
+    JitsiMeetJS.createLocalTracks({devices})
+        .then(onLocalTracks)
+        .catch(error => {
+            console.warn(error);
+            isJoined = false;
+        });
+    if (withVideo) setupLocalVideo();
 
     function setupLocalVideo() {
         // video window for jitsi
@@ -374,6 +380,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
             jitsiVideoElem.setAttribute("height", videoHeight);
             // jitsiVideoElem.removeEventListener('loadeddata', setupCornerVideo);
         }
+
         jitsiVideoElem.addEventListener('loadeddata', setupCornerVideo);
         window.addEventListener('orientationchange', () => { // mobile only
             globals.localVideoWidth = Number(window.innerWidth / 5);
@@ -391,34 +398,34 @@ var ARENAJitsiAPI = (function (jitsiServer) {
 
         screenSharePrefix: SCREENSHARE,
 
-        ready: function() {
-            return isJoined && jitsiAudioTrack && jitsiVideoTrack;
+        ready: function () {
+            return isJoined && jitsiAudioTrack && (!withVideo || jitsiVideoTrack);
         },
 
-        showVideo: function() {
+        showVideo: function () {
             if (jitsiVideoElem) jitsiVideoElem.style.display = "block";
         },
 
-        hideVideo: function() {
+        hideVideo: function () {
             if (jitsiVideoElem) jitsiVideoElem.style.display = "none";
         },
 
-        getJitsiId: function() {
+        getJitsiId: function () {
             return jitsiId;
         },
 
-        activeSpeakerChanged: function() {
+        activeSpeakerChanged: function () {
             return prevActiveSpeaker !== activeSpeaker;
         },
 
-        chromeSpatialAudioOn: function() {
+        chromeSpatialAudioOn: function () {
             return chromeSpatialAudioOn;
         },
 
         unmuteAudio: function () {
             jitsiAudioTrack.unmute();
             hasAudio = true;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function (resolve, reject) {
                 resolve()
             });
         },
@@ -426,7 +433,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         muteAudio: function () {
             jitsiAudioTrack.mute();
             hasAudio = false;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function (resolve, reject) {
                 resolve()
             });
         },
@@ -434,7 +441,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         startVideo: function () {
             jitsiVideoTrack.unmute();
             hasVideo = true;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function (resolve, reject) {
                 resolve()
             });
         },
@@ -442,7 +449,7 @@ var ARENAJitsiAPI = (function (jitsiServer) {
         stopVideo: function () {
             jitsiVideoTrack.mute();
             hasVideo = false;
-            return new Promise(function(resolve,reject) {
+            return new Promise(function (resolve, reject) {
                 resolve()
             });
         },
@@ -455,17 +462,17 @@ var ARENAJitsiAPI = (function (jitsiServer) {
             return hasVideo;
         },
 
-        getAudioTrack: function(jitsiId) {
+        getAudioTrack: function (jitsiId) {
             return remoteTracks[jitsiId] && remoteTracks[jitsiId][0];
         },
 
-        getVideoTrack: function(jitsiId) {
+        getVideoTrack: function (jitsiId) {
             return remoteTracks[jitsiId] && remoteTracks[jitsiId][1];
         },
 
         leave: function () {
             disconnect();
-            return new Promise(function(resolve,reject) {
+            return new Promise(function (resolve, reject) {
                 resolve()
             });
         }
