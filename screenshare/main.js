@@ -5,16 +5,16 @@ const jitsi_server = window.jitsiURL;
 const options = {
     hosts: {
         domain: jitsi_server,
-        muc: 'conference.' + jitsi_server // FIXME: use XEP-0030
+        muc: 'conference.' + jitsi_server, // FIXME: use XEP-0030
     },
     bosh: '//' + jitsi_server + '/http-bind', // FIXME: use xep-0156 for that
 
     // The name of client node advertised in XEP-0115 'c' stanza
-    clientNode: 'http://jitsi.org/jitsimeet'
+    clientNode: 'http://jitsi.org/jitsimeet',
 };
 
 const confOptions = {
-    openBridgeChannel: true
+    openBridgeChannel: true,
 };
 
 let connection = null;
@@ -33,7 +33,7 @@ function onLocalTracks(tracks) {
     for (let i = 0; i < localTracks.length; i++) {
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
-            audioLevel => console.log(`Audio Level local: ${audioLevel}`));
+            (audioLevel) => console.log(`Audio Level local: ${audioLevel}`));
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
             () => console.log('local track muted'));
@@ -42,7 +42,7 @@ function onLocalTracks(tracks) {
             () => console.log('local track stoped'));
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
-            deviceId =>
+            (deviceId) =>
                 console.log(
                     `track audio output device was changed to ${deviceId}`));
         if (localTracks[i].getType() === 'audio') {
@@ -77,7 +77,7 @@ function onRemoteTrack(track) {
 
     track.addEventListener(
         JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
-        audioLevel => console.log(`Audio Level remote: ${audioLevel}`));
+        (audioLevel) => console.log(`Audio Level remote: ${audioLevel}`));
     track.addEventListener(
         JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
         () => console.log('remote track muted'));
@@ -85,7 +85,7 @@ function onRemoteTrack(track) {
         JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
         () => console.log('remote track stoped'));
     track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
-        deviceId =>
+        (deviceId) =>
             console.log(
                 `track audio output device was changed to ${deviceId}`));
     const id = participant + track.getType() + idx;
@@ -134,18 +134,18 @@ function onConnectionSuccess() {
     room = connection.initJitsiConference(window.scene, confOptions);
     room.setDisplayName(window.objectIds.join());
     // room.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteTrack);
-    room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, track => {
+    room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });
     room.on(
         JitsiMeetJS.events.conference.CONFERENCE_JOINED,
         onConferenceJoined);
-    room.on(JitsiMeetJS.events.conference.USER_JOINED, id => {
+    room.on(JitsiMeetJS.events.conference.USER_JOINED, (id) => {
         console.log('user join');
         remoteTracks[id] = [];
     });
     room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
-    room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, track => {
+    room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
         console.log(`${track.getType()} - ${track.isMuted()}`);
     });
     room.on(
@@ -207,7 +207,7 @@ $(window).bind('unload', unload);
 
 // JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 const initOptions = {
-    disableAudioLevels: true
+    disableAudioLevels: true,
 };
 
 JitsiMeetJS.init(initOptions);
@@ -230,8 +230,8 @@ JitsiMeetJS.mediaDevices.addEventListener(
 
 connection.connect();
 
-JitsiMeetJS.createLocalTracks({ devices: ['desktop'] })
+JitsiMeetJS.createLocalTracks({devices: ['desktop']})
     .then(onLocalTracks)
-    .catch(error => {
+    .catch((error) => {
         throw error;
     });
