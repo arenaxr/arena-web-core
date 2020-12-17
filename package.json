@@ -1,0 +1,24 @@
+{
+  "name": "arena-core",
+  "version": "1.0.0",
+  "description": "Core browser client for ARENA",
+  "browser": "main.js",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.15.0",
+    "eslint-config-google": "^0.14.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conix-center/ARENA-core.git"
+  },
+  "author": "CONIX Center",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/conix-center/ARENA-core/issues"
+  },
+  "homepage": "https://github.com/conix-center/ARENA-core#readme"
+}

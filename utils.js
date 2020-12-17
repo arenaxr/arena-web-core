@@ -38,40 +38,43 @@ function getUrlParam(parameter, defaultValue) {
     if (window.location.href.indexOf(parameter) > -1) {
         urlParameter = getUrlVars()[parameter];
     }
-    if (urlParameter === "") {
+    if (urlParameter === '') {
         return defaultValue;
     }
     return urlParameter;
 }
 
 function getQueryParams(name, defaultValue) {
-    var qs = location.search;
+    const qs = location.search;
 
-    var params = [];
-    var tokens;
-    var re = /[?&]?([^=]+)=([^&]*)/g;
+    const params = [];
+    let tokens;
+    const re = /[?&]?([^=]+)=([^&]*)/g;
 
     while (tokens = re.exec(qs)) {
-        if (decodeURIComponent(tokens[1]) == name)
+        if (decodeURIComponent(tokens[1]) == name) {
             params.push(decodeURIComponent(tokens[2]));
+        }
     }
 
-    if (params === []) return defaultValue
+    if (params === []) return defaultValue;
     else return params;
 }
 
 function getUrlParams(parameter, defaultValue) {
-    let urlParameter = defaultValue;
-    var indexes = [];
+    const urlParameter = defaultValue;
+    const indexes = [];
     parameter = parameter + '=';
     if (window.location.href.indexOf(parameter) > -1) {
-        var vars = getUrlVars();
-        for (var i = 0; i < vars.length; i++) {
-            if (vars[parameter] == parameter)
+        const vars = getUrlVars();
+        for (let i = 0; i < vars.length; i++) {
+            if (vars[parameter] == parameter) {
                 indexes.push(vars[i]);
+            }
         }
-    } else
+    } else {
         indexes.push(defaultValue);
+    }
 
     return indexes;
 }
@@ -83,7 +86,7 @@ function debug(msg) {
 function updateConixBox(eventName, coordsData, myThis) {
     const sceney = myThis.sceneEl;
     const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', myThis.id + " " + eventName + " " + '\n' + coordsToText(coordsData));
+    textEl.setAttribute('value', myThis.id + ' ' + eventName + ' ' + '\n' + coordsToText(coordsData));
     console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
 }
 
@@ -96,28 +99,28 @@ function debugConixText(coordsData) {
 function debugRaw(debugMsg) {
     const textEl = document.getElementById('conix-text');
     textEl.setAttribute('value', debugMsg);
-    //console.log('debug: ', debugMsg);
+    // console.log('debug: ', debugMsg);
 }
 
 function eventAction(evt, eventName, myThis) {
     const newPosition = myThis.object3D.position;
 
-    let coordsData = {
+    const coordsData = {
         x: newPosition.x.toFixed(3),
         y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3)
+        z: newPosition.z.toFixed(3),
     };
 
     // publish to MQTT
-    const objName = myThis.id + "_" + globals.idTag;
+    const objName = myThis.id + '_' + globals.idTag;
     publish(globals.outputTopic + objName, {
         object_id: objName,
-        action: "clientEvent",
+        action: 'clientEvent',
         type: eventName,
         data: {
             position: coordsData,
-            source: globals.camName
-        }
+            source: globals.camName,
+        },
     });
 }
 
@@ -125,24 +128,24 @@ function setCoordsData(evt) {
     return {
         x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
         y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
-        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3)
+        z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3),
     };
 }
 
 function setClickData(evt) {
-    if (evt.detail.intersection)
+    if (evt.detail.intersection) {
         return {
             x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
             y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
-            z: parseFloat(evt.detail.intersection.point.z.toFixed(3))
-        }
-    else {
-        console.log("WARN: empty coords data");
+            z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
+        };
+    } else {
+        console.log('WARN: empty coords data');
         return {
             x: 0,
             y: 0,
-            z: 0
-        }
+            z: 0,
+        };
     }
 }
 
@@ -150,7 +153,7 @@ function vec3ToObject(vec) {
     return {
         x: parseFloat(vec.x.toFixed(3)),
         y: parseFloat(vec.y.toFixed(3)),
-        z: parseFloat(vec.z.toFixed(3))
+        z: parseFloat(vec.z.toFixed(3)),
     };
 }
 
@@ -159,7 +162,7 @@ function quatToObject(q) {
         x: parseFloat(q.x.toFixed(3)),
         y: parseFloat(q.y.toFixed(3)),
         z: parseFloat(q.z.toFixed(3)),
-        w: parseFloat(q.w.toFixed(3))
+        w: parseFloat(q.w.toFixed(3)),
     };
 }
 
