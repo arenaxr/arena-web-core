@@ -38,56 +38,56 @@ window.onload = function() {
     initAuthPanel(); // add auth details panel
 };
 
-var auth2;
+let auth2;
 // check if the current user is already signed in
-var authCheck = function(args) {
-    localStorage.removeItem("mqtt_token"); // deprecate local token storage
+const authCheck = function(args) {
+    localStorage.removeItem('mqtt_token'); // deprecate local token storage
     AUTH.signInPath = args.signInPath;
-    switch (localStorage.getItem("auth_choice")) {
-        case "anonymous":
-            window.addEventListener('load', checkAnonAuth);
-            break;
-        case "google":
-        default: // default = can mean private browser
-            // normal check for google auth2
-            try {
-                gapi.load('auth2', checkGoogleAuth);
-            } catch (e) {
-                console.error(e);
-                // send login with redirection url from this page
-                localStorage.setItem("request_uri", location.href);
-                location.href = AUTH.signInPath;
-            }
-            break;
+    switch (localStorage.getItem('auth_choice')) {
+    case 'anonymous':
+        window.addEventListener('load', checkAnonAuth);
+        break;
+    case 'google':
+    default: // default = can mean private browser
+        // normal check for google auth2
+        try {
+            gapi.load('auth2', checkGoogleAuth);
+        } catch (e) {
+            console.error(e);
+            // send login with redirection url from this page
+            localStorage.setItem('request_uri', location.href);
+            location.href = AUTH.signInPath;
+        }
+        break;
     }
 };
 
 function checkAnonAuth(event) {
     // prefix all anon users with "anonymous-"
-    var anonName = processUserNames(localStorage.getItem("display_name"), 'anonymous-');
-    requestMqttToken("anonymous", anonName);
+    const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+    requestMqttToken('anonymous', anonName);
 }
 
 function checkGoogleAuth() {
     auth2 = gapi.auth2.init({
-        client_id: defaults.gAuthClientId
+        client_id: defaults.gAuthClientId,
     }).then(function() {
         auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
-            console.log("User is not signed in.");
+            console.log('User is not signed in.');
             // send login with redirection url from this page
-            localStorage.setItem("request_uri", location.href);
+            localStorage.setItem('request_uri', location.href);
             location.href = AUTH.signInPath;
         } else {
-            console.log("User is already signed in.");
-            localStorage.setItem("auth_choice", "google");
-            var googleUser = auth2.currentUser.get();
+            console.log('User is already signed in.');
+            localStorage.setItem('auth_choice', 'google');
+            const googleUser = auth2.currentUser.get();
             onSignIn(googleUser);
         }
     }, function(error) {
         console.error(error);
         // send login with redirection url from this page
-        localStorage.setItem("request_uri", location.href);
+        localStorage.setItem('request_uri', location.href);
         location.href = AUTH.signInPath;
     });
 }
@@ -99,18 +99,18 @@ function checkGoogleAuth() {
  */
 function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
-    var processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
+    let processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
     if (typeof globals !== 'undefined') {
         if (typeof defaults !== 'undefined' && globals.userParam !== defaults.userParam) {
             // userParam set? persist to storage
-            localStorage.setItem("display_name", decodeURI(globals.userParam));
+            localStorage.setItem('display_name', decodeURI(globals.userParam));
             processedName = globals.userParam;
         }
-        if (localStorage.getItem("display_name") === null) {
+        if (localStorage.getItem('display_name') === null) {
             // Use auth name to create human-readable name
-            localStorage.setItem("display_name", authName);
+            localStorage.setItem('display_name', authName);
         }
-        globals.displayName = localStorage.getItem("display_name");
+        globals.displayName = localStorage.getItem('display_name');
     }
     if (prefix !== null) {
         processedName = `${prefix}${processedName}`;
@@ -118,46 +118,46 @@ function processUserNames(authName, prefix = null) {
     if (typeof globals !== 'undefined') {
         globals.userParam = processedName;
         // replay global id setup from events.js
-        globals.idTag = globals.timeID + "_" + globals.userParam; // e.g. 1234_eric
+        globals.idTag = globals.timeID + '_' + globals.userParam; // e.g. 1234_eric
         if (globals.fixedCamera !== '') {
-            globals.camName = "camera_" + globals.fixedCamera + "_" + globals.fixedCamera;
+            globals.camName = 'camera_' + globals.fixedCamera + '_' + globals.fixedCamera;
         } else {
-            globals.camName = "camera_" + globals.idTag; // e.g. camera_1234_eric
+            globals.camName = 'camera_' + globals.idTag; // e.g. camera_1234_eric
         }
-        globals.viveLName = "viveLeft_" + globals.idTag; // e.g. viveLeft_9240_X
-        globals.viveRName = "viveRight_" + globals.idTag; // e.g. viveRight_9240_X
+        globals.viveLName = 'viveLeft_' + globals.idTag; // e.g. viveLeft_9240_X
+        globals.viveRName = 'viveRight_' + globals.idTag; // e.g. viveRight_9240_X
     }
     return processedName;
 }
 
 function onSignIn(googleUser) {
-    var profile = googleUser.getBasicProfile();
+    const profile = googleUser.getBasicProfile();
     console.log('ID: ' + profile.getId());
     console.log('Full Name: ' + profile.getName());
     console.log('Email: ' + profile.getEmail());
     processUserNames(profile.getName());
     // request mqtt-auth
-    var id_token = googleUser.getAuthResponse().id_token;
-    requestMqttToken("google", profile.getEmail(), id_token);
+    const id_token = googleUser.getAuthResponse().id_token;
+    requestMqttToken('google', profile.getEmail(), id_token);
 }
 
 function signOut() {
     // logout, and disassociate user
-    switch (localStorage.getItem("auth_choice")) {
-        case "google":
-            var auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function() {
-                console.log('User signed out.');
-            });
-            auth2.disconnect();
-            break;
-        default:
-            break;
+    switch (localStorage.getItem('auth_choice')) {
+    case 'google':
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function() {
+            console.log('User signed out.');
+        });
+        auth2.disconnect();
+        break;
+    default:
+        break;
     }
-    localStorage.removeItem("auth_choice");
-    localStorage.removeItem("mqtt_username");
+    localStorage.removeItem('auth_choice');
+    localStorage.removeItem('mqtt_username');
     // back to signin page
-    localStorage.setItem("request_uri", location.href);
+    localStorage.setItem('request_uri', location.href);
     location.href = AUTH.signInPath;
 }
 
@@ -179,8 +179,8 @@ function getCookie(name) {
 
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
-    let xhr = new XMLHttpRequest();
-    var params = "username=" + mqtt_username + "&id_token=" + id_token;
+    const xhr = new XMLHttpRequest();
+    let params = 'username=' + mqtt_username + '&id_token=' + id_token;
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
@@ -217,7 +217,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             signOut(); // critical error
         } else {
             // keep payload for later viewing
-            var tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
+            const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
             completeAuth(xhr.response.username, xhr.response.token);
         }
@@ -225,38 +225,38 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
 }
 
 function completeAuth(username, token) {
-    localStorage.setItem("mqtt_username", username);
+    localStorage.setItem('mqtt_username', username);
     // mqtt-token must be set to authorize access to MQTT broker
     const authCompleteEvent = new CustomEvent('onauth', {
         detail: {
             mqtt_username: username,
-            mqtt_token: token
-        }
+            mqtt_token: token,
+        },
     });
     window.dispatchEvent(authCompleteEvent);
 }
 
 function getAuthStatus() {
-    switch (localStorage.getItem("auth_choice")) {
-        case "google":
-            var googleUser = auth2.currentUser.get();
-            var profile = googleUser.getBasicProfile();
-            return {
-                type: "Google",
-                name: profile.getName(),
-                email: profile.getEmail(),
-            };
-        default:
-            return {
-                type: "Anonymous",
-                name: localStorage.getItem("display_name"),
-                email: "N/A",
-            };
+    switch (localStorage.getItem('auth_choice')) {
+    case 'google':
+        var googleUser = auth2.currentUser.get();
+        var profile = googleUser.getBasicProfile();
+        return {
+            type: 'Google',
+            name: profile.getName(),
+            email: profile.getEmail(),
+        };
+    default:
+        return {
+            type: 'Anonymous',
+            name: localStorage.getItem('display_name'),
+            email: 'N/A',
+        };
     }
 }
 
 function formatPerms(perms) {
-    let lines = [];
+    const lines = [];
     if (perms.sub) {
         lines.push(`User: ${perms.sub}`);
     }
@@ -266,7 +266,7 @@ function formatPerms(perms) {
     }
     lines.push(`<br>Publish topics:`);
     if (perms.publ && perms.publ.length > 0) {
-        perms.publ.forEach(pub => {
+        perms.publ.forEach((pub) => {
             lines.push(`- ${pub}`);
         });
     } else {
@@ -274,7 +274,7 @@ function formatPerms(perms) {
     }
     lines.push(`<br>Subscribe topics:`);
     if (perms.subs && perms.subs.length > 0) {
-        perms.subs.forEach(sub => {
+        perms.subs.forEach((sub) => {
             lines.push(`- ${sub}`);
         });
     } else {
@@ -333,23 +333,22 @@ function initAuthPanel() {
 
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = 'Close';
-    closeBtn.addEventListener('click', event => {
+    closeBtn.addEventListener('click', (event) => {
         overlayDiv.style.display = 'none';
-    })
+    });
     modalDiv.appendChild(closeBtn);
 }
 
 // https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
 function storageAvailable(type) {
-    var storage;
+    let storage;
     try {
         storage = window[type];
-        var x = '__storage_test__';
+        const x = '__storage_test__';
         storage.setItem(x, x);
         storage.removeItem(x);
         return true;
-    }
-    catch (e) {
+    } catch (e) {
         return e instanceof DOMException && (
             // everything except Firefox
             e.code === 22 ||
