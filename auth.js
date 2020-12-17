@@ -38,7 +38,9 @@ window.onload = function() {
     initAuthPanel(); // add auth details panel
 };
 
-let auth2;
+// eslint-disable-next-line no-var
+var auth2;
+
 // check if the current user is already signed in
 const authCheck = function(args) {
     localStorage.removeItem('mqtt_token'); // deprecate local token storage
