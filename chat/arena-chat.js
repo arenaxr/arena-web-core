@@ -48,7 +48,8 @@ export default class ARENAChat {
       mqtt_username:
         st.mqtt_username !== undefined ? st.mqtt_username : "non_auth",
       mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
-      supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false
+      supportDevFolders:
+        st.supportDevFolders !== undefined ? st.supportDevFolders : false,
     };
 
     // users list
@@ -252,7 +253,7 @@ export default class ARENAChat {
       _this.usersPopup.style.display = "none";
       _this.chatDot.style.display = "none";
       _this.lmPopup.style.display = "none";
-      this.unreadMsgs = 0;
+      _this.unreadMsgs = 0;
 
       // scroll to bottom
       _this.msgList.scrollTop = _this.msgList.scrollHeight;
@@ -489,7 +490,8 @@ export default class ARENAChat {
         cid: msg.cameraid,
         ts: new Date().getTime(),
       };
-      if (msg.from_scene === this.settings.scene) this.populateUserList(msg.from_un);
+      if (msg.from_scene === this.settings.scene)
+        this.populateUserList(msg.from_un);
       else this.populateUserList();
       this.keepalive(); // let this user know about us
     } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
@@ -577,7 +579,7 @@ export default class ARENAChat {
     this.msgList.scrollTop = this.msgList.scrollHeight;
   }
 
-  populateUserList(newUser=undefined) {
+  populateUserList(newUser = undefined) {
     this.usersList.innerHTML = "";
     let selVal = this.toSel.value;
     this.toSel.innerHTML = "";
@@ -606,23 +608,20 @@ export default class ARENAChat {
 
     this.nUserslabel.innerHTML = Object.keys(this.liveUsers).length + 1; // count all users
     this.usersDot.innerHTML = nUsers < 100 ? nUsers : "...";
-    if (newUser) this.displayAlert(
-      newUser + " joined.",
-      5000
-    );
+    if (newUser) this.displayAlert(newUser + " joined.", 5000);
 
-    let uli = document.createElement("li"); 
+    let uli = document.createElement("li");
     uli.innerHTML = this.settings.username + " (Me)";
     _this.usersList.appendChild(uli);
     let uBtnCtnr = document.createElement("div");
     uBtnCtnr.className = "users-list-btn-ctnr";
     uli.appendChild(uBtnCtnr);
-    let sspan = document.createElement("span");
-    sspan.className = "users-list-btn s";
-    sspan.title = "Mute User";
-    uBtnCtnr.appendChild(sspan);
+    let usspan = document.createElement("span");
+    usspan.className = "users-list-btn s";
+    usspan.title = "Mute User";
+    uBtnCtnr.appendChild(usspan);
     // span click event (send sound on/off msg to ussr)
-    sspan.onclick = function () {
+    usspan.onclick = function () {
       let abtn = document.getElementById("btn-audio-off");
       if (abtn == undefined) {
         console.error("Could not find audio button");
@@ -669,7 +668,7 @@ export default class ARENAChat {
           _this.ctrlMsg(user.uid, "sound:off");
         };
       } else {
-        uli .className = "oscene";
+        uli.className = "oscene";
       }
       let op = document.createElement("option");
       op.value = user.uid;
@@ -820,7 +819,9 @@ export default class ARENAChat {
 
     let direction = new THREE.Vector3();
     landmarkObj.object3D.getWorldDirection(direction);
-    let distance = globals.landmarkTeleportDistance ? globals.landmarkTeleportDistance : 3.5; // distance to put you
+    let distance = globals.landmarkTeleportDistance
+      ? globals.landmarkTeleportDistance
+      : 3.5; // distance to put you
     let pos = new THREE.Vector3();
     landmarkObj.object3D.getWorldPosition(pos);
     myCamera.object3D.position.copy(pos);
@@ -840,19 +841,26 @@ export default class ARENAChat {
     if (scene !== this.settings.scene) {
       localStorage.setItem("moveToFrontOfCamera", cameraId);
       let path = window.location.pathname.substring(1);
-      let devPath='';
+      let devPath = "";
       if (this.settings.supportDevFolders && path.length > 0) {
         try {
           devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
-        } catch(e) {
+        } catch (e) {
           // no devPath
         }
       }
-      var href = new URL(document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene);
+      var href = new URL(
+        document.location.protocol +
+          "//" +
+          document.location.hostname +
+          document.location.port +
+          "/" +
+          devPath +
+          scene
+      );
       document.location.href = href.toString();
       return;
     }
-
 
     let sceneEl = document.querySelector("a-scene");
     if (!sceneEl) {
@@ -878,7 +886,9 @@ export default class ARENAChat {
 
     let direction = new THREE.Vector3();
     toCam.object3D.getWorldDirection(direction);
-    let distance = globals.userTeleportDistance ? globals.userTeleportDistance : 2; // distance to put you
+    let distance = globals.userTeleportDistance
+      ? globals.userTeleportDistance
+      : 2; // distance to put you
     myCamera.object3D.position
       .copy(toCam.object3D.position.clone())
       .add(direction.multiplyScalar(-distance));
