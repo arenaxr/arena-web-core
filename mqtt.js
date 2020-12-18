@@ -1193,7 +1193,7 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.object3D.position.set(value.x, value.y, value.z);
                     } else {
                         if (value === null) {
-                            entityEl.removeAttribute(attribute, value);
+                            entityEl.removeAttribute(attribute);
                         } else {
                             entityEl.setAttribute(attribute, value);
                         }
