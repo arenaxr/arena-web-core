@@ -354,6 +354,9 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         console.log('No permitted video device detected');
         const vidbtn = document.getElementById('btn-video-off');
         if (vidbtn) vidbtn.remove();
+        const audbtn = document.getElementById('btn-audio-off');
+        if (audbtn) audbtn.remove();
+        alert("No Webcam or Audio Input Device found! You are now in spectator mode. You won't be able to share audio or video.");
     }
     JitsiMeetJS.createLocalTracks({devices})
         .then(onLocalTracks)
