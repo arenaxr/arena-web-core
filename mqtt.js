@@ -542,7 +542,7 @@ function drawMicrophoneState(entityEl, hasAudio) {
         micIconEl.setAttribute('id', name);
         micIconEl.setAttribute('scale', '0.2 0.2 0.2');
         micIconEl.setAttribute('position', '0 0.3 0.045');
-        micIconEl.setAttribute('src', 'url(images/micOFF.png)');
+        micIconEl.setAttribute('src', 'url(images/icons/audio-off.png)');
         entityEl.appendChild(micIconEl);
     } else if (micIconEl && hasAudio) {
         entityEl.removeChild(micIconEl);

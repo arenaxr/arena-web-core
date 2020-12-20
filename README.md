@@ -1,21 +1,10 @@
 # ARENA
-Render 3d content in AFrame from MQTT messages
+Render 3D content in AFrame from MQTT messages. Main repository for ARENA browser clients.
 
 ## Documentation
 The ARENA MQTT Messaging user guide and tutorials: [ARENA Documentation: Messaging](https://conix-center.github.io/ARENA/content/messaging/).
 
-## References
-This code originated as a clone of the demo for a tool that exports a Unity scene as an A-Frame page https://github.com/if1live/unity-scene-web-exporter .
-It was then modified to do real-time updating of scene objects based on another demo ("networked AFrame" https://github.com/networked-aframe/networked-aframe) and using MQTT in a browser https://github.com/reese-long/mqtt-browser-demo
-
-It now bears very little resemblance to the original, much commented out of `index.html`, and much added. The live ARENA site can be viewed at http://xr.andrew.cmu.edu on most devices.
-
-A sign-on screen at http://xr.andrew.cmu.edu/go lets you set your name, choose an environment theme, and set the 'scene' (associated with a 'topic') which can be thought of as a set of 3d objects. The default is 'render'. The settings are passed into the ARENA page as URL arguments such as `http://xr.andrew.cmu.edu?name=charles&theme=default&scene=render`. The `name` argument will appear above your head in the 3d world. If you don't specify a name, `X` will appear instead.
-
-### User IDs
-ARENA visitors are uniquely identified by their camera name, which is also their user name. As all 3D objects in the ARENA are identified by names, camera IDs have 3 underscore separated components, e.g: `camera_1234_er1k`. The last part is what appears above your head (representation in the 3D view), the middle part is a unique ID. If you want to override the random unique ID, you can specify on the URL parameter e.g. `&fixedCamera=er1k` which will ignore the `&name=` and so `er1k` will appear above your head and the camera ID will be `camera_er1k_er1k`.
-
-## INSTALLATION
+## Installation
 Step one is to clone this repo into the default web content folder on a linux machine runing Apache, e.g. in `/var/www/html`.
 **AFrame is added as a submodule, use the following command to clone:**
 
@@ -26,67 +15,8 @@ Step two, you'll also probably want to be running the Mosquitto MQTT server. In 
 ### Local Instance Installation with docker
 See [docker compose repository](https://github.com/conix-center/arena-services-docker).
 
-## Files
- * `mqtt.js` - Javascript to subscribe to MQTT topic(s) via wildcard, parse primitive-object messages, and add/remove AFrame Elements to the scene accordingly.
- The message format (as part of a higher level, more general "ARENA" system design plan for AR) is documented at work-in-progress  
-https://conix.io/conix_mw/index.php?title=Spatial_Web/ARENA_Architecture#Pub.2FSub_Structure
- * `index.html` - mostly commented out AFrame HTML wrapper
- * `paho-mqtt.js` - a copy of (but not the location referenced in this code) the Eclipse Paho MQTT library, for convenient inspection
- * `cmds.sh` - linux commands to draw a small grid of test cylinders (to debug rotation)
- * `models/` - AFrame format model and material definitions for a space shuttle from the original demo scene
- * `CONIX.png` - a bitmap so we can draw the Conix logo on things (support for bitmaps on primitives is a TODO) that should really be in:
- * `images/` - a better place to store bitmaps :)
- * `shapes.py` - the most sandbox-like thing here: sample code to send random primitive shape draw commands as MQTT messages
-
- ### 3D models/
- Here are some ready-to-use models on the xr.andrew.cmu.edu server, accessible with the models/modelname.glb path:
-```
-2CylinderEngine.glb            Cameras.gltf              MultiUVTest.glb               TriangleWithoutIndices.gltf  hat2.glb
-2CylinderEngine.gltf           CesiumMan.glb             MultiUVTest.gltf              TwoSidedPlane.gltf           helios
-AlphaBlendModeTest.glb         CesiumMan.gltf            NormalTangentMirrorTest.glb   UnlitTest.glb                hololens.glb
-AlphaBlendModeTest.gltf        CesiumMilkTruck.glb       NormalTangentMirrorTest.gltf  UnlitTest.gltf               izzy
-AnimatedCube.gltf              CesiumMilkTruck.gltf      NormalTangentTest.glb         VC.glb                       marcus2.glb
-AnimatedMorphCube.glb          Corset.glb                NormalTangentTest.gltf        VC.gltf                      marcus3.glb
-AnimatedMorphCube.gltf         Corset.gltf               OrientationTest.glb           VertexColorTest.glb          monkey
-AnimatedMorphSphere.glb        Court.glb                 OrientationTest.gltf          VertexColorTest.gltf         nara
-AnimatedMorphSphere.gltf       Cube.gltf                 Plane.mtl                     WaterBottle.glb              nuno.glb
-AnimatedTriangle.gltf          Cube.mtl                  Plane.obj                     WaterBottle.gltf             palm
-AntiqueCamera.glb              Cube.obj                  ReciprocatingSaw.glb          anthony.glb                  peacock
-AntiqueCamera.gltf             DamagedHelmet.glb         ReciprocatingSaw.gltf         avocadoman                   rearbody.mtl
-Avocado.glb                    DamagedHelmet.gltf        RiggedFigure.glb              baby_yoda                    rearbody.obj
-Avocado.gltf                   Drone.glb                 RiggedFigure.gltf             body.mtl                     rhetoritician
-BarramundiFish.glb             Duck.glb                  RiggedSimple.glb              body.obj                     scene.bin
-BarramundiFish.gltf            Duck.gltf                 RiggedSimple.gltf             cat                          skull
-BoomBox.glb                    Earth.glb                 Scene.bin                     chicken                      sphere_clicktest.gltf
-BoomBox.gltf                   EnvironmentTest.gltf      SciFiHelmet.gltf              chickenmove                  tail.mtl
-BoomBoxWithAxes.gltf           Flags.glb                 Shuttle.glb                   cow                          tail.obj
-Box.glb                        FlightHelmet.gltf         SimpleMeshes.gltf             cow2                         throne
-Box.gltf                       GearboxAssy.glb           SimpleMorph.gltf              crown                        tiles.mtl
-BoxAnimated.glb                GearboxAssy.gltf          SimpleSparseAccessor.gltf     cybertruck                   tiles.obj
-BoxAnimated.gltf               Head.gltf                 SmilingFace.glb               drone-small.glb              toni.glb
-BoxInterleaved.glb             Head2.glb                 Snoop.glb                     drone.gltf                   tri_prism.glb
-BoxInterleaved.gltf            InterpolationTest.glb     SpecGlossVsMetalRough.glb     enginside.mtl                valve_index_left.gltf
-BoxTextured.glb                InterpolationTest.gltf    SpecGlossVsMetalRough.gltf    enginside.obj                valve_index_right.gltf
-BoxTextured.gltf               Lantern.glb               Sponza.gltf                   engmount.mtl                 vr_controller_vive.mtl
-BoxTexturedNonPowerOfTwo.glb   Lantern.gltf              Stringlights.glb              engmount.obj                 vr_controller_vive.obj
-BoxTexturedNonPowerOfTwo.gltf  MetalRoughSpheres.glb     Suzanne.gltf                  engout.mtl                   windows.mtl
-BoxVertexColors.glb            MetalRoughSpheres.gltf    TextureCoordinateTest.glb     engout.obj                   windows.obj
-BoxVertexColors.gltf           Monster.glb               TextureCoordinateTest.gltf    engrim.mtl                   wings.mtl
-BrainStem.glb                  Monster.gltf              TextureSettingsTest.glb       engrim.obj                   wings.obj
-BrainStem.gltf                 Moon.glb                  TextureSettingsTest.gltf      er1k.glb
-Buggy.glb                      MorphPrimitivesTest.glb   TextureTransformTest.gltf     frog
-Buggy.gltf                     MorphPrimitivesTest.gltf  Triangle.gltf                 goose
-```
-##### Getting models from Sketchfab
-Sketchfab GLTF models don't always come in convenient single .glb files. Sometimes they consist of a main .gltf file that refers to several textures and other files in a textures/ folder and .glb file. And to make matters worse, the default name is scene.gltf. But if you put everything from the download into a folder of it's own, you can keep it separate from other scene.gltf files, and they will find the right files through relative paths. For example
-```
-ls /var/www/html/models/nara
-scene.bin  scene.gltf  textures
-```
-##### Animated GLTF models
-(See below for syntax for playing animations) Models with .gltf extension are text files that can be edited. If you search for 'animation' then search for 'name' you can see the names of animations available to use as arguments.
- ## General Purpose AFrame using Subtopics
- Most of these take JSON data where x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%).
+## General Purpose AFrame using Subtopics
+Most of these take JSON data where x,y,z(location in meters),x,y,z,w(rotation in quaternions),x,y,z(scale factor where 1=100%).
 If you leave out any of these, defaults will be used: location(0,0,0), rotation(0,0,0,1), scale(1,1,1), color(white). Another general setting is whether or not to persist an object to the ARENA scene database, determined by `"persist": true`
 #### Draw a Cube
  Instantiate, persist a cube and set all it's basic parameters
@@ -132,7 +62,7 @@ mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/cube_1 -m '{"object_id" : "
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/drone/image_floor -m '{"object_id": "image_floor", "action": "create", "data": {"object_type": "image", "position": {"x":0, "y": 0, "z": 0.4}, "rotation": {"x": -0.7, "y": 0, "z": 0, "w": 0.7}, "url": "images/floor.png", "scale": {"x":12, "y":12, "z": 2}, "material": {"repeat": {"x":4, "y":4}}}}'
 ```
-URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`  
+URLs work in the URL parameter slot. Instead of `images/2.png` it would be e.g. `url(http://xr.andrew.cmu.edu/images/foo.jpg)`
 To update the image of a named image already in the scene, use this syntax:
 ```
 mosquitto_pub -h oz.andrew.cmu.edu -t realm/s/render/image_2 -m '{"object_id" : "image_2", "action": "update", "type": "object", "data": {"material": {"src": "https://xr.andrew.cmu.edu/abstract/downtown.png"}}}'
@@ -308,7 +238,7 @@ By default we use A-Frame 'laser-controls' which default to showing Valve Index 
   - mouseleave
   - mousedown
   - mouseup
- * triggerdown / triggerup for left and right hand controllers  
+ * triggerdown / triggerup for left and right hand controllers
 The MQTT topic name for viewing these events can be the standard prefix (e.g. realm/s/render/) concatenated with a string made up of object ID that generated the event. An example event MQTT:
 ```
 realm/s/render/fallBox2 {"object_id":"fallBox2","action":"clientEvent","type":"mousedown","data":{"position":{"x":-0.993,"y":0.342,"z":-1.797},"source":"camera_8715_er"}}
