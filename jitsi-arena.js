@@ -212,11 +212,10 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     function onUserLeft(id) {
         console.log('user left:', id);
         if (!remoteTracks[id]) return;
-        // console.log(remoteTracks)
         const screenShareEl = screenShareDict[id];
         if (screenShareEl) {
             screenShareEl.setAttribute('material', 'src', null);
-            screenShareDict[id] = undefined;
+            delete screenShareDict[id];
         }
         $(`#video${id}`).remove();
         delete remoteTracks[id];
@@ -351,12 +350,15 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         devices.push('video');
         withVideo = true;
     } catch (e) {
-        console.log('No permitted video device detected');
         const vidbtn = document.getElementById('btn-video-off');
         if (vidbtn) vidbtn.remove();
         const audbtn = document.getElementById('btn-audio-off');
         if (audbtn) audbtn.remove();
-        alert("No Webcam or Audio Input Device found! You are now in spectator mode. You won't be able to share audio or video.");
+        swal({
+            title: 'No Webcam or Audio Input Device found!',
+            text: `You are now in "spectator mode". This means you won\'t be able to share audio or video, but can still interact with other users in the ARENA.`,
+            icon: 'warning'
+        })
     }
     JitsiMeetJS.createLocalTracks({devices})
         .then(onLocalTracks)
@@ -380,7 +382,6 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
             const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
             jitsiVideoElem.setAttribute('width', globals.localVideoWidth);
             jitsiVideoElem.setAttribute('height', videoHeight);
-            // jitsiVideoElem.removeEventListener('loadeddata', setupCornerVideo);
         }
 
         jitsiVideoElem.addEventListener('loadeddata', setupCornerVideo);

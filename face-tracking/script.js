@@ -66,7 +66,7 @@ ARENA.FaceTracker = (function () {
         videoCanv = document.createElement("canvas");
         setVideoStyle(videoCanv);
         videoCanv.style.zIndex = 9998;
-        videoCanv.style.opacity = 0.25;
+        videoCanv.style.opacity = 0.30;
         document.body.appendChild(videoCanv);
 
         overlayCanv = document.createElement("canvas");
