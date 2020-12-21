@@ -914,29 +914,29 @@ function _onMessageArrived(message, jsonMessage) {
                 let camPos = globals.sceneObjects.myCamera.object3D.position;
                 let entityPos = entityEl.object3D.position;
                 let distance = camPos.distanceTo(entityPos);
-                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 25;
+                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 20;
 
                 const videoID = `video${theMessage.jitsiId}`;
                 if (theMessage.hasVideo) {
                     const videoElem = document.getElementById(videoID);
-                    const videoTrack = ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId);
+                    const videoTrack = ARENA.JitsiAPI ? ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId) : undefined;
                     if (!videoTrack) return;
                     entityEl.videoTrack = videoTrack;
 
                     // frustrum culling for WebRTC streams
                     let cam = globals.sceneObjects.myCamera.sceneEl.camera;
                     let frustum = new THREE.Frustum();
-                    frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
+                    frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
                         cam.matrixWorldInverse));
                     let inFieldOfView = frustum.containsPoint(entityPos);
 
                     // check if A/V cut off distance has been reached
                     if (!inFieldOfView || distance > globals.maxAVDist) {
                         entityEl.videoTrack.enabled = false; // pause WebRTC video stream
-                        if (videoElem) videoElem.pause();
+                        if (videoElem && !videoElem.paused) videoElem.pause();
                     } else {
                         entityEl.videoTrack.enabled = true; // unpause WebRTC video stream
-                        if (videoElem) videoElem.play();
+                        if (videoElem && videoElem.paused) videoElem.play();
                     }
 
                     // draw video cube, but only if it didnt exist before
@@ -962,7 +962,7 @@ function _onMessageArrived(message, jsonMessage) {
                 drawMicrophoneState(entityEl, theMessage.hasAudio);
                 if (theMessage.hasAudio) {
                     // set up positional audio, but only once per camera
-                    const audioTrack = ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId);
+                    const audioTrack = ARENA.JitsiAPI ? ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId) : undefined;
                     if (!audioTrack) return;
 
                     // check if audio track changed since last update

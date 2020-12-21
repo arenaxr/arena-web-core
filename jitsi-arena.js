@@ -167,7 +167,6 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         const displayNames = conference.getParticipantById(participant)._displayName;
         const objectIds = displayNames.split(',');
 
-        console.log(displayNames, objectIds);
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) { // create
             $('a-assets').append(
