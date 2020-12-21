@@ -131,7 +131,6 @@ function setupIcons() {
         if (!ARENA.JitsiAPI) return;
 
         const defaultScreenObj = globals.screenshare ? globals.screenshare : 'screenshare';
-        const screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
         swal({
             title: 'You clicked on screen share!',
             text: `In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!`,

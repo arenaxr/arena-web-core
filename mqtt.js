@@ -134,7 +134,6 @@ const loadScene = () => {
     xhr.send();
     xhr.onload = async () => {
         if (xhr.status !== 200) {
-            // not every scene will have scene-objects
             console.log('No scene-options object found');
         } else {
             const payload = xhr.response[xhr.response.length - 1];
@@ -299,8 +298,6 @@ function onConnected(reconnect, uri) {
     const myMsg = {
         object_id: globals.camName,
         action: 'create',
-        // persist: true,
-        // ttl: 3000,
         data: {
             object_type: 'camera',
             position: {
@@ -316,7 +313,6 @@ function onConnected(reconnect, uri) {
             },
             color: color,
         },
-        //  user_agent: navigator.userAgent
     };
     console.log(navigator.userAgent);
 
@@ -327,7 +323,7 @@ function onConnected(reconnect, uri) {
     sceneObjects.myCamera.setAttribute('position', globals.startCoords);
 
     sceneObjects.myCamera.addEventListener('vioChanged', (e) => {
-        //        console.log("vioChanged", e.detail);
+        // console.log("vioChanged", e.detail);
 
         if (globals.fixedCamera !== '') {
             const msg = {
@@ -526,7 +522,7 @@ function drawVideoCube(entityEl, videoID) {
     videoCubeDark.setAttribute('material', 'shader', 'flat');
     videoCubeDark.setAttribute('transparent', 'true');
     videoCubeDark.setAttribute('color', 'black');
-    videoCubeDark.setAttribute('opacity', '0.7');
+    videoCubeDark.setAttribute('opacity', '0.8');
 
     entityEl.appendChild(videoCube);
     entityEl.appendChild(videoCubeDark);
@@ -542,7 +538,7 @@ function drawMicrophoneState(entityEl, hasAudio) {
         micIconEl.setAttribute('id', name);
         micIconEl.setAttribute('scale', '0.2 0.2 0.2');
         micIconEl.setAttribute('position', '0 0.3 0.045');
-        micIconEl.setAttribute('src', 'url(images/micOFF.png)');
+        micIconEl.setAttribute('src', 'url(images/icons/audio-off.png)');
         entityEl.appendChild(micIconEl);
     } else if (micIconEl && hasAudio) {
         entityEl.removeChild(micIconEl);
@@ -906,27 +902,52 @@ function _onMessageArrived(message, jsonMessage) {
                 drawMicrophoneState(entityEl, theMessage.hasAudio);
             }
             return;
-            break;
 
         case 'camera':
             // decide if we need draw or delete videoCube around head
             if (theMessage.hasOwnProperty('jitsiId')) {
-                if (theMessage.jitsiId === '' || (ARENA.JitsiAPI && !ARENA.JitsiAPI.ready())) {
-                    console.log('jitsiId empty');
-                    break; // other-person has no camera ... yet
+                if (!theMessage.jitsiId || (ARENA.JitsiAPI && !ARENA.JitsiAPI.ready())) {
+                    // console.log('jitsiId empty');
+                    break; // other-person has no jitsi stream ... yet
                 }
 
-                drawMicrophoneState(entityEl, theMessage.hasAudio);
+                let camPos = globals.sceneObjects.myCamera.object3D.position;
+                let entityPos = entityEl.object3D.position;
+                let distance = camPos.distanceTo(entityPos);
+                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 25;
 
                 const videoID = `video${theMessage.jitsiId}`;
                 if (theMessage.hasVideo) {
-                    if (document.getElementById(videoID) &&
-                                !(entityEl.getAttribute('videoCubeDrawn') == 'true')) {
-                        // console.log("draw videoCube: " + theMessage.jitsiId);
+                    const videoElem = document.getElementById(videoID);
+                    const videoTrack = ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId);
+                    if (!videoTrack) return;
+                    entityEl.videoTrack = videoTrack;
+
+                    // frustrum culling for WebRTC streams
+                    let cam = globals.sceneObjects.myCamera.sceneEl.camera;
+                    let frustum = new THREE.Frustum();
+                    frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
+                        cam.matrixWorldInverse));
+                    let inFieldOfView = frustum.containsPoint(entityPos);
+
+                    // check if A/V cut off distance has been reached
+                    if (!inFieldOfView || distance > globals.maxAVDist) {
+                        entityEl.videoTrack.enabled = false; // pause WebRTC video stream
+                        if (videoElem) videoElem.pause();
+                    } else {
+                        entityEl.videoTrack.enabled = true; // unpause WebRTC video stream
+                        if (videoElem) videoElem.play();
+                    }
+
+                    // draw video cube, but only if it didnt exist before
+                    if (videoElem && entityEl.getAttribute('videoCubeDrawn') != 'true') {
                         drawVideoCube(entityEl, videoID);
                         entityEl.setAttribute('videoCubeDrawn', true);
                     }
                 } else {
+                    if (entityEl.videoTrack)
+                        entityEl.videoTrack.enabled = false; // pause WebRTC video stream
+                    // remove video cubes
                     const vidCube = document.getElementById(videoID + 'cube');
                     if (entityEl.contains(vidCube)) {
                         entityEl.removeChild(vidCube);
@@ -938,6 +959,7 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('videoCubeDrawn', false);
                 }
 
+                drawMicrophoneState(entityEl, theMessage.hasAudio);
                 if (theMessage.hasAudio) {
                     // set up positional audio, but only once per camera
                     const audioTrack = ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId);
@@ -946,7 +968,15 @@ function _onMessageArrived(message, jsonMessage) {
                     // check if audio track changed since last update
                     const oldAudioTrack = entityEl.audioTrack;
                     entityEl.audioTrack = audioTrack.track;
-                    if (entityEl.audioTrack !== oldAudioTrack) {
+
+                    // check if A/V cut off distance has been reached
+                    if (distance > globals.maxAVDist) {
+                        entityEl.audioTrack.enabled = false; // pause WebRTC audio stream
+                    } else {
+                        entityEl.audioTrack.enabled = true; // unpause WebRTC audio stream
+                    }
+
+                    if (entityEl.audioTrack.enabled && entityEl.audioTrack !== oldAudioTrack) {
                         // set up and attach positional audio
                         const audioStream = new MediaStream();
                         audioStream.addTrack(entityEl.audioTrack);
@@ -963,6 +993,7 @@ function _onMessageArrived(message, jsonMessage) {
                             sceneEl.audioListener = listener;
                         }
 
+                        // create positional audio, but only if didnt exist before
                         if (!entityEl.positionalAudio) {
                             const audioSource = new THREE.PositionalAudio(listener);
                             audioSource.setMediaStreamSource(audioStream);
@@ -971,23 +1002,22 @@ function _onMessageArrived(message, jsonMessage) {
                         } else {
                             entityEl.positionalAudio.setMediaStreamSource(audioStream);
                         }
-                        if (globals.refDist) {
+
+                        // set positional audio scene params
+                        if (globals.refDist) { // L-R panning
                             entityEl.positionalAudio.setRefDistance(globals.refDist);
-                        } // L-R panning
+                        }
                         if (globals.rolloffFact) {
                             entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
                         }
                         if (globals.distModel) {
                             entityEl.positionalAudio.setDistanceModel(globals.distModel);
                         }
-                        if (globals.maxDist) {
-                            entityEl.positionalAudio.setMaxDistance(globals.maxDist);
-                        }
                         if (globals.volume) {
                             entityEl.positionalAudio.setVolume(globals.volume);
                         }
 
-                        // fixes chrome echo bug
+                        // sorta fixes chrome echo bug, but not always
                         const audioCtx = THREE.AudioContext.getContext();
                         const resume = () => {
                             audioCtx.resume();
@@ -1004,6 +1034,10 @@ function _onMessageArrived(message, jsonMessage) {
                         document.body.addEventListener('touchmove', resume, false);
                         document.body.addEventListener('mousemove', resume, false);
                     }
+                }
+                else {
+                    if (entityEl.audioTrack)
+                        entityEl.audioTrack.enabled = false; // pause WebRTC audio stream
                 }
             }
 
@@ -1193,7 +1227,7 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.object3D.position.set(value.x, value.y, value.z);
                     } else {
                         if (value === null) {
-                            entityEl.removeAttribute(attribute, value);
+                            entityEl.removeAttribute(attribute);
                         } else {
                             entityEl.setAttribute(attribute, value);
                         }
@@ -1205,7 +1239,7 @@ function _onMessageArrived(message, jsonMessage) {
             break;
         }
         default:
-            console.log('EMPTY MESSAGE?', message.destinationName, message.payloadString);
+            console.log('Possibly Empty Message: ', message.destinationName, message.payloadString);
             break;
         } // switch (theMessage.type)
     } // case "update":
