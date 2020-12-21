@@ -911,10 +911,10 @@ function _onMessageArrived(message, jsonMessage) {
                     break; // other-person has no jitsi stream ... yet
                 }
 
-                var camPos = globals.sceneObjects.myCamera.object3D.position;
-                var entityPos = entityEl.object3D.position;
-                var distance = camPos.distanceTo(entityPos);
-                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 20;
+                let camPos = globals.sceneObjects.myCamera.object3D.position;
+                let entityPos = entityEl.object3D.position;
+                let distance = camPos.distanceTo(entityPos);
+                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 25;
 
                 const videoID = `video${theMessage.jitsiId}`;
                 if (theMessage.hasVideo) {
@@ -923,8 +923,15 @@ function _onMessageArrived(message, jsonMessage) {
                     if (!videoTrack) return;
                     entityEl.videoTrack = videoTrack;
 
+                    // frustrum culling for WebRTC streams
+                    let cam = globals.sceneObjects.myCamera.sceneEl.camera;
+                    let frustum = new THREE.Frustum();
+                    frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
+                        cam.matrixWorldInverse));
+                    let inFieldOfView = frustum.containsPoint(entityPos);
+
                     // check if A/V cut off distance has been reached
-                    if (distance > globals.maxAVDist) {
+                    if (!inFieldOfView || distance > globals.maxAVDist) {
                         entityEl.videoTrack.enabled = false; // pause WebRTC video stream
                         if (videoElem) videoElem.pause();
                     } else {
