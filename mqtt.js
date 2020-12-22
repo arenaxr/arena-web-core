@@ -474,7 +474,7 @@ function onConnected(reconnect, uri) {
  */
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.error(`MQTT scene connection lost, code: 
+        console.error(`MQTT scene connection lost, code:
             ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`);
     }
     console.warn('MQTT scene automatically reconnecting...');
@@ -571,7 +571,7 @@ async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), 
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
      *     this prevents hearing the audio twice.
      *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
      *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
@@ -1013,7 +1013,7 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.audioTrack.enabled = true; // unpause WebRTC audio stream
                     }
 
-                    if (entityEl.audioTrack.enabled && entityEl.audioTrack !== oldAudioTrack) {
+                    if (entityEl.audioTrack !== oldAudioTrack) {
                         // set up and attach positional audio
                         const audioStream = new MediaStream();
                         audioStream.addTrack(entityEl.audioTrack);
