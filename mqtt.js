@@ -911,9 +911,9 @@ function _onMessageArrived(message, jsonMessage) {
                     break; // other-person has no jitsi stream ... yet
                 }
 
-                let camPos = globals.sceneObjects.myCamera.object3D.position;
-                let entityPos = entityEl.object3D.position;
-                let distance = camPos.distanceTo(entityPos);
+                const camPos = globals.sceneObjects.myCamera.object3D.position;
+                const entityPos = entityEl.object3D.position;
+                const distance = camPos.distanceTo(entityPos);
                 globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 20;
 
                 const videoID = `video${theMessage.jitsiId}`;
@@ -924,11 +924,11 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.videoTrack = videoTrack;
 
                     // frustrum culling for WebRTC streams
-                    let cam = globals.sceneObjects.myCamera.sceneEl.camera;
-                    let frustum = new THREE.Frustum();
+                    const cam = globals.sceneObjects.myCamera.sceneEl.camera;
+                    const frustum = new THREE.Frustum();
                     frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
                         cam.matrixWorldInverse));
-                    let inFieldOfView = frustum.containsPoint(entityPos);
+                    const inFieldOfView = frustum.containsPoint(entityPos);
 
                     // check if A/V cut off distance has been reached
                     if (!inFieldOfView || distance > globals.maxAVDist) {
@@ -945,8 +945,9 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.setAttribute('videoCubeDrawn', true);
                     }
                 } else {
-                    if (entityEl.videoTrack)
-                        entityEl.videoTrack.enabled = false; // pause WebRTC video stream
+                    if (entityEl.videoTrack) {
+                        entityEl.videoTrack.enabled = false;
+                    } // pause WebRTC video stream
                     // remove video cubes
                     const vidCube = document.getElementById(videoID + 'cube');
                     if (entityEl.contains(vidCube)) {
@@ -1034,10 +1035,10 @@ function _onMessageArrived(message, jsonMessage) {
                         document.body.addEventListener('touchmove', resume, false);
                         document.body.addEventListener('mousemove', resume, false);
                     }
-                }
-                else {
-                    if (entityEl.audioTrack)
-                        entityEl.audioTrack.enabled = false; // pause WebRTC audio stream
+                } else {
+                    if (entityEl.audioTrack) {
+                        entityEl.audioTrack.enabled = false;
+                    } // pause WebRTC audio stream
                 }
             }
 

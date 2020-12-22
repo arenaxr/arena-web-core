@@ -356,8 +356,8 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         swal({
             title: 'No Webcam or Audio Input Device found!',
             text: `You are now in "spectator mode". This means you won\'t be able to share audio or video, but can still interact with other users in the ARENA.`,
-            icon: 'warning'
-        })
+            icon: 'warning',
+        });
     }
     JitsiMeetJS.createLocalTracks({devices})
         .then(onLocalTracks)
