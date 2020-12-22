@@ -52,6 +52,12 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     // ==================================================
     // PRIVATE FUNCTIONS
     // ==================================================
+
+    /**
+     * Called when user joins
+     * @param {Number} participantId Participant id
+     * @param {String} trackType track type ('audio'/'video')
+     */
     function connectArena(participantId, trackType) {
         jitsiId = participantId;
         console.log('connectArena: ' + participantId, trackType);
@@ -59,7 +65,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * Handles local tracks.
-     * @param tracks Array with JitsiTrack objects
+     * @param {[]} tracks Array with JitsiTrack objects
      */
     function onLocalTracks(tracks) {
         localTracks = tracks;
@@ -103,6 +109,13 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         if (jitsiVideoTrack) jitsiVideoTrack.mute();
     }
 
+    /**
+     * Update screen share object
+     * @param {Number} screenShareId JitsiTrack object
+     * @param {Number} videoId Jitsi video Id
+     * @param {Number} participantId Jitsi participand Id
+     * @return {Object} screenShare scene object
+     */
     function updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
         screenShareId = screenShareId.replace(SCREENSHARE, '');
@@ -128,7 +141,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * Handles remote tracks
-     * @param track JitsiTrack object
+     * @param {Object} track JitsiTrack object
      */
     function onRemoteTrack(track) {
         if (track.isLocal()) {
@@ -186,7 +199,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     }
 
     /**
-     * That function is executed when the conference is joined
+     * This function is executed when the conference is joined
      */
     function onConferenceJoined() {
         isJoined = true;
@@ -206,7 +219,8 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     }
 
     /**
-     * @param id
+     * Called when user joins
+     * @param {Number} id user Id
      */
     function onUserLeft(id) {
         console.log('user left:', id);
@@ -221,7 +235,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     }
 
     /**
-     * That function is called when connection is established successfully
+     * This function is called when connection is established successfully
      */
     function onConnectionSuccess() {
         conference = connection.initJitsiConference(arenaConferenceName, confOptions);
@@ -281,6 +295,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * This function is called when device list changes
+     * @param {Object} devices List of devices
      */
     function onDeviceListChanged(devices) {
         console.info('current devices', devices);
@@ -303,7 +318,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     }
 
     /**
-     *
+     * called on unload; release tracks, leave conference
      */
     function unload() {
         for (let i = 0; i < localTracks.length; i++) {
@@ -355,7 +370,8 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         if (audbtn) audbtn.remove();
         swal({
             title: 'No Webcam or Audio Input Device found!',
-            text: `You are now in "spectator mode". This means you won\'t be able to share audio or video, but can still interact with other users in the ARENA.`,
+            text: `You are now in "spectator mode". This means you won\'t be able to share audio or video, 
+                     but can still interact with other users in the ARENA.`,
             icon: 'warning',
         });
     }
@@ -367,6 +383,9 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         });
     if (withVideo) setupLocalVideo();
 
+    /**
+     * show user video on the corner
+     */
     function setupLocalVideo() {
         // video window for jitsi
         jitsiVideoElem = document.getElementById('localVideo');
@@ -377,6 +396,9 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         jitsiVideoElem.style.borderRadius = '10px';
         jitsiVideoElem.style.opacity = 0.95; // slightly see through
 
+        /**
+        * set video element size
+        */
         function setupCornerVideo() {
             const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
             jitsiVideoElem.setAttribute('width', globals.localVideoWidth);
