@@ -56,7 +56,8 @@ const loadArena = (urlToLoad, position, rotation) => {
                         msg.data.position.z = msg.data.position.z + position.z;
                     }
                     if (rotation) {
-                        const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y, msg.data.rotation.z, msg.data.rotation.w);
+                        const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y,
+                            msg.data.rotation.z, msg.data.rotation.w);
                         const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
                         r.multiply(q);
                         msg.data.rotation.x = r.x;
@@ -177,6 +178,21 @@ const loadScene = () => {
         }
         // initialize Jitsi videoconferencing
         ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        // init chat after JitsiAPI starts
+        ARENA.Chat.init({
+            userid: globals.idTag,
+            cameraid: globals.camName,
+            username: globals.displayName,
+            arena_conference: ARENA.JitsiAPI, // pass reference to JitsiAPI
+            realm: defaults.realm,
+            scene: globals.scenenameParam,
+            persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,
+            keepalive_interval_ms: 30000,
+            mqtt_host: globals.mqttParam,
+            mqtt_username: globals.username,
+            mqtt_token: globals.mqttToken,
+            supportDevFolders: defaults.supportDevFolders,
+        });
     };
 };
 
@@ -206,21 +222,6 @@ window.addEventListener('onauth', function(e) {
         password: globals.mqttToken,
     });
 
-    // init chat
-    ARENA.Chat.init({
-        userid: globals.idTag,
-        cameraid: globals.camName,
-        username: globals.displayName,
-        realm: defaults.realm,
-        scene: globals.scenenameParam,
-        persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,
-        keepalive_interval_ms: 30000,
-        mqtt_host: globals.mqttParam,
-        mqtt_username: globals.username,
-        mqtt_token: globals.mqttToken,
-        supportDevFolders: defaults.supportDevFolders,
-    });
-
     // init runtime manager
     ARENA.RuntimeManager.init({
         mqtt_uri: globals.mqttParam,
@@ -236,6 +237,11 @@ window.addEventListener('onauth', function(e) {
 
 let oldMsg = '';
 
+/**
+ * MQTT onConnected callback
+ * @param {Boolean} reconnect is a reconnect
+ * @param {Object} uri uri used
+ */
 function onConnected(reconnect, uri) {
     if (reconnect) {
         // For reconnect, do not reinitialize user state, that will warp user back and lose
@@ -244,6 +250,7 @@ function onConnected(reconnect, uri) {
         if (!ARENA.JitsiAPI.ready()) {
             ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
             console.warn(`ARENA Jitsi restarting...`);
+            //TODO: ARENA.Chat.setArenaConference(ARENA.JitsiAPI); // tell chat about new conference object
         }
         ARENA.mqttClient.subscribe(globals.renderTopic);
         console.warn(`MQTT scene reconnected to ${uri}`);
@@ -461,22 +468,18 @@ function onConnected(reconnect, uri) {
     }
 }
 
+/**
+ * MQTT onConnectionLost callback
+ * @param {Object} responseObject paho response object
+ */
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.error(`MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`);
+        console.error(`MQTT scene connection lost, code: 
+            ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`);
     }
     console.warn('MQTT scene automatically reconnecting...');
     // no need to connect manually here, "reconnect: true" already set
 }
-
-const publish_retained = (dest, msg) => {
-    // console.log('desint :', dest, 'msggg', msg)
-    const message = new Paho.Message(msg);
-    message.destinationName = dest;
-    message.retained = true;
-    // message.qos = 2;
-    ARENA.mqttClient.send(message);
-};
 
 window.publish = (dest, msg) => {
     if (!ARENA.mqttClient.isConnected()) return;
@@ -495,6 +498,11 @@ window.publish = (dest, msg) => {
     ARENA.mqttClient.send(message);
 };
 
+/**
+ * Utility function to check incoming messages
+ * @param {String} str string with message to check
+ * @return {Bolean}
+ */
 function isJson(str) {
     try {
         JSON.parse(str);
@@ -506,6 +514,11 @@ function isJson(str) {
     return true;
 }
 
+/**
+ * Draw video head
+ * @param {Object} entityEl scene entity
+ * @param {Number} videoID video Id
+ */
 function drawVideoCube(entityEl, videoID) {
     // attach video to head
     const videoCube = document.createElement('a-box');
@@ -528,7 +541,11 @@ function drawVideoCube(entityEl, videoID) {
     entityEl.appendChild(videoCubeDark);
 }
 
-
+/**
+ * Draw microphone
+ * @param {Object} entityEl scene entity
+ * @param {Boolean} hasAudio
+ */
 function drawMicrophoneState(entityEl, hasAudio) {
     // entityEl is the head
     const name = 'muted_' + entityEl.id;
@@ -545,17 +562,23 @@ function drawMicrophoneState(entityEl, hasAudio) {
     }
 }
 
-// https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
+/**
+ * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
+ * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
+ * @param {Object} gainNode
+ */
 async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), 
+     *     this prevents hearing the audio twice.
      *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
      *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
      *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
      *  6. connect the other RTCPeerConnection's stream to a new audio element.
-     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
+     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
+     *  while preserving all the audio processing that was performed via the WebAudio API.
      */
 
     const audioEl = new Audio();
@@ -584,7 +607,8 @@ async function enableChromeAEC(gainNode) {
     });
 
     try {
-        // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
+        /* The following should never fail, but just in case, we won't disconnect/reconnect
+           the gainNode unless all of this succeeds */
         loopbackDestination.stream.getTracks().forEach((track) => {
             outboundPeerConnection.addTrack(track, loopbackDestination.stream);
         });
@@ -608,6 +632,12 @@ async function enableChromeAEC(gainNode) {
     }
 }
 
+/**
+ * Call internal MessageArrived handler; Isolates message error handling
+ * Also called to handle persist objects
+ * @param {Object} message
+ * @param {String} jsonMessage
+ */
 function onMessageArrived(message, jsonMessage) {
     try {
         _onMessageArrived(message, jsonMessage);
@@ -616,7 +646,8 @@ function onMessageArrived(message, jsonMessage) {
             if (message.payloadString) {
                 console.error('onMessageArrived Error!', err, message.payloadString);
             } else {
-                console.error('onMessageArrived Error!', err, new TextDecoder('utf-8').decode(message.payloadBytes), message.payloadBytes);
+                console.error('onMessageArrived Error!', err,
+                    new TextDecoder('utf-8').decode(message.payloadBytes), message.payloadBytes);
             }
         } else if (jsonMessage) {
             console.error('onMessageArrived Error!', err, JSON.stringify(jsonMessage));
@@ -626,6 +657,11 @@ function onMessageArrived(message, jsonMessage) {
 
 let progMsgs = {};
 
+/**
+ * Internal MessageArrived handler; handles object create/delete/event/... messages
+ * @param {Object} message
+ * @param {String} jsonMessage
+ */
 function _onMessageArrived(message, jsonMessage) {
     const sceneObjects = globals.sceneObjects;
     let theMessage = {};
@@ -851,7 +887,7 @@ function _onMessageArrived(message, jsonMessage) {
 
                 // Parent/Child handling
                 if (theMessage.data.parent) {
-                    var parentEl = sceneObjects[theMessage.data.parent];
+                    const parentEl = sceneObjects[theMessage.data.parent];
                     if (parentEl) {
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
@@ -1216,8 +1252,9 @@ function _onMessageArrived(message, jsonMessage) {
             if (name === globals.viveRName) {
                 return;
             }
-            // just setAttribute() - data can contain multiple attribute-value pairs
-            // e.g: { ... "action": "update", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... }
+            /* just setAttribute() - data can contain multiple attribute-value pairs
+             e.g: { ... "action": "update", "data":
+                    { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... } */
 
             const entityEl = sceneObjects[theMessage.object_id];
             if (entityEl) {
