@@ -749,12 +749,18 @@ function _onMessageArrived(message, jsonMessage) {
         if (name === globals.camName) {
             // check if it is a command for the local camera
             if (theMessage.type === 'camera-override') {
-                let myCamera=globals.sceneObjects.myCamera;
+                const myCamera=globals.sceneObjects.myCamera;
+                if (!myCamera) {
+                    console.error('Camera override: ;ocal camera object does not exist! (create camera before)');
+                    return;
+                }
                 const p = theMessage.data.position;
-                myCamera.object3D.position.set(p.x, p.y, p.z);
+                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
                 const r = theMessage.data.rotation;
-                myCamera.components["look-controls"].yawObject.rotation.setFromQuaternion(
-                    new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                if (r) {
+                    myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
+                        new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                }
             }
             return;
         }
