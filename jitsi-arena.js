@@ -55,7 +55,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * Called when user joins
-     * @param {Number} participantId Participant id
+     * @param {String} participantId Participant id
      * @param {String} trackType track type ('audio'/'video')
      */
     function connectArena(participantId, trackType) {
@@ -111,9 +111,9 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * Update screen share object
-     * @param {Number} screenShareId JitsiTrack object
-     * @param {Number} videoId Jitsi video Id
-     * @param {Number} participantId Jitsi participand Id
+     * @param {String} screenShareId JitsiTrack object
+     * @param {String} videoId Jitsi video Id
+     * @param {String} participantId Jitsi participand Id
      * @return {Object} screenShare scene object
      */
     function updateScreenShareObject(screenShareId, videoId, participantId) {
@@ -220,7 +220,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * Called when user joins
-     * @param {Number} id user Id
+     * @param {String} id user Id
      */
     function onUserLeft(id) {
         console.log('user left:', id);
