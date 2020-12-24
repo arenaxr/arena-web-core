@@ -749,9 +749,13 @@ function _onMessageArrived(message, jsonMessage) {
         if (name === globals.camName) {
             // check if it is a command for the local camera
             if (theMessage.type === 'camera-override') {
+                if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
+                    console.error('Camera override: object_type must be camera.');
+                    return;
+                }
                 const myCamera=globals.sceneObjects.myCamera;
                 if (!myCamera) {
-                    console.error('Camera override: ;ocal camera object does not exist! (create camera before)');
+                    console.error('Camera override: local camera object does not exist! (create camera before)');
                     return;
                 }
                 const p = theMessage.data.position;
@@ -760,6 +764,29 @@ function _onMessageArrived(message, jsonMessage) {
                 if (r) {
                     myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
                         new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                }
+            } else if (theMessage.type === 'look-at') {
+                if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
+                    console.error('Camera look-at: object_type must be camera.');
+                    return;
+                }
+                const myCamera=globals.sceneObjects.myCamera;
+                if (!myCamera) {
+                    console.error('Camera look-at: local camera object does not exist! (create camera before)');
+                    return;
+                }
+                let target = theMessage.data.target;
+                if (!target.x) { // check if an object id was given
+                    const targetObj = globals.sceneObjects[target];
+                    if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
+                    else {
+                        console.error('Camera look-at: target not found.');
+                        return;
+                    }
+                }
+                if (target.x && target.y && target.z) { // x, y, z given
+                    myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z);
+                    myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z);
                 }
             }
             return;
