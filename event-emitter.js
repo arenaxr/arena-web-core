@@ -1,11 +1,24 @@
 /** Class encapsulating an EventTarget for ARENA events. */
 class ARENAEventEmitter {
 
-
     /**
      * Definitions of events and documentation of callbacks
      */      
     static events = {
+        /**
+         * Indicates we joined a jitsi conference (also on reconnect),
+         * provides a list of current users/participants:
+         * @typedef {Object} UserData
+         * @param id {string} the ARENA id (camName) of the user 
+         * @param dn {string} the display name of the user
+         *
+         * The following parameters are passed to listeners (event.detail object):
+         * @callback jitsiConnectCallback
+         * @param scene {string} the scene
+         * @param pl {[]} participant list; array of {UserData} objects
+         */   
+        JITSI_CONNECT: 'jitsi_connect',
+
         /**
          * Indicates a user joined. The event provides
          * the following parameters to its listeners (event.detail object):
@@ -31,7 +44,7 @@ class ARENAEventEmitter {
 
     /**
      * Modules that are possible event sources
-     * Used for events where the source is relevant/needed: {userJoinCallback|userLeftCallback}
+     * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|...}
      *
      */   
     static sources = {
@@ -63,7 +76,7 @@ class ARENAEventEmitter {
      *    }
      * 
      * @param eventName {string} name of the event
-     * @param listner {userJoinCallback|userLeftCallback} callback
+     * @param listner {jitsiConnectCallback|userJoinCallback|userLeftCallback|...} callback
      */    
     on(eventName, listener) {
         return this._target.addEventListener(eventName, listener);
@@ -73,7 +86,7 @@ class ARENAEventEmitter {
      * Event listner that is removed after being called once
      * 
      * @param eventName {string} name of the event
-     * @param listner {userJoinCallback|userLeftCallback} callback
+     * @param listner {jitsiConnectCallback|userJoinCallback|userLeftCallback|...} callback
      */    
     once(eventName, listener) {
         return this._target.addEventListener(eventName, listener, {once: true});
@@ -83,7 +96,7 @@ class ARENAEventEmitter {
      * Remove listner
      * 
      * @param eventName {string} name of the event
-     * @param listner {userJoinCallback|userLeftCallback} callback
+     * @param listner {jitsiConnectCallback|userJoinCallback|userLeftCallback|...} callback
      */    
     off(eventName, listener) {
         return this._target.removeEventListener(eventName, listener);
@@ -101,7 +114,6 @@ class ARENAEventEmitter {
      * @param detail {Object} custom event properties
      */    
     emit(eventName, detail) {
-        console.log("** EVENT:", eventName, detail);
         return this._target.dispatchEvent(
             new CustomEvent(eventName, {detail, cancelable: true}),
         );

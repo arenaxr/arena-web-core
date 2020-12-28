@@ -338,8 +338,19 @@ export default class ARENAChat {
       _this.populateUserList();
     });
 
+    ARENA.events.on(ARENAEventEmitter.events.JITSI_CONNECT, this.jitsiConnectCallback);
     ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, this.userJoinCallback);
   }
+
+  /**
+   * Called when we connect to a jitsi conference (including reconnects)
+   * Defined as a closure to capture 'this'
+   * @param {object} e event object; e.detail contains the callback arguments
+  */
+ jitsiConnectCallback = (e) => {
+  const args = e.detail;
+  console.log("****Jitsi connect", args.scene, args.pl);
+}
 
 
   /**
@@ -348,12 +359,8 @@ export default class ARENAChat {
    * @param {object} e event object; e.detail contains the callback arguments
   */
   userJoinCallback = (e) => {
-    if (e.type !==  ARENAEventEmitter.events.USER_JOINED) {
-      console.error("Chat: Received wrong event type! (expecting user join event)");
-    }
     const args = e.detail;
     console.log("****Jitsi user joined", args.id, args.dn, args.scene, args.src);
-    console.log(this.settings);
   }
 
   // perform some async startup tasks
@@ -768,7 +775,6 @@ export default class ARENAChat {
   }
 
   keepalive(tryconnect = false) {
-    console.log('keep alive!');
     this.ctrlMsg("all", "keepalive", tryconnect);
   }
 

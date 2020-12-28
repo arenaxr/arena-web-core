@@ -64,6 +64,19 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     function connectArena(participantId, trackType) {
         jitsiId = participantId;
         console.log('connectArena: ' + participantId, trackType);
+
+        // emit jitsi connect event
+        let pl = [];
+        conference.getParticipants().forEach( (user) => {
+            const arenaUserName = user.getProperty('arenaUserName')
+            const arenaDisplayName = user.getProperty('arenaDisplayName');
+            if (arenaUserName && arenaDisplayName) {
+                pl.push({id: arenaUserName, dn: arenaDisplayName});
+            }
+        });
+        ARENA.events.emit(ARENAEventEmitter.events.JITSI_CONNECT, {
+            scene: arenaConferenceName,
+            pl: pl});
     }
 
     /**
@@ -229,7 +242,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         console.log('New user joined:', id, conference.getParticipantById(id).getProperty('arenaDisplayName'));
         remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
 
-        const arenaUserName = conference.getParticipantById(id).getProperty('arenaUserName')
+        const arenaUserName = conference.getParticipantById(id).getProperty('arenaUserName');
         const arenaDisplayName = conference.getParticipantById(id).getProperty('arenaDisplayName');
         if (arenaUserName && arenaDisplayName) {
             // emit user joined event
