@@ -18,7 +18,8 @@ export default class ARENAChat {
   privateTopicPrefix = "/g/c/p/";
 
   constructor(st) {
-    // handle default this.settings
+
+      // handle default this.settings
     st = st || {};
     this.settings = {
       userid: st.userid !== undefined ? st.userid : uuidv4(),
@@ -336,6 +337,23 @@ export default class ARENAChat {
       _this.keepalive(); // let other users know
       _this.populateUserList();
     });
+
+    ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, this.userJoinCallback);
+  }
+
+
+  /**
+   * Called when user joins
+   * Defined as a closure to capture 'this'
+   * @param {object} e event object; e.detail contains the callback arguments
+  */
+  userJoinCallback = (e) => {
+    if (e.type !==  ARENAEventEmitter.events.USER_JOINED) {
+      console.error("Chat: Received wrong event type! (expecting user join event)");
+    }
+    const args = e.detail;
+    console.log("****Jitsi user joined", args.id, args.dn, args.scene, args.src);
+    console.log(this.settings);
   }
 
   // perform some async startup tasks
@@ -358,7 +376,7 @@ export default class ARENAChat {
       "chat-" + this.settings.userid
     );
 
-    var _this = this;
+    var _this = this; /* save reference to class instance */
     let msg = {
       object_id: uuidv4(),
       type: "chat-ctrl",
@@ -381,6 +399,7 @@ export default class ARENAChat {
         this.mqttc.subscribe(this.settings.subscribePublicTopic);
         this.mqttc.subscribe(this.settings.subscribePrivateTopic);
 
+        /* bind callback to _this, so it can access the class instance */
         this.mqttc.onConnectionLost = this.onConnectionLost.bind(_this);
         this.mqttc.onMessageArrived = this.onMessageArrived.bind(_this);
 
@@ -749,6 +768,7 @@ export default class ARENAChat {
   }
 
   keepalive(tryconnect = false) {
+    console.log('keep alive!');
     this.ctrlMsg("all", "keepalive", tryconnect);
   }
 
