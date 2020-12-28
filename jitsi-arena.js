@@ -247,7 +247,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         if (arenaUserName && arenaDisplayName) {
             // emit user joined event
             ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                id: arenaUserName,
+                cid: arenaUserName,
                 dn: arenaDisplayName,
                 scene: arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI});
@@ -277,7 +277,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         delete remoteTracks[id];
         // emit user left event
         ARENA.events.emit(ARENAEventEmitter.events.USER_LEFT,
-            {id: arenaUserName, dn: arenaDisplayName, src: ARENAEventEmitter.sources.JITSI});
+            {cid: arenaUserName, dn: arenaDisplayName, src: ARENAEventEmitter.sources.JITSI});
     }
 
     /**
@@ -327,7 +327,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
                     if (arenaUserName && arenaDisplayName) {
                         // emit new user event
                         ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                            id: arenaUserName,
+                            cid: arenaUserName,
                             dn: arenaDisplayName,
                             scene: arenaConferenceName,
                             src: ARENAEventEmitter.sources.JITSI});

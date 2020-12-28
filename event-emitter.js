@@ -9,7 +9,7 @@ class ARENAEventEmitter {
          * Indicates we joined a jitsi conference (also on reconnect),
          * provides a list of current users/participants:
          * @typedef {Object} UserData
-         * @param id {string} the ARENA id (camName) of the user 
+         * @param cid {string} the ARENA camera id of the user 
          * @param dn {string} the display name of the user
          *
          * The following parameters are passed to listeners (event.detail object):
@@ -24,7 +24,7 @@ class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback userJoinCallback
-         * @param id {string} the ARENA id (camName) of the user 
+         * @param cid {string} the ARENA camera id of the user  
          * @param dn {string} the display name of the user
          * @param scene {string} the scene
          * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
@@ -36,7 +36,7 @@ class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback userLeftCallback
-         * @param id {string} the ARENA id (camName) of the user 
+         * @param cid {string} the ARENA camera id of the user  
          * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
          */   
         USER_LEFT: 'user_left'
@@ -72,7 +72,7 @@ class ARENAEventEmitter {
      *      // event type should match, unless this function is registered as a callback for several different events
      *      if (e.type !==  ARENAEventEmitter.events.USER_JOINED) return; 
      *      const args = e.detail; // receive arguments as defined by {userJoinCallback}
-     *      console.log("User join: ", args.id, args.dn, args.scene, args.src); 
+     *      console.log("User join: ", args.cid, args.dn, args.scene, args.src); 
      *    }
      * 
      * @param eventName {string} name of the event
@@ -106,7 +106,7 @@ class ARENAEventEmitter {
      * Emit event
      * 
      * Usage example:
-     *  emit(ARENAEventEmitter.events.USER_JOINED, {id: 'camera_1356_X', dn: 'User X', scene: 'ascene', src: ARENAEventEmitter.sources.JITSI});
+     *  emit(ARENAEventEmitter.events.USER_JOINED, {cid: 'camera_1356_X', dn: 'User X', scene: 'ascene', src: ARENAEventEmitter.sources.JITSI});
      * 
      *  Emits a USER_JOINED event, with the defined custom callback arguments: id, dn, scene and src (see {userJoinCallback})
      * 
