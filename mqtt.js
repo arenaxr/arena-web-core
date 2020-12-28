@@ -776,7 +776,7 @@ function _onMessageArrived(message, jsonMessage) {
                     return;
                 }
                 let target = theMessage.data.target;
-                if (!target.x) { // check if an object id was given
+                if (target.hasOwnProperty("object_id")) { // check if an object id was given
                     const targetObj = globals.sceneObjects[target];
                     if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
                     else {
@@ -784,7 +784,10 @@ function _onMessageArrived(message, jsonMessage) {
                         return;
                     }
                 }
-                if (target.x && target.y && target.z) { // x, y, z given
+                if (target.hasOwnProperty("x") &&
+                    target.hasOwnProperty("y") &&
+                    target.hasOwnProperty("z"))
+                { // x, y, z given
                     myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z);
                     myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z);
                 }
@@ -1305,6 +1308,8 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w);
                     } else if (attribute === 'position') {
                         entityEl.object3D.position.set(value.x, value.y, value.z);
+                    } else if (attribute === 'color') {
+                        entityEl.setAttribute('material', 'color', value);
                     } else {
                         if (value === null) {
                             entityEl.removeAttribute(attribute);
