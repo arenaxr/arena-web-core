@@ -65,10 +65,10 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         jitsiId = participantId;
         console.log('connectArena: ' + participantId, trackType);
 
-        // emit jitsi connect event
+        // create participant list and emit jitsi connect event
         let pl = [];
         conference.getParticipants().forEach( (user) => {
-            const arenaUserName = user.getProperty('arenaUserName')
+            const arenaUserName = user.getProperty('arenaUserName');
             const arenaDisplayName = user.getProperty('arenaDisplayName');
             if (arenaUserName && arenaDisplayName) {
                 pl.push({id: arenaUserName, dn: arenaDisplayName});
@@ -260,11 +260,11 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     /**
      * Called when user leaves
      * @param {string} id user Id
-     * @param {object} id user object (JitsiParticipant)
+     * @param {object} user user object (JitsiParticipant)
      */
     function onUserLeft(id, user) {
         console.log('user left:', id);
-        const arenaUserName = user.getProperty('arenaUserName')
+        const arenaUserName = user.getProperty('arenaUserName');
         const arenaDisplayName = user.getProperty('arenaDisplayName');
 
         if (!remoteTracks[id]) return;
