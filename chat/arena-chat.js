@@ -369,7 +369,7 @@ export default class ARENAChat {
                 this.liveUsers[user.cid] = {
                     un: user.dn,
                     scene: args.scene,
-                    cid: user.id,
+                    cid: user.cid,
                     ts: new Date().getTime(),
                 };
                 if (args.scene === this.settings.scene)
@@ -481,12 +481,8 @@ export default class ARENAChat {
             from_cid: this.settings.cameraid,
             from_un: this.settings.username,
             from_scene: this.settings.scene,
-            from_desc:
-                decodeURI(this.settings.username) +
-                " (" +
-                this.toSel.options[this.toSel.selectedIndex].text +
-                ") " +
-                new Date().toLocaleTimeString(),
+            from_desc: decodeURI(this.settings.username) + " (" +
+                this.toSel.options[this.toSel.selectedIndex].text + ") ",
             cameraid: this.settings.cameraid,
             text: msgTxt,
         };
@@ -499,7 +495,7 @@ export default class ARENAChat {
                   );
         //console.log("sending", msg, "to", dstTopic);
         this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
-        this.txtAddMsg(msg.text, msg.from_desc, "self");
+        this.txtAddMsg(msg.text, msg.from_desc + new Date().toLocaleTimeString(), "self");
     }
 
     onMessageArrived(mqttMsg) {
@@ -600,7 +596,7 @@ export default class ARENAChat {
         if (msg.to_cid === "scene" && msg.from_scene != this.settings.scene)
             return;
 
-        this.txtAddMsg(msg.text, msg.from_desc, "other");
+        this.txtAddMsg(msg.text, msg.from_desc + new Date().toLocaleTimeString(), "other");
 
         this.unreadMsgs++;
         this.chatDot.innerHTML =
