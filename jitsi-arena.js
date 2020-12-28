@@ -319,7 +319,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
         conference.on(JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
             (user, propertyKey, oldPropertyValue, propertyValue) => {
-                console.log(`Property changed: ${user.getId()} ${propertyKey} ${propertyValue} ${oldPropertyValue}`);
+                //console.log(`Property changed: ${user.getId()} ${propertyKey} ${propertyValue} ${oldPropertyValue}`);
                 const id = user.getId();
                 if (newUsersWaitingProperties[id]) {
                     const arenaUserName = conference.getParticipantById(id).getProperty('arenaUserName');
