@@ -57,19 +57,19 @@ export default class ARENAChat {
 				- global public (*o*pen) topic (gtopic; realm/g/c/o/#)
 				- a user (*p*rivate) topic (utopic; realm/g/c/p/userhandle/#)
 		
-		Clients write always to a topic with its own userhandle:
-  		    	 - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-userid]/userhandle)
+		  Clients write always to a topic with its own userhandle:
+  		   - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-cameraid]/userhandle)
 				 - a global topic (ugtopic; realm/g/c/o/userhandle);
 
-		    where userhandle = userid + btoa(userid)
+		    where userhandle = cameraid + btoa(cameraid)
 
 			Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
 			Note: scene-only messages are sent to public topic and filtered at the client
 
 			Summary of topics/permissions:
-			 subscribePrivateTopic  - receive private messages (realm/g/c/p/userid/#): Read
+			 subscribePrivateTopic  - receive private messages (realm/g/c/p/cameraid/#): Read
 			 subscribePublicTopic  - receive open messages to everyone and/or scene (realm/g/c/o/#): Read
-			 publishPrivateTopic - send private messages to a user (realm/g/c/p/[regex-matching-any-userid]/userhandle): Write
+			 publishPrivateTopic - send private messages to a user (realm/g/c/p/[regex-matching-any-cameraid]/userhandle): Write
 			 publishPublicTopic - send open messages (chat keepalive, messages to all/scene) (realm/g/c/o/userhandle): Write
 	    */
 
