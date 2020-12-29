@@ -330,6 +330,10 @@ body {
 	background-color: rgb(179, 178, 178);
 }
 
+.user-list .jitsi {
+    background-color: rgb(179, 142, 142);
+}
+
 .lm-list-btn-ctnr,
 .users-list-btn-ctnr {
 	position: absolute;
