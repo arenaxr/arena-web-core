@@ -18,14 +18,21 @@ class FaceDetector {
 
     getPoseModel(req_callback) {
         const req = new XMLHttpRequest();
-        req.open('GET', './face_landmarks_68_compressed.dat', true);
+        req.open(
+                'GET',
+                'https://arena-cdn.conix.io/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat',
+                true
+            );
         req.responseType = 'arraybuffer';
-        req.onload = (e) => {
+        req.onload = e => {
             const payload = req.response;
             if (payload) {
                 req_callback();
                 this.poseModelInit(payload);
                 this.ready = true;
+            }
+            else {
+                console.log("shape_predictor_68_face_landmarks model not found!")
             }
         };
         req.send(null);
