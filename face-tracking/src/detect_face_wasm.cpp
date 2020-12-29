@@ -4,7 +4,6 @@
 #include <emscripten/emscripten.h>
 
 #include <dlib/opencv.h>
-#include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -14,8 +13,12 @@
 
 #include <dlib/external/zlib/zlib.h>
 
-#define PI          3.14159265
-#define MODEL_SIZE  99693937
+#define PI                  3.14159265
+#define FRAME_SKIP_RATE     15
+#define MODEL_SIZE          99693937
+
+#define FEATURES_LEN        140     // 4 + 2 * 68
+#define POSE_LEN            7       // 4 + 3
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,32 +74,32 @@ void pose_model_init(char buf[], size_t buf_len) {
     model_points.push_back( Point3d(0.000000, -3.116408, 6.097667) );
     model_points.push_back( Point3d(0.000000, -7.415691, 4.070434) );
 
-    cout << "Ready to detect!" << endl;
+    cout << "Face Tracking Ready!" << endl;
 }
 
 EMSCRIPTEN_KEEPALIVE
-uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) {
+uint16_t *detect_face_features(uchar pixels[], size_t cols, size_t rows) {
     static correlation_tracker tracker;
     static bool track = false;
     static uint32_t frames = 0;
 
-    const uint8_t parts_len = 5 + 2 * 68;
-    uint16_t *parts = new uint16_t[parts_len];
     int left, top, right, bottom;
 
+    uint16_t *features = new uint16_t[FEATURES_LEN];
+
     array2d<uint8_t> gray;
-    gray.set_size(srcRows, srcCols);
+    gray.set_size(rows, cols);
 
     uint32_t idx;
-    for (int i = 0; i < srcRows; ++i) {
-        for (int j = 0; j < srcCols; ++j) {
-            idx = (i * srcCols * 4) + j * 4;
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            idx = (i * cols * 4) + j * 4;
 
             // rgba to rgb
-            uchar r = srcData[idx];
-            uchar g = srcData[idx + 1];
-            uchar b = srcData[idx + 2];
-            // uchar a = srcData[idx + 3];
+            uchar r = pixels[idx];
+            uchar g = pixels[idx + 1];
+            uchar b = pixels[idx + 2];
+            // uchar a = pixels[idx + 3];
 
             // turn src image to gray scale
             gray[i][j] = (0.30 * r) + (0.59 * g) + (0.11 * b);
@@ -124,7 +127,7 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
     right = face_rect.right();
     bottom = face_rect.bottom();
 
-    if (left >= 0 && top < srcRows && right < srcCols && bottom >= 0) {
+    if (left >= 0 && top < rows && right < cols && bottom >= 0) {
         dlib::rectangle face_rect(
             (long)(left),
             (long)(top),
@@ -139,30 +142,28 @@ uint16_t *detect_face_features(uchar srcData[], size_t srcCols, size_t srcRows) 
             tracker.start_track(gray, face_rect);
         }
 
-        parts[1] = left;
-        parts[2] = top;
-        parts[3] = right;
-        parts[4] = bottom;
-        for (uint8_t i = 0, j = 5; i < shape.num_parts(); i += 1, j += 2) {
-            parts[j]   = shape.part(i).x();
-            parts[j+1] = shape.part(i).y();
+        features[0] = left;
+        features[1] = top;
+        features[2] = right;
+        features[3] = bottom;
+        for (uint8_t i = 0, j = 4; i < shape.num_parts(); i+=1, j+=2) {
+            features[j]   = shape.part(i).x();
+            features[j+1] = shape.part(i).y();
         }
     }
     else {
         track = false; // detect again if bbox is out of bounds
     }
 
-    parts[0] = parts_len; // set first idx to len when passed to js
-
-    if (++frames % 15 == 0) {
+    if (++frames % FRAME_SKIP_RATE == 0) {
         track = false;
     }
 
-    return parts;
+    return features;
 }
 
 EMSCRIPTEN_KEEPALIVE
-double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
+double *get_pose(uint16_t landmarks[], size_t cols, size_t rows) {
     static bool first_iter = true;
 
     static Mat camera_matrix, distortion;
@@ -175,13 +176,12 @@ double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
 
     static std::vector<Point2d> image_pts;
 
-    uint8_t result_len;
-    double *result;
     double x, y, z;
+    double *pose = new double[POSE_LEN];
 
     if (first_iter) {
-        double focal_length = srcCols;
-        Point2d center = Point2d(srcCols/2, srcRows/2);
+        double focal_length = cols;
+        Point2d center = Point2d(cols/2, rows/2);
         camera_matrix = (Mat_<double>(3,3) << focal_length, 0, center.x, 0 , focal_length, center.y, 0, 0, 1);
         distortion = Mat::zeros(4, 1, CV_64FC1);
         first_iter = false;
@@ -210,24 +210,20 @@ double *get_pose(uint16_t landmarks[], size_t srcCols, size_t srcRows) {
     hconcat(rot_mat, trans_vec, pose_mat);
     decomposeProjectionMatrix(pose_mat, out_intrinsics, out_rot, out_trans, noArray(), noArray(), noArray(), euler_angle);
 
-    result_len = 8;
-    result = new double[result_len];
-    result[0] = result_len;
-
     x = euler_angle.at<double>(0) * PI / 180.0;
     y = euler_angle.at<double>(1) * PI / 180.0;
     z = euler_angle.at<double>(2) * PI / 180.0;
 
-    result[1] = sin(x/2) * cos(y/2) * cos(z/2) - cos(x/2) * sin(y/2) * sin(z/2);
-    result[2] = cos(x/2) * sin(y/2) * cos(z/2) + sin(x/2) * cos(y/2) * sin(z/2);
-    result[3] = cos(x/2) * cos(y/2) * sin(z/2) - sin(x/2) * sin(y/2) * cos(z/2);
-    result[4] = cos(x/2) * cos(y/2) * cos(z/2) + sin(x/2) * sin(y/2) * sin(z/2);
+    pose[0] = sin(x/2) * cos(y/2) * cos(z/2) - cos(x/2) * sin(y/2) * sin(z/2);
+    pose[1] = cos(x/2) * sin(y/2) * cos(z/2) + sin(x/2) * cos(y/2) * sin(z/2);
+    pose[2] = cos(x/2) * cos(y/2) * sin(z/2) - sin(x/2) * sin(y/2) * cos(z/2);
+    pose[3] = cos(x/2) * cos(y/2) * cos(z/2) + sin(x/2) * sin(y/2) * sin(z/2);
 
-    result[5] = trans_vec.at<double>(0);
-    result[6] = trans_vec.at<double>(1);
-    result[7] = trans_vec.at<double>(2);
+    pose[4] = trans_vec.at<double>(0);
+    pose[5] = trans_vec.at<double>(1);
+    pose[6] = trans_vec.at<double>(2);
 
-    return result;
+    return pose;
 }
 
 #ifdef __cplusplus

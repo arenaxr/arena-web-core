@@ -4,7 +4,16 @@ importScripts('https://unpkg.com/comlink/dist/umd/comlink.js');
 class FaceDetector {
     constructor(callback) {
         const _this = this;
+
         this.ready = false;
+
+        this._bboxLength = 4;
+        this._landmarksLength = 2 * 68;
+        this._featuresLength = this._landmarksLength + this._bboxLength;
+        this._rotLength = 4;
+        this._transLength = 3;
+        this._poseLength = this._rotLength + this._transLength;
+
         FaceDetectorWasm().then(function(Module) {
             console.log('Face Detector WASM module loaded.');
             _this.onWasmInit(Module);
@@ -14,6 +23,10 @@ class FaceDetector {
 
     onWasmInit(Module) {
         this._Module = Module;
+
+        this.initializeShapePredictor = this._Module.cwrap("pose_model_init", null, ["number", "number"]);
+        this.detectFaceFeatures = this._Module.cwrap("detect_face_features", "number", ["number", "number", "number"]);
+        this.findPose = this._Module.cwrap("get_pose", "number", ["number", "number", "number"]);
     }
 
     getPoseModel(req_callback) {
@@ -42,83 +55,51 @@ class FaceDetector {
         const model = new Uint8Array(data);
         const buf = this._Module._malloc(model.length);
         this._Module.HEAPU8.set(model, buf);
-        this._Module.ccall(
-            'pose_model_init',
-            null,
-            ['number', 'number'],
-            [buf, model.length],
-        );
+        this.initializeShapePredictor(buf, model.length);
     }
 
-    detect(im_arr, width, height) {
-        if (!this.ready) return [[], []];
+    detectFeatures(imArr, width, height) {
+        if (!this.ready) return undefined;
 
-        const im_ptr = this._Module._malloc(im_arr.length);
-        this._Module.HEAPU8.set(im_arr, im_ptr);
+        const imPtr = this._Module._malloc(imArr.length);
+        this._Module.HEAPU8.set(imArr, imPtr);
 
-        const ptr = this._Module.ccall(
-            'detect_face_features',
-            'number',
-            ['number', 'number', 'number'],
-            [im_ptr, width, height],
-        );
-        const ptrU16 = ptr / Uint16Array.BYTES_PER_ELEMENT;
+        // console.time("features");
+        const ptr = this.detectFaceFeatures(imPtr, width, height);
+        // console.timeEnd("features");
+        let features = new Uint16Array(this._Module.HEAPU16.buffer, ptr, this._featuresLength);
 
-        const len = this._Module.HEAPU16[ptrU16];
-
-        let i = 1;
-
-        const bbox = [];
-        for (; i < 5; i++) {
-            bbox.push(this._Module.HEAPU16[ptrU16+i]);
-        }
-
-        const landmarksRaw = [];
-        for (; i < len; i++) {
-            landmarksRaw.push(this._Module.HEAPU16[ptrU16+i]);
-        }
+        const bbox = features.slice(0, this._bboxLength);
+        const landmarksRaw = features.slice(this._bboxLength, this._featuresLength);
 
         this._Module._free(ptr);
-        this._Module._free(im_ptr);
+        this._Module._free(imPtr);
 
-        return [landmarksRaw, bbox];
+        return {
+            bbox: bbox,
+            landmarks: landmarksRaw
+        };
     }
 
-    getPose(parts_arr, width, height) {
-        if (!this.ready) return [null, null];
+    getPose(partsArr, width, height) {
+        if (!this.ready) return undefined;
 
-        const parts_ptr = this._Module._malloc(parts_arr.length * Uint16Array.BYTES_PER_ELEMENT);
-        this._Module.HEAPU16.set(parts_arr, parts_ptr / Uint16Array.BYTES_PER_ELEMENT);
+        const partsPtr = this._Module._malloc(partsArr.length * Uint16Array.BYTES_PER_ELEMENT);
+        this._Module.HEAPU16.set(partsArr, partsPtr / Uint16Array.BYTES_PER_ELEMENT);
 
-        const ptr = this._Module.ccall(
-            'get_pose',
-            'number',
-            ['number', 'number', 'number'],
-            [parts_ptr, width, height],
-        );
-        const ptrF64 = ptr / Float64Array.BYTES_PER_ELEMENT;
+        const ptr = this.findPose(partsPtr, width, height);
+        let pose = new Float64Array(this._Module.HEAPF64.buffer, ptr, this._featuresLength);
 
-        const len = this._Module.HEAPF64[ptrF64];
-
-        let i = 1;
-
-        const quat = [];
-        for (; i < 5; i++) {
-            quat.push(this._Module.HEAPF64[ptrF64+i]);
-        }
-        quat[1] = -quat[1];
-        quat[2] = -quat[2];
-
-        const trans = [];
-        for (; i < len; i++) {
-            trans.push(this._Module.HEAPF64[ptrF64+i]);
-        }
-        trans[0] = -trans[0];
+        const quat = pose.slice(0, this._rotLength);
+        const trans = pose.slice(this._rotLength, this._poseLength);
 
         this._Module._free(ptr);
-        this._Module._free(parts_ptr);
+        this._Module._free(partsPtr);
 
-        return [quat, trans];
+        return {
+            rotation: quat,
+            translation: trans
+        };
     }
 }
 
