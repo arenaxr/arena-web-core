@@ -1160,3 +1160,14 @@ AFRAME.registerComponent('ttl', {
         }
     },
 });
+
+AFRAME.registerComponent('arena-renderer-defaults', {
+    init: function() {
+        console.log(this.el.sceneEl.renderer);
+        this.el.sceneEl.renderer.outputEncoding = 3001;
+        this.el.sceneEl.renderer.physicallyCorrectLights = true;
+        this.el.sceneEl.renderer.setClearColor( 0xcccccc );
+
+        console.log(this.el.sceneEl.renderer);
+    },
+});
