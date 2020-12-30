@@ -20,6 +20,11 @@ const getSceneName = () => {
     }
 };
 
+window.ARENA = {};
+
+// arena events target
+ARENA.events = new ARENAEventEmitter();
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
