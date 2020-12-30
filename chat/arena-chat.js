@@ -15,7 +15,7 @@ export default class ARENAChat {
     static PRIVATE_TOPIC_PREFIX = '/g/c/p/';
 
     static userType = {
-        JITSI: 'jitsi',
+        EXTERNAL: 'external',
         ARENA: 'arena'
     };
 
@@ -75,22 +75,22 @@ export default class ARENAChat {
 
         // receive private messages  (subscribe only)
         this.settings.subscribePrivateTopic =
-            this.settings.realm + this.PRIVATE_TOPIC_PREFIX + this.settings.userid + '/#';
+            this.settings.realm + ARENAChat.PRIVATE_TOPIC_PREFIX + this.settings.userid + '/#';
 
         // receive open messages to everyone and/or scene (subscribe only)
-        this.settings.subscribePublicTopic = this.settings.realm + this.PUBLIC_TOPIC_PREFIX + '#';
+        this.settings.subscribePublicTopic = this.settings.realm + ARENAChat.PUBLIC_TOPIC_PREFIX + '#';
 
         // send private messages to a user (publish only)
         this.settings.publishPrivateTopic =
             this.settings.realm +
-            this.PRIVATE_TOPIC_PREFIX +
+            ARENAChat.PRIVATE_TOPIC_PREFIX +
             '{to_uid}/' +
             this.settings.userid +
             btoa(this.settings.userid);
 
         // send open messages (chat keepalive, messages to all/scene) (publish only)
         this.settings.publishPublicTopic =
-            this.settings.realm + this.PUBLIC_TOPIC_PREFIX + this.settings.userid + btoa(this.settings.userid);
+            this.settings.realm + ARENAChat.PUBLIC_TOPIC_PREFIX + this.settings.userid + btoa(this.settings.userid);
 
         // counter for unread msgs
         this.unreadMsgs = 0;
@@ -329,7 +329,6 @@ export default class ARENAChat {
      */
     jitsiConnectCallback = (e) => {
         const args = e.detail;
-        console.log('****Jitsi connect', args.scene, args.pl);
         args.pl.forEach((user) => {
             console.log('Jitsi User: ', user);
             // check if jitsi knows about someone we don't; add to user list
@@ -339,9 +338,9 @@ export default class ARENAChat {
                     scene: args.scene,
                     cid: user.cn,
                     ts: new Date().getTime(),
-                    type: this.userType.JITSI, // indicate we only know about the user from jitsi
+                    type: ARENAChat.userType.EXTERNAL, // indicate we only know about the user from jitsi
                 };
-                if (args.scene === this.settings.scene) this.populateUserList(user.dn);
+                if (args.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
                 else this.populateUserList();
             }
         });
@@ -357,14 +356,15 @@ export default class ARENAChat {
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
         if (!this.liveUsers[user.id]) {
+            let _this = this;
             this.liveUsers[user.id] = {
                 un: user.dn,
                 scene: user.scene,
                 cid: user.cn,
                 ts: new Date().getTime(),
-                type: this.userType.JITSI, // indicate we only know about the user from jitsi
+                type: ARENAChat.userType.EXTERNAL, // indicate we only know about the user from jitsi
             };
-            if (user.scene === this.settings.scene) this.populateUserList(user.dn);
+            if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
             else this.populateUserList();
         }
     };
@@ -378,6 +378,7 @@ export default class ARENAChat {
         if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
         const user = e.detail;
         if (!this.liveUsers[user.id]) return;
+        if (this.liveUsers[user.id].type === ARENAChat.userType.ARENA) return; // will be handled through mqtt messaging
         delete this.liveUsers[user.id];
         this.populateUserList();
     };
@@ -501,7 +502,7 @@ export default class ARENAChat {
         if (
             !mqttMsg.destinationName ===
             this.settings.realm +
-                this.PRIVATE_TOPIC_PREFIX +
+                ARENAChat.PRIVATE_TOPIC_PREFIX +
                 this.settings.userid +
                 '/' +
                 msg.from_uid +
@@ -509,7 +510,7 @@ export default class ARENAChat {
         )
             if (
                 !mqttMsg.destinationName ===
-                this.settings.realm + this.PUBLIC_TOPIC_PREFIX + msg.from_uid + btoa(msg.from_uid)
+                this.settings.realm + ARENAChat.PUBLIC_TOPIC_PREFIX + msg.from_uid + btoa(msg.from_uid)
             )
                 return;
 
@@ -520,9 +521,9 @@ export default class ARENAChat {
                 scene: msg.from_scene,
                 cid: msg.cameraid,
                 ts: new Date().getTime(),
-                type: this.userType.ARENA,
+                type: ARENAChat.userType.ARENA,
             };
-            if (msg.from_scene === this.settings.scene) this.populateUserList(msg.from_un);
+            if (msg.from_scene === this.settings.scene) this.populateUserList(this.liveUsers[msg.from_uid]);
             else this.populateUserList();
             this.keepalive(); // let this user know about us
         } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
@@ -530,7 +531,7 @@ export default class ARENAChat {
             this.liveUsers[msg.from_uid].scene = msg.from_scene;
             this.liveUsers[msg.from_uid].cid = msg.cameraid;
             this.liveUsers[msg.from_uid].ts = new Date().getTime();
-            this.liveUsers[msg.from_uid].type = this.userType.ARENA;
+            this.liveUsers[msg.from_uid].type = ARENAChat.userType.ARENA;
             if (msg.text) {
                 if (msg.text == 'left') {
                     delete this.liveUsers[msg.from_uid];
@@ -630,7 +631,7 @@ export default class ARENAChat {
 
         this.nSceneUserslabel.innerHTML = nTotalUsers;
         this.usersDot.innerHTML = nSceneUsers < 100 ? nSceneUsers : '...';
-        if (newUser) this.displayAlert(newUser + ' joined.', 5000);
+        if (newUser) this.displayAlert(newUser.un + ((newUser.type === ARENAChat.userType.EXTERNAL) ? ' (external)' : '') + ' joined.', 5000, newUser.type);
 
         let uli = document.createElement('li');
         uli.innerHTML = this.settings.username + ' (Me)';
@@ -656,7 +657,7 @@ export default class ARENAChat {
         userList.forEach((user) => {
             let uli = document.createElement('li');
 
-            uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') + decodeURI(user.un) + (user.type === _this.userType.JITSI ? ' (jitsi only)' : '');
+            uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') + decodeURI(user.un) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
 
             let uBtnCtnr = document.createElement('div');
             uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -689,7 +690,7 @@ export default class ARENAChat {
                     // message to target user
                     _this.ctrlMsg(user.uid, 'sound:off');
                 };
-                if (user.type === _this.userType.JITSI) uli.className = 'jitsi';
+                if (user.type === ARENAChat.userType.EXTERNAL) uli.className = 'external';
             } else {
                 uli.className = 'oscene';
             }
@@ -799,17 +800,16 @@ export default class ARENAChat {
         let now = new Date().getTime();
         let _this = this;
         Object.keys(_this.liveUsers).forEach(function (key) {
-            if (now - _this.liveUsers[key].ts > _this.settings.keepalive_interval_ms && _this.liveUsers[key].type === _this.userType.ARENA) {
+            if (now - _this.liveUsers[key].ts > _this.settings.keepalive_interval_ms && _this.liveUsers[key].type === ARENAChat.userType.ARENA) {
                 delete _this.liveUsers[key];
             }
         });
     }
 
-    displayAlert(msg, timeMs) {
-        let alert = document.getElementById('alert');
-
+    displayAlert(msg, timeMs, type='') {
         this.alertBox.innerHTML = msg;
         this.alertBox.style.display = 'block';
+        this.alertBox.className = "chat-alert-box " + type;
         setTimeout(() => {
             this.alertBox.style.display = 'none';
         }, timeMs); // clear message in timeMs milliseconds

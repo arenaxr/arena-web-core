@@ -192,9 +192,6 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
         const videoId = `video${participant}`;
         // const displayNames = conference.getParticipantById(participant)._displayName;
-        let camNames = conference.getParticipantById(participant).getProperty('arenaCameraName');
-        if (!camNames) camNames = conference.getParticipantById(participant).getDisplayName();
-        const objectIds = camNames.split(',');
 
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) {
@@ -202,6 +199,11 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             $('a-assets').append(`<video autoplay='1' id='${videoId}'/>`);
         }
         track.attach($(`#${videoId}`)[0]);
+
+        let camNames = conference.getParticipantById(participant).getProperty('arenaCameraName');
+        if (!camNames) camNames = conference.getParticipantById(participant).getDisplayName();
+        if (!camNames) return; // handle jitsi-only users that have not set the display name
+        const objectIds = camNames.split(',');
 
         // handle screen share video
         for (let i = 0; i < objectIds.length; i++) {
@@ -275,10 +277,12 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             });
         } else {
             // this might be a jitsi-only user; emit event if name does not have the arena tag
-            if (!conference.getParticipantById(id).getDisplayName().includes(ARENA_USER)) {
+            let dn = conference.getParticipantById(id).getDisplayName();
+            if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
+            if (!dn.includes(ARENA_USER)) {
                 ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
                     id: id,
-                    dn: conference.getParticipantById(id).getDisplayName(),
+                    dn: dn,
                     cn: undefined,
                     scene: arenaConferenceName,
                     src: ARENAEventEmitter.sources.JITSI,
@@ -288,7 +292,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                     // emit event anyway in NEW_USER_TIMEOUT_MS if we dont hear from this user
                     ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
                         id: id,
-                        dn: conference.getParticipantById(id).getDisplayName(),
+                        dn: dn,
                         cn: undefined,
                         scene: arenaConferenceName,
                         src: ARENAEventEmitter.sources.JITSI,

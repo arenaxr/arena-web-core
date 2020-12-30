@@ -25,6 +25,13 @@ body {
 	display: none;
 }
 
+.chat-alert-box.arena {
+	background: #b5b9cb;
+}
+
+.chat-alert-box.external {
+	background: #d79999;
+}
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
@@ -330,7 +337,7 @@ body {
 	background-color: rgb(179, 178, 178);
 }
 
-.user-list .jitsi {
+.user-list .external {
     background-color: rgb(179, 142, 142);
 }
 

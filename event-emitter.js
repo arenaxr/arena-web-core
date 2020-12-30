@@ -116,7 +116,7 @@ class ARENAEventEmitter {
      * @param detail {Object} custom event properties
      */    
     emit(eventName, detail) {
-        console.info("EVENT:", eventName, detail);
+        //console.info("EVENT:", eventName, detail);
         return this._target.dispatchEvent(
             new CustomEvent(eventName, {detail, cancelable: true}),
         );
