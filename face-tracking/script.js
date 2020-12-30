@@ -299,6 +299,7 @@ ARENA.FaceTracker = (function () {
         grayscale.requestStream()
             .then(source => {
                 onInit(source);
+                process();
             })
             .catch(err => {
                 console.warn("ERROR: " + err);
