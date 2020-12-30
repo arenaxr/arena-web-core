@@ -31,6 +31,8 @@ Download and install [emsdk](https://emscripten.org/docs/getting_started/downloa
 
 Run ```build.sh``` to build. Optional flag ```--force```.
 
+See [here](https://github.com/EdwardLu2018/wasm-face-tracking).
+
 ## Landmark Locations for Reference
 ![landmarks](./img/face_landmarks.jpg)
 

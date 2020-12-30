@@ -142,8 +142,14 @@
 
       </a-entity>
     </a-scene>
+
     <video src="" id="localVideo" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
+
     <div id="gltf-loading"></div>
+
+    <!-- face tracking -->
+    <script src="face-tracking/dist/arena-face-tracker.min.js"></script>
+    <script src="face-tracking/script.js"></script>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="https://apis.google.com/js/platform.js"></script>

@@ -364,7 +364,7 @@ function onConnected(reconnect, uri) {
             jitsiId: ARENA.JitsiAPI ? ARENA.JitsiAPI.getJitsiId() : null,
             hasAudio: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasAudio() : false,
             hasVideo: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasVideo() : false,
-            hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.hasAvatar(),
+            hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.running(),
             displayName: globals.displayName,
             action: 'create',
             type: 'object',
@@ -446,7 +446,7 @@ function onConnected(reconnect, uri) {
                     color: color,
                 },
             };
-            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric_eric
+            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric
             publish(globals.outputTopic + globals.viveRName, msg);
         });
     }
@@ -457,15 +457,6 @@ function onConnected(reconnect, uri) {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     ARENA.mqttClient.subscribe(globals.renderTopic);
-
-    // download and initialize face tracking code
-    //
-    if (!AFRAME.utils.device.isMobile()) {
-        importScript('./face-tracking/script.js').then(() => {
-            const displayBbox = false; const flipped = false;
-            ARENA.FaceTracker.init(displayBbox, flipped);
-        });
-    }
 }
 
 /**

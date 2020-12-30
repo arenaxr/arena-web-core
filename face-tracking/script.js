@@ -1,5 +1,3 @@
-import * as Comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
-
 ARENA.FaceTracker = (function () {
     // ==================================================
     // PRIVATE VARIABLES
@@ -8,118 +6,47 @@ ARENA.FaceTracker = (function () {
 
     let prevJSON = null;
 
-    let frames = 0, framesToSkip = 1;
     let displayBbox = false, flipped = false;
-    let vidStream = null;
-    let loadingTimer = null;
-    let ready = false;
 
-    let videoHeight = 0;
-    let videoElem = null, videoCanv = null, overlayCanv = null;
+    var grayscale = null;
 
-    let faceDetector = null;
-    let hasAvatar = false;
+    var videoCanvas = null;
+    var overlayCanvas = null;
+    var videoSource = null;
+
+    var worker = null;
+    var imageData = null;
+
+    var running = false;
+
+    var width = globals.localVideoWidth;
+    var height = Math.ceil((window.screen.height / window.screen.width) * width);
+
+    const targetFps = 30;
+    const fpsInterval = 1000 / targetFps; // ms
+
+    var startTime, prevTime;
+
+    var initializingTimer = null;
 
     // ==================================================
     // PRIVATE FUNCTIONS
     // ==================================================
     function writeOverlayText(text) {
-        if (!overlayCanv) return;
-        const overlayCtx = overlayCanv.getContext("2d");
+        const overlayCtx = overlayCanvas.getContext("2d");
         overlayCtx.clearRect(
             0, 0,
-            globals.localVideoWidth,
-            videoHeight
+            width,
+            height
         );
         overlayCtx.font = "17px Arial";
         overlayCtx.textAlign = "center";
         overlayCtx.fillStyle = OVERLAY_COLOR;
-        overlayCtx.fillText(text, overlayCanv.width/2, overlayCanv.height/8);
-    }
-
-    function setupVideo(setupCallback) {
-        videoElem = document.createElement("video");
-        videoElem.setAttribute("autoplay", "");
-        videoElem.setAttribute("muted", "");
-        videoElem.setAttribute("playsinline", "");
-
-        navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "user" },
-            audio: false
-        })
-        .then(stream => {
-            vidStream = stream;
-            videoElem.srcObject = stream;
-            videoElem.play();
-        })
-        .catch(function(err) {
-            console.log("ERROR: " + err);
-        });
-
-        function setVideoStyle(elem) {
-            elem.style.position = "absolute";
-            elem.style.top = "15px";
-            elem.style.left = "15px";
-            elem.style.borderRadius = "10px";
-        }
-
-        videoCanv = document.createElement("canvas");
-        setVideoStyle(videoCanv);
-        videoCanv.style.zIndex = 9998;
-        videoCanv.style.opacity = 0.30;
-        document.body.appendChild(videoCanv);
-
-        overlayCanv = document.createElement("canvas");
-        setVideoStyle(overlayCanv);
-        overlayCanv.style.zIndex = 9999;
-        document.body.appendChild(overlayCanv);
-
-        videoElem.addEventListener("canplay", function(e) {
-            videoHeight = videoElem.videoHeight / (videoElem.videoWidth / globals.localVideoWidth);
-
-            videoElem.setAttribute("width", globals.localVideoWidth);
-            videoElem.setAttribute("height", videoHeight);
-
-            videoCanv.width = globals.localVideoWidth;
-            videoCanv.height = videoHeight;
-            if (flipped) {
-                videoCanv.getContext('2d').translate(globals.localVideoWidth, 0);
-                videoCanv.getContext('2d').scale(-1, 1);
-            }
-
-            overlayCanv.width = globals.localVideoWidth;
-            overlayCanv.height = videoHeight;
-
-            if (setupCallback) setupCallback();
-        }, false);
-    }
-
-    function getFrame() {
-        const videoCanvCtx = videoCanv.getContext("2d");
-        videoCanvCtx.drawImage(
-            videoElem,
-            0, 0,
-            globals.localVideoWidth,
-            videoHeight
-        );
-        return videoCanvCtx.getImageData(0, 0, globals.localVideoWidth, videoHeight).data;
-    }
-
-    function hasFace(landmarks) {
-        if (!landmarks || landmarks.length == 0) return false;
-
-        let zeros = 0;
-        for (let i = 0; i < landmarks.length; i++) {
-            if (i % 2 == 0 && landmarks[i] > globals.localVideoWidth) return false;
-            if (i % 2 == 1 && landmarks[i] > videoHeight) return false;
-            if (landmarks[i] == 0) zeros++;
-        }
-        // if there are many 0's (>2/3) then assume there is no face
-        return zeros <= landmarks.length / 3;
+        overlayCtx.fillText(text, overlayCanvas.width/2, overlayCanvas.height/8);
     }
 
     function drawBbox(bbox) {
-        const overlayCtx = overlayCanv.getContext("2d");
+        const overlayCtx = overlayCanvas.getContext("2d");
 
         overlayCtx.beginPath();
         overlayCtx.strokeStyle = "red";
@@ -136,7 +63,7 @@ ARENA.FaceTracker = (function () {
     }
 
     function drawPolyline(landmarks, start, end, closed) {
-        const overlayCtx = overlayCanv.getContext("2d");
+        const overlayCtx = overlayCanvas.getContext("2d");
         overlayCtx.beginPath();
         overlayCtx.strokeStyle = OVERLAY_COLOR;
         overlayCtx.lineWidth = 1.5;
@@ -152,47 +79,57 @@ ARENA.FaceTracker = (function () {
         overlayCtx.stroke();
     }
 
-    function drawLandmarks(landmarksRaw, bbox) {
-        if (!overlayCanv) return;
-        if (!landmarksRaw || landmarksRaw.length == 0) return;
-        if (loadingTimer) clearInterval(loadingTimer);
+    function drawFeatures(features) {
+        const bbox = features.bbox
+        const landmarks = features.landmarks;
 
-        const overlayCtx = overlayCanv.getContext("2d");
-        overlayCtx.clearRect(0, 0, globals.localVideoWidth, videoHeight);
+        const overlayCtx = overlayCanvas.getContext("2d");
+        overlayCtx.clearRect( 0, 0, width, height );
 
-        let landmarks = [];
-        let face = hasFace(landmarksRaw);
-        for (let i = 0; i < landmarksRaw.length; i += 2) {
-            if (face) {
-                const l = [landmarksRaw[i], landmarksRaw[i+1]];
-                landmarks.push(l);
-            }
-            else {
-                landmarks.push([0,0]);
-            }
+        var landmarksFormatted = [];
+        for (var i = 0; i < landmarks.length; i += 2) {
+            const l = [landmarks[i], landmarks[i+1]];
+            landmarksFormatted.push(l);
         }
 
         if (displayBbox) drawBbox(bbox);
-        drawPolyline(landmarks, 0,  16, false);   // Jaw line
-        drawPolyline(landmarks, 17, 21, false);   // Left eyebrow
-        drawPolyline(landmarks, 22, 26, false);   // Right eyebrow
-        drawPolyline(landmarks, 27, 30, false);   // Nose bridge
-        drawPolyline(landmarks, 30, 35, true);    // Lower nose
-        drawPolyline(landmarks, 36, 41, true);    // Left eye
-        drawPolyline(landmarks, 42, 47, true);    // Right Eye
-        drawPolyline(landmarks, 48, 59, true);    // Outer lip
-        drawPolyline(landmarks, 60, 67, true);    // Inner lip
+        drawPolyline(landmarksFormatted, 0,  16, false);   // jaw
+        drawPolyline(landmarksFormatted, 17, 21, false);   // left eyebrow
+        drawPolyline(landmarksFormatted, 22, 26, false);   // right eyebrow
+        drawPolyline(landmarksFormatted, 27, 30, false);   // nose bridge
+        drawPolyline(landmarksFormatted, 30, 35, true);    // lower nose
+        drawPolyline(landmarksFormatted, 36, 41, true);    // left eye
+        drawPolyline(landmarksFormatted, 42, 47, true);    // right Eye
+        drawPolyline(landmarksFormatted, 48, 59, true);    // outer lip
+        drawPolyline(landmarksFormatted, 60, 67, true);    // inner lip
+    }
+
+    function hasFace(landmarks) {
+        if (!landmarks || landmarks.length == 0) return false;
+
+        let numZeros = 0;
+        for (let i = 0; i < landmarks.length; i++) {
+            if (i % 2 == 0 && landmarks[i] > width) return false;
+            if (i % 2 == 1 && landmarks[i] > height) return false;
+            if (landmarks[i] == 0) numZeros++;
+        }
+        return numZeros != landmarks.length;
     }
 
     function round3(num) {
         return parseFloat(num.toFixed(3));
     }
 
-    function createFaceJSON(landmarksRaw, bbox, quat, trans, width, height) {
+    function createFaceJSON(hasFace, features, pose) {
+        const landmarksRaw = features.landmarks;
+        const bbox = features.bbox;
+        const quat = pose.rotation;
+        const trans = pose.translation;
+
         let faceJSON = {};
         faceJSON["object_id"] = "face_" + globals.idTag;
 
-        faceJSON["hasFace"] = hasFace(landmarksRaw);
+        faceJSON["hasFace"] = hasFace;
 
         faceJSON["image"] = {};
         faceJSON["image"]["flipped"] = flipped;
@@ -237,107 +174,203 @@ ARENA.FaceTracker = (function () {
         return faceJSON;
     }
 
-    async function detectFace(frame, width, height) {
-        let landmarksRaw = [], bbox = [], quat = [], trans = [];
-        if (faceDetector && ready) {
-            const features = await faceDetector.detectFeatures(frame, width, height);
-            if (features) {
-                landmarksRaw = features.landmarks;
-                bbox = features.bbox;
-            }
+    // display frames
+    function tick() {
+        if (!running) return;
 
-            const pose = await faceDetector.getPose(landmarksRaw, globals.localVideoWidth, videoHeight);
-            if (pose) {
-                quat = pose.rotation;
-                trans = pose.translation;
-            }
+        const now = Date.now();
+        const dt = now - prevTime;
+
+        if (dt >= fpsInterval) {
+            prevTime = now - (dt % fpsInterval);
+            imageData = grayscale.getFrame();
+            const videoCanvasCtx = videoCanvas.getContext("2d");
+            videoCanvasCtx.drawImage(
+                videoSource, 0, 0, width, height
+            );
         }
-        return [landmarksRaw, bbox, quat, trans];
+
+        requestAnimationFrame(tick);
     }
 
-    async function processVideo() {
-        if (hasAvatar) {
-            if (frames % framesToSkip == 0) {
-                const [landmarksRaw, bbox, quat, trans] = await detectFace(getFrame(), globals.localVideoWidth, videoHeight);
-                drawLandmarks(landmarksRaw, bbox);
+    function onInit(source) {
+        videoSource = source;
+        running = true;
 
-                const faceJSON = createFaceJSON(landmarksRaw, bbox, quat, trans, globals.localVideoWidth, videoHeight);
-                if (faceJSON != prevJSON) {
-                    publish(globals.outputTopic + globals.camName + "/face", faceJSON);
-                    prevJSON = faceJSON;
+        const overlayCtx = overlayCanvas.getContext("2d");
+        overlayCtx.clearRect( 0, 0, width, height );
+
+        if (!worker) {
+            // worker to handle CV in the background
+            worker = new Worker("./face-tracking/face-tracker.worker.js");
+            worker.postMessage({ type: "init", width: width, height: height });
+
+            worker.onmessage = function (e) {
+                var msg = e.data;
+                switch (msg.type) {
+                    case "loaded": {
+                        process(); // start processing after face-tracker is ready
+                        break;
+                    }
+                    case "progress": {
+                        const progress = (Math.round(msg.progress * 100) / 100).toFixed(2);
+                        // if loading progress is more than 99, start displaying initialization
+                        if (progress > 99) {
+                            let i = 0;
+                            if (!initializingTimer) {
+                                initializingTimer = setInterval(() => {
+                                    if (running) {
+                                        writeOverlayText(`Initializing Face Tracking${".".repeat(i%4)}`);
+                                        i++;
+                                    }
+                                }, 500);
+                            }
+                        }
+                        if (running) {
+                            writeOverlayText(`Downloading Face Model: ${progress}%`);
+                        }
+                        break;
+                    }
+                    case "result": {
+                        if (running) {
+                            const valid = hasFace(msg.features.landmarks);
+                            if (valid) {
+                                drawFeatures(msg.features);
+                            } else {
+                                const overlayCtx = overlayCanvas.getContext("2d");
+                                overlayCtx.clearRect( 0, 0, width, height );
+                            }
+                            if (msg.features && msg.pose) {
+                                const faceJSON = createFaceJSON(valid, msg.features, msg.pose);
+                                if (faceJSON != prevJSON) {
+                                    publish(globals.outputTopic + globals.camName + "/face", faceJSON);
+                                    prevJSON = faceJSON;
+                                }
+                            }
+                        }
+                        if (initializingTimer) {
+                            clearInterval(initializingTimer);
+                        }
+                        process(); // process again after we just finished processing
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
                 }
             }
-            frames++;
-            requestAnimationFrame(processVideo);
+        }
+
+        startTime = Date.now();
+        prevTime = startTime;
+
+        tick();
+    }
+
+    // tell worker we have an image ready to process
+    function process() {
+        if (running && imageData) {
+            worker.postMessage({ type: 'process', imagedata: imageData });
         }
     }
 
-    function displayInitialization() {
-        let i = 0;
-        loadingTimer = setInterval(() => {
-            writeOverlayText("Initializing Face Tracking" + ".".repeat(i%4)); i++;
-        }, 500);
-        ready = true;
+    function stop() {
+        if (!running) return;
+
+        if (videoSource) {
+            const overlayCtx = overlayCanvas.getContext("2d");
+            overlayCtx.clearRect( 0, 0, width, height );
+
+            const tracks = videoSource.srcObject.getTracks();
+            tracks.forEach(function(track) {
+                track.stop();
+            });
+            videoSource.srcObject = null;
+
+            videoCanvas.style.display = "none";
+            running = false;
+        }
+    }
+
+    function restart() {
+        if (running) return;
+
+        videoCanvas.style.display = "block";
+        grayscale.requestStream()
+            .then(source => {
+                onInit(source);
+            })
+            .catch(err => {
+                console.warn("ERROR: " + err);
+            });
     }
 
     return {
         // ==================================================
         // PUBLIC
         // ==================================================
-        init: async function init(_displayBbox, _flipped) {
+        init: function init(_displayBbox, _flipped) {
             displayBbox = _displayBbox;
             flipped = _flipped;
-            const FaceDetector = Comlink.wrap(new Worker("./face-tracking/faceDetector.js"));
-            faceDetector = await new FaceDetector(
-                Comlink.proxy(displayInitialization) // input is a callback
-            );
+
+            function setVideoStyle(elem) {
+                elem.style.position = "absolute";
+                elem.style.borderRadius = "10px";
+                elem.style.top = "15px";
+                elem.style.left = "15px";
+            }
+
+            var video = document.createElement("video");
+            video.setAttribute("autoplay", "");
+            video.setAttribute("muted", "");
+            video.setAttribute("playsinline", "");
+            videoCanvas = document.createElement("canvas");
+            setVideoStyle(videoCanvas);
+            videoCanvas.id = "face-tracking-video";
+            videoCanvas.width = width;
+            videoCanvas.height = height;
+            videoCanvas.style.zIndex = 9998;
+            videoCanvas.style.opacity = 0.3;
+            if (flipped) {
+                videoCanvas.getContext('2d').translate(width, 0);
+                videoCanvas.getContext('2d').scale(-1, 1);
+            }
+            document.body.appendChild(videoCanvas);
+
+            overlayCanvas = document.createElement("canvas");
+            setVideoStyle(overlayCanvas);
+            overlayCanvas.id = "face-tracking-overlay";
+            overlayCanvas.width = width;
+            overlayCanvas.height = height;
+            overlayCanvas.style.zIndex = 9999;
+            document.body.appendChild(overlayCanvas);
+
+            grayscale = new ARENAFaceTracker.GrayScaleMedia(video, width, height);
         },
 
-        hasAvatar: function() {
-            return hasAvatar;
+        running: function() {
+            return running;
         },
 
-        trackFaceOn: function() {
-            if (!faceDetector || !faceDetector.ready) return;
-
-            setupVideo(() => {
-                if (!ready) {
-                    writeOverlayText("Downloading Face Model: 72MB");
-                }
-                requestAnimationFrame(processVideo);
-            });
-
-            hasAvatar = true;
+        run: function() {
+            restart();
             return new Promise(function(resolve, reject) {
                 resolve();
             });
         },
 
-        trackFaceOff: function() {
-            if (!faceDetector || !faceDetector.ready ||
-                !overlayCanv || !videoCanv || !videoElem) return;
-
-            if (overlayCanv) {
-                document.body.removeChild(overlayCanv);
-                overlayCanv = null;
-            }
-
-            if (videoCanv) {
-                document.body.removeChild(videoCanv);
-                videoCanv = null;
-            }
-
-            const tracks = vidStream.getTracks();
-            tracks.forEach(function(track) {
-                track.stop();
-            });
-            videoElem.srcObject = null;
-            videoElem = undefined;
-
-            hasAvatar = false;
+        stop: function() {
+            stop();
             return new Promise(function(resolve, reject) {
                 resolve();
             });
         }
     }
 })();
+
+// initialize face tracking code if not on mobile
+if (!AFRAME.utils.device.isMobile()) {
+    const displayBbox = false;
+    const flipped = false;
+    ARENA.FaceTracker.init(displayBbox, flipped);
+}
