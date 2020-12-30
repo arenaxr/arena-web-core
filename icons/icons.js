@@ -53,7 +53,7 @@ function setupIcons() {
                 videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
                 avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
                 ARENA.JitsiAPI.showVideo();
-                ARENA.FaceTracker.trackFaceOff();
+                ARENA.FaceTracker.stop();
             });
         } else {
             videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
@@ -64,17 +64,17 @@ function setupIcons() {
     });
 
     const avatarBtn = createIconButton('avatar3-off', 'Face-recognition avatar on/off. You appear as a 3d-animated face.', () => {
-        if (!ARENA.FaceTracker.hasAvatar()) { // toggled
-            ARENA.FaceTracker.trackFaceOn().then((_) => {
+        if (!ARENA.FaceTracker.running()) { // toggled
+            ARENA.FaceTracker.run().then((_) => {
                 avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
-                if (!ARENA.JitsiAPI.ready()) return;
+                if (!ARENA.JitsiAPI || !ARENA.JitsiAPI.ready()) return;
                 ARENA.JitsiAPI.stopVideo().then((_) => {
                     videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
                     ARENA.JitsiAPI.hideVideo();
                 });
             });
         } else {
-            ARENA.FaceTracker.trackFaceOff().then((_) => {
+            ARENA.FaceTracker.stop().then((_) => {
                 avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
             });
         }
