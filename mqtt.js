@@ -1,7 +1,5 @@
 // 'use strict';
 
-window.ARENA = {};
-
 ARENA.mqttClient = new Paho.Client(globals.mqttParam, 'webClient-' + globals.timeID);
 ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
@@ -178,21 +176,6 @@ const loadScene = () => {
         }
         // initialize Jitsi videoconferencing
         ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
-        // init chat after JitsiAPI starts
-        ARENA.Chat.init({
-            userid: globals.idTag,
-            cameraid: globals.camName,
-            username: globals.displayName,
-            arena_conference: ARENA.JitsiAPI, // pass reference to JitsiAPI
-            realm: defaults.realm,
-            scene: globals.scenenameParam,
-            persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,
-            keepalive_interval_ms: 30000,
-            mqtt_host: globals.mqttParam,
-            mqtt_username: globals.username,
-            mqtt_token: globals.mqttToken,
-            supportDevFolders: defaults.supportDevFolders,
-        });
     };
 };
 
@@ -233,6 +216,21 @@ window.addEventListener('onauth', function(e) {
         mqtt_username: globals.username,
         mqtt_token: globals.mqttToken,
     });
+
+    // init chat after 
+    ARENA.Chat.init({
+        userid: globals.idTag,
+        cameraid: globals.camName,
+        username: globals.displayName,
+        realm: defaults.realm,
+        scene: globals.scenenameParam,
+        persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,
+        keepalive_interval_ms: 30000,
+        mqtt_host: globals.mqttParam,
+        mqtt_username: globals.username,
+        mqtt_token: globals.mqttToken,
+        supportDevFolders: defaults.supportDevFolders,
+    });
 });
 
 let oldMsg = '';
@@ -250,7 +248,6 @@ function onConnected(reconnect, uri) {
         if (!ARENA.JitsiAPI.ready()) {
             ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
             console.warn(`ARENA Jitsi restarting...`);
-            //TODO: ARENA.Chat.setArenaConference(ARENA.JitsiAPI); // tell chat about new conference object
         }
         ARENA.mqttClient.subscribe(globals.renderTopic);
         console.warn(`MQTT scene reconnected to ${uri}`);

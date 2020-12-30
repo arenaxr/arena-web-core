@@ -1,12 +1,11 @@
 /* global $, JitsiMeetJS */
 
-const ARENAJitsiAPI = (async function(jitsiServer) {
+const ARENAJitsiAPI = async function(jitsiServer) {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================
 
-    // These match config info on Jitsi Meet server (oz.andrew.cmu.edu)
-    // in lines 7-37 of file /etc/jitsi/meet/oz.andrew.cmu.edu-config.js
+    // we use the scene name as the jitsi room name
     const arenaConferenceName = globals.scenenameParam.toLowerCase();
 
     const connectOptions = {
@@ -40,23 +39,35 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     let localTracks = []; // just our set of audio,video tracks
     const remoteTracks = {}; // map of arrays of tracks
 
-    let jitsiAudioTrack = null; let jitsiVideoTrack = null;
+    let jitsiAudioTrack = null;
+    let jitsiVideoTrack = null;
     let jitsiVideoElem = null;
-    let prevActiveSpeaker = null; let activeSpeaker = null;
+    let prevActiveSpeaker = null;
+    let activeSpeaker = null;
 
-    let hasAudio = false; let hasVideo = false;
+    let hasAudio = false;
+    let hasVideo = false;
 
     const SCREENSHARE = 'scr33nsh4r3'; // unique prefix for screenshare clients
     const screenShareDict = {};
 
+    const ARENA_USER = '#4r3n4'; // unique arena client "tag"
+
+    const NEW_USER_TIMEOUT_MS = 2000;
+
+    /* list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
+     * participants receive data about its properties (e.g. arenaDisplayName and arenaUserName).
+     * we wait NEW_USER_TIMEOUT_MS to hear about these in case it is an arena user and notify anyway after this timeout
+     */
+    const newUserTimers = [];
     // ==================================================
     // PRIVATE FUNCTIONS
     // ==================================================
 
     /**
      * Called when user joins
-     * @param {String} participantId Participant id
-     * @param {String} trackType track type ('audio'/'video')
+     * @param {string} participantId Participant id
+     * @param {string} trackType track type ('audio'/'video')
      */
     function connectArena(participantId, trackType) {
         jitsiId = participantId;
@@ -72,20 +83,18 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
         for (let i = 0; i < localTracks.length; i++) {
             const track = localTracks[i];
-            track.addEventListener(
-                JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
-                (audioLevel) => console.log(`Audio Level local: ${audioLevel}`));
-            track.addEventListener(
-                JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-                () => console.log('local track state changed'));
-            track.addEventListener(
-                JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-                () => console.log('local track stopped'));
-            track.addEventListener(
-                JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
-                (deviceId) =>
-                    console.log(
-                        `track audio output device was changed to ${deviceId}`));
+            track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
+                console.log(`Audio Level local: ${audioLevel}`),
+            );
+            track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () =>
+                console.log('local track state changed'),
+            );
+            track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () =>
+                console.log('local track stopped'),
+            );
+            track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
+                console.log(`track audio output device was changed to ${deviceId}`),
+            );
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // $('body').append(`<video autoplay='1' id='localVideo${i}' />`);
@@ -100,7 +109,8 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
                 //            track.attach($(`#aud0`)[0]);
                 jitsiAudioTrack = track;
             }
-            if (isJoined) { // mobile only?
+            if (isJoined) {
+                // mobile only?
                 conference.addTrack(track);
                 connectArena(conference.myUserId(), track.getType());
             }
@@ -111,16 +121,17 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     /**
      * Update screen share object
-     * @param {String} screenShareId JitsiTrack object
-     * @param {String} videoId Jitsi video Id
-     * @param {String} participantId Jitsi participand Id
-     * @return {Object} screenShare scene object
+     * @param {string} screenShareId JitsiTrack object
+     * @param {string} videoId Jitsi video Id
+     * @param {string} participantId Jitsi participand Id
+     * @return {object} screenShare scene object
      */
     function updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
         screenShareId = screenShareId.replace(SCREENSHARE, '');
         let screenShareEl = globals.sceneObjects[screenShareId];
-        if (!screenShareEl) { // create if doesnt exist
+        if (!screenShareEl) {
+            // create if doesnt exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
             screenShareEl.setAttribute('rotation.order', 'YXZ');
@@ -149,27 +160,30 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         }
         const participant = track.getParticipantId();
 
-        if (!remoteTracks[participant]) { // new participant
+        if (!remoteTracks[participant]) {
+            // new participant
             remoteTracks[participant] = [null, null]; // create array to hold their tracks
         }
 
         if (track.getType() == 'audio') {
-            if (remoteTracks[participant][0]) remoteTracks[participant][0].dispose();
+            if (remoteTracks[participant][0]) {
+                remoteTracks[participant][0].dispose();
+            }
             remoteTracks[participant][0] = track;
         } else if (track.getType() == 'video') {
-            if (remoteTracks[participant][1]) remoteTracks[participant][1].dispose();
+            if (remoteTracks[participant][1]) {
+                remoteTracks[participant][1].dispose();
+            }
             remoteTracks[participant][1] = track;
         }
 
-        track.addEventListener(
-            JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
-            (audioLevel) => console.log(`Audio Level remote: ${audioLevel}`));
-        track.addEventListener(
-            JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-            () => console.log('remote track stopped'));
-        track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
-            (deviceId) =>
-                console.log(`track audio output device was changed to ${deviceId}`));
+        track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
+            console.log(`Audio Level remote: ${audioLevel}`),
+        );
+        track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () => console.log('remote track stopped'));
+        track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
+            console.log(`track audio output device was changed to ${deviceId}`),
+        );
         // track.addEventListener(
         //     JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
         //     () => {
@@ -177,15 +191,19 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         //     });
 
         const videoId = `video${participant}`;
-        const displayNames = conference.getParticipantById(participant)._displayName;
-        const objectIds = displayNames.split(',');
+        // const displayNames = conference.getParticipantById(participant)._displayName;
 
         // create HTML video elem to store video
-        if (!document.getElementById(videoId)) { // create
-            $('a-assets').append(
-                `<video autoplay='1' id='${videoId}'/>`);
+        if (!document.getElementById(videoId)) {
+            // create
+            $('a-assets').append(`<video autoplay='1' id='${videoId}'/>`);
         }
         track.attach($(`#${videoId}`)[0]);
+
+        let camNames = conference.getParticipantById(participant).getProperty('arenaCameraName');
+        if (!camNames) camNames = conference.getParticipantById(participant).getDisplayName();
+        if (!camNames) return; // handle jitsi-only users that have not set the display name
+        const objectIds = camNames.split(',');
 
         // handle screen share video
         for (let i = 0; i < objectIds.length; i++) {
@@ -216,14 +234,84 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
                 connectArena(conference.myUserId(), track.getType()); // desktop only?
             }
         }
+
+        // create participant list and emit jitsi connect event
+        const pl = [];
+        conference.getParticipants().forEach((user) => {
+            const arenaId = user.getProperty('arenaId');
+            const arenaDisplayName = user.getProperty('arenaDisplayName');
+            const arenaCameraName = user.getProperty('arenaCameraName');
+            if (arenaId) {
+                pl.push({
+                    id: arenaId,
+                    dn: arenaDisplayName,
+                    cn: arenaCameraName,
+                });
+            }
+        });
+        ARENA.events.emit(ARENAEventEmitter.events.JITSI_CONNECT, {
+            scene: arenaConferenceName,
+            pl: pl,
+        });
     }
 
     /**
      * Called when user joins
-     * @param {String} id user Id
+     * @param {string} id
      */
-    function onUserLeft(id) {
+    async function onUserJoined(id) {
+        console.log('New user joined:', id, conference.getParticipantById(id).getDisplayName());
+        remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
+
+        const arenaId = conference.getParticipantById(id).getProperty('arenaId');
+        const arenaDisplayName = conference.getParticipantById(id).getProperty('arenaDisplayName');
+        const arenaCameraName = conference.getParticipantById(id).getProperty('arenaCameraName');
+        if (arenaId && arenaDisplayName && arenaCameraName) {
+            // emit user joined event in the off chance we know all properties of this arena user
+            ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                id: arenaId,
+                dn: arenaDisplayName,
+                cn: arenaCameraName,
+                scene: arenaConferenceName,
+                src: ARENAEventEmitter.sources.JITSI,
+            });
+        } else {
+            // this might be a jitsi-only user; emit event if name does not have the arena tag
+            let dn = conference.getParticipantById(id).getDisplayName();
+            if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
+            if (!dn.includes(ARENA_USER)) {
+                ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                    id: id,
+                    dn: dn,
+                    cn: undefined,
+                    scene: arenaConferenceName,
+                    src: ARENAEventEmitter.sources.JITSI,
+                });
+            } else {
+                newUserTimers[id] = setTimeout(() => {
+                    // emit event anyway in NEW_USER_TIMEOUT_MS if we dont hear from this user
+                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                        id: id,
+                        dn: dn,
+                        cn: undefined,
+                        scene: arenaConferenceName,
+                        src: ARENAEventEmitter.sources.JITSI,
+                    });
+                }, NEW_USER_TIMEOUT_MS);
+            }
+        }
+    }
+
+    /**
+     * Called when user leaves
+     * @param {string} id user Id
+     * @param {object} user user object (JitsiParticipant)
+     */
+    function onUserLeft(id, user) {
         console.log('user left:', id);
+        let arenaId = user.getProperty('arenaId');
+        if (!arenaId) arenaId = id; // this was a jitsi-only user
+
         if (!remoteTracks[id]) return;
         const screenShareEl = screenShareDict[id];
         if (screenShareEl) {
@@ -232,6 +320,12 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         }
         $(`#video${id}`).remove();
         delete remoteTracks[id];
+
+        // emit user left event
+        ARENA.events.emit(ARENAEventEmitter.events.USER_LEFT, {
+            id: arenaId,
+            src: ARENAEventEmitter.sources.JITSI,
+        });
     }
 
     /**
@@ -244,45 +338,73 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.log(`track removed!!!${track}`);
         });
-        conference.on(
-            JitsiMeetJS.events.conference.CONFERENCE_JOINED,
-            onConferenceJoined);
-        conference.on(JitsiMeetJS.events.conference.USER_JOINED, (id) => {
-            console.log('New user joined:', id);
-            remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
-        });
+        conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, onConferenceJoined);
+        conference.on(JitsiMeetJS.events.conference.USER_JOINED, onUserJoined);
         conference.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
-        // conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, track => {
-        // });
         conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, (id) => {
             console.log(`(conference) Dominant Speaker ID: ${id}`);
             prevActiveSpeaker = activeSpeaker;
             activeSpeaker = id;
         });
-        conference.on(
-            JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED,
-            (userID, displayName) => console.log(`${userID} - ${displayName}`));
-        conference.on(
-            JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED,
-            (userID, audioLevel) => console.log(`${userID} - ${audioLevel}`));
-        conference.on(
-            JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
-            () => console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`));
+        conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
+            console.log(`${userID} - ${displayName}`),
+        );
+        conference.on(JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED, (userID, audioLevel) =>
+            console.log(`${userID} - ${audioLevel}`),
+        );
+        conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
+            console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
+        );
 
-        // set the (unique) ARENA user's name
-        conference.setDisplayName(globals.camName);
+        // set the ARENA user's name with a "unique" ARENA tag
+        conference.setDisplayName(globals.displayName + ` (${ARENA_USER}_${globals.idTag})`);
+
+        // set local properties
+        conference.setLocalParticipantProperty('arenaId', globals.idTag);
+        conference.setLocalParticipantProperty('arenaDisplayName', globals.displayName);
+        conference.setLocalParticipantProperty('arenaCameraName', globals.camName);
+
+        conference.on(
+            JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
+            (user, propertyKey, oldPropertyValue, propertyValue) => {
+                // console.log(`Property changed: ${user.getId()} ${propertyKey} ${propertyValue} ${oldPropertyValue}`);
+                const id = user.getId();
+                if (
+                    propertyKey === 'arenaId' ||
+                    propertyKey === 'arenaDisplayName' ||
+                    propertyKey === 'arenaCameraName'
+                ) {
+                    const arenaId = conference.getParticipantById(id).getProperty('arenaId');
+                    const arenaDisplayName = conference.getParticipantById(id).getProperty('arenaDisplayName');
+                    const arenaCameraName = conference.getParticipantById(id).getProperty('arenaCameraName');
+                    if (arenaId && arenaDisplayName && arenaCameraName) {
+                        // clear timeout for new user notification
+                        clearInterval(newUserTimers[id]);
+                        delete(newUserTimers[id]);
+                        // emit new user event
+                        ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                            id: arenaId,
+                            dn: arenaDisplayName,
+                            cn: arenaCameraName,
+                            scene: arenaConferenceName,
+                            src: ARENAEventEmitter.sources.JITSI,
+                        });
+                    }
+                }
+            },
+        );
+
         conference.join(); // conference.join(password);
 
         chromeSpatialAudioOn = AFRAME.utils.device.isMobile();
         if (!chromeSpatialAudioOn) {
             // only tested and working on mac on chrome
-            navigator.mediaDevices.enumerateDevices()
-                .then(function(devices) {
-                    const headphonesConnected = devices
-                        .filter((device) => /audio\w+/.test(device.kind))
-                        .find((device) => device.label.toLowerCase().includes('head'));
-                    chromeSpatialAudioOn = !!headphonesConnected;
-                });
+            navigator.mediaDevices.enumerateDevices().then(function(devices) {
+                const headphonesConnected = devices
+                    .filter((device) => /audio\w+/.test(device.kind))
+                    .find((device) => device.label.toLowerCase().includes('head'));
+                chromeSpatialAudioOn = !!headphonesConnected;
+            });
         }
     }
 
@@ -306,15 +428,9 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
      */
     function disconnect() {
         console.log('disconnected!');
-        connection.removeEventListener(
-            JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
-            onConnectionSuccess);
-        connection.removeEventListener(
-            JitsiMeetJS.events.connection.CONNECTION_FAILED,
-            onConnectionFailed);
-        connection.removeEventListener(
-            JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED,
-            disconnect);
+        connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, onConnectionSuccess);
+        connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, onConnectionFailed);
+        connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
     }
 
     /**
@@ -333,9 +449,7 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
 
     JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
-    JitsiMeetJS.mediaDevices.addEventListener(
-        JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
-        onDeviceListChanged);
+    JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, onDeviceListChanged);
 
     // ==================================================
     // MAIN START
@@ -343,24 +457,18 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
     JitsiMeetJS.init(initOptions);
 
     connection = new JitsiMeetJS.JitsiConnection(null, null, connectOptions);
-    connection.addEventListener(
-        JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED,
-        (id) => console.log(`(connection) Dominant Speaker ID: ${id}`));
-    connection.addEventListener(
-        JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
-        onConnectionSuccess);
-    connection.addEventListener(
-        JitsiMeetJS.events.connection.CONNECTION_FAILED,
-        onConnectionFailed);
-    connection.addEventListener(
-        JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED,
-        disconnect);
+    connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) =>
+        console.log(`(connection) Dominant Speaker ID: ${id}`),
+    );
+    connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, onConnectionSuccess);
+    connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, onConnectionFailed);
+    connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
     connection.connect();
 
     const devices = ['audio'];
     let withVideo = false;
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({video: true});
+        await navigator.mediaDevices.getUserMedia({video: true});
         devices.push('video');
         withVideo = true;
     } catch (e) {
@@ -397,8 +505,8 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         jitsiVideoElem.style.opacity = 0.95; // slightly see through
 
         /**
-        * set video element size
-        */
+         * set video element size
+         */
         function setupCornerVideo() {
             const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
             jitsiVideoElem.setAttribute('width', globals.localVideoWidth);
@@ -406,7 +514,8 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         }
 
         jitsiVideoElem.addEventListener('loadeddata', setupCornerVideo);
-        window.addEventListener('orientationchange', () => { // mobile only
+        window.addEventListener('orientationchange', () => {
+            // mobile only
             globals.localVideoWidth = Number(window.innerWidth / 5);
             this.stopVideo();
             setupCornerVideo();
@@ -421,6 +530,9 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
         serverName: jitsiServer,
 
         screenSharePrefix: SCREENSHARE,
+
+        // conference event constants (so other modules can use these without importing jitsiMeetJS)
+        events: JitsiMeetJS.events.conference,
 
         ready: function() {
             return isJoined && jitsiAudioTrack && (!withVideo || jitsiVideoTrack);
@@ -500,5 +612,15 @@ const ARENAJitsiAPI = (async function(jitsiServer) {
                 resolve();
             });
         },
+
+        getUserId: function(participantJitsiId) {
+            if (jitsiId == participantJitsiId) return globals.camName;
+            // our arena id (camera name) is the jitsi display name
+            return conference.getParticipantById(participantJitsiId)._displayName;
+        },
+
+        getProperty: function(participantJitsiId, property) {
+            return conference.getParticipantById(participantJitsiId).getProperty(property);
+        },
     };
-});
+};
