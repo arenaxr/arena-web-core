@@ -744,6 +744,51 @@ function _onMessageArrived(message, jsonMessage) {
         delete theMessage.object_id;
 
         if (name === globals.camName) {
+            // check if it is a command for the local camera
+            if (theMessage.type === 'camera-override') {
+                if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
+                    console.error('Camera override: object_type must be camera.');
+                    return;
+                }
+                const myCamera=globals.sceneObjects.myCamera;
+                if (!myCamera) {
+                    console.error('Camera override: local camera object does not exist! (create camera before)');
+                    return;
+                }
+                const p = theMessage.data.position;
+                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
+                const r = theMessage.data.rotation;
+                if (r) {
+                    myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
+                        new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                }
+            } else if (theMessage.type === 'look-at') {
+                if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
+                    console.error('Camera look-at: object_type must be camera.');
+                    return;
+                }
+                const myCamera=globals.sceneObjects.myCamera;
+                if (!myCamera) {
+                    console.error('Camera look-at: local camera object does not exist! (create camera before)');
+                    return;
+                }
+                let target = theMessage.data.target;
+                if (!target.hasOwnProperty('x')) { // check if an object id was given
+                    const targetObj = globals.sceneObjects[target];
+                    if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
+                    else {
+                        console.error('Camera look-at: target not found.');
+                        return;
+                    }
+                }
+                if (target.hasOwnProperty('x') &&
+                    target.hasOwnProperty('y') &&
+                    target.hasOwnProperty('z'))
+                { // x, y, z given
+                    myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z);
+                    myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z);
+                }
+            }
             return;
         }
 
@@ -1260,6 +1305,16 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w);
                     } else if (attribute === 'position') {
                         entityEl.object3D.position.set(value.x, value.y, value.z);
+                    } else if (attribute === 'color') {
+                        if (!entityEl.hasOwnProperty('text')) {
+                            entityEl.setAttribute('material', 'color', value);
+                        } else {
+                            entityEl.setAttribute('text', 'color', value);
+                        }
+                    } else if (attribute === 'text') {
+                        if (entityEl.hasOwnProperty('text')) {
+                            entityEl.setAttribute('text', 'value', value);
+                        }
                     } else {
                         if (value === null) {
                             entityEl.removeAttribute(attribute);

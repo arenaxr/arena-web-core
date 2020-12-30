@@ -20,4 +20,5 @@ else
     make
 fi
 
-cp detect_face_wasm.* ..
+cp ../wasm/detect_face_wasm.* ..
+cd ..

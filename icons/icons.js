@@ -66,9 +66,9 @@ function setupIcons() {
     const avatarBtn = createIconButton('avatar3-off', 'Face-recognition avatar on/off. You appear as a 3d-animated face.', () => {
         if (!ARENA.FaceTracker.hasAvatar()) { // toggled
             ARENA.FaceTracker.trackFaceOn().then((_) => {
+                avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
                 if (!ARENA.JitsiAPI.ready()) return;
                 ARENA.JitsiAPI.stopVideo().then((_) => {
-                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
                     videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
                     ARENA.JitsiAPI.hideVideo();
                 });

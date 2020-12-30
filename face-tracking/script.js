@@ -240,8 +240,17 @@ ARENA.FaceTracker = (function () {
     async function detectFace(frame, width, height) {
         let landmarksRaw = [], bbox = [], quat = [], trans = [];
         if (faceDetector && ready) {
-            [landmarksRaw, bbox] = await faceDetector.detect(frame, width, height);
-            [quat, trans] = await faceDetector.getPose(landmarksRaw, globals.localVideoWidth, videoHeight);
+            const features = await faceDetector.detectFeatures(frame, width, height);
+            if (features) {
+                landmarksRaw = features.landmarks;
+                bbox = features.bbox;
+            }
+
+            const pose = await faceDetector.getPose(landmarksRaw, globals.localVideoWidth, videoHeight);
+            if (pose) {
+                quat = pose.rotation;
+                trans = pose.translation;
+            }
         }
         return [landmarksRaw, bbox, quat, trans];
     }
