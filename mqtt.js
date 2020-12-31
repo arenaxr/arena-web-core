@@ -124,9 +124,9 @@ const loadScene = () => {
     };
 
     // set renderer defaults that are different from THREE/aframe defaults
-    const renderer = document.querySelector('a-scene').renderer;
+    //const renderer = document.querySelector('a-scene').renderer;
     renderer.gammaFactor = 2.2;
-    this.renderer.outputEncoding = THREE['sRGBEncoding'];
+    renderer.outputEncoding = THREE['sRGBEncoding'];
 
     globals.sceneObjects.env = document.createElement('a-entity');
     globals.sceneObjects.env.id = 'env';
