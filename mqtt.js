@@ -123,6 +123,11 @@ const loadScene = () => {
         jitsiServer: 'mr.andrew.cmu.edu',
     };
 
+    // set renderer defaults that are different from THREE/aframe defaults
+    const renderer = document.querySelector('a-scene').renderer;
+    renderer.gammaFactor = 2.2;
+    this.renderer.outputEncoding = THREE['sRGBEncoding'];
+
     globals.sceneObjects.env = document.createElement('a-entity');
     globals.sceneObjects.env.id = 'env';
 
@@ -147,7 +152,6 @@ const loadScene = () => {
                     globals.sceneObjects.env.setAttribute('environment', attribute, value);
                 }
                 document.getElementById('sceneRoot').appendChild(globals.sceneObjects.env);
-                const renderer = document.querySelector('a-scene').renderer;
                 const rendererSettings = options['renderer-settings'];
                 if (rendererSettings) {
                     for (const [attribute, value] of Object.entries(rendererSettings)) {
