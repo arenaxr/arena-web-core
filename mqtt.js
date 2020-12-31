@@ -147,6 +147,15 @@ const loadScene = () => {
                     globals.sceneObjects.env.setAttribute('environment', attribute, value);
                 }
                 document.getElementById('sceneRoot').appendChild(globals.sceneObjects.env);
+                const renderer = document.querySelector('a-scene').renderer;
+                const rendererSettings = options['renderer-settings'];
+                if (rendererSettings) {
+                    for (const [attribute, value] of Object.entries(rendererSettings)) {
+                        if (attribute === 'outputEncoding') renderer[attribute] = THREE[value];
+                        else renderer[attribute] = value;
+                    }
+                }
+                console.log(renderer);
             } else {
                 // set defaults
                 globals.sceneObjects.env.setAttribute('environment', 'preset', 'starry');
