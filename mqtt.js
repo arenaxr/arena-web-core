@@ -124,7 +124,7 @@ const loadScene = () => {
     };
 
     // set renderer defaults that are different from THREE/aframe defaults
-    //const renderer = document.querySelector('a-scene').renderer;
+    const renderer = document.querySelector('a-scene').renderer;
     renderer.gammaFactor = 2.2;
     renderer.outputEncoding = THREE['sRGBEncoding'];
 
@@ -230,7 +230,7 @@ window.addEventListener('onauth', function(e) {
         mqtt_token: globals.mqttToken,
     });
 
-    // init chat after 
+    // init chat after
     ARENA.Chat.init({
         userid: globals.idTag,
         cameraid: globals.camName,
@@ -475,8 +475,9 @@ function onConnected(reconnect, uri) {
  */
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.error(`MQTT scene connection lost, code:
-            ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`);
+        console.error(
+            `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`
+        );
     }
     console.warn('MQTT scene automatically reconnecting...');
     // no need to connect manually here, "reconnect: true" already set

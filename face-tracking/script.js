@@ -201,8 +201,8 @@ ARENA.FaceTracker = (function () {
         overlayCtx.clearRect( 0, 0, width, height );
 
         if (!worker) {
-            // worker to handle CV in the background
-            worker = new Worker("./face-tracking/face-tracker.worker.js");
+            // worker to handle feature detection in the background
+            worker = new Worker("./face-tracking/js/face-tracker.worker.js");
             worker.postMessage({ type: "init", width: width, height: height });
 
             worker.onmessage = function (e) {
@@ -251,7 +251,7 @@ ARENA.FaceTracker = (function () {
                         if (initializingTimer) {
                             clearInterval(initializingTimer);
                         }
-                        process(); // process again after we just finished processing
+                        process(); // process another frame
                         break;
                     }
                     default: {

@@ -30,8 +30,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     };
 
     let connection = null;
-    let isJoined = false;
     let conference = null;
+    let isJoined = false;
 
     let jitsiId = null;
 
@@ -440,8 +440,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         for (let i = 0; i < localTracks.length; i++) {
             localTracks[i].dispose();
         }
-        conference.leave();
-        connection.disconnect();
+        if (conference) conference.leave();
+        if (connection) connection.disconnect();
     }
 
     $(window).bind('beforeunload', unload);
@@ -478,7 +478,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         if (audbtn) audbtn.remove();
         swal({
             title: 'No Webcam or Audio Input Device found!',
-            text: `You are now in "spectator mode". This means you won\'t be able to share audio or video, 
+            text: `You are now in "spectator mode". This means you won\'t be able to share audio or video,
                      but can still interact with other users in the ARENA.`,
             icon: 'warning',
         });
