@@ -48,7 +48,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     let hasAudio = false;
     let hasVideo = false;
 
-    const SCREENSHARE = 'scr33nsh4r3'; // unique prefix for screenshare clients
+    const SCREENSHARE_PREFIX = '#5cr33n5h4r3'; // unique prefix for screenshare clients
     const screenShareDict = {};
 
     const ARENA_USER = '#4r3n4'; // unique arena client "tag"
@@ -128,7 +128,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
      */
     function updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
-        screenShareId = screenShareId.replace(SCREENSHARE, '');
+
         let screenShareEl = globals.sceneObjects[screenShareId];
         if (!screenShareEl) {
             // create if doesnt exist
@@ -154,27 +154,27 @@ const ARENAJitsiAPI = async function(jitsiServer) {
      * Handles remote tracks
      * @param {Object} track JitsiTrack object
      */
-    function onRemoteTrack(track) {
+    async function onRemoteTrack(track) {
         if (track.isLocal()) {
             return;
         }
-        const participant = track.getParticipantId();
+        const participantId = track.getParticipantId();
 
-        if (!remoteTracks[participant]) {
-            // new participant
-            remoteTracks[participant] = [null, null]; // create array to hold their tracks
+        if (!remoteTracks[participantId]) {
+            // new participantId
+            remoteTracks[participantId] = [null, null]; // create array to hold their tracks
         }
 
         if (track.getType() == 'audio') {
-            if (remoteTracks[participant][0]) {
-                remoteTracks[participant][0].dispose();
+            if (remoteTracks[participantId][0]) {
+                remoteTracks[participantId][0].dispose();
             }
-            remoteTracks[participant][0] = track;
+            remoteTracks[participantId][0] = track;
         } else if (track.getType() == 'video') {
-            if (remoteTracks[participant][1]) {
-                remoteTracks[participant][1].dispose();
+            if (remoteTracks[participantId][1]) {
+                remoteTracks[participantId][1].dispose();
             }
-            remoteTracks[participant][1] = track;
+            remoteTracks[participantId][1] = track;
         }
 
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
@@ -190,8 +190,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         //         console.log('remote track muted')
         //     });
 
-        const videoId = `video${participant}`;
-        // const displayNames = conference.getParticipantById(participant)._displayName;
+        const videoId = `video${participantId}`;
 
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) {
@@ -200,17 +199,45 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         }
         track.attach($(`#${videoId}`)[0]);
 
-        let camNames = conference.getParticipantById(participant).getProperty('arenaCameraName');
-        if (!camNames) camNames = conference.getParticipantById(participant).getDisplayName();
+        let user = conference.getParticipantById(participantId);
+        let camNames = user.getProperty('arenaCameraName');
+        if (!camNames) camNames = user.getDisplayName();
         if (!camNames) return; // handle jitsi-only users that have not set the display name
-        const objectIds = camNames.split(',');
+
+        if (camNames.includes(SCREENSHARE_PREFIX)) {
+            let dn = user.getProperty('screenshareDispName');
+            if (!dn) dn = user.getDisplayName();
+            if (!dn) dn = `No Name #${id}`;
+            let camName = user.getProperty('screenshareCamName');
+            var objectIds = user.getProperty('screenshareObjIds');
+
+            if (camName && objectIds) {
+                ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
+                    id: participantId,
+                    dn: dn,
+                    cn: camName,
+                    scene: arenaConferenceName,
+                    src: ARENAEventEmitter.sources.JITSI,
+                });
+                objectIds = objectIds.split(',');
+            } else { // display as external user; possible spoofer
+                ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                    id: participantId,
+                    dn: dn,
+                    cn: undefined,
+                    scene: arenaConferenceName,
+                    src: ARENAEventEmitter.sources.JITSI,
+                });
+                return;
+            }
+        }
 
         // handle screen share video
         for (let i = 0; i < objectIds.length; i++) {
-            if (objectIds[i] && objectIds[i].includes(SCREENSHARE)) {
+            if (objectIds[i]) {
                 const video = $(`#${videoId}`);
                 video.on('loadeddata', (e) => {
-                    screenShareEl = updateScreenShareObject(objectIds[i], videoId, participant);
+                    updateScreenShareObject(objectIds[i], videoId, participantId);
                 });
             }
         }
@@ -280,13 +307,15 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             let dn = conference.getParticipantById(id).getDisplayName();
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
             if (!dn.includes(ARENA_USER)) {
-                ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                    id: id,
-                    dn: dn,
-                    cn: undefined,
-                    scene: arenaConferenceName,
-                    src: ARENAEventEmitter.sources.JITSI,
-                });
+                if (!dn.includes(SCREENSHARE_PREFIX)) {
+                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                        id: id,
+                        dn: dn,
+                        cn: undefined,
+                        scene: arenaConferenceName,
+                        src: ARENAEventEmitter.sources.JITSI,
+                    });
+                }
             } else {
                 newUserTimers[id] = setTimeout(() => {
                     // emit event anyway in NEW_USER_TIMEOUT_MS if we dont hear from this user
@@ -529,7 +558,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         // ==================================================
         serverName: jitsiServer,
 
-        screenSharePrefix: SCREENSHARE,
+        screenSharePrefix: SCREENSHARE_PREFIX,
 
         // conference event constants (so other modules can use these without importing jitsiMeetJS)
         events: JitsiMeetJS.events.conference,
