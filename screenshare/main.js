@@ -52,7 +52,9 @@ function onLocalTracks(tracks) {
             localTracks[i].attach($(`#localAudio${i}`)[0]);
         } else { // desktop
             $('body').append(
-                `<video autoplay='1' id='localScreenShare${i}' class="screen-share" width="1000" height="650" />`);
+                `<video autoplay='1' id='localScreenShare${i}' class="screen-share" />`);
+            $(`#localScreenShare${i}`).css("width", "100%");
+            $(`#localScreenShare${i}`).css("height", "auto");
             localTracks[i].attach($(`#localScreenShare${i}`)[0]);
         }
         if (isJoined) {

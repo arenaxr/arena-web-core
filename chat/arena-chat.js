@@ -661,7 +661,7 @@ export default class ARENAChat {
             if (newUser.type !== ARENAChat.userType.SCREENSHARE) {
                 msg = newUser.un + ((newUser.type === ARENAChat.userType.EXTERNAL) ? ' (external)' : '') + ' joined.';
             } else {
-                msg = newUser.un + " started screensharing.";
+                msg = newUser.un + " started screen sharing.";
             }
             this.displayAlert(
                 msg,
@@ -694,7 +694,7 @@ export default class ARENAChat {
         userList.forEach((user) => {
             let uli = document.createElement('li');
 
-            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s screenshare';
+            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s screen share';
             uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') +
                                     decodeURI(name) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
 

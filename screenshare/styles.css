@@ -1,7 +1,14 @@
+html,
+body {
+    margin: 0;
+    overflow: hidden;
+}
+
 .leave-button {
     background-color: rgba(0, 0, 0, 0.20);
     border: none;
     color: black;
+    font-weight: bold;
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
@@ -9,24 +16,17 @@
     font-size: 15px;
     cursor: pointer;
     border-radius: 10px;
+    top: 15px;
+    left: 15px;
     margin: auto;
+    position: absolute;
+    z-index: 9999;
 
     animation: iconfadein 2.0s;
     -moz-animation: iconfadein 2.0s; /* Firefox */
     -webkit-animation: iconfadein 2.0s; /* Safari and Chrome */
     -o-animation: iconfadein 2.0s; /* Opera */
     animation-fill-mode: forwards;
-}
-
-.screen-share {
-    text-align: center;
-    position: fixed;
-    left: 50%;
-    width: 1000px;
-    margin-left: -500px;
-    border: 5px solid;
-    border-radius: 10px;
-    padding: 5px;
 }
 
 .leave-button:active,
