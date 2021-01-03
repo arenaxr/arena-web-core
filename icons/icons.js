@@ -161,6 +161,7 @@ function setupIcons() {
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.scene = globals.scenenameParam;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
+                            screenshareWindow.displayName = globals.displayName;
                             screenshareWindow.camName = globals.camName;
                             screenshareWindow.objectIds = objectIds.join();
                         });

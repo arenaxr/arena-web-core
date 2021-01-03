@@ -101,6 +101,7 @@ function onConnectionSuccess() {
         () => console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`));
 
     conference.setDisplayName(`${(+new Date).toString(36)} ${window.screenSharePrefix}_${window.camName}`);
+    conference.setLocalParticipantProperty('screenshareDispName', window.displayName);
     conference.setLocalParticipantProperty('screenshareCamName', window.camName);
     conference.setLocalParticipantProperty('screenshareObjIds', window.objectIds);
 

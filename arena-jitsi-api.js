@@ -204,11 +204,12 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         if (!camNames) camNames = user.getDisplayName();
         if (!camNames) return; // handle jitsi-only users that have not set the display name
 
-        var objectIds;
         if (camNames.includes(SCREENSHARE_PREFIX)) {
-            let dn = user.getDisplayName();
+            let dn = user.getProperty('screenshareDispName');
+            if (!dn) dn = user.getDisplayName();
+            if (!dn) dn = `No Name #${id}`;
             let camName = user.getProperty('screenshareCamName');
-            objectIds = user.getProperty('screenshareObjIds');
+            var objectIds = user.getProperty('screenshareObjIds');
 
             if (camName && objectIds) {
                 ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
