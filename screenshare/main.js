@@ -1,6 +1,7 @@
 /* global $, JitsiMeetJS */
 
 const jitsi_server = window.jitsiURL;
+if (!jitsi_server) window.close();
 
 const options = {
     hosts: {
@@ -61,46 +62,6 @@ function onLocalTracks(tracks) {
 }
 
 /**
- * Handles remote tracks
- * @param track JitsiTrack object
- */
-function onRemoteTrack(track) {
-    if (track.isLocal()) {
-        return;
-    }
-    const participant = track.getParticipantId();
-
-    if (!remoteTracks[participant]) {
-        remoteTracks[participant] = [];
-    }
-    const idx = remoteTracks[participant].push(track);
-
-    track.addEventListener(
-        JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED,
-        (audioLevel) => console.log(`Audio Level remote: ${audioLevel}`));
-    track.addEventListener(
-        JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
-        () => console.log('remote track muted'));
-    track.addEventListener(
-        JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-        () => console.log('remote track stoped'));
-    track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
-        (deviceId) =>
-            console.log(
-                `track audio output device was changed to ${deviceId}`));
-    const id = participant + track.getType() + idx;
-
-    if (track.getType() === 'video') {
-        $('body').append(
-            `<video autoplay='1' id='${participant}video${idx}' />`);
-    } else {
-        $('body').append(
-            `<audio autoplay='1' id='${participant}audio${idx}' />`);
-    }
-    track.attach($(`#${id}`)[0]);
-}
-
-/**
  * That function is executed when the conference is joined
  */
 function onConferenceJoined() {
@@ -112,28 +73,11 @@ function onConferenceJoined() {
 }
 
 /**
- *
- * @param id
- */
-function onUserLeft(id) {
-    console.log('user left');
-    if (!remoteTracks[id]) {
-        return;
-    }
-    const tracks = remoteTracks[id];
-
-    for (let i = 0; i < tracks.length; i++) {
-        tracks[i].detach($(`#${id}${tracks[i].getType()}`));
-    }
-}
-
-/**
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
     room = connection.initJitsiConference(window.scene, confOptions);
-    room.setDisplayName(window.objectIds.join());
-    // room.on(JitsiMeetJS.events.conference.TRACK_ADDED, onRemoteTrack);
+    room.setDisplayName(window.screenSharePrefix+window.camName+"|"+window.objectIds);
     room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });
@@ -144,7 +88,6 @@ function onConnectionSuccess() {
         console.log('user join');
         remoteTracks[id] = [];
     });
-    room.on(JitsiMeetJS.events.conference.USER_LEFT, onUserLeft);
     room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
         console.log(`${track.getType()} - ${track.isMuted()}`);
     });

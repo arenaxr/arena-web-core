@@ -150,19 +150,19 @@ function setupIcons() {
                         },
                     })
                         .then((value) => {
-                            const serverName = ARENA.JitsiAPI.serverName;
                             let objectIds = value ? value : defaultScreenObj;
-                            objectIds = objectIds.replace(', ', ',').split(',');
+                            objectIds = objectIds.split(',');
                             for (let i = 0; i < objectIds.length; i++) {
-                                if (objectIds[i] && objectIds[i] != ARENA.JitsiAPI.screenSharePrefix) {
-                                    objectIds[i] = ARENA.JitsiAPI.screenSharePrefix+objectIds[i];
+                                if (objectIds[i]) {
+                                    objectIds[i] = objectIds[i].trim();
                                 }
                             }
-                            objectIds = objectIds.join();
-                            const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
+                            let screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
+                            screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.scene = globals.scenenameParam;
-                            screenshareWindow.jitsiURL = serverName;
-                            screenshareWindow.objectIds = objectIds.split(',');
+                            screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
+                            screenshareWindow.camName = globals.camName;
+                            screenshareWindow.objectIds = objectIds.join();
                         });
                 }
             });

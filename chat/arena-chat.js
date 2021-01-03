@@ -16,6 +16,7 @@ export default class ARENAChat {
 
     static userType = {
         EXTERNAL: 'external',
+        SCREENSHARE: 'screenshare',
         ARENA: 'arena'
     };
 
@@ -56,7 +57,7 @@ export default class ARENAChat {
 	    Clients listen for chat messages on:
 				- global public (*o*pen) topic (gtopic; realm/g/c/o/#)
 				- a user (*p*rivate) topic (utopic; realm/g/c/p/userhandle/#)
-		
+
 		  Clients write always to a topic with its own userhandle:
   		   - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-cameraid]/userhandle)
 				 - a global topic (ugtopic; realm/g/c/o/userhandle);
@@ -319,6 +320,7 @@ export default class ARENAChat {
 
         ARENA.events.on(ARENAEventEmitter.events.JITSI_CONNECT, this.jitsiConnectCallback);
         ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, this.userJoinCallback);
+        ARENA.events.on(ARENAEventEmitter.events.SCREENSHARE, this.screenshareCallback);
         ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, this.userLeftCallback);
     }
 
@@ -363,6 +365,29 @@ export default class ARENAChat {
                 cid: user.cn,
                 ts: new Date().getTime(),
                 type: ARENAChat.userType.EXTERNAL, // indicate we only know about the user from jitsi
+            };
+            if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
+            else this.populateUserList();
+        }
+    };
+
+    /**
+     * Called when a user screenshares
+     * Defined as a closure to capture 'this'
+     * @param {object} e event object; e.detail contains the callback arguments
+     */
+    screenshareCallback = (e) => {
+        if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
+        const user = e.detail;
+        // check if jitsi knows about someone we don't; add to user list
+        if (!this.liveUsers[user.id]) {
+            let _this = this;
+            this.liveUsers[user.id] = {
+                un: user.dn,
+                scene: user.scene,
+                cid: user.cn,
+                ts: new Date().getTime(),
+                type: ARENAChat.userType.SCREENSHARE, // indicate we know the user is screensharing
             };
             if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
             else this.populateUserList();
@@ -631,7 +656,19 @@ export default class ARENAChat {
 
         this.nSceneUserslabel.innerHTML = nTotalUsers;
         this.usersDot.innerHTML = nSceneUsers < 100 ? nSceneUsers : '...';
-        if (newUser) this.displayAlert(newUser.un + ((newUser.type === ARENAChat.userType.EXTERNAL) ? ' (external)' : '') + ' joined.', 5000, newUser.type);
+        if (newUser) {
+            var msg = "";
+            if (newUser.type !== ARENAChat.userType.SCREENSHARE) {
+                msg = newUser.un + ((newUser.type === ARENAChat.userType.EXTERNAL) ? ' (external)' : '') + ' joined.';
+            } else {
+                msg = newUser.cid + " started screensharing.";
+            }
+            this.displayAlert(
+                msg,
+                5000,
+                newUser.type
+            );
+        }
 
         let uli = document.createElement('li');
         uli.innerHTML = this.settings.username + ' (Me)';
@@ -657,42 +694,45 @@ export default class ARENAChat {
         userList.forEach((user) => {
             let uli = document.createElement('li');
 
-            uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') + decodeURI(user.un) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
+            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.cid + ' screenshare';
+            uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') + decodeURI(name) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
 
-            let uBtnCtnr = document.createElement('div');
-            uBtnCtnr.className = 'users-list-btn-ctnr';
-            uli.appendChild(uBtnCtnr);
+            if (user.type !== ARENAChat.userType.SCREENSHARE) {
+                let uBtnCtnr = document.createElement('div');
+                uBtnCtnr.className = 'users-list-btn-ctnr';
+                uli.appendChild(uBtnCtnr);
 
-            let fuspan = document.createElement('span');
-            fuspan.className = 'users-list-btn fu';
-            fuspan.title = 'Find User';
-            uBtnCtnr.appendChild(fuspan);
+                let fuspan = document.createElement('span');
+                fuspan.className = 'users-list-btn fu';
+                fuspan.title = 'Find User';
+                uBtnCtnr.appendChild(fuspan);
 
-            // span click event (move us to be in front of another clicked user)
-            let cid = user.cid;
-            let scene = user.scene;
-            fuspan.onclick = function () {
-                _this.moveToFrontOfCamera(cid, scene);
-            };
-
-            if (user.scene == _this.settings.scene) {
-                let sspan = document.createElement('span');
-                sspan.className = 'users-list-btn s';
-                sspan.title = 'Mute User';
-                uBtnCtnr.appendChild(sspan);
-
-                // span click event (send sound on/off msg to ussr)
-                sspan.onclick = function () {
-                    if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
-                        _this.displayAlert('Anonymous users may not mute others.', 3000);
-                        return;
-                    }
-                    // message to target user
-                    _this.ctrlMsg(user.uid, 'sound:off');
+                // span click event (move us to be in front of another clicked user)
+                let cid = user.cid;
+                let scene = user.scene;
+                fuspan.onclick = function () {
+                    _this.moveToFrontOfCamera(cid, scene);
                 };
-                if (user.type === ARENAChat.userType.EXTERNAL) uli.className = 'external';
-            } else {
-                uli.className = 'oscene';
+
+                if (user.scene == _this.settings.scene) {
+                    let sspan = document.createElement('span');
+                    sspan.className = 'users-list-btn s';
+                    sspan.title = 'Mute User';
+                    uBtnCtnr.appendChild(sspan);
+
+                    // span click event (send sound on/off msg to ussr)
+                    sspan.onclick = function () {
+                        if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+                            _this.displayAlert('Anonymous users may not mute others.', 3000);
+                            return;
+                        }
+                        // message to target user
+                        _this.ctrlMsg(user.uid, 'sound:off');
+                    };
+                    if (user.type === ARENAChat.userType.EXTERNAL) uli.className = 'external';
+                } else {
+                    uli.className = 'oscene';
+                }
             }
             let op = document.createElement('option');
             op.value = user.uid;

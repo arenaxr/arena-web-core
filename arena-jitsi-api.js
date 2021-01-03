@@ -48,7 +48,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     let hasAudio = false;
     let hasVideo = false;
 
-    const SCREENSHARE = 'scr33nsh4r3'; // unique prefix for screenshare clients
+    const SCREENSHARE_PREFIX = '#5cr33n5h4r3'; // unique prefix for screenshare clients
     const screenShareDict = {};
 
     const ARENA_USER = '#4r3n4'; // unique arena client "tag"
@@ -128,7 +128,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
      */
     function updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
-        screenShareId = screenShareId.replace(SCREENSHARE, '');
+
         let screenShareEl = globals.sceneObjects[screenShareId];
         if (!screenShareEl) {
             // create if doesnt exist
@@ -191,7 +191,6 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         //     });
 
         const videoId = `video${participant}`;
-        // const displayNames = conference.getParticipantById(participant)._displayName;
 
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) {
@@ -203,14 +202,20 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         let camNames = conference.getParticipantById(participant).getProperty('arenaCameraName');
         if (!camNames) camNames = conference.getParticipantById(participant).getDisplayName();
         if (!camNames) return; // handle jitsi-only users that have not set the display name
-        const objectIds = camNames.split(',');
+
+        var objectIds;
+        if (camNames.includes(SCREENSHARE_PREFIX)) {
+            let screenshareData = camNames.replace(SCREENSHARE_PREFIX, "");
+            screenshareData = screenshareData.split("|"); // "cameraName|[objectIds]"
+            objectIds = screenshareData[1].split(",");
+        }
 
         // handle screen share video
         for (let i = 0; i < objectIds.length; i++) {
-            if (objectIds[i] && objectIds[i].includes(SCREENSHARE)) {
+            if (objectIds[i]) {
                 const video = $(`#${videoId}`);
                 video.on('loadeddata', (e) => {
-                    screenShareEl = updateScreenShareObject(objectIds[i], videoId, participant);
+                    updateScreenShareObject(objectIds[i], videoId, participant);
                 });
             }
         }
@@ -280,13 +285,26 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             let dn = conference.getParticipantById(id).getDisplayName();
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
             if (!dn.includes(ARENA_USER)) {
-                ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                    id: id,
-                    dn: dn,
-                    cn: undefined,
-                    scene: arenaConferenceName,
-                    src: ARENAEventEmitter.sources.JITSI,
-                });
+                if (!dn.includes(SCREENSHARE_PREFIX)) {
+                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                        id: id,
+                        dn: dn,
+                        cn: undefined,
+                        scene: arenaConferenceName,
+                        src: ARENAEventEmitter.sources.JITSI,
+                    });
+                } else {
+                    let screenshareData = dn.replace(SCREENSHARE_PREFIX, "");
+                    screenshareData = screenshareData.split("|"); // "cameraName|[objectIds]"
+                    let camName = screenshareData[0];
+                    ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
+                        id: id,
+                        dn: dn,
+                        cn: camName,
+                        scene: arenaConferenceName,
+                        src: ARENAEventEmitter.sources.JITSI,
+                    });
+                }
             } else {
                 newUserTimers[id] = setTimeout(() => {
                     // emit event anyway in NEW_USER_TIMEOUT_MS if we dont hear from this user
@@ -529,7 +547,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         // ==================================================
         serverName: jitsiServer,
 
-        screenSharePrefix: SCREENSHARE,
+        screenSharePrefix: SCREENSHARE_PREFIX,
 
         // conference event constants (so other modules can use these without importing jitsiMeetJS)
         events: JitsiMeetJS.events.conference,
