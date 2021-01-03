@@ -33,6 +33,9 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     let conference = null;
     let isJoined = false;
 
+    let avConnected = false;
+    let withVideo = false;
+
     let jitsiId = null;
 
     let chromeSpatialAudioOn = null;
@@ -220,6 +223,17 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                     src: ARENAEventEmitter.sources.JITSI,
                 });
                 objectIds = objectIds.split(',');
+
+                // handle screen share video
+                for (let i = 0; i < objectIds.length; i++) {
+                    if (objectIds[i]) {
+                        const video = $(`#${videoId}`);
+                        video.on('loadeddata', (e) => {
+                            updateScreenShareObject(objectIds[i], videoId, participantId);
+                        });
+                    }
+                }
+
             } else { // display as external user; possible spoofer
                 ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
                     id: participantId,
@@ -229,16 +243,6 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                     src: ARENAEventEmitter.sources.JITSI,
                 });
                 return;
-            }
-        }
-
-        // handle screen share video
-        for (let i = 0; i < objectIds.length; i++) {
-            if (objectIds[i]) {
-                const video = $(`#${videoId}`);
-                video.on('loadeddata', (e) => {
-                    updateScreenShareObject(objectIds[i], videoId, participantId);
-                });
             }
         }
     }
@@ -494,61 +498,74 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
     connection.connect();
 
-    const devices = ['audio'];
-    let withVideo = false;
-    try {
-        await navigator.mediaDevices.getUserMedia({video: true});
-        devices.push('video');
-        withVideo = true;
-    } catch (e) {
-        const vidbtn = document.getElementById('btn-video-off');
-        if (vidbtn) vidbtn.remove();
-        const audbtn = document.getElementById('btn-audio-off');
-        if (audbtn) audbtn.remove();
-        swal({
-            title: 'No Webcam or Audio Input Device found!',
-            text: `You are now in "spectator mode". This means you won\'t be able to share audio or video,
-                     but can still interact with other users in the ARENA.`,
-            icon: 'warning',
-        });
-    }
-    JitsiMeetJS.createLocalTracks({devices})
-        .then(onLocalTracks)
-        .catch((error) => {
-            console.warn(error);
-            isJoined = false;
-        });
-    if (withVideo) setupLocalVideo();
+    function avConnect() {
+        return new Promise(async function(resolve, reject) {
+            if (avConnected) {
+                resolve();
+                return;
+            }
 
-    /**
-     * show user video on the corner
-     */
-    function setupLocalVideo() {
-        // video window for jitsi
-        jitsiVideoElem = document.getElementById('localVideo');
-        jitsiVideoElem.style.display = 'none';
-        jitsiVideoElem.style.position = 'absolute';
-        jitsiVideoElem.style.top = '15px';
-        jitsiVideoElem.style.left = '15px';
-        jitsiVideoElem.style.borderRadius = '10px';
-        jitsiVideoElem.style.opacity = 0.95; // slightly see through
+            const devices = ['audio'];
+            try {
+                await navigator.mediaDevices.getUserMedia({video: true});
+                devices.push('video');
+                withVideo = true;
+            } catch (e) {
+                const vidbtn = document.getElementById('btn-video-off');
+                if (vidbtn) vidbtn.remove();
+                const audbtn = document.getElementById('btn-audio-off');
+                if (audbtn) audbtn.remove();
+                swal({
+                    title: 'No Webcam or Audio Input Device found!',
+                    text: `You are now in "spectator mode". This means you won\'t be able to share audio or video,
+                            but can still interact with other users in the ARENA.`,
+                    icon: 'warning',
+                });
+            }
+            avConnected = true;
+            JitsiMeetJS.createLocalTracks({devices})
+                .then(tracks => {
+                    onLocalTracks(tracks);
+                    if (withVideo) setupLocalVideo();
+                    resolve();
+                })
+                .catch((error) => {
+                    console.warn(error);
+                    isJoined = false;
+                    reject();
+                });
 
-        /**
-         * set video element size
-         */
-        function setupCornerVideo() {
-            const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
-            jitsiVideoElem.setAttribute('width', globals.localVideoWidth);
-            jitsiVideoElem.setAttribute('height', videoHeight);
-        }
+            /**
+             * show user video on the corner
+             */
+            function setupLocalVideo() {
+                // video window for jitsi
+                jitsiVideoElem = document.getElementById('localVideo');
+                jitsiVideoElem.style.display = 'none';
+                jitsiVideoElem.style.position = 'absolute';
+                jitsiVideoElem.style.top = '15px';
+                jitsiVideoElem.style.left = '15px';
+                jitsiVideoElem.style.borderRadius = '10px';
+                jitsiVideoElem.style.opacity = 0.95; // slightly see through
+                jitsiVideoElem.setAttribute('width', globals.localVideoWidth);
 
-        jitsiVideoElem.addEventListener('loadeddata', setupCornerVideo);
-        window.addEventListener('orientationchange', () => {
-            // mobile only
-            globals.localVideoWidth = Number(window.innerWidth / 5);
-            this.stopVideo();
-            setupCornerVideo();
-            this.startVideo();
+                /**
+                 * set video element size
+                 */
+                function setupCornerVideo() {
+                    const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
+                    jitsiVideoElem.setAttribute('height', videoHeight);
+                }
+
+                jitsiVideoElem.onloadedmetadata = e => { setupCornerVideo(); }
+                window.addEventListener('orientationchange', () => {
+                    // mobile only
+                    globals.localVideoWidth = Number(window.innerWidth / 5);
+                    this.stopVideo();
+                    setupCornerVideo();
+                    this.startVideo();
+                });
+            }
         });
     }
 
@@ -564,7 +581,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         events: JitsiMeetJS.events.conference,
 
         ready: function() {
-            return isJoined && jitsiAudioTrack && (!withVideo || jitsiVideoTrack);
+            return isJoined;
         },
 
         showVideo: function() {
@@ -583,39 +600,69 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             return prevActiveSpeaker !== activeSpeaker;
         },
 
+        activeSpeaker: function() {
+            return activeSpeaker;
+        },
+
         chromeSpatialAudioOn: function() {
             return chromeSpatialAudioOn;
         },
 
         unmuteAudio: function() {
-            jitsiAudioTrack.unmute();
-            hasAudio = true;
             return new Promise(function(resolve, reject) {
-                resolve();
+                avConnect()
+                    .then(() => {
+                        jitsiAudioTrack.unmute()
+                            .then(() => {
+                                hasAudio = true;
+                                resolve();
+                            })
+                            .catch((err) => {
+                                reject(err);
+                            })
+                    });
             });
         },
 
         muteAudio: function() {
-            jitsiAudioTrack.mute();
-            hasAudio = false;
             return new Promise(function(resolve, reject) {
-                resolve();
+                jitsiAudioTrack.mute()
+                    .then(() => {
+                        hasAudio = false;
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    })
             });
         },
 
         startVideo: function() {
-            jitsiVideoTrack.unmute();
-            hasVideo = true;
             return new Promise(function(resolve, reject) {
-                resolve();
+                avConnect()
+                    .then(() => {
+                        jitsiVideoTrack.unmute()
+                            .then(() => {
+                                hasVideo = true;
+                                resolve();
+                            })
+                            .catch((err) => {
+                                reject(err);
+                            })
+                    });
             });
         },
 
         stopVideo: function() {
-            jitsiVideoTrack.mute();
-            hasVideo = false;
             return new Promise(function(resolve, reject) {
-                resolve();
+                jitsiVideoTrack.mute()
+                    .then(() => {
+                        hasVideo = false;
+                        resolve();
+                    })
+                    .catch((err) => {
+                        reject(err);
+                    })
             });
         },
 
@@ -636,6 +683,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         },
 
         leave: function() {
+            unload();
             disconnect();
             return new Promise(function(resolve, reject) {
                 resolve();

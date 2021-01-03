@@ -371,9 +371,6 @@ function onConnected(reconnect, uri) {
         // console.log("poseChanged", e.detail);
         const msg = {
             object_id: globals.camName,
-            jitsiId: ARENA.JitsiAPI ? ARENA.JitsiAPI.getJitsiId() : null,
-            hasAudio: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasAudio() : false,
-            hasVideo: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasVideo() : false,
             hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.running(),
             displayName: globals.displayName,
             action: 'create',
@@ -394,8 +391,12 @@ function onConnected(reconnect, uri) {
                 color: color,
             },
         };
+        if (ARENA.JitsiAPI) {
+            msg.jitsiId = ARENA.JitsiAPI.getJitsiId();
+            msg.hasAudio = ARENA.JitsiAPI.hasAudio();
+            msg.hasVideo = ARENA.JitsiAPI.hasVideo();
+        }
 
-        // if (true) { // Publish camera coordinates with great vigor
         if (msg !== oldMsg) { // suppress duplicates
             publish(globals.outputTopic + globals.camName, msg); // extra timestamp info at end for debugging
             oldMsg = msg;
@@ -975,21 +976,21 @@ function _onMessageArrived(message, jsonMessage) {
             }
             return;
 
-        case 'videoconf':
+        case 'videoconf': // unimplemented as of now
             // handle changes to other users audio/video status
-            if (theMessage.hasOwnProperty('jitsiId')) {
+            // if (theMessage.hasOwnProperty('jitsiId')) {
                 // possibly change active speaker
-                if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
-                    globals.previousSpeakerEl = entityEl;
-                }
-                drawMicrophoneState(entityEl, theMessage.hasAudio);
-            }
+                // if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
+                //     globals.previousSpeakerEl = entityEl;
+                // }
+                // drawMicrophoneState(entityEl, theMessage.hasAudio);
+            // }
             return;
 
         case 'camera':
             // decide if we need draw or delete videoCube around head
             if (theMessage.hasOwnProperty('jitsiId')) {
-                if (!theMessage.jitsiId || (ARENA.JitsiAPI && !ARENA.JitsiAPI.ready())) {
+                if (!theMessage.jitsiId || !ARENA.JitsiAPI || !ARENA.JitsiAPI.ready()) {
                     // console.log('jitsiId empty');
                     break; // other-person has no jitsi stream ... yet
                 }
@@ -999,11 +1000,11 @@ function _onMessageArrived(message, jsonMessage) {
                 const distance = camPos.distanceTo(entityPos);
                 globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 20;
 
+                /* Handle Jitsi Video */
                 const videoID = `video${theMessage.jitsiId}`;
                 if (theMessage.hasVideo) {
                     const videoElem = document.getElementById(videoID);
-                    const videoTrack = ARENA.JitsiAPI ? ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId) : undefined;
-                    if (!videoTrack) return;
+                    const videoTrack = ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId);
                     entityEl.videoTrack = videoTrack;
 
                     // frustrum culling for WebRTC streams
@@ -1015,10 +1016,14 @@ function _onMessageArrived(message, jsonMessage) {
 
                     // check if A/V cut off distance has been reached
                     if (!inFieldOfView || distance > globals.maxAVDist) {
-                        entityEl.videoTrack.enabled = false; // pause WebRTC video stream
+                        if (entityEl.videoTrack) {
+                            entityEl.videoTrack.enabled = false;
+                        }// pause WebRTC video stream
                         if (videoElem && !videoElem.paused) videoElem.pause();
                     } else {
-                        entityEl.videoTrack.enabled = true; // unpause WebRTC video stream
+                        if (entityEl.videoTrack) {
+                            entityEl.videoTrack.enabled = true;
+                        }// unpause WebRTC video stream
                         if (videoElem && videoElem.paused) videoElem.play();
                     }
 
@@ -1043,6 +1048,7 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('videoCubeDrawn', false);
                 }
 
+                /* Handle Jitsi Audio */
                 drawMicrophoneState(entityEl, theMessage.hasAudio);
                 if (theMessage.hasAudio) {
                     // set up positional audio, but only once per camera
@@ -1055,9 +1061,13 @@ function _onMessageArrived(message, jsonMessage) {
 
                     // check if A/V cut off distance has been reached
                     if (distance > globals.maxAVDist) {
-                        entityEl.audioTrack.enabled = false; // pause WebRTC audio stream
+                        if (entityEl.audioTrack) {
+                            entityEl.audioTrack.enabled = false;
+                        }// pause WebRTC audio stream
                     } else {
-                        entityEl.audioTrack.enabled = true; // unpause WebRTC audio stream
+                        if (entityEl.audioTrack) {
+                            entityEl.audioTrack.enabled = true;
+                        }// unpause WebRTC audio stream
                     }
 
                     if (entityEl.audioTrack !== oldAudioTrack) {
@@ -1073,35 +1083,33 @@ function _onMessageArrived(message, jsonMessage) {
                             listener = new THREE.AudioListener();
                             const camEl = globals.sceneObjects.myCamera.object3D;
                             camEl.add(listener);
-                            globals.audioListener = listener;
                             sceneEl.audioListener = listener;
                         }
 
-                        // create positional audio, but only if didnt exist before
-                        if (!entityEl.positionalAudio) {
-                            const audioSource = new THREE.PositionalAudio(listener);
-                            audioSource.setMediaStreamSource(audioStream);
-                            entityEl.positionalAudio = audioSource;
-                            entityEl.object3D.add(audioSource);
+                        // create positional audio, but only if didn't exist before
+                        if (!entityEl.audioSource) {
+                            entityEl.audioSource = new THREE.PositionalAudio(listener);
+                            entityEl.audioSource.setMediaStreamSource(audioStream);
+                            entityEl.object3D.add(entityEl.audioSource);
+
+                            // set positional audio scene params
+                            if (globals.volume) {
+                                entityEl.audioSource.setVolume(globals.volume);
+                            }
+                            if (globals.refDist) { // L-R panning
+                                entityEl.audioSource.setRefDistance(globals.refDist);
+                            }
+                            if (globals.rolloffFact) {
+                                entityEl.audioSource.setRolloffFactor(globals.rolloffFact);
+                            }
+                            if (globals.distModel) {
+                                entityEl.audioSource.setDistanceModel(globals.distModel);
+                            }
                         } else {
-                            entityEl.positionalAudio.setMediaStreamSource(audioStream);
+                            entityEl.audioSource.setMediaStreamSource(audioStream);
                         }
 
-                        // set positional audio scene params
-                        if (globals.refDist) { // L-R panning
-                            entityEl.positionalAudio.setRefDistance(globals.refDist);
-                        }
-                        if (globals.rolloffFact) {
-                            entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
-                        }
-                        if (globals.distModel) {
-                            entityEl.positionalAudio.setDistanceModel(globals.distModel);
-                        }
-                        if (globals.volume) {
-                            entityEl.positionalAudio.setVolume(globals.volume);
-                        }
-
-                        // sorta fixes chrome echo bug, but not always
+                        // sorta fixes chrome echo bug
                         const audioCtx = THREE.AudioContext.getContext();
                         const resume = () => {
                             audioCtx.resume();
