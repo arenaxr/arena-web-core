@@ -1,14 +1,14 @@
 /* global $, JitsiMeetJS */
 
-const jitsi_server = window.jitsiURL;
-if (!jitsi_server) window.close();
+const jitsiServer = window.jitsiURL;
+if (!jitsiServer) window.close();
 
 const options = {
     hosts: {
-        domain: jitsi_server,
-        muc: 'conference.' + jitsi_server, // FIXME: use XEP-0030
+        domain: jitsiServer,
+        muc: 'conference.' + jitsiServer, // FIXME: use XEP-0030
     },
-    bosh: '//' + jitsi_server + '/http-bind', // FIXME: use xep-0156 for that
+    bosh: '//' + jitsiServer + '/http-bind', // FIXME: use xep-0156 for that
 
     // The name of client node advertised in XEP-0115 'c' stanza
     clientNode: 'http://jitsi.org/jitsimeet',
@@ -20,7 +20,7 @@ const confOptions = {
 
 let connection = null;
 let isJoined = false;
-let room = null;
+let conference = null;
 
 let localTracks = [];
 const remoteTracks = {};
@@ -56,7 +56,7 @@ function onLocalTracks(tracks) {
             localTracks[i].attach($(`#localScreenShare${i}`)[0]);
         }
         if (isJoined) {
-            room.addTrack(localTracks[i]);
+            conference.addTrack(localTracks[i]);
         }
     }
 }
@@ -68,7 +68,7 @@ function onConferenceJoined() {
     console.log('conference joined!');
     isJoined = true;
     for (let i = 0; i < localTracks.length; i++) {
-        room.addTrack(localTracks[i]);
+        conference.addTrack(localTracks[i]);
     }
 }
 
@@ -76,31 +76,35 @@ function onConferenceJoined() {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    room = connection.initJitsiConference(window.scene, confOptions);
-    room.setDisplayName(window.screenSharePrefix+window.camName+"|"+window.objectIds);
-    room.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
+    conference = connection.initJitsiConference(window.scene, confOptions);
+    conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });
-    room.on(
+    conference.on(
         JitsiMeetJS.events.conference.CONFERENCE_JOINED,
         onConferenceJoined);
-    room.on(JitsiMeetJS.events.conference.USER_JOINED, (id) => {
+    conference.on(JitsiMeetJS.events.conference.USER_JOINED, (id) => {
         console.log('user join');
         remoteTracks[id] = [];
     });
-    room.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
+    conference.on(JitsiMeetJS.events.conference.TRACK_MUTE_CHANGED, (track) => {
         console.log(`${track.getType()} - ${track.isMuted()}`);
     });
-    room.on(
+    conference.on(
         JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED,
         (userID, displayName) => console.log(`${userID} - ${displayName}`));
-    room.on(
+    conference.on(
         JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED,
         (userID, audioLevel) => console.log(`${userID} - ${audioLevel}`));
-    room.on(
+    conference.on(
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
-        () => console.log(`${room.getPhoneNumber()} - ${room.getPhonePin()}`));
-    room.join();
+        () => console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`));
+
+    conference.setDisplayName(`${(+new Date).toString(36)} ${window.screenSharePrefix}_${window.camName}`);
+    conference.setLocalParticipantProperty('screenshareCamName', window.camName);
+    conference.setLocalParticipantProperty('screenshareObjIds', window.objectIds);
+
+    conference.join();
 }
 
 /**
@@ -140,7 +144,7 @@ function unload() {
     for (let i = 0; i < localTracks.length; i++) {
         localTracks[i].dispose();
     }
-    room.leave();
+    conference.leave();
     connection.disconnect();
     window.close();
 }

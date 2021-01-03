@@ -154,27 +154,27 @@ const ARENAJitsiAPI = async function(jitsiServer) {
      * Handles remote tracks
      * @param {Object} track JitsiTrack object
      */
-    function onRemoteTrack(track) {
+    async function onRemoteTrack(track) {
         if (track.isLocal()) {
             return;
         }
-        const participant = track.getParticipantId();
+        const participantId = track.getParticipantId();
 
-        if (!remoteTracks[participant]) {
-            // new participant
-            remoteTracks[participant] = [null, null]; // create array to hold their tracks
+        if (!remoteTracks[participantId]) {
+            // new participantId
+            remoteTracks[participantId] = [null, null]; // create array to hold their tracks
         }
 
         if (track.getType() == 'audio') {
-            if (remoteTracks[participant][0]) {
-                remoteTracks[participant][0].dispose();
+            if (remoteTracks[participantId][0]) {
+                remoteTracks[participantId][0].dispose();
             }
-            remoteTracks[participant][0] = track;
+            remoteTracks[participantId][0] = track;
         } else if (track.getType() == 'video') {
-            if (remoteTracks[participant][1]) {
-                remoteTracks[participant][1].dispose();
+            if (remoteTracks[participantId][1]) {
+                remoteTracks[participantId][1].dispose();
             }
-            remoteTracks[participant][1] = track;
+            remoteTracks[participantId][1] = track;
         }
 
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
@@ -190,7 +190,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         //         console.log('remote track muted')
         //     });
 
-        const videoId = `video${participant}`;
+        const videoId = `video${participantId}`;
 
         // create HTML video elem to store video
         if (!document.getElementById(videoId)) {
@@ -199,15 +199,36 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         }
         track.attach($(`#${videoId}`)[0]);
 
-        let camNames = conference.getParticipantById(participant).getProperty('arenaCameraName');
-        if (!camNames) camNames = conference.getParticipantById(participant).getDisplayName();
+        let user = conference.getParticipantById(participantId);
+        let camNames = user.getProperty('arenaCameraName');
+        if (!camNames) camNames = user.getDisplayName();
         if (!camNames) return; // handle jitsi-only users that have not set the display name
 
         var objectIds;
         if (camNames.includes(SCREENSHARE_PREFIX)) {
-            let screenshareData = camNames.replace(SCREENSHARE_PREFIX, "");
-            screenshareData = screenshareData.split("|"); // "cameraName|[objectIds]"
-            objectIds = screenshareData[1].split(",");
+            let dn = user.getDisplayName();
+            let camName = user.getProperty('screenshareCamName');
+            objectIds = user.getProperty('screenshareObjIds');
+
+            if (camName && objectIds) {
+                ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
+                    id: participantId,
+                    dn: dn,
+                    cn: camName,
+                    scene: arenaConferenceName,
+                    src: ARENAEventEmitter.sources.JITSI,
+                });
+                objectIds = objectIds.split(',');
+            } else { // display as external user; possible spoofer
+                ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                    id: participantId,
+                    dn: dn,
+                    cn: undefined,
+                    scene: arenaConferenceName,
+                    src: ARENAEventEmitter.sources.JITSI,
+                });
+                return;
+            }
         }
 
         // handle screen share video
@@ -215,7 +236,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             if (objectIds[i]) {
                 const video = $(`#${videoId}`);
                 video.on('loadeddata', (e) => {
-                    updateScreenShareObject(objectIds[i], videoId, participant);
+                    updateScreenShareObject(objectIds[i], videoId, participantId);
                 });
             }
         }
@@ -290,17 +311,6 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         id: id,
                         dn: dn,
                         cn: undefined,
-                        scene: arenaConferenceName,
-                        src: ARENAEventEmitter.sources.JITSI,
-                    });
-                } else {
-                    let screenshareData = dn.replace(SCREENSHARE_PREFIX, "");
-                    screenshareData = screenshareData.split("|"); // "cameraName|[objectIds]"
-                    let camName = screenshareData[0];
-                    ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
-                        id: id,
-                        dn: dn,
-                        cn: camName,
                         scene: arenaConferenceName,
                         src: ARENAEventEmitter.sources.JITSI,
                     });
