@@ -530,6 +530,7 @@ function drawVideoCube(entityEl, videoID) {
     videoCube.setAttribute('scale', '0.6 0.4 0.6');
     videoCube.setAttribute('material', 'shader', 'flat');
     videoCube.setAttribute('src', `#${videoID}`); // video only (!audio)
+    videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
 
     const videoCubeDark = document.createElement('a-box');
     videoCubeDark.setAttribute('id', videoID + 'cubeDark');
