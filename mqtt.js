@@ -1,7 +1,5 @@
 // 'use strict';
 
-window.ARENA = {};
-
 ARENA.mqttClient = new Paho.Client(globals.mqttParam, 'webClient-' + globals.timeID);
 ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
@@ -56,7 +54,8 @@ const loadArena = (urlToLoad, position, rotation) => {
                         msg.data.position.z = msg.data.position.z + position.z;
                     }
                     if (rotation) {
-                        const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y, msg.data.rotation.z, msg.data.rotation.w);
+                        const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y,
+                            msg.data.rotation.z, msg.data.rotation.w);
                         const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
                         r.multiply(q);
                         msg.data.rotation.x = r.x;
@@ -124,6 +123,11 @@ const loadScene = () => {
         jitsiServer: 'mr.andrew.cmu.edu',
     };
 
+    // set renderer defaults that are different from THREE/aframe defaults
+    const renderer = document.querySelector('a-scene').renderer;
+    renderer.gammaFactor = 2.2;
+    renderer.outputEncoding = THREE['sRGBEncoding'];
+
     globals.sceneObjects.env = document.createElement('a-entity');
     globals.sceneObjects.env.id = 'env';
 
@@ -148,6 +152,14 @@ const loadScene = () => {
                     globals.sceneObjects.env.setAttribute('environment', attribute, value);
                 }
                 document.getElementById('sceneRoot').appendChild(globals.sceneObjects.env);
+                const rendererSettings = options['renderer-settings'];
+                if (rendererSettings) {
+                    for (const [attribute, value] of Object.entries(rendererSettings)) {
+                        if (attribute === 'outputEncoding') renderer[attribute] = THREE[value];
+                        else renderer[attribute] = value;
+                    }
+                }
+                console.log(renderer);
             } else {
                 // set defaults
                 globals.sceneObjects.env.setAttribute('environment', 'preset', 'starry');
@@ -206,7 +218,19 @@ window.addEventListener('onauth', function(e) {
         password: globals.mqttToken,
     });
 
-    // init chat
+    // init runtime manager
+    ARENA.RuntimeManager.init({
+        mqtt_uri: globals.mqttParam,
+        onInitCallback: function() {
+            console.log('Runtime init done.');
+        },
+        name: 'rt-' + Math.round(Math.random() * 10000) + '-' + globals.username,
+        dbg: false,
+        mqtt_username: globals.username,
+        mqtt_token: globals.mqttToken,
+    });
+
+    // init chat after
     ARENA.Chat.init({
         userid: globals.idTag,
         cameraid: globals.camName,
@@ -220,22 +244,15 @@ window.addEventListener('onauth', function(e) {
         mqtt_token: globals.mqttToken,
         supportDevFolders: defaults.supportDevFolders,
     });
-
-    // init runtime manager
-    ARENA.RuntimeManager.init({
-        mqtt_uri: globals.mqttParam,
-        onInitCallback: function() {
-            console.log('Runtime init done.');
-        },
-        name: 'rt-' + Math.round(Math.random() * 10000) + '-' + globals.username,
-        dbg: false,
-        mqtt_username: globals.username,
-        mqtt_token: globals.mqttToken,
-    });
 });
 
 let oldMsg = '';
 
+/**
+ * MQTT onConnected callback
+ * @param {Boolean} reconnect is a reconnect
+ * @param {Object} uri uri used
+ */
 function onConnected(reconnect, uri) {
     if (reconnect) {
         // For reconnect, do not reinitialize user state, that will warp user back and lose
@@ -354,10 +371,7 @@ function onConnected(reconnect, uri) {
         // console.log("poseChanged", e.detail);
         const msg = {
             object_id: globals.camName,
-            jitsiId: ARENA.JitsiAPI ? ARENA.JitsiAPI.getJitsiId() : null,
-            hasAudio: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasAudio() : false,
-            hasVideo: ARENA.JitsiAPI ? ARENA.JitsiAPI.hasVideo() : false,
-            hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.hasAvatar(),
+            hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.running(),
             displayName: globals.displayName,
             action: 'create',
             type: 'object',
@@ -377,8 +391,12 @@ function onConnected(reconnect, uri) {
                 color: color,
             },
         };
+        if (ARENA.JitsiAPI) {
+            msg.jitsiId = ARENA.JitsiAPI.getJitsiId();
+            msg.hasAudio = ARENA.JitsiAPI.hasAudio();
+            msg.hasVideo = ARENA.JitsiAPI.hasVideo();
+        }
 
-        // if (true) { // Publish camera coordinates with great vigor
         if (msg !== oldMsg) { // suppress duplicates
             publish(globals.outputTopic + globals.camName, msg); // extra timestamp info at end for debugging
             oldMsg = msg;
@@ -439,7 +457,7 @@ function onConnected(reconnect, uri) {
                     color: color,
                 },
             };
-            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric_eric
+            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric
             publish(globals.outputTopic + globals.viveRName, msg);
         });
     }
@@ -450,33 +468,21 @@ function onConnected(reconnect, uri) {
     // ok NOW start listening for MQTT messages
     // * moved this out of loadArena() since it is conceptually a different thing
     ARENA.mqttClient.subscribe(globals.renderTopic);
-
-    // download and initialize face tracking code
-    //
-    if (!AFRAME.utils.device.isMobile()) {
-        importScript('./face-tracking/script.js').then(() => {
-            const displayBbox = false; const flipped = false;
-            ARENA.FaceTracker.init(displayBbox, flipped);
-        });
-    }
 }
 
+/**
+ * MQTT onConnectionLost callback
+ * @param {Object} responseObject paho response object
+ */
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
-        console.error(`MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`);
+        console.error(
+            `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`
+        );
     }
     console.warn('MQTT scene automatically reconnecting...');
     // no need to connect manually here, "reconnect: true" already set
 }
-
-const publish_retained = (dest, msg) => {
-    // console.log('desint :', dest, 'msggg', msg)
-    const message = new Paho.Message(msg);
-    message.destinationName = dest;
-    message.retained = true;
-    // message.qos = 2;
-    ARENA.mqttClient.send(message);
-};
 
 window.publish = (dest, msg) => {
     if (!ARENA.mqttClient.isConnected()) return;
@@ -495,6 +501,11 @@ window.publish = (dest, msg) => {
     ARENA.mqttClient.send(message);
 };
 
+/**
+ * Utility function to check incoming messages
+ * @param {String} str string with message to check
+ * @return {Bolean}
+ */
 function isJson(str) {
     try {
         JSON.parse(str);
@@ -506,6 +517,11 @@ function isJson(str) {
     return true;
 }
 
+/**
+ * Draw video head
+ * @param {Object} entityEl scene entity
+ * @param {Number} videoID video Id
+ */
 function drawVideoCube(entityEl, videoID) {
     // attach video to head
     const videoCube = document.createElement('a-box');
@@ -528,7 +544,11 @@ function drawVideoCube(entityEl, videoID) {
     entityEl.appendChild(videoCubeDark);
 }
 
-
+/**
+ * Draw microphone
+ * @param {Object} entityEl scene entity
+ * @param {Boolean} hasAudio
+ */
 function drawMicrophoneState(entityEl, hasAudio) {
     // entityEl is the head
     const name = 'muted_' + entityEl.id;
@@ -545,17 +565,23 @@ function drawMicrophoneState(entityEl, hasAudio) {
     }
 }
 
-// https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
+/**
+ * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
+ * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
+ * @param {Object} gainNode
+ */
 async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out), this prevents hearing the audio twice.
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
+     *     this prevents hearing the audio twice.
      *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
      *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
      *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
      *  6. connect the other RTCPeerConnection's stream to a new audio element.
-     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC, while preserving all the audio processing that was performed via the WebAudio API.
+     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
+     *  while preserving all the audio processing that was performed via the WebAudio API.
      */
 
     const audioEl = new Audio();
@@ -584,7 +610,8 @@ async function enableChromeAEC(gainNode) {
     });
 
     try {
-        // The following should never fail, but just in case, we won't disconnect/reconnect the gainNode unless all of this succeeds
+        /* The following should never fail, but just in case, we won't disconnect/reconnect
+           the gainNode unless all of this succeeds */
         loopbackDestination.stream.getTracks().forEach((track) => {
             outboundPeerConnection.addTrack(track, loopbackDestination.stream);
         });
@@ -608,6 +635,12 @@ async function enableChromeAEC(gainNode) {
     }
 }
 
+/**
+ * Call internal MessageArrived handler; Isolates message error handling
+ * Also called to handle persist objects
+ * @param {Object} message
+ * @param {String} jsonMessage
+ */
 function onMessageArrived(message, jsonMessage) {
     try {
         _onMessageArrived(message, jsonMessage);
@@ -616,7 +649,8 @@ function onMessageArrived(message, jsonMessage) {
             if (message.payloadString) {
                 console.error('onMessageArrived Error!', err, message.payloadString);
             } else {
-                console.error('onMessageArrived Error!', err, new TextDecoder('utf-8').decode(message.payloadBytes), message.payloadBytes);
+                console.error('onMessageArrived Error!', err,
+                    new TextDecoder('utf-8').decode(message.payloadBytes), message.payloadBytes);
             }
         } else if (jsonMessage) {
             console.error('onMessageArrived Error!', err, JSON.stringify(jsonMessage));
@@ -626,6 +660,11 @@ function onMessageArrived(message, jsonMessage) {
 
 let progMsgs = {};
 
+/**
+ * Internal MessageArrived handler; handles object create/delete/event/... messages
+ * @param {Object} message
+ * @param {String} jsonMessage
+ */
 function _onMessageArrived(message, jsonMessage) {
     const sceneObjects = globals.sceneObjects;
     let theMessage = {};
@@ -711,6 +750,51 @@ function _onMessageArrived(message, jsonMessage) {
         delete theMessage.object_id;
 
         if (name === globals.camName) {
+            // check if it is a command for the local camera
+            if (theMessage.type === 'camera-override') {
+                if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
+                    console.error('Camera override: object_type must be camera.');
+                    return;
+                }
+                const myCamera=globals.sceneObjects.myCamera;
+                if (!myCamera) {
+                    console.error('Camera override: local camera object does not exist! (create camera before)');
+                    return;
+                }
+                const p = theMessage.data.position;
+                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
+                const r = theMessage.data.rotation;
+                if (r) {
+                    myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
+                        new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                }
+            } else if (theMessage.type === 'look-at') {
+                if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
+                    console.error('Camera look-at: object_type must be camera.');
+                    return;
+                }
+                const myCamera=globals.sceneObjects.myCamera;
+                if (!myCamera) {
+                    console.error('Camera look-at: local camera object does not exist! (create camera before)');
+                    return;
+                }
+                let target = theMessage.data.target;
+                if (!target.hasOwnProperty('x')) { // check if an object id was given
+                    const targetObj = globals.sceneObjects[target];
+                    if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
+                    else {
+                        console.error('Camera look-at: target not found.');
+                        return;
+                    }
+                }
+                if (target.hasOwnProperty('x') &&
+                    target.hasOwnProperty('y') &&
+                    target.hasOwnProperty('z'))
+                { // x, y, z given
+                    myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z);
+                    myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z);
+                }
+            }
             return;
         }
 
@@ -851,7 +935,7 @@ function _onMessageArrived(message, jsonMessage) {
 
                 // Parent/Child handling
                 if (theMessage.data.parent) {
-                    var parentEl = sceneObjects[theMessage.data.parent];
+                    const parentEl = sceneObjects[theMessage.data.parent];
                     if (parentEl) {
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
@@ -892,51 +976,55 @@ function _onMessageArrived(message, jsonMessage) {
             }
             return;
 
-        case 'videoconf':
+        case 'videoconf': // unimplemented as of now
             // handle changes to other users audio/video status
-            if (theMessage.hasOwnProperty('jitsiId')) {
+            // if (theMessage.hasOwnProperty('jitsiId')) {
                 // possibly change active speaker
-                if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
-                    globals.previousSpeakerEl = entityEl;
-                }
-                drawMicrophoneState(entityEl, theMessage.hasAudio);
-            }
+                // if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
+                //     globals.previousSpeakerEl = entityEl;
+                // }
+                // drawMicrophoneState(entityEl, theMessage.hasAudio);
+            // }
             return;
 
         case 'camera':
             // decide if we need draw or delete videoCube around head
             if (theMessage.hasOwnProperty('jitsiId')) {
-                if (!theMessage.jitsiId || (ARENA.JitsiAPI && !ARENA.JitsiAPI.ready())) {
+                if (!theMessage.jitsiId || !ARENA.JitsiAPI || !ARENA.JitsiAPI.ready()) {
                     // console.log('jitsiId empty');
                     break; // other-person has no jitsi stream ... yet
                 }
 
-                let camPos = globals.sceneObjects.myCamera.object3D.position;
-                let entityPos = entityEl.object3D.position;
-                let distance = camPos.distanceTo(entityPos);
-                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 25;
+                const camPos = globals.sceneObjects.myCamera.object3D.position;
+                const entityPos = entityEl.object3D.position;
+                const distance = camPos.distanceTo(entityPos);
+                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 20;
 
+                /* Handle Jitsi Video */
                 const videoID = `video${theMessage.jitsiId}`;
                 if (theMessage.hasVideo) {
                     const videoElem = document.getElementById(videoID);
                     const videoTrack = ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId);
-                    if (!videoTrack) return;
                     entityEl.videoTrack = videoTrack;
 
                     // frustrum culling for WebRTC streams
-                    let cam = globals.sceneObjects.myCamera.sceneEl.camera;
-                    let frustum = new THREE.Frustum();
-                    frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
+                    const cam = globals.sceneObjects.myCamera.sceneEl.camera;
+                    const frustum = new THREE.Frustum();
+                    frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
                         cam.matrixWorldInverse));
-                    let inFieldOfView = frustum.containsPoint(entityPos);
+                    const inFieldOfView = frustum.containsPoint(entityPos);
 
                     // check if A/V cut off distance has been reached
                     if (!inFieldOfView || distance > globals.maxAVDist) {
-                        entityEl.videoTrack.enabled = false; // pause WebRTC video stream
-                        if (videoElem) videoElem.pause();
+                        if (entityEl.videoTrack) {
+                            entityEl.videoTrack.enabled = false;
+                        }// pause WebRTC video stream
+                        if (videoElem && !videoElem.paused) videoElem.pause();
                     } else {
-                        entityEl.videoTrack.enabled = true; // unpause WebRTC video stream
-                        if (videoElem) videoElem.play();
+                        if (entityEl.videoTrack) {
+                            entityEl.videoTrack.enabled = true;
+                        }// unpause WebRTC video stream
+                        if (videoElem && videoElem.paused) videoElem.play();
                     }
 
                     // draw video cube, but only if it didnt exist before
@@ -945,8 +1033,9 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.setAttribute('videoCubeDrawn', true);
                     }
                 } else {
-                    if (entityEl.videoTrack)
-                        entityEl.videoTrack.enabled = false; // pause WebRTC video stream
+                    if (entityEl.videoTrack) {
+                        entityEl.videoTrack.enabled = false;
+                    } // pause WebRTC video stream
                     // remove video cubes
                     const vidCube = document.getElementById(videoID + 'cube');
                     if (entityEl.contains(vidCube)) {
@@ -959,10 +1048,11 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.setAttribute('videoCubeDrawn', false);
                 }
 
+                /* Handle Jitsi Audio */
                 drawMicrophoneState(entityEl, theMessage.hasAudio);
                 if (theMessage.hasAudio) {
                     // set up positional audio, but only once per camera
-                    const audioTrack = ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId);
+                    const audioTrack = ARENA.JitsiAPI ? ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId) : undefined;
                     if (!audioTrack) return;
 
                     // check if audio track changed since last update
@@ -971,12 +1061,16 @@ function _onMessageArrived(message, jsonMessage) {
 
                     // check if A/V cut off distance has been reached
                     if (distance > globals.maxAVDist) {
-                        entityEl.audioTrack.enabled = false; // pause WebRTC audio stream
+                        if (entityEl.audioTrack) {
+                            entityEl.audioTrack.enabled = false;
+                        }// pause WebRTC audio stream
                     } else {
-                        entityEl.audioTrack.enabled = true; // unpause WebRTC audio stream
+                        if (entityEl.audioTrack) {
+                            entityEl.audioTrack.enabled = true;
+                        }// unpause WebRTC audio stream
                     }
 
-                    if (entityEl.audioTrack.enabled && entityEl.audioTrack !== oldAudioTrack) {
+                    if (entityEl.audioTrack !== oldAudioTrack) {
                         // set up and attach positional audio
                         const audioStream = new MediaStream();
                         audioStream.addTrack(entityEl.audioTrack);
@@ -989,35 +1083,33 @@ function _onMessageArrived(message, jsonMessage) {
                             listener = new THREE.AudioListener();
                             const camEl = globals.sceneObjects.myCamera.object3D;
                             camEl.add(listener);
-                            globals.audioListener = listener;
                             sceneEl.audioListener = listener;
                         }
 
-                        // create positional audio, but only if didnt exist before
-                        if (!entityEl.positionalAudio) {
-                            const audioSource = new THREE.PositionalAudio(listener);
-                            audioSource.setMediaStreamSource(audioStream);
-                            entityEl.positionalAudio = audioSource;
-                            entityEl.object3D.add(audioSource);
+                        // create positional audio, but only if didn't exist before
+                        if (!entityEl.audioSource) {
+                            entityEl.audioSource = new THREE.PositionalAudio(listener);
+                            entityEl.audioSource.setMediaStreamSource(audioStream);
+                            entityEl.object3D.add(entityEl.audioSource);
+
+                            // set positional audio scene params
+                            if (globals.volume) {
+                                entityEl.audioSource.setVolume(globals.volume);
+                            }
+                            if (globals.refDist) { // L-R panning
+                                entityEl.audioSource.setRefDistance(globals.refDist);
+                            }
+                            if (globals.rolloffFact) {
+                                entityEl.audioSource.setRolloffFactor(globals.rolloffFact);
+                            }
+                            if (globals.distModel) {
+                                entityEl.audioSource.setDistanceModel(globals.distModel);
+                            }
                         } else {
-                            entityEl.positionalAudio.setMediaStreamSource(audioStream);
+                            entityEl.audioSource.setMediaStreamSource(audioStream);
                         }
 
-                        // set positional audio scene params
-                        if (globals.refDist) { // L-R panning
-                            entityEl.positionalAudio.setRefDistance(globals.refDist);
-                        }
-                        if (globals.rolloffFact) {
-                            entityEl.positionalAudio.setRolloffFactor(globals.rolloffFact);
-                        }
-                        if (globals.distModel) {
-                            entityEl.positionalAudio.setDistanceModel(globals.distModel);
-                        }
-                        if (globals.volume) {
-                            entityEl.positionalAudio.setVolume(globals.volume);
-                        }
-
-                        // sorta fixes chrome echo bug, but not always
+                        // sorta fixes chrome echo bug
                         const audioCtx = THREE.AudioContext.getContext();
                         const resume = () => {
                             audioCtx.resume();
@@ -1034,10 +1126,10 @@ function _onMessageArrived(message, jsonMessage) {
                         document.body.addEventListener('touchmove', resume, false);
                         document.body.addEventListener('mousemove', resume, false);
                     }
-                }
-                else {
-                    if (entityEl.audioTrack)
-                        entityEl.audioTrack.enabled = false; // pause WebRTC audio stream
+                } else {
+                    if (entityEl.audioTrack) {
+                        entityEl.audioTrack.enabled = false;
+                    } // pause WebRTC audio stream
                 }
             }
 
@@ -1215,8 +1307,9 @@ function _onMessageArrived(message, jsonMessage) {
             if (name === globals.viveRName) {
                 return;
             }
-            // just setAttribute() - data can contain multiple attribute-value pairs
-            // e.g: { ... "action": "update", "data": { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... }
+            /* just setAttribute() - data can contain multiple attribute-value pairs
+             e.g: { ... "action": "update", "data":
+                    { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... } */
 
             const entityEl = sceneObjects[theMessage.object_id];
             if (entityEl) {
@@ -1225,6 +1318,16 @@ function _onMessageArrived(message, jsonMessage) {
                         entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w);
                     } else if (attribute === 'position') {
                         entityEl.object3D.position.set(value.x, value.y, value.z);
+                    } else if (attribute === 'color') {
+                        if (!entityEl.hasOwnProperty('text')) {
+                            entityEl.setAttribute('material', 'color', value);
+                        } else {
+                            entityEl.setAttribute('text', 'color', value);
+                        }
+                    } else if (attribute === 'text') {
+                        if (entityEl.hasOwnProperty('text')) {
+                            entityEl.setAttribute('text', 'value', value);
+                        }
                     } else {
                         if (value === null) {
                             entityEl.removeAttribute(attribute);

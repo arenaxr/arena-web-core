@@ -1,6 +1,8 @@
 # ARENA Face Detection and Tracking
 
-## JSON format:
+**Note:** The facial landmark annotations used by ARENA (found here: https://arena-cdn.conix.io/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat) are for **research purposes ONLY** and commercial use is **PROHIBITED**!
+
+## JSON Format
 
 To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
 
@@ -22,27 +24,19 @@ To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
     "timestamp": <time>
 }
 ```
-## Landmark locations for reference
-![landmarks](./img/face_landmarks.jpg)
 
-## URL params:
+## Building
 
-- trackFace (bool)      - Enables face detection. Default is 0!
-- debugFace (bool)      - Enables console logging of JSON output and execution time for face detection, pose estimation, and MQTT pub + JSON creation.
-- vidWidth (int)        - Sets the width of the video window in pixels, height is scaled by aspect ratio. The larger the width, the slower the face detection will take. Default is 320.
-- vidOff (bool)         - Removes live video window.
-- overlayOff (bool)     - Removes overlaying the face wire frame on the video window and the "initializing face detection" texts.
-- bboxOn (bool)         - Show the bbox in the video window.
-- flipped (bool)        - Flip source image.
-- frameSkip (int)       - How many frames should be skipped. default is 1 (no frames skipped).
-
-## Building:
-
-Download and install [emsdk](https://emscripten.org/docs/getting_started/downloads.html), [opencv](https://github.com/opencv/opencv), and [dlib](https://github.com/davisking/dlib). Build WASM for [opencv_js](https://docs.opencv.org/3.4/d4/da1/tutorial_js_setup.html).
+Download and install [emsdk](https://emscripten.org/docs/getting_started/downloads.html) (version 1.39.16 works best), [opencv](https://github.com/opencv/opencv), and [dlib](https://github.com/davisking/dlib). Build WASM for [opencv_js](https://docs.opencv.org/3.4/d4/da1/tutorial_js_setup.html).
 
 Run ```build.sh``` to build. Optional flag ```--force```.
 
-## Citations:
+See [here](https://github.com/EdwardLu2018/wasm-face-tracking).
+
+## Landmark Locations for Reference
+![landmarks](./img/face_landmarks.jpg)
+
+## Citations
 
 C. Sagonas, E. Antonakos, G, Tzimiropoulos, S. Zafeiriou, M. Pantic. 300 faces In-the-wild challenge: Database and results. Image and Vision Computing (IMAVIS), Special Issue on Facial Landmark Localisation "In-The-Wild". 2016.
 

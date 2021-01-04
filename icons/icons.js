@@ -34,7 +34,6 @@ function publishHeadText(displayName) {
 
 function setupIcons() {
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
-        if (!ARENA.JitsiAPI.ready()) return;
         if (!ARENA.JitsiAPI.hasAudio()) { // toggled
             ARENA.JitsiAPI.unmuteAudio().then((_) => {
                 audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
@@ -47,13 +46,12 @@ function setupIcons() {
     });
 
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
-        if (!ARENA.JitsiAPI.ready()) return;
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
             ARENA.JitsiAPI.startVideo().then((_) => {
                 videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
                 avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
                 ARENA.JitsiAPI.showVideo();
-                ARENA.FaceTracker.trackFaceOff();
+                ARENA.FaceTracker.stop();
             });
         } else {
             videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
@@ -64,17 +62,18 @@ function setupIcons() {
     });
 
     const avatarBtn = createIconButton('avatar3-off', 'Face-recognition avatar on/off. You appear as a 3d-animated face.', () => {
-        if (!ARENA.FaceTracker.hasAvatar()) { // toggled
-            ARENA.FaceTracker.trackFaceOn().then((_) => {
-                if (!ARENA.JitsiAPI.ready()) return;
-                ARENA.JitsiAPI.stopVideo().then((_) => {
-                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
-                    videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
-                    ARENA.JitsiAPI.hideVideo();
-                });
+        if (!ARENA.FaceTracker.running()) { // toggled
+            ARENA.FaceTracker.run().then((_) => {
+                avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
+                if (ARENA.JitsiAPI && ARENA.JitsiAPI.ready()) {
+                    ARENA.JitsiAPI.stopVideo().then((_) => {
+                        videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
+                        ARENA.JitsiAPI.hideVideo();
+                    });
+                }
             });
         } else {
-            ARENA.FaceTracker.trackFaceOff().then((_) => {
+            ARENA.FaceTracker.stop().then((_) => {
                 avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
             });
         }
@@ -150,19 +149,20 @@ function setupIcons() {
                         },
                     })
                         .then((value) => {
-                            const serverName = ARENA.JitsiAPI.serverName;
                             let objectIds = value ? value : defaultScreenObj;
-                            objectIds = objectIds.replace(', ', ',').split(',');
+                            objectIds = objectIds.split(',');
                             for (let i = 0; i < objectIds.length; i++) {
-                                if (objectIds[i] && objectIds[i] != ARENA.JitsiAPI.screenSharePrefix) {
-                                    objectIds[i] = ARENA.JitsiAPI.screenSharePrefix+objectIds[i];
+                                if (objectIds[i]) {
+                                    objectIds[i] = objectIds[i].trim();
                                 }
                             }
-                            objectIds = objectIds.join();
-                            const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
+                            let screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
+                            screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.scene = globals.scenenameParam;
-                            screenshareWindow.jitsiURL = serverName;
-                            screenshareWindow.objectIds = objectIds.split(',');
+                            screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
+                            screenshareWindow.displayName = globals.displayName;
+                            screenshareWindow.camName = globals.camName;
+                            screenshareWindow.objectIds = objectIds.join();
                         });
                 }
             });

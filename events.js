@@ -20,6 +20,11 @@ const getSceneName = () => {
     }
 };
 
+window.ARENA = {};
+
+// arena events target
+ARENA.events = new ARENAEventEmitter();
+
 window.globals = {
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
@@ -140,9 +145,6 @@ globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath[Math.floor
 globals.outputTopic = defaults.realm + '/s/' + globals.scenenameParam + '/';
 globals.renderTopic = globals.outputTopic + '#';
 globals.camName = '';
-globals.activeSpeaker = '';
-globals.previousSpeakerId = '';
-globals.previousSpeakerEl = '';
 globals.displayName = decodeURI(globals.userParam); // set initial name
 globals.idTag = globals.timeID + '_' + globals.userParam; // e.g. 1234_eric
 

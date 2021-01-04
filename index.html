@@ -66,11 +66,9 @@
             <script src="https://rawgit.com/chenzlabs/aframe-ar/master/dist/aframe-ar.js"></script>
     -->
 
-    <!-- intro dialog -->
-    <!-- <script src="intro-dialog/intro_dialog.js"></script> -->
-
     <!-- useful utility funcs -->
     <script src="utils.js"></script>
+    <script src="event-emitter.js"></script>
 
     <!-- our default configs -->
     <script src="conf/defaults.js"></script>
@@ -83,7 +81,7 @@
 
     <!-- jitsi -->
     <script src="libs/lib-jitsi-meet.min.js"></script>
-    <script src="jitsi-arena.js"></script>
+    <script src="arena-jitsi-api.js"></script>
 
     <!-- icons -->
     <link rel="stylesheet" href="icons/icons.css">
@@ -142,8 +140,14 @@
 
       </a-entity>
     </a-scene>
+
     <video src="" id="localVideo" muted="muted" volume="0" autoplay="true" playsinline="true" crossorigin="anonymous"></video>
+
     <div id="gltf-loading"></div>
+
+    <!-- face tracking -->
+    <script src="face-tracking/dist/arena-face-tracker.min.js"></script>
+    <script src="face-tracking/script.js"></script>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
