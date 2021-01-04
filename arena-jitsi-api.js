@@ -523,6 +523,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                 });
             }
             avConnected = true;
+
             JitsiMeetJS.createLocalTracks({devices})
                 .then(tracks => {
                     onLocalTracks(tracks);
@@ -569,6 +570,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         });
     }
 
+    avConnect();
+
     return {
         // ==================================================
         // PUBLIC
@@ -610,59 +613,69 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
         unmuteAudio: function() {
             return new Promise(function(resolve, reject) {
-                avConnect()
-                    .then(() => {
-                        jitsiAudioTrack.unmute()
-                            .then(() => {
-                                hasAudio = true;
-                                resolve();
-                            })
-                            .catch((err) => {
-                                reject(err);
-                            })
-                    });
+                if (jitsiAudioTrack) {
+                    jitsiAudioTrack.unmute()
+                        .then(() => {
+                            hasAudio = true;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
         muteAudio: function() {
             return new Promise(function(resolve, reject) {
-                jitsiAudioTrack.mute()
-                    .then(() => {
-                        hasAudio = false;
-                        resolve();
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    })
+                if (jitsiAudioTrack) {
+                    jitsiAudioTrack.mute()
+                        .then(() => {
+                            hasAudio = false;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
         startVideo: function() {
             return new Promise(function(resolve, reject) {
-                avConnect()
-                    .then(() => {
-                        jitsiVideoTrack.unmute()
-                            .then(() => {
-                                hasVideo = true;
-                                resolve();
-                            })
-                            .catch((err) => {
-                                reject(err);
-                            })
-                    });
+                if (jitsiVideoTrack) {
+                    jitsiVideoTrack.unmute()
+                        .then(() => {
+                            hasVideo = true;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
         stopVideo: function() {
             return new Promise(function(resolve, reject) {
-                jitsiVideoTrack.mute()
-                    .then(() => {
-                        hasVideo = false;
-                        resolve();
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    })
+                if (jitsiVideoTrack) {
+                    jitsiVideoTrack.mute()
+                        .then(() => {
+                            hasVideo = false;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 

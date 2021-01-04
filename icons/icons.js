@@ -35,29 +35,37 @@ function publishHeadText(displayName) {
 function setupIcons() {
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
         if (!ARENA.JitsiAPI.hasAudio()) { // toggled
-            ARENA.JitsiAPI.unmuteAudio().then((_) => {
-                audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
-            });
+            ARENA.JitsiAPI.unmuteAudio()
+                .then((_) => {
+                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         } else {
-            ARENA.JitsiAPI.muteAudio().then((_) => {
-                audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-off.png\')';
-            });
+            ARENA.JitsiAPI.muteAudio()
+                .then((_) => {
+                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-off.png\')';
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         }
     });
 
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
-            ARENA.JitsiAPI.startVideo().then((_) => {
-                videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
-                avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
-                ARENA.JitsiAPI.showVideo();
-                ARENA.FaceTracker.stop();
-            });
+            ARENA.JitsiAPI.startVideo()
+                .then((_) => {
+                    videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
+                    ARENA.JitsiAPI.showVideo();
+                    ARENA.FaceTracker.stop();
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         } else {
             videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
-            ARENA.JitsiAPI.stopVideo().then((_) => {
-                ARENA.JitsiAPI.hideVideo();
-            });
+            ARENA.JitsiAPI.stopVideo()
+                .then((_) => {
+                    ARENA.JitsiAPI.hideVideo();
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         }
     });
 
