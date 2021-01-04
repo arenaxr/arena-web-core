@@ -4,6 +4,7 @@
 // - MQTT broker
 //
 // Required:
+//  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="./conf/defaults.js"></script>  <!-- for window.defaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
@@ -89,6 +90,17 @@ function processUserNames(authName, prefix = null) {
 
 function signOut() {
     // logout, and disassociate user
+    switch (localStorage.getItem('auth_choice')) {
+    case 'google':
+        var auth2 = gapi.auth2.getAuthInstance();
+        auth2.signOut().then(function() {
+            console.log('User signed out.');
+        });
+        auth2.disconnect();
+        break;
+    default:
+        break;
+    }
     localStorage.removeItem('auth_choice');
     localStorage.removeItem('mqtt_username');
     // back to signin page
