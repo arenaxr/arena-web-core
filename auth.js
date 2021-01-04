@@ -43,11 +43,7 @@ const authCheck = function(args) {
     localStorage.removeItem('mqtt_token'); // localStorage deprecated for token
     AUTH.signInPath = `${args.userRoot}/login`;
     AUTH.signOutPath = `${args.userRoot}/logout`;
-    if (localStorage.getItem('auth_choice')) {
-        window.addEventListener('load', requestAuthState);
-    } else {
-        location.href = AUTH.signInPath;
-    }
+    window.addEventListener('load', requestAuthState);
 };
 
 /**
@@ -89,18 +85,6 @@ function processUserNames(authName, prefix = null) {
 }
 
 function signOut() {
-    // logout, and disassociate user
-    switch (localStorage.getItem('auth_choice')) {
-    case 'google':
-        var auth2 = gapi.auth2.getAuthInstance();
-        auth2.signOut().then(function() {
-            console.log('User signed out.');
-        });
-        auth2.disconnect();
-        break;
-    default:
-        break;
-    }
     localStorage.removeItem('auth_choice');
     localStorage.removeItem('mqtt_username');
     // back to signin page
@@ -136,21 +120,30 @@ function requestAuthState() {
         if (xhr.status !== 200) {
             console.error(`Error loading user_state: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
         } else {
-            AUTH.user_type = xhr.response.type;
-            localStorage.setItem('auth_choice', xhr.response.type);
+            AUTH.user_type = xhr.response.type; // user database auth state
+            const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
             if (xhr.response.authenticated) {
-                processUserNames(xhr.response.fullname);
+                // auth user login
+                localStorage.setItem('auth_choice', xhr.response.type);
+                processUserNames(xhr.response.fullname ? xhr.response.fullname : xhr.response.username);
                 AUTH.user_username = xhr.response.username;
                 AUTH.user_fullname = xhr.response.fullname;
                 AUTH.user_email = xhr.response.email;
                 requestMqttToken(xhr.response.type, xhr.response.username);
             } else {
-                // prefix all anon users with "anonymous-"
-                const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
-                AUTH.user_username = anonName;
-                AUTH.user_fullname = localStorage.getItem('display_name');
-                AUTH.user_email = 'N/A';
-                requestMqttToken('anonymous', anonName);
+                if (savedAuthType == 'anonymous') {
+                    // user chose to login as 'anonymous'
+                    localStorage.setItem('auth_choice', xhr.response.type);
+                    // prefix all anon users with "anonymous-"
+                    const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+                    AUTH.user_username = anonName;
+                    AUTH.user_fullname = localStorage.getItem('display_name');
+                    AUTH.user_email = 'N/A';
+                    requestMqttToken('anonymous', anonName);
+                } else {
+                    // user is logged out or new and not logged in
+                    location.href = AUTH.signInPath;
+                }
             }
         }
     };

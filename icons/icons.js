@@ -260,6 +260,7 @@ function setupIcons() {
 
     formDiv.append('Authenticator: ');
     const authType = document.createElement('span');
+    authType.setAttribute('style', 'text-transform: capitalize;');
     formDiv.appendChild(authType);
     formDiv.appendChild(document.createElement('br'));
 
