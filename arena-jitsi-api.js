@@ -233,7 +233,6 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         });
                     }
                 }
-
             } else { // display as external user; possible spoofer
                 ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
                     id: participantId,
