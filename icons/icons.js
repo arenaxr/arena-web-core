@@ -243,6 +243,12 @@ function setupIcons() {
     label.style.fontSize = 'medium';
     formDiv.appendChild(label);
 
+    const profile = document.createElement('a');
+    profile.href = `./user/profile`;
+    profile.innerHTML = 'Profile';
+    formDiv.appendChild(profile);
+    formDiv.appendChild(document.createElement('br'));
+
     const perms = document.createElement('a');
     perms.href = '#';
     perms.innerHTML = 'MQTT Permissions';
@@ -257,14 +263,19 @@ function setupIcons() {
     formDiv.appendChild(authType);
     formDiv.appendChild(document.createElement('br'));
 
+    formDiv.append('ARENA Username: ');
+    const authUsername = document.createElement('span');
+    formDiv.appendChild(authUsername);
+    formDiv.appendChild(document.createElement('br'));
+
     formDiv.append('Email: ');
     const authEmail = document.createElement('span');
     formDiv.appendChild(authEmail);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Name: ');
-    const authName = document.createElement('span');
-    formDiv.appendChild(authName);
+    const authFullname = document.createElement('span');
+    formDiv.appendChild(authFullname);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.appendChild(document.createElement('br'));
@@ -297,7 +308,8 @@ function setupIcons() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
         authType.innerHTML = auth.type;
-        authName.innerHTML = auth.username;
+        authUsername.innerHTML = auth.username;
+        authFullname.innerHTML = auth.fullname;
         authEmail.innerHTML = auth.email;
     }
 

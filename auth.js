@@ -137,15 +137,19 @@ function requestAuthState() {
             console.error(`Error loading user_state: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
         } else {
             AUTH.user_type = xhr.response.type;
-            AUTH.user_username = xhr.response.username;
-            AUTH.user_fullname = xhr.response.fullname;
-            AUTH.user_email = xhr.response.email;
             localStorage.setItem('auth_choice', xhr.response.type);
             if (xhr.response.authenticated) {
+                processUserNames(xhr.response.fullname);
+                AUTH.user_username = xhr.response.username;
+                AUTH.user_fullname = xhr.response.fullname;
+                AUTH.user_email = xhr.response.email;
                 requestMqttToken(xhr.response.type, xhr.response.username);
             } else {
                 // prefix all anon users with "anonymous-"
                 const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+                AUTH.user_username = anonName;
+                AUTH.user_fullname = localStorage.getItem('display_name');
+                AUTH.user_email = 'N/A';
                 requestMqttToken('anonymous', anonName);
             }
         }
