@@ -1,5 +1,9 @@
 /* global AFRAME */
 
+let camParent = new THREE.Matrix4();
+let cam = new THREE.Matrix4();
+const cpi = new THREE.Matrix4();
+
 /**
  * Tracking camera movement in real time. Emits camera pose change and vio change events.
  *

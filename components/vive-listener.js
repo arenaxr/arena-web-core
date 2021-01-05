@@ -1,5 +1,34 @@
 /* global AFRAME */
 
+
+/**
+ * Generates a vive event
+ * @param {Object} evt event
+ * @param {string} eventName name of event, i.e. 'triggerup'
+ * @param {Object} myThis reference to object that generated the event
+ */
+function eventAction(evt, eventName, myThis) {
+    const newPosition = myThis.object3D.position;
+
+    const coordsData = {
+        x: newPosition.x.toFixed(3),
+        y: newPosition.y.toFixed(3),
+        z: newPosition.z.toFixed(3),
+    };
+
+    // publish to MQTT
+    const objName = myThis.id + '_' + globals.idTag;
+    publish(globals.outputTopic + objName, {
+        object_id: objName,
+        action: 'clientEvent',
+        type: eventName,
+        data: {
+            position: coordsData,
+            source: globals.camName,
+        },
+    });
+}
+
 /**
  * Vive events.
  *

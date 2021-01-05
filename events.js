@@ -113,7 +113,6 @@ window.globals = {
                 cursor.setAttribute('fuse', false);
                 cursor.setAttribute('scale', '0.1 0.1 0.1');
                 cursor.setAttribute('position', '0 0 -0.1'); // move reticle closer (side effect: bigger!)
-                // cursor.setAttribute('animation__22', "startEvents: click; property: rotation; dur: 500; easing: linear; from: 0 0 0; to: 30 30 360");
                 cursor.setAttribute('color', '#333');
                 cursor.setAttribute('max-distance', '10000');
                 cursor.setAttribute('id', 'fuse-cursor');
@@ -161,44 +160,19 @@ globals.newPosition = new THREE.Vector3();
 globals.vioRotation = new THREE.Quaternion();
 globals.vioPosition = new THREE.Vector3();
 globals.vioMatrix = new THREE.Matrix4();
-let camParent = new THREE.Matrix4();
-let cam = new THREE.Matrix4();
-const cpi = new THREE.Matrix4();
 
-globals.newViveLRotation = new THREE.Quaternion();
-globals.newViveLPosition = new THREE.Vector3();
-globals.vioViveLRotation = new THREE.Quaternion();
-globals.vioViveLPosition = new THREE.Vector3();
-const ViveLcamParent = new THREE.Matrix4();
-const ViveLcam = new THREE.Matrix4();
-const ViveLcpi = new THREE.Matrix4();
+// globals.newViveLRotation = new THREE.Quaternion();
+// globals.newViveLPosition = new THREE.Vector3();
+// globals.vioViveLRotation = new THREE.Quaternion();
+// globals.vioViveLPosition = new THREE.Vector3();
+// const ViveLcamParent = new THREE.Matrix4();
+// const ViveLcam = new THREE.Matrix4();
+// const ViveLcpi = new THREE.Matrix4();
 
-globals.newViveRRotation = new THREE.Quaternion();
-globals.newViveRPosition = new THREE.Vector3();
-globals.vioViveRRotation = new THREE.Quaternion();
-globals.vioViveRPosition = new THREE.Vector3();
-const ViveRcamParent = new THREE.Matrix4();
-const ViveRcam = new THREE.Matrix4();
-const ViveRcpi = new THREE.Matrix4();
-
-function eventAction(evt, eventName, myThis) {
-    const newPosition = myThis.object3D.position;
-
-    const coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3),
-    };
-
-    // publish to MQTT
-    const objName = myThis.id + '_' + globals.idTag;
-    publish(globals.outputTopic + objName, {
-        object_id: objName,
-        action: 'clientEvent',
-        type: eventName,
-        data: {
-            position: coordsData,
-            source: globals.camName,
-        },
-    });
-}
+// globals.newViveRRotation = new THREE.Quaternion();
+// globals.newViveRPosition = new THREE.Vector3();
+// globals.vioViveRRotation = new THREE.Quaternion();
+// globals.vioViveRPosition = new THREE.Vector3();
+// const ViveRcamParent = new THREE.Matrix4();
+// const ViveRcam = new THREE.Matrix4();
+// const ViveRcpi = new THREE.Matrix4();

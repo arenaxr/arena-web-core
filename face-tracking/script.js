@@ -331,11 +331,11 @@ ARENA.FaceTracker = (function() {
             const overlayCtx = overlayCanvas.getContext('2d');
             overlayCtx.clearRect( 0, 0, width, height );
 
-            const tracks = videoSource.srcobject.getTracks();
+            const tracks = videoSource.srcObject.getTracks();
             tracks.forEach(function(track) {
                 track.stop();
             });
-            videoSource.srcobject = null;
+            videoSource.srcObject = null;
 
             videoCanvas.style.display = 'none';
             running = false;

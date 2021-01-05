@@ -3,7 +3,7 @@
 ## click-listener
 Call a given callback when object is clicked.
 
-## collission-listener
+## collision-listener
 Listen for collisions, callback on event.
 
 ## goto-url
@@ -37,8 +37,8 @@ When applied to an entity, the entity will remove itself from DOM after the spec
 Adds a video to an entity and controls its playback.
 
 ## vive-listener
-Vive events. 
+Vive events.
 
 ## vive-pose-listener
-Tracking Vive controller movement in real time. 
+Tracking Vive controller movement in real time.
 
