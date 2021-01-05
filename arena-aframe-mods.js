@@ -7,17 +7,14 @@
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
-    let acceleration;
-    let adAxis;
     let adSign;
     const data = this.data;
     const keys = this.keys;
     const velocity = this.velocity;
-    let wsAxis;
     let wsSign;
 
-    adAxis = data.adAxis;
-    wsAxis = data.wsAxis;
+    const adAxis = data.adAxis;
+    const wsAxis = data.wsAxis;
 
     // If FPS too low, reset velocity.
     if (delta > MAX_DELTA) {
@@ -49,7 +46,7 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
     }
 
     // Update velocity using keys pressed.
-    acceleration = data.acceleration;
+    const acceleration = data.acceleration;
     if (data.adEnabled) {
         adSign = data.adInverted ? -1 : 1;
         if (keys.KeyA) {
@@ -71,7 +68,7 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
 };
 
 const MAX_DELTA_LOOK = 0.015;
-const PI_2 = Math.PI / 2;
+// const PI_2 = Math.PI / 2;
 keysPressed = {};
 
 AFRAME.registerComponent('look-controls-arrow', {
@@ -99,15 +96,24 @@ AFRAME.registerComponent('look-controls-arrow', {
 
     tick: function(time, delta) {
         if (!globals || !globals.sceneObjects.myCamera) return;
+        const myCamera = globals.sceneObjects.myCamera;
+        const lookControls = myCamera.components['look-controls'];
 
         const keys = keysPressed;
-        if (keys['ArrowLeft']) globals.sceneObjects.myCamera.components['look-controls'].yawObject.rotation.y += MAX_DELTA_LOOK;
-        if (keys['ArrowRight']) globals.sceneObjects.myCamera.components['look-controls'].yawObject.rotation.y -= MAX_DELTA_LOOK;
+        if (keys['ArrowLeft']) {
+            lookControls.yawObject.rotation.y += MAX_DELTA_LOOK;
+        }
+        if (keys['ArrowRight']) {
+            lookControls.yawObject.rotation.y -= MAX_DELTA_LOOK;
+        }
 
-        // if (keys['ArrowUp']) globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x += MAX_DELTA_LOOK;
-        // if (keys['ArrowDown']) globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x -= MAX_DELTA_LOOK;
-        // globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x =
-        //     Math.max(-PI_2, Math.min(PI_2, globals.sceneObjects.myCamera.components['look-controls'].pitchObject.rotation.x));
+        // if (keys['ArrowUp']) {
+        //    lookControls.pitchObject.rotation.x += MAX_DELTA_LOOK;
+        // }
+        // if (keys['ArrowDown']) {
+        // lookControls.pitchObject.rotation.x -= MAX_DELTA_LOOK;
+        // }
+        // lookControls.pitchObject.rotation.x = Math.max(-PI_2, Math.min(PI_2, lookControls.pitchObject.rotation.x));
     },
 });
 

@@ -259,7 +259,7 @@ function onConnected(reconnect, uri) {
         // current state. Instead, reconnection should naturally allow messages to continue.
         // need to resubscribe however, to keep receiving messages
         if (!ARENA.JitsiAPI.ready()) {
-            ARENA.JitsiAPI = await ARENAJitsiAPI(globals.jitsiServer);
+            ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
             console.warn(`ARENA Jitsi restarting...`);
         }
         ARENA.mqttClient.subscribe(globals.renderTopic);
