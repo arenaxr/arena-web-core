@@ -1,13 +1,16 @@
 const ICON_BTN_CLASS = 'arena-icon-button';
 
-
+/**
+ * Creates a button that will be dispalyed as an icon on the left of the screen
+ * @param {string} initialImage name of initial image to be displayed
+ * @param {string} tooltip tip to be displayed on hover
+ * @param {function} onClick function that will be run on click
+ * @return {object} div that is the parent of the button
+ */
 function createIconButton(initialImage, tooltip, onClick) {
-    let iconButton;
-    let wrapper;
-
     // Create elements.
-    wrapper = document.createElement('div');
-    iconButton = document.createElement('button');
+    const wrapper = document.createElement('div');
+    const iconButton = document.createElement('button');
     iconButton.style.backgroundImage = `url('images/icons/${initialImage}.png')`;
     iconButton.className = ICON_BTN_CLASS;
     iconButton.setAttribute('id', 'btn-' + initialImage);
@@ -23,7 +26,10 @@ function createIconButton(initialImage, tooltip, onClick) {
     return wrapper;
 }
 
-
+/**
+ * Publishes an mqtt message that updates the display name of a user
+ * @param {string} displayName display name of user's camera
+ */
 function publishHeadText(displayName) {
     publish('realm/s/' + globals.scenenameParam + '/head-text_' + globals.camName, {
         'object_id': globals.camName,
@@ -34,68 +40,88 @@ function publishHeadText(displayName) {
     });
 }
 
-
+/**
+ * Sets up various icons for side menu
+ */
 function setupIcons() {
+    /**
+     * Create audio button
+     */
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
         if (!ARENA.JitsiAPI.hasAudio()) { // toggled
             ARENA.JitsiAPI.unmuteAudio()
-                .then((_) => {
+                .then(() => {
                     audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
                 })
-                .catch((err) => {console.log("Jitsi is not ready yet")})
+                .catch((err) => {
+                    console.log(err);
+                });
         } else {
             ARENA.JitsiAPI.muteAudio()
-                .then((_) => {
+                .then(() => {
                     audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-off.png\')';
                 })
-                .catch((err) => {console.log("Jitsi is not ready yet")})
+                .catch((err) => {
+                    console.log(err);
+                });
         }
     });
 
-
+    /**
+     * Create video button
+     */
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
             ARENA.JitsiAPI.startVideo()
-                .then((_) => {
+                .then(() => {
                     videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
                     avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
                     ARENA.JitsiAPI.showVideo();
                     ARENA.FaceTracker.stop();
                 })
-                .catch((err) => {console.log("Jitsi is not ready yet")})
+                .catch((err) => {
+                    console.log(err);
+                });
         } else {
             videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
             ARENA.JitsiAPI.stopVideo()
-                .then((_) => {
+                .then(() => {
                     ARENA.JitsiAPI.hideVideo();
                 })
-                .catch((err) => {console.log("Jitsi is not ready yet")})
+                .catch((err) => {
+                    console.log(err);
+                });
         }
     });
 
-
-    const avatarBtn = createIconButton('avatar3-off', 'Face-recognition avatar on/off. You appear as a 3d-animated face.', () => {
-        if (!ARENA.FaceTracker.running()) { // toggled
-            ARENA.FaceTracker.run().then((_) => {
-                avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
-                if (ARENA.JitsiAPI && ARENA.JitsiAPI.ready()) {
-                    ARENA.JitsiAPI.stopVideo().then((_) => {
-                        videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
-                        ARENA.JitsiAPI.hideVideo();
-                    });
-                }
-            });
-        } else {
-            ARENA.FaceTracker.stop().then((_) => {
-                avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
-            });
-        }
-    });
+    /**
+     * Create face tracking button
+     */
+    const avatarBtn = createIconButton('avatar3-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
+        () => {
+            if (!ARENA.FaceTracker.running()) { // toggled
+                ARENA.FaceTracker.run().then(() => {
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
+                    if (ARENA.JitsiAPI && ARENA.JitsiAPI.ready()) {
+                        ARENA.JitsiAPI.stopVideo().then(() => {
+                            videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
+                            ARENA.JitsiAPI.hideVideo();
+                        });
+                    }
+                });
+            } else {
+                ARENA.FaceTracker.stop().then(() => {
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
+                });
+            }
+        });
 
 
     const settingsButtons = [];
 
-
+    /**
+     * Create speed button
+     */
     let speedState = 0;
     const speedBtn = createIconButton('speed-medium', 'Change your movement speed.', () => {
         speedState = (speedState + 1) % 3;
@@ -125,9 +151,11 @@ function setupIcons() {
     speedBtn.style.display = 'none';
     settingsButtons.push(speedBtn);
 
-
+    /**
+     * Create flying on/off button
+     */
     globals.flying = false;
-    const flyingBtn = createIconButton('flying-off', 'Flying on/off', () => {
+    const flyingBtn = createIconButton('flying-off', 'Flying on/off.', () => {
         globals.flying = !globals.flying;
         if (globals.flying) { // toggled
             flyingBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/flying-on.png\')';
@@ -142,8 +170,10 @@ function setupIcons() {
     flyingBtn.style.display = 'none';
     settingsButtons.push(flyingBtn);
 
-
-    const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window', () => {
+    /**
+     * Create screen share button
+     */
+    const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window.', () => {
         if (!ARENA.JitsiAPI) return;
 
         const defaultScreenObj = globals.screenshare ? globals.screenshare : 'screenshare';
@@ -173,7 +203,7 @@ function setupIcons() {
                                     objectIds[i] = objectIds[i].trim();
                                 }
                             }
-                            let screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
+                            const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.scene = globals.scenenameParam;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
@@ -187,8 +217,10 @@ function setupIcons() {
     screenShareButton.style.display = 'none';
     settingsButtons.push(screenShareButton);
 
-
-    const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA', () => {
+    /**
+     * Create logout button
+     */
+    const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA.', () => {
         swal({
             title: 'You are about to sign out of the ARENA!',
             text: 'Are you sure you want to sign out?',
@@ -205,7 +237,9 @@ function setupIcons() {
     logoutBtn.style.display = 'none';
     settingsButtons.push(logoutBtn);
 
-
+    /**
+     * Create additional setting button
+     */
     let expanded = false;
     const settingsBtn = createIconButton('more', 'Additional settings', () => {
         expanded = !expanded;
@@ -244,7 +278,9 @@ function setupIcons() {
     document.body.appendChild(iconsDiv);
 
 
-    // Add settings panel
+    /**
+     * Add settings panel
+     */
     const settingsPopup = document.createElement('div');
     settingsPopup.className = 'settings-popup';
     document.body.appendChild(settingsPopup);
@@ -313,6 +349,9 @@ function setupIcons() {
         saveSettings();
     };
 
+    /**
+     * Loads the settings popup
+     */
     function loadSettings() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
@@ -321,6 +360,9 @@ function setupIcons() {
         authEmail.innerHTML = auth.email;
     }
 
+    /**
+     * Saves the display name when changed
+     */
     function saveSettings() {
         const re = new RegExp(nameRegex);
         // if name has at least one alpha char

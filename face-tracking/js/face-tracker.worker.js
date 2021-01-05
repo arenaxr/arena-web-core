@@ -26,18 +26,24 @@ if ('function' === typeof importScripts) {
 
     var features = null, pose = null;
 
+    /**
+     * Initialization
+     */
     function load(msg) {
         var onLoad = function() {
-            postMessage({ type: "loaded" });
+            postMessage({type: "loaded"});
         }
 
         var onProgress = function(progress) {
-            postMessage({ type: "progress", progress: progress });
+            postMessage({type: "progress", progress: progress});
         }
 
         faceTracker = new ARENAFaceTracker.FaceTracker(msg.width, msg.height, onLoad, onProgress);
     }
 
+    /**
+     * Main processing loop
+     */
     function process() {
         features = null;
         pose = null;
@@ -51,13 +57,9 @@ if ('function' === typeof importScripts) {
         }
 
         if (features) {
-            postMessage({ type: "result", features: features, pose: pose });
+            postMessage({type: "result", features: features, pose: pose});
         }
-        // else {
-        //     postMessage({ type: "not found" });
-        // }
 
         next = null;
     }
-
 }

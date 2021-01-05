@@ -58,7 +58,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
     const NEW_USER_TIMEOUT_MS = 2000;
 
-    /* list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
+    /**
+     * list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
      * participants receive data about its properties (e.g. arenaDisplayName and arenaUserName).
      * we wait NEW_USER_TIMEOUT_MS to hear about these in case it is an arena user and notify anyway after this timeout
      */
@@ -155,7 +156,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
     /**
      * Handles remote tracks
-     * @param {Object} track JitsiTrack object
+     * @param {object} track JitsiTrack object
      */
     async function onRemoteTrack(track) {
         if (track.isLocal()) {
@@ -202,7 +203,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         }
         track.attach($(`#${videoId}`)[0]);
 
-        let user = conference.getParticipantById(participantId);
+        const user = conference.getParticipantById(participantId);
         let camNames = user.getProperty('arenaCameraName');
         if (!camNames) camNames = user.getDisplayName();
         if (!camNames) return; // handle jitsi-only users that have not set the display name
@@ -211,8 +212,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             let dn = user.getProperty('screenshareDispName');
             if (!dn) dn = user.getDisplayName();
             if (!dn) dn = `No Name #${id}`;
-            let camName = user.getProperty('screenshareCamName');
-            var objectIds = user.getProperty('screenshareObjIds');
+            const camName = user.getProperty('screenshareCamName');
+            const objectIds = user.getProperty('screenshareObjIds');
 
             if (camName && objectIds) {
                 ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
@@ -449,7 +450,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
     /**
      * This function is called when device list changes
-     * @param {Object} devices List of devices
+     * @param {object} devices List of devices
      */
     function onDeviceListChanged(devices) {
         console.info('current devices', devices);
@@ -497,6 +498,10 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
     connection.connect();
 
+    /**
+     * Connect audio and video and start sending local tracks
+     * @return {promise}
+     */
     function avConnect() {
         return new Promise(async function(resolve, reject) {
             if (avConnected) {
@@ -524,15 +529,15 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             avConnected = true;
 
             JitsiMeetJS.createLocalTracks({devices})
-                .then(tracks => {
+                .then((tracks) => {
                     onLocalTracks(tracks);
                     if (withVideo) setupLocalVideo();
                     resolve();
                 })
-                .catch((error) => {
-                    console.warn(error);
+                .catch((err) => {
                     isJoined = false;
-                    reject();
+                    console.warn(err);
+                    reject(err);
                 });
 
             /**
@@ -553,11 +558,15 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                  * set video element size
                  */
                 function setupCornerVideo() {
-                    const videoHeight = jitsiVideoElem.videoHeight / (jitsiVideoElem.videoWidth / globals.localVideoWidth);
+                    const videoHeight = jitsiVideoElem.videoHeight /
+                                            (jitsiVideoElem.videoWidth / globals.localVideoWidth);
                     jitsiVideoElem.setAttribute('height', videoHeight);
                 }
 
-                jitsiVideoElem.onloadedmetadata = e => { setupCornerVideo(); }
+                jitsiVideoElem.onloadedmetadata = () => {
+                    setupCornerVideo();
+                };
+
                 window.addEventListener('orientationchange', () => {
                     // mobile only
                     globals.localVideoWidth = Number(window.innerWidth / 5);
@@ -620,9 +629,9 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         })
                         .catch((err) => {
                             reject(err);
-                        })
+                        });
                 } else {
-                    reject();
+                    reject(new Error('Jitsi is not ready yet'));
                 }
             });
         },
@@ -637,9 +646,9 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         })
                         .catch((err) => {
                             reject(err);
-                        })
+                        });
                 } else {
-                    reject();
+                    reject(new Error('Jitsi is not ready yet'));
                 }
             });
         },
@@ -654,9 +663,9 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         })
                         .catch((err) => {
                             reject(err);
-                        })
+                        });
                 } else {
-                    reject();
+                    reject(new Error('Jitsi is not ready yet'));
                 }
             });
         },
@@ -671,9 +680,9 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         })
                         .catch((err) => {
                             reject(err);
-                        })
+                        });
                 } else {
-                    reject();
+                    reject(new Error('Jitsi is not ready yet'));
                 }
             });
         },

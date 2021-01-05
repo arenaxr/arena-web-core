@@ -27,7 +27,7 @@ const remoteTracks = {};
 
 /**
  * Handles local tracks.
- * @param tracks Array with JitsiTrack objects
+ * @param {[]} tracks Array with JitsiTrack objects
  */
 function onLocalTracks(tracks) {
     localTracks = tracks;
@@ -52,9 +52,9 @@ function onLocalTracks(tracks) {
             localTracks[i].attach($(`#localAudio${i}`)[0]);
         } else { // desktop
             $('body').append(
-                `<video autoplay='1' id='localScreenShare${i}' class="screen-share" />`);
-            $(`#localScreenShare${i}`).css("width", "100%");
-            $(`#localScreenShare${i}`).css("height", "auto");
+                `<video autoplay='1' id='localScreenShare${i}' class='screen-share' />`);
+            $(`#localScreenShare${i}`).css('width', '100%');
+            $(`#localScreenShare${i}`).css('height', 'auto');
             localTracks[i].attach($(`#localScreenShare${i}`)[0]);
         }
         if (isJoined) {
@@ -119,6 +119,7 @@ function onConnectionFailed() {
 
 /**
  * This function is called when the connection fail.
+ * @param {[]} devices list of devices
  */
 function onDeviceListChanged(devices) {
     console.info('current devices', devices);
