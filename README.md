@@ -6,12 +6,14 @@ This repository contains the code for the ARENA browser client, an environment t
 We also take advantage of WASM‘s availability in all major browsers and other platforms outside the browser to execute distributed XR applications (the browser runtime source is [here](https://github.com/conix-center/arena-runtime-browser)).
 
 # Examples
+<table>
+  <tr>
+    <td><img alt="" src="images/a1.gif"></td><td><img alt="" src="images/a2.gif"></td>
+  </tr><tr>
+    <td><img alt="" src="images/a3.gif"></td><td><img alt="" src="images/a4.gif"></td>
+  </tr>
+</table>
 
-  <img alt="" src="images/a1.gif" width="49%">
-  <img alt="" src="images/a2.gif" width="49%">
-  <img alt="" src="images/a3.gif" width="49%">
-  <img alt="" src="images/a4.gif" width="49%">
-  
 ## Documentation
 The main ARENA documentation here: [https://arena.conix.io/](https://arena.conix.io/).
 
