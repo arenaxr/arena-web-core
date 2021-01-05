@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Tracking camera movement in real time. Emits camera pose change and vio change events.
+ *
+ */
 AFRAME.registerComponent('pose-listener', {
     // if we want to make throttling settable at init time over mqtt,
     // create a Component variable here & use instead of globals.updateMillis
@@ -30,6 +36,11 @@ AFRAME.registerComponent('pose-listener', {
             this.el.emit('poseChanged', Object.assign(globals.newPosition, globals.newRotation));
             this.el.emit('vioChanged', Object.assign(globals.vioPosition, globals.vioRotation));
             this.lastPose = newPose;
+
+            // DEBUG
+            // debugConixText(newPosition);
+            // debugRaw(this.el.object3D.matrixAutoUpdate + '\n' + this.el.object3D.matrixWorldNeedsUpdate +
+            //      '\n' + THREE.Object3D.DefaultMatrixAutoUpdate);
         }
         this.heartBeatCounter++;
     }),

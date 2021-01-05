@@ -1,3 +1,11 @@
+/* global AFRAME */
+
+/**
+ * One physics feature is applying an impulse to an object to set it in motion.
+ * This happens in conjunction with an event.
+ * Works along physics system (aframe-physics-system).
+ *
+ */
 AFRAME.registerComponent('impulse', {
     schema: {
         on: {
@@ -28,8 +36,6 @@ AFRAME.registerComponent('impulse', {
     },
 
     update: function(oldData) {
-        // this in fact only gets called when the component that it is - gets updated
-        // unlike the update method in Unity that gets called every frame
         const data = this.data; // Component property values.
         const el = this.el; // Reference to the component's entity.
 
@@ -49,14 +55,7 @@ AFRAME.registerComponent('impulse', {
             console.log(data);
         }
     },
-
-    pause: function() {
-        // this.removeEventListeners()
-    },
-    play: function() {
-        // this.addEventListeners()
-    },
-    // handle component removal (why can't it just go away?)
+    // handle component removal 
     remove: function() {
         const data = this.data;
         const el = this.el;

@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Listen for collisions, callback on event.
+ *
+ */
 AFRAME.registerComponent('collision-listener', {
     // listen for collisions, call defined function on event evt
     init: function() {

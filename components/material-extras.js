@@ -1,3 +1,5 @@
+/* global AFRAME */
+
 /**
  * Material extras component.
  * Allows to set extra material properties, namely texture encodind

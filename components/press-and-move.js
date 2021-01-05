@@ -1,6 +1,10 @@
+/* global AFRAME */
+
+/**
+ * Support user camera movement with the mouse.
+ *
+ */
 AFRAME.registerComponent('press-and-move', {
-    // hackish way to move on mobile devices.
-    // press and hold to move at a constant speed in the direction you are looking at
     schema: {
         speed: {type: 'number', default: 5.0},
     },
@@ -49,3 +53,4 @@ AFRAME.registerComponent('press-and-move', {
         }
     }),
 });
+

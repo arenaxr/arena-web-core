@@ -1,3 +1,5 @@
+/* global AFRAME */
+
 /**
  * TTL component.
  *

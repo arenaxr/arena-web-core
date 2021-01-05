@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Load scene from persistence.
+ *
+ */
 AFRAME.registerComponent('load-scene', {
     // load scene from persistence db
     schema: {

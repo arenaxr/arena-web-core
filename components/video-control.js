@@ -1,5 +1,12 @@
+/* global AFRAME */
+
+/**
+ * Adds a video to an entity and controls its playback.
+ *
+ */
 AFRAME.registerComponent('video-control', {
     // e.g. <a-entity video-control="videoName: superVideo" ...>
+
     schema: {
         videoPath: {
             type: 'string',

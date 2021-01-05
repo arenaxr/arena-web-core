@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Vive events.
+ *
+ */
 AFRAME.registerComponent('vive-listener', {
     init: function() {
         this.el.addEventListener('triggerup', function(evt) {

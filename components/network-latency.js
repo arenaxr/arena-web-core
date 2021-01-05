@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Publish with qos of 2 for network graph to update latency
+ *
+ */
 AFRAME.registerComponent('network-latency', {
     // publish empty message with qos of 2 for network graph to update latency
     init: function() {

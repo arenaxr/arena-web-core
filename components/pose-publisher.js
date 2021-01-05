@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Tracking camera movement in real time. Publishes camera pose
+ *
+ */
 AFRAME.registerComponent('pose-publisher', {
     init: function() {
         // Set up the tick throttling.

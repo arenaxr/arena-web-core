@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Load new URL if clicked
+ *
+ */
 AFRAME.registerComponent('goto-url', {
     // load new URL if clicked
     schema: {
@@ -15,12 +21,9 @@ AFRAME.registerComponent('goto-url', {
     multiple: true,
 
     init: function() {
-        const self = this;
     },
 
     update: function() {
-        // this in fact only gets called when the component that it is - gets updated
-        // unlike the update method in Unity that gets called every frame
         const data = this.data; // Component property values.
         const el = this.el; // Reference to the component's entity.
         let fired = false;
@@ -61,13 +64,7 @@ AFRAME.registerComponent('goto-url', {
         }
     },
 
-    pause: function() {
-        // this.removeEventListeners()
-    },
-    play: function() {
-        // this.addEventListeners()
-    },
-    // handle component removal (why can't it just go away?)
+    // handle component removal 
     remove: function() {
         const data = this.data;
         const el = this.el;

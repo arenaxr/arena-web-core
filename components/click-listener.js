@@ -1,3 +1,9 @@
+/* global AFRAME */
+
+/**
+ * Listen for clicks, call defined function on event evt
+ *
+ */
 AFRAME.registerComponent('click-listener', {
     // listen for clicks, call defined function on event evt
     init: function() {
