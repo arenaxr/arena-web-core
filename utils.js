@@ -102,28 +102,6 @@ function debugRaw(debugMsg) {
     // console.log('debug: ', debugMsg);
 }
 
-function eventAction(evt, eventName, myThis) {
-    const newPosition = myThis.object3D.position;
-
-    const coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3),
-    };
-
-    // publish to MQTT
-    const objName = myThis.id + '_' + globals.idTag;
-    publish(globals.outputTopic + objName, {
-        object_id: objName,
-        action: 'clientEvent',
-        type: eventName,
-        data: {
-            position: coordsData,
-            source: globals.camName,
-        },
-    });
-}
-
 function setCoordsData(evt) {
     return {
         x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),

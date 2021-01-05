@@ -1,5 +1,6 @@
 const ICON_BTN_CLASS = 'arena-icon-button';
 
+
 function createIconButton(initialImage, tooltip, onClick) {
     let iconButton;
     let wrapper;
@@ -22,6 +23,7 @@ function createIconButton(initialImage, tooltip, onClick) {
     return wrapper;
 }
 
+
 function publishHeadText(displayName) {
     publish('realm/s/' + globals.scenenameParam + '/head-text_' + globals.camName, {
         'object_id': globals.camName,
@@ -31,6 +33,7 @@ function publishHeadText(displayName) {
         'data': {'object_type': 'headtext'},
     });
 }
+
 
 function setupIcons() {
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
@@ -48,6 +51,7 @@ function setupIcons() {
                 .catch((err) => {console.log("Jitsi is not ready yet")})
         }
     });
+
 
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
@@ -69,6 +73,7 @@ function setupIcons() {
         }
     });
 
+
     const avatarBtn = createIconButton('avatar3-off', 'Face-recognition avatar on/off. You appear as a 3d-animated face.', () => {
         if (!ARENA.FaceTracker.running()) { // toggled
             ARENA.FaceTracker.run().then((_) => {
@@ -87,7 +92,9 @@ function setupIcons() {
         }
     });
 
+
     const settingsButtons = [];
+
 
     let speedState = 0;
     const speedBtn = createIconButton('speed-medium', 'Change your movement speed.', () => {
@@ -118,6 +125,7 @@ function setupIcons() {
     speedBtn.style.display = 'none';
     settingsButtons.push(speedBtn);
 
+
     globals.flying = false;
     const flyingBtn = createIconButton('flying-off', 'Flying on/off', () => {
         globals.flying = !globals.flying;
@@ -133,6 +141,7 @@ function setupIcons() {
     });
     flyingBtn.style.display = 'none';
     settingsButtons.push(flyingBtn);
+
 
     const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window', () => {
         if (!ARENA.JitsiAPI) return;
@@ -178,6 +187,7 @@ function setupIcons() {
     screenShareButton.style.display = 'none';
     settingsButtons.push(screenShareButton);
 
+
     const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA', () => {
         swal({
             title: 'You are about to sign out of the ARENA!',
@@ -216,6 +226,7 @@ function setupIcons() {
         }
     });
 
+
     const iconsDiv = document.createElement('div');
     iconsDiv.setAttribute('id', 'icons-div');
     iconsDiv.appendChild(audioBtn);
@@ -231,6 +242,7 @@ function setupIcons() {
     iconsDiv.appendChild(logoutBtn);
     iconsDiv.appendChild(settingsBtn);
     document.body.appendChild(iconsDiv);
+
 
     // Add settings panel
     const settingsPopup = document.createElement('div');
