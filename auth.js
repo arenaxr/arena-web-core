@@ -38,7 +38,7 @@ window.onload = function() {
     initAuthPanel(); // add auth details panel
 };
 
-// check if the current user is already signed in.
+// check if the current user is already signed in
 const authCheck = function(args) {
     localStorage.removeItem('mqtt_token'); // localStorage deprecated for token
     AUTH.signInPath = `${args.userRoot}/login`;
@@ -152,7 +152,7 @@ function requestAuthState() {
 function requestMqttToken(auth_type, mqtt_username) {
     // Request JWT before connection
     const xhr = new XMLHttpRequest();
-    let params = 'username=' + mqtt_username; // + "&id_token=" + id_token;
+    let params = 'username=' + mqtt_username;
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
