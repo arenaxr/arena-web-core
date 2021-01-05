@@ -477,7 +477,7 @@ function onConnected(reconnect, uri) {
 function onConnectionLost(responseObject) {
     if (responseObject.errorCode !== 0) {
         console.error(
-            `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`
+            `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
         );
     }
     console.warn('MQTT scene automatically reconnecting...');
@@ -788,10 +788,10 @@ function _onMessageArrived(message, jsonMessage) {
                         return;
                     }
                 }
+                // x, y, z given
                 if (target.hasOwnProperty('x') &&
                     target.hasOwnProperty('y') &&
-                    target.hasOwnProperty('z'))
-                { // x, y, z given
+                    target.hasOwnProperty('z')) {
                     myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z);
                     myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z);
                 }
@@ -980,11 +980,11 @@ function _onMessageArrived(message, jsonMessage) {
         case 'videoconf': // unimplemented as of now
             // handle changes to other users audio/video status
             // if (theMessage.hasOwnProperty('jitsiId')) {
-                // possibly change active speaker
-                // if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
-                //     globals.previousSpeakerEl = entityEl;
-                // }
-                // drawMicrophoneState(entityEl, theMessage.hasAudio);
+            //     //possibly change active speaker
+            //      if (theMessage.hasVideo && ARENA.JitsiAPI.activeSpeakerChanged()) {
+            //          globals.previousSpeakerEl = entityEl;
+            //      }
+            //      drawMicrophoneState(entityEl, theMessage.hasAudio);
             // }
             return;
 

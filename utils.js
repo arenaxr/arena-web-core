@@ -83,19 +83,6 @@ function debug(msg) {
     publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
-function updateConixBox(eventName, coordsData, myThis) {
-    const sceney = myThis.sceneEl;
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', myThis.id + ' ' + eventName + ' ' + '\n' + coordsToText(coordsData));
-    console.log(myThis.id + ' was clicked at: ', coordsToText(coordsData), ' by', globals.camName);
-}
-
-function debugConixText(coordsData) {
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', 'pose: ' + coordsToText(coordsData));
-    console.log('pose: ', coordsToText(coordsData));
-}
-
 function debugRaw(debugMsg) {
     const textEl = document.getElementById('conix-text');
     textEl.setAttribute('value', debugMsg);

@@ -11,7 +11,7 @@ function createIconButton(initialImage, tooltip, onClick) {
     // Create elements.
     const wrapper = document.createElement('div');
     const iconButton = document.createElement('button');
-    iconButton.style.backgroundImage = `url('images/icons/${initialImage}.png')`;
+    iconButton.style.backgroundImage = `url('icons/images/${initialImage}.png')`;
     iconButton.className = ICON_BTN_CLASS;
     iconButton.setAttribute('id', 'btn-' + initialImage);
     iconButton.setAttribute('title', tooltip);
@@ -51,7 +51,7 @@ function setupIcons() {
         if (!ARENA.JitsiAPI.hasAudio()) { // toggled
             ARENA.JitsiAPI.unmuteAudio()
                 .then(() => {
-                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
+                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/audio-on.png\')';
                 })
                 .catch((err) => {
                     console.log(err);
@@ -59,7 +59,7 @@ function setupIcons() {
         } else {
             ARENA.JitsiAPI.muteAudio()
                 .then(() => {
-                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-off.png\')';
+                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/audio-off.png\')';
                 })
                 .catch((err) => {
                     console.log(err);
@@ -74,8 +74,8 @@ function setupIcons() {
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
             ARENA.JitsiAPI.startVideo()
                 .then(() => {
-                    videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
-                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
+                    videoBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/video-on.png\')';
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/avatar3-off.png\')';
                     ARENA.JitsiAPI.showVideo();
                     ARENA.FaceTracker.stop();
                 })
@@ -83,7 +83,7 @@ function setupIcons() {
                     console.log(err);
                 });
         } else {
-            videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
+            videoBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/video-off.png\')';
             ARENA.JitsiAPI.stopVideo()
                 .then(() => {
                     ARENA.JitsiAPI.hideVideo();
@@ -101,17 +101,17 @@ function setupIcons() {
         () => {
             if (!ARENA.FaceTracker.running()) { // toggled
                 ARENA.FaceTracker.run().then(() => {
-                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-on.png\')';
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/avatar3-on.png\')';
                     if (ARENA.JitsiAPI && ARENA.JitsiAPI.ready()) {
                         ARENA.JitsiAPI.stopVideo().then(() => {
-                            videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
+                            videoBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/video-off.png\')';
                             ARENA.JitsiAPI.hideVideo();
                         });
                     }
                 });
             } else {
                 ARENA.FaceTracker.stop().then(() => {
-                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/avatar3-off.png\')';
                 });
             }
         });
@@ -126,21 +126,21 @@ function setupIcons() {
     const speedBtn = createIconButton('speed-medium', 'Change your movement speed.', () => {
         speedState = (speedState + 1) % 3;
         if (speedState == 0) { // medium
-            speedBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/speed-medium.png\')';
+            speedBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/speed-medium.png\')';
             if (!AFRAME.utils.device.isMobile()) {
                 globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 30});
             } else {
                 globals.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 5.0});
             }
         } else if (speedState == 1) { // fast
-            speedBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/speed-fast.png\')';
+            speedBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/speed-fast.png\')';
             if (!AFRAME.utils.device.isMobile()) {
                 globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 60});
             } else {
                 globals.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 10.0});
             }
         } else if (speedState == 2) { // slow
-            speedBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/speed-slow.png\')';
+            speedBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/speed-slow.png\')';
             if (!AFRAME.utils.device.isMobile()) {
                 globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 15});
             } else {
@@ -158,12 +158,12 @@ function setupIcons() {
     const flyingBtn = createIconButton('flying-off', 'Flying on/off.', () => {
         globals.flying = !globals.flying;
         if (globals.flying) { // toggled
-            flyingBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/flying-on.png\')';
+            flyingBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/flying-on.png\')';
         } else {
             const groundedPos = globals.sceneObjects.myCamera.getAttribute('position');
             groundedPos.y = parseFloat(globals.startCoords.split(' ')[1]);
             globals.sceneObjects.myCamera.setAttribute('position', groundedPos);
-            flyingBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/flying-off.png\')';
+            flyingBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/flying-off.png\')';
         }
         globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'fly': globals.flying});
     });
@@ -244,14 +244,14 @@ function setupIcons() {
     const settingsBtn = createIconButton('more', 'Additional settings', () => {
         expanded = !expanded;
         if (expanded) { // toggled
-            settingsBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/less.png\')';
+            settingsBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/less.png\')';
             for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = 'block';
             }
             settingsPopup.style.display = 'block'; // open settings panel
             loadSettings();
         } else {
-            settingsBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/more.png\')';
+            settingsBtn.childNodes[0].style.backgroundImage = 'url(\'icons/images/more.png\')';
             for (let i = 0; i < settingsButtons.length; i++) {
                 settingsButtons[i].style.display = 'none';
             }
