@@ -29,12 +29,7 @@ function onConnected(reconnect, uri) {
     // first connection for this client
     console.log(`MQTT scene init user state, connected to ${uri}`);
 
-    // Let's get the camera and publish it's presence over MQTT
-    // slight hack: we rely on it's name being already defined in the HTML as "my-camera"
-    // add event listener for camera moved ("poseChanged") event
-
-    // make 'env' and 'box-obj' (from index.html) scene objects so they can be modified
-    // Add them to our dictionary of scene objects
+    // Add scene objects to dictionary of scene objects
     const sceneObjects = globals.sceneObjects;
 
     sceneObjects.cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>

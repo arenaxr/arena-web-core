@@ -2,8 +2,13 @@
 //
 // useful misc utility functions
 
-// usage:
-//   importScript('./path/to/script.js').then((allExports) => { .... }));
+/**
+ * Dynamically import js script
+ * usage:
+ *   importScript('./path/to/script.js').then((allExports) => { .... }));
+ * @param {string} path path of js script
+ * @return {promise}
+ */
 function importScript(path) {
     let entry = window.importScript.__db[path];
     if (entry === undefined) {
@@ -26,83 +31,23 @@ importScript.__db = {};
 window['importScript'] = importScript; // needed if we ourselves are in a module
 
 /**
- * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
- * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
- * @param {Object} gainNode
+ * Gets URL parameters as dictionary
+ * @return {object} dictionary of URL parameters
  */
-async function enableChromeAEC(gainNode) {
-    /**
-     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-     *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
-     *     this prevents hearing the audio twice.
-     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-     *  6. connect the other RTCPeerConnection's stream to a new audio element.
-     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
-     *  while preserving all the audio processing that was performed via the WebAudio API.
-     */
-
-    const audioEl = new Audio();
-    audioEl.setAttribute('autoplay', 'autoplay');
-    audioEl.setAttribute('playsinline', 'playsinline');
-
-    const context = THREE.AudioContext.getContext();
-    const loopbackDestination = context.createMediaStreamDestination();
-    const outboundPeerConnection = new RTCPeerConnection();
-    const inboundPeerConnection = new RTCPeerConnection();
-
-    const onError = (e) => {
-        console.error('RTCPeerConnection loopback initialization error', e);
-    };
-
-    outboundPeerConnection.addEventListener('icecandidate', (e) => {
-        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('icecandidate', (e) => {
-        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('track', (e) => {
-        audioEl.srcObject = e.streams[0];
-    });
-
-    try {
-        /* The following should never fail, but just in case, we won't disconnect/reconnect
-           the gainNode unless all of this succeeds */
-        loopbackDestination.stream.getTracks().forEach((track) => {
-            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
-        });
-
-        const offer = await outboundPeerConnection.createOffer();
-        outboundPeerConnection.setLocalDescription(offer);
-        await inboundPeerConnection.setRemoteDescription(offer);
-
-        const answer = await inboundPeerConnection.createAnswer();
-        inboundPeerConnection.setLocalDescription(answer);
-        outboundPeerConnection.setRemoteDescription(answer);
-
-        gainNode.disconnect();
-        if (ARENA.JitsiAPI.chromeSpatialAudioOn()) {
-            gainNode.connect(context.destination);
-        } else {
-            gainNode.connect(loopbackDestination);
-        }
-    } catch (e) {
-        onError(e);
-    }
-}
-
 function getUrlVars() {
     const vars = {};
-    const parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
+    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
         vars[key] = value;
     });
     return vars;
 }
 
+/**
+ * Extracts URL params
+ * @param {string} parameter URL parameter
+ * @param {string} defaultValue default value in case parameter doesnt exist
+ * @return {string} value associated with parameter
+ */
 function getUrlParam(parameter, defaultValue) {
     let urlParameter = defaultValue;
     if (window.location.href.indexOf(parameter) > -1) {
@@ -114,25 +59,13 @@ function getUrlParam(parameter, defaultValue) {
     return urlParameter;
 }
 
-function getQueryParams(name, defaultValue) {
-    const qs = location.search;
-
-    const params = [];
-    let tokens;
-    const re = /[?&]?([^=]+)=([^&]*)/g;
-
-    while (tokens = re.exec(qs)) {
-        if (decodeURIComponent(tokens[1]) == name) {
-            params.push(decodeURIComponent(tokens[2]));
-        }
-    }
-
-    if (params === []) return defaultValue;
-    else return params;
-}
-
+/**
+ * Extracts URL params
+ * @param {string} parameter URL parameter
+ * @param {string} defaultValue default value in case parameter doesnt exist
+ * @return {[]} list of indicies
+ */
 function getUrlParams(parameter, defaultValue) {
-    const urlParameter = defaultValue;
     const indexes = [];
     parameter = parameter + '=';
     if (window.location.href.indexOf(parameter) > -1) {
@@ -149,16 +82,19 @@ function getUrlParams(parameter, defaultValue) {
     return indexes;
 }
 
+/**
+ * Publishes debug message to mqtt
+ * @param {object} msg msg to debug
+ */
 function debug(msg) {
     publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
-function debugRaw(debugMsg) {
-    const textEl = document.getElementById('conix-text');
-    textEl.setAttribute('value', debugMsg);
-    // console.log('debug: ', debugMsg);
-}
-
+/**
+ * Returns the position of an event's target
+ * @param {object} evt event object
+ * @return {object} position of target
+ */
 function setCoordsData(evt) {
     return {
         x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
@@ -167,6 +103,11 @@ function setCoordsData(evt) {
     };
 }
 
+/**
+ * Returns where an evt's intersection happened
+ * @param {object} evt event object
+ * @return {object} event intersection as object
+ */
 function setClickData(evt) {
     if (evt.detail.intersection) {
         return {
@@ -184,6 +125,11 @@ function setClickData(evt) {
     }
 }
 
+/**
+ * Turns 3 elem vector to object
+ * @param {object} c 3 elem vector
+ * @return {object} 3 elem vector as object
+ */
 function vec3ToObject(vec) {
     return {
         x: parseFloat(vec.x.toFixed(3)),
@@ -192,6 +138,11 @@ function vec3ToObject(vec) {
     };
 }
 
+/**
+ * Turns quaternion to object
+ * @param {object} c quaternion
+ * @return {object} quaternion as object
+ */
 function quatToObject(q) {
     return {
         x: parseFloat(q.x.toFixed(3)),
@@ -201,18 +152,28 @@ function quatToObject(q) {
     };
 }
 
+/**
+ * Turns position to string
+ * @param {object} c position
+ * @return {string} position as string
+ */
 function coordsToText(c) {
     return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
 }
 
+/**
+ * Turns quaternions to string
+ * @param {object} c rotation in quaternions
+ * @return {string} rotation as string
+ */
 function rotToText(c) {
     return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
 }
 
 /**
  * Utility function to check incoming messages
- * @param {String} str string with message to check
- * @return {Bolean}
+ * @param {string} str string with message to check
+ * @return {boolean}
  */
 function isJson(str) {
     try {
