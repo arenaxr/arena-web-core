@@ -1,7 +1,4 @@
-// arena.js
-//
-// globals
-// 'use strict';
+/* global AFRAME, THREE */
 
 /**
  * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
@@ -22,12 +19,9 @@ function getSceneName() {
     }
 };
 
-window.ARENA = {};
-
-// arena events target
-ARENA.events = new ARENAEventEmitter();
-
-window.globals = {
+window.ARENA = {
+    // arena events target
+    events: new ARENAEventEmitter(),
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
     // TODO(mwfarb): push per scene themes/styles into json scene object
@@ -63,12 +57,12 @@ window.globals = {
                 document.head.appendChild(base64script);
 
                 document.addEventListener('mousedown', function(e) {
-                    // debug("MOUSEDOWN " + window.globals.lastMouseTarget);
+                    // debug("MOUSEDOWN " + window.ARENA.lastMouseTarget);
 
-                    if (window.globals.lastMouseTarget) {
-                        // debug("has target: "+window.globals.lastMouseTarget);
+                    if (window.ARENA.lastMouseTarget) {
+                        // debug("has target: "+window.ARENA.lastMouseTarget);
 
-                        const el = window.globals.sceneObjects[window.globals.lastMouseTarget];
+                        const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
                         const elPos = new THREE.Vector3();
                         el.object3D.getWorldPosition(elPos);
                         // debug("worldPosition is:");
@@ -79,7 +73,7 @@ window.globals = {
                             z: elPos.z,
                         };
                         el.emit('mousedown', {
-                            'clicker': window.globals.camName,
+                            'clicker': window.ARENA.camName,
                             'intersection': {
                                 point: intersection,
                             },
@@ -90,8 +84,8 @@ window.globals = {
                     }
                 });
                 document.addEventListener('mouseup', function(e) {
-                    if (window.globals.lastMouseTarget) {
-                        const el = window.globals.sceneObjects[window.globals.lastMouseTarget];
+                    if (window.ARENA.lastMouseTarget) {
+                        const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
                         const elPos = new THREE.Vector3();
                         el.object3D.getWorldPosition(elPos);
                         const intersection = {
@@ -101,7 +95,7 @@ window.globals = {
                         };
                         // debug(elPos.x);
                         el.emit('mouseup', {
-                            'clicker': window.globals.camName,
+                            'clicker': window.ARENA.camName,
                             'intersection': {
                                 point: intersection,
                             },
@@ -129,44 +123,44 @@ window.globals = {
 const urlLat = getUrlParam('lat');
 const urlLong = getUrlParam('long');
 if (urlLat && urlLong) {
-    globals.clientCoords = {
+    ARENA.clientCoords = {
         latitude: urlLat,
         longitude: urlLong,
     };
 } else {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-            globals.clientCoords = position.coords;
+            ARENA.clientCoords = position.coords;
         });
     }
 }
 
-globals.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + globals.scenenameParam;
-globals.mqttParam = 'wss://' + globals.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() * defaults.mqttPath.length)];
-globals.outputTopic = defaults.realm + '/s/' + globals.scenenameParam + '/';
-globals.renderTopic = globals.outputTopic + '#';
-globals.camName = '';
-globals.displayName = decodeURI(globals.userParam); // set initial name
-globals.idTag = globals.timeID + '_' + globals.userParam; // e.g. 1234_eric
+ARENA.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + ARENA.scenenameParam;
+ARENA.mqttParam = 'wss://' + ARENA.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() * defaults.mqttPath.length)];
+ARENA.outputTopic = defaults.realm + '/s/' + ARENA.scenenameParam + '/';
+ARENA.renderTopic = ARENA.outputTopic + '#';
+ARENA.camName = '';
+ARENA.displayName = decodeURI(ARENA.userParam); // set initial name
+ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
 
-if (globals.fixedCamera !== '') {
-    globals.camName = 'camera_' + globals.fixedCamera + '_' + globals.fixedCamera;
+if (ARENA.fixedCamera !== '') {
+    ARENA.camName = 'camera_' + ARENA.fixedCamera + '_' + ARENA.fixedCamera;
 } else {
-    globals.camName = 'camera_' + globals.idTag; // e.g. camera_1234_eric
+    ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
 }
 
-globals.viveLName = 'viveLeft_' + globals.idTag; // e.g. viveLeft_9240_X
-globals.viveRName = 'viveRight_' + globals.idTag; // e.g. viveRight_9240_X
+ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
+ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
 
-globals.newRotation = new THREE.Quaternion();
-globals.newPosition = new THREE.Vector3();
-globals.vioRotation = new THREE.Quaternion();
-globals.vioPosition = new THREE.Vector3();
-globals.vioMatrix = new THREE.Matrix4();
+ARENA.newRotation = new THREE.Quaternion();
+ARENA.newPosition = new THREE.Vector3();
+ARENA.vioRotation = new THREE.Quaternion();
+ARENA.vioPosition = new THREE.Vector3();
+ARENA.vioMatrix = new THREE.Matrix4();
 
 /**
  * loads scene objects from specified persistence URL if specified,
- * or globals.persistenceUrl if not
+ * or ARENA.persistenceUrl if not
  * @param {string} urlToLoad which url to load arena from
  * @param {object} position initial position
  * @param {object} rotation initial rotation
@@ -175,7 +169,7 @@ function loadArena(urlToLoad, position, rotation) {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
-    else xhr.open('GET', globals.persistenceUrl);
+    else xhr.open('GET', ARENA.persistenceUrl);
 
     xhr.responseType = 'json';
     xhr.send();
@@ -200,7 +194,7 @@ function loadArena(urlToLoad, position, rotation) {
                     ARENA.RuntimeManager.createModule(pobj);
                     continue;
                 }
-                if (obj.object_id === globals.camName) {
+                if (obj.object_id === ARENA.camName) {
                     continue; // don't load our own camera/head assembly
                 }
                 if (obj.attributes.parent) {
@@ -234,7 +228,7 @@ function loadArena(urlToLoad, position, rotation) {
             const l2 = deferredObjects.length;
             for (let i = 0; i < l2; i++) {
                 const obj = deferredObjects[i];
-                if (obj.attributes.parent === globals.camName) {
+                if (obj.attributes.parent === ARENA.camName) {
                     continue; // don't load our own camera/head assembly
                 }
                 const msg = {
@@ -251,14 +245,14 @@ function loadArena(urlToLoad, position, rotation) {
 
 /**
  * deletes scene objects from specified persistence URL if specified,
- * or globals.persistenceUrl if not
+ * or ARENA.persistenceUrl if not
  * @param {string} urlToLoad which url to unload arena from
  */
 function unloadArena(urlToLoad) {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT;
     if (urlToLoad) xhr.open('GET', urlToLoad);
-    else xhr.open('GET', globals.persistenceUrl);
+    else xhr.open('GET', ARENA.persistenceUrl);
 
     xhr.responseType = 'json';
     xhr.send();
@@ -271,7 +265,7 @@ function unloadArena(urlToLoad) {
             const l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
                 const obj = arenaObjects[i];
-                if (obj.object_id === globals.camName) {
+                if (obj.object_id === ARENA.camName) {
                     // don't load our own camera/head assembly
                 } else {
                     const msg = {
@@ -303,7 +297,7 @@ function loadScene() {
 
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT;
-    xhr.open('GET', globals.persistenceUrl + '?type=scene-options');
+    xhr.open('GET', ARENA.persistenceUrl + '?type=scene-options');
     xhr.responseType = 'json';
     xhr.send();
     xhr.onload = async () => {
@@ -315,7 +309,7 @@ function loadScene() {
                 const options = payload['attributes'];
                 sceneOptions = options['scene-options'];
                 for (const [attribute, value] of Object.entries(sceneOptions)) {
-                    globals[attribute] = value;
+                    ARENA[attribute] = value;
                 }
 
                 const envPresets = options['env-presets'];
@@ -367,15 +361,15 @@ function loadScene() {
 
 let lwt;
 window.addEventListener('onauth', function(e) {
-    globals.username = e.detail.mqtt_username;
-    globals.mqttToken = e.detail.mqtt_token;
+    ARENA.username = e.detail.mqtt_username;
+    ARENA.mqttToken = e.detail.mqtt_token;
 
     // Last Will and Testament message sent to subscribers if this client loses connection
     lwt = new Paho.Message(JSON.stringify({
-        object_id: globals.camName,
+        object_id: ARENA.camName,
         action: 'delete',
     }));
-    lwt.destinationName = globals.outputTopic + globals.camName;
+    lwt.destinationName = ARENA.outputTopic + ARENA.camName;
     lwt.qos = 2;
     lwt.retained = false;
     ARENA.mqttClient.connect({
@@ -387,34 +381,34 @@ window.addEventListener('onauth', function(e) {
         },
         reconnect: true,
         willMessage: lwt,
-        userName: globals.username,
-        password: globals.mqttToken,
+        userName: ARENA.username,
+        password: ARENA.mqttToken,
     });
 
     // init runtime manager
     ARENA.RuntimeManager.init({
-        mqtt_uri: globals.mqttParam,
+        mqtt_uri: ARENA.mqttParam,
         onInitCallback: function() {
             console.log('Runtime init done.');
         },
-        name: 'rt-' + Math.round(Math.random() * 10000) + '-' + globals.username,
+        name: 'rt-' + Math.round(Math.random() * 10000) + '-' + ARENA.username,
         dbg: false,
-        mqtt_username: globals.username,
-        mqtt_token: globals.mqttToken,
+        mqtt_username: ARENA.username,
+        mqtt_token: ARENA.mqttToken,
     });
 
     // init chat after
     ARENA.Chat.init({
-        userid: globals.idTag,
-        cameraid: globals.camName,
-        username: globals.displayName,
+        userid: ARENA.idTag,
+        cameraid: ARENA.camName,
+        username: ARENA.displayName,
         realm: defaults.realm,
-        scene: globals.scenenameParam,
+        scene: ARENA.scenenameParam,
         persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,
         keepalive_interval_ms: 30000,
-        mqtt_host: globals.mqttParam,
-        mqtt_username: globals.username,
-        mqtt_token: globals.mqttToken,
+        mqtt_host: ARENA.mqttParam,
+        mqtt_username: ARENA.username,
+        mqtt_token: ARENA.mqttToken,
         supportDevFolders: defaults.supportDevFolders,
     });
 

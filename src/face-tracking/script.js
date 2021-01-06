@@ -1,3 +1,5 @@
+/* global ARENA */
+
 ARENA.FaceTracker = (function() {
     // ==================================================
     // PRIVATE VARIABLES
@@ -20,7 +22,7 @@ ARENA.FaceTracker = (function() {
 
     let running = false;
 
-    const width = globals.localVideoWidth;
+    const width = ARENA.localVideoWidth;
     const height = Math.ceil((window.screen.height / window.screen.width) * width);
 
     const targetFps = 30;
@@ -166,7 +168,7 @@ ARENA.FaceTracker = (function() {
         const trans = pose.translation;
 
         const faceJSON = {};
-        faceJSON['object_id'] = 'face_' + globals.idTag;
+        faceJSON['object_id'] = 'face_' + ARENA.idTag;
 
         faceJSON['hasFace'] = hasFace;
 
@@ -288,7 +290,7 @@ ARENA.FaceTracker = (function() {
                         if (msg.features && msg.pose) {
                             const faceJSON = createFaceJSON(valid, msg.features, msg.pose);
                             if (faceJSON != prevJSON) {
-                                publish(globals.outputTopic + globals.camName + '/face', faceJSON);
+                                publish(ARENA.outputTopic + ARENA.camName + '/face', faceJSON);
                                 prevJSON = faceJSON;
                             }
                         }

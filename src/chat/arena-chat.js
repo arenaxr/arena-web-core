@@ -1,3 +1,5 @@
+/* global ARENA */
+
 import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';
 
@@ -875,7 +877,7 @@ export default class ARENAChat {
 
         let direction = new THREE.Vector3();
         landmarkObj.object3D.getWorldDirection(direction);
-        let distance = globals.landmarkTeleportDistance ? globals.landmarkTeleportDistance : 3.5; // distance to put you
+        let distance = ARENA.landmarkTeleportDistance ? ARENA.landmarkTeleportDistance : 3.5; // distance to put you
         let pos = new THREE.Vector3();
         landmarkObj.object3D.getWorldPosition(pos);
         myCamera.object3D.position.copy(pos);
@@ -940,7 +942,7 @@ export default class ARENAChat {
 
         let direction = new THREE.Vector3();
         toCam.object3D.getWorldDirection(direction);
-        let distance = globals.userTeleportDistance ? globals.userTeleportDistance : 2; // distance to put you
+        let distance = ARENA.userTeleportDistance ? ARENA.userTeleportDistance : 2; // distance to put you
         myCamera.object3D.position.copy(toCam.object3D.position.clone()).add(direction.multiplyScalar(-distance));
         myCamera.object3D.position.y = toCam.object3D.position.y;
         // rotate our camera to face the other user

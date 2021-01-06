@@ -87,7 +87,7 @@ function getUrlParams(parameter, defaultValue) {
  * @param {object} msg msg to debug
  */
 function debug(msg) {
-    publish(globals.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
+    publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
 /**

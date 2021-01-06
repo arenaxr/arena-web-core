@@ -1,6 +1,8 @@
+/* global AFRAME, THREE, ARENA */
+
 // 'use strict';
 
-ARENA.mqttClient = new Paho.Client(globals.mqttParam, 'webClient-' + globals.timeID);
+ARENA.mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
 ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
 ARENA.mqttClient.onMessageArrived = onMessageArrived;
@@ -18,10 +20,10 @@ function onConnected(reconnect, uri) {
         // current state. Instead, reconnection should naturally allow messages to continue.
         // need to resubscribe however, to keep receiving messages
         if (!ARENA.JitsiAPI.ready()) {
-            ARENA.JitsiAPI = ARENAJitsiAPI(globals.jitsiServer);
+            ARENA.JitsiAPI = ARENAJitsiAPI(ARENA.jitsiServer);
             console.warn(`ARENA Jitsi restarting...`);
         }
-        ARENA.mqttClient.subscribe(globals.renderTopic);
+        ARENA.mqttClient.subscribe(ARENA.renderTopic);
         console.warn(`MQTT scene reconnected to ${uri}`);
         return; // do not continue!
     }
@@ -30,7 +32,7 @@ function onConnected(reconnect, uri) {
     console.log(`MQTT scene init user state, connected to ${uri}`);
 
     // Add scene objects to dictionary of scene objects
-    const sceneObjects = globals.sceneObjects;
+    const sceneObjects = ARENA.sceneObjects;
 
     sceneObjects.cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     sceneObjects.cameraSpinner = document.getElementById('CameraSpinner'); // this is an <a-entity>
@@ -38,7 +40,7 @@ function onConnected(reconnect, uri) {
     sceneObjects.scene = document.querySelector('a-scene');
 
     sceneObjects.myCamera = document.getElementById('my-camera');
-    sceneObjects[globals.camName] = sceneObjects.myCamera;
+    sceneObjects[ARENA.camName] = sceneObjects.myCamera;
 
     // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -46,7 +48,7 @@ function onConnected(reconnect, uri) {
     const they = sceneObjects.myCamera.object3D.position.y;
     const thez = sceneObjects.myCamera.object3D.position.z;
     const myMsg = {
-        object_id: globals.camName,
+        object_id: ARENA.camName,
         action: 'create',
         data: {
             object_type: 'camera',
@@ -65,16 +67,16 @@ function onConnected(reconnect, uri) {
         },
     };
 
-    publish(globals.outputTopic + globals.camName, myMsg);
+    publish(ARENA.outputTopic + ARENA.camName, myMsg);
 
-    sceneObjects.myCamera.setAttribute('position', globals.startCoords);
+    sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
     sceneObjects.myCamera.addEventListener('vioChanged', (e) => {
         // console.log("vioChanged", e.detail);
 
-        if (globals.fixedCamera !== '') {
+        if (ARENA.fixedCamera !== '') {
             const msg = {
-                object_id: globals.camName,
+                object_id: ARENA.camName,
                 action: 'create',
                 type: 'object',
                 data: {
@@ -93,15 +95,15 @@ function onConnected(reconnect, uri) {
                     color: color,
                 },
             };
-            publish(globals.vioTopic + globals.camName, msg); // extra timestamp info at end for debugging
+            publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
         }
     });
 
     sceneObjects.myCamera.addEventListener('poseChanged', (e) => {
         const msg = {
-            object_id: globals.camName,
+            object_id: ARENA.camName,
             hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.running(),
-            displayName: globals.displayName,
+            displayName: ARENA.displayName,
             action: 'create',
             type: 'object',
             data: {
@@ -127,7 +129,7 @@ function onConnected(reconnect, uri) {
         }
 
         if (msg !== oldMsg) { // suppress duplicates
-            publish(globals.outputTopic + globals.camName, msg); // extra timestamp info at end for debugging
+            publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
             oldMsg = msg;
         }
     });
@@ -136,7 +138,7 @@ function onConnected(reconnect, uri) {
     if (viveLeftHand) {
         viveLeftHand.addEventListener('viveChanged', (e) => {
             const msg = {
-                object_id: globals.viveLName,
+                object_id: ARENA.viveLName,
                 action: 'update',
                 type: 'object',
                 data: {
@@ -157,7 +159,7 @@ function onConnected(reconnect, uri) {
             };
 
             // rate limiting is handled in vive-pose-listener
-            publish(globals.outputTopic + globals.viveLName, msg);
+            publish(ARENA.outputTopic + ARENA.viveLName, msg);
         });
     }
     const viveRightHand = document.getElementById('vive-rightHand');
@@ -165,7 +167,7 @@ function onConnected(reconnect, uri) {
     if (viveRightHand) {
         viveRightHand.addEventListener('viveChanged', (e) => {
             const msg = {
-                object_id: globals.viveRName, // e.g. viveRight_9240_X or viveRight_eric_eric
+                object_id: ARENA.viveRName, // e.g. viveRight_9240_X or viveRight_eric_eric
                 action: 'update',
                 type: 'object',
                 data: {
@@ -185,7 +187,7 @@ function onConnected(reconnect, uri) {
                 },
             };
             // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric
-            publish(globals.outputTopic + globals.viveRName, msg);
+            publish(ARENA.outputTopic + ARENA.viveRName, msg);
         });
     }
 
@@ -193,7 +195,7 @@ function onConnected(reconnect, uri) {
     loadArena();
 
     // start listening for MQTT messages
-    ARENA.mqttClient.subscribe(globals.renderTopic);
+    ARENA.mqttClient.subscribe(ARENA.renderTopic);
 }
 
 /**
@@ -306,7 +308,7 @@ let progMsgs = {};
  * @param {String} jsonMessage
  */
 function _onMessageArrived(message, jsonMessage) {
-    const sceneObjects = globals.sceneObjects;
+    const sceneObjects = ARENA.sceneObjects;
     let theMessage = {};
     if (message) {
         if (!isJson(message.payloadString)) {
@@ -387,14 +389,14 @@ function _onMessageArrived(message, jsonMessage) {
         const name = theMessage.object_id;
         delete theMessage.object_id;
 
-        if (name === globals.camName) {
+        if (name === ARENA.camName) {
             // check if it is a command for the local camera
             if (theMessage.type === 'camera-override') {
                 if (theMessage.data.object_type !== 'camera') { // object_id of was camera given; should be a camera
                     console.error('Camera override: object_type must be camera.');
                     return;
                 }
-                const myCamera=globals.sceneObjects.myCamera;
+                const myCamera=ARENA.sceneObjects.myCamera;
                 if (!myCamera) {
                     console.error('Camera override: local camera object does not exist! (create camera before)');
                     return;
@@ -411,14 +413,14 @@ function _onMessageArrived(message, jsonMessage) {
                     console.error('Camera look-at: object_type must be camera.');
                     return;
                 }
-                const myCamera=globals.sceneObjects.myCamera;
+                const myCamera=ARENA.sceneObjects.myCamera;
                 if (!myCamera) {
                     console.error('Camera look-at: local camera object does not exist! (create camera before)');
                     return;
                 }
                 let target = theMessage.data.target;
                 if (!target.hasOwnProperty('x')) { // check if an object id was given
-                    const targetObj = globals.sceneObjects[target];
+                    const targetObj = ARENA.sceneObjects[target];
                     if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
                     else {
                         console.error('Camera look-at: target not found.');
@@ -617,10 +619,10 @@ function _onMessageArrived(message, jsonMessage) {
                     break; // other-person has no jitsi stream ... yet
                 }
 
-                const camPos = globals.sceneObjects.myCamera.object3D.position;
+                const camPos = ARENA.sceneObjects.myCamera.object3D.position;
                 const entityPos = entityEl.object3D.position;
                 const distance = camPos.distanceTo(entityPos);
-                globals.maxAVDist = globals.maxAVDist ? globals.maxAVDist : 20;
+                ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
 
                 /* Handle Jitsi Video */
                 const videoID = `video${theMessage.jitsiId}`;
@@ -630,14 +632,14 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.videoTrack = videoTrack;
 
                     // frustrum culling for WebRTC streams
-                    const cam = globals.sceneObjects.myCamera.sceneEl.camera;
+                    const cam = ARENA.sceneObjects.myCamera.sceneEl.camera;
                     const frustum = new THREE.Frustum();
                     frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
                         cam.matrixWorldInverse));
                     const inFieldOfView = frustum.containsPoint(entityPos);
 
                     // check if A/V cut off distance has been reached
-                    if (!inFieldOfView || distance > globals.maxAVDist) {
+                    if (!inFieldOfView || distance > ARENA.maxAVDist) {
                         if (entityEl.videoTrack) {
                             entityEl.videoTrack.enabled = false;
                         }// pause WebRTC video stream
@@ -682,7 +684,7 @@ function _onMessageArrived(message, jsonMessage) {
                     entityEl.audioTrack = audioTrack.track;
 
                     // check if A/V cut off distance has been reached
-                    if (distance > globals.maxAVDist) {
+                    if (distance > ARENA.maxAVDist) {
                         if (entityEl.audioTrack) {
                             entityEl.audioTrack.enabled = false;
                         }// pause WebRTC audio stream
@@ -697,13 +699,13 @@ function _onMessageArrived(message, jsonMessage) {
                         const audioStream = new MediaStream();
                         audioStream.addTrack(entityEl.audioTrack);
 
-                        const sceneEl = globals.sceneObjects.scene;
+                        const sceneEl = ARENA.sceneObjects.scene;
                         let listener = null;
                         if (sceneEl.audioListener) {
                             listener = sceneEl.audioListener;
                         } else {
                             listener = new THREE.AudioListener();
-                            const camEl = globals.sceneObjects.myCamera.object3D;
+                            const camEl = ARENA.sceneObjects.myCamera.object3D;
                             camEl.add(listener);
                             sceneEl.audioListener = listener;
                         }
@@ -715,17 +717,17 @@ function _onMessageArrived(message, jsonMessage) {
                             entityEl.object3D.add(entityEl.audioSource);
 
                             // set positional audio scene params
-                            if (globals.volume) {
-                                entityEl.audioSource.setVolume(globals.volume);
+                            if (ARENA.volume) {
+                                entityEl.audioSource.setVolume(ARENA.volume);
                             }
-                            if (globals.refDist) { // L-R panning
-                                entityEl.audioSource.setRefDistance(globals.refDist);
+                            if (ARENA.refDist) { // L-R panning
+                                entityEl.audioSource.setRefDistance(ARENA.refDist);
                             }
-                            if (globals.rolloffFact) {
-                                entityEl.audioSource.setRolloffFactor(globals.rolloffFact);
+                            if (ARENA.rolloffFact) {
+                                entityEl.audioSource.setRolloffFactor(ARENA.rolloffFact);
                             }
-                            if (globals.distModel) {
-                                entityEl.audioSource.setDistanceModel(globals.distModel);
+                            if (ARENA.distModel) {
+                                entityEl.audioSource.setDistanceModel(ARENA.distModel);
                             }
                         } else {
                             entityEl.audioSource.setMediaStreamSource(audioStream);
@@ -884,13 +886,13 @@ function _onMessageArrived(message, jsonMessage) {
         switch (theMessage.type) { // "object", "rig"
         case 'object': {
             // our own camera/controllers: bail, this message is meant for all other viewers
-            if (name === globals.camName) {
+            if (name === ARENA.camName) {
                 return;
             }
-            if (name === globals.viveLName) {
+            if (name === ARENA.viveLName) {
                 return;
             }
-            if (name === globals.viveRName) {
+            if (name === ARENA.viveRName) {
                 return;
             }
             /* just setAttribute() - data can contain multiple attribute-value pairs

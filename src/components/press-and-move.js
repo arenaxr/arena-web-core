@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Support user camera movement with the mouse.
@@ -13,7 +13,7 @@ AFRAME.registerComponent('press-and-move', {
         this.drag = false;
         this.longTouch = false;
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
 
         const self = this;
         window.addEventListener('touchstart', function(evt) {
@@ -40,15 +40,15 @@ AFRAME.registerComponent('press-and-move', {
         if (this.longTouch) {
             this.timer = null;
             if (!this.drag) {
-                const eulerRot = globals.sceneObjects.myCamera.getAttribute('rotation');
+                const eulerRot = ARENA.sceneObjects.myCamera.getAttribute('rotation');
                 const dx = this.data.speed * (dt / 1000) * Math.cos(eulerRot.y * Math.PI / 180);
                 const dy = this.data.speed * (dt / 1000) * Math.sin(eulerRot.y * Math.PI / 180);
                 const dz = this.data.speed * (dt / 1000) * Math.sin(eulerRot.x * Math.PI / 180);
-                const newPosition = globals.sceneObjects.myCamera.getAttribute('position');
+                const newPosition = ARENA.sceneObjects.myCamera.getAttribute('position');
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
-                newPosition.y += globals.flying ? dz : 0;
-                globals.sceneObjects.myCamera.setAttribute('position', newPosition);
+                newPosition.y += ARENA.flying ? dz : 0;
+                ARENA.sceneObjects.myCamera.setAttribute('position', newPosition);
             }
         }
     }),

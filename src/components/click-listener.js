@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Listen for clicks, call defined function on event evt
@@ -10,7 +10,7 @@ AFRAME.registerComponent('click-listener', {
         const self = this;
 
         this.el.addEventListener('mousedown', function(evt) {
-            const clickPos = vec3ToObject(globals.newPosition);
+            const clickPos = vec3ToObject(ARENA.newPosition);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -22,19 +22,19 @@ AFRAME.registerComponent('click-listener', {
                     data: {
                         clickPos: clickPos,
                         position: coordsData,
-                        source: globals.camName,
+                        source: ARENA.camName,
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(globals.outputTopic + this.id, thisMsg);
+                    publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                // console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', globals.camName);
+                // console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', ARENA.camName);
             }
         });
 
         // console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
-            const clickPos = vec3ToObject(globals.newPosition);
+            const clickPos = vec3ToObject(ARENA.newPosition);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -46,18 +46,18 @@ AFRAME.registerComponent('click-listener', {
                     data: {
                         clickPos: clickPos,
                         position: coordsData,
-                        source: globals.camName,
+                        source: ARENA.camName,
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(globals.outputTopic + this.id, thisMsg);
+                    publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                // console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', globals.camName);
+                // console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', ARENA.camName);
             }
         });
 
         this.el.addEventListener('mouseenter', function(evt) {
-            const clickPos = vec3ToObject(globals.newPosition);
+            const clickPos = vec3ToObject(ARENA.newPosition);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -69,18 +69,18 @@ AFRAME.registerComponent('click-listener', {
                     data: {
                         clickPos: clickPos,
                         position: coordsData,
-                        source: globals.camName,
+                        source: ARENA.camName,
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(globals.outputTopic + this.id, thisMsg);
+                    publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                window.globals.lastMouseTarget = this.id;
+                window.ARENA.lastMouseTarget = this.id;
             }
         });
 
         this.el.addEventListener('mouseleave', function(evt) {
-            const clickPos = vec3ToObject(globals.newPosition);
+            const clickPos = vec3ToObject(ARENA.newPosition);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -92,13 +92,13 @@ AFRAME.registerComponent('click-listener', {
                     data: {
                         clickPos: clickPos,
                         position: coordsData,
-                        source: globals.camName,
+                        source: ARENA.camName,
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(globals.outputTopic + this.id, thisMsg);
+                    publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                window.globals.lastMouseTarget = undefined;
+                window.ARENA.lastMouseTarget = undefined;
             }
         });
     },

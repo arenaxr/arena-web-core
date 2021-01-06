@@ -1,4 +1,4 @@
-/* global $, JitsiMeetJS */
+/* global AFRAME, ARENA, JitsiMeetJS */
 
 const ARENAJitsiAPI = async function(jitsiServer) {
     // ==================================================
@@ -6,7 +6,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     // ==================================================
 
     // we use the scene name as the jitsi room name
-    const arenaConferenceName = globals.scenenameParam.toLowerCase();
+    const arenaConferenceName = ARENA.scenenameParam.toLowerCase();
 
     const connectOptions = {
         hosts: {
@@ -133,7 +133,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     function updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
 
-        let screenShareEl = globals.sceneObjects[screenShareId];
+        let screenShareEl = ARENA.sceneObjects[screenShareId];
         if (!screenShareEl) {
             // create if doesnt exist
             screenShareEl = document.createElement('a-entity');
@@ -143,8 +143,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             screenShareEl.setAttribute('scale', '8 6 0.01');
             screenShareEl.setAttribute('position', '0 3.1 -3');
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
-            globals.sceneObjects.scene.appendChild(screenShareEl);
-            globals.sceneObjects[screenShareId] = screenShareEl;
+            ARENA.sceneObjects.scene.appendChild(screenShareEl);
+            ARENA.sceneObjects[screenShareId] = screenShareEl;
         }
         screenShareEl.setAttribute('muted', 'false');
         screenShareEl.setAttribute('autoplay', 'true');
@@ -390,12 +390,12 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         );
 
         // set the ARENA user's name with a "unique" ARENA tag
-        conference.setDisplayName(globals.displayName + ` (${ARENA_USER}_${globals.idTag})`);
+        conference.setDisplayName(ARENA.displayName + ` (${ARENA_USER}_${ARENA.idTag})`);
 
         // set local properties
-        conference.setLocalParticipantProperty('arenaId', globals.idTag);
-        conference.setLocalParticipantProperty('arenaDisplayName', globals.displayName);
-        conference.setLocalParticipantProperty('arenaCameraName', globals.camName);
+        conference.setLocalParticipantProperty('arenaId', ARENA.idTag);
+        conference.setLocalParticipantProperty('arenaDisplayName', ARENA.displayName);
+        conference.setLocalParticipantProperty('arenaCameraName', ARENA.camName);
 
         conference.on(
             JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
@@ -552,14 +552,14 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                 jitsiVideoElem.style.left = '15px';
                 jitsiVideoElem.style.borderRadius = '10px';
                 jitsiVideoElem.style.opacity = 0.95; // slightly see through
-                jitsiVideoElem.setAttribute('width', globals.localVideoWidth);
+                jitsiVideoElem.setAttribute('width', ARENA.localVideoWidth);
 
                 /**
                  * set video element size
                  */
                 function setupCornerVideo() {
                     const videoHeight = jitsiVideoElem.videoHeight /
-                                            (jitsiVideoElem.videoWidth / globals.localVideoWidth);
+                                            (jitsiVideoElem.videoWidth / ARENA.localVideoWidth);
                     jitsiVideoElem.setAttribute('height', videoHeight);
                 }
 
@@ -569,7 +569,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
                 window.addEventListener('orientationchange', () => {
                     // mobile only
-                    globals.localVideoWidth = Number(window.innerWidth / 5);
+                    ARENA.localVideoWidth = Number(window.innerWidth / 5);
                     this.stopVideo();
                     setupCornerVideo();
                     this.startVideo();
@@ -712,7 +712,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         },
 
         getUserId: function(participantJitsiId) {
-            if (jitsiId == participantJitsiId) return globals.camName;
+            if (jitsiId == participantJitsiId) return ARENA.camName;
             // our arena id (camera name) is the jitsi display name
             return conference.getParticipantById(participantJitsiId)._displayName;
         },

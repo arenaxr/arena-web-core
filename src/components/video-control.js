@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Adds a video to an entity and controls its playback.
@@ -55,7 +55,7 @@ AFRAME.registerComponent('video-control', {
         thevideo.pause(); // start the video as paused initially or else audio will play when video is not shown!
 
         this.el.addEventListener('mousedown', function(evt) {
-            if (evt.detail.clicker == globals.camName || anyoneClicks && evt.detail.clicker && (evt.detail.clicker != globals.camName)) {
+            if (evt.detail.clicker == ARENA.camName || anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName)) {
                 const theSource = thePlayer.getAttribute('arenaVideo');
                 const theVideoId = thePlayer.getAttribute('videoId');
                 const theFrameId = thePlayer.getAttribute('frameId');

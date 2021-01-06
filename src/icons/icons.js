@@ -1,3 +1,5 @@
+/* global AFRAME, ARENA */
+
 const ICON_BTN_CLASS = 'arena-icon-button';
 
 /**
@@ -31,8 +33,8 @@ function createIconButton(initialImage, tooltip, onClick) {
  * @param {string} displayName display name of user's camera
  */
 function publishHeadText(displayName) {
-    publish('realm/s/' + globals.scenenameParam + '/head-text_' + globals.camName, {
-        'object_id': globals.camName,
+    publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+        'object_id': ARENA.camName,
         'action': 'create',
         'type': 'object',
         'displayName': displayName,
@@ -128,23 +130,23 @@ function setupIcons() {
         if (speedState == 0) { // medium
             speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/speed-medium.png\')';
             if (!AFRAME.utils.device.isMobile()) {
-                globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 30});
+                ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 30});
             } else {
-                globals.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 5.0});
+                ARENA.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 5.0});
             }
         } else if (speedState == 1) { // fast
             speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/speed-fast.png\')';
             if (!AFRAME.utils.device.isMobile()) {
-                globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 60});
+                ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 60});
             } else {
-                globals.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 10.0});
+                ARENA.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 10.0});
             }
         } else if (speedState == 2) { // slow
             speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/speed-slow.png\')';
             if (!AFRAME.utils.device.isMobile()) {
-                globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 15});
+                ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 15});
             } else {
-                globals.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 2.5});
+                ARENA.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 2.5});
             }
         }
     });
@@ -154,18 +156,18 @@ function setupIcons() {
     /**
      * Create flying on/off button
      */
-    globals.flying = false;
+    ARENA.flying = false;
     const flyingBtn = createIconButton('flying-off', 'Flying on/off.', () => {
-        globals.flying = !globals.flying;
-        if (globals.flying) { // toggled
+        ARENA.flying = !ARENA.flying;
+        if (ARENA.flying) { // toggled
             flyingBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/flying-on.png\')';
         } else {
-            const groundedPos = globals.sceneObjects.myCamera.getAttribute('position');
-            groundedPos.y = parseFloat(globals.startCoords.split(' ')[1]);
-            globals.sceneObjects.myCamera.setAttribute('position', groundedPos);
+            const groundedPos = ARENA.sceneObjects.myCamera.getAttribute('position');
+            groundedPos.y = parseFloat(ARENA.startCoords.split(' ')[1]);
+            ARENA.sceneObjects.myCamera.setAttribute('position', groundedPos);
             flyingBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/flying-off.png\')';
         }
-        globals.sceneObjects.myCamera.setAttribute('wasd-controls', {'fly': globals.flying});
+        ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'fly': ARENA.flying});
     });
     flyingBtn.style.display = 'none';
     settingsButtons.push(flyingBtn);
@@ -176,7 +178,7 @@ function setupIcons() {
     const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window.', () => {
         if (!ARENA.JitsiAPI) return;
 
-        const defaultScreenObj = globals.screenshare ? globals.screenshare : 'screenshare';
+        const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
         swal({
             title: 'You clicked on screen share!',
             text: `In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!`,
@@ -205,10 +207,10 @@ function setupIcons() {
                             }
                             const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
-                            screenshareWindow.scene = globals.scenenameParam;
+                            screenshareWindow.scene = ARENA.scenenameParam;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
-                            screenshareWindow.displayName = globals.displayName;
-                            screenshareWindow.camName = globals.camName;
+                            screenshareWindow.displayName = ARENA.displayName;
+                            screenshareWindow.camName = ARENA.camName;
                             screenshareWindow.objectIds = objectIds.join();
                         });
                 }
@@ -368,11 +370,11 @@ function setupIcons() {
         // if name has at least one alpha char
         if (re.test(usernameInput.value)) {
             // remove extra spaces
-            globals.displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
-            localStorage.setItem('display_name', globals.displayName); // save for next use
-            publishHeadText(globals.displayName); // push to other users' views
+            ARENA.displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
+            localStorage.setItem('display_name', ARENA.displayName); // save for next use
+            publishHeadText(ARENA.displayName); // push to other users' views
             const newSettingsEvent = new CustomEvent('newsettings', { // push to local listeners
-                detail: {name: globals.displayName},
+                detail: {name: ARENA.displayName},
             });
             window.dispatchEvent(newSettingsEvent);
         }

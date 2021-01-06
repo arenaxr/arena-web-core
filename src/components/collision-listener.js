@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Listen for collisions, callback on event.
@@ -32,7 +32,7 @@ AFRAME.registerComponent('collision-listener', {
                     source: collider,
                 },
             };
-            publish(globals.outputTopic + this.id, thisMsg);
+            publish(ARENA.outputTopic + this.id, thisMsg);
         });
     },
 });

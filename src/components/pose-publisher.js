@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Tracking camera movement in real time. Publishes camera pose
@@ -7,7 +7,7 @@
 AFRAME.registerComponent('pose-publisher', {
     init: function() {
         // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
     },
 
     tick: (function(t, dt) {
@@ -23,13 +23,13 @@ AFRAME.registerComponent('pose-publisher', {
             this.lastPose = newPose;
 
             const objName = this.el.id;
-            publish(globals.outputTopic + objName, {
+            publish(ARENA.outputTopic + objName, {
                 object_id: objName,
                 action: 'update',
                 persist: false,
                 type: 'object',
                 data: {
-                    source: globals.camName,
+                    source: ARENA.camName,
                     position: vec3ToObject(newPosition),
                     rotation: quatToObject(newRotation),
                 },

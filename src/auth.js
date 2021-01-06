@@ -1,3 +1,5 @@
+/* global ARENA */
+
 // auth.js
 //
 // Authentication and Authorization for the following ARENA assets:
@@ -11,7 +13,7 @@
 //  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
 //
 // Optional:
-//  <script src="./events.js"></script>  <!-- for window.globals -->
+//  <script src="./events.js"></script>  <!-- for window.ARENA -->
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
@@ -102,32 +104,32 @@ function checkGoogleAuth() {
 function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
     let processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
-    if (typeof globals !== 'undefined') {
-        if (typeof defaults !== 'undefined' && globals.userParam !== defaults.userParam) {
+    if (typeof ARENA !== 'undefined') {
+        if (typeof defaults !== 'undefined' && ARENA.userParam !== defaults.userParam) {
             // userParam set? persist to storage
-            localStorage.setItem('display_name', decodeURI(globals.userParam));
-            processedName = globals.userParam;
+            localStorage.setItem('display_name', decodeURI(ARENA.userParam));
+            processedName = ARENA.userParam;
         }
         if (localStorage.getItem('display_name') === null) {
             // Use auth name to create human-readable name
             localStorage.setItem('display_name', authName);
         }
-        globals.displayName = localStorage.getItem('display_name');
+        ARENA.displayName = localStorage.getItem('display_name');
     }
     if (prefix !== null) {
         processedName = `${prefix}${processedName}`;
     }
-    if (typeof globals !== 'undefined') {
-        globals.userParam = processedName;
+    if (typeof ARENA !== 'undefined') {
+        ARENA.userParam = processedName;
         // replay global id setup from events.js
-        globals.idTag = globals.timeID + '_' + globals.userParam; // e.g. 1234_eric
-        if (globals.fixedCamera !== '') {
-            globals.camName = 'camera_' + globals.fixedCamera + '_' + globals.fixedCamera;
+        ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
+        if (ARENA.fixedCamera !== '') {
+            ARENA.camName = 'camera_' + ARENA.fixedCamera + '_' + ARENA.fixedCamera;
         } else {
-            globals.camName = 'camera_' + globals.idTag; // e.g. camera_1234_eric
+            ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
         }
-        globals.viveLName = 'viveLeft_' + globals.idTag; // e.g. viveLeft_9240_X
-        globals.viveRName = 'viveRight_' + globals.idTag; // e.g. viveRight_9240_X
+        ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
+        ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
     }
     return processedName;
 }
@@ -190,21 +192,21 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             params += `&realm=${defaults.realm}`;
         }
     }
-    if (typeof globals !== 'undefined') {
-        if (globals.scenenameParam) {
-            params += `&scene=${globals.scenenameParam}`;
+    if (typeof ARENA !== 'undefined') {
+        if (ARENA.scenenameParam) {
+            params += `&scene=${ARENA.scenenameParam}`;
         }
-        if (globals.idTag) {
-            params += `&userid=${globals.idTag}`;
+        if (ARENA.idTag) {
+            params += `&userid=${ARENA.idTag}`;
         }
-        if (globals.camName) {
-            params += `&camid=${globals.camName}`;
+        if (ARENA.camName) {
+            params += `&camid=${ARENA.camName}`;
         }
-        if (globals.viveLName) {
-            params += `&ctrlid1=${globals.viveLName}`;
+        if (ARENA.viveLName) {
+            params += `&ctrlid1=${ARENA.viveLName}`;
         }
-        if (globals.viveRName) {
-            params += `&ctrlid2=${globals.viveRName}`;
+        if (ARENA.viveRName) {
+            params += `&ctrlid2=${ARENA.viveRName}`;
         }
     }
     xhr.open('POST', defaults.urlMqttAuth);

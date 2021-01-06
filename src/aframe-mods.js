@@ -1,7 +1,9 @@
-// arena-aframe-mods.js
-//
-// Direct modifications to AFRAME components to improve UX in the ARENA
+/* global AFRAME, ARENA */
 
+/**
+ * Direct modifications to AFRAME components to improve UX in the ARENA
+ *
+ */
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
@@ -93,8 +95,8 @@ AFRAME.registerComponent('look-controls-arrow', {
     },
 
     tick: function(time, delta) {
-        if (!globals || !globals.sceneObjects.myCamera) return;
-        const myCamera = globals.sceneObjects.myCamera;
+        if (!ARENA || !ARENA.sceneObjects.myCamera) return;
+        const myCamera = ARENA.sceneObjects.myCamera;
         const lookControls = myCamera.components['look-controls'];
 
         const keys = keysPressed;

@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 
 /**
@@ -17,14 +17,14 @@ function eventAction(evt, eventName, myThis) {
     };
 
     // publish to MQTT
-    const objName = myThis.id + '_' + globals.idTag;
-    publish(globals.outputTopic + objName, {
+    const objName = myThis.id + '_' + ARENA.idTag;
+    publish(ARENA.outputTopic + objName, {
         object_id: objName,
         action: 'clientEvent',
         type: eventName,
         data: {
             position: coordsData,
-            source: globals.camName,
+            source: ARENA.camName,
         },
     });
 }

@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Tracking Vive controller movement in real time.
@@ -7,7 +7,7 @@
 AFRAME.registerComponent('vive-pose-listener', {
     init: function() {
         // Set up the tick throttling.
-        this.tick = AFRAME.utils.throttleTick(this.tick, globals.updateMillis, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
     },
 
     tick: (function(t, dt) {
