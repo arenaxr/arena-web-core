@@ -19,8 +19,8 @@ It uses a [publish/subscribe system](https://mqtt.org/) to allow users and progr
 ## Documentation
 The main ARENA documentation is here: [https://arena.conix.io/](https://arena.conix.io/).
 
-[Quick Start for users](https://arena.conix.io/content/tutorials/).
-[Quick Start for developers](https://arena.conix.io/content/tutorials/dev-guide.html).
+- [Quick Start for users](https://arena.conix.io/content/tutorials/).
+- [Quick Start for developers](https://arena.conix.io/content/tutorials/dev-guide.html).
 
 ## Installation
 
