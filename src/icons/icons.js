@@ -29,20 +29,6 @@ function createIconButton(initialImage, tooltip, onClick) {
 }
 
 /**
- * Publishes an mqtt message that updates the display name of a user
- * @param {string} displayName display name of user's camera
- */
-function publishHeadText(displayName) {
-    publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
-        'object_id': ARENA.camName,
-        'action': 'create',
-        'type': 'object',
-        'displayName': displayName,
-        'data': {'object_type': 'headtext'},
-    });
-}
-
-/**
  * Sets up various icons for side menu
  */
 function setupIcons() {

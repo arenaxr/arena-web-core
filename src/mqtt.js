@@ -270,11 +270,25 @@ function drawMicrophoneState(entityEl, hasAudio) {
         micIconEl.setAttribute('id', name);
         micIconEl.setAttribute('scale', '0.2 0.2 0.2');
         micIconEl.setAttribute('position', '0 0.3 0.045');
-        micIconEl.setAttribute('src', 'url(images/icons/audio-off.png)');
+        micIconEl.setAttribute('src', 'url(src/icons/images/audio-off.png)');
         entityEl.appendChild(micIconEl);
     } else if (micIconEl && hasAudio) {
         entityEl.removeChild(micIconEl);
     }
+}
+
+/**
+ * Publishes an mqtt message that updates the display name of a user
+ * @param {string} displayName display name of user's camera
+ */
+function publishHeadText(displayName) {
+    publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+        'object_id': ARENA.camName,
+        'action': 'create',
+        'type': 'object',
+        'displayName': displayName,
+        'data': {'object_type': 'headtext'},
+    });
 }
 
 /**
