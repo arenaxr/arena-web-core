@@ -36,6 +36,7 @@
 
     <!-- from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js -->
     <script src="vendor/aframe-spe-particles-component.min.js"></script>
+    <script src="vendor/aframe-particle-system-component.min.js"></script>
 
     <!-- from https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.js -->
     <script src="vendor/webxr-polyfill.js"></script>
@@ -74,8 +75,8 @@
     <!-- our default configs -->
     <script src="conf/defaults.js"></script>
 
+    <script src="arena.js"></script>
     <!-- our camera change and other event listener Components -->
-    <script src="events.js"></script>
     <script src="components/click-listener.js"></script>
     <script src="components/collision-listener.js"></script>
     <script src="components/goto-url.js"></script>
@@ -141,9 +142,6 @@
         <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
         <!-- vive-pose-listener component gets controller pose in real time -->
         <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
-
-        <a-text id="conix_text" value="" position="0 1.3 -1" side="double" anchor="center" scale="0.8 0.8 0.8" color="#FF77FF"></a-text>
-
       </a-entity>
     </a-scene>
 
@@ -160,6 +158,5 @@
     <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="./auth.js"></script>
     <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
-
   </body>
 </html>

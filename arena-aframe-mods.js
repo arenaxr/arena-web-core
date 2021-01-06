@@ -1,8 +1,6 @@
-// arena-aframemods.js
+// arena-aframe-mods.js
 //
-// Direct modifications to AFRAME components to
-// improve UX in the ARENA
-// maybe one day move this to custom AFRAME build?
+// Direct modifications to AFRAME components to improve UX in the ARENA
 
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
