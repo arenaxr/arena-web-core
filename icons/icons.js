@@ -266,7 +266,7 @@ function setupIcons() {
     formDiv.appendChild(authType);
     formDiv.appendChild(document.createElement('br'));
 
-    formDiv.append('ARENA Username: ');
+    formDiv.append('Username: ');
     const authUsername = document.createElement('span');
     formDiv.appendChild(authUsername);
     formDiv.appendChild(document.createElement('br'));

@@ -227,9 +227,11 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
                 var profile = googleUser.getBasicProfile();
                 AUTH.user_fullname = profile.getName();
                 AUTH.user_email = profile.getEmail();
+                break;
             default:
                 AUTH.user_fullname = localStorage.getItem('display_name');
                 AUTH.user_email = 'N/A';
+                break;
             }
 
             // keep payload for later viewing
