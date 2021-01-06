@@ -220,7 +220,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
         } else {
             AUTH.user_type = auth_type;
             // TODO (mwfarb): replace username with deterministic arena-account name
-            AUTH.user_username = encodeURIComponent(mqtt_username);
+            AUTH.user_username = mqtt_username; // encodeURIComponent(mqtt_username);
             switch (auth_type) {
             case 'google':
                 var googleUser = auth2.currentUser.get();
