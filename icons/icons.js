@@ -262,7 +262,13 @@ function setupIcons() {
 
     formDiv.append('Authenticator: ');
     const authType = document.createElement('span');
+    authType.style.textTransform = 'capitalize';
     formDiv.appendChild(authType);
+    formDiv.appendChild(document.createElement('br'));
+
+    formDiv.append('ARENA Username: ');
+    const authUsername = document.createElement('span');
+    formDiv.appendChild(authUsername);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Email: ');
@@ -271,8 +277,8 @@ function setupIcons() {
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Name: ');
-    const authName = document.createElement('span');
-    formDiv.appendChild(authName);
+    const authFullname = document.createElement('span');
+    formDiv.appendChild(authFullname);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.appendChild(document.createElement('br'));
@@ -305,7 +311,8 @@ function setupIcons() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
         authType.innerHTML = auth.type;
-        authName.innerHTML = auth.name;
+        authUsername.innerHTML = auth.username;
+        authFullname.innerHTML = auth.fullname;
         authEmail.innerHTML = auth.email;
     }
 
