@@ -40,7 +40,7 @@ window.onload = function() {
 
 // check if the current user is already signed in
 const authCheck = function(args) {
-    localStorage.removeItem('mqtt_token'); // localStorage deprecated for token
+    localStorage.setItem('request_uri', location.href); // save current in case of login redirect
     AUTH.signInPath = `${args.userRoot}/login`;
     AUTH.signOutPath = `${args.userRoot}/logout`;
     window.addEventListener('load', requestAuthState);
