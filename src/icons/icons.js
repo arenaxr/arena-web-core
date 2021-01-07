@@ -7,7 +7,7 @@ const ICON_BTN_CLASS = 'arena-icon-button';
  * @param {string} initialImage name of initial image to be displayed
  * @param {string} tooltip tip to be displayed on hover
  * @param {function} onClick function that will be run on click
- * @return {object} div that is the parent of the button
+ * @return {Object} div that is the parent of the button
  */
 function createIconButton(initialImage, tooltip, onClick) {
     // Create elements.
@@ -65,7 +65,9 @@ function setupIcons() {
                     videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-on.png\')';
                     avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-off.png\')';
                     ARENA.JitsiAPI.showVideo();
-                    ARENA.FaceTracker.stop();
+                    if (ARENA.FaceTracker.running()) {
+                        ARENA.FaceTracker.stop();
+                    }
                 })
                 .catch((err) => {
                     console.log(err);
@@ -346,6 +348,20 @@ function setupIcons() {
         authType.innerHTML = auth.type;
         authName.innerHTML = auth.name;
         authEmail.innerHTML = auth.email;
+    }
+
+    /**
+     * Publishes an mqtt message that updates the display name of a user
+     * @param {string} displayName display name of user's camera
+     */
+    function publishHeadText(displayName) {
+        publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+            'object_id': ARENA.camName,
+            'action': 'create',
+            'type': 'object',
+            'displayName': displayName,
+            'data': {'object_type': 'headtext'},
+        });
     }
 
     /**

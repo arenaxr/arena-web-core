@@ -32,7 +32,7 @@ window['importScript'] = importScript; // needed if we ourselves are in a module
 
 /**
  * Gets URL parameters as dictionary
- * @return {object} dictionary of URL parameters
+ * @return {Object} dictionary of URL parameters
  */
 function getUrlVars() {
     const vars = {};
@@ -84,7 +84,7 @@ function getUrlParams(parameter, defaultValue) {
 
 /**
  * Publishes debug message to mqtt
- * @param {object} msg msg to debug
+ * @param {Object} msg msg to debug
  */
 function debug(msg) {
     publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
@@ -92,8 +92,8 @@ function debug(msg) {
 
 /**
  * Returns the position of an event's target
- * @param {object} evt event object
- * @return {object} position of target
+ * @param {Object} evt event object
+ * @return {Object} position of target
  */
 function setCoordsData(evt) {
     return {
@@ -105,8 +105,8 @@ function setCoordsData(evt) {
 
 /**
  * Returns where an evt's intersection happened
- * @param {object} evt event object
- * @return {object} event intersection as object
+ * @param {Object} evt event object
+ * @return {Object} event intersection as object
  */
 function setClickData(evt) {
     if (evt.detail.intersection) {
@@ -127,8 +127,8 @@ function setClickData(evt) {
 
 /**
  * Turns 3 elem vector to object
- * @param {object} c 3 elem vector
- * @return {object} 3 elem vector as object
+ * @param {Object} c 3 elem vector
+ * @return {Object} 3 elem vector as object
  */
 function vec3ToObject(vec) {
     return {
@@ -140,8 +140,8 @@ function vec3ToObject(vec) {
 
 /**
  * Turns quaternion to object
- * @param {object} c quaternion
- * @return {object} quaternion as object
+ * @param {Object} c quaternion
+ * @return {Object} quaternion as object
  */
 function quatToObject(q) {
     return {
@@ -154,7 +154,7 @@ function quatToObject(q) {
 
 /**
  * Turns position to string
- * @param {object} c position
+ * @param {Object} c position
  * @return {string} position as string
  */
 function coordsToText(c) {
@@ -163,7 +163,7 @@ function coordsToText(c) {
 
 /**
  * Turns quaternions to string
- * @param {object} c rotation in quaternions
+ * @param {Object} c rotation in quaternions
  * @return {string} rotation as string
  */
 function rotToText(c) {

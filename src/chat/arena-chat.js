@@ -329,7 +329,7 @@ export default class ARENAChat {
     /**
      * Called when we connect to a jitsi conference (including reconnects)
      * Defined as a closure to capture 'this'
-     * @param {object} e event object; e.detail contains the callback arguments
+     * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiConnectCallback = (e) => {
         const args = e.detail;
@@ -353,7 +353,7 @@ export default class ARENAChat {
     /**
      * Called when user joins
      * Defined as a closure to capture 'this'
-     * @param {object} e event object; e.detail contains the callback arguments
+     * @param {Object} e event object; e.detail contains the callback arguments
      */
     userJoinCallback = (e) => {
         if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
@@ -376,7 +376,7 @@ export default class ARENAChat {
     /**
      * Called when a user screenshares
      * Defined as a closure to capture 'this'
-     * @param {object} e event object; e.detail contains the callback arguments
+     * @param {Object} e event object; e.detail contains the callback arguments
      */
     screenshareCallback = (e) => {
         if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
@@ -399,7 +399,7 @@ export default class ARENAChat {
     /**
      * Called when user leaves
      * Defined as a closure to capture 'this'
-     * @param {object} e event object; e.detail contains the callback arguments
+     * @param {Object} e event object; e.detail contains the callback arguments
      */
     userLeftCallback = (e) => {
         if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events

@@ -67,7 +67,7 @@ class ARENAEventEmitter {
      *  src (see {userJoinCallback})
      *
      * @param {string} eventName name of the event
-     * @param {object} detail custom event properties
+     * @param {Object} detail custom event properties
      * @return {undefined}
      */
     emit(eventName, detail) {
