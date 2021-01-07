@@ -1,25 +1,20 @@
+/**
+ * @fileoverview Main ARENA Object
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 /* global AFRAME, THREE */
 
-/**
- * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
- * @return {string} the scene name from URL
- */
-function getSceneName() {
-    let path = window.location.pathname.substring(1);
-    if (defaults.supportDevFolders && path.length > 0) {
-        path = path.replace(path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0], '');
-    }
-    if (path === '' || path === 'index.html') {
-        return getUrlParam('scene', defaults.scenenameParam);
-    }
-    try {
-        return path.match(/^[^\/]+(\/[^\/]+)?/g)[0];
-    } catch (e) {
-        return getUrlParam('scene', defaults.scenenameParam);
-    }
-};
+import '/utils.js'; 
+import '/mqtt.js'; 
 
-window.ARENA = {
+/**
+ * ARENA object
+ */
+ window.ARENA = {
     // arena events target
     events: new ARENAEventEmitter(),
     timeID: new Date().getTime() % 10000,
@@ -414,3 +409,5 @@ window.addEventListener('onauth', function(e) {
 
     setupIcons();
 });
+
+import '/components/index.js' // load additional aframe components
