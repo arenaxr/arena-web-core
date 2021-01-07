@@ -7,9 +7,9 @@ window.addEventListener('enter-vr', function(e) {
         if (isWebXRViewer) {
             const base64script = document.createElement('script');
             base64script.onload = async () => {
-                await importScript('/apriltag/script.js');
+                await importScript('./src/apriltag/script.js');
             };
-            base64script.src = '/apriltag/base64_binary.js';
+            base64script.src = './src/apriltag/base64_binary.js';
             document.head.appendChild(base64script);
 
             // handle tap events
