@@ -427,10 +427,3 @@ ARENA.FaceTracker = (function() {
         },
     };
 })();
-
-// initialize face tracking code if not on mobile
-if (!AFRAME.utils.device.isMobile()) {
-    const displayBbox = false;
-    const flipped = false;
-    ARENA.FaceTracker.init(displayBbox, flipped);
-}

@@ -7,8 +7,6 @@ ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
 ARENA.mqttClient.onMessageArrived = onMessageArrived;
 
-let oldMsg = '';
-
 /**
  * MQTT onConnected callback
  * @param {Boolean} reconnect is a reconnect
@@ -40,101 +38,10 @@ function onConnected(reconnect, uri) {
     sceneObjects.myCamera = document.getElementById('my-camera');
     sceneObjects[ARENA.camName] = sceneObjects.myCamera;
 
-    // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-    const thex = sceneObjects.myCamera.object3D.position.x;
-    const they = sceneObjects.myCamera.object3D.position.y;
-    const thez = sceneObjects.myCamera.object3D.position.z;
-    const myMsg = {
-        object_id: ARENA.camName,
-        action: 'create',
-        data: {
-            object_type: 'camera',
-            position: {
-                x: thex,
-                y: they,
-                z: thez,
-            },
-            rotation: {
-                x: 0,
-                y: 0,
-                z: 0,
-                w: 0,
-            },
-            color: color,
-        },
-    };
-
-    publish(ARENA.outputTopic + ARENA.camName, myMsg);
-
+    sceneObjects.myCamera.setAttribute('arena-camera', 'enabled', true);
+    sceneObjects.myCamera.setAttribute('arena-camera', 'color', color);
     sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
-
-    sceneObjects.myCamera.addEventListener('vioChanged', (e) => {
-        // console.log("vioChanged", e.detail);
-
-        if (ARENA.fixedCamera !== '') {
-            const msg = {
-                object_id: ARENA.camName,
-                action: 'create',
-                type: 'object',
-                data: {
-                    object_type: 'camera',
-                    position: {
-                        x: parseFloat(e.detail.x.toFixed(3)),
-                        y: parseFloat(e.detail.y.toFixed(3)),
-                        z: parseFloat(e.detail.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(e.detail._x.toFixed(3)),
-                        y: parseFloat(e.detail._y.toFixed(3)),
-                        z: parseFloat(e.detail._z.toFixed(3)),
-                        w: parseFloat(e.detail._w.toFixed(3)),
-                    },
-                    color: color,
-                },
-            };
-            publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
-        }
-    });
-
-    sceneObjects.myCamera.addEventListener('poseChanged', (e) => {
-        const msg = {
-            object_id: ARENA.camName,
-            displayName: ARENA.displayName,
-            action: 'create',
-            type: 'object',
-            data: {
-                object_type: 'camera',
-                position: {
-                    x: parseFloat(e.detail.x.toFixed(3)),
-                    y: parseFloat(e.detail.y.toFixed(3)),
-                    z: parseFloat(e.detail.z.toFixed(3)),
-                },
-                rotation: {
-                    x: parseFloat(e.detail._x.toFixed(3)),
-                    y: parseFloat(e.detail._y.toFixed(3)),
-                    z: parseFloat(e.detail._z.toFixed(3)),
-                    w: parseFloat(e.detail._w.toFixed(3)),
-                },
-                color: color,
-            },
-        };
-
-        if (ARENA.JitsiAPI) {
-            msg.jitsiId = ARENA.JitsiAPI.getJitsiId();
-            msg.hasAudio = ARENA.JitsiAPI.hasAudio();
-            msg.hasVideo = ARENA.JitsiAPI.hasVideo();
-        }
-
-        if (ARENA.FaceTracker) {
-            msg.hasAvatar = ARENA.FaceTracker.running();
-        }
-
-        if (msg !== oldMsg) { // suppress duplicates
-            publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
-            oldMsg = msg;
-        }
-    });
 
     const viveLeftHand = document.getElementById('vive-leftHand');
     if (viveLeftHand) {
@@ -484,7 +391,7 @@ function _onMessageArrived(message, jsonMessage) {
                 sceneObjects[name] = entityEl;
             } else if (type === 'camera') {
                 entityEl.setAttribute('id', name); // e.g. camera_1234_er1k
-                entityEl.setAttribute('arena-camera', 'color', color);
+                entityEl.setAttribute('arena-user', 'color', color);
                 sceneEl.appendChild(entityEl);
                 sceneObjects[name] = entityEl;
             } else {
@@ -537,12 +444,12 @@ function _onMessageArrived(message, jsonMessage) {
         case 'camera':
             // decide if we need draw or delete videoCube around head
             if (theMessage.hasOwnProperty('jitsiId')) {
-                entityEl.setAttribute('arena-camera', 'jitsiId', theMessage.jitsiId);
-                entityEl.setAttribute('arena-camera', 'hasVideo', theMessage.hasVideo);
-                entityEl.setAttribute('arena-camera', 'hasAudio', theMessage.hasAudio);
+                entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
+                entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
+                entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
             }
             if (theMessage.hasOwnProperty('displayName')) {
-                entityEl.setAttribute('arena-camera', 'displayName', theMessage.displayName); // update head text
+                entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text
             }
             break;
 

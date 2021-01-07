@@ -152,12 +152,6 @@ if (ARENA.fixedCamera !== '') {
 ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
 ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
 
-ARENA.newRotation = new THREE.Quaternion();
-ARENA.newPosition = new THREE.Vector3();
-ARENA.vioRotation = new THREE.Quaternion();
-ARENA.vioPosition = new THREE.Vector3();
-ARENA.vioMatrix = new THREE.Matrix4();
-
 /**
  * loads scene objects from specified persistence URL if specified,
  * or ARENA.persistenceUrl if not
@@ -414,6 +408,13 @@ window.addEventListener('onauth', function(e) {
         mqtt_token: ARENA.mqttToken,
         supportDevFolders: defaults.supportDevFolders,
     });
+
+    // initialize face tracking if not on mobile
+    if (!AFRAME.utils.device.isMobile()) {
+        const displayBbox = false;
+        const flipped = false;
+        ARENA.FaceTracker.init(displayBbox, flipped);
+    }
 
     setupIcons();
 });
