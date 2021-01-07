@@ -5,8 +5,10 @@
  *
  */
 AFRAME.registerComponent('arena-camera', {
-    enabled: {type: 'boolean', default: false},
-    color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
+    schema: {
+        enabled: {type: 'boolean', default: false},
+        color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
+    },
 
     init: function() {
         this.rotation = new THREE.Quaternion();
@@ -23,7 +25,7 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
 
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
     },
 
     publishPose() {
@@ -114,7 +116,7 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position every 1 sec
-        if (this.lastPose !== newPose || this.heartBeatCounter % 1000 == 0) {
+        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / ARENA.updateMillis) == 0) {
             this.publishPose();
             this.publishVio();
             this.lastPose = newPose;

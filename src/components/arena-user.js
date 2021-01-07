@@ -1,5 +1,9 @@
 /* global AFRAME, ARENA, THREE */
 
+/**
+ * Another user's camera in the ARENA. Handles Jitsi and display name updates.
+ *
+ */
 AFRAME.registerComponent('arena-user', {
     schema: {
         color: {type: 'color', default: 'white'},
@@ -8,6 +12,7 @@ AFRAME.registerComponent('arena-user', {
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
     },
+
     init: function() {
         const data = this.data;
         const el = this.el;
@@ -49,6 +54,7 @@ AFRAME.registerComponent('arena-user', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
+
     drawMicrophone() {
         const el = this.el;
 
@@ -63,6 +69,7 @@ AFRAME.registerComponent('arena-user', {
             el.appendChild(micIconEl);
         }
     },
+
     removeMicrophone() {
         const el = this.el;
 
@@ -72,6 +79,7 @@ AFRAME.registerComponent('arena-user', {
             el.removeChild(micIconEl);
         }
     },
+
     drawVideoCube() {
         const el = this.el;
 
@@ -98,6 +106,7 @@ AFRAME.registerComponent('arena-user', {
 
         this.videoCubeDrawn = true;
     },
+
     removeVideoCube() {
         const el = this.el;
 
@@ -112,6 +121,7 @@ AFRAME.registerComponent('arena-user', {
         }
         this.videoCubeDrawn = false;
     },
+
     aec(listener) {
         // sorta fixes chrome echo bug
         const audioCtx = THREE.AudioContext.getContext();
@@ -130,6 +140,7 @@ AFRAME.registerComponent('arena-user', {
         document.body.addEventListener('touchmove', resume, false);
         document.body.addEventListener('mousemove', resume, false);
     },
+
     update: function(oldData) {
         const data = this.data;
         const el = this.el;
@@ -212,6 +223,7 @@ AFRAME.registerComponent('arena-user', {
             }
         }
     },
+
     tick: function() {
         const el = this.el;
 

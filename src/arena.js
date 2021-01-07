@@ -149,6 +149,7 @@ if (ARENA.fixedCamera !== '') {
     ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
 }
 
+ARENA.avatarName = 'avatar_' + ARENA.idTag;
 ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
 ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
 

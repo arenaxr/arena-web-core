@@ -69,6 +69,7 @@
     <!-- our camera change and other event listener Components -->
     <script src="src/components/arena-camera.js"></script>
     <script src="src/components/arena-user.js"></script>
+    <script src="src/components/arena-vive.js"></script>
     <script src="src/components/click-listener.js"></script>
     <script src="src/components/collision-listener.js"></script>
     <script src="src/components/goto-url.js"></script>
@@ -78,8 +79,6 @@
     <script src="src/components/press-and-move.js"></script>
     <script src="src/components/ttl.js"></script>
     <script src="src/components/video-control.js"></script>
-    <script src="src/components/vive-listener.js"></script>
-    <script src="src/components/vive-pose-listener.js"></script>
 
     <!-- our mqtt.js (main) script -->
     <script src="src/mqtt.js" type="text/javascript"></script>
@@ -132,9 +131,7 @@
           </a-entity>
         </a-entity>
 
-        <!-- vive-listener component gets all controller buttons as events -->
         <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-        <!-- vive-pose-listener component gets controller pose in real time -->
         <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
       </a-entity>
     </a-scene>

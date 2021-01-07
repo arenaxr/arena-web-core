@@ -43,62 +43,19 @@ function onConnected(reconnect, uri) {
     sceneObjects.myCamera.setAttribute('arena-camera', 'color', color);
     sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
-    const viveLeftHand = document.getElementById('vive-leftHand');
-    if (viveLeftHand) {
-        viveLeftHand.addEventListener('viveChanged', (e) => {
-            const msg = {
-                object_id: ARENA.viveLName,
-                action: 'update',
-                type: 'object',
-                data: {
-                    object_type: 'viveLeft',
-                    position: {
-                        x: parseFloat(e.detail.x.toFixed(3)),
-                        y: parseFloat(e.detail.y.toFixed(3)),
-                        z: parseFloat(e.detail.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(e.detail._x.toFixed(3)),
-                        y: parseFloat(e.detail._y.toFixed(3)),
-                        z: parseFloat(e.detail._z.toFixed(3)),
-                        w: parseFloat(e.detail._w.toFixed(3)),
-                    },
-                    color: color,
-                },
-            };
+    const viveLeft = document.getElementById('vive-leftHand');
+    viveLeft.setAttribute('arena-vive', 'enabled', true);
+    viveLeft.setAttribute('arena-vive', 'name', ARENA.viveLName);
+    viveLeft.setAttribute('arena-vive', 'hand', 'left');
+    viveLeft.setAttribute('arena-vive', 'color', color);
+    sceneObjects[ARENA.viveLName] = viveLeft;
 
-            // rate limiting is handled in vive-pose-listener
-            publish(ARENA.outputTopic + ARENA.viveLName, msg);
-        });
-    }
-    const viveRightHand = document.getElementById('vive-rightHand');
-    // realtime position tracking of right hand controller
-    if (viveRightHand) {
-        viveRightHand.addEventListener('viveChanged', (e) => {
-            const msg = {
-                object_id: ARENA.viveRName, // e.g. viveRight_9240_X or viveRight_eric_eric
-                action: 'update',
-                type: 'object',
-                data: {
-                    object_type: 'viveRight',
-                    position: {
-                        x: parseFloat(e.detail.x.toFixed(3)),
-                        y: parseFloat(e.detail.y.toFixed(3)),
-                        z: parseFloat(e.detail.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(e.detail._x.toFixed(3)),
-                        y: parseFloat(e.detail._y.toFixed(3)),
-                        z: parseFloat(e.detail._z.toFixed(3)),
-                        w: parseFloat(e.detail._w.toFixed(3)),
-                    },
-                    color: color,
-                },
-            };
-            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric
-            publish(ARENA.outputTopic + ARENA.viveRName, msg);
-        });
-    }
+    const viveRight = document.getElementById('vive-rightHand');
+    viveRight.setAttribute('arena-vive', 'enabled', true);
+    viveRight.setAttribute('arena-vive', 'name', ARENA.viveRName);
+    viveRight.setAttribute('arena-vive', 'hand', 'right');
+    viveRight.setAttribute('arena-vive', 'color', color);
+    sceneObjects[ARENA.viveRName] = viveRight;
 
     loadScene();
     loadArena();
@@ -550,11 +507,6 @@ function _onMessageArrived(message, jsonMessage) {
         }
 
         // what remains are attributes for special cases; iteratively set them
-        // BUG
-        //            for (const [attribute, value] of Object.entries(theMessage.data)) {
-        // console.log("setting attr", attribute);
-        //                entityEl.setAttribute(attribute, value);
-        //            }
         const thing = Object.entries(theMessage.data);
         const len = thing.length;
         for (let i = 0; i < len; i++) {
@@ -577,6 +529,9 @@ function _onMessageArrived(message, jsonMessage) {
                 return;
             }
             if (name === ARENA.viveRName) {
+                return;
+            }
+            if (name === ARENA.avatarName) {
                 return;
             }
             /* just setAttribute() - data can contain multiple attribute-value pairs
