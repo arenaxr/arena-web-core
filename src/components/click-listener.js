@@ -11,7 +11,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mousedown', function(evt) {
             const camera = document.getElementById('my-camera');
-            position = camera.getAttribute('position');
+            const position = camera.getAttribute('position');
 
             const clickPos = vec3ToObject(position);
             const coordsData = setClickData(evt);
@@ -31,14 +31,13 @@ AFRAME.registerComponent('click-listener', {
                 if (!self.el.getAttribute('goto-url')) {
                     publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                // console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', ARENA.camName);
             }
         });
 
         // console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
             const camera = document.getElementById('my-camera');
-            position = camera.getAttribute('position');
+            const position = camera.getAttribute('position');
 
             const clickPos = vec3ToObject(position);
             const coordsData = setClickData(evt);
@@ -58,13 +57,12 @@ AFRAME.registerComponent('click-listener', {
                 if (!self.el.getAttribute('goto-url')) {
                     publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                // console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', ARENA.camName);
             }
         });
 
         this.el.addEventListener('mouseenter', function(evt) {
             const camera = document.getElementById('my-camera');
-            position = camera.getAttribute('position');
+            const position = camera.getAttribute('position');
 
             const clickPos = vec3ToObject(position);
             const coordsData = setCoordsData(evt);
@@ -84,13 +82,13 @@ AFRAME.registerComponent('click-listener', {
                 if (!self.el.getAttribute('goto-url')) {
                     publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                window.ARENA.lastMouseTarget = this.id;
+                window.lastMouseTarget = this.id;
             }
         });
 
         this.el.addEventListener('mouseleave', function(evt) {
             const camera = document.getElementById('my-camera');
-            position = camera.getAttribute('position');
+            const position = camera.getAttribute('position');
 
             const clickPos = vec3ToObject(position);
             const coordsData = setCoordsData(evt);
@@ -110,7 +108,7 @@ AFRAME.registerComponent('click-listener', {
                 if (!self.el.getAttribute('goto-url')) {
                     publish(ARENA.outputTopic + this.id, thisMsg);
                 }
-                window.ARENA.lastMouseTarget = undefined;
+                window.lastMouseTarget = undefined;
             }
         });
     },

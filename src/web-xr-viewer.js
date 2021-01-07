@@ -31,8 +31,6 @@ window.addEventListener('enter-vr', function(e) {
                         },
                         'cursorEl': true,
                     }, false);
-                } else {
-                    // debug("no lastMouseTarget");
                 }
             });
 
