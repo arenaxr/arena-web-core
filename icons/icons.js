@@ -260,6 +260,11 @@ function setupIcons() {
     formDiv.appendChild(perms);
     formDiv.appendChild(document.createElement('br'));
 
+    formDiv.append('Scene: ');
+    const sceneName = document.createElement('span');
+    formDiv.appendChild(sceneName);
+    formDiv.appendChild(document.createElement('br'));
+
     formDiv.append('Authenticator: ');
     const authType = document.createElement('span');
     authType.style.textTransform = 'capitalize';
@@ -310,6 +315,7 @@ function setupIcons() {
     function loadSettings() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
+        sceneName.innerHTML = globals.scenenameParam;
         authType.innerHTML = auth.type;
         authUsername.innerHTML = auth.username;
         authFullname.innerHTML = auth.fullname;
