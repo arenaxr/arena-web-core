@@ -7,8 +7,6 @@ ARENA.mqttClient.onConnected = onConnected;
 ARENA.mqttClient.onConnectionLost = onConnectionLost;
 ARENA.mqttClient.onMessageArrived = onMessageArrived;
 
-let oldMsg = '';
-
 /**
  * MQTT onConnected callback
  * @param {Boolean} reconnect is a reconnect
@@ -37,159 +35,27 @@ function onConnected(reconnect, uri) {
     sceneObjects.cameraRig = document.getElementById('CameraRig'); // this is an <a-entity>
     sceneObjects.cameraSpinner = document.getElementById('CameraSpinner'); // this is an <a-entity>
 
-    sceneObjects.scene = document.querySelector('a-scene');
-
     sceneObjects.myCamera = document.getElementById('my-camera');
     sceneObjects[ARENA.camName] = sceneObjects.myCamera;
 
-    // Publish initial camera presence
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
-    const thex = sceneObjects.myCamera.object3D.position.x;
-    const they = sceneObjects.myCamera.object3D.position.y;
-    const thez = sceneObjects.myCamera.object3D.position.z;
-    const myMsg = {
-        object_id: ARENA.camName,
-        action: 'create',
-        data: {
-            object_type: 'camera',
-            position: {
-                x: thex,
-                y: they,
-                z: thez,
-            },
-            rotation: {
-                x: 0,
-                y: 0,
-                z: 0,
-                w: 0,
-            },
-            color: color,
-        },
-    };
-
-    publish(ARENA.outputTopic + ARENA.camName, myMsg);
-
+    sceneObjects.myCamera.setAttribute('arena-camera', 'enabled', true);
+    sceneObjects.myCamera.setAttribute('arena-camera', 'color', color);
     sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
-    sceneObjects.myCamera.addEventListener('vioChanged', (e) => {
-        // console.log("vioChanged", e.detail);
+    const viveLeft = document.getElementById('vive-leftHand');
+    viveLeft.setAttribute('arena-vive', 'enabled', true);
+    viveLeft.setAttribute('arena-vive', 'name', ARENA.viveLName);
+    viveLeft.setAttribute('arena-vive', 'hand', 'left');
+    viveLeft.setAttribute('arena-vive', 'color', color);
+    sceneObjects[ARENA.viveLName] = viveLeft;
 
-        if (ARENA.fixedCamera !== '') {
-            const msg = {
-                object_id: ARENA.camName,
-                action: 'create',
-                type: 'object',
-                data: {
-                    object_type: 'camera',
-                    position: {
-                        x: parseFloat(e.detail.x.toFixed(3)),
-                        y: parseFloat(e.detail.y.toFixed(3)),
-                        z: parseFloat(e.detail.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(e.detail._x.toFixed(3)),
-                        y: parseFloat(e.detail._y.toFixed(3)),
-                        z: parseFloat(e.detail._z.toFixed(3)),
-                        w: parseFloat(e.detail._w.toFixed(3)),
-                    },
-                    color: color,
-                },
-            };
-            publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
-        }
-    });
-
-    sceneObjects.myCamera.addEventListener('poseChanged', (e) => {
-        const msg = {
-            object_id: ARENA.camName,
-            hasAvatar: (ARENA.FaceTracker !== undefined) && ARENA.FaceTracker.running(),
-            displayName: ARENA.displayName,
-            action: 'create',
-            type: 'object',
-            data: {
-                object_type: 'camera',
-                position: {
-                    x: parseFloat(e.detail.x.toFixed(3)),
-                    y: parseFloat(e.detail.y.toFixed(3)),
-                    z: parseFloat(e.detail.z.toFixed(3)),
-                },
-                rotation: {
-                    x: parseFloat(e.detail._x.toFixed(3)),
-                    y: parseFloat(e.detail._y.toFixed(3)),
-                    z: parseFloat(e.detail._z.toFixed(3)),
-                    w: parseFloat(e.detail._w.toFixed(3)),
-                },
-                color: color,
-            },
-        };
-        if (ARENA.JitsiAPI) {
-            msg.jitsiId = ARENA.JitsiAPI.getJitsiId();
-            msg.hasAudio = ARENA.JitsiAPI.hasAudio();
-            msg.hasVideo = ARENA.JitsiAPI.hasVideo();
-        }
-
-        if (msg !== oldMsg) { // suppress duplicates
-            publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
-            oldMsg = msg;
-        }
-    });
-
-    const viveLeftHand = document.getElementById('vive-leftHand');
-    if (viveLeftHand) {
-        viveLeftHand.addEventListener('viveChanged', (e) => {
-            const msg = {
-                object_id: ARENA.viveLName,
-                action: 'update',
-                type: 'object',
-                data: {
-                    object_type: 'viveLeft',
-                    position: {
-                        x: parseFloat(e.detail.x.toFixed(3)),
-                        y: parseFloat(e.detail.y.toFixed(3)),
-                        z: parseFloat(e.detail.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(e.detail._x.toFixed(3)),
-                        y: parseFloat(e.detail._y.toFixed(3)),
-                        z: parseFloat(e.detail._z.toFixed(3)),
-                        w: parseFloat(e.detail._w.toFixed(3)),
-                    },
-                    color: color,
-                },
-            };
-
-            // rate limiting is handled in vive-pose-listener
-            publish(ARENA.outputTopic + ARENA.viveLName, msg);
-        });
-    }
-    const viveRightHand = document.getElementById('vive-rightHand');
-    // realtime position tracking of right hand controller
-    if (viveRightHand) {
-        viveRightHand.addEventListener('viveChanged', (e) => {
-            const msg = {
-                object_id: ARENA.viveRName, // e.g. viveRight_9240_X or viveRight_eric_eric
-                action: 'update',
-                type: 'object',
-                data: {
-                    object_type: 'viveRight',
-                    position: {
-                        x: parseFloat(e.detail.x.toFixed(3)),
-                        y: parseFloat(e.detail.y.toFixed(3)),
-                        z: parseFloat(e.detail.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(e.detail._x.toFixed(3)),
-                        y: parseFloat(e.detail._y.toFixed(3)),
-                        z: parseFloat(e.detail._z.toFixed(3)),
-                        w: parseFloat(e.detail._w.toFixed(3)),
-                    },
-                    color: color,
-                },
-            };
-            // e.g. realm/s/render/viveRight_9240_X or realm/s/render/viveRight_eric
-            publish(ARENA.outputTopic + ARENA.viveRName, msg);
-        });
-    }
+    const viveRight = document.getElementById('vive-rightHand');
+    viveRight.setAttribute('arena-vive', 'enabled', true);
+    viveRight.setAttribute('arena-vive', 'name', ARENA.viveRName);
+    viveRight.setAttribute('arena-vive', 'hand', 'right');
+    viveRight.setAttribute('arena-vive', 'color', color);
+    sceneObjects[ARENA.viveRName] = viveRight;
 
     loadScene();
     loadArena();
@@ -229,69 +95,6 @@ window.publish = (dest, msg) => {
 };
 
 /**
- * Draw video head
- * @param {Object} entityEl scene entity
- * @param {Number} videoID video Id
- */
-function drawVideoCube(entityEl, videoID) {
-    // attach video to head
-    const videoCube = document.createElement('a-box');
-    videoCube.setAttribute('id', videoID + 'cube');
-    videoCube.setAttribute('position', '0 0 0');
-    videoCube.setAttribute('scale', '0.6 0.4 0.6');
-    videoCube.setAttribute('material', 'shader', 'flat');
-    videoCube.setAttribute('src', `#${videoID}`); // video only (!audio)
-    videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-
-    const videoCubeDark = document.createElement('a-box');
-    videoCubeDark.setAttribute('id', videoID + 'cubeDark');
-    videoCubeDark.setAttribute('position', '0 0 0.01');
-    videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
-    videoCubeDark.setAttribute('material', 'shader', 'flat');
-    videoCubeDark.setAttribute('transparent', 'true');
-    videoCubeDark.setAttribute('color', 'black');
-    videoCubeDark.setAttribute('opacity', '0.8');
-
-    entityEl.appendChild(videoCube);
-    entityEl.appendChild(videoCubeDark);
-}
-
-/**
- * Draw microphone
- * @param {Object} entityEl scene entity
- * @param {Boolean} hasAudio
- */
-function drawMicrophoneState(entityEl, hasAudio) {
-    // entityEl is the head
-    const name = 'muted_' + entityEl.id;
-    let micIconEl = document.querySelector('#' + name);
-    if (!micIconEl && !hasAudio) {
-        micIconEl = document.createElement('a-image');
-        micIconEl.setAttribute('id', name);
-        micIconEl.setAttribute('scale', '0.2 0.2 0.2');
-        micIconEl.setAttribute('position', '0 0.3 0.045');
-        micIconEl.setAttribute('src', 'url(src/icons/images/audio-off.png)');
-        entityEl.appendChild(micIconEl);
-    } else if (micIconEl && hasAudio) {
-        entityEl.removeChild(micIconEl);
-    }
-}
-
-/**
- * Publishes an mqtt message that updates the display name of a user
- * @param {string} displayName display name of user's camera
- */
-function publishHeadText(displayName) {
-    publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
-        'object_id': ARENA.camName,
-        'action': 'create',
-        'type': 'object',
-        'displayName': displayName,
-        'data': {'object_type': 'headtext'},
-    });
-}
-
-/**
  * Call internal MessageArrived handler; Isolates message error handling
  * Also called to handle persist objects
  * @param {Object} message
@@ -323,7 +126,9 @@ let progMsgs = {};
  */
 function _onMessageArrived(message, jsonMessage) {
     const sceneObjects = ARENA.sceneObjects;
+    const sceneEl = document.querySelector('a-scene');
     let theMessage = {};
+
     if (message) {
         if (!isJson(message.payloadString)) {
             return;
@@ -539,45 +344,12 @@ function _onMessageArrived(message, jsonMessage) {
                 entityEl.object3D.quaternion.set(xrot, yrot, zrot, wrot);
 
                 // Add it to our dictionary of scene objects
-                sceneObjects.scene.appendChild(entityEl);
+                sceneEl.appendChild(entityEl);
                 sceneObjects[name] = entityEl;
             } else if (type === 'camera') {
                 entityEl.setAttribute('id', name); // e.g. camera_1234_er1k
-                entityEl.setAttribute('rotation.order', 'YXZ');
-                entityEl.object3D.position.set(0, 0, 0);
-                entityEl.object3D.rotation.set(0, 0, 0);
-
-                // this is the head 3d model
-                const headModelEl = document.createElement('a-entity');
-                headModelEl.setAttribute('id', 'head-model_' + name);
-                headModelEl.setAttribute('rotation', '0 180 0');
-                headModelEl.object3D.scale.set(1, 1, 1);
-                headModelEl.setAttribute('dynamic-body', 'type', 'static');
-
-                headModelEl.setAttribute('gltf-model', 'url(models/Head.gltf)'); // actually a face mesh
-
-                // place a colored text above the head
-                const headtext = document.createElement('a-text');
-                const decodeName = decodeURI(name.split('_')[2]);
-                // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
-                const personName = decodeName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                headtext.setAttribute('id', 'headtext_' + name);
-                headtext.setAttribute('value', personName);
-                headtext.setAttribute('position', '0 0.45 0.05');
-                headtext.setAttribute('side', 'double');
-                headtext.setAttribute('align', 'center');
-                headtext.setAttribute('anchor', 'center');
-                headtext.setAttribute('scale', '0.4 0.4 0.4');
-                headtext.setAttribute('rotation', '0 180 0');
-                headtext.setAttribute('color', color); // color
-                headtext.setAttribute('width', 5); // try setting last
-
-                entityEl.appendChild(headtext);
-                entityEl.appendChild(headModelEl);
-                sceneObjects['head-text_' + name] = headtext;
-                sceneObjects['head-model_' + name] = headModelEl;
-
-                sceneObjects.scene.appendChild(entityEl);
+                entityEl.setAttribute('arena-user', 'color', color);
+                sceneEl.appendChild(entityEl);
                 sceneObjects[name] = entityEl;
             } else {
                 entityEl.setAttribute('id', name);
@@ -595,7 +367,7 @@ function _onMessageArrived(message, jsonMessage) {
                         console.log('orphaned; parent ' + name + ' cannot find ' + theMessage.data.parent + ' yet');
                     }
                 } else {
-                    sceneObjects.scene.appendChild(entityEl);
+                    sceneEl.appendChild(entityEl);
                     // Add it to our dictionary of scene objects
                     sceneObjects[name] = entityEl;
                 }
@@ -629,157 +401,12 @@ function _onMessageArrived(message, jsonMessage) {
         case 'camera':
             // decide if we need draw or delete videoCube around head
             if (theMessage.hasOwnProperty('jitsiId')) {
-                if (!theMessage.jitsiId || !ARENA.JitsiAPI || !ARENA.JitsiAPI.ready()) {
-                    break; // other-person has no jitsi stream ... yet
-                }
-
-                const camPos = ARENA.sceneObjects.myCamera.object3D.position;
-                const entityPos = entityEl.object3D.position;
-                const distance = camPos.distanceTo(entityPos);
-                ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
-
-                /* Handle Jitsi Video */
-                const videoID = `video${theMessage.jitsiId}`;
-                if (theMessage.hasVideo) {
-                    const videoElem = document.getElementById(videoID);
-                    const videoTrack = ARENA.JitsiAPI.getVideoTrack(theMessage.jitsiId);
-                    entityEl.videoTrack = videoTrack;
-
-                    // frustrum culling for WebRTC streams
-                    const cam = ARENA.sceneObjects.myCamera.sceneEl.camera;
-                    const frustum = new THREE.Frustum();
-                    frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
-                        cam.matrixWorldInverse));
-                    const inFieldOfView = frustum.containsPoint(entityPos);
-
-                    // check if A/V cut off distance has been reached
-                    if (!inFieldOfView || distance > ARENA.maxAVDist) {
-                        if (entityEl.videoTrack) {
-                            entityEl.videoTrack.enabled = false;
-                        }// pause WebRTC video stream
-                        if (videoElem && !videoElem.paused) videoElem.pause();
-                    } else {
-                        if (entityEl.videoTrack) {
-                            entityEl.videoTrack.enabled = true;
-                        }// unpause WebRTC video stream
-                        if (videoElem && videoElem.paused) videoElem.play();
-                    }
-
-                    // draw video cube, but only if it didnt exist before
-                    if (videoElem && entityEl.getAttribute('videoCubeDrawn') != 'true') {
-                        drawVideoCube(entityEl, videoID);
-                        entityEl.setAttribute('videoCubeDrawn', true);
-                    }
-                } else {
-                    if (entityEl.videoTrack) {
-                        entityEl.videoTrack.enabled = false;
-                    } // pause WebRTC video stream
-                    // remove video cubes
-                    const vidCube = document.getElementById(videoID + 'cube');
-                    if (entityEl.contains(vidCube)) {
-                        entityEl.removeChild(vidCube);
-                    }
-                    const vidCubeDark = document.getElementById(videoID + 'cubeDark');
-                    if (entityEl.contains(vidCubeDark)) {
-                        entityEl.removeChild(vidCubeDark);
-                    }
-                    entityEl.setAttribute('videoCubeDrawn', false);
-                }
-
-                /* Handle Jitsi Audio */
-                drawMicrophoneState(entityEl, theMessage.hasAudio);
-                if (theMessage.hasAudio) {
-                    // set up positional audio, but only once per camera
-                    const audioTrack = ARENA.JitsiAPI ? ARENA.JitsiAPI.getAudioTrack(theMessage.jitsiId) : undefined;
-                    if (!audioTrack) return;
-
-                    // check if audio track changed since last update
-                    const oldAudioTrack = entityEl.audioTrack;
-                    entityEl.audioTrack = audioTrack.track;
-
-                    // check if A/V cut off distance has been reached
-                    if (distance > ARENA.maxAVDist) {
-                        if (entityEl.audioTrack) {
-                            entityEl.audioTrack.enabled = false;
-                        }// pause WebRTC audio stream
-                    } else {
-                        if (entityEl.audioTrack) {
-                            entityEl.audioTrack.enabled = true;
-                        }// unpause WebRTC audio stream
-                    }
-
-                    if (entityEl.audioTrack !== oldAudioTrack) {
-                        // set up and attach positional audio
-                        const audioStream = new MediaStream();
-                        audioStream.addTrack(entityEl.audioTrack);
-
-                        const sceneEl = ARENA.sceneObjects.scene;
-                        let listener = null;
-                        if (sceneEl.audioListener) {
-                            listener = sceneEl.audioListener;
-                        } else {
-                            listener = new THREE.AudioListener();
-                            const camEl = ARENA.sceneObjects.myCamera.object3D;
-                            camEl.add(listener);
-                            sceneEl.audioListener = listener;
-                        }
-
-                        // create positional audio, but only if didn't exist before
-                        if (!entityEl.audioSource) {
-                            entityEl.audioSource = new THREE.PositionalAudio(listener);
-                            entityEl.audioSource.setMediaStreamSource(audioStream);
-                            entityEl.object3D.add(entityEl.audioSource);
-
-                            // set positional audio scene params
-                            if (ARENA.volume) {
-                                entityEl.audioSource.setVolume(ARENA.volume);
-                            }
-                            if (ARENA.refDist) { // L-R panning
-                                entityEl.audioSource.setRefDistance(ARENA.refDist);
-                            }
-                            if (ARENA.rolloffFact) {
-                                entityEl.audioSource.setRolloffFactor(ARENA.rolloffFact);
-                            }
-                            if (ARENA.distModel) {
-                                entityEl.audioSource.setDistanceModel(ARENA.distModel);
-                            }
-                        } else {
-                            entityEl.audioSource.setMediaStreamSource(audioStream);
-                        }
-
-                        // sorta fixes chrome echo bug
-                        const audioCtx = THREE.AudioContext.getContext();
-                        const resume = () => {
-                            audioCtx.resume();
-                            setTimeout(function() {
-                                if (audioCtx.state === 'running') {
-                                    if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-                                        enableChromeAEC(listener.gain);
-                                    }
-                                    document.body.removeEventListener('touchmove', resume, false);
-                                    document.body.removeEventListener('mousemove', resume, false);
-                                }
-                            }, 0);
-                        };
-                        document.body.addEventListener('touchmove', resume, false);
-                        document.body.addEventListener('mousemove', resume, false);
-                    }
-                } else {
-                    if (entityEl.audioTrack) {
-                        entityEl.audioTrack.enabled = false;
-                    } // pause WebRTC audio stream
-                }
+                entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
+                entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
+                entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
             }
-
             if (theMessage.hasOwnProperty('displayName')) {
-                // update head text
-                for (const child of entityEl.children) {
-                    if (child.getAttribute('id').includes('headtext_')) {
-                        // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
-                        const name = theMessage.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        child.setAttribute('value', name);
-                    }
-                }
+                entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text
             }
             break;
 
@@ -880,11 +507,6 @@ function _onMessageArrived(message, jsonMessage) {
         }
 
         // what remains are attributes for special cases; iteratively set them
-        // BUG
-        //            for (const [attribute, value] of Object.entries(theMessage.data)) {
-        // console.log("setting attr", attribute);
-        //                entityEl.setAttribute(attribute, value);
-        //            }
         const thing = Object.entries(theMessage.data);
         const len = thing.length;
         for (let i = 0; i < len; i++) {
@@ -907,6 +529,9 @@ function _onMessageArrived(message, jsonMessage) {
                 return;
             }
             if (name === ARENA.viveRName) {
+                return;
+            }
+            if (name === ARENA.avatarName) {
                 return;
             }
             /* just setAttribute() - data can contain multiple attribute-value pairs

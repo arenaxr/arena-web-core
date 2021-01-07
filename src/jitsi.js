@@ -135,6 +135,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
         let screenShareEl = ARENA.sceneObjects[screenShareId];
         if (!screenShareEl) {
+            const sceneEl = document.querySelector('a-scene');
             // create if doesnt exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
@@ -143,7 +144,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             screenShareEl.setAttribute('scale', '8 6 0.01');
             screenShareEl.setAttribute('position', '0 3.1 -3');
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
-            ARENA.sceneObjects.scene.appendChild(screenShareEl);
+            sceneEl.appendChild(screenShareEl);
             ARENA.sceneObjects[screenShareId] = screenShareEl;
         }
         screenShareEl.setAttribute('muted', 'false');
@@ -213,7 +214,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
             if (!dn) dn = user.getDisplayName();
             if (!dn) dn = `No Name #${id}`;
             const camName = user.getProperty('screenshareCamName');
-            const objectIds = user.getProperty('screenshareObjIds');
+            let objectIds = user.getProperty('screenshareObjIds');
 
             if (camName && objectIds) {
                 ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {

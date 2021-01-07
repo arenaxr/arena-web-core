@@ -144,21 +144,16 @@ if (ARENA.fixedCamera !== '') {
     ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
 }
 
+ARENA.avatarName = 'avatar_' + ARENA.idTag;
 ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
 ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
-
-ARENA.newRotation = new THREE.Quaternion();
-ARENA.newPosition = new THREE.Vector3();
-ARENA.vioRotation = new THREE.Quaternion();
-ARENA.vioPosition = new THREE.Vector3();
-ARENA.vioMatrix = new THREE.Matrix4();
 
 /**
  * loads scene objects from specified persistence URL if specified,
  * or ARENA.persistenceUrl if not
  * @param {string} urlToLoad which url to load arena from
- * @param {object} position initial position
- * @param {object} rotation initial rotation
+ * @param {Object} position initial position
+ * @param {Object} rotation initial rotation
  */
 function loadArena(urlToLoad, position, rotation) {
     const xhr = new XMLHttpRequest();
@@ -349,6 +344,9 @@ function loadScene() {
                 document.getElementById('sceneRoot').appendChild(light1);
             }
         }
+
+        ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
+
         // initialize Jitsi videoconferencing
         ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
@@ -406,6 +404,13 @@ window.addEventListener('onauth', function(e) {
         mqtt_token: ARENA.mqttToken,
         supportDevFolders: defaults.supportDevFolders,
     });
+
+    // initialize face tracking if not on mobile
+    if (!AFRAME.utils.device.isMobile()) {
+        const displayBbox = false;
+        const flipped = false;
+        ARENA.FaceTracker.init(displayBbox, flipped);
+    }
 
     setupIcons();
 });

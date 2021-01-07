@@ -156,7 +156,8 @@ function unload() {
 $(window).bind('beforeunload', unload);
 $(window).bind('unload', unload);
 
-// JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+
 const initOptions = {
     disableAudioLevels: true,
 };
