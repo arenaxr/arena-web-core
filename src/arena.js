@@ -22,91 +22,21 @@ function getSceneName() {
     }
 };
 
-window.ARENA = {
-    // arena events target
-    events: new ARENAEventEmitter(),
-    timeID: new Date().getTime() % 10000,
-    sceneObjects: new Map(),
-    updateMillis: getUrlParam('camUpdateRate', defaults.updateMillis),
-    scenenameParam: getSceneName(), // scene
-    userParam: getUrlParam('name', defaults.userParam),
-    startCoords: getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
-    mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
-    fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
-    ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
-    localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
-    latencyTopic: defaults.latencyTopic,
-    lastMouseTarget: undefined,
-    inAR: false,
-    isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
-    onEnterXR: function(xrType) {
-        if (xrType === 'ar') {
-            this.isAR = true;
-            if (this.isWebXRViewer) {
-                const base64script = document.createElement('script');
-                base64script.onload = async () => {
-                    await importScript('/apriltag/script.js');
-                };
-                base64script.src = '/apriltag/base64_binary.js';
-                document.head.appendChild(base64script);
+window.ARENA = {};
 
-                document.addEventListener('mousedown', function(e) {
-                    if (window.ARENA.lastMouseTarget) {
-                        const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
-                        const elPos = new THREE.Vector3();
-                        el.object3D.getWorldPosition(elPos);
+ARENA.events = new ARENAEventEmitter(); // arena events target
+ARENA.timeID = new Date().getTime() % 10000;
+ARENA.sceneObjects = new Map();
+ARENA.updateMillis = getUrlParam('camUpdateRate', defaults.updateMillis);
+ARENA.scenenameParam = getSceneName(); // scene
+ARENA.userParam = getUrlParam('name', defaults.userParam);
+ARENA.startCoords = getUrlParam('location', defaults.startCoords).replace(/,/g, ' ');
 
-                        const intersection = {
-                            x: elPos.x,
-                            y: elPos.y,
-                            z: elPos.z,
-                        };
-                        el.emit('mousedown', {
-                            'clicker': window.ARENA.camName,
-                            'intersection': {
-                                point: intersection,
-                            },
-                            'cursorEl': true,
-                        }, false);
-                    } else {
-                        // debug("no lastMouseTarget");
-                    }
-                });
-                document.addEventListener('mouseup', function(e) {
-                    if (window.ARENA.lastMouseTarget) {
-                        const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
-                        const elPos = new THREE.Vector3();
-                        el.object3D.getWorldPosition(elPos);
-                        const intersection = {
-                            x: elPos.x,
-                            y: elPos.y,
-                            z: elPos.z,
-                        };
-                        el.emit('mouseup', {
-                            'clicker': window.ARENA.camName,
-                            'intersection': {
-                                point: intersection,
-                            },
-                            'cursorEl': true,
-                        }, false);
-                    }
-                });
-                let cursor = document.getElementById('mouseCursor');
-                const cursorParent = cursor.parentNode;
-                cursorParent.removeChild(cursor);
-                cursor = document.createElement('a-cursor');
-                cursor.setAttribute('fuse', false);
-                cursor.setAttribute('scale', '0.1 0.1 0.1');
-                cursor.setAttribute('position', '0 0 -0.1'); // move reticle closer (side effect: bigger!)
-                cursor.setAttribute('color', '#333');
-                cursor.setAttribute('max-distance', '10000');
-                cursor.setAttribute('id', 'fuse-cursor');
-                cursorParent.appendChild(cursor);
-            }
-            document.getElementById('env').setAttribute('visible', false);
-        }
-    },
-};
+ARENA.mqttParamZ = getUrlParam('mqttServer', defaults.mqttParamZ);
+ARENA.fixedCamera = getUrlParam('fixedCamera', defaults.fixedCamera);
+ARENA.ATLASurl = getUrlParam('ATLASurl', defaults.ATLASurl);
+ARENA.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+ARENA.latencyTopic = defaults.latencyTopic;
 
 ARENA.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + ARENA.scenenameParam;
 ARENA.mqttParam = 'wss://' + ARENA.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() * defaults.mqttPath.length)];

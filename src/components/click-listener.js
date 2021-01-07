@@ -10,7 +10,10 @@ AFRAME.registerComponent('click-listener', {
         const self = this;
 
         this.el.addEventListener('mousedown', function(evt) {
-            const clickPos = vec3ToObject(ARENA.newPosition);
+            const camera = document.getElementById('my-camera');
+            position = camera.getAttribute('position');
+
+            const clickPos = vec3ToObject(position);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -34,7 +37,10 @@ AFRAME.registerComponent('click-listener', {
 
         // console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
-            const clickPos = vec3ToObject(ARENA.newPosition);
+            const camera = document.getElementById('my-camera');
+            position = camera.getAttribute('position');
+
+            const clickPos = vec3ToObject(position);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -57,7 +63,10 @@ AFRAME.registerComponent('click-listener', {
         });
 
         this.el.addEventListener('mouseenter', function(evt) {
-            const clickPos = vec3ToObject(ARENA.newPosition);
+            const camera = document.getElementById('my-camera');
+            position = camera.getAttribute('position');
+
+            const clickPos = vec3ToObject(position);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -80,7 +89,10 @@ AFRAME.registerComponent('click-listener', {
         });
 
         this.el.addEventListener('mouseleave', function(evt) {
-            const clickPos = vec3ToObject(ARENA.newPosition);
+            const camera = document.getElementById('my-camera');
+            position = camera.getAttribute('position');
+
+            const clickPos = vec3ToObject(position);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
