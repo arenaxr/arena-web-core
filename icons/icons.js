@@ -260,9 +260,20 @@ function setupIcons() {
     formDiv.appendChild(perms);
     formDiv.appendChild(document.createElement('br'));
 
+    formDiv.append('Scene: ');
+    const sceneName = document.createElement('span');
+    formDiv.appendChild(sceneName);
+    formDiv.appendChild(document.createElement('br'));
+
     formDiv.append('Authenticator: ');
     const authType = document.createElement('span');
+    authType.style.textTransform = 'capitalize';
     formDiv.appendChild(authType);
+    formDiv.appendChild(document.createElement('br'));
+
+    formDiv.append('Username: ');
+    const authUsername = document.createElement('span');
+    formDiv.appendChild(authUsername);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Email: ');
@@ -271,8 +282,8 @@ function setupIcons() {
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Name: ');
-    const authName = document.createElement('span');
-    formDiv.appendChild(authName);
+    const authFullname = document.createElement('span');
+    formDiv.appendChild(authFullname);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.appendChild(document.createElement('br'));
@@ -304,8 +315,10 @@ function setupIcons() {
     function loadSettings() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
+        sceneName.innerHTML = globals.scenenameParam;
         authType.innerHTML = auth.type;
-        authName.innerHTML = auth.name;
+        authUsername.innerHTML = auth.username;
+        authFullname.innerHTML = auth.fullname;
         authEmail.innerHTML = auth.email;
     }
 

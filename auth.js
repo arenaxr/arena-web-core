@@ -218,6 +218,21 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
+            AUTH.user_type = auth_type;
+            AUTH.user_username = xhr.response.username;
+            switch (auth_type) {
+            case 'google':
+                var googleUser = auth2.currentUser.get();
+                var profile = googleUser.getBasicProfile();
+                AUTH.user_fullname = profile.getName();
+                AUTH.user_email = profile.getEmail();
+                break;
+            default:
+                AUTH.user_fullname = localStorage.getItem('display_name');
+                AUTH.user_email = 'N/A';
+                break;
+            }
+
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
@@ -239,22 +254,12 @@ function completeAuth(username, token) {
 }
 
 function getAuthStatus() {
-    switch (localStorage.getItem('auth_choice')) {
-    case 'google':
-        var googleUser = auth2.currentUser.get();
-        var profile = googleUser.getBasicProfile();
-        return {
-            type: 'Google',
-            name: profile.getName(),
-            email: profile.getEmail(),
-        };
-    default:
-        return {
-            type: 'Anonymous',
-            name: localStorage.getItem('display_name'),
-            email: 'N/A',
-        };
-    }
+    return {
+        type: AUTH.user_type,
+        username: AUTH.user_username,
+        fullname: AUTH.user_fullname,
+        email: AUTH.user_email,
+    };
 }
 
 function formatPerms(perms) {

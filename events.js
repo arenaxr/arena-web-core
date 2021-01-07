@@ -8,7 +8,10 @@
 const getSceneName = () => {
     let path = window.location.pathname.substring(1);
     if (defaults.supportDevFolders && path.length > 0) {
-        path = path.replace(path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0], '');
+        const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
+        if (devPrefix){
+            path = path.replace(devPrefix[0], '');
+        }
     }
     if (path === '' || path === 'index.html') {
         return getUrlParam('scene', defaults.scenenameParam);
@@ -1182,7 +1185,7 @@ AFRAME.registerComponent('material-extras', {
         const mesh = this.el.getObject3D('mesh');
         if (!mesh) console.error("could not find mesh!");
         if (mesh.material) {
-            if (mesh.material.map) { 
+            if (mesh.material.map) {
                 mesh.material.map.encoding = THREE[this.data.encoding];
                 mesh.material.needsUpdate = this.data.needsUpdate;
             }
