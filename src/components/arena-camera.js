@@ -7,6 +7,7 @@
 AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: {type: 'boolean', default: false},
+        displayName: {type: 'string', default: 'No Name'},
         color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
     },
 
@@ -31,9 +32,10 @@ AFRAME.registerComponent('arena-camera', {
     publishPose() {
         const data = this.data;
         if (!data.enabled) return;
+
         const msg = {
             object_id: ARENA.camName,
-            displayName: ARENA.displayName,
+            displayName: data.displayName,
             action: 'create',
             type: 'object',
             data: {
@@ -69,6 +71,7 @@ AFRAME.registerComponent('arena-camera', {
     publishVio() {
         const data = this.data;
         if (!data.enabled) return;
+
         if (ARENA.fixedCamera !== '') {
             const msg = {
                 object_id: ARENA.camName,
@@ -94,8 +97,29 @@ AFRAME.registerComponent('arena-camera', {
         }
     },
 
+    publishHeadText() {
+        const data = this.data;
+
+        publish(ARENA.outputTopic + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+            'object_id': ARENA.camName,
+            'action': 'create',
+            'type': 'object',
+            'displayName': data.displayName,
+            'data': {'object_type': 'headtext'},
+        });
+    },
+
+    update(oldData) {
+        const data = this.data;
+
+        if (data.displayName !== oldData.displayName) {
+            this.publishHeadText();
+        }
+    },
+
     tick: (function(t, dt) {
         const el = this.el;
+
         this.heartBeatCounter++;
 
         this.rotation.setFromRotationMatrix(el.object3D.matrixWorld);

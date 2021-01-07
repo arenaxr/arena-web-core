@@ -197,7 +197,7 @@ function setupIcons() {
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.scene = ARENA.scenenameParam;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
-                            screenshareWindow.displayName = ARENA.displayName;
+                            screenshareWindow.displayName = getDisplayName();
                             screenshareWindow.camName = ARENA.camName;
                             screenshareWindow.objectIds = objectIds.join();
                         });
@@ -298,9 +298,20 @@ function setupIcons() {
     formDiv.appendChild(perms);
     formDiv.appendChild(document.createElement('br'));
 
+    formDiv.append('Scene: ');
+    const sceneName = document.createElement('span');
+    formDiv.appendChild(sceneName);
+    formDiv.appendChild(document.createElement('br'));
+
     formDiv.append('Authenticator: ');
     const authType = document.createElement('span');
+    authType.style.textTransform = 'capitalize';
     formDiv.appendChild(authType);
+    formDiv.appendChild(document.createElement('br'));
+
+    formDiv.append('Username: ');
+    const authUsername = document.createElement('span');
+    formDiv.appendChild(authUsername);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Email: ');
@@ -309,8 +320,8 @@ function setupIcons() {
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.append('Name: ');
-    const authName = document.createElement('span');
-    formDiv.appendChild(authName);
+    const authFullname = document.createElement('span');
+    formDiv.appendChild(authFullname);
     formDiv.appendChild(document.createElement('br'));
 
     formDiv.appendChild(document.createElement('br'));
@@ -345,23 +356,11 @@ function setupIcons() {
     function loadSettings() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
+        sceneName.innerHTML = ARENA.scenenameParam;
         authType.innerHTML = auth.type;
-        authName.innerHTML = auth.name;
+        authUsername.innerHTML = auth.username;
+        authFullname.innerHTML = auth.fullname;
         authEmail.innerHTML = auth.email;
-    }
-
-    /**
-     * Publishes an mqtt message that updates the display name of a user
-     * @param {string} displayName display name of user's camera
-     */
-    function publishHeadText(displayName) {
-        publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
-            'object_id': ARENA.camName,
-            'action': 'create',
-            'type': 'object',
-            'displayName': displayName,
-            'data': {'object_type': 'headtext'},
-        });
     }
 
     /**
@@ -372,11 +371,12 @@ function setupIcons() {
         // if name has at least one alpha char
         if (re.test(usernameInput.value)) {
             // remove extra spaces
-            ARENA.displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
-            localStorage.setItem('display_name', ARENA.displayName); // save for next use
-            publishHeadText(ARENA.displayName); // push to other users' views
+            const displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
+            localStorage.setItem('display_name', displayName); // save for next use
+            const camera = document.getElementById('my-camera');
+            camera.setAttribute('arena-camera', 'displayName', displayName); // push to other users' views
             const newSettingsEvent = new CustomEvent('newsettings', { // push to local listeners
-                detail: {name: ARENA.displayName},
+                detail: {name: displayName},
             });
             window.dispatchEvent(newSettingsEvent);
         }

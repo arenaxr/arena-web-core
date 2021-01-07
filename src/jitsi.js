@@ -5,8 +5,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     // PRIVATE VARIABLES
     // ==================================================
 
-    // we use the scene name as the jitsi room name
-    const arenaConferenceName = ARENA.scenenameParam.toLowerCase();
+    // we use the scene name as the jitsi room name, handle namespace with '/' = '_'
+    const arenaConferenceName = ARENA.scenenameParam.toLowerCase().replace('/', '_');
 
     const connectOptions = {
         hosts: {

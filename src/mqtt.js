@@ -41,6 +41,7 @@ function onConnected(reconnect, uri) {
     const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
     sceneObjects.myCamera.setAttribute('arena-camera', 'enabled', true);
     sceneObjects.myCamera.setAttribute('arena-camera', 'color', color);
+    sceneObjects.myCamera.setAttribute('arena-camera', 'displayName', getDisplayName());
     sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
     const viveLeft = document.getElementById('vive-leftHand');
@@ -261,6 +262,10 @@ function _onMessageArrived(message, jsonMessage) {
             return; // don't create another env
         }
 
+        if (theMessage.type === 'face-features') {
+            return; // ignore face features
+        }
+
         let x; let y; let z; let xrot; let yrot; let zrot; let wrot; let xscale; let yscale; let zscale; let color;
         // Strategy: remove JSON for core attributes (position, rotation, color, scale) after parsing
         // what remains are attribute-value pairs that can be set iteratively
@@ -387,14 +392,7 @@ function _onMessageArrived(message, jsonMessage) {
         case 'headtext':
             // handle changes to other users head text
             if (theMessage.hasOwnProperty('displayName')) {
-                // update head text
-                for (const child of entityEl.children) {
-                    if (child.getAttribute('id').includes('headtext_')) {
-                        // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
-                        const name = theMessage.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                        child.setAttribute('value', name);
-                    }
-                }
+                entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text
             }
             return;
 
@@ -529,6 +527,9 @@ function _onMessageArrived(message, jsonMessage) {
                 return;
             }
             if (name === ARENA.viveRName) {
+                return;
+            }
+            if (name === ARENA.faceName) {
                 return;
             }
             if (name === ARENA.avatarName) {

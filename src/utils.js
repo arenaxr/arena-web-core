@@ -91,6 +91,16 @@ function debug(msg) {
 }
 
 /**
+ * Gets display name either from local storage or from userParam
+ * @return {string} display name
+ */
+function getDisplayName() {
+    let displayName = localStorage.getItem('display_name');
+    if (!displayName) displayName = decodeURI(ARENA.userParam);
+    return displayName;
+}
+
+/**
  * Returns the position of an event's target
  * @param {Object} evt event object
  * @return {Object} position of target

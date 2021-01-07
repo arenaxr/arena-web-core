@@ -7,7 +7,10 @@
 function getSceneName() {
     let path = window.location.pathname.substring(1);
     if (defaults.supportDevFolders && path.length > 0) {
-        path = path.replace(path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0], '');
+        const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
+        if (devPrefix) {
+            path = path.replace(devPrefix[0], '');
+        }
     }
     if (path === '' || path === 'index.html') {
         return getUrlParam('scene', defaults.scenenameParam);
@@ -24,31 +27,22 @@ window.ARENA = {
     events: new ARENAEventEmitter(),
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
-    // TODO(mwfarb): push per scene themes/styles into json scene object
     updateMillis: getUrlParam('camUpdateRate', defaults.updateMillis),
     scenenameParam: getSceneName(), // scene
     userParam: getUrlParam('name', defaults.userParam),
     startCoords: getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
-    weatherParam: getUrlParam('weather', defaults.weatherParam),
     mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
     fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
     ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
     localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
-    vioTopic: defaults.vioTopic,
     latencyTopic: defaults.latencyTopic,
     lastMouseTarget: undefined,
     inAR: false,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
     onEnterXR: function(xrType) {
-        // debug("ENTERING XR");
-
         if (xrType === 'ar') {
-            // debug("xrType is ar");
-
             this.isAR = true;
             if (this.isWebXRViewer) {
-                // debug("isWebXRViewer = true");
-
                 const base64script = document.createElement('script');
                 base64script.onload = async () => {
                     await importScript('/apriltag/script.js');
@@ -57,16 +51,11 @@ window.ARENA = {
                 document.head.appendChild(base64script);
 
                 document.addEventListener('mousedown', function(e) {
-                    // debug("MOUSEDOWN " + window.ARENA.lastMouseTarget);
-
                     if (window.ARENA.lastMouseTarget) {
-                        // debug("has target: "+window.ARENA.lastMouseTarget);
-
                         const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
                         const elPos = new THREE.Vector3();
                         el.object3D.getWorldPosition(elPos);
-                        // debug("worldPosition is:");
-                        // debug(elPos.x.toString()+","+elPos.x.toString()+","+elPos.x.toString());
+
                         const intersection = {
                             x: elPos.x,
                             y: elPos.y,
@@ -93,7 +82,6 @@ window.ARENA = {
                             y: elPos.y,
                             z: elPos.z,
                         };
-                        // debug(elPos.x);
                         el.emit('mouseup', {
                             'clicker': window.ARENA.camName,
                             'intersection': {
@@ -120,36 +108,24 @@ window.ARENA = {
     },
 };
 
-const urlLat = getUrlParam('lat');
-const urlLong = getUrlParam('long');
-if (urlLat && urlLong) {
-    ARENA.clientCoords = {
-        latitude: urlLat,
-        longitude: urlLong,
-    };
-} else {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            ARENA.clientCoords = position.coords;
-        });
-    }
-}
-
 ARENA.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + ARENA.scenenameParam;
 ARENA.mqttParam = 'wss://' + ARENA.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() * defaults.mqttPath.length)];
+
 ARENA.outputTopic = defaults.realm + '/s/' + ARENA.scenenameParam + '/';
+ARENA.vioTopic = defaults.vioTopic;
 ARENA.renderTopic = ARENA.outputTopic + '#';
-ARENA.camName = '';
-ARENA.displayName = decodeURI(ARENA.userParam); // set initial name
+
 ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
 
+ARENA.camName = '';
 if (ARENA.fixedCamera !== '') {
     ARENA.camName = 'camera_' + ARENA.fixedCamera + '_' + ARENA.fixedCamera;
 } else {
     ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
 }
 
-ARENA.avatarName = 'avatar_' + ARENA.idTag;
+ARENA.faceName = 'face_' + ARENA.idTag; // e.g. face_9240_X
+ARENA.avatarName = 'avatar_' + ARENA.idTag; // e.g. avatar_9240_X
 ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
 ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
 
@@ -353,12 +329,27 @@ function loadScene() {
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
 
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer);
     };
 };
 
 let lwt;
 window.addEventListener('onauth', function(e) {
+    const urlLat = getUrlParam('lat');
+    const urlLong = getUrlParam('long');
+    if (urlLat && urlLong) {
+        ARENA.clientCoords = {
+            latitude: urlLat,
+            longitude: urlLong,
+        };
+    } else {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                ARENA.clientCoords = position.coords;
+            });
+        }
+    }
+
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
 
@@ -399,7 +390,7 @@ window.addEventListener('onauth', function(e) {
     ARENA.Chat.init({
         userid: ARENA.idTag,
         cameraid: ARENA.camName,
-        username: ARENA.displayName,
+        username: getDisplayName(),
         realm: defaults.realm,
         scene: ARENA.scenenameParam,
         persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,
