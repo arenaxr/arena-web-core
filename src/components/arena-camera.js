@@ -1,5 +1,7 @@
 /* global AFRAME, ARENA */
 
+import * as ARENAUtils from '../utils.js'; 
+
 /**
  * Tracking camera movement in real time. Emits camera pose change and vio change events.
  *
@@ -63,7 +65,7 @@ AFRAME.registerComponent('arena-camera', {
             msg.hasAvatar = ARENA.FaceTracker.running();
         }
 
-        publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+        ARENA.mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
     publishVio() {
@@ -91,7 +93,7 @@ AFRAME.registerComponent('arena-camera', {
                     color: data.color,
                 },
             };
-            publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+            ARENA.mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
         }
     },
 
@@ -134,8 +136,8 @@ AFRAME.registerComponent('arena-camera', {
         data.vioRotation.setFromRotationMatrix(this.cpi);
         data.vioPosition.setFromMatrixPosition(this.cpi);
 
-        const rotationCoords = rotToText(data.rotation);
-        const positionCoords = coordsToText(data.position);
+        const rotationCoords = ARENAUtils.rotToText(this.rotation);
+        const positionCoords = ARENAUtils.coordsToText(this.position);
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position every 1 sec

@@ -11,14 +11,11 @@
     <title>ARENA</title>
     <meta name="description" content="Augmented Reality Edge Networking Architecture">
 
-    <script src="vendor/strophe/strophe.js"></script>
-    <script src="vendor/strophe/strophe.disco.min.js?v=1"></script>
+    <!-- jquery, needed by lib jitsi -->
+    <script src="vendor/jquery-2.1.1.min.js"></script>
 
     <!-- lib jitsi -->
     <script src="src/vendor/lib-jitsi-meet.min.js"></script>
-
-    <!-- paho mqtt lib -->
-    <script src="vendor/paho-mqtt.js" type="text/javascript"></script>
 
     <!-- our default configs -->
     <script src="conf/defaults.js"></script>
@@ -74,7 +71,7 @@
     <div id="gltf-loading"></div>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-    <script src="https://apis.google.com/js/platform.js"></script>
+<!--    <script src="https://apis.google.com/js/platform.js"></script> -->
     <script src="vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="src/auth.js"></script>
     <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>

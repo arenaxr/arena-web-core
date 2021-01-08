@@ -79,7 +79,6 @@ ARENA.loadArena = (urlToLoad, position, rotation) => {
             const l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
                 const obj = arenaObjects[i];
-                console.log("HERE", obj);
                 if (obj.type == 'program') {
                     const pobj = {
                         'object_id': obj.object_id,
@@ -255,6 +254,8 @@ ARENA.loadScene = () => {
         }
 
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
+        // initialize Jitsi videoconferencing
+        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 

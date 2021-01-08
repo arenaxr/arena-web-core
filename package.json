@@ -19,8 +19,12 @@
     "aframe-spe-particles-component": "^1.0.4",
     "chat": "^1.0.8",
     "core-js": "^3.8.2",
+    "googleapis": "^67.0.0",
     "jquery": "^3.5.1",
+    "jsrsasign": "^10.1.4",
+    "jsrsasign-util": "^1.0.2",
     "linkifyjs": "^2.1.9",
+    "paho-mqtt": "^1.1.0",
     "sweetalert": "^2.1.2",
     "webxr-polyfill": "^2.0.3"
   },

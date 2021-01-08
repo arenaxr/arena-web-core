@@ -9,6 +9,7 @@
 /* global THREE, ARENA, Paho */
 
 // 'use strict';
+import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
 import {ARENAJitsiAPI} from './jitsi.js';
 import * as ARENAUtils from './utils.js';
 
@@ -29,10 +30,10 @@ export const ARENAMqttAPI = function() {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
-            //if (!ARENA.JitsiAPI.ready()) {
-            //    ARENA.JitsiAPI = ARENAJitsiAPI(ARENA.jitsiServer);
-            //    console.warn(`ARENA Jitsi restarting...`);
-            //}
+            if (!ARENA.JitsiAPI.ready()) {
+                ARENA.JitsiAPI = ARENAJitsiAPI(ARENA.jitsiServer);
+                console.warn(`ARENA Jitsi restarting...`);
+            }
             mqttClient.subscribe(ARENA.renderTopic);
             console.warn(`MQTT scene reconnected to ${uri}`);
             return; // do not continue!

@@ -9,33 +9,34 @@
 /**
  * ARENA A-Frame components and systems
  */
-import('/components/arena-camera.js');
-import('/components/arena-user.js');
-import('/components/arena-vive.js');
-import('/components/click-listener.js');
-import('/components/collision-listener.js');
-import('/components/goto-url.js');
-import('/components/impulse.js');
-import('/components/load-scene.js');
-import('/components/material-extras.js');
-import('/components/network-latency.js');
-import('/components/press-and-move.js');
-import('/components/ttl.js');
-import('/components/video-control.js');
+
+import './arena-camera.js';
+import './arena-user.js';
+import './arena-vive.js';
+import './click-listener.js';
+import './collision-listener.js';
+import './goto-url.js';
+import './impulse.js';
+import './load-scene.js';
+import './material-extras.js';
+import './network-latency.js';
+import './press-and-move.js';
+import './ttl.js';
+import './video-control.js';
 
 /**
  * Additional A-Frame components and systems
  */
 
 // from npm, when available
-import('aframe-meshline-component'); // thick lines - seems to have bugs
-import('webxr-polyfill'); // fallback for non-webXR browsers
-import('aframe-environment-component'); // pretty environments
-import('aframe-particle-system-component');
-//import('aframe-spe-particles-component');
+import 'aframe-meshline-component'; // thick lines - seems to have bugs
+import 'webxr-polyfill'; // fallback for non-webXR browsers
+import 'aframe-environment-component'; // pretty environments
+//import 'aframe-particle-system-component';
+//import 'aframe-spe-particles-component';
 
 // direct file imports
-import('/components/vendor/aframe-physics-system.js'); // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-import('/components/vendor/aframe-multisrc-component.js'); // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
-import('/components/vendor/transparent-occlude.js'); // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
-import('/components/vendor/morphTarget.js'); // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component
+import './vendor/aframe-physics-system.js'; // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
+import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
+import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
+import './vendor/morphTarget.js'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component

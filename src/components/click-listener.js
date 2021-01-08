@@ -1,5 +1,7 @@
 /* global AFRAME, ARENA */
 
+import * as ARENAUtils from '../utils.js'; 
+
 /**
  * Listen for clicks, call defined function on event evt
  *
@@ -13,7 +15,7 @@ AFRAME.registerComponent('click-listener', {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
 
-            const clickPos = vec3ToObject(position);
+            const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -39,7 +41,7 @@ AFRAME.registerComponent('click-listener', {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
 
-            const clickPos = vec3ToObject(position);
+            const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -64,7 +66,7 @@ AFRAME.registerComponent('click-listener', {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
 
-            const clickPos = vec3ToObject(position);
+            const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
@@ -90,7 +92,7 @@ AFRAME.registerComponent('click-listener', {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
 
-            const clickPos = vec3ToObject(position);
+            const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {

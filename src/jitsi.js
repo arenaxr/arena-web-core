@@ -8,6 +8,7 @@
 
 /* global AFRAME, ARENA, JitsiMeetJS */
 
+import $ from "jquery";
 import swal from 'sweetalert';
 import {ARENAEventEmitter} from './event-emitter.js';
 
