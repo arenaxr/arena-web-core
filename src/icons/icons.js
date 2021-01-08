@@ -221,7 +221,7 @@ export function setupIcons() {
         })
             .then((confirmed) => {
                 if (confirmed) {
-                    signOut(); // --> ./auth.js
+                    signOut();
                 }
             });
     });
