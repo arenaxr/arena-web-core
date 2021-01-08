@@ -6,9 +6,9 @@
  * @date 2020
  */
 
-
 /* global ARENA, Paho */
-//import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
+
+import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
 import {ARENAEventEmitter} from '../event-emitter.js';
 import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';

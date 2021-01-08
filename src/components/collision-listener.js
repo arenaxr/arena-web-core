@@ -1,5 +1,7 @@
 /* global AFRAME, ARENA */
 
+//import * as ARENAUtils from '../utils.js'; 
+
 /**
  * Listen for collisions, callback on event.
  *
@@ -15,7 +17,7 @@ AFRAME.registerComponent('collision-listener', {
                 return;
             }
 
-            // const coordsData = setClickData(evt);
+            // const coordsData = ARENAUtils.setClickData(evt);
             const coordsData = {
                 x: 0,
                 y: 0,

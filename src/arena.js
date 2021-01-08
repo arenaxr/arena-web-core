@@ -39,14 +39,14 @@ import {ARENAChat} from './chat/arena-chat.js';
     inAR: false,
     isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
     onEnterXR: function(xrType) {
-        // debug("ENTERING XR");
+        // ARENAUtils.debug("ENTERING XR");
 
         if (xrType === 'ar') {
-            // debug("xrType is ar");
+            // ARENAUtils.debug("xrType is ar");
 
             this.isAR = true;
             if (this.isWebXRViewer) {
-                // debug("isWebXRViewer = true");
+                // ARENAUtils.debug("isWebXRViewer = true");
 
                 const base64script = document.createElement('script');
                 base64script.onload = async () => {
@@ -56,16 +56,16 @@ import {ARENAChat} from './chat/arena-chat.js';
                 document.head.appendChild(base64script);
 
                 document.addEventListener('mousedown', function(e) {
-                    // debug("MOUSEDOWN " + window.ARENA.lastMouseTarget);
+                    // ARENAUtils.debug("MOUSEDOWN " + window.ARENA.lastMouseTarget);
 
                     if (window.ARENA.lastMouseTarget) {
-                        // debug("has target: "+window.ARENA.lastMouseTarget);
+                        // ARENAUtils.debug("has target: "+window.ARENA.lastMouseTarget);
 
                         const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
                         const elPos = new THREE.Vector3();
                         el.object3D.getWorldPosition(elPos);
-                        // debug("worldPosition is:");
-                        // debug(elPos.x.toString()+","+elPos.x.toString()+","+elPos.x.toString());
+                        // ARENAUtils.debug("worldPosition is:");
+                        // ARENAUtils.debug(elPos.x.toString()+","+elPos.x.toString()+","+elPos.x.toString());
                         const intersection = {
                             x: elPos.x,
                             y: elPos.y,
@@ -79,7 +79,7 @@ import {ARENAChat} from './chat/arena-chat.js';
                             'cursorEl': true,
                         }, false);
                     } else {
-                        // debug("no lastMouseTarget");
+                        // ARENAUtils.debug("no lastMouseTarget");
                     }
                 });
                 document.addEventListener('mouseup', function(e) {
@@ -92,7 +92,7 @@ import {ARENAChat} from './chat/arena-chat.js';
                             y: elPos.y,
                             z: elPos.z,
                         };
-                        // debug(elPos.x);
+                        // ARENAUtils.debug(elPos.x);
                         el.emit('mouseup', {
                             'clicker': window.ARENA.camName,
                             'intersection': {
@@ -178,7 +178,6 @@ ARENA.loadArena = (urlToLoad, position, rotation) => {
             const l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
                 const obj = arenaObjects[i];
-                console.log("HERE", obj);
                 if (obj.type == 'program') {
                     const pobj = {
                         'object_id': obj.object_id,
@@ -354,7 +353,7 @@ ARENA.loadScene = () => {
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
 
         // initialize Jitsi videoconferencing
-        //ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 
