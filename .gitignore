@@ -1,6 +1,7 @@
 node_modules
 defaults.js
 conf/
+.cache/
 # private repos
 models/
 store
