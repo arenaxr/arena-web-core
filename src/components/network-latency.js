@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, Paho */
 
 /**
  * Publish with qos of 2 for network graph to update latency
@@ -14,8 +14,8 @@ AFRAME.registerComponent('network-latency', {
         this.message.qos = 2;
     },
     tick: (function(t, dt) {
-        if (ARENA.mqttClient.isConnected()) {
-            ARENA.mqttClient.send(this.message);
+        if (ARENA.mqtt.isConnected()) {
+            ARENA.mqtt.send(this.message);
         }
     }),
 });

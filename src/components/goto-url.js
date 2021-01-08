@@ -1,5 +1,7 @@
 /* global AFRAME */
 
+import swal from 'sweetalert';
+
 /**
  * Load new URL if clicked
  *

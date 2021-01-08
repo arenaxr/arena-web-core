@@ -1,10 +1,20 @@
-/* global ARENA */
+/**
+ * @fileoverview MQTT-based chat 
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
 
+
+/* global ARENA, Paho */
+//import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
+import {ARENAEventEmitter} from '../event-emitter.js';
 import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';
+import swal from 'sweetalert';
 
 var mqttc;
-
 // generate an uuid
 function uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
@@ -952,3 +962,5 @@ export default class ARENAChat {
         );
     }
 }
+
+exports.ARENAChat = ARENAChat;

@@ -31,7 +31,7 @@ function createIconButton(initialImage, tooltip, onClick) {
 /**
  * Sets up various icons for side menu
  */
-function setupIcons() {
+export function setupIcons() {
     /**
      * Create audio button
      */
@@ -197,7 +197,8 @@ function setupIcons() {
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.scene = ARENA.scenenameParam;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
-                            screenshareWindow.displayName = getDisplayName();
+                            const camera = document.getElementById('my-camera');
+                            screenshareWindow.displayName = camera.getAttribute('displayName');
                             screenshareWindow.camName = ARENA.camName;
                             screenshareWindow.objectIds = objectIds.join();
                         });

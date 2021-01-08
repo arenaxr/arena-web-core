@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 /**
  * Load scene from persistence.
@@ -52,10 +52,10 @@ AFRAME.registerComponent('load-scene', {
                     // MQTT click event that everyone gets
                     console.log('load-scene url=' + data.url);
                     if (!this.loaded) {
-                        loadArena(data.url, data.position, data.rotation);
+                        ARENA.loadArena(data.url, data.position, data.rotation);
                         this.loaded = true;
                     } else {
-                        unloadArena(data.url);
+                        ARENA.unloadArena(data.url);
                         this.loaded = false;
                     }
                 }

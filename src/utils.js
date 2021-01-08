@@ -1,40 +1,34 @@
 // utils.js
 //
-// useful misc utility functions
+// useful misc utility export functions
 
 /**
- * Dynamically import js script
- * usage:
- *   importScript('./path/to/script.js').then((allExports) => { .... }));
- * @param {string} path path of js script
- * @return {promise}
+ * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
+ * @return {string} scene name
  */
-function importScript(path) {
-    let entry = window.importScript.__db[path];
-    if (entry === undefined) {
-        const escape = path.replace(`'`, `\\'`);
-        const script = Object.assign(document.createElement('script'), {
-            type: 'module',
-            textContent: `import * as x from '${escape}'; importScript.__db['${escape}'].resolve(x);`,
-        });
-        entry = importScript.__db[path] = {};
-        entry.promise = new Promise((resolve, reject) => {
-            entry.resolve = resolve;
-            script.onerror = reject;
-        });
-        document.head.appendChild(script);
-        script.remove();
+export function getSceneName() {
+    let path = window.location.pathname.substring(1);
+    if (defaults.supportDevFolders && path.length > 0) {
+        const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
+        if (devPrefix){
+            path = path.replace(devPrefix[0], '');
+        }
     }
-    return entry.promise;
-}
-importScript.__db = {};
-window['importScript'] = importScript; // needed if we ourselves are in a module
+    if (path === '' || path === 'index.html') {
+        return getUrlParam('scene', defaults.scenenameParam);
+    }
+    try {
+        return path.match(/^[^\/]+(\/[^\/]+)?/g)[0];
+    } catch (e) {
+        return getUrlParam('scene', defaults.scenenameParam);
+    }
+};
 
 /**
  * Gets URL parameters as dictionary
  * @return {Object} dictionary of URL parameters
  */
-function getUrlVars() {
+export function getUrlVars() {
     const vars = {};
     window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
         vars[key] = value;
@@ -48,7 +42,7 @@ function getUrlVars() {
  * @param {string} defaultValue default value in case parameter doesnt exist
  * @return {string} value associated with parameter
  */
-function getUrlParam(parameter, defaultValue) {
+export function getUrlParam(parameter, defaultValue) {
     let urlParameter = defaultValue;
     if (window.location.href.indexOf(parameter) > -1) {
         urlParameter = getUrlVars()[parameter];
@@ -65,7 +59,7 @@ function getUrlParam(parameter, defaultValue) {
  * @param {string} defaultValue default value in case parameter doesnt exist
  * @return {[]} list of indicies
  */
-function getUrlParams(parameter, defaultValue) {
+export function getUrlParams(parameter, defaultValue) {
     const indexes = [];
     parameter = parameter + '=';
     if (window.location.href.indexOf(parameter) > -1) {
@@ -86,15 +80,15 @@ function getUrlParams(parameter, defaultValue) {
  * Publishes debug message to mqtt
  * @param {Object} msg msg to debug
  */
-function debug(msg) {
-    publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
+export function debug(msg) {
+    ARENA.mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
 }
 
 /**
  * Gets display name either from local storage or from userParam
  * @return {string} display name
  */
-function getDisplayName() {
+export function getDisplayName() {
     let displayName = localStorage.getItem('display_name');
     if (!displayName) displayName = decodeURI(ARENA.userParam);
     return displayName;
@@ -105,7 +99,7 @@ function getDisplayName() {
  * @param {Object} evt event object
  * @return {Object} position of target
  */
-function setCoordsData(evt) {
+export function setCoordsData(evt) {
     return {
         x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
         y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
@@ -118,7 +112,7 @@ function setCoordsData(evt) {
  * @param {Object} evt event object
  * @return {Object} event intersection as object
  */
-function setClickData(evt) {
+export function setClickData(evt) {
     if (evt.detail.intersection) {
         return {
             x: parseFloat(evt.detail.intersection.point.x.toFixed(3)),
@@ -140,7 +134,7 @@ function setClickData(evt) {
  * @param {Object} c 3 elem vector
  * @return {Object} 3 elem vector as object
  */
-function vec3ToObject(vec) {
+export function vec3ToObject(vec) {
     return {
         x: parseFloat(vec.x.toFixed(3)),
         y: parseFloat(vec.y.toFixed(3)),
@@ -153,7 +147,7 @@ function vec3ToObject(vec) {
  * @param {Object} c quaternion
  * @return {Object} quaternion as object
  */
-function quatToObject(q) {
+export function quatToObject(q) {
     return {
         x: parseFloat(q.x.toFixed(3)),
         y: parseFloat(q.y.toFixed(3)),
@@ -167,7 +161,7 @@ function quatToObject(q) {
  * @param {Object} c position
  * @return {string} position as string
  */
-function coordsToText(c) {
+export function coordsToText(c) {
     return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
 }
 
@@ -176,16 +170,16 @@ function coordsToText(c) {
  * @param {Object} c rotation in quaternions
  * @return {string} rotation as string
  */
-function rotToText(c) {
+export function rotToText(c) {
     return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
 }
 
 /**
- * Utility function to check incoming messages
+ * Utility export function to check incoming messages
  * @param {string} str string with message to check
  * @return {boolean}
  */
-function isJson(str) {
+export function isJson(str) {
     try {
         JSON.parse(str);
     } catch (e) {
