@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import * as ARENAUtils from '../utils.js'; 
+import {ARENAUtils} from '../utils.js';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and vio change events.

@@ -6,15 +6,15 @@
  * @date 2020
  */
 
-import {ARENAEventEmitter} from './event-emitter.js';
-import * as ARENAUtils from './utils.js';
-import {ARENAMqttAPI} from './mqtt.js'
-import {ARENAJitsiAPI} from './jitsi.js';
-import {setupIcons} from './icons/icons.js';
+import {ARENAUtils} from './utils.js';
+import {ARENAMqtt} from './mqtt.js'
+import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/arena-chat.js';
+import {ARENAEventEmitter} from './event-emitter.js';
+import {setupIcons} from './icons/icons.js';
 
 /**
- * ARENA object
+ * ARENA global object
  */
 window.ARENA = {};
 
@@ -22,7 +22,7 @@ ARENA.events = new ARENAEventEmitter(); // arena events target
 ARENA.timeID = new Date().getTime() % 10000;
 ARENA.sceneObjects = new Map();
 ARENA.updateMillis = ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis);
-ARENA.scenenameParam = ARENAUtils.getSceneName(); // scene
+ARENA.scenenameParam = ARENAUtils.getSceneName();
 ARENA.userParam = ARENAUtils.getUrlParam('name', defaults.userParam);
 ARENA.startCoords = ARENAUtils.getUrlParam('location', defaults.startCoords).replace(/,/g, ' ');
 
@@ -255,7 +255,7 @@ ARENA.loadScene = () => {
 
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        ARENA.JitsiAPI = await ARENAJitsi(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 
@@ -278,7 +278,7 @@ window.addEventListener('onauth', function(e) {
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
 
-    ARENA.mqtt = ARENAMqttAPI();
+    ARENA.mqtt = ARENAMqtt();
 
     ARENA.mqtt.connect({
         onSuccess: function() {

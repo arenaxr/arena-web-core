@@ -10,10 +10,10 @@
 
 // 'use strict';
 import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
-import {ARENAJitsiAPI} from './jitsi.js';
-import * as ARENAUtils from './utils.js';
+import {ARENAJitsi} from './jitsi.js';
+import {ARENAUtils} from './utils.js';
 
-export const ARENAMqttAPI = function() {
+export const ARENAMqtt = function() {
 
     let mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
     mqttClient.onConnected = onConnected;
@@ -31,7 +31,7 @@ export const ARENAMqttAPI = function() {
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
             if (!ARENA.JitsiAPI.ready()) {
-                ARENA.JitsiAPI = ARENAJitsiAPI(ARENA.jitsiServer);
+                ARENA.JitsiAPI = ARENAJitsi(ARENA.jitsiServer);
                 console.warn(`ARENA Jitsi restarting...`);
             }
             mqttClient.subscribe(ARENA.renderTopic);

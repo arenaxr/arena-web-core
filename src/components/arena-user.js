@@ -240,11 +240,12 @@ AFRAME.registerComponent('arena-user', {
 
             /* Handle Jitsi Audio */
             if (data.hasAudio) {
-                this.removeMicrophone();
-
                 // set up positional audio, but only once per camera
                 const jistiAudioTrack = ARENA.JitsiAPI.getAudioTrack(data.jitsiId);
                 this.audioTrack = jistiAudioTrack.track;
+                if (this.audioTrack) {
+                    this.removeMicrophone();
+                }
 
                 // set up and attach positional audio
                 const audioStream = new MediaStream();

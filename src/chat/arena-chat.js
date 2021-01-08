@@ -1,5 +1,5 @@
 /**
- * @fileoverview MQTT-based chat 
+ * @fileoverview MQTT-based chat
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
