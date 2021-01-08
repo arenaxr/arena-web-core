@@ -113,16 +113,10 @@ export const ARENAJitsiAPI = async function(jitsiServer) {
             );
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
-                // $('body').append(`<video autoplay='1' id='localVideo${i}' />`);
-
-                // instead use already defined e.g. <video id="localVideo" ...>
+                // use already defined e.g. <video id="localVideo" ...>
                 track.attach($(`#localVideo`)[0]);
                 jitsiVideoTrack = track;
             } else if (track.getType() === 'audio') {
-                // $('body').append(`<audio autoplay='1' muted='true' id='localAudio${i}' />`);
-
-                // instead use already defined in index.html <audio id="aud0" ...>
-                //            track.attach($(`#aud0`)[0]);
                 jitsiAudioTrack = track;
             }
             if (isJoined) {
@@ -272,10 +266,10 @@ export const ARENAJitsiAPI = async function(jitsiServer) {
             connectArena(conference.myUserId(), '');
         } else {
             for (let i = 0; i < localTracks.length; i++) {
-                track = localTracks[i];
+                const track = localTracks[i];
                 conference.addTrack(track);
                 // connect to ARENA; draw media button(s)
-                connectArena(conference.myUserId(), track.getType()); // desktop only?
+                connectArena(conference.myUserId(), track.getType());
             }
         }
 
