@@ -192,7 +192,7 @@ export const ARENAMqttAPI = function() {
             // console.log(message.payloadString, topic, name);
 
             if (ARENA.sceneObjects[name]) {
-                parentEl = ARENA.sceneObjects[name].parentEl;
+                const parentEl = ARENA.sceneObjects[name].parentEl;
                 parentEl.removeChild(ARENA.sceneObjects[name]);
                 delete ARENA.sceneObjects[name];
                 return;
