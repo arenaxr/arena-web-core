@@ -40,7 +40,7 @@ window.addEventListener('enter-vr', function(e) {
         if (isWebXRViewer) {
             const base64script = document.createElement('script');
             base64script.onload = async () => {
-                await ARENAUtils.importScript('./src/apriltag/script.js');
+                await importScript('./src/apriltag/script.js');
             };
             base64script.src = './src/apriltag/base64_binary.js';
             document.head.appendChild(base64script);

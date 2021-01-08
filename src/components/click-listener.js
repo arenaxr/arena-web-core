@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import * as ARENAUtils from '../utils.js';
+import {ARENAUtils} from '../utils.js';
 
 /**
  * Listen for clicks, call defined function on event evt

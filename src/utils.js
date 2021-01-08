@@ -35,7 +35,7 @@ export class ARENAUtils {
             vars[key] = value;
         });
         return vars;
-    }
+    };
 
     /**
      * Extracts URL params
@@ -52,7 +52,7 @@ export class ARENAUtils {
             return defaultValue;
         }
         return urlParameter;
-    }
+    };
 
     /**
      * Extracts URL params
@@ -75,7 +75,7 @@ export class ARENAUtils {
         }
 
         return indexes;
-    }
+    };
 
     /**
      * Publishes debug message to mqtt
@@ -83,7 +83,7 @@ export class ARENAUtils {
      */
     static debug(msg) {
         ARENA.mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
-    }
+    };
 
     /**
      * Gets display name either from local storage or from userParam
@@ -93,7 +93,7 @@ export class ARENAUtils {
         let displayName = localStorage.getItem('display_name');
         if (!displayName) displayName = decodeURI(ARENA.userParam);
         return displayName;
-    }
+    };
 
     /**
      * Returns the position of an event's target
@@ -106,7 +106,7 @@ export class ARENAUtils {
             y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
             z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3),
         };
-    }
+    };
 
     /**
      * Returns where an evt's intersection happened
@@ -128,11 +128,11 @@ export class ARENAUtils {
                 z: 0,
             };
         }
-    }
+    };
 
     /**
      * Turns 3 elem vector to object
-     * @param {Object} c 3 elem vector
+     * @param {Object} vec 3 elem vector
      * @return {Object} 3 elem vector as object
      */
     static vec3ToObject(vec) {
@@ -141,11 +141,11 @@ export class ARENAUtils {
             y: parseFloat(vec.y.toFixed(3)),
             z: parseFloat(vec.z.toFixed(3)),
         };
-    }
+    };
 
     /**
      * Turns quaternion to object
-     * @param {Object} c quaternion
+     * @param {Object} q quaternion
      * @return {Object} quaternion as object
      */
     static quatToObject(q) {
@@ -155,7 +155,7 @@ export class ARENAUtils {
             z: parseFloat(q.z.toFixed(3)),
             w: parseFloat(q.w.toFixed(3)),
         };
-    }
+    };
 
     /**
      * Turns position to string
@@ -164,7 +164,7 @@ export class ARENAUtils {
      */
     static coordsToText(c) {
         return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
-    }
+    };
 
     /**
      * Turns quaternions to string
@@ -173,7 +173,7 @@ export class ARENAUtils {
      */
     static rotToText(c) {
         return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
-    }
+    };
 
     /**
      * Utility static to check incoming messages
@@ -189,6 +189,5 @@ export class ARENAUtils {
             return false;
         }
         return true;
-    }
-
+    };
 }
