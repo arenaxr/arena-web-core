@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import * as ARENAUtils from '../utils.js'; 
+import * as ARENAUtils from '../utils.js';
 
 /**
  * Listen for clicks, call defined function on event evt
@@ -16,7 +16,7 @@ AFRAME.registerComponent('click-listener', {
             const position = camera.getAttribute('position');
 
             const clickPos = ARENAUtils.vec3ToObject(position);
-            const coordsData = setClickData(evt);
+            const coordsData = ARENAUtils.setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -42,7 +42,7 @@ AFRAME.registerComponent('click-listener', {
             const position = camera.getAttribute('position');
 
             const clickPos = ARENAUtils.vec3ToObject(position);
-            const coordsData = setClickData(evt);
+            const coordsData = ARENAUtils.setClickData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -67,7 +67,7 @@ AFRAME.registerComponent('click-listener', {
             const position = camera.getAttribute('position');
 
             const clickPos = ARENAUtils.vec3ToObject(position);
-            const coordsData = setCoordsData(evt);
+            const coordsData = ARENAUtils.setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT
@@ -93,7 +93,7 @@ AFRAME.registerComponent('click-listener', {
             const position = camera.getAttribute('position');
 
             const clickPos = ARENAUtils.vec3ToObject(position);
-            const coordsData = setCoordsData(evt);
+            const coordsData = ARENAUtils.setCoordsData(evt);
 
             if ('cursorEl' in evt.detail) {
                 // original click event; simply publish to MQTT

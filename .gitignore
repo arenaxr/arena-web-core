@@ -136,3 +136,7 @@ tags
 
 ## S/MIME message
 *.smime
+
+## parcel build
+.cache
+dist/
