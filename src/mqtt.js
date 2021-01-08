@@ -257,7 +257,6 @@ export const ARENAMqtt = function() {
             if (theMessage.type === 'scene-options') {
                 return; // don't create another env
             }
-
             if (theMessage.type === 'face-features') {
                 return; // ignore face features
             }
@@ -381,7 +380,7 @@ export const ARENAMqtt = function() {
             switch (type) {
             case 'light':
                 entityEl.setAttribute('light', 'type', 'ambient');
-                // does this work for light a-entities ?
+                // does this work for light a-entities?
                 entityEl.setAttribute('light', 'color', color);
                 break;
 
@@ -407,56 +406,6 @@ export const ARENAMqtt = function() {
             case 'viveLeft':
                 break;
             case 'viveRight':
-                break;
-
-            case 'image': // use special 'url' data slot for bitmap URL (like gltf-models do)
-                entityEl.setAttribute('geometry', 'primitive', 'plane');
-                entityEl.setAttribute('material', 'src', theMessage.data.url);
-                entityEl.setAttribute('material', 'shader', 'flat');
-                entityEl.object3D.scale.set(xscale, yscale, zscale);
-                break;
-
-            case 'line':
-                entityEl.setAttribute('line', theMessage.data);
-                entityEl.setAttribute('line', 'color', color);
-                break;
-
-            case 'thickline':
-                entityEl.setAttribute('meshline', theMessage.data);
-                entityEl.setAttribute('meshline', 'color', color);
-                delete theMessage.data.thickline;
-                break;
-
-            case 'particle':
-                entityEl.setAttribute('particle-system', theMessage.data);
-                break;
-
-            case 'gltf-model':
-                entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
-                entityEl.setAttribute('gltf-model', theMessage.data.url);
-
-            case 'camera':
-                // decide if we need draw or delete videoCube around head
-                if (theMessage.hasOwnProperty('jitsiId')) {
-                    entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
-                    entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
-                    entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
-                }
-                if (theMessage.hasOwnProperty('displayName')) {
-                    entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text
-                }
-                break;
-
-            case 'viveLeft':
-                break;
-            case 'viveRight':
-                break;
-
-            case 'image': // use special 'url' data slot for bitmap URL (like gltf-models do)
-                entityEl.setAttribute('geometry', 'primitive', 'plane');
-                entityEl.setAttribute('material', 'src', theMessage.data.url);
-                entityEl.setAttribute('material', 'shader', 'flat');
-                entityEl.object3D.scale.set(xscale, yscale, zscale);
                 break;
 
             case 'line':
@@ -491,7 +440,7 @@ export const ARENAMqtt = function() {
                     }
                     gltfProgressEl.innerHTML = innerHTML;
                     gltfProgressEl.className = 'show';
-                    if (evt.detail.progress == 100 || failed) {
+                    if (evt.detail.progress === 100 || failed) {
                         setTimeout(() => {
                             progMsgs = {};
                             gltfProgressEl.className = 'hide';
@@ -513,6 +462,13 @@ export const ARENAMqtt = function() {
                 delete theMessage.data.url;
                 break;
 
+            case 'image': // use special 'url' data slot for bitmap URL (like gltf-models do)
+                entityEl.setAttribute('geometry', 'primitive', 'plane');
+                entityEl.setAttribute('material', 'src', theMessage.data.url);
+                entityEl.setAttribute('material', 'shader', 'flat');
+                entityEl.object3D.scale.set(xscale, yscale, zscale);
+                break;
+
             case 'text':
                 // set a bunch of defaults
                 entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
@@ -531,9 +487,9 @@ export const ARENAMqtt = function() {
 
             default:
                 // handle arbitrary A-Frame geometry primitive types
-                entityEl.setAttribute('geometry', 'primitive', type);
+                if (type) entityEl.setAttribute('geometry', 'primitive', type);
                 entityEl.object3D.scale.set(xscale, yscale, zscale);
-                entityEl.setAttribute('material', 'color', color);
+                if (color) entityEl.setAttribute('material', 'color', color);
                 break;
             } // switch(type)
 

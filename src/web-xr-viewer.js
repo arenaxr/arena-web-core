@@ -1,4 +1,9 @@
 /**
+ * WebXR viewer handler and pseudo-click generator
+ *
+ */
+
+/**
  * Dynamically import js script
  * usage:
  *   importScript('./path/to/script.js').then((allExports) => { .... }));

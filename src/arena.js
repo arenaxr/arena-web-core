@@ -87,7 +87,7 @@ ARENA.loadArena = (urlToLoad, position, rotation) => {
                         'data': obj.attributes,
                     };
                     // ask runtime manager to start this program
-                    ARENA.RuntimeManager.createModule(pobj);
+                    // ARENA.RuntimeManager.createModule(pobj);
                     continue;
                 }
                 if (obj.object_id === ARENA.camName) {
