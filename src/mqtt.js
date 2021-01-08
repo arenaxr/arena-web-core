@@ -53,6 +53,7 @@ export const ARENAMqttAPI = function() {
         const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
         sceneObjects.myCamera.setAttribute('arena-camera', 'enabled', true);
         sceneObjects.myCamera.setAttribute('arena-camera', 'color', color);
+        sceneObjects.myCamera.setAttribute('arena-camera', 'displayName', ARENAUtils.getDisplayName());
         sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
         const viveLeft = document.getElementById('vive-leftHand');
@@ -644,11 +645,11 @@ export const ARENAMqttAPI = function() {
 
         /**
          * Direct call to mqtt client send
-         * @param {object} message
+         * @param {object} msg
          */
         send: function(msg) {
-            if (mqttClient.isConnected()) return;
-            return mqttClient.send(message);
+            if (!mqttClient.isConnected()) return;
+            return mqttClient.send(msg);
         },
         /**
          * Publish to given dest topic
@@ -656,7 +657,7 @@ export const ARENAMqttAPI = function() {
          * @param {object} msg
          */
         publish: function(dest, msg) {
-            if (mqttClient.isConnected()) return;
+            if (!mqttClient.isConnected()) return;
 
             if (typeof msg === 'object') {
                 // add timestamp to all published messages

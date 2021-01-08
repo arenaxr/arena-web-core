@@ -1,9 +1,15 @@
 node_modules
 defaults.js
 conf/
+
+## parcel build
+dist/
+.cache/
+
 # private repos
 models/
 store
+
 # arena test versions
 *dev.*
 *dev2.*
@@ -136,7 +142,3 @@ tags
 
 ## S/MIME message
 *.smime
-
-## parcel build
-.cache
-dist/
