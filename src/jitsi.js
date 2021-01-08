@@ -18,7 +18,7 @@ export const ARENAJitsiAPI = async function(jitsiServer) {
     // ==================================================
 
     // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-    const arenaConferenceName = globals.scenenameParam.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+    const arenaConferenceName = ARENA.scenenameParam.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
     const connectOptions = {
         hosts: {

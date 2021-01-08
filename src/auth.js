@@ -30,7 +30,7 @@
 
 
 'use strict';
-import * as gapi from 'googleapis';
+//import * as gapi from 'googleapis';
 
 window.AUTH = {}; // auth namespace
 

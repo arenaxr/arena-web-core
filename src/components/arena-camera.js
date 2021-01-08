@@ -100,7 +100,7 @@ AFRAME.registerComponent('arena-camera', {
     publishHeadText() {
         const data = this.data;
 
-        publish(ARENA.outputTopic + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+        ARENA.mqtt.publish(ARENA.outputTopic + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
             'object_id': ARENA.camName,
             'action': 'create',
             'type': 'object',
@@ -136,8 +136,8 @@ AFRAME.registerComponent('arena-camera', {
         data.vioRotation.setFromRotationMatrix(this.cpi);
         data.vioPosition.setFromMatrixPosition(this.cpi);
 
-        const rotationCoords = ARENAUtils.rotToText(this.rotation);
-        const positionCoords = ARENAUtils.coordsToText(this.position);
+        const rotationCoords = ARENAUtils.rotToText(data.rotation);
+        const positionCoords = ARENAUtils.coordsToText(data.position);
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position every 1 sec
