@@ -35,7 +35,7 @@
   },
   "scripts": {
     "watch": "parcel watch src/index.js",
-    "build": "parcel build src/index.js"
+    "build": "parcel build src/index.js --public-url ./dist"
   },
   "repository": {
     "type": "git",
