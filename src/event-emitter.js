@@ -1,7 +1,8 @@
+
 /** Class encapsulating an EventTarget for ARENA events.
  * See events and documentation of callbacks bellow
 */
-class ARENAEventEmitter {
+export default class ARENAEventEmitter {
     /**
      * Create an event emitter.
      */
@@ -140,9 +141,10 @@ ARENAEventEmitter.events = {
 * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|...}
 *
 */
-ARENAEventEmitter.sources = sources = {
+ARENAEventEmitter.sources = {
     JITSI: 'jitsi',
     CHAT: 'chat',
 };
 
-// export default ARENAEventEmitter
+exports.ARENAEventEmitter = ARENAEventEmitter;
+

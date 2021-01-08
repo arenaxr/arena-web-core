@@ -1,6 +1,17 @@
+/**
+ * @fileoverview Jitsi API for the ARENA
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 /* global AFRAME, ARENA, JitsiMeetJS */
 
-const ARENAJitsiAPI = async function(jitsiServer) {
+import swal from 'sweetalert';
+import {ARENAEventEmitter} from './event-emitter.js';
+
+export const ARENAJitsiAPI = async function(jitsiServer) {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================

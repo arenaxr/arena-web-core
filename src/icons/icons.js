@@ -31,7 +31,7 @@ function createIconButton(initialImage, tooltip, onClick) {
 /**
  * Sets up various icons for side menu
  */
-function setupIcons() {
+export function setupIcons() {
     /**
      * Create audio button
      */
@@ -355,7 +355,7 @@ function setupIcons() {
      * @param {string} displayName display name of user's camera
      */
     function publishHeadText(displayName) {
-        publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+        ARENA.mqtt.publish('realm/s/' + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
             'object_id': ARENA.camName,
             'action': 'create',
             'type': 'object',

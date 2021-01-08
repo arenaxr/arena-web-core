@@ -6,10 +6,14 @@
  * @date 2020
  */
 
-/* global AFRAME, THREE */
+/* global AFRAME, THREE, Paho */
 
-import '/utils.js'; 
-import '/mqtt.js'; 
+import {ARENAEventEmitter} from './event-emitter.js';
+import * as ARENAUtils from './utils.js'; 
+import {ARENAMqttAPI} from './mqtt.js'
+import {ARENAJitsiAPI} from './jitsi.js';
+import {setupIcons} from './icons/icons.js';
+import {ARENAChat} from './chat/arena-chat.js';
 
 /**
  * ARENA object
@@ -20,14 +24,14 @@ import '/mqtt.js';
     timeID: new Date().getTime() % 10000,
     sceneObjects: new Map(),
     // TODO(mwfarb): push per scene themes/styles into json scene object
-    updateMillis: getUrlParam('camUpdateRate', defaults.updateMillis),
-    scenenameParam: getSceneName(), // scene
-    userParam: getUrlParam('name', defaults.userParam),
-    startCoords: getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
-    weatherParam: getUrlParam('weather', defaults.weatherParam),
-    mqttParamZ: getUrlParam('mqttServer', defaults.mqttParamZ),
-    fixedCamera: getUrlParam('fixedCamera', defaults.fixedCamera),
-    ATLASurl: getUrlParam('ATLASurl', defaults.ATLASurl),
+    updateMillis: ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis),
+    scenenameParam: ARENAUtils.getSceneName(), // scene
+    userParam: ARENAUtils.getUrlParam('name', defaults.userParam),
+    startCoords: ARENAUtils.getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
+    weatherParam: ARENAUtils.getUrlParam('weather', defaults.weatherParam),
+    mqttParamZ: ARENAUtils.getUrlParam('mqttServer', defaults.mqttParamZ),
+    fixedCamera: ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera),
+    ATLASurl: ARENAUtils.getUrlParam('ATLASurl', defaults.ATLASurl),
     localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
     vioTopic: defaults.vioTopic,
     latencyTopic: defaults.latencyTopic,
@@ -46,7 +50,7 @@ import '/mqtt.js';
 
                 const base64script = document.createElement('script');
                 base64script.onload = async () => {
-                    await importScript('/apriltag/script.js');
+                    await ARENAUtils.importScript('/apriltag/script.js');
                 };
                 base64script.src = '/apriltag/base64_binary.js';
                 document.head.appendChild(base64script);
@@ -115,8 +119,8 @@ import '/mqtt.js';
     },
 };
 
-const urlLat = getUrlParam('lat');
-const urlLong = getUrlParam('long');
+const urlLat = ARENAUtils.getUrlParam('lat');
+const urlLong = ARENAUtils.getUrlParam('long');
 if (urlLat && urlLong) {
     ARENA.clientCoords = {
         latitude: urlLat,
@@ -155,7 +159,8 @@ ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
  * @param {Object} position initial position
  * @param {Object} rotation initial rotation
  */
-function loadArena(urlToLoad, position, rotation) {
+ARENA.loadArena = (urlToLoad, position, rotation) => {
+    
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -173,6 +178,7 @@ function loadArena(urlToLoad, position, rotation) {
             const l = arenaObjects.length;
             for (let i = 0; i < l; i++) {
                 const obj = arenaObjects[i];
+                console.log("HERE", obj);
                 if (obj.type == 'program') {
                     const pobj = {
                         'object_id': obj.object_id,
@@ -212,7 +218,7 @@ function loadArena(urlToLoad, position, rotation) {
                         msg.data.rotation.w = r.w;
                     }
 
-                    onMessageArrived(undefined, msg);
+                    ARENA.mqtt.processMessage(msg);
                 }
             }
             const l2 = deferredObjects.length;
@@ -227,7 +233,7 @@ function loadArena(urlToLoad, position, rotation) {
                     data: obj.attributes,
                 };
                 console.log('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
-                onMessageArrived(undefined, msg);
+                ARENA.mqtt.processMessage(msg);
             }
         }
     };
@@ -238,7 +244,7 @@ function loadArena(urlToLoad, position, rotation) {
  * or ARENA.persistenceUrl if not
  * @param {string} urlToLoad which url to unload arena from
  */
-function unloadArena(urlToLoad) {
+ARENA.unloadArena = (urlToLoad) => {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT;
     if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -272,7 +278,7 @@ function unloadArena(urlToLoad) {
 /**
  * Loads and applied scene-options, if it exists, otherwise set to default enviornment
  */
-function loadScene() {
+ARENA.loadScene = () => {
     let sceneOptions = {
         jitsiServer: 'mr.andrew.cmu.edu',
     };
@@ -348,24 +354,17 @@ function loadScene() {
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
 
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        //ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 
-let lwt;
 window.addEventListener('onauth', function(e) {
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
 
-    // Last Will and Testament message sent to subscribers if this client loses connection
-    lwt = new Paho.Message(JSON.stringify({
-        object_id: ARENA.camName,
-        action: 'delete',
-    }));
-    lwt.destinationName = ARENA.outputTopic + ARENA.camName;
-    lwt.qos = 2;
-    lwt.retained = false;
-    ARENA.mqttClient.connect({
+    ARENA.mqtt = ARENAMqttAPI();
+    
+    ARENA.mqtt.connect({
         onSuccess: function() {
             console.log('MQTT scene connection success.');
         },
@@ -373,11 +372,15 @@ window.addEventListener('onauth', function(e) {
             console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
         },
         reconnect: true,
-        willMessage: lwt,
         userName: ARENA.username,
         password: ARENA.mqttToken,
-    });
-
+        },
+        // last will message
+        JSON.stringify({object_id: ARENA.camName, action: 'delete'}),
+        // last will topic
+        ARENA.outputTopic + ARENA.camName
+        );
+/*
     // init runtime manager
     ARENA.RuntimeManager.init({
         mqtt_uri: ARENA.mqttParam,
@@ -389,9 +392,9 @@ window.addEventListener('onauth', function(e) {
         mqtt_username: ARENA.username,
         mqtt_token: ARENA.mqttToken,
     });
-
+*/
     // init chat after
-    ARENA.Chat.init({
+    ARENA.chat = new ARENAChat({
         userid: ARENA.idTag,
         cameraid: ARENA.camName,
         username: ARENA.displayName,
@@ -404,6 +407,7 @@ window.addEventListener('onauth', function(e) {
         mqtt_token: ARENA.mqttToken,
         supportDevFolders: defaults.supportDevFolders,
     });
+    ARENA.chat.start();
 
     // initialize face tracking if not on mobile
     if (!AFRAME.utils.device.isMobile()) {
@@ -414,5 +418,3 @@ window.addEventListener('onauth', function(e) {
 
     setupIcons();
 });
-
-import '/components/index.js' // load additional aframe components

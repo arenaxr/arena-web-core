@@ -32,7 +32,7 @@ AFRAME.registerComponent('collision-listener', {
                     source: collider,
                 },
             };
-            publish(ARENA.outputTopic + this.id, thisMsg);
+            ARENA.mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
         });
     },
 });

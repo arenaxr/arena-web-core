@@ -1,9 +1,13 @@
+/**
+ * @fileoverview Direct modifications to AFRAME components to improve UX in the ARENA
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 /* global AFRAME, ARENA */
 
-/**
- * Direct modifications to AFRAME components to improve UX in the ARENA
- *
- */
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {

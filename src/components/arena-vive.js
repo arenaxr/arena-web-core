@@ -17,7 +17,7 @@ function eventAction(evt, eventName, myThis) {
 
     // publish to MQTT
     const objName = myThis.id + '_' + ARENA.idTag;
-    publish(ARENA.outputTopic + objName, {
+    ARENA.mqtt.publish(ARENA.outputTopic + objName, {
         object_id: objName,
         action: 'clientEvent',
         type: eventName,
@@ -107,7 +107,7 @@ AFRAME.registerComponent('arena-vive', {
                 color: data.color,
             },
         };
-        publish(ARENA.outputTopic + data.name, msg);
+        ARENA.mqtt.publish(ARENA.outputTopic + data.name, msg);
     },
 
     tick: (function(t, dt) {

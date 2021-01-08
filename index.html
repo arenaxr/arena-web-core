@@ -11,95 +11,25 @@
     <title>ARENA</title>
     <meta name="description" content="Augmented Reality Edge Networking Architecture">
 
-    <!-- jQuery -->
-    <script src="vendor/jquery-2.1.1.min.js"></script>
-
-    <!-- Strophe, used by libjitsi -->
     <script src="vendor/strophe/strophe.js"></script>
     <script src="vendor/strophe/strophe.disco.min.js?v=1"></script>
 
-    <!-- the AFrame script library (minified) -->
-    <script src="aframe/dist/aframe-master.min.js"></script>
+    <!-- lib jitsi -->
+    <script src="src/vendor/lib-jitsi-meet.min.js"></script>
 
-    <!-- multisrc component: multiple texture sides for e.g. dice -->
-    <!-- from https://cdn.rawgit.com/elbobo/aframe-multisrc-component/b6d23310/dist/0.3/aframe-multisrc-component.js -->
-    <script src="vendor/aframe-multisrc-component.js"></script>
-
-    <!-- from https://cdn.rawgit.com/donmccurdy/aframe-physics-system/v4.0.1/dist/aframe-physics-system.js -->
-    <script src="vendor/aframe-physics-system.js"></script>
-
-    <!-- thick lines  - seems to have bugs -->
-    <!-- from https://rawgit.com/andreasplesch/aframe-meshline-component/master/dist/aframe-meshline-component.min.js -->
-    <script src="vendor/aframe-meshline-component.js"></script>
-
-    <!-- from https://unpkg.com/aframe-spe-particles-component@^1.0.4/dist/aframe-spe-particles-component.min.js -->
-    <script src="vendor/aframe-spe-particles-component.min.js"></script>
-    <script src="vendor/aframe-particle-system-component.min.js"></script>
-
-    <!-- from https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.js -->
-    <script src="vendor/webxr-polyfill.js"></script>
-
-    <!-- pretty backgrounds  -->
-    <script src="vendor/aframe-environment-component.min.js"></script>
-
-    <!-- transparent occlude -->
-    <script src="vendor/transparent-occlude.js"></script>
-
-    <!-- gltf animations -->
-    <script src="vendor/morphTarget.js"></script>
-
-    <!-- V3.1 of the Paho MQTT.js library -->
+    <!-- paho mqtt lib -->
     <script src="vendor/paho-mqtt.js" type="text/javascript"></script>
-
-    <!-- custom alerts -->
-    <script src="vendor/sweetalert.min.js"></script>
 
     <!-- our default configs -->
     <script src="conf/defaults.js"></script>
 
-    <!-- aframe component modifications -->
-    <script src="src/aframe-mods.js"></script>
-
-    <!-- utility funcs -->
-    <script src="src/utils.js"></script>
-    <script src="src/event-emitter.js"></script>
-
-    <script src="src/arena.js"></script>
-
-    <!-- Components -->
-    <script src="src/components/arena-camera.js"></script>
-    <script src="src/components/arena-user.js"></script>
-    <script src="src/components/arena-vive.js"></script>
-    <script src="src/components/click-listener.js"></script>
-    <script src="src/components/collision-listener.js"></script>
-    <script src="src/components/goto-url.js"></script>
-    <script src="src/components/impulse.js"></script>
-    <script src="src/components/load-scene.js"></script>
-    <script src="src/components/material-extras.js"></script>
-    <script src="src/components/press-and-move.js"></script>
-    <script src="src/components/ttl.js"></script>
-    <script src="src/components/video-control.js"></script>
-
-    <!-- mqtt script -->
-    <script src="src/mqtt.js" type="text/javascript"></script>
-
-    <!-- jitsi -->
-    <script src="vendor/lib-jitsi-meet.min.js"></script>
-    <script src="src/jitsi.js"></script>
+    <!-- main arena bundle -->
+    <script src="dist/index.js"></script>
 
     <!-- face tracking -->
     <script src="src/face-tracking/dist/arena-face-tracker.min.js"></script>
-    <script src="src/face-tracking/script.js"></script>
-
-    <!-- icons -->
-    <script src="src/icons/icons.js"></script>
-
-    <!-- mqtt chat dialog -->
-    <script src="src/chat/dist/index.js" type="module"></script>
-
-    <!-- runtime manager -->
-    <script src="src/runtime-mngr/index.js"></script>
-
+    <script src="src/face-tracking/script.js"></script> 
+    
     <!-- import stylesheets -->
     <link rel="stylesheet" href="src/icons/icons.css">
     <link rel="stylesheet" href="src/chat/style.css">

@@ -26,7 +26,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
                 }
                 // console.log(this.id + ' mousedown at: ', coordsToText(coordsData), 'by', ARENA.camName);
             }
@@ -50,7 +50,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
                 }
                 // console.log(this.id + ' mouseup at: ', coordsToText(coordsData), 'by', ARENA.camName);
             }
@@ -73,7 +73,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
                 }
                 window.ARENA.lastMouseTarget = this.id;
             }
@@ -96,7 +96,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
                 }
                 window.ARENA.lastMouseTarget = undefined;
             }
