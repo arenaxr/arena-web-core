@@ -9,17 +9,16 @@ import * as ARENAUtils from '../utils.js';
 AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: {type: 'boolean', default: false},
+        displayName: {type: 'string', default: 'No Name'},
         color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
+        rotation: {type: 'vec4', default: new THREE.Quaternion()},
+        position: {type: 'vec3', default: new THREE.Vector3()},
+        vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
+        vioPosition: {type: 'vec3', default: new THREE.Vector3()},
     },
 
     init: function() {
-        this.rotation = new THREE.Quaternion();
-        this.position = new THREE.Vector3();
-
-        this.vioRotation = new THREE.Quaternion();
-        this.vioPosition = new THREE.Vector3();
         this.vioMatrix = new THREE.Matrix4();
-
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
@@ -33,23 +32,24 @@ AFRAME.registerComponent('arena-camera', {
     publishPose() {
         const data = this.data;
         if (!data.enabled) return;
+
         const msg = {
             object_id: ARENA.camName,
-            displayName: ARENA.displayName,
+            displayName: data.displayName,
             action: 'create',
             type: 'object',
             data: {
                 object_type: 'camera',
                 position: {
-                    x: parseFloat(this.position.x.toFixed(3)),
-                    y: parseFloat(this.position.y.toFixed(3)),
-                    z: parseFloat(this.position.z.toFixed(3)),
+                    x: parseFloat(data.position.x.toFixed(3)),
+                    y: parseFloat(data.position.y.toFixed(3)),
+                    z: parseFloat(data.position.z.toFixed(3)),
                 },
                 rotation: {
-                    x: parseFloat(this.rotation._x.toFixed(3)),
-                    y: parseFloat(this.rotation._y.toFixed(3)),
-                    z: parseFloat(this.rotation._z.toFixed(3)),
-                    w: parseFloat(this.rotation._w.toFixed(3)),
+                    x: parseFloat(data.rotation._x.toFixed(3)),
+                    y: parseFloat(data.rotation._y.toFixed(3)),
+                    z: parseFloat(data.rotation._z.toFixed(3)),
+                    w: parseFloat(data.rotation._w.toFixed(3)),
                 },
                 color: data.color,
             },
@@ -71,6 +71,7 @@ AFRAME.registerComponent('arena-camera', {
     publishVio() {
         const data = this.data;
         if (!data.enabled) return;
+
         if (ARENA.fixedCamera !== '') {
             const msg = {
                 object_id: ARENA.camName,
@@ -79,15 +80,15 @@ AFRAME.registerComponent('arena-camera', {
                 data: {
                     object_type: 'camera',
                     position: {
-                        x: parseFloat(this.vioPosition.x.toFixed(3)),
-                        y: parseFloat(this.vioPosition.y.toFixed(3)),
-                        z: parseFloat(this.vioPosition.z.toFixed(3)),
+                        x: parseFloat(data.vioPosition.x.toFixed(3)),
+                        y: parseFloat(data.vioPosition.y.toFixed(3)),
+                        z: parseFloat(data.vioPosition.z.toFixed(3)),
                     },
                     rotation: {
-                        x: parseFloat(this.vioRotation._x.toFixed(3)),
-                        y: parseFloat(this.vioRotation._y.toFixed(3)),
-                        z: parseFloat(this.vioRotation._z.toFixed(3)),
-                        w: parseFloat(this.vioRotation._w.toFixed(3)),
+                        x: parseFloat(data.vioRotation._x.toFixed(3)),
+                        y: parseFloat(data.vioRotation._y.toFixed(3)),
+                        z: parseFloat(data.vioRotation._z.toFixed(3)),
+                        w: parseFloat(data.vioRotation._w.toFixed(3)),
                     },
                     color: data.color,
                 },
@@ -96,12 +97,34 @@ AFRAME.registerComponent('arena-camera', {
         }
     },
 
+    publishHeadText() {
+        const data = this.data;
+
+        publish(ARENA.outputTopic + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+            'object_id': ARENA.camName,
+            'action': 'create',
+            'type': 'object',
+            'displayName': data.displayName,
+            'data': {'object_type': 'headtext'},
+        });
+    },
+
+    update(oldData) {
+        const data = this.data;
+
+        if (data.displayName !== oldData.displayName) {
+            this.publishHeadText();
+        }
+    },
+
     tick: (function(t, dt) {
+        const data = this.data;
         const el = this.el;
+
         this.heartBeatCounter++;
 
-        this.rotation.setFromRotationMatrix(el.object3D.matrixWorld);
-        this.position.setFromMatrixPosition(el.object3D.matrixWorld);
+        data.rotation.setFromRotationMatrix(el.object3D.matrixWorld);
+        data.position.setFromMatrixPosition(el.object3D.matrixWorld);
 
         this.camParent = el.object3D.parent.matrixWorld;
         this.cam = el.object3D.matrixWorld;
@@ -110,8 +133,8 @@ AFRAME.registerComponent('arena-camera', {
         this.cpi.multiply(this.cam);
 
         this.vioMatrix.copy(this.cpi);
-        this.vioRotation.setFromRotationMatrix(this.cpi);
-        this.vioPosition.setFromMatrixPosition(this.cpi);
+        data.vioRotation.setFromRotationMatrix(this.cpi);
+        data.vioPosition.setFromMatrixPosition(this.cpi);
 
         const rotationCoords = ARENAUtils.rotToText(this.rotation);
         const positionCoords = ARENAUtils.coordsToText(this.position);

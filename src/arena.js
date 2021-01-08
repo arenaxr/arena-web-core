@@ -6,10 +6,8 @@
  * @date 2020
  */
 
-/* global AFRAME, THREE, Paho */
-
 import {ARENAEventEmitter} from './event-emitter.js';
-import * as ARENAUtils from './utils.js'; 
+import * as ARENAUtils from './utils.js';
 import {ARENAMqttAPI} from './mqtt.js'
 import {ARENAJitsiAPI} from './jitsi.js';
 import {setupIcons} from './icons/icons.js';
@@ -18,137 +16,40 @@ import {ARENAChat} from './chat/arena-chat.js';
 /**
  * ARENA object
  */
- window.ARENA = {
-    // arena events target
-    events: new ARENAEventEmitter(),
-    timeID: new Date().getTime() % 10000,
-    sceneObjects: new Map(),
-    // TODO(mwfarb): push per scene themes/styles into json scene object
-    updateMillis: ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis),
-    scenenameParam: ARENAUtils.getSceneName(), // scene
-    userParam: ARENAUtils.getUrlParam('name', defaults.userParam),
-    startCoords: ARENAUtils.getUrlParam('location', defaults.startCoords).replace(/,/g, ' '),
-    weatherParam: ARENAUtils.getUrlParam('weather', defaults.weatherParam),
-    mqttParamZ: ARENAUtils.getUrlParam('mqttServer', defaults.mqttParamZ),
-    fixedCamera: ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera),
-    ATLASurl: ARENAUtils.getUrlParam('ATLASurl', defaults.ATLASurl),
-    localVideoWidth: AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300,
-    vioTopic: defaults.vioTopic,
-    latencyTopic: defaults.latencyTopic,
-    lastMouseTarget: undefined,
-    inAR: false,
-    isWebXRViewer: navigator.userAgent.includes('WebXRViewer'),
-    onEnterXR: function(xrType) {
-        // ARENAUtils.debug("ENTERING XR");
+window.ARENA = {};
 
-        if (xrType === 'ar') {
-            // ARENAUtils.debug("xrType is ar");
+ARENA.events = new ARENAEventEmitter(); // arena events target
+ARENA.timeID = new Date().getTime() % 10000;
+ARENA.sceneObjects = new Map();
+ARENA.updateMillis = ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis);
+ARENA.scenenameParam = ARENAUtils.getSceneName(); // scene
+ARENA.userParam = ARENAUtils.getUrlParam('name', defaults.userParam);
+ARENA.startCoords = ARENAUtils.getUrlParam('location', defaults.startCoords).replace(/,/g, ' ');
 
-            this.isAR = true;
-            if (this.isWebXRViewer) {
-                // ARENAUtils.debug("isWebXRViewer = true");
-
-                const base64script = document.createElement('script');
-                base64script.onload = async () => {
-                    await ARENAUtils.importScript('/apriltag/script.js');
-                };
-                base64script.src = '/apriltag/base64_binary.js';
-                document.head.appendChild(base64script);
-
-                document.addEventListener('mousedown', function(e) {
-                    // ARENAUtils.debug("MOUSEDOWN " + window.ARENA.lastMouseTarget);
-
-                    if (window.ARENA.lastMouseTarget) {
-                        // ARENAUtils.debug("has target: "+window.ARENA.lastMouseTarget);
-
-                        const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
-                        const elPos = new THREE.Vector3();
-                        el.object3D.getWorldPosition(elPos);
-                        // ARENAUtils.debug("worldPosition is:");
-                        // ARENAUtils.debug(elPos.x.toString()+","+elPos.x.toString()+","+elPos.x.toString());
-                        const intersection = {
-                            x: elPos.x,
-                            y: elPos.y,
-                            z: elPos.z,
-                        };
-                        el.emit('mousedown', {
-                            'clicker': window.ARENA.camName,
-                            'intersection': {
-                                point: intersection,
-                            },
-                            'cursorEl': true,
-                        }, false);
-                    } else {
-                        // ARENAUtils.debug("no lastMouseTarget");
-                    }
-                });
-                document.addEventListener('mouseup', function(e) {
-                    if (window.ARENA.lastMouseTarget) {
-                        const el = window.ARENA.sceneObjects[window.ARENA.lastMouseTarget];
-                        const elPos = new THREE.Vector3();
-                        el.object3D.getWorldPosition(elPos);
-                        const intersection = {
-                            x: elPos.x,
-                            y: elPos.y,
-                            z: elPos.z,
-                        };
-                        // ARENAUtils.debug(elPos.x);
-                        el.emit('mouseup', {
-                            'clicker': window.ARENA.camName,
-                            'intersection': {
-                                point: intersection,
-                            },
-                            'cursorEl': true,
-                        }, false);
-                    }
-                });
-                let cursor = document.getElementById('mouseCursor');
-                const cursorParent = cursor.parentNode;
-                cursorParent.removeChild(cursor);
-                cursor = document.createElement('a-cursor');
-                cursor.setAttribute('fuse', false);
-                cursor.setAttribute('scale', '0.1 0.1 0.1');
-                cursor.setAttribute('position', '0 0 -0.1'); // move reticle closer (side effect: bigger!)
-                cursor.setAttribute('color', '#333');
-                cursor.setAttribute('max-distance', '10000');
-                cursor.setAttribute('id', 'fuse-cursor');
-                cursorParent.appendChild(cursor);
-            }
-            document.getElementById('env').setAttribute('visible', false);
-        }
-    },
-};
-
-const urlLat = ARENAUtils.getUrlParam('lat');
-const urlLong = ARENAUtils.getUrlParam('long');
-if (urlLat && urlLong) {
-    ARENA.clientCoords = {
-        latitude: urlLat,
-        longitude: urlLong,
-    };
-} else {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition((position) => {
-            ARENA.clientCoords = position.coords;
-        });
-    }
-}
+ARENA.mqttParamZ = ARENAUtils.getUrlParam('mqttServer', defaults.mqttParamZ);
+ARENA.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera);
+ARENA.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', defaults.ATLASurl);
+ARENA.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+ARENA.latencyTopic = defaults.latencyTopic;
 
 ARENA.persistenceUrl = '//' + defaults.persistHost + defaults.persistPath + ARENA.scenenameParam;
 ARENA.mqttParam = 'wss://' + ARENA.mqttParamZ + defaults.mqttPath[Math.floor(Math.random() * defaults.mqttPath.length)];
+
 ARENA.outputTopic = defaults.realm + '/s/' + ARENA.scenenameParam + '/';
+ARENA.vioTopic = defaults.vioTopic;
 ARENA.renderTopic = ARENA.outputTopic + '#';
-ARENA.camName = '';
-ARENA.displayName = decodeURI(ARENA.userParam); // set initial name
+
 ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
 
+ARENA.camName = '';
 if (ARENA.fixedCamera !== '') {
     ARENA.camName = 'camera_' + ARENA.fixedCamera + '_' + ARENA.fixedCamera;
 } else {
     ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
 }
 
-ARENA.avatarName = 'avatar_' + ARENA.idTag;
+ARENA.faceName = 'face_' + ARENA.idTag; // e.g. face_9240_X
+ARENA.avatarName = 'avatar_' + ARENA.idTag; // e.g. avatar_9240_X
 ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
 ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
 
@@ -160,7 +61,7 @@ ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
  * @param {Object} rotation initial rotation
  */
 ARENA.loadArena = (urlToLoad, position, rotation) => {
-    
+
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -275,7 +176,7 @@ ARENA.unloadArena = (urlToLoad) => {
 };
 
 /**
- * Loads and applied scene-options, if it exists, otherwise set to default enviornment
+ * Loads and applied scene-options (if it exists), otherwise set to default enviornment
  */
 ARENA.loadScene = () => {
     let sceneOptions = {
@@ -322,6 +223,8 @@ ARENA.loadScene = () => {
                 }
             } else {
                 // set defaults
+                const sceneRoot = document.getElementById('sceneRoot');
+
                 // enviornment.setAttribute('particle-system', 'preset', 'snow');
                 // enviornment.setAttribute('particle-system', 'enabled', 'true');
                 enviornment.setAttribute('environment', 'preset', 'starry');
@@ -331,7 +234,7 @@ ARENA.loadScene = () => {
                 enviornment.setAttribute('environment', 'grid', 'none');
                 enviornment.setAttribute('environment', 'fog', 0);
                 enviornment.setAttribute('environment', 'fog', 0);
-                document.getElementById('sceneRoot').appendChild(enviornment);
+                sceneRoot.appendChild(enviornment);
 
                 // make default env have lights
                 const light = document.createElement('a-light');
@@ -345,24 +248,38 @@ ARENA.loadScene = () => {
                 light1.setAttribute('position', '-0.272 0.39 1.25');
                 light1.setAttribute('color', '#C2E6C7');
 
-                document.getElementById('sceneRoot').appendChild(light);
-                document.getElementById('sceneRoot').appendChild(light1);
+                sceneRoot.appendChild(light);
+                sceneRoot.appendChild(light1);
             }
         }
 
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
-
         // initialize Jitsi videoconferencing
         ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 
 window.addEventListener('onauth', function(e) {
+    const urlLat = ARENAUtils.getUrlParam('lat');
+    const urlLong = ARENAUtils.getUrlParam('long');
+    if (urlLat && urlLong) {
+        ARENA.clientCoords = {
+            latitude: urlLat,
+            longitude: urlLong,
+        };
+    } else {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                ARENA.clientCoords = position.coords;
+            });
+        }
+    }
+
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
 
     ARENA.mqtt = ARENAMqttAPI();
-    
+
     ARENA.mqtt.connect({
         onSuccess: function() {
             console.log('MQTT scene connection success.');
@@ -396,7 +313,7 @@ window.addEventListener('onauth', function(e) {
     ARENA.chat = new ARENAChat({
         userid: ARENA.idTag,
         cameraid: ARENA.camName,
-        username: ARENA.displayName,
+        username: ARENAUtils.getDisplayName(),
         realm: defaults.realm,
         scene: ARENA.scenenameParam,
         persist_uri: 'https://' + defaults.persistHost + defaults.persistPath,

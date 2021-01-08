@@ -10,8 +10,3 @@
 import 'aframe'; // AFRAME
 import './arena.js'; // ARENA
 import '/components/index.js';
-
-
-window.addEventListener('DOMContentLoaded', (event) => {
-    document.querySelector('a-scene').addEventListener('loaded', function () { console.log("HERE!")});
-});

@@ -3,34 +3,6 @@
 // useful misc utility export functions
 
 /**
- * Dynamically import js script
- * usage:
- *   importScript('./path/to/script.js').then((allExports) => { .... }));
- * @param {string} path path of js script
- * @return {promise}
- */
-export function importScript(path) {
-    let entry = window.importScript.__db[path];
-    if (entry === undefined) {
-        const escape = path.replace(`'`, `\\'`);
-        const script = Object.assign(document.createElement('script'), {
-            type: 'module',
-            textContent: `import * as x from '${escape}'; importScript.__db['${escape}'].resolve(x);`,
-        });
-        entry = importScript.__db[path] = {};
-        entry.promise = new Promise((resolve, reject) => {
-            entry.resolve = resolve;
-            script.onerror = reject;
-        });
-        document.head.appendChild(script);
-        script.remove();
-    }
-    return entry.promise;
-}
-importScript.__db = {};
-window['importScript'] = importScript; // needed if we ourselves are in a module
-
-/**
  * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
  * @return {string} scene name
  */
@@ -110,6 +82,16 @@ export function getUrlParams(parameter, defaultValue) {
  */
 export function debug(msg) {
     ARENA.mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
+}
+
+/**
+ * Gets display name either from local storage or from userParam
+ * @return {string} display name
+ */
+export function getDisplayName() {
+    let displayName = localStorage.getItem('display_name');
+    if (!displayName) displayName = decodeURI(ARENA.userParam);
+    return displayName;
 }
 
 /**

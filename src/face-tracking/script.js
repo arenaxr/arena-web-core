@@ -168,49 +168,53 @@ ARENA.FaceTracker = (function() {
         const trans = pose.translation;
 
         const faceJSON = {};
-        faceJSON['object_id'] = 'face_' + ARENA.idTag;
+        faceJSON['object_id'] = ARENA.faceName;
+        faceJSON['type'] = 'face-features';
+        faceJSON['action'] = 'create';
 
-        faceJSON['hasFace'] = hasFace;
+        faceJSON['data'] = {};
 
-        faceJSON['image'] = {};
-        faceJSON['image']['flipped'] = flipped;
-        faceJSON['image']['width'] = width;
-        faceJSON['image']['height'] = height;
+        faceJSON['data']['hasFace'] = hasFace;
 
-        faceJSON['pose'] = {};
+        faceJSON['data']['image'] = {};
+        faceJSON['data']['image']['flipped'] = flipped;
+        faceJSON['data']['image']['width'] = width;
+        faceJSON['data']['image']['height'] = height;
+
+        faceJSON['data']['pose'] = {};
         const quatAdjusted = [];
         for (let i = 0; i < 4; i++) {
-            const adjustedQuat = faceJSON['hasFace'] ? round3(quat[i]) : 0;
+            const adjustedQuat = hasFace ? round3(quat[i]) : 0;
             quatAdjusted.push(adjustedQuat);
         }
-        faceJSON['pose']['quaternions'] = quatAdjusted;
+        faceJSON['data']['pose']['quaternions'] = quatAdjusted;
 
         const transAdjusted = [];
         for (let i = 0; i < 3; i++) {
-            const adjustedTrans = faceJSON['hasFace'] ? round3(trans[i]) : 0;
+            const adjustedTrans = hasFace ? round3(trans[i]) : 0;
             transAdjusted.push(adjustedTrans);
         }
-        faceJSON['pose']['translation'] = transAdjusted;
-
-        // faceJSON['frame'] = frame;
+        faceJSON['data']['pose']['translation'] = transAdjusted;
 
         const landmarksAdjusted = [];
         for (let i = 0; i < 68*2; i += 2) {
-            const adjustedX = faceJSON['hasFace'] ? round3((landmarksRaw[i]-width/2)/width) : 0;
-            const adjustedY = faceJSON['hasFace'] ? round3((height/2-landmarksRaw[i+1])/height): 0;
+            const adjustedX = hasFace ? round3((landmarksRaw[i]-width/2)/width) : 0;
+            const adjustedY = hasFace ? round3((height/2-landmarksRaw[i+1])/height): 0;
             landmarksAdjusted.push(adjustedX);
             landmarksAdjusted.push(adjustedY);
         }
-        faceJSON['landmarks'] = landmarksAdjusted;
+        faceJSON['data']['landmarks'] = landmarksAdjusted;
 
         const bboxAdjusted = [];
         for (let i = 0; i < 4; i += 2) {
-            const adjustedX = faceJSON['hasFace'] ? round3((bbox[i]-width/2)/width) : 0;
-            const adjustedY = faceJSON['hasFace'] ? round3((height/2-bbox[i+1])/height): 0;
+            const adjustedX = hasFace ? round3((bbox[i]-width/2)/width) : 0;
+            const adjustedY = hasFace ? round3((height/2-bbox[i+1])/height): 0;
             bboxAdjusted.push(adjustedX);
             bboxAdjusted.push(adjustedY);
         }
-        faceJSON['bbox'] = bboxAdjusted;
+        faceJSON['data']['bbox'] = bboxAdjusted;
+
+        // faceJSON['data']['frame'] = frame;
 
         return faceJSON;
     }
@@ -389,7 +393,7 @@ ARENA.FaceTracker = (function() {
             videoCanvas.id = 'face-tracking-video';
             videoCanvas.width = width;
             videoCanvas.height = height;
-            videoCanvas.style.zIndex = 9998;
+            videoCanvas.style.zIndex = 9997;
             videoCanvas.style.opacity = 0.3;
             if (flipped) {
                 videoCanvas.getContext('2d').translate(width, 0);
@@ -402,7 +406,7 @@ ARENA.FaceTracker = (function() {
             overlayCanvas.id = 'face-tracking-overlay';
             overlayCanvas.width = width;
             overlayCanvas.height = height;
-            overlayCanvas.style.zIndex = 9999;
+            overlayCanvas.style.zIndex = 9998;
             document.body.appendChild(overlayCanvas);
 
             grayscale = new ARENAFaceTracker.GrayScaleMedia(video, width, height);

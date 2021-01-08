@@ -11,10 +11,10 @@
 // 'use strict';
 import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
 import {ARENAJitsiAPI} from './jitsi.js';
-import * as ARENAUtils from './utils.js'; 
+import * as ARENAUtils from './utils.js';
 
 export const ARENAMqttAPI = function() {
-    
+
     let mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
     mqttClient.onConnected = onConnected;
     mqttClient.onConnectionLost = onConnectionLost;
@@ -41,7 +41,6 @@ export const ARENAMqttAPI = function() {
 
         // first connection for this client
         console.log(`MQTT scene init user state, connected to ${uri}`);
-
         // Add scene objects to dictionary of scene objects
         const sceneObjects = ARENA.sceneObjects;
 
@@ -90,7 +89,7 @@ export const ARENAMqttAPI = function() {
         console.warn('MQTT scene automatically reconnecting...');
         // no need to connect manually here, "reconnect: true" already set
     }
-    
+
     /**
      * Call internal MessageArrived handler; Isolates message error handling
      * Also called to handle persist objects
@@ -258,6 +257,10 @@ export const ARENAMqttAPI = function() {
                 return; // don't create another env
             }
 
+            if (theMessage.type === 'face-features') {
+                return; // ignore face features
+            }
+
             let x; let y; let z; let xrot; let yrot; let zrot; let wrot; let xscale; let yscale; let zscale; let color;
             // Strategy: remove JSON for core attributes (position, rotation, color, scale) after parsing
             // what remains are attribute-value pairs that can be set iteratively
@@ -384,16 +387,52 @@ export const ARENAMqttAPI = function() {
             case 'headtext':
                 // handle changes to other users head text
                 if (theMessage.hasOwnProperty('displayName')) {
-                    // update head text
-                    for (const child of entityEl.children) {
-                        if (child.getAttribute('id').includes('headtext_')) {
-                            // TODO(mwfarb): support full unicode in a-frame text, until then, normalize headtext
-                            const name = theMessage.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                            child.setAttribute('value', name);
-                        }
-                    }
+                    entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text
                 }
                 return;
+
+            case 'camera':
+                // decide if we need draw or delete videoCube around head
+                if (theMessage.hasOwnProperty('jitsiId')) {
+                    entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
+                    entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
+                    entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
+                }
+                if (theMessage.hasOwnProperty('displayName')) {
+                    entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text
+                }
+                break;
+
+            case 'viveLeft':
+                break;
+            case 'viveRight':
+                break;
+
+            case 'image': // use special 'url' data slot for bitmap URL (like gltf-models do)
+                entityEl.setAttribute('geometry', 'primitive', 'plane');
+                entityEl.setAttribute('material', 'src', theMessage.data.url);
+                entityEl.setAttribute('material', 'shader', 'flat');
+                entityEl.object3D.scale.set(xscale, yscale, zscale);
+                break;
+
+            case 'line':
+                entityEl.setAttribute('line', theMessage.data);
+                entityEl.setAttribute('line', 'color', color);
+                break;
+
+            case 'thickline':
+                entityEl.setAttribute('meshline', theMessage.data);
+                entityEl.setAttribute('meshline', 'color', color);
+                delete theMessage.data.thickline;
+                break;
+
+            case 'particle':
+                entityEl.setAttribute('particle-system', theMessage.data);
+                break;
+
+            case 'gltf-model':
+                entityEl.setAttribute('scale', xscale + ' ' + yscale + ' ' + zscale);
+                entityEl.setAttribute('gltf-model', theMessage.data.url);
 
             case 'camera':
                 // decide if we need draw or delete videoCube around head
@@ -514,6 +553,7 @@ export const ARENAMqttAPI = function() {
 
             break;
         }
+
         case 'update': {
             const name = theMessage.object_id;
             switch (theMessage.type) { // "object", "rig"
@@ -526,6 +566,9 @@ export const ARENAMqttAPI = function() {
                     return;
                 }
                 if (name === ARENA.viveRName) {
+                    return;
+                }
+                if (name === ARENA.faceName) {
                     return;
                 }
                 if (name === ARENA.avatarName) {
@@ -596,7 +639,7 @@ export const ARENAMqttAPI = function() {
                 mqttClientOptions.willMessage = lwt;
             }
 
-            mqttClient.connect(mqttClientOptions);            
+            mqttClient.connect(mqttClientOptions);
         },
 
         /**
