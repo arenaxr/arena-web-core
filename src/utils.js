@@ -1,6 +1,6 @@
 // utils.js
 //
-// useful misc utility export functions
+// useful misc utility functions
 
 /**
  * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
