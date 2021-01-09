@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <title>Sign In to the ARENA</title>
+    <link href="//xr.andrew.cmu.edu/conix-x.png" rel="icon" type="image/png"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+    <script src="../conf/defaults.js"></script>
+    <script src="../auth.js"></script>
+    <link href="../vendor/mdb/mdb.min.css" rel="stylesheet"/>
+    <script src="../vendor/sweetalert.min.js"></script>
+    <style>
+        body {
+            background-color: #32364d;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .top-logo {
+            max-height: 64px;
+        }
+        .title-logo {
+            max-height: 32px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="min-vh-100" id="landing">
+    <div class="container-xxl">
+        <div class="row pt-5 d-flex justify-content-between align-items-center">
+            <div class="col-lg-4">
+                <img alt="Conix Logo" class="top-logo" src="../images/xr-logo-white-v7.png"/>
+            </div>
+            <div class="col-lg-4 text-end">
+                <Button class="btn btn-white" id="loginPageBtn">Login</Button>
+            </div>
+        </div>
+        <div class="row my-5">
+            <div class="col bg-img shadow rounded bg-white">
+                <div class="body-card min-vh-75">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-none d-flex align-items-center min-vh-100" id="login">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-lg-4 col-md-6 shadow rounded bg-white p-5">
+                <div class="row mb-3">
+                    <h3>Login</h3>
+                </div>
+                <div class="row mb-5 text-center">
+                    <div class="col">
+                        <img alt="conix face logo" src="../images/conix-face-white.jpg"/>
+                    </div>
+                </div>
+                <div class="row">
+                    <form id="loginForm">
+                        <div class="form-floating">
+                            <select aria-label="Provider Select" class="form-select mb-3" id="provider">
+                                <option value="anon">Anonymous</option>
+                                <option value="google">Google</option>
+                            </select>
+                            <label for="provider">Authentication Provider</label>
+                        </div>
+                        <div class="form-outline mb-3" id="username-input">
+                            <input class="form-control" id="username" type="text">
+                            <label class="form-label" for="username">User Name</label>
+                        </div>
+                        <button class="btn btn-white" id="anonBtn" type="submit">Sign In</button>
+                        <div class="d-none" id="googleBtn">
+                            <button class="btn btn-white" type="submit">Google Sign In</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-none d-flex align-items-center min-vh-100" id="av">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white">
+                <div class="row mb-3">
+                    <div class="col">
+                        <button id="redetectAVBtn" class="float-end btn btn-sm btn-outline-primary">
+                            Re-detect Devices <i class="fas fa-sync"></i>
+                        </button>
+                        <h3><img alt="Conix Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Setup</h3>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-7">
+                        <video autoplay muted playsinline id="vidPreview" class="w-100 h-auto"></video>
+                    </div>
+                    <div class="col-5">
+                        <div class="form-floating mb-3">
+                            <select aria-label="Video Source" class="form-select mb-3" id="vidSourceSelect">
+                            </select>
+                            <label for="provider">Select Video Device</label>
+                        </div>
+                        <!-- ref: HTMLMediaElement.setSinkId(sinkId) !-->
+                        <div class="form-floating">
+                            <select aria-label="Speaker Device" class="form-select mb-3" id="audioOutSelect">
+                                <option selected>No Device Detected</option>
+                            </select>
+                            <label for="provider">Select Speaker Device</label>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary mb-3">
+                            Play Test Sound <i class="fas fa-volume-up"></i>
+                        </button>
+                        <div class="form-floating mb-3">
+                            <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
+                            </select>
+                            <label for="provider">Select Microphone Device</label>
+                        </div>
+                        <div class="progress">
+                            <div
+                                    aria-valuemax="100"
+                                    aria-valuemin="0"
+                                    aria-valuenow="75"
+                                    class="progress-bar bg-success"
+                                    role="progressbar"
+                                    style="width: 75%"
+                            ></div>
+                        </div>
+                        <!-- Ref https://github.com/cwilso/volume-meter/ !-->
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-outline mb-3" id="displayName-input">
+                            <input class="form-control" id="displayName" type="text">
+                            <label class="form-label" for="displayName">Display Name</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">Scene URL</span>
+                            <input
+                                    aria-label="Scene URL"
+                                    class="form-control"
+                                    id="sceneURL"
+                                    readonly
+                                    type="text"
+                                    value="https://arena.andrew.cmu.edu/foo/bar"
+                            />
+                            <button class="btn btn-primary">Enter</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <img alt="instruction video" class="w-100 h-auto" src="../images/intro_dialog_animation.gif"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="d-none d-flex align-items-center min-vh-100" id="sceneChoice">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white">
+                <div class="row mb-3">
+                    <div class="col">
+                        <h3><img alt="Conix Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Welcome</h3>
+                    </div>
+                </div>
+                <div class="row mb-3">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../vendor/mdb/mdb.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        function showEl(el, flex = false) {
+            const showClass = flex ? 'd-flex' : 'd-block';
+            el.classList.add(showClass);
+            el.classList.remove('d-none');
+        };
+        function hideEl(el, flex = false) {
+            const showClass = flex ? 'd-flex' : 'd-block';
+            el.classList.add('d-none');
+            el.classList.remove(showClass);
+        };
+        function changePage(page, callback) {
+            switch (page) {
+                case 'login':
+                    hideEl(document.getElementById('landing'));
+                    showEl(document.getElementById('login'), true);
+                    break;
+                case 'av':
+                    hideEl(document.getElementById('login'));
+                    showEl(document.getElementById('av'), true);
+                    break;
+                case 'sceneChoice':
+                    hideEl(document.getElementById('av'));
+                    showEl(document.getElementById('sceneChoice'), true);
+                    break;
+                default:
+                //
+            }
+            if (callback) {
+                callback();
+            }
+        };
+        document.getElementById('loginPageBtn').addEventListener('click', () => changePage('login'));
+        const userInput = document.getElementById('username-input');
+        const anonBtn = document.getElementById('anonBtn');
+        const googleBtn = document.getElementById('googleBtn');
+        document.getElementById('loginForm').addEventListener('change', ({target}) => {
+            switch (target.value) {
+                case 'google':
+                    hideEl(userInput);
+                    hideEl(anonBtn);
+                    showEl(googleBtn);
+                    break;
+                case 'anon':
+                    showEl(userInput);
+                    hideEl(googleBtn);
+                    showEl(anonBtn);
+                    break;
+                default:
+                //
+            }
+        });
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            changePage('av', detectDevices);
+        });
+        // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
+        const videoElement = document.getElementById("vidPreview");
+        const audioInSelect = document.getElementById("audioSourceSelect");
+        const videoSelect = document.getElementById("vidSourceSelect");
+
+        audioInSelect.onchange = getStream;
+        videoSelect.onchange = getStream;
+
+        function getDevices() {
+            // AFAICT in Safari this only gets default devices until gUM is called :/
+            return navigator.mediaDevices.enumerateDevices();
+        }
+
+        function gotDevices(deviceInfos) {
+            // Faster than innerHTML. No options have listeners so this is ok
+            audioInSelect.textContent = '';
+            videoSelect.textContent = '';
+            window.deviceInfos = deviceInfos; // make available to console
+            for (const deviceInfo of deviceInfos) {
+                const option = document.createElement('option');
+                option.value = deviceInfo.deviceId;
+                if (deviceInfo.kind === 'audioinput') {
+                    option.text = deviceInfo.label || `Microphone ${audioInSelect.length + 1}`;
+                    audioInSelect.appendChild(option);
+                } else if (deviceInfo.kind === 'videoinput') {
+                    option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+                    videoSelect.appendChild(option);
+                }
+            }
+            const noElementOption = document.createElement("option");
+            noElementOption.setAttribute('selected', true);
+            noElementOption.text = 'No Device Detected';
+            if (!audioInSelect.childElementCount) {
+                audioInSelect.appendChild(noElementOption.cloneNode(true));
+            }
+            audioInSelect.selectedIndex = 0;
+            if (!videoSelect.childElementCount) {
+                videoSelect.appendChild(noElementOption.cloneNode(true));
+            }
+            videoSelect.selectedIndex = 0;
+        }
+
+        function getStream() {
+            if (window.stream) {
+                window.stream.getTracks().forEach(track => {
+                    track.stop();
+                });
+            }
+            const audioSource = audioInSelect.value;
+            const videoSource = videoSelect.value;
+            const constraints = {
+                audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
+                video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+            };
+            return navigator.mediaDevices.getUserMedia(constraints).
+                then(gotStream).catch(handleMediaError);
+        }
+
+        function gotStream(stream) {
+            window.stream = stream; // make stream available to console
+            audioInSelect.selectedIndex = [...audioInSelect.options].
+                findIndex(option => option.text === stream.getAudioTracks()[0].label);
+            videoSelect.selectedIndex = [...videoSelect.options].
+                findIndex(option => option.text === stream.getVideoTracks()[0].label);
+            videoElement.srcObject = stream;
+            /*
+            let aspectRatioClass = 'w-100';
+            const vidSettings = stream.getVideoTracks()[0].getSettings();
+            switch ((vidSettings.width/vidSettings.height).toFixed(2)) {
+                case '1.33':
+                    aspectRatioClass = 'four-three'
+                    break;
+                case '1.77':
+                    aspectRatioClass = 'sixteen-nine'
+                    break;
+                default:
+                    //
+            }
+            videoElement.setAttribute('class', aspectRatioClass);
+            */
+        }
+
+        function handleMediaError(error) {
+            console.log('Error: ', error);
+            swal('Oops...',
+                `Could not initialize devices.
+                Please ensure your devices are plugged in and allow browser audio and video access permissions.`,
+                'error');
+        }
+
+        const detectDevices = () => {
+            getStream()
+            .then(getDevices)
+            .then(gotDevices)
+            .catch(handleMediaError);
+        }
+        document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
+    });
+</script>
+<script>
+    'use strict';
+
+    // TODO(mwfarb): App Store iOS build of WebXRViewer, G-Auth rejects the UA with 403
+
+    // browser detection is not fun...
+    var is_safari = navigator.userAgent.indexOf('Safari') > -1;
+    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('ChiOS') > -1;
+    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
+    var is_webxrviewer = navigator.userAgent.indexOf('WebXRViewer') > -1;
+    var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
+    var is_edge = navigator.userAgent.indexOf('Edg') > -1;
+    var is_opera = navigator.userAgent.toLowerCase().indexOf('op') > -1;
+    if ((is_edge) && (is_safari)) {
+        is_safari = false;
+    }
+    if ((is_firefox) && (is_safari)) {
+        is_safari = false;
+    }
+    if ((is_chrome) && (is_safari)) {
+        is_safari = false;
+    }
+    if ((is_chrome) && (is_opera)) {
+        is_chrome = false;
+    }
+
+    var urlParts = location.href.split('/');
+    var rootPath = urlParts[0] + '//' + urlParts[2];
+
+    const popupConfig = {
+        client_id: defaults.gAuthClientId,
+    };
+    const redirectConfig = {
+        client_id: defaults.gAuthClientId,
+        ux_mode: 'redirect',
+        redirect_uri: rootPath + '/signin/google/',
+    };
+    const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
+    var auth2;
+    var googleUser = {};
+    var initGoogleAuth = function() {
+        gapi.load('auth2', function() {
+            auth2 = gapi.auth2.init(gapiInitConfig).then(function() {
+                auth2 = gapi.auth2.getAuthInstance();
+                attachGoogleSignin(document.getElementById('customBtnGoogle'));
+                if (auth2.isSignedIn.get()) {
+                    console.log('User is already signed in.');
+                    var googleUser = auth2.currentUser.get();
+                    onGoogleSignIn(googleUser);
+                }
+            }, function(error) {
+                // Private browsing may get here, we handle the error, and
+                // provide anonymous sign in as an alternative.
+                console.error(error);
+                // TODO(mwfarb): gray out google button
+                // var nodes = document.getElementById("customBtnGoogle").getElementsByTagName('*');
+                // for (var i = 0; i < nodes.length; i++) {
+                //     nodes[i].disabled = true;
+                // }
+            });
+        });
+    };
+
+    function attachGoogleSignin(element) {
+        auth2.attachClickHandler(element, {}, onGoogleSignIn, function(error) {
+            alert(JSON.stringify(error, undefined, 2));
+        });
+    }
+
+    function onGoogleSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        console.log('Signed In: ' + profile.getEmail());
+        localStorage.setItem('auth_choice', 'google');
+        returnToRequestedPage();
+    }
+
+    function returnToRequestedPage() {
+        if (localStorage.getItem('request_uri')) {
+            //redirect user to originally requested page
+            location.href = localStorage.getItem('request_uri');
+        } else {
+            location.href = '..'; // back to main ARENA
+        }
+    }
+
+    const nameRegex = '^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$';
+    var initAnonAuth = function() {
+        var re = new RegExp(nameRegex);
+        var anonBtn = document.getElementById('customBtnAnon');
+        if (typeof anonBtn != 'undefined') {
+            anonBtn.addEventListener('click', function(event) {
+                // check for saved name, use it
+                var savedName = localStorage.getItem('display_name');
+                if (savedName !== null && re.test(savedName)) {
+                    localStorage.setItem('auth_choice', 'anonymous');
+                    returnToRequestedPage();
+                } else { // if no passable name, ask for one
+                    var namePanel = document.getElementById('anonNameWrapper');
+                    namePanel.hidden = false;
+                }
+            });
+        }
+        const formHandler = (e) => {
+            e.preventDefault();
+            // validate
+            if (re.test(usernameInput.value)) {
+                // remove extra spaces
+                var displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
+                localStorage.setItem('display_name', displayName);  // save for next use
+                localStorage.setItem('auth_choice', 'anonymous');
+                returnToRequestedPage();
+            }
+        };
+        var usernameInput = document.getElementById('usernameInput');
+        usernameInput.setAttribute('pattern', nameRegex);
+        var nameBtn = document.getElementById('btnAnonName');
+        nameBtn.addEventListener('click', formHandler);
+        document.getElementById('login-form').addEventListener('submit', formHandler);
+    };
+
+    initGoogleAuth();
+    initAnonAuth();
+</script>
+</body>
+</html>
