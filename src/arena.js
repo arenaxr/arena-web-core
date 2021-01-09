@@ -23,12 +23,11 @@ ARENA.timeID = new Date().getTime() % 10000;
 ARENA.sceneObjects = new Map();
 ARENA.updateMillis = ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis);
 ARENA.scenenameParam = ARENAUtils.getSceneName();
-ARENA.userParam = ARENAUtils.getUrlParam('name', defaults.userParam);
 ARENA.startCoords = ARENAUtils.getUrlParam('location', defaults.startCoords).replace(/,/g, ' ');
 
 ARENA.mqttParamZ = ARENAUtils.getUrlParam('mqttServer', defaults.mqttParamZ);
-ARENA.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera);
 ARENA.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', defaults.ATLASurl);
+
 ARENA.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
 ARENA.latencyTopic = defaults.latencyTopic;
 
@@ -39,7 +38,9 @@ ARENA.outputTopic = defaults.realm + '/s/' + ARENA.scenenameParam + '/';
 ARENA.vioTopic = defaults.vioTopic;
 ARENA.renderTopic = ARENA.outputTopic + '#';
 
+ARENA.userParam = ARENAUtils.getUrlParam('name', defaults.userParam);
 ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
+ARENA.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera);
 
 ARENA.camName = '';
 if (ARENA.fixedCamera !== '') {
