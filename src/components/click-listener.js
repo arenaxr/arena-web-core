@@ -36,7 +36,6 @@ AFRAME.registerComponent('click-listener', {
             }
         });
 
-        // console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');

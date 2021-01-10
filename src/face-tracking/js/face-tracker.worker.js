@@ -1,6 +1,6 @@
 if ('function' === typeof importScripts) {
-    importScripts("face_tracker_wasm.js");
-    importScripts("../dist/arena-face-tracker.min.js");
+    importScripts("./face_tracker_wasm.js");
+    importScripts("../dist/face-tracker.min.js");
 
     self.onmessage = function (e) {
         var msg = e.data;
@@ -26,9 +26,6 @@ if ('function' === typeof importScripts) {
 
     var features = null, pose = null;
 
-    /**
-     * Initialization
-     */
     function load(msg) {
         var onLoad = function() {
             postMessage({type: "loaded"});
@@ -38,16 +35,12 @@ if ('function' === typeof importScripts) {
             postMessage({type: "progress", progress: progress});
         }
 
-        faceTracker = new ARENAFaceTracker.FaceTracker(msg.width, msg.height, onLoad, onProgress);
+        faceTracker = new FaceTracker.FaceTracker(msg.width, msg.height, onLoad, onProgress);
     }
 
-    /**
-     * Main processing loop
-     */
     function process() {
         features = null;
         pose = null;
-        if (!next) return;
 
         if (faceTracker && faceTracker.ready) {
             features = faceTracker.detectFeatures(next);
@@ -59,7 +52,11 @@ if ('function' === typeof importScripts) {
         if (features) {
             postMessage({type: "result", features: features, pose: pose});
         }
+        // else {
+        //     postMessage({ type: "not found" });
+        // }
 
         next = null;
     }
+
 }

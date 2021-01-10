@@ -409,7 +409,7 @@ ARENA.FaceTracker = (function() {
             overlayCanvas.style.zIndex = 9998;
             document.body.appendChild(overlayCanvas);
 
-            grayscale = new ARENAFaceTracker.GrayScaleMedia(video, width, height);
+            grayscale = new FaceTracker.GrayScaleMedia(video, width, height);
         },
 
         running: function() {
