@@ -327,9 +327,9 @@ window.addEventListener('onauth', function(e) {
     ARENA.chat.start();
 
     // initialize face tracking if not on mobile
-    if (!AFRAME.utils.device.isMobile()) {
+    if (ARENA.FaceTracker && !AFRAME.utils.device.isMobile()) {
         const displayBbox = false;
-        const flipped = false;
+        const flipped = true;
         ARENA.FaceTracker.init(displayBbox, flipped);
     }
 

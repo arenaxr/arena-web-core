@@ -89,6 +89,7 @@ export function setupIcons() {
      */
     const avatarBtn = createIconButton('avatar3-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
         () => {
+            if (!ARENA.FaceTracker) return;
             if (!ARENA.FaceTracker.running()) { // toggled
                 ARENA.FaceTracker.run().then(() => {
                     avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-on.png\')';

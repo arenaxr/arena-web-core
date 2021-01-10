@@ -1,3 +1,10 @@
+#localVideo {
+    transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg); /* Firefox */
+    -webkit-transform: rotateY(180deg); /* Safari and Chrome */
+    -o-transform: iconfadein 1.0s; /* Opera */
+}
+
 #icons-div {
     display: flex;
     flex-direction: column;

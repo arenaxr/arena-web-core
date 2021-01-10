@@ -142,7 +142,7 @@ ARENA.FaceTracker = (function() {
             if (i % 2 == 1 && landmarks[i] > height) return false;
             if (landmarks[i] == 0) numZeros++;
         }
-        return numZeros != landmarks.length;
+        return numZeros <= landmarks.length / 2;
     }
 
     /**
@@ -395,10 +395,6 @@ ARENA.FaceTracker = (function() {
             videoCanvas.height = height;
             videoCanvas.style.zIndex = 9997;
             videoCanvas.style.opacity = 0.3;
-            if (flipped) {
-                videoCanvas.getContext('2d').translate(width, 0);
-                videoCanvas.getContext('2d').scale(-1, 1);
-            }
             document.body.appendChild(videoCanvas);
 
             overlayCanvas = document.createElement('canvas');
@@ -410,6 +406,11 @@ ARENA.FaceTracker = (function() {
             document.body.appendChild(overlayCanvas);
 
             grayscale = new FaceTracker.GrayScaleMedia(video, width, height);
+            if (flipped) {
+                videoCanvas.getContext('2d').translate(width, 0);
+                videoCanvas.getContext('2d').scale(-1, 1);
+                grayscale.flipHorizontal();
+            }
         },
 
         running: function() {
