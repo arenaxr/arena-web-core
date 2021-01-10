@@ -559,15 +559,15 @@ export const ARENAJitsi = async function(jitsiServer) {
                 jitsiVideoElem.style.left = '15px';
                 jitsiVideoElem.style.borderRadius = '10px';
                 jitsiVideoElem.style.opacity = 0.95; // slightly see through
+                jitsiVideoElem.setAttribute('width', ARENA.localVideoWidth);
 
                 /**
                  * set video element size
                  */
                 function setupCornerVideo() {
-                    const width = ARENA.localVideoWidth;
-                    const height = Math.ceil((window.screen.height / window.screen.width) * width);
-                    jitsiVideoElem.setAttribute('width', width);
-                    jitsiVideoElem.setAttribute('height', height);
+                    const videoHeight = jitsiVideoElem.videoHeight /
+                                            (jitsiVideoElem.videoWidth / ARENA.localVideoWidth);
+                    jitsiVideoElem.setAttribute('height', videoHeight);
                 }
 
                 jitsiVideoElem.onloadedmetadata = () => {
