@@ -19,6 +19,7 @@ import {setupIcons} from './icons/icons.js';
 window.ARENA = {};
 
 ARENA.events = new ARENAEventEmitter(); // arena events target
+
 ARENA.timeID = new Date().getTime() % 10000;
 ARENA.sceneObjects = new Map();
 ARENA.updateMillis = ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis);
@@ -119,7 +120,7 @@ ARENA.loadArena = (urlToLoad, position, rotation) => {
                         msg.data.rotation.w = r.w;
                     }
 
-                    ARENA.mqtt.processMessage(msg);
+                    ARENA.Mqtt.processMessage(msg);
                 }
             }
             const l2 = deferredObjects.length;
@@ -134,7 +135,7 @@ ARENA.loadArena = (urlToLoad, position, rotation) => {
                     data: obj.attributes,
                 };
                 console.log('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
-                ARENA.mqtt.processMessage(msg);
+                ARENA.Mqtt.processMessage(msg);
             }
         }
     };
@@ -276,12 +277,12 @@ window.addEventListener('onauth', function(e) {
         }
     }
 
+    ARENA.Mqtt = ARENAMqtt(); // mqtt API (after ARENA.* above, are defined)
+
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
 
-    ARENA.mqtt = ARENAMqtt();
-
-    ARENA.mqtt.connect({
+    ARENA.Mqtt.connect({
         onSuccess: function() {
             console.log('MQTT scene connection success.');
         },

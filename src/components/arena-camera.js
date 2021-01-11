@@ -65,7 +65,7 @@ AFRAME.registerComponent('arena-camera', {
             msg.hasAvatar = ARENA.FaceTracker.running();
         }
 
-        ARENA.mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+        ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
     publishVio() {
@@ -93,14 +93,14 @@ AFRAME.registerComponent('arena-camera', {
                     color: data.color,
                 },
             };
-            ARENA.mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+            ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
         }
     },
 
     publishHeadText() {
         const data = this.data;
 
-        ARENA.mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
+        ARENA.Mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
             'object_id': ARENA.camName,
             'action': 'create',
             'type': 'object',

@@ -12,9 +12,6 @@
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
 //  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
 //
-// Optional:
-//  <script src="./events.js"></script>  <!-- for window.ARENA -->
-//
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
 // can be present when making a broker connection which will need username (email) and
@@ -28,9 +25,6 @@
 //     });
 // });
 
-
-'use strict';
-//import * as gapi from 'googleapis';
 
 window.AUTH = {}; // auth namespace
 
@@ -46,7 +40,7 @@ window.onload = function() {
 var auth2;
 
 // check if the current user is already signed in
-const authCheck = function(args) {
+function authCheck(args) {
     localStorage.removeItem('mqtt_token'); // deprecate local token storage
     AUTH.signInPath = args.signInPath;
     switch (localStorage.getItem('auth_choice')) {

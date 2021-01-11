@@ -17,8 +17,8 @@ AFRAME.registerComponent('network-latency', {
     },
     tick: (function(t, dt) {
         if (ARENA.mqtt) {
-            if (ARENA.mqtt.isConnected()) {
-                ARENA.mqtt.send(this.message);
+            if (ARENA.Mqtt.isConnected()) {
+                ARENA.Mqtt.send(this.message);
             }
         }
     }),
