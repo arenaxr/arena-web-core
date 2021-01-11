@@ -102,9 +102,9 @@ export class ARENAUtils {
      */
     static setCoordsData(evt) {
         return {
-            x: parseFloat(evt.currentTarget.object3D.position.x).toFixed(3),
-            y: parseFloat(evt.currentTarget.object3D.position.y).toFixed(3),
-            z: parseFloat(evt.currentTarget.object3D.position.z).toFixed(3),
+            x: parseFloat(evt.currentTarget.object3D.position.x.toFixed(3)),
+            y: parseFloat(evt.currentTarget.object3D.position.y.toFixed(3)),
+            z: parseFloat(evt.currentTarget.object3D.position.z.toFixed(3)),
         };
     };
 
