@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import * as ARENAUtils from '../utils.js'; 
+import {ARENAUtils} from '../utils.js';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and vio change events.
@@ -100,7 +100,7 @@ AFRAME.registerComponent('arena-camera', {
     publishHeadText() {
         const data = this.data;
 
-        ARENA.mqtt.publish(ARENA.outputTopic + ARENA.scenenameParam + '/head-text_' + ARENA.camName, {
+        ARENA.mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
             'object_id': ARENA.camName,
             'action': 'create',
             'type': 'object',

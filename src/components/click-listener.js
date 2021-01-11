@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import * as ARENAUtils from '../utils.js';
+import {ARENAUtils} from '../utils.js';
 
 /**
  * Listen for clicks, call defined function on event evt
@@ -36,7 +36,6 @@ AFRAME.registerComponent('click-listener', {
             }
         });
 
-        // console.log("mouseup init");
         this.el.addEventListener('mouseup', function(evt) {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');

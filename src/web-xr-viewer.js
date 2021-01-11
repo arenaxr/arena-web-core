@@ -1,4 +1,9 @@
 /**
+ * WebXR viewer handler and pseudo-click generator
+ *
+ */
+
+/**
  * Dynamically import js script
  * usage:
  *   importScript('./path/to/script.js').then((allExports) => { .... }));
@@ -35,10 +40,22 @@ window.addEventListener('enter-vr', function(e) {
         if (isWebXRViewer) {
             const base64script = document.createElement('script');
             base64script.onload = async () => {
-                await ARENAUtils.importScript('./src/apriltag/script.js');
+                await importScript('./src/apriltag/script.js');
             };
             base64script.src = './src/apriltag/base64_binary.js';
             document.head.appendChild(base64script);
+
+            // create psuedo-cursor
+            let cursor = document.getElementById('mouse-cursor');
+            const cursorParent = cursor.parentNode;
+            cursorParent.removeChild(cursor);
+            cursor = document.createElement('a-cursor');
+            cursor.setAttribute('fuse', false);
+            cursor.setAttribute('scale', '0.1 0.1 0.1');
+            cursor.setAttribute('position', '0 0 -0.1');
+            cursor.setAttribute('color', '#555');
+            cursor.setAttribute('max-distance', '10000');
+            cursorParent.appendChild(cursor);
 
             // handle tap events
             document.addEventListener('mousedown', function(e) {
@@ -81,19 +98,6 @@ window.addEventListener('enter-vr', function(e) {
                     }, false);
                 }
             });
-
-            // create psuedo-cursor
-            let cursor = document.getElementById('mouseCursor');
-            const cursorParent = cursor.parentNode;
-            cursorParent.removeChild(cursor);
-            cursor = document.createElement('a-cursor');
-            cursor.setAttribute('fuse', false);
-            cursor.setAttribute('scale', '0.1 0.1 0.1');
-            cursor.setAttribute('position', '0 0 -0.1'); // move reticle closer (side effect: bigger!)
-            cursor.setAttribute('color', '#333');
-            cursor.setAttribute('max-distance', '10000');
-            cursor.setAttribute('id', 'fuse-cursor');
-            cursorParent.appendChild(cursor);
         }
         document.getElementById('env').setAttribute('visible', false);
     }

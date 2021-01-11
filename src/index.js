@@ -9,4 +9,5 @@
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
 import 'aframe'; // AFRAME
 import './arena.js'; // ARENA
-import '/components/index.js';
+import './aframe-mods.js'; // AFRAME modifications
+import './components/index.js';

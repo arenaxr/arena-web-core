@@ -2,7 +2,70 @@
 /** Class encapsulating an EventTarget for ARENA events.
  * See events and documentation of callbacks bellow
 */
-export default class ARENAEventEmitter {
+export class ARENAEventEmitter {
+    static events = {
+        /**
+        * Indicates we joined a jitsi conference (also on reconnect),
+        * provides a list of current users/participants:
+        * @typedef {Object} UserData
+        * @param id {string} the ARENA id of the user
+        * @param dn {string} the display name of the user
+        * @param cn {string} the camera name of the user
+        *
+        * The following parameters are passed to listeners (event.detail object):
+        * @callback jitsiConnectCallback
+        * @param scene {string} the scene
+        * @param pl {[]} participant list; array of {UserData} objects
+        */
+        JITSI_CONNECT: 'jitsi_connect',
+
+        /**
+         * Indicates a user joined. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback userJoinCallback
+         * @param id {string} the ARENA id of the user
+         * @param dn {string} the display name of the user
+         * @param cn {string} the camera name of the user
+         * @param scene {string} the scene
+         * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
+         */
+        USER_JOINED: 'user_joined',
+
+        /**
+         * Indicates a user joined. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback userJoinCallback
+         * @param id {string} the ARENA id of the user
+         * @param dn {string} the display name of the user
+         * @param cn {string} the camera name of the user
+         * @param scene {string} the scene
+         * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
+         */
+        SCREENSHARE: 'screenshare',
+
+        /**
+         * Indicates a user joined. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback userLeftCallback
+         * @param id {string} the ARENA id of the user
+         * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
+         */
+        USER_LEFT: 'user_left',
+    };
+
+    /**
+    * Modules that are possible event sources
+    * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|...}
+    *
+    */
+    static sources = {
+        JITSI: 'jitsi',
+        CHAT: 'chat',
+    };
+
     /**
      * Create an event emitter.
      */
@@ -78,73 +141,3 @@ export default class ARENAEventEmitter {
         );
     }
 }
-
-/**
-* Definitions of events and documentation of callbacks
-* (outside the class for pre-ES6 browsers)
-*/
-ARENAEventEmitter.events = {
-    /**
-    * Indicates we joined a jitsi conference (also on reconnect),
-    * provides a list of current users/participants:
-    * @typedef {Object} UserData
-    * @param id {string} the ARENA id of the user
-    * @param dn {string} the display name of the user
-    * @param cn {string} the camera name of the user
-    *
-    * The following parameters are passed to listeners (event.detail object):
-    * @callback jitsiConnectCallback
-    * @param scene {string} the scene
-    * @param pl {[]} participant list; array of {UserData} objects
-    */
-    JITSI_CONNECT: 'jitsi_connect',
-
-    /**
-    * Indicates a user joined. The event provides
-    * the following parameters to its listeners (event.detail object):
-    *
-    * @callback userJoinCallback
-    * @param id {string} the ARENA id of the user
-    * @param dn {string} the display name of the user
-    * @param cn {string} the camera name of the user
-    * @param scene {string} the scene
-    * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
-    */
-    USER_JOINED: 'user_joined',
-
-    /**
-    * Indicates a user joined. The event provides
-    * the following parameters to its listeners (event.detail object):
-    *
-    * @callback userJoinCallback
-    * @param id {string} the ARENA id of the user
-    * @param dn {string} the display name of the user
-    * @param cn {string} the camera name of the user
-    * @param scene {string} the scene
-    * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
-    */
-    SCREENSHARE: 'screenshare',
-
-    /**
-    * Indicates a user joined. The event provides
-    * the following parameters to its listeners (event.detail object):
-    *
-    * @callback userLeftCallback
-    * @param id {string} the ARENA id of the user
-    * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
-    */
-    USER_LEFT: 'user_left',
-};
-
-/**
-* Modules that are possible event sources
-* Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|...}
-*
-*/
-ARENAEventEmitter.sources = {
-    JITSI: 'jitsi',
-    CHAT: 'chat',
-};
-
-exports.ARENAEventEmitter = ARENAEventEmitter;
-

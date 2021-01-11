@@ -1,5 +1,5 @@
 /**
- * @fileoverview MQTT-based chat 
+ * @fileoverview MQTT-based chat
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
@@ -344,7 +344,7 @@ export default class ARENAChat {
     jitsiConnectCallback = (e) => {
         const args = e.detail;
         args.pl.forEach((user) => {
-            console.log('Jitsi User: ', user);
+            // console.log('Jitsi User: ', user);
             // check if jitsi knows about someone we don't; add to user list
             if (!this.liveUsers[user.id]) {
                 this.liveUsers[user.id] = {

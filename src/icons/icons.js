@@ -89,6 +89,7 @@ export function setupIcons() {
      */
     const avatarBtn = createIconButton('avatar3-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
         () => {
+            if (!ARENA.FaceTracker) return;
             if (!ARENA.FaceTracker.running()) { // toggled
                 ARENA.FaceTracker.run().then(() => {
                     avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-on.png\')';
@@ -198,7 +199,7 @@ export function setupIcons() {
                             screenshareWindow.scene = ARENA.scenenameParam;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
                             const camera = document.getElementById('my-camera');
-                            screenshareWindow.displayName = camera.getAttribute('displayName');
+                            screenshareWindow.displayName = camera.getAttribute('arena-camera').displayName;
                             screenshareWindow.camName = ARENA.camName;
                             screenshareWindow.objectIds = objectIds.join();
                         });

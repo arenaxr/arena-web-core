@@ -139,10 +139,10 @@ ARENA.FaceTracker = (function() {
         let numZeros = 0;
         for (let i = 0; i < landmarks.length; i++) {
             if (i % 2 == 0 && landmarks[i] > width) return false;
-            if (i % 2 == 1 && landmarks[i] > height) return false;
+            if (i % 2 == 1 && landmarks[i] <= 0) return false;
             if (landmarks[i] == 0) numZeros++;
         }
-        return numZeros != landmarks.length;
+        return numZeros <= landmarks.length / 2;
     }
 
     /**
@@ -388,6 +388,7 @@ ARENA.FaceTracker = (function() {
             video.setAttribute('autoplay', '');
             video.setAttribute('muted', '');
             video.setAttribute('playsinline', '');
+
             videoCanvas = document.createElement('canvas');
             setVideoStyle(videoCanvas);
             videoCanvas.id = 'face-tracking-video';
@@ -395,10 +396,6 @@ ARENA.FaceTracker = (function() {
             videoCanvas.height = height;
             videoCanvas.style.zIndex = 9997;
             videoCanvas.style.opacity = 0.3;
-            if (flipped) {
-                videoCanvas.getContext('2d').translate(width, 0);
-                videoCanvas.getContext('2d').scale(-1, 1);
-            }
             document.body.appendChild(videoCanvas);
 
             overlayCanvas = document.createElement('canvas');
@@ -409,7 +406,12 @@ ARENA.FaceTracker = (function() {
             overlayCanvas.style.zIndex = 9998;
             document.body.appendChild(overlayCanvas);
 
-            grayscale = new ARENAFaceTracker.GrayScaleMedia(video, width, height);
+            grayscale = new FaceTracker.GrayScaleMedia(video, width, height);
+            if (flipped) {
+                videoCanvas.getContext('2d').translate(width, 0);
+                videoCanvas.getContext('2d').scale(-1, 1);
+                grayscale.flipHorizontal();
+            }
         },
 
         running: function() {

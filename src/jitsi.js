@@ -12,7 +12,7 @@ import $ from "jquery";
 import swal from 'sweetalert';
 import {ARENAEventEmitter} from './event-emitter.js';
 
-export const ARENAJitsiAPI = async function(jitsiServer) {
+export const ARENAJitsi = async function(jitsiServer) {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================

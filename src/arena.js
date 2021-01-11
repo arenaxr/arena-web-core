@@ -6,15 +6,15 @@
  * @date 2020
  */
 
-import {ARENAEventEmitter} from './event-emitter.js';
-import * as ARENAUtils from './utils.js';
-import {ARENAMqttAPI} from './mqtt.js'
-import {ARENAJitsiAPI} from './jitsi.js';
-import {setupIcons} from './icons/icons.js';
+import {ARENAUtils} from './utils.js';
+import {ARENAMqtt} from './mqtt.js'
+import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/arena-chat.js';
+import {ARENAEventEmitter} from './event-emitter.js';
+import {setupIcons} from './icons/icons.js';
 
 /**
- * ARENA object
+ * ARENA global object
  */
 window.ARENA = {};
 
@@ -22,13 +22,12 @@ ARENA.events = new ARENAEventEmitter(); // arena events target
 ARENA.timeID = new Date().getTime() % 10000;
 ARENA.sceneObjects = new Map();
 ARENA.updateMillis = ARENAUtils.getUrlParam('camUpdateRate', defaults.updateMillis);
-ARENA.scenenameParam = ARENAUtils.getSceneName(); // scene
-ARENA.userParam = ARENAUtils.getUrlParam('name', defaults.userParam);
+ARENA.scenenameParam = ARENAUtils.getSceneName();
 ARENA.startCoords = ARENAUtils.getUrlParam('location', defaults.startCoords).replace(/,/g, ' ');
 
 ARENA.mqttParamZ = ARENAUtils.getUrlParam('mqttServer', defaults.mqttParamZ);
-ARENA.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera);
 ARENA.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', defaults.ATLASurl);
+
 ARENA.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
 ARENA.latencyTopic = defaults.latencyTopic;
 
@@ -39,7 +38,9 @@ ARENA.outputTopic = defaults.realm + '/s/' + ARENA.scenenameParam + '/';
 ARENA.vioTopic = defaults.vioTopic;
 ARENA.renderTopic = ARENA.outputTopic + '#';
 
+ARENA.userParam = ARENAUtils.getUrlParam('name', defaults.userParam);
 ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
+ARENA.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', defaults.fixedCamera);
 
 ARENA.camName = '';
 if (ARENA.fixedCamera !== '') {
@@ -87,7 +88,7 @@ ARENA.loadArena = (urlToLoad, position, rotation) => {
                         'data': obj.attributes,
                     };
                     // ask runtime manager to start this program
-                    ARENA.RuntimeManager.createModule(pobj);
+                    // ARENA.RuntimeManager.createModule(pobj);
                     continue;
                 }
                 if (obj.object_id === ARENA.camName) {
@@ -255,7 +256,7 @@ ARENA.loadScene = () => {
 
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = await ARENAJitsiAPI(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        ARENA.JitsiAPI = await ARENAJitsi(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 
@@ -278,7 +279,7 @@ window.addEventListener('onauth', function(e) {
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
 
-    ARENA.mqtt = ARENAMqttAPI();
+    ARENA.mqtt = ARENAMqtt();
 
     ARENA.mqtt.connect({
         onSuccess: function() {
@@ -326,9 +327,9 @@ window.addEventListener('onauth', function(e) {
     ARENA.chat.start();
 
     // initialize face tracking if not on mobile
-    if (!AFRAME.utils.device.isMobile()) {
+    if (ARENA.FaceTracker && !AFRAME.utils.device.isMobile()) {
         const displayBbox = false;
-        const flipped = false;
+        const flipped = true;
         ARENA.FaceTracker.init(displayBbox, flipped);
     }
 
