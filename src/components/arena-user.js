@@ -220,7 +220,7 @@ AFRAME.registerComponent('arena-user', {
             this.headText.setAttribute('value', name);
         }
 
-        if (ARENA.JitsiAPI.ready() && data.jitsiId) {
+        if (data.jitsiId) {
             /* Handle Jitsi Video */
             this.videoID = `video${data.jitsiId}`;
             if (data.hasVideo) {
@@ -242,49 +242,54 @@ AFRAME.registerComponent('arena-user', {
             if (data.hasAudio) {
                 // set up positional audio, but only once per camera
                 const jistiAudioTrack = ARENA.JitsiAPI.getAudioTrack(data.jitsiId);
+                if (!jistiAudioTrack) return;
+
+                const oldAudioTrack = this.audioTrack;
                 this.audioTrack = jistiAudioTrack.track;
                 if (this.audioTrack) {
                     this.removeMicrophone();
                 }
 
-                // set up and attach positional audio
-                const audioStream = new MediaStream();
-                audioStream.addTrack(this.audioTrack);
+                if (this.audioTrack !== oldAudioTrack) {
+                    // set up and attach positional audio
+                    const audioStream = new MediaStream();
+                    audioStream.addTrack(this.audioTrack);
 
-                const sceneEl = document.querySelector('a-scene');
-                let listener = null;
-                if (sceneEl.audioListener) {
-                    listener = sceneEl.audioListener;
-                } else {
-                    listener = new THREE.AudioListener();
-                    const camEl = ARENA.sceneObjects.myCamera.object3D;
-                    camEl.add(listener);
-                    sceneEl.audioListener = listener;
+                    const sceneEl = document.querySelector('a-scene');
+                    let listener = null;
+                    if (sceneEl.audioListener) {
+                        listener = sceneEl.audioListener;
+                    } else {
+                        listener = new THREE.AudioListener();
+                        const camEl = ARENA.sceneObjects.myCamera.object3D;
+                        camEl.add(listener);
+                        sceneEl.audioListener = listener;
+                    }
+
+                    // create positional audio, but only if didn't exist before
+                    if (!this.audioSource) {
+                        this.audioSource = new THREE.PositionalAudio(listener);
+                        this.audioSource.setMediaStreamSource(audioStream);
+                        el.object3D.add(this.audioSource);
+
+                        // set positional audio scene params
+                        if (ARENA.volume) {
+                            this.audioSource.setVolume(ARENA.volume);
+                        }
+                        if (ARENA.refDist) { // L-R panning
+                            this.audioSource.setRefDistance(ARENA.refDist);
+                        }
+                        if (ARENA.rolloffFact) {
+                            this.audioSource.setRolloffFactor(ARENA.rolloffFact);
+                        }
+                        if (ARENA.distModel) {
+                            this.audioSource.setDistanceModel(ARENA.distModel);
+                        }
+                    } else {
+                        this.audioSource.setMediaStreamSource(audioStream);
+                    }
+                    this.aec(listener);
                 }
-
-                // create positional audio, but only if didn't exist before
-                if (!this.audioSource) {
-                    this.audioSource = new THREE.PositionalAudio(listener);
-                    this.audioSource.setMediaStreamSource(audioStream);
-                    el.object3D.add(this.audioSource);
-
-                    // set positional audio scene params
-                    if (ARENA.volume) {
-                        this.audioSource.setVolume(ARENA.volume);
-                    }
-                    if (ARENA.refDist) { // L-R panning
-                        this.audioSource.setRefDistance(ARENA.refDist);
-                    }
-                    if (ARENA.rolloffFact) {
-                        this.audioSource.setRolloffFactor(ARENA.rolloffFact);
-                    }
-                    if (ARENA.distModel) {
-                        this.audioSource.setDistanceModel(ARENA.distModel);
-                    }
-                } else {
-                    this.audioSource.setMediaStreamSource(audioStream);
-                }
-                this.aec(listener);
             } else {
                 this.drawMicrophone();
                 // pause WebRTC audio stream

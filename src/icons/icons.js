@@ -36,6 +36,7 @@ export function setupIcons() {
      * Create audio button
      */
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
+        if (!ARENA.JitsiAPI) return;
         if (!ARENA.JitsiAPI.hasAudio()) { // toggled
             ARENA.JitsiAPI.unmuteAudio()
                 .then(() => {
@@ -59,6 +60,7 @@ export function setupIcons() {
      * Create video button
      */
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
+        if (!ARENA.JitsiAPI) return;
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
             ARENA.JitsiAPI.startVideo()
                 .then(() => {

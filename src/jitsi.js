@@ -559,6 +559,7 @@ export const ARENAJitsi = async function(jitsiServer) {
                 jitsiVideoElem.style.left = '15px';
                 jitsiVideoElem.style.borderRadius = '10px';
                 jitsiVideoElem.style.opacity = 0.95; // slightly see through
+                jitsiVideoElem.style.zIndex = 9999;
                 jitsiVideoElem.setAttribute('width', ARENA.localVideoWidth);
 
                 /**
