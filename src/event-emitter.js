@@ -54,6 +54,16 @@ export class ARENAEventEmitter {
          * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
          */
         USER_LEFT: 'user_left',
+
+        /**
+         * Indicates user authentication is done. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback onAuthCallback
+         * @param mqtt_username {string} the mqtt username (used to login into the server)
+         * @param mqtt_token {string} the mqtt token (used to login into the server)
+         */
+        ONAUTH: 'onauth'
     };
 
     /**
