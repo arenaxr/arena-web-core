@@ -5,10 +5,11 @@
 export class ARENAUtils {
     /**
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
-     * @return {string} scene name
+     * @return {string} scene name - includes namespace prefix (e.g. `namespace/foo`)
      */
     static getSceneName() {
         let path = window.location.pathname.substring(1);
+        let {namespaceParam: namespace, scenenameParam: scenename} = defaults;
         if (defaults.supportDevFolders && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
             if (devPrefix){
@@ -16,12 +17,22 @@ export class ARENAUtils {
             }
         }
         if (path === '' || path === 'index.html') {
-            return this.getUrlParam('scene', defaults.scenenameParam);
+            scenename = this.getUrlParam('scene', scenename);
+            return `${namespace}/${scenename}`;
         }
         try {
-            return path.match(/^[^\/]+(\/[^\/]+)?/g)[0];
+            const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
+            const matches = r.exec(path).groups;
+            // Only first group is given, namespace is actually the scene name
+            if (matches.scenename === undefined) {
+                scenename = matches.namespace;
+                return `${namespace}/${scenename}`;
+            }
+            // Both scene and namespace are defined, return regex as-is
+            return `${matches.namespace}/${matches.scenename}`;
         } catch (e) {
-            return this.getUrlParam('scene', defaults.scenenameParam);
+            scenename = this.getUrlParam('scene', scenename);
+            return `${namespace}/${scenename}`;
         }
     };
 
