@@ -7,7 +7,7 @@ import * as Comlink from "https://unpkg.com/comlink/dist/esm/comlink.mjs";
 
 var bufIndex = 0;
 var cvThrottle = 0;
-var dtagMatrix = new THREE.Matrix4();
+var dtagMatrix = new THREE.Matrix4()
 var rigMatrix = new THREE.Matrix4();
 // var rigMatrixT = new THREE.Matrix4();
 var vioMatrixCopy = new THREE.Matrix4();
@@ -139,7 +139,7 @@ window.processCV = async function (frame) {
                 };
                 jsonMsg.localize_tag = true;
             }
-            ARENA.mqtt.publish('realm/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
+            ARENA.Mqtt.publish('realm/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
         } else {
             let localizerTag;
             for (let detection of detections) {
@@ -195,7 +195,7 @@ window.processCV = async function (frame) {
                                 },
                             }
                         });
-                        ARENA.mqtt.publish('realm/s/' + ARENA.renderParam + '/apriltag_' + dtagid, JSON.stringify(jsonMsg));
+                        ARENA.Mqtt.publish('realm/s/' + ARENA.renderParam + '/apriltag_' + dtagid, JSON.stringify(jsonMsg));
                     }
                 }
             }
@@ -290,7 +290,7 @@ window.processCV2 = async function (frame) {
             jsonMsg.geolocation = {latitude: ARENA.clientCoords.latitude, longitude: ARENA.clientCoords.longitude};
             jsonMsg.localize_tag = true;
         }
-        ARENA.mqtt.publish('realm/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
+        ARENA.Mqtt.publish('realm/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
         let ids = detections.map(tag => tag.id);
         console.log('April Tag IDs Detected: ' + ids.join(', '));
     } // this is the resulting json with the detections

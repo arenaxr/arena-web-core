@@ -82,7 +82,7 @@ export class ARENAUtils {
      * @param {Object} msg msg to debug
      */
     static debug(msg) {
-        ARENA.mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
+        ARENA.Mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
     };
 
     /**
