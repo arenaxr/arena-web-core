@@ -397,9 +397,11 @@ export const ARENAMqtt = function() {
                     entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
                     entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
                     entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
-                    // force an update in case jitsi wasnt ready
-                    entityEl.components['arena-user'].updateVideo();
-                    entityEl.components['arena-user'].updateAudio();
+                    // force a/v updates in case jitsi wasnt ready
+                    if (ARENA.JitsiAPI.ready() && theMessage.jitsiId) {
+                        entityEl.components['arena-user'].updateVideo();
+                        entityEl.components['arena-user'].updateAudio();
+                    }
                 }
                 if (theMessage.hasOwnProperty('displayName')) {
                     entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text

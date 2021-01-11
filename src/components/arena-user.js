@@ -115,6 +115,7 @@ AFRAME.registerComponent('arena-user', {
 
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
+        this.drawMicrophone();
 
         this.videoTrack = null;
         this.videoID = null;
@@ -305,11 +306,6 @@ AFRAME.registerComponent('arena-user', {
         if (data.displayName !== oldData.displayName) {
             const name = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.headText.setAttribute('value', name);
-        }
-
-        if (ARENA.JitsiAPI.ready() && data.jitsiId) {
-            this.updateVideo();
-            this.updateAudio();
         }
     },
 
