@@ -9,7 +9,7 @@ export class ARENAUtils {
      */
     static getSceneName() {
         let path = window.location.pathname.substring(1);
-        let {namespace, scenename} = defaults;
+        let {namespaceParam: namespace, scenenameParam: scenename} = defaults;
         if (defaults.supportDevFolders && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
             if (devPrefix){
@@ -17,7 +17,7 @@ export class ARENAUtils {
             }
         }
         if (path === '' || path === 'index.html') {
-            scenename = this.getUrlParam('scene', defaults.scenenameParam);
+            scenename = this.getUrlParam('scene', scenename);
             return `${namespace}/${scenename}`;
         }
         try {
@@ -31,7 +31,7 @@ export class ARENAUtils {
             // Both scene and namespace are defined, return regex as-is
             return `${matches.namespace}/${matches.scenename}`;
         } catch (e) {
-            scenename = this.getUrlParam('scene', defaults.scenenameParam);
+            scenename = this.getUrlParam('scene', scenename);
             return `${namespace}/${scenename}`;
         }
     };
