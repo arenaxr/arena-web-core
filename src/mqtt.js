@@ -394,11 +394,12 @@ export const ARENAMqtt = function() {
             case 'camera':
                 // decide if we need draw or delete videoCube around head
                 if (theMessage.hasOwnProperty('jitsiId')) {
-                    if (ARENA.JitsiAPI.ready()) {
-                        entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
-                        entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
-                        entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
-                    }
+                    entityEl.setAttribute('arena-user', 'jitsiId', theMessage.jitsiId);
+                    entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
+                    entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
+                    // force an update in case jitsi wasnt ready
+                    entityEl.components['arena-user'].updateVideo();
+                    entityEl.components['arena-user'].updateAudio();
                 }
                 if (theMessage.hasOwnProperty('displayName')) {
                     entityEl.setAttribute('arena-user', 'displayName', theMessage.displayName); // update head text

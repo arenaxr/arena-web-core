@@ -211,92 +211,105 @@ AFRAME.registerComponent('arena-user', {
         document.body.addEventListener('mousemove', resume, false);
     },
 
-    update: function(oldData) {
+    updateVideo() {
+        const data = this.data;
+        if (!data) return;
+
+        /* Handle Jitsi Video */
+        this.videoID = `video${data.jitsiId}`;
+        if (data.hasVideo) {
+            this.videoTrack = ARENA.JitsiAPI.getVideoTrack(data.jitsiId);
+            // draw video cube, but only if it didnt exist before
+            videoElem = document.getElementById(this.videoID);
+            if (videoElem && !this.videoCubeDrawn) {
+                this.drawVideoCube();
+            }
+        } else {
+            // pause WebRTC video stream
+            if (this.videoTrack) {
+                this.videoTrack.enabled = false;
+            }
+            this.removeVideoCube();
+        }
+    },
+
+    updateAudio() {
         const data = this.data;
         const el = this.el;
+        if (!data) return;
+
+        /* Handle Jitsi Audio */
+        if (data.hasAudio) {
+            // set up positional audio, but only once per camera
+            const jistiAudioTrack = ARENA.JitsiAPI.getAudioTrack(data.jitsiId);
+            if (!jistiAudioTrack) return;
+
+            const oldAudioTrack = this.audioTrack;
+            this.audioTrack = jistiAudioTrack.track;
+            if (this.audioTrack) {
+                this.removeMicrophone();
+            }
+
+            if (this.audioTrack !== oldAudioTrack) {
+                // set up and attach positional audio
+                const audioStream = new MediaStream();
+                audioStream.addTrack(this.audioTrack);
+
+                const sceneEl = document.querySelector('a-scene');
+                let listener = null;
+                if (sceneEl.audioListener) {
+                    listener = sceneEl.audioListener;
+                } else {
+                    listener = new THREE.AudioListener();
+                    const camEl = ARENA.sceneObjects.myCamera.object3D;
+                    camEl.add(listener);
+                    sceneEl.audioListener = listener;
+                }
+
+                // create positional audio, but only if didn't exist before
+                if (!this.audioSource) {
+                    this.audioSource = new THREE.PositionalAudio(listener);
+                    this.audioSource.setMediaStreamSource(audioStream);
+                    el.object3D.add(this.audioSource);
+
+                    // set positional audio scene params
+                    if (ARENA.volume) {
+                        this.audioSource.setVolume(ARENA.volume);
+                    }
+                    if (ARENA.refDist) { // L-R panning
+                        this.audioSource.setRefDistance(ARENA.refDist);
+                    }
+                    if (ARENA.rolloffFact) {
+                        this.audioSource.setRolloffFactor(ARENA.rolloffFact);
+                    }
+                    if (ARENA.distModel) {
+                        this.audioSource.setDistanceModel(ARENA.distModel);
+                    }
+                } else {
+                    this.audioSource.setMediaStreamSource(audioStream);
+                }
+                this.aec(listener);
+            }
+        } else {
+            this.drawMicrophone();
+            // pause WebRTC audio stream
+            if (this.audioTrack) {
+                this.audioTrack.enabled = false;
+            }
+        }
+    },
+
+    update: function(oldData) {
+        const data = this.data;
 
         if (data.displayName !== oldData.displayName) {
             const name = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.headText.setAttribute('value', name);
         }
 
-        if (data.jitsiId) {
-            /* Handle Jitsi Video */
-            this.videoID = `video${data.jitsiId}`;
-            if (data.hasVideo) {
-                this.videoTrack = ARENA.JitsiAPI.getVideoTrack(data.jitsiId);
-                // draw video cube, but only if it didnt exist before
-                videoElem = document.getElementById(this.videoID);
-                if (videoElem && !this.videoCubeDrawn) {
-                    this.drawVideoCube();
-                }
-            } else {
-                // pause WebRTC video stream
-                if (this.videoTrack) {
-                    this.videoTrack.enabled = false;
-                }
-                this.removeVideoCube();
-            }
-
-            /* Handle Jitsi Audio */
-            if (data.hasAudio) {
-                // set up positional audio, but only once per camera
-                const jistiAudioTrack = ARENA.JitsiAPI.getAudioTrack(data.jitsiId);
-                if (!jistiAudioTrack) return;
-
-                const oldAudioTrack = this.audioTrack;
-                this.audioTrack = jistiAudioTrack.track;
-                if (this.audioTrack) {
-                    this.removeMicrophone();
-                }
-
-                if (this.audioTrack !== oldAudioTrack) {
-                    // set up and attach positional audio
-                    const audioStream = new MediaStream();
-                    audioStream.addTrack(this.audioTrack);
-
-                    const sceneEl = document.querySelector('a-scene');
-                    let listener = null;
-                    if (sceneEl.audioListener) {
-                        listener = sceneEl.audioListener;
-                    } else {
-                        listener = new THREE.AudioListener();
-                        const camEl = ARENA.sceneObjects.myCamera.object3D;
-                        camEl.add(listener);
-                        sceneEl.audioListener = listener;
-                    }
-
-                    // create positional audio, but only if didn't exist before
-                    if (!this.audioSource) {
-                        this.audioSource = new THREE.PositionalAudio(listener);
-                        this.audioSource.setMediaStreamSource(audioStream);
-                        el.object3D.add(this.audioSource);
-
-                        // set positional audio scene params
-                        if (ARENA.volume) {
-                            this.audioSource.setVolume(ARENA.volume);
-                        }
-                        if (ARENA.refDist) { // L-R panning
-                            this.audioSource.setRefDistance(ARENA.refDist);
-                        }
-                        if (ARENA.rolloffFact) {
-                            this.audioSource.setRolloffFactor(ARENA.rolloffFact);
-                        }
-                        if (ARENA.distModel) {
-                            this.audioSource.setDistanceModel(ARENA.distModel);
-                        }
-                    } else {
-                        this.audioSource.setMediaStreamSource(audioStream);
-                    }
-                    this.aec(listener);
-                }
-            } else {
-                this.drawMicrophone();
-                // pause WebRTC audio stream
-                if (this.audioTrack) {
-                    this.audioTrack.enabled = false;
-                }
-            }
+        if (ARENA.JitsiAPI.ready() && data.jitsiId) {
+            this.updateVideo();
+            this.updateAudio();
         }
     },
 
