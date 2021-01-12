@@ -17,8 +17,11 @@ import {ARENAUtils} from './utils.js';
  * Main ARENA MQTT client
  */
 export class ARENAMqtt {
+    static mqtt = undefined;
+
     static init() {
-        return new ARENAMqtt();
+        if (!this.mqtt) this.mqtt = new ARENAMqtt();
+        return this.mqtt;
     }
 
     /**
@@ -42,8 +45,8 @@ export class ARENAMqtt {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
-            if (!ARENA.JitsiAPI.ready()) {
-                ARENA.JitsiAPI = ARENAJitsi(ARENA.jitsiServer);
+            if (!ARENAJitsi.jitsi.ready) {
+                ARENAJitsi.jitsi.connect();
                 console.warn(`ARENA Jitsi restarting...`);
             }
             this.mqttClient.subscribe(ARENA.renderTopic);
@@ -408,7 +411,7 @@ export class ARENAMqtt {
                     entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
                     entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
                     // force a/v updates in case jitsi wasnt ready
-                    if (ARENA.JitsiAPI.ready() && theMessage.jitsiId) {
+                    if (ARENAJitsi.jitsi.ready && theMessage.jitsiId) {
                         entityEl.components['arena-user'].updateVideo();
                         entityEl.components['arena-user'].updateAudio();
                     }

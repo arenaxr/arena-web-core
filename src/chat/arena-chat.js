@@ -707,7 +707,7 @@ export class ARENAChat {
         userList.forEach((user) => {
             let uli = document.createElement('li');
 
-            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s screen share';
+            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s Screen Share';
             uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') +
                                     decodeURI(name) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
 

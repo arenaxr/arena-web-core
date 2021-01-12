@@ -16,7 +16,7 @@ import {setupIcons} from './icons/icons.js';
 /**
  * ARENA global object
  */
-window.ARENA = {};
+module.exports = window.ARENA = {};
 
 ARENA.events = new ARENAEventEmitter(); // arena events target
 
@@ -63,7 +63,6 @@ ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
  * @param {Object} rotation initial rotation
  */
 ARENA.loadArena = (urlToLoad, position, rotation) => {
-
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = !defaults.disallowJWT; // Include JWT cookie
     if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -257,7 +256,7 @@ ARENA.loadScene = () => {
 
         ARENA.maxAVDist = ARENA.maxAVDist ? ARENA.maxAVDist : 20;
         // initialize Jitsi videoconferencing
-        ARENA.JitsiAPI = await ARENAJitsi(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+        ARENAJitsi.init(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
     };
 };
 

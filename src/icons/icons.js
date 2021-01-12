@@ -1,4 +1,5 @@
 /* global AFRAME, ARENA */
+import {ARENAJitsi} from '../jitsi.js';
 import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
@@ -37,9 +38,9 @@ export function setupIcons() {
      * Create audio button
      */
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
-        if (!ARENA.JitsiAPI) return;
-        if (!ARENA.JitsiAPI.hasAudio()) { // toggled
-            ARENA.JitsiAPI.unmuteAudio()
+        if (!ARENAJitsi.jitsi) return;
+        if (!ARENAJitsi.jitsi.hasAudio) { // toggled
+            ARENAJitsi.jitsi.unmuteAudio()
                 .then(() => {
                     audioBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/audio-on.png\')';
                 })
@@ -47,7 +48,7 @@ export function setupIcons() {
                     console.log(err);
                 });
         } else {
-            ARENA.JitsiAPI.muteAudio()
+            ARENAJitsi.jitsi.muteAudio()
                 .then(() => {
                     audioBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/audio-off.png\')';
                 })
@@ -61,13 +62,13 @@ export function setupIcons() {
      * Create video button
      */
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
-        if (!ARENA.JitsiAPI) return;
-        if (!ARENA.JitsiAPI.hasVideo()) { // toggled
-            ARENA.JitsiAPI.startVideo()
+        if (!ARENAJitsi.jitsi) return;
+        if (!ARENAJitsi.jitsi.hasVideo) { // toggled
+            ARENAJitsi.jitsi.startVideo()
                 .then(() => {
                     videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-on.png\')';
                     avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-off.png\')';
-                    ARENA.JitsiAPI.showVideo();
+                    ARENAJitsi.jitsi.showVideo();
                     if (ARENA.FaceTracker.running()) {
                         ARENA.FaceTracker.stop();
                     }
@@ -77,9 +78,9 @@ export function setupIcons() {
                 });
         } else {
             videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-off.png\')';
-            ARENA.JitsiAPI.stopVideo()
+            ARENAJitsi.jitsi.stopVideo()
                 .then(() => {
-                    ARENA.JitsiAPI.hideVideo();
+                    ARENAJitsi.jitsi.hideVideo();
                 })
                 .catch((err) => {
                     console.log(err);
@@ -96,10 +97,10 @@ export function setupIcons() {
             if (!ARENA.FaceTracker.running()) { // toggled
                 ARENA.FaceTracker.run().then(() => {
                     avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-on.png\')';
-                    if (ARENA.JitsiAPI && ARENA.JitsiAPI.ready()) {
-                        ARENA.JitsiAPI.stopVideo().then(() => {
+                    if (ARENAJitsi.jitsi && ARENAJitsi.jitsi.ready) {
+                        ARENAJitsi.jitsi.stopVideo().then(() => {
                             videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-off.png\')';
-                            ARENA.JitsiAPI.hideVideo();
+                            ARENAJitsi.jitsi.hideVideo();
                         });
                     }
                 });
@@ -168,7 +169,7 @@ export function setupIcons() {
      * Create screen share button
      */
     const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window.', () => {
-        if (!ARENA.JitsiAPI) return;
+        if (!ARENAJitsi.jitsi) return;
 
         const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
         swal({
@@ -200,9 +201,9 @@ export function setupIcons() {
                             const screenshareWindow = window.open('./screenshare/index.html', '_blank');
                             const camera = document.getElementById('my-camera');
                             screenshareWindow.params = {
-                                jitsiURL: ARENA.JitsiAPI.serverName,
-                                screenSharePrefix: ARENA.JitsiAPI.screenSharePrefix,
-                                conferenceName: ARENA.JitsiAPI.conferenceName,
+                                jitsiURL: ARENAJitsi.jitsi.serverName,
+                                screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,
+                                conferenceName: ARENAJitsi.jitsi.arenaConferenceName,
                                 displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
                                 camName: ARENA.camName,
                                 objectIds: objectIds.join(),

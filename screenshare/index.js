@@ -41,7 +41,10 @@ function onLocalTracks(tracks) {
             () => console.log('local track muted'));
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-            () => console.log('local track stoped'));
+            () => {
+                console.log('local track stoped');
+                window.close();
+            });
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
             (deviceId) =>
