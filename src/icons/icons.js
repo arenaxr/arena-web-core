@@ -197,14 +197,16 @@ export function setupIcons() {
                                     objectIds[i] = objectIds[i].trim();
                                 }
                             }
-                            const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
-                            screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
-                            screenshareWindow.conferenceName = ARENA.JitsiAPI.conferenceName;
-                            screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
+                            const screenshareWindow = window.open('./screenshare/index.html', '_blank');
                             const camera = document.getElementById('my-camera');
-                            screenshareWindow.displayName = camera.getAttribute('arena-camera').displayName;
-                            screenshareWindow.camName = ARENA.camName;
-                            screenshareWindow.objectIds = objectIds.join();
+                            screenshareWindow.params = {
+                                jitsiURL: ARENA.JitsiAPI.serverName,
+                                screenSharePrefix: ARENA.JitsiAPI.screenSharePrefix,
+                                conferenceName: ARENA.JitsiAPI.conferenceName,
+                                displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
+                                camName: ARENA.camName,
+                                objectIds: objectIds.join(),
+                            };
                         });
                 }
             });

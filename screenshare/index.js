@@ -1,6 +1,7 @@
 /* global $, JitsiMeetJS */
 
-const jitsiServer = window.jitsiURL;
+if (!window.params) window.close();
+const jitsiServer = window.params.jitsiURL;
 if (!jitsiServer) window.close();
 
 const options = {
@@ -78,7 +79,7 @@ function onConferenceJoined() {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    conference = connection.initJitsiConference(window.conferenceName, confOptions);
+    conference = connection.initJitsiConference(window.params.conferenceName, confOptions);
     conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });
@@ -102,10 +103,12 @@ function onConnectionSuccess() {
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`));
 
-    conference.setDisplayName(`${(+new Date).toString(36)} ${window.screenSharePrefix}_${window.camName}`);
-    conference.setLocalParticipantProperty('screenshareDispName', window.displayName);
-    conference.setLocalParticipantProperty('screenshareCamName', window.camName);
-    conference.setLocalParticipantProperty('screenshareObjIds', window.objectIds);
+    conference.setDisplayName(
+        `${(+new Date).toString(36)} ${window.params.screenSharePrefix}_${window.params.camName}`,
+    );
+    conference.setLocalParticipantProperty('screenshareDispName', window.params.displayName);
+    conference.setLocalParticipantProperty('screenshareCamName', window.params.camName);
+    conference.setLocalParticipantProperty('screenshareObjIds', window.params.objectIds);
 
     conference.join();
 }

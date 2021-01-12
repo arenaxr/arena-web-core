@@ -23,7 +23,7 @@ function uuidv4() {
     );
 }
 
-export default class ARENAChat {
+export class ARENAChat {
     static PUBLIC_TOPIC_PREFIX = '/g/c/o/';
     static PRIVATE_TOPIC_PREFIX = '/g/c/p/';
 
@@ -377,7 +377,7 @@ export default class ARENAChat {
                 scene: user.scene,
                 cid: user.cn,
                 ts: new Date().getTime(),
-                type: ARENAChat.userType.EXTERNAL, // indicate we only know about the user from jitsi
+                type: ARENAChat.userType.EXTERNAL, // indicate we only know about the users from jitsi
             };
             if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
             else this.populateUserList();
@@ -963,5 +963,3 @@ export default class ARENAChat {
         );
     }
 }
-
-exports.ARENAChat = ARENAChat;
