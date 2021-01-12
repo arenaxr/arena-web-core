@@ -1,4 +1,5 @@
 /* global AFRAME, ARENA */
+import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
 

@@ -23,7 +23,9 @@
     <script src="conf/defaults.js"></script>
 
     <!-- main arena bundle -->
-    <script src="dist/index.js"></script>
+    <script src="dist/arena.js"></script>
+    <!-- main arena stylesheet -->
+    <link rel="stylesheet" href="dist/arena.css">
 
     <!-- face tracking -->
     <script src="src/face-tracking/dist/face-tracker.min.js"></script>
@@ -31,10 +33,6 @@
 
     <!-- webxr viewer handler -->
     <script src="src/web-xr-viewer.js"></script>
-
-    <!-- import stylesheets -->
-    <link rel="stylesheet" href="src/icons/icons.css">
-    <link rel="stylesheet" href="src/chat/style.css">
   </head>
   <body>
   <a-scene background="color: black" name="MQTTScene" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">  <!-- stats physics -->

@@ -13,6 +13,7 @@ import {ARENAEventEmitter} from '../event-emitter.js';
 import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';
 import swal from 'sweetalert';
+import './style.css';
 
 var mqttc;
 // generate an uuid
