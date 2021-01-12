@@ -12,7 +12,7 @@ import * as Paho from 'paho-mqtt'; //https://www.npmjs.com/package/paho-mqtt
 import {ARENAEventEmitter} from '../event-emitter.js';
 import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';
-import swal from 'sweetalert';
+import Swal from 'sweetalert2';
 import './style.css';
 
 var mqttc;
@@ -304,18 +304,18 @@ export class ARENAChat {
                 return;
             }
 
-            swal({
+            Swal.fire({
                 title: 'Are you sure?',
                 text: 'This will send a mute request to all users.',
                 icon: 'warning',
-                buttons: true,
-                dangerMode: true,
-            }).then((sendMute) => {
-                if (sendMute) {
-                    // send to all scene topic
-                    _this.ctrlMsg('scene', 'sound:off');
-                }
-            });
+                showCancelButton: true,
+            })
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        // send to all scene topic
+                        _this.ctrlMsg('scene', 'sound:off');
+                    }
+                });
         };
 
         const moveToCamera = localStorage.getItem('moveToFrontOfCamera');

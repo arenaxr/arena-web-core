@@ -1,4 +1,5 @@
 /* global AFRAME, ARENA */
+import Swal from 'sweetalert2';
 import {ARENAJitsi} from '../jitsi.js';
 import './style.css';
 
@@ -172,44 +173,45 @@ export function setupIcons() {
         if (!ARENAJitsi.jitsi) return;
 
         const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
-        swal({
+        Swal.fire({
             title: 'You clicked on screen share!',
-            text: `In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!`,
-            icon: 'warning',
-            buttons: ['Cancel', 'Yes'],
+            text: 'In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
         })
-            .then((confirmed) => {
-                if (confirmed) {
-                    swal({
-                        title: 'You clicked on screen share!',
-                        text: 'Enter the name(s) of the object(s) you want to screenshare on (use commas for multiple objects):',
-                        content: {
-                            element: 'input',
-                            attributes: {
-                                defaultValue: defaultScreenObj,
-                            },
-                        },
-                    })
-                        .then((value) => {
-                            let objectIds = value ? value : defaultScreenObj;
-                            objectIds = objectIds.split(',');
-                            for (let i = 0; i < objectIds.length; i++) {
-                                if (objectIds[i]) {
-                                    objectIds[i] = objectIds[i].trim();
-                                }
+            .then((result) => {
+                if (!result.isConfirmed) return;
+                Swal.fire({
+                    title: 'You clicked on screen share!',
+                    text: 'Enter the name(s) of the object(s) you want to screenshare on (use commas for multiple objects):',
+                    input: 'text',
+                    inputValue: defaultScreenObj,
+                    inputAttributes: {
+                        autocapitalize: 'off',
+                    },
+                    showCancelButton: true,
+                })
+                    .then((result) => {
+                        if (!result.value) return;
+                        let objectIds = result.value;
+                        objectIds = objectIds.split(',');
+                        for (let i = 0; i < objectIds.length; i++) {
+                            if (objectIds[i]) {
+                                objectIds[i] = objectIds[i].trim();
                             }
-                            const screenshareWindow = window.open('./screenshare/index.html', '_blank');
-                            const camera = document.getElementById('my-camera');
-                            screenshareWindow.params = {
-                                jitsiURL: ARENAJitsi.jitsi.serverName,
-                                screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,
-                                conferenceName: ARENAJitsi.jitsi.arenaConferenceName,
-                                displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
-                                camName: ARENA.camName,
-                                objectIds: objectIds.join(),
-                            };
-                        });
-                }
+                        }
+                        const screenshareWindow = window.open('./screenshare/index.html', '_blank');
+                        const camera = document.getElementById('my-camera');
+                        screenshareWindow.params = {
+                            jitsiURL: ARENAJitsi.jitsi.serverName,
+                            screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,
+                            conferenceName: ARENAJitsi.jitsi.arenaConferenceName,
+                            displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
+                            camName: ARENA.camName,
+                            objectIds: objectIds.join(),
+                        };
+                    });
             });
     });
     screenShareButton.style.display = 'none';
@@ -219,15 +221,14 @@ export function setupIcons() {
      * Create logout button
      */
     const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA.', () => {
-        swal({
+        Swal.fire({
             title: 'You are about to sign out of the ARENA!',
             text: 'Are you sure you want to sign out?',
             icon: 'warning',
-            dangerMode: true,
-            buttons: ['Cancel', 'Yes'],
+            showCancelButton: true,
         })
-            .then((confirmed) => {
-                if (confirmed) {
+            .then((result) => {
+                if (result.isConfirmed) {
                     signOut();
                 }
             });

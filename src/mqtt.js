@@ -645,7 +645,7 @@ export class ARENAMqtt {
      * @param {string} jsonMessage
      */
     processMessage(jsonMessage) {
-        return onMessageArrived(undefined, jsonMessage);
+        return this.onMessageArrived(undefined, jsonMessage);
     }
 
     /**

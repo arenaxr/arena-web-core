@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA, JitsiMeetJS */
 import $ from 'jquery';
-import swal from 'sweetalert';
+import Swal from 'sweetalert2';
 import {ARENAEventEmitter} from './event-emitter.js';
 
 export class ARENAJitsi {
@@ -18,6 +18,10 @@ export class ARENAJitsi {
     static jitsi = undefined;
 
     constructor(jitsiServer) {
+        if (!window.JitsiMeetJS) {
+            console.warn("Jitsi is not found!");
+            return;
+        }
         this.serverName = jitsiServer;
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
@@ -530,11 +534,13 @@ export class ARENAJitsi {
             if (vidbtn) vidbtn.remove();
             const audbtn = document.getElementById('btn-audio-off');
             if (audbtn) audbtn.remove();
-            swal({
+            Swal.fire({
                 title: 'No Webcam or Audio Input Device found!',
                 text: `You are now in "spectator mode". This means you won\'t be able to share audio or video,
                         but can still interact with other users in the ARENA.`,
                 icon: 'warning',
+                showConfirmButton: true,
+                confirmButtonText: 'Ok'
             });
         }
         this.avConnected = true;
