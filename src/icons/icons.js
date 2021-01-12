@@ -199,7 +199,7 @@ export function setupIcons() {
                             }
                             const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
-                            screenshareWindow.scene = ARENA.scenenameParam;
+                            screenshareWindow.conferenceName = ARENA.JitsiAPI.conferenceName;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;
                             const camera = document.getElementById('my-camera');
                             screenshareWindow.displayName = camera.getAttribute('arena-camera').displayName;

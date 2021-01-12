@@ -78,7 +78,7 @@ function onConferenceJoined() {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    conference = connection.initJitsiConference(window.scene, confOptions);
+    conference = connection.initJitsiConference(window.conferenceName, confOptions);
     conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });

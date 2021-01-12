@@ -596,6 +596,8 @@ export const ARENAJitsi = async function(jitsiServer) {
 
         screenSharePrefix: SCREENSHARE_PREFIX,
 
+        conferenceName: arenaConferenceName,
+
         // conference event constants (so other modules can use these without importing jitsiMeetJS)
         events: JitsiMeetJS.events.conference,
 
