@@ -30,16 +30,13 @@
     <!-- face tracking -->
     <script src="src/face-tracking/dist/face-tracker.min.js"></script>
     <script src="src/face-tracking/script.js"></script>
-
-    <!-- webxr viewer handler -->
-    <script src="src/web-xr-viewer.js"></script>
   </head>
   <body>
   <a-scene background="color: black" name="MQTTScene" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">  <!-- stats physics -->
       <a-assets>
         <!-- Vive controller 3d model -->
-        <a-asset-item id="viveControl-obj" src="models/vr_controller_vive.obj"></a-asset-item>
-        <a-asset-item id="viveControl-mtl" src="models/vr_controller_vive.mtl"></a-asset-item>
+        <!-- <a-asset-item id="viveControl-obj" src="models/vr_controller_vive.obj"></a-asset-item>
+        <a-asset-item id="viveControl-mtl" src="models/vr_controller_vive.mtl"></a-asset-item> -->
       </a-assets>
 
       <a-entity id="sceneRoot">
@@ -61,8 +58,8 @@
           </a-entity>
         </a-entity>
 
-        <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-        <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
+        <!-- <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
+        <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity> -->
       </a-entity>
     </a-scene>
 

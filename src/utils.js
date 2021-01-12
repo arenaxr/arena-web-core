@@ -6,6 +6,9 @@
  * @date 2020
  */
 
+/**
+ * Wrapper class for various utility functions
+ */
 export class ARENAUtils {
     /**
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
@@ -16,7 +19,7 @@ export class ARENAUtils {
         let {namespaceParam: namespace, scenenameParam: scenename} = defaults;
         if (defaults.supportDevFolders && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
-            if (devPrefix){
+            if (devPrefix) {
                 path = path.replace(devPrefix[0], '');
             }
         }
@@ -91,6 +94,28 @@ export class ARENAUtils {
 
         return indexes;
     };
+
+    /**
+     * Gets geolocation of user's device
+     * @return {object} geolocation of user's device
+     */
+    static getLocation() {
+        const urlLat = ARENAUtils.getUrlParam('lat');
+        const urlLong = ARENAUtils.getUrlParam('long');
+        if (urlLat && urlLong) {
+            ARENA.clientCoords = {
+                latitude: urlLat,
+                longitude: urlLong,
+            };
+        } else {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    ARENA.clientCoords = position.coords;
+                });
+            }
+        }
+        return ARENA.clientCoords;
+    }
 
     /**
      * Publishes debug message to mqtt

@@ -10,4 +10,5 @@
 import 'aframe'; // AFRAME
 import './arena.js'; // ARENA
 import './aframe-mods.js'; // AFRAME modifications
-import './components/index.js';
+import './components/index.js'; // custom AFRAME components
+import './web-xr-viewer.js';

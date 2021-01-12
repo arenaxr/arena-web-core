@@ -13,18 +13,31 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAUtils} from './utils.js';
 
-export const ARENAMqtt = function() {
-    const mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
-    mqttClient.onConnected = onConnected;
-    mqttClient.onConnectionLost = onConnectionLost;
-    mqttClient.onMessageArrived = onMessageArrived;
+/**
+ * Main ARENA MQTT client
+ */
+export class ARENAMqtt {
+    static init() {
+        return new ARENAMqtt();
+    }
+
+    /**
+     * Constructor
+     */
+    constructor() {
+        this.mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
+        this.mqttClient.onConnected = this.onConnected.bind(this);
+        this.mqttClient.onConnectionLost = this.onConnectionLost.bind(this);
+        this.mqttClient.onMessageArrived = this.onMessageArrived.bind(this);
+        this.progMsgs = {};
+    }
 
     /**
      * MQTT onConnected callback
      * @param {Boolean} reconnect is a reconnect
      * @param {Object} uri uri used
      */
-    function onConnected(reconnect, uri) {
+    onConnected(reconnect, uri) {
         if (reconnect) {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
@@ -33,7 +46,7 @@ export const ARENAMqtt = function() {
                 ARENA.JitsiAPI = ARENAJitsi(ARENA.jitsiServer);
                 console.warn(`ARENA Jitsi restarting...`);
             }
-            mqttClient.subscribe(ARENA.renderTopic);
+            this.mqttClient.subscribe(ARENA.renderTopic);
             console.warn(`MQTT scene reconnected to ${uri}`);
             return; // do not continue!
         }
@@ -55,32 +68,32 @@ export const ARENAMqtt = function() {
         sceneObjects.myCamera.setAttribute('arena-camera', 'displayName', ARENAUtils.getDisplayName());
         sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
-        const viveLeft = document.getElementById('vive-leftHand');
-        viveLeft.setAttribute('arena-vive', 'enabled', true);
-        viveLeft.setAttribute('arena-vive', 'name', ARENA.viveLName);
-        viveLeft.setAttribute('arena-vive', 'hand', 'left');
-        viveLeft.setAttribute('arena-vive', 'color', color);
-        sceneObjects[ARENA.viveLName] = viveLeft;
+        // const viveLeft = document.getElementById('vive-leftHand');
+        // viveLeft.setAttribute('arena-vive', 'enabled', true);
+        // viveLeft.setAttribute('arena-vive', 'name', ARENA.viveLName);
+        // viveLeft.setAttribute('arena-vive', 'hand', 'left');
+        // viveLeft.setAttribute('arena-vive', 'color', color);
+        // sceneObjects[ARENA.viveLName] = viveLeft;
 
-        const viveRight = document.getElementById('vive-rightHand');
-        viveRight.setAttribute('arena-vive', 'enabled', true);
-        viveRight.setAttribute('arena-vive', 'name', ARENA.viveRName);
-        viveRight.setAttribute('arena-vive', 'hand', 'right');
-        viveRight.setAttribute('arena-vive', 'color', color);
-        sceneObjects[ARENA.viveRName] = viveRight;
+        // const viveRight = document.getElementById('vive-rightHand');
+        // viveRight.setAttribute('arena-vive', 'enabled', true);
+        // viveRight.setAttribute('arena-vive', 'name', ARENA.viveRName);
+        // viveRight.setAttribute('arena-vive', 'hand', 'right');
+        // viveRight.setAttribute('arena-vive', 'color', color);
+        // sceneObjects[ARENA.viveRName] = viveRight;
 
         ARENA.loadScene();
         ARENA.loadArena();
 
         // start listening for MQTT messages
-        mqttClient.subscribe(ARENA.renderTopic);
+        this.mqttClient.subscribe(ARENA.renderTopic);
     }
 
     /**
      * MQTT onConnectionLost callback
      * @param {Object} responseObject paho response object
      */
-    function onConnectionLost(responseObject) {
+    onConnectionLost(responseObject) {
         if (responseObject.errorCode !== 0) {
             console.error(
                 `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
@@ -96,9 +109,9 @@ export const ARENAMqtt = function() {
      * @param {Object} message
      * @param {String} jsonMessage
      */
-    function onMessageArrived(message, jsonMessage) {
+    onMessageArrived(message, jsonMessage) {
         try {
-            _onMessageArrived(message, jsonMessage);
+            this._onMessageArrived(message, jsonMessage);
         } catch (err) {
             if (message) {
                 if (message.payloadString) {
@@ -113,14 +126,12 @@ export const ARENAMqtt = function() {
         }
     }
 
-    let progMsgs = {};
-
     /**
      * Internal MessageArrived handler; handles object create/delete/event/... messages
      * @param {Object} message
      * @param {String} jsonMessage
      */
-    function _onMessageArrived(message, jsonMessage) {
+    _onMessageArrived(message, jsonMessage) {
         const sceneObjects = ARENA.sceneObjects;
         const sceneEl = document.querySelector('a-scene');
         let theMessage = {};
@@ -434,7 +445,7 @@ export const ARENAMqtt = function() {
                 const updateProgress = (failed, evt) => {
                     const gltfProgressEl = document.getElementById('gltf-loading');
                     let innerHTML = 'Loading 3D model:<br/>';
-                    for (const [src, progress] of Object.entries(progMsgs)) {
+                    for (const [src, progress] of Object.entries(this.progMsgs)) {
                         if (progress === 'failed') {
                             innerHTML += '<b>"' + src + '"' + '<br/>' + 'Failed!</b>' + '<br/>';
                         } else {
@@ -446,21 +457,21 @@ export const ARENAMqtt = function() {
                     gltfProgressEl.className = 'show';
                     if (evt.detail.progress === 100 || failed) {
                         setTimeout(() => {
-                            progMsgs = {};
+                            this.progMsgs = {};
                             gltfProgressEl.className = 'hide';
                         }, 3000);
                     }
                 };
 
                 entityEl.addEventListener('model-progress', (evt) => {
-                    progMsgs[evt.detail.src] = evt.detail.progress;
+                    this.progMsgs[evt.detail.src] = evt.detail.progress;
                     updateProgress(false, evt);
                     if (evt.detail.progress === 100) {
-                        delete progMsgs[evt.detail.src];
+                        delete this.progMsgs[evt.detail.src];
                     }
                 });
                 entityEl.addEventListener('model-error', (evt) => {
-                    progMsgs[evt.detail.src] = 'failed';
+                    this.progMsgs[evt.detail.src] = 'failed';
                     updateProgress(true, evt);
                 });
                 delete theMessage.data.url;
@@ -577,75 +588,70 @@ export const ARENAMqtt = function() {
         } // switch (theMessage.action)
     }
 
-    return {
-        // ==================================================
-        // PUBLIC
-        // ==================================================
+    /**
+     * Connect mqtt client; If given, setup a last will message given as argument
+     * @param {object} mqttClientOptions paho mqtt options
+     * @param {string} lwMsg last will message
+     * @param {string} lwTopic last will destination topic message
+     */
+    connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
+        if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
+            // Last Will and Testament message sent to subscribers if this client loses connection
+            let lwt = new Paho.Message(lwMsg);
+            lwt.destinationName = lwTopic;
+            lwt.qos = 2;
+            lwt.retained = false;
 
-        /**
-         * Connect mqtt client; If given, setup a last will message given as argument
-         * @param {object} mqttClientOptions paho mqtt options
-         * @param {string} lwMsg last will message
-         * @param {string} lwTopic last will destination topic message
-         */
-        connect: function(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
-            if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
-                // Last Will and Testament message sent to subscribers if this client loses connection
-                let lwt = new Paho.Message(lwMsg);
-                lwt.destinationName = lwTopic;
-                lwt.qos = 2;
-                lwt.retained = false;
+            mqttClientOptions.willMessage = lwt;
+        }
 
-                mqttClientOptions.willMessage = lwt;
-            }
+        this.mqttClient.connect(mqttClientOptions);
+    }
 
-            mqttClient.connect(mqttClientOptions);
-        },
+    /**
+     * Direct call to mqtt client send
+     * @param {object} msg
+     */
+    send(msg) {
+        if (!this.mqttClient.isConnected()) return;
+        return this.mqttClient.send(msg);
+    }
+    /**
+     * Publish to given dest topic
+     * @param {string} dest
+     * @param {object} msg
+     */
+    publish(dest, msg) {
+        if (!this.mqttClient.isConnected()) return;
 
-        /**
-         * Direct call to mqtt client send
-         * @param {object} msg
-         */
-        send: function(msg) {
-            if (!mqttClient.isConnected()) return;
-            return mqttClient.send(msg);
-        },
-        /**
-         * Publish to given dest topic
-         * @param {string} dest
-         * @param {object} msg
-         */
-        publish: function(dest, msg) {
-            if (!mqttClient.isConnected()) return;
+        if (typeof msg === 'object') {
+            // add timestamp to all published messages
+            const d = new Date();
+            const n = d.toISOString();
+            msg['timestamp'] = n;
 
-            if (typeof msg === 'object') {
-                // add timestamp to all published messages
-                const d = new Date();
-                const n = d.toISOString();
-                msg['timestamp'] = n;
+            msg = JSON.stringify(msg);
+        }
+        const message = new Paho.Message(msg);
+        message.destinationName = dest;
+        return this.mqttClient.send(message);
+    }
 
-                msg = JSON.stringify(msg);
-            }
-            const message = new Paho.Message(msg);
-            message.destinationName = dest;
-            return mqttClient.send(message);
-        },
-        /**
-         * Send a message to internal receive handler
-         * @param {string} jsonMessage
-         */
-        processMessage: function(jsonMessage) {
-            return onMessageArrived(undefined, jsonMessage);
-        },
-        /**
-         * Check if client is connected
-         * @param {string} jsonMessage
-         */
-        isConnected: function(jsonMessage) {
-            return mqttClient.isConnected();
-        },
+    /**
+     * Send a message to internal receive handler
+     * @param {string} jsonMessage
+     */
+    processMessage(jsonMessage) {
+        return onMessageArrived(undefined, jsonMessage);
+    }
 
-    };
+    /**
+     * Check if client is connected
+     * @param {string} jsonMessage
+     */
+    isConnected(jsonMessage) {
+        return this.mqttClient.isConnected();
+    }
 };
 
 

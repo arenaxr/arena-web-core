@@ -262,22 +262,9 @@ ARENA.loadScene = () => {
 };
 
 window.addEventListener('onauth', function(e) {
-    const urlLat = ARENAUtils.getUrlParam('lat');
-    const urlLong = ARENAUtils.getUrlParam('long');
-    if (urlLat && urlLong) {
-        ARENA.clientCoords = {
-            latitude: urlLat,
-            longitude: urlLong,
-        };
-    } else {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition((position) => {
-                ARENA.clientCoords = position.coords;
-            });
-        }
-    }
+    ARENA.clientCoords = ARENAUtils.getLocation();
 
-    ARENA.Mqtt = ARENAMqtt(); // mqtt API (after ARENA.* above, are defined)
+    ARENA.Mqtt = ARENAMqtt.init(); // mqtt API (after ARENA.* above, are defined)
 
     ARENA.username = e.detail.mqtt_username;
     ARENA.mqttToken = e.detail.mqtt_token;
@@ -292,13 +279,13 @@ window.addEventListener('onauth', function(e) {
         reconnect: true,
         userName: ARENA.username,
         password: ARENA.mqttToken,
-        },
-        // last will message
-        JSON.stringify({object_id: ARENA.camName, action: 'delete'}),
-        // last will topic
-        ARENA.outputTopic + ARENA.camName
-        );
-/*
+    },
+    // last will message
+    JSON.stringify({object_id: ARENA.camName, action: 'delete'}),
+    // last will topic
+    ARENA.outputTopic + ARENA.camName,
+    );
+    /*
     // init runtime manager
     ARENA.RuntimeManager.init({
         mqtt_uri: ARENA.mqttParam,
@@ -310,7 +297,8 @@ window.addEventListener('onauth', function(e) {
         mqtt_username: ARENA.username,
         mqtt_token: ARENA.mqttToken,
     });
-*/
+    */
+
     // init chat after
     ARENA.chat = new ARENAChat({
         userid: ARENA.idTag,
