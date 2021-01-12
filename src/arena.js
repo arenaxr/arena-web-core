@@ -7,7 +7,7 @@
  */
 
 import {ARENAUtils} from './utils.js';
-import {ARENAMqtt} from './mqtt.js'
+import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/arena-chat.js';
 import {ARENAEventEmitter} from './event-emitter.js';

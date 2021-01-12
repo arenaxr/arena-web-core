@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA, JitsiMeetJS */
 
-import $ from "jquery";
+import $ from 'jquery';
 import swal from 'sweetalert';
 import {ARENAEventEmitter} from './event-emitter.js';
 
@@ -578,9 +578,9 @@ export const ARENAJitsi = async function(jitsiServer) {
                 window.addEventListener('orientationchange', () => {
                     // mobile only
                     ARENA.localVideoWidth = Number(window.innerWidth / 5);
-                    this.stopVideo();
+                    stopVideo();
                     setupCornerVideo();
-                    this.startVideo();
+                    startVideo();
                 });
             }
         });

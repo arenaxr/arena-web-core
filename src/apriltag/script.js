@@ -92,7 +92,7 @@ window.processCV = async function (frame) {
     let timestamp = new Date();
     let camParent = ARENA.sceneObjects.myCamera.object3D.parent.matrixWorld;
     let cam = ARENA.sceneObjects.myCamera.object3D.matrixWorld;
-    vioMatrixCopy.getInverse(camParent);
+    vioMatrixCopy.copy(camParent).invert(); // vioMatrixCopy.getInverse(camParent);
     vioMatrixCopy.multiply(cam);
 
     vioRot.setFromRotationMatrix(vioMatrixCopy);
@@ -221,7 +221,7 @@ window.processCV2 = async function (frame) {
     let timestamp = new Date();
     let camParent = ARENA.sceneObjects.myCamera.object3D.parent.matrixWorld;
     let cam = ARENA.sceneObjects.myCamera.object3D.matrixWorld;
-    vioMatrixCopy.getInverse(camParent);
+    vioMatrixCopy.copy(camParent).invert(); // vioMatrixCopy.getInverse(camParent);
     vioMatrixCopy.multiply(cam);
 
     vioRot.setFromRotationMatrix(vioMatrixCopy);
@@ -311,8 +311,8 @@ function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
     dtagMatrix.multiply(FLIPMATRIX);
 
     // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
-    dtagMatrix.getInverse(dtagMatrix);
-    vioMatrixCopyT.getInverse(vioMatrixCopy);
+    dtagMatrix.copy(dtagMatrix).invert(); // dtagMatrix.getInverse(dtagMatrix);
+    vioMatrixCopyT.copy(vioMatrixCopy).invert(); // vioMatrixCopyT.getInverse(vioMatrixCopy);
     rigMatrix.identity();
     rigMatrix.multiplyMatrices(refTag, dtagMatrix);
     rigMatrix.multiply(vioMatrixCopyT);

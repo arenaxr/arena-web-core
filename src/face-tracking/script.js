@@ -294,7 +294,7 @@ ARENA.FaceTracker = (function() {
                         if (msg.features && msg.pose) {
                             const faceJSON = createFaceJSON(valid, msg.features, msg.pose);
                             if (faceJSON != prevJSON) {
-                                ARENA.mqtt.publish(ARENA.outputTopic + ARENA.camName + '/face', faceJSON);
+                                ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName + '/face', faceJSON);
                                 prevJSON = faceJSON;
                             }
                         }

@@ -12,7 +12,7 @@
     "last 3 safari versions"
   ],
   "dependencies": {
-    "aframe": "file:aframe",
+    "aframe": "^1.0.0",
     "aframe-environment-component": "^2.0.0",
     "aframe-meshline-component": "^0.3.1",
     "aframe-particle-system-component": "^1.1.3",

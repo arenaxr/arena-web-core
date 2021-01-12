@@ -6,16 +6,15 @@
  * @date 2020
  */
 
-/* global THREE, ARENA, Paho */
+/* global THREE, ARENA */
 
 // 'use strict';
-import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
+import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAUtils} from './utils.js';
 
 export const ARENAMqtt = function() {
-
-    let mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
+    const mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
     mqttClient.onConnected = onConnected;
     mqttClient.onConnectionLost = onConnectionLost;
     mqttClient.onMessageArrived = onMessageArrived;
@@ -538,7 +537,7 @@ export const ARENAMqtt = function() {
                 }
                 /* just setAttribute() - data can contain multiple attribute-value pairs
                 e.g: { ... "action": "update", "data":
-                        { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... } */
+                    { "animation": { "property": "rotation", "to": "0 360 0", "loop": "true", "dur": 10000}}}' ... } */
 
                 const entityEl = sceneObjects[theMessage.object_id];
                 if (entityEl) {
@@ -578,8 +577,7 @@ export const ARENAMqtt = function() {
         } // switch (theMessage.action)
     }
 
-	return {
-
+    return {
         // ==================================================
         // PUBLIC
         // ==================================================

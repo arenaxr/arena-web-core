@@ -10,6 +10,7 @@
 
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
+
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
     let adSign;
     const data = this.data;

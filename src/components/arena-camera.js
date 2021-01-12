@@ -129,7 +129,8 @@ AFRAME.registerComponent('arena-camera', {
         this.camParent = el.object3D.parent.matrixWorld;
         this.cam = el.object3D.matrixWorld;
 
-        this.cpi.getInverse(this.camParent);
+        this.cpi.copy(this.camParent).invert();
+        // this.cpi.getInverse(this.camParent);
         this.cpi.multiply(this.cam);
 
         this.vioMatrix.copy(this.cpi);
