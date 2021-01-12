@@ -174,8 +174,9 @@ export function setupIcons() {
 
         const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
         Swal.fire({
-            title: 'You clicked on screen share!',
-            text: 'In order to share your screen, ARENA will open a new tab.\nAre you sure you want to share your screen?\nIf so, make sure you have screen share permissions enabled for this browser!',
+            title: 'You clicked on screen share! Are you sure you want to share your screen?',
+            html: `In order to share your screen, ARENA will open a new tab.<br>
+                  <i>Make sure you have screen share permissions enabled for this browser!</i>`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Yes',
@@ -201,8 +202,8 @@ export function setupIcons() {
                                 objectIds[i] = objectIds[i].trim();
                             }
                         }
-                        const screenshareWindow = window.open('./screenshare/index.html', '_blank');
                         const camera = document.getElementById('my-camera');
+                        const screenshareWindow = window.open('./screenshare/index.html', '_blank');
                         screenshareWindow.params = {
                             jitsiURL: ARENAJitsi.jitsi.serverName,
                             screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,

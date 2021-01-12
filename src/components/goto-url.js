@@ -31,12 +31,11 @@ AFRAME.registerComponent('goto-url', {
         let fired = false;
         if (data.on && data.url) { // we have an event?
             el.addEventListener(data.on, function(evt) {
-                // console.log("goto-url url=" + data.url);
                 if (!fired) {
                     fired = true;
                     Swal.fire({
                         title: `You clicked on a ${data.dest} URL!`,
-                        html: `Are you sure you want to open \n<u>${data.url}</u>?`,
+                        html: `Are you sure you want to open <u>${data.url}</u>?`,
                         showCancelButton: true,
                     })
                         .then((result) => {
