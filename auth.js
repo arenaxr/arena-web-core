@@ -190,19 +190,6 @@ function requestMqttToken(auth_type, mqtt_username) {
         } else {
             AUTH.user_type = auth_type;
             AUTH.user_username = xhr.response.username;
-            switch (auth_type) {
-            case 'google':
-                var googleUser = auth2.currentUser.get();
-                var profile = googleUser.getBasicProfile();
-                AUTH.user_fullname = profile.getName();
-                AUTH.user_email = profile.getEmail();
-                break;
-            default:
-                AUTH.user_fullname = localStorage.getItem('display_name');
-                AUTH.user_email = 'N/A';
-                break;
-            }
-
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
@@ -258,6 +245,10 @@ function formatPerms(perms) {
         lines.push(`- `);
     }
     return lines.join('<br>');
+}
+
+function showProfile() {
+    location.href = `/user/profile`;
 }
 
 function showPerms() {

@@ -252,8 +252,11 @@ function setupIcons() {
     formDiv.appendChild(label);
 
     const profile = document.createElement('a');
-    profile.href = `./user/profile`;
+    profile.href = '#';
     profile.innerHTML = 'Profile';
+    profile.onclick = function() {
+        showProfile();
+    };
     formDiv.appendChild(profile);
     formDiv.appendChild(document.createElement('br'));
 
