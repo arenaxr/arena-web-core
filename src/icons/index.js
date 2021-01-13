@@ -43,9 +43,9 @@ export class SideMenu {
          * Create audio button
          */
         const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
-            if (!ARENAJitsi.jitsi) return;
-            if (!ARENAJitsi.jitsi.hasAudio) { // toggled
-                ARENAJitsi.jitsi.unmuteAudio()
+            if (!ARENA.Jitsi) return;
+            if (!ARENA.Jitsi.hasAudio) { // toggled
+                ARENA.Jitsi.unmuteAudio()
                     .then(() => {
                         audioBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/audio-on.png\')';
                     })
@@ -53,7 +53,7 @@ export class SideMenu {
                         console.log(err);
                     });
             } else {
-                ARENAJitsi.jitsi.muteAudio()
+                ARENA.Jitsi.muteAudio()
                     .then(() => {
                         audioBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/audio-off.png\')';
                     })
@@ -67,13 +67,13 @@ export class SideMenu {
          * Create video button
          */
         const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
-            if (!ARENAJitsi.jitsi) return;
-            if (!ARENAJitsi.jitsi.hasVideo) { // toggled
-                ARENAJitsi.jitsi.startVideo()
+            if (!ARENA.Jitsi) return;
+            if (!ARENA.Jitsi.hasVideo) { // toggled
+                ARENA.Jitsi.startVideo()
                     .then(() => {
                         videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-on.png\')';
                         avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-off.png\')';
-                        ARENAJitsi.jitsi.showVideo();
+                        ARENA.Jitsi.showVideo();
                         if (ARENA.FaceTracker.running()) {
                             ARENA.FaceTracker.stop();
                         }
@@ -83,9 +83,9 @@ export class SideMenu {
                     });
             } else {
                 videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-off.png\')';
-                ARENAJitsi.jitsi.stopVideo()
+                ARENA.Jitsi.stopVideo()
                     .then(() => {
-                        ARENAJitsi.jitsi.hideVideo();
+                        ARENA.Jitsi.hideVideo();
                     })
                     .catch((err) => {
                         console.log(err);
@@ -102,10 +102,10 @@ export class SideMenu {
                 if (!ARENA.FaceTracker.running()) { // toggled
                     ARENA.FaceTracker.run().then(() => {
                         avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar3-on.png\')';
-                        if (ARENAJitsi.jitsi && ARENAJitsi.jitsi.ready) {
-                            ARENAJitsi.jitsi.stopVideo().then(() => {
+                        if (ARENA.Jitsi && ARENA.Jitsi.ready) {
+                            ARENA.Jitsi.stopVideo().then(() => {
                                 videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-off.png\')';
-                                ARENAJitsi.jitsi.hideVideo();
+                                ARENA.Jitsi.hideVideo();
                             });
                         }
                     });
@@ -174,7 +174,7 @@ export class SideMenu {
          * Create screen share button
          */
         const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window.', () => {
-            if (!ARENAJitsi.jitsi) return;
+            if (!ARENA.Jitsi) return;
 
             const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
             Swal.fire({
@@ -209,9 +209,9 @@ export class SideMenu {
                             const camera = document.getElementById('my-camera');
                             const screenshareWindow = window.open('./screenshare/index.html', '_blank');
                             screenshareWindow.params = {
-                                jitsiURL: ARENAJitsi.jitsi.serverName,
+                                jitsiURL: ARENA.Jitsi.serverName,
                                 screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,
-                                conferenceName: ARENAJitsi.jitsi.arenaConferenceName,
+                                conferenceName: ARENA.Jitsi.arenaConferenceName,
                                 displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
                                 camName: ARENA.camName,
                                 objectIds: objectIds.join(),
@@ -370,7 +370,7 @@ export class SideMenu {
         function loadSettings() {
             usernameInput.value = localStorage.getItem('display_name');
             const auth = getAuthStatus();
-            sceneName.innerHTML = ARENA.scenenameParam;
+            sceneName.innerHTML = ARENA.sceneName;
             authType.innerHTML = auth.type;
             authUsername.innerHTML = auth.username;
             authFullname.innerHTML = auth.fullname;

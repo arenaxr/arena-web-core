@@ -1,7 +1,6 @@
 /* global AFRAME, ARENA */
 
 import {ARENAUtils} from '../utils.js';
-import {ARENAJitsi} from '../jitsi.js';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and vio change events.
@@ -56,10 +55,10 @@ AFRAME.registerComponent('arena-camera', {
             },
         };
 
-        if (ARENAJitsi.jitsi) {
-            msg.jitsiId = ARENAJitsi.jitsi.getJitsiId();
-            msg.hasAudio = ARENAJitsi.jitsi.hasAudio;
-            msg.hasVideo = ARENAJitsi.jitsi.hasVideo;
+        if (ARENA.Jitsi) {
+            msg.jitsiId = ARENA.Jitsi.getJitsiId();
+            msg.hasAudio = ARENA.Jitsi.hasAudio;
+            msg.hasVideo = ARENA.Jitsi.hasVideo;
         }
 
         if (ARENA.FaceTracker) {

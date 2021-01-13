@@ -1,5 +1,4 @@
 /* global AFRAME, ARENA, THREE */
-import {ARENAJitsi} from '../jitsi.js';
 
 /**
  * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
@@ -61,7 +60,7 @@ async function enableChromeAEC(gainNode) {
         outboundPeerConnection.setRemoteDescription(answer);
 
         gainNode.disconnect();
-        if (ARENAJitsi.jitsi.chromeSpatialAudioOn) {
+        if (ARENA.Jitsi.chromeSpatialAudioOn) {
             gainNode.connect(context.destination);
         } else {
             gainNode.connect(loopbackDestination);
@@ -220,7 +219,7 @@ AFRAME.registerComponent('arena-user', {
         /* Handle Jitsi Video */
         this.videoID = `video${data.jitsiId}`;
         if (data.hasVideo) {
-            this.videoTrack = ARENAJitsi.jitsi.getVideoTrack(data.jitsiId);
+            this.videoTrack = ARENA.Jitsi.getVideoTrack(data.jitsiId);
             // draw video cube, but only if it didnt exist before
             const videoElem = document.getElementById(this.videoID);
             if (videoElem && !this.videoCubeDrawn) {
@@ -243,7 +242,7 @@ AFRAME.registerComponent('arena-user', {
         /* Handle Jitsi Audio */
         if (data.hasAudio) {
             // set up positional audio, but only once per camera
-            const jistiAudioTrack = ARENAJitsi.jitsi.getAudioTrack(data.jitsiId);
+            const jistiAudioTrack = ARENA.Jitsi.getAudioTrack(data.jitsiId);
             if (!jistiAudioTrack) return;
 
             const oldAudioTrack = this.audioTrack;

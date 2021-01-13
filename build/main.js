@@ -130,8 +130,8 @@ window.addEventListener('onauth', async function (e) {
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
-    if (defaults && defaults.mqttParamZ) { // prefer deployed custom config
-        arena_host.value = defaults.mqttParamZ;
+    if (defaults && defaults.mqttHost) { // prefer deployed custom config
+        arena_host.value = defaults.mqttHost;
     } else {
         arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
     }
@@ -151,7 +151,7 @@ window.addEventListener('onauth', async function (e) {
           } catch(e) {
             // no devPath
           }
-        }  
+        }
         scene_url.href = document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene.value;
     };
 

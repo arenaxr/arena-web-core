@@ -53,7 +53,7 @@ export class Arena {
     }
 
     /**
-     * Sets this.userName using name given as argument, url parameter value, or default 
+     * Sets this.userName using name given as argument, url parameter value, or default
      * Important: Also sets idTag which depends on user name (and other properties that depend on idTag)
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
@@ -63,11 +63,11 @@ export class Arena {
         this.userName = name;
 
         // set idTag (based on userName)
-        this.setIdTag(); 
+        this.setIdTag();
     }
 
     /**
-     * Sets this.idTag using name given as argument, url parameter value, or default 
+     * Sets this.idTag using name given as argument, url parameter value, or default
      * Important: Also sets amName, faceName, avatarName, viveLName, viveRName which depend on idTag
      * Important: User name must be set
      * @param {string} name user name to set; will use url parameter value or default is no name is given
@@ -75,21 +75,21 @@ export class Arena {
     setIdTag = (idTag=undefined) => {
         if (this.userName == undefined) throw "setIdTag: user name not defined."; // user name must be set
         if (idTag == undefined) idTag = new Date().getTime() % 10000 + '_' + this.userName; // e.g. 1234_eric
-        this.idTag = idTag; 
+        this.idTag = idTag;
 
-        // set camName 
+        // set camName
         this.camName = 'camera_' + this.idTag; // e.g. camera_1234_eric
         // if fixedCamera is given, then camName must be set accordingly
-        this.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', ''); 
+        this.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', '');
         if (this.fixedCamera !== '') {
             this.camName = this.fixedCamera;
         }
-        
+
         // set faceName, avatarName, viveLName, viveRName which depend on user name
         this.faceName = 'face_' + this.idTag; // e.g. face_9240_X
         this.avatarName = 'avatar_' + this.idTag; // e.g. avatar_9240_X
         this.viveLName = 'viveLeft_' + this.idTag; // e.g. viveLeft_9240_X
-        this.viveRName = 'viveRight_' + this.idTag; // e.g. viveRight_9240_X    
+        this.viveRName = 'viveRight_' + this.idTag; // e.g. viveRight_9240_X
     }
 
     /**
@@ -137,7 +137,7 @@ export class Arena {
      */
     setmqttHost = () => {
         this.mqttHost = ARENAUtils.getUrlParam('mqttHost', this.defaults.mqttHost);
-        this.mqttHostURI = 'wss://' + this.mqttHost + this.defaults.mqttPath[Math.floor(Math.random() * this.defaults.mqttPath.length)];    
+        this.mqttHostURI = 'wss://' + this.mqttHost + this.defaults.mqttPath[Math.floor(Math.random() * this.defaults.mqttPath.length)];
     }
 
     /**
@@ -357,7 +357,7 @@ export class Arena {
             this.maxAVDist = this.maxAVDist ? this.maxAVDist : 20;
 
             // initialize Jitsi videoconferencing
-            ARENAJitsi.init(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+            this.Jitsi = ARENAJitsi.init(sceneOptions.jitsiServer);
         };
     };
 
@@ -369,10 +369,10 @@ export class Arena {
         this.clientCoords = ARENAUtils.getLocation();
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
-    
+
         this.username = e.detail.mqtt_username;
         this.mqttToken = e.detail.mqtt_token;
-    
+
         this.Mqtt.connect({
             onSuccess: function() {
                 console.log('MQTT scene connection success.');
@@ -402,7 +402,7 @@ export class Arena {
             mqtt_token: this.mqttToken,
         });
         */
-    
+
         // init chat after
         this.chat = new ARENAChat({
             userid: this.idTag,
@@ -418,19 +418,19 @@ export class Arena {
             supportDevFolders: this.defaults.supportDevFolders,
         });
         this.chat.start();
-    
+
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
             const displayBbox = false;
             const flipped = true;
             this.FaceTracker.init(displayBbox, flipped);
         }
-    
-        SideMenu.setupIcons();   
+
+        SideMenu.setupIcons();
     }
 }
 
 /**
  * ARENA global object
  */
-window.ARENA = Arena.init();
+module.exports = window.ARENA = Arena.init();

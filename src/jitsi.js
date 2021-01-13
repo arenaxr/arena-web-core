@@ -17,6 +17,15 @@ export class ARENAJitsi {
     static NEW_USER_TIMEOUT_MS = 2000;
     static jitsi = undefined;
 
+    static init(jitsiServer) {
+        if (!this.jitsi) {
+            this.jitsi = new ARENAJitsi(jitsiServer);
+            this.jitsi.connect();
+            this.jitsi.avConnect();
+        }
+        return this.jitsi;
+    }
+
     constructor(jitsiServer) {
         if (!window.JitsiMeetJS) {
             console.warn("Jitsi is not found!");
@@ -25,7 +34,7 @@ export class ARENAJitsi {
         this.serverName = jitsiServer;
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.arenaConferenceName = ARENA.scenenameParam.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        this.arenaConferenceName = ARENA.sceneName.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         this.connectOptions = {
             hosts: {
@@ -80,15 +89,6 @@ export class ARENAJitsi {
          * we wait NEW_USER_TIMEOUT_MS to hear about these in case it is an arena user and notify anyway after this timeout
          */
         this.newUserTimers = [];
-    }
-
-    static init(jitsiServer) {
-        if (!this.jitsi) {
-            this.jitsi = new ARENAJitsi(jitsiServer);
-            this.jitsi.connect();
-            this.jitsi.avConnect();
-        }
-        return this.jitsi;
     }
 
     connect() {
@@ -536,8 +536,8 @@ export class ARENAJitsi {
             if (audbtn) audbtn.remove();
             Swal.fire({
                 title: 'No Webcam or Audio Input Device found!',
-                text: `You are now in "spectator mode". This means you won\'t be able to share audio or video,
-                        but can still interact with other users in the ARENA.`,
+                html: `You are now in <i>"spectator mode"</i>. This means you won\'t be able to share audio or video,
+                       but can still interact with other users.`,
                 icon: 'warning',
                 showConfirmButton: true,
                 confirmButtonText: 'Ok',
