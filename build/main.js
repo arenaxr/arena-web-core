@@ -130,8 +130,8 @@ window.addEventListener('onauth', async function (e) {
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
-    if (defaults && defaults.mqttParamZ) { // prefer deployed custom config
-        arena_host.value = defaults.mqttParamZ;
+    if (ARENADefaults && ARENADefaults.mqttHost) { // prefer deployed custom config
+        arena_host.value = ARENADefaults.mqttHost;
     } else {
         arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
     }
@@ -145,13 +145,13 @@ window.addEventListener('onauth', async function (e) {
     var updateLink = function() {
         let path = window.location.pathname.substring(1);
         let devPath='';
-        if (defaults.supportDevFolders && path.length > 0) {
+        if (ARENADefaults.supportDevFolders && path.length > 0) {
           try {
             devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
           } catch(e) {
             // no devPath
           }
-        }  
+        }
         scene_url.href = document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene.value;
     };
 

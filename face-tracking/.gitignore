@@ -1,9 +1,0 @@
-build/
-
-emsdk/
-opencv/
-dlib/
-
-emsdk_set_env.sh
-
-.DS_Store
