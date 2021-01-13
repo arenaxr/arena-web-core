@@ -309,7 +309,7 @@ export class ARENAChat {
                 text: 'This will send a mute request to all users.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Ok',
+                confirmButtonText: 'Yes',
             })
                 .then((result) => {
                     if (result.isConfirmed) {

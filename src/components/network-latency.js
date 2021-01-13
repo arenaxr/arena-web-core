@@ -1,6 +1,6 @@
-/* global AFRAME, ARENA, Paho */
+/* global AFRAME, ARENA */
 
-import * as Paho from "paho-mqtt"; //https://www.npmjs.com/package/paho-mqtt
+const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 
 /**
  * Publish with qos of 2 for network graph to update latency
@@ -16,7 +16,7 @@ AFRAME.registerComponent('network-latency', {
         this.message.qos = 2;
     },
     tick: (function(t, dt) {
-        if (ARENA.mqtt) {
+        if (ARENA.Mqtt) {
             if (ARENA.Mqtt.isConnected()) {
                 ARENA.Mqtt.send(this.message);
             }
