@@ -10,38 +10,6 @@
  * Wrapper class for various utility functions
  */
 export class ARENAUtils {
-    /**
-     * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
-     * @return {string} scene name - includes namespace prefix (e.g. `namespace/foo`)
-     */
-    static getSceneName() {
-        let path = window.location.pathname.substring(1);
-        let {namespaceParam: namespace, scenenameParam: scenename} = defaults;
-        if (defaults.supportDevFolders && path.length > 0) {
-            const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
-            if (devPrefix) {
-                path = path.replace(devPrefix[0], '');
-            }
-        }
-        if (path === '' || path === 'index.html') {
-            scenename = this.getUrlParam('scene', scenename);
-            return `${namespace}/${scenename}`;
-        }
-        try {
-            const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
-            const matches = r.exec(path).groups;
-            // Only first group is given, namespace is actually the scene name
-            if (matches.scenename === undefined) {
-                scenename = matches.namespace;
-                return `${namespace}/${scenename}`;
-            }
-            // Both scene and namespace are defined, return regex as-is
-            return `${matches.namespace}/${matches.scenename}`;
-        } catch (e) {
-            scenename = this.getUrlParam('scene', scenename);
-            return `${namespace}/${scenename}`;
-        }
-    };
 
     /**
      * Gets URL parameters as dictionary
@@ -67,8 +35,9 @@ export class ARENAUtils {
             urlParameter = this.getUrlVars()[parameter];
         }
         if (urlParameter === '') {
-            return defaultValue;
+            urlParameter = defaultValue;
         }
+        //console.info(`ARENA (URL) config param ${parameter}: ${urlParameter}`);
         return urlParameter;
     };
 
@@ -102,19 +71,20 @@ export class ARENAUtils {
     static getLocation() {
         const urlLat = ARENAUtils.getUrlParam('lat');
         const urlLong = ARENAUtils.getUrlParam('long');
+        let clientCoords;
         if (urlLat && urlLong) {
-            ARENA.clientCoords = {
+            clientCoords = {
                 latitude: urlLat,
                 longitude: urlLong,
             };
         } else {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((position) => {
-                    ARENA.clientCoords = position.coords;
+                    clientCoords = position.coords;
                 });
             }
         }
-        return ARENA.clientCoords;
+        return clientCoords;
     }
 
     /**
@@ -123,16 +93,6 @@ export class ARENAUtils {
      */
     static debug(msg) {
         ARENA.Mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
-    };
-
-    /**
-     * Gets display name either from local storage or from userParam
-     * @return {string} display name
-     */
-    static getDisplayName() {
-        let displayName = localStorage.getItem('display_name');
-        if (!displayName) displayName = decodeURI(ARENA.userParam);
-        return displayName;
     };
 
     /**
@@ -161,7 +121,7 @@ export class ARENAUtils {
                 z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
             };
         } else {
-            console.log('WARN: empty coords data');
+            console.info('WARN: empty coords data');
             return {
                 x: 0,
                 y: 0,
@@ -224,8 +184,8 @@ export class ARENAUtils {
         try {
             JSON.parse(str);
         } catch (e) {
-            console.log(str);
-            console.log(e.message);
+            console.error(str);
+            console.error(e.message);
             return false;
         }
         return true;

@@ -13,7 +13,7 @@ AFRAME.registerComponent('press-and-move', {
         this.drag = false;
         this.longTouch = false;
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
 
         const self = this;
         window.addEventListener('touchstart', function(evt) {

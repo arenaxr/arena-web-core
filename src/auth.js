@@ -70,7 +70,7 @@ function checkAnonAuth(event) {
 
 function checkGoogleAuth() {
     auth2 = gapi.auth2.init({
-        client_id: defaults.gAuthClientId,
+        client_id: ARENA.defaults.gAuthClientId,
     }).then(function() {
         auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
@@ -101,10 +101,10 @@ function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
     let processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
     if (typeof ARENA !== 'undefined') {
-        if (typeof defaults !== 'undefined' && ARENA.userParam !== defaults.userParam) {
-            // userParam set? persist to storage
-            localStorage.setItem('display_name', decodeURI(ARENA.userParam));
-            processedName = ARENA.userParam;
+        if (typeof defaults !== 'undefined' && ARENA.userName !== ARENA.defaults.userName) {
+            // userName set? persist to storage
+            localStorage.setItem('display_name', decodeURI(ARENA.userName));
+            processedName = ARENA.userName;
         }
         if (localStorage.getItem('display_name') === null) {
             // Use auth name to create human-readable name
@@ -116,16 +116,7 @@ function processUserNames(authName, prefix = null) {
         processedName = `${prefix}${processedName}`;
     }
     if (typeof ARENA !== 'undefined') {
-        ARENA.userParam = processedName;
-        // replay global id setup from events.js
-        ARENA.idTag = ARENA.timeID + '_' + ARENA.userParam; // e.g. 1234_eric
-        if (ARENA.fixedCamera !== '') {
-            ARENA.camName = 'camera_' + ARENA.fixedCamera + '_' + ARENA.fixedCamera;
-        } else {
-            ARENA.camName = 'camera_' + ARENA.idTag; // e.g. camera_1234_eric
-        }
-        ARENA.viveLName = 'viveLeft_' + ARENA.idTag; // e.g. viveLeft_9240_X
-        ARENA.viveRName = 'viveRight_' + ARENA.idTag; // e.g. viveRight_9240_X
+        ARENA.setUserName(processedName);
     }
     return processedName;
 }
@@ -184,13 +175,13 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
-        if (defaults.realm) {
-            params += `&realm=${defaults.realm}`;
+        if (ARENA.defaults.realm) {
+            params += `&realm=${ARENA.defaults.realm}`;
         }
     }
     if (typeof ARENA !== 'undefined') {
-        if (ARENA.scenenameParam) {
-            params += `&scene=${ARENA.scenenameParam}`;
+        if (ARENA.sceneName) {
+            params += `&scene=${ARENA.sceneName}`;
         }
         if (ARENA.idTag) {
             params += `&userid=${ARENA.idTag}`;
@@ -205,7 +196,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             params += `&ctrlid2=${ARENA.viveRName}`;
         }
     }
-    xhr.open('POST', defaults.urlMqttAuth);
+    xhr.open('POST', ARENA.defaults.urlMqttAuth);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

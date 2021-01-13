@@ -26,7 +26,7 @@ AFRAME.registerComponent('arena-camera', {
         this.lastPose = '';
 
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },
 
     publishPose() {
@@ -142,7 +142,7 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position every 1 sec
-        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / ARENA.updateMillis) == 0) {
+        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
             this.publishPose();
             this.publishVio();
             this.lastPose = newPose;

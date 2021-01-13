@@ -79,7 +79,7 @@ AFRAME.registerComponent('arena-vive', {
             eventAction(evt, 'trackpaddown', this);
         });
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.updateMillis, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },
 
     publishPose() {

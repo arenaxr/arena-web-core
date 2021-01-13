@@ -197,7 +197,7 @@ export function setupIcons() {
                                     objectIds[i] = objectIds[i].trim();
                                 }
                             }
-                            const screenshareWindow = window.open(`${defaults.screenSharePath}`, '_blank');
+                            const screenshareWindow = window.open(`${ARENA.defaults.screenSharePath}`, '_blank');
                             screenshareWindow.screenSharePrefix = ARENA.JitsiAPI.screenSharePrefix;
                             screenshareWindow.conferenceName = ARENA.JitsiAPI.conferenceName;
                             screenshareWindow.jitsiURL = ARENA.JitsiAPI.serverName;

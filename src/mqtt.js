@@ -17,6 +17,7 @@ import {ARENAUtils} from './utils.js';
  * Main ARENA MQTT client
  */
 export class ARENAMqtt {
+
     static init() {
         return new ARENAMqtt();
     }
@@ -25,7 +26,7 @@ export class ARENAMqtt {
      * Constructor
      */
     constructor() {
-        this.mqttClient = new Paho.Client(ARENA.mqttParam, 'webClient-' + ARENA.timeID);
+        this.mqttClient = new Paho.Client(ARENA.mqttHostURI, 'webClient-' + ARENA.idTag);
         this.mqttClient.onConnected = this.onConnected.bind(this);
         this.mqttClient.onConnectionLost = this.onConnectionLost.bind(this);
         this.mqttClient.onMessageArrived = this.onMessageArrived.bind(this);
@@ -42,9 +43,11 @@ export class ARENAMqtt {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
-            if (!ARENA.JitsiAPI.ready()) {
-                ARENA.JitsiAPI = ARENAJitsi(ARENA.jitsiServer);
-                console.warn(`ARENA Jitsi restarting...`);
+            if (ARENA.JitsiAPI) {
+                if (!ARENA.JitsiAPI.ready()) {
+                    ARENA.JitsiAPI = ARENAJitsi(ARENA.jitsiServer);
+                    console.warn(`ARENA Jitsi restarting...`);
+                }
             }
             this.mqttClient.subscribe(ARENA.renderTopic);
             console.warn(`MQTT scene reconnected to ${uri}`);
@@ -65,7 +68,7 @@ export class ARENAMqtt {
         const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
         sceneObjects.myCamera.setAttribute('arena-camera', 'enabled', true);
         sceneObjects.myCamera.setAttribute('arena-camera', 'color', color);
-        sceneObjects.myCamera.setAttribute('arena-camera', 'displayName', ARENAUtils.getDisplayName());
+        sceneObjects.myCamera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
         sceneObjects.myCamera.setAttribute('position', ARENA.startCoords);
 
         // const viveLeft = document.getElementById('vive-leftHand');
@@ -408,9 +411,11 @@ export class ARENAMqtt {
                     entityEl.setAttribute('arena-user', 'hasVideo', theMessage.hasVideo);
                     entityEl.setAttribute('arena-user', 'hasAudio', theMessage.hasAudio);
                     // force a/v updates in case jitsi wasnt ready
-                    if (ARENA.JitsiAPI.ready() && theMessage.jitsiId) {
-                        entityEl.components['arena-user'].updateVideo();
-                        entityEl.components['arena-user'].updateAudio();
+                    if (ARENA.JitsiAPI) {
+                        if (ARENA.JitsiAPI.ready() && theMessage.jitsiId) {
+                            entityEl.components['arena-user'].updateVideo();
+                            entityEl.components['arena-user'].updateAudio();
+                        }
                     }
                 }
                 if (theMessage.hasOwnProperty('displayName')) {
@@ -641,8 +646,8 @@ export class ARENAMqtt {
      * Send a message to internal receive handler
      * @param {string} jsonMessage
      */
-    processMessage(jsonMessage) {
-        return onMessageArrived(undefined, jsonMessage);
+    processMessage = (jsonMessage) => {
+        return this.onMessageArrived(undefined, jsonMessage);
     }
 
     /**
