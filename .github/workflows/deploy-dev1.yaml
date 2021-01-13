@@ -30,4 +30,4 @@ jobs:
              git reset --hard HEAD
              git pull
              npm install
-             npm run build
+             parcel build src/index.js -o arena-core.js --public-url /dist
