@@ -25,7 +25,7 @@ jobs:
           envs: TARGET
           script: |
              cd  $TARGET
-             git checkout master
+             git checkout refactor
              git reset --hard HEAD
              git pull
              npm install
