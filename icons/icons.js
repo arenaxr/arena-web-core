@@ -35,29 +35,37 @@ function publishHeadText(displayName) {
 function setupIcons() {
     const audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
         if (!ARENA.JitsiAPI.hasAudio()) { // toggled
-            ARENA.JitsiAPI.unmuteAudio().then((_) => {
-                audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
-            });
+            ARENA.JitsiAPI.unmuteAudio()
+                .then((_) => {
+                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-on.png\')';
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         } else {
-            ARENA.JitsiAPI.muteAudio().then((_) => {
-                audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-off.png\')';
-            });
+            ARENA.JitsiAPI.muteAudio()
+                .then((_) => {
+                    audioBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/audio-off.png\')';
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         }
     });
 
     const videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
         if (!ARENA.JitsiAPI.hasVideo()) { // toggled
-            ARENA.JitsiAPI.startVideo().then((_) => {
-                videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
-                avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
-                ARENA.JitsiAPI.showVideo();
-                ARENA.FaceTracker.stop();
-            });
+            ARENA.JitsiAPI.startVideo()
+                .then((_) => {
+                    videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-on.png\')';
+                    avatarBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/avatar3-off.png\')';
+                    ARENA.JitsiAPI.showVideo();
+                    ARENA.FaceTracker.stop();
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         } else {
             videoBtn.childNodes[0].style.backgroundImage = 'url(\'images/icons/video-off.png\')';
-            ARENA.JitsiAPI.stopVideo().then((_) => {
-                ARENA.JitsiAPI.hideVideo();
-            });
+            ARENA.JitsiAPI.stopVideo()
+                .then((_) => {
+                    ARENA.JitsiAPI.hideVideo();
+                })
+                .catch((err) => {console.log("Jitsi is not ready yet")})
         }
     });
 
@@ -258,6 +266,11 @@ function setupIcons() {
     formDiv.appendChild(perms);
     formDiv.appendChild(document.createElement('br'));
 
+    formDiv.append('Scene: ');
+    const sceneName = document.createElement('span');
+    formDiv.appendChild(sceneName);
+    formDiv.appendChild(document.createElement('br'));
+
     formDiv.append('Authenticator: ');
     const authType = document.createElement('span');
     authType.style.textTransform = 'capitalize';
@@ -308,6 +321,7 @@ function setupIcons() {
     function loadSettings() {
         usernameInput.value = localStorage.getItem('display_name');
         const auth = getAuthStatus();
+        sceneName.innerHTML = globals.scenenameParam;
         authType.innerHTML = auth.type;
         authUsername.innerHTML = auth.username;
         authFullname.innerHTML = auth.fullname;

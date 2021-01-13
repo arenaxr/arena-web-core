@@ -5,8 +5,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
     // PRIVATE VARIABLES
     // ==================================================
 
-    // we use the scene name as the jitsi room name
-    const arenaConferenceName = globals.scenenameParam.toLowerCase();
+    // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
+    const arenaConferenceName = globals.scenenameParam.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
     const connectOptions = {
         hosts: {
@@ -233,7 +233,6 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                         });
                     }
                 }
-
             } else { // display as external user; possible spoofer
                 ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
                     id: participantId,
@@ -523,6 +522,7 @@ const ARENAJitsiAPI = async function(jitsiServer) {
                 });
             }
             avConnected = true;
+
             JitsiMeetJS.createLocalTracks({devices})
                 .then(tracks => {
                     onLocalTracks(tracks);
@@ -569,6 +569,8 @@ const ARENAJitsiAPI = async function(jitsiServer) {
         });
     }
 
+    avConnect();
+
     return {
         // ==================================================
         // PUBLIC
@@ -610,59 +612,69 @@ const ARENAJitsiAPI = async function(jitsiServer) {
 
         unmuteAudio: function() {
             return new Promise(function(resolve, reject) {
-                avConnect()
-                    .then(() => {
-                        jitsiAudioTrack.unmute()
-                            .then(() => {
-                                hasAudio = true;
-                                resolve();
-                            })
-                            .catch((err) => {
-                                reject(err);
-                            })
-                    });
+                if (jitsiAudioTrack) {
+                    jitsiAudioTrack.unmute()
+                        .then(() => {
+                            hasAudio = true;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
         muteAudio: function() {
             return new Promise(function(resolve, reject) {
-                jitsiAudioTrack.mute()
-                    .then(() => {
-                        hasAudio = false;
-                        resolve();
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    })
+                if (jitsiAudioTrack) {
+                    jitsiAudioTrack.mute()
+                        .then(() => {
+                            hasAudio = false;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
         startVideo: function() {
             return new Promise(function(resolve, reject) {
-                avConnect()
-                    .then(() => {
-                        jitsiVideoTrack.unmute()
-                            .then(() => {
-                                hasVideo = true;
-                                resolve();
-                            })
-                            .catch((err) => {
-                                reject(err);
-                            })
-                    });
+                if (jitsiVideoTrack) {
+                    jitsiVideoTrack.unmute()
+                        .then(() => {
+                            hasVideo = true;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
         stopVideo: function() {
             return new Promise(function(resolve, reject) {
-                jitsiVideoTrack.mute()
-                    .then(() => {
-                        hasVideo = false;
-                        resolve();
-                    })
-                    .catch((err) => {
-                        reject(err);
-                    })
+                if (jitsiVideoTrack) {
+                    jitsiVideoTrack.mute()
+                        .then(() => {
+                            hasVideo = false;
+                            resolve();
+                        })
+                        .catch((err) => {
+                            reject(err);
+                        })
+                } else {
+                    reject();
+                }
             });
         },
 
