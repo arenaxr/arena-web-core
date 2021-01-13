@@ -39,7 +39,10 @@ window.onload = function() {
 // eslint-disable-next-line no-var
 var auth2;
 
-// check if the current user is already signed in
+/**
+ * check if the current user is already signed in
+ * @param {object} args auth arguments
+ */
 function authCheck(args) {
     localStorage.removeItem('mqtt_token'); // deprecate local token storage
     AUTH.signInPath = args.signInPath;
@@ -62,12 +65,19 @@ function authCheck(args) {
     }
 };
 
+/**
+ * check anonymous authentication
+ * @param {object} event event
+ */
 function checkAnonAuth(event) {
     // prefix all anon users with "anonymous-"
     const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
     requestMqttToken('anonymous', anonName);
 }
 
+/**
+ * check google oauth authentication
+ */
 function checkGoogleAuth() {
     auth2 = gapi.auth2.init({
         client_id: ARENADefaults.gAuthClientId,
@@ -94,8 +104,9 @@ function checkGoogleAuth() {
 
 /**
  * Processes name sources from auth for downstream use.
- * @param {string} authName - Preferred name from auth source.
- * @return {string} A username suitable for auth requests.
+ * @param {string} authName Preferred name from auth source
+ * @param {string} prefix User name prefix
+ * @return {string} A username suitable for auth requests
  */
 function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
@@ -121,6 +132,11 @@ function processUserNames(authName, prefix = null) {
     return processedName;
 }
 
+
+/**
+ * Processes user signin.
+ * @param {object} googleUser user data
+ */
 function onSignIn(googleUser) {
     const profile = googleUser.getBasicProfile();
     console.log('ID: ' + profile.getId());
@@ -132,6 +148,9 @@ function onSignIn(googleUser) {
     requestMqttToken('google', profile.getEmail(), id_token);
 }
 
+/**
+ * Processes user sign out.
+ */
 function signOut() {
     // logout, and disassociate user
     switch (localStorage.getItem('auth_choice')) {
@@ -152,6 +171,11 @@ function signOut() {
     location.href = AUTH.signInPath;
 }
 
+/**
+ * Utility function to get cookie value
+ * @param {string} name cookie name
+ * @return {string} cookie value
+ */
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -168,6 +192,12 @@ function getCookie(name) {
     return cookieValue;
 }
 
+/**
+ * Request token to auth service
+ * @param {string} auth_type authentication type
+ * @param {string} mqtt_username mqtt user name
+ * @param {string} id_token id to use in the token
+ */
 function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     // Request JWT before connection
     const xhr = new XMLHttpRequest();
@@ -230,9 +260,20 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     };
 }
 
+/**
+ * Auth is done; persist data in local storage and emit event
+ * @param {string} username auth user name
+ * @param {string} token mqtt token
+ */
 function completeAuth(username, token) {
     localStorage.setItem('mqtt_username', username);
     // mqtt-token must be set to authorize access to MQTT broker
+    if (typeof ARENA !== 'undefined') {
+        // emit event to ARENA
+
+        return;
+    }
+    // emit custom event to window
     const authCompleteEvent = new CustomEvent('onauth', {
         detail: {
             mqtt_username: username,
@@ -242,6 +283,10 @@ function completeAuth(username, token) {
     window.dispatchEvent(authCompleteEvent);
 }
 
+/**
+ * Get auth status
+ * @return {object} auth status object
+ */
 function getAuthStatus() {
     return {
         type: AUTH.user_type,
@@ -251,6 +296,11 @@ function getAuthStatus() {
     };
 }
 
+/**
+ * Utility function to format token contents
+ * @param {object} perms token permissions
+ * @return {string} html formated string
+ */
 function formatPerms(perms) {
     const lines = [];
     if (perms.sub) {
@@ -279,6 +329,9 @@ function formatPerms(perms) {
     return lines.join('<br>');
 }
 
+/**
+ * Present a div with token permissions
+ */
 function showPerms() {
     const overlayDiv = document.querySelector('#perms-overlay');
     const dataDiv = document.querySelector('#perms-data');
@@ -286,6 +339,9 @@ function showPerms() {
     overlayDiv.style.display = 'block';
 }
 
+/**
+ * Create auth ui panel
+ */
 function initAuthPanel() {
     const body = document.querySelector('body');
     const overlayDiv = document.createElement('div');
@@ -335,7 +391,12 @@ function initAuthPanel() {
     modalDiv.appendChild(closeBtn);
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+/**
+ * Check if local storage is available
+ * https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API
+ * @param {string} type storage type
+ * @return {boolean} storage available true/false
+ */
 function storageAvailable(type) {
     let storage;
     try {
