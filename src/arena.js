@@ -49,7 +49,7 @@ export class Arena {
         //console.log(ARENA);
 
         // setup event listner
-        window.addEventListener('onauth', this.onAuth.bind(this));
+        this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
     }
 
     /**

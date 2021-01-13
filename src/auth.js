@@ -269,19 +269,18 @@ function requestMqttToken(authType, mqttUsername, idToken = null) {
  */
 function completeAuth(username, token) {
     localStorage.setItem('mqtt_username', username);
+    const onAuthEvt = {
+        mqtt_username: username,
+        mqtt_token: token,
+    };
     // mqtt-token must be set to authorize access to MQTT broker
     if (typeof ARENA !== 'undefined') {
-        // emit event to ARENA
-
+        // emit event to ARENA.event
+        ARENA.events.emit('onauth', onAuthEvt);
         return;
     }
     // emit custom event to window
-    const authCompleteEvent = new CustomEvent('onauth', {
-        detail: {
-            mqtt_username: username,
-            mqtt_token: token,
-        },
-    });
+    const authCompleteEvent = new CustomEvent('onauth', {detail: onAuthEvt});
     window.dispatchEvent(authCompleteEvent);
 }
 
