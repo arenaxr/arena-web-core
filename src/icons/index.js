@@ -207,7 +207,7 @@ export class SideMenu {
                                 }
                             }
                             const camera = document.getElementById('my-camera');
-                            const screenshareWindow = window.open('./screenshare/index.html', '_blank');
+                            const screenshareWindow = window.open('./screenshare', '_blank');
                             screenshareWindow.params = {
                                 jitsiURL: ARENA.Jitsi.serverName,
                                 screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,

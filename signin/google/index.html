@@ -11,7 +11,7 @@
     var auth2;
     gapi.load('auth2', function () {
         auth2 = gapi.auth2.init({
-            client_id: defaults.gAuthClientId
+            client_id: ARENADefaults.gAuthClientId
         }).then(function () {
             auth2 = gapi.auth2.getAuthInstance();
             console.log(gapi.auth2.getAuthInstance().isSignedIn.get());

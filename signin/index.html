@@ -77,10 +77,10 @@
     var rootPath = urlParts[0] + "//" + urlParts[2];
 
     const popupConfig = {
-        client_id: defaults.gAuthClientId,
+        client_id: ARENADefaults.gAuthClientId,
     };
     const redirectConfig = {
-        client_id: defaults.gAuthClientId,
+        client_id: ARENADefaults.gAuthClientId,
         ux_mode: 'redirect',
         redirect_uri: rootPath + '/signin/google/',
     };
