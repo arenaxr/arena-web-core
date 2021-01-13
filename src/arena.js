@@ -9,9 +9,9 @@
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
-import {ARENAChat} from './chat/arena-chat.js';
+import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {setupIcons} from './icons/icons.js';
+import {SideMenu} from './icons/';
 
 /**
  * Arena Object
@@ -357,7 +357,7 @@ export class Arena {
             this.maxAVDist = this.maxAVDist ? this.maxAVDist : 20;
 
             // initialize Jitsi videoconferencing
-            this.JitsiAPI = await ARENAJitsi(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
+            ARENAJitsi.init(sceneOptions.jitsiServer ? sceneOptions.jitsiServer : 'mr.andrew.cmu.edu');
         };
     };
 
@@ -426,7 +426,7 @@ export class Arena {
             this.FaceTracker.init(displayBbox, flipped);
         }
     
-        setupIcons();    
+        SideMenu.setupIcons();   
     }
 }
 

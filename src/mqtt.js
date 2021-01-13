@@ -17,9 +17,11 @@ import {ARENAUtils} from './utils.js';
  * Main ARENA MQTT client
  */
 export class ARENAMqtt {
+    static mqtt = undefined;
 
     static init() {
-        return new ARENAMqtt();
+        if (!this.mqtt) this.mqtt = new ARENAMqtt();
+        return this.mqtt;
     }
 
     /**

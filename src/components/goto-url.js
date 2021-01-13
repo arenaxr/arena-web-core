@@ -1,6 +1,6 @@
 /* global AFRAME */
 
-import swal from 'sweetalert';
+import Swal from 'sweetalert2';
 
 /**
  * Load new URL if clicked
@@ -31,16 +31,15 @@ AFRAME.registerComponent('goto-url', {
         let fired = false;
         if (data.on && data.url) { // we have an event?
             el.addEventListener(data.on, function(evt) {
-                // console.log("goto-url url=" + data.url);
                 if (!fired) {
                     fired = true;
-                    swal({
-                        title: 'You clicked on a URL!',
-                        text: 'Are you sure you want to open \n[' + data.url + ']?',
-                        buttons: ['Cancel', 'Yes'],
+                    Swal.fire({
+                        title: `You clicked on a ${data.dest} URL!`,
+                        html: `Are you sure you want to open <u>${data.url}</u>?`,
+                        showCancelButton: true,
                     })
-                        .then((confirmed) => {
-                            if (confirmed) {
+                        .then((result) => {
+                            if (result.isConfirmed) {
                                 switch (data.dest) {
                                 case 'popup':
                                     window.open(data.url, 'popup', 'width=500,height=500');
@@ -66,7 +65,7 @@ AFRAME.registerComponent('goto-url', {
         }
     },
 
-    // handle component removal 
+    // handle component removal
     remove: function() {
         const data = this.data;
         const el = this.el;

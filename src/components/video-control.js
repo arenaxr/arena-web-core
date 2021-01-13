@@ -6,12 +6,11 @@
  */
 AFRAME.registerComponent('video-control', {
     // e.g. <a-entity video-control="videoName: superVideo" ...>
-
     schema: {
-        videoPath: {
-            type: 'string',
-            default: '',
-        },
+        video_object: {type: 'string', default: ''},
+        video_path: {type: 'string', default: ''},
+        anyone_clicks: {type: 'boolean', default: true},
+        video_loop: {type: 'boolean', default: true},
     },
     multiple: true,
 
@@ -28,14 +27,12 @@ AFRAME.registerComponent('video-control', {
 
         const thePlayer = document.getElementById(theID);
         const theAssets = $('a-assets');
-        const whoVideo = document.getElementById(videoPath);
 
         this.videoNum = this.el.id;
         const videoId = this.videoNum + '_videoId';
         ;
         theAssets.append(
             `<video id='${videoId}' src='${videoPath}' autoplay loop='${videoLoop}'/>`,
-            // `<a-entity id='${videoId}' src='${videoPath}' muted='true' loop='false'/>`
         );
 
         const frameId = this.videoNum + '_frameId';
@@ -55,28 +52,22 @@ AFRAME.registerComponent('video-control', {
         thevideo.pause(); // start the video as paused initially or else audio will play when video is not shown!
 
         this.el.addEventListener('mousedown', function(evt) {
-            if (evt.detail.clicker == ARENA.camName || anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName)) {
+            if (evt.detail.clicker == ARENA.camName ||
+                anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName)) {
                 const theSource = thePlayer.getAttribute('arenaVideo');
                 const theVideoId = thePlayer.getAttribute('videoId');
                 const theFrameId = thePlayer.getAttribute('frameId');
-                // console.log(theSource)
 
                 if (theSource != frameSrc) {
                     // FRAME
                     thevideo.pause(); // pause the html video elem ==> pause aframe video elem
-
-                    // thePlayer.setAttribute('material', 'src', `#${frameId}`);
                     thePlayer.setAttribute('material', 'src', `#${theFrameId}`);
-
                     thePlayer.setAttribute('arenaVideo', frameSrc);
                 } else {
                     // VIDEO
-                    // thePlayer.setAttribute('material', 'src', `#${videoId}`);
                     thePlayer.setAttribute('material', 'src', `#${theVideoId}`);
-
                     thePlayer.setAttribute('arenaVideo', videoPath);
                     thevideo.volume = 1; // default is 1; this just demonstrates how to change
-
                     thevideo.play(); // play the html video elem ==> play aframe video elem
                 }
             }

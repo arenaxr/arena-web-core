@@ -12,7 +12,7 @@ import * as Paho from 'paho-mqtt'; //https://www.npmjs.com/package/paho-mqtt
 import {ARENAEventEmitter} from '../event-emitter.js';
 import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';
-import swal from 'sweetalert';
+import Swal from 'sweetalert2';
 import './style.css';
 
 var mqttc;
@@ -23,7 +23,7 @@ function uuidv4() {
     );
 }
 
-export default class ARENAChat {
+export class ARENAChat {
     static PUBLIC_TOPIC_PREFIX = '/g/c/o/';
     static PRIVATE_TOPIC_PREFIX = '/g/c/p/';
 
@@ -304,18 +304,18 @@ export default class ARENAChat {
                 return;
             }
 
-            swal({
+            Swal.fire({
                 title: 'Are you sure?',
                 text: 'This will send a mute request to all users.',
                 icon: 'warning',
-                buttons: true,
-                dangerMode: true,
-            }).then((sendMute) => {
-                if (sendMute) {
-                    // send to all scene topic
-                    _this.ctrlMsg('scene', 'sound:off');
-                }
-            });
+                showCancelButton: true,
+            })
+                .then((result) => {
+                    if (result.isConfirmed) {
+                        // send to all scene topic
+                        _this.ctrlMsg('scene', 'sound:off');
+                    }
+                });
         };
 
         const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
@@ -377,7 +377,7 @@ export default class ARENAChat {
                 scene: user.scene,
                 cid: user.cn,
                 ts: new Date().getTime(),
-                type: ARENAChat.userType.EXTERNAL, // indicate we only know about the user from jitsi
+                type: ARENAChat.userType.EXTERNAL, // indicate we only know about the users from jitsi
             };
             if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
             else this.populateUserList();
@@ -707,7 +707,7 @@ export default class ARENAChat {
         userList.forEach((user) => {
             let uli = document.createElement('li');
 
-            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s screen share';
+            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s Screen Share';
             uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') +
                                     decodeURI(name) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
 
@@ -963,5 +963,3 @@ export default class ARENAChat {
         );
     }
 }
-
-exports.ARENAChat = ARENAChat;
