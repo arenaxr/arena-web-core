@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - refactor 
   pull_request:
     branches:
       - master
@@ -26,7 +25,7 @@ jobs:
           envs: TARGET
           script: |
              cd  $TARGET
-             git checkout refactor
+             git checkout master
              git reset --hard HEAD
              git pull
              npm install
