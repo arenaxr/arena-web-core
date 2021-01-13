@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* global ARENA */
 
 // auth.js
@@ -8,7 +9,7 @@
 // Required:
 //  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
-//  <script src="./conf/defaults.js"></script>  <!-- for window.defaults -->
+//  <script src="./conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
 //  <script src="./auth.js"></script>  <!-- browser authorization flow -->
 //  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
 //
@@ -29,7 +30,8 @@
 window.AUTH = {}; // auth namespace
 
 if (!storageAvailable('localStorage')) {
-    alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it. Bugs are coming! Perhaps you have disabled cookies?');
+    alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it.' +
+        'Bugs are coming! Perhaps you have disabled cookies?');
 }
 
 window.onload = function() {
@@ -144,8 +146,8 @@ function onSignIn(googleUser) {
     console.log('Email: ' + profile.getEmail());
     processUserNames(profile.getName());
     // request mqtt-auth
-    const id_token = googleUser.getAuthResponse().id_token;
-    requestMqttToken('google', profile.getEmail(), id_token);
+    const idToken = googleUser.getAuthResponse().id_token;
+    requestMqttToken('google', profile.getEmail(), idToken);
 }
 
 /**
@@ -155,7 +157,7 @@ function signOut() {
     // logout, and disassociate user
     switch (localStorage.getItem('auth_choice')) {
     case 'google':
-        var auth2 = gapi.auth2.getAuthInstance();
+        const auth2 = gapi.auth2.getAuthInstance();
         auth2.signOut().then(function() {
             console.log('User signed out.');
         });
@@ -194,15 +196,15 @@ function getCookie(name) {
 
 /**
  * Request token to auth service
- * @param {string} auth_type authentication type
- * @param {string} mqtt_username mqtt user name
- * @param {string} id_token id to use in the token
+ * @param {string} authType authentication type
+ * @param {string} mqttUsername mqtt user name
+ * @param {string} idToken id to use in the token
  */
-function requestMqttToken(auth_type, mqtt_username, id_token = null) {
+function requestMqttToken(authType, mqttUsername, idToken = null) {
     // Request JWT before connection
     const xhr = new XMLHttpRequest();
-    let params = 'username=' + mqtt_username + '&id_token=' + id_token;
-    params += `&id_auth=${auth_type}`;
+    let params = 'username=' + mqttUsername + '&id_token=' + idToken;
+    params += `&id_auth=${authType}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
         if (ARENADefaults.realm) {
@@ -237,12 +239,12 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
-            AUTH.user_type = auth_type;
+            AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;
-            switch (auth_type) {
+            switch (authType) {
             case 'google':
-                var googleUser = auth2.currentUser.get();
-                var profile = googleUser.getBasicProfile();
+                const googleUser = auth2.currentUser.get();
+                const profile = googleUser.getBasicProfile();
                 AUTH.user_fullname = profile.getName();
                 AUTH.user_email = profile.getEmail();
                 break;
