@@ -21,5 +21,10 @@ AFRAME.registerComponent('network-latency', {
                 ARENA.Mqtt.send(this.message);
             }
         }
+        if (ARENA.chat) {
+            if (ARENA.chat.mqttc.isConnected()) {
+                ARENA.chat.mqttc.send(this.message);
+            }
+        }
     }),
 });
