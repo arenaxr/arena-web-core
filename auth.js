@@ -248,7 +248,8 @@ function formatPerms(perms) {
 }
 
 function showProfile() {
-    location.href = `/user/profile`;
+    // open profile in new page to avoid mqtt disconnect
+    location.href = window.open('/user/profile');
 }
 
 function showPerms() {
