@@ -231,6 +231,7 @@ export class SideMenu {
                 text: 'Are you sure you want to sign out?',
                 icon: 'warning',
                 showCancelButton: true,
+                confirmButtonText: 'Ok',
             })
                 .then((result) => {
                     if (result.isConfirmed) {
