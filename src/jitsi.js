@@ -80,9 +80,6 @@ export class ARENAJitsi {
         this.hasVideo = false;
 
         this.screenShareDict = {};
-
-        // this.events = JitsiMeetJS.events.conference;
-
         /**
          * list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
          * participants receive data about its properties (e.g. arenaDisplayName and arenaUserName).
@@ -258,7 +255,7 @@ export class ARENAJitsi {
                     id: participantId,
                     dn: dn,
                     cn: camName,
-                    scene: this.arenaConferenceName,
+                    scene: ARENA.sceneName,
                     src: ARENAEventEmitter.sources.JITSI,
                 });
                 objectIds = objectIds.split(',');
@@ -277,7 +274,7 @@ export class ARENAJitsi {
                     id: participantId,
                     dn: dn,
                     cn: undefined,
-                    scene: this.arenaConferenceName,
+                    scene: ARENA.sceneName,
                     src: ARENAEventEmitter.sources.JITSI,
                 });
                 return;
@@ -319,7 +316,7 @@ export class ARENAJitsi {
             }
         });
         ARENA.events.emit(ARENAEventEmitter.events.JITSI_CONNECT, {
-            scene: this.arenaConferenceName,
+            scene: ARENA.sceneName,
             pl: pl,
         });
     }
@@ -341,33 +338,29 @@ export class ARENAJitsi {
                 id: arenaId,
                 dn: arenaDisplayName,
                 cn: arenaCameraName,
-                scene: this.arenaConferenceName,
+                scene: ARENA.sceneName,
                 src: ARENAEventEmitter.sources.JITSI,
             });
         } else {
-            // this might be a jitsi-only user; emit event if name does not have the arena tag
-            let dn = this.conference.getParticipantById(id).getDisplayName();
+            let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
+            // user join event args, to be emited below
+            let userJoinedArgs = {
+                id: id,
+                dn: dn,
+                cn: undefined,
+                scene: ARENA.sceneName,
+                src: ARENAEventEmitter.sources.JITSI,
+            }
+            // this might be a jitsi-only user; emit event if name does not have the arena tag
             if (!dn.includes(ARENAJitsi.ARENA_USER)) {
                 if (!dn.includes(ARENAJitsi.SCREENSHARE_PREFIX)) {
-                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                        id: id,
-                        dn: dn,
-                        cn: undefined,
-                        scene: this.arenaConferenceName,
-                        src: ARENAEventEmitter.sources.JITSI,
-                    });
+                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, userJoinedArgs);
                 }
             } else {
                 this.newUserTimers[id] = setTimeout(() => {
                     // emit event anyway in NEW_USER_TIMEOUT_MS if we dont hear from this user
-                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                        id: id,
-                        dn: dn,
-                        cn: undefined,
-                        scene: this.arenaConferenceName,
-                        src: ARENAEventEmitter.sources.JITSI,
-                    });
+                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, userJoinedArgs);
                 }, ARENAJitsi.NEW_USER_TIMEOUT_MS);
             }
         }

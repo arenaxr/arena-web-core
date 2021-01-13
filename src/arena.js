@@ -403,6 +403,7 @@ export class Arena {
         });
         */
 
+        console.log(ARENA.defaults, this.getDisplayName());
         // init chat after
         this.chat = new ARENAChat({
             userid: this.idTag,
