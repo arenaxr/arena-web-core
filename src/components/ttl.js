@@ -29,6 +29,7 @@ AFRAME.registerComponent('ttl', {
         const now = new Date();
         if (now > this.expireAt) {
             this.el.parentNode.removeChild(this.el);
+            delete ARENA.sceneObjects[this.el.id];
         }
     },
 });
