@@ -83,7 +83,7 @@ export async function populateList(scene, filter='.*', chk_type={'object': true,
     }
 
     try {
-        let persistOpt = defaults.disallowJWT ? {} : { credentials: "include" };
+        let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: "include" };
         var data = await fetch(persist.persist_uri + "!allscenes", persistOpt);
         if (!data) {
           displayAlert("Error fetching scene list from database.", "error", 5000);
@@ -121,7 +121,7 @@ export async function populateList(scene, filter='.*', chk_type={'object': true,
     }
 
     try {
-        let persistOpt = defaults.disallowJWT ? {} : { credentials: "include" };
+        let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: "include" };
         var data = await fetch(persist.persist_uri + scene, persistOpt);
         if (!data) {
           displayAlert("Error fetching scene from database.", "error", 5000);

@@ -70,7 +70,7 @@ function checkAnonAuth(event) {
 
 function checkGoogleAuth() {
     auth2 = gapi.auth2.init({
-        client_id: ARENA.defaults.gAuthClientId,
+        client_id: ARENADefaults.gAuthClientId,
     }).then(function() {
         auth2 = gapi.auth2.getAuthInstance();
         if (!auth2.isSignedIn.get()) {
@@ -101,7 +101,7 @@ function processUserNames(authName, prefix = null) {
     // var processedName = encodeURI(authName);
     let processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
     if (typeof ARENA !== 'undefined') {
-        if (typeof defaults !== 'undefined' && ARENA.userName !== ARENA.defaults.userName) {
+        if (typeof ARENADefaults !== 'undefined' && ARENA.userName !== ARENADefaults.userName) {
             // userName set? persist to storage
             localStorage.setItem('display_name', decodeURI(ARENA.userName));
             processedName = ARENA.userName;
@@ -175,8 +175,8 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
     params += `&id_auth=${auth_type}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
-        if (ARENA.defaults.realm) {
-            params += `&realm=${ARENA.defaults.realm}`;
+        if (ARENADefaults.realm) {
+            params += `&realm=${ARENADefaults.realm}`;
         }
     }
     if (typeof ARENA !== 'undefined') {
@@ -196,7 +196,7 @@ function requestMqttToken(auth_type, mqtt_username, id_token = null) {
             params += `&ctrlid2=${ARENA.viveRName}`;
         }
     }
-    xhr.open('POST', ARENA.defaults.urlMqttAuth);
+    xhr.open('POST', ARENADefaults.urlMqttAuth);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
