@@ -178,6 +178,8 @@ export class ARENAJitsi {
             screenShareEl.setAttribute('scale', '8 6 0.01');
             screenShareEl.setAttribute('position', '0 3.1 -3');
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
+            screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+
             sceneEl.appendChild(screenShareEl);
             ARENA.sceneObjects[screenShareId] = screenShareEl;
         }
