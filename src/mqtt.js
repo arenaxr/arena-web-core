@@ -9,7 +9,7 @@
 /* global THREE, ARENA */
 
 // 'use strict';
-import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
+const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 import {ARENAUtils} from './utils.js';
 
 /**
