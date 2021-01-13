@@ -540,7 +540,7 @@ export class ARENAJitsi {
                         but can still interact with other users in the ARENA.`,
                 icon: 'warning',
                 showConfirmButton: true,
-                confirmButtonText: 'Ok'
+                confirmButtonText: 'Ok',
             });
         }
         this.avConnected = true;

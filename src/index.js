@@ -9,6 +9,6 @@
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
 import 'aframe'; // AFRAME
 import './arena.js'; // ARENA
-import './aframe-mods.js'; // AFRAME modifications
-import './components/index.js'; // custom AFRAME components
-import './web-xr-viewer.js';
+import './aframe-mods/'; // AFRAME modifications
+import './components/'; // custom AFRAME components
+import './webxr/'; // spedial handler for webxr devices

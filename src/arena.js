@@ -9,9 +9,9 @@
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
-import {ARENAChat} from './chat/arena-chat.js';
+import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {setupIcons} from './icons/icons.js';
+import {SideMenu} from './icons/';
 
 /**
  * ARENA global object
@@ -321,5 +321,5 @@ window.addEventListener('onauth', function(e) {
         ARENA.FaceTracker.init(displayBbox, flipped);
     }
 
-    setupIcons();
+    SideMenu.setupIcons();
 });
