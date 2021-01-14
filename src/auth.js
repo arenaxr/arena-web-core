@@ -111,6 +111,9 @@ function getCookie(name) {
     return cookieValue;
 }
 
+/**
+ * Request user state data for client-side state management.
+ */
 function requestAuthState() {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `/user/user_state`);
@@ -156,7 +159,8 @@ function requestAuthState() {
  * Request token to auth service
  * @param {string} authType authentication type
  * @param {string} mqttUsername mqtt user name
- */function requestMqttToken(auth_type, mqtt_username) {
+ */
+function requestMqttToken(auth_type, mqtt_username) {
     // Request JWT before connection
     const xhr = new XMLHttpRequest();
     let params = 'username=' + mqtt_username;
