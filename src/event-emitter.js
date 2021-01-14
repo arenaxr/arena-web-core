@@ -4,6 +4,16 @@
 */
 export class ARENAEventEmitter {
     static events = {
+
+        /**
+         * Indicate user settings changed (currently, username changes). The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback onNewSettingsCallback
+         * @param updated {object} dictionary of changed properties 
+         */
+        NEW_SETTINGS: 'new_settings',
+
         /**
         * Indicates we joined a jitsi conference (also on reconnect),
         * provides a list of current users/participants:
