@@ -16,6 +16,7 @@ export class ClientEvent {
 
         const name = result.name;
         const data = result.data;
+
         const entityEl = document.getElementById(name);
         if (!entityEl) {
             Logger.error('clientEvent', `Object with object_id "${name}" does not exist!`);
