@@ -1,6 +1,7 @@
 /* global $, JitsiMeetJS */
 
-const jitsiServer = window.jitsiURL;
+if (!window.params) window.close();
+const jitsiServer = window.params.jitsiURL;
 if (!jitsiServer) window.close();
 
 const options = {
@@ -27,7 +28,7 @@ const remoteTracks = {};
 
 /**
  * Handles local tracks.
- * @param tracks Array with JitsiTrack objects
+ * @param {[]} tracks Array with JitsiTrack objects
  */
 function onLocalTracks(tracks) {
     localTracks = tracks;
@@ -40,7 +41,10 @@ function onLocalTracks(tracks) {
             () => console.log('local track muted'));
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
-            () => console.log('local track stoped'));
+            () => {
+                console.log('local track stoped');
+                window.close();
+            });
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED,
             (deviceId) =>
@@ -52,9 +56,9 @@ function onLocalTracks(tracks) {
             localTracks[i].attach($(`#localAudio${i}`)[0]);
         } else { // desktop
             $('body').append(
-                `<video autoplay='1' id='localScreenShare${i}' class="screen-share" />`);
-            $(`#localScreenShare${i}`).css("width", "100%");
-            $(`#localScreenShare${i}`).css("height", "auto");
+                `<video autoplay='1' id='localScreenShare${i}' class='screen-share' />`);
+            $(`#localScreenShare${i}`).css('width', '100%');
+            $(`#localScreenShare${i}`).css('height', 'auto');
             localTracks[i].attach($(`#localScreenShare${i}`)[0]);
         }
         if (isJoined) {
@@ -78,7 +82,7 @@ function onConferenceJoined() {
  * That function is called when connection is established successfully
  */
 function onConnectionSuccess() {
-    conference = connection.initJitsiConference(window.scene, confOptions);
+    conference = connection.initJitsiConference(window.params.conferenceName, confOptions);
     conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
         console.log(`track removed!!!${track}`);
     });
@@ -102,10 +106,12 @@ function onConnectionSuccess() {
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`));
 
-    conference.setDisplayName(`${(+new Date).toString(36)} ${window.screenSharePrefix}_${window.camName}`);
-    conference.setLocalParticipantProperty('screenshareDispName', window.displayName);
-    conference.setLocalParticipantProperty('screenshareCamName', window.camName);
-    conference.setLocalParticipantProperty('screenshareObjIds', window.objectIds);
+    conference.setDisplayName(
+        `${(+new Date).toString(36)} ${window.params.screenSharePrefix}_${window.params.camName}`,
+    );
+    conference.setLocalParticipantProperty('screenshareDispName', window.params.displayName);
+    conference.setLocalParticipantProperty('screenshareCamName', window.params.camName);
+    conference.setLocalParticipantProperty('screenshareObjIds', window.params.objectIds);
 
     conference.join();
 }
@@ -119,6 +125,7 @@ function onConnectionFailed() {
 
 /**
  * This function is called when the connection fail.
+ * @param {[]} devices list of devices
  */
 function onDeviceListChanged(devices) {
     console.info('current devices', devices);
@@ -155,7 +162,8 @@ function unload() {
 $(window).bind('beforeunload', unload);
 $(window).bind('unload', unload);
 
-// JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+
 const initOptions = {
     disableAudioLevels: true,
 };

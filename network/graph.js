@@ -84,11 +84,11 @@ window.addEventListener('onauth', function(e) {
 
     function init() {
         let brokerAddr;
-        if (defaults && defaults.mqttParamZ) { // prefer deployed custom config
-            brokerAddr = `wss://${defaults.mqttParamZ}${defaults.mqttPath[0]}`;
+        if (ARENADefaults && ARENADefaults.mqttHost) { // prefer deployed custom config
+            brokerAddr = `wss://${ARENADefaults.mqttHost}${ARENADefaults.mqttPath[0]}`;
         }
         window.client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
-        window.graphTopic = defaults.graphTopic;
+        window.graphTopic = ARENADefaults.graphTopic;
 
         window.client.onConnectionLost = onConnectionLost;
         window.client.onMessageArrived = onMessageArrived;

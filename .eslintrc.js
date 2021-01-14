@@ -8,6 +8,7 @@ module.exports = {
         'google',
     ],
     'parserOptions': {
+        'sourceType': 'module',
         'ecmaVersion': 12,
     },
     'rules': {

@@ -1,9 +1,15 @@
-node_modules
+node_modules/
 defaults.js
 conf/
+
+## parcel build
+dist/
+.cache/
+
 # private repos
 models/
 store
+
 # arena test versions
 *dev.*
 *dev2.*
