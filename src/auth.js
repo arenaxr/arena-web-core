@@ -39,7 +39,7 @@ window.onload = function() {
 };
 
 /**
- * check if the current user is already signed in
+ * Initialize and launch start of authentication flow.
  * @param {object} args auth arguments
  */
 const authCheck = function(args) {
@@ -160,11 +160,11 @@ function requestAuthState() {
  * @param {string} authType authentication type
  * @param {string} mqttUsername mqtt user name
  */
-function requestMqttToken(auth_type, mqtt_username) {
+function requestMqttToken(authType, mqttUsername) {
     // Request JWT before connection
     const xhr = new XMLHttpRequest();
-    let params = 'username=' + mqtt_username;
-    params += `&id_auth=${auth_type}`;
+    let params = 'username=' + mqttUsername;
+    params += `&id_auth=${authType}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
         if (ARENADefaults.realm) {
@@ -247,7 +247,7 @@ function getAuthStatus() {
 /**
  * Utility function to format token contents
  * @param {object} perms token permissions
- * @return {string} html formated string
+ * @return {string} html formatted string
  */
 function formatPerms(perms) {
     const lines = [];
