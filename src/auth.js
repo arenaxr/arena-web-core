@@ -239,12 +239,21 @@ function requestMqttToken(authType, mqttUsername, idToken = null) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
+<<<<<<< HEAD:src/auth.js
             AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;
             switch (authType) {
             case 'google':
                 const googleUser = auth2.currentUser.get();
                 const profile = googleUser.getBasicProfile();
+=======
+            AUTH.user_type = auth_type;
+            AUTH.user_username = xhr.response.username;
+            switch (auth_type) {
+            case 'google':
+                var googleUser = auth2.currentUser.get();
+                var profile = googleUser.getBasicProfile();
+>>>>>>> master:auth.js
                 AUTH.user_fullname = profile.getName();
                 AUTH.user_email = profile.getEmail();
                 break;
