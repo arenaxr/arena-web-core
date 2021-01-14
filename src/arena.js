@@ -29,7 +29,6 @@ export class Arena {
         this.defaults = ARENADefaults; // "get" arena defaults
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
-        this.sceneObjects = new Map();
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
         this.startCoords = ARENAUtils.getUrlParam('startCoords', this.defaults.startCoords).replace(/,/g, ' ');
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
@@ -45,8 +44,6 @@ export class Arena {
 
         // set mqttHost and mqttHostURI from url params or defaults
         this.setmqttHost()
-
-        //console.log(ARENA);
 
         // setup event listner
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
@@ -403,7 +400,6 @@ export class Arena {
         });
         */
 
-        console.log(ARENA.defaults, this.getDisplayName());
         // init chat after
         this.chat = new ARENAChat({
             userid: this.idTag,

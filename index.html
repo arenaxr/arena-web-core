@@ -49,8 +49,8 @@
         <a-box static-body position="0 1 15" id="border3" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
         <a-box static-body position="0 1 -15" id="border4" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
 
-        <a-entity position="0 0 0" id="CameraRig">
-          <a-entity position="0 0 0" id="CameraSpinner" name="PerspectiveCamera" tag="MainCamera">
+        <a-entity position="0 0 0" id="cameraRig">
+          <a-entity position="0 0 0" id="cameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
             <a-camera id="my-camera" far="10000" near="0.1" wasd-controls="fly: false; acceleration: 30" look-controls="reverseMouseDrag: true" look-controls-arrow mouse-cursor press-and-move network-latency>
               <a-entity id="mouse-cursor" cursor="rayOrigin: mouse" raycaster="objects:[click-listener]"></a-entity>

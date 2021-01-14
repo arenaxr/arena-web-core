@@ -60,7 +60,7 @@ window.addEventListener('enter-vr', function(e) {
             // handle tap events
             document.addEventListener('mousedown', function(e) {
                 if (window.lastMouseTarget) {
-                    const el = window.ARENA.sceneObjects[window.lastMouseTarget];
+                    const el = document.getElementById(window.lastMouseTarget);
                     const elPos = new THREE.Vector3();
                     el.object3D.getWorldPosition(elPos);
 
@@ -81,7 +81,7 @@ window.addEventListener('enter-vr', function(e) {
 
             document.addEventListener('mouseup', function(e) {
                 if (window.lastMouseTarget) {
-                    const el = window.ARENA.sceneObjects[window.lastMouseTarget];
+                    const el = document.getElementById(window.lastMouseTarget);
                     const elPos = new THREE.Vector3();
                     el.object3D.getWorldPosition(elPos);
                     const intersection = {
