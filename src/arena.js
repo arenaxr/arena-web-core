@@ -45,8 +45,6 @@ export class Arena {
         // set mqttHost and mqttHostURI from url params or defaults
         this.setmqttHost()
 
-        //console.log(ARENA);
-
         // setup event listner
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
     }
@@ -402,7 +400,6 @@ export class Arena {
         });
         */
 
-        console.log(ARENA.defaults, this.getDisplayName());
         // init chat after
         this.chat = new ARENAChat({
             userid: this.idTag,

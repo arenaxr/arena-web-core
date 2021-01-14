@@ -1,3 +1,5 @@
+import './style.css'
+
 /**
  * Wrapper for GLTF progress loader
  */

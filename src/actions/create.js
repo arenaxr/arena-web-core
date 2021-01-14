@@ -1,6 +1,6 @@
 import {Logger} from './logger.js';
 import {Parser} from './parser.js';
-import {GLTFProgress} from './gltf-progress.js';
+import {GLTFProgress} from '../gltf-progress/';
 
 /**
  * Create object handler
