@@ -90,8 +90,8 @@ window.processCV = async function (frame) {
 
     // Save vio before processing apriltag. Don't touch global though
     let timestamp = new Date();
-    let camParent = ARENA.sceneObjects.myCamera.object3D.parent.matrixWorld;
-    let cam = ARENA.sceneObjects.myCamera.object3D.matrixWorld;
+    let camParent = document.getElementById('my-camera').object3D.parent.matrixWorld;
+    let cam = document.getElementById('my-camera').object3D.matrixWorld;
     vioMatrixCopy.copy(camParent).invert(); // vioMatrixCopy.getInverse(camParent);
     vioMatrixCopy.multiply(cam);
 
@@ -162,8 +162,8 @@ window.processCV = async function (frame) {
                         // Reconcile which localizer tag is better based on error?
                     } else {
                         let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detection.pose, refTag.pose);
-                        ARENA.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
-                        ARENA.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+                        document.getElementById('cameraSpinner').object3D.quaternion.setFromRotationMatrix(rigPose);
+                        document.getElementById('cameraRig').object3D.position.setFromMatrixPosition(rigPose);
                         localizerTag = true;
                         /* ** Rig update for networked solver, disable for now
                         rigMatrixT.copy(rigPose);
@@ -219,8 +219,8 @@ window.processCV2 = async function (frame) {
 
     // Save vio before processing apriltag. Don't touch global though
     let timestamp = new Date();
-    let camParent = ARENA.sceneObjects.myCamera.object3D.parent.matrixWorld;
-    let cam = ARENA.sceneObjects.myCamera.object3D.matrixWorld;
+    let camParent = document.getElementById('my-camera').object3D.parent.matrixWorld;
+    let cam = document.getElementById('my-camera').object3D.matrixWorld;
     vioMatrixCopy.copy(camParent).invert(); // vioMatrixCopy.getInverse(camParent);
     vioMatrixCopy.multiply(cam);
 
@@ -278,8 +278,8 @@ window.processCV2 = async function (frame) {
             }
         } else if (refTag) {  // Solve clientside, MUST have a reference tag though
             let rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detections[0].pose, refTag.pose);
-            ARENA.sceneObjects.cameraSpinner.object3D.quaternion.setFromRotationMatrix(rigPose);
-            ARENA.sceneObjects.cameraRig.object3D.position.setFromMatrixPosition(rigPose);
+            document.getElementById('cameraSpinner').object3D.quaternion.setFromRotationMatrix(rigPose);
+            document.getElementById('cameraRig').object3D.position.setFromMatrixPosition(rigPose);
             rigPose.transpose(); // Flip to column-major, so that rigPose.elements comes out row-major for numpy
             jsonMsg.rigMatrix = rigPose.elements; // Make sure networked solver still has latest rig for reference
         } else { // No reference tag, not networked/builder mode, nothing to do

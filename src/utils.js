@@ -10,7 +10,6 @@
  * Wrapper class for various utility functions
  */
 export class ARENAUtils {
-
     /**
      * Gets URL parameters as dictionary
      * @return {Object} dictionary of URL parameters

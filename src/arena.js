@@ -29,7 +29,6 @@ export class Arena {
         this.defaults = ARENADefaults; // "get" arena defaults
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
-        this.sceneObjects = new Map();
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
         this.startCoords = ARENAUtils.getUrlParam('startCoords', this.defaults.startCoords).replace(/,/g, ' ');
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);

@@ -74,19 +74,19 @@
 
 #gltf-loading {
     visibility: hidden;
-    left: 50%;
-    width: 200px;
-    margin-left: -100px;
-    background-color: white;
+    border: 2px solid #1f7987;
+    background: #dbdbdb;
     text-align: center;
-    border-radius: 10px;
-    padding: 15px;
+    border-radius: 20px;
+    padding: 20px;
     position: fixed;
     z-index: 9999;
-    bottom: 20px;
+    bottom: 21px;
     font-size: 15px;
     word-wrap: break-word;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
+    left: 50%;
+    transform: translate(-50%, 0%);
 }
 
 #gltf-loading.show {

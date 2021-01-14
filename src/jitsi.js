@@ -99,9 +99,11 @@ export class ARENAJitsi {
         JitsiMeetJS.init(this.initOptions);
 
         this.connection = new JitsiMeetJS.JitsiConnection(null, null, this.connectOptions);
-        this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) =>
-            console.log(`(this.connection) Dominant Speaker ID: ${id}`),
-        );
+        this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
+            // console.log(`(connection) Dominant Speaker ID: ${id}`),
+            this.prevActiveSpeaker = this.activeSpeaker;
+            this.activeSpeaker = id;
+        });
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect.bind(this));
@@ -167,7 +169,7 @@ export class ARENAJitsi {
     updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
 
-        let screenShareEl = ARENA.sceneObjects[screenShareId];
+        let screenShareEl = document.getElementById(screenShareId);
         if (!screenShareEl) {
             const sceneEl = document.querySelector('a-scene');
             // create if doesnt exist
@@ -181,7 +183,6 @@ export class ARENAJitsi {
             screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
 
             sceneEl.appendChild(screenShareEl);
-            ARENA.sceneObjects[screenShareId] = screenShareEl;
         }
         screenShareEl.setAttribute('muted', 'false');
         screenShareEl.setAttribute('autoplay', 'true');
@@ -408,7 +409,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, (id) => {
-            console.log(`(this.conference) Dominant Speaker ID: ${id}`);
+            // console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
         });
