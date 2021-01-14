@@ -262,7 +262,7 @@ AFRAME.registerComponent('arena-user', {
                     listener = sceneEl.audioListener;
                 } else {
                     listener = new THREE.AudioListener();
-                    const camEl = ARENA.sceneObjects.myCamera.object3D;
+                    const camEl = document.getElementById('my-camera').object3D;
                     camEl.add(listener);
                     sceneEl.audioListener = listener;
                 }
@@ -310,15 +310,22 @@ AFRAME.registerComponent('arena-user', {
     },
 
     tick: function() {
+        const data = this.data;
         const el = this.el;
 
-        const camPos = ARENA.sceneObjects.myCamera.object3D.position;
+        // do period a/v updates
+        if (ARENA.Jitsi && ARENA.Jitsi.ready && data.jitsiId) {
+            this.updateVideo();
+            this.updateAudio();
+        }
+
+        const camPos = document.getElementById('my-camera').object3D.position;
         const entityPos = el.object3D.position;
         const distance = camPos.distanceTo(entityPos);
 
         if (this.videoTrack && this.videoID) {
             // frustrum culling for WebRTC streams
-            const cam = ARENA.sceneObjects.myCamera.sceneEl.camera;
+            const cam = document.getElementById('my-camera').sceneEl.camera;
             const frustum = new THREE.Frustum();
             frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
                 cam.matrixWorldInverse));

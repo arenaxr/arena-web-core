@@ -128,23 +128,23 @@ export class SideMenu {
             if (speedState == 0) { // medium
                 speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/speed-medium.png\')';
                 if (!AFRAME.utils.device.isMobile()) {
-                    ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 30});
+                    document.getElementById('my-camera').setAttribute('wasd-controls', {'acceleration': 30});
                 } else {
-                    ARENA.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 5.0});
+                    document.getElementById('my-camera').setAttribute('press-and-move', {'speed': 5.0});
                 }
             } else if (speedState == 1) { // fast
                 speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/speed-fast.png\')';
                 if (!AFRAME.utils.device.isMobile()) {
-                    ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 60});
+                    document.getElementById('my-camera').setAttribute('wasd-controls', {'acceleration': 60});
                 } else {
-                    ARENA.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 10.0});
+                    document.getElementById('my-camera').setAttribute('press-and-move', {'speed': 10.0});
                 }
             } else if (speedState == 2) { // slow
                 speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/speed-slow.png\')';
                 if (!AFRAME.utils.device.isMobile()) {
-                    ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'acceleration': 15});
+                    document.getElementById('my-camera').setAttribute('wasd-controls', {'acceleration': 15});
                 } else {
-                    ARENA.sceneObjects.myCamera.setAttribute('press-and-move', {'speed': 2.5});
+                    document.getElementById('my-camera').setAttribute('press-and-move', {'speed': 2.5});
                 }
             }
         });
@@ -160,12 +160,12 @@ export class SideMenu {
             if (ARENA.flying) { // toggled
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/flying-on.png\')';
             } else {
-                const groundedPos = ARENA.sceneObjects.myCamera.getAttribute('position');
+                const groundedPos = document.getElementById('my-camera').getAttribute('position');
                 groundedPos.y = parseFloat(ARENA.startCoords.split(' ')[1]);
-                ARENA.sceneObjects.myCamera.setAttribute('position', groundedPos);
+                document.getElementById('my-camera').setAttribute('position', groundedPos);
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/flying-off.png\')';
             }
-            ARENA.sceneObjects.myCamera.setAttribute('wasd-controls', {'fly': ARENA.flying});
+            document.getElementById('my-camera').setAttribute('wasd-controls', {'fly': ARENA.flying});
         });
         flyingBtn.style.display = 'none';
         settingsButtons.push(flyingBtn);

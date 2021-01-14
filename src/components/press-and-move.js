@@ -40,15 +40,15 @@ AFRAME.registerComponent('press-and-move', {
         if (this.longTouch) {
             this.timer = null;
             if (!this.drag) {
-                const eulerRot = ARENA.sceneObjects.myCamera.getAttribute('rotation');
+                const eulerRot = document.getElementById('my-camera').getAttribute('rotation');
                 const dx = this.data.speed * (dt / 1000) * Math.cos(eulerRot.y * Math.PI / 180);
                 const dy = this.data.speed * (dt / 1000) * Math.sin(eulerRot.y * Math.PI / 180);
                 const dz = this.data.speed * (dt / 1000) * Math.sin(eulerRot.x * Math.PI / 180);
-                const newPosition = ARENA.sceneObjects.myCamera.getAttribute('position');
+                const newPosition = document.getElementById('my-camera').getAttribute('position');
                 newPosition.x -= dy; // subtract b/c negative is forward
                 newPosition.z -= dx;
                 newPosition.y += ARENA.flying ? dz : 0;
-                ARENA.sceneObjects.myCamera.setAttribute('position', newPosition);
+                document.getElementById('my-camera').setAttribute('position', newPosition);
             }
         }
     }),
