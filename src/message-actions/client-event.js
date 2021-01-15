@@ -11,15 +11,12 @@ export class ClientEvent {
      * @param {object} message message to be parsed
      */
     static handle(message) {
-        const result = Parser.parse('clientEvent', message);
-        if (result === undefined) return;
+        const id = message.name;
+        const data = message.data;
 
-        const name = result.name;
-        const data = result.data;
-
-        const entityEl = document.getElementById(name);
+        const entityEl = document.getElementById(id);
         if (!entityEl) {
-            Logger.error('clientEvent', `Object with object_id "${name}" does not exist!`);
+            Logger.error('clientEvent', `Object with object_id "${id}" does not exist!`);
             return;
         }
 
