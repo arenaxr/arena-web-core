@@ -7,11 +7,10 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="./conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
-//  <script src="./auth.js"></script>  <!-- browser authorization flow -->
-//  <script type="text/javascript">authCheck({ userRoot: "./user" });</script>
+//  <script src="./src/auth.js"></script>  <!-- browser authorization flow -->
+//  <script type="text/javascript">authCheck();</script>
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
@@ -42,7 +41,7 @@ window.onload = function() {
  * Initialize and launch start of authentication flow.
  * @param {object} args auth arguments
  */
-const authCheck = function(args) {
+const authCheck = function() {
     localStorage.setItem('request_uri', location.href); // save current in case of login redirect
     AUTH.signInPath = `${window.location.protocol}//${window.location.host}/user/login`;
     AUTH.signOutPath = `${window.location.protocol}//${window.location.host}/user/logout`;
