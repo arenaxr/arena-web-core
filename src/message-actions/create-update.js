@@ -1,11 +1,10 @@
 import {Logger} from './logger.js';
-import {Parser} from './parser.js';
 import {GLTFProgress} from '../gltf-progress/';
 
 // handle actions
 const ACTIONS = {
-    CREATE: 1,
-    UPDATE: 2
+    CREATE: 'create',
+    UPDATE: 'update'
 }
 
 // path to controler models
@@ -69,7 +68,7 @@ export class CreateUpdate {
                 if (!entityEl) {
                     // create object
                     entityEl = document.createElement('a-entity');
-                    
+                    entityEl.setAttribute('id', id);
                     // after setting object attributes, we will add it to the scene
                     addObj = true;
                 }
@@ -118,30 +117,14 @@ export class CreateUpdate {
         }
     }
 
-    /**
-     * Create handler; utility call to wrap handle()
-     * @param {object} message message to be parsed
-     */
-    static handleCreate(message) {
-        this.handle(ACTIONS.CREATE, message);
-    }
-
-    /**
-     * Update handler; utility call to wrap handle()
-     * @param {object} message message to be parsed
-     */
-    static handleUpdate(message) {
-        this.handle(ACTIONS.UPDATE, message);
-    }
-
     static updateObject(entityEl, message) {
 
         let data = message.data;
-        const type = data.object_type;
+        let type = data.object_type;
         delete data.object_type; // remove attribute so we don't set it later 
 
-        // handle some type special cases 
-        // TODO: make components that handle these 
+        // handle some geometries and type special cases 
+        // TODO: using components that handle these would allow to remove most of the special cases 
         switch (type) {
             case 'headtext':
                 // handle changes to other users head text
@@ -178,7 +161,13 @@ export class CreateUpdate {
 
                 delete data.url; // remove attribute so we don't set it later
                 break;
+            case 'thickline':
+                // rename thickline to meshline (the actual component that deals with thicklines)
+                data.meshline = data.thickline;
+                delete message.data.thickline;
+                break;                
             case 'image': 
+                // image is just a textured plane
                 entityEl.setAttribute('geometry', 'primitive', 'plane');
                 if (data.hasOwnProperty('url')) {
                     entityEl.setAttribute('material', 'src', data.url); // image src from url
@@ -189,30 +178,36 @@ export class CreateUpdate {
                 }
                 delete data.url;
                 break;
-            default:
-                // handle arbitrary A-Frame geometry primitive types
+            case 'cube':
+                type='box'; // arena legacy! new libraries/persist objects should use box!
+            case 'box':
+            case 'circle':
+            case 'cone':
+            case 'cylinder':
+            case 'dodecahedron':
+            case 'icosahedron':
+            case 'octahedron':
+            case 'plane':
+            case 'ring':
+            case 'sphere':
+            case 'tetrahedron':
+            case 'torus':
+            case 'torusKnot':
+            case 'triangle':
+                // handle A-Frame geometry types (custom geometries must be added above)
+                // Note: we could get a list of registered geometries with Object.keys(AFRAME.geometries)
+                // and support arbritrary geometries
                 if (type) entityEl.setAttribute('geometry', 'primitive', type);
                 break;
         } // switch(type)
 
-        
         for (const [attribute, value] of Object.entries(data)) {
-            console.log("id attr value:", message.id, attribute, value);
+            //console.info("Set attribute [id attr value]:", message.id, attribute, value);
             if (attribute === 'rotation') {
                 if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion 
                 else entityEl.object3D.rotation.set(value.x, value.y, value.z); // otherwise its a rotation given in radians
             } else if (attribute === 'position') {
                 entityEl.object3D.position.set(value.x, value.y, value.z);
-            /*} else if (attribute === 'color') {
-                if (!entityEl.hasOwnProperty('text')) {
-                    entityEl.setAttribute('material', 'color', value);
-                } else {
-                    entityEl.setAttribute('text', 'color', value);
-                }
-            } else if (attribute === 'text') {
-                if (entityEl.hasOwnProperty('text')) {
-                    entityEl.setAttribute('text', 'value', value);
-                }*/
             } else if (attribute === 'ttl') {
                 entityEl.setAttribute('ttl', {seconds: value});
             } else {
@@ -223,7 +218,6 @@ export class CreateUpdate {
                 }
             }
         }
-
     }
 
     /**

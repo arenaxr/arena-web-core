@@ -11,7 +11,7 @@ export class ClientEvent {
      * @param {object} message message to be parsed
      */
     static handle(message) {
-        const id = message.name;
+        const id = message.id;
         const data = message.data;
 
         const entityEl = document.getElementById(id);

@@ -139,22 +139,17 @@ export class ARENAMqtt {
         }
 
         if (!theMessage) {
-            console.error('Received empty message');
+            console.warn('Received empty message');
             return;
         }
 
         if (theMessage.object_id === undefined) {
-            console.error('Malformed message (no object_id):', JSON.stringify(message));
+            console.warn('Malformed message (no object_id):', JSON.stringify(message));
             return;
         }
 
-        if (theMessage.data === undefined) {
-            console.error('Malformed message (no data field):', JSON.stringify(message));
-            return undefined;
-        }
-
         if (theMessage.action === undefined) {
-            console.error('Malformed message (no action field):', JSON.stringify(message));
+            console.warn('Malformed message (no action field):', JSON.stringify(message));
             return;
         }
 
@@ -163,22 +158,27 @@ export class ARENAMqtt {
         delete theMessage.object_id;
 
         switch (theMessage.action) { // clientEvent, create, delete, update
-            case 'clientEvent': {
+            case 'clientEvent': 
+                if (theMessage.data === undefined) {
+                    console.warn('Malformed message (no data field):', JSON.stringify(message));
+                    return;
+                }
                 ClientEvent.handle(theMessage);
+                break;            
+            case 'create': 
+            case 'update': 
+                if (theMessage.data === undefined) {
+                    console.warn('Malformed message (no data field):', JSON.stringify(message));
+                    return;
+                }
+                CreateUpdate.handle(theMessage.action, theMessage);
                 break;
-            }
-            case 'delete': {
+            case 'delete': 
                 Delete.handle(theMessage);
                 break;
-            }
-            case 'create': {
-                CreateUpdate.handleCreate(theMessage);
+            default: 
+                console.warn('Malformed message (invalid action field):', JSON.stringify(message));
                 break;
-            }
-            case 'update': {
-                CreateUpdate.handleUpdate(theMessage);
-                break;
-            }
         }
     }
 
