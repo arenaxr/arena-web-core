@@ -27,16 +27,18 @@ AFRAME.registerComponent('arena-camera', {
 
         this.heartBeatCounter = 0;
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
+
+        this.create = false;
     },
 
-    publishPose() {
+    publishPose(action='update') {
         const data = this.data;
         if (!data.enabled) return;
 
         const msg = {
             object_id: ARENA.camName,
             displayName: data.displayName,
-            action: 'create',
+            action: action,
             type: 'object',
             data: {
                 object_type: 'camera',
@@ -68,14 +70,14 @@ AFRAME.registerComponent('arena-camera', {
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
-    publishVio() {
+    publishVio(action='update') {
         const data = this.data;
         if (!data.enabled) return;
 
         if (ARENA.fixedCamera !== '') {
             const msg = {
                 object_id: ARENA.camName,
-                action: 'create',
+                action: action,
                 type: 'object',
                 data: {
                     object_type: 'camera',
@@ -97,7 +99,7 @@ AFRAME.registerComponent('arena-camera', {
         }
     },
 
-    publishHeadText() {
+    publishHeadText(action='update') {
         const data = this.data;
 
         ARENA.Mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
@@ -111,6 +113,15 @@ AFRAME.registerComponent('arena-camera', {
 
     update(oldData) {
         const data = this.data;
+
+        if (!this.create) {
+            // send initial create msgs
+            this.publishHeadText('create');
+            this.publishPose('create');
+            this.publishVio('create');            
+            this.create = false;
+            return;
+        }
 
         if (data.displayName !== oldData.displayName) {
             this.publishHeadText();
@@ -141,10 +152,12 @@ AFRAME.registerComponent('arena-camera', {
         const positionCoords = ARENAUtils.coordsToText(data.position);
         const newPose = rotationCoords + ' ' + positionCoords;
 
-        // update position every 1 sec
-        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
-            this.publishPose();
-            this.publishVio();
+        // update position if pose changed, or every 1 sec heartbeat
+        let action = 'update';
+        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) action = 'create'; // heartbeats are create
+        if (this.lastPose !== newPose || action === 'create') {
+            this.publishPose(action);
+            this.publishVio(action);
             this.lastPose = newPose;
         }
     }),
