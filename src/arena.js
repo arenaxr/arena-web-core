@@ -12,7 +12,7 @@ import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
-
+//import {RuntimeManager} from './runtime-mngr'
 /**
  * Arena Object
  */
@@ -71,7 +71,7 @@ export class Arena {
      */
     setIdTag = (idTag=undefined) => {
         if (this.userName == undefined) throw "setIdTag: user name not defined."; // user name must be set
-        if (idTag == undefined) idTag = new Date().getTime() % 10000 + '_' + this.userName; // e.g. 1234_eric
+        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName; 
         this.idTag = idTag;
 
         // set camName
@@ -364,12 +364,13 @@ export class Arena {
      * Remaining init will be done once mqtt connection is done
      */
     onAuth = async (e) => {
+        const args = e.detail;
         this.clientCoords = ARENAUtils.getLocation();
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
-        this.username = e.detail.mqtt_username;
-        this.mqttToken = e.detail.mqtt_token;
+        this.username = args.mqtt_username;
+        this.mqttToken = args.mqtt_token;
 
         this.Mqtt.connect({
             onSuccess: function() {
