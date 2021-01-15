@@ -44,8 +44,8 @@ window.onload = function() {
  */
 const authCheck = function(args) {
     localStorage.setItem('request_uri', location.href); // save current in case of login redirect
-    AUTH.signInPath = `${args.userRoot}/login`;
-    AUTH.signOutPath = `${args.userRoot}/logout`;
+    AUTH.signInPath = `${window.location.protocol}//${window.location.host}/user/login`;
+    AUTH.signOutPath = `${window.location.protocol}//${window.location.host}/user/logout`;
     window.addEventListener('load', requestAuthState);
 };
 
@@ -227,7 +227,7 @@ function completeAuth(username, token) {
         return;
     }
     // emit custom event to window
-    const authCompleteEvent = new CustomEvent('onauth', {detail: onAuthEvt});
+    const authCompleteEvent = new CustomEvent('onauth', { detail: onAuthEvt });
     window.dispatchEvent(authCompleteEvent);
 }
 
@@ -279,7 +279,7 @@ function formatPerms(perms) {
 
 function showProfile() {
     // open profile in new page to avoid mqtt disconnect
-    location.href = window.open('/user/profile');
+    window.open(`${window.location.protocol}//${window.location.host}/user/profile`);
 }
 
 /**
