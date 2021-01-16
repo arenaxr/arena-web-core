@@ -46,7 +46,7 @@ export class CreateUpdate {
                 let entityEl = document.getElementById(id);
 
                 if (action === ACTIONS.CREATE) { 
-                    // delete object, if exists; ensures create clears all properties
+                    // delete object, if exists; ensures create clears all attributes
                     if (entityEl) {
                         const parentEl = entityEl.parentEl;
                         if (parentEl) {
@@ -74,7 +74,7 @@ export class CreateUpdate {
                 }
 
                 // handle attributes of object
-                this.updateObject(entityEl, message);
+                this.setObjectAttributes(entityEl, message);
 
                 // add object to the scene after setting all attributes
                 if (addObj) {
@@ -86,18 +86,17 @@ export class CreateUpdate {
                             entityEl.flushToDOM();
                             parentEl.appendChild(entityEl);
                         } else {
-                            Logger.warning('create', 'Orphaned:', `${name} cannot find parent: ${message.data.parent}!`);
+                            Logger.warning('create', 'Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
                         }
                     } else {
                         sceneEl.appendChild(entityEl);
-                    }
-                    
-                    // special case for vive controllers; add gltf model on creation
-                    if (message.data.object_type === 'viveLeft' || message.data.object_type === 'viveRight') {
-                        entityEl.setAttribute('gltf-model', viveControllerPath[message.data.object_type]);
-                    }
+                    }                    
                 }
 
+                if (message.ttl !== undefined) { // Allow falsy value of 0
+                    entityEl.setAttribute('ttl', {seconds: message.ttl});
+                }
+                                
                 return;
 
             case 'camera-override': 
@@ -117,21 +116,20 @@ export class CreateUpdate {
         }
     }
 
-    static updateObject(entityEl, message) {
+   /**
+     * Handles object attributes
+     * @param {object} entityEl the new aframe object
+     * @param {object} message message to be parsed
+     */
+    static setObjectAttributes(entityEl, message) {
 
         let data = message.data;
         let type = data.object_type;
         delete data.object_type; // remove attribute so we don't set it later 
 
-        // handle some geometries and type special cases 
-        // TODO: using components that handle these would allow to remove most of the special cases 
+        // handle geometries and some type special cases 
+        // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the special cases 
         switch (type) {
-            case 'headtext':
-                // handle changes to other users head text
-                if (message.hasOwnProperty('displayName')) {
-                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
-                }
-                break; 
             case 'camera':
                 if (data.hasOwnProperty('color')) {
                     entityEl.setAttribute('arena-user', 'color', data.color);
@@ -161,11 +159,12 @@ export class CreateUpdate {
 
                 delete data.url; // remove attribute so we don't set it later
                 break;
-            case 'thickline':
-                // rename thickline to meshline (the actual component that deals with thicklines)
-                data.meshline = data.thickline;
-                delete message.data.thickline;
-                break;                
+            case 'headtext':
+                // handle changes to other users head text
+                if (message.hasOwnProperty('displayName')) {
+                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
+                }
+                break; 
             case 'image': 
                 // image is just a textured plane
                 entityEl.setAttribute('geometry', 'primitive', 'plane');
@@ -177,6 +176,29 @@ export class CreateUpdate {
                     }
                 }
                 delete data.url;
+                delete data.image;
+                break;
+            case 'text': 
+                if (!data.hasOwnProperty('side')) {
+                    entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)
+                }
+                entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
+                // Support legacy `data: { text: 'STRING TEXT' }`
+                const theText = data.text;
+                if (typeof theText === 'string' || theText instanceof String) {
+                    entityEl.setAttribute('text', 'value', message.data.text);
+                    delete data.text;
+                }
+                break;
+            case 'thickline':
+                // rename thickline to meshline (the actual component that deals with thicklines)
+                data.meshline = data.thickline;
+                delete message.data.thickline;
+                break;
+            case 'viveLeft':
+            case 'viveRight':
+                //entityEl.setAttribute('gltf-model', viveControllerPath[type]);
+                //delete data[type];
                 break;
             case 'cube':
                 type='box'; // arena legacy! new libraries/persist objects should use box!
@@ -196,26 +218,47 @@ export class CreateUpdate {
             case 'triangle':
                 // handle A-Frame geometry types (custom geometries must be added above)
                 // Note: we could get a list of registered geometries with Object.keys(AFRAME.geometries)
-                // and support arbritrary geometries
+                // and support arbritrary geometries (but this switch avoids the performance penalty of doing so)
                 if (type) entityEl.setAttribute('geometry', 'primitive', type);
                 break;
         } // switch(type)
 
         for (const [attribute, value] of Object.entries(data)) {
-            //console.info("Set attribute [id attr value]:", message.id, attribute, value);
-            if (attribute === 'rotation') {
-                if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion 
-                else entityEl.object3D.rotation.set(value.x, value.y, value.z); // otherwise its a rotation given in radians
-            } else if (attribute === 'position') {
-                entityEl.object3D.position.set(value.x, value.y, value.z);
-            } else if (attribute === 'ttl') {
-                entityEl.setAttribute('ttl', {seconds: value});
-            } else {
-                if (value === null) {
-                    entityEl.removeAttribute(attribute);
-                } else {
-                    entityEl.setAttribute(attribute, value);
-                }
+            console.info("Set attribute [id attr value]:", message.id, attribute, value);
+
+            // handle some special cases for attributes; default is to let aframe handle them directly
+            // e.g. some attributes are set directly to the THREE.js object for performance reasons
+            switch (attribute) {
+                case 'rotation':
+                    // rotation is set directly in the THREE.js object, for performance reasons
+                    if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion 
+                    else entityEl.object3D.rotation.set(value.x, value.y, value.z); // otherwise its a rotation given in radians
+                    break;
+                case 'position':
+                    // position is set directly in the THREE.js object, for performance reasons
+                    entityEl.object3D.position.set(value.x, value.y, value.z);
+                    break;
+                case 'scale':
+                    // scale is set directly in the THREE.js object, for performance reasons
+                    entityEl.object3D.scale.set(value.x, value.y, value.z);
+                    break;
+                case 'color':
+                    // color is applied to the material, except if it is text
+                    if (!entityEl.hasOwnProperty('text')) {
+                        entityEl.setAttribute('material', 'color', value);
+                    } else {
+                        entityEl.setAttribute('text', 'color', value);
+                    }
+                case 'ttl':  
+                    // ttl is applied to property 'seconds' of ttl component
+                    entityEl.setAttribute('ttl', {seconds: value});
+                default:
+                    // all other attributes are pushed directly to aframe
+                    if (value === null) { // if null, remove attribute
+                        entityEl.removeAttribute(attribute);
+                    } else {
+                        entityEl.setAttribute(attribute, value);
+                    }
             }
         }
     }

@@ -28,7 +28,10 @@ AFRAME.registerComponent('arena-camera', {
         this.heartBeatCounter = 0;
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
 
-        this.create = false;
+        // send initial create
+        this.publishHeadText('create');
+        this.publishPose('create');
+        this.publishVio('create');
     },
 
     publishPose(action='update') {
@@ -114,15 +117,6 @@ AFRAME.registerComponent('arena-camera', {
     update(oldData) {
         const data = this.data;
 
-        if (!this.create) {
-            // send initial create msgs
-            this.publishHeadText('create');
-            this.publishPose('create');
-            this.publishVio('create');            
-            this.create = false;
-            return;
-        }
-
         if (data.displayName !== oldData.displayName) {
             this.publishHeadText();
         }
@@ -153,12 +147,14 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position if pose changed, or every 1 sec heartbeat
-        let action = 'update';
-        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) action = 'create'; // heartbeats are create
-        if (this.lastPose !== newPose || action === 'create') {
-            this.publishPose(action);
-            this.publishVio(action);
-            this.lastPose = newPose;
+        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
+            // heartbeats are sent as create; TMP: sending as updates
+            this.publishPose(); 
+            this.publishVio();
+        } else if (this.lastPose !== newPose) {
+            this.publishPose();
+            this.publishVio();
         }
+        this.lastPose = newPose;
     }),
 });

@@ -17,6 +17,7 @@ export class Delete {
         const entityEl = document.getElementById(id);
         if (!entityEl) {
             Logger.error('delete', `Object with object_id "${id}" does not exist!`);
+            return;
         }
 
         const parentEl = entityEl.parentEl;

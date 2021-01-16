@@ -33,7 +33,7 @@
   "scripts": {
     "watch": "parcel watch src/index.js -o arena-core.js",
     "build": "parcel build src/index.js -o arena-core.js --public-url ./dist",
-    "build-prod": "parcel build src/index.js -o arena-core.js --public-url ./dist --no-source-maps"
+    "build-main": "parcel build src/index.js -o arena-core.js --public-url /dist"
   },
   "repository": {
     "type": "git",
