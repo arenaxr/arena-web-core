@@ -32,6 +32,8 @@ import './video-control.js';
 import 'aframe-meshline-component'; // thick lines - seems to have bugs
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
+import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
+
 //import 'aframe-particle-system-component';
 //import 'aframe-spe-particles-component';
 
