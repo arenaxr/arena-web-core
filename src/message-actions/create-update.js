@@ -281,7 +281,6 @@ export class CreateUpdate {
     static setComponentAttributes(entityEl, data, cName) {
         if (!AFRAME.components[cName]) return; // no component registered with this name
         for (const [attribute, value] of Object.entries(data)) {                    
-            //if (AFRAME.components[cName].Component.prototype.schema.find((attr) => attr === attribute)) {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {    
                 entityEl.setAttribute(cName, attribute, value);
                 delete data[attribute]; // we handled this attribute; remove it
