@@ -305,6 +305,17 @@ export class SideMenu {
         label.style.fontSize = 'medium';
         formDiv.appendChild(label);
 
+        const stats = document.createElement('a');
+        stats.href = '#';
+        stats.innerHTML = 'Toggle Stats</br></br>';
+        stats.onclick = function() {
+            //showPerms();
+            let sceneEl = document.querySelector('a-scene');
+            let statsEl = sceneEl.getAttribute('stats');
+            sceneEl.setAttribute('stats', !statsEl);
+        };
+        formDiv.appendChild(stats);
+
         const perms = document.createElement('a');
         perms.href = '#';
         perms.innerHTML = 'MQTT Permissions';
