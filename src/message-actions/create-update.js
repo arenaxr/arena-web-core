@@ -152,6 +152,7 @@ export class CreateUpdate {
             case 'gltf-model':
                 // gltf-model from data.url
                 if (data.hasOwnProperty('url')) {
+                    console.log('gltf-model', data.url);
                     entityEl.setAttribute('gltf-model', data.url);
                 }
                 // add load event listners
@@ -190,7 +191,9 @@ export class CreateUpdate {
                 if (typeof theText === 'string' || theText instanceof String) {
                     entityEl.setAttribute('text', 'value', data.text);
                     delete data.text;
-                }                
+                }
+                if (!data.hasOwnProperty('side')) entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)	
+                if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5                            
                 break;
             case 'thickline':
                 // the component that deals with thicklines is meshline
@@ -224,7 +227,6 @@ export class CreateUpdate {
                 }
                 break;
             default: 
-                //console.log(AFRAME.geometries);
                 // check if the type is a registered geometry (that we do not catch in the cases above)
                 if (AFRAME.geometries[type]) {
                     entityEl.setAttribute('geometry', 'primitive', type);
@@ -237,9 +239,9 @@ export class CreateUpdate {
             this.setComponentAttributes(entityEl, data, type);
         }
 
-        // what remains in data are attributes for components
+        // what remains in data are components
         for (const [attribute, value] of Object.entries(data)) {
-            //console.info("Set attribute [id type -  attr value]:", message.id, type, attribute, value);
+            //console.info("Set entity attribute [id type -  attr value]:", message.id, type, attribute, value);
 
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object); 
             // default is to let aframe handle attributes directly
@@ -282,6 +284,7 @@ export class CreateUpdate {
         if (!AFRAME.components[cName]) return; // no component registered with this name
         for (const [attribute, value] of Object.entries(data)) {                    
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {    
+                //console.info("Set component attribute [id type -  attr value]:", entityEl.getAttribute('id'), cName, attribute, value);
                 entityEl.setAttribute(cName, attribute, value);
                 delete data[attribute]; // we handled this attribute; remove it
             }
