@@ -96,7 +96,7 @@ export class CreateUpdate {
                 if (message.ttl !== undefined) { // Allow falsy value of 0
                     entityEl.setAttribute('ttl', {seconds: message.ttl});
                 }
-                                
+
                 return;
 
             case 'camera-override': 
@@ -127,8 +127,13 @@ export class CreateUpdate {
         let type = data.object_type;
         delete data.object_type; // remove attribute so we don't set it later 
 
+        if (!type) {
+            Logger.warning('Update/Create:', 'Malformed message; type is undefined; attributes might not be set correctly.');
+        }
+
         // handle geometries and some type special cases 
         // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the special cases 
+        let isGeometry = false;
         switch (type) {
             case 'camera':
                 if (data.hasOwnProperty('color')) {
@@ -167,6 +172,7 @@ export class CreateUpdate {
                 break; 
             case 'image': 
                 // image is just a textured plane
+                // TODO: create an aframe component for this
                 entityEl.setAttribute('geometry', 'primitive', 'plane');
                 if (data.hasOwnProperty('url')) {
                     entityEl.setAttribute('material', 'src', data.url); // image src from url
@@ -179,22 +185,17 @@ export class CreateUpdate {
                 delete data.image;
                 break;
             case 'text': 
-                if (!data.hasOwnProperty('side')) {
-                    entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)
-                }
-                entityEl.setAttribute('text', 'width', 5); // the default for <a-text>
                 // Support legacy `data: { text: 'STRING TEXT' }`
                 const theText = data.text;
                 if (typeof theText === 'string' || theText instanceof String) {
-                    entityEl.setAttribute('text', 'value', message.data.text);
+                    entityEl.setAttribute('text', 'value', data.text);
                     delete data.text;
-                }
+                }                
                 break;
             case 'thickline':
-                // rename thickline to meshline (the actual component that deals with thicklines)
-                data.meshline = data.thickline;
-                delete message.data.thickline;
-                break;
+                // the component that deals with thicklines is meshline
+                type='meshline';
+                break; 
             case 'viveLeft':
             case 'viveRight':
                 //entityEl.setAttribute('gltf-model', viveControllerPath[type]);
@@ -216,18 +217,32 @@ export class CreateUpdate {
             case 'torus':
             case 'torusKnot':
             case 'triangle':
-                // handle A-Frame geometry types (custom geometries must be added above)
-                // Note: we could get a list of registered geometries with Object.keys(AFRAME.geometries)
-                // and support arbritrary geometries (but this switch avoids the performance penalty of doing so)
-                if (type) entityEl.setAttribute('geometry', 'primitive', type);
+                // handle A-Frame geometry types here for performance (custom geometries are handled in the default case)
+                if (type) {
+                    entityEl.setAttribute('geometry', 'primitive', type);
+                    isGeometry = true;
+                }
                 break;
+            default: 
+                //console.log(AFRAME.geometries);
+                // check if the type is a registered geometry (that we do not catch in the cases above)
+                if (AFRAME.geometries[type]) {
+                    entityEl.setAttribute('geometry', 'primitive', type);
+                    isGeometry = true;
+                }
         } // switch(type)
+        
+        if (!isGeometry && type) {
+            // check if we have a registered component (type = component name) that takes the attributes received
+            this.setComponentAttributes(entityEl, data, type);
+        }
 
+        // what remains in data are attributes for components
         for (const [attribute, value] of Object.entries(data)) {
-            console.info("Set attribute [id attr value]:", message.id, attribute, value);
+            //console.info("Set attribute [id type -  attr value]:", message.id, type, attribute, value);
 
-            // handle some special cases for attributes; default is to let aframe handle them directly
-            // e.g. some attributes are set directly to the THREE.js object for performance reasons
+            // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object); 
+            // default is to let aframe handle attributes directly
             switch (attribute) {
                 case 'rotation':
                     // rotation is set directly in the THREE.js object, for performance reasons
@@ -241,14 +256,7 @@ export class CreateUpdate {
                 case 'scale':
                     // scale is set directly in the THREE.js object, for performance reasons
                     entityEl.object3D.scale.set(value.x, value.y, value.z);
-                    break;
-                case 'color':
-                    // color is applied to the material, except if it is text
-                    if (!entityEl.hasOwnProperty('text')) {
-                        entityEl.setAttribute('material', 'color', value);
-                    } else {
-                        entityEl.setAttribute('text', 'color', value);
-                    }
+                    break;               
                 case 'ttl':  
                     // ttl is applied to property 'seconds' of ttl component
                     entityEl.setAttribute('ttl', {seconds: value});
@@ -259,6 +267,24 @@ export class CreateUpdate {
                     } else {
                         entityEl.setAttribute(attribute, value);
                     }
+            } // switch attribute
+        }
+    }
+
+   /**
+     * Handles component attributes
+     * Check if we have a registered component that takes the attributes given in data
+     * @param {object} entityEl the new aframe object
+     * @param {object} data data part of the message with the attributes
+     * @param {string} cName component name
+     */
+    static setComponentAttributes(entityEl, data, cName) {
+        if (!AFRAME.components[cName]) return; // no component registered with this name
+        for (const [attribute, value] of Object.entries(data)) {                    
+            //if (AFRAME.components[cName].Component.prototype.schema.find((attr) => attr === attribute)) {
+            if (AFRAME.components[cName].Component.prototype.schema[attribute]) {    
+                entityEl.setAttribute(cName, attribute, value);
+                delete data[attribute]; // we handled this attribute; remove it
             }
         }
     }

@@ -156,7 +156,7 @@ export class ARENAMqtt {
         // rename object_id to match internal handlers (and aframe)
         theMessage.id = theMessage.object_id;
         delete theMessage.object_id;
-
+        
         switch (theMessage.action) { // clientEvent, create, delete, update
             case 'clientEvent': 
                 if (theMessage.data === undefined) {
