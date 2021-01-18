@@ -81,7 +81,8 @@ export class CreateUpdate {
                     // Parent/Child handling
                     const sceneEl = document.querySelector('a-scene');
                     if (message.data.parent) {
-                        const parentEl = document.getElementById(message.data.parent);
+                        let parentName = (ARENA.camName == message.data.parent) ? 'my-camera' : message.data.parent; // our camera is named 'my-camera'
+                        const parentEl = document.getElementById(parentName);
                         if (parentEl) {
                             entityEl.flushToDOM();
                             parentEl.appendChild(entityEl);
@@ -111,8 +112,13 @@ export class CreateUpdate {
                 }
                 return;
 
+            case 'scene-options':
+            case 'face-features':
+                // these message types are not for us; silently ignore these
+                return;
+
             default: 
-                Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Ignored:', JSON.stringify(message));
+                Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknow type:', JSON.stringify(message));
         }
     }
 
