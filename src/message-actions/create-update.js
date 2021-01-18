@@ -100,7 +100,7 @@ export class CreateUpdate {
                 return;
 
             case 'camera-override': 
-                handleCameraOverride(message);
+                this.handleCameraOverride(message);
                 return;
 
             case 'rig':                
@@ -193,7 +193,8 @@ export class CreateUpdate {
                     delete data.text;
                 }
                 if (!data.hasOwnProperty('side')) entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)	
-                if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5                            
+                if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)                    
+                if (!data.hasOwnProperty('align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
                 break;
             case 'thickline':
                 // the component that deals with thicklines is meshline
