@@ -12,12 +12,12 @@ export class Parser {
      */
     static parse(source, message) {
         if (!message) {
-            Logger.warn(source, 'Recieved empty message');
+            Logger.warn(source, 'Received empty message');
             return undefined;
         }
 
-        const name = message.object_id;
-        if (name === undefined) {
+        const object_id = message.object_id;
+        if (object_id === undefined) {
             Logger.error(source, 'Malformed message (no object_id):', JSON.stringify(message));
             return undefined;
         }
@@ -29,7 +29,7 @@ export class Parser {
         }
 
         return {
-            name: name,
+            object_id: object_id,
             data: data,
         };
     }

@@ -319,15 +319,17 @@ export class ARENAChat {
                 });
         };
 
+        // check if we jumped to a different scene from a "teleport"
         const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
-        //console.log(moveToCamera);
         if (moveToCamera !== null) {
             localStorage.removeItem('moveToFrontOfCamera');
             this.moveToFrontOfCamera(moveToCamera, this.settings.scene);
         }
 
-        window.addEventListener('newsettings', (e) => {
-            _this.settings.username = e.detail.name;
+        ARENA.events.on(ARENAEventEmitter.events.NEW_SETTINGS, (e) => {
+            const args = e.detail;   
+            if (!args.userName) return // only handle a user name change
+            _this.settings.username = args.userName;
             _this.keepalive(); // let other users know
             _this.populateUserList();
         });

@@ -7,8 +7,7 @@
  */
 
 import {ClientEvent} from './client-event.js';
-import {Create} from'./create.js';
-import {Update} from'./update.js';
+import {CreateUpdate} from'./create-update.js';
 import {Delete} from'./delete.js';
 
-export {ClientEvent, Create, Update, Delete};
+export {ClientEvent, CreateUpdate, Delete};
