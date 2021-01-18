@@ -115,7 +115,7 @@ function getCookie(name) {
  */
 function requestAuthState() {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/user/user_state`);
+    xhr.open('GET', `/user/user_state`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
