@@ -35,7 +35,7 @@
     <div class="container-xxl">
         <div class="row pt-5 d-flex justify-content-between align-items-center">
             <div class="col-lg-4">
-                <img alt="Conix Logo" class="top-logo" src="../images/xr-logo-white-v7.png"/>
+                <img alt="CONIX Logo" class="top-logo" src="../images/xr-logo-white-v7.png"/>
             </div>
             <div class="col-lg-4 text-end">
                 <Button class="btn btn-white" id="loginPageBtn">Login</Button>
@@ -92,15 +92,15 @@
             <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white">
                 <div class="row mb-3">
                     <div class="col">
-                        <button id="redetectAVBtn" class="float-end btn btn-sm btn-outline-primary">
+                        <button class="float-end btn btn-sm btn-outline-primary" id="redetectAVBtn">
                             Re-detect Devices <i class="fas fa-sync"></i>
                         </button>
-                        <h3><img alt="Conix Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Setup</h3>
+                        <h3><img alt="CONIX Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Setup</h3>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-7">
-                        <video autoplay muted playsinline id="vidPreview" class="w-100 h-auto"></video>
+                        <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
                     </div>
                     <div class="col-5">
                         <div class="form-floating mb-3">
@@ -152,7 +152,7 @@
                                     type="text"
                                     value="https://arena.andrew.cmu.edu/foo/bar"
                             />
-                            <button class="btn btn-primary">Enter</button>
+                            <button class="btn btn-primary" id="enterSceneAVBtn">Enter</button>
                         </div>
                     </div>
                 </div>
@@ -170,14 +170,102 @@
 <div class="d-none d-flex align-items-center min-vh-100" id="sceneChoice">
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center">
-            <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white">
+            <div class="col-lg-6 p-5 col-md-8 shadow rounded bg-white">
                 <div class="row mb-3">
                     <div class="col">
-                        <h3><img alt="Conix Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Welcome</h3>
+                        <h3><img alt="CONIX Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Welcome $user</h3>
                     </div>
                 </div>
+                <hr/>
                 <div class="row mb-3">
+                    <div class="col">
+                        <div class="row mb-4">
+                            <div class="col text-center">
+                                <button class="btn btn-outline-primary" id="createSceneBtn">Create Scene</button>
+                            </div>
+                        </div>
+                        <div class="row mb-3 row-cols-lg-auto g-3 align-items-center">
+                            <div class="col-12">
+                                <select aria-label="Scene Select" class="form-select me-3" id="userSceneSelect">
+                                    <option value="1">Scene 1</option>
+                                    <option value="2">Scene 2</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-outline-primary">Enter Scene</button>
+                            </div>
+                            <div class="col-12">
+                                <button class="btn btn-outline-primary">Delete Scene</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Scene URL</span>
+                                    <input
+                                            aria-label="Scene URL"
+                                            class="form-control"
+                                            id="sceneUrl2"
+                                            readonly
+                                            type="text"
+                                            value="https://arena.andrew.cmu.edu/foo/bar"
+                                    />
+                                    <button class="btn btn-primary">Copy Link</button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <h4 class="mb-3">Discover</h4>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" placeholder="Scene Name" aria-label="Scene Name">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="input-group mb-3">
+                                    <select aria-label="Public Scene Select" class="form-select" id="publicSceneSelect">
+                                        <option value="1">Public Scene 1</option>
+                                        <option value="2">Public Scene 2</option>
+                                    </select>
+                                    <button class="btn btn-primary" type="button">Enter Scene</button>
+                                </div>
+                            </div>
+                        </div>
+                        <hr/>
+                        <h4>Advanced</h4>
+                        <div class="row">
+                            <div class="row mb-3 row-cols-lg-auto g-3 align-items-center">
+                                <div class="col-12">
+                                    <button class="btn btn-outline-primary">Builder </button>
+                                </div>
+                                <div class="col-12">
+                                    <button class="btn btn-outline-primary">Filestore</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="d-none d-flex align-items-center min-vh-100" id="createScene">
+    <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+            <div class="col-lg-6 p-5 col-md-8 shadow rounded bg-white">
+                <div class="row mb-3">
+                    <div class="col">
+                        <h3><img alt="CONIX Logo" class="title-logo" src="../images/xr-logo-v7.png"/> Create a New Scene</h3>
+                    </div>
+                </div>
+                <hr/>
+                <div class="row mb-3">
+                    <div class="col">
+                        Buttons go here
+                    </div>
                 </div>
             </div>
         </div>
@@ -191,12 +279,14 @@
             const showClass = flex ? 'd-flex' : 'd-block';
             el.classList.add(showClass);
             el.classList.remove('d-none');
-        };
+        }
+
         function hideEl(el, flex = false) {
             const showClass = flex ? 'd-flex' : 'd-block';
             el.classList.add('d-none');
             el.classList.remove(showClass);
-        };
+        }
+
         function changePage(page, callback) {
             switch (page) {
                 case 'login':
@@ -211,13 +301,18 @@
                     hideEl(document.getElementById('av'));
                     showEl(document.getElementById('sceneChoice'), true);
                     break;
+                case 'createScene':
+                    hideEl(document.getElementById('sceneChoice'));
+                    showEl(document.getElementById('createScene'), true);
+                    break;
                 default:
                 //
             }
             if (callback) {
                 callback();
             }
-        };
+        }
+
         document.getElementById('loginPageBtn').addEventListener('click', () => changePage('login'));
         const userInput = document.getElementById('username-input');
         const anonBtn = document.getElementById('anonBtn');
@@ -243,9 +338,9 @@
             changePage('av', detectDevices);
         });
         // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
-        const videoElement = document.getElementById("vidPreview");
-        const audioInSelect = document.getElementById("audioSourceSelect");
-        const videoSelect = document.getElementById("vidSourceSelect");
+        const videoElement = document.getElementById('vidPreview');
+        const audioInSelect = document.getElementById('audioSourceSelect');
+        const videoSelect = document.getElementById('vidSourceSelect');
 
         audioInSelect.onchange = getStream;
         videoSelect.onchange = getStream;
@@ -271,7 +366,7 @@
                     videoSelect.appendChild(option);
                 }
             }
-            const noElementOption = document.createElement("option");
+            const noElementOption = document.createElement('option');
             noElementOption.setAttribute('selected', true);
             noElementOption.text = 'No Device Detected';
             if (!audioInSelect.childElementCount) {
@@ -294,7 +389,7 @@
             const videoSource = videoSelect.value;
             const constraints = {
                 audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-                video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+                video: {deviceId: videoSource ? {exact: videoSource} : undefined},
             };
             return navigator.mediaDevices.getUserMedia(constraints).
                 then(gotStream).catch(handleMediaError);
@@ -333,12 +428,11 @@
         }
 
         const detectDevices = () => {
-            getStream()
-            .then(getDevices)
-            .then(gotDevices)
-            .catch(handleMediaError);
-        }
+            getStream().then(getDevices).then(gotDevices).catch(handleMediaError);
+        };
         document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
+        document.getElementById('enterSceneAVBtn').addEventListener('click', () => changePage('sceneChoice'));
+        document.getElementById('createSceneBtn').addEventListener('click', () => changePage('createScene'));
     });
 </script>
 <script>
