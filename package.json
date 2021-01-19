@@ -19,7 +19,7 @@
     "aframe-particle-system-component": "^1.1.3",
     "aframe-spe-particles-component": "^1.0.4",
     "chat": "^1.0.8",
-    "core-js": "^3.8.2",
+    "core-js": "^3.8.3",
     "jquery": "^3.5.1",
     "linkifyjs": "^2.1.9",
     "paho-mqtt": "^1.1.0",
@@ -27,7 +27,7 @@
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
-    "eslint": "^7.17.0",
+    "eslint": "^7.18.0",
     "eslint-config-google": "^0.14.0",
     "parcel-bundler": "^1.12.4"
   },

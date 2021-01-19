@@ -326,6 +326,7 @@ export class SideMenu {
         formDiv.appendChild(document.createElement('br'));
 
         const perms = document.createElement('a');
+        perms.href = '#';
         perms.innerHTML = 'MQTT Permissions';
         perms.onclick = function() {
             showPerms();
