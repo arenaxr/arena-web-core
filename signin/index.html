@@ -31,7 +31,7 @@
 </head>
 
 <body>
-<div class="min-vh-100" id="landing">
+<div class="d-none min-vh-100 routePage" id="landing">
     <div class="container-xxl">
         <div class="row pt-5 d-flex justify-content-between align-items-center">
             <div class="col-lg-4">
@@ -44,14 +44,14 @@
         <div class="row my-5">
             <div class="col px-0 bg-black">
                 <div class="ratio ratio-16x9">
-                     <iframe src="https://www.youtube-nocookie.com/embed/nZM-uiAPkqc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                     <iframe src="https://www.youtube-nocookie.com/embed/nZM-uiAPkqc?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="d-none d-flex align-items-center min-vh-100" id="login">
+<div class="d-none d-flex align-items-center min-vh-100 routePage" id="signIn">
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col-lg-4 col-md-6 shadow rounded bg-white p-5">
@@ -72,13 +72,13 @@
                             </select>
                             <label for="provider">Authentication Provider</label>
                         </div>
-                        <div class="form-outline mb-3" id="username-input">
-                            <input class="form-control" id="username" type="text">
-                            <label class="form-label" for="username">User Name</label>
+                        <div class="form-outline mb-3" id="usernameContainer">
+                            <input class="form-control" id="usernameInput" type="text">
+                            <label class="form-label" for="usernameInput">User Name</label>
                         </div>
                         <button class="btn btn-white" id="anonBtn" type="submit">Sign In</button>
                         <div class="d-none" id="googleBtn">
-                            <button class="btn btn-white" type="submit">Google Sign In</button>
+                            <button class="btn btn-white">Google Sign In</button>
                         </div>
                     </form>
                 </div>
@@ -87,7 +87,7 @@
     </div>
 </div>
 
-<div class="d-none d-flex align-items-center min-vh-100" id="av">
+<div class="d-none d-flex align-items-center min-vh-100 routePage" id="setup">
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white">
@@ -168,7 +168,7 @@
 </div>
 
 
-<div class="d-none d-flex align-items-center min-vh-100" id="sceneChoice">
+<div class="d-none d-flex align-items-center min-vh-100 routePage" id="sceneSelect">
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col-lg-6 p-5 col-md-8 shadow rounded bg-white">
@@ -253,7 +253,7 @@
     </div>
 </div>
 
-<div class="d-none d-flex align-items-center min-vh-100" id="createScene">
+<div class="d-none d-flex align-items-center min-vh-100 routePage" id="createScene">
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col-lg-6 p-5 col-md-8 shadow rounded bg-white">
@@ -275,69 +275,66 @@
 
 <script src="../vendor/mdb/mdb.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function() {   // document.ready() equiv
+
+        // Rudimentary routing based on location hash
+        window.addEventListener('hashchange', function() {
+            const validRoutes = [
+                '#landing',
+                '#signIn',
+                '#setup',
+                '#sceneSelect',
+                '#createScene'
+            ]
+            const routePage = validRoutes.includes(window.location.hash) ? window.location.hash : '#landing';
+            const pageEl = document.querySelector(routePage);
+            hideEls(document.querySelectorAll(`.routePage:not(${routePage})`))
+            showEl(pageEl, true);
+            pageEl.dispatchEvent(new Event('routePageLoaded'));
+        }, false);
+
         function showEl(el, flex = false) {
             const showClass = flex ? 'd-flex' : 'd-block';
             el.classList.add(showClass);
             el.classList.remove('d-none');
         }
 
-        function hideEl(el, flex = false) {
+        function hideEls(els, flex = false) {
             const showClass = flex ? 'd-flex' : 'd-block';
-            el.classList.add('d-none');
-            el.classList.remove(showClass);
-        }
-
-        function changePage(page, callback) {
-            switch (page) {
-                case 'login':
-                    hideEl(document.getElementById('landing'));
-                    showEl(document.getElementById('login'), true);
-                    break;
-                case 'av':
-                    hideEl(document.getElementById('login'));
-                    showEl(document.getElementById('av'), true);
-                    break;
-                case 'sceneChoice':
-                    hideEl(document.getElementById('av'));
-                    showEl(document.getElementById('sceneChoice'), true);
-                    break;
-                case 'createScene':
-                    hideEl(document.getElementById('sceneChoice'));
-                    showEl(document.getElementById('createScene'), true);
-                    break;
-                default:
-                //
-            }
-            if (callback) {
-                callback();
+            for (let el of els) {
+                el.classList.add('d-none');
+                el.classList.remove(showClass);
             }
         }
 
-        document.getElementById('loginPageBtn').addEventListener('click', () => changePage('login'));
-        const userInput = document.getElementById('username-input');
+        function changePage(page = 'landing') {
+            if (window.location.hash !== page) {
+                window.location.hash = page;
+            }
+        }
+
+        document.getElementById('loginPageBtn').addEventListener('click', () => changePage('signIn'));
+        const usernameContainer = document.getElementById('usernameContainer');
         const anonBtn = document.getElementById('anonBtn');
         const googleBtn = document.getElementById('googleBtn');
         document.getElementById('loginForm').addEventListener('change', ({target}) => {
             switch (target.value) {
                 case 'google':
-                    hideEl(userInput);
-                    hideEl(anonBtn);
+                    hideEls([usernameContainer, anonBtn]);
                     showEl(googleBtn);
                     break;
                 case 'anon':
-                    showEl(userInput);
-                    hideEl(googleBtn);
+                    showEl(usernameContainer);
+                    hideEls([googleBtn]);
                     showEl(anonBtn);
                     break;
                 default:
                 //
             }
         });
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            changePage('av', detectDevices);
-        });
+
         // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
         const videoElement = document.getElementById('vidPreview');
         const audioInSelect = document.getElementById('audioSourceSelect');
@@ -432,132 +429,128 @@
             getStream().then(getDevices).then(gotDevices).catch(handleMediaError);
         };
         document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
-        document.getElementById('enterSceneAVBtn').addEventListener('click', () => changePage('sceneChoice'));
+        document.getElementById('setup').addEventListener('routePageLoaded', detectDevices);
+        document.getElementById('enterSceneAVBtn').addEventListener('click', () => changePage('sceneSelect'));
         document.getElementById('createSceneBtn').addEventListener('click', () => changePage('createScene'));
-    });
-</script>
-<script>
-    'use strict';
 
-    // TODO(mwfarb): App Store iOS build of WebXRViewer, G-Auth rejects the UA with 403
+        changePage();
 
-    // browser detection is not fun...
-    var is_safari = navigator.userAgent.indexOf('Safari') > -1;
-    var is_chrome = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('ChiOS') > -1;
-    var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
-    var is_webxrviewer = navigator.userAgent.indexOf('WebXRViewer') > -1;
-    var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
-    var is_edge = navigator.userAgent.indexOf('Edg') > -1;
-    var is_opera = navigator.userAgent.toLowerCase().indexOf('op') > -1;
-    if ((is_edge) && (is_safari)) {
-        is_safari = false;
-    }
-    if ((is_firefox) && (is_safari)) {
-        is_safari = false;
-    }
-    if ((is_chrome) && (is_safari)) {
-        is_safari = false;
-    }
-    if ((is_chrome) && (is_opera)) {
-        is_chrome = false;
-    }
+        /******************************************************************************************************/
 
-    var urlParts = location.href.split('/');
-    var rootPath = urlParts[0] + '//' + urlParts[2];
 
-    const popupConfig = {
-        client_id: defaults.gAuthClientId,
-    };
-    const redirectConfig = {
-        client_id: defaults.gAuthClientId,
-        ux_mode: 'redirect',
-        redirect_uri: rootPath + '/signin/google/',
-    };
-    const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
-    var auth2;
-    var googleUser = {};
-    var initGoogleAuth = function() {
-        gapi.load('auth2', function() {
-            auth2 = gapi.auth2.init(gapiInitConfig).then(function() {
-                auth2 = gapi.auth2.getAuthInstance();
-                attachGoogleSignin(document.getElementById('customBtnGoogle'));
-                if (auth2.isSignedIn.get()) {
-                    console.log('User is already signed in.');
-                    var googleUser = auth2.currentUser.get();
-                    onGoogleSignIn(googleUser);
-                }
-            }, function(error) {
-                // Private browsing may get here, we handle the error, and
-                // provide anonymous sign in as an alternative.
-                console.error(error);
-                // TODO(mwfarb): gray out google button
-                // var nodes = document.getElementById("customBtnGoogle").getElementsByTagName('*');
-                // for (var i = 0; i < nodes.length; i++) {
-                //     nodes[i].disabled = true;
-                // }
-            });
-        });
-    };
+        // TODO(mwfarb): App Store iOS build of WebXRViewer, G-Auth rejects the UA with 403
 
-    function attachGoogleSignin(element) {
-        auth2.attachClickHandler(element, {}, onGoogleSignIn, function(error) {
-            alert(JSON.stringify(error, undefined, 2));
-        });
-    }
-
-    function onGoogleSignIn(googleUser) {
-        var profile = googleUser.getBasicProfile();
-        console.log('Signed In: ' + profile.getEmail());
-        localStorage.setItem('auth_choice', 'google');
-        returnToRequestedPage();
-    }
-
-    function returnToRequestedPage() {
-        if (localStorage.getItem('request_uri')) {
-            //redirect user to originally requested page
-            location.href = localStorage.getItem('request_uri');
-        } else {
-            location.href = '..'; // back to main ARENA
+        // browser detection is not fun...
+        var is_safari = navigator.userAgent.indexOf('Safari') > -1;
+        var is_chrome = navigator.userAgent.indexOf('Chrome') > -1 || navigator.userAgent.indexOf('ChiOS') > -1;
+        var is_firefox = navigator.userAgent.indexOf('Firefox') > -1 || navigator.userAgent.indexOf('FxiOS') > -1;
+        var is_webxrviewer = navigator.userAgent.indexOf('WebXRViewer') > -1;
+        var is_explorer = navigator.userAgent.indexOf('MSIE') > -1;
+        var is_edge = navigator.userAgent.indexOf('Edg') > -1;
+        var is_opera = navigator.userAgent.toLowerCase().indexOf('op') > -1;
+        if ((is_edge) && (is_safari)) {
+            is_safari = false;
         }
-    }
-
-    const nameRegex = '^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$';
-    var initAnonAuth = function() {
-        var re = new RegExp(nameRegex);
-        var anonBtn = document.getElementById('customBtnAnon');
-        if (typeof anonBtn != 'undefined') {
-            anonBtn.addEventListener('click', function(event) {
-                // check for saved name, use it
-                var savedName = localStorage.getItem('display_name');
-                if (savedName !== null && re.test(savedName)) {
-                    localStorage.setItem('auth_choice', 'anonymous');
-                    returnToRequestedPage();
-                } else { // if no passable name, ask for one
-                    var namePanel = document.getElementById('anonNameWrapper');
-                    namePanel.hidden = false;
-                }
-            });
+        if ((is_firefox) && (is_safari)) {
+            is_safari = false;
         }
-        const formHandler = (e) => {
-            e.preventDefault();
-            // validate
-            if (re.test(usernameInput.value)) {
-                // remove extra spaces
-                var displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
-                localStorage.setItem('display_name', displayName);  // save for next use
-                localStorage.setItem('auth_choice', 'anonymous');
-                returnToRequestedPage();
-            }
+        if ((is_chrome) && (is_safari)) {
+            is_safari = false;
+        }
+        if ((is_chrome) && (is_opera)) {
+            is_chrome = false;
+        }
+
+        var urlParts = location.href.split('/');
+        var rootPath = urlParts[0] + '//' + urlParts[2];
+
+        const popupConfig = {
+            client_id: defaults.gAuthClientId,
         };
-        var usernameInput = document.getElementById('usernameInput');
-        usernameInput.setAttribute('pattern', nameRegex);
-        var nameBtn = document.getElementById('btnAnonName');
-        nameBtn.addEventListener('click', formHandler);
-        document.getElementById('login-form').addEventListener('submit', formHandler);
-    };
+        const redirectConfig = {
+            client_id: defaults.gAuthClientId,
+            ux_mode: 'redirect',
+            redirect_uri: rootPath + '/signin/google/',
+        };
+        const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
+        var auth2;
+        var googleUser = {};
+        var initGoogleAuth = function() {
+            gapi.load('auth2', function() {
+                auth2 = gapi.auth2.init(gapiInitConfig).then(function() {
+                    auth2 = gapi.auth2.getAuthInstance();
+                    attachGoogleSignin(googleBtn);
+                    if (auth2.isSignedIn.get()) {
+                        console.log('User is already signed in.');
+                        var googleUser = auth2.currentUser.get();
+                        onGoogleSignIn(googleUser);
+                    }
+                }, function(error) {
+                    // Private browsing may get here, we handle the error, and
+                    // provide anonymous sign in as an alternative.
+                    console.error(error);
+                    // TODO(mwfarb): gray out google button
+                    // var nodes = document.getElementById("customBtnGoogle").getElementsByTagName('*');
+                    // for (var i = 0; i < nodes.length; i++) {
+                    //     nodes[i].disabled = true;
+                    // }
+                });
+            });
+        };
 
-    initGoogleAuth();
-    initAnonAuth();
+        function attachGoogleSignin(element) {
+            auth2.attachClickHandler(element, {}, onGoogleSignIn, function(error) {
+                alert(JSON.stringify(error, undefined, 2));
+            });
+        }
+
+        function onGoogleSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            console.log('Signed In: ' + profile.getEmail());
+            localStorage.setItem('auth_choice', 'google');
+            changePage('setup');
+            // returnToRequestedPage();
+        }
+
+        function returnToRequestedPage() {
+            if (localStorage.getItem('request_uri')) {
+                //redirect user to originally requested page
+                location.href = localStorage.getItem('request_uri');
+            } else {
+                location.href = '..'; // back to main ARENA
+            }
+        }
+
+        const nameRegex = '^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$';
+        const usernameInput = document.getElementById('usernameInput');
+        usernameInput.setAttribute('pattern', nameRegex);
+
+        document.getElementById('signIn').addEventListener('routePageLoaded', () => {
+            if (localStorage.getItem('display_name')) {
+                usernameInput.value = localStorage.getItem('display_name');
+                usernameInput.focus();
+            }
+        })
+
+        const initAnonAuth = function() {
+            const re = new RegExp(nameRegex);
+            const anonFormHandler = (e) => {
+                e.preventDefault();
+                // validate
+                if (re.test(usernameInput.value)) {
+                    // remove extra spaces
+                    const displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
+                    localStorage.setItem('display_name', displayName);  // save for next use
+                    localStorage.setItem('auth_choice', 'anonymous');
+                    // returnToRequestedPage();
+                    changePage('setup');
+                }
+            };
+            document.getElementById('loginForm').addEventListener('submit', anonFormHandler);
+        };
+        initGoogleAuth();
+        initAnonAuth();
+    });
 </script>
 </body>
 </html>
