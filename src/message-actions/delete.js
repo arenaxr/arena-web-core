@@ -9,14 +9,15 @@ export class Delete {
      * @param {object} message message to be parsed
      */
     static handle(message) {
-        const name = message.object_id;
-        if (name === undefined) {
+        const id = message.id;
+        if (id === undefined) {
             Logger.error('delete', 'Malformed message (no object_id):', JSON.stringify(message));
         }
 
-        const entityEl = document.getElementById(name);
+        const entityEl = document.getElementById(id);
         if (!entityEl) {
-            Logger.error('delete', `Object with object_id "${name}" does not exist!`);
+            Logger.error('delete', `Object with object_id "${id}" does not exist!`);
+            return;
         }
 
         const parentEl = entityEl.parentEl;

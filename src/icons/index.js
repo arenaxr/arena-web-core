@@ -1,6 +1,7 @@
 /* global AFRAME, ARENA */
 import Swal from 'sweetalert2';
 import {ARENAJitsi} from '../jitsi.js';
+import {ARENAEventEmitter} from '../event-emitter.js';
 import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
@@ -304,6 +305,17 @@ export class SideMenu {
         label.style.fontSize = 'medium';
         formDiv.appendChild(label);
 
+        const stats = document.createElement('a');
+        stats.href = '#';
+        stats.innerHTML = 'Toggle Stats</br></br>';
+        stats.onclick = function() {
+            //showPerms();
+            let sceneEl = document.querySelector('a-scene');
+            let statsEl = sceneEl.getAttribute('stats');
+            sceneEl.setAttribute('stats', !statsEl);
+        };
+        formDiv.appendChild(stats);
+
         const profile = document.createElement('a');
         profile.href = '#';
         profile.innerHTML = 'Profile';
@@ -314,7 +326,6 @@ export class SideMenu {
         formDiv.appendChild(document.createElement('br'));
 
         const perms = document.createElement('a');
-        perms.href = '#';
         perms.innerHTML = 'MQTT Permissions';
         perms.onclick = function() {
             showPerms();
@@ -399,10 +410,7 @@ export class SideMenu {
                 localStorage.setItem('display_name', displayName); // save for next use
                 const camera = document.getElementById('my-camera');
                 camera.setAttribute('arena-camera', 'displayName', displayName); // push to other users' views
-                const newSettingsEvent = new CustomEvent('newsettings', { // push to local listeners
-                    detail: {name: displayName},
-                });
-                window.dispatchEvent(newSettingsEvent);
+                ARENA.events.emit(ARENAEventEmitter.events.NEW_SETTINGS, {userName: displayName});
             }
         }
     }

@@ -12,7 +12,7 @@ import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
-
+//import {RuntimeManager} from './runtime-mngr'
 /**
  * Arena Object
  */
@@ -65,13 +65,13 @@ export class Arena {
 
     /**
      * Sets this.idTag using name given as argument, url parameter value, or default
-     * Important: Also sets amName, faceName, avatarName, viveLName, viveRName which depend on idTag
+     * Important: Also sets amName, faceName, viveLName, viveRName which depend on idTag
      * Important: User name must be set
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
     setIdTag = (idTag=undefined) => {
         if (this.userName == undefined) throw "setIdTag: user name not defined."; // user name must be set
-        if (idTag == undefined) idTag = new Date().getTime() % 10000 + '_' + this.userName; // e.g. 1234_eric
+        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName; 
         this.idTag = idTag;
 
         // set camName
@@ -84,7 +84,6 @@ export class Arena {
 
         // set faceName, avatarName, viveLName, viveRName which depend on user name
         this.faceName = 'face_' + this.idTag; // e.g. face_9240_X
-        this.avatarName = 'avatar_' + this.idTag; // e.g. avatar_9240_X
         this.viveLName = 'viveLeft_' + this.idTag; // e.g. viveLeft_9240_X
         this.viveRName = 'viveRight_' + this.idTag; // e.g. viveRight_9240_X
     }
@@ -198,6 +197,7 @@ export class Arena {
                         const msg = {
                             object_id: obj.object_id,
                             action: 'create',
+                            type: obj.type,
                             data: obj.attributes,
                         };
                         if (position) {
@@ -228,6 +228,7 @@ export class Arena {
                     const msg = {
                         object_id: obj.object_id,
                         action: 'create',
+                        type: obj.type,
                         data: obj.attributes,
                     };
                     console.log('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
@@ -363,12 +364,13 @@ export class Arena {
      * Remaining init will be done once mqtt connection is done
      */
     onAuth = async (e) => {
+        const args = e.detail;
         this.clientCoords = ARENAUtils.getLocation();
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
-        this.username = e.detail.mqtt_username;
-        this.mqttToken = e.detail.mqtt_token;
+        this.username = args.mqtt_username;
+        this.mqttToken = args.mqtt_token;
 
         this.Mqtt.connect({
             onSuccess: function() {

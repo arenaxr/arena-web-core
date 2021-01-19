@@ -27,16 +27,21 @@ AFRAME.registerComponent('arena-camera', {
 
         this.heartBeatCounter = 0;
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
+
+        // send initial create
+        this.publishHeadText('create');
+        this.publishPose('create');
+        this.publishVio('create');
     },
 
-    publishPose() {
+    publishPose(action='update') {
         const data = this.data;
         if (!data.enabled) return;
 
         const msg = {
             object_id: ARENA.camName,
             displayName: data.displayName,
-            action: 'create',
+            action: action,
             type: 'object',
             data: {
                 object_type: 'camera',
@@ -68,14 +73,14 @@ AFRAME.registerComponent('arena-camera', {
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
-    publishVio() {
+    publishVio(action='update') {
         const data = this.data;
         if (!data.enabled) return;
 
         if (ARENA.fixedCamera !== '') {
             const msg = {
                 object_id: ARENA.camName,
-                action: 'create',
+                action: action,
                 type: 'object',
                 data: {
                     object_type: 'camera',
@@ -97,7 +102,7 @@ AFRAME.registerComponent('arena-camera', {
         }
     },
 
-    publishHeadText() {
+    publishHeadText(action='update') {
         const data = this.data;
 
         ARENA.Mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
@@ -141,11 +146,15 @@ AFRAME.registerComponent('arena-camera', {
         const positionCoords = ARENAUtils.coordsToText(data.position);
         const newPose = rotationCoords + ' ' + positionCoords;
 
-        // update position every 1 sec
-        if (this.lastPose !== newPose || this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
+        // update position if pose changed, or every 1 sec heartbeat
+        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
+            // heartbeats are sent as create; TMP: sending as updates
+            this.publishPose(); 
+            this.publishVio();
+        } else if (this.lastPose !== newPose) {
             this.publishPose();
             this.publishVio();
-            this.lastPose = newPose;
         }
+        this.lastPose = newPose;
     }),
 });

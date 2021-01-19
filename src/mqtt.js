@@ -11,7 +11,7 @@
 // 'use strict';
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 import {ARENAUtils} from './utils.js';
-import {ClientEvent, Create, Update, Delete} from './actions/';
+import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
 
 /**
  * Main ARENA MQTT client
@@ -138,24 +138,47 @@ export class ARENAMqtt {
             theMessage = jsonMessage;
         }
 
-        if (!theMessage.action) return;
+        if (!theMessage) {
+            console.warn('Received empty message');
+            return;
+        }
+
+        if (theMessage.object_id === undefined) {
+            console.warn('Malformed message (no object_id):', JSON.stringify(message));
+            return;
+        }
+
+        if (theMessage.action === undefined) {
+            console.warn('Malformed message (no action field):', JSON.stringify(message));
+            return;
+        }
+
+        // rename object_id to match internal handlers (and aframe)
+        theMessage.id = theMessage.object_id;
+        delete theMessage.object_id;
+        
         switch (theMessage.action) { // clientEvent, create, delete, update
-        case 'clientEvent': {
-            ClientEvent.handle(theMessage);
-            break;
-        }
-        case 'delete': {
-            Delete.handle(theMessage);
-            break;
-        }
-        case 'create': {
-            Create.handle(theMessage);
-            break;
-        }
-        case 'update': {
-            Update.handle(theMessage);
-            break;
-        }
+            case 'clientEvent': 
+                if (theMessage.data === undefined) {
+                    console.warn('Malformed message (no data field):', JSON.stringify(message));
+                    return;
+                }
+                ClientEvent.handle(theMessage);
+                break;            
+            case 'create': 
+            case 'update': 
+                if (theMessage.data === undefined) {
+                    console.warn('Malformed message (no data field):', JSON.stringify(message));
+                    return;
+                }
+                CreateUpdate.handle(theMessage.action, theMessage);
+                break;
+            case 'delete': 
+                Delete.handle(theMessage);
+                break;
+            default: 
+                console.warn('Malformed message (invalid action field):', JSON.stringify(message));
+                break;
         }
     }
 
