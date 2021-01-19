@@ -262,6 +262,13 @@ export class CreateUpdate {
                     // position is set directly in the THREE.js object, for performance reasons
                     entityEl.object3D.position.set(value.x, value.y, value.z);
                     break;
+                case 'color':
+                    if (!entityEl.hasOwnProperty('text')) {
+                        entityEl.setAttribute('material', 'color', value);
+                    } else {
+                        entityEl.setAttribute('text', 'color', value);
+                    }
+                    break;
                 case 'scale':
                     // scale is set directly in the THREE.js object, for performance reasons
                     entityEl.object3D.scale.set(value.x, value.y, value.z);
