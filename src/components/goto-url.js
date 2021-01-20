@@ -37,6 +37,8 @@ AFRAME.registerComponent('goto-url', {
                         title: `You clicked on a ${data.dest} URL!`,
                         html: `Are you sure you want to open <u>${data.url}</u>?`,
                         showCancelButton: true,
+                        confirmButtonText: 'Yes',
+                        reverseButtons: true,
                     })
                         .then((result) => {
                             if (result.isConfirmed) {
