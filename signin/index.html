@@ -15,6 +15,7 @@
     <script src="../auth.js"></script>
     <link href="../vendor/mdb/mdb.min.css" rel="stylesheet"/>
     <script src="../vendor/sweetalert.min.js"></script>
+    <script src="../vendor/volume-meter.js"></script>
     <style>
         body {
             background-color: #32364d;
@@ -78,7 +79,7 @@
                         </div>
                         <button class="btn btn-white" id="anonBtn" type="submit">Sign In</button>
                         <div class="d-none" id="googleBtn">
-                            <button class="btn btn-white">Google Sign In</button>
+                            <button class="btn btn-white" type="button">Google Sign In</button>
                         </div>
                     </form>
                 </div>
@@ -101,7 +102,9 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-7">
-                        <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
+                        <div>
+                            <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
+                        </div>
                     </div>
                     <div class="col-5">
                         <div class="form-floating mb-3">
@@ -109,29 +112,30 @@
                             </select>
                             <label for="provider">Select Video Device</label>
                         </div>
-                        <!-- ref: HTMLMediaElement.setSinkId(sinkId) !-->
                         <div class="form-floating">
                             <select aria-label="Speaker Device" class="form-select mb-3" id="audioOutSelect">
                                 <option selected>No Device Detected</option>
                             </select>
                             <label for="provider">Select Speaker Device</label>
                         </div>
-                        <button class="btn btn-sm btn-outline-primary mb-3">
+                        <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
                             Play Test Sound <i class="fas fa-volume-up"></i>
                         </button>
+                        <audio id="testAudioOut" src="../media/step.ogg"></audio>
                         <div class="form-floating mb-3">
                             <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
                             </select>
                             <label for="provider">Select Microphone Device</label>
                         </div>
-                        <div class="progress">
+                        <div class="progress" style="height: 10px;">
                             <div
                                     aria-valuemax="100"
                                     aria-valuemin="0"
-                                    aria-valuenow="75"
-                                    class="progress-bar bg-success"
+                                    aria-valuenow="0"
+                                    class="progress-bar progress-bar-striped bg-success"
                                     role="progressbar"
-                                    style="width: 75%"
+                                    style="width: 0"
+                                    id="micMeter"
                             ></div>
                         </div>
                         <!-- Ref https://github.com/cwilso/volume-meter/ !-->
@@ -338,10 +342,20 @@
         // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
         const videoElement = document.getElementById('vidPreview');
         const audioInSelect = document.getElementById('audioSourceSelect');
+        const audioOutSelect = document.getElementById('audioOutSelect');
         const videoSelect = document.getElementById('vidSourceSelect');
+        const testAudioOut = document.getElementById('testAudioOut');
+        const micMeter = document.getElementById('micMeter');
+
+        let mediaStreamSource = null;
+        let meterProcess = null;
+        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioContext = new AudioContext();
 
         audioInSelect.onchange = getStream;
         videoSelect.onchange = getStream;
+        // This will fail on a lot of browsers :(
+        audioOutSelect.onchange = () => testAudioOut.setSinkId && testAudioOut.setSinkId(audioOutSelect.value);
 
         function getDevices() {
             // AFAICT in Safari this only gets default devices until gUM is called :/
@@ -351,17 +365,27 @@
         function gotDevices(deviceInfos) {
             // Faster than innerHTML. No options have listeners so this is ok
             audioInSelect.textContent = '';
+            audioOutSelect.textContent = '';
             videoSelect.textContent = '';
             window.deviceInfos = deviceInfos; // make available to console
             for (const deviceInfo of deviceInfos) {
                 const option = document.createElement('option');
                 option.value = deviceInfo.deviceId;
-                if (deviceInfo.kind === 'audioinput') {
-                    option.text = deviceInfo.label || `Microphone ${audioInSelect.length + 1}`;
-                    audioInSelect.appendChild(option);
-                } else if (deviceInfo.kind === 'videoinput') {
-                    option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
-                    videoSelect.appendChild(option);
+                switch (deviceInfo.kind) {
+                   case 'audioinput':
+                        option.text = deviceInfo.label || `Microphone ${audioInSelect.length + 1}`;
+                        audioInSelect.appendChild(option);
+                        break;
+                    case 'audiooutput':
+                        option.text = deviceInfo.label || `Speaker ${audioOutSelect.length + 1}`;
+                        audioOutSelect.appendChild(option);
+                        break;
+                    case 'videoinput':
+                        option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+                        videoSelect.appendChild(option);
+                        break;
+                    default:
+                        //
                 }
             }
             const noElementOption = document.createElement('option');
@@ -375,6 +399,11 @@
                 videoSelect.appendChild(noElementOption.cloneNode(true));
             }
             videoSelect.selectedIndex = 0;
+            if (!audioOutSelect.childElementCount) {
+                noElementOption.text = 'Default Device';
+                audioOutSelect.appendChild(noElementOption.cloneNode(true));
+            }
+            audioOutSelect.selectedIndex = 0;
         }
 
         function getStream() {
@@ -400,21 +429,29 @@
             videoSelect.selectedIndex = [...videoSelect.options].
                 findIndex(option => option.text === stream.getVideoTracks()[0].label);
             videoElement.srcObject = stream;
-            /*
-            let aspectRatioClass = 'w-100';
+
+
+            // Scale video preview container
+            let aspectRatioClass = '';
             const vidSettings = stream.getVideoTracks()[0].getSettings();
             switch ((vidSettings.width/vidSettings.height).toFixed(2)) {
                 case '1.33':
-                    aspectRatioClass = 'four-three'
+                    aspectRatioClass = 'ratio ratio-4x3'
                     break;
                 case '1.77':
-                    aspectRatioClass = 'sixteen-nine'
+                    aspectRatioClass = 'ratio ratio-16x9'
                     break;
                 default:
                     //
             }
-            videoElement.setAttribute('class', aspectRatioClass);
-            */
+            videoElement.parentElement.setAttribute('class', aspectRatioClass);
+
+            // Mic Test Meter via https://github.com/cwilso/volume-meter/
+            meterProcess && meterProcess.shutdown();
+            mediaStreamSource = audioContext.createMediaStreamSource(stream);
+            meterProcess = createAudioMeter(audioContext);
+            mediaStreamSource.connect(meterProcess)
+            micDrawLoop();
         }
 
         function handleMediaError(error) {
@@ -428,6 +465,21 @@
         const detectDevices = () => {
             getStream().then(getDevices).then(gotDevices).catch(handleMediaError);
         };
+
+
+        function micDrawLoop() {
+            // set bar based on the current volume
+            const vol = meterProcess.volume * 100 * 2;
+            micMeter.setAttribute('style', `width: ${vol}%`);
+            micMeter.setAttribute('aria-valuenow', '' + vol);
+            // set up the next visual callback
+            window.requestAnimationFrame( micDrawLoop );
+        }
+
+        document.getElementById('playTestAudioOutBtn').addEventListener('click', () => {
+            testAudioOut.play();
+        });
+
         document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
         document.getElementById('setup').addEventListener('routePageLoaded', detectDevices);
         document.getElementById('enterSceneAVBtn').addEventListener('click', () => changePage('sceneSelect'));
@@ -472,7 +524,8 @@
             ux_mode: 'redirect',
             redirect_uri: rootPath + '/signin/google/',
         };
-        const gapiInitConfig = is_safari ? popupConfig : redirectConfig;
+        // Popup for this demo
+        const gapiInitConfig = popupConfig;
         var auth2;
         var googleUser = {};
         var initGoogleAuth = function() {
