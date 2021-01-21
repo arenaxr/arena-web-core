@@ -2980,7 +2980,7 @@
     "properties":{
        "object_id":{
           "type":"string",
-          "minLength":5,
+          "minLength":3,
           "description":"A uuid or otherwise unique identifier for this object"
        },
        "action":{
