@@ -154,7 +154,7 @@ export class Arena {
      * @param {Object} position initial position
      * @param {Object} rotation initial rotation
      */
-    loadArena = (urlToLoad, position, rotation) => {
+    loadArenaScene = (urlToLoad, position, rotation) => {
 
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
@@ -244,7 +244,7 @@ export class Arena {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArena = (urlToLoad) => {
+    unloadArenaScene = (urlToLoad) => {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT;
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -276,9 +276,9 @@ export class Arena {
     };
 
     /**
-     * Loads and applied scene-options (if it exists), otherwise set to default enviornment
+     * Loads and applies scene-options (if it exists), otherwise set to default environment
      */
-    loadScene = () => {
+    loadSceneOptions = () => {
         let sceneOptions = {
             jitsiServer: 'mr.andrew.cmu.edu',
         };

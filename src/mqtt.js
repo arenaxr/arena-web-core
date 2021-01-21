@@ -77,8 +77,8 @@ export class ARENAMqtt {
         // viveRight.setAttribute('arena-vive', 'hand', 'right');
         // viveRight.setAttribute('arena-vive', 'color', color);
 
-        ARENA.loadScene();
-        ARENA.loadArena();
+        ARENA.loadSceneOptions();
+        ARENA.loadArenaScene();
 
         // start listening for MQTT messages
         this.mqttClient.subscribe(ARENA.renderTopic);
