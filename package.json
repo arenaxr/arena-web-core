@@ -27,6 +27,7 @@
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
+    "cssnano": "^4.1.10",
     "eslint": "^7.18.0",
     "eslint-config-google": "^0.14.0",
     "parcel-bundler": "^1.12.4"
