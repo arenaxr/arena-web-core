@@ -372,7 +372,7 @@ async function updateAprilTags() {
     if (new Date() - ARENA.lastAprilTagUpdate < 3 * 1000 !== false) {
         return false;
     }
-    fetch(ARENA.ATLASurl + '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + '40.4427' + '&long=' + '79.9430')
+    fetch(ARENA.ATLASurl + '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + position.latitude + '&long=' + position.longitude)
         .then(response => {
             window.ARENA.lastAprilTagUpdate = new Date();
             return response.json();
