@@ -185,6 +185,7 @@ export class SideMenu {
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Yes',
+                reverseButtons: true,
             })
                 .then((result) => {
                     if (!result.isConfirmed) return;
@@ -197,6 +198,7 @@ export class SideMenu {
                             autocapitalize: 'off',
                         },
                         showCancelButton: true,
+                        reverseButtons: true,
                     })
                         .then((result) => {
                             if (!result.value) return;
@@ -233,6 +235,7 @@ export class SideMenu {
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes',
+                reverseButtons: true,
             })
                 .then((result) => {
                     if (result.isConfirmed) {
