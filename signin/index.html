@@ -119,7 +119,7 @@
                             <label for="provider">Select Speaker Device</label>
                         </div>
                         <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
-                            Play Test Sound <i class="fas fa-volume-up"></i>
+                            Play Test Sound <i id="playTestAudioOutIcon" class="fas fa-volume-off"></i>
                         </button>
                         <audio id="testAudioOut" src="../media/step.ogg"></audio>
                         <div class="form-floating mb-3">
@@ -345,6 +345,8 @@
         const audioOutSelect = document.getElementById('audioOutSelect');
         const videoSelect = document.getElementById('vidSourceSelect');
         const testAudioOut = document.getElementById('testAudioOut');
+        const testAudioOutBtn = document.getElementById('playTestAudioOutBtn');
+        const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
         const micMeter = document.getElementById('micMeter');
 
         let mediaStreamSource = null;
@@ -476,8 +478,18 @@
             window.requestAnimationFrame( micDrawLoop );
         }
 
-        document.getElementById('playTestAudioOutBtn').addEventListener('click', () => {
-            testAudioOut.play();
+        testAudioOutBtn.addEventListener('click', () => {
+            if (testAudioOut.paused) {
+                testAudioOutIcon.setAttribute('class', 'fas fa-volume-up');
+                testAudioOut.play();
+            } else {
+                testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
+                testAudioOut.pause();
+                testAudioOut.currentTime = 0;
+            }
+        });
+        testAudioOutBtn.addEventListener("ended", () => {
+            testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
         });
 
         document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
