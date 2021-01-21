@@ -118,7 +118,6 @@ function requestAuthState() {
     xhr.open('GET', `/user/user_state`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.send();
     xhr.responseType = 'json';
     xhr.onload = () => {
@@ -150,6 +149,53 @@ function requestAuthState() {
                     location.href = AUTH.signInPath;
                 }
             }
+        }
+    };
+}
+
+/**
+ * API SAMPLE: Request scene names which the user has permission to from user database.
+ */
+function _requestUserScenes() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/user/my_scenes');
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    xhr.send();
+    xhr.responseType = 'json';
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+        } else {
+            const scenes = xhr.response;
+            console.debug('user scenes count:', scenes.length);
+            scenes.forEach(s => {
+                console.debug('user scene name:', s.name);
+            });
+        }
+    };
+}
+
+/**
+ * API SAMPLE: Request a scene is added to the user database.
+ * @param {string} sceneNameOnly name of the scene without namespace
+ * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
+ */
+function _requestUserNewScene(sceneNameOnly, isPublic) {
+    var params = new FormData();
+    params.append("scene", sceneNameOnly);
+    params.append("is_public", isPublic);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/user/new_scene');
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    xhr.send(params);
+    xhr.responseType = 'json';
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+        } else {
+            console.debug('added new scene ', sceneNameOnly);
         }
     };
 }

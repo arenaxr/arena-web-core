@@ -403,7 +403,7 @@ async function updateAprilTags() {
 async function init() {
     let ARENA = window.ARENA;
     // WebWorkers use `postMessage` and therefore work with Comlink.
-    const Apriltag = Comlink.wrap(new Worker("/apriltag/apriltag.js"));
+    const Apriltag = Comlink.wrap(new Worker("./src/apriltag/apriltag.js"));
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('builder')) {
         ARENA.builder = true;

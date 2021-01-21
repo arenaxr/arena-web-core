@@ -310,6 +310,7 @@ export class ARENAChat {
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes',
+                reverseButtons: true,
             })
                 .then((result) => {
                     if (result.isConfirmed) {
@@ -327,7 +328,7 @@ export class ARENAChat {
         }
 
         ARENA.events.on(ARENAEventEmitter.events.NEW_SETTINGS, (e) => {
-            const args = e.detail;   
+            const args = e.detail;
             if (!args.userName) return // only handle a user name change
             _this.settings.username = args.userName;
             _this.keepalive(); // let other users know

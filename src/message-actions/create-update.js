@@ -158,7 +158,6 @@ export class CreateUpdate {
             case 'gltf-model':
                 // gltf-model from data.url
                 if (data.hasOwnProperty('url')) {
-                    console.log('gltf-model', data.url);
                     entityEl.setAttribute('gltf-model', data.url);
                 }
                 // add load event listners
@@ -256,7 +255,7 @@ export class CreateUpdate {
                 case 'rotation':
                     // rotation is set directly in the THREE.js object, for performance reasons
                     if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion 
-                    else entityEl.object3D.rotation.set(value.x, value.y, value.z); // otherwise its a rotation given in radians
+                    else entityEl.object3D.rotation.set( THREE.Math.degToRad(value.x), THREE.Math.degToRad(value.y), THREE.Math.degToRad(value.z)); // otherwise its a rotation given in degrees
                     break;
                 case 'position':
                     // position is set directly in the THREE.js object, for performance reasons
