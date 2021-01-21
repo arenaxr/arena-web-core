@@ -35,7 +35,8 @@ export class Arena {
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         this.vioTopic = this.defaults.vioTopic;
-
+        this.clientCoords = ARENAUtils.getLocation();
+        
         // set scene name from url
         this.setSceneName();
 
@@ -365,7 +366,6 @@ export class Arena {
      */
     onAuth = async (e) => {
         const args = e.detail;
-        this.clientCoords = ARENAUtils.getLocation();
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
