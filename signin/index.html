@@ -485,7 +485,7 @@
         document.getElementById('enterSceneAVBtn').addEventListener('click', () => changePage('sceneSelect'));
         document.getElementById('createSceneBtn').addEventListener('click', () => changePage('createScene'));
 
-        changePage();
+        changePage(window.location.hash.slice(1));
 
         /******************************************************************************************************/
 
