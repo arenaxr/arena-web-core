@@ -372,7 +372,7 @@ async function updateAprilTags() {
     if (new Date() - ARENA.lastAprilTagUpdate < 3 * 1000 !== false) {
         return false;
     }
-    fetch(ARENA.ATLASurl + '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + position.latitude + '&long=' + position.longitude)
+    fetch(ARENA.ATLASurl + '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' + '40.4427' + '&long=' + '79.9430')
         .then(response => {
             window.ARENA.lastAprilTagUpdate = new Date();
             return response.json();
@@ -403,7 +403,7 @@ async function updateAprilTags() {
 async function init() {
     let ARENA = window.ARENA;
     // WebWorkers use `postMessage` and therefore work with Comlink.
-    const Apriltag = Comlink.wrap(new Worker("/apriltag/apriltag.js"));
+    const Apriltag = Comlink.wrap(new Worker("./src/apriltag/apriltag.js"));
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('builder')) {
         ARENA.builder = true;
