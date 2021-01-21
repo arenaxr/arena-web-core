@@ -28,9 +28,9 @@
     "title":"Landmarks",
     "properties":{
        "object_id":{
-        "type":"string",
-        "minLength":3,
-        "description":"A uuid or otherwise unique identifier for this object"
+            "type":"string",
+            "minLength":3,
+            "description":"A uuid or otherwise unique identifier for this object"
          },
        "action":{
           "type":"string",
