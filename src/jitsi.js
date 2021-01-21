@@ -579,12 +579,16 @@ export class ARENAJitsi {
                 setupCornerVideo.bind(this)();
             };
 
+            let _this = this;
             window.addEventListener('orientationchange', () => {
                 // mobile only
-                ARENA.localVideoWidth = Number(window.innerWidth / 5);
-                stopVideo();
-                setupCornerVideo.bind(this)();
-                startVideo();
+                const sceneEl = document.querySelector('a-scene');
+                if (!sceneEl.is('ar-mode')) { // this code can disrupt an ar session
+                    ARENA.localVideoWidth = Number(window.innerWidth / 5);
+                    _this.stopVideo();
+                    setupCornerVideo.bind(_this)();
+                    _this.startVideo();
+                }
             });
         }
     }

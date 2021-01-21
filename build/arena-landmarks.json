@@ -28,11 +28,10 @@
     "title":"Landmarks",
     "properties":{
        "object_id":{
-          "type":"string",
-          "description":"Object identifier; Must be a valid UUID.",
-          "minLength":36,
-          "pattern":"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-       },
+            "type":"string",
+            "minLength":3,
+            "description":"A uuid or otherwise unique identifier for this object"
+         },
        "action":{
           "type":"string",
           "description":"One of 3 basic Create/Update/Delete actions",
