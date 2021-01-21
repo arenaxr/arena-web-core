@@ -158,7 +158,6 @@ export class CreateUpdate {
             case 'gltf-model':
                 // gltf-model from data.url
                 if (data.hasOwnProperty('url')) {
-                    console.log('gltf-model', data.url);
                     entityEl.setAttribute('gltf-model', data.url);
                 }
                 // add load event listners
