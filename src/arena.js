@@ -35,7 +35,6 @@ export class Arena {
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         this.vioTopic = this.defaults.vioTopic;
-        this.clientCoords = ARENAUtils.getLocation();
         
         // set scene name from url
         this.setSceneName();
@@ -361,14 +360,32 @@ export class Arena {
     };
 
     /**
+     * User location callback; Called when the user location is available (or error is returned)
+     * 
+     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successfull; "default" location if error
+     * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error
+     */
+    userLocationCallback = (coords, err=undefined) => {
+        // save user location
+        ARENA.clientCoords = coords;
+        console.log("Location:", coords);
+
+        // emit event 
+        ARENA.events.emit(ARENAEventEmitter.events.ONLOCATION, { error: err });
+    }
+
+    /**
      * When user auth is done, startup mqtt, runtime, chat and other ui elements;
      * Remaining init will be done once mqtt connection is done
      */
     onAuth = async (e) => {
-        const args = e.detail;
+
+        // request user location and setup a callback when it is available
+        ARENAUtils.getLocation(this.userLocationCallback.bind(this));
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
+        const args = e.detail;
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
 

@@ -364,7 +364,13 @@ function showGrayscaleImage(canvasid, pixeldata, imgWidth, imgHeight) {
 
 async function updateAprilTags() {
     let ARENA = window.ARENA;
+
+    ARENA.aprilTags = {
+        0: ORIGINTAG
+    };
+
     if (ARENA.clientCoords === undefined) {
+        console.error('No device location! Cannot query ATLAS.');
         return false;
     }
     let position = ARENA.clientCoords;
@@ -378,9 +384,6 @@ async function updateAprilTags() {
             return response.json();
         })
         .then(data => {
-            ARENA.aprilTags = {
-                0: ORIGINTAG
-            };
             data.forEach(tag => {
                 let tagid = tag.name.substring(9);
                 if (tagid !== 0) {
