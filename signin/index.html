@@ -163,7 +163,7 @@
                 </div>
                 <div class="row">
                     <div class="col">
-                        <img alt="instruction video" id="demoAnim" class="w-100 h-auto" src="../images/intro_dialog_animation.gif"/>
+                        <img alt="instructions" class="w-100 h-auto" src="../images/instructions.png"/>
                     </div>
                 </div>
             </div>
@@ -496,7 +496,6 @@
         document.getElementById('setup').addEventListener('routePageLoaded', detectDevices);
         document.getElementById('enterSceneAVBtn').addEventListener('click', () => changePage('sceneSelect'));
         document.getElementById('createSceneBtn').addEventListener('click', () => changePage('createScene'));
-        document.getElementById('demoAnim').ondragstart = () => false;
 
         window.dispatchEvent(new Event('hashchange')); // Manually trigger initial hash routing
 
