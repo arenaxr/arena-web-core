@@ -333,7 +333,7 @@ export class CreateUpdate {
                 myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
                     new THREE.Quaternion(r.x, r.y, r.z, r.w));
             }
-        } else if (message.data.object_type !== 'look-at') { // camera look-at
+        } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
                 Logger.error('camera look-at', 'local camera object does not exist! (create camera before)');
                 return;
