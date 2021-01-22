@@ -471,7 +471,7 @@
 
         function micDrawLoop() {
             // set bar based on the current volume
-            const vol = meterProcess.volume * 100 * 2;
+            const vol = meterProcess.volume * 100 * 3;
             micMeter.setAttribute('style', `width: ${vol}%`);
             micMeter.setAttribute('aria-valuenow', '' + vol);
             // set up the next visual callback
