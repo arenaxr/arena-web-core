@@ -343,7 +343,7 @@
                 "description":"Volume for users in a scene",
                 "default":1
              },
-             "distModel":{
+             "distanceModel":{
                 "type":"string",
                 "title":"Positional Audio Distance Model",
                 "description":"Algorithm to use to reduce the volume of the audio source as it moves away from the listener",
@@ -354,13 +354,13 @@
                 ],
                 "default":"inverse"
              },
-             "refDist":{
+             "refDistance":{
                 "type":"number",
                 "title":"Positional Audio Reference Distance",
                 "description":"Distance at which the volume reduction starts taking effect",
                 "default":1
              },
-             "rolloffFact":{
+             "rolloffFactor":{
                 "type":"number",
                 "title":"Positional Audio Rolloff Factor",
                 "description":"How quickly the volume is reduced as the source moves away from the listener",

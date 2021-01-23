@@ -58,8 +58,11 @@ export class ARENAMqtt {
         // first connection for this client
         console.log(`MQTT scene init user state, connected to ${uri}`);
 
+        let color = Math.floor(Math.random() * 16777215).toString(16);
+        if (color.length < 6) color = "0" + color;
+        color = '#' + color
+
         const camera = document.getElementById('my-camera');
-        const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
         camera.setAttribute('arena-camera', 'enabled', true);
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
@@ -156,27 +159,27 @@ export class ARENAMqtt {
         // rename object_id to match internal handlers (and aframe)
         theMessage.id = theMessage.object_id;
         delete theMessage.object_id;
-        
+
         switch (theMessage.action) { // clientEvent, create, delete, update
-            case 'clientEvent': 
+            case 'clientEvent':
                 if (theMessage.data === undefined) {
                     console.warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
                 ClientEvent.handle(theMessage);
-                break;            
-            case 'create': 
-            case 'update': 
+                break;
+            case 'create':
+            case 'update':
                 if (theMessage.data === undefined) {
                     console.warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
                 CreateUpdate.handle(theMessage.action, theMessage);
                 break;
-            case 'delete': 
+            case 'delete':
                 Delete.handle(theMessage);
                 break;
-            default: 
+            default:
                 console.warn('Malformed message (invalid action field):', JSON.stringify(message));
                 break;
         }

@@ -233,7 +233,7 @@ function _requestUserScenes() {
         } else {
             const scenes = xhr.response;
             console.debug('user scenes count:', scenes.length);
-            scenes.forEach(s => {
+            scenes.forEach((s) => {
                 console.debug('user scene name:', s.name);
             });
         }
@@ -246,9 +246,9 @@ function _requestUserScenes() {
  * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
  */
 function _requestUserNewScene(sceneNameOnly, isPublic) {
-    var params = new FormData();
-    params.append("scene", sceneNameOnly);
-    params.append("is_public", isPublic);
+    const params = new FormData();
+    params.append('scene', sceneNameOnly);
+    params.append('is_public', isPublic);
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/user/new_scene');
     const csrftoken = getCookie('csrftoken');
