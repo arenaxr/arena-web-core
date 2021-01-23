@@ -66,7 +66,6 @@ export class ARENAJitsi {
 
         this.jitsiId = null;
 
-        this.chromeSpatialAudioOn = null;
         this.localTracks = []; // just our set of audio,video tracks
         this.remoteTracks = {}; // map of arrays of tracks
 
@@ -467,17 +466,6 @@ export class ARENAJitsi {
         );
 
         this.conference.join(); // this.conference.join(password);
-
-        this.chromeSpatialAudioOn = AFRAME.utils.device.isMobile();
-        if (!this.chromeSpatialAudioOn) {
-            // only tested and working on mac on chrome
-            navigator.mediaDevices.enumerateDevices().then(function(devices) {
-                const headphonesConnected = devices
-                    .filter((device) => /audio\w+/.test(device.kind))
-                    .find((device) => device.label.toLowerCase().includes('head'));
-                this.chromeSpatialAudioOn = !!headphonesConnected;
-            }.bind(this));
-        }
     }
 
     /**

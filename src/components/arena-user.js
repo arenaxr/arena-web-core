@@ -51,7 +51,6 @@ AFRAME.registerComponent('arena-user', {
         this.videoID = null;
         this.audioTrack = null;
         this.audioID = null;
-        this.maxDistReached = false;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -143,29 +142,26 @@ AFRAME.registerComponent('arena-user', {
 
     createAudio() {
         const el = this.el;
-        // add sound component, but only once
-        const sound = el.components.sound;
-        if (!sound) {
-            el.setAttribute('sound', `src: #${this.audioID}`);
+        el.setAttribute('sound', `src: #${this.audioID}`);
 
-            if (ARENA.volume) {
-                el.setAttribute('sound', `volume: ${ARENA.volume}`);
-            }
-            if (ARENA.refDistance) {
-                el.setAttribute('sound', `refDistance: ${ARENA.refDistance}`);
-            }
-            if (ARENA.rolloffFactor) {
-                el.setAttribute('sound', `rolloffFactor: ${ARENA.rolloffFactor}`);
-            }
-            if (ARENA.distanceModel) {
-                el.setAttribute('sound', `distanceModel: ${ARENA.distanceModel}`);
-            }
+        if (ARENA.refDistance) {
+            el.setAttribute('sound', `refDistance: ${ARENA.refDistance}`);
+        }
+        if (ARENA.rolloffFactor) {
+            el.setAttribute('sound', `rolloffFactor: ${ARENA.rolloffFactor}`);
+        }
+        if (ARENA.distanceModel) {
+            el.setAttribute('sound', `distanceModel: ${ARENA.distanceModel}`);
+        }
+        if (ARENA.volume) {
+            el.setAttribute('sound', `volume: ${ARENA.volume}`);
         }
     },
 
     updateAudio() {
         const data = this.data;
         if (!data) return;
+        const el = this.el;
 
         /* Handle Jitsi Audio */
         this.audioID = `audio${data.jitsiId}`;
@@ -176,8 +172,11 @@ AFRAME.registerComponent('arena-user', {
 
             const jitsiAudio = document.getElementById(this.audioID);
             if (jitsiAudio) {
-                this.createAudio();
-                this.removeMicrophone();
+                const sound = el.components.sound;
+                if (!sound) {
+                    this.createAudio();
+                    this.removeMicrophone();
+                }
             }
         } else {
             this.drawMicrophone();
@@ -212,7 +211,7 @@ AFRAME.registerComponent('arena-user', {
         const distance = camPos.distanceTo(entityPos);
 
         if (this.videoTrack && this.videoID) {
-            // frustrum culling for WebRTC streams
+            // frustum culling for WebRTC streams
             const cam = document.getElementById('my-camera').sceneEl.camera;
             const frustum = new THREE.Frustum();
             frustum.setFromProjectionMatrix(
@@ -223,12 +222,10 @@ AFRAME.registerComponent('arena-user', {
             const jistiVideo = document.getElementById(this.videoID);
             // check if A/V cut off distance has been reached
             if (!inFieldOfView || distance > ARENA.maxAVDist) {
-                // pause WebRTC video stream
-                this.videoTrack.enabled = false;
+                this.videoTrack.enabled = false; // pause WebRTC video stream
                 if (jistiVideo && !jistiVideo.paused) jistiVideo.pause();
             } else {
-                // unpause WebRTC video stream
-                this.videoTrack.enabled = true;
+                this.videoTrack.enabled = true; // unpause WebRTC video stream
                 if (jistiVideo && jistiVideo.paused) jistiVideo.play();
             }
         }
@@ -236,11 +233,9 @@ AFRAME.registerComponent('arena-user', {
         if (this.audioTrack && this.audioID) {
             // check if A/V cut off distance has been reached
             if (distance > ARENA.maxAVDist) {
-                // pause WebRTC audio stream
-                this.audioTrack.enabled = false;
+                this.audioTrack.enabled = false; // pause WebRTC audio stream
             } else {
-                // unpause WebRTC audio stream
-                this.audioTrack.enabled = true;
+                this.audioTrack.enabled = true; // unpause WebRTC audio stream
             }
         }
     },
