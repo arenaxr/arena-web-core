@@ -1,76 +1,6 @@
 /* global AFRAME, ARENA, THREE */
 
 /**
- * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
- * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
- * @param {Object} gainNode
- */
-async function enableChromeAEC(gainNode) {
-    /**
-     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-     *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
-     *     this prevents hearing the audio twice.
-     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-     *  6. connect the other RTCPeerConnection's stream to a new audio element.
-     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
-     *  while preserving all the audio processing that was performed via the WebAudio API.
-     */
-
-    const audioEl = new Audio();
-    audioEl.setAttribute('autoplay', 'autoplay');
-    audioEl.setAttribute('playsinline', 'playsinline');
-
-    const context = THREE.AudioContext.getContext();
-    const loopbackDestination = context.createMediaStreamDestination();
-    const outboundPeerConnection = new RTCPeerConnection();
-    const inboundPeerConnection = new RTCPeerConnection();
-
-    const onError = (e) => {
-        console.error('RTCPeerConnection loopback initialization error', e);
-    };
-
-    outboundPeerConnection.addEventListener('icecandidate', (e) => {
-        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('icecandidate', (e) => {
-        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('track', (e) => {
-        audioEl.srcObject = e.streams[0];
-    });
-
-    try {
-        /* The following should never fail, but just in case, we won't disconnect/reconnect
-           the gainNode unless all of this succeeds */
-        loopbackDestination.stream.getTracks().forEach((track) => {
-            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
-        });
-
-        const offer = await outboundPeerConnection.createOffer();
-        outboundPeerConnection.setLocalDescription(offer);
-        await inboundPeerConnection.setRemoteDescription(offer);
-
-        const answer = await inboundPeerConnection.createAnswer();
-        inboundPeerConnection.setLocalDescription(answer);
-        outboundPeerConnection.setRemoteDescription(answer);
-
-        gainNode.disconnect();
-        if (ARENA.Jitsi.chromeSpatialAudioOn) {
-            gainNode.connect(context.destination);
-        } else {
-            gainNode.connect(loopbackDestination);
-        }
-    } catch (e) {
-        onError(e);
-    }
-}
-
-/**
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
  *
  */
@@ -111,7 +41,7 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('rotation', '0 180 0');
         this.headModel.object3D.scale.set(1, 1, 1);
         this.headModel.setAttribute('dynamic-body', 'type', 'static');
-        this.headModel.setAttribute('gltf-model', 'url(models/Head.gltf)'); // actually a face mesh
+        this.headModel.setAttribute('gltf-model', 'url(/models/Head.gltf)'); // actually a face mesh
 
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
@@ -119,9 +49,9 @@ AFRAME.registerComponent('arena-user', {
 
         this.videoTrack = null;
         this.videoID = null;
-        this.videoCubeDrawn = false;
         this.audioTrack = null;
-        this.audioSource = null;
+        this.audioID = null;
+        this.maxDistReached = false;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -136,7 +66,7 @@ AFRAME.registerComponent('arena-user', {
             micIconEl.setAttribute('id', name);
             micIconEl.setAttribute('scale', '0.2 0.2 0.2');
             micIconEl.setAttribute('position', '0 0.3 0.045');
-            micIconEl.setAttribute('src', 'url(src/icons/images/audio-off.png)');
+            micIconEl.setAttribute('src', 'url(/src/icons/images/audio-off.png)');
             el.appendChild(micIconEl);
         }
     },
@@ -160,7 +90,7 @@ AFRAME.registerComponent('arena-user', {
         videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('scale', '0.6 0.4 0.6');
         videoCube.setAttribute('material', 'shader', 'flat');
-        videoCube.setAttribute('src', `#${this.videoID}`); // video only (!audio)
+        videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
 
         const videoCubeDark = document.createElement('a-box');
@@ -174,8 +104,6 @@ AFRAME.registerComponent('arena-user', {
 
         el.appendChild(videoCube);
         el.appendChild(videoCubeDark);
-
-        this.videoCubeDrawn = true;
     },
 
     removeVideoCube() {
@@ -186,30 +114,11 @@ AFRAME.registerComponent('arena-user', {
         if (el.contains(vidCube)) {
             el.removeChild(vidCube);
         }
+
         const vidCubeDark = document.getElementById(this.videoID + 'cubeDark');
         if (el.contains(vidCubeDark)) {
             el.removeChild(vidCubeDark);
         }
-        this.videoCubeDrawn = false;
-    },
-
-    aec(listener) {
-        // sorta fixes chrome echo bug
-        const audioCtx = THREE.AudioContext.getContext();
-        const resume = () => {
-            audioCtx.resume();
-            setTimeout(function() {
-                if (audioCtx.state === 'running') {
-                    if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-                        enableChromeAEC(listener.gain);
-                    }
-                    document.body.removeEventListener('touchmove', resume, false);
-                    document.body.removeEventListener('mousemove', resume, false);
-                }
-            }, 0);
-        };
-        document.body.addEventListener('touchmove', resume, false);
-        document.body.addEventListener('mousemove', resume, false);
     },
 
     updateVideo() {
@@ -220,83 +129,58 @@ AFRAME.registerComponent('arena-user', {
         this.videoID = `video${data.jitsiId}`;
         if (data.hasVideo) {
             this.videoTrack = ARENA.Jitsi.getVideoTrack(data.jitsiId);
-            // draw video cube, but only if it didnt exist before
-            const videoElem = document.getElementById(this.videoID);
-            if (videoElem && !this.videoCubeDrawn) {
-                this.drawVideoCube();
+            const jistiVideo = document.getElementById(this.videoID);
+            if (jistiVideo) {
+                const vidCube = document.getElementById(this.videoID + 'cube');
+                if (!vidCube) {
+                    this.drawVideoCube();
+                }
             }
         } else {
-            // pause WebRTC video stream
-            if (this.videoTrack) {
-                this.videoTrack.enabled = false;
-            }
             this.removeVideoCube();
+        }
+    },
+
+    createAudio() {
+        const el = this.el;
+        // add sound component, but only once
+        const sound = el.components.sound;
+        if (!sound) {
+            el.setAttribute('sound', `src: #${this.audioID}`);
+
+            if (ARENA.volume) {
+                el.setAttribute('sound', `volume: ${ARENA.volume}`);
+            }
+            if (ARENA.refDistance) {
+                el.setAttribute('sound', `refDistance: ${ARENA.refDistance}`);
+            }
+            if (ARENA.rolloffFactor) {
+                el.setAttribute('sound', `rolloffFactor: ${ARENA.rolloffFactor}`);
+            }
+            if (ARENA.distanceModel) {
+                el.setAttribute('sound', `distanceModel: ${ARENA.distanceModel}`);
+            }
         }
     },
 
     updateAudio() {
         const data = this.data;
-        const el = this.el;
         if (!data) return;
 
         /* Handle Jitsi Audio */
+        this.audioID = `audio${data.jitsiId}`;
         if (data.hasAudio) {
             // set up positional audio, but only once per camera
-            const jistiAudioTrack = ARENA.Jitsi.getAudioTrack(data.jitsiId);
-            if (!jistiAudioTrack) return;
+            this.audioTrack = ARENA.Jitsi.getAudioTrack(data.jitsiId);
+            if (!this.audioTrack) return;
 
-            const oldAudioTrack = this.audioTrack;
-            this.audioTrack = jistiAudioTrack.track;
-            if (this.audioTrack) {
+            const jitsiAudio = document.getElementById(this.audioID);
+            if (jitsiAudio) {
+                this.createAudio();
                 this.removeMicrophone();
-            }
-
-            if (this.audioTrack !== oldAudioTrack) {
-                // set up and attach positional audio
-                const audioStream = new MediaStream();
-                audioStream.addTrack(this.audioTrack);
-
-                const sceneEl = document.querySelector('a-scene');
-                let listener = null;
-                if (sceneEl.audioListener) {
-                    listener = sceneEl.audioListener;
-                } else {
-                    listener = new THREE.AudioListener();
-                    const camEl = document.getElementById('my-camera').object3D;
-                    camEl.add(listener);
-                    sceneEl.audioListener = listener;
-                }
-
-                // create positional audio, but only if didn't exist before
-                if (!this.audioSource) {
-                    this.audioSource = new THREE.PositionalAudio(listener);
-                    this.audioSource.setMediaStreamSource(audioStream);
-                    el.object3D.add(this.audioSource);
-
-                    // set positional audio scene params
-                    if (ARENA.volume) {
-                        this.audioSource.setVolume(ARENA.volume);
-                    }
-                    if (ARENA.refDist) { // L-R panning
-                        this.audioSource.setRefDistance(ARENA.refDist);
-                    }
-                    if (ARENA.rolloffFact) {
-                        this.audioSource.setRolloffFactor(ARENA.rolloffFact);
-                    }
-                    if (ARENA.distModel) {
-                        this.audioSource.setDistanceModel(ARENA.distModel);
-                    }
-                } else {
-                    this.audioSource.setMediaStreamSource(audioStream);
-                }
-                this.aec(listener);
             }
         } else {
             this.drawMicrophone();
-            // pause WebRTC audio stream
-            if (this.audioTrack) {
-                this.audioTrack.enabled = false;
-            }
         }
     },
 
@@ -327,39 +211,32 @@ AFRAME.registerComponent('arena-user', {
             // frustrum culling for WebRTC streams
             const cam = document.getElementById('my-camera').sceneEl.camera;
             const frustum = new THREE.Frustum();
-            frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(cam.projectionMatrix,
-                cam.matrixWorldInverse));
+            frustum.setFromProjectionMatrix(
+                new THREE.Matrix4().multiplyMatrices(
+                    cam.projectionMatrix, cam.matrixWorldInverse));
             const inFieldOfView = frustum.containsPoint(entityPos);
 
-            const videoElem = document.getElementById(this.videoID);
+            const jistiVideo = document.getElementById(this.videoID);
             // check if A/V cut off distance has been reached
             if (!inFieldOfView || distance > ARENA.maxAVDist) {
                 // pause WebRTC video stream
-                if (this.videoTrack) {
-                    this.videoTrack.enabled = false;
-                }
-                if (videoElem && !videoElem.paused) videoElem.pause();
+                this.videoTrack.enabled = false;
+                if (jistiVideo && !jistiVideo.paused) jistiVideo.pause();
             } else {
                 // unpause WebRTC video stream
-                if (this.videoTrack) {
-                    this.videoTrack.enabled = true;
-                }
-                if (videoElem && videoElem.paused) videoElem.play();
+                this.videoTrack.enabled = true;
+                if (jistiVideo && jistiVideo.paused) jistiVideo.play();
             }
         }
 
-        if (this.audioTrack) {
+        if (this.audioTrack && this.audioID) {
             // check if A/V cut off distance has been reached
             if (distance > ARENA.maxAVDist) {
                 // pause WebRTC audio stream
-                if (this.audioTrack) {
-                    this.audioTrack.enabled = false;
-                }
+                this.audioTrack.enabled = false;
             } else {
                 // unpause WebRTC audio stream
-                if (this.audioTrack) {
-                    this.audioTrack.enabled = true;
-                }
+                this.audioTrack.enabled = true;
             }
         }
     },

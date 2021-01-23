@@ -65,7 +65,7 @@ export class ARENAUtils {
 
     /**
      * Register a callback for the geolocation of user's device
-     * 
+     *
      * The callback should take the folowing arguments
      * @callback onLocationCallback
      * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successfull; "default" location if error
@@ -81,19 +81,19 @@ export class ARENAUtils {
             }, undefined);
         } else {
             if (navigator.geolocation) {
-                var options = {
+                const options = {
                     enableHighAccuracy: true,
                     timeout: 5000,
-                    maximumAge: 0
+                    maximumAge: 0,
                 };
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         if (callback) callback(position.coords, undefined);
                     },
-                    (err) => {        
+                    (err) => {
                         console.error(`Error getting device location: ${err.message}`);
-                        console.warn('Defaulting to campus location');            
-                        if (callback) callback({ latitude: 40.4427, longitude: 79.9430}, err);
+                        console.warn('Defaulting to campus location');
+                        if (callback) callback({latitude: 40.4427, longitude: 79.9430}, err);
                     },
                     options);
             }
