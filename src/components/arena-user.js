@@ -19,7 +19,7 @@ AFRAME.registerComponent('arena-user', {
         const name = el.id;
 
         el.setAttribute('rotation.order', 'YXZ');
-        el.object3D.position.set(0, 0, 0);
+        el.object3D.position.set(0, 1.6, 0);
         el.object3D.rotation.set(0, 0, 0);
 
         const decodeName = decodeURI(name.split('_')[2]);
