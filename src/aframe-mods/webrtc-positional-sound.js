@@ -76,7 +76,7 @@ Sound.prototype.update = function (oldData) {
       }
     }
 
-    var src = data.src.src;
+    var src = data.src;
     this.loaded = false;
     this.audioLoader.load(src, function (buffer) {
       self.pool.children.forEach(function (sound) {

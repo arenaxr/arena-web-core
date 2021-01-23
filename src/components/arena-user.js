@@ -191,6 +191,10 @@ AFRAME.registerComponent('arena-user', {
             const name = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.headText.setAttribute('value', name);
         }
+
+        if (data.color !== oldData.color) {
+            this.headText.setAttribute('color', data.color);
+        }
     },
 
     tick: function() {
