@@ -278,6 +278,7 @@ AFRAME.registerComponent('arena-user', {
 
     update: function(oldData) {
         const data = this.data;
+        const el = this.el;
 
         if (data.displayName !== oldData.displayName) {
             const name = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
