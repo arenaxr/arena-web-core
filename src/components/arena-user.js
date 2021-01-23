@@ -51,6 +51,7 @@ AFRAME.registerComponent('arena-user', {
         this.videoID = null;
         this.audioTrack = null;
         this.audioID = null;
+        this.distReached = null;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -171,7 +172,7 @@ AFRAME.registerComponent('arena-user', {
             if (!this.audioTrack) return;
 
             const jitsiAudio = document.getElementById(this.audioID);
-            if (jitsiAudio) {
+            if (!this.distReached && jitsiAudio) {
                 const sound = el.components.sound;
                 if (!sound) {
                     this.createAudio();
@@ -200,7 +201,7 @@ AFRAME.registerComponent('arena-user', {
         const data = this.data;
         const el = this.el;
 
-        // do period a/v updates
+        // do periodic a/v updates
         if (ARENA.Jitsi && ARENA.Jitsi.ready && data.jitsiId) {
             this.updateVideo();
             this.updateAudio();
@@ -234,8 +235,11 @@ AFRAME.registerComponent('arena-user', {
             // check if A/V cut off distance has been reached
             if (distance > ARENA.maxAVDist) {
                 this.audioTrack.enabled = false; // pause WebRTC audio stream
+                this.distReached = true;
+                el.removeAttribute('sound');
             } else {
                 this.audioTrack.enabled = true; // unpause WebRTC audio stream
+                this.distReached = false;
             }
         }
     },
