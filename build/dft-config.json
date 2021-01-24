@@ -1,6 +1,7 @@
 {
-	"schema_file": "arena-obj3d.json",
-	"scene": "render",
+    "schema_file": "arena-obj3d.json",
+    "namespace": "public",
+	"scene": "lobby",
 	"arena_host": "arena.andrew.cmu.edu",
 	"hosts": [
 		{

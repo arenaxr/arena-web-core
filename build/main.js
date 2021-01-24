@@ -1,4 +1,5 @@
 import * as PersistObjects from "./persist-objects.js"
+import {ARENAUserAccount} from "./arena-account.js"
 
 var schema_files = {
     "object": {
@@ -41,32 +42,26 @@ window.addEventListener('onauth', async function (e) {
 
     // Divs/textareas on the page
     var output = document.getElementById("output");
-    var output_oneline = document.getElementById("output_oneline");
+    var new_scene_modal = document.getElementById("newSceneModal");
     var editor = document.getElementById("editor");
     var validate = document.getElementById("validate");
-    var objlist = document.getElementById("objlist");
-    var scene = document.getElementById("arena_scene");
     var scenelist = document.getElementById("scenelist");
-    var mqtthost = document.getElementById("mqtt_host");
+    var namespacelist = document.getElementById("namespacelist");
     var arena_host = document.getElementById("arena_host");
-    var editmsg = document.getElementById("editmsg");
     var scene_url = document.getElementById("scene_url");
     var objfilter = document.getElementById("objfilter");
 
     // Buttons/s
+    var open_add_scene_button = document.getElementById("openaddscene");
+    var add_scene_button = document.getElementById("addscene");
     var set_value_button = document.getElementById("setvalue");
     var select_schema = document.getElementById("objtype");
     var genid_button = document.getElementById("genid");
     var clearform_button = document.getElementById("clearform");
-    //var add_button = document.getElementById("addobj");
-    //var add_button_large = document.getElementById("addobjlarge");
     var del_button = document.getElementById("delobj");
     var all_button = document.getElementById("selectall");
     var clearsel_button = document.getElementById("clearlist");
     var refresh_button = document.getElementById("refreshlist");
-    var mqtt_reconnect = document.getElementById("mqtt_reconnect");
-    var mqtt_reconnect = document.getElementById("mqtt_reconnect");
-    var mqtt_reconnect = document.getElementById("mqtt_reconnect");
 
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
@@ -106,7 +101,7 @@ window.addEventListener('onauth', async function (e) {
         type_chk[objtype] = true;
         lbl.addEventListener( 'change', function(e) {
               type_chk[e.target.value] = e.target.checked;
-              PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+              PersistObjects.populateObjectList(scene_list.value, objfilter.value, type_chk);
         });
     }
 
@@ -117,7 +112,7 @@ window.addEventListener('onauth', async function (e) {
       console.error("Error loading defaults:", err.message);
       return;
     }
-
+/*
     // load host values
     var arena_host_list = document.getElementById('arena_host_list');
     dfts.hosts.forEach(function(host) {
@@ -125,11 +120,12 @@ window.addEventListener('onauth', async function (e) {
        option.value = host.name;
        arena_host_list.appendChild(option);
     });
-
+*/
     // load values from defaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
-    scene.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+    namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
+    scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
     if (ARENADefaults && ARENADefaults.mqttHost) { // prefer deployed custom config
         arena_host.value = ARENADefaults.mqttHost;
     } else {
@@ -152,7 +148,8 @@ window.addEventListener('onauth', async function (e) {
             // no devPath
           }
         }
-        scene_url.href = document.location.protocol+'//'+document.location.hostname+document.location.port+'/'+devPath+scene.value;
+        
+        scene_url.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${devPath}${namespacelist.value}/${scenelist.value}`;
     };
 
     // when a host addr is changed; update settings
@@ -160,7 +157,7 @@ window.addEventListener('onauth', async function (e) {
         var hostData = mqttAndPersistURI(location.hostname);
         PersistObjects.set_options({ persist_uri: hostData.persist_uri });
         PersistObjects.mqttReconnect({ mqtt_uri: hostData.mqtt_uri});
-        await PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+        await PersistObjects.populateObjectList(scene_list.value, objfilter.value, type_chk);
         reload();
         updateLink();
     }
@@ -259,9 +256,35 @@ window.addEventListener('onauth', async function (e) {
     JSONEditor.defaults.options.object_layout = "normal";
     JSONEditor.defaults.options.show_errors = "interaction";
 
+    // Open new scene modal
+    open_add_scene_button.addEventListener("click", function() {
+        document.getElementById("newSceneModalLabel").innerHTML = `Add scene to user/org: ${namespacelist.value}`;
+        new_scene_modal.style.display = "block";
+    });
+
+    // Add new scene 
+    add_scene_button.addEventListener("click", function() {
+        console.log("Add scene");
+        new_scene_modal.style.display = "none";
+    });
+
+    // close modal
+    document.querySelectorAll('.close-modal').forEach(item => {
+        item.addEventListener("click", function() {
+            var modal = document.getElementById("newSceneModal");
+            modal.style.display = "none";
+        });
+    });
+
     // When the "update form" button is clicked, set the editor"s value
     set_value_button.addEventListener("click", function() {
-        let obj = JSON.parse(output.value);
+        try {
+            let obj = JSON.parse(output.value);
+        } catch (err) {
+            displayAlert(`Invalid JSON input: ${err}`, 'error', 5000);
+            return;
+        }
+    
         editObject(obj, obj.action);
     });
 
@@ -269,7 +292,7 @@ window.addEventListener('onauth', async function (e) {
     clearform_button.addEventListener("click", function() {
       reload();
     });
-
+ 
     // generate a random object_id
     genid_button.addEventListener("click", function() {
         var obj = JSON.parse(output.value);
@@ -298,42 +321,43 @@ window.addEventListener('onauth', async function (e) {
         mqtt_uri: hostData.mqtt_uri,
         obj_list: document.getElementById("objlist"),
         scene_list: document.getElementById("scenelist"),
+        ns_list: document.getElementById("namespacelist"),
         scene_textbox: document.getElementById("arena_scene"),
         log_panel: document.getElementById("logpanel"),
         editobj_handler: editObject,
+        auth_state: await ARENAUserAccount.userAuthState(),
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
     });
 
+    await PersistObjects.populateLists(objfilter.value, type_chk);
     reload();
     updateLink();
 
-    await PersistObjects.populateList(scene.value, objfilter.value, type_chk);
     displayAlert("Done loading.", "info", 1000);
 
-    // Change listener for scene
-    scene.addEventListener("change", async function() {
-        PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+    // Change listener for namespace
+    namespacelist.addEventListener("change", async function() {
+        PersistObjects.populateSceneList(namespacelist.value);
         reload();
         updateLink();
-        localStorage.setItem("scene", scene.value);
-        scenelist.value = scene.value;
+        localStorage.setItem("namespace", namespacelist.value );
+        scenelist.dispatchEvent(new Event('change'));
     });
 
     // Change listener for scene list
     scenelist.addEventListener("change", async function() {
-        if (scenelist.value !== "No scenes found.") {
-          scene.value = scenelist.value;
-          PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+        if (scenelist.disabled === false) {
+          PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
           reload();
           updateLink();
-          localStorage.setItem("scene", scene.value);
+          localStorage.setItem("scene", scenelist.value );          
         }
     });
 
     // Change listener for object id filter regex
     objfilter.addEventListener("change", async function() {
-        PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+        PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
     });
 
     // Change listener for arena URL
@@ -352,13 +376,13 @@ window.addEventListener('onauth', async function (e) {
     });
 
     refresh_button.addEventListener("click", function() {
-        PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+        PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
     });
 
     del_button.addEventListener("click", function() {
-        PersistObjects.deleteSelected(scene.value);
+        PersistObjects.deleteSelected(scene_list.value);
         setTimeout(() => {
-            PersistObjects.populateList(scene.value, objfilter.value, type_chk);
+            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });
@@ -369,7 +393,7 @@ window.addEventListener('onauth', async function (e) {
               alert("Please check validation errors.");
               return;
           }
-          PersistObjects.addObject(output.value, scene.value);
+          PersistObjects.addObject(output.value, scene_list.value);
       });
     });
 });
