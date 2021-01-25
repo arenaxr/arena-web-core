@@ -7,11 +7,10 @@
 // - MQTT broker
 //
 // Required:
-//  <script src="https://apis.google.com/js/platform.js"></script>
 //  <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="./conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
-//  <script src="./auth.js"></script>  <!-- browser authorization flow -->
-//  <script type="text/javascript">authCheck({ signInPath: "./signin" });</script>
+//  <script src="./src/auth.js"></script>  <!-- browser authorization flow -->
+//  <script type="text/javascript">authCheck();</script>
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
@@ -38,71 +37,16 @@ window.onload = function() {
     initAuthPanel(); // add auth details panel
 };
 
-// eslint-disable-next-line no-var
-var auth2;
-
 /**
- * check if the current user is already signed in
+ * Initialize and launch start of authentication flow.
  * @param {object} args auth arguments
  */
-function authCheck(args) {
-    localStorage.removeItem('mqtt_token'); // deprecate local token storage
-    AUTH.signInPath = args.signInPath;
-    switch (localStorage.getItem('auth_choice')) {
-    case 'anonymous':
-        window.addEventListener('load', checkAnonAuth);
-        break;
-    case 'google':
-    default: // default = can mean private browser
-        // normal check for google auth2
-        try {
-            gapi.load('auth2', checkGoogleAuth);
-        } catch (e) {
-            console.error(e);
-            // send login with redirection url from this page
-            localStorage.setItem('request_uri', location.href);
-            location.href = AUTH.signInPath;
-        }
-        break;
-    }
+const authCheck = function() {
+    localStorage.setItem('request_uri', location.href); // save current in case of login redirect
+    AUTH.signInPath = `${window.location.protocol}//${window.location.host}/user/login`;
+    AUTH.signOutPath = `${window.location.protocol}//${window.location.host}/user/logout`;
+    window.addEventListener('load', requestAuthState);
 };
-
-/**
- * check anonymous authentication
- * @param {object} event event
- */
-function checkAnonAuth(event) {
-    // prefix all anon users with "anonymous-"
-    const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
-    requestMqttToken('anonymous', anonName);
-}
-
-/**
- * check google oauth authentication
- */
-function checkGoogleAuth() {
-    auth2 = gapi.auth2.init({
-        client_id: ARENADefaults.gAuthClientId,
-    }).then(function() {
-        auth2 = gapi.auth2.getAuthInstance();
-        if (!auth2.isSignedIn.get()) {
-            console.log('User is not signed in.');
-            // send login with redirection url from this page
-            localStorage.setItem('request_uri', location.href);
-            location.href = AUTH.signInPath;
-        } else {
-            console.log('User is already signed in.');
-            localStorage.setItem('auth_choice', 'google');
-            const googleUser = auth2.currentUser.get();
-            onSignIn(googleUser);
-        }
-    }, function(error) {
-        console.error(error);
-        // send login with redirection url from this page
-        localStorage.setItem('request_uri', location.href);
-        location.href = AUTH.signInPath;
-    });
-}
 
 /**
  * Processes name sources from auth for downstream use.
@@ -134,43 +78,15 @@ function processUserNames(authName, prefix = null) {
     return processedName;
 }
 
-
-/**
- * Processes user signin.
- * @param {object} googleUser user data
- */
-function onSignIn(googleUser) {
-    const profile = googleUser.getBasicProfile();
-    console.log('ID: ' + profile.getId());
-    console.log('Full Name: ' + profile.getName());
-    console.log('Email: ' + profile.getEmail());
-    processUserNames(profile.getName());
-    // request mqtt-auth
-    const idToken = googleUser.getAuthResponse().id_token;
-    requestMqttToken('google', profile.getEmail(), idToken);
-}
-
 /**
  * Processes user sign out.
  */
 function signOut() {
-    // logout, and disassociate user
-    switch (localStorage.getItem('auth_choice')) {
-    case 'google':
-        const auth2 = gapi.auth2.getAuthInstance();
-        auth2.signOut().then(function() {
-            console.log('User signed out.');
-        });
-        auth2.disconnect();
-        break;
-    default:
-        break;
-    }
     localStorage.removeItem('auth_choice');
     localStorage.removeItem('mqtt_username');
     // back to signin page
     localStorage.setItem('request_uri', location.href);
-    location.href = AUTH.signInPath;
+    location.href = AUTH.signOutPath;
 }
 
 /**
@@ -195,9 +111,9 @@ function getCookie(name) {
 }
 
 /**
- * API SAMPLE: Request user state data for client-side state management.
+ * Request user state data for client-side state management.
  */
-function _requestUserAuthState() {
+function requestAuthState() {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `/user/user_state`);
     const csrftoken = getCookie('csrftoken');
@@ -206,13 +122,33 @@ function _requestUserAuthState() {
     xhr.responseType = 'json';
     xhr.onload = () => {
         if (xhr.status !== 200) {
-            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+            console.error(`Error loading user_state: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
         } else {
-            console.debug('user authenticated:', xhr.response.authenticated);
-            console.debug('user type:', xhr.response.type);
-            console.debug('user username:', xhr.response.username);
-            console.debug('user fullname:', xhr.response.fullname);
-            console.debug('user email:', xhr.response.email);
+            AUTH.user_type = xhr.response.type; // user database auth state
+            const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
+            if (xhr.response.authenticated) {
+                // auth user login
+                localStorage.setItem('auth_choice', xhr.response.type);
+                processUserNames(xhr.response.fullname ? xhr.response.fullname : xhr.response.username);
+                AUTH.user_username = xhr.response.username;
+                AUTH.user_fullname = xhr.response.fullname;
+                AUTH.user_email = xhr.response.email;
+                requestMqttToken(xhr.response.type, xhr.response.username);
+            } else {
+                if (savedAuthType == 'anonymous') {
+                    // user chose to login as 'anonymous'
+                    localStorage.setItem('auth_choice', xhr.response.type);
+                    // prefix all anon users with "anonymous-"
+                    const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+                    AUTH.user_username = anonName;
+                    AUTH.user_fullname = localStorage.getItem('display_name');
+                    AUTH.user_email = 'N/A';
+                    requestMqttToken('anonymous', anonName);
+                } else {
+                    // user is logged out or new and not logged in
+                    location.href = AUTH.signInPath;
+                }
+            }
         }
     };
 }
@@ -268,12 +204,11 @@ function _requestUserNewScene(sceneNameOnly, isPublic) {
  * Request token to auth service
  * @param {string} authType authentication type
  * @param {string} mqttUsername mqtt user name
- * @param {string} idToken id to use in the token
  */
-function requestMqttToken(authType, mqttUsername, idToken = null) {
+function requestMqttToken(authType, mqttUsername) {
     // Request JWT before connection
     const xhr = new XMLHttpRequest();
-    let params = 'username=' + mqttUsername + '&id_token=' + idToken;
+    let params = 'username=' + mqttUsername;
     params += `&id_auth=${authType}`;
     // provide user control topics for token construction
     if (typeof defaults !== 'undefined') {
@@ -298,7 +233,7 @@ function requestMqttToken(authType, mqttUsername, idToken = null) {
             params += `&ctrlid2=${ARENA.viveRName}`;
         }
     }
-    xhr.open('POST', ARENADefaults.urlMqttAuth);
+    xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -311,19 +246,6 @@ function requestMqttToken(authType, mqttUsername, idToken = null) {
         } else {
             AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;
-            switch (authType) {
-            case 'google':
-                const googleUser = auth2.currentUser.get();
-                const profile = googleUser.getBasicProfile();
-                AUTH.user_fullname = profile.getName();
-                AUTH.user_email = profile.getEmail();
-                break;
-            default:
-                AUTH.user_fullname = localStorage.getItem('display_name');
-                AUTH.user_email = 'N/A';
-                break;
-            }
-
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
@@ -350,7 +272,7 @@ function completeAuth(username, token) {
         return;
     }
     // emit custom event to window
-    const authCompleteEvent = new CustomEvent('onauth', {detail: onAuthEvt});
+    const authCompleteEvent = new CustomEvent('onauth', { detail: onAuthEvt });
     window.dispatchEvent(authCompleteEvent);
 }
 
@@ -370,7 +292,7 @@ function getAuthStatus() {
 /**
  * Utility function to format token contents
  * @param {object} perms token permissions
- * @return {string} html formated string
+ * @return {string} html formatted string
  */
 function formatPerms(perms) {
     const lines = [];
@@ -398,6 +320,11 @@ function formatPerms(perms) {
         lines.push(`- `);
     }
     return lines.join('<br>');
+}
+
+function showProfile() {
+    // open profile in new page to avoid mqtt disconnect
+    window.open(`${window.location.protocol}//${window.location.host}/user/profile`);
 }
 
 /**

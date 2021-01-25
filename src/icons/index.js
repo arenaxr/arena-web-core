@@ -319,6 +319,15 @@ export class SideMenu {
         };
         formDiv.appendChild(stats);
 
+        const profile = document.createElement('a');
+        profile.href = '#';
+        profile.innerHTML = 'Profile';
+        profile.onclick = function() {
+            showProfile();
+        };
+        formDiv.appendChild(profile);
+        formDiv.appendChild(document.createElement('br'));
+
         const perms = document.createElement('a');
         perms.href = '#';
         perms.innerHTML = 'MQTT Permissions';
@@ -339,7 +348,7 @@ export class SideMenu {
         formDiv.appendChild(authType);
         formDiv.appendChild(document.createElement('br'));
 
-        formDiv.append('Username: ');
+        formDiv.append('ARENA Username: ');
         const authUsername = document.createElement('span');
         formDiv.appendChild(authUsername);
         formDiv.appendChild(document.createElement('br'));
