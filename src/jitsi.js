@@ -390,6 +390,7 @@ export class ARENAJitsi {
             delete this.screenShareDict[id];
         }
         $(`#video${id}`).remove();
+        $(`#audio${id}`).remove();
         delete this.remoteTracks[id];
 
         // emit user left event
