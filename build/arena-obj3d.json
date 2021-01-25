@@ -211,6 +211,34 @@
              }
           }
        },
+       "material-extras":{
+          "type":"object",
+          "title":"Material extras",
+          "description":"Define extra material properties.",
+          "properties":{
+             "encoding":{
+                "type":"string",
+                "enum":[
+                   "LinearEncoding",
+                   "sRGBEncoding",
+                   "GammaEncoding",
+                   "RGBEEncoding",
+                   "LogLuvEncoding",
+                   "RGBM7Encoding",
+                   "RGBM16Encoding",
+                   "RGBDEncoding",
+                   "BasicDepthPacking",
+                   "RGBADepthPacking"
+                ],
+                "default":"sRGBEncoding"
+             },
+             "needsUpdate":{
+                "type":"boolean",
+                "default":false
+             }
+          },
+          "default": {"encoding": "sRGBEncoding", "needsUpdate": false}
+       },
        "multisrc":{
           "type":"object",
           "title":"Multi Source",
@@ -566,22 +594,25 @@
           "description":"Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)"
        },
        "shadow":{
-        "properties": {
-            "cast": {
-                "type": "boolean",
-                "title": "cast shadow",
-                "description": "Whether the entity casts shadows onto the surrounding scene",
-                "default": false
-            },
-            "receive": {
-                "type": "boolean",
-                "title": "receive shadow",
-                "description": "Whether the entity receives shadows from the surrounding scene",
-                "default": false
-            }
-        },
-        "default": {"cast": false, "receive": false}
-     },
+          "properties":{
+             "cast":{
+                "type":"boolean",
+                "title":"cast shadow",
+                "description":"Whether the entity casts shadows onto the surrounding scene",
+                "default":false
+             },
+             "receive":{
+                "type":"boolean",
+                "title":"receive shadow",
+                "description":"Whether the entity receives shadows from the surrounding scene",
+                "default":false
+             }
+          },
+          "default":{
+             "cast":false,
+             "receive":false
+          }
+       },
        "text":{
           "properties":{
              "object_type":{
@@ -728,6 +759,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -838,6 +872,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -876,10 +913,10 @@
              },
              "color":{
                 "$ref":"#/definitions/color"
-             },             
+             },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":true,
           "required":[
@@ -910,6 +947,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -954,7 +994,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":false,
           "required":[
@@ -990,6 +1030,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1033,7 +1076,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":false,
           "default":{
@@ -1203,71 +1246,71 @@
                 "description":"Id of element the spot should point to. set to null to transform spotlight by orientation, pointing to it’s -Z axis. NOTE: Spot light type only.",
                 "default":null
              },
-              "castShadow": {
+             "castShadow":{
                 "title":"castShadow (point, spot, directional)",
                 "type":"boolean",
-                "default": false
-              },
-              "shadowBias": {
+                "default":false
+             },
+             "shadowBias":{
                 "title":"shadowBias (castShadow=true)",
                 "type":"number",
-                "default": 0
-              },
-              "shadowCameraFar": {
+                "default":0
+             },
+             "shadowCameraFar":{
                 "title":"shadowCameraFar (castShadow=true)",
                 "type":"number",
-                "default": 500
-              },
-              "shadowCameraFov": {
+                "default":500
+             },
+             "shadowCameraFov":{
                 "title":"shadowCameraFov (castShadow=true)",
                 "type":"number",
-                "default": 90
-              },
-              "shadowCameraNear": {
+                "default":90
+             },
+             "shadowCameraNear":{
                 "title":"shadowCameraNear (castShadow=true)",
                 "type":"number",
-                "default": 0.5
-              },
-              "shadowCameraTop": {
+                "default":0.5
+             },
+             "shadowCameraTop":{
                 "title":"shadowCameraTop (castShadow=true)",
                 "type":"number",
-                "default": 5
-              },
-              "shadowCameraRight": {
+                "default":5
+             },
+             "shadowCameraRight":{
                 "title":"shadowCameraRight (castShadow=true)",
                 "type":"number",
-                "default": 5
-              },
-              "shadowCameraBottom": {
+                "default":5
+             },
+             "shadowCameraBottom":{
                 "title":"shadowCameraBottom (castShadow=true)",
                 "type":"number",
-                "default": -5
-              },
-              "shadowCameraLeft": {
+                "default":-5
+             },
+             "shadowCameraLeft":{
                 "title":"shadowCameraBottom (castShadow=true)",
                 "type":"number",
-                "default": -5
-              },
-              "shadowCameraVisible": {
+                "default":-5
+             },
+             "shadowCameraVisible":{
                 "title":"shadowCameraVisible (castShadow=true)",
                 "type":"boolean",
-                "default": false
-              },
-              "shadowMapHeight": {
+                "default":false
+             },
+             "shadowMapHeight":{
                 "title":"shadowMapHeight (castShadow=true)",
                 "type":"number",
-                "default": 512
-              },
-              "shadowMapWidth": {
+                "default":512
+             },
+             "shadowMapWidth":{
                 "title":"shadowMapWidth (castShadow=true)",
                 "type":"number",
-                "default": 512
-              },
-              "shadowRadius": {
+                "default":512
+             },
+             "shadowRadius":{
                 "title":"shadowRadius (castShadow=true)",
                 "type":"number",
-                "default": 1
-              },             
+                "default":1
+             },
              "position":{
                 "title":"position",
                 "$ref":"#/definitions/position"
@@ -1283,7 +1326,7 @@
              "parent":{
                 "title":"parent",
                 "$ref":"#/definitions/parent"
-             }             
+             }
           },
           "additionalProperties":false,
           "default":{
@@ -1360,7 +1403,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "default":{
              "object_type":"line",
@@ -1419,7 +1462,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":false,
           "default":{
@@ -1491,6 +1534,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -1619,6 +1665,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1716,6 +1765,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -1831,6 +1883,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1941,6 +1996,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2021,6 +2079,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2099,6 +2160,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -2193,6 +2257,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -2298,6 +2365,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -2409,6 +2479,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2511,6 +2584,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2609,6 +2685,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -2714,6 +2793,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2814,6 +2896,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"

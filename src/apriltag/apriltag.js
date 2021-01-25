@@ -1,4 +1,4 @@
-importScripts('apriltag_wasm.js');
+importScripts('./apriltag_wasm.js');
 importScripts('https://unpkg.com/comlink/dist/umd/comlink.js');
 // importScripts("https://unpkg.com/comlink@alpha/dist/umd/comlink.js");
 /*

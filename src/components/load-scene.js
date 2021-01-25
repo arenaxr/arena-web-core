@@ -2,6 +2,7 @@
 
 /**
  * Load scene from persistence.
+ * TODO: this component is currently not used and probably needs to be updated
  *
  */
 AFRAME.registerComponent('load-scene', {
@@ -52,10 +53,10 @@ AFRAME.registerComponent('load-scene', {
                     // MQTT click event that everyone gets
                     console.log('load-scene url=' + data.url);
                     if (!this.loaded) {
-                        ARENA.loadArena(data.url, data.position, data.rotation);
+                        ARENA.loadArenaScene(data.url, data.position, data.rotation);
                         this.loaded = true;
                     } else {
-                        ARENA.unloadArena(data.url);
+                        ARENA.unloadArenaScene(data.url);
                         this.loaded = false;
                     }
                 }

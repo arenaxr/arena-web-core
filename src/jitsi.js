@@ -66,7 +66,6 @@ export class ARENAJitsi {
 
         this.jitsiId = null;
 
-        this.chromeSpatialAudioOn = null;
         this.localTracks = []; // just our set of audio,video tracks
         this.remoteTracks = {}; // map of arrays of tracks
 
@@ -212,11 +211,68 @@ export class ARENAJitsi {
                 this.remoteTracks[participantId][0].dispose();
             }
             this.remoteTracks[participantId][0] = track;
+
+            const audioId = `audio${participantId}`;
+            // create HTML audio elem to store audio
+            if (!document.getElementById(audioId)) {
+                $('a-assets').append(`<audio id='${audioId}'/>`);
+            }
+            track.attach($(`#${audioId}`)[0]);
         } else if (track.getType() == 'video') {
             if (this.remoteTracks[participantId][1]) {
                 this.remoteTracks[participantId][1].dispose();
             }
             this.remoteTracks[participantId][1] = track;
+
+            const videoId = `video${participantId}`;
+            // create HTML video elem to store video
+            if (!document.getElementById(videoId)) {
+                $('a-assets').append(`<video autoplay='1' id='${videoId}'/>`);
+            }
+            track.attach($(`#${videoId}`)[0]);
+
+            const user = this.conference.getParticipantById(participantId);
+            let camNames = user.getProperty('arenaCameraName');
+            if (!camNames) camNames = user.getDisplayName();
+            if (!camNames) return; // handle jitsi-only users that have not set the display name
+
+            if (camNames.includes(ARENAJitsi.SCREENSHARE_PREFIX)) {
+                let dn = user.getProperty('screenshareDispName');
+                if (!dn) dn = user.getDisplayName();
+                if (!dn) dn = `No Name #${id}`;
+                const camName = user.getProperty('screenshareCamName');
+                let objectIds = user.getProperty('screenshareObjIds');
+
+                if (camName && objectIds) {
+                    ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
+                        id: participantId,
+                        dn: dn,
+                        cn: camName,
+                        scene: ARENA.sceneName,
+                        src: ARENAEventEmitter.sources.JITSI,
+                    });
+                    objectIds = objectIds.split(',');
+
+                    // handle screen share video
+                    for (let i = 0; i < objectIds.length; i++) {
+                        if (objectIds[i]) {
+                            const video = $(`#${videoId}`);
+                            video.on('loadeddata', (e) => {
+                                this.updateScreenShareObject(objectIds[i], videoId, participantId);
+                            });
+                        }
+                    }
+                } else { // display as external user; possible spoofer
+                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                        id: participantId,
+                        dn: dn,
+                        cn: undefined,
+                        scene: ARENA.sceneName,
+                        src: ARENAEventEmitter.sources.JITSI,
+                    });
+                    return;
+                }
+            }
         }
 
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
@@ -231,58 +287,6 @@ export class ARENAJitsi {
         //     () => {
         //         console.log('remote track muted')
         //     });
-
-        const videoId = `video${participantId}`;
-
-        // create HTML video elem to store video
-        if (!document.getElementById(videoId)) {
-            // create
-            $('a-assets').append(`<video autoplay='1' id='${videoId}'/>`);
-        }
-        track.attach($(`#${videoId}`)[0]);
-
-        const user = this.conference.getParticipantById(participantId);
-        let camNames = user.getProperty('arenaCameraName');
-        if (!camNames) camNames = user.getDisplayName();
-        if (!camNames) return; // handle jitsi-only users that have not set the display name
-
-        if (camNames.includes(ARENAJitsi.SCREENSHARE_PREFIX)) {
-            let dn = user.getProperty('screenshareDispName');
-            if (!dn) dn = user.getDisplayName();
-            if (!dn) dn = `No Name #${id}`;
-            const camName = user.getProperty('screenshareCamName');
-            let objectIds = user.getProperty('screenshareObjIds');
-
-            if (camName && objectIds) {
-                ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
-                    id: participantId,
-                    dn: dn,
-                    cn: camName,
-                    scene: ARENA.sceneName,
-                    src: ARENAEventEmitter.sources.JITSI,
-                });
-                objectIds = objectIds.split(',');
-
-                // handle screen share video
-                for (let i = 0; i < objectIds.length; i++) {
-                    if (objectIds[i]) {
-                        const video = $(`#${videoId}`);
-                        video.on('loadeddata', (e) => {
-                            this.updateScreenShareObject(objectIds[i], videoId, participantId);
-                        });
-                    }
-                }
-            } else { // display as external user; possible spoofer
-                ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
-                    id: participantId,
-                    dn: dn,
-                    cn: undefined,
-                    scene: ARENA.sceneName,
-                    src: ARENAEventEmitter.sources.JITSI,
-                });
-                return;
-            }
-        }
     }
 
     /**
@@ -463,14 +467,14 @@ export class ARENAJitsi {
 
         this.conference.join(); // this.conference.join(password);
 
-        this.chromeSpatialAudioOn = AFRAME.utils.device.isMobile();
-        if (!this.chromeSpatialAudioOn) {
+        this.spatialAudioOn = AFRAME.utils.device.isMobile();
+        if (!this.spatialAudioOn) {
             // only tested and working on mac on chrome
             navigator.mediaDevices.enumerateDevices().then(function(devices) {
                 const headphonesConnected = devices
                     .filter((device) => /audio\w+/.test(device.kind))
                     .find((device) => device.label.toLowerCase().includes('head'));
-                this.chromeSpatialAudioOn = !!headphonesConnected;
+                this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
     }

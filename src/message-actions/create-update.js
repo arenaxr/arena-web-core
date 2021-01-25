@@ -114,7 +114,8 @@ export class CreateUpdate {
 
             case 'scene-options':
             case 'face-features':
-                // these message types are not for us; silently ignore these
+            case 'landmarks':    
+                // these message types are not for us; silently ignore them
                 return;
 
             default: 
@@ -245,7 +246,34 @@ export class CreateUpdate {
             this.setComponentAttributes(entityEl, data, type);
         }
 
-        // what remains in data are components
+        // what remains in data are components we set as attributes of the entity
+        this.setEntityAttributes(entityEl, data);        
+    }
+
+   /**
+     * Handles component attributes
+     * Check if we have a registered component that takes the attributes given in data
+     * @param {object} entityEl the new aframe object
+     * @param {object} data data part of the message with the attributes
+     * @param {string} cName component name
+     */
+    static setComponentAttributes(entityEl, data, cName) {
+        if (!AFRAME.components[cName]) return; // no component registered with this name
+        for (const [attribute, value] of Object.entries(data)) {                    
+            if (AFRAME.components[cName].Component.prototype.schema[attribute]) {    
+                entityEl.setAttribute(cName, attribute, value);
+                delete data[attribute]; // we handled this attribute; remove it
+            }
+        }
+    }
+
+   /**
+     * Handles entity attributes (components)
+     * 
+     * @param {object} entityEl the new aframe object
+     * @param {object} data data part of the message with the attributes
+     */
+    static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
             //console.info("Set entity attribute [id type -  attr value]:", message.id, type, attribute, value);
 
@@ -286,26 +314,8 @@ export class CreateUpdate {
         }
     }
 
-   /**
-     * Handles component attributes
-     * Check if we have a registered component that takes the attributes given in data
-     * @param {object} entityEl the new aframe object
-     * @param {object} data data part of the message with the attributes
-     * @param {string} cName component name
-     */
-    static setComponentAttributes(entityEl, data, cName) {
-        if (!AFRAME.components[cName]) return; // no component registered with this name
-        for (const [attribute, value] of Object.entries(data)) {                    
-            if (AFRAME.components[cName].Component.prototype.schema[attribute]) {    
-                //console.info("Set component attribute [id type -  attr value]:", entityEl.getAttribute('id'), cName, attribute, value);
-                entityEl.setAttribute(cName, attribute, value);
-                delete data[attribute]; // we handled this attribute; remove it
-            }
-        }
-    }
-
     /**
-     * Create handler
+     * Camera override handler
      * @param {object} message message to be parsed
      */
     static handleCameraOverride(message) {
@@ -323,7 +333,7 @@ export class CreateUpdate {
                 myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
                     new THREE.Quaternion(r.x, r.y, r.z, r.w));
             }
-        } else if (message.data.object_type !== 'look-at') { // camera look-at
+        } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
                 Logger.error('camera look-at', 'local camera object does not exist! (create camera before)');
                 return;

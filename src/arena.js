@@ -35,7 +35,7 @@ export class Arena {
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         this.vioTopic = this.defaults.vioTopic;
-
+        
         // set scene name from url
         this.setSceneName();
 
@@ -153,7 +153,7 @@ export class Arena {
      * @param {Object} position initial position
      * @param {Object} rotation initial rotation
      */
-    loadArena = (urlToLoad, position, rotation) => {
+    loadArenaScene = (urlToLoad, position, rotation) => {
 
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
@@ -243,7 +243,7 @@ export class Arena {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArena = (urlToLoad) => {
+    unloadArenaScene = (urlToLoad) => {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT;
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -275,9 +275,9 @@ export class Arena {
     };
 
     /**
-     * Loads and applied scene-options (if it exists), otherwise set to default enviornment
+     * Loads and applies scene-options (if it exists), otherwise set to default environment
      */
-    loadScene = () => {
+    loadSceneOptions = () => {
         let sceneOptions = {
             jitsiServer: 'mr.andrew.cmu.edu',
         };
@@ -360,15 +360,32 @@ export class Arena {
     };
 
     /**
+     * User location callback; Called when the user location is available (or error is returned)
+     * 
+     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successfull; "default" location if error
+     * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error
+     */
+    userLocationCallback = (coords, err=undefined) => {
+        // save user location
+        ARENA.clientCoords = coords;
+        console.log("Location:", coords);
+
+        // emit event 
+        ARENA.events.emit(ARENAEventEmitter.events.ONLOCATION, { error: err });
+    }
+
+    /**
      * When user auth is done, startup mqtt, runtime, chat and other ui elements;
      * Remaining init will be done once mqtt connection is done
      */
     onAuth = async (e) => {
-        const args = e.detail;
-        this.clientCoords = ARENAUtils.getLocation();
+
+        // request user location and setup a callback when it is available
+        ARENAUtils.getLocation(this.userLocationCallback.bind(this));
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
+        const args = e.detail;
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
 
