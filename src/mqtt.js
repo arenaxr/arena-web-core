@@ -67,6 +67,10 @@ export class ARENAMqtt {
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
         camera.setAttribute('position', ARENA.startCoords);
+        // enable vio if fixedCamera is given
+        if (ARENA.fixedCamera !== '') {
+            camera.setAttribute('arena-camera', 'vioEnabled', true);
+        }
 
         // const viveLeft = document.getElementById('vive-leftHand');
         // viveLeft.setAttribute('arena-vive', 'enabled', true);

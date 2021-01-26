@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Main ARENA Object
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 /* global AFRAME, ARENA */
 
 import {ARENAUtils} from '../utils.js';
@@ -9,6 +17,7 @@ import {ARENAUtils} from '../utils.js';
 AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: {type: 'boolean', default: false},
+        vioEnabled: {type: 'boolean', default: false},
         displayName: {type: 'string', default: 'No Name'},
         color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
@@ -17,7 +26,7 @@ AFRAME.registerComponent('arena-camera', {
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
     },
 
-    init: function() {
+    init: function () {
         this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
@@ -34,7 +43,7 @@ AFRAME.registerComponent('arena-camera', {
         this.publishVio('create');
     },
 
-    publishPose(action='update') {
+    publishPose(action = 'update') {
         const data = this.data;
         if (!data.enabled) return;
 
@@ -73,44 +82,42 @@ AFRAME.registerComponent('arena-camera', {
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
-    publishVio(action='update') {
+    publishVio(action = 'update') {
         const data = this.data;
-        if (!data.enabled) return;
+        if (!data.vioEnabled) return;
 
-        if (ARENA.fixedCamera !== '') {
-            const msg = {
-                object_id: ARENA.camName,
-                action: action,
-                type: 'object',
-                data: {
-                    object_type: 'camera',
-                    position: {
-                        x: parseFloat(data.vioPosition.x.toFixed(3)),
-                        y: parseFloat(data.vioPosition.y.toFixed(3)),
-                        z: parseFloat(data.vioPosition.z.toFixed(3)),
-                    },
-                    rotation: {
-                        x: parseFloat(data.vioRotation._x.toFixed(3)),
-                        y: parseFloat(data.vioRotation._y.toFixed(3)),
-                        z: parseFloat(data.vioRotation._z.toFixed(3)),
-                        w: parseFloat(data.vioRotation._w.toFixed(3)),
-                    },
-                    color: data.color,
+        const msg = {
+            object_id: ARENA.camName,
+            action: action,
+            type: 'object',
+            data: {
+                object_type: 'camera',
+                position: {
+                    x: parseFloat(data.vioPosition.x.toFixed(3)),
+                    y: parseFloat(data.vioPosition.y.toFixed(3)),
+                    z: parseFloat(data.vioPosition.z.toFixed(3)),
                 },
-            };
-            ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
-        }
+                rotation: {
+                    x: parseFloat(data.vioRotation._x.toFixed(3)),
+                    y: parseFloat(data.vioRotation._y.toFixed(3)),
+                    z: parseFloat(data.vioRotation._z.toFixed(3)),
+                    w: parseFloat(data.vioRotation._w.toFixed(3)),
+                },
+                color: data.color,
+            },
+        };
+        ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
-    publishHeadText(action='update') {
+    publishHeadText(action = 'update') {
         const data = this.data;
 
         ARENA.Mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
-            'object_id': ARENA.camName,
-            'action': 'create',
-            'type': 'object',
-            'displayName': data.displayName,
-            'data': {'object_type': 'headtext'},
+            object_id: ARENA.camName,
+            action: 'create',
+            type: 'object',
+            displayName: data.displayName,
+            data: {object_type: 'headtext'},
         });
     },
 
@@ -122,7 +129,7 @@ AFRAME.registerComponent('arena-camera', {
         }
     },
 
-    tick: (function(t, dt) {
+    tick: function (t, dt) {
         const data = this.data;
         const el = this.el;
 
@@ -149,12 +156,12 @@ AFRAME.registerComponent('arena-camera', {
         // update position if pose changed, or every 1 sec heartbeat
         if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
             // heartbeats are sent as create; TMP: sending as updates
-            this.publishPose(); 
+            this.publishPose();
             this.publishVio();
         } else if (this.lastPose !== newPose) {
             this.publishPose();
             this.publishVio();
         }
         this.lastPose = newPose;
-    }),
+    },
 });

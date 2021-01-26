@@ -35,7 +35,6 @@ export class Arena {
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
-        this.vioTopic = this.defaults.vioTopic;
         this.clientCoords = ARENAUtils.getLocation();
         
         // set scene name from url
@@ -49,7 +48,6 @@ export class Arena {
 
         // setup event listner
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
-
     }
 
     /**
@@ -94,7 +92,7 @@ export class Arena {
     /**
      * Sets this.sceneName from url. Includes namespace prefix (e.g. `namespace/foo`)
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
-     * Also sets persistenceUrl, outputTopic, renderTopic which depend on scene name
+     * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
      */
     setSceneName = () => {
         let path = window.location.pathname.substring(1);
@@ -125,10 +123,11 @@ export class Arena {
                 this.sceneName = `${namespace}/${scenename}`;
             }
         }
-        // Sets persistenceUrl, outputTopic, renderTopic
+        // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
         this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.sceneName;
         this.outputTopic = this.defaults.realm + '/s/' + this.sceneName + '/';
         this.renderTopic = this.outputTopic + '#';
+        this.vioTopic = this.defaults.realm + '/vio/' + this.sceneName + '/';
     }
 
     /**
@@ -429,7 +428,7 @@ export class Arena {
 
         SideMenu.setupIcons();
 
-        console.log("ARENA Started:", ARENA);
+        console.log("ARENA Started; ARENA=", ARENA);
     }
 }
 
