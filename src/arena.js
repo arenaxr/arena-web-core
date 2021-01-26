@@ -12,7 +12,8 @@ import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
-//import {RuntimeManager} from './runtime-mngr'
+import {RuntimeMngr} from './runtime-mngr';
+
 /**
  * Arena Object
  */
@@ -35,6 +36,7 @@ export class Arena {
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         this.vioTopic = this.defaults.vioTopic;
+        this.clientCoords = ARENAUtils.getLocation();
         
         // set scene name from url
         this.setSceneName();
@@ -287,8 +289,8 @@ export class Arena {
         renderer.gammaFactor = 2.2;
         renderer.outputEncoding = THREE['sRGBEncoding'];
 
-        const enviornment = document.createElement('a-entity');
-        enviornment.id = 'env';
+        const environment = document.createElement('a-entity');
+        environment.id = 'env';
 
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT;
@@ -309,9 +311,9 @@ export class Arena {
 
                     const envPresets = options['env-presets'];
                     for (const [attribute, value] of Object.entries(envPresets)) {
-                        enviornment.setAttribute('environment', attribute, value);
+                        environment.setAttribute('environment', attribute, value);
                     }
-                    document.getElementById('sceneRoot').appendChild(enviornment);
+                    document.getElementById('sceneRoot').appendChild(environment);
 
                     const rendererSettings = options['renderer-settings'];
                     if (rendererSettings) {
@@ -326,14 +328,14 @@ export class Arena {
 
                     // enviornment.setAttribute('particle-system', 'preset', 'snow');
                     // enviornment.setAttribute('particle-system', 'enabled', 'true');
-                    enviornment.setAttribute('environment', 'preset', 'starry');
-                    enviornment.setAttribute('environment', 'seed', 3);
-                    enviornment.setAttribute('environment', 'flatShading', true);
-                    enviornment.setAttribute('environment', 'groundTexture', 'squares');
-                    enviornment.setAttribute('environment', 'grid', 'none');
-                    enviornment.setAttribute('environment', 'fog', 0);
-                    enviornment.setAttribute('environment', 'fog', 0);
-                    sceneRoot.appendChild(enviornment);
+                    environment.setAttribute('environment', 'preset', 'starry');
+                    environment.setAttribute('environment', 'seed', 3);
+                    environment.setAttribute('environment', 'flatShading', true);
+                    environment.setAttribute('environment', 'groundTexture', 'squares');
+                    environment.setAttribute('environment', 'grid', 'none');
+                    environment.setAttribute('environment', 'fog', 0);
+                    environment.setAttribute('environment', 'fog', 0);
+                    sceneRoot.appendChild(environment);
 
                     // make default env have lights
                     const light = document.createElement('a-light');
@@ -360,32 +362,14 @@ export class Arena {
     };
 
     /**
-     * User location callback; Called when the user location is available (or error is returned)
-     * 
-     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successfull; "default" location if error
-     * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error
-     */
-    userLocationCallback = (coords, err=undefined) => {
-        // save user location
-        ARENA.clientCoords = coords;
-        console.log("Location:", coords);
-
-        // emit event 
-        ARENA.events.emit(ARENAEventEmitter.events.ONLOCATION, { error: err });
-    }
-
-    /**
      * When user auth is done, startup mqtt, runtime, chat and other ui elements;
      * Remaining init will be done once mqtt connection is done
      */
     onAuth = async (e) => {
-
-        // request user location and setup a callback when it is available
-        ARENAUtils.getLocation(this.userLocationCallback.bind(this));
+        const args = e.detail;
 
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
-        const args = e.detail;
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
 
@@ -405,8 +389,9 @@ export class Arena {
         // last will topic
         this.outputTopic + this.camName,
         );
-        /*
+        
         // init runtime manager
+        this.RuntimeManager=RuntimeMngr;
         this.RuntimeManager.init({
             mqtt_uri: this.mqttHostURI,
             onInitCallback: function() {
@@ -417,8 +402,7 @@ export class Arena {
             mqtt_username: this.username,
             mqtt_token: this.mqttToken,
         });
-        */
-
+        
         // init chat after
         this.chat = new ARENAChat({
             userid: this.idTag,
