@@ -101,7 +101,7 @@ export class CreateUpdate {
                 return;
 
             case 'camera-override': 
-                this.handleCameraOverride(message);
+                this.handleCameraOverride(action, message);
                 return;
 
             case 'rig':                
@@ -318,7 +318,8 @@ export class CreateUpdate {
      * Camera override handler
      * @param {object} message message to be parsed
      */
-    static handleCameraOverride(message) {
+    static handleCameraOverride(action, message) {
+        if (action !== ACTIONS.UPDATE) return; // camera override must be an update
         const myCamera = document.getElementById('my-camera');
 
         if (message.data.object_type === 'camera') { // camera override
@@ -332,6 +333,7 @@ export class CreateUpdate {
             if (r) {
                 myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
                     new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                Logger.warning('camera override', message);
             }
         } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
@@ -353,6 +355,7 @@ export class CreateUpdate {
                 target.hasOwnProperty('z')) {
                 myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z );
                 myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z );
+                Logger.warning('camera look-at', message);
             }
         }
     }
