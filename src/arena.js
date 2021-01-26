@@ -49,6 +49,7 @@ export class Arena {
 
         // setup event listner
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
+
     }
 
     /**
@@ -427,6 +428,8 @@ export class Arena {
         }
 
         SideMenu.setupIcons();
+
+        console.log("ARENA Started:", ARENA);
     }
 }
 
