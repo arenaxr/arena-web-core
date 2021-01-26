@@ -29,6 +29,7 @@ function createIconButton(initialImage, tooltip, onClick) {
         evt.stopPropagation();
     });
 
+    wrapper.onClick = onClick;
     return wrapper;
 }
 
@@ -36,9 +37,24 @@ function createIconButton(initialImage, tooltip, onClick) {
  * SideMenu class
  */
 export class SideMenu {
+
+    // we will save a list of the buttons other modules can request to be clicked
+    static _buttonList = [];
+
+    // button names, to be used by other modules
+    static buttons = {
+        AUDIO: 'audio',
+        VIDEO: 'video',
+        AVATAR: 'avatar',
+        SPEED: 'speed',
+        FLYING: 'fly',
+        SCREENSHARE: 'screenshare',
+        LOGOUT: 'logout'
+    };
+
     /**
      * Set up various icons for side menu
-     */
+     */   
     static setupIcons() {
         /**
          * Create audio button
@@ -63,6 +79,7 @@ export class SideMenu {
                     });
             }
         });
+        this._buttonList[this.buttons.AUDIO] = audioBtn;
 
         /**
          * Create video button
@@ -93,6 +110,7 @@ export class SideMenu {
                     });
             }
         });
+        this._buttonList[this.buttons.VIDEO] = videoBtn;
 
         /**
          * Create face tracking button
@@ -116,7 +134,7 @@ export class SideMenu {
                     });
                 }
             });
-
+        this._buttonList[this.buttons.AVATAR] = avatarBtn;
 
         const settingsButtons = [];
 
@@ -151,6 +169,7 @@ export class SideMenu {
         });
         speedBtn.style.display = 'none';
         settingsButtons.push(speedBtn);
+        this._buttonList[this.buttons.SPEED] = speedBtn;
 
         /**
          * Create flying on/off button
@@ -170,6 +189,7 @@ export class SideMenu {
         });
         flyingBtn.style.display = 'none';
         settingsButtons.push(flyingBtn);
+        this._buttonList[this.buttons.FLYING] = flyingBtn;
 
         /**
          * Create screen share button
@@ -224,6 +244,7 @@ export class SideMenu {
         });
         screenShareButton.style.display = 'none';
         settingsButtons.push(screenShareButton);
+        this._buttonList[this.buttons.SCREENSHARE] = screenShareButton;
 
         /**
          * Create logout button
@@ -245,6 +266,7 @@ export class SideMenu {
         });
         logoutBtn.style.display = 'none';
         settingsButtons.push(logoutBtn);
+        this._buttonList[this.buttons.LOGOUT] = logoutBtn;
 
         /**
          * Create additional setting button
@@ -417,5 +439,13 @@ export class SideMenu {
                 ARENA.events.emit(ARENAEventEmitter.events.NEW_SETTINGS, {userName: displayName});
             }
         }
+    }
+
+    /**
+     * Other modules can call this to request a click on a button
+     * @param button {string} the button name. Use SideMenu.buttons constants
+     */   
+    static clickButton(button) {
+        this._buttonList[button].onClick();
     }
 }
