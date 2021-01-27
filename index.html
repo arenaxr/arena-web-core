@@ -30,6 +30,21 @@
     <!-- face tracking -->
     <script src="src/face-tracking/dist/face-tracker.min.js"></script>
     <script src="src/face-tracking/script.js"></script>
+
+    <!-- 2D UI -->
+    <link href="vendor/mdb/mdb.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" crossorigin="anonymous" />
+    <style>
+      body {
+        background-color: #32364d;
+      }
+      .title-logo {
+        max-height: 32px;
+      }
+      #avSetup {
+        z-index: 999;
+      }
+    </style>
   </head>
   <body>
   <a-scene background="color: black" name="ARENAScene" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;" stats="false">  <!-- stats physics -->
@@ -67,9 +82,98 @@
 
     <div id="gltf-loading"></div>
 
+    <!-- A/V Setup -->
+    <div class="d-none d-flex align-items-center min-vh-100 routePage" id="avSetup">
+      <div class="container">
+        <div class="row d-flex justify-content-center align-items-center">
+          <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white">
+            <div class="row mb-3">
+              <div class="col">
+                <button class="float-end btn btn-sm btn-outline-primary" id="redetectAVBtn">
+                  Re-detect Devices <i class="fas fa-sync"></i>
+                </button>
+                <h3><img alt="CONIX Logo" class="title-logo" src="images/xr-logo-v7.png"/> Setup</h3>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-7 mb-md-0 mb-3">
+                <div>
+                  <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="form-floating mb-3">
+                  <select aria-label="Video Source" class="form-select mb-3" id="vidSourceSelect">
+                  </select>
+                  <label for="vidSourceSelect">Select Video Device</label>
+                </div>
+                <div class="form-floating">
+                  <select aria-label="Speaker Device" class="form-select mb-3" id="audioOutSelect">
+                    <option selected>No Device Detected</option>
+                  </select>
+                  <label for="audioOutSelect">Select Speaker Device</label>
+                </div>
+                <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
+                  Play Test Sound <i id="playTestAudioOutIcon" class="fas fa-volume-off"></i>
+                </button>
+                <audio id="testAudioOut" src="media/step.ogg"></audio>
+                <div class="form-floating mb-3">
+                  <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
+                  </select>
+                  <label for="audioSourceSelect">Select Microphone Device</label>
+                </div>
+                <div class="progress" style="height: 10px;">
+                  <div
+                          aria-valuemax="100"
+                          aria-valuemin="0"
+                          aria-valuenow="0"
+                          class="progress-bar progress-bar-striped bg-success"
+                          role="progressbar"
+                          style="width: 0"
+                          id="micMeter"
+                  ></div>
+                </div>
+                <!-- Ref https://github.com/cwilso/volume-meter/ !-->
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <div class="form-outline mb-3" id="displayName-input">
+                  <input class="form-control" id="displayName" type="text">
+                  <label class="form-label" for="displayName">Display Name</label>
+                </div>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Scene URL</span>
+                  <input
+                          aria-label="Scene URL"
+                          class="form-control"
+                          id="sceneURL"
+                          readonly
+                          type="text"
+                  />
+                  <button class="btn btn-primary" id="enterSceneAVBtn">Enter</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col">
+                <img alt="instructions" class="w-100 h-auto" src="images/instructions.png"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="src/auth.js"></script>
     <script type="text/javascript">authCheck();</script>
+
+    <!-- 2D UI -->
+    <script src="vendor/mdb/mdb.min.js"></script>
+
+    <!-- Mic setup audio processing -->
+    <script src="vendor/volume-meter.js"></script>
   </body>
 </html>
