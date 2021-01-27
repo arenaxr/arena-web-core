@@ -101,9 +101,6 @@ window.setupAV = (callback) => {
             findIndex((option) => option.text === stream.getVideoTracks()[0].label);
         videoElement.srcObject = stream;
 
-        localStorage.setItem('prefAudioInput', audioInSelect.value);
-        localStorage.setItem('prefVideoInput', videoSelect.value);
-
         // Scale video preview container
         let aspectRatioClass = '';
         const vidSettings = stream.getVideoTracks()[0].getSettings();
@@ -169,6 +166,8 @@ window.setupAV = (callback) => {
     document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
     document.getElementById('enterSceneAVBtn').addEventListener('click', () => {
         localStorage.setItem('display_name', displayName.value);
+        localStorage.setItem('prefAudioInput', audioInSelect.value);
+        localStorage.setItem('prefVideoInput', videoSelect.value);
         setupPanel.classList.add('d-none');
         if (callback) callback();
     });
