@@ -11,6 +11,7 @@ window.setupAV = (callback) => {
     const testAudioOutBtn = document.getElementById('playTestAudioOutBtn');
     const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
     const micMeter = document.getElementById('micMeter');
+    const displayName = document.getElementById('displayName-input');
 
     let mediaStreamSource = null;
     let meterProcess = null;
@@ -20,7 +21,12 @@ window.setupAV = (callback) => {
     audioInSelect.onchange = getStream;
     videoSelect.onchange = getStream;
     // This will fail on a lot of browsers :(
-    audioOutSelect.onchange = () => testAudioOut.setSinkId && testAudioOut.setSinkId(audioOutSelect.value);
+    audioOutSelect.onchange = () => {
+        if (testAudioOut.setSinkId) {
+            localStorage.setItem('sinkId', audioOutSelect.value);
+            testAudioOut.setSinkId(audioOutSelect.value);
+        }
+    };
 
     function getDevices() {
         // AFAICT in Safari this only gets default devices until gUM is called :/
@@ -161,10 +167,15 @@ window.setupAV = (callback) => {
 
     document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
     document.getElementById('enterSceneAVBtn').addEventListener('click', () => {
+        localStorage.setItem('display_name', displayName.value);
         setupPanel.classList.add('d-none');
         if (callback) callback();
     });
     document.getElementById('sceneURL').value = window.location.href;
+    if (localStorage.getItem('display_name')) {
+        displayName.value = localStorage.getItem('display_name');
+        displayName.focus();
+    }
 
     // Init
     setupPanel.classList.remove('d-none');
