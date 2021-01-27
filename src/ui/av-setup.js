@@ -165,4 +165,5 @@ window.setupAV = (callback) => {
         if (callback) callback();
     });
     setupPanel.classList.remove('d-none');
+    document.getElementById('sceneURL').value = window.location.href;
 };
