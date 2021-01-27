@@ -1,7 +1,7 @@
 import Swal from 'sweetalert2'; // Alerts
 
+// Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
 window.setupAV = (callback) => {
-    // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
     const setupPanel = document.getElementById('avSetup');
     const videoElement = document.getElementById('vidPreview');
     const audioInSelect = document.getElementById('audioSourceSelect');
@@ -162,7 +162,7 @@ window.setupAV = (callback) => {
     document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
     document.getElementById('enterSceneAVBtn').addEventListener('click', () => {
         setupPanel.classList.add('d-none');
-        setupPanel.classList.remove('d-block');
         if (callback) callback();
     });
+    setupPanel.classList.remove('d-none');
 };
