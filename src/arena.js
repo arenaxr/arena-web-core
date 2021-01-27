@@ -36,7 +36,7 @@ export class Arena {
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         this.clientCoords = ARENAUtils.getLocation();
-        
+
         // set scene name from url
         this.setSceneName();
 
@@ -72,7 +72,7 @@ export class Arena {
      */
     setIdTag = (idTag=undefined) => {
         if (this.userName == undefined) throw "setIdTag: user name not defined."; // user name must be set
-        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName; 
+        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName;
         this.idTag = idTag;
 
         // set camName
@@ -356,8 +356,7 @@ export class Arena {
 
             this.maxAVDist = this.maxAVDist ? this.maxAVDist : 20;
 
-            // initialize Jitsi videoconferencing
-            this.Jitsi = ARENAJitsi.init(sceneOptions.jitsiServer);
+            this.sceneOptions = sceneOptions;
         };
     };
 
@@ -389,7 +388,7 @@ export class Arena {
         // last will topic
         this.outputTopic + this.camName,
         );
-        
+
         // init runtime manager
         this.RuntimeManager=RuntimeMngr;
         this.RuntimeManager.init({
@@ -402,7 +401,7 @@ export class Arena {
             mqtt_username: this.username,
             mqtt_token: this.mqttToken,
         });
-        
+
         // init chat after
         this.chat = new ARENAChat({
             userid: this.idTag,
@@ -418,6 +417,11 @@ export class Arena {
             supportDevFolders: this.defaults.supportDevFolders,
         });
         this.chat.start();
+
+        window.setupAV(() => {
+            // initialize Jitsi videoconferencing
+            this.Jitsi = ARENAJitsi.init(this.sceneOptions.jitsiServer);
+        });
 
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {

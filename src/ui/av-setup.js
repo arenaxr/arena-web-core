@@ -1,6 +1,6 @@
 import Swal from 'sweetalert2'; // Alerts
 
-document.addEventListener('onauth', function() { // document.ready() equiv
+window.setupAV = (callback) => {
     // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
     const setupPanel = document.getElementById('avSetup');
     const videoElement = document.getElementById('vidPreview');
@@ -83,6 +83,7 @@ document.addEventListener('onauth', function() { // document.ready() equiv
             audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
             video: {deviceId: videoSource ? {exact: videoSource} : undefined},
         };
+        localStorage.setItem('mediaConstraints', JSON.stringify(constraints));
         return navigator.mediaDevices.getUserMedia(constraints).
             then(gotStream).catch(handleMediaError);
     }
@@ -162,5 +163,6 @@ document.addEventListener('onauth', function() { // document.ready() equiv
     document.getElementById('enterSceneAVBtn').addEventListener('click', () => {
         setupPanel.classList.add('d-none');
         setupPanel.classList.remove('d-block');
+        if (callback) callback();
     });
-});
+};
