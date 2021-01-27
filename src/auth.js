@@ -268,7 +268,7 @@ function completeAuth(username, token) {
         ARENA.events.emit('onauth', onAuthEvt);
         return;
     }
-    localStorage.removeItem('request_uri', location.href);
+    localStorage.removeItem('request_uri');
 
     // emit custom event to window
     const authCompleteEvent = new CustomEvent('onauth', { detail: onAuthEvt });
