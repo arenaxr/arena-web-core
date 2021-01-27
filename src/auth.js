@@ -83,7 +83,6 @@ function processUserNames(authName, prefix = null) {
  */
 function signOut() {
     localStorage.removeItem('auth_choice');
-    localStorage.removeItem('mqtt_username');
     // back to signin page
     localStorage.setItem('request_uri', location.href);
     location.href = AUTH.signOutPath;
@@ -137,7 +136,6 @@ function requestAuthState() {
             } else {
                 if (savedAuthType == 'anonymous') {
                     // user chose to login as 'anonymous'
-                    localStorage.setItem('auth_choice', xhr.response.type);
                     // prefix all anon users with "anonymous-"
                     const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
                     AUTH.user_username = anonName;
@@ -260,7 +258,6 @@ function requestMqttToken(authType, mqttUsername) {
  * @param {string} token mqtt token
  */
 function completeAuth(username, token) {
-    localStorage.setItem('mqtt_username', username);
     const onAuthEvt = {
         mqtt_username: username,
         mqtt_token: token,
@@ -271,6 +268,8 @@ function completeAuth(username, token) {
         ARENA.events.emit('onauth', onAuthEvt);
         return;
     }
+    localStorage.removeItem('request_uri', location.href);
+
     // emit custom event to window
     const authCompleteEvent = new CustomEvent('onauth', { detail: onAuthEvt });
     window.dispatchEvent(authCompleteEvent);
