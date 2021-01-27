@@ -164,6 +164,9 @@ window.setupAV = (callback) => {
         setupPanel.classList.add('d-none');
         if (callback) callback();
     });
-    setupPanel.classList.remove('d-none');
     document.getElementById('sceneURL').value = window.location.href;
+
+    // Init
+    setupPanel.classList.remove('d-none');
+    detectDevices();
 };
