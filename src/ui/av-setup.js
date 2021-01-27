@@ -172,12 +172,12 @@ window.setupAV = (callback) => {
         if (callback) callback();
     });
     document.getElementById('sceneURL').value = window.location.href;
+
+    // Init
+    setupPanel.classList.remove('d-none');
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();
     }
-
-    // Init
-    setupPanel.classList.remove('d-none');
     detectDevices();
 };
