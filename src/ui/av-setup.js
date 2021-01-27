@@ -23,7 +23,7 @@ window.setupAV = (callback) => {
     // This will fail on a lot of browsers :(
     audioOutSelect.onchange = () => {
         if (testAudioOut.setSinkId) {
-            localStorage.setItem('sinkId', audioOutSelect.value);
+            localStorage.setItem('prefAudioOutput', audioOutSelect.value);
             testAudioOut.setSinkId(audioOutSelect.value);
         }
     };
@@ -89,7 +89,6 @@ window.setupAV = (callback) => {
             audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
             video: {deviceId: videoSource ? {exact: videoSource} : undefined},
         };
-        localStorage.setItem('mediaConstraints', JSON.stringify(constraints));
         return navigator.mediaDevices.getUserMedia(constraints).
             then(gotStream).catch(handleMediaError);
     }
@@ -102,6 +101,8 @@ window.setupAV = (callback) => {
             findIndex((option) => option.text === stream.getVideoTracks()[0].label);
         videoElement.srcObject = stream;
 
+        localStorage.setItem('prefAudioInput', audioInSelect.value);
+        localStorage.setItem('prefVideoInput', videoSelect.value);
 
         // Scale video preview container
         let aspectRatioClass = '';
