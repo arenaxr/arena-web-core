@@ -3,3 +3,6 @@ build/
 network/
 screenshare/
 signin/
+dist/
+**/vendor/**
+*.min.js
