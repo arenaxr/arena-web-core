@@ -8,3 +8,9 @@ body {
     z-index: 999;
     position: relative;
 }
+
+.max-vh-100 {
+    max-height: 100vh !important;
+}
+
+

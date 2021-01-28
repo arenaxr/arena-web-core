@@ -102,6 +102,7 @@ window.setupAV = (callback) => {
         videoElement.srcObject = stream;
 
         // Scale video preview container
+        /*
         let aspectRatioClass = '';
         const vidSettings = stream.getVideoTracks()[0].getSettings();
         switch ((vidSettings.width/vidSettings.height).toFixed(2)) {
@@ -115,6 +116,7 @@ window.setupAV = (callback) => {
             //
         }
         videoElement.parentElement.setAttribute('class', aspectRatioClass);
+         */
 
         // Mic Test Meter via https://github.com/cwilso/volume-meter/
         meterProcess && meterProcess.shutdown();
