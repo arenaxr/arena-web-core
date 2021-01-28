@@ -10,34 +10,33 @@
  * Wrapper class to perform requests to arena account
  */
 export class ARENAUserAccount {
-
     /**
      * Internal call to perform xhr request
      */
-    static _makeRequest(method, url, params=undefined) {
+    static _makeRequest(method, url, params = undefined) {
         return new Promise(function (resolve, reject) {
             let xhr = new XMLHttpRequest();
             xhr.open(method, url);
             const csrftoken = getCookie('csrftoken');
             xhr.setRequestHeader('X-CSRFToken', csrftoken);
-            xhr.responseType = 'json';    
-                xhr.onload = function () {
+            xhr.responseType = 'json';
+            xhr.onload = function () {
                 if (this.status >= 200 && this.status < 300) {
                     resolve(xhr.response);
                 } else {
                     reject({
                         status: this.status,
-                        statusText: xhr.statusText
+                        statusText: xhr.statusText,
                     });
                 }
             };
             xhr.onerror = function () {
                 reject({
                     status: this.status,
-                    statusText: xhr.statusText
+                    statusText: xhr.statusText,
                 });
             };
-            xhr.send();
+            xhr.send(params);
         });
     }
 
@@ -58,8 +57,8 @@ export class ARENAUserAccount {
 
     /**
      * Request scene names which the user has permission to from user database
-     * @return {string[]]} list of scene names 
-     */    
+     * @return {string[]]} list of scene names
+     */
     static async userScenes() {
         let result = await ARENAUserAccount._makeRequest('GET', '/user/my_scenes');
         return result;
@@ -69,13 +68,12 @@ export class ARENAUserAccount {
      * Request a scene is added to the user database.
      * @param {string} sceneNameOnly name of the scene without namespace
      * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
-     */    
+     */
     static async requestUserNewScene(sceneNameOnly, isPublic) {
         var params = new FormData();
-        params.append("scene", sceneNameOnly);
-        params.append("is_public", isPublic);
+        params.append('scene', sceneNameOnly);
+        params.append('is_public', isPublic);
         let result = await ARENAUserAccount._makeRequest('POST', '/user/new_scene', params);
         return result;
     }
 }
-

@@ -35,12 +35,8 @@ export async function init(settings) {
                 ? settings.persist_uri
                 : location.hostname + (location.port ? ':' + location.port : '') + '/persist/',
         obj_list: settings.obj_list,
-        scene_list: settings.scene_list,
-        ns_list: settings.ns_list,
-        scene_textbox: settings.scene_textbox,
         log_panel: settings.log_panel,
         editobj_handler: settings.editobj_handler,
-        auth_state: settings.auth_state,
         mqtt_username: settings.mqtt_username,
         mqtt_token: settings.mqtt_token,
     };
@@ -84,11 +80,7 @@ export async function set_options(settings) {
     settings = settings || {};
     (persist.persist_uri = settings.persist_uri !== undefined ? settings.persist_uri : persist.persist_uri),
         (persist.obj_list = settings.obj_list !== undefined ? settings.obj_list : persist.obj_list),
-        (persist.scene_list = settings.scene_list !== undefined ? settings.scene_list : persist.scene_list),
-        (persist.ns_list = settings.ns_list !== undefined ? settings.ns_list : persist.ns_list),
-        (persist.scene_textbox = settings.scene_textbox !== undefined ? settings.scene_textbox : persist.scene_textbox),
         (persist.log_panel = settings.log_panel !== undefined ? settings.log_panel : persist.log_panel),
-        (persist.auth_state = settings.auth_state !== undefined ? settings.auth_state : persist.auth_state),
         (persist.editobj_handler =
             settings.editobj_handler !== undefined ? settings.editobj_handler : persist.editobj_handler);
 }
@@ -101,11 +93,26 @@ export function log(message) {
     }
 }
 
-export async function populateLists(filter,chk_type)  {
-    let ns = await populateNamespaceList();
-    if (ns) {
-        populateSceneList(ns);
+export async function populateSceneAndNsLists(ns_list, scene_list)  {
+    persist.auth_state = await ARENAUserAccount.userAuthState();
+
+    if (!persist.authenticated) {
+        displayAlert(`Please do a non-anonymous login.`, 'error', 5000);
+        var option = document.createElement('option');
+        option.text = '';
+        ns_list.add(option);
+        ns_list.disabled = true;
+        scene_list.disabled = true;
+        return undefined;
     }
+
+    let ns = await populateNamespaceList(ns_list);
+    if (ns) {
+        populateSceneList(ns, scene_list);
+    } else {
+        scene_list.disabled = true;
+    }
+    return ns;
 }
 
 export async function populateObjectList(
@@ -234,38 +241,28 @@ export async function populateObjectList(
     }
 }
 
-export async function populateNamespaceList() {
+export async function populateNamespaceList(ns_list) {
+    if (!persist.auth_state) return; // should not be called when we are not logged in
+
     var scenes = await ARENAUserAccount.userScenes();
 
     if (scenes.status) {
-        displayAlert(`Error fetching scene list from account: ${statusText}`, 5000);
+        displayAlert(`Error fetching scene list from account: ${statusText}`, 'error', 5000);
         console.error(statusText);
-        return;
+        return undefined;
     }
     //console.log(scenes);
 
     // clear list
-    while (persist.ns_list.firstChild) {
-        persist.ns_list.removeChild(persist.ns_list.firstChild);
+    while (ns_list.firstChild) {
+        ns_list.removeChild(ns_list.firstChild);
     }
 
-    if (scenes.length == 0) {
-        var option = document.createElement('option');
-        option.text = 'No data found.';
-        persist.scene_list.add(option);
-        option = document.createElement('option');
-        option.text = 'No data found.';
-        persist.ns_list.add(option);
-        persist.scene_list.disabled = true;
-        persist.ns_list.disabled = true;
-        return undefined;
-    }
-    
+    persist.scenes = [];
+    persist.namespaces = [];
 
-        persist.scene_list.disabled = false;
-        persist.ns_list.disabled = false;
-        persist.scenes = [];
-        persist.namespaces = [];
+    if (scenes.length > 0) {
+        ns_list.disabled = false;
         // split scenes into scene name and namespace
         for (let i = 0; i < scenes.length; i++) {
             let sn = scenes[i].name.split('/');
@@ -274,42 +271,46 @@ export async function populateNamespaceList() {
             persist.scenes.push({ns: sn[0], name: sn[1]});
         }
 
-        let ns = persist.namespaces.indexOf('public') >= 0 ? 'public' : persist.namespaces[0];
-        if (persist.auth_state) {
-            if (persist.auth_state.authenticated && persist.namespaces.indexOf(persist.auth_state.username) >= 0)
-                ns = persist.auth_state.username;
-        }
-
         // sort lists
         persist.namespaces.sort();
         persist.scenes.sort();
-
-        // populate lists
-        for (let i = 0; i < persist.namespaces.length; i++) {
-            var option = document.createElement('option');
-            option.text = persist.namespaces[i];
-            persist.ns_list.add(option);
-        }
-        persist.ns_list.value = ns;
-        return ns;
-}
-
-export function populateSceneList(ns) {
-    if (persist.scenes.length == 0) return;
-    // clear list
-    while (persist.scene_list.firstChild) {
-        persist.scene_list.removeChild(persist.scene_list.firstChild);
     }
 
+    // add user namespace if needed
+    if (persist.namespaces.indexOf(persist.auth_state.username) < 0) {
+        var option = document.createElement('option');
+        option.text = persist.auth_state.username;
+        ns_list.add(option);
+    }
+    // populate lists
+    for (let i = 0; i < persist.namespaces.length; i++) {
+        var option = document.createElement('option');
+        option.text = persist.namespaces[i];
+        ns_list.add(option);
+    }
+    ns_list.value = persist.auth_state.username;
+    return persist.auth_state.username;
+}
+
+export function populateSceneList(ns, scene_list) {
+    if (!persist.auth_state) return; // should not be called when we are not logged in
+    if (persist.scenes.length == 0) return;
+
+    // clear list
+    while (scene_list.firstChild) {
+        scene_list.removeChild(scene_list.firstChild);
+    }
+
+    scene_list.disabled = false;
     let first=undefined;
     for (let i = 0; i < persist.scenes.length; i++) {
         if (persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
         var option = document.createElement('option');
         option.text = persist.scenes[i].name;
-        persist.scene_list.add(option);
+        scene_list.add(option);
     }
-    persist.scene_list.value=first;
+    scene_list.value=first;
 }
 
 export function deleteSelected(scene) {

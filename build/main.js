@@ -320,25 +320,25 @@ window.addEventListener('onauth', async function (e) {
         persist_uri: hostData.persist_uri,
         mqtt_uri: hostData.mqtt_uri,
         obj_list: document.getElementById("objlist"),
-        scene_list: document.getElementById("scenelist"),
-        ns_list: document.getElementById("namespacelist"),
-        scene_textbox: document.getElementById("arena_scene"),
         log_panel: document.getElementById("logpanel"),
         editobj_handler: editObject,
-        auth_state: await ARENAUserAccount.userAuthState(),
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
     });
 
-    await PersistObjects.populateLists(objfilter.value, type_chk);
+    let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
+    if (!result) return;
     reload();
     updateLink();
+
+    let as = await ARENAUserAccount.userAuthState();
+    console.log(as);
 
     displayAlert("Done loading.", "info", 1000);
 
     // Change listener for namespace
     namespacelist.addEventListener("change", async function() {
-        PersistObjects.populateSceneList(namespacelist.value);
+        PersistObjects.populateSceneList(namespacelist.value, scenelist);
         reload();
         updateLink();
         localStorage.setItem("namespace", namespacelist.value );
