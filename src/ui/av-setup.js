@@ -77,14 +77,14 @@ window.setupAV = (callback) => {
         audioOutSelect.selectedIndex = 0;
     }
 
-    function getStream() {
+    function getStream({prefAudioInput, prefVideoInput}) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
                 track.stop();
             });
         }
-        const audioSource = audioInSelect.value;
-        const videoSource = videoSelect.value;
+        const audioSource = prefAudioInput || audioInSelect.value;
+        const videoSource = prefVideoInput || videoSelect.value;
         const constraints = {
             audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
             video: {deviceId: videoSource ? {exact: videoSource} : undefined},
@@ -131,14 +131,19 @@ window.setupAV = (callback) => {
         await Swal.fire({
             title: 'Oops...',
             html: `Could not initialize devices.<br/>
-                Please ensure your devices are plugged in and allow 
-                browser audio and video access permissions.<br/>
+                Please ensure your selected or previous preferred devices
+                are plugged in and allow browser audio and video access
+                permissions.<br/>
                 You can attempt to re-detect devices.`,
             icon: 'error'});
     }
 
-    const detectDevices = () => {
-        getStream().then(getDevices).then(gotDevices).catch(handleMediaError);
+    const detectDevices = (initial = false) => {
+        const preferredDevices = initial ? {} : {
+            prefAudioInput: localStorage.getItem('prefAudioInput'),
+            prefVideoInput: localStorage.getItem('prefVideoInput'),
+        };
+        getStream(preferredDevices).then(getDevices).then(gotDevices).catch(handleMediaError);
     };
 
 
