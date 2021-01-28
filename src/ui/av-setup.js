@@ -65,11 +65,17 @@ window.setupAV = (callback) => {
         if (!audioInSelect.childElementCount) {
             audioInSelect.appendChild(noElementOption.cloneNode(true));
         }
-        audioInSelect.selectedIndex = 0;
+        const currentAudioIndex = [...audioInSelect.options].
+            findIndex((option) => option.text === stream.getAudioTracks()[0].label);
+        audioInSelect.selectedIndex = (currentAudioIndex === -1) ? 0 : currentAudioIndex;
+
         if (!videoSelect.childElementCount) {
             videoSelect.appendChild(noElementOption.cloneNode(true));
         }
-        videoSelect.selectedIndex = 0;
+        const currentVideoIndex = [...videoSelect.options].
+            findIndex((option) => option.text === stream.getVideoTracks()[0].label);
+        videoSelect.selectedIndex = (currentVideoIndex === -1) ? 0 : currentVideoIndex;
+
         if (!audioOutSelect.childElementCount) {
             noElementOption.text = 'Default Device';
             audioOutSelect.appendChild(noElementOption.cloneNode(true));
