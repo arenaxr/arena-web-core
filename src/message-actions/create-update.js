@@ -241,6 +241,11 @@ export class CreateUpdate {
                 }
         } // switch(type)
         
+        // handle geometry attributes
+        if (isGeometry) {
+            this.setGeometryAttributes(entityEl, data, type);
+        }
+
         if (!isGeometry && type) {
             // check if we have a registered component (type = component name) that takes the attributes received
             this.setComponentAttributes(entityEl, data, type);
@@ -249,6 +254,22 @@ export class CreateUpdate {
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);        
     }
+
+   /**
+     * Handles geometry primitive attributes
+     * @param {object} entityEl the new aframe object
+     * @param {object} data data part of the message with the attributes
+     * @param {string} gName geometry name
+     */
+    static setGeometryAttributes(entityEl, data, gName) {
+        if (!AFRAME.geometries[gName]) return; // no geometry registered with this name
+        for (const [attribute, value] of Object.entries(data)) {
+            if (AFRAME.geometries[gName].Geometry.prototype.schema[attribute]) {    
+                entityEl.setAttribute('geometry', attribute, value);
+                delete data[attribute]; // we handled this attribute; remove it
+            }
+        }
+    }  
 
    /**
      * Handles component attributes
@@ -266,7 +287,7 @@ export class CreateUpdate {
             }
         }
     }
-
+  
    /**
      * Handles entity attributes (components)
      * 
