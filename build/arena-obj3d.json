@@ -109,7 +109,7 @@
                 "type":"string",
                 "format":"color",
                 "title":"color",
-                "default":"#ffffff",
+                "default":"#7f7f7f",
                 "description":"Base diffuse color."
              },
              "alphaTest":{
@@ -237,7 +237,10 @@
                 "default":false
              }
           },
-          "default": {"encoding": "sRGBEncoding", "needsUpdate": false}
+          "default":{
+             "encoding":"sRGBEncoding",
+             "needsUpdate":false
+          }
        },
        "multisrc":{
           "type":"object",
@@ -336,17 +339,23 @@
              "startEvents":{
                 "type":"array",
                 "description":"Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
-                "default":[]
+                "default":[
+                   
+                ]
              },
              "pauseEvents":{
                 "type":"array",
                 "description":"Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
-                "default":[]
+                "default":[
+                   
+                ]
              },
              "resumeEvents":{
                 "type":"array",
                 "description":"Comma-separated list of events to listen to trigger resume after pausing.",
-                "default":[]
+                "default":[
+                   
+                ]
              },
              "round":{
                 "type":"boolean",
@@ -1486,7 +1495,7 @@
              "path":"-2 -1 0, 0 20 0, 10 -1 10",
              "lineWidth":5,
              "lineWidthStyle":1,
-             "color":"#ffffff"
+             "color":"#7f7f7f"
           },
           "required":[
              "object_type",
@@ -1610,10 +1619,8 @@
                 "y":0,
                 "z":0
              },
-             "scale":{
-                "x":1,
-                "y":1,
-                "z":1
+             "material":{
+                "color":"#7f7f7f"
              }
           },
           "required":[
@@ -1826,6 +1833,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"circle",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -1943,6 +1967,24 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"cone",
+             "height":2,
+             "radiusBottom":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "height",
@@ -2056,6 +2098,24 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"cylinder",
+             "radius":1,
+             "height":2,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius",
@@ -2139,6 +2199,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"dodecahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2221,6 +2298,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"octahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2318,6 +2412,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"octahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "width",
@@ -2426,6 +2537,24 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"ring",
+             "radiusInner":1,
+             "radiusOuter":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radiusInner",
@@ -2557,10 +2686,8 @@
                 "y":0,
                 "z":0
              },
-             "scale":{
-                "x":1,
-                "y":1,
-                "z":1
+             "material":{
+                "color":"#7f7f7f"
              }
           },
           "required":[
@@ -2644,6 +2771,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"tetrahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2746,6 +2890,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"torus",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2853,6 +3014,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"torusKnot",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2957,6 +3135,37 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"triangle",
+             "vertexA":{
+                "x":0,
+                "y":0.5,
+                "z":0
+             },
+             "vertexB":{
+                "x":-0.5,
+                "y":-0.5,
+                "z":0
+             },
+             "vertexC":{
+                "x":0.5,
+                "y":-0.5,
+                "z":0
+             },
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "vertexA",
