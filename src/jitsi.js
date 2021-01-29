@@ -179,14 +179,15 @@ export class ARENAJitsi {
             screenShareEl.setAttribute('scale', '8 6 0.01');
             screenShareEl.setAttribute('position', '0 3.1 -3');
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
-
+            screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+            screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
+            
             sceneEl.appendChild(screenShareEl);
         }
         screenShareEl.setAttribute('muted', 'false');
         screenShareEl.setAttribute('autoplay', 'true');
         screenShareEl.setAttribute('playsinline', 'true');
         screenShareEl.setAttribute('material', 'src', `#${videoId}`);
-        screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         this.screenShareDict[participantId] = screenShareEl;
         return screenShareEl;
     }
