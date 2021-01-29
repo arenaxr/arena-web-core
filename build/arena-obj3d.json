@@ -274,14 +274,14 @@
                 "default":false
              },
              "from":{
-                "type":"object",
+                "type":"string",
                 "description":"Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
-                "default":null
+                "default":""
              },
              "to":{
-                "type":"object",
+                "type":"string",
                 "description":"Target value at end of animation.",
-                "default":null
+                "default":""
              },
              "type":{
                 "type":"string",
@@ -314,27 +314,43 @@
                 "default":0
              },
              "autoplay":{
+                "type":"boolean",
+                "description":"Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
                 "default":true
              },
              "easing":{
+                "type":"string",
+                "description":"Easing function of animation. To ease in, ease out, ease in and out.",
                 "default":"easeInQuad"
              },
              "elasticity":{
+                "type":"number",
+                "description":"How much to bounce (higher is stronger).",
                 "default":400
              },
              "enabled":{
+                "type":"boolean",
+                "description":"If disabled, animation will stop and startEvents will not trigger animation start.",
                 "default":true
              },
              "startEvents":{
-                "type":"array"
+                "type":"array",
+                "description":"Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
+                "default":[]
              },
              "pauseEvents":{
-                "type":"array"
+                "type":"array",
+                "description":"Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
+                "default":[]
              },
              "resumeEvents":{
-                "type":"array"
+                "type":"array",
+                "description":"Comma-separated list of events to listen to trigger resume after pausing.",
+                "default":[]
              },
              "round":{
+                "type":"boolean",
+                "description":"Whether to round values.",
                 "default":false
              }
           }
@@ -2413,7 +2429,7 @@
           "required":[
              "object_type",
              "radiusInner",
-             "radiusOutter"
+             "radiusOuter"
           ]
        },
        "sphere":{
