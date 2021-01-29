@@ -28,11 +28,19 @@ window.setupAV = (callback) => {
         }
     };
 
+    /**
+     * Alias
+     * @return {Promise<MediaDeviceInfo[]>}
+     */
     function getDevices() {
         // AFAICT in Safari this only gets default devices until gUM is called :/
         return navigator.mediaDevices.enumerateDevices();
     }
 
+    /**
+     * Populates select dropdowns with detected devuces
+     * @param {MediaDeviceInfo[]} deviceInfos - List of enumerated devices
+     */
     function gotDevices(deviceInfos) {
         // Faster than innerHTML. No options have listeners so this is ok
         audioInSelect.textContent = '';
@@ -60,7 +68,7 @@ window.setupAV = (callback) => {
             }
         }
         const noElementOption = document.createElement('option');
-        noElementOption.setAttribute('selected', true);
+        noElementOption.setAttribute('selected', 'selected');
         noElementOption.text = 'No Device Detected';
         if (!audioInSelect.childElementCount) {
             audioInSelect.appendChild(noElementOption.cloneNode(true));
@@ -83,6 +91,12 @@ window.setupAV = (callback) => {
         audioOutSelect.selectedIndex = 0;
     }
 
+    /**
+     * gUM's specified audio/video devices and passes stream to gotStream.
+     * @param {?string} prefAudioInput - preferred audio deviceId
+     * @param {?string} prefVideoInput - preferred audio deviceId
+     * @return {Promise<MediaStream | void>}
+     */
     function getStream({prefAudioInput, prefVideoInput}) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
@@ -99,6 +113,11 @@ window.setupAV = (callback) => {
             then(gotStream).catch(handleMediaError);
     }
 
+    /**
+     * Attempts to updates a/v dropdowns with devices from a stream.
+     * Also initializes sound processing to display microphone volume meter
+     * @param {MediaStream} stream - Stream created by gUM
+     */
     function gotStream(stream) {
         window.stream = stream; // make stream available to console
         audioInSelect.selectedIndex = [...audioInSelect.options].
@@ -106,23 +125,6 @@ window.setupAV = (callback) => {
         videoSelect.selectedIndex = [...videoSelect.options].
             findIndex((option) => option.text === stream.getVideoTracks()[0].label);
         videoElement.srcObject = stream;
-
-        // Scale video preview container
-        /*
-        let aspectRatioClass = '';
-        const vidSettings = stream.getVideoTracks()[0].getSettings();
-        switch ((vidSettings.width/vidSettings.height).toFixed(2)) {
-        case '1.33':
-            aspectRatioClass = 'ratio ratio-4x3';
-            break;
-        case '1.77':
-            aspectRatioClass = 'ratio ratio-16x9';
-            break;
-        default:
-            //
-        }
-        videoElement.parentElement.setAttribute('class', aspectRatioClass);
-         */
 
         // Mic Test Meter via https://github.com/cwilso/volume-meter/
         meterProcess && meterProcess.shutdown();
@@ -132,6 +134,12 @@ window.setupAV = (callback) => {
         micDrawLoop();
     }
 
+    /**
+     * Error handler, typically when gUM fails from nonexistent audio and/or
+     * video input device
+     * @param {Error} error
+     * @return {Promise<void>}
+     */
     async function handleMediaError(error) {
         console.log('Error: ', error);
         await Swal.fire({
@@ -152,7 +160,9 @@ window.setupAV = (callback) => {
         getStream(preferredDevices).then(getDevices).then(gotDevices).catch(handleMediaError);
     };
 
-
+    /**
+     * Animation loop to draw detected microphone audio level
+     */
     function micDrawLoop() {
         // set bar based on the current volume
         const vol = meterProcess.volume * 100 * 3;
