@@ -524,10 +524,20 @@ export class ARENAJitsi {
         if (this.avConnected) {
             return;
         }
-
+        const perfAudioInput = localStorage.getItem('prefAudioInput') ;
+        const perfVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
+        const deviceOpts ={}
+        if (perfAudioInput) {
+            deviceOpts.micDeviceId = perfAudioInput;
+        }
         try {
-            await navigator.mediaDevices.getUserMedia({video: true});
+            let vidConstraint = true;
+            if  (perfVideoInput) {
+                vidConstraint = { deviceId: { exact : perfVideoInput}};
+                deviceOpts.cameraDeviceId = perfVideoInput;
+            }
+            await navigator.mediaDevices.getUserMedia({video: vidConstraint});
             devices.push('video');
             this.withVideo = true;
         } catch (e) {
@@ -546,7 +556,7 @@ export class ARENAJitsi {
         }
         this.avConnected = true;
 
-        JitsiMeetJS.createLocalTracks({devices})
+        JitsiMeetJS.createLocalTracks({devices, ...deviceOpts})
             .then((tracks) => {
                 this.onLocalTracks(tracks);
                 if (this.withVideo) setupLocalVideo.bind(this)();
