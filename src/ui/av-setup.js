@@ -194,7 +194,8 @@ window.setupAV = (callback) => {
         setupPanel.classList.add('d-none');
         if (callback) callback();
     });
-    document.getElementById('sceneURL').value = window.location.href;
+    document.getElementById('readonlyNamespace').value = ARENA.sceneName.split('/')[0];
+    document.getElementById('readonlySceneName').value = ARENA.sceneName.split('/')[1];
 
     // Init
     setupPanel.classList.remove('d-none');

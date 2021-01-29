@@ -37,10 +37,10 @@
   </head>
   <body>
   <!-- A/V Setup -->
-  <div class="d-none d-flex align-items-center min-vh-100" id="avSetup">
+  <div class=" d-flex align-items-center min-vh-100" id="avSetup">
     <div class="container">
       <div class="row d-flex justify-content-center align-items-center">
-        <div class="col-lg-8 p-5 col-md-10 shadow rounded bg-white max-vh-100 overflow-auto">
+        <div class="col-lg-10 col-xl-8 p-5 shadow rounded bg-white max-vh-100 overflow-auto">
           <div class="row mb-3">
             <div class="col">
               <button class="float-end btn btn-sm btn-outline-primary" id="redetectAVBtn">
@@ -92,19 +92,27 @@
           </div>
           <div class="row">
             <div class="col">
-              <div class="form-outline mb-3" id="displayName">
-                <input class="form-control" id="displayName-input" type="text">
-                <label class="form-label" for="displayName-input">Display Name</label>
-              </div>
               <div class="input-group mb-3">
-                <span class="input-group-text">Scene URL</span>
+                <span class="col-6 col-md-3 input-group-text font-weight-bold">Namespace</span>
                 <input
-                        aria-label="Scene URL"
-                        class="form-control"
-                        id="sceneURL"
+                        aria-label="Namespace"
+                        class="col-6 col-md-3 form-control"
+                        id="readonlyNamespace"
                         readonly
                         type="text"
                 />
+                <span class="col-6 col-md-3 input-group-text font-weight-bold">Scene Name</span>
+                <input
+                        aria-label="Scene Name"
+                        class="col-6 col-md-3 form-control"
+                        id="readonlySceneName"
+                        readonly
+                        type="text"
+                />
+              </div>
+              <div class="form-outline input-group mb-3" id="displayName">
+                <input class="form-control" id="displayName-input" type="text">
+                <label class="form-label " for="displayName-input" style="z-index:999">Display Name</label>
                 <button class="btn btn-primary" id="enterSceneAVBtn">Enter</button>
               </div>
             </div>
