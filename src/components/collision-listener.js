@@ -34,7 +34,7 @@ AFRAME.registerComponent('collision-listener', {
                     source: collider,
                 },
             };
-            ARENA.Mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
+            ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
         });
     },
 });

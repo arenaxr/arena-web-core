@@ -31,7 +31,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    ARENA.Mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
             }
         });
@@ -56,7 +56,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    ARENA.Mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
             }
         });
@@ -81,7 +81,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    ARENA.Mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
                 window.lastMouseTarget = this.id;
             }
@@ -107,7 +107,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
-                    ARENA.Mqtt.publish(ARENA.outputTopic + this.id, thisMsg);
+                    ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
                 window.lastMouseTarget = undefined;
             }
