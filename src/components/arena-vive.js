@@ -17,6 +17,7 @@ function eventAction(evt, eventName, myThis) {
 
     // publish to MQTT
     const objName = myThis.id + '_' + ARENA.idTag;
+    // publishing events attached to user id objects allows sculpting security
     ARENA.Mqtt.publish(ARENA.outputTopic + objName, {
         object_id: objName,
         action: 'clientEvent',
