@@ -31,6 +31,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
+                    // publishing events attached to user id objects allows sculpting security
                     ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
             }
@@ -56,6 +57,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
+                    // publishing events attached to user id objects allows sculpting security
                     ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
             }
@@ -81,6 +83,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
+                    // publishing events attached to user id objects allows sculpting security
                     ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
                 window.lastMouseTarget = this.id;
@@ -107,6 +110,7 @@ AFRAME.registerComponent('click-listener', {
                     },
                 };
                 if (!self.el.getAttribute('goto-url')) {
+                    // publishing events attached to user id objects allows sculpting security
                     ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
                 }
                 window.lastMouseTarget = undefined;
