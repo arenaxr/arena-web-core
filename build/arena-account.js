@@ -26,7 +26,7 @@ export class ARENAUserAccount {
                 } else {
                     reject({
                         status: this.status,
-                        statusText: xhr.statusText,
+                        statusText: xhr.statusText
                     });
                 }
             };

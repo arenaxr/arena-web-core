@@ -66,7 +66,10 @@ window.addEventListener('onauth', async function (e) {
     // Buttons/s
     var open_add_scene_button = document.getElementById("openaddscene");
     var add_scene_button = document.getElementById("addscene");
+<<<<<<< HEAD
     var delete_scene_button = document.getElementById("deletescene");
+=======
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
     var set_value_button = document.getElementById("setvalue");
     var select_schema = document.getElementById("objtype");
     var genid_button = document.getElementById("genid");
@@ -75,8 +78,11 @@ window.addEventListener('onauth', async function (e) {
     var all_button = document.getElementById("selectall");
     var clearsel_button = document.getElementById("clearlist");
     var refresh_button = document.getElementById("refreshlist");
+<<<<<<< HEAD
     var refresh_sl_button = document.getElementById("refreshscenelist");
     
+=======
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
 
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
@@ -116,7 +122,11 @@ window.addEventListener('onauth', async function (e) {
         type_chk[objtype] = true;
         lbl.addEventListener( 'change', function(e) {
               type_chk[e.target.value] = e.target.checked;
+<<<<<<< HEAD
               PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+=======
+              PersistObjects.populateObjectList(scene_list.value, objfilter.value, type_chk);
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         });
     }
 
@@ -127,13 +137,29 @@ window.addEventListener('onauth', async function (e) {
       console.error("Error loading defaults:", err.message);
       return;
     }
+<<<<<<< HEAD
 
+=======
+/*
+    // load host values
+    var arena_host_list = document.getElementById('arena_host_list');
+    dfts.hosts.forEach(function(host) {
+       var option = document.createElement('option');
+       option.value = host.name;
+       arena_host_list.appendChild(option);
+    });
+*/
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
     // load values from defaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
     namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
     scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+<<<<<<< HEAD
     if (ARENADefaults.mqttHost) { // prefer deployed custom config
+=======
+    if (ARENADefaults && ARENADefaults.mqttHost) { // prefer deployed custom config
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         arena_host.value = ARENADefaults.mqttHost;
     } else {
         arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
@@ -164,7 +190,11 @@ window.addEventListener('onauth', async function (e) {
         var hostData = mqttAndPersistURI(location.hostname);
         PersistObjects.set_options({ persist_uri: hostData.persist_uri });
         PersistObjects.mqttReconnect({ mqtt_uri: hostData.mqtt_uri});
+<<<<<<< HEAD
         await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+=======
+        await PersistObjects.populateObjectList(scene_list.value, objfilter.value, type_chk);
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         reload();
         updateLink();
     }
@@ -260,6 +290,7 @@ window.addEventListener('onauth', async function (e) {
     JSONEditor.defaults.options.show_errors = "interaction";
 
     // Open new scene modal
+<<<<<<< HEAD
     open_add_scene_button.addEventListener("click", async function() {
         //document.getElementById("newSceneModalLabel").innerHTML = `Add scene to user/org: ${namespacelist.value}`;
         //new_scene_modal.style.display = "block";
@@ -329,6 +360,19 @@ window.addEventListener('onauth', async function (e) {
           });
     });
     
+=======
+    open_add_scene_button.addEventListener("click", function() {
+        document.getElementById("newSceneModalLabel").innerHTML = `Add scene to user/org: ${namespacelist.value}`;
+        new_scene_modal.style.display = "block";
+    });
+
+    // Add new scene 
+    add_scene_button.addEventListener("click", function() {
+        console.log("Add scene");
+        new_scene_modal.style.display = "none";
+    });
+
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
     // close modal
     document.querySelectorAll('.close-modal').forEach(item => {
         item.addEventListener("click", function() {
@@ -339,6 +383,7 @@ window.addEventListener('onauth', async function (e) {
 
     // When the "update form" button is clicked, set the editor"s value
     set_value_button.addEventListener("click", function() {
+<<<<<<< HEAD
         let obj;
         try {
             obj = JSON.parse(output.value);
@@ -349,6 +394,12 @@ window.addEventListener('onauth', async function (e) {
                 html: `Error: ${err}`,
                 timer: 8000,
             });    
+=======
+        try {
+            let obj = JSON.parse(output.value);
+        } catch (err) {
+            displayAlert(`Invalid JSON input: ${err}`, 'error', 5000);
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
             return;
         }
     
@@ -398,13 +449,21 @@ window.addEventListener('onauth', async function (e) {
         persist_uri: hostData.persist_uri,
         mqtt_uri: hostData.mqtt_uri,
         obj_list: document.getElementById("objlist"),
+<<<<<<< HEAD
+=======
+        scene_list: document.getElementById("scenelist"),
+        ns_list: document.getElementById("namespacelist"),
+        scene_textbox: document.getElementById("arena_scene"),
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         log_panel: document.getElementById("logpanel"),
         editobj_handler: editObject,
+        auth_state: await ARENAUserAccount.userAuthState(),
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
         dft_scene_objs: dfts.new_scene_objs,
     });
 
+<<<<<<< HEAD
     let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
     if (!result) return;
     PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
@@ -420,6 +479,17 @@ window.addEventListener('onauth', async function (e) {
     // Change listener for namespace
     namespacelist.addEventListener("change", async function() {
         PersistObjects.populateSceneList(namespacelist.value, scenelist);
+=======
+    await PersistObjects.populateLists(objfilter.value, type_chk);
+    reload();
+    updateLink();
+
+    displayAlert("Done loading.", "info", 1000);
+
+    // Change listener for namespace
+    namespacelist.addEventListener("change", async function() {
+        PersistObjects.populateSceneList(namespacelist.value);
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         reload();
         updateLink();
         localStorage.setItem("namespace", namespacelist.value );
@@ -458,6 +528,7 @@ window.addEventListener('onauth', async function (e) {
 
     refresh_button.addEventListener("click", function() {
         PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+<<<<<<< HEAD
     });
 
     refresh_sl_button.addEventListener("click", async function() {
@@ -468,6 +539,12 @@ window.addEventListener('onauth', async function (e) {
 
     del_button.addEventListener("click", function() {
         PersistObjects.deleteSelected(`${namespacelist.value}/${scenelist.value}`);
+=======
+    });
+
+    del_button.addEventListener("click", function() {
+        PersistObjects.deleteSelected(scene_list.value);
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         setTimeout(() => {
             PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
             reload();
@@ -494,7 +571,17 @@ window.addEventListener('onauth', async function (e) {
         PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
     };
     document.querySelectorAll('.addobj').forEach(item => {
+<<<<<<< HEAD
       item.addEventListener("click", addObjHandler);
+=======
+      item.addEventListener("click", function() {
+          if (validate.value != "valid") {
+              alert("Please check validation errors.");
+              return;
+          }
+          PersistObjects.addObject(output.value, scene_list.value);
+      });
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
     });
 });
 

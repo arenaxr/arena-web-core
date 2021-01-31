@@ -35,6 +35,12 @@
       <div class='span8 col-md-8 columns eight large-8'>
         <h2>Scene Editor</h2>
 
+<<<<<<< HEAD
+=======
+        <a style="float: right;" href="#" onclick="{ signOut(); PersistObjects.set_options({auth_state: undefined}); }">Logout</a>
+        <a style="float: right;" href="#" onclick="showPerms();">Perm/</a>
+
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         <div id="alert" class="alert alert-error" style="z-index:1000; position: fixed; top: 1em; left: 1em; opacity: 0.9; width: 400px; display: none">
           Alert Message.
         </div>
@@ -44,9 +50,17 @@
           <span class="add-on">User or Organization</span>
           <select id="namespacelist" class="input-medium">
           </select>
+<<<<<<< HEAD
           <span class="add-on">Scene</span>
           <select id="scenelist" class="input-medium">
           </select>
+=======
+          <span class="add-on">/Scene</span>
+          <select id="scenelist" class="input-medium">
+          </select>
+          <a class="btn" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i class="icon-refresh"></i></a>
+          <a class="btn" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
         </div>
           <a class="btn btn-small" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
           <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i class="icon-trash"></i></a>
@@ -120,7 +134,44 @@
         <p>This will update whenever the form changes to show validation errors if there are any.</p>
         <textarea id='validate' class='infopanel' readonly disabled class='form-control'></textarea>
       </div>
+<<<<<<< HEAD
     </div>    
+=======
+    </div>
+
+    <!-- new scene modal -->
+    <div id="newSceneModal" class="modal hide" tabindex="-1">
+        <div class="modal-header">
+          <button type="button" class="close close-modal" id="modalclose" aria-hidden="true">×</button>
+          <h3 id="newSceneModalLabel"></h3>
+        </div>
+        <div class="modal-body ">
+            <form class="form-horizontal">
+                <div class="control-group">
+                  <label class="control-label" for="modalscenename">Scene Name</label>
+                  <div class="controls">
+                    <input type="text" id="modalscenename" placeholder="Scene Name">
+                  </div>
+                </div>
+                <div class="control-group">
+                  <div class="controls">
+                    <label class="checkbox">
+                      <input type="checkbox" disabled=true>Copy objects from scene:
+                    </label>
+                  </div>
+                  <div class="controls">
+                    <select id="modalscenelist" class="input-medium" disabled=true></select>
+                </div>
+              </form>        
+              </p>Scene will be created with default permissions and a default scene options object.
+            </div>     
+        <div class="modal-footer">
+            <button class="btn close-modal" aria-hidden="true">Cancel</button>
+          <button class="btn btn-primary" id="addscene">Add scene</button>
+        </div>
+    </div>
+    
+>>>>>>> f31f82105b9f25483f1802fd6b71447b91cc6839
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="../conf/defaults.js"></script>
