@@ -11,13 +11,18 @@ import {ARENAUserAccount} from './arena-account.js';
 
 var persist;
 
-function type_order(type){
+function type_order(type) {
     switch (type) {
-        case 'scene-options': return 0;
-        case 'landmarks': return 1;
-        case 'program': return 2;
-        case 'object': return 3;
-        default: return 4;
+        case 'scene-options':
+            return 0;
+        case 'landmarks':
+            return 1;
+        case 'program':
+            return 2;
+        case 'object':
+            return 3;
+        default:
+            return 4;
     }
 }
 
@@ -35,11 +40,13 @@ export async function init(settings) {
                 ? settings.persist_uri
                 : location.hostname + (location.port ? ':' + location.port : '') + '/persist/',
         obj_list: settings.obj_list,
-        log_panel: settings.log_panel,
         editobj_handler: settings.editobj_handler,
         mqtt_username: settings.mqtt_username,
         mqtt_token: settings.mqtt_token,
+        dft_scene_objs: settings.dft_scene_objs,
     };
+
+    persist.currentSceneObjs = [];
 
     // set select when clicking on a list item
     persist.obj_list.addEventListener(
@@ -60,18 +67,22 @@ export async function init(settings) {
         mqtt_token: persist.mqtt_token,
     });
 
-    log('Starting connection to ' + persist.mqtt_uri + '...');
+    console.info('Starting connection to ' + persist.mqtt_uri + '...');
 
     // connect
     try {
         persist.mc.connect();
     } catch (error) {
         console.error(error); // Failure!
-        displayAlert('Error connecting to MQTT: ' + error, 'error', 2000);
+        Alert.fire({
+            icon: 'error',
+            title: `Error connecting to MQTT: ${error}`,
+            timer: 5000,
+        });
         return;
     }
 
-    log('Connected.');
+    console.info('Connected.');
 }
 
 // change options; mqtt host and port are changed with mqttReconnect()
@@ -80,37 +91,42 @@ export async function set_options(settings) {
     settings = settings || {};
     (persist.persist_uri = settings.persist_uri !== undefined ? settings.persist_uri : persist.persist_uri),
         (persist.obj_list = settings.obj_list !== undefined ? settings.obj_list : persist.obj_list),
-        (persist.log_panel = settings.log_panel !== undefined ? settings.log_panel : persist.log_panel),
         (persist.editobj_handler =
             settings.editobj_handler !== undefined ? settings.editobj_handler : persist.editobj_handler);
 }
 
-// log a message
-export function log(message) {
-    if (persist.log_panel !== undefined) {
-        persist.log_panel.value += message + '\n';
-        persist.log_panel.scrollTop = persist.log_panel.scrollHeight;
-    }
-}
-
-export async function populateSceneAndNsLists(ns_list, scene_list)  {
-    persist.auth_state = await ARENAUserAccount.userAuthState();
-
-    if (!persist.authenticated) {
-        displayAlert(`Please do a non-anonymous login.`, 'error', 5000);
-        var option = document.createElement('option');
-        option.text = '';
-        ns_list.add(option);
-        ns_list.disabled = true;
-        scene_list.disabled = true;
+export async function populateSceneAndNsLists(nsList, sceneList) {
+    try {
+        persist.auth_state = await ARENAUserAccount.userAuthState();
+    } catch (err) {
+        Alert.fire({
+            icon: 'Error',
+            title: `Error querying user authetication status: ${err}`,
+            timer: 5000,
+        });
+        console.error(err);
         return undefined;
     }
 
-    let ns = await populateNamespaceList(ns_list);
+    if (!persist.auth_state.authenticated) {
+        Alert.fire({
+            icon: 'error',
+            title: 'Please do a non-anonymous login.',
+            timer: 10000,
+        });
+        var option = document.createElement('option');
+        option.text = '';
+        nsList.add(option);
+        nsList.disabled = true;
+        sceneList.disabled = true;
+        return undefined;
+    }
+
+    let ns = await populateNamespaceList(nsList);
     if (ns) {
-        populateSceneList(ns, scene_list);
+        populateSceneList(ns, sceneList);
     } else {
-        scene_list.disabled = true;
+        sceneList.disabled = true;
     }
     return ns;
 }
@@ -120,7 +136,7 @@ export async function populateObjectList(
     filter = '.*',
     chk_type = {object: true, program: true, 'scene-options': true, landmarks: true}
 ) {
-    console.log("populateList");
+    persist.currentSceneObjs = [];
 
     if (persist.persist_uri == undefined) {
         console.error('Persist DB URL not defined.'); // populate list should be called after persist_url is set
@@ -131,16 +147,28 @@ export async function populateObjectList(
         let persistOpt = ARENADefaults.disallowJWT ? {} : {credentials: 'include'};
         var data = await fetch(persist.persist_uri + scene, persistOpt);
         if (!data) {
-            displayAlert('Error fetching scene from database.', 'error', 5000);
+            Alert.fire({
+                icon: 'error',
+                title: 'Error fetching scene from database.',
+                timer: 5000,
+            });
             return;
         }
         if (!data.ok) {
-            displayAlert('Error fetching scene from database.', 'error', 5000);
+            Alert.fire({
+                icon: 'error',
+                title: 'Error fetching scene from database.',
+                timer: 5000,
+            });
             return;
         }
         var sceneobjs = await data.json();
     } catch (err) {
-        displayAlert('Error fetching scene from database: ' + err, 'error', 5000);
+        Alert.fire({
+            icon: 'error',
+            title: `Error fetching scene from database: ${err}`,
+            timer: 5000,
+        });
         return;
     }
     persist.currentSceneObjs = sceneobjs;
@@ -149,24 +177,24 @@ export async function populateObjectList(
     }
 
     // sort object list by type, then object_id
-    sceneobjs.sort(function(a, b) {
+    sceneobjs.sort(function (a, b) {
         // order by type
         if (type_order(a.type) < type_order(b.type)) {
             return -1;
-          }
-          if (type_order(a.type) > type_order(b.type)) {
+        }
+        if (type_order(a.type) > type_order(b.type)) {
             return 1;
-          }
-          // then by object_id
-          if (a.object_id < b.object_id) {
+        }
+        // then by object_id
+        if (a.object_id < b.object_id) {
             return -1;
-          }
-          if (a.object_id > b.object_id) {
+        }
+        if (a.object_id > b.object_id) {
             return 1;
-          }
-          return 0;
+        }
+        return 0;
     });
-    
+
     //console.log(sceneobjs);
     if (sceneobjs.length == 0) {
         var li = document.createElement('li');
@@ -181,7 +209,11 @@ export async function populateObjectList(
     try {
         re = new RegExp(filter);
     } catch (err) {
-        displayAlert('Invalid filter ' + err + " (NOTE: '.*' matches all object ids)", 'error', 5000);
+        Alert.fire({
+            icon: 'error',
+            title: `Invalid filter ${err} (NOTE: '.*' matches all object ids)`,
+            timer: 5000,
+        });
         return;
     }
 
@@ -241,28 +273,34 @@ export async function populateObjectList(
     }
 }
 
-export async function populateNamespaceList(ns_list) {
-    if (!persist.auth_state) return; // should not be called when we are not logged in
+export async function populateNamespaceList(nsList) {
+    if (!persist.auth_state.authenticated) return; // should not be called when we are not logged in
 
-    var scenes = await ARENAUserAccount.userScenes();
-
-    if (scenes.status) {
-        displayAlert(`Error fetching scene list from account: ${statusText}`, 'error', 5000);
-        console.error(statusText);
+    let scenes;
+    try {
+        scenes = await ARENAUserAccount.userScenes();
+    } catch (err) {
+        Alert.fire({
+            icon: 'error',
+            title: `Error fetching scene list from account: ${err}`,
+            timer: 5000,
+        });
+        console.error(err);
         return undefined;
     }
+
     //console.log(scenes);
 
     // clear list
-    while (ns_list.firstChild) {
-        ns_list.removeChild(ns_list.firstChild);
+    while (nsList.firstChild) {
+        nsList.removeChild(nsList.firstChild);
     }
 
     persist.scenes = [];
     persist.namespaces = [];
 
     if (scenes.length > 0) {
-        ns_list.disabled = false;
+        nsList.disabled = false;
         // split scenes into scene name and namespace
         for (let i = 0; i < scenes.length; i++) {
             let sn = scenes[i].name.split('/');
@@ -280,37 +318,100 @@ export async function populateNamespaceList(ns_list) {
     if (persist.namespaces.indexOf(persist.auth_state.username) < 0) {
         var option = document.createElement('option');
         option.text = persist.auth_state.username;
-        ns_list.add(option);
+        nsList.add(option);
     }
-    // populate lists
+
+    // populate list
     for (let i = 0; i < persist.namespaces.length; i++) {
         var option = document.createElement('option');
         option.text = persist.namespaces[i];
-        ns_list.add(option);
+        nsList.add(option);
     }
-    ns_list.value = persist.auth_state.username;
+    nsList.value = persist.auth_state.username;
     return persist.auth_state.username;
 }
 
-export function populateSceneList(ns, scene_list) {
-    if (!persist.auth_state) return; // should not be called when we are not logged in
-    if (persist.scenes.length == 0) return;
-
-    // clear list
-    while (scene_list.firstChild) {
-        scene_list.removeChild(scene_list.firstChild);
+export function populateSceneList(ns, sceneList) {
+    if (!persist.auth_state.authenticated) return; // should not be called when we are not logged in
+    if (persist.scenes.length == 0) {
+        sceneList.disabled = true;
+        return;
     }
 
-    scene_list.disabled = false;
-    let first=undefined;
+    // clear list
+    while (sceneList.firstChild) {
+        sceneList.removeChild(sceneList.firstChild);
+    }
+
+    sceneList.disabled = false;
+    let first = undefined;
     for (let i = 0; i < persist.scenes.length; i++) {
         if (persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
-        var option = document.createElement('option');
+        let option = document.createElement('option');
         option.text = persist.scenes[i].name;
-        scene_list.add(option);
+        sceneList.add(option);
     }
-    scene_list.value=first;
+    if (!first) {
+        sceneList.disabled = true;
+        let option = document.createElement('option');
+        option.text = 'No scenes.';
+        sceneList.add(option);
+    } else sceneList.value = first;
+}
+
+export function populateNewSceneNamespaces(nsList) {
+    if (!persist.auth_state.authenticated) {
+        throw 'User must be authenticated.';
+    }
+
+    let ns = [persist.auth_state.username];
+    if (persist.namespaces.indexOf('public') > 0) {
+        ns.push('public');
+    }
+
+    // clear list
+    while (nsList.firstChild) {
+        nsList.removeChild(nsList.firstChild);
+    }
+
+    // populate list
+    for (let i = 0; i < ns.length; i++) {
+        var option = document.createElement('option');
+        option.text = ns[i];
+        nsList.add(option);
+    }
+    nsList.value = persist.auth_state.username;
+    return ns;
+}
+
+export async function addNewScene(ns, sceneName) {
+    let isPublic = false;
+
+    if (ns === 'public') isPublic = true;
+    try {
+        let result = await ARENAUserAccount.requestUserNewScene(sceneName, isPublic);
+    } catch (err) {
+        Alert.fire({
+            icon: 'error',
+            title: `Error adding scene: ${err}`,
+            timer: 5000,
+        });
+        console.error(err);
+    }
+    Alert.fire({
+        icon: 'info',
+        title: 'Scene added',
+        timer: 5000,
+    });
+    // add default scene objects
+    persist.dft_scene_objs.forEach((obj) => {
+        addObject(obj, `${ns}/${sceneName}`);
+    });
+}
+
+export async function deleteScene(ns, sceneName) {
+    Swal.fire('Meh, we have not implemented this yet! :-)');
 }
 
 export function deleteSelected(scene) {
@@ -324,11 +425,15 @@ export function deleteSelected(scene) {
                 action: 'delete',
             });
             var topic = 'realm/s/' + scene;
-            log('Publish [ ' + topic + ']: ' + delJson);
+            console.info('Publish [ ' + topic + ']: ' + delJson);
             try {
                 persist.mc.publish(topic, delJson);
             } catch (error) {
-                displayAlert('Error deleting: ' + error, 'error', 5000);
+                Alert.fire({
+                    icon: 'error',
+                    title: `Error deleting: ${error}`,
+                    timer: 5000,
+                });
                 return;
             }
         }
@@ -349,9 +454,7 @@ export function clearSelected() {
     }
 }
 
-export function addObject(objJson, scene) {
-    var obj = JSON.parse(objJson);
-
+export async function addObject(obj, scene) {
     var found = false;
     for (let i = 0; i < persist.currentSceneObjs.length; i++) {
         if (persist.currentSceneObjs[i].object_id == obj.object_id) {
@@ -360,45 +463,65 @@ export function addObject(objJson, scene) {
         }
     }
 
-    // set overwrite to true so previous attributes are removed
-    if (obj.action == 'update' && found) obj.overwrite = true;
+    if (obj.action === 'update') {
+        if (found === false) {
+            let result = await Swal.fire({
+                title: 'Update non-existing object ?',
+                html: 'You probably want to <b>create</b> new objects (update usually will have no effect).',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: `Create`,
+                denyButtonText: `Update (i'm sure)`,
+            });
+            console.log(result);
+            if (result.isConfirmed) {
+                obj.action = 'create';
+            } else if (result.isDismissed) {
+                console.log('here');
+                Alert.fire({
+                    icon: 'warning',
+                    title: 'Canceled',
+                    html: 'Add/Update Canceled',
+                    timer: 10000,
+                });
+                return;
+            }
+        }
+    }
 
-    let persistAlert =
-        obj.persist == false
-            ? "<br/>This object will be added added to the scene, but not to the list of persisted objects. <br/><strong>Are you sure you don't want persist=true ?</strong>"
-            : '';
-    objJson = JSON.stringify(obj);
+    // set overwrite to true so previous attributes are removed
+    if (found) obj.overwrite = true;
+
+    let persistAlert = obj.persist == false ? '<br/><strong>Object not persisted.</strong>' : '';
+    let objJson = JSON.stringify(obj);
     var topic = 'realm/s/' + scene;
-    log('Publish [ ' + topic + ']: ' + objJson);
+    console.info('Publish [ ' + topic + ']: ' + objJson);
     try {
         persist.mc.publish(topic, objJson);
     } catch (error) {
-        displayAlert('Error adding object: ' + error, 'error', 5000);
+        Alert.fire({
+            icon: 'error',
+            title: `Error adding object: ${error}`,
+            timer: 5000,
+        });
         return;
     }
 
     if (obj.action == 'update') {
-        if (found == false)
-            displayAlert(
-                "Sent update to new object id; Are you sure you don't want action=create ?" + persistAlert,
-                'info',
-                5000
-            );
-        else
-            displayAlert(
-                'Object update published (previous attributes overwritten/deleted).' + persistAlert,
-                'info',
-                5000
-            );
+        if (found == true)
+            Alert.fire({
+                icon: 'warning',
+                title: 'Updated',
+                html: `Object update published (previous attributes overwritten/deleted). ${persistAlert}`,
+                timer: 5000,
+            });
     } else {
-        if (found == false) displayAlert('Object create published.' + persistAlert, 'info', 5000);
-        else
-            displayAlert(
-                "Sent create to existing object id; Previous attibutes not cleared. Are you sure you don't want action=update ?" +
-                    persistAlert,
-                'info',
-                5000
-            );
+        Alert.fire({
+            icon: 'info',
+            title: 'Created',
+            html: `Object create published. ${persistAlert}`,
+            timer: 5000,
+        });
     }
     populateObjectList(scene);
 }
@@ -410,7 +533,7 @@ export function mqttReconnect(settings) {
 
     if (persist.mc) persist.mc.disconnect();
 
-    log('Disconnected.');
+    console.info('Disconnected.');
 
     // start mqtt client
     persist.mc = new MqttClient({
@@ -423,11 +546,15 @@ export function mqttReconnect(settings) {
     try {
         persist.mc.connect();
     } catch (error) {
-        displayAlert('Error connecting to MQTT: ' + error, 'error', 5000);
+        Alert.fire({
+            icon: 'error',
+            title: `Error connecting to MQTT: ${error}`,
+            timer: 5000,
+        });
         return;
     }
 
-    log('Connected to ' + persist.mqtt_uri);
+    console.info('Connected to ' + persist.mqtt_uri);
 }
 
 // callback from mqttclient; on reception of message
