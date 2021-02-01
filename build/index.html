@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <title>Scene Editor</title>
-  <!-- placeholders for the theme switcher -->
+  <!-- bootstrap and font-awesome -->
   <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'>
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
   <link rel="stylesheet" type="text/css" href="list.css">
@@ -16,9 +16,16 @@
       font-style: normal;
     }
   </style>
+  <!-- Include sweet alert bootstrap theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  <!-- jsoneditor -->
   <script language="javascript" src="third-party/jsoneditor.min.js"></script>
+  <!-- clipboard; for easy copy-paste -->
   <script src="third-party/clipboard.min.js"></script>
+  <!-- paho -->
   <script src="/vendor/paho-mqtt.js" type="text/javascript"></script>
+  <!-- our main javascript -->
   <script src="main.js" type="module"></script>
 </head>
 
@@ -28,23 +35,24 @@
       <div class='span8 col-md-8 columns eight large-8'>
         <h2>Scene Editor</h2>
 
-        <a style="float: right;" href="#" onclick="signOut();">Logout</a>
-        <a style="float: right;" href="#" onclick="showPerms();">Perm/</a>
-
         <div id="alert" class="alert alert-error" style="z-index:1000; position: fixed; top: 1em; left: 1em; opacity: 0.9; width: 400px; display: none">
           Alert Message.
         </div>
 
+        <form class="form-inline">
         <div class="input-prepend">
-          <span class="add-on">Scene</span>
-          <input type="text" id='arena_scene' class="input-large">
-          <select id="scenelist" class="input-medium">
-            <option value="render">render</option>
+          <span class="add-on">User or Organization</span>
+          <select id="namespacelist" class="input-medium">
           </select>
-
+          <span class="add-on">Scene</span>
+          <select id="scenelist" class="input-medium">
+          </select>
         </div>
-        <p />
-        <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in ARENA (new Window)</a>
+          <a class="btn btn-small" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
+          <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i class="icon-trash"></i></a>
+          <a class="btn btn-small" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i class="icon-refresh"></i></a>
+        </form>
+        <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in Current Scene ARENA (new Window)</a>
         <h4>Scene Objects (Persisted)</h4>
          <div class="input-prepend">
           <span class="add-on">Filter object_id (regex)</span>
@@ -60,6 +68,7 @@
         <p>
         <form class="form-inline">
           <a class="btn btn-small btn-danger" href="#" id='delobj' title="Delete Selected Objects"><i class="icon-trash"></i> Delete Selected</a>
+          <a class="btn btn-small" href="#" id='copyobj' title="Copy Selected Objects"><i class="icon-share"></i> Copy Selected</a>
           <a class="btn btn-small" href="#" id='selectall' title="Selected All Objects in the List"><i class="icon-check"></i> Select All</a>
           <a class="btn btn-small" href="#" id='clearlist' title="Clear Selection"><i class="icon-remove"></i> Clear Selected</a>
           <a class="btn btn-small" href="#" id='refreshlist' title="Refresh List from Database"><i class="icon-refresh"></i></a>
@@ -70,12 +79,15 @@
         <p />
         <div class="input-prepend">
           <span class="add-on" style="width:80px">ARENA Host</span>
-          <input type="text" id='arena_host' list='arena_host_list' value="oz.andrew.cmu.edu">
+          <input type="text" id='arena_host' readonly disabled list='arena_host_list' value="arena.andrew.cmu.edu">
           <datalist id="arena_host_list">
           </datalist>
         </div>
-        <p />
-        <textarea id='logpanel' class='infopanel' readonly disabled class='form-control'></textarea>
+        <p/>        
+        <form class="form-inline">
+            <a class="btn btn-small" href="#" title="Show Permissions" onclick="showPerms();"><i class=" icon-lock"></i></a>
+            <a class="btn btn-small btn-warning" href="#" title="Logut" onclick="{ signOut(); PersistObjects.set_options({auth_state: undefined}); }"><i class=" icon-user"></i>Logout</a>
+        </form>        
       </div>
     </div>
     <div class='row'>
@@ -112,8 +124,7 @@
         <p>This will update whenever the form changes to show validation errors if there are any.</p>
         <textarea id='validate' class='infopanel' readonly disabled class='form-control'></textarea>
       </div>
-    </div>
-
+    </div>    
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="../conf/defaults.js"></script>

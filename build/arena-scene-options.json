@@ -438,7 +438,8 @@
        "object_id":{
             "type":"string",
             "minLength":3,
-            "description":"A uuid or otherwise unique identifier for this object"
+            "description":"A uuid or otherwise unique identifier for this object",
+            "default": "scene-options"
        },
        "action":{
           "type":"string",

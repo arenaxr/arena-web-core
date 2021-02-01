@@ -1,19 +1,42 @@
 {
-	"schema_file": "arena-obj3d.json",
-	"scene": "render",
-	"arena_host": "arena.andrew.cmu.edu",
-	"hosts": [
-		{
-			 "name": "arena.andrew.cmu.edu",
-	     "arena_uri": "https://arena.andrew.cmu.edu/",
-			 "persist_uri": "https://arena.andrew.cmu.edu/persist/",
-	     "mqtt_uri": "wss://arena.andrew.cmu.edu/mqtt/"
-	  },
-		{
-			"name": "xr.andrew.cmu.edu",
-			"arena_uri": "https://xr.andrew.cmu.edu/",
-			"persist_uri": "https://oz.andrew.cmu.edu/persist/",
-			"mqtt_uri": "wss://oz.andrew.cmu.edu/mqtt/"
-	  }
-  ]
-}
+    "schema_file":"arena-obj3d.json",
+    "namespace":"public",
+    "scene":"lobby",
+    "arena_host":"arena.andrew.cmu.edu",
+    "new_scene_objs":[
+       {
+          "object_id":"scene-options",
+          "action":"create",
+          "persist":true,
+          "type":"scene-options",
+          "data":{
+             "env-presets":{
+                "active":true,
+                "preset":"none",
+                "ground":"none",
+                "lighting":"none"
+             },
+             "scene-options":{
+                "jitsiServer":"mr.andrew.cmu.edu",
+                "clickableOnlyEvents":true,
+                "privateScene":true,
+                "maxAVDist":20
+             }
+          }
+       },
+       {
+          "object_id":"scene-landmarks",
+          "action":"create",
+          "persist":true,
+          "type":"landmarks",
+          "data":{
+             "landmarks":[
+                {
+                   "object_id":"screenshare",
+                   "label":"Screenshare"
+                }
+             ]
+          }
+       }
+    ]
+ }
