@@ -1005,6 +1005,89 @@
              "scale"
           ]
        },
+       "threejs-scene":{
+        "properties":{
+           "object_type":{
+              "type":"string",
+              "title":"3D object type",
+              "description":"The object type.",
+              "enum":[
+                 "threejs-scene"
+              ]
+           },
+           "url":{
+              "$ref":"#/definitions/url"
+           },
+           "position":{
+              "$ref":"#/definitions/position"
+           },
+           "rotation":{
+              "$ref":"#/definitions/rotation"
+           },
+           "scale":{
+              "$ref":"#/definitions/scale"
+           },
+           "material":{
+              "$ref":"#/definitions/material"
+           },
+           "material-extras":{
+              "$ref":"#/definitions/material-extras"
+           },
+           "multisrc":{
+              "$ref":"#/definitions/multisrc"
+           },
+           "animation":{
+              "$ref":"#/definitions/animation"
+           },
+           "animation-mixer":{
+              "$ref":"#/definitions/animation-mixer"
+           },
+           "sound":{
+              "$ref":"#/definitions/sound"
+           },
+           "dynamic-body":{
+              "$ref":"#/definitions/dynamic-body"
+           },
+           "impulse":{
+              "$ref":"#/definitions/impulse"
+           },
+           "click-listener":{
+              "$ref":"#/definitions/click-listener"
+           },
+           "collision-listener":{
+              "$ref":"#/definitions/collision-listener"
+           },
+           "goto-url":{
+              "$ref":"#/definitions/goto-url"
+           },
+           "video-control":{
+              "$ref":"#/definitions/video-control"
+           },
+           "color":{
+              "title":"color (deprecated; don't use)",
+              "description":"Color is an attribute of the material; Add a material to change the color of the object",
+              "$ref":"#/definitions/color"
+           },
+           "parent":{
+              "$ref":"#/definitions/parent"
+           },
+           "text":{
+              "$ref":"#/definitions/text"
+           },
+           "shadow":{
+              "$ref":"#/definitions/shadow"
+           }
+        },
+        "additionalProperties":false,
+        "required":[
+           "object_type",
+           "url",
+           "legacyLoader",
+           "position",
+           "rotation",
+           "scale"
+        ]
+     },
        "image":{
           "properties":{
              "object_type":{
@@ -2961,6 +3044,11 @@
                 "title":"GLTF Model",
                 "description":"Load a GLTF model",
                 "$ref":"#/definitions/gltf-model"
+             },
+             {
+                "title":"Three.js Scene",
+                "description":"Load a Three.js Scene",
+                "$ref":"#/definitions/threejs-scene"
              },
              {
                 "title":"Image",

@@ -21,6 +21,7 @@ import './load-scene.js';
 import './material-extras.js';
 import './network-latency.js';
 import './press-and-move.js';
+import './threejs-scene.js';
 import './ttl.js';
 import './video-control.js';
 
