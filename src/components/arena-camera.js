@@ -1,5 +1,5 @@
 /**
- * @fileoverview Main ARENA Object
+ * @fileoverview ARENA camera component; track camera movement
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
