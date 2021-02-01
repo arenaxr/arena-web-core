@@ -3272,7 +3272,7 @@
              },
              {
                 "title":"Three.js Scene",
-                "description":"Load a Three.js Scene (no support for THREE.js legacy scenes; Using glTF is preferred)",
+                "description":"Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred)",
                 "$ref":"#/definitions/threejs-scene"
              },
              {
