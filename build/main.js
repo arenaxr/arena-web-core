@@ -477,7 +477,7 @@ window.addEventListener('onauth', async function (e) {
     cpy_button.addEventListener("click", function() {
         Swal.fire({
             title: 'Copy selected objects',
-            html: `<p>Copy to existing user scene</p>
+            html: `<p>Copy to existing scene</p>
                    <div class="input-prepend">
                     <span class="add-on" style="width:120px">Destination Scene</span>
                     <select id="modalscenelist" style="width:215px"></select>
