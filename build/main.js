@@ -32,22 +32,6 @@ const Alert = Swal.mixin({
 })
 window.Alert = Alert;
 
-// display a floating alert message
-// supported types (bootstrap): success, info, error
-var displayAlert = window.displayAlert =  function(msg, type, timeMs) {
-  let alert = document.getElementById("alert");
-  alert.className = "alert" + " alert-" + type + " alert-block";
-
-  alert.innerHTML = msg;
-  //alert.style = "position: fixed; top: 1em; left: 1em; opacity: 0.9; width: 400px; display: block";
-  alert.style.display = "block";
-  if (timeMs == 0 ) return;
-  setTimeout(() => {
-      alert.style.display = "none";
-  }, timeMs); // clear message in timeMs milliseconds
-
-}
-
 window.addEventListener('onauth', async function (e) {
     var schema;
     var jsoneditor;
@@ -76,7 +60,6 @@ window.addEventListener('onauth', async function (e) {
     var refresh_button = document.getElementById("refreshlist");
     var refresh_sl_button = document.getElementById("refreshscenelist");
     
-
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
         text: function(trigger) {
@@ -126,11 +109,11 @@ window.addEventListener('onauth', async function (e) {
       console.error("Error loading defaults:", err.message);
       return;
     }
+
     // load values from defaults or local storage, if they exist
     select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
     select_schema.dispatchEvent(new Event("change"));
-    namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
-    scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+
     if (ARENADefaults.mqttHost) { // prefer deployed custom config
         arena_host.value = ARENADefaults.mqttHost;
     } else {
@@ -143,7 +126,7 @@ window.addEventListener('onauth', async function (e) {
         schema = await data.json();
     }
 
-    var updateLink = function() {
+    var getDevPath = function() {
         let path = window.location.pathname.substring(1);
         let devPath='';
         if (ARENADefaults.supportDevFolders && path.length > 0) {
@@ -153,8 +136,18 @@ window.addEventListener('onauth', async function (e) {
             // no devPath
           }
         }
-        
-        scene_url.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${devPath}${namespacelist.value}/${scenelist.value}`;
+        return devPath;
+    };
+
+    var updateLink = function() {
+        let dp = getDevPath();
+        scene_url.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespacelist.value}/${scenelist.value}`;
+    };
+
+    var updateUrl = function() {
+        let newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('scene', `${namespacelist.value}/${scenelist.value}`);
+        window.history.pushState({ path: newUrl.href }, '', newUrl.href);
     };
 
     // when a host addr is changed; update settings
@@ -405,12 +398,28 @@ window.addEventListener('onauth', async function (e) {
         dft_scene_objs: dfts.new_scene_objs,
     });
 
+    // load namespace and scene values
     let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
+
+    // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
+    let url = new URL(window.location.href);
+    let sceneParam = url.searchParams.get('scene');
+    if (sceneParam) {
+        let sn = sceneParam.split('/');
+        namespacelist.value = sn[0];
+        scenelist.value = sn[1];    
+    } else {
+        namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
+        scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");    
+    }    
+    namespacelist.dispatchEvent(new Event('change'));
+
     if (!result) return;
     PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
     reload();
     updateLink();
-
+    updateUrl();
+    
     Alert.fire({
         icon: 'info',
         title: 'Done Loading',
@@ -432,7 +441,8 @@ window.addEventListener('onauth', async function (e) {
           PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
           reload();
           updateLink();
-          localStorage.setItem("scene", scenelist.value );          
+          localStorage.setItem("scene", scenelist.value );
+          updateUrl();
         }
     });
 
