@@ -3047,7 +3047,7 @@
              },
              {
                 "title":"Three.js Scene",
-                "description":"Load a Three.js Scene",
+                "description":"Load a Three.js Scene (no support for THREE.js legacy scenes; Using glTF is preferred)",
                 "$ref":"#/definitions/threejs-scene"
              },
              {
