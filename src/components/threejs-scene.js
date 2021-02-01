@@ -10,7 +10,6 @@
 
 AFRAME.registerComponent('threejs-scene', {
     schema: {
-        legacyLoader: {type: 'boolean', default: false},
         url: {type: 'string', default: ''},
     },
 
@@ -31,44 +30,26 @@ AFRAME.registerComponent('threejs-scene', {
 
         this.remove();
 
-        const onLoad = function(obj) {
-            // Add the loaded object to the scene
-            self.model = obj;
-            el.setObject3D('mesh', self.model);
-            el.emit('model-loaded', {format: 'threejs-scene', model: self.model});
-            console.log('loaded');
-        };
-
-        if (!this.data.legacyLoader) {
-            this.loader.load(
-                // resource URL
-                this.data.url,
-                // onLoad callback
-                onLoad,
-                // onProgress callback
-                function(xhr) {
-                    console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
-                },
-                // onError callback
-                function(err) {
-                    console.error('Error loading three.js scene');
-                },
-            );
-        } else {
-            try {
-                fetch(this.data.url)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        //console.log(data);
-                        //const json = JSON.parse(data);
-                        const parsedObj = this.loader.parse(data);
-                        console.log(parsedObj);
-                    });
-            } catch (err) {
-                console.error('Error loading scene file:', err.message);
-                return;
-            }
-        }
+        this.loader.load(
+            // resource URL
+            this.data.url,
+            // onLoad callback
+            function(obj) {
+                // Add the loaded object to the scene
+                self.model = obj;
+                el.setObject3D('mesh', self.model);
+                el.emit('model-loaded', {format: 'threejs-scene', model: self.model});
+                console.log('loaded');
+            },
+            // onProgress callback
+            function(xhr) {
+                console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+            },
+            // onError callback
+            function(err) {
+                console.error('Error loading three.js scene');
+            },
+        );
     },
 
     remove: function() {
