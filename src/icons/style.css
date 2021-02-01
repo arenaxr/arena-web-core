@@ -70,5 +70,5 @@
     top: 10px;
     right: 100px;
     font-size: small;
-    overflow: scroll;
+    overflow: auto;
 }
