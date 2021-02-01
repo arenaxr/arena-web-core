@@ -68,6 +68,7 @@
         <p>
         <form class="form-inline">
           <a class="btn btn-small btn-danger" href="#" id='delobj' title="Delete Selected Objects"><i class="icon-trash"></i> Delete Selected</a>
+          <a class="btn btn-small" href="#" id='copyobj' title="Copy Selected Objects"><i class="icon-share"></i> Copy Selected</a>
           <a class="btn btn-small" href="#" id='selectall' title="Selected All Objects in the List"><i class="icon-check"></i> Select All</a>
           <a class="btn btn-small" href="#" id='clearlist' title="Clear Selection"><i class="icon-remove"></i> Clear Selected</a>
           <a class="btn btn-small" href="#" id='refreshlist' title="Refresh List from Database"><i class="icon-refresh"></i></a>
@@ -82,8 +83,11 @@
           <datalist id="arena_host_list">
           </datalist>
         </div>
-        <p/>
-        <a href="#" onclick="showPerms();">Perm/</a><a href="#" onclick="{ signOut(); PersistObjects.set_options({auth_state: undefined}); }">Logout</a>
+        <p/>        
+        <form class="form-inline">
+            <a class="btn btn-small" href="#" title="Show Permissions" onclick="showPerms();"><i class=" icon-lock"></i></a>
+            <a class="btn btn-small btn-warning" href="#" title="Logut" onclick="{ signOut(); PersistObjects.set_options({auth_state: undefined}); }"><i class=" icon-user"></i>Logout</a>
+        </form>        
       </div>
     </div>
     <div class='row'>

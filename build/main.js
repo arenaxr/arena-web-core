@@ -54,7 +54,6 @@ window.addEventListener('onauth', async function (e) {
 
     // Divs/textareas on the page
     var output = document.getElementById("output");
-    var new_scene_modal = document.getElementById("newSceneModal");
     var editor = document.getElementById("editor");
     var validate = document.getElementById("validate");
     var scenelist = document.getElementById("scenelist");
@@ -65,13 +64,13 @@ window.addEventListener('onauth', async function (e) {
 
     // Buttons/s
     var open_add_scene_button = document.getElementById("openaddscene");
-    var add_scene_button = document.getElementById("addscene");
     var delete_scene_button = document.getElementById("deletescene");
     var set_value_button = document.getElementById("setvalue");
     var select_schema = document.getElementById("objtype");
     var genid_button = document.getElementById("genid");
     var clearform_button = document.getElementById("clearform");
     var del_button = document.getElementById("delobj");
+    var cpy_button = document.getElementById("copyobj");
     var all_button = document.getElementById("selectall");
     var clearsel_button = document.getElementById("clearlist");
     var refresh_button = document.getElementById("refreshlist");
@@ -241,7 +240,7 @@ window.addEventListener('onauth', async function (e) {
         Alert.fire({
             icon: 'info',
             title: 'Loaded.',
-            html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/><button class="btn btn-primary btn-small" type="button" title="Add or Update Object" onClick="addObjHandler()"><i class="icon-plus"></i> Add/Update Object</a> </button> when done.',
+            html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/><button class="btn btn-primary btn-mini" type="button" title="Add or Update Object" onClick="addObjHandler()"><i class="icon-plus"></i> Add/Update Object</a> </button> when done.',
             timer: 10000,
         });        
     }
@@ -391,6 +390,7 @@ window.addEventListener('onauth', async function (e) {
     });
 
     var hostData = mqttAndPersistURI(location.hostname);
+    var auth_state = await ARENAUserAccount.userAuthState();
 
     // start persist object mngr
     PersistObjects.init({
@@ -399,7 +399,7 @@ window.addEventListener('onauth', async function (e) {
         obj_list: document.getElementById("objlist"),
         log_panel: document.getElementById("logpanel"),
         editobj_handler: editObject,
-        auth_state: await ARENAUserAccount.userAuthState(),
+        auth_state: auth_state,
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
         dft_scene_objs: dfts.new_scene_objs,
@@ -467,16 +467,58 @@ window.addEventListener('onauth', async function (e) {
     });
 
     del_button.addEventListener("click", function() {
-        PersistObjects.deleteSelected(`${namespacelist.value}/${scenelist.value}`);
+        PersistObjects.selectedObjsPerformAction('delete', `${namespacelist.value}/${scenelist.value}`);
         setTimeout(() => {
             PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });
 
+    cpy_button.addEventListener("click", function() {
+        Swal.fire({
+            title: 'Copy selected objects',
+            html: `<p>Copy to existing user scene</p>
+                   <div class="input-prepend">
+                    <span class="add-on" style="width:120px">Destination Scene</span>
+                    <select id="modalscenelist" style="width:215px"></select>
+                  </div>`,
+            confirmButtonText: 'Copy Objects',
+            focusConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            willOpen: () => {
+              const nsList = Swal.getPopup().querySelector('#modalscenelist');
+              PersistObjects.populateSceneList(undefined, nsList);
+            },
+            preConfirm: () => {
+              const scene = Swal.getPopup().querySelector('#modalscenelist').value;
+              if (!scene) {
+                Swal.showValidationMessage(`Please select a destination scene`)
+              }
+              return { scene: scene }
+            }
+          }).then((result) => {
+            if (result.isDismissed) {
+              console.log("canceled");
+              return;
+            }
+            PersistObjects.selectedObjsPerformAction('create', result.value.scene);
+            Alert.fire({
+                icon: 'info',
+                title: 'Objects copied',
+                timer: 5000,
+            });    
+          })
+    });
+
     window.addObjHandler = async function() {
         if (validate.value != "valid") {
             alert("Please check validation errors.");
+            Alert.fire({
+                icon: 'error',
+                title: 'Please check validation errors.',
+                timer: 8000,
+            });              
             return;
         }
         let obj;

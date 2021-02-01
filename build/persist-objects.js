@@ -223,8 +223,8 @@ export async function populateObjectList(
         var span = document.createElement('span');
         var img = document.createElement('img');
 
-        // save obj id so we can use in delete later
-        li.setAttribute('data-objid', sceneobjs[i].object_id);
+        // save obj json so we can use later in slected object actions (delete/copy)
+        li.setAttribute('data-obj', JSON.stringify(sceneobjs[i]));
         var inputValue = '';
 
         if (sceneobjs[i].attributes == undefined) continue;
@@ -290,8 +290,6 @@ export async function populateNamespaceList(nsList) {
         return undefined;
     }
 
-    //console.log(scenes);
-
     // clear list
     while (nsList.firstChild) {
         nsList.removeChild(nsList.firstChild);
@@ -347,10 +345,10 @@ export function populateSceneList(ns, sceneList) {
     sceneList.disabled = false;
     let first = undefined;
     for (let i = 0; i < persist.scenes.length; i++) {
-        if (persist.scenes[i].ns !== ns) continue;
+        if (ns && persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
         let option = document.createElement('option');
-        option.text = persist.scenes[i].name;
+        option.text = (ns == undefined) ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
         sceneList.add(option);
     }
     if (!first) {
@@ -415,20 +413,23 @@ export async function deleteScene(ns, sceneName) {
     Swal.fire('Meh, we have not implemented this yet! :-)');
 }
 
-export function deleteSelected(scene) {
+export function selectedObjsPerformAction(action, scene) {
     var items = persist.obj_list.getElementsByTagName('li');
     for (var i = 0; i < items.length; i++) {
         if (items[i].classList.contains('checked')) {
-            var object_id = items[i].getAttribute('data-objid');
-            //console.log(object_id);
-            var delJson = JSON.stringify({
-                object_id: object_id,
-                action: 'delete',
+            var objJson = items[i].getAttribute('data-obj');
+            var obj = JSON.parse(objJson);
+            var actionObj = JSON.stringify({
+                object_id: obj.object_id,
+                action: action,
+                persist: true,
+                type: obj.type,
+                data: (obj.attributes != undefined) ? obj.attributes : obj.data
             });
             var topic = 'realm/s/' + scene;
-            console.info('Publish [ ' + topic + ']: ' + delJson);
+            console.info('Publish [ ' + topic + ']: ' + actionObj);
             try {
-                persist.mc.publish(topic, delJson);
+                persist.mc.publish(topic, actionObj);
             } catch (error) {
                 Alert.fire({
                     icon: 'error',
