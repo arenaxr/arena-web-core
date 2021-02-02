@@ -156,11 +156,7 @@ window.addEventListener('onauth', async function (e) {
         var hostData = mqttAndPersistURI(location.hostname);
         PersistObjects.set_options({ persist_uri: hostData.persist_uri });
         PersistObjects.mqttReconnect({ mqtt_uri: hostData.mqtt_uri});
-<<<<<<< HEAD
         if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
-=======
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
         reload();
         updateLink();
     }
@@ -262,7 +258,6 @@ window.addEventListener('onauth', async function (e) {
         Swal.fire({
             title: 'Add New Scene',
             html: `<div class="input-prepend">
-<<<<<<< HEAD
                     <span class="add-on" style="width:125px">User or Organization</span>
                     <select id="modalnamespacelist" style="width:215px"> <option value="public">public</option></select>
                   </div>
@@ -272,17 +267,6 @@ window.addEventListener('onauth', async function (e) {
                   </div>  
                   <div class="input-prepend">
                     <span class="add-on" style="width:125px">Clone from Scene</span>
-=======
-                    <span class="add-on" style="width:120px">User or Organization</span>
-                    <select id="modalnamespacelist" style="width:215px"> <option value="public">public</option></select>
-                  </div>
-                  <div class="input-prepend">
-                    <span class="add-on" style="width:120px">Scene</span>
-                    <input type="text" style="width:200px" id="modalscenename" placeholder="Scene Name">
-                  </div>  
-                  <div class="input-prepend">
-                    <span class="add-on" style="width:120px">Clone from Scene</span>
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
                     <select id="modalclonescenelist" style="width:215px" disabled=true></select>
                   </div>
                   <p><small>Scene will be created with default permissions and objects.</small></p>`,
@@ -417,18 +401,12 @@ window.addEventListener('onauth', async function (e) {
 
     // load namespace and scene values
     let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
-<<<<<<< HEAD
     if (!result) return;
-=======
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
 
     // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
     let url = new URL(window.location.href);
     let sceneParam = url.searchParams.get('scene');
-<<<<<<< HEAD
     let ns = namespacelist.value;
-=======
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
     if (sceneParam) {
         let sn = sceneParam.split('/');
         namespacelist.value = sn[0];
@@ -437,7 +415,6 @@ window.addEventListener('onauth', async function (e) {
         namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
         scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");    
     }    
-<<<<<<< HEAD
     // do initial update 
     if (ns !== namespacelist.value) { // if we changed namespace
         PersistObjects.populateSceneList(namespacelist.value, scenelist);
@@ -458,26 +435,6 @@ window.addEventListener('onauth', async function (e) {
     // Change listener for namespace
     namespacelist.addEventListener("change", async function() {
         PersistObjects.populateSceneList(namespacelist.value, scenelist);
-=======
-    namespacelist.dispatchEvent(new Event('change'));
-
-    if (!result) return;
-    PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
-    reload();
-    updateLink();
-    updateUrl();
-    
-    Alert.fire({
-        icon: 'info',
-        title: 'Done Loading',
-        timer: 2000,
-    });
-
-    // Change listener for namespace
-    namespacelist.addEventListener("change", async function() {
-        PersistObjects.populateSceneList(namespacelist.value, scenelist);
-        reload();
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
         updateLink();
         localStorage.setItem("namespace", namespacelist.value );
         scenelist.dispatchEvent(new Event('change'));
@@ -485,30 +442,17 @@ window.addEventListener('onauth', async function (e) {
 
     // Change listener for scene list
     scenelist.addEventListener("change", async function() {
-<<<<<<< HEAD
         if (scenelist.disabled === true) return;
         PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
         reload();
         updateLink();
         localStorage.setItem("scene", scenelist.value );
         updateUrl();
-=======
-        if (scenelist.disabled === false) {
-          PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
-          reload();
-          updateLink();
-          localStorage.setItem("scene", scenelist.value );
-          updateUrl();
-        }
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
     });
 
     // Change listener for object id filter regex
     objfilter.addEventListener("change", async function() {
-<<<<<<< HEAD
         if (scenelist.disabled === true) return;
-=======
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
         PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
     });
 
@@ -528,10 +472,7 @@ window.addEventListener('onauth', async function (e) {
     });
 
     refresh_button.addEventListener("click", function() {
-<<<<<<< HEAD
         if (scenelist.disabled === true) return;
-=======
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
         PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
     });
 
@@ -544,11 +485,7 @@ window.addEventListener('onauth', async function (e) {
     del_button.addEventListener("click", function() {
         PersistObjects.selectedObjsPerformAction('delete', `${namespacelist.value}/${scenelist.value}`);
         setTimeout(() => {
-<<<<<<< HEAD
             if (scenelist.disabled === false) PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
-=======
-            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
->>>>>>> 64d8b420f086b0469ea94ca8300e05189912dc90
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });
