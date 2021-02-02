@@ -90,7 +90,7 @@ window.processCV = async function (frame) {
 
     if (detections.length) {
         if (ARENA.networkedTagSolver || ARENA.publishDetections) {
-            let jsonMsg = {scene: ARENA.renderParam, timestamp: timestamp, camera_id: ARENA.camName};
+            let jsonMsg = {scene: ARENA.renderParam, type: 'apriltag', timestamp: timestamp, camera_id: ARENA.camName};
             jsonMsg.vio = vio;
             jsonMsg.detections = [];
             for (let detection of detections) {
@@ -110,7 +110,7 @@ window.processCV = async function (frame) {
                 };
                 jsonMsg.localize_tag = true;
             }
-            ARENA.Mqtt.publish('realm/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
+            ARENA.Mqtt.publish(ARENA.defaults.realm + '/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
         } 
         if (!ARENA.networkedTagSolver) {
             let localizerTag;
@@ -262,7 +262,7 @@ window.processCV2 = async function (frame) {
             jsonMsg.geolocation = {latitude: ARENA.clientCoords.latitude, longitude: ARENA.clientCoords.longitude};
             jsonMsg.localize_tag = true;
         }
-        ARENA.Mqtt.publish('realm/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
+        ARENA.Mqtt.publish(ARENA.defaults.realm + '/g/a/' + ARENA.camName, JSON.stringify(jsonMsg));
         let ids = detections.map(tag => tag.id);
         console.log('April Tag IDs Detected: ' + ids.join(', '));
     } // this is the resulting json with the detections
