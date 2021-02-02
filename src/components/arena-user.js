@@ -170,7 +170,7 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
-    drawfCube() {
+    drawVideoCube() {
         const el = this.el;
 
         // attach video to head
