@@ -188,9 +188,14 @@ window.setupAV = (callback) => {
 
     document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
     document.getElementById('enterSceneAVBtn').addEventListener('click', () => {
+        // Stash preferred devices
         localStorage.setItem('display_name', displayName.value);
         localStorage.setItem('prefAudioInput', audioInSelect.value);
         localStorage.setItem('prefVideoInput', videoSelect.value);
+        // Stop audio and video preview
+        videoElement.srcObject.getAudioTracks()[0].stop();
+        videoElement.srcObject.getVideoTracks()[0].stop();
+        // Hide AV panel
         setupPanel.classList.add('d-none');
         if (callback) callback();
     });
