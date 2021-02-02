@@ -181,7 +181,7 @@ AFRAME.registerComponent('arena-user', {
         videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-        screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
+        videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
 
         const videoCubeDark = document.createElement('a-box');
         videoCubeDark.setAttribute('id', this.videoID + 'cubeDark');
