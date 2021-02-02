@@ -38,7 +38,6 @@ AFRAME.registerComponent('arena-camera', {
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
 
         // send initial create
-        this.publishHeadText('create');
         this.publishPose('create');
         this.publishVio('create');
     },
@@ -109,24 +108,8 @@ AFRAME.registerComponent('arena-camera', {
         ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
 
-    publishHeadText(action = 'update') {
-        const data = this.data;
-
-        ARENA.Mqtt.publish(ARENA.outputTopic + '/head-text_' + ARENA.camName, {
-            object_id: ARENA.camName,
-            action: 'create',
-            type: 'object',
-            displayName: data.displayName,
-            data: {object_type: 'headtext'},
-        });
-    },
-
     update(oldData) {
         const data = this.data;
-
-        if (data.displayName !== oldData.displayName) {
-            this.publishHeadText();
-        }
     },
 
     tick: function (t, dt) {
