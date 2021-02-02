@@ -11,7 +11,7 @@ AFRAME.registerComponent('network-latency', {
     init: function() {
         this.UPDATE_INTERVAL_MS = 10000; // updates every 10s
         this.tick = AFRAME.utils.throttleTick(this.tick, this.UPDATE_INTERVAL_MS, this);
-        this.message = new Paho.Message(''); // send blank message
+        this.message = new Paho.Message('{ "type": "latency" }'); // send message type latency
         this.message.destinationName = ARENA.latencyTopic;
         this.message.qos = 2;
     },
