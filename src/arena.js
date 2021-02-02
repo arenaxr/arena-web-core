@@ -12,7 +12,8 @@ import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
-//import {RuntimeManager} from './runtime-mngr'
+import {RuntimeMngr} from './runtime-mngr';
+
 /**
  * Arena Object
  */
@@ -34,9 +35,8 @@ export class Arena {
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
-        this.vioTopic = this.defaults.vioTopic;
         this.clientCoords = ARENAUtils.getLocation();
-        
+
         // set scene name from url
         this.setSceneName();
 
@@ -72,7 +72,7 @@ export class Arena {
      */
     setIdTag = (idTag=undefined) => {
         if (this.userName == undefined) throw "setIdTag: user name not defined."; // user name must be set
-        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName; 
+        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName;
         this.idTag = idTag;
 
         // set camName
@@ -92,7 +92,7 @@ export class Arena {
     /**
      * Sets this.sceneName from url. Includes namespace prefix (e.g. `namespace/foo`)
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
-     * Also sets persistenceUrl, outputTopic, renderTopic which depend on scene name
+     * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
      */
     setSceneName = () => {
         let path = window.location.pathname.substring(1);
@@ -123,10 +123,11 @@ export class Arena {
                 this.sceneName = `${namespace}/${scenename}`;
             }
         }
-        // Sets persistenceUrl, outputTopic, renderTopic
+        // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
         this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.sceneName;
         this.outputTopic = this.defaults.realm + '/s/' + this.sceneName + '/';
         this.renderTopic = this.outputTopic + '#';
+        this.vioTopic = this.defaults.realm + '/vio/' + this.sceneName + '/';
     }
 
     /**
@@ -288,8 +289,8 @@ export class Arena {
         renderer.gammaFactor = 2.2;
         renderer.outputEncoding = THREE['sRGBEncoding'];
 
-        const enviornment = document.createElement('a-entity');
-        enviornment.id = 'env';
+        const environment = document.createElement('a-entity');
+        environment.id = 'env';
 
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT;
@@ -310,9 +311,9 @@ export class Arena {
 
                     const envPresets = options['env-presets'];
                     for (const [attribute, value] of Object.entries(envPresets)) {
-                        enviornment.setAttribute('environment', attribute, value);
+                        environment.setAttribute('environment', attribute, value);
                     }
-                    document.getElementById('sceneRoot').appendChild(enviornment);
+                    document.getElementById('sceneRoot').appendChild(environment);
 
                     const rendererSettings = options['renderer-settings'];
                     if (rendererSettings) {
@@ -327,14 +328,14 @@ export class Arena {
 
                     // enviornment.setAttribute('particle-system', 'preset', 'snow');
                     // enviornment.setAttribute('particle-system', 'enabled', 'true');
-                    enviornment.setAttribute('environment', 'preset', 'starry');
-                    enviornment.setAttribute('environment', 'seed', 3);
-                    enviornment.setAttribute('environment', 'flatShading', true);
-                    enviornment.setAttribute('environment', 'groundTexture', 'squares');
-                    enviornment.setAttribute('environment', 'grid', 'none');
-                    enviornment.setAttribute('environment', 'fog', 0);
-                    enviornment.setAttribute('environment', 'fog', 0);
-                    sceneRoot.appendChild(enviornment);
+                    environment.setAttribute('environment', 'preset', 'starry');
+                    environment.setAttribute('environment', 'seed', 3);
+                    environment.setAttribute('environment', 'flatShading', true);
+                    environment.setAttribute('environment', 'groundTexture', 'squares');
+                    environment.setAttribute('environment', 'grid', 'none');
+                    environment.setAttribute('environment', 'fog', 0);
+                    environment.setAttribute('environment', 'fog', 0);
+                    sceneRoot.appendChild(environment);
 
                     // make default env have lights
                     const light = document.createElement('a-light');
@@ -355,8 +356,7 @@ export class Arena {
 
             this.maxAVDist = this.maxAVDist ? this.maxAVDist : 20;
 
-            // initialize Jitsi videoconferencing
-            this.Jitsi = ARENAJitsi.init(sceneOptions.jitsiServer);
+            this.sceneOptions = sceneOptions;
         };
     };
 
@@ -388,8 +388,9 @@ export class Arena {
         // last will topic
         this.outputTopic + this.camName,
         );
-        /*
+
         // init runtime manager
+        this.RuntimeManager=RuntimeMngr;
         this.RuntimeManager.init({
             mqtt_uri: this.mqttHostURI,
             onInitCallback: function() {
@@ -400,7 +401,6 @@ export class Arena {
             mqtt_username: this.username,
             mqtt_token: this.mqttToken,
         });
-        */
 
         // init chat after
         this.chat = new ARENAChat({
@@ -418,6 +418,11 @@ export class Arena {
         });
         this.chat.start();
 
+        window.setupAV(() => {
+            // initialize Jitsi videoconferencing
+            this.Jitsi = ARENAJitsi.init(this.sceneOptions.jitsiServer);
+        });
+
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
             const displayBbox = false;
@@ -426,6 +431,8 @@ export class Arena {
         }
 
         SideMenu.setupIcons();
+
+        console.log("ARENA Started; ARENA=", ARENA);
     }
 }
 

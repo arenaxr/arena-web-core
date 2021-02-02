@@ -14,6 +14,7 @@ import linkify from 'linkifyjs';
 import linkifyStr from 'linkifyjs/string';
 import Swal from 'sweetalert2';
 import './style.css';
+import { SideMenu } from '../icons/index.js';
 
 var mqttc;
 // generate an uuid
@@ -585,15 +586,10 @@ export class ARENAChat {
         // process commands
         if (msg.type == 'chat-ctrl') {
             if (msg.text == 'sound:off') {
-                //console.log("muteAudio");
-                let abtn = document.getElementById('btn-audio-off');
-                if (abtn == undefined) {
-                    console.error('Could not find audio button');
-                    return;
-                }
-                if (abtn.style.backgroundImage.includes('audio-on.png') == true) {
-                    abtn.click();
-                    this.displayAlert('Sound muted. Requested by ' + msg.from_un + '.', 3000);
+                //console.log("muteAudio", ARENA.Jitsi.hasAudio);
+                // only mute
+                if (ARENA.Jitsi.hasAudio) {
+                    SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
             }
             return;
@@ -697,14 +693,12 @@ export class ARENAChat {
         usspan.className = 'users-list-btn s';
         usspan.title = 'Mute User';
         uBtnCtnr.appendChild(usspan);
-        // span click event (send sound on/off msg to ussr)
+        // span click event (sound off)
         usspan.onclick = function () {
-            let abtn = document.getElementById('btn-audio-off');
-            if (abtn == undefined) {
-                console.error('Could not find audio button');
-                return;
+            // only mute
+            if (ARENA.Jitsi.hasAudio) {
+                SideMenu.clickButton(SideMenu.buttons.AUDIO);
             }
-            abtn.click();
         };
 
         // list users
@@ -850,7 +844,7 @@ export class ARENAChat {
             cameraid: this.settings.cameraid,
             text: text,
         };
-        //console.log("ctrl", msg, "to", dstTopic);
+        //console.info("ctrl", msg, "to", dstTopic);
         this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
     }
 

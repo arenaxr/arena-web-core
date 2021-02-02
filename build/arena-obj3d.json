@@ -109,7 +109,7 @@
                 "type":"string",
                 "format":"color",
                 "title":"color",
-                "default":"#ffffff",
+                "default":"#7f7f7f",
                 "description":"Base diffuse color."
              },
              "alphaTest":{
@@ -211,6 +211,37 @@
              }
           }
        },
+       "material-extras":{
+          "type":"object",
+          "title":"Material extras",
+          "description":"Define extra material properties.",
+          "properties":{
+             "encoding":{
+                "type":"string",
+                "enum":[
+                   "LinearEncoding",
+                   "sRGBEncoding",
+                   "GammaEncoding",
+                   "RGBEEncoding",
+                   "LogLuvEncoding",
+                   "RGBM7Encoding",
+                   "RGBM16Encoding",
+                   "RGBDEncoding",
+                   "BasicDepthPacking",
+                   "RGBADepthPacking"
+                ],
+                "default":"sRGBEncoding"
+             },
+             "needsUpdate":{
+                "type":"boolean",
+                "default":false
+             }
+          },
+          "default":{
+             "encoding":"sRGBEncoding",
+             "needsUpdate":false
+          }
+       },
        "multisrc":{
           "type":"object",
           "title":"Multi Source",
@@ -246,14 +277,14 @@
                 "default":false
              },
              "from":{
-                "type":"object",
+                "type":"string",
                 "description":"Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
-                "default":null
+                "default":""
              },
              "to":{
-                "type":"object",
+                "type":"string",
                 "description":"Target value at end of animation.",
-                "default":null
+                "default":""
              },
              "type":{
                 "type":"string",
@@ -286,27 +317,49 @@
                 "default":0
              },
              "autoplay":{
+                "type":"boolean",
+                "description":"Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
                 "default":true
              },
              "easing":{
+                "type":"string",
+                "description":"Easing function of animation. To ease in, ease out, ease in and out.",
                 "default":"easeInQuad"
              },
              "elasticity":{
+                "type":"number",
+                "description":"How much to bounce (higher is stronger).",
                 "default":400
              },
              "enabled":{
+                "type":"boolean",
+                "description":"If disabled, animation will stop and startEvents will not trigger animation start.",
                 "default":true
              },
              "startEvents":{
-                "type":"array"
+                "type":"array",
+                "description":"Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
+                "default":[
+                   
+                ]
              },
              "pauseEvents":{
-                "type":"array"
+                "type":"array",
+                "description":"Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
+                "default":[
+                   
+                ]
              },
              "resumeEvents":{
-                "type":"array"
+                "type":"array",
+                "description":"Comma-separated list of events to listen to trigger resume after pausing.",
+                "default":[
+                   
+                ]
              },
              "round":{
+                "type":"boolean",
+                "description":"Whether to round values.",
                 "default":false
              }
           }
@@ -566,22 +619,25 @@
           "description":"Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)"
        },
        "shadow":{
-        "properties": {
-            "cast": {
-                "type": "boolean",
-                "title": "cast shadow",
-                "description": "Whether the entity casts shadows onto the surrounding scene",
-                "default": false
-            },
-            "receive": {
-                "type": "boolean",
-                "title": "receive shadow",
-                "description": "Whether the entity receives shadows from the surrounding scene",
-                "default": false
-            }
-        },
-        "default": {"cast": false, "receive": false}
-     },
+          "properties":{
+             "cast":{
+                "type":"boolean",
+                "title":"cast shadow",
+                "description":"Whether the entity casts shadows onto the surrounding scene",
+                "default":false
+             },
+             "receive":{
+                "type":"boolean",
+                "title":"receive shadow",
+                "description":"Whether the entity receives shadows from the surrounding scene",
+                "default":false
+             }
+          },
+          "default":{
+             "cast":false,
+             "receive":false
+          }
+       },
        "text":{
           "properties":{
              "object_type":{
@@ -728,6 +784,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -838,6 +897,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -876,10 +938,10 @@
              },
              "color":{
                 "$ref":"#/definitions/color"
-             },             
+             },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":true,
           "required":[
@@ -911,6 +973,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -954,7 +1019,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":false,
           "required":[
@@ -965,6 +1030,89 @@
              "scale"
           ]
        },
+       "threejs-scene":{
+        "properties":{
+           "object_type":{
+              "type":"string",
+              "title":"3D object type",
+              "description":"The object type.",
+              "enum":[
+                 "threejs-scene"
+              ]
+           },
+           "url":{
+              "$ref":"#/definitions/url"
+           },
+           "position":{
+              "$ref":"#/definitions/position"
+           },
+           "rotation":{
+              "$ref":"#/definitions/rotation"
+           },
+           "scale":{
+              "$ref":"#/definitions/scale"
+           },
+           "material":{
+              "$ref":"#/definitions/material"
+           },
+           "material-extras":{
+              "$ref":"#/definitions/material-extras"
+           },
+           "multisrc":{
+              "$ref":"#/definitions/multisrc"
+           },
+           "animation":{
+              "$ref":"#/definitions/animation"
+           },
+           "animation-mixer":{
+              "$ref":"#/definitions/animation-mixer"
+           },
+           "sound":{
+              "$ref":"#/definitions/sound"
+           },
+           "dynamic-body":{
+              "$ref":"#/definitions/dynamic-body"
+           },
+           "impulse":{
+              "$ref":"#/definitions/impulse"
+           },
+           "click-listener":{
+              "$ref":"#/definitions/click-listener"
+           },
+           "collision-listener":{
+              "$ref":"#/definitions/collision-listener"
+           },
+           "goto-url":{
+              "$ref":"#/definitions/goto-url"
+           },
+           "video-control":{
+              "$ref":"#/definitions/video-control"
+           },
+           "color":{
+              "title":"color (deprecated; don't use)",
+              "description":"Color is an attribute of the material; Add a material to change the color of the object",
+              "$ref":"#/definitions/color"
+           },
+           "parent":{
+              "$ref":"#/definitions/parent"
+           },
+           "text":{
+              "$ref":"#/definitions/text"
+           },
+           "shadow":{
+              "$ref":"#/definitions/shadow"
+           }
+        },
+        "additionalProperties":false,
+        "required":[
+           "object_type",
+           "url",
+           "legacyLoader",
+           "position",
+           "rotation",
+           "scale"
+        ]
+     },
        "image":{
           "properties":{
              "object_type":{
@@ -990,6 +1138,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1033,7 +1184,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":false,
           "default":{
@@ -1203,71 +1354,71 @@
                 "description":"Id of element the spot should point to. set to null to transform spotlight by orientation, pointing to it’s -Z axis. NOTE: Spot light type only.",
                 "default":null
              },
-              "castShadow": {
+             "castShadow":{
                 "title":"castShadow (point, spot, directional)",
                 "type":"boolean",
-                "default": false
-              },
-              "shadowBias": {
+                "default":false
+             },
+             "shadowBias":{
                 "title":"shadowBias (castShadow=true)",
                 "type":"number",
-                "default": 0
-              },
-              "shadowCameraFar": {
+                "default":0
+             },
+             "shadowCameraFar":{
                 "title":"shadowCameraFar (castShadow=true)",
                 "type":"number",
-                "default": 500
-              },
-              "shadowCameraFov": {
+                "default":500
+             },
+             "shadowCameraFov":{
                 "title":"shadowCameraFov (castShadow=true)",
                 "type":"number",
-                "default": 90
-              },
-              "shadowCameraNear": {
+                "default":90
+             },
+             "shadowCameraNear":{
                 "title":"shadowCameraNear (castShadow=true)",
                 "type":"number",
-                "default": 0.5
-              },
-              "shadowCameraTop": {
+                "default":0.5
+             },
+             "shadowCameraTop":{
                 "title":"shadowCameraTop (castShadow=true)",
                 "type":"number",
-                "default": 5
-              },
-              "shadowCameraRight": {
+                "default":5
+             },
+             "shadowCameraRight":{
                 "title":"shadowCameraRight (castShadow=true)",
                 "type":"number",
-                "default": 5
-              },
-              "shadowCameraBottom": {
+                "default":5
+             },
+             "shadowCameraBottom":{
                 "title":"shadowCameraBottom (castShadow=true)",
                 "type":"number",
-                "default": -5
-              },
-              "shadowCameraLeft": {
+                "default":-5
+             },
+             "shadowCameraLeft":{
                 "title":"shadowCameraBottom (castShadow=true)",
                 "type":"number",
-                "default": -5
-              },
-              "shadowCameraVisible": {
+                "default":-5
+             },
+             "shadowCameraVisible":{
                 "title":"shadowCameraVisible (castShadow=true)",
                 "type":"boolean",
-                "default": false
-              },
-              "shadowMapHeight": {
+                "default":false
+             },
+             "shadowMapHeight":{
                 "title":"shadowMapHeight (castShadow=true)",
                 "type":"number",
-                "default": 512
-              },
-              "shadowMapWidth": {
+                "default":512
+             },
+             "shadowMapWidth":{
                 "title":"shadowMapWidth (castShadow=true)",
                 "type":"number",
-                "default": 512
-              },
-              "shadowRadius": {
+                "default":512
+             },
+             "shadowRadius":{
                 "title":"shadowRadius (castShadow=true)",
                 "type":"number",
-                "default": 1
-              },             
+                "default":1
+             },
              "position":{
                 "title":"position",
                 "$ref":"#/definitions/position"
@@ -1283,7 +1434,7 @@
              "parent":{
                 "title":"parent",
                 "$ref":"#/definitions/parent"
-             }             
+             }
           },
           "additionalProperties":false,
           "default":{
@@ -1360,7 +1511,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "default":{
              "object_type":"line",
@@ -1419,7 +1570,7 @@
              },
              "shadow":{
                 "$ref":"#/definitions/shadow"
-             }             
+             }
           },
           "additionalProperties":false,
           "default":{
@@ -1427,7 +1578,7 @@
              "path":"-2 -1 0, 0 20 0, 10 -1 10",
              "lineWidth":5,
              "lineWidthStyle":1,
-             "color":"#ffffff"
+             "color":"#7f7f7f"
           },
           "required":[
              "object_type",
@@ -1492,6 +1643,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1548,10 +1702,8 @@
                 "y":0,
                 "z":0
              },
-             "scale":{
-                "x":1,
-                "y":1,
-                "z":1
+             "material":{
+                "color":"#7f7f7f"
              }
           },
           "required":[
@@ -1618,6 +1770,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -1717,6 +1872,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1758,6 +1916,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"circle",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -1831,6 +2006,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1872,6 +2050,24 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"cone",
+             "height":2,
+             "radiusBottom":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "height",
@@ -1941,6 +2137,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -1982,6 +2181,24 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"cylinder",
+             "radius":1,
+             "height":2,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius",
@@ -2021,6 +2238,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2062,6 +2282,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"dodecahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2100,6 +2337,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2141,6 +2381,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"octahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2194,6 +2451,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2235,6 +2495,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"octahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "width",
@@ -2299,6 +2576,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2340,10 +2620,28 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"ring",
+             "radiusInner":1,
+             "radiusOuter":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radiusInner",
-             "radiusOutter"
+             "radiusOuter"
           ]
        },
        "sphere":{
@@ -2409,6 +2707,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2468,10 +2769,8 @@
                 "y":0,
                 "z":0
              },
-             "scale":{
-                "x":1,
-                "y":1,
-                "z":1
+             "material":{
+                "color":"#7f7f7f"
              }
           },
           "required":[
@@ -2510,6 +2809,9 @@
              },
              "material":{
                 "$ref":"#/definitions/material"
+             },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
              },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
@@ -2552,6 +2854,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"tetrahedron",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2610,6 +2929,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2651,6 +2973,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"torus",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2714,6 +3053,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2755,6 +3097,23 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"torusKnot",
+             "radius":1,
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "radius"
@@ -2815,6 +3174,9 @@
              "material":{
                 "$ref":"#/definitions/material"
              },
+             "material-extras":{
+                "$ref":"#/definitions/material-extras"
+             },
              "multisrc":{
                 "$ref":"#/definitions/multisrc"
              },
@@ -2856,6 +3218,37 @@
              }
           },
           "additionalProperties":false,
+          "default":{
+             "object_type":"triangle",
+             "vertexA":{
+                "x":0,
+                "y":0.5,
+                "z":0
+             },
+             "vertexB":{
+                "x":-0.5,
+                "y":-0.5,
+                "z":0
+             },
+             "vertexC":{
+                "x":0.5,
+                "y":-0.5,
+                "z":0
+             },
+             "position":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "rotation":{
+                "x":0,
+                "y":0,
+                "z":0
+             },
+             "material":{
+                "color":"#7f7f7f"
+             }
+          },
           "required":[
              "object_type",
              "vertexA",
@@ -2876,6 +3269,11 @@
                 "title":"GLTF Model",
                 "description":"Load a GLTF model",
                 "$ref":"#/definitions/gltf-model"
+             },
+             {
+                "title":"Three.js Scene",
+                "description":"Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred)",
+                "$ref":"#/definitions/threejs-scene"
              },
              {
                 "title":"Image",

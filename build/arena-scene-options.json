@@ -196,7 +196,7 @@
              "groundColor2":{
                 "type":"string",
                 "format":"color",
-                "title":"Ground Color",
+                "title":"Ground Color (secondary)",
                 "description":"Secondary color of the ground. Used for textures, ignored if groundTexture is none.",
                 "default":"#694439"
              },
@@ -343,7 +343,7 @@
                 "description":"Volume for users in a scene",
                 "default":1
              },
-             "distModel":{
+             "distanceModel":{
                 "type":"string",
                 "title":"Positional Audio Distance Model",
                 "description":"Algorithm to use to reduce the volume of the audio source as it moves away from the listener",
@@ -354,13 +354,13 @@
                 ],
                 "default":"inverse"
              },
-             "refDist":{
+             "refDistance":{
                 "type":"number",
                 "title":"Positional Audio Reference Distance",
                 "description":"Distance at which the volume reduction starts taking effect",
                 "default":1
              },
-             "rolloffFact":{
+             "rolloffFactor":{
                 "type":"number",
                 "title":"Positional Audio Rolloff Factor",
                 "description":"How quickly the volume is reduced as the source moves away from the listener",
@@ -438,7 +438,8 @@
        "object_id":{
             "type":"string",
             "minLength":3,
-            "description":"A uuid or otherwise unique identifier for this object"
+            "description":"A uuid or otherwise unique identifier for this object",
+            "default": "scene-options"
        },
        "action":{
           "type":"string",

@@ -9,3 +9,4 @@
 import './arrow-controls.js';
 import './gltf-model-loading.js';
 import './wasd-speed-controls.js';
+import './webrtc-positional-sound.js';

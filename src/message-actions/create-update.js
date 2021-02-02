@@ -101,7 +101,7 @@ export class CreateUpdate {
                 return;
 
             case 'camera-override': 
-                this.handleCameraOverride(message);
+                this.handleCameraOverride(action, message);
                 return;
 
             case 'rig':                
@@ -241,6 +241,11 @@ export class CreateUpdate {
                 }
         } // switch(type)
         
+        // handle geometry attributes
+        if (isGeometry) {
+            this.setGeometryAttributes(entityEl, data, type);
+        }
+
         if (!isGeometry && type) {
             // check if we have a registered component (type = component name) that takes the attributes received
             this.setComponentAttributes(entityEl, data, type);
@@ -249,6 +254,22 @@ export class CreateUpdate {
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);        
     }
+
+   /**
+     * Handles geometry primitive attributes
+     * @param {object} entityEl the new aframe object
+     * @param {object} data data part of the message with the attributes
+     * @param {string} gName geometry name
+     */
+    static setGeometryAttributes(entityEl, data, gName) {
+        if (!AFRAME.geometries[gName]) return; // no geometry registered with this name
+        for (const [attribute, value] of Object.entries(data)) {
+            if (AFRAME.geometries[gName].Geometry.prototype.schema[attribute]) {    
+                entityEl.setAttribute('geometry', attribute, value);
+                delete data[attribute]; // we handled this attribute; remove it
+            }
+        }
+    }  
 
    /**
      * Handles component attributes
@@ -266,7 +287,7 @@ export class CreateUpdate {
             }
         }
     }
-
+  
    /**
      * Handles entity attributes (components)
      * 
@@ -318,7 +339,8 @@ export class CreateUpdate {
      * Camera override handler
      * @param {object} message message to be parsed
      */
-    static handleCameraOverride(message) {
+    static handleCameraOverride(action, message) {
+        if (action !== ACTIONS.UPDATE) return; // camera override must be an update
         const myCamera = document.getElementById('my-camera');
 
         if (message.data.object_type === 'camera') { // camera override
@@ -332,8 +354,9 @@ export class CreateUpdate {
             if (r) {
                 myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
                     new THREE.Quaternion(r.x, r.y, r.z, r.w));
+                Logger.warning('camera override', message);
             }
-        } else if (message.data.object_type !== 'look-at') { // camera look-at
+        } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
                 Logger.error('camera look-at', 'local camera object does not exist! (create camera before)');
                 return;
@@ -353,6 +376,7 @@ export class CreateUpdate {
                 target.hasOwnProperty('z')) {
                 myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z );
                 myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z );
+                Logger.warning('camera look-at', message);
             }
         }
     }

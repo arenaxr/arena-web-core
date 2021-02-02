@@ -73,7 +73,16 @@ export class ARENAEventEmitter {
          * @param mqtt_username {string} the mqtt username (used to login into the server)
          * @param mqtt_token {string} the mqtt token (used to login into the server)
          */
-        ONAUTH: 'onauth'
+        ONAUTH: 'onauth',
+        
+        /**
+         * Indicates user location is available (or if an error was returned). The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback onAuthCallback
+         * @param error {object} GeolocationPositionError with details of the error
+         */
+        ONLOCATION: 'onlocation'        
     };
 
     /**
