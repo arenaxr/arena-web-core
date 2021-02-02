@@ -198,6 +198,23 @@ function _requestUserNewScene(sceneNameOnly, isPublic) {
     };
 }
 
+function _requestDeleteScene(sceneNameOnly) {
+    const params = new FormData();
+    const xhr = new XMLHttpRequest();
+    xhr.open('DELETE', `/user/scenes/${sceneNameOnly}`);
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    xhr.send(params);
+    xhr.responseType = 'json';
+    xhr.onload = () => {
+        if (xhr.status !== 200) {
+            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+        } else {
+            console.debug(xhr.response);
+        }
+    };
+}
+
 /**
  * Request token to auth service
  * @param {string} authType authentication type
