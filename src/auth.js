@@ -72,9 +72,6 @@ function processUserNames(authName, prefix = null) {
     if (prefix !== null) {
         processedName = `${prefix}${processedName}`;
     }
-    if (typeof ARENA !== 'undefined') {
-        ARENA.setUserName(processedName);
-    }
     return processedName;
 }
 
@@ -265,10 +262,7 @@ function requestMqttToken(authType, mqttUsername) {
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
-
-            ARENA.setIdTag(xhr.response.user_ids.userid);
-
-            completeAuth(xhr.response.username, xhr.response.token);
+            completeAuth(xhr.response);
         }
     };
 }
@@ -278,11 +272,14 @@ function requestMqttToken(authType, mqttUsername) {
  * @param {string} username auth user name
  * @param {string} token mqtt token
  */
-function completeAuth(username, token) {
+function completeAuth(response) {
     const onAuthEvt = {
-        mqtt_username: username,
-        mqtt_token: token,
+        mqtt_username: response.username,
+        mqtt_token: response.token,
     };
+    if (response.user_ids) {
+        onAuthEvt.user_ids = response.user_ids
+    }
     // mqtt-token must be set to authorize access to MQTT broker
     if (typeof ARENA !== 'undefined') {
         // emit event to ARENA.event

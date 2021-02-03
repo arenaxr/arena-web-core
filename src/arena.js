@@ -371,6 +371,8 @@ export class Arena {
 
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
+        this.setUserName(args.mqtt_username);
+        this.setIdTag(args.user_ids.userid);
 
         this.Mqtt.connect({
             onSuccess: function() {
