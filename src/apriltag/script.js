@@ -104,7 +104,7 @@ window.processCV = async function(frame) {
                 delete d.corners;
                 delete d.center;
                 // Known tag from ATLAS (includes Origin tag)
-                if (d.id !== 0 && ARENA.aprilTags[d.id] && ARENA.aprilTags[d.id].pose) {
+                if (ARENA.aprilTags[d.id] && ARENA.aprilTags[d.id].pose) {
                     d.refTag = ARENA.aprilTags[d.id];
                 }
                 jsonMsg.detections.push(d);
