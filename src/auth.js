@@ -236,19 +236,19 @@ function requestMqttToken(authType, mqttUsername) {
             params += `&scene=${ARENA.sceneName}`;
         }
         if (ARENA.idTag) {
-            params += `&userid=${ARENA.idTag}`;
         }
         if (ARENA.camName) {
-            params += `&camid=${ARENA.camName}`;
         }
         if (ARENA.viveLName) {
-            params += `&ctrlid1=${ARENA.viveLName}`;
         }
         if (ARENA.viveRName) {
-            params += `&ctrlid2=${ARENA.viveRName}`;
         }
+        params += `&userid=true`;
+        params += `&camid=true`;
+        params += `&ctrlid1=true`;
+        params += `&ctrlid2=true`;
     }
-    xhr.open('POST', `/user/mqtt_auth`);
+    xhr.open('POST', `/user/mqtt`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -259,11 +259,15 @@ function requestMqttToken(authType, mqttUsername) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
+            console.log(xhr.response)
             AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
+
+            ARENA.setIdTag(xhr.response.user_ids.userid);
+
             completeAuth(xhr.response.username, xhr.response.token);
         }
     };
