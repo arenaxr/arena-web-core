@@ -249,7 +249,6 @@ function requestMqttToken(authType, mqttUsername) {
             alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             signOut(); // critical error
         } else {
-            console.log(xhr.response)
             AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;
             // keep payload for later viewing
