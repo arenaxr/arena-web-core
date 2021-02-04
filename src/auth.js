@@ -63,7 +63,8 @@ function processUserNames(authName, prefix = null) {
             localStorage.setItem('display_name', decodeURI(ARENA.userName));
             processedName = ARENA.userName;
         }
-        if (localStorage.getItem('display_name') === null) {
+        const savedName = localStorage.getItem('display_name');
+        if (savedName === null || !savedName || savedName == 'undefined') {
             // Use auth name to create human-readable name
             localStorage.setItem('display_name', authName);
         }
