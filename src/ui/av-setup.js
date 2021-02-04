@@ -193,8 +193,10 @@ window.setupAV = (callback) => {
         localStorage.setItem('prefAudioInput', audioInSelect.value);
         localStorage.setItem('prefVideoInput', videoSelect.value);
         // Stop audio and video preview
-        videoElement.srcObject.getAudioTracks()[0].stop();
-        videoElement.srcObject.getVideoTracks()[0].stop();
+        if (videoElement.srcObject) {
+            videoElement.srcObject.getAudioTracks()[0].stop();
+            videoElement.srcObject.getVideoTracks()[0].stop();
+        }
         // Hide AV panel
         setupPanel.classList.add('d-none');
         if (callback) callback();
