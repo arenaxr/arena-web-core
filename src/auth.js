@@ -238,7 +238,7 @@ function requestMqttToken(authType, mqttUsername) {
         params += `&ctrlid1=true`;
         params += `&ctrlid2=true`;
     }
-    xhr.open('POST', `/user/mqtt`);
+    xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
