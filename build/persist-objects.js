@@ -445,14 +445,6 @@ export async function addNewScene(ns, sceneName, newObjs) {
 }
 
 export async function deleteScene(ns, sceneName) {
-    if (ns != persist.auth_state.username) {
-        Alert.fire({
-            icon: 'error',
-            title: `Can only delete user scenes.`,
-            timer: 5000,
-        });
-        return;
-    }
     selectedObjsPerformAction('delete', `${ns}/${sceneName}`, true);
     try {
         let result = await ARENAUserAccount.requestDeleteUserScene(`${ns}/${sceneName}`);
