@@ -52,27 +52,21 @@ export class Arena {
 
     /**
      * Sets this.userName using name given as argument, url parameter value, or default
-     * Important: Also sets idTag which depends on user name (and other properties that depend on idTag)
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
     setUserName = (name=undefined) => {
         // set userName
         if (name == undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
         this.userName = name;
-
-        // set idTag (based on userName)
-        this.setIdTag();
     }
 
     /**
      * Sets this.idTag using name given as argument, url parameter value, or default
      * Important: Also sets amName, faceName, viveLName, viveRName which depend on idTag
-     * Important: User name must be set
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
     setIdTag = (idTag=undefined) => {
-        if (this.userName == undefined) throw "setIdTag: user name not defined."; // user name must be set
-        if (idTag == undefined) idTag = Math.round(Math.random() * 10000) + '_' + this.userName;
+        if (idTag == undefined) throw "setIdTag: idTag not defined."; // idTag must be set
         this.idTag = idTag;
 
         // set camName
@@ -371,7 +365,11 @@ export class Arena {
 
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
+
+        // match name on the end of the id tag
         this.setUserName(args.mqtt_username);
+
+        // id tag including name is set from authentication service
         this.setIdTag(args.user_ids.userid);
 
         this.Mqtt.connect({

@@ -232,14 +232,6 @@ function requestMqttToken(authType, mqttUsername) {
         if (ARENA.sceneName) {
             params += `&scene=${ARENA.sceneName}`;
         }
-        if (ARENA.idTag) {
-        }
-        if (ARENA.camName) {
-        }
-        if (ARENA.viveLName) {
-        }
-        if (ARENA.viveRName) {
-        }
         params += `&userid=true`;
         params += `&camid=true`;
         params += `&ctrlid1=true`;
