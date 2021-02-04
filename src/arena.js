@@ -370,7 +370,7 @@ export class Arena {
         this.setUserName(args.mqtt_username);
 
         // id tag including name is set from authentication service
-        this.setIdTag(args.user_ids.userid);
+        this.setIdTag(args.ids.userid);
 
         this.Mqtt.connect({
             onSuccess: function() {
