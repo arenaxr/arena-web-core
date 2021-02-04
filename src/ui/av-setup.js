@@ -73,17 +73,27 @@ window.setupAV = (callback) => {
         if (!audioInSelect.childElementCount) {
             audioInSelect.appendChild(noElementOption.cloneNode(true));
         }
-        const currentAudioIndex = [...audioInSelect.options].
-            findIndex((option) => option.text === stream.getAudioTracks()[0].label);
-        audioInSelect.selectedIndex = (currentAudioIndex === -1) ? 0 : currentAudioIndex;
-
         if (!videoSelect.childElementCount) {
             videoSelect.appendChild(noElementOption.cloneNode(true));
         }
-        const currentVideoIndex = [...videoSelect.options].
-            findIndex((option) => option.text === stream.getVideoTracks()[0].label);
-        videoSelect.selectedIndex = (currentVideoIndex === -1) ? 0 : currentVideoIndex;
+        if (window.stream) {
+            const currentAudioIndex = [...audioInSelect.options].
+                findIndex((option) => option.text ===
+                    window.stream.getAudioTracks()[0].label);
+            audioInSelect.selectedIndex = (currentAudioIndex === -1) ?
+                0 :
+                currentAudioIndex;
 
+            const currentVideoIndex = [...videoSelect.options].
+                findIndex((option) => option.text ===
+                    window.stream.getVideoTracks()[0].label);
+            videoSelect.selectedIndex = (currentVideoIndex === -1) ?
+                0 :
+                currentVideoIndex;
+        } else {
+            audioInSelect.selectedIndex = 0;
+            videoSelect.selectedIndex = 0;
+        }
         if (!audioOutSelect.childElementCount) {
             noElementOption.text = 'Default Device';
             audioOutSelect.appendChild(noElementOption.cloneNode(true));
