@@ -360,7 +360,7 @@ export class Arena {
      */
     onAuth = async (e) => {
         const args = e.detail;
-
+        console.log(args);
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
         this.username = args.mqtt_username;

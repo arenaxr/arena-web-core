@@ -197,7 +197,7 @@ export class ARENAChat {
         muteAllDiv.appendChild(this.silenceAllBtn);
 
         let label = document.createElement('span');
-        label.innerHTML = '<br/><br/>&nbsp';
+        label.innerHTML = '<br/>&nbsp';
         label.style.fontSize = 'small';
         this.usersPopup.appendChild(label);
 
@@ -206,7 +206,7 @@ export class ARENAChat {
         this.usersPopup.appendChild(this.nSceneUserslabel);
 
         label = document.createElement('span');
-        label.innerHTML = ' Users (buttons allow to find and mute users):';
+        label.innerHTML = ' Users (you can find and mute users):';
         label.style.fontSize = 'small';
         this.usersPopup.appendChild(label);
 
@@ -228,7 +228,7 @@ export class ARENAChat {
         this.lmPopup.appendChild(this.closeLmBtn);
 
         label = document.createElement('span');
-        label.innerHTML = '<br/><br/>&nbspLandmarks (buttons allow to find landmarks):';
+        label.innerHTML = '<br/>&nbspLandmarks (buttons allow to find landmarks):';
         label.style.fontSize = 'small';
         this.lmPopup.appendChild(label);
 
