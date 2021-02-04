@@ -11,10 +11,10 @@
           "type":"scene-options",
           "data":{
              "env-presets":{
-                "active":true,
-                "preset":"none",
-                "ground":"none",
-                "lighting":"none"
+                "active": true,
+                "preset": "default",
+                "ground": "hills",
+                "lighting": "distant"
              },
              "scene-options":{
                 "jitsiServer":"mr.andrew.cmu.edu",

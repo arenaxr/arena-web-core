@@ -76,4 +76,13 @@ export class ARENAUserAccount {
         let result = await ARENAUserAccount._makeRequest('POST', '/user/new_scene', params);
         return result;
     }
+
+    /**
+     * Request to delete scene permissions from user db
+     * @param {string} sceneNameOnly name of the scene without namespace
+     */
+    static async requestDeleteUserScene(sceneNameOnly) {
+        let result = await ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${sceneNameOnly}`);
+        return result;
+    }    
 }

@@ -40,11 +40,11 @@ export async function init(settings) {
                 ? settings.persist_uri
                 : location.hostname + (location.port ? ':' + location.port : '') + '/persist/',
         obj_list: settings.obj_list,
+        addeditsection: settings.addeditsection,
         editobj_handler: settings.editobj_handler,
         auth_state: settings.auth_state,
         mqtt_username: settings.mqtt_username,
         mqtt_token: settings.mqtt_token,
-        dft_scene_objs: settings.dft_scene_objs,
     };
 
     persist.currentSceneObjs = [];
@@ -77,7 +77,7 @@ export async function init(settings) {
         console.error(error); // Failure!
         Alert.fire({
             icon: 'error',
-            title: `Error connecting to MQTT: ${error}`,
+            title: `Error connecting to MQTT: ${JSON.stringify(error)}`,
             timer: 5000,
         });
         return;
@@ -100,26 +100,32 @@ export async function populateSceneAndNsLists(nsList, sceneList) {
     try {
         persist.auth_state = await ARENAUserAccount.userAuthState();
     } catch (err) {
-        Alert.fire({
+        Swal.fire({
             icon: 'Error',
-            title: `Error querying user authetication status: ${err}`,
-            timer: 5000,
+            title: `Error querying user authentication status: ${err.statusText}`,
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
         });
         console.error(err);
         return undefined;
     }
 
     if (!persist.auth_state.authenticated) {
-        Alert.fire({
+        Swal.fire({
             icon: 'error',
             title: 'Please do a non-anonymous login.',
-            timer: 10000,
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+        }).then((result) => {
+            signOut();
         });
+
         var option = document.createElement('option');
         option.text = '';
         nsList.add(option);
         nsList.disabled = true;
-        sceneList.disabled = true;
+        disableSceneList(sceneList);
         return undefined;
     }
 
@@ -127,9 +133,26 @@ export async function populateSceneAndNsLists(nsList, sceneList) {
     if (ns) {
         populateSceneList(ns, sceneList);
     } else {
-        sceneList.disabled = true;
+        disableSceneList(sceneList);
     }
     return ns;
+}
+
+export function clearObjectList(noObjNotification = true) {
+    persist.currentSceneObjs = [];
+    while (persist.obj_list.firstChild) {
+        persist.obj_list.removeChild(persist.obj_list.firstChild);
+    }
+
+    if (!noObjNotification) return;
+
+    var li = document.createElement('li');
+    var span = document.createElement('span');
+    var img = document.createElement('img');
+    var t = document.createTextNode('No objects in the scene');
+    li.appendChild(t);
+
+    persist.obj_list.appendChild(li);
 }
 
 export async function populateObjectList(
@@ -137,7 +160,7 @@ export async function populateObjectList(
     filter = '.*',
     chk_type = {object: true, program: true, 'scene-options': true, landmarks: true}
 ) {
-    persist.currentSceneObjs = [];
+    clearObjectList(false);
 
     if (persist.persist_uri == undefined) {
         console.error('Persist DB URL not defined.'); // populate list should be called after persist_url is set
@@ -167,15 +190,12 @@ export async function populateObjectList(
     } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: `Error fetching scene from database: ${err}`,
+            title: `Error fetching scene from database: ${JSON.stringify(err)}`,
             timer: 5000,
         });
         return;
     }
     persist.currentSceneObjs = sceneobjs;
-    while (persist.obj_list.firstChild) {
-        persist.obj_list.removeChild(persist.obj_list.firstChild);
-    }
 
     // sort object list by type, then object_id
     sceneobjs.sort(function (a, b) {
@@ -202,6 +222,7 @@ export async function populateObjectList(
         var t = document.createTextNode('No objects in the scene');
         li.appendChild(t);
         persist.obj_list.appendChild(li);
+        persist.addeditsection.style = 'display:block';
         return;
     }
 
@@ -212,7 +233,7 @@ export async function populateObjectList(
     } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: `Invalid filter ${err} (NOTE: '.*' matches all object ids)`,
+            title: `Invalid filter ${JSON.stringify(err)} (NOTE: '.*' matches all object ids)`,
             timer: 5000,
         });
         return;
@@ -272,6 +293,7 @@ export async function populateObjectList(
 
         persist.obj_list.appendChild(li);
     }
+    persist.addeditsection.style = 'display:block';
 }
 
 export async function populateNamespaceList(nsList) {
@@ -283,7 +305,7 @@ export async function populateNamespaceList(nsList) {
     } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: `Error fetching scene list from account: ${err}`,
+            title: `Error fetching scene list from account: ${err.statusText}`,
             timer: 5000,
         });
         console.error(err);
@@ -330,10 +352,20 @@ export async function populateNamespaceList(nsList) {
     return persist.auth_state.username;
 }
 
-export function populateSceneList(ns, sceneList) {
+export function disableSceneList(sceneList) {
+    if (!sceneList) return;
+    sceneList.disabled = true;
+    let option = document.createElement('option');
+    option.text = 'No scenes.';
+    sceneList.add(option);
+    clearObjectList();
+    persist.addeditsection.style = 'display:none';
+}
+
+export function populateSceneList(ns, sceneList, selected = undefined) {
     if (!persist.auth_state.authenticated) return; // should not be called when we are not logged in
     if (persist.scenes.length == 0) {
-        sceneList.disabled = true;
+        disableSceneList(sceneList);
         return;
     }
 
@@ -348,15 +380,15 @@ export function populateSceneList(ns, sceneList) {
         if (ns && persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
         let option = document.createElement('option');
-        option.text = (ns == undefined) ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
+        option.text = ns == undefined ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
         sceneList.add(option);
     }
     if (!first) {
-        sceneList.disabled = true;
-        let option = document.createElement('option');
-        option.text = 'No scenes.';
-        sceneList.add(option);
-    } else sceneList.value = first;
+        disableSceneList(sceneList);
+    } else {
+        if (!selected) sceneList.value = first;
+        else sceneList.value = selected;
+    }
 }
 
 export function populateNewSceneNamespaces(nsList) {
@@ -384,7 +416,7 @@ export function populateNewSceneNamespaces(nsList) {
     return ns;
 }
 
-export async function addNewScene(ns, sceneName) {
+export async function addNewScene(ns, sceneName, newObjs) {
     let isPublic = false;
 
     if (ns === 'public') isPublic = true;
@@ -393,7 +425,7 @@ export async function addNewScene(ns, sceneName) {
     } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: `Error adding scene: ${err}`,
+            title: `Error adding scene: ${err.statusText}`,
             timer: 5000,
         });
         console.error(err);
@@ -403,41 +435,62 @@ export async function addNewScene(ns, sceneName) {
         title: 'Scene added',
         timer: 5000,
     });
-    // add default scene objects
-    persist.dft_scene_objs.forEach((obj) => {
+    persist.scenes.push({ns: ns, name: sceneName});
+    if (!newObjs) return;
+
+    // add objects to the new scene
+    newObjs.forEach((obj) => {
         addObject(obj, `${ns}/${sceneName}`);
     });
 }
 
 export async function deleteScene(ns, sceneName) {
-    Swal.fire('Meh, we have not implemented this yet! :-)');
+    if (ns != persist.auth_state.username) {
+        Alert.fire({
+            icon: 'error',
+            title: `Can only delete user scenes.`,
+            timer: 5000,
+        });
+        return;
+    }
+    selectedObjsPerformAction('delete', `${ns}/${sceneName}`, true);
+    try {
+        let result = await ARENAUserAccount.requestDeleteUserScene(`${ns}/${sceneName}`);
+    } catch (err) {
+        Alert.fire({
+            icon: 'error',
+            title: `Error deleting scene: ${err.statusText}`,
+            timer: 5000,
+        });
+        console.error(err);
+    }
 }
 
-export function selectedObjsPerformAction(action, scene) {
+export function selectedObjsPerformAction(action, scene, all = false) {
     var items = persist.obj_list.getElementsByTagName('li');
     for (var i = 0; i < items.length; i++) {
-        if (items[i].classList.contains('checked')) {
-            var objJson = items[i].getAttribute('data-obj');
-            var obj = JSON.parse(objJson);
-            var actionObj = JSON.stringify({
-                object_id: obj.object_id,
-                action: action,
-                persist: true,
-                type: obj.type,
-                data: (obj.attributes != undefined) ? obj.attributes : obj.data
+        if (!items[i].classList.contains('checked') && !all) continue;        
+        var objJson = items[i].getAttribute('data-obj');
+        if (!objJson) continue;
+        var obj = JSON.parse(objJson);
+        var actionObj = JSON.stringify({
+            object_id: obj.object_id,
+            action: action,
+            persist: true,
+            type: obj.type,
+            data: obj.attributes != undefined ? obj.attributes : obj.data,
+        });
+        var topic = 'realm/s/' + scene;
+        console.info('Publish [ ' + topic + ']: ' + actionObj);
+        try {
+            persist.mc.publish(topic, actionObj);
+        } catch (error) {
+            Alert.fire({
+                icon: 'error',
+                title: `Error deleting: ${JSON.stringify(error)}`,
+                timer: 5000,
             });
-            var topic = 'realm/s/' + scene;
-            console.info('Publish [ ' + topic + ']: ' + actionObj);
-            try {
-                persist.mc.publish(topic, actionObj);
-            } catch (error) {
-                Alert.fire({
-                    icon: 'error',
-                    title: `Error deleting: ${error}`,
-                    timer: 5000,
-                });
-                return;
-            }
+            return;
         }
     }
 }
@@ -503,7 +556,7 @@ export async function addObject(obj, scene) {
     } catch (error) {
         Alert.fire({
             icon: 'error',
-            title: `Error adding object: ${error}`,
+            title: `Error adding object: ${JSON.stringify(error)}`,
             timer: 5000,
         });
         return;
@@ -525,7 +578,6 @@ export async function addObject(obj, scene) {
             timer: 5000,
         });
     }
-    populateObjectList(scene);
 }
 
 export function mqttReconnect(settings) {
@@ -550,7 +602,7 @@ export function mqttReconnect(settings) {
     } catch (error) {
         Alert.fire({
             icon: 'error',
-            title: `Error connecting to MQTT: ${error}`,
+            title: `Error connecting to MQTT: ${JSON.stringify(error)}`,
             timer: 5000,
         });
         return;
