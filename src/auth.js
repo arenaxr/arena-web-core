@@ -270,8 +270,8 @@ function completeAuth(response) {
         mqtt_username: response.username,
         mqtt_token: response.token,
     };
-    if (response.user_ids) {
-        onAuthEvt.user_ids = response.user_ids
+    if (response.ids) {
+        onAuthEvt.ids = response.ids
     }
     // mqtt-token must be set to authorize access to MQTT broker
     if (typeof ARENA !== 'undefined') {
