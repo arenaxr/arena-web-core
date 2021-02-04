@@ -63,7 +63,8 @@ function processUserNames(authName, prefix = null) {
             localStorage.setItem('display_name', decodeURI(ARENA.userName));
             processedName = ARENA.userName;
         }
-        if (localStorage.getItem('display_name') === null) {
+        const savedName = localStorage.getItem('display_name');
+        if (savedName === null || !savedName || savedName == 'undefined') {
             // Use auth name to create human-readable name
             localStorage.setItem('display_name', authName);
         }
@@ -71,9 +72,6 @@ function processUserNames(authName, prefix = null) {
     }
     if (prefix !== null) {
         processedName = `${prefix}${processedName}`;
-    }
-    if (typeof ARENA !== 'undefined') {
-        ARENA.setUserName(processedName);
     }
     return processedName;
 }
@@ -235,18 +233,10 @@ function requestMqttToken(authType, mqttUsername) {
         if (ARENA.sceneName) {
             params += `&scene=${ARENA.sceneName}`;
         }
-        if (ARENA.idTag) {
-            params += `&userid=${ARENA.idTag}`;
-        }
-        if (ARENA.camName) {
-            params += `&camid=${ARENA.camName}`;
-        }
-        if (ARENA.viveLName) {
-            params += `&ctrlid1=${ARENA.viveLName}`;
-        }
-        if (ARENA.viveRName) {
-            params += `&ctrlid2=${ARENA.viveRName}`;
-        }
+        params += `&userid=true`;
+        params += `&camid=true`;
+        params += `&ctrlid1=true`;
+        params += `&ctrlid2=true`;
     }
     xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
@@ -264,7 +254,7 @@ function requestMqttToken(authType, mqttUsername) {
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(xhr.response.token);
             AUTH.token_payload = tokenObj.payloadObj;
-            completeAuth(xhr.response.username, xhr.response.token);
+            completeAuth(xhr.response);
         }
     };
 }
@@ -274,11 +264,14 @@ function requestMqttToken(authType, mqttUsername) {
  * @param {string} username auth user name
  * @param {string} token mqtt token
  */
-function completeAuth(username, token) {
+function completeAuth(response) {
     const onAuthEvt = {
-        mqtt_username: username,
-        mqtt_token: token,
+        mqtt_username: response.username,
+        mqtt_token: response.token,
     };
+    if (response.ids) {
+        onAuthEvt.ids = response.ids
+    }
     // mqtt-token must be set to authorize access to MQTT broker
     if (typeof ARENA !== 'undefined') {
         // emit event to ARENA.event

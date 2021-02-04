@@ -1,10 +1,7 @@
 name: ARENA Dev Staging SSH Deploy
 on:
-  # Trigger the workflow on push or pull request on master
+  # Trigger the workflow on push on master
   push:
-    branches:
-      - master
-  pull_request:
     branches:
       - master
 
