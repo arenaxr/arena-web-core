@@ -280,8 +280,6 @@ export class SideMenu {
                     settingsButtons[i].style.display = 'block';
                 }
                 settingsPopup.style.display = 'block'; // open settings panel
-                document.getElementById('settingsUsernameInput').focus();
-
                 loadSettings();
             } else {
                 settingsBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/more.png\')';
@@ -420,6 +418,7 @@ export class SideMenu {
          */
         function loadSettings() {
             usernameInput.value = localStorage.getItem('display_name');
+            document.getElementById('settingsUsernameInput').focus();
             const auth = getAuthStatus();
             sceneName.innerHTML = ARENA.sceneName;
             authType.innerHTML = auth.type;
