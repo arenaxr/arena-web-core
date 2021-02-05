@@ -319,7 +319,7 @@ export class SideMenu {
         document.body.appendChild(settingsPopup);
 
         const closeSettingsBtn = document.createElement('span');
-        closeSettingsBtn.className = 'close';
+        closeSettingsBtn.className = 'close pe-2';
         closeSettingsBtn.innerHTML = '&times';
         settingsPopup.appendChild(closeSettingsBtn);
 
