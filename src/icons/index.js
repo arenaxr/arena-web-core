@@ -54,7 +54,7 @@ export class SideMenu {
 
     /**
      * Set up various icons for side menu
-     */   
+     */
     static setupIcons() {
         /**
          * Create audio button
@@ -313,26 +313,27 @@ export class SideMenu {
          * Add settings panel
          */
         const settingsPopup = document.createElement('div');
-        settingsPopup.className = 'settings-popup';
+        settingsPopup.className = 'settings-popup px-3 py-1 bg-white';
         document.body.appendChild(settingsPopup);
 
         const closeSettingsBtn = document.createElement('span');
-        closeSettingsBtn.className = 'close';
+        closeSettingsBtn.className = 'close pe-2';
         closeSettingsBtn.innerHTML = '&times';
         settingsPopup.appendChild(closeSettingsBtn);
 
         const formDiv = document.createElement('div');
-        formDiv.className = 'form-container';
+        formDiv.className = 'pb-3';
         settingsPopup.appendChild(formDiv);
 
         let label = document.createElement('span');
-        label.innerHTML = 'Settings</br></br>';
+        label.innerHTML = 'Settings';
         label.style.fontSize = 'medium';
         formDiv.appendChild(label);
 
         const stats = document.createElement('a');
         stats.href = '#';
-        stats.innerHTML = 'Toggle Stats</br></br>';
+        stats.innerHTML = 'Toggle Stats';
+        stats.className = 'd-block py-1';
         stats.onclick = function() {
             //showPerms();
             let sceneEl = document.querySelector('a-scene');
@@ -344,20 +345,16 @@ export class SideMenu {
         const profile = document.createElement('a');
         profile.href = '#';
         profile.innerHTML = 'Profile';
-        profile.onclick = function() {
-            showProfile();
-        };
+        profile.onclick = showProfile;
+        profile.className="d-block pb-1";
         formDiv.appendChild(profile);
-        formDiv.appendChild(document.createElement('br'));
 
         const perms = document.createElement('a');
         perms.href = '#';
         perms.innerHTML = 'MQTT Permissions';
-        perms.onclick = function() {
-            showPerms();
-        };
+        perms.onclick = showPerms;
+        perms.className="d-block pb-1";
         formDiv.appendChild(perms);
-        formDiv.appendChild(document.createElement('br'));
 
         formDiv.append('Scene: ');
         const sceneName = document.createElement('span');
@@ -383,23 +380,29 @@ export class SideMenu {
         formDiv.append('Name: ');
         const authFullname = document.createElement('span');
         formDiv.appendChild(authFullname);
-        formDiv.appendChild(document.createElement('br'));
 
-        formDiv.appendChild(document.createElement('br'));
+        const usernameInputDiv = document.createElement('div');
+        usernameInputDiv.className = 'my-2';
 
-        label = document.createElement('span');
+        label = document.createElement('label');
+        label.className= 'form-label mb-0';
+        label.setAttribute('for', 'settingsUsernameInput')
         label.innerHTML = 'Display Name';
-        formDiv.appendChild(label);
+        usernameInputDiv.appendChild(label);
 
         const nameRegex = '^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$';
         const usernameInput = document.createElement('input');
         usernameInput.setAttribute('type', 'text');
-        usernameInput.setAttribute('placeholder', 'Display Name');
         usernameInput.setAttribute('pattern', nameRegex);
-        formDiv.appendChild(usernameInput);
+        usernameInput.setAttribute('name', 'settingsUsernameInput')
+        usernameInput.className="form-control";
+        usernameInputDiv.appendChild(usernameInput);
+
+        formDiv.appendChild(usernameInputDiv);
 
         const saveSettingsBtn = document.createElement('button');
         saveSettingsBtn.innerHTML = 'Save';
+        saveSettingsBtn.className = 'btn btn-info btn-sm';
         formDiv.appendChild(saveSettingsBtn);
 
         closeSettingsBtn.onclick = function() {
@@ -444,7 +447,7 @@ export class SideMenu {
     /**
      * Other modules can call this to request a click on a button
      * @param button {string} the button name. Use SideMenu.buttons constants
-     */   
+     */
     static clickButton(button) {
         this._buttonList[button].onClick();
     }

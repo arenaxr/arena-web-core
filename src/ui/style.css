@@ -7,6 +7,7 @@ body {
 #avSetup {
     z-index: 999;
     position: relative;
+    background-color: rgba(0,0,0,0.6)
 }
 
 .max-vh-100 {

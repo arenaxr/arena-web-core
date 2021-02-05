@@ -361,7 +361,6 @@ export class Arena {
     onAuth = async (e) => {
         const args = e.detail;
         console.log(args);
-        this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
 
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
@@ -372,6 +371,7 @@ export class Arena {
         // id tag including name is set from authentication service
         this.setIdTag(args.ids.userid);
 
+        this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
         this.Mqtt.connect({
             onSuccess: function() {
                 console.log('MQTT scene connection success.');
