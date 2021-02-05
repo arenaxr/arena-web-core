@@ -165,6 +165,7 @@ export class ARENAChat {
         this.msgTxt = document.createElement('textarea');
         this.msgTxt.setAttribute('rows', '1');
         this.msgTxt.setAttribute('placeholder', 'Type message..');
+        formDiv.className = 'form-container';
         formDiv.appendChild(this.msgTxt);
 
         this.toSel = document.createElement('select');
@@ -745,12 +746,12 @@ export class ARENAChat {
                 } else {
                     uli.className = 'oscene';
                 }
+                let op = document.createElement('option');
+                op.value = user.uid;
+                op.innerHTML =
+                    'to: ' + decodeURI(user.un) + (user.scene != _this.settings.scene ? ' (' + user.scene + ')' : '');
+                _this.toSel.appendChild(op);    
             }
-            let op = document.createElement('option');
-            op.value = user.uid;
-            op.innerHTML =
-                'to: ' + decodeURI(user.un) + (user.scene != _this.settings.scene ? ' (' + user.scene + ')' : '');
-            _this.toSel.appendChild(op);
             _this.usersList.appendChild(uli);
         });
         this.toSel.value = selVal; // preserve selected value
