@@ -385,7 +385,7 @@ export class SideMenu {
         usernameInputDiv.className = 'my-2';
 
         label = document.createElement('label');
-        label.className= 'form-label';
+        label.className= 'form-label mb-0';
         label.setAttribute('for', 'settingsUsernameInput')
         label.innerHTML = 'Display Name';
         usernameInputDiv.appendChild(label);
