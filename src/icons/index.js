@@ -382,20 +382,21 @@ export class SideMenu {
         formDiv.appendChild(authFullname);
 
         const usernameInputDiv = document.createElement('div');
-        usernameInputDiv.className = 'mt-1 form-outline';
+        usernameInputDiv.className = 'my-2';
+
+        label = document.createElement('label');
+        label.className= 'form-label';
+        label.setAttribute('for', 'settingsUsernameInput')
+        label.innerHTML = 'Display Name';
+        usernameInputDiv.appendChild(label);
 
         const nameRegex = '^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$';
         const usernameInput = document.createElement('input');
         usernameInput.setAttribute('type', 'text');
         usernameInput.setAttribute('pattern', nameRegex);
-        usernameInput.setAttribute('id', 'settingsUsernameInput')
+        usernameInput.setAttribute('name', 'settingsUsernameInput')
         usernameInput.className="form-control";
         usernameInputDiv.appendChild(usernameInput);
-
-        label = document.createElement('label');
-        label.className= 'form-label';
-        label.innerHTML = 'Display Name';
-        usernameInputDiv.appendChild(label);
 
         formDiv.appendChild(usernameInputDiv);
 
@@ -418,7 +419,6 @@ export class SideMenu {
          */
         function loadSettings() {
             usernameInput.value = localStorage.getItem('display_name');
-            document.getElementById('settingsUsernameInput').focus();
             const auth = getAuthStatus();
             sceneName.innerHTML = ARENA.sceneName;
             authType.innerHTML = auth.type;
