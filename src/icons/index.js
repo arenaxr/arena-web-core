@@ -54,7 +54,7 @@ export class SideMenu {
 
     /**
      * Set up various icons for side menu
-     */   
+     */
     static setupIcons() {
         /**
          * Create audio button
@@ -326,13 +326,14 @@ export class SideMenu {
         settingsPopup.appendChild(formDiv);
 
         let label = document.createElement('span');
-        label.innerHTML = 'Settings</br></br>';
+        label.innerHTML = 'Settings';
         label.style.fontSize = 'medium';
         formDiv.appendChild(label);
 
         const stats = document.createElement('a');
         stats.href = '#';
-        stats.innerHTML = 'Toggle Stats</br></br>';
+        stats.innerHTML = 'Toggle Stats';
+        stats.setAttribute("class", "d-block py-1");
         stats.onclick = function() {
             //showPerms();
             let sceneEl = document.querySelector('a-scene');
@@ -344,18 +345,16 @@ export class SideMenu {
         const profile = document.createElement('a');
         profile.href = '#';
         profile.innerHTML = 'Profile';
-        profile.onclick = function() {
-            showProfile();
-        };
+        profile.onclick = showProfile;
+        profile.setAttribute("class", "d-block pb-1");
         formDiv.appendChild(profile);
         formDiv.appendChild(document.createElement('br'));
 
         const perms = document.createElement('a');
         perms.href = '#';
         perms.innerHTML = 'MQTT Permissions';
-        perms.onclick = function() {
-            showPerms();
-        };
+        perms.onclick = showPerms;
+        perms.setAttribute("class", "d-block pb-1");
         formDiv.appendChild(perms);
         formDiv.appendChild(document.createElement('br'));
 
@@ -387,16 +386,22 @@ export class SideMenu {
 
         formDiv.appendChild(document.createElement('br'));
 
-        label = document.createElement('span');
-        label.innerHTML = 'Display Name';
-        formDiv.appendChild(label);
+        const usernameInputDiv = document.createElement('div');
+        usernameInputDiv.setAttribute('class', 'form-outline');
 
         const nameRegex = '^(?=[^A-Za-z]*[A-Za-z]{2,})[ -~]*$';
         const usernameInput = document.createElement('input');
         usernameInput.setAttribute('type', 'text');
-        usernameInput.setAttribute('placeholder', 'Display Name');
         usernameInput.setAttribute('pattern', nameRegex);
-        formDiv.appendChild(usernameInput);
+        usernameInput.setAttribute("class", "form-control");
+        usernameInputDiv.appendChild(usernameInput);
+
+        label = document.createElement('label');
+        label.setAttribute('class', 'form-label');
+        label.innerHTML = 'Display Name';
+        usernameInputDiv.appendChild(label);
+
+        formDiv.appendChild(usernameInputDiv);
 
         const saveSettingsBtn = document.createElement('button');
         saveSettingsBtn.innerHTML = 'Save';
@@ -444,7 +449,7 @@ export class SideMenu {
     /**
      * Other modules can call this to request a click on a button
      * @param button {string} the button name. Use SideMenu.buttons constants
-     */   
+     */
     static clickButton(button) {
         this._buttonList[button].onClick();
     }
