@@ -493,8 +493,10 @@ window.addEventListener('onauth', async function (e) {
             });    
             return;
         }
-        PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
-        PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk); 
+        await PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
+        setTimeout(async () => {
+            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk); 
+        }, 500); // refresh after a while, so that new object messages are processed        
     };
     document.querySelectorAll('.addobj').forEach(item => {
       item.addEventListener("click", addObjHandler);
