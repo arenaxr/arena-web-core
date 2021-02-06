@@ -173,19 +173,14 @@ function _requestUserScenes() {
 }
 
 /**
- * API SAMPLE: Request a scene is added to the user database.
- * @param {string} sceneNameOnly name of the scene without namespace
- * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
+ * API SAMPLE: Add a scene to the user database.
+ * @param {string} namespace_scene name of the scene with namespace
  */
-function _requestUserNewScene(sceneNameOnly, isPublic) {
-    const params = new FormData();
-    params.append('scene', sceneNameOnly);
-    params.append('is_public', isPublic);
+function _requestUserNewScene(namespace_scene) {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/user/new_scene');
+    xhr.open('POST', `/user/scenes/${namespace_scene}`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.send(params);
     xhr.responseType = 'json';
     xhr.onload = () => {
         if (xhr.status !== 200) {
@@ -196,13 +191,15 @@ function _requestUserNewScene(sceneNameOnly, isPublic) {
     };
 }
 
-function _requestDeleteScene(sceneNameOnly) {
-    const params = new FormData();
+/**
+ * API SAMPLE: Delete a scene from the user database.
+ * @param {string} namespace_scene name of the scene with namespace
+ */
+function _requestDeleteScene(namespace_scene) {
     const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', `/user/scenes/${sceneNameOnly}`);
+    xhr.open('DELETE', `/user/scenes/${namespace_scene}`);
     const csrftoken = getCookie('csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.send(params);
     xhr.responseType = 'json';
     xhr.onload = () => {
         if (xhr.status !== 200) {

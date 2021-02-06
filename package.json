@@ -12,7 +12,7 @@
     "last 3 safari versions"
   ],
   "dependencies": {
-    "aframe": "^1.0.0",
+    "aframe": "^1.2.0",
     "aframe-environment-component": "^2.0.0",
     "aframe-extras": "^6.1.1",
     "aframe-meshline-component": "^0.3.1",
@@ -23,11 +23,11 @@
     "jquery": "^3.5.1",
     "linkifyjs": "^2.1.9",
     "paho-mqtt": "^1.1.0",
-    "sweetalert2": "^10.0.0",
+    "sweetalert2": "^10.14.0",
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
-    "eslint": "^7.17.0",
+    "eslint": "^7.19.0",
     "eslint-config-google": "^0.14.0",
     "parcel-bundler": "^1.12.4"
   },
