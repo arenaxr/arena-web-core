@@ -185,6 +185,9 @@ export class CreateUpdate {
                     entityEl.setAttribute('material', 'src', data.url); // image src from url
                     if (!data.hasOwnProperty('material-extras')) {
                         // default images to sRGBEncoding, if not specified
+                        entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');   
+                        entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
+                        /*
                         entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
                         setTimeout(async () => {
                             entityEl.setAttribute('material-extras', 'needsUpdate', 'false');
@@ -192,6 +195,7 @@ export class CreateUpdate {
                         setTimeout(async () => {
                             entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
                         }, 1000); // try again in a bit in case material is not ready yet    
+                        */
                     }
                 }
                 delete data.url;
