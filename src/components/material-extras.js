@@ -13,6 +13,7 @@ AFRAME.registerComponent('material-extras', {
         needsUpdate: {default: false},
     },
     init: function() {
+        this.retry = true;
         this.update();
     },
     update: function() {
@@ -22,6 +23,20 @@ AFRAME.registerComponent('material-extras', {
             if (mesh.material.map) {
                 mesh.material.map.encoding = THREE[this.data.encoding];
                 mesh.material.needsUpdate = this.data.needsUpdate;
+            } else {
+                if (this.retry) {
+                    setTimeout(async () => {
+                        this.retry=false;
+                        this.update();
+                    }, 1000); // try again in a bit in case material is not ready yet
+                }
+            }
+        } else {
+            if (this.retry) {
+                setTimeout(async () => {
+                    this.retry=false;
+                    this.update();
+                }, 1000); // try again in a bit in case material is not ready yet
             }
         }
     },
