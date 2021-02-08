@@ -83,7 +83,6 @@ AFRAME.registerComponent('arena-camera', {
 
     publishVio(action = 'update') {
         const data = this.data;
-        if (!data.vioEnabled) return;
 
         const msg = {
             object_id: ARENA.camName,
@@ -140,11 +139,10 @@ AFRAME.registerComponent('arena-camera', {
         if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
-            this.publishVio();
         } else if (this.lastPose !== newPose) {
             this.publishPose();
-            this.publishVio();
         }
+        if (!data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
     },
 });
