@@ -7,7 +7,7 @@
  */
 
 import MqttClient from './mqtt-client.js';
-import {ARENAUserAccount} from './arena-account.js';
+import { ARENAUserAccount } from './arena-account.js';
 
 var persist;
 
@@ -52,7 +52,7 @@ export async function init(settings) {
     // set select when clicking on a list item
     persist.obj_list.addEventListener(
         'click',
-        function (ev) {
+        function(ev) {
             if (ev.target.tagName === 'LI') {
                 ev.target.classList.toggle('checked');
             }
@@ -158,7 +158,7 @@ export function clearObjectList(noObjNotification = true) {
 export async function populateObjectList(
     scene,
     filter = '.*',
-    chk_type = {object: true, program: true, 'scene-options': true, landmarks: true}
+    chk_type = { object: true, program: true, 'scene-options': true, landmarks: true }
 ) {
     clearObjectList(false);
 
@@ -168,7 +168,7 @@ export async function populateObjectList(
     }
 
     try {
-        let persistOpt = ARENADefaults.disallowJWT ? {} : {credentials: 'include'};
+        let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
         var data = await fetch(persist.persist_uri + scene, persistOpt);
         if (!data) {
             Alert.fire({
@@ -198,7 +198,7 @@ export async function populateObjectList(
     persist.currentSceneObjs = sceneobjs;
 
     // sort object list by type, then object_id
-    sceneobjs.sort(function (a, b) {
+    sceneobjs.sort(function(a, b) {
         // order by type
         if (type_order(a.type) < type_order(b.type)) {
             return -1;
@@ -284,9 +284,9 @@ export async function populateObjectList(
         editspan.appendChild(ielem);
         li.appendChild(editspan);
 
-        editspan.onclick = (function () {
+        editspan.onclick = (function() {
             var obj = sceneobjs[i];
-            return function () {
+            return function() {
                 persist.editobj_handler(obj);
             };
         })();
@@ -327,7 +327,7 @@ export async function populateNamespaceList(nsList) {
             let sn = scenes[i].name.split('/');
             if (sn.length < 2) continue;
             if (persist.namespaces.indexOf(sn[0]) < 0) persist.namespaces.push(sn[0]);
-            persist.scenes.push({ns: sn[0], name: sn[1]});
+            persist.scenes.push({ ns: sn[0], name: sn[1] });
         }
 
         // sort lists
@@ -417,11 +417,8 @@ export function populateNewSceneNamespaces(nsList) {
 }
 
 export async function addNewScene(ns, sceneName, newObjs) {
-    let isPublic = false;
-
-    if (ns === 'public') isPublic = true;
     try {
-        let result = await ARENAUserAccount.requestUserNewScene(sceneName, isPublic);
+        let result = await ARENAUserAccount.requestUserNewScene(`${ns}/${sceneName}`);
     } catch (err) {
         Alert.fire({
             icon: 'error',
@@ -435,7 +432,7 @@ export async function addNewScene(ns, sceneName, newObjs) {
         title: 'Scene added',
         timer: 5000,
     });
-    persist.scenes.push({ns: ns, name: sceneName});
+    persist.scenes.push({ ns: ns, name: sceneName });
     if (!newObjs) return;
 
     // add objects to the new scene
@@ -461,7 +458,7 @@ export async function deleteScene(ns, sceneName) {
 export function selectedObjsPerformAction(action, scene, all = false) {
     var items = persist.obj_list.getElementsByTagName('li');
     for (var i = 0; i < items.length; i++) {
-        if (!items[i].classList.contains('checked') && !all) continue;        
+        if (!items[i].classList.contains('checked') && !all) continue;
         var objJson = items[i].getAttribute('data-obj');
         if (!objJson) continue;
         var obj = JSON.parse(objJson);
@@ -604,4 +601,4 @@ export function mqttReconnect(settings) {
 }
 
 // callback from mqttclient; on reception of message
-function onMqttMessage(message) {}
+function onMqttMessage(message) { }

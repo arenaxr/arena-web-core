@@ -14,13 +14,13 @@ export class ARENAUserAccount {
      * Internal call to perform xhr request
      */
     static _makeRequest(method, url, params = undefined) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(function(resolve, reject) {
             let xhr = new XMLHttpRequest();
             xhr.open(method, url);
             const csrftoken = getCookie('csrftoken');
             xhr.setRequestHeader('X-CSRFToken', csrftoken);
             xhr.responseType = 'json';
-            xhr.onload = function () {
+            xhr.onload = function() {
                 if (this.status >= 200 && this.status < 300) {
                     resolve(xhr.response);
                 } else {
@@ -30,7 +30,7 @@ export class ARENAUserAccount {
                     });
                 }
             };
-            xhr.onerror = function () {
+            xhr.onerror = function() {
                 reject({
                     status: this.status,
                     statusText: xhr.statusText,
@@ -66,23 +66,21 @@ export class ARENAUserAccount {
 
     /**
      * Request a scene is added to the user database.
-     * @param {string} sceneNameOnly name of the scene without namespace
+     * @param {string} scene_namespace name of the scene without namespace
      * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
      */
-    static async requestUserNewScene(sceneNameOnly, isPublic) {
+    static async requestUserNewScene(scene_namespace) {
         var params = new FormData();
-        params.append('scene', sceneNameOnly);
-        params.append('is_public', isPublic);
-        let result = await ARENAUserAccount._makeRequest('POST', '/user/new_scene', params);
+        let result = await ARENAUserAccount._makeRequest('POST', `/user/scenes/${scene_namespace}`);
         return result;
     }
 
     /**
      * Request to delete scene permissions from user db
-     * @param {string} sceneNameOnly name of the scene without namespace
+     * @param {string} scene_namespace name of the scene without namespace
      */
-    static async requestDeleteUserScene(sceneNameOnly) {
-        let result = await ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${sceneNameOnly}`);
+    static async requestDeleteUserScene(scene_namespace) {
+        let result = await ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${scene_namespace}`);
         return result;
-    }    
+    }
 }

@@ -150,67 +150,6 @@ function requestAuthState() {
 }
 
 /**
- * API SAMPLE: Request scene names which the user has permission to from user database.
- */
-function _requestUserScenes() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/user/my_scenes');
-    const csrftoken = getCookie('csrftoken');
-    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.send();
-    xhr.responseType = 'json';
-    xhr.onload = () => {
-        if (xhr.status !== 200) {
-            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
-        } else {
-            const scenes = xhr.response;
-            console.debug('user scenes count:', scenes.length);
-            scenes.forEach((s) => {
-                console.debug('user scene name:', s.name);
-            });
-        }
-    };
-}
-
-/**
- * API SAMPLE: Add a scene to the user database.
- * @param {string} namespace_scene name of the scene with namespace
- */
-function _requestUserNewScene(namespace_scene) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', `/user/scenes/${namespace_scene}`);
-    const csrftoken = getCookie('csrftoken');
-    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.responseType = 'json';
-    xhr.onload = () => {
-        if (xhr.status !== 200) {
-            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
-        } else {
-            console.debug('added new scene ', sceneNameOnly);
-        }
-    };
-}
-
-/**
- * API SAMPLE: Delete a scene from the user database.
- * @param {string} namespace_scene name of the scene with namespace
- */
-function _requestDeleteScene(namespace_scene) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', `/user/scenes/${namespace_scene}`);
-    const csrftoken = getCookie('csrftoken');
-    xhr.setRequestHeader('X-CSRFToken', csrftoken);
-    xhr.responseType = 'json';
-    xhr.onload = () => {
-        if (xhr.status !== 200) {
-            console.error(`Error: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
-        } else {
-            console.debug(xhr.response);
-        }
-    };
-}
-
-/**
  * Request token to auth service
  * @param {string} authType authentication type
  * @param {string} mqttUsername mqtt user name

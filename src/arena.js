@@ -6,13 +6,13 @@
  * @date 2020
  */
 
-import {ARENAUtils} from './utils.js';
-import {ARENAMqtt} from './mqtt.js';
-import {ARENAJitsi} from './jitsi.js';
-import {ARENAChat} from './chat/';
-import {ARENAEventEmitter} from './event-emitter.js';
-import {SideMenu} from './icons/';
-import {RuntimeMngr} from './runtime-mngr';
+import { ARENAUtils } from './utils.js';
+import { ARENAMqtt } from './mqtt.js';
+import { ARENAJitsi } from './jitsi.js';
+import { ARENAChat } from './chat/';
+import { ARENAEventEmitter } from './event-emitter.js';
+import { SideMenu } from './icons/';
+import { RuntimeMngr } from './runtime-mngr';
 
 /**
  * Arena Object
@@ -54,7 +54,7 @@ export class Arena {
      * Sets this.userName using name given as argument, url parameter value, or default
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
-    setUserName = (name=undefined) => {
+    setUserName = (name = undefined) => {
         // set userName
         if (name == undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
         this.userName = name;
@@ -65,7 +65,7 @@ export class Arena {
      * Important: Also sets amName, faceName, viveLName, viveRName which depend on idTag
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
-    setIdTag = (idTag=undefined) => {
+    setIdTag = (idTag = undefined) => {
         if (idTag == undefined) throw "setIdTag: idTag not defined."; // idTag must be set
         this.idTag = idTag;
 
@@ -90,7 +90,7 @@ export class Arena {
      */
     setSceneName = () => {
         let path = window.location.pathname.substring(1);
-        let {namespace: namespace, sceneName: scenename} = this.defaults;
+        let { namespace: namespace, sceneName: scenename } = this.defaults;
         if (this.defaults.supportDevFolders && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
             if (devPrefix) {
@@ -360,7 +360,6 @@ export class Arena {
      */
     onAuth = async (e) => {
         const args = e.detail;
-        console.log(args);
 
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
@@ -383,14 +382,14 @@ export class Arena {
             userName: this.username,
             password: this.mqttToken,
         },
-        // last will message
-        JSON.stringify({object_id: this.camName, action: 'delete'}),
-        // last will topic
-        this.outputTopic + this.camName,
+            // last will message
+            JSON.stringify({ object_id: this.camName, action: 'delete' }),
+            // last will topic
+            this.outputTopic + this.camName,
         );
 
         // init runtime manager
-        this.RuntimeManager=RuntimeMngr;
+        this.RuntimeManager = RuntimeMngr;
         this.RuntimeManager.init({
             mqtt_uri: this.mqttHostURI,
             onInitCallback: function() {
