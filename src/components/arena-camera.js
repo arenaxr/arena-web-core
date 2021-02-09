@@ -142,7 +142,7 @@ AFRAME.registerComponent('arena-camera', {
         } else if (this.lastPose !== newPose) {
             this.publishPose();
         }
-        if (!data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
+        if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
     },
 });
