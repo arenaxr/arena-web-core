@@ -173,14 +173,23 @@ export class Arena {
                 for (let i = 0; i < l; i++) {
                     const obj = arenaObjects[i];
                     if (obj.type == 'program') {
+                        // construct program object for rt manager request
                         const pobj = {
                             'object_id': obj.object_id,
                             'action': 'create',
                             'type': 'program',
                             'data': obj.attributes,
                         };
+                        // arena variables that are replaced; keys are the variable names e.g. ${scene}, ${cameraid}, ...
+                        const avars = {
+                            scene: ARENA.sceneName,
+                            cameraid: ARENA.camName,
+                            username: ARENA.getDisplayName,
+                            mqtth: ARENA.mqttHost
+                        };
+                        console.log("avars", avars);
                         // ask runtime manager to start this program
-                        // this.RuntimeManager.createModule(pobj);
+                        this.RuntimeManager.createModule(pobj, avars);
                         continue;
                     }
                     if (obj.object_id === this.camName) {
