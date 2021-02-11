@@ -1,8 +1,8 @@
-#localVideo {
-    transform: rotateY(180deg);
-    -moz-transform: rotateY(180deg); /* Firefox */
-    -webkit-transform: rotateY(180deg); /* Safari and Chrome */
-    -o-transform: iconfadein 1.0s; /* Opera */
+#cornerVideo {
+    transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1); /* Firefox */
+    -webkit-transform: scale(-1, 1); /* Safari and Chrome */
+    -o-transform: scale(-1, 1); /* Opera */
 }
 
 #icons-div {
