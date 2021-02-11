@@ -142,8 +142,8 @@ export class ARENAJitsi {
             );
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
-                // use already defined e.g. <video id="localVideo" ...>
-                track.attach($(`#localVideo`)[0]);
+                // use already defined e.g. <video id="cornerVideo" ...>
+                track.attach($(`#cornerVideo`)[0]);
                 this.jitsiVideoTrack = track;
             } else if (track.getType() === 'audio') {
                 this.jitsiAudioTrack = track;
@@ -181,7 +181,7 @@ export class ARENAJitsi {
             screenShareEl.setAttribute('material', 'shader: flat; side: double');
             screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
             screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
-            
+
             sceneEl.appendChild(screenShareEl);
         }
         screenShareEl.setAttribute('muted', 'false');
@@ -560,7 +560,7 @@ export class ARENAJitsi {
         JitsiMeetJS.createLocalTracks({devices, ...deviceOpts})
             .then((tracks) => {
                 this.onLocalTracks(tracks);
-                if (this.withVideo) setupLocalVideo.bind(this)();
+                if (this.withVideo) setupCornerVideo.bind(this)();
             })
             .catch((err) => {
                 this.ready = false;
@@ -568,31 +568,31 @@ export class ARENAJitsi {
             });
 
         /**
-         * show user video on the corner
+         * show user video in the corner
          */
-        function setupLocalVideo() {
+        function setupCornerVideo() {
             // video window for jitsi
-            this.jitsiVideoElem = document.getElementById('localVideo');
-            this.jitsiVideoElem.style.display = 'none';
+            this.jitsiVideoElem = document.getElementById('cornerVideo');
             this.jitsiVideoElem.style.position = 'absolute';
+            this.jitsiVideoElem.style.borderRadius = '10px';
             this.jitsiVideoElem.style.top = '15px';
             this.jitsiVideoElem.style.left = '15px';
-            this.jitsiVideoElem.style.borderRadius = '10px';
-            this.jitsiVideoElem.style.opacity = 0.95; // slightly see through
-            this.jitsiVideoElem.style.zIndex = 9999;
-            this.jitsiVideoElem.setAttribute('width', ARENA.localVideoWidth);
+            this.jitsiVideoElem.style.zIndex = '9999';
+            this.jitsiVideoElem.style.opacity = '0.95'; // slightly see through
+            this.jitsiVideoElem.style.display = 'none';
+            this.jitsiVideoElem.style.width = ARENA.localVideoWidth + 'px';
 
             /**
              * set video element size
              */
-            function setupCornerVideo() {
+            function setCornerVideoHeight() {
                 const videoHeight = this.jitsiVideoElem.videoHeight /
                                         (this.jitsiVideoElem.videoWidth / ARENA.localVideoWidth);
-                this.jitsiVideoElem.setAttribute('height', videoHeight);
+                this.jitsiVideoElem.style.height = videoHeight + 'px';
             }
 
             this.jitsiVideoElem.onloadedmetadata = () => {
-                setupCornerVideo.bind(this)();
+                setCornerVideoHeight.bind(this)();
             };
 
             let _this = this;
@@ -602,7 +602,7 @@ export class ARENAJitsi {
                 if (!sceneEl.is('ar-mode')) { // this code can disrupt an ar session
                     ARENA.localVideoWidth = Number(window.innerWidth / 5);
                     _this.stopVideo();
-                    setupCornerVideo.bind(_this)();
+                    setCornerVideoHeight.bind(_this)();
                     _this.startVideo();
                 }
             });
