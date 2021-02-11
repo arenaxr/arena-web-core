@@ -1,97 +1,81 @@
-<!-- <style>
+<style>
+    /* Allow space for navbar  */
     body {
         padding-top: 60px;
     }
 
-    /* fix padding under menu after resize */
-    @media screen and (max-width: 767px) {
-        body {
-            padding-top: 60px;
-        }
+    /* Navbar styles need to disinherit from list.css */
+    #header ul li {
+        cursor: unset;
+        position: unset;
+        padding: unset;
+        list-style-type: unset;
+        background: unset;
+        font-size: unset;
+        transition: unset;
+        -webkit-user-select: unset;
+        -moz-user-select: unset;
+        -ms-user-select: unset;
+        user-select: unset;
     }
+</style>
 
-    @media screen and (min-width:768px) and (max-width: 991px) {
-        body {
-            padding-top: 110px;
-        }
-    }
-
-    @media screen and (min-width: 992px) {
-        body {
-            padding-top: 60px;
-        }
-    }
-</style> -->
-
-<!-- Navbar -->
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-    <!-- Container wrapper -->
-    <div class="container-fluid">
-        <!-- Navbar brand -->
-        <a class="navbar-brand" href="/user/scenes">ARENA</a>
-
-        <!-- Toggle button -->
-        <button class="navbar-toggler" type="button" data-mdb-toggle="collapse"
-            data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-            <i class="fas fa-bars"></i>
-        </button>
-
-        <!-- Collapsible wrapper -->
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <!-- Left links -->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- {% if user.is_authenticated %} -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/build">Builder</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/arts">Runtime</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/network">Network</a>
-                </li>
-                <!-- {% endif %} -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/storemng">File Store</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="https://atlas.conix.io">ATLAS</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="https://arena.conix.io">Documentation</a>
-                </li>
-            </ul>
-            <!-- Left links -->
-
-            <!-- Navbar dropdown -->
-            <ul class="navbar-nav ml-auto">
-                <!-- {% if user.is_authenticated %} -->
-                <!-- Dropdown menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                        data-mdb-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {{user.get_username}}</a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="/user/profile">Profile</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="/user/logout">Logout</a>
-                    </div>
-                </li>
-                <!-- {% else %} -->
-                <li class="nav-item">
-                    <a class="nav-link" href="/user/login">Login</a>
-                </li>
-                <!-- {% endif %} -->
-            </ul>
-
+<!-- Bootstrap 2.3.2 styled header -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/user/scenes">ARENA</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <!-- {% if user.is_authenticated %} -->
+                    <li>
+                        <a href="/build">Builder</a>
+                    </li>
+                    <li>
+                        <a href="/arts">Runtime</a>
+                    </li>
+                    <li>
+                        <a href="/network">Network</a>
+                    </li>
+                    <!-- {% endif %} -->
+                    <li>
+                        <a href="/storemng">File Store</a>
+                    </li>
+                    <li>
+                        <a href="https://atlas.conix.io">ATLAS</a>
+                    </li>
+                    <li>
+                        <a href="https://arena.conix.io">Documentation</a>
+                    </li>
+                    <li class="dropdown pull-right">
+                        <a href="#" class="dropdown-toggle pull-right" data-toggle="dropdown">username <b
+                                class="caret"></b></a>
+                        <ul class="dropdown-menu pull-right" role="menu" aria-labelledby="dropdownMenu">
+                            <!-- {% if user.is_authenticated %} -->
+                            <li>
+                                <a href="/user/profile">Profile</a>
+                            </li>
+                            <li>
+                                <a href="#" onclick="showPerms();">Permissions</a>
+                            </li>
+                            <li>
+                                <a href="/user/logout">Logout</a>
+                            </li>
+                            <!-- {% else %} -->
+                            <li>
+                                <a href="/user/login">Login</a>
+                            </li>
+                            <!-- {% endif %} -->
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
         </div>
-        <!-- Collapsible wrapper -->
     </div>
-    <!-- Container wrapper -->
-</nav>
-<!-- Navbar -->
-<!-- <div class="page-header">
-    <div class="clearfix">
-    </div>
-</div> -->
+</div>

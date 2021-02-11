@@ -10,13 +10,15 @@
     <link rel="stylesheet" href="style.css">
 
     <!-- Navbar Header -->
-    <script type="text/javascript" src="../vendor/mdb/mdb.min.js"></script>
+    <link rel='stylesheet'
+        href='https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'>
     <script type="text/javascript" src="../vendor/jquery-2.1.1.min.js"></script>
     <script>
         $(function() {
             $("#header").load("../header.html");
         });
     </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
     <script src="https://unpkg.com/layout-base/layout-base.js"></script>
@@ -30,8 +32,6 @@
 
 <body>
     <div id="header"></div>
-    <a style="float: right;" href="#" onclick="showPerms();">Perm</a>
-
     <div style="width:200px;position:fixed;padding:5px;">
         <h2 style="color:white;padding:3px;">ARENA MQTT Network</h2>
 
