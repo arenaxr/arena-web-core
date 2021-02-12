@@ -202,6 +202,7 @@ window.setupAV = (callback) => {
         localStorage.setItem('display_name', displayName.value);
         localStorage.setItem('prefAudioInput', audioInSelect.value);
         localStorage.setItem('prefVideoInput', videoSelect.value);
+        localStorage.setItem('prefAudioOutput', audioOutSelect.value);
         // Stop audio and video preview
         if (videoElement.srcObject) {
             videoElement.srcObject.getAudioTracks()[0].stop();

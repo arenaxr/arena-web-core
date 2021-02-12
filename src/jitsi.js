@@ -95,6 +95,9 @@ export class ARENAJitsi {
 
         JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, this.onDeviceListChanged.bind(this));
 
+        const prefAudioOutput = localStorage.getItem('prefAudioOutput') ;
+        JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+
         JitsiMeetJS.init(this.initOptions);
 
         this.connection = new JitsiMeetJS.JitsiConnection(null, null, this.connectOptions);
