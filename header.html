@@ -3,6 +3,7 @@
     /* Allow space for navbar  */
     body {
         padding-top: 60px;
+        line-height: unset;
     }
 
     /* Navbar styles need to disinherit from list.css */
@@ -30,7 +31,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/user/scenes">ARENA</a>
+            <a class="brand" href="/user/scenes"><b>ARENA</b></a>
             <div class="nav-collapse collapse">
                 <ul class="nav">
                     <li>
@@ -78,7 +79,7 @@
                         "<ul class='dropdown-menu' role='menu' aria-labelledby='dropdownMenu'></ul>")
                     $("ul .dropdown-menu").append(`<li><a href="${host}/user/profile">Profile</a></li>`);
                     $("ul .dropdown-menu").append(
-                        `<li><a href="#" onclick="showPerms();">Permissions</a></li>`);
+                        `<li><a href="#" onclick="window.showPerms();">Permissions</a></li>`);
                     $("ul .dropdown-menu").append(`<li><a href="${host}/user/logout">Logout</a></li>`);
                 } else {
                     $("#auth-dropdown").html("Login");
