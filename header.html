@@ -1,0 +1,90 @@
+<!-- arena-core header for non-3d scene pages -->
+<style>
+    /* Allow space for navbar  */
+    body {
+        padding-top: 60px;
+        line-height: unset;
+    }
+
+    /* Navbar styles need to disinherit from list.css */
+    #header ul li {
+        cursor: unset;
+        position: unset;
+        padding: unset;
+        list-style-type: unset;
+        background: unset;
+        font-size: unset;
+        transition: unset;
+        -webkit-user-select: unset;
+        -moz-user-select: unset;
+        -ms-user-select: unset;
+        user-select: unset;
+    }
+</style>
+
+<!-- Bootstrap 2.3.2 styled header -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/user/scenes"><b>ARENA</b></a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li>
+                        <a href="/build">Builder</a>
+                    </li>
+                    <li>
+                        <a href="/arts">Runtime</a>
+                    </li>
+                    <li>
+                        <a href="/network">Network</a>
+                    </li>
+                    <li>
+                        <a href="/storemng">File Store</a>
+                    </li>
+                    <li>
+                        <a href="https://atlas.conix.io">ATLAS</a>
+                    </li>
+                    <li>
+                        <a href="https://arena.conix.io">Documentation</a>
+                    </li>
+                </ul>
+                <ul class="nav pull-right">
+                    <li class="dropdown">
+                        <a href="#" id="auth-dropdown"></a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // update auth state in nav bar
+    $(document).ready(function() {
+        fetch('/user/user_state')
+            .then(response => response.json())
+            .then(data => {
+                const host = `${window.location.protocol}//${window.location.host}`;
+                if (data.authenticated) {
+                    $("#auth-dropdown").html(`${data.username} <b class='caret'></b>`);
+                    $("#auth-dropdown").attr("class", "dropdown-toggle");
+                    $("#auth-dropdown").attr("data-toggle", "dropdown");
+                    $("#auth-dropdown").after(
+                        "<ul class='dropdown-menu' role='menu' aria-labelledby='dropdownMenu'></ul>")
+                    $("ul .dropdown-menu").append(`<li><a href="${host}/user/profile">Profile</a></li>`);
+                    $("ul .dropdown-menu").append(
+                        `<li><a href="#" onclick="window.showPerms();">MQTT Permissions</a></li>`);
+                    $("ul .dropdown-menu").append(`<li><a href="${host}/user/logout">Logout</a></li>`);
+                } else {
+                    $("#auth-dropdown").html("Login");
+                    $("#auth-dropdown").attr("href", `${host}/user/login`);
+                }
+            });
+    });
+</script>

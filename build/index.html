@@ -16,6 +16,17 @@
       font-style: normal;
     }
   </style>
+
+  <!-- Navbar Header -->
+  <script src="https://getbootstrap.com/2.3.2/assets/js/jquery.js"></script>
+  <script src="https://getbootstrap.com/2.3.2/assets/js/bootstrap-dropdown.js"></script>
+  <script src="https://getbootstrap.com/2.3.2/assets/js/bootstrap-collapse.js"></script>
+  <script>
+    $(function() {
+      $("#header").load("../header.html");
+    });
+  </script>
+
   <!-- Include sweet alert bootstrap theme -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -30,26 +41,30 @@
 </head>
 
 <body>
+  <div id="header"></div>
   <div class='container'>
     <div class='row'>
       <div class='span8 col-md-8 columns eight large-8'>
         <h2>Scene Editor</h2>
         <form class="form-inline">
-        <div class="input-prepend">
-          <span class="add-on">User or Organization</span>
-          <select id="namespacelist" class="input-medium">
-          </select>
-          <span class="add-on">Scene</span>
-          <select id="scenelist" class="input-medium">
-          </select>
-        </div>
+          <div class="input-prepend">
+            <span class="add-on">User or Organization</span>
+            <select id="namespacelist" class="input-medium">
+            </select>
+            <span class="add-on">Scene</span>
+            <select id="scenelist" class="input-medium">
+            </select>
+          </div>
           <a class="btn btn-small" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
-          <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i class="icon-trash"></i></a>
-          <a class="btn btn-small" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i class="icon-refresh"></i></a>
+          <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i
+              class="icon-trash"></i></a>
+          <a class="btn btn-small" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i
+              class="icon-refresh"></i></a>
         </form>
-        <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in Current Scene ARENA (new Window)</a>
+        <a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in Current Scene ARENA (new
+          Window)</a>
         <h4>Scene Objects (Persisted)</h4>
-         <div class="input-prepend">
+        <div class="input-prepend">
           <span class="add-on">Filter object_id (regex)</span>
           <input type="text" id='objfilter' class="input-medium" value=".*">
         </div>
@@ -61,13 +76,18 @@
           </ul>
         </div>
         <p>
-        <form class="form-inline">
-          <a class="btn btn-small btn-danger" href="#" id='delobj' title="Delete Selected Objects"><i class="icon-trash"></i> Delete Selected</a>
-          <a class="btn btn-small" href="#" id='copyobj' title="Copy Selected Objects"><i class="icon-share"></i> Copy Selected</a>
-          <a class="btn btn-small" href="#" id='selectall' title="Selected All Objects in the List"><i class="icon-check"></i> Select All</a>
-          <a class="btn btn-small" href="#" id='clearlist' title="Clear Selection"><i class="icon-remove"></i> Clear Selected</a>
-          <a class="btn btn-small" href="#" id='refreshlist' title="Refresh List from Database"><i class="icon-refresh"></i></a>
-        </form>
+          <form class="form-inline">
+            <a class="btn btn-small btn-danger" href="#" id='delobj' title="Delete Selected Objects"><i
+                class="icon-trash"></i> Delete Selected</a>
+            <a class="btn btn-small" href="#" id='copyobj' title="Copy Selected Objects"><i class="icon-share"></i> Copy
+              Selected</a>
+            <a class="btn btn-small" href="#" id='selectall' title="Selected All Objects in the List"><i
+                class="icon-check"></i> Select All</a>
+            <a class="btn btn-small" href="#" id='clearlist' title="Clear Selection"><i class="icon-remove"></i> Clear
+              Selected</a>
+            <a class="btn btn-small" href="#" id='refreshlist' title="Refresh List from Database"><i
+                class="icon-refresh"></i></a>
+          </form>
         </p>
       </div>
       <div class='span4 col-md-4 columns four large-4'>
@@ -78,11 +98,14 @@
           <datalist id="arena_host_list">
           </datalist>
         </div>
-        <p/>        
+        <p />
         <form class="form-inline">
-            <a class="btn btn-small" href="#" title="Show Permissions" onclick="showPerms();"><i class=" icon-lock"></i></a>
-            <a class="btn btn-small btn-warning" href="#" title="Logut" onclick="{ signOut(); PersistObjects.set_options({auth_state: undefined}); }"><i class=" icon-user"></i>Logout</a>
-        </form>        
+          <a class="btn btn-small" href="#" title="Show Permissions" onclick="showPerms();"><i
+              class=" icon-lock"></i></a>
+          <a class="btn btn-small btn-warning" href="#" title="Logut"
+            onclick="{ signOut(); PersistObjects.set_options({auth_state: undefined}); }"><i
+              class=" icon-user"></i>Logout</a>
+        </form>
       </div>
     </div>
     <div class='row' id='addeditsection' style="display: none">
@@ -97,34 +120,43 @@
           </label>
         </form>
         <form class="form-inline">
-          <button class="btn btn-small" type="button" id='clearform' title="Clear Form Data"><i class="icon-file"></i></a>Clear Form</button>
-          <button class="btn btn-small" type="button" id='genid' title="Generate a Random object_id"><i class="icon-tag"></i>Gen object_id</a> </button>
-          <button class="btn btn-primary btn-small addobj" type="button" title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
+          <button class="btn btn-small" type="button" id='clearform' title="Clear Form Data"><i
+              class="icon-file"></i></a>Clear Form</button>
+          <button class="btn btn-small" type="button" id='genid' title="Generate a Random object_id"><i
+              class="icon-tag"></i>Gen object_id</a> </button>
+          <button class="btn btn-primary btn-small addobj" type="button" title="Add or Update Object"><i
+              class="icon-plus"></i> Add/Update Object</a> </button>
         </form>
 
         <div id='editor'></div>
-        <button class="btn btn-primary addobj" type="button" title="Add or Update Object"><i class="icon-plus"></i> Add/Update Object</a> </button>
-        <br/>
-        <br/>
+        <button class="btn btn-primary addobj" type="button" title="Add or Update Object"><i class="icon-plus"></i>
+          Add/Update Object</a> </button>
+        <br />
+        <br />
       </div>
       <div class='span4 col-md-4 columns four large-4'>
         <h3>Object JSON</h3>
         <p>
-          <a class="btn btn-small" href="#" id='setvalue' title="Update Form with JSON Data"><i class="icon-random"></i>Update form</a>
-          <a id='copy_json' class="btn btn-small" href="#" title="Copy JSON to Clipboard"><i class="icon-share"></i>Copy JSON</a>
+          <a class="btn btn-small" href="#" id='setvalue' title="Update Form with JSON Data"><i
+              class="icon-random"></i>Update form</a>
+          <a id='copy_json' class="btn btn-small" href="#" title="Copy JSON to Clipboard"><i class="icon-share"></i>Copy
+            JSON</a>
         </p>
         <textarea id='output' class='form-control objjson'></textarea>
-        <a id='copy_json_oneline' class="btn btn-small" href="#" title="Copy one-liner JSON to Clipboard"><i class="icon-share"></i>Copy one-liner JSON</a>
+        <a id='copy_json_oneline' class="btn btn-small" href="#" title="Copy one-liner JSON to Clipboard"><i
+            class="icon-share"></i>Copy one-liner JSON</a>
         <h2>Validation</h2>
         <p>This will update whenever the form changes to show validation errors if there are any.</p>
         <textarea id='validate' class='infopanel' readonly disabled class='form-control'></textarea>
       </div>
-    </div>    
+    </div>
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="../conf/defaults.js"></script>
     <script src="../src/auth.js"></script>
-    <script type="text/javascript">authCheck();</script>
-  </body>
+    <script type="text/javascript">
+      authCheck();
+    </script>
+</body>
 
 </html>
