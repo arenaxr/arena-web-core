@@ -215,10 +215,7 @@ export class Arena {
                                 msg.data.rotation.z, msg.data.rotation.w);
                             const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
                             r.multiply(q);
-                            msg.data.rotation.x = r.x;
-                            msg.data.rotation.y = r.y;
-                            msg.data.rotation.z = r.z;
-                            msg.data.rotation.w = r.w;
+                            msg.data.rotation = r;
                         }
 
                         this.Mqtt.processMessage(msg);
@@ -287,6 +284,9 @@ export class Arena {
             jitsiServer: 'mr.andrew.cmu.edu',
         };
 
+        // we add all elements to our scene root
+        const sceneRoot = document.getElementById('sceneRoot');
+
         // set renderer defaults that are different from THREE/aframe defaults
         const renderer = document.querySelector('a-scene').renderer;
         renderer.gammaFactor = 2.2;
@@ -316,7 +316,7 @@ export class Arena {
                     for (const [attribute, value] of Object.entries(envPresets)) {
                         environment.setAttribute('environment', attribute, value);
                     }
-                    document.getElementById('sceneRoot').appendChild(environment);
+                    sceneRoot.appendChild(environment);
 
                     const rendererSettings = options['renderer-settings'];
                     if (rendererSettings) {
@@ -326,11 +326,7 @@ export class Arena {
                         }
                     }
                 } else {
-                    // set defaults
-                    const sceneRoot = document.getElementById('sceneRoot');
-
-                    // enviornment.setAttribute('particle-system', 'preset', 'snow');
-                    // enviornment.setAttribute('particle-system', 'enabled', 'true');
+                    // set defaults                
                     environment.setAttribute('environment', 'preset', 'starry');
                     environment.setAttribute('environment', 'seed', 3);
                     environment.setAttribute('environment', 'flatShading', true);
