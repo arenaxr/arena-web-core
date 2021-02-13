@@ -79,7 +79,6 @@ export class CreateUpdate {
                 // add object to the scene after setting all attributes
                 if (addObj) {
                     // Parent/Child handling
-                    const sceneEl = document.querySelector('a-scene');
                     if (message.data.parent) {
                         let parentName = (ARENA.camName == message.data.parent) ? 'my-camera' : message.data.parent; // our camera is named 'my-camera'
                         const parentEl = document.getElementById(parentName);
@@ -90,7 +89,8 @@ export class CreateUpdate {
                             Logger.warning('create', 'Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
                         }
                     } else {
-                        sceneEl.appendChild(entityEl);
+                        const sceneRoot = document.getElementById('sceneRoot');
+                        sceneRoot.appendChild(entityEl);
                     }                    
                 }
 

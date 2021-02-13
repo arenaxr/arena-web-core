@@ -82,7 +82,16 @@ export class ARENAEventEmitter {
          * @callback onAuthCallback
          * @param error {object} GeolocationPositionError with details of the error
          */
-        ONLOCATION: 'onlocation'        
+        ONLOCATION: 'onlocation',   
+
+        /**
+         * Indicates when scene is successfully fully loaded
+         * the following parameters to its listeners (event.detail object):
+         * 
+         * @callback onSceneLoadedCallback
+         * @param result {boolean} Should alwasy be true
+         */
+        SCENE_LOADED: 'scene_loaded'          
     };
 
     /**

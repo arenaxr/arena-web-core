@@ -58,34 +58,8 @@ export class ARENAMqtt {
         // first connection for this client
         console.log(`MQTT scene init user state, connected to ${uri}`);
 
-        let color = Math.floor(Math.random() * 16777215).toString(16);
-        if (color.length < 6) color = "0" + color;
-        color = '#' + color
-
-        const camera = document.getElementById('my-camera');
-        camera.setAttribute('arena-camera', 'enabled', true);
-        camera.setAttribute('arena-camera', 'color', color);
-        camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
-        camera.setAttribute('position', ARENA.startCoords);
-        // enable vio if fixedCamera is given
-        if (ARENA.fixedCamera !== '') {
-            camera.setAttribute('arena-camera', 'vioEnabled', true);
-        }
-
-        // const viveLeft = document.getElementById('vive-leftHand');
-        // viveLeft.setAttribute('arena-vive', 'enabled', true);
-        // viveLeft.setAttribute('arena-vive', 'name', ARENA.viveLName);
-        // viveLeft.setAttribute('arena-vive', 'hand', 'left');
-        // viveLeft.setAttribute('arena-vive', 'color', color);
-
-        // const viveRight = document.getElementById('vive-rightHand');
-        // viveRight.setAttribute('arena-vive', 'enabled', true);
-        // viveRight.setAttribute('arena-vive', 'name', ARENA.viveRName);
-        // viveRight.setAttribute('arena-vive', 'hand', 'right');
-        // viveRight.setAttribute('arena-vive', 'color', color);
-
-        ARENA.loadSceneOptions();
-        ARENA.loadArenaScene();
+        // do scene init before starting to receive messages
+        ARENA.initScene();
 
         // start listening for MQTT messages
         this.mqttClient.subscribe(ARENA.renderTopic);
