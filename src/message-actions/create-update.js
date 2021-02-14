@@ -159,7 +159,8 @@ export class CreateUpdate {
             case 'gltf-model':
                 // gltf-model from data.url
                 if (data.hasOwnProperty('url')) {
-                    entityEl.setAttribute('gltf-model', data.url);
+                    let url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
+                    entityEl.setAttribute('gltf-model', url);
                 }
                 // add load event listners
                 entityEl.addEventListener('model-progress', (evt) => {
