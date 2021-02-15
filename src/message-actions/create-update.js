@@ -204,10 +204,6 @@ export class CreateUpdate {
                 if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)                    
                 if (!data.hasOwnProperty('align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
                 break;
-            case 'thickline':
-                // the component that deals with thicklines is meshline
-                type='meshline';
-                break; 
             case 'viveLeft':
             case 'viveRight':
                 //entityEl.setAttribute('gltf-model', viveControllerPath[type]);
