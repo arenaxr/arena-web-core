@@ -79,7 +79,6 @@ export class CreateUpdate {
                 // add object to the scene after setting all attributes
                 if (addObj) {
                     // Parent/Child handling
-                    const sceneEl = document.querySelector('a-scene');
                     if (message.data.parent) {
                         let parentName = (ARENA.camName == message.data.parent) ? 'my-camera' : message.data.parent; // our camera is named 'my-camera'
                         const parentEl = document.getElementById(parentName);
@@ -90,7 +89,8 @@ export class CreateUpdate {
                             Logger.warning('create', 'Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
                         }
                     } else {
-                        sceneEl.appendChild(entityEl);
+                        const sceneRoot = document.getElementById('sceneRoot');
+                        sceneRoot.appendChild(entityEl);
                     }                    
                 }
 
@@ -159,7 +159,8 @@ export class CreateUpdate {
             case 'gltf-model':
                 // gltf-model from data.url
                 if (data.hasOwnProperty('url')) {
-                    entityEl.setAttribute('gltf-model', data.url);
+                    let url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
+                    entityEl.setAttribute('gltf-model', url);
                 }
                 // add load event listners
                 entityEl.addEventListener('model-progress', (evt) => {

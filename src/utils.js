@@ -91,7 +91,7 @@ export class ARENAUtils {
                         if (callback) callback(position.coords, undefined);
                     },
                     (err) => {
-                        console.error(`Error getting device location: ${err.message}`);
+                        console.warn(`Error getting device location: ${err.message}`);
                         console.warn('Defaulting to campus location');
                         if (callback) callback({latitude: 40.4427, longitude: 79.9430}, err);
                     },

@@ -31,7 +31,9 @@ export class Arena {
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
-        this.startCoords = ARENAUtils.getUrlParam('startCoords', this.defaults.startCoords).replace(/,/g, ' ');
+        this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if URL parameter not given
+        // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
+        if (this.startCoords) this.startCoords = this.startCoords.replace(/,/g, ' '); 
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
@@ -143,13 +145,59 @@ export class Arena {
     };
 
     /**
+     * scene init before starting to receive messages
+     */
+    initScene = () => {
+        // add our camera to scene
+            
+        // after scene is completely loaded, add user camera 
+        this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
+            let color = Math.floor(Math.random() * 16777215).toString(16);
+            if (color.length < 6) color = "0" + color;
+            color = '#' + color
+    
+            const camera = document.getElementById('my-camera');
+            camera.setAttribute('arena-camera', 'enabled', true);
+            camera.setAttribute('arena-camera', 'color', color);
+            camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
+
+            // try to define starting position if the scene has startPosition objects
+            if (!ARENA.startCoords) {
+                // get startPosition objects
+                const startPositions = Array.from(document.querySelectorAll('[id^="startPosition"]'));
+                if (startPositions.length > 0) {
+                    let posi = Math.floor(Math.random() * startPositions.length);                    
+                    ARENA.startCoords = startPositions[posi].getAttribute('position');
+                    // also set rotation
+                    camera.setAttribute('position', startPositions[posi].getAttribute('rotation'));
+                }
+            } 
+            if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
+            console.log("startCoords", ARENA.startCoords);
+            camera.setAttribute('position', ARENA.startCoords); // an x, y, z object or a space-separated string
+        });
+
+        // enable vio if fixedCamera is given
+        if (ARENA.fixedCamera !== '') {
+            camera.setAttribute('arena-camera', 'vioEnabled', true);
+        }
+
+        // load scene
+        ARENA.loadSceneOptions();
+        ARENA.loadScene();        
+
+        //setTimeout(async () => {
+        //}, 1000);
+    }
+
+    /**
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to load arena from
      * @param {Object} position initial position
      * @param {Object} rotation initial rotation
      */
-    loadArenaScene = (urlToLoad, position, rotation) => {
+    loadScene = (urlToLoad, position, rotation) => {
 
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
@@ -187,7 +235,6 @@ export class Arena {
                             username: ARENA.getDisplayName,
                             mqtth: ARENA.mqttHost
                         };
-                        console.log("avars", avars);
                         // ask runtime manager to start this program
                         this.RuntimeManager.createModule(pobj, avars);
                         continue;
@@ -215,10 +262,7 @@ export class Arena {
                                 msg.data.rotation.z, msg.data.rotation.w);
                             const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
                             r.multiply(q);
-                            msg.data.rotation.x = r.x;
-                            msg.data.rotation.y = r.y;
-                            msg.data.rotation.z = r.z;
-                            msg.data.rotation.w = r.w;
+                            msg.data.rotation = r;
                         }
 
                         this.Mqtt.processMessage(msg);
@@ -239,6 +283,7 @@ export class Arena {
                     console.log('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
                 }
+                ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
             }
         };
     };
@@ -287,6 +332,9 @@ export class Arena {
             jitsiServer: 'mr.andrew.cmu.edu',
         };
 
+        // we add all elements to our scene root
+        const sceneRoot = document.getElementById('sceneRoot');
+
         // set renderer defaults that are different from THREE/aframe defaults
         const renderer = document.querySelector('a-scene').renderer;
         renderer.gammaFactor = 2.2;
@@ -316,7 +364,7 @@ export class Arena {
                     for (const [attribute, value] of Object.entries(envPresets)) {
                         environment.setAttribute('environment', attribute, value);
                     }
-                    document.getElementById('sceneRoot').appendChild(environment);
+                    sceneRoot.appendChild(environment);
 
                     const rendererSettings = options['renderer-settings'];
                     if (rendererSettings) {
@@ -326,11 +374,7 @@ export class Arena {
                         }
                     }
                 } else {
-                    // set defaults
-                    const sceneRoot = document.getElementById('sceneRoot');
-
-                    // enviornment.setAttribute('particle-system', 'preset', 'snow');
-                    // enviornment.setAttribute('particle-system', 'enabled', 'true');
+                    // set defaults                
                     environment.setAttribute('environment', 'preset', 'starry');
                     environment.setAttribute('environment', 'seed', 3);
                     environment.setAttribute('environment', 'flatShading', true);
