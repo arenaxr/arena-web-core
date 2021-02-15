@@ -32,6 +32,8 @@ export class Arena {
         this.timeID = new Date().getTime() % 10000;
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
         this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if URL parameter not given
+        // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
+        if (this.startCoords) this.startCoords = this.startCoords.replace(/,/g, ' '); 
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
@@ -170,8 +172,9 @@ export class Arena {
                     camera.setAttribute('position', startPositions[posi].getAttribute('rotation'));
                 }
             } 
-            if (!ARENA.startCoords) ARENA.startCoords = {x: 0, y: 1.6, z: 0} //ARENA.startCoords = ARENA.defaults.startCoords; // default position
-            camera.setAttribute('position', ARENA.startCoords);
+            if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
+            console.log("startCoords", ARENA.startCoords);
+            camera.setAttribute('position', ARENA.startCoords); // an x, y, z object or a space-separated string
         });
 
         // enable vio if fixedCamera is given
