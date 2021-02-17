@@ -42,7 +42,7 @@ window.onload = function() {
  * @param {object} args auth arguments
  */
 const authCheck = function() {
-    localStorage.setItem('request_uri', location.href); // save current in case of login redirect
+    localStorage.setItem('request_uri', location.href); // 'remember' uri for login redirect
     AUTH.signInPath = `${window.location.protocol}//${window.location.host}/user/login`;
     AUTH.signOutPath = `${window.location.protocol}//${window.location.host}/user/logout`;
     window.addEventListener('load', requestAuthState);
@@ -82,7 +82,6 @@ function processUserNames(authName, prefix = null) {
 function signOut() {
     localStorage.removeItem('auth_choice');
     // back to signin page
-    localStorage.setItem('request_uri', location.href);
     location.href = AUTH.signOutPath;
 }
 
@@ -208,13 +207,13 @@ function completeAuth(response) {
     if (response.ids) {
         onAuthEvt.ids = response.ids
     }
+    localStorage.removeItem('request_uri'); // 'forget' redirect on success
     // mqtt-token must be set to authorize access to MQTT broker
     if (typeof ARENA !== 'undefined') {
         // emit event to ARENA.event
         ARENA.events.emit('onauth', onAuthEvt);
         return;
     }
-    localStorage.removeItem('request_uri');
 
     // emit custom event to window
     const authCompleteEvent = new CustomEvent('onauth', { detail: onAuthEvt });
