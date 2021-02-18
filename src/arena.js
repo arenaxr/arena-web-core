@@ -175,12 +175,14 @@ export class Arena {
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
             console.log("startCoords", ARENA.startCoords);
             camera.setAttribute('position', ARENA.startCoords); // an x, y, z object or a space-separated string
+
+            // enable vio if fixedCamera is given
+            if (ARENA.fixedCamera !== '') {
+                camera.setAttribute('arena-camera', 'vioEnabled', true);
+            }
+
         });
 
-        // enable vio if fixedCamera is given
-        if (ARENA.fixedCamera !== '') {
-            camera.setAttribute('arena-camera', 'vioEnabled', true);
-        }
 
         // load scene
         ARENA.loadSceneOptions();
