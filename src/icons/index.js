@@ -181,7 +181,7 @@ export class SideMenu {
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-on.png\')';
             } else {
                 const groundedPos = document.getElementById('my-camera').getAttribute('position');
-                groundedPos.y = parseFloat(ARENA.startCoords.split(' ')[1]);
+                groundedPos.y = ARENA.startCoords.y;
                 document.getElementById('my-camera').setAttribute('position', groundedPos);
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-off.png\')';
             }
