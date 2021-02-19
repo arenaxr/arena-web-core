@@ -1,42 +1,8 @@
 {
-    "schema_file":"arena-obj3d.json",
+    "schema_definitions":"schemas/arena-schema-files.json",
+    "schema_file":"schemas/box.json",
     "namespace":"public",
     "scene":"lobby",
     "arena_host":"arena.andrew.cmu.edu",
-    "new_scene_objs":[
-       {
-          "object_id":"scene-options",
-          "action":"create",
-          "persist":true,
-          "type":"scene-options",
-          "data":{
-             "env-presets":{
-                "active": true,
-                "preset": "default",
-                "ground": "hills",
-                "lighting": "distant"
-             },
-             "scene-options":{
-                "jitsiServer":"mr.andrew.cmu.edu",
-                "clickableOnlyEvents":true,
-                "privateScene":true,
-                "maxAVDist":20
-             }
-          }
-       },
-       {
-          "object_id":"scene-landmarks",
-          "action":"create",
-          "persist":true,
-          "type":"landmarks",
-          "data":{
-             "landmarks":[
-                {
-                   "object_id":"screenshare",
-                   "label":"Screenshare"
-                }
-             ]
-          }
-       }
-    ]
+    "default_objs_scene":"public/default"
  }
