@@ -147,7 +147,7 @@ export async function fetchSceneObjects(scene) {
     if (persist.persistUri == undefined) {
         throw 'Persist DB URL not defined.'; // should be called after persist_url is set
     }
-    var sceneObjs;
+    let sceneObjs;
     try {
         let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
         let data = await fetch(persist.persistUri + scene, persistOpt);
@@ -161,7 +161,6 @@ export async function fetchSceneObjects(scene) {
     } catch (err) {
         throw `Error fetching scene from database: ${JSON.stringify(err)}`
     }
-    console.log(sceneObjs);
     return sceneObjs;
 }
 
