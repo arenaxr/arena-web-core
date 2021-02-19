@@ -30,27 +30,27 @@ function type_order(type) {
  *
  */
 export async function init(settings) {
-    if (settings.obj_list == undefined) throw 'Must provide a list element';
+    if (settings.objList == undefined) throw 'Must provide a list element';
     // handle default settings
     settings = settings || {};
     persist = {
-        mqtt_uri: settings.mqtt_uri !== undefined ? settings.mqtt_uri : 'wss://arena.andrew.cmu.edu/mqtt/',
-        persist_uri:
-            settings.persist_uri !== undefined
-                ? settings.persist_uri
+        mqttUri: settings.mqttUri !== undefined ? settings.mqttUri : 'wss://arena.andrew.cmu.edu/mqtt/',
+        persistUri:
+            settings.persistUri !== undefined
+                ? settings.persistUri
                 : location.hostname + (location.port ? ':' + location.port : '') + '/persist/',
-        obj_list: settings.obj_list,
-        addeditsection: settings.addeditsection,
-        editobj_handler: settings.editobj_handler,
-        auth_state: settings.auth_state,
-        mqtt_username: settings.mqtt_username,
-        mqtt_token: settings.mqtt_token,
+        objList: settings.objList,
+        addEditSection: settings.addEditSection,
+        editObjHandler: settings.editObjHandler,
+        authState: settings.authState,
+        mqttUsername: settings.mqttUsername,
+        mqttToken: settings.mqttToken,
     };
 
     persist.currentSceneObjs = [];
 
     // set select when clicking on a list item
-    persist.obj_list.addEventListener(
+    persist.objList.addEventListener(
         'click',
         function(ev) {
             if (ev.target.tagName === 'LI') {
@@ -62,13 +62,13 @@ export async function init(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        uri: persist.mqtt_uri,
+        uri: persist.mqttUri,
         onMessageCallback: onMqttMessage,
-        mqtt_username: persist.mqtt_username,
-        mqtt_token: persist.mqtt_token,
+        mqtt_username: persist.mqttUsername,
+        mqtt_token: persist.mqttToken,
     });
 
-    console.info('Starting connection to ' + persist.mqtt_uri + '...');
+    console.info('Starting connection to ' + persist.mqttUri + '...');
 
     // connect
     try {
@@ -86,19 +86,9 @@ export async function init(settings) {
     console.info('Connected.');
 }
 
-// change options; mqtt host and port are changed with mqttReconnect()
-export async function set_options(settings) {
-    // handle default settings
-    settings = settings || {};
-    (persist.persist_uri = settings.persist_uri !== undefined ? settings.persist_uri : persist.persist_uri),
-        (persist.obj_list = settings.obj_list !== undefined ? settings.obj_list : persist.obj_list),
-        (persist.editobj_handler =
-            settings.editobj_handler !== undefined ? settings.editobj_handler : persist.editobj_handler);
-}
-
 export async function populateSceneAndNsLists(nsList, sceneList) {
     try {
-        persist.auth_state = await ARENAUserAccount.userAuthState();
+        persist.authState = await ARENAUserAccount.userAuthState();
     } catch (err) {
         Swal.fire({
             icon: 'Error',
@@ -111,7 +101,7 @@ export async function populateSceneAndNsLists(nsList, sceneList) {
         return undefined;
     }
 
-    if (!persist.auth_state.authenticated) {
+    if (!persist.authState.authenticated) {
         Swal.fire({
             icon: 'error',
             title: 'Please do a non-anonymous login.',
@@ -140,40 +130,39 @@ export async function populateSceneAndNsLists(nsList, sceneList) {
 
 export function clearObjectList(noObjNotification = true) {
     persist.currentSceneObjs = [];
-    while (persist.obj_list.firstChild) {
-        persist.obj_list.removeChild(persist.obj_list.firstChild);
+    while (persist.objList.firstChild) {
+        persist.objList.removeChild(persist.objList.firstChild);
     }
 
     if (!noObjNotification) return;
 
-    var li = document.createElement('li');
-    var span = document.createElement('span');
-    var img = document.createElement('img');
-    var t = document.createTextNode('No objects in the scene');
+    let li = document.createElement('li');
+    let t = document.createTextNode('No objects in the scene');
     li.appendChild(t);
 
-    persist.obj_list.appendChild(li);
+    persist.objList.appendChild(li);
 }
 
 export async function fetchSceneObjects(scene) {
-    if (persist.persist_uri == undefined) {
+    if (persist.persistUri == undefined) {
         throw 'Persist DB URL not defined.'; // should be called after persist_url is set
     }
-
+    var sceneObjs;
     try {
         let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
-        var data = await fetch(persist.persist_uri + scene, persistOpt);
+        let data = await fetch(persist.persistUri + scene, persistOpt);
         if (!data) {
             throw 'Could not fetch data'; 
         }
         if (!data.ok) {
             throw 'Fetch request result not ok'; 
         }
-        var sceneobjs = await data.json();
+        sceneObjs = await data.json();
     } catch (err) {
         throw `Error fetching scene from database: ${JSON.stringify(err)}`
     }
-    return sceneobjs;
+    console.log(sceneObjs);
+    return sceneObjs;
 }
 
 export async function populateObjectList(
@@ -183,9 +172,9 @@ export async function populateObjectList(
 ) {
     clearObjectList(false);
 
-    var sceneobjs;
+    let sceneObjs;
     try {
-        sceneobjs = await fetchSceneObjects(scene);
+        sceneObjs = await fetchSceneObjects(scene);
     } catch (err) {
         Alert.fire({
             icon: 'error',
@@ -194,10 +183,10 @@ export async function populateObjectList(
         });
         return;        
     }
-    persist.currentSceneObjs = sceneobjs;
+    persist.currentSceneObjs = sceneObjs;
 
     // sort object list by type, then object_id
-    sceneobjs.sort(function(a, b) {
+    sceneObjs.sort(function(a, b) {
         // order by type
         if (type_order(a.type) < type_order(b.type)) {
             return -1;
@@ -216,12 +205,12 @@ export async function populateObjectList(
     });
 
     //console.log(sceneobjs);
-    if (sceneobjs.length == 0) {
+    if (sceneObjs.length == 0) {
         var li = document.createElement('li');
         var t = document.createTextNode('No objects in the scene');
         li.appendChild(t);
-        persist.obj_list.appendChild(li);
-        persist.addeditsection.style = 'display:block';
+        persist.objList.appendChild(li);
+        persist.addEditSection.style = 'display:block';
         return;
     }
 
@@ -238,36 +227,36 @@ export async function populateObjectList(
         return;
     }
 
-    for (let i = 0; i < sceneobjs.length; i++) {
-        var li = document.createElement('li');
-        var span = document.createElement('span');
-        var img = document.createElement('img');
+    for (let i = 0; i < sceneObjs.length; i++) {
+        let li = document.createElement('li');
+        let span = document.createElement('span');
+        let img = document.createElement('img');
 
         // save obj json so we can use later in slected object actions (delete/copy)
-        li.setAttribute('data-obj', JSON.stringify(sceneobjs[i]));
-        var inputValue = '';
+        li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
+        let inputValue = '';
 
-        if (sceneobjs[i].attributes == undefined) continue;
-        if (objTypeFilter[sceneobjs[i].type] == false) continue;
-        if (re.test(sceneobjs[i].object_id) == false) continue;
+        if (sceneObjs[i].attributes == undefined) continue;
+        if (objTypeFilter[sceneObjs[i].type] == false) continue;
+        if (re.test(sceneObjs[i].object_id) == false) continue;
 
-        if (sceneobjs[i].type == 'object') {
-            inputValue = sceneobjs[i].object_id + ' ( ' + sceneobjs[i].attributes.object_type + ' )';
+        if (sceneObjs[i].type == 'object') {
+            inputValue = sceneObjs[i].object_id + ' ( ' + sceneObjs[i].attributes.object_type + ' )';
             img.src = 'assets/3dobj-icon.png';
-            if (objTypeFilter[sceneobjs[i].attributes.object_type] == false) continue;
-        } else if (sceneobjs[i].type == 'program') {
-            var ptype = sceneobjs[i].attributes.filetype == 'WA' ? 'WASM program' : 'python program';
-            inputValue = sceneobjs[i].object_id + ' ( ' + ptype + ': ' + sceneobjs[i].attributes.filename + ' )';
+            if (objTypeFilter[sceneObjs[i].attributes.object_type] == false) continue;
+        } else if (sceneObjs[i].type == 'program') {
+            var ptype = sceneObjs[i].attributes.filetype == 'WA' ? 'WASM program' : 'python program';
+            inputValue = sceneObjs[i].object_id + ' ( ' + ptype + ': ' + sceneObjs[i].attributes.filename + ' )';
             img.src = 'assets/program-icon.png';
-        } else if (sceneobjs[i].type == 'scene-options') {
-            inputValue = sceneobjs[i].object_id + ' ( scene options )';
+        } else if (sceneObjs[i].type == 'scene-options') {
+            inputValue = sceneObjs[i].object_id + ' ( scene options )';
             img.src = 'assets/options-icon.png';
-        } else if (sceneobjs[i].type == 'landmarks') {
-            inputValue = sceneobjs[i].object_id + ' ( landmarks )';
+        } else if (sceneObjs[i].type == 'landmarks') {
+            inputValue = sceneObjs[i].object_id + ' ( landmarks )';
             img.src = 'assets/map-icon.png';
         }
 
-        var t = document.createTextNode(inputValue);
+        let t = document.createTextNode(inputValue);
         li.appendChild(t);
 
         // add image
@@ -277,27 +266,27 @@ export async function populateObjectList(
         li.appendChild(span);
 
         // add edit "button"
-        var editspan = document.createElement('span');
-        var ielem = document.createElement('i');
+        let editspan = document.createElement('span');
+        let ielem = document.createElement('i');
         ielem.className = 'icon-edit';
         editspan.className = 'edit';
         editspan.appendChild(ielem);
         li.appendChild(editspan);
 
         editspan.onclick = (function() {
-            var obj = sceneobjs[i];
+            let obj = sceneObjs[i];
             return function() {
-                persist.editobj_handler(obj);
+                persist.editObjHandler(obj);
             };
         })();
 
-        persist.obj_list.appendChild(li);
+        persist.objList.appendChild(li);
     }
-    persist.addeditsection.style = 'display:block';
+    persist.addEditSection.style = 'display:block';
 }
 
 export async function populateNamespaceList(nsList) {
-    if (!persist.auth_state.authenticated) return; // should not be called when we are not logged in
+    if (!persist.authState.authenticated) return; // should not be called when we are not logged in
 
     let scenes;
     try {
@@ -336,9 +325,9 @@ export async function populateNamespaceList(nsList) {
     }
 
     // add user namespace if needed
-    if (persist.namespaces.indexOf(persist.auth_state.username) < 0) {
+    if (persist.namespaces.indexOf(persist.authState.username) < 0) {
         var option = document.createElement('option');
-        option.text = persist.auth_state.username;
+        option.text = persist.authState.username;
         nsList.add(option);
     }
 
@@ -348,8 +337,8 @@ export async function populateNamespaceList(nsList) {
         option.text = persist.namespaces[i];
         nsList.add(option);
     }
-    nsList.value = persist.auth_state.username;
-    return persist.auth_state.username;
+    nsList.value = persist.authState.username;
+    return persist.authState.username;
 }
 
 export function disableSceneList(sceneList) {
@@ -359,11 +348,11 @@ export function disableSceneList(sceneList) {
     option.text = 'No scenes.';
     sceneList.add(option);
     clearObjectList();
-    persist.addeditsection.style = 'display:none';
+    persist.addEditSection.style = 'display:none';
 }
 
 export function populateSceneList(ns, sceneList, selected = undefined) {
-    if (!persist.auth_state.authenticated) return; // should not be called when we are not logged in
+    if (!persist.authState.authenticated) return; // should not be called when we are not logged in
     if (persist.scenes.length == 0) {
         disableSceneList(sceneList);
         return;
@@ -392,11 +381,11 @@ export function populateSceneList(ns, sceneList, selected = undefined) {
 }
 
 export function populateNewSceneNamespaces(nsList) {
-    if (!persist.auth_state.authenticated) {
+    if (!persist.authState.authenticated) {
         throw 'User must be authenticated.';
     }
 
-    let ns = [persist.auth_state.username];
+    let ns = [persist.authState.username];
     if (persist.namespaces.indexOf('public') > 0) {
         ns.push('public');
     }
@@ -412,7 +401,7 @@ export function populateNewSceneNamespaces(nsList) {
         option.text = ns[i];
         nsList.add(option);
     }
-    nsList.value = persist.auth_state.username;
+    nsList.value = persist.authState.username;
     return ns;
 }
 
@@ -443,8 +432,9 @@ export async function addNewScene(ns, sceneName, newObjs) {
 
 export async function deleteScene(ns, sceneName) {
     selectedObjsPerformAction('delete', `${ns}/${sceneName}`, true);
+    let result;
     try {
-        let result = await ARENAUserAccount.requestDeleteUserScene(`${ns}/${sceneName}`);
+        result = await ARENAUserAccount.requestDeleteUserScene(`${ns}/${sceneName}`);
     } catch (err) {
         Alert.fire({
             icon: 'error',
@@ -456,7 +446,7 @@ export async function deleteScene(ns, sceneName) {
 }
 
 export function selectedObjsPerformAction(action, scene, all = false) {
-    var items = persist.obj_list.getElementsByTagName('li');
+    var items = persist.objList.getElementsByTagName('li');
     for (var i = 0; i < items.length; i++) {
         if (!items[i].classList.contains('checked') && !all) continue;
         var objJson = items[i].getAttribute('data-obj');
@@ -485,14 +475,14 @@ export function selectedObjsPerformAction(action, scene, all = false) {
 }
 
 export function selectAll() {
-    var items = persist.obj_list.getElementsByTagName('li');
+    var items = persist.objList.getElementsByTagName('li');
     for (var i = 0; i < items.length; i++) {
         items[i].classList.add('checked');
     }
 }
 
 export function clearSelected() {
-    var items = persist.obj_list.getElementsByTagName('li');
+    var items = persist.objList.getElementsByTagName('li');
     for (var i = 0; i < items.length; i++) {
         items[i].classList.remove('checked');
     }
@@ -572,7 +562,7 @@ export async function addObject(obj, scene) {
 export function mqttReconnect(settings) {
     settings = settings || {};
 
-    persist.mqtt_uri = settings.mqtt_uri !== undefined ? settings.mqtt_uri : 'wss://arena.andrew.cmu.edu/mqtt/';
+    persist.mqttUri = settings.mqtt_uri !== undefined ? settings.mqtt_uri : 'wss://arena.andrew.cmu.edu/mqtt/';
 
     if (persist.mc) persist.mc.disconnect();
 
@@ -580,10 +570,10 @@ export function mqttReconnect(settings) {
 
     // start mqtt client
     persist.mc = new MqttClient({
-        uri: persist.mqtt_uri,
+        uri: persist.mqttUri,
         onMessageCallback: onMqttMessage,
-        mqtt_username: persist.mqtt_username,
-        mqtt_token: persist.mqtt_token,
+        mqtt_username: persist.mqttUsername,
+        mqtt_token: persist.mqttToken,
     });
 
     try {
@@ -597,7 +587,7 @@ export function mqttReconnect(settings) {
         return;
     }
 
-    console.info('Connected to ' + persist.mqtt_uri);
+    console.info('Connected to ' + persist.mqttUri);
 }
 
 // callback from mqttclient; on reception of message

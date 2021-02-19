@@ -1,33 +1,6 @@
 import * as PersistObjects from "./persist-objects.js"
 import {ARENAUserAccount} from "./arena-account.js"
 
-var schema_files = {
-    "object": {
-        file: "arena-obj3d.json",
-        description: "3D Object"
-    },
-    "entity": {
-        file: "schemas/entity.json",
-        description: "Entity"
-    },
-    "object-test": {
-        file: "schemas/entity.json",
-        description: "Entity-New"
-    },
-    "program": {
-        file: "arena-program.json",
-        description: "Program"
-    },
-    "scene-options": {
-        file: "arena-scene-options.json",
-        description: "Scene Options"
-    },
-    "landmarks": {
-        file: "arena-landmarks.json",
-        description: "Scene Landmarks"
-    }
-};
-
 const Alert = Swal.mixin({
     toast: true,
     position: 'top-start',
@@ -54,35 +27,35 @@ window.addEventListener('onauth', async function (e) {
     var validate = document.getElementById("validate");
     var scenelist = document.getElementById("scenelist");
     var namespacelist = document.getElementById("namespacelist");
-    var scene_url = document.getElementById("scene_url");
-    var objfilter = document.getElementById("objfilter");
-    var objfiltersel = document.getElementById("objfiltersel");
+    var sceneUrl = document.getElementById("scene_url");
+    var objFilter = document.getElementById("objfilter");
+    var objFilterSel = document.getElementById("objfiltersel");
     var arenaHostLbl = document.getElementById("arenahost");
 
     // Buttons/s
-    var open_add_scene_button = document.getElementById("openaddscene");
-    var delete_scene_button = document.getElementById("deletescene");
-    var set_value_button = document.getElementById("setvalue");
-    var select_schema = document.getElementById("objtype");
-    var genid_button = document.getElementById("genid");
-    var clearform_button = document.getElementById("clearform");
-    var del_button = document.getElementById("delobj");
-    var cpy_button = document.getElementById("copyobj");
-    var all_button = document.getElementById("selectall");
-    var clearsel_button = document.getElementById("clearlist");
-    var refresh_button = document.getElementById("refreshlist");
-    var refresh_sl_button = document.getElementById("refreshscenelist");
+    var openAddSceneButton = document.getElementById("openaddscene");
+    var deleteSceneButton = document.getElementById("deletescene");
+    var setValueButton = document.getElementById("setvalue");
+    var selectSchema = document.getElementById("objtype");
+    var genidButton = document.getElementById("genid");
+    var clearformButton = document.getElementById("clearform");
+    var delButton = document.getElementById("delobj");
+    var cpyButton = document.getElementById("copyobj");
+    var allButton = document.getElementById("selectall");
+    var clearselButton = document.getElementById("clearlist");
+    var refreshButton = document.getElementById("refreshlist");
+    var refreshSlButton = document.getElementById("refreshscenelist");
     
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
-        text: function(trigger) {
+        text: function() {
             return output.value;
         }
     });
 
     new ClipboardJS(document.querySelector("#copy_json_oneline"), {
-        text: function(trigger) {
-          var json = jsoneditor.getValue();
+        text: function() {
+          let json = jsoneditor.getValue();
           return JSON.stringify(json, null, 0);
         }
     });
@@ -102,7 +75,7 @@ window.addEventListener('onauth', async function (e) {
 
     var updateLink = function() {
         let dp = getDevPath();
-        scene_url.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespacelist.value}/${scenelist.value}`;
+        sceneUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespacelist.value}/${scenelist.value}`;
     };
 
     var updateUrl = function() {
@@ -111,7 +84,7 @@ window.addEventListener('onauth', async function (e) {
         window.history.pushState({ path: newUrl.href }, '', newUrl.href);
     };
 
-    // return uris assuming persist and mqtt are accessed through the webhost
+    // return uris assuming persist and mqtt are accessed through the webhost; use arenadefaults if defined
     var mqttAndPersistURI = function() {
         if (ARENADefaults) {
             return { 
@@ -128,7 +101,7 @@ window.addEventListener('onauth', async function (e) {
     };
 
     var reload = function(keep_value) {
-        var startval = (jsoneditor && keep_value) ? jsoneditor.getValue() : window.startval;
+        let startval = (jsoneditor && keep_value) ? jsoneditor.getValue() : window.startval;
         window.startval = undefined;
 
         if (jsoneditor) jsoneditor.destroy();
@@ -141,11 +114,11 @@ window.addEventListener('onauth', async function (e) {
 
         // When the value of the editor changes, update the JSON output and validation message
         jsoneditor.on("change", function() {
-            var json = jsoneditor.getValue();
+            let json = jsoneditor.getValue();
 
             output.value = JSON.stringify(json, null, 2);
 
-            var validation_errors = jsoneditor.validate();
+            let validation_errors = jsoneditor.validate();
             // Show validation errors if there are any
             if (validation_errors.length) {
                 validate.value = JSON.stringify(validation_errors, null, 2);
@@ -157,7 +130,7 @@ window.addEventListener('onauth', async function (e) {
 
     var getARENAObject = function(obj, action="create", persist=true) {
         // create updateobj, where data = attributes if object comes from persist
-        var arenaObj = {
+        let arenaObj = {
           object_id: obj.object_id,
           action: action,
           persist: persist,
@@ -171,13 +144,13 @@ window.addEventListener('onauth', async function (e) {
     var editObject = async function(obj, action="update") {
 
         // create updateobj, where data = attributes if object comes from persist
-        var updateobj = getARENAObject(obj, action);
+        let updateobj = getARENAObject(obj, action);
 
-        var schemaType = (updateobj.type === 'object') ? updateobj.data.object_type : updateobj.type
-        var schemaFile = objSchemas[schemaType].file;
-        var data = await fetch(schemaFile);
+        let schemaType = (updateobj.type === 'object') ? updateobj.data.object_type : updateobj.type
+        let schemaFile = objSchemas[schemaType].file;
+        let data = await fetch(schemaFile);
         schema = await data.json();
-        select_schema.value = schemaFile;
+        selectSchema.value = schemaFile;
 
         if (jsoneditor) jsoneditor.destroy();
         jsoneditor = new JSONEditor(editor, {
@@ -211,7 +184,7 @@ window.addEventListener('onauth', async function (e) {
     JSONEditor.defaults.options.show_errors = "interaction";
 
     // Open new scene modal
-    open_add_scene_button.addEventListener("click", async function() {
+    openAddSceneButton.addEventListener("click", async function() {
         //document.getElementById("newSceneModalLabel").innerHTML = `Add scene to user/org: ${namespacelist.value}`;
         //new_scene_modal.style.display = "block";
         Swal.fire({
@@ -256,14 +229,14 @@ window.addEventListener('onauth', async function (e) {
             await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dftSceneObjects : undefined);
             setTimeout(async () => {
                 await PersistObjects.populateSceneList(result.value.ns, scenelist, result.value.scene);
-                if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+                if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
                 reload();
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
           })        
     });
 
-    delete_scene_button.addEventListener("click", async function() {
+    deleteSceneButton.addEventListener("click", async function() {
         Swal.fire({
             title: 'Delete Scene ?',
             text: "You won't be able to revert this.",
@@ -292,13 +265,13 @@ window.addEventListener('onauth', async function (e) {
     // close modal
     document.querySelectorAll('.close-modal').forEach(item => {
         item.addEventListener("click", function() {
-            var modal = document.getElementById("newSceneModal");
+            let modal = document.getElementById("newSceneModal");
             modal.style.display = "none";
         });
     });
 
     // When the "update form" button is clicked, set the editor"s value
-    set_value_button.addEventListener("click", function() {
+    setValueButton.addEventListener("click", function() {
         let obj;
         try {
             obj = JSON.parse(output.value);
@@ -316,12 +289,12 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // clear form
-    clearform_button.addEventListener("click", function() {
+    clearformButton.addEventListener("click", function() {
       reload();
     });
  
     // generate a random object_id
-    genid_button.addEventListener("click", function() {
+    genidButton.addEventListener("click", function() {
         let obj;
         try {
             obj = JSON.parse(output.value);
@@ -343,8 +316,8 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // Change listener for object type
-    select_schema.addEventListener("change", async function() {        
-        let schemaFile = select_schema.value;
+    selectSchema.addEventListener("change", async function() {        
+        let schemaFile = selectSchema.value;
         let data = await fetch(schemaFile);
         schema = await data.json();
         localStorage.setItem("schemaFile", schemaFile);
@@ -362,7 +335,7 @@ window.addEventListener('onauth', async function (e) {
     // Change listener for scene list
     scenelist.addEventListener("change", async function() {
         if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
         reload();
         updateLink();
         localStorage.setItem("scene", scenelist.value );
@@ -370,49 +343,49 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // Change listener for object id filter regex
-    objfilter.addEventListener("change", async function() {
+    objFilter.addEventListener("change", async function() {
         if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
     });
 
-    objfiltersel.addEventListener("click", async function() {
-        objTypeFilter[objfiltersel.value] = !objTypeFilter[objfiltersel.value];
-        var opts = objfiltersel.options;
-        let opt = objfiltersel.namedItem('objfilter_' + objfiltersel.value);
-        let text = ((objTypeFilter[objfiltersel.value]) ? 'Hide':'Show') + opt.innerHTML.substring(4);
+    objFilterSel.addEventListener("click", async function() {
+        objTypeFilter[objFilterSel.value] = !objTypeFilter[objFilterSel.value];
+        var opts = objFilterSel.options;
+        let opt = objFilterSel.namedItem('objfilter_' + objFilterSel.value);
+        let text = ((objTypeFilter[objFilterSel.value]) ? 'Hide':'Show') + opt.innerHTML.substring(4);
         opt.innerHTML = text;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
     });
 
     // listeners for buttons
-    all_button.addEventListener("click", function() {
+    allButton.addEventListener("click", function() {
         PersistObjects.selectAll();
     });
 
-    clearsel_button.addEventListener("click", function() {
+    clearselButton.addEventListener("click", function() {
         PersistObjects.clearSelected();
     });
 
-    refresh_button.addEventListener("click", async function() {
+    refreshButton.addEventListener("click", async function() {
         if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
     });
 
-    refresh_sl_button.addEventListener("click", async function() {
+    refreshSlButton.addEventListener("click", async function() {
         await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
         reload();
         updateLink();    
     });
 
-    del_button.addEventListener("click", async function() {
+    delButton.addEventListener("click", async function() {
         PersistObjects.selectedObjsPerformAction('delete', `${namespacelist.value}/${scenelist.value}`);
         setTimeout(async () => {
-            if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+            if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });
 
-    cpy_button.addEventListener("click", function() {
+    cpyButton.addEventListener("click", function() {
         Swal.fire({
             title: 'Copy selected objects',
             html: `<p>Copy to existing scene</p>
@@ -473,7 +446,7 @@ window.addEventListener('onauth', async function (e) {
         }
         await PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
         setTimeout(async () => {
-            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter); 
+            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter); 
         }, 500); // refresh after a while, so that new object messages are processed        
     };
     document.querySelectorAll('.addobj').forEach(item => {
@@ -507,24 +480,24 @@ window.addEventListener('onauth', async function (e) {
           ofile.title = objSchemas[objtype].description;
           ofile.id = 'objtype_' + objtype;
           ofile.appendChild(document.createTextNode(objSchemas[objtype].title));
-          select_schema.appendChild(ofile);
+          selectSchema.appendChild(ofile);
   
           let ofilter = document.createElement("option");
           ofilter.value = objtype;
           ofilter.title = `Show/Hide ${objSchemas[objtype].title}`;
           ofilter.id = 'objfilter_' + objtype;
           ofilter.appendChild(document.createTextNode(`Hide ${objSchemas[objtype].title}`));
-          objfiltersel.appendChild(ofilter);
+          objFilterSel.appendChild(ofilter);
           objTypeFilter[objtype] = true;
       }
   
       // load values from defaults or local storage, if they exist
-      select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
-      select_schema.dispatchEvent(new Event("change"));
+      selectSchema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
+      selectSchema.dispatchEvent(new Event("change"));
   
       // Scene config schema
       if (!schema) {
-          var data = await fetch(dfts.schema_file);
+          let data = await fetch(dfts.schema_file);
           schema = await data.json();
       }
 
@@ -534,14 +507,14 @@ window.addEventListener('onauth', async function (e) {
 
     // start persist object mngr
     PersistObjects.init({
-        persist_uri: hostData.persist_uri,
-        mqtt_uri: hostData.mqtt_uri,
-        obj_list: document.getElementById("objlist"),
-        addeditsection: document.getElementById("addeditsection"),
-        editobj_handler: editObject,
-        auth_state: authState,
-        mqtt_username: e.detail.mqtt_username,
-        mqtt_token: e.detail.mqtt_token,
+        persistUri: hostData.persist_uri,
+        mqttUri: hostData.mqtt_uri,
+        objList: document.getElementById("objlist"),
+        addEditSection: document.getElementById("addeditsection"),
+        editObjHandler: editObject,
+        authState: authState,
+        mqttUsername: e.detail.mqtt_username,
+        mqttToken: e.detail.mqtt_token,
     });
 
     // load default objects, convert to mqtt wire format
@@ -576,7 +549,7 @@ window.addEventListener('onauth', async function (e) {
         PersistObjects.populateSceneList(namespacelist.value, scenelist);
         localStorage.setItem("namespace", namespacelist.value );
     }
-    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter); 
+    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter); 
     localStorage.setItem("scene", scenelist.value );
     reload();
     updateLink();
