@@ -143,17 +143,23 @@ window.addEventListener('onauth', async function (e) {
         });
     };
 
+    var getARENAObject = function(obj, action="create", persist=true) {
+        // create updateobj, where data = attributes if object comes from persist
+        var arenaObj = {
+          object_id: obj.object_id,
+          action: action,
+          persist: persist,
+          type: obj.type,
+          data: (obj.attributes != undefined) ? obj.attributes : obj.data
+        };
+        return arenaObj;
+    }
+
     // we indicate this function as the edit handler to persist
     var editObject = async function(obj, action="update") {
 
         // create updateobj, where data = attributes if object comes from persist
-        var updateobj = {
-          object_id: obj.object_id,
-          action: action,
-          persist: true,
-          type: obj.type,
-          data: (obj.attributes != undefined) ? obj.attributes : obj.data
-        };
+        var updateobj = getARENAObject(obj, action);
 
         var schemaType = (updateobj.type === 'object') ? updateobj.data.object_type : updateobj.type
         var schemaFile = obj_schemas[schemaType].file;
@@ -463,9 +469,8 @@ window.addEventListener('onauth', async function (e) {
     });
 
     /**
-     * Setup initial state of the page
+     * Load defaults, setup initial state of the page
      */
-
 
     try {
         var data = await fetch("./dft-config.json");
@@ -533,13 +538,16 @@ window.addEventListener('onauth', async function (e) {
         mqtt_token: e.detail.mqtt_token,
     });
 
-    // load default objects
+    // load default objects, convert to mqtt wire format
     try {
         dftSceneObjects = await PersistObjects.fetchSceneObjects(dfts.default_objs_scene);
     } catch (err) {
         console.warn(`Could not load default scene objects from ${dfts.default_objs_scene}: ${err}`);
-    }    
-
+    }
+    for (let i=0; i<dftSceneObjects.length; i++) {
+        let dftObj = dftSceneObjects[i];
+        dftSceneObjects[i] = getARENAObject(dftObj);
+    }
 
     // load namespace and scene values
     let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
