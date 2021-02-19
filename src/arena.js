@@ -206,8 +206,6 @@ export class Arena {
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
-
-        xhr.responseType = 'json';
         xhr.send();
         const deferredObjects = [];
         const Parents = {};
@@ -307,8 +305,6 @@ export class Arena {
         xhr.withCredentials = !this.defaults.disallowJWT;
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
-
-        xhr.responseType = 'json';
         xhr.send();
 
         xhr.onload = () => {
@@ -361,7 +357,6 @@ export class Arena {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT;
         xhr.open('GET', this.persistenceUrl + '?type=scene-options');
-        xhr.responseType = 'json';
         xhr.send();
         xhr.onload = async () => {
             if (xhr.status !== 200 || xhr.response == undefined) {
