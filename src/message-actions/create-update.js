@@ -183,7 +183,8 @@ export class CreateUpdate {
                 // TODO: create an aframe component for this
                 entityEl.setAttribute('geometry', 'primitive', 'plane');
                 if (data.hasOwnProperty('url')) {
-                    entityEl.setAttribute('material', 'src', data.url); // image src from url
+                    let url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
+                    entityEl.setAttribute('material', 'src', url); // image src from url
                     if (!data.hasOwnProperty('material-extras')) {
                         // default images to sRGBEncoding, if not specified
                         entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');   
