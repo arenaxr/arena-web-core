@@ -207,6 +207,7 @@ export class Arena {
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
         xhr.send();
+        xhr.responseType = 'json';
         const deferredObjects = [];
         const Parents = {};
         xhr.onload = () => {
@@ -306,7 +307,7 @@ export class Arena {
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
         xhr.send();
-
+        xhr.responseType = 'json';
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -358,6 +359,7 @@ export class Arena {
         xhr.withCredentials = !this.defaults.disallowJWT;
         xhr.open('GET', this.persistenceUrl + '?type=scene-options');
         xhr.send();
+        xhr.responseType = 'json';
         xhr.onload = async () => {
             if (xhr.status !== 200 || xhr.response == undefined) {
                 console.log(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
