@@ -6,6 +6,14 @@ var schema_files = {
         file: "arena-obj3d.json",
         description: "3D Object"
     },
+    "entity": {
+        file: "schemas/entity.json",
+        description: "Entity"
+    },
+    "object-test": {
+        file: "schemas/entity.json",
+        description: "Entity-New"
+    },
     "program": {
         file: "arena-program.json",
         description: "Program"
@@ -42,9 +50,9 @@ window.addEventListener('onauth', async function (e) {
     var validate = document.getElementById("validate");
     var scenelist = document.getElementById("scenelist");
     var namespacelist = document.getElementById("namespacelist");
-    var arena_host = document.getElementById("arena_host");
     var scene_url = document.getElementById("scene_url");
     var objfilter = document.getElementById("objfilter");
+    var objfiltersel = document.getElementById("objfiltersel");
 
     // Buttons/s
     var open_add_scene_button = document.getElementById("openaddscene");
@@ -74,41 +82,39 @@ window.addEventListener('onauth', async function (e) {
         }
     });
 
-    // keep state of type checkboxes
-    var typechkdiv =  document.getElementById("type_chk_div");
-    var type_chk = {};
-
-    for (var objtype in schema_files) {
-        // add schema files to select
-        var ofile = document.createElement("option");
-        ofile.value = schema_files[objtype].file;
-        ofile.appendChild(document.createTextNode(schema_files[objtype].description));
-        select_schema.appendChild(ofile);
-
-        // add type checkboxes
-        var lbl = document.createElement("label");
-        lbl.className = "checkbox inline ";
-        var input = document.createElement("input");
-        input.type = "checkbox";
-        input.setAttribute("checked", "true");
-        input.setAttribute("value", objtype);
-        lbl.appendChild(input);
-        lbl.innerHTML += schema_files[objtype].description;
-        typechkdiv.appendChild(lbl);
-        type_chk[objtype] = true;
-        lbl.addEventListener( 'change', async function(e) {
-              if (scenelist.disabled === true) return;
-              type_chk[e.target.value] = e.target.checked;
-              await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
-        });
-    }
-
     try {
       var data = await fetch("./dft-config.json");
       var dfts = await data.json();
     } catch (err) {
       console.error("Error loading defaults:", err.message);
       return;
+    }
+
+    try {
+        var data = await fetch(dfts.schema_definitions);
+        var obj_schemas = await data.json();
+      } catch (err) {
+        console.error("Error loading schema definitions:", err.message);
+        return;
+    }
+    
+    var objTypeFilter = {};
+    for (var objtype in obj_schemas) {
+        // add schema files to select
+        var ofile = document.createElement("option");
+        ofile.value = obj_schemas[objtype].file;
+        ofile.title = obj_schemas[objtype].description;
+        ofile.id = 'objtype_' + objtype;
+        ofile.appendChild(document.createTextNode(obj_schemas[objtype].title));
+        select_schema.appendChild(ofile);
+
+        var ofilter = document.createElement("option");
+        ofilter.value = objtype;
+        ofilter.title = `Show/Hide ${obj_schemas[objtype].title}`;
+        ofilter.id = 'objfilter_' + objtype;
+        ofilter.appendChild(document.createTextNode(`Hide ${obj_schemas[objtype].title}`));
+        objfiltersel.appendChild(ofilter);
+        objTypeFilter[objtype] = true;
     }
 
     // load values from defaults or local storage, if they exist
@@ -123,7 +129,7 @@ window.addEventListener('onauth', async function (e) {
 
     // Scene config schema
     if (!schema) {
-        data = await fetch("arena-obj3d.json");
+        var data = await fetch(dfts.schema_file);
         schema = await data.json();
     }
 
@@ -163,12 +169,11 @@ window.addEventListener('onauth', async function (e) {
         var startval = (jsoneditor && keep_value) ? jsoneditor.getValue() : window.startval;
         window.startval = undefined;
 
-        //new ClipboardJS(".btn");
-
         if (jsoneditor) jsoneditor.destroy();
         jsoneditor = new JSONEditor(editor, {
             schema: schema,
-            startval: startval
+            startval: startval,
+            ajax: true
         });
         window.jsoneditor = jsoneditor;
 
@@ -200,15 +205,12 @@ window.addEventListener('onauth', async function (e) {
           data: (obj.attributes != undefined) ? obj.attributes : obj.data
         };
 
-        var schemaFile = schema_files[updateobj.type].file;
+        var schemaType = (updateobj.type === 'object') ? updateobj.data.object_type : updateobj.type
+        var schemaFile = obj_schemas[schemaType].file;
         var data = await fetch(schemaFile);
         schema = await data.json();
-        for (var opt, j = 0; opt = select_schema[j]; j++) {
-            if (opt.value == schema_files[updateobj.type].file) {
-                select_schema.selectedIndex = j;
-                break;
-            }
-        }
+        select_schema.value = schemaFile;
+
         if (jsoneditor) jsoneditor.destroy();
         jsoneditor = new JSONEditor(editor, {
             schema: schema,
@@ -235,7 +237,6 @@ window.addEventListener('onauth', async function (e) {
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
     JSONEditor.defaults.options.required_by_default = false;
-    //JSONEditor.defaults.options.no_additional_properties = true;    
     JSONEditor.defaults.options.theme = "bootstrap2";
     JSONEditor.defaults.options.iconlib = "fontawesome4";
     JSONEditor.defaults.options.object_layout = "normal";
@@ -287,7 +288,7 @@ window.addEventListener('onauth', async function (e) {
             await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dfts.new_scene_objs : undefined);
             setTimeout(async () => {
                 await PersistObjects.populateSceneList(result.value.ns, scenelist, result.value.scene);
-                if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+                if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
                 reload();
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
@@ -374,9 +375,9 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // Change listener for object type
-    select_schema.addEventListener("change", async function() {
-        var schemaFile = select_schema.value;
-        var data = await fetch(schemaFile);
+    select_schema.addEventListener("change", async function() {        
+        let schemaFile = select_schema.value;
+        let data = await fetch(schemaFile);
         schema = await data.json();
         localStorage.setItem("schemaFile", schemaFile);
         reload();
@@ -393,7 +394,7 @@ window.addEventListener('onauth', async function (e) {
     // Change listener for scene list
     scenelist.addEventListener("change", async function() {
         if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
         reload();
         updateLink();
         localStorage.setItem("scene", scenelist.value );
@@ -403,7 +404,16 @@ window.addEventListener('onauth', async function (e) {
     // Change listener for object id filter regex
     objfilter.addEventListener("change", async function() {
         if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
+    });
+
+    objfiltersel.addEventListener("click", async function() {
+        objTypeFilter[objfiltersel.value] = !objTypeFilter[objfiltersel.value];
+        var opts = objfiltersel.options;
+        let opt = objfiltersel.namedItem('objfilter_' + objfiltersel.value);
+        let text = ((objTypeFilter[objfiltersel.value]) ? 'Hide':'Show') + opt.innerHTML.substring(4);
+        opt.innerHTML = text;
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
     });
 
     // listeners for buttons
@@ -417,7 +427,7 @@ window.addEventListener('onauth', async function (e) {
 
     refresh_button.addEventListener("click", async function() {
         if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
     });
 
     refresh_sl_button.addEventListener("click", async function() {
@@ -429,7 +439,7 @@ window.addEventListener('onauth', async function (e) {
     del_button.addEventListener("click", async function() {
         PersistObjects.selectedObjsPerformAction('delete', `${namespacelist.value}/${scenelist.value}`);
         setTimeout(async () => {
-            if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk);
+            if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });
@@ -495,7 +505,7 @@ window.addEventListener('onauth', async function (e) {
         }
         await PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
         setTimeout(async () => {
-            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk); 
+            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter); 
         }, 500); // refresh after a while, so that new object messages are processed        
     };
     document.querySelectorAll('.addobj').forEach(item => {
@@ -542,7 +552,7 @@ window.addEventListener('onauth', async function (e) {
         PersistObjects.populateSceneList(namespacelist.value, scenelist);
         localStorage.setItem("namespace", namespacelist.value );
     }
-    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, type_chk); 
+    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter); 
     localStorage.setItem("scene", scenelist.value );
     reload();
     updateLink();
