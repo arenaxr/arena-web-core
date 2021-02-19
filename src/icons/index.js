@@ -26,7 +26,6 @@ function createIconButton(initialImage, tooltip, onClick) {
     wrapper.appendChild(iconButton);
     iconButton.addEventListener('click', function(evt) {
         onClick();
-        window.activeElement.blur();
         evt.stopPropagation();
     });
 
