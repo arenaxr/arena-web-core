@@ -155,45 +155,44 @@ export function clearObjectList(noObjNotification = true) {
     persist.obj_list.appendChild(li);
 }
 
-export async function populateObjectList(
-    scene,
-    filter = '.*',
-    chk_type = { object: true, program: true, 'scene-options': true, landmarks: true }
-) {
-    clearObjectList(false);
-
+export async function fetchSceneObjects(scene) {
     if (persist.persist_uri == undefined) {
-        console.error('Persist DB URL not defined.'); // populate list should be called after persist_url is set
-        return;
+        throw 'Persist DB URL not defined.'; // should be called after persist_url is set
     }
 
     try {
         let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
         var data = await fetch(persist.persist_uri + scene, persistOpt);
         if (!data) {
-            Alert.fire({
-                icon: 'error',
-                title: 'Error fetching scene from database.',
-                timer: 5000,
-            });
-            return;
+            throw 'Could not fetch data'; 
         }
         if (!data.ok) {
-            Alert.fire({
-                icon: 'error',
-                title: 'Error fetching scene from database.',
-                timer: 5000,
-            });
-            return;
+            throw 'Fetch request result not ok'; 
         }
         var sceneobjs = await data.json();
     } catch (err) {
+        throw `Error fetching scene from database: ${JSON.stringify(err)}`
+    }
+    return sceneobjs;
+}
+
+export async function populateObjectList(
+    scene,
+    filter,
+    objTypeFilter 
+) {
+    clearObjectList(false);
+
+    var sceneobjs;
+    try {
+        sceneobjs = await fetchSceneObjects(scene);
+    } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: `Error fetching scene from database: ${JSON.stringify(err)}`,
+            title: 'Error fetching scene from database: ${err}',
             timer: 5000,
         });
-        return;
+        return;        
     }
     persist.currentSceneObjs = sceneobjs;
 
@@ -249,12 +248,13 @@ export async function populateObjectList(
         var inputValue = '';
 
         if (sceneobjs[i].attributes == undefined) continue;
-        if (chk_type[sceneobjs[i].type] == false) continue;
+        if (objTypeFilter[sceneobjs[i].type] == false) continue;
         if (re.test(sceneobjs[i].object_id) == false) continue;
 
         if (sceneobjs[i].type == 'object') {
             inputValue = sceneobjs[i].object_id + ' ( ' + sceneobjs[i].attributes.object_type + ' )';
             img.src = 'assets/3dobj-icon.png';
+            if (objTypeFilter[sceneobjs[i].attributes.object_type] == false) continue;
         } else if (sceneobjs[i].type == 'program') {
             var ptype = sceneobjs[i].attributes.filetype == 'WA' ? 'WASM program' : 'python program';
             inputValue = sceneobjs[i].object_id + ' ( ' + ptype + ': ' + sceneobjs[i].attributes.filename + ' )';

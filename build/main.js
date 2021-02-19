@@ -43,6 +43,7 @@ window.Alert = Alert;
 window.addEventListener('onauth', async function (e) {
     var schema;
     var jsoneditor;
+    var dftSceneObjects;
 
     // Divs/textareas on the page
     var output = document.getElementById("output");
@@ -81,57 +82,6 @@ window.addEventListener('onauth', async function (e) {
           return JSON.stringify(json, null, 0);
         }
     });
-
-    try {
-      var data = await fetch("./dft-config.json");
-      var dfts = await data.json();
-    } catch (err) {
-      console.error("Error loading defaults:", err.message);
-      return;
-    }
-
-    try {
-        var data = await fetch(dfts.schema_definitions);
-        var obj_schemas = await data.json();
-      } catch (err) {
-        console.error("Error loading schema definitions:", err.message);
-        return;
-    }
-    
-    var objTypeFilter = {};
-    for (var objtype in obj_schemas) {
-        // add schema files to select
-        var ofile = document.createElement("option");
-        ofile.value = obj_schemas[objtype].file;
-        ofile.title = obj_schemas[objtype].description;
-        ofile.id = 'objtype_' + objtype;
-        ofile.appendChild(document.createTextNode(obj_schemas[objtype].title));
-        select_schema.appendChild(ofile);
-
-        var ofilter = document.createElement("option");
-        ofilter.value = objtype;
-        ofilter.title = `Show/Hide ${obj_schemas[objtype].title}`;
-        ofilter.id = 'objfilter_' + objtype;
-        ofilter.appendChild(document.createTextNode(`Hide ${obj_schemas[objtype].title}`));
-        objfiltersel.appendChild(ofilter);
-        objTypeFilter[objtype] = true;
-    }
-
-    // load values from defaults or local storage, if they exist
-    select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
-    select_schema.dispatchEvent(new Event("change"));
-
-    if (ARENADefaults.mqttHost) { // prefer deployed custom config
-        arena_host.value = ARENADefaults.mqttHost;
-    } else {
-        arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
-    }
-
-    // Scene config schema
-    if (!schema) {
-        var data = await fetch(dfts.schema_file);
-        schema = await data.json();
-    }
 
     var getDevPath = function() {
         let path = window.location.pathname.substring(1);
@@ -285,7 +235,7 @@ window.addEventListener('onauth', async function (e) {
             }
           }).then(async (result) => {
             if (result.isDismissed) return;
-            await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dfts.new_scene_objs : undefined);
+            await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dftSceneObjects : undefined);
             setTimeout(async () => {
                 await PersistObjects.populateSceneList(result.value.ns, scenelist, result.value.scene);
                 if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objfilter.value, objTypeFilter);
@@ -516,6 +466,58 @@ window.addEventListener('onauth', async function (e) {
      * Setup initial state of the page
      */
 
+
+    try {
+        var data = await fetch("./dft-config.json");
+        var dfts = await data.json();
+      } catch (err) {
+        console.error("Error loading defaults:", err.message);
+        return;
+      }
+  
+      try {
+          var data = await fetch(dfts.schema_definitions);
+          var obj_schemas = await data.json();
+        } catch (err) {
+          console.error("Error loading schema definitions:", err.message);
+          return;
+      }
+      
+      var objTypeFilter = {};
+      for (var objtype in obj_schemas) {
+          // add schema files to select
+          var ofile = document.createElement("option");
+          ofile.value = obj_schemas[objtype].file;
+          ofile.title = obj_schemas[objtype].description;
+          ofile.id = 'objtype_' + objtype;
+          ofile.appendChild(document.createTextNode(obj_schemas[objtype].title));
+          select_schema.appendChild(ofile);
+  
+          var ofilter = document.createElement("option");
+          ofilter.value = objtype;
+          ofilter.title = `Show/Hide ${obj_schemas[objtype].title}`;
+          ofilter.id = 'objfilter_' + objtype;
+          ofilter.appendChild(document.createTextNode(`Hide ${obj_schemas[objtype].title}`));
+          objfiltersel.appendChild(ofilter);
+          objTypeFilter[objtype] = true;
+      }
+  
+      // load values from defaults or local storage, if they exist
+      select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
+      select_schema.dispatchEvent(new Event("change"));
+  
+      if (ARENADefaults.mqttHost) { // prefer deployed custom config
+          arena_host.value = ARENADefaults.mqttHost;
+      } else {
+          arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
+      }
+  
+      // Scene config schema
+      if (!schema) {
+          var data = await fetch(dfts.schema_file);
+          schema = await data.json();
+      }
+
     var hostData = mqttAndPersistURI(location.hostname);
     var auth_state = await ARENAUserAccount.userAuthState();
 
@@ -530,6 +532,14 @@ window.addEventListener('onauth', async function (e) {
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
     });
+
+    // load default objects
+    try {
+        dftSceneObjects = await PersistObjects.fetchSceneObjects(dfts.default_objs_scene);
+    } catch (err) {
+        console.warn(`Could not load default scene objects from ${dfts.default_objs_scene}: ${err}`);
+    }    
+
 
     // load namespace and scene values
     let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
