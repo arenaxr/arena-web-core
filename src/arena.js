@@ -13,6 +13,7 @@ import { ARENAChat } from './chat/';
 import { ARENAEventEmitter } from './event-emitter.js';
 import { SideMenu } from './icons/';
 import { RuntimeMngr } from './runtime-mngr';
+import Swal from 'sweetalert2';
 
 /**
  * Arena Object
@@ -33,7 +34,7 @@ export class Arena {
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
         this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if URL parameter not given
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
-        if (this.startCoords) this.startCoords = this.startCoords.replace(/,/g, ' '); 
+        if (this.startCoords) this.startCoords = this.startCoords.replace(/,/g, ' ');
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
@@ -149,13 +150,13 @@ export class Arena {
      */
     initScene = () => {
         // add our camera to scene
-            
-        // after scene is completely loaded, add user camera 
+
+        // after scene is completely loaded, add user camera
         this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
             let color = Math.floor(Math.random() * 16777215).toString(16);
             if (color.length < 6) color = "0" + color;
             color = '#' + color
-    
+
             const camera = document.getElementById('my-camera');
             camera.setAttribute('arena-camera', 'enabled', true);
             camera.setAttribute('arena-camera', 'color', color);
@@ -166,12 +167,12 @@ export class Arena {
                 // get startPosition objects
                 const startPositions = Array.from(document.querySelectorAll('[id^="startPosition"]'));
                 if (startPositions.length > 0) {
-                    let posi = Math.floor(Math.random() * startPositions.length);                    
+                    let posi = Math.floor(Math.random() * startPositions.length);
                     ARENA.startCoords = startPositions[posi].getAttribute('position');
                     // also set rotation
                     camera.setAttribute('position', startPositions[posi].getAttribute('rotation'));
                 }
-            } 
+            }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
             console.log("startCoords", ARENA.startCoords);
             camera.setAttribute('position', ARENA.startCoords); // an x, y, z object or a space-separated string
@@ -184,7 +185,7 @@ export class Arena {
 
         // load scene
         ARENA.loadSceneOptions();
-        ARENA.loadScene();        
+        ARENA.loadScene();
 
         //setTimeout(async () => {
         //}, 1000);
@@ -210,7 +211,13 @@ export class Arena {
         const Parents = {};
         xhr.onload = () => {
             if (xhr.status !== 200) {
-                alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
+                Swal.fire({
+                    title: 'Error loading initial scene data',
+                    text:  `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
+                    icon: 'error',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Ok',
+                });
             } else {
                 if (xhr.response == undefined) {
                     console.error("No scene objects found in persistence.")
@@ -304,7 +311,13 @@ export class Arena {
 
         xhr.onload = () => {
             if (xhr.status !== 200) {
-                alert(`Error loading initial scene data: ${xhr.status}: ${xhr.statusText}`);
+                Swal.fire({
+                    title: 'Error loading initial scene data',
+                    text:  `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
+                    icon: 'error',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Ok',
+                });
             } else {
                 const arenaObjects = xhr.response;
                 const l = arenaObjects.length;
@@ -350,7 +363,7 @@ export class Arena {
         xhr.send();
         xhr.onload = async () => {
             if (xhr.status !== 200 || xhr.response == undefined) {
-                console.log('No scene-options object found');
+                console.log(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             } else {
                 const payload = xhr.response[xhr.response.length - 1];
                 if (payload) {
@@ -374,7 +387,7 @@ export class Arena {
                         }
                     }
                 } else {
-                    // set defaults                
+                    // set defaults
                     environment.setAttribute('environment', 'preset', 'starry');
                     environment.setAttribute('environment', 'seed', 3);
                     environment.setAttribute('environment', 'flatShading', true);
