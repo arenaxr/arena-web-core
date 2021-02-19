@@ -43,7 +43,10 @@ window.Alert = Alert;
 window.addEventListener('onauth', async function (e) {
     var schema;
     var jsoneditor;
+    var dfts;
+    var objSchemas
     var dftSceneObjects;
+    var objTypeFilter = {};
 
     // Divs/textareas on the page
     var output = document.getElementById("output");
@@ -54,6 +57,7 @@ window.addEventListener('onauth', async function (e) {
     var scene_url = document.getElementById("scene_url");
     var objfilter = document.getElementById("objfilter");
     var objfiltersel = document.getElementById("objfiltersel");
+    var arenaHostLbl = document.getElementById("arenahost");
 
     // Buttons/s
     var open_add_scene_button = document.getElementById("openaddscene");
@@ -108,8 +112,16 @@ window.addEventListener('onauth', async function (e) {
     };
 
     // return uris assuming persist and mqtt are accessed through the webhost
-    var mqttAndPersistURI = function(hn) {
+    var mqttAndPersistURI = function() {
+        if (ARENADefaults) {
+            return { 
+                host: ARENADefaults.mqttHost,
+                persist_uri: location.protocol + "//"+ ARENADefaults.persistHost + ARENADefaults.persistPath,
+                mqtt_uri: "wss://"+ ARENADefaults.mqttHost + "/mqtt/"
+            };    
+        }
         return {
+            host: ARENADefaults.mqttHost,
             persist_uri: location.protocol + "//"+ location.hostname + (location.port ? ":" + location.port : "") + "/persist/",
             mqtt_uri: "wss://"+ location.hostname + (location.port ? ":" + location.port : "") + "/mqtt/"
         };
@@ -162,7 +174,7 @@ window.addEventListener('onauth', async function (e) {
         var updateobj = getARENAObject(obj, action);
 
         var schemaType = (updateobj.type === 'object') ? updateobj.data.object_type : updateobj.type
-        var schemaFile = obj_schemas[schemaType].file;
+        var schemaFile = objSchemas[schemaType].file;
         var data = await fetch(schemaFile);
         schema = await data.json();
         select_schema.value = schemaFile;
@@ -473,36 +485,35 @@ window.addEventListener('onauth', async function (e) {
      */
 
     try {
-        var data = await fetch("./dft-config.json");
-        var dfts = await data.json();
+        let data = await fetch("./dft-config.json");
+        dfts = await data.json();
       } catch (err) {
         console.error("Error loading defaults:", err.message);
         return;
       }
   
       try {
-          var data = await fetch(dfts.schema_definitions);
-          var obj_schemas = await data.json();
+          let data = await fetch(dfts.schema_definitions);
+          objSchemas = await data.json();
         } catch (err) {
           console.error("Error loading schema definitions:", err.message);
           return;
       }
       
-      var objTypeFilter = {};
-      for (var objtype in obj_schemas) {
+      for (let objtype in objSchemas) {
           // add schema files to select
-          var ofile = document.createElement("option");
-          ofile.value = obj_schemas[objtype].file;
-          ofile.title = obj_schemas[objtype].description;
+          let ofile = document.createElement("option");
+          ofile.value = objSchemas[objtype].file;
+          ofile.title = objSchemas[objtype].description;
           ofile.id = 'objtype_' + objtype;
-          ofile.appendChild(document.createTextNode(obj_schemas[objtype].title));
+          ofile.appendChild(document.createTextNode(objSchemas[objtype].title));
           select_schema.appendChild(ofile);
   
-          var ofilter = document.createElement("option");
+          let ofilter = document.createElement("option");
           ofilter.value = objtype;
-          ofilter.title = `Show/Hide ${obj_schemas[objtype].title}`;
+          ofilter.title = `Show/Hide ${objSchemas[objtype].title}`;
           ofilter.id = 'objfilter_' + objtype;
-          ofilter.appendChild(document.createTextNode(`Hide ${obj_schemas[objtype].title}`));
+          ofilter.appendChild(document.createTextNode(`Hide ${objSchemas[objtype].title}`));
           objfiltersel.appendChild(ofilter);
           objTypeFilter[objtype] = true;
       }
@@ -511,20 +522,15 @@ window.addEventListener('onauth', async function (e) {
       select_schema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
       select_schema.dispatchEvent(new Event("change"));
   
-      if (ARENADefaults.mqttHost) { // prefer deployed custom config
-          arena_host.value = ARENADefaults.mqttHost;
-      } else {
-          arena_host.value = (localStorage.getItem("arena_host") === null || localStorage.getItem("arena_host").length <= 1) ? dfts.arena_host : localStorage.getItem("arena_host");
-      }
-  
       // Scene config schema
       if (!schema) {
           var data = await fetch(dfts.schema_file);
           schema = await data.json();
       }
 
-    var hostData = mqttAndPersistURI(location.hostname);
-    var auth_state = await ARENAUserAccount.userAuthState();
+    let hostData = mqttAndPersistURI(location.hostname);
+    let authState = await ARENAUserAccount.userAuthState();
+    arenaHostLbl.value = hostData.host;
 
     // start persist object mngr
     PersistObjects.init({
@@ -533,7 +539,7 @@ window.addEventListener('onauth', async function (e) {
         obj_list: document.getElementById("objlist"),
         addeditsection: document.getElementById("addeditsection"),
         editobj_handler: editObject,
-        auth_state: auth_state,
+        auth_state: authState,
         mqtt_username: e.detail.mqtt_username,
         mqtt_token: e.detail.mqtt_token,
     });
