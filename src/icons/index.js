@@ -6,8 +6,15 @@ import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
 
+document.addEventListener('focusin', function(e) {
+    console.log('focusin: ', e)
+}, true);
+document.addEventListener('focus', function(e) {
+    console.log('focus: ', e)
+}, true);
+
 /**
- * Creates a button that will be dispalyed as an icon on the left of the screen
+ * Creates a button that will be displayed as an icon on the left of the screen
  * @param {string} initialImage name of initial image to be displayed
  * @param {string} tooltip tip to be displayed on hover
  * @param {function} onClick function that will be run on click
@@ -27,6 +34,8 @@ function createIconButton(initialImage, tooltip, onClick) {
     iconButton.addEventListener('click', function(evt) {
         onClick();
         evt.stopPropagation();
+        document.activeElement.blur();
+        document.body.focus();
     });
 
     wrapper.onClick = onClick;
