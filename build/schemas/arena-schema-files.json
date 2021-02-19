@@ -1,0 +1,127 @@
+{
+    "entity": {
+        "file": "schemas/entity.json",
+        "title": "Entity (generic object)",
+        "description": "Entities are the base of all objects in the scene. Entities are containers into which components can be attached."
+    },
+    "gltf-model": {
+        "file": "schemas/gltf-model.json",
+        "title": "GLTF Model",
+        "description": "Load a GLTF model"
+    },
+    "threejs-scene": {
+        "file": "schemas/threejs-scene.json",
+        "title": "Three.js Scene",
+        "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred)"
+    },
+    "image": {
+        "file": "schemas/image.json",
+        "title": "Image",
+        "description": "Display an image on a plane"
+    },
+    "text": {
+        "file": "schemas/text.json",
+        "title": "Text",
+        "description": "Display text"
+    },
+    "light": {
+        "file": "schemas/light.json",
+        "title": "Light",
+        "description": "A light"
+    },
+    "line": {
+        "file": "schemas/line.json",
+        "title": "Line",
+        "description": "Draw a line"
+    },
+    "thickline": {
+        "file": "schemas/thickline.json",
+        "title": "Thickline",
+        "description": "Draw a line that can have a custom width"
+    },
+    "box": {
+        "file": "schemas/box.json",
+        "title": "Box",
+        "description": "Box Geometry"
+    },
+    "cube": {
+        "file": "schemas/cube.json",
+        "title": "Cube (deprecated; don't use)",
+        "description": "Cube (=Box) Geometry; Supported for Legacy reasons; Please use Box in new scenes"
+    },
+    "circle": {
+        "file": "schemas/circle.json",
+        "title": "Circle",
+        "description": "Circle Geometry"
+    },
+    "cone": {
+        "file": "schemas/cone.json",
+        "title": "Cone",
+        "description": "Cone Geometry"
+    },
+    "cylinder": {
+        "file": "schemas/cylinder.json",
+        "title": "Cylinder",
+        "description": "cylinder Geometry"
+    },
+    "dodecahedron": {
+        "file": "schemas/dodecahedron.json",
+        "title": "Dodecahedron",
+        "description": "dodecahedron Geometry"
+    },
+    "octahedron": {
+        "file": "schemas/octahedron.json",
+        "title": "Octahedron",
+        "description": "Octahedron Geometry"
+    },
+    "plane": {
+        "file": "schemas/plane.json",
+        "title": "Plane",
+        "description": "Plane Geometry"
+    },
+    "ring": {
+        "file": "schemas/ring.json",
+        "title": "Ring",
+        "description": "Ring Geometry"
+    },
+    "sphere": {
+        "file": "schemas/sphere.json",
+        "title": "Sphere",
+        "description": "Sphere Geometry"
+    },
+    "tetrahedron": {
+        "file": "schemas/tetrahedron.json",
+        "title": "Tetrahedron",
+        "description": "Tetrahedron Geometry"
+    },
+    "torus": {
+        "file": "schemas/torus.json",
+        "title": "Torus",
+        "description": "Torus Geometry"
+    },
+    "torusKnot": {
+        "file": "schemas/torusKnot.json",
+        "title": "Torus Knot",
+        "description": "Torus Knot Geometry"
+    },
+    "triangle": {
+        "file": "schemas/triangle.json",
+        "title": "Triangle",
+        "description": "Triangle Geometry"
+    },
+    "program": {
+        "file": "schemas/arena-program.json",
+        "title": "Program",
+        "description": "ARENA program data"
+    },
+    "scene-options": {
+        "file": "schemas/arena-scene-options.json",
+        "title": "Scene Options",
+        "description": "ARENA scene options"
+    },
+    "landmarks": {
+        "file": "schemas/arena-landmarks.json",
+        "title": "Scene Landmarks",
+        "description": "ARENA landmarks"
+    }
+}
