@@ -126,6 +126,11 @@ window.addEventListener('onauth', async function (e) {
                 validate.value = "valid";
             }
         });
+
+        let typeSel = document.getElementsByName("root[type]")[0];
+        let objTypeSel = document.getElementsByName("root[data][object_type]")[0];
+        if (typeSel) typeSel.disabled = true;
+        if (objTypeSel) objTypeSel.disabled = true;        
     };
 
     var getARENAObject = function(obj, action="create", persist=true) {
@@ -197,10 +202,6 @@ window.addEventListener('onauth', async function (e) {
                     <span class="add-on" style="width:125px">Scene</span>
                     <input type="text" style="width:200px" id="modalscenename" placeholder="Scene Name">
                   </div>  
-                  <div class="input-prepend">
-                    <span class="add-on" style="width:125px">Clone from Scene</span>
-                    <select id="modalclonescenelist" style="width:215px" disabled=true></select>
-                  </div>
                   <p><small>Scene will be created with default permissions.</small></p>`,    
             confirmButtonText: 'Add Scene',
             focusConfirm: false,
@@ -208,7 +209,7 @@ window.addEventListener('onauth', async function (e) {
             cancelButtonText: 'Cancel',
             input: 'checkbox',
             inputValue: 1,
-            inputPlaceholder:'Add Default Scene Options and Landmarks',
+            inputPlaceholder:`Add Objects from Default Scene: ${dfts.default_objs_scene}`,
             willOpen: () => {
                 const modalNsList = Swal.getPopup().querySelector('#modalnamespacelist');
                 PersistObjects.populateNewSceneNamespaces(modalNsList);
