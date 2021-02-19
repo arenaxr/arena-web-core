@@ -25,12 +25,13 @@
 //     });
 // });
 
-
 window.AUTH = {}; // auth namespace
 
 if (!storageAvailable('localStorage')) {
-    alert('QUACK!\n\nLocalStorage has been disabled, and the ARENA needs it.' +
-        'Bugs are coming! Perhaps you have disabled cookies?');
+    const title = 'QUACK!';
+    const text = 'LocalStorage has been disabled, and the ARENA needs it.' +
+        'Bugs are coming! Perhaps you have disabled cookies?';
+    authError(title, text);
 }
 
 window.onload = function() {
@@ -38,11 +39,31 @@ window.onload = function() {
 };
 
 /**
+ * Display user-friendly error message.
+ * @param {string} title Title of error
+ * @param {string} text Error message
+ */
+function authError(title, text) {
+    console.error(`${title}: ${text}`);
+    // TODO: add sweetalert if it can be imported from the package
+    // if (sweetalert2 !== 'undefined') {
+    //     Swal.fire({
+    //         title: title,
+    //         text: text,
+    //         icon: 'error',
+    //         showConfirmButton: true,
+    //         confirmButtonText: 'Ok',
+    //     });
+    // } else {
+    alert(`${title}\n\n${text}`);
+    // }
+}
+
+/**
  * Initialize and launch start of authentication flow.
  * @param {object} args auth arguments
  */
 const authCheck = function() {
-    localStorage.setItem('request_uri', location.href); // 'remember' uri for login redirect
     AUTH.signInPath = `${window.location.protocol}//${window.location.host}/user/login`;
     AUTH.signOutPath = `${window.location.protocol}//${window.location.host}/user/logout`;
     window.addEventListener('load', requestAuthState);
@@ -118,7 +139,9 @@ function requestAuthState() {
     xhr.responseType = 'json';
     xhr.onload = () => {
         if (xhr.status !== 200) {
-            console.error(`Error loading user_state: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+            const title = 'Error loading user state';
+            const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
+            authError(title, text);
         } else {
             AUTH.user_type = xhr.response.type; // user database auth state
             const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
@@ -141,6 +164,8 @@ function requestAuthState() {
                     requestMqttToken('anonymous', anonName);
                 } else {
                     // user is logged out or new and not logged in
+                    // 'remember' uri for post-login, just before login redirect
+                    localStorage.setItem('request_uri', location.href);
                     location.href = AUTH.signInPath;
                 }
             }
@@ -181,7 +206,9 @@ function requestMqttToken(authType, mqttUsername) {
     xhr.responseType = 'json';
     xhr.onload = () => {
         if (xhr.status !== 200) {
-            alert(`Error loading mqtt-token: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+            const title = 'Error loading MQTT token';
+            const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
+            authError(title, text);
             signOut(); // critical error
         } else {
             AUTH.user_type = authType;
@@ -196,8 +223,7 @@ function requestMqttToken(authType, mqttUsername) {
 
 /**
  * Auth is done; persist data in local storage and emit event
- * @param {string} username auth user name
- * @param {string} token mqtt token
+ * @param {object} response The mqtt_auth response json
  */
 function completeAuth(response) {
     const onAuthEvt = {
@@ -205,9 +231,9 @@ function completeAuth(response) {
         mqtt_token: response.token,
     };
     if (response.ids) {
-        onAuthEvt.ids = response.ids
+        onAuthEvt.ids = response.ids;
     }
-    localStorage.removeItem('request_uri'); // 'forget' redirect on success
+    localStorage.removeItem('request_uri'); // 'forget' login redirect on success
     // mqtt-token must be set to authorize access to MQTT broker
     if (typeof ARENA !== 'undefined') {
         // emit event to ARENA.event
@@ -216,7 +242,9 @@ function completeAuth(response) {
     }
 
     // emit custom event to window
-    const authCompleteEvent = new CustomEvent('onauth', { detail: onAuthEvt });
+    const authCompleteEvent = new CustomEvent('onauth', {
+        detail: onAuthEvt
+    });
     window.dispatchEvent(authCompleteEvent);
 }
 
@@ -266,8 +294,10 @@ function formatPerms(perms) {
     return lines.join('<br>');
 }
 
+/**
+ * Open profile in new page to avoid mqtt disconnect.
+ */
 function showProfile() {
-    // open profile in new page to avoid mqtt disconnect
     window.open(`${window.location.protocol}//${window.location.host}/user/profile`);
 }
 
@@ -349,15 +379,15 @@ function storageAvailable(type) {
         return true;
     } catch (e) {
         return e instanceof DOMException && (
-            // everything except Firefox
-            e.code === 22 ||
-            // Firefox
-            e.code === 1014 ||
-            // test name field too, because code might not be present
-            // everything except Firefox
-            e.name === 'QuotaExceededError' ||
-            // Firefox
-            e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+                // everything except Firefox
+                e.code === 22 ||
+                // Firefox
+                e.code === 1014 ||
+                // test name field too, because code might not be present
+                // everything except Firefox
+                e.name === 'QuotaExceededError' ||
+                // Firefox
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
             // acknowledge QuotaExceededError only if there's something already stored
             (storage && storage.length !== 0);
     }
