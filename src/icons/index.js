@@ -7,7 +7,7 @@ import './style.css';
 const ICON_BTN_CLASS = 'arena-icon-button';
 
 /**
- * Creates a button that will be dispalyed as an icon on the left of the screen
+ * Creates a button that will be displayed as an icon on the left of the screen
  * @param {string} initialImage name of initial image to be displayed
  * @param {string} tooltip tip to be displayed on hover
  * @param {function} onClick function that will be run on click
@@ -27,6 +27,15 @@ function createIconButton(initialImage, tooltip, onClick) {
     iconButton.addEventListener('click', function(evt) {
         onClick();
         evt.stopPropagation();
+
+        // Button focus is different per browser, so set manual focus. In general, we need to check
+        // UI elements on our overlay that can keep input focus, since the natural implementation
+        // on most browsers is that input elements capture tab/arrow/+chars for DOM navigation and
+        // input.
+
+        // Chrome appears to leave focus on the button, but we need it back to body for 3D navigation.
+        document.activeElement.blur();
+        document.body.focus();
     });
 
     wrapper.onClick = onClick;
