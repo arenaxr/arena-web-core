@@ -89,6 +89,7 @@ window.addEventListener('onauth', function(e) {
         }
         window.client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
         window.graphTopic = ARENADefaults.graphTopic;
+        window.latencyTopic = window.graphTopic + "/latency";
 
         window.client.onConnectionLost = onConnectionLost;
         window.client.onMessageArrived = onMessageArrived;
@@ -104,9 +105,9 @@ window.addEventListener('onauth', function(e) {
     function onConnect() {
         console.log("Connected!");
         window.client.subscribe(window.graphTopic);
-        publish(window.client, window.graphTopic + "/latency", "", 2);
+        publish(window.client, window.latencyTopic, "", 2);
         setInterval(() => {
-            publish(window.client, window.graphTopic + "/latency", "", 2);
+            publish(window.client, window.latencyTopic, "", 2);
         }, 10000);
     }
 
@@ -134,16 +135,17 @@ window.addEventListener('onauth', function(e) {
     function runLayout() {
         cy.layout({
             name: 'fcose',
-            padding: 50,
+            padding: 10,
+            randomize: true,
             fit: true,
             animate: true,
+            packComponents: true,
             nodeRepulsion: 4500,
             idealEdgeLength: 50,
-            randomize: false,
             tile: true,
             tilingPaddingVertical: 10,
             tilingPaddingHorizontal: 10,
-            animationDuration: 100,
+            animationDuration: 300,
             animationEasing: 'ease-out'
         }).run();
     }

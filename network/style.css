@@ -3,6 +3,17 @@ body {
     font-family: "Lato", sans-serif;
 }
 
+#container {
+    width: 200px;
+    position: fixed;
+    padding: 5px;
+}
+
+#title {
+    color: white;
+    margin-left: 10px;
+}
+
 #cy {
     height: 100%;
     width: 100%;
@@ -13,7 +24,7 @@ body {
     z-index: -1;
 }
 
-#container {
+#cy-container {
     overflow: hidden;
 }
 
