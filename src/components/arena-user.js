@@ -117,11 +117,11 @@ AFRAME.registerComponent('arena-user', {
         el.appendChild(this.headModel);
         this.drawMicrophone();
 
-        this.videoTrack = null;
         this.videoID = null;
-        this.audioTrack = null;
         this.audioID = null;
         this.distReached = null;
+
+        this.frustum = new THREE.Frustum();
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -218,7 +218,10 @@ AFRAME.registerComponent('arena-user', {
         /* Handle Jitsi Video */
         this.videoID = `video${data.jitsiId}`;
         if (data.hasVideo) {
-            this.videoTrack = ARENA.Jitsi.getVideoTrack(data.jitsiId);
+            if (!ARENA.Jitsi.getVideoTrack(data.jitsiId)) {
+                return;
+            }
+
             const jistiVideo = document.getElementById(this.videoID);
             if (jistiVideo) {
                 const vidCube = document.getElementById(this.videoID + 'cube');
@@ -261,8 +264,9 @@ AFRAME.registerComponent('arena-user', {
         this.audioID = `audio${data.jitsiId}`;
         if (data.hasAudio) {
             // set up positional audio, but only once per camera
-            this.audioTrack = ARENA.Jitsi.getAudioTrack(data.jitsiId);
-            if (!this.audioTrack) return;
+            if (!ARENA.Jitsi.getAudioTrack(data.jitsiId)) {
+                return;
+            }
 
             const jitsiAudio = document.getElementById(this.audioID);
             if (jitsiAudio) {
@@ -274,6 +278,38 @@ AFRAME.registerComponent('arena-user', {
             }
         } else {
             this.drawMicrophone();
+        }
+    },
+
+    muteAudio() {
+        const el = this.el;
+        const jistiAudio = document.getElementById(this.audioID);
+        if (jistiAudio) {
+            jistiAudio.srcObject.getTracks().forEach((t) => t.enabled = false);
+        }
+        el.removeAttribute('sound');
+    },
+
+    unmuteAudio() {
+        const jistiAudio = document.getElementById(this.audioID);
+        if (jistiAudio) {
+            jistiAudio.srcObject.getTracks().forEach((t) => t.enabled = true);
+        }
+    },
+
+    muteVideo() {
+        const jistiVideo = document.getElementById(this.videoID);
+        if (jistiVideo) {
+            if (!jistiVideo.paused) jistiVideo.pause();
+            jistiVideo.srcObject.getTracks().forEach((t) => t.enabled = false);
+        }
+    },
+
+    unmuteVideo() {
+        const jistiVideo = document.getElementById(this.videoID);
+        if (jistiVideo) {
+            if (jistiVideo.paused) jistiVideo.play();
+            jistiVideo.srcObject.getTracks().forEach((t) => t.enabled = true);
         }
     },
 
@@ -304,34 +340,34 @@ AFRAME.registerComponent('arena-user', {
         const entityPos = el.object3D.position;
         const distance = camPos.distanceTo(entityPos);
 
-        if (this.videoTrack && this.videoID) {
-            // frustum culling for WebRTC streams
-            const cam = document.getElementById('my-camera').sceneEl.camera;
-            const frustum = new THREE.Frustum();
-            frustum.setFromProjectionMatrix(
-                new THREE.Matrix4().multiplyMatrices(
-                    cam.projectionMatrix, cam.matrixWorldInverse));
-            const inFieldOfView = frustum.containsPoint(entityPos);
+        if (this.videoID) {
+            // frustum culling for WebRTC video streams
+            const vidCube = document.getElementById(this.videoID + 'cube');
+            let inFieldOfView = true;
+            if (el.contains(vidCube)) {
+                const cam = document.getElementById('my-camera').sceneEl.camera;
+                this.frustum.setFromProjectionMatrix(
+                    new THREE.Matrix4().multiplyMatrices(
+                        cam.projectionMatrix, cam.matrixWorldInverse));
+                const bbox = new THREE.Box3().setFromObject(vidCube.object3D);
+                inFieldOfView = this.frustum.intersectsBox(bbox);
+            }
 
-            const jistiVideo = document.getElementById(this.videoID);
             // check if A/V cut off distance has been reached
             if (!inFieldOfView || distance > ARENA.maxAVDist) {
-                this.videoTrack.enabled = false; // pause WebRTC video stream
-                if (jistiVideo && !jistiVideo.paused) jistiVideo.pause();
+                this.muteVideo();
             } else {
-                this.videoTrack.enabled = true; // unpause WebRTC video stream
-                if (jistiVideo && jistiVideo.paused) jistiVideo.play();
+                this.unmuteVideo();
             }
         }
 
-        if (this.audioTrack && this.audioID) {
+        if (this.audioID) {
             // check if A/V cut off distance has been reached
             if (distance > ARENA.maxAVDist) {
-                this.audioTrack.enabled = false; // pause WebRTC audio stream
+                this.muteAudio();
                 this.distReached = true;
-                el.removeAttribute('sound');
             } else {
-                this.audioTrack.enabled = true; // unpause WebRTC audio stream
+                this.unmuteAudio();
                 this.distReached = false;
             }
         }

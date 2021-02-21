@@ -697,11 +697,17 @@ export class ARENAJitsi {
     }
 
     getAudioTrack(jitsiId) {
-        return this.remoteTracks[jitsiId] && this.remoteTracks[jitsiId][0];
+        if (this.remoteTracks[jitsiId])
+            return this.remoteTracks[jitsiId][0];
+        else
+            return null;
     }
 
     getVideoTrack(jitsiId) {
-        return this.remoteTracks[jitsiId] && this.remoteTracks[jitsiId][1];
+        if (this.remoteTracks[jitsiId])
+            return this.remoteTracks[jitsiId][1];
+        else
+            return null;
     }
 
     leave() {
