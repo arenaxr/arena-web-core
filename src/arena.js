@@ -170,7 +170,11 @@ export class Arena {
                     let posi = Math.floor(Math.random() * startPositions.length);
                     ARENA.startCoords = startPositions[posi].getAttribute('position');
                     // also set rotation
-                    camera.setAttribute('position', startPositions[posi].getAttribute('rotation'));
+                    let rot = startPositions[posi].getAttribute('rotation');
+                    camera.components['look-controls'].yawObject.rotation.x = rot.x;
+                    camera.components['look-controls'].yawObject.rotation.y = rot.y;
+                    camera.components['look-controls'].yawObject.rotation.z = rot.z;
+                    camera.components['look-controls'].yawObject.rotation.w = rot.w;
                 }
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
