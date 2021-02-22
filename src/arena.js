@@ -171,7 +171,6 @@ export class Arena {
                     ARENA.startCoords = startPositions[posi].getAttribute('position');
                     // also set rotation
                     let rot = startPositions[posi].getAttribute('rotation');
-                    // rotation is set directly in the THREE.js object, for performance reasons
                     if (rot.hasOwnProperty('w')) camera.components['look-controls'].yawObject.quaternion.set(rot.x, rot.y, rot.z, rot.w); // has 'w' coordinate: a quaternion
                     else camera.components['look-controls'].yawObject.rotation.set( THREE.Math.degToRad(rot.x), THREE.Math.degToRad(rot.y), THREE.Math.degToRad(rot.z)); // otherwise its a rotation given in degrees
                 }
