@@ -40,6 +40,24 @@ AFRAME.registerComponent('arena-camera', {
         // send initial create
         this.publishPose('create');
         this.publishVio('create');
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                if (window.bgHeartbeatTimer) {
+                    clearInterval(window.bgHeartbeatTimer);
+                }
+            } else {
+                window.bgHeartbeatCount = 0;
+                window.bgHeartbeatTimer = setInterval(() => {
+                    // 30 minute timeout
+                    if (window.bgHeartbeatCount >= 30 * 60) {
+                        return clearInterval(window.bgHeartbeatTimer);
+                    }
+                    this.publishPose();
+                    window.bgHeartbeatCount++;
+                }, 1000);
+            }
+        });
     },
 
     publishPose(action = 'update') {
