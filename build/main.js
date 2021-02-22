@@ -217,13 +217,12 @@ window.addEventListener('onauth', async function (e) {
             preConfirm: () => {
               const ns = Swal.getPopup().querySelector('#modalnamespacelist').value;
               const scene = Swal.getPopup().querySelector('#modalscenename').value;
-              const clones = Swal.getPopup().querySelector('#modalclonescenelist').value;
               const addobjs = !!Swal.getPopup().querySelector('#swal2-checkbox').checked;
       
               if (!scene) {
                 Swal.showValidationMessage(`Please enter a new scene name`)
               }    
-              return { ns: ns, scene: scene, clones: clones, addobjs: addobjs}
+              return { ns: ns, scene: scene, addobjs: addobjs}
             }
           }).then(async (result) => {
             if (result.isDismissed) return;
