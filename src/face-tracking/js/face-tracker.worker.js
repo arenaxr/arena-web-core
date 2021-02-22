@@ -1,39 +1,39 @@
 if ('function' === typeof importScripts) {
-    importScripts("./face_tracker_wasm.js");
-    importScripts("../dist/face-tracker.min.js");
+    importScripts('./face_tracker_wasm.js');
+    importScripts('../dist/face-tracker.min.js');
 
-    self.onmessage = function (e) {
-        var msg = e.data;
+    self.onmessage = function(e) {
+        const msg = e.data;
         switch (msg.type) {
-            case "init": {
-                load(msg);
-                return;
-            }
-            case "process": {
-                next = msg.imagedata;
-                process();
-                return;
-            }
-            default: {
-                break;
-            }
+        case 'init': {
+            load(msg);
+            return;
+        }
+        case 'process': {
+            next = msg.imagedata;
+            process();
+            return;
+        }
+        default: {
+            break;
+        }
         }
     };
 
     var next = null;
 
-    var faceTracker = null;
+    let faceTracker = null;
 
-    var features = null, pose = null;
+    let features = null; let pose = null;
 
     function load(msg) {
-        var onLoad = function() {
-            postMessage({type: "loaded"});
-        }
+        const onLoad = function() {
+            postMessage({type: 'loaded'});
+        };
 
-        var onProgress = function(progress) {
-            postMessage({type: "progress", progress: progress});
-        }
+        const onProgress = function(progress) {
+            postMessage({type: 'progress', progress: progress});
+        };
 
         faceTracker = new FaceTracker.FaceTracker(msg.width, msg.height, onLoad, onProgress);
     }
@@ -50,7 +50,7 @@ if ('function' === typeof importScripts) {
         }
 
         if (features) {
-            postMessage({type: "result", features: features, pose: pose});
+            postMessage({type: 'result', features: features, pose: pose});
         }
         // else {
         //     postMessage({ type: "not found" });
@@ -58,5 +58,4 @@ if ('function' === typeof importScripts) {
 
         next = null;
     }
-
 }

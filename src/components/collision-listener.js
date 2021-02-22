@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-//import {ARENAUtils} from '../utils.js';
+// import {ARENAUtils} from '../utils.js';
 
 /**
  * Listen for collisions, callback on event.

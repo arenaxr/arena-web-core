@@ -110,7 +110,9 @@ AFRAME.registerComponent('look-controls-arrow', {
 });
 
 function isEmptyObject(keys) {
-    var key;
-    for (key in keys) { return false; }
+    let key;
+    for (key in keys) {
+        return false;
+    }
     return true;
 }

@@ -55,7 +55,7 @@ AFRAME.registerComponent('impulse', {
             console.log(data);
         }
     },
-    // handle component removal 
+    // handle component removal
     remove: function() {
         const data = this.data;
         const el = this.el;

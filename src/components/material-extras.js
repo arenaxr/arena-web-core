@@ -26,7 +26,7 @@ AFRAME.registerComponent('material-extras', {
         const mesh = this.el.getObject3D('mesh');
 
         if (!mesh) {
-            console.error("could not find mesh!");
+            console.error('could not find mesh!');
             this.retryUpdate();
         }
 
@@ -40,7 +40,7 @@ AFRAME.registerComponent('material-extras', {
     retryUpdate() {
         if (this.retryIndex < this.retryTimeouts.length) {
             setTimeout(async () => {
-                console.log("retry!");
+                console.log('retry!');
                 this.retryIndex++;
                 this.doUpdate();
             }, this.retryTimeouts[this.retryIndex]); // try again in a bit

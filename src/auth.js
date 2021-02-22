@@ -243,7 +243,7 @@ function completeAuth(response) {
 
     // emit custom event to window
     const authCompleteEvent = new CustomEvent('onauth', {
-        detail: onAuthEvt
+        detail: onAuthEvt,
     });
     window.dispatchEvent(authCompleteEvent);
 }
@@ -379,8 +379,8 @@ function storageAvailable(type) {
         return true;
     } catch (e) {
         return e instanceof DOMException && (
-                // everything except Firefox
-                e.code === 22 ||
+        // everything except Firefox
+            e.code === 22 ||
                 // Firefox
                 e.code === 1014 ||
                 // test name field too, because code might not be present

@@ -26,7 +26,7 @@ AFRAME.registerComponent('arena-camera', {
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
     },
 
-    init: function () {
+    init: function() {
         this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
@@ -111,7 +111,7 @@ AFRAME.registerComponent('arena-camera', {
         const data = this.data;
     },
 
-    tick: function (t, dt) {
+    tick: function(t, dt) {
         const data = this.data;
         const el = this.el;
 

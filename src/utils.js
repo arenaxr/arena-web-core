@@ -36,7 +36,7 @@ export class ARENAUtils {
         if (urlParameter === '') {
             urlParameter = defaultValue;
         }
-        //console.info(`ARENA (URL) config param ${parameter}: ${urlParameter}`);
+        // console.info(`ARENA (URL) config param ${parameter}: ${urlParameter}`);
         return urlParameter;
     };
 
