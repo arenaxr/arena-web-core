@@ -25,8 +25,6 @@ function uuidv4() {
 }
 
 export class ARENAChat {
-    static PUBLIC_TOPIC_PREFIX = '/g/c/o/';
-    static PRIVATE_TOPIC_PREFIX = '/g/c/p/';
 
     static userType = {
         EXTERNAL: 'external',
@@ -69,43 +67,37 @@ export class ARENAChat {
 
         /*
 	    Clients listen for chat messages on:
-				- global public (*o*pen) topic (gtopic; realm/g/c/o/#)
-				- a user (*p*rivate) topic (utopic; realm/g/c/p/userhandle/#)
+			- global public (*o*pen) topic (<realm>/c/<auth-user-namespace>/o/#)
+			- a user (*p*rivate) topic (<realm>/c/<auth-user-namespace>/p/userhandle/#)
 
-		  Clients write always to a topic with its own userhandle:
-  		   - a topic for each user for private messages (ugtopic; realm/g/c/p/[other-cameraid]/userhandle)
-				 - a global topic (ugtopic; realm/g/c/o/userhandle);
+		Clients write always to a topic with its own userhandle:
+  		    - a topic for each user for private messages ( <realm>/c/<auth-user-namespace>/p/[other-cameraid]/userhandle)
+		    - a global topic (ugtopic; r<realm>/c/<auth-user-namespace>/o/userhandle);
 
-		    where userhandle = cameraid + btoa(cameraid)
+		where userhandle = cameraid + btoa(cameraid)
 
-			Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
-			Note: scene-only messages are sent to public topic and filtered at the client
+		Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
+		Note: scene-only messages are sent to public topic and filtered at the client
+        Note: auth-user-namespace is the mqtt_username; not the curent scene namespace 
 
-			Summary of topics/permissions:
-			 subscribePrivateTopic  - receive private messages (realm/g/c/p/cameraid/#): Read
-			 subscribePublicTopic  - receive open messages to everyone and/or scene (realm/g/c/o/#): Read
-			 publishPrivateTopic - send private messages to a user (realm/g/c/p/[regex-matching-any-cameraid]/userhandle): Write
-			 publishPublicTopic - send open messages (chat keepalive, messages to all/scene) (realm/g/c/o/userhandle): Write
+		Summary of topics/permissions:
+            <realm>/c/<user-namespace>/p/<userid>/#  - receive private messages
+            <realm>/c/<user-namespace>/o/#  - receive open messages to everyone and/or scene
+            <realm>/c/<user-namespace>/o/userhandle - send open messages (chat keepalive, messages to all/scene)
+            <realm>/c/<user-namespace>/p/[regex-matching-any-userid]/userhandle - private messages to user
 	    */
 
         // receive private messages  (subscribe only)
-        this.settings.subscribePrivateTopic =
-            this.settings.realm + ARENAChat.PRIVATE_TOPIC_PREFIX + this.settings.userid + '/#';
+        this.settings.subscribePrivateTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/p/${this.settings.userid}/#`;
 
         // receive open messages to everyone and/or scene (subscribe only)
-        this.settings.subscribePublicTopic = this.settings.realm + ARENAChat.PUBLIC_TOPIC_PREFIX + '#';
+        this.settings.subscribePublicTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/o/#`; 
 
         // send private messages to a user (publish only)
-        this.settings.publishPrivateTopic =
-            this.settings.realm +
-            ARENAChat.PRIVATE_TOPIC_PREFIX +
-            '{to_uid}/' +
-            this.settings.userid +
-            btoa(this.settings.userid);
+        this.settings.publishPrivateTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/p/\{to_uid\}/${this.settings.userid+btoa(this.settings.userid)}`;
 
         // send open messages (chat keepalive, messages to all/scene) (publish only)
-        this.settings.publishPublicTopic =
-            this.settings.realm + ARENAChat.PUBLIC_TOPIC_PREFIX + this.settings.userid + btoa(this.settings.userid);
+        this.settings.publishPublicTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/o/${this.settings.userid+btoa(this.settings.userid)}`;
 
         // counter for unread msgs
         this.unreadMsgs = 0;
@@ -816,7 +808,7 @@ export class ARENAChat {
 
         op = document.createElement('option');
         op.value = 'all';
-        op.innerHTML = 'to: all scenes';
+        op.innerHTML = 'to: namespace';
         this.toSel.appendChild(op);
     }
 
