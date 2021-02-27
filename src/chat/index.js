@@ -40,6 +40,7 @@ export class ARENAChat {
             cameraid: st.cameraid !== undefined ? st.cameraid : 'camera_auser',
             username: st.username !== undefined ? st.username : 'chat-dft-username',
             realm: st.realm !== undefined ? st.realm : 'realm',
+            namespace: st.namespace !== undefined ? st.namespace : 'public',
             scene: st.scene !== undefined ? st.scene : 'render',
             persist_uri:
                 st.persist_uri !== undefined

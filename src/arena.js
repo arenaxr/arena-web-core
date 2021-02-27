@@ -473,6 +473,7 @@ export class Arena {
             cameraid: this.camName,
             username: this.getDisplayName(),
             realm: this.defaults.realm,
+            namespace: this.nameSpace,
             scene: this.sceneName,
             persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
             keepalive_interval_ms: 30000,
