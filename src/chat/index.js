@@ -68,37 +68,37 @@ export class ARENAChat {
 
         /*
 	    Clients listen for chat messages on:
-			- global public (*o*pen) topic (<realm>/c/<auth-user-namespace>/o/#)
-			- a user (*p*rivate) topic (<realm>/c/<auth-user-namespace>/p/userhandle/#)
+			- global public (*o*pen) topic (<realm>/c/<scene-namespace>/o/#)
+			- a user (*p*rivate) topic (<realm>/c/<scene-namespace>/p/userhandle/#)
 
 		Clients write always to a topic with its own userhandle:
-  		    - a topic for each user for private messages ( <realm>/c/<auth-user-namespace>/p/[other-cameraid]/userhandle)
-		    - a global topic (ugtopic; r<realm>/c/<auth-user-namespace>/o/userhandle);
+  		    - a topic for each user for private messages ( <realm>/c/<scene-namespace>/p/[other-cameraid]/userhandle)
+		    - a global topic (ugtopic; r<realm>/c/<scene-namespace>/o/userhandle);
 
 		where userhandle = cameraid + btoa(cameraid)
 
 		Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
 		Note: scene-only messages are sent to public topic and filtered at the client
-        Note: auth-user-namespace is the mqtt_username; not the curent scene namespace 
+        Note: scene-namespace is the current scene namespace 
 
 		Summary of topics/permissions:
-            <realm>/c/<user-namespace>/p/<userid>/#  - receive private messages
-            <realm>/c/<user-namespace>/o/#  - receive open messages to everyone and/or scene
-            <realm>/c/<user-namespace>/o/userhandle - send open messages (chat keepalive, messages to all/scene)
-            <realm>/c/<user-namespace>/p/[regex-matching-any-userid]/userhandle - private messages to user
+            <realm>/c/<scene-namespace>/p/<userid>/#  - receive private messages
+            <realm>/c/<scene-namespace>/o/#  - receive open messages to everyone and/or scene
+            <realm>/c/<scene-namespace>/o/userhandle - send open messages (chat keepalive, messages to all/scene)
+            <realm>/c/<scene-namespace>/p/[regex-matching-any-userid]/userhandle - private messages to user
 	    */
 
         // receive private messages  (subscribe only)
-        this.settings.subscribePrivateTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/p/${this.settings.userid}/#`;
+        this.settings.subscribePrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/${this.settings.userid}/#`;
 
         // receive open messages to everyone and/or scene (subscribe only)
-        this.settings.subscribePublicTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/o/#`; 
+        this.settings.subscribePublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/#`; 
 
         // send private messages to a user (publish only)
-        this.settings.publishPrivateTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/p/\{to_uid\}/${this.settings.userid+btoa(this.settings.userid)}`;
+        this.settings.publishPrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/\{to_uid\}/${this.settings.userid+btoa(this.settings.userid)}`;
 
         // send open messages (chat keepalive, messages to all/scene) (publish only)
-        this.settings.publishPublicTopic = `${this.settings.realm}/c/${this.settings.mqtt_username}/o/${this.settings.userid+btoa(this.settings.userid)}`;
+        this.settings.publishPublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/${this.settings.userid+btoa(this.settings.userid)}`;
 
         // counter for unread msgs
         this.unreadMsgs = 0;
