@@ -157,7 +157,7 @@ window.addEventListener('onauth', function(e) {
             let ip = json["ips"][i]
             let ipJSON = {};
             ipJSON["data"] = {};
-            ipJSON["data"]["id"] = ip["address"];
+            ipJSON["data"]["id"] = ip["id"];
             ipJSON["data"]["class"] = "ip";
             ipJSON["group"] = "nodes";
             res.push(ipJSON);
@@ -169,7 +169,7 @@ window.addEventListener('onauth', function(e) {
                 clientJSON["data"]["id"] = client["name"];
                 clientJSON["data"]["latency"] = client["latency"];
                 clientJSON["data"]["class"] = "client";
-                clientJSON["data"]["parent"] = ip["address"];
+                clientJSON["data"]["parent"] = ip["id"];
                 clientJSON["group"] = "nodes";
                 res.push(clientJSON);
 
