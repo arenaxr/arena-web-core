@@ -136,7 +136,7 @@
 
       <a-entity id="sceneRoot">
         <!-- ground plane so falling objects don't fall through floor -->
-        <a-plane static-body position="0 -0.1 0" id="groundPlane" collision-listener color="#FFAAEE" transparent="true" opacity=".01" height="30" width="30" rotation="-90 0 0"></a-plane>
+        <a-box static-body position="0 -0.01 0" id="groundPlane" color="#FFAAEE" transparent="true" opacity=".01" height="0.01" depth="1000" width="1000"></a-box>
 
         <!-- walls so rolling objects don't roll off edge -->
         <a-box static-body position="-15 1 0" id="border1" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30"></a-box>
