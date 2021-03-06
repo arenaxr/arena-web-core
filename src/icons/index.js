@@ -381,7 +381,7 @@ export class SideMenu {
         const stats = document.createElement('a');
         stats.href = '#';
         stats.innerHTML = 'Toggle Stats';
-        stats.className = 'd-block py-1';
+        stats.className = 'd-block pb-1';
         stats.onclick = function() {
             let sceneEl = document.querySelector('a-scene');
             let statsEl = sceneEl.getAttribute('stats');
