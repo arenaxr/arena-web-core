@@ -339,12 +339,50 @@ export class SideMenu {
         label.style.fontSize = 'medium';
         formDiv.appendChild(label);
 
+        const credits = document.createElement('a');
+        credits.href = '#';
+        credits.innerHTML = 'Scene Credits';
+        credits.className = 'd-block py-1';
+        credits.onclick = function() {
+            settingsPopup.style.display = 'none'; // close settings panel
+            let attrSystem = document.querySelector("a-scene").systems["attribution"];
+            let attrMsgs = [];
+            if (attrSystem) {
+                attrMsgs = attrSystem.getMsgs();
+            }
+            if (attrMsgs.length < 1) {
+                Swal.fire({
+                    title: 'Scene Credits',
+                    text: "Could not find any attributions (did you add an attribution component to models?).",
+                    icon: 'error'
+                  }).then((result) => {
+                    settingsPopup.style.display = 'block'; // show settings panel
+                  });
+                  return;            
+            }
+            let creditsTable='<table>';
+            attrMsgs.forEach(am => {
+                creditsTable += `<tr><td align='left'><small>${am.modelDescription} (id:${am.id})</small></td><td>&nbsp</td><td align='left'><small>${am.message}</small></td></tr>`;
+            });
+            creditsTable+='</table>';
+            Swal.fire({
+              title: 'Scene Credits',
+              html: creditsTable,
+              width: 900,
+              focusConfirm: false,
+              showCancelButton: false,
+              cancelButtonText: 'Cancel'
+            }).then((result) => {
+                settingsPopup.style.display = 'block'; // show settings panel
+            });                      
+        };
+        formDiv.appendChild(credits);
+
         const stats = document.createElement('a');
         stats.href = '#';
         stats.innerHTML = 'Toggle Stats';
-        stats.className = 'd-block py-1';
+        stats.className = 'd-block pb-1';
         stats.onclick = function() {
-            //showPerms();
             let sceneEl = document.querySelector('a-scene');
             let statsEl = sceneEl.getAttribute('stats');
             sceneEl.setAttribute('stats', !statsEl);
