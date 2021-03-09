@@ -185,7 +185,6 @@ export class Arena {
 
         });
 
-
         // load scene
         ARENA.loadSceneOptions();
         ARENA.loadScene();
@@ -342,7 +341,7 @@ export class Arena {
      */
     loadSceneOptions = () => {
         let sceneOptions = {
-            jitsiServer: 'mr.andrew.cmu.edu',
+            jitsiServer: ARENA.defaults.jitsiHost,
         };
 
         // we add all elements to our scene root
