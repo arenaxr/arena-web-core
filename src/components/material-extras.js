@@ -23,12 +23,11 @@ AFRAME.registerComponent('material-extras', {
         this.update();
     },
     update: function(oldData) {
-        console.log(this.data, oldData);
         this.retryIndex = 0;
 
         let transparentOccluder = false;
         if (oldData) transparentOccluder = oldData.transparentOccluder;
-        
+
         if (transparentOccluder !== this.data.transparentOccluder) {
             // a transparent occluder has renderOrder=0 and colorWrite=false
             if (this.data.transparentOccluder == true) {
@@ -40,7 +39,6 @@ AFRAME.registerComponent('material-extras', {
             }
         }
         this.el.object3D.renderOrder=this.data.renderOrder;
-        console.log(this.el.id, this.data.renderOrder, this.el.object3D);
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
         this.updateMaterial();
     },
@@ -63,7 +61,7 @@ AFRAME.registerComponent('material-extras', {
     retryUpdateMaterial() {
         if (this.retryIndex < this.retryTimeouts.length) {
             setTimeout(async () => {
-                console.log('retry!');
+                //console.log('retry!');
                 this.retryIndex++;
                 this.updateMaterial();
             }, this.retryTimeouts[this.retryIndex]); // try again in a bit
