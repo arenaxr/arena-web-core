@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import {ARENAEventEmitter} from './event-emitter.js';
 
 export class ARENAJitsi {
+    static ARENA_APP_ID = 'arena';
     static SCREENSHARE_PREFIX = '#5cr33n5h4r3'; // unique prefix for screenshare clients
     static ARENA_USER = '#4r3n4'; // unique arena client "tag"
     static NEW_USER_TIMEOUT_MS = 2000;
@@ -100,7 +101,7 @@ export class ARENAJitsi {
 
         JitsiMeetJS.init(this.initOptions);
 
-        this.connection = new JitsiMeetJS.JitsiConnection(null, null, this.connectOptions);
+        this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
         this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
             // console.log(`(connection) Dominant Speaker ID: ${id}`),
             this.prevActiveSpeaker = this.activeSpeaker;
