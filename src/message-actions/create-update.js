@@ -13,6 +13,9 @@ const viveControllerPath = {
     viveRight: 'store/models/valve_index_left.gltf',
 };
 
+// default render order of objects; reserve 0 for occlusion
+const RENDER_ORDER = 1;
+
 /**
  * Create/Update object handler
  */
@@ -71,6 +74,9 @@ export class CreateUpdate {
                 addObj = true;
             }
 
+            // set to default render order
+            entityEl.object3D.renderOrder = RENDER_ORDER; 
+            
             // handle attributes of object
             this.setObjectAttributes(entityEl, message);
 
