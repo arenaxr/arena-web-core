@@ -103,11 +103,12 @@ window.setupAV = (callback) => {
 
     /**
      * gUM's specified audio/video devices and passes stream to gotStream.
+     * @param {?event} _evt - Unused positional arg
      * @param {?string} prefAudioInput - preferred audio deviceId
      * @param {?string} prefVideoInput - preferred audio deviceId
      * @return {Promise<MediaStream | void>}
      */
-    function getStream({prefAudioInput, prefVideoInput}) {
+    function getStream(_evt= undefined, {prefAudioInput, prefVideoInput} = {}) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
                 track.stop();
@@ -120,7 +121,13 @@ window.setupAV = (callback) => {
             video: {deviceId: videoSource ? {exact: videoSource} : undefined},
         };
         return navigator.mediaDevices.getUserMedia(constraints).
-            then(gotStream).catch(handleMediaError);
+            then(gotStream).catch((e) => {
+                // Prefer failed, don't popup alert, just fallback to detect-all
+                if (prefAudioInput || prefAudioInput) {
+                    return getStream();
+                }
+                return handleMediaError(e);
+            });
     }
 
     /**
@@ -162,8 +169,8 @@ window.setupAV = (callback) => {
             icon: 'error'});
     }
 
-    const detectDevices = (initial = false) => {
-        const preferredDevices = initial ? {} : {
+    const detectDevices = () => {
+        const preferredDevices = {
             prefAudioInput: localStorage.getItem('prefAudioInput'),
             prefVideoInput: localStorage.getItem('prefVideoInput'),
         };
