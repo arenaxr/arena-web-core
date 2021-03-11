@@ -182,7 +182,7 @@ export class Arena {
             if (ARENA.fixedCamera !== '') {
                 camera.setAttribute('arena-camera', 'vioEnabled', true);
             }
-
+            this.Jitsi = ARENAJitsi.init(this.sceneOptions.jitsiServer);
         });
 
         // load scene
@@ -483,10 +483,7 @@ export class Arena {
         });
         this.chat.start();
 
-        window.setupAV(() => {
-            // initialize Jitsi videoconferencing
-            this.Jitsi = ARENAJitsi.init(this.sceneOptions.jitsiServer);
-        });
+        window.setupAV();
 
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
