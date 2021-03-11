@@ -105,6 +105,7 @@ export class CreateUpdate {
             return;
 
         case 'camera-override':
+            if (id !== ARENA.camName) return; // bail if not for us
             this.handleCameraOverride(action, message);
             return;
 
@@ -343,6 +344,7 @@ export class CreateUpdate {
      */
     static handleCameraOverride(action, message) {
         if (action !== ACTIONS.UPDATE) return; // camera override must be an update
+
         const myCamera = document.getElementById('my-camera');
 
         if (message.data.object_type === 'camera') { // camera override
