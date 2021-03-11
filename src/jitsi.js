@@ -32,15 +32,15 @@ export class ARENAJitsi {
             console.warn("Jitsi is not found!");
             return;
         }
-        this.serverName = jitsiServer;
-
+        this.serverName = jitsiServer; 
+        
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
         this.arenaConferenceName = ARENA.sceneName.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         this.connectOptions = {
             hosts: {
-                domain: this.serverName,
-                muc: 'conference.' + this.serverName, // FIXME: use XEP-0030
+                domain: this.serverName.split(':')[0], //remove port, if exists. 
+                muc: 'conference.' + this.serverName.split(':')[0], // remove port, if exists. FIXME: use XEP-0030
             },
             bosh: '//' + this.serverName + '/http-bind', // FIXME: use xep-0156 for that
 
@@ -100,7 +100,6 @@ export class ARENAJitsi {
         JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
 
         JitsiMeetJS.init(this.initOptions);
-
         this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
         this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
             // console.log(`(connection) Dominant Speaker ID: ${id}`),
