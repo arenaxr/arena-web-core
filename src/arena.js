@@ -184,7 +184,6 @@ export class Arena {
             if (ARENA.fixedCamera !== '') {
                 camera.setAttribute('arena-camera', 'vioEnabled', true);
             }
-
         });
 
         // load scene
@@ -485,7 +484,7 @@ export class Arena {
             // initialize Jitsi videoconferencing
             this.Jitsi = ARENAJitsi.init(this.jitsiHost);
         });
-
+      
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
             const displayBbox = false;
