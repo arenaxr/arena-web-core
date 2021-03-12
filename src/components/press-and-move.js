@@ -9,6 +9,7 @@ AFRAME.registerComponent('press-and-move', {
         speed: {type: 'number', default: 5.0},
     },
     init: function() {
+        console.log('press-and-move', 'init');
         this.timer = null;
         this.drag = false;
         this.longTouch = false;
@@ -17,7 +18,7 @@ AFRAME.registerComponent('press-and-move', {
 
         const self = this;
         window.addEventListener('touchstart', function(evt) {
-            evt.preventDefault();
+            //evt.preventDefault();
             if (!self.timer) {
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;

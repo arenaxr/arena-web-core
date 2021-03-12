@@ -5,6 +5,7 @@ AFRAME.registerComponent('gesture-detector', {
 
     init: function() {
         console.log('gesture-detector', 'init');
+        //const self = this;
 
         this.internalState = {
             previousState: null,
@@ -12,20 +13,20 @@ AFRAME.registerComponent('gesture-detector', {
 
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
 
-        this.el.addEventListener('touchstart', this.emitGestureEvent);
+        window.addEventListener('touchstart', this.emitGestureEvent);
 
-        this.el.addEventListener('touchend', this.emitGestureEvent);
+        window.addEventListener('touchend', this.emitGestureEvent);
 
-        this.el.addEventListener('touchmove', this.emitGestureEvent);
+        window.addEventListener('touchmove', this.emitGestureEvent);
     },
 
     remove: function() {
         console.log('gesture-detector', 'remove');
-        this.el.removeEventListener('touchstart', this.emitGestureEvent);
+        window.removeEventListener('touchstart', this.emitGestureEvent);
 
-        this.el.removeEventListener('touchend', this.emitGestureEvent);
+        window.removeEventListener('touchend', this.emitGestureEvent);
 
-        this.el.removeEventListener('touchmove', this.emitGestureEvent);
+        window.removeEventListener('touchmove', this.emitGestureEvent);
     },
 
     emitGestureEvent(event) {
