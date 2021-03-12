@@ -2,19 +2,9 @@
 // Based off https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
 
 AFRAME.registerComponent('gesture-detector', {
-    schema: {
-        element: {
-            default: '',
-        },
-    },
 
     init: function() {
-        this.targetElement =
-            this.data.element && document.querySelector(this.data.element);
-
-        if (!this.targetElement) {
-            this.targetElement = this.el;
-        }
+        console.log('gesture-detector', 'init');
 
         this.internalState = {
             previousState: null,
@@ -22,19 +12,20 @@ AFRAME.registerComponent('gesture-detector', {
 
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
 
-        this.targetElement.addEventListener('touchstart', this.emitGestureEvent);
+        this.el.addEventListener('touchstart', this.emitGestureEvent);
 
-        this.targetElement.addEventListener('touchend', this.emitGestureEvent);
+        this.el.addEventListener('touchend', this.emitGestureEvent);
 
-        this.targetElement.addEventListener('touchmove', this.emitGestureEvent);
+        this.el.addEventListener('touchmove', this.emitGestureEvent);
     },
 
     remove: function() {
-        this.targetElement.removeEventListener('touchstart', this.emitGestureEvent);
+        console.log('gesture-detector', 'remove');
+        this.el.removeEventListener('touchstart', this.emitGestureEvent);
 
-        this.targetElement.removeEventListener('touchend', this.emitGestureEvent);
+        this.el.removeEventListener('touchend', this.emitGestureEvent);
 
-        this.targetElement.removeEventListener('touchmove', this.emitGestureEvent);
+        this.el.removeEventListener('touchmove', this.emitGestureEvent);
     },
 
     emitGestureEvent(event) {
@@ -52,15 +43,37 @@ AFRAME.registerComponent('gesture-detector', {
         const gestureStarted = currentState && !gestureContinues;
 
         if (gestureEnded) {
+            console.log('gesture-detector', 'gestureEnded');
             const eventName =
                 this.getEventPrefix(previousState.touchCount) + 'fingerend';
 
-            this.el.emit(eventName, previousState);
+            //this.el.emit(eventName, previousState);
+            // do not emit touch move locally, send through MQTT
+
+            const camera = document.getElementById('my-camera');
+            const position = camera.getAttribute('position');
+
+            const clickPos = ARENAUtils.vec3ToObject(position);
+
+            // generated finger move
+            const thisMsg = {
+                object_id: this.id,
+                action: 'clientEvent',
+                type: eventName,
+                data: {
+                    clickPos: clickPos,
+                    positionChange: previousState,
+                    source: ARENA.camName,
+                },
+            };
+            // publishing events attached to user id objects allows sculpting security
+            ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
 
             this.internalState.previousState = null;
         }
 
         if (gestureStarted) {
+            console.log('gesture-detector', 'gestureStarted');
             currentState.startTime = performance.now();
 
             currentState.startPosition = currentState.position;
@@ -70,12 +83,33 @@ AFRAME.registerComponent('gesture-detector', {
             const eventName =
                 this.getEventPrefix(currentState.touchCount) + 'fingerstart';
 
-            this.el.emit(eventName, currentState);
+            //this.el.emit(eventName, currentState);
+            // do not emit touch move locally, send through MQTT
+
+            const camera = document.getElementById('my-camera');
+            const position = camera.getAttribute('position');
+
+            const clickPos = ARENAUtils.vec3ToObject(position);
+
+            // generated finger move
+            const thisMsg = {
+                object_id: this.id,
+                action: 'clientEvent',
+                type: eventName,
+                data: {
+                    clickPos: clickPos,
+                    positionChange: currentState,
+                    source: ARENA.camName,
+                },
+            };
+            // publishing events attached to user id objects allows sculpting security
+            ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
 
             this.internalState.previousState = currentState;
         }
 
         if (gestureContinues) {
+            console.log('gesture-detector', 'gestureContinues');
             const eventDetail = {
                 positionChange: {
                     x: currentState.position.x - previousState.position.x,
@@ -113,7 +147,7 @@ AFRAME.registerComponent('gesture-detector', {
                 type: eventName,
                 data: {
                     clickPos: clickPos,
-                    positionChange: eventDetail.positionChange,
+                    positionChange: eventDetail,
                     source: ARENA.camName,
                 },
             };
