@@ -1,6 +1,8 @@
 // Component that detects and emits events for touch gestures
 // Based off https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
 
+import {ARENAUtils} from '../utils.js';
+
 AFRAME.registerComponent('gesture-detector', {
 
     init: function() {
