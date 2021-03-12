@@ -15,25 +15,25 @@ AFRAME.registerComponent('gesture-detector', {
 
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
 
-        //window.addEventListener('touchstart', this.emitGestureEvent);
-        //window.addEventListener('touchend', this.emitGestureEvent);
-        //window.addEventListener('touchmove', this.emitGestureEvent);
+        window.addEventListener('touchstart', this.emitGestureEvent);
+        window.addEventListener('touchend', this.emitGestureEvent);
+        window.addEventListener('touchmove', this.emitGestureEvent);
 
-        window.addEventListener('pointerstart', this.emitGestureEvent);
-        window.addEventListener('pointerend', this.emitGestureEvent);
-        window.addEventListener('pointermove', this.emitGestureEvent);
+        // window.addEventListener('pointerstart', this.emitGestureEvent);
+        // window.addEventListener('pointerend', this.emitGestureEvent);
+        // window.addEventListener('pointermove', this.emitGestureEvent);
     },
 
     remove: function() {
         console.log('gesture-detector', 'remove');
 
-        //window.removeEventListener('touchstart', this.emitGestureEvent);
-        //window.removeEventListener('touchend', this.emitGestureEvent);
-        //window.removeEventListener('touchmove', this.emitGestureEvent);
+        window.removeEventListener('touchstart', this.emitGestureEvent);
+        window.removeEventListener('touchend', this.emitGestureEvent);
+        window.removeEventListener('touchmove', this.emitGestureEvent);
 
-        window.removeEventListener('pointerstart', this.emitGestureEvent);
-        window.removeEventListener('pointerend', this.emitGestureEvent);
-        window.removeEventListener('pointermove', this.emitGestureEvent);
+        // window.removeEventListener('pointerstart', this.emitGestureEvent);
+        // window.removeEventListener('pointerend', this.emitGestureEvent);
+        // window.removeEventListener('pointermove', this.emitGestureEvent);
     },
 
     emitGestureEvent(event) {
