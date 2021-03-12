@@ -70,7 +70,7 @@ AFRAME.registerComponent('gesture-detector', {
                 type: eventName,
                 data: {
                     clickPos: clickPos,
-                    positionChange: previousState,
+                    ...previousState,
                     source: ARENA.camName,
                 },
             };
@@ -106,7 +106,7 @@ AFRAME.registerComponent('gesture-detector', {
                 type: eventName,
                 data: {
                     clickPos: clickPos,
-                    positionChange: currentState,
+                    ...currentState,
                     source: ARENA.camName,
                 },
             };
@@ -121,7 +121,6 @@ AFRAME.registerComponent('gesture-detector', {
             const eventDetail = {
                 positionChange: {
                     x: currentState.position.x - previousState.position.x,
-
                     y: currentState.position.y - previousState.position.y,
                 },
             };
@@ -131,11 +130,9 @@ AFRAME.registerComponent('gesture-detector', {
             }
 
             // Update state with new data
-
             Object.assign(previousState, currentState);
 
             // Add state data to event detail
-
             Object.assign(eventDetail, previousState);
 
             const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
@@ -155,7 +152,7 @@ AFRAME.registerComponent('gesture-detector', {
                 type: eventName,
                 data: {
                     clickPos: clickPos,
-                    positionChange: eventDetail,
+                    ...eventDetail,
                     source: ARENA.camName,
                 },
             };
@@ -170,7 +167,6 @@ AFRAME.registerComponent('gesture-detector', {
         }
 
         // Convert event.touches to an array so we can use reduce
-
         const touchList = [];
 
         for (let i = 0; i < event.touches.length; i++) {
@@ -182,7 +178,6 @@ AFRAME.registerComponent('gesture-detector', {
         };
 
         // Calculate center of all current touches
-
         const centerPositionRawX =
             touchList.reduce((sum, touch) => sum + touch.clientX, 0) /
             touchList.length;
@@ -197,7 +192,6 @@ AFRAME.registerComponent('gesture-detector', {
         };
 
         // Scale touch position and spread by average of window dimensions
-
         const screenScale = 2 / (window.innerWidth + window.innerHeight);
 
         touchState.position = {
@@ -206,7 +200,6 @@ AFRAME.registerComponent('gesture-detector', {
         };
 
         // Calculate average spread of touches from the center point
-
         if (touchList.length >= 2) {
             const spread =
                 touchList.reduce((sum, touch) => {
