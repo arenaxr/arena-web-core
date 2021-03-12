@@ -65,7 +65,7 @@ AFRAME.registerComponent('gesture-detector', {
 
             // generated finger move
             const thisMsg = {
-                object_id: this.id,
+                object_id: 'my-camera',
                 action: 'clientEvent',
                 type: eventName,
                 data: {
@@ -101,7 +101,7 @@ AFRAME.registerComponent('gesture-detector', {
 
             // generated finger move
             const thisMsg = {
-                object_id: this.id,
+                object_id: 'my-camera',
                 action: 'clientEvent',
                 type: eventName,
                 data: {
@@ -150,7 +150,7 @@ AFRAME.registerComponent('gesture-detector', {
 
             // generated finger move
             const thisMsg = {
-                object_id: this.id,
+                object_id: 'my-camera',
                 action: 'clientEvent',
                 type: eventName,
                 data: {
