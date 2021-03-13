@@ -100,6 +100,7 @@ export class ARENAJitsi {
         JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
 
         JitsiMeetJS.init(this.initOptions);
+        console.info("Jitsi, connecting:", this.connectOptions);
         this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
         this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
             // console.log(`(connection) Dominant Speaker ID: ${id}`),
