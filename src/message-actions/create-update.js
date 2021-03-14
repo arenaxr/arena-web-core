@@ -163,8 +163,14 @@ export class CreateUpdate {
         case 'gltf-model':
             // gltf-model from data.url
             if (data.hasOwnProperty('url')) {
-                const url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
-                entityEl.setAttribute('gltf-model', url);
+//                const url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
+                entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.url));
+                delete data.url; // remove attribute so we don't set it later
+            }
+            // gltf-model from data.src
+            if (data.hasOwnProperty('src')) {
+                entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.src));
+                delete data.src; // remove attribute so we don't set it later
             }
             // add load event listners
             entityEl.addEventListener('model-progress', (evt) => {
@@ -174,7 +180,6 @@ export class CreateUpdate {
                 GLTFProgress.updateProgress(true, evt);
             });
 
-            delete data.url; // remove attribute so we don't set it later
             break;
         case 'headtext':
             // handle changes to other users head text
@@ -187,15 +192,18 @@ export class CreateUpdate {
             // TODO: create an aframe component for this
             entityEl.setAttribute('geometry', 'primitive', 'plane');
             if (data.hasOwnProperty('url')) {
-                const url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
-                entityEl.setAttribute('material', 'src', url); // image src from url
-                if (!data.hasOwnProperty('material-extras')) {
-                    // default images to sRGBEncoding, if not specified
-                    entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-                    entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
-                }
+                entityEl.setAttribute('material', 'src', this.crossOriginDropboxSrc(data.url)); // image src from url
+                delete data.url;
             }
-            delete data.url;
+            if (data.hasOwnProperty('src')) {
+                entityEl.setAttribute('material', 'src', this.crossOriginDropboxSrc(data.src)); // image src from url
+                delete data.src;
+            }
+            if (!data.hasOwnProperty('material-extras')) {
+                // default images to sRGBEncoding, if not specified
+                entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+                entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
+            }
             delete data.image;
             break;
         case 'text':
@@ -299,7 +307,7 @@ export class CreateUpdate {
      */
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
-            // console.info("Set entity attribute [id type -  attr value]:", message.id, type, attribute, value);
+            //console.info("Set entity attribute [id type -  attr value]:", entityEl.getAttribute('id'), attribute, value);
 
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
@@ -327,6 +335,11 @@ export class CreateUpdate {
             case 'ttl':
                 // ttl is applied to property 'seconds' of ttl component
                 entityEl.setAttribute('ttl', {seconds: value});
+            case 'material':
+            case 'sound':
+                if (value.hasOwnProperty('src')) {
+                    value.src = this.crossOriginDropboxSrc(value.src);
+                }
             default:
                 // all other attributes are pushed directly to aframe
                 if (value === null) { // if null, remove attribute
@@ -339,7 +352,18 @@ export class CreateUpdate {
     }
 
     /**
+     * Replace dropbox link to dl.dropboxusercontent, which 
+     * supports crossOrigin content
+     * @param {string} src message to be parsed
+     * @return {string} new valur
+     */
+    static crossOriginDropboxSrc(src) {
+        return src.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
+    }
+
+    /**
      * Camera override handler
+     * @param {string} action message action
      * @param {object} message message to be parsed
      */
     static handleCameraOverride(action, message) {

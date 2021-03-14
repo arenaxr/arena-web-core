@@ -741,7 +741,6 @@
             "required": [
                 "object_type",
                 "url",
-                "legacyLoader",
                 "position",
                 "rotation",
                 "scale"

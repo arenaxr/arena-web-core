@@ -16,7 +16,6 @@ AFRAME.registerSystem('attribution', {
     schema: {},
     init: function() {
         this.entities = [];
-        console.log('System init');
     },
     registerComponent: function(el) {
         this.entities.push(el);
