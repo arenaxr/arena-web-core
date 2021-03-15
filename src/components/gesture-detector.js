@@ -17,12 +17,19 @@ AFRAME.registerComponent('gesture-detector', {
 
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
 
+        window.addEventListener('mouseup', function() {console.log('mouseup')});
+        window.addEventListener('mousedown', function() {console.log('mousedown')});
+        window.addEventListener('mousemove', function() {console.log('mousemove')});
+
         window.addEventListener('touchstart', function() {console.log('touchstart')});
         window.addEventListener('touchend', function() {console.log('touchend')});
         window.addEventListener('touchmove', function() {console.log('touchmove')});
+
         window.addEventListener('pointerstart', function() {console.log('pointerstart')});
         window.addEventListener('pointerend', function() {console.log('pointerend')});
         window.addEventListener('pointermove', function() {console.log('pointermove')});
+        window.addEventListener('pointerdown', function() {console.log('pointerdown')});
+        window.addEventListener('pointerup', function() {console.log('pointerup')});
 
         // window.addEventListener('touchstart', this.emitGestureEvent);
         // window.addEventListener('touchend', this.emitGestureEvent);
