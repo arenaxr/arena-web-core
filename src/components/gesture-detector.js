@@ -17,9 +17,16 @@ AFRAME.registerComponent('gesture-detector', {
 
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
 
-        window.addEventListener('touchstart', this.emitGestureEvent);
-        window.addEventListener('touchend', this.emitGestureEvent);
-        window.addEventListener('touchmove', this.emitGestureEvent);
+        window.addEventListener('touchstart', function() {console.log('touchstart')});
+        window.addEventListener('touchend', function() {console.log('touchend')});
+        window.addEventListener('touchmove', function() {console.log('touchmove')});
+        window.addEventListener('pointerstart', function() {console.log('pointerstart')});
+        window.addEventListener('pointerend', function() {console.log('pointerend')});
+        window.addEventListener('pointermove', function() {console.log('pointermove')});
+
+        // window.addEventListener('touchstart', this.emitGestureEvent);
+        // window.addEventListener('touchend', this.emitGestureEvent);
+        // window.addEventListener('touchmove', this.emitGestureEvent);
 
         // window.addEventListener('pointerstart', this.emitGestureEvent);
         // window.addEventListener('pointerend', this.emitGestureEvent);
@@ -29,9 +36,9 @@ AFRAME.registerComponent('gesture-detector', {
     remove: function() {
         console.log('gesture-detector', 'remove');
 
-        window.removeEventListener('touchstart', this.emitGestureEvent);
-        window.removeEventListener('touchend', this.emitGestureEvent);
-        window.removeEventListener('touchmove', this.emitGestureEvent);
+        // window.removeEventListener('touchstart', this.emitGestureEvent);
+        // window.removeEventListener('touchend', this.emitGestureEvent);
+        // window.removeEventListener('touchmove', this.emitGestureEvent);
 
         // window.removeEventListener('pointerstart', this.emitGestureEvent);
         // window.removeEventListener('pointerend', this.emitGestureEvent);
