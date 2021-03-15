@@ -9,7 +9,6 @@ import {ARENAUtils} from '../utils.js';
 AFRAME.registerComponent('click-listener', {
     // listen for clicks, call defined function on event evt
     init: function() {
-        console.log('click-listener', 'init');
         const self = this;
 
         this.el.addEventListener('mousedown', function(evt) {

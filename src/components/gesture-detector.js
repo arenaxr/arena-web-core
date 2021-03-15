@@ -3,57 +3,37 @@
 
 // TODO: Needs refactoring to measure tick counts, and reasonable publish rates
 
-import {ARENAUtils} from '../utils.js';
+import {
+    ARENAUtils
+} from '../utils.js';
 
 AFRAME.registerComponent('gesture-detector', {
 
     init: function() {
-        console.log('gesture-detector', 'init');
-        //const self = this;
-
         this.internalState = {
             previousState: null,
         };
 
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
 
-        window.addEventListener('mouseup', function() {console.log('mouseup')});
-        window.addEventListener('mousedown', function() {console.log('mousedown')});
-        window.addEventListener('mousemove', function() {console.log('mousemove')});
-
-        window.addEventListener('touchstart', function() {console.log('touchstart')});
-        window.addEventListener('touchend', function() {console.log('touchend')});
-        window.addEventListener('touchmove', function() {console.log('touchmove')});
-
-        window.addEventListener('pointerstart', function() {console.log('pointerstart')});
-        window.addEventListener('pointerend', function() {console.log('pointerend')});
-        window.addEventListener('pointermove', function() {console.log('pointermove')});
-        window.addEventListener('pointerdown', function() {console.log('pointerdown')});
-        window.addEventListener('pointerup', function() {console.log('pointerup')});
-
-        // window.addEventListener('touchstart', this.emitGestureEvent);
-        // window.addEventListener('touchend', this.emitGestureEvent);
-        // window.addEventListener('touchmove', this.emitGestureEvent);
-
-        // window.addEventListener('pointerstart', this.emitGestureEvent);
-        // window.addEventListener('pointerend', this.emitGestureEvent);
-        // window.addEventListener('pointermove', this.emitGestureEvent);
+        window.addEventListener('touchstart', this.emitGestureEvent);
+        window.addEventListener('touchend', this.emitGestureEvent);
+        window.addEventListener('touchmove', this.emitGestureEvent);
     },
 
     remove: function() {
-        console.log('gesture-detector', 'remove');
-
-        // window.removeEventListener('touchstart', this.emitGestureEvent);
-        // window.removeEventListener('touchend', this.emitGestureEvent);
-        // window.removeEventListener('touchmove', this.emitGestureEvent);
-
-        // window.removeEventListener('pointerstart', this.emitGestureEvent);
-        // window.removeEventListener('pointerend', this.emitGestureEvent);
-        // window.removeEventListener('pointermove', this.emitGestureEvent);
+        window.removeEventListener('touchstart', this.emitGestureEvent);
+        window.removeEventListener('touchend', this.emitGestureEvent);
+        window.removeEventListener('touchmove', this.emitGestureEvent);
     },
 
     emitGestureEvent(event) {
         const currentState = this.getTouchState(event);
+
+        // only send MQTT clientEvent for 2+ finger touches to avoid 1-finger common touch press-and-move
+        if (currentState.touchCount < 2) {
+            return;
+        }
 
         const previousState = this.internalState.previousState;
 
@@ -67,25 +47,22 @@ AFRAME.registerComponent('gesture-detector', {
         const gestureStarted = currentState && !gestureContinues;
 
         if (gestureEnded) {
-            console.log('gesture-detector', 'gestureEnded');
             const eventName =
                 this.getEventPrefix(previousState.touchCount) + 'fingerend';
 
-            //this.el.emit(eventName, previousState);
-            // do not emit touch move locally, send through MQTT
-
+            // send through MQTT
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
-
             const clickPos = ARENAUtils.vec3ToObject(position);
 
             // generated finger move
             const thisMsg = {
-                object_id: 'my-camera',
+                object_id: 'my-camera', //object_id: this.id,
                 action: 'clientEvent',
                 type: eventName,
                 data: {
                     clickPos: clickPos,
+                    //position: previousState.position,
                     ...previousState,
                     source: ARENA.camName,
                 },
@@ -97,7 +74,6 @@ AFRAME.registerComponent('gesture-detector', {
         }
 
         if (gestureStarted) {
-            console.log('gesture-detector', 'gestureStarted');
             currentState.startTime = performance.now();
 
             currentState.startPosition = currentState.position;
@@ -107,21 +83,19 @@ AFRAME.registerComponent('gesture-detector', {
             const eventName =
                 this.getEventPrefix(currentState.touchCount) + 'fingerstart';
 
-            //this.el.emit(eventName, currentState);
-            // do not emit touch move locally, send through MQTT
-
+            // send through MQTT
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
-
             const clickPos = ARENAUtils.vec3ToObject(position);
 
             // generated finger move
             const thisMsg = {
-                object_id: 'my-camera',
+                object_id: 'my-camera', //object_id: this.id,
                 action: 'clientEvent',
                 type: eventName,
                 data: {
                     clickPos: clickPos,
+                    //position: currentState.position,
                     ...currentState,
                     source: ARENA.camName,
                 },
@@ -133,7 +107,6 @@ AFRAME.registerComponent('gesture-detector', {
         }
 
         if (gestureContinues) {
-            console.log('gesture-detector', 'gestureContinues');
             const eventDetail = {
                 positionChange: {
                     x: currentState.position.x - previousState.position.x,
@@ -153,21 +126,19 @@ AFRAME.registerComponent('gesture-detector', {
 
             const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
 
-            // this.el.emit(eventName, eventDetail);
-            // do not emit touch move locally, send through MQTT
-
+            // send through MQTT
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');
-
             const clickPos = ARENAUtils.vec3ToObject(position);
 
             // generated finger move
             const thisMsg = {
-                object_id: 'my-camera',
+                object_id: 'my-camera', //object_id: this.id,
                 action: 'clientEvent',
                 type: eventName,
                 data: {
                     clickPos: clickPos,
+                    //position: eventDetail.position,
                     ...eventDetail,
                     source: ARENA.camName,
                 },
