@@ -35,10 +35,12 @@ export class Arena {
         this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if URL parameter not given
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
         if (this.startCoords) this.startCoords = this.startCoords.replace(/,/g, ' ');
+        this.jitsiHost = this.defaults.jitsiHost;
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         this.clientCoords = ARENAUtils.getLocation();
+        this.maxAVDist = 20;
 
         // set scene name from url
         this.setSceneName();
@@ -182,7 +184,6 @@ export class Arena {
             if (ARENA.fixedCamera !== '') {
                 camera.setAttribute('arena-camera', 'vioEnabled', true);
             }
-            this.Jitsi = ARENAJitsi.init(this.sceneOptions.jitsiServer);
         });
 
         // load scene
@@ -340,10 +341,8 @@ export class Arena {
      * Loads and applies scene-options (if it exists), otherwise set to default environment
      */
     loadSceneOptions = () => {
-        let sceneOptions = {
-            jitsiServer: ARENA.defaults.jitsiHost,
-        };
-
+        let sceneOptions;
+        
         // we add all elements to our scene root
         const sceneRoot = document.getElementById('sceneRoot');
 
@@ -413,8 +412,6 @@ export class Arena {
                 }
             }
 
-            this.maxAVDist = this.maxAVDist ? this.maxAVDist : 20;
-
             this.sceneOptions = sceneOptions;
         };
     };
@@ -483,8 +480,11 @@ export class Arena {
         });
         this.chat.start();
 
-        window.setupAV();
-
+        window.setupAV(() => {
+            // initialize Jitsi videoconferencing
+            this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+        });
+      
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
             const displayBbox = false;

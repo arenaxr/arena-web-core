@@ -241,7 +241,9 @@ export class SideMenu {
                             const camera = document.getElementById('my-camera');
                             const screenshareWindow = window.open('./screenshare', '_blank');
                             screenshareWindow.params = {
-                                jitsiURL: ARENA.Jitsi.serverName,
+                                connectOptions: ARENA.Jitsi.connectOptions,
+                                appID: ARENAJitsi.ARENA_APP_ID,
+                                token: ARENA.mqttToken,
                                 screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,
                                 conferenceName: ARENA.Jitsi.arenaConferenceName,
                                 displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
