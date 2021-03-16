@@ -9,6 +9,7 @@ import {
  * https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
  */
 AFRAME.registerComponent('gesture-detector', {
+    // Without throttling, touchmove publishes at ~20ms
     schema: {
         publishRateMs: {
             default: 200,
@@ -51,8 +52,8 @@ AFRAME.registerComponent('gesture-detector', {
 
         if (gestureStarted) {
             currentState.startTime = performance.now();
-            currentState.startPosition = currentState.position;
-            currentState.startSpread = currentState.spread;
+            currentState.positionStart = currentState.position;
+            currentState.spreadStart = currentState.spread;
             const eventName = this.getEventPrefix(currentState.touchCount) + 'fingerstart';
             if (!this.internalState.timer) {
                 this.internalState.timer = window.setTimeout(() => {
