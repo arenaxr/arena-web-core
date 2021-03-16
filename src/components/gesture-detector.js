@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 import {
-    ARENAUtils
+    ARENAUtils,
 } from '../utils.js';
 
 /**
@@ -9,10 +9,17 @@ import {
  * https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
  */
 AFRAME.registerComponent('gesture-detector', {
+    // Without throttling, touchmove publishes at ~20ms
+    schema: {
+        publishRateMs: {
+            default: 200,
+        },
+    },
 
     init: function() {
         this.internalState = {
             previousState: null,
+            timer: null,
         };
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
         window.addEventListener('touchstart', this.emitGestureEvent);
@@ -36,14 +43,23 @@ AFRAME.registerComponent('gesture-detector', {
         if (gestureEnded) {
             const eventName = this.getEventPrefix(previousState.touchCount) + 'fingerend';
             this.sendGesture(eventName, previousState);
+            if (this.internalState.timer) {
+                clearTimeout(this.internalState.timer);
+                this.internalState.timer = null;
+            }
             this.internalState.previousState = null;
         }
 
         if (gestureStarted) {
             currentState.startTime = performance.now();
-            currentState.startPosition = currentState.position;
-            currentState.startSpread = currentState.spread;
+            currentState.positionStart = currentState.position;
+            currentState.spreadStart = currentState.spread;
             const eventName = this.getEventPrefix(currentState.touchCount) + 'fingerstart';
+            if (!this.internalState.timer) {
+                this.internalState.timer = window.setTimeout(() => {
+                    this.internalState.timer = null;
+                }, this.data.publishRateMs);
+            }
             this.sendGesture(eventName, currentState);
             this.internalState.previousState = currentState;
         }
@@ -63,8 +79,14 @@ AFRAME.registerComponent('gesture-detector', {
             // Add state data to event detail
             Object.assign(eventDetail, previousState);
 
-            const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
-            this.sendGesture(eventName, eventDetail);
+            if (!this.internalState.timer) { // throttle publish to publishRateMs
+                const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
+                this.sendGesture(eventName, eventDetail);
+
+                this.internalState.timer = window.setTimeout(() => {
+                    this.internalState.timer = null;
+                }, this.data.publishRateMs);
+            }
         }
     },
 
@@ -135,7 +157,16 @@ AFRAME.registerComponent('gesture-detector', {
             data: {
                 clickPos: clickPos,
                 source: ARENA.camName,
-                ...eventDetail, // cast in position, positionChange, spreadChange
+                position: {
+                    x: parseFloat(eventDetail.position.x.toFixed(5)),
+                    y: parseFloat(eventDetail.position.y.toFixed(5)),
+                },
+                positionStart: {
+                    x: parseFloat(eventDetail.positionStart.x.toFixed(5)),
+                    y: parseFloat(eventDetail.positionStart.y.toFixed(5)),
+                },
+                spread: parseFloat(eventDetail.spread.toFixed(5)),
+                spreadStart: parseFloat(eventDetail.spreadStart.toFixed(5)),
             },
         };
         // publishing events attached to user id objects allows sculpting security

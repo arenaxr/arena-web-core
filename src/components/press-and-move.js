@@ -18,7 +18,7 @@ AFRAME.registerComponent('press-and-move', {
         const self = this;
         window.addEventListener('touchstart', function(evt) {
             evt.preventDefault();
-            if (!self.timer) {
+            if (!self.timer && evt.touches.length == 1) { // let gesture-detector handle 2+ touches
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;
                 }, 750); // press for 750ms counts as long press
