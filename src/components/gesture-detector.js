@@ -90,7 +90,6 @@ AFRAME.registerComponent('gesture-detector', {
 
         // Scale touch position and spread by average of window dimensions
         const screenScale = 2 / (window.innerWidth + window.innerHeight);
-
         touchState.position = {
             x: centerPositionRawX * screenScale,
             y: centerPositionRawY * screenScale,
@@ -123,7 +122,6 @@ AFRAME.registerComponent('gesture-detector', {
         if (eventDetail.touchCount < 2) {
             return;
         }
-
         // send through MQTT
         const camera = document.getElementById('my-camera');
         const position = camera.getAttribute('position');
@@ -131,25 +129,15 @@ AFRAME.registerComponent('gesture-detector', {
 
         // generated finger move
         const thisMsg = {
-            object_id: 'my-camera', //object_id: this.id,
+            object_id: 'my-camera',
             action: 'clientEvent',
             type: eventName,
             data: {
                 clickPos: clickPos,
-                position: eventDetail.positionRaw,
-                //...eventDetail,
                 source: ARENA.camName,
+                ...eventDetail, // cast in position, positionChange, spreadChange
             },
         };
-        if (eventDetail.positionChange) {
-            thisMsg.data.positionChange = eventDetail.positionChange;
-        }
-        if (eventDetail.spreadChange) {
-            thisMsg.data.spreadChange = eventDetail.spreadChange;
-        }
-        if (eventDetail.spreadChange) {
-            thisMsg.data.spreadChange = eventDetail.spreadChange;
-        }
         // publishing events attached to user id objects allows sculpting security
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
     },
