@@ -299,12 +299,12 @@
           "type":"object",
           "title":"Scene Options",
           "properties":{
-             "jitsiServer":{
+             "jitsiHost":{
                 "type":"string",
-                "title":"Scene Jitsi Server",
+                "title":"Scene Jitsi Host",
                 "description":"Jitsi host used for this scene.",
                 "minLength":5,
-                "default":"mr.andrew.cmu.edu"
+                "default":"jitsi0.andrew.cmu.edu:8443"
              },
              "screenshare":{
                 "type":"string",

@@ -1,20 +1,10 @@
-/* global $, JitsiMeetJS */
+/* global $, JitsiMeetJS */ 
 
 if (!window.params) window.close();
-const jitsiServer = window.params.jitsiURL;
-if (!jitsiServer) window.close();
 
-const options = {
-    hosts: {
-        domain: jitsiServer,
-        muc: 'conference.' + jitsiServer, // FIXME: use XEP-0030
-    },
-    bosh: '//' + jitsiServer + '/http-bind', // FIXME: use xep-0156 for that
-
-    // The name of client node advertised in XEP-0115 'c' stanza
-    clientNode: 'http://jitsi.org/jitsimeet',
-};
-
+const options = window.params.connectOptions;
+const appID = window.params.appID;
+const token = window.params.token;
 const confOptions = {
     openBridgeChannel: true,
 };
@@ -170,7 +160,7 @@ const initOptions = {
 
 JitsiMeetJS.init(initOptions);
 
-connection = new JitsiMeetJS.JitsiConnection(null, null, options);
+connection = new JitsiMeetJS.JitsiConnection(appID, token, options);
 
 connection.addEventListener(
     JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
