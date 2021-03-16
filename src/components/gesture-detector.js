@@ -144,11 +144,13 @@ AFRAME.registerComponent('gesture-detector', {
                     x: parseFloat(eventDetail.position.x.toFixed(5)),
                     y: parseFloat(eventDetail.position.y.toFixed(5)),
                 },
+                positionStart: {
+                    x: parseFloat(eventDetail.positionStart.x.toFixed(5)),
+                    y: parseFloat(eventDetail.positionStart.y.toFixed(5)),
+                },
+                spread: parseFloat(eventDetail.spread.toFixed(5)),
+                spreadStart: parseFloat(eventDetail.spreadStart.toFixed(5)),
             },
-        };
-        if (eventDetail.positionChange) {
-            thisMsg.data.positionChange.x = parseFloat(eventDetail.positionChange.x.toFixed(5));
-            thisMsg.data.positionChange.y = parseFloat(eventDetail.positionChange.y.toFixed(5));
         };
         // publishing events attached to user id objects allows sculpting security
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
