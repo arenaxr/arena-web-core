@@ -18,6 +18,7 @@ AFRAME.registerComponent('gesture-detector', {
     init: function() {
         this.internalState = {
             previousState: null,
+            timer: null,
         };
         this.emitGestureEvent = this.emitGestureEvent.bind(this);
         window.addEventListener('touchstart', this.emitGestureEvent);
@@ -41,6 +42,10 @@ AFRAME.registerComponent('gesture-detector', {
         if (gestureEnded) {
             const eventName = this.getEventPrefix(previousState.touchCount) + 'fingerend';
             this.sendGesture(eventName, previousState);
+            if (this.internalState.timer) {
+                clearTimeout(this.internalState.timer);
+                this.internalState.timer = null;
+            }
             this.internalState.previousState = null;
         }
 
@@ -49,6 +54,11 @@ AFRAME.registerComponent('gesture-detector', {
             currentState.startPosition = currentState.position;
             currentState.startSpread = currentState.spread;
             const eventName = this.getEventPrefix(currentState.touchCount) + 'fingerstart';
+            if (!this.internalState.timer) {
+                this.internalState.timer = window.setTimeout(() => {
+                    this.internalState.timer = null;
+                }, this.data.publishRateMs);
+            }
             this.sendGesture(eventName, currentState);
             this.internalState.previousState = currentState;
         }
@@ -68,8 +78,14 @@ AFRAME.registerComponent('gesture-detector', {
             // Add state data to event detail
             Object.assign(eventDetail, previousState);
 
-            const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
-            this.sendGesture(eventName, eventDetail);
+            if (!this.internalState.timer) { // throttle publish to publishRateMs
+                const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
+                this.sendGesture(eventName, eventDetail);
+
+                this.internalState.timer = window.setTimeout(() => {
+                    this.internalState.timer = null;
+                }, this.data.publishRateMs);
+            }
         }
     },
 
