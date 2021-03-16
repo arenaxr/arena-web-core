@@ -18,6 +18,9 @@ AFRAME.registerComponent('press-and-move', {
         const self = this;
         window.addEventListener('touchstart', function(evt) {
             evt.preventDefault();
+            if (evt.touches.length > 1) {
+                return; // let gesture-detector handle 2+ touches
+            }
             if (!self.timer) {
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;
@@ -25,6 +28,9 @@ AFRAME.registerComponent('press-and-move', {
             }
         });
         window.addEventListener('touchend', function(evt) {
+            if (evt.touches.length > 1) {
+                return; // let gesture-detector handle 2+ touches
+            }
             if (self.timer) {
                 clearTimeout(self.timer);
                 self.timer = null;
@@ -33,6 +39,9 @@ AFRAME.registerComponent('press-and-move', {
             self.drag = false;
         });
         window.addEventListener('touchmove', function(evt) {
+            if (evt.touches.length > 1) {
+                return; // let gesture-detector handle 2+ touches
+            }
             // self.drag = true; // might be better without drag detection
         });
     },

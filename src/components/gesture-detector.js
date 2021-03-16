@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 import {
-    ARENAUtils
+    ARENAUtils,
 } from '../utils.js';
 
 /**
@@ -9,6 +9,11 @@ import {
  * https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
  */
 AFRAME.registerComponent('gesture-detector', {
+    schema: {
+        publishRateMs: {
+            default: 200,
+        },
+    },
 
     init: function() {
         this.internalState = {
@@ -135,8 +140,15 @@ AFRAME.registerComponent('gesture-detector', {
             data: {
                 clickPos: clickPos,
                 source: ARENA.camName,
-                ...eventDetail, // cast in position, positionChange, spreadChange
+                position: {
+                    x: parseFloat(eventDetail.position.x.toFixed(5)),
+                    y: parseFloat(eventDetail.position.y.toFixed(5)),
+                },
             },
+        };
+        if (eventDetail.positionChange) {
+            thisMsg.data.positionChange.x = parseFloat(eventDetail.positionChange.x.toFixed(5));
+            thisMsg.data.positionChange.y = parseFloat(eventDetail.positionChange.y.toFixed(5));
         };
         // publishing events attached to user id objects allows sculpting security
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
