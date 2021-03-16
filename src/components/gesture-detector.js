@@ -28,12 +28,6 @@ AFRAME.registerComponent('gesture-detector', {
 
     emitGestureEvent(event) {
         const currentState = this.getTouchState(event);
-
-        // // only send MQTT clientEvent for 2+ finger touches to avoid 1-finger common touch press-and-move
-        // if (currentState.touchCount < 2) {
-        //     return;
-        // }
-
         const previousState = this.internalState.previousState;
         const gestureContinues = previousState && currentState && currentState.touchCount == previousState.touchCount;
         const gestureEnded = previousState && !gestureContinues;
@@ -125,6 +119,11 @@ AFRAME.registerComponent('gesture-detector', {
     },
 
     sendGesture(eventName, eventDetail) {
+        // only send MQTT clientEvent for 2+ finger touches to avoid 1-finger common touch press-and-move
+        if (eventDetail.touchCount < 2) {
+            return;
+        }
+
         // send through MQTT
         const camera = document.getElementById('my-camera');
         const position = camera.getAttribute('position');
