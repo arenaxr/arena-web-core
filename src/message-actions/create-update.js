@@ -161,16 +161,17 @@ export class CreateUpdate {
             }
             break;
         case 'gltf-model':
-            // gltf-model from data.url
+            // handle url property (=src)
             if (data.hasOwnProperty('url')) {
-//                const url = data.url.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
-                entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.url));
+                // our *a*gtlf-model takes a src attribute - different from aframe's gltf-model
+                data.src=this.crossOriginDropboxSrc(data.url); 
                 delete data.url; // remove attribute so we don't set it later
             }
-            // gltf-model from data.src
-            if (data.hasOwnProperty('src')) {
-                entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.src));
-                delete data.src; // remove attribute so we don't set it later
+            // use our *a*gltf-model component instead 
+            type = 'agltf-model';
+            // add attribution by default, if not given
+            if (!data.hasOwnProperty('attribution')) {
+                entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
             // add load event listners
             entityEl.addEventListener('model-progress', (evt) => {
