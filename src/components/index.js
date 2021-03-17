@@ -10,6 +10,7 @@
  * ARENA A-Frame components and systems
  */
 
+import './agltf-model.js'
 import './arena-camera.js';
 import './arena-user.js';
 import './arena-vive.js';
