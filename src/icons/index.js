@@ -348,11 +348,11 @@ export class SideMenu {
         credits.onclick = function() {
             settingsPopup.style.display = 'none'; // close settings panel
             let attrSystem = document.querySelector("a-scene").systems["attribution"];
-            let attrMsgs = [];
+            let attrTable = undefined;
             if (attrSystem) {
-                attrMsgs = attrSystem.getMsgs();
+                attrTable = attrSystem.getAttributionTable();
             }
-            if (attrMsgs.length < 1) {
+            if (attrTable == undefined) {
                 Swal.fire({
                     title: 'Scene Credits',
                     text: "Could not find any attributions (did you add an attribution component to models?).",
@@ -362,15 +362,10 @@ export class SideMenu {
                   });
                   return;            
             }
-            let creditsTable='<table>';
-            attrMsgs.forEach(am => {
-                creditsTable += `<tr><td align='left'><small>${am.modelDescription} (id:${am.id})</small></td><td>&nbsp</td><td align='left'><small>${am.message}</small></td></tr>`;
-            });
-            creditsTable+='</table>';
             Swal.fire({
               title: 'Scene Credits',
-              html: creditsTable,
-              width: 900,
+              html: attrTable,
+              width: 800,
               focusConfirm: false,
               showCancelButton: false,
               cancelButtonText: 'Cancel'
