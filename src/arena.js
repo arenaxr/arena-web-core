@@ -189,9 +189,6 @@ export class Arena {
         // load scene
         ARENA.loadSceneOptions();
         ARENA.loadScene();
-
-        //setTimeout(async () => {
-        //}, 1000);
     }
 
     /**
@@ -351,7 +348,7 @@ export class Arena {
         renderer.gammaFactor = 2.2;
         renderer.outputEncoding = THREE['sRGBEncoding'];
 
-        const environment = document.createElement('a-entity');
+        let environment = document.createElement('a-entity');
         environment.id = 'env';
 
         const xhr = new XMLHttpRequest();
@@ -367,6 +364,17 @@ export class Arena {
                 if (payload) {
                     const options = payload['attributes'];
                     sceneOptions = options['scene-options'];
+
+                    // deal with scene attribution
+                    if (sceneOptions['attribution']) {
+                        let sceneAttr  = document.createElement('a-entity');
+                        sceneAttr.setAttribute('id', 'scene-options-attribution');
+                        sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
+                        sceneRoot.appendChild(sceneAttr);
+                        delete sceneOptions.attribution;
+                    }
+
+                    // save scene options
                     for (const [attribute, value] of Object.entries(sceneOptions)) {
                         ARENA[attribute] = value;
                     }

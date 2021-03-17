@@ -90,13 +90,12 @@ AFRAME.registerSystem('attribution', {
         const r = new RegExp(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g); // fairly permissive url regex
         const match = r.exec(extras[attribute]); // extract url
         const url = (match) ? match[0] : undefined;
-        const value = extras[attribute].replace(url, '').replace('()', '').trim();
+        const value = extras[attribute].replace(url, '').replace('(', '').replace(')', '').trim(); // remove url, parenthesis and extra spaces
         attribution[attribute] = value;
         attribution[`${attribute}URL`] = url;
         return true;
     },
 });
-
 
 AFRAME.registerComponent('attribution', {
     schema: {
