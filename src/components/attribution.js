@@ -32,9 +32,9 @@ AFRAME.registerSystem('attribution', {
         const _this = this; // save reference to system
         // if element has a gltf-model component try to extract attribution from gltf asset extras
         el.addEventListener('loaded', function() {
-            if (el.components.hasOwnProperty('agltf-model')) {
+            if (el.components.hasOwnProperty('gltf-model')) {
                 el.addEventListener('model-loaded', function() {
-                    const gltfComponent = el.components['agltf-model'];
+                    const gltfComponent = el.components['gltf-model'];
                     _this.extractAttributionFromGtlfAsset(el, gltfComponent);
                 });
             }

@@ -1,6 +1,13 @@
 /* global AFRAME */
 
-// emit model onProgress (loading) event for gltf models
+/**
+ * @fileoverview Emit model onProgress (loading) event for gltf models; save model.asset
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 AFRAME.components['gltf-model'].Component.prototype.update = function() {
     const self = this;
     const el = this.el;
@@ -15,6 +22,7 @@ AFRAME.components['gltf-model'].Component.prototype.update = function() {
     this.loader.load(src, function gltfLoaded(gltfModel) {
         self.model = gltfModel.scene || gltfModel.scenes[0];
         self.model.animations = gltfModel.animations;
+        self.model.asset = gltfModel.asset; // save asset
         el.setObject3D('mesh', self.model);
         el.emit('model-loaded', {format: 'gltf', model: self.model});
     }, function gltfProgress(xhr) {
