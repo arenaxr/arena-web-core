@@ -15,6 +15,7 @@ AFRAME.components['gltf-model'].Component.prototype.update = function() {
     this.loader.load(src, function gltfLoaded(gltfModel) {
         self.model = gltfModel.scene || gltfModel.scenes[0];
         self.model.animations = gltfModel.animations;
+        self.model.asset = gltfModel.asset; // save asset
         el.setObject3D('mesh', self.model);
         el.emit('model-loaded', {format: 'gltf', model: self.model});
     }, function gltfProgress(xhr) {
