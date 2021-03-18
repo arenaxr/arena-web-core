@@ -161,14 +161,14 @@ export class CreateUpdate {
             }
             break;
         case 'gltf-model':
-            // handle url property (=src)
+            // support both url and src property 
             if (data.hasOwnProperty('url')) {
-                // our *a*gtlf-model takes a src attribute - different from aframe's gltf-model
-                data.src=this.crossOriginDropboxSrc(data.url); 
+                data.src=data.url; // make src=url
                 delete data.url; // remove attribute so we don't set it later
+            } 
+            if (data.hasOwnProperty('src')) {
+                entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.src));
             }
-            // use our *a*gltf-model component instead 
-            type = 'agltf-model';
             // add attribution by default, if not given
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
