@@ -381,7 +381,10 @@ export class Arena {
 
                     const envPresets = options['env-presets'];
                     for (const [attribute, value] of Object.entries(envPresets)) {
-                        environment.setAttribute('environment', attribute, value);
+                        // all env presets attributes are dealt by the aframe component, except the hide in ar
+                        if (attribute == 'hideInAR') {
+                            if (value) environment.setAttribute('hide-in-ar-mode', value);
+                        } else environment.setAttribute('environment', attribute, value);
                     }
                     sceneRoot.appendChild(environment);
 

@@ -288,7 +288,13 @@
                 "default":"#ccc",
                 "title":"Grid Color",
                 "description":"Color of the grid."
-             }
+             },
+             "hideInAR":{
+                "type":"boolean",
+                "default":true,
+                "title":"Hide when entering AR",
+                "description":"If true, hide the environment when entering AR."
+             }             
           },
           "required":[
              "active",

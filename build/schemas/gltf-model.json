@@ -769,7 +769,7 @@
                  "$ref": "#/definitions/attribution"
              }
           },
-          "additionalProperties":false,
+          "additionalProperties":true,
           "required":[
              "object_type",
              "url",
