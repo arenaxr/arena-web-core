@@ -12,11 +12,11 @@ AFRAME.registerComponent('hide-in-ar-mode', {
         this.el.sceneEl.addEventListener('enter-vr', (ev) => {
             this.wasVisible = this.el.getAttribute('visible');
             if (this.el.sceneEl.is('ar-mode')) {
-                this.el.setAttribute('visible', true);
+                this.el.setAttribute('visible', false);
             }
         });
         this.el.sceneEl.addEventListener('exit-vr', (ev) => {
-            if (this.wasVisible) this.el.setAttribute('visible', false);
+            if (this.wasVisible) this.el.setAttribute('visible', true);
         });
     },
 });
