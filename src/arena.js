@@ -175,8 +175,9 @@ export class Arena {
                 if (startPositions.length > 0) {
                     let posi = Math.floor(Math.random() * startPositions.length);
                     ARENA.startCoords = startPositions[posi].getAttribute('position');
+
                     // also set rotation
-                    camera.setAttribute('position', startPositions[posi].getAttribute('rotation'));
+                    camera.components['look-controls'].yawObject.rotation.copy(startPositions[posi].object3D.rotation);                
                 }
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
