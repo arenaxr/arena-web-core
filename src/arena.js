@@ -105,6 +105,7 @@ export class Arena {
         if (path === '' || path === 'index.html') {
             scenename = ARENAUtils.getUrlParam('scene', scenename);
             this.sceneName = `${namespace}/${scenename}`;
+            this.nameSpace = namespace;
         } else {
             try {
                 const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
@@ -113,17 +114,19 @@ export class Arena {
                 if (matches.scenename === undefined) {
                     scenename = matches.namespace;
                     this.sceneName = `${namespace}/${scenename}`;
+                    this.nameSpace = namespace;
                 } else {
                     // Both scene and namespace are defined, return regex as-is
                     this.sceneName = `${matches.namespace}/${matches.scenename}`;
+                    this.nameSpace = matches.namespace;
                 }
             } catch (e) {
                 scenename = ARENAUtils.getUrlParam('scene', scenename);
                 this.sceneName = `${namespace}/${scenename}`;
+                this.nameSpace = namespace;
             }
         }
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
-        this.nameSpace = namespace;
         this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.sceneName;
         this.outputTopic = this.defaults.realm + '/s/' + this.sceneName + '/';
         this.renderTopic = this.outputTopic + '#';
@@ -177,7 +180,6 @@ export class Arena {
                 }
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
-            console.log("startCoords", ARENA.startCoords);
             camera.setAttribute('position', ARENA.startCoords); // an x, y, z object or a space-separated string
 
             // enable vio if fixedCamera is given
@@ -286,7 +288,7 @@ export class Arena {
                         type: obj.type,
                         data: obj.attributes,
                     };
-                    console.log('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
+                    console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
                 }
                 ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
@@ -358,7 +360,7 @@ export class Arena {
         xhr.responseType = 'json';
         xhr.onload = async () => {
             if (xhr.status !== 200 || xhr.response == undefined) {
-                console.log(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
+                console.info(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             } else {
                 const payload = xhr.response[xhr.response.length - 1];
                 if (payload) {
@@ -443,7 +445,7 @@ export class Arena {
         this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
         this.Mqtt.connect({
             onSuccess: function() {
-                console.log('MQTT scene connection success.');
+                console.info('MQTT scene connection success.');
             },
             onFailure: function(res) {
                 console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
@@ -463,7 +465,7 @@ export class Arena {
         this.RuntimeManager.init({
             mqtt_uri: this.mqttHostURI,
             onInitCallback: function() {
-                console.log('Runtime init done.');
+                console.info('Runtime init done.');
             },
             name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.username,
             dbg: false,
@@ -502,7 +504,7 @@ export class Arena {
 
         SideMenu.setupIcons();
 
-        console.log("ARENA Started; ARENA=", ARENA);
+        console.info("ARENA Started; ARENA=", ARENA);
     }
 }
 
