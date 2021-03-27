@@ -121,6 +121,8 @@ export class SideMenu {
         });
         this._buttonList[this.buttons.VIDEO] = videoBtn;
 
+        const settingsButtons = [];
+
         /**
          * Create face tracking button
          */
@@ -143,9 +145,9 @@ export class SideMenu {
                     });
                 }
             });
+        avatarBtn.style.display = 'none';
+        settingsButtons.push(avatarBtn);
         this._buttonList[this.buttons.AVATAR] = avatarBtn;
-
-        const settingsButtons = [];
 
         /**
          * Create speed button
@@ -360,7 +362,7 @@ export class SideMenu {
                   }).then((result) => {
                     settingsPopup.style.display = 'block'; // show settings panel
                   });
-                  return;            
+                  return;
             }
             Swal.fire({
               title: 'Scene Credits',
@@ -371,7 +373,7 @@ export class SideMenu {
               cancelButtonText: 'Cancel'
             }).then((result) => {
                 settingsPopup.style.display = 'block'; // show settings panel
-            });                      
+            });
         };
         formDiv.appendChild(credits);
 
