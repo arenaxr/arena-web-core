@@ -10,12 +10,15 @@ let cvThrottle = 0;
 const dtagMatrix = new THREE.Matrix4();
 const rigMatrix = new THREE.Matrix4();
 // var rigMatrixT = new THREE.Matrix4();
-const vioMatrixCopy = new THREE.Matrix4();
-const vioMatrixCopyT = new THREE.Matrix4();
+const vioMatrixPrev = new THREE.Matrix4();
+const vioMatrix = new THREE.Matrix4();
+const vioMatrixInv = new THREE.Matrix4();
+const vioMatrixDiff = new THREE.Matrix4();
 const tagPoseMatrix = new THREE.Matrix4();
 const identityMatrix = new THREE.Matrix4();
 const vioRot = new THREE.Quaternion();
 const vioPos = new THREE.Vector3();
+const vioPosDiff = new THREE.Vector3();
 const tagPoseRot = new THREE.Quaternion();
 const cvPerfTrack = Array(10).fill(16.66, 0, 10);
 // Updates CV throttle from rolling avg of last 10 frame processing intervals in ms. min rate 1fps, max 60
@@ -46,8 +49,23 @@ FLIPMATRIX.set(
     0, 0, 0, 1,
 );
 
+const MOVE_THRESH = 0.05;
+const ROT_THRESH = 0.087;
+
 // call processCV; Need to make sure we only do it after the wasm module is loaded
 let fx = 0; let fy = 0; let cx = 0; let cy = 0;
+
+const vioFilter = (vioPrev, vioCur) => {
+    vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
+    if (MOVE_THRESH <
+        vioPosDiff.setFromMatrixPosition(vioMatrixDiff).length()) {
+        return false;
+    } // np.linalg.norm(posediff[0:3, 3])
+    return ROT_THRESH >= Math.acos(
+        (vioMatrixDiff[0][0] + vioMatrixDiff[1][1] + vioMatrixDiff[2][2] - 1) /
+        2); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
+};
+
 
 window.processCV = async function(frame) {
     const ARENA = window.ARENA;
@@ -61,13 +79,18 @@ window.processCV = async function(frame) {
 
     // Save vio before processing apriltag. Don't touch global though
     const timestamp = new Date();
+    vioMatrixPrev.copy(vioMatrix);
     const camParent = document.getElementById('my-camera').object3D.parent.matrixWorld;
     const cam = document.getElementById('my-camera').object3D.matrixWorld;
-    vioMatrixCopy.copy(camParent).invert(); // vioMatrixCopy.getInverse(camParent);
-    vioMatrixCopy.multiply(cam);
+    vioMatrix.copy(camParent).invert(); // vioMatrix.getInverse(camParent);
+    vioMatrix.multiply(cam);
+    vioMatrixInv.copy(vioMatrix).invert(); // vioMatrixT.getInverse(vioMatrix);
+    if (!vioFilter(vioMatrixPrev, vioMatrixInv)) {
+        return;
+    }
 
-    vioRot.setFromRotationMatrix(vioMatrixCopy);
-    vioPos.setFromMatrixPosition(vioMatrixCopy);
+    vioRot.setFromRotationMatrix(vioMatrix);
+    vioPos.setFromMatrixPosition(vioMatrix);
 
     const vio = {position: vioPos, rotation: vioRot};
 
@@ -140,7 +163,7 @@ window.processCV = async function(frame) {
                         continue;
                         // Reconcile which localizer tag is better based on error?
                     } else {
-                        const rigPose = getRigPoseFromAprilTag(vioMatrixCopy, detection.pose, refTag.pose);
+                        const rigPose = getRigPoseFromAprilTag(detection.pose, refTag.pose);
                         document.getElementById('cameraSpinner').object3D.quaternion.setFromRotationMatrix(rigPose);
                         document.getElementById('cameraRig').object3D.position.setFromMatrixPosition(rigPose);
                         localizerTag = true;
@@ -154,7 +177,7 @@ window.processCV = async function(frame) {
                     if (rigMatrix.equals(identityMatrix)) {
                         console.log('Client apriltag solver no calculated rigMatrix yet, zero on origin tag first');
                     } else {
-                        const tagPose = getTagPoseFromRig(vioMatrixCopy, detection.pose, rigMatrix);
+                        const tagPose = getTagPoseFromRig(detection.pose);
                         tagPoseRot.setFromRotationMatrix(tagPose);
                         // Send update directly to scene
                         Object.assign(jsonMsg, {
@@ -190,14 +213,13 @@ window.processCV = async function(frame) {
 
 /**
  * Calculates the correct rigPose from detected aprilTag
- * @param {THREE.Matrix4} vioMatrix - Current vio of camera
  * @param {Object} dtag - Detected tag pose from camera
  * @param {Array.<Array.<number>>} dtag.R - 2D rotation array
  * @param {Array.<number>} dtag.t - 1D translation array
  * @param {THREE.Matrix4} refTag - Tag pose from scene origin
  * @return {THREE.Matrix4} rigMatrix
  */
-function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
+function getRigPoseFromAprilTag(dtag, refTag) {
     const r = dtag.R;
     const t = dtag.t;
 
@@ -212,23 +234,21 @@ function getRigPoseFromAprilTag(vioMatrix, dtag, refTag) {
 
     // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
     dtagMatrix.copy(dtagMatrix).invert(); // dtagMatrix.getInverse(dtagMatrix);
-    vioMatrixCopyT.copy(vioMatrixCopy).invert(); // vioMatrixCopyT.getInverse(vioMatrixCopy);
     rigMatrix.identity();
     rigMatrix.multiplyMatrices(refTag, dtagMatrix);
-    rigMatrix.multiply(vioMatrixCopyT);
+    rigMatrix.multiply(vioMatrixInv);
 
     return rigMatrix;
 }
 
 /**
  * Calculates the pose of a detected AprilTag from scene origin
- * @param {THREE.Matrix4} vioMatrix - Current vio of camera
  * @param {Object} dtag - Detected tag pose from camera
  * @param {Array.<Array.<number>>} dtag.R - 2D rotation array
  * @param {Array.<number>} dtag.t - 1D translation array
  * @return {THREE.Matrix4} rigMatrix
  */
-function getTagPoseFromRig(vioMatrix, dtag) {
+function getTagPoseFromRig(dtag) {
     const r = dtag.R;
     const t = dtag.t;
     dtagMatrix.set( // Transposed rotation
@@ -242,7 +262,7 @@ function getTagPoseFromRig(vioMatrix, dtag) {
 
     // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
     tagPoseMatrix.copy(rigMatrix);
-    tagPoseMatrix.multiply(vioMatrixCopy);
+    tagPoseMatrix.multiply(vioMatrix);
     tagPoseMatrix.multiply(dtagMatrix);
 
     return tagPoseMatrix;
@@ -313,8 +333,10 @@ async function updateAprilTags() {
                     }
                 }
             });
+        })
+        .finally(() => {
+            return true;
         });
-    return true;
 }
 
 /**
