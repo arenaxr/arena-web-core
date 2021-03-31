@@ -75,8 +75,8 @@ export class CreateUpdate {
             }
 
             // set to default render order
-            entityEl.object3D.renderOrder = RENDER_ORDER; 
-            
+            entityEl.object3D.renderOrder = RENDER_ORDER;
+
             // handle attributes of object
             this.setObjectAttributes(entityEl, message);
 
@@ -124,7 +124,7 @@ export class CreateUpdate {
             return;
 
         default:
-            Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknow type:', JSON.stringify(message));
+            Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknown type:', JSON.stringify(message));
         }
     }
 
@@ -161,11 +161,11 @@ export class CreateUpdate {
             }
             break;
         case 'gltf-model':
-            // support both url and src property 
+            // support both url and src property
             if (data.hasOwnProperty('url')) {
                 data.src=data.url; // make src=url
                 delete data.url; // remove attribute so we don't set it later
-            } 
+            }
             if (data.hasOwnProperty('src')) {
                 entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.src));
             }
@@ -353,7 +353,7 @@ export class CreateUpdate {
     }
 
     /**
-     * Replace dropbox link to dl.dropboxusercontent, which 
+     * Replace dropbox link to dl.dropboxusercontent, which
      * supports crossOrigin content
      * @param {string} src message to be parsed
      * @return {string} new valur

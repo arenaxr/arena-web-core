@@ -101,7 +101,7 @@ AFRAME.registerComponent('attribution', {
     schema: {
         author: {
             type: 'string',
-            default: 'Unknow Author',
+            default: 'Unknown Author',
         }, // e.g. Vaptor-Studio
         authorURL: {
             type: 'string',
@@ -109,7 +109,7 @@ AFRAME.registerComponent('attribution', {
         }, // e.g. https://sketchfab.com/VapTor
         license: {
             type: 'string',
-            default: 'Unkown License',
+            default: 'Unknown License',
         }, // e.g. CC-BY-4.0
         licenseURL: {
             type: 'string',
