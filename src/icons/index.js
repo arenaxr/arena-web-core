@@ -158,17 +158,17 @@ export class SideMenu {
             if (speedState == 0) { // medium
                 speedBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/speed-medium.png\')';
                 document.getElementById('my-camera').setAttribute('wasd-controls', {'acceleration': 30});
-                document.getElementById('my-camera').setAttribute('press-and-move', {'acceleration': 10});
+                document.getElementById('my-camera').setAttribute('press-and-move', {'acceleration': 30});
 
             } else if (speedState == 1) { // fast
                 speedBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/speed-fast.png\')';
                 document.getElementById('my-camera').setAttribute('wasd-controls', {'acceleration': 60});
-                document.getElementById('my-camera').setAttribute('press-and-move', {'acceleration': 20});
+                document.getElementById('my-camera').setAttribute('press-and-move', {'acceleration': 60});
 
             } else if (speedState == 2) { // slow
                 speedBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/speed-slow.png\')';
                 document.getElementById('my-camera').setAttribute('wasd-controls', {'acceleration': 15});
-                document.getElementById('my-camera').setAttribute('press-and-move', {'acceleration': 5});
+                document.getElementById('my-camera').setAttribute('press-and-move', {'acceleration': 15});
             }
         });
         speedBtn.style.display = 'none';
@@ -178,10 +178,10 @@ export class SideMenu {
         /**
          * Create flying on/off button
          */
-        ARENA.flying = false;
+        let flying = false;
         const flyingBtn = createIconButton('flying-off', 'Flying on/off.', () => {
-            ARENA.flying = !ARENA.flying;
-            if (ARENA.flying) { // toggled
+            flying = !flying;
+            if (flying) { // toggled
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-on.png\')';
             } else {
                 const groundedPos = document.getElementById('my-camera').getAttribute('position');
@@ -189,7 +189,8 @@ export class SideMenu {
                 document.getElementById('my-camera').setAttribute('position', groundedPos);
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-off.png\')';
             }
-            document.getElementById('my-camera').setAttribute('wasd-controls', {'fly': ARENA.flying});
+            document.getElementById('my-camera').setAttribute('wasd-controls', {'fly': flying});
+            document.getElementById('my-camera').setAttribute('press-and-move', {'fly': flying});
         });
         flyingBtn.style.display = 'none';
         settingsButtons.push(flyingBtn);
