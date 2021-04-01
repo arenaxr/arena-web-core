@@ -177,7 +177,7 @@ export class Arena {
                     ARENA.startCoords = startPositions[posi].getAttribute('position');
 
                     // also set rotation
-                    camera.components['look-controls'].yawObject.rotation.copy(startPositions[posi].object3D.rotation);                
+                    camera.components['look-controls'].yawObject.rotation.copy(startPositions[posi].object3D.rotation);
                 }
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
@@ -342,7 +342,7 @@ export class Arena {
      */
     loadSceneOptions = () => {
         let sceneOptions;
-        
+
         // we add all elements to our scene root
         const sceneRoot = document.getElementById('sceneRoot');
 
@@ -495,7 +495,7 @@ export class Arena {
             // initialize Jitsi videoconferencing
             this.Jitsi = ARENAJitsi.init(this.jitsiHost);
         });
-      
+
         // initialize face tracking if not on mobile
         if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
             const displayBbox = false;

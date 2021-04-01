@@ -1,12 +1,15 @@
 /* global AFRAME, ARENA */
 
+const MAX_DELTA = 0.2;
+const LONG_PRESS_DURATION_THRESHOLD = 750; // press for 750ms counts as long press
+
 /**
  * Support user camera movement with the mouse.
  *
  */
 AFRAME.registerComponent('press-and-move', {
     schema: {
-        speed: {type: 'number', default: 5.0},
+        acceleration: {default: 10},
     },
     init: function() {
         this.timer = null;
@@ -21,9 +24,10 @@ AFRAME.registerComponent('press-and-move', {
             if (!self.timer && evt.touches.length == 1) { // let gesture-detector handle 2+ touches
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;
-                }, 750); // press for 750ms counts as long press
+                }, LONG_PRESS_DURATION_THRESHOLD);
             }
         });
+
         window.addEventListener('touchend', function(evt) {
             if (self.timer) {
                 clearTimeout(self.timer);
@@ -32,25 +36,35 @@ AFRAME.registerComponent('press-and-move', {
             self.longTouch = false;
             self.drag = false;
         });
-        window.addEventListener('touchmove', function(evt) {
-            // self.drag = true; // might be better without drag detection
-        });
     },
-    tick: (function(t, dt) {
+    tick: function(time, delta) {
+        const data = this.data;
+        const acceleration = data.acceleration;
+
+        delta = delta / 1000;
+
+        // If FPS too low, ignore.
+        if (delta > MAX_DELTA) {
+            return;
+        }
+
         if (this.longTouch) {
             this.timer = null;
-            if (!this.drag) {
-                const eulerRot = document.getElementById('my-camera').getAttribute('rotation');
-                const dx = this.data.speed * (dt / 1000) * Math.cos(eulerRot.y * Math.PI / 180);
-                const dy = this.data.speed * (dt / 1000) * Math.sin(eulerRot.y * Math.PI / 180);
-                const dz = this.data.speed * (dt / 1000) * Math.sin(eulerRot.x * Math.PI / 180);
-                const newPosition = document.getElementById('my-camera').getAttribute('position');
-                newPosition.x -= dy; // subtract b/c negative is forward
-                newPosition.z -= dx;
-                newPosition.y += ARENA.flying ? dz : 0;
-                document.getElementById('my-camera').setAttribute('position', newPosition);
-            }
+
+            const eulerRot = document.getElementById('my-camera').getAttribute('rotation');
+
+            const dx = acceleration * (delta * Math.cos(eulerRot.y * Math.PI / 180));
+            const dy = acceleration * (delta * Math.sin(eulerRot.y * Math.PI / 180));
+            const dz = acceleration * (delta * Math.sin(eulerRot.x * Math.PI / 180));
+
+            const newPosition = document.getElementById('my-camera').getAttribute('position');
+
+            newPosition.x -= dy; // subtract b/c negative is forward
+            newPosition.z -= dx;
+            newPosition.y += ARENA.flying ? dz : 0;
+
+            document.getElementById('my-camera').setAttribute('position', newPosition);
         }
-    }),
+    },
 });
 

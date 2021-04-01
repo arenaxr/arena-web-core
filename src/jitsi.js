@@ -32,14 +32,14 @@ export class ARENAJitsi {
             console.warn("Jitsi is not found!");
             return;
         }
-        this.serverName = jitsiServer; 
-        
+        this.serverName = jitsiServer;
+
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
         this.arenaConferenceName = ARENA.sceneName.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         this.connectOptions = {
             hosts: {
-                domain: this.serverName.split(':')[0], //remove port, if exists. 
+                domain: this.serverName.split(':')[0], //remove port, if exists.
                 muc: 'conference.' + this.serverName.split(':')[0], // remove port, if exists. FIXME: use XEP-0030
             },
             bosh: '//' + this.serverName + '/http-bind', // FIXME: use xep-0156 for that
@@ -585,29 +585,25 @@ export class ARENAJitsi {
             this.jitsiVideoElem.style.display = 'none';
             this.jitsiVideoElem.style.width = ARENA.localVideoWidth + 'px';
 
+            let _this = this;
             /**
              * set video element size
              */
             function setCornerVideoHeight() {
-                const videoHeight = this.jitsiVideoElem.videoHeight /
-                                        (this.jitsiVideoElem.videoWidth / ARENA.localVideoWidth);
-                this.jitsiVideoElem.style.height = videoHeight + 'px';
+                const width = _this.jitsiVideoElem.style.width;
+                const videoHeight = _this.jitsiVideoElem.videoHeight /
+                                        (_this.jitsiVideoElem.videoWidth / width);
+                _this.jitsiVideoElem.style.height = videoHeight + 'px';
             }
 
             this.jitsiVideoElem.onloadedmetadata = () => {
-                setCornerVideoHeight.bind(this)();
+                setCornerVideoHeight();
             };
 
-            let _this = this;
+            // mobile only
             window.addEventListener('orientationchange', () => {
-                // mobile only
-                const sceneEl = document.querySelector('a-scene');
-                if (!sceneEl.is('ar-mode')) { // this code can disrupt an ar session
-                    ARENA.localVideoWidth = Number(window.innerWidth / 5);
-                    _this.stopVideo();
-                    setCornerVideoHeight.bind(_this)();
-                    _this.startVideo();
-                }
+                ARENA.localVideoWidth = Number(window.innerWidth / 5);
+                setCornerVideoHeight();
             });
         }
     }
