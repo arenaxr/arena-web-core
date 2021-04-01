@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>ARENA Users</title>
+    <link href="/vendor/mdb/mdb.min.css" rel="stylesheet" type="text/css">
+    <link href="/vendor/fontawesome/all.min.css" rel="stylesheet" type="text/css">
+    <link href="images/conix-x.png" rel="icon" type="image/png">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Roboto+Slab&display=swap" rel="stylesheet">
+    <style>
+        body,
+        html {
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .top-logo {
+            max-height: 100px;
+        }
+
+        .intro-text {
+            font-family: 'Roboto Slab', serif;
+            font-size: 1.4rem;
+        }
+
+        .font-weight-boldest {
+            font-weight: 900;
+        }
+
+        .btn-xred {
+            color: #fff;
+            background-color: #a42629;
+            font-size: 1em;
+        }
+
+        .btn-xred.focus,
+        .btn-xred:focus,
+        .btn-xred:hover {
+            color: #fff;
+            background-color: #8d2013
+        }
+
+        .btn-check:active + .btn-xred,
+        .btn-check:checked + .btn-xred,
+        .btn-xred.active,
+        .btn-xred:active,
+        .show > .btn-xred.dropdown-toggle {
+            color: #fff;
+            background-color: #521819
+        }
+
+        .btn-check:active + .btn-xred:focus,
+        .btn-check:checked + .btn-xred:focus,
+        .btn-xred.active:focus,
+        .btn-xred:active:focus,
+        .show > .btn-xred.dropdown-toggle:focus {
+            -webkit-box-shadow: 0 4px 10px 0 rgba(0, 0, 0, .2), 0 4px 20px 0 rgba(0, 0, 0, .1);
+            box-shadow: 0 4px 10px 0 rgba(0, 0, 0, .2), 0 4px 20px 0 rgba(0, 0, 0, .1)
+        }
+
+        .btn-xred.disabled,
+        .btn-xred:disabled {
+            color: #fff;
+            background-color: #a42629
+        }
+
+        .btn-outline-xred {
+            color: #a42629;
+            border-color: #a42629;
+            font-size: 1em;
+            font-weight: 900;
+        }
+
+        .btn-outline-xred:hover {
+            color: #a42629;
+            background-color: rgba(0, 0, 0, .02)
+        }
+
+        .btn-outline-xred.active,
+        .btn-outline-xred.dropdown-toggle.show,
+        .btn-outline-xred.focus,
+        .btn-outline-xred:active,
+        .btn-outline-xred:focus {
+            color: #a42629;
+            background-color: transparent
+        }
+
+        .btn-outline-xred.active:focus,
+        .btn-outline-xred.dropdown-toggle.show:focus,
+        .btn-outline-xred:active:focus {
+            -webkit-box-shadow: none;
+            box-shadow: none
+        }
+
+        .btn-outline-xred.disabled,
+        .btn-outline-xred:disabled {
+            color: #a42629
+        }
+
+
+        .social-icon {
+            max-height: 48px;
+        }
+
+        img.scene-thumb {
+            transition: transform .25s ease;
+        }
+
+        @media (min-width: 1200px) {
+            img.scene-thumb:hover {
+                transform: scale(1.75);
+            }
+
+            .thumb-container:nth-child(4n+2) img.scene-thumb:hover {
+                transform: translateX(30%) scale(1.75);
+            }
+
+            .thumb-container:nth-child(4n+1) img.scene-thumb:hover {
+                transform: translateX(-30%) scale(1.75);
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1199px) {
+            img.scene-thumb:hover {
+                transform: scale(1.5);
+            }
+
+            .thumb-container:nth-child(3n+2) img.scene-thumb:hover {
+                transform: translateX(25%) scale(1.5);
+            }
+
+            .thumb-container:nth-child(3n+1) img.scene-thumb:hover {
+                transform: translateX(-25%) scale(1.5);
+            }
+        }
+
+        @media (min-width: 576px) and (max-width: 767.98px) {
+            .thumb-container:nth-child(even) img.scene-thumb:hover {
+                transform: translateX(25%) scale(1.5);
+            }
+
+            .thumb-container:nth-child(odd) img.scene-thumb:hover {
+                transform: translateX(-25%) scale(1.5);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="min-vh-100 routePage" id="landing">
+    <div class="container-xxl">
+        <div class="row pt-3 d-flex justify-content-between align-items-center">
+            <div class="col-lg-4">
+                <img alt="CONIX Logo" class="top-logo" src="/images/xr-logo-v8.png"/>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a class="btn btn-xred" href="/user">Login</a>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col col-lg-8 offset-lg-2 col-12">
+                <div class="intro-text">
+                    The ARENA (Augmented Reality Edge Networking Architecture) is a platform for supporting real-time
+                    mixed reality interaction between multiple users and the physical world.
+                </div>
+            </div>
+        </div>
+        <div class="row my-4">
+            <div class="col-lg-10 offset-lg-1 col-12 px-0 bg-black">
+                <div class="ratio ratio-16x9">
+                    <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                            frameborder="0"
+                            src="https://www.youtube-nocookie.com/embed/ftY3VMM2rhU?autoplay=1&loop=1&playlist=ftY3VMM2rhU&modestbranding=1&rel=0&controls=0">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+        <div class="row my-5">
+            <div class="col col-lg-8 offset-lg-2 col-12 d-flex">
+                <div class="flex-grow-1 text-center d-flex justify-content-around">
+                    <a href="https://www.youtube.com/playlist?list=PL_AQ_N7xzl5qA-5ezYJg80Br_jdbdathD" target="_blank">
+                        <img alt="youtube icon" class="social-icon" src="/images/youtube-icon.png"/>
+                    </a>
+                    <a href="https://github.com/conix-center" target="_blank">
+                        <img alt="github icon" class="social-icon" src="/images/github-icon.png"/>
+                    </a>
+                </div>
+                <div class="flex-grow-1  text-center">
+                    <a class="btn btn-outline-xred btn-lg" href="https://arena.conix.io/">Learn More</a>
+                </div>
+                <div class="flex-grow-1 text-center">
+                    <a class="btn btn-xred btn-lg font-weight-boldest" href="/user">Try Arena</a>
+                </div>
+            </div>
+        </div>
+        <div class="row my-5 pt-3">
+            <div class="col-12 text-center">
+                <h2>
+                    Click the images to try these scenes
+                </h2>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/lobby">
+                    <img alt="Lobby Scene" class="img-fluid scene-thumb" src="/images/thumbs/a8.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/fireside">
+                    <img alt="Fireside Scene" class="img-fluid scene-thumb"
+                         src="/images/thumbs/a7.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/meeting-4">
+                    <img alt="Meeting-4 Scene" class="img-fluid scene-thumb"
+                         src="/images/thumbs/a6.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/island">
+                    <img alt="Island Scene" class="img-fluid scene-thumb" src="/images/thumbs/a5.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/kingshall">
+                    <img alt="Kings Hall Scene" class="img-fluid scene-thumb"
+                         src="/images/thumbs/a4.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/skatepark">
+                    <img alt="Skate Park Scene" class="img-fluid scene-thumb"
+                         src="/images/thumbs/a3.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/cmu-tepper-hall">
+                    <img alt="CMU Tepper Hall Scene" class="img-fluid scene-thumb"
+                         src="/images/thumbs/a2.jpg">
+                </a>
+            </div>
+            <div class="col-xl-3 col-md-4 col-sm-6 p-3 thumb-container">
+                <a href="/public/loft">
+                    <img alt="Loft Scene" class="img-fluid scene-thumb" src="/images/thumbs/a1.jpg">
+                </a>
+            </div>
+        </div>
+        <div class="row my-4">
+            <div class="col col-lg-6 offset-lg-3 col-12 text-center">
+                This work was supported in part by the CONIX Research Center, one of six centers in JUMP, a
+                Semiconductor Research Corporation (SRC) program sponsored by DARPA.<br/>
+                For more information, please contact <a href="mailto:info@conix.io">info@conix.io</a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/vendor/mdb/mdb.min.js" type="text/javascript"></script>
+</body>
+</html>
