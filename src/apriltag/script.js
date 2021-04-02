@@ -60,14 +60,14 @@ const vioFilter = (vioPrev, vioCur) => {
     vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
     const moveDiff = vioPosDiff.setFromMatrixPosition(vioMatrixDiff).length(); // np.linalg.norm(posediff[0:3, 3])
     if (moveDiff > MOVE_THRESH) {
-        console.log('Move Threshold Exceeded: ' + moveDiff);
+        // console.log('Move Threshold Exceeded: ' + moveDiff);
         return false;
     }
     const rotDiff = Math.acos(
         (vioMatrixDiff.elements[0] + vioMatrixDiff.elements[5] + vioMatrixDiff.elements[10] - 1) /
         2); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
     if (rotDiff > ROT_THRESH) {
-        console.log('Move Threshold Exceeded: ' + moveDiff);
+        // console.log('Move Threshold Exceeded: ' + moveDiff);
         return false;
     }
     return true;
@@ -155,7 +155,7 @@ window.processCV = async function(frame) {
             let localizerTag;
             for (const detection of detections) {
                 if (detection.pose.e > DTAG_ERROR_THRESH) {
-                    console.log('Move Threshold Exceeded: ' + d.error);
+                    // console.log('Move Threshold Exceeded: ' + detection.pose.e);
                     continue;
                 }
                 const jsonMsg = {scene: ARENA.renderParam, timestamp: timestamp, camera_id: ARENA.camName};
