@@ -1,0 +1,797 @@
+{
+    "definitions": {
+        "coord3d": {
+            "type": "object",
+            "required": [
+                "x",
+                "y",
+                "z"
+            ],
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
+                }
+            }
+        },
+        "rot3d": {
+            "type": "object",
+            "required": [
+                "x",
+                "y",
+                "z"
+            ],
+            "properties": {
+                "x": {
+                    "type": "number",
+                    "default": 0
+                },
+                "y": {
+                    "type": "number",
+                    "default": 0
+                },
+                "z": {
+                    "type": "number",
+                    "default": 0
+                },
+                "w": {
+                    "type": "number",
+                    "default": 1
+                }
+            }
+        },
+        "position": {
+            "title": "Position",
+            "description": "3D object position",
+            "$ref": "#/definitions/coord3d"
+        },
+        "rotation": {
+            "title": "Rotation",
+            "description": "3D object rotation in degrees by default; Right-handed coordinate system. Switches to quaternion representation if 'w' is given",
+            "$ref": "#/definitions/rot3d"
+        },
+        "scale": {
+            "id": "scale",
+            "title": "Scale",
+            "description": "3D object scale",
+            "$ref": "#/definitions/coord3d",
+            "default": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            }
+        },
+        "material": {
+            "type": "object",
+            "title": "Material",
+            "description": "The material properties of the object\u2019s surface.",
+            "properties": {
+                "src": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'"
+                },
+                "transparent": {
+                    "type": "boolean",
+                    "description": "Whether material is transparent. Transparent entities are rendered after non-transparent entities.",
+                    "default": false
+                },
+                "opacity": {
+                    "type": "number",
+                    "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
+                    "default": 1.0
+                },
+                "colorWrite": {
+                    "type": "boolean",
+                    "description": "Color write"
+                },
+                "render-order": {
+                    "type": "string",
+                    "description": "The render-order system takes a comma-delimited list of strings that name the render order layers. The render order layers will map to a number starting from 0 and counting up from there.",
+                    "default": "0"
+                },
+                "side": {
+                    "type": "string",
+                    "enum": [
+                        "front",
+                        "back",
+                        "double"
+                    ],
+                    "description": "Which sides of the mesh to render. Can be one of front, back, or double.",
+                    "default": "front"
+                },
+                "color": {
+                    "type": "string",
+                    "format": "color",
+                    "title": "color",
+                    "default": "#7f7f7f",
+                    "description": "Base diffuse color."
+                },
+                "alphaTest": {
+                    "type": "number",
+                    "description": "Alpha test threshold for transparency.",
+                    "default": 0
+                },
+                "depthTest": {
+                    "type": "boolean",
+                    "description": "Whether depth testing is enabled when rendering the material.",
+                    "default": true
+                },
+                "flatShading": {
+                    "type": "boolean",
+                    "description": "Use THREE.FlatShading rather than THREE.StandardShading.",
+                    "default": false
+                },
+                "npot": {
+                    "type": "boolean",
+                    "description": "Use settings for non-power-of-two (NPOT) texture.",
+                    "default": false
+                },
+                "offset": {
+                    "type": "object",
+                    "description": "Texture offset to be used.",
+                    "properties": {
+                        "x": {
+                            "type": "number"
+                        },
+                        "y": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "x",
+                        "y"
+                    ],
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    }
+                },
+                "repeat": {
+                    "type": "object",
+                    "description": "Texture repeat to be used.",
+                    "properties": {
+                        "x": {
+                            "type": "number"
+                        },
+                        "y": {
+                            "type": "number"
+                        }
+                    },
+                    "required": [
+                        "x",
+                        "y"
+                    ],
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    }
+                },
+                "shader": {
+                    "type": "string",
+                    "description": "Which material to use. Defaults to the standard material. Can be set to the flat material or to a registered custom shader material.",
+                    "default": "standard"
+                },
+                "vertexColors": {
+                    "type": "string",
+                    "enum": [
+                        "none",
+                        "vertex",
+                        "face"
+                    ],
+                    "description": "Whether to use vertex or face colors to shade the material. Can be one of none, vertex, or face.",
+                    "default": "none"
+                },
+                "visible": {
+                    "type": "boolean",
+                    "description": "Whether material is visible. Raycasters will ignore invisible materials.",
+                    "default": true
+                },
+                "blending": {
+                    "type": "string",
+                    "enum": [
+                        "none",
+                        "normal",
+                        "additive",
+                        "subtractive",
+                        "multiply"
+                    ],
+                    "description": "The blending mode for the material\u2019s RGB and Alpha sent to the WebGLRenderer. Can be one of none, normal, additive, subtractive or multiply",
+                    "default": "normal"
+                },
+                "dithering": {
+                    "type": "boolean",
+                    "description": "Whether material is dithered with noise. Removes banding from gradients like ones produced by lighting.",
+                    "default": true
+                }
+            }
+        },
+        "material-extras": {
+            "type": "object",
+            "title": "Material extras",
+            "description": "Define extra material properties.",
+            "properties": {
+                "encoding": {
+                    "type": "string",
+                    "enum": [
+                        "LinearEncoding",
+                        "sRGBEncoding",
+                        "GammaEncoding",
+                        "RGBEEncoding",
+                        "LogLuvEncoding",
+                        "RGBM7Encoding",
+                        "RGBM16Encoding",
+                        "RGBDEncoding",
+                        "BasicDepthPacking",
+                        "RGBADepthPacking"
+                    ],
+                    "default": "sRGBEncoding"
+                },
+                "needsUpdate": {
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "default": {
+                "encoding": "sRGBEncoding",
+                "needsUpdate": false
+            }
+        },
+        "multisrc": {
+            "type": "object",
+            "title": "Multi Source",
+            "description": "Define multiple visual sources applied to an object.",
+            "properties": {
+                "srcspath": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URI, relative or full path of a directory containing srcs, e.g. \u201cstore/users/wiselab/images/dice/\u201d (required)."
+                },
+                "srcs": {
+                    "type": "string",
+                    "description": "A comma-delimited list if URIs, e.g. \u201cside1.png, side2.png, side3.png, side4.png, side5.png, side6.png\u201d (required)."
+                }
+            },
+            "required": [
+                "srcspath",
+                "srcs"
+            ]
+        },
+        "animation": {
+            "type": "object",
+            "title": "Animation",
+            "description": "Animate and tween values",
+            "properties": {
+                "property": {
+                    "type": "string",
+                    "description": "Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute."
+                },
+                "isRawProperty": {
+                    "type": "boolean",
+                    "description": "Flag to animate an arbitrary object property outside of A-Frame components for better performance. If set to true, for example, we can set property to like components.material.material.opacity. If property starts with components or object3D, this will be inferred to true.",
+                    "default": false
+                },
+                "from": {
+                    "type": "string",
+                    "description": "Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
+                    "default": ""
+                },
+                "to": {
+                    "type": "string",
+                    "description": "Target value at end of animation.",
+                    "default": ""
+                },
+                "type": {
+                    "type": "string",
+                    "description": "Right now only supports color for tweening isRawProperty color XYZ/RGB vector values.",
+                    "default": ""
+                },
+                "delay": {
+                    "type": "number",
+                    "description": "How long (milliseconds) to wait before starting.",
+                    "default": 0
+                },
+                "dir": {
+                    "type": "string",
+                    "enum": [
+                        "normal",
+                        "alternate",
+                        "reverse"
+                    ],
+                    "description": "Which dir to go from from to to.",
+                    "default": "normal"
+                },
+                "dur": {
+                    "type": "number",
+                    "description": "How long (milliseconds) each cycle of the animation is.",
+                    "default": 1000
+                },
+                "loop": {
+                    "type": "number",
+                    "description": "How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
+                    "default": 0
+                },
+                "autoplay": {
+                    "type": "boolean",
+                    "description": "Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
+                    "default": true
+                },
+                "easing": {
+                    "type": "string",
+                    "description": "Easing function of animation. To ease in, ease out, ease in and out.",
+                    "default": "easeInQuad"
+                },
+                "elasticity": {
+                    "type": "number",
+                    "description": "How much to bounce (higher is stronger).",
+                    "default": 400
+                },
+                "enabled": {
+                    "type": "boolean",
+                    "description": "If disabled, animation will stop and startEvents will not trigger animation start.",
+                    "default": true
+                },
+                "startEvents": {
+                    "type": "array",
+                    "description": "Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
+                    "default": []
+                },
+                "pauseEvents": {
+                    "type": "array",
+                    "description": "Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
+                    "default": []
+                },
+                "resumeEvents": {
+                    "type": "array",
+                    "description": "Comma-separated list of events to listen to trigger resume after pausing.",
+                    "default": []
+                },
+                "round": {
+                    "type": "boolean",
+                    "description": "Whether to round values.",
+                    "default": false
+                }
+            }
+        },
+        "animation-mixer": {
+            "type": "object",
+            "title": "Animation Mixer",
+            "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'",
+            "properties": {
+                "clip": {
+                    "type": "string",
+                    "description": "Name of the animation clip(s) to play. Accepts wildcards.",
+                    "default": "*"
+                },
+                "duration": {
+                    "type": "number",
+                    "description": "Duration of the animation, in seconds (0 = auto).",
+                    "default": "0"
+                },
+                "crossFadeDuration": {
+                    "type": "number",
+                    "description": "Duration of cross-fades between clips, in seconds.",
+                    "default": "0"
+                },
+                "repetitions": {
+                    "type": "number",
+                    "description": "Number of times to play the clip, in addition to the first play. Repetitions are ignored for loop: once.",
+                    "enum": [
+                        "once",
+                        "repeate",
+                        "pingpong"
+                    ],
+                    "default": 0
+                },
+                "timeScale": {
+                    "type": "number",
+                    "description": "Scaling factor for playback speed. A value of 0 causes the animation to pause. Negative values cause the animation to play backwards.",
+                    "default": 1
+                },
+                "clampWhenFinished": {
+                    "type": "boolean",
+                    "description": "If true, halts the animation at the last frame.",
+                    "default": false
+                }
+            }
+        },
+        "sound": {
+            "type": "object",
+            "title": "Positional Sound",
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the components-position.",
+            "properties": {
+                "autoplay": {
+                    "type": "boolean",
+                    "description": "Whether to automatically play sound once set.",
+                    "default": false
+                },
+                "distanceModel": {
+                    "type": "string",
+                    "enum": [
+                        "linear",
+                        "inverse",
+                        "exponential"
+                    ],
+                    "description": "Sound model: linear, inverse, or exponential.",
+                    "default": "inverse"
+                },
+                "loop": {
+                    "type": "boolean",
+                    "description": "Whether to loop the sound once the sound finishes playing.",
+                    "default": false
+                },
+                "maxDistance": {
+                    "type": "number",
+                    "description": "Maximum distance between the audio source and the listener, after which the volume is not reduced any further.",
+                    "default": 10000
+                },
+                "on": {
+                    "type": "string",
+                    "enum": [
+                        "mousedown",
+                        "mouseup",
+                        "mouseenter",
+                        "mouseleave",
+                        "triggerdown",
+                        "triggerup",
+                        "gripdown",
+                        "gripup",
+                        "menudown",
+                        "menuup",
+                        "systemdown",
+                        "systemup",
+                        "trackpaddown",
+                        "trackpadup"
+                    ],
+                    "description": "An event for the entity to listen to before playing sound.",
+                    "default": "mousedown"
+                },
+                "poolSize": {
+                    "type": "number",
+                    "description": "Numbers of simultaneous instances of this sound that can be playing at the same time",
+                    "default": 1
+                },
+                "positional": {
+                    "type": "boolean",
+                    "description": "Whether or not the audio is positional (movable).",
+                    "default": true
+                },
+                "refDistance": {
+                    "type": "number",
+                    "description": "Reference distance for reducing volume as the audio source moves further from the listener.",
+                    "default": 1
+                },
+                "rolloffFactor": {
+                    "type": "number",
+                    "description": "Describes how quickly the volume is reduced as the source moves away from the listener.",
+                    "default": 1
+                },
+                "src": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL path to sound file e.g. 'store/users/wiselab/sound/wave.mp3'"
+                },
+                "volume": {
+                    "type": "number",
+                    "description": "How loud to play the sound.",
+                    "default": 1
+                }
+            }
+        },
+        "dynamic-body": {
+            "type": "object",
+            "title": "Physics",
+            "description": "Physics type attached to the object.",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "static",
+                        "dynamic"
+                    ]
+                }
+            },
+            "required": [
+                "type"
+            ]
+        },
+        "impulse": {
+            "title": "Impulse",
+            "description": "The force applied using physics. Requires click-listener",
+            "type": "object",
+            "properties": {
+                "on": {
+                    "type": "string"
+                },
+                "force": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "string"
+                }
+            }
+        },
+        "click-listener": {
+            "title": "Click Listener",
+            "description": "Object will listen for clicks",
+            "type": "boolean"
+        },
+        "collision-listener": {
+            "title": "Collision Listener",
+            "description": "Name of the collision-listener, default can be empty string",
+            "type": "string"
+        },
+        "goto-url": {
+            "title": "Goto URL",
+            "description": "Goto given URL; Requires click-listner",
+            "type": "object",
+            "properties": {
+                "dest": {
+                    "type": "string",
+                    "enum": [
+                        "popup",
+                        "newtab",
+                        "sametab"
+                    ]
+                },
+                "on": {
+                    "type": "string",
+                    "enum": [
+                        "mousedown",
+                        "mouseup"
+                    ]
+                },
+                "url": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            },
+            "required": [
+                "dest",
+                "on",
+                "url"
+            ]
+        },
+        "video-control": {
+            "title": "Video",
+            "description": "Video Control",
+            "type": "object",
+            "properties": {
+                "video_object": {
+                    "type": "string",
+                    "description": "Name of object where to put the video, e.g. 'square_vid6'"
+                },
+                "frame_object": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL of a thumbnail image, e.g. 'store/users/wiselab/images/conix-face-white.jpg'"
+                },
+                "video_path": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "URL of the video file, e.g. 'store/users/wiselab/videos/kungfu.mp4'"
+                }
+            },
+            "required": [
+                "video_object",
+                "frame_object",
+                "video_path"
+            ]
+        },
+        "parent": {
+            "title": "Parent",
+            "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
+            "type": "string"
+        },
+        "buffer": {
+            "type": "boolean",
+            "title": "Buffer",
+            "description": "Transform geometry into a BufferGeometry to reduce memory usage at the cost of being harder to manipulate (geometries only: box, circle, cone, ...).",
+            "default": "true"
+        },
+        "skipCache": {
+            "type": "boolean",
+            "title": "Skip Cache",
+            "description": "Disable retrieving the shared geometry object from the cache. (geometries only: box, circle, cone, ...).",
+            "default": "true"
+        },
+        "color": {
+            "type": "string",
+            "format": "color",
+            "title": "Color",
+            "default": "#ffa500"
+        },
+        "url": {
+            "type": "string",
+            "format": "uri",
+            "title": "Url",
+            "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)"
+        },
+        "shadow": {
+            "properties": {
+                "cast": {
+                    "type": "boolean",
+                    "title": "cast shadow",
+                    "description": "Whether the entity casts shadows onto the surrounding scene",
+                    "default": false
+                },
+                "receive": {
+                    "type": "boolean",
+                    "title": "receive shadow",
+                    "description": "Whether the entity receives shadows from the surrounding scene",
+                    "default": false
+                }
+            },
+            "default": {
+                "cast": false,
+                "receive": false
+            }
+        }
+    },
+    "title": "AprilTag",
+    "description": "An AprilTag (36h11 family). AprilTag is a visual fiducial system, used in the ARENA to anchor scenes in the real world.",
+    "properties": {
+        "object_id": {
+            "type": "string",
+            "minLength": 3,
+            "description": "A uuid or otherwise unique identifier for this object"
+        },
+        "action": {
+            "type": "string",
+            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+            "enum": [
+                "create",
+                "delete",
+                "update",
+                "clientEvent"
+            ],
+            "default": "create"
+        },
+        "type": {
+            "type": "string",
+            "description": "One of the message types: object (3D A-Frame Object), scene-options, landmarks, program (derived from 'type' select above)",
+            "enum": [
+                "object"
+            ]
+        },
+        "persist": {
+            "type": "boolean",
+            "default": "true",
+            "description": "Persist this object in the database (default false = do not persist)"
+        },
+        "data": {
+            "properties": {
+                "object_type": {
+                    "type": "string",
+                    "title": "3D object type",
+                    "description": "3D object type (derived from 'type' select above).",
+                    "enum": [
+                        "apriltag"
+                    ]
+                },
+                "tagid": {
+                    "type": "number",
+                    "title": "The tag id [0, 586]",
+                    "default": 0
+                },
+                "size": {
+                    "type": "number",
+                    "title": "Tag size (mm)",
+                    "default": 150
+                },
+                "url": {
+                    "type": "string",
+                    "title": "URL associated with the tag",
+                    "default": ""
+                },
+                "lat": {
+                    "type": "number",
+                    "title": "Tag latitude",
+                    "minimum": -90,
+                    "maximum": 90,
+                    "default": 0
+                },
+                "lon": {
+                    "type": "number",
+                    "title": "Tag longitude",
+                    "minimum": -180,
+                    "maximum": 180,
+                    "default": 0
+                },    
+                "ele": {
+                    "type": "number",
+                    "title": "Tag elevation (m)",
+                    "default": 0
+                },                 
+                "position": {
+                    "$ref": "#/definitions/position"
+                },
+                "buffer": {
+                    "$ref": "#/definitions/buffer"
+                },
+                "skipCache": {
+                    "$ref": "#/definitions/skipCache"
+                },
+                "rotation": {
+                    "$ref": "#/definitions/rotation"
+                },
+                "scale": {
+                    "$ref": "#/definitions/scale"
+                },
+                "material": {
+                    "$ref": "#/definitions/material"
+                },
+                "material-extras": {
+                    "$ref": "#/definitions/material-extras"
+                },
+                "multisrc": {
+                    "$ref": "#/definitions/multisrc"
+                },
+                "animation": {
+                    "$ref": "#/definitions/animation"
+                },
+                "animation-mixer": {
+                    "$ref": "#/definitions/animation-mixer"
+                },
+                "sound": {
+                    "$ref": "#/definitions/sound"
+                },
+                "dynamic-body": {
+                    "$ref": "#/definitions/dynamic-body"
+                },
+                "impulse": {
+                    "$ref": "#/definitions/impulse"
+                },
+                "click-listener": {
+                    "$ref": "#/definitions/click-listener"
+                },
+                "collision-listener": {
+                    "$ref": "#/definitions/collision-listener"
+                },
+                "goto-url": {
+                    "$ref": "#/definitions/goto-url"
+                },
+                "video-control": {
+                    "$ref": "#/definitions/video-control"
+                },
+                "parent": {
+                    "$ref": "#/definitions/parent"
+                },
+                "text": {
+                    "$ref": "#/definitions/text"
+                },
+                "shadow": {
+                    "$ref": "#/definitions/shadow"
+                }
+            },
+            "additionalProperties": false,
+            "default": {
+                "object_type": "apriltag",
+                "tagid": 0,
+                "size": 150,
+                "lat": 40.4432,
+                "lon": 79.9428,
+                "ele": 200
+            },
+            "required": [
+                "object_type",
+                "size",
+                "lat",
+                "lon"
+            ],
+            "title": "Apriltag Data"
+        }
+    },
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}

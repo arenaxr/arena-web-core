@@ -4,6 +4,11 @@
         "title": "Entity (generic object)",
         "description": "Entities are the base of all objects in the scene. Entities are containers into which components can be attached."
     },
+    "apriltag": {
+        "file": "schemas/apriltag.json",
+        "title": "AprilTag",
+        "description": "AprilTag is a visual fiducial system, used in the ARENA to anchor scenes in the real world."
+    },
     "gltf-model": {
         "file": "schemas/gltf-model.json",
         "title": "GLTF Model",
