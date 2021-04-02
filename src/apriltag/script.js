@@ -49,6 +49,7 @@ FLIPMATRIX.set(
     0, 0, 0, 1,
 );
 
+const DTAG_ERROR_THRESH = 5e-6;
 const MOVE_THRESH = 0.05;
 const ROT_THRESH = 0.087;
 
@@ -57,13 +58,19 @@ let fx = 0; let fy = 0; let cx = 0; let cy = 0;
 
 const vioFilter = (vioPrev, vioCur) => {
     vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
-    if (MOVE_THRESH <
-        vioPosDiff.setFromMatrixPosition(vioMatrixDiff).length()) {
+    const moveDiff = vioPosDiff.setFromMatrixPosition(vioMatrixDiff).length(); // np.linalg.norm(posediff[0:3, 3])
+    if (moveDiff > MOVE_THRESH) {
+        console.log('Move Threshold Exceeded: ' + moveDiff);
         return false;
-    } // np.linalg.norm(posediff[0:3, 3])
-    return ROT_THRESH >= Math.acos(
-        (vioMatrixDiff[0][0] + vioMatrixDiff[1][1] + vioMatrixDiff[2][2] - 1) /
+    }
+    const rotDiff = Math.acos(
+        (vioMatrixDiff.elements[0] + vioMatrixDiff.elements[5] + vioMatrixDiff.elements[10] - 1) /
         2); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
+    if (rotDiff > ROT_THRESH) {
+        console.log('Move Threshold Exceeded: ' + moveDiff);
+        return false;
+    }
+    return true;
 };
 
 
@@ -124,6 +131,9 @@ window.processCV = async function(frame) {
             jsonMsg.detections = [];
             for (const detection of detections) {
                 const d = detection;
+                if (d.pose.e > DTAG_ERROR_THRESH) {
+                    continue;
+                }
                 delete d.corners;
                 delete d.center;
                 // Known tag from ATLAS (includes Origin tag)
@@ -144,6 +154,10 @@ window.processCV = async function(frame) {
         if (!ARENA.networkedTagSolver) {
             let localizerTag;
             for (const detection of detections) {
+                if (detection.pose.e > DTAG_ERROR_THRESH) {
+                    console.log('Move Threshold Exceeded: ' + d.error);
+                    continue;
+                }
                 const jsonMsg = {scene: ARENA.renderParam, timestamp: timestamp, camera_id: ARENA.camName};
                 delete detection.corners;
                 delete detection.center;
@@ -335,8 +349,9 @@ async function updateAprilTags() {
             });
         })
         .finally(() => {
-            return true;
+            // Merge in apriltag system
         });
+    return true;
 }
 
 /**
