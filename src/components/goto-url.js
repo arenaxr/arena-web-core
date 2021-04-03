@@ -23,11 +23,13 @@ AFRAME.registerComponent('goto-url', {
     multiple: true,
 
     init: function() {
+
     },
 
     update: function() {
-        const data = this.data; // Component property values.
-        const el = this.el; // Reference to the component's entity.
+        const data = this.data;
+        const el = this.el;
+
         let fired = false;
         if (data.on && data.url) { // we have an event?
             el.addEventListener(data.on, function(evt) {

@@ -14,6 +14,11 @@ export class ClientEvent {
         const id = message.id;
         const data = message.data;
 
+        // ignore goto-url and textinput events
+        if (message.type == 'goto-url' || message.type == 'textinput') {
+            return;
+        }
+
         const entityEl = document.getElementById(id);
         if (!entityEl) {
             Logger.error('clientEvent', `Object with object_id "${id}" does not exist!`);
@@ -28,7 +33,7 @@ export class ClientEvent {
                 parseFloat(data.position.z),
             );
         } else {
-            Logger.warn('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
+            Logger.warning('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
         }
 
         const clicker = data.source;

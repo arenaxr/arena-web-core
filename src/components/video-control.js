@@ -12,6 +12,7 @@ AFRAME.registerComponent('video-control', {
         anyone_clicks: {type: 'boolean', default: true},
         video_loop: {type: 'boolean', default: true},
     },
+
     multiple: true,
 
     init: function() {
@@ -20,6 +21,7 @@ AFRAME.registerComponent('video-control', {
         const videoPath = data.video_path;
         const anyoneClicks = data.anyone_clicks;
         const videoLoop = data.video_loop;
+
         let frameSrc = 'images/conix-face.white.jpg'; // default
         if (data.frame_object) {
             frameSrc = data.frame_object;
@@ -75,17 +77,17 @@ AFRAME.registerComponent('video-control', {
     },
 
     update: function(oldData) {
-        // this in fact only gets called when the component that it is - gets updated
-        // unlike the update method in Unity that gets called every frame
-        const data = this.data; // Component property values.
-        const el = this.el; // Reference to the component's entity.
+
     },
+
     pause: function() {
         // this.removeEventListeners()
     },
+
     play: function() {
         // this.addEventListeners()
     },
+
     // handle component removal (why can't it just go away?)
     remove: function() {
         const data = this.data;
