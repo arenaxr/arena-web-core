@@ -245,9 +245,14 @@ ARENA.FaceTracker = (function() {
     function restart() {
         running = true;
         if (!initialized) {
+            let cameraOptions = {};
+            const perfVideoInput = localStorage.getItem('prefVideoInput');
+            if (perfVideoInput) {
+                cameraOptions = {deviceId: {exact: perfVideoInput}};
+            }
             const shapePredURL =
                 'https://arena-cdn.conix.io/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat';
-            faceTracker.init(shapePredURL);
+            faceTracker.init(shapePredURL, cameraOptions);
             initialized = true;
         } else {
             faceTracker.restart();
@@ -258,9 +263,9 @@ ARENA.FaceTracker = (function() {
         // ==================================================
         // PUBLIC
         // ==================================================
-        init: function init(_displayBbox, _flipped) {
+        init: function init(_displayBbox) {
             displayBbox = _displayBbox;
-            flipped = _flipped;
+            flipped = true;
 
             faceTrackerSource = new FaceTracker.FaceTrackerSource({
                 width: width,
@@ -270,6 +275,7 @@ ARENA.FaceTracker = (function() {
 
             window.addEventListener('onFaceTrackerInit', (e) => {
                 const video = e.detail.source;
+                video.className = 'flipVideo';
                 video.style.borderRadius = '10px';
                 video.style.top = '15px';
                 video.style.left = '15px';
