@@ -11,27 +11,16 @@ ARENA.FaceTracker = (function() {
     let displayBbox = false;
     let flipped = false;
 
-    let grayscale = null;
-
-    let videoCanvas = null;
-    let overlayCanvas = null;
-    let videoSource = null;
-
-    let worker = null;
-    let imageData = null;
-
+    let initialized = false;
+    let initializingTimer = null;
     let running = false;
 
     const width = ARENA.localVideoWidth;
     const height = Math.ceil((window.screen.height / window.screen.width) * width);
 
-    const targetFps = 30;
-    const fpsInterval = 1000 / targetFps; // ms
-
-    let startTime;
-    let prevTime;
-
-    let initializingTimer = null;
+    let overlayCanvas;
+    let faceTrackerSource;
+    let faceTracker;
 
     // ==================================================
     // PRIVATE FUNCTIONS
@@ -43,11 +32,7 @@ ARENA.FaceTracker = (function() {
      */
     function writeOverlayText(text) {
         const overlayCtx = overlayCanvas.getContext('2d');
-        overlayCtx.clearRect(
-            0, 0,
-            width,
-            height,
-        );
+        overlayCtx.clearRect( 0, 0, width, height );
         overlayCtx.font = '17px Arial';
         overlayCtx.textAlign = 'center';
         overlayCtx.fillStyle = OVERLAY_COLOR;
@@ -62,15 +47,15 @@ ARENA.FaceTracker = (function() {
         const overlayCtx = overlayCanvas.getContext('2d');
 
         overlayCtx.beginPath();
-        overlayCtx.strokeStyle = 'red';
+        overlayCtx.strokeStyle = 'blue';
         overlayCtx.lineWidth = 1.5;
 
         // [x1,y1,x2,y2]
-        overlayCtx.moveTo(bbox[0], bbox[1]);
-        overlayCtx.lineTo(bbox[0], bbox[3]);
-        overlayCtx.lineTo(bbox[2], bbox[3]);
-        overlayCtx.lineTo(bbox[2], bbox[1]);
-        overlayCtx.lineTo(bbox[0], bbox[1]);
+        overlayCtx.moveTo(bbox.left, bbox.top);
+        overlayCtx.lineTo(bbox.left, bbox.bottom);
+        overlayCtx.lineTo(bbox.right, bbox.bottom);
+        overlayCtx.lineTo(bbox.right, bbox.top);
+        overlayCtx.lineTo(bbox.left, bbox.top);
 
         overlayCtx.stroke();
     }
@@ -104,6 +89,7 @@ ARENA.FaceTracker = (function() {
      * @param {object} features object returned by face tracker worker
      */
     function drawFeatures(features) {
+        if (!running) return;
         const bbox = features.bbox;
         const landmarks = features.landmarks;
 
@@ -139,7 +125,7 @@ ARENA.FaceTracker = (function() {
         let numZeros = 0;
         for (let i = 0; i < landmarks.length; i++) {
             if (i % 2 == 0 && landmarks[i] > width) return false;
-            if (i % 2 == 1 && landmarks[i] <= 0) return false;
+            if (i % 2 == 1 && landmarks[i] > height) return false;
             if (landmarks[i] == 0) numZeros++;
         }
         return numZeros <= landmarks.length / 2;
@@ -157,13 +143,13 @@ ARENA.FaceTracker = (function() {
     /**
      * Creates JSON representation of face tracker output to be sent through mqtt
      * @param {boolean} hasFace whether or not features are valid
-     * @param {object} features bbox and landmarks
+     * @param {object} landmarks landmarks
+     * @param {object} bbox bbox
      * @param {object} pose rotation and translation estimation of face
      * @return {object} resulting JSON of normalized values to be sent through mqtt
      */
-    function createFaceJSON(hasFace, features, pose) {
-        const landmarksRaw = features.landmarks;
-        const bbox = features.bbox;
+    function createFaceJSON(hasFace, landmarks, bbox, pose) {
+        const landmarksRaw = landmarks;
         const quat = pose.rotation;
         const trans = pose.translation;
 
@@ -182,18 +168,36 @@ ARENA.FaceTracker = (function() {
         faceJSON['data']['image']['height'] = height;
 
         faceJSON['data']['pose'] = {};
+
+        let adjustedQuat;
         const quatAdjusted = [];
-        for (let i = 0; i < 4; i++) {
-            const adjustedQuat = hasFace ? round3(quat[i]) : 0;
-            quatAdjusted.push(adjustedQuat);
-        }
+
+        adjustedQuat = hasFace ? round3(quat.x) : 0;
+        quatAdjusted.push(adjustedQuat);
+
+        adjustedQuat = hasFace ? round3(quat.y) : 0;
+        quatAdjusted.push(adjustedQuat);
+
+        adjustedQuat = hasFace ? round3(quat.z) : 0;
+        quatAdjusted.push(adjustedQuat);
+
+        adjustedQuat = hasFace ? round3(quat.w) : 0;
+        quatAdjusted.push(adjustedQuat);
+
         faceJSON['data']['pose']['quaternions'] = quatAdjusted;
 
+        let adjustedTrans;
         const transAdjusted = [];
-        for (let i = 0; i < 3; i++) {
-            const adjustedTrans = hasFace ? round3(trans[i]) : 0;
-            transAdjusted.push(adjustedTrans);
-        }
+
+        adjustedTrans = hasFace ? round3(trans.x) : 0;
+        transAdjusted.push(adjustedTrans);
+
+        adjustedTrans = hasFace ? round3(trans.y) : 0;
+        transAdjusted.push(adjustedTrans);
+
+        adjustedTrans = hasFace ? round3(trans.z) : 0;
+        transAdjusted.push(adjustedTrans);
+
         faceJSON['data']['pose']['translation'] = transAdjusted;
 
         const landmarksAdjusted = [];
@@ -205,164 +209,49 @@ ARENA.FaceTracker = (function() {
         }
         faceJSON['data']['landmarks'] = landmarksAdjusted;
 
+        let adjustedX;
+        let adjustedY;
         const bboxAdjusted = [];
-        for (let i = 0; i < 4; i += 2) {
-            const adjustedX = hasFace ? round3((bbox[i]-width/2)/width) : 0;
-            const adjustedY = hasFace ? round3((height/2-bbox[i+1])/height): 0;
-            bboxAdjusted.push(adjustedX);
-            bboxAdjusted.push(adjustedY);
-        }
+
+        adjustedX = hasFace ? round3((bbox.left-width/2)/width) : 0;
+        adjustedY = hasFace ? round3((height/2-bbox.top)/height): 0;
+        bboxAdjusted.push(adjustedX);
+        bboxAdjusted.push(adjustedY);
+
+        adjustedX = hasFace ? round3((bbox.right-width/2)/width) : 0;
+        adjustedY = hasFace ? round3((height/2-bbox.bottom)/height): 0;
+        bboxAdjusted.push(adjustedX);
+        bboxAdjusted.push(adjustedY);
+
         faceJSON['data']['bbox'] = bboxAdjusted;
 
         // faceJSON['data']['frame'] = frame;
 
         return faceJSON;
     }
-
-    /**
-     * Display frames. Main loop
-     */
-    function tick() {
-        if (!running) return;
-
-        const now = Date.now();
-        const dt = now - prevTime;
-
-        if (dt >= fpsInterval) {
-            prevTime = now - (dt % fpsInterval);
-            imageData = grayscale.getFrame();
-            const videoCanvasCtx = videoCanvas.getContext('2d');
-            videoCanvasCtx.drawImage(
-                videoSource, 0, 0, width, height,
-            );
-        }
-
-        requestAnimationFrame(tick);
-    }
-
-    /**
-     * Callback for initializaton of main face tracking video. Sets up worker and calls main loop
-     * @param {object} source media source for video
-     */
-    function onInit(source) {
-        videoSource = source;
-        running = true;
-
-        const overlayCtx = overlayCanvas.getContext('2d');
-        overlayCtx.clearRect( 0, 0, width, height );
-
-        if (!worker) {
-            // worker to handle feature detection in the background
-            worker = new Worker('./src/face-tracking/js/face-tracker.worker.js');
-            worker.postMessage({type: 'init', width: width, height: height});
-
-            worker.onmessage = function(e) {
-                const msg = e.data;
-                switch (msg.type) {
-                case 'loaded': {
-                    process(); // start processing after face-tracker is ready
-                    break;
-                }
-                case 'progress': {
-                    const progress = (Math.round(msg.progress * 100) / 100).toFixed(2);
-                    // if loading progress is more than 99, start displaying initialization
-                    if (progress > 99) {
-                        let i = 0;
-                        if (!initializingTimer) {
-                            initializingTimer = setInterval(() => {
-                                if (running) {
-                                    writeOverlayText(`Initializing Face Tracking${'.'.repeat(i%4)}`);
-                                    i++;
-                                }
-                            }, 500);
-                        }
-                    }
-                    if (running) {
-                        writeOverlayText(`Downloading Face Model: ${progress}%`);
-                    }
-                    break;
-                }
-                case 'result': {
-                    if (running) {
-                        const valid = hasFace(msg.features.landmarks);
-                        if (valid) {
-                            drawFeatures(msg.features);
-                        } else {
-                            const overlayCtx = overlayCanvas.getContext('2d');
-                            overlayCtx.clearRect( 0, 0, width, height );
-                        }
-                        if (msg.features && msg.pose) {
-                            const faceJSON = createFaceJSON(valid, msg.features, msg.pose);
-                            if (faceJSON != prevJSON) {
-                                ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName + '/face', faceJSON);
-                                prevJSON = faceJSON;
-                            }
-                        }
-                    }
-                    if (initializingTimer) {
-                        clearInterval(initializingTimer);
-                    }
-                    process(); // process another frame
-                    break;
-                }
-                default: {
-                    break;
-                }
-                }
-            };
-        }
-
-        startTime = Date.now();
-        prevTime = startTime;
-
-        tick();
-    }
-
-    /**
-     * Tell worker we have an image ready to process
-     */
-    function process() {
-        if (running && imageData) {
-            worker.postMessage({type: 'process', imagedata: imageData});
-        }
-    }
-
     /**
      * Stop running face tracker and stop videos and overlay
      */
     function stop() {
-        if (!running) return;
-
-        if (videoSource) {
-            const overlayCtx = overlayCanvas.getContext('2d');
-            overlayCtx.clearRect( 0, 0, width, height );
-
-            const tracks = videoSource.srcObject.getTracks();
-            tracks.forEach(function(track) {
-                track.stop();
-            });
-            videoSource.srcObject = null;
-
-            videoCanvas.style.display = 'none';
-            running = false;
-        }
+        running = false;
+        faceTracker.stop();
+        const overlayCtx = overlayCanvas.getContext('2d');
+        overlayCtx.clearRect( 0, 0, width, height );
     }
 
     /**
      * Start running face tracker again
      */
     function restart() {
-        if (running) return;
-
-        videoCanvas.style.display = 'block';
-        grayscale.requestStream()
-            .then((source) => {
-                onInit(source);
-                process();
-            })
-            .catch((err) => {
-                console.warn('ERROR: ' + err);
-            });
+        running = true;
+        if (!initialized) {
+            const shapePredURL =
+                'https://arena-cdn.conix.io/store/face-tracking/shape_predictor_68_face_landmarks_compressed.dat';
+            faceTracker.init(shapePredURL);
+            initialized = true;
+        } else {
+            faceTracker.restart();
+        }
     }
 
     return {
@@ -373,45 +262,71 @@ ARENA.FaceTracker = (function() {
             displayBbox = _displayBbox;
             flipped = _flipped;
 
-            /**
-             * Sets location of HTML element to be upper left corner with 15px margin
-             * @param {object} elem element to set style for
-             */
-            function setVideoStyle(elem) {
-                elem.style.position = 'absolute';
-                elem.style.borderRadius = '10px';
-                elem.style.top = '15px';
-                elem.style.left = '15px';
-            }
+            faceTrackerSource = new FaceTracker.FaceTrackerSource({
+                width: width,
+                height: height,
+            });
+            faceTracker = new FaceTracker.FaceTracker(faceTrackerSource);
 
-            const video = document.createElement('video');
-            video.setAttribute('autoplay', '');
-            video.setAttribute('muted', '');
-            video.setAttribute('playsinline', '');
+            window.addEventListener('onFaceTrackerInit', (e) => {
+                const video = e.detail.source;
+                video.style.borderRadius = '10px';
+                video.style.top = '15px';
+                video.style.left = '15px';
+                video.style.zIndex = '9999';
+                const videoWidth = video.style.width;
+                const videoHeight = video.videoHeight / (video.videoWidth / videoWidth);
+                video.style.height = videoHeight + 'px';
+                document.body.appendChild(video);
 
-            videoCanvas = document.createElement('canvas');
-            setVideoStyle(videoCanvas);
-            videoCanvas.id = 'face-tracking-video';
-            videoCanvas.width = width;
-            videoCanvas.height = height;
-            videoCanvas.style.zIndex = 9997;
-            videoCanvas.style.opacity = 0.3;
-            document.body.appendChild(videoCanvas);
+                overlayCanvas = document.createElement('canvas');
+                overlayCanvas.id = 'face-tracking-overlay';
+                overlayCanvas.style.zIndex = '9999';
+                faceTrackerSource.copyDimensionsTo(overlayCanvas);
+                document.body.appendChild(overlayCanvas);
+            });
 
-            overlayCanvas = document.createElement('canvas');
-            setVideoStyle(overlayCanvas);
-            overlayCanvas.id = 'face-tracking-overlay';
-            overlayCanvas.width = width;
-            overlayCanvas.height = height;
-            overlayCanvas.style.zIndex = 9998;
-            document.body.appendChild(overlayCanvas);
+            window.addEventListener('onFaceTrackerProgress', (e) => {
+                const progress = e.detail.progress;
+                writeOverlayText(`Downloading Face Model: ${progress}%`);
+            });
 
-            grayscale = new FaceTracker.GrayScaleMedia(video, width, height);
-            if (flipped) {
-                videoCanvas.getContext('2d').translate(width, 0);
-                videoCanvas.getContext('2d').scale(-1, 1);
-                grayscale.flipHorizontal();
-            }
+            window.addEventListener('onFaceTrackerLoading', (e) => {
+                let i = 0;
+                if (!initializingTimer) {
+                    initializingTimer = setInterval(() => {
+                        if (running) {
+                            writeOverlayText(`Initializing Face Tracking${'.'.repeat(i%4)}`);
+                            i++;
+                        }
+                    }, 500);
+                }
+            });
+
+            window.addEventListener('onFaceTrackerFeatures', (e) => {
+                const features = e.detail.features;
+                const pose = e.detail.pose;
+                const bbox = features.bbox;
+                const landmarks = features.landmarks;
+
+                const valid = hasFace(landmarks);
+                if (valid) {
+                    drawFeatures(features);
+                } else {
+                    const overlayCtx = overlayCanvas.getContext('2d');
+                    overlayCtx.clearRect( 0, 0, width, height );
+                }
+
+                const faceJSON = createFaceJSON(valid, landmarks, bbox, pose);
+                if (faceJSON !== prevJSON) {
+                    ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName + '/face', faceJSON);
+                    prevJSON = faceJSON;
+                }
+
+                if (initializingTimer) {
+                    clearInterval(initializingTimer);
+                }
+            });
         },
 
         running: function() {

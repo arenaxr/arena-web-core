@@ -528,13 +528,15 @@ export class ARENAJitsi {
         if (this.avConnected) {
             return;
         }
-        const perfAudioInput = localStorage.getItem('prefAudioInput') ;
+
+        const perfAudioInput = localStorage.getItem('prefAudioInput');
         const perfVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
-        const deviceOpts ={}
+        const deviceOpts = {};
         if (perfAudioInput) {
             deviceOpts.micDeviceId = perfAudioInput;
         }
+
         try {
             let vidConstraint = true;
             if  (perfVideoInput) {
@@ -590,9 +592,9 @@ export class ARENAJitsi {
              * set video element size
              */
             function setCornerVideoHeight() {
-                const width = _this.jitsiVideoElem.style.width;
+                const videoWidth = _this.jitsiVideoElem.style.width;
                 const videoHeight = _this.jitsiVideoElem.videoHeight /
-                                        (_this.jitsiVideoElem.videoWidth / width);
+                                        (_this.jitsiVideoElem.videoWidth / videoWidth);
                 _this.jitsiVideoElem.style.height = videoHeight + 'px';
             }
 
