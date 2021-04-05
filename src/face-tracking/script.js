@@ -270,6 +270,7 @@ ARENA.FaceTracker = (function() {
 
             window.addEventListener('onFaceTrackerInit', (e) => {
                 const video = e.detail.source;
+                video.className = 'flipVideo';
                 video.style.borderRadius = '10px';
                 video.style.top = '15px';
                 video.style.left = '15px';
