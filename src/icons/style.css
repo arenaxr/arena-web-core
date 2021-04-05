@@ -8,6 +8,11 @@
 }
 
 .flipVideo {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    border-radius: 10px;
+    z-index: 9999;
     transform: scale(-1, 1);
     -moz-transform: scale(-1, 1); /* Firefox */
     -webkit-transform: scale(-1, 1); /* Safari and Chrome */

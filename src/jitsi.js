@@ -579,12 +579,7 @@ export class ARENAJitsi {
             // video window for jitsi
             this.jitsiVideoElem = document.getElementById('cornerVideo');
             this.jitsiVideoElem.className = 'flipVideo';
-            this.jitsiVideoElem.style.position = 'absolute';
-            this.jitsiVideoElem.style.borderRadius = '10px';
-            this.jitsiVideoElem.style.top = '15px';
-            this.jitsiVideoElem.style.left = '15px';
-            this.jitsiVideoElem.style.zIndex = '9999';
-            this.jitsiVideoElem.style.opacity = '0.95'; // slightly see through
+            this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
             this.jitsiVideoElem.style.display = 'none';
             this.jitsiVideoElem.style.width = ARENA.localVideoWidth + 'px';
 
