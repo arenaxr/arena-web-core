@@ -578,6 +578,7 @@ export class ARENAJitsi {
         function setupCornerVideo() {
             // video window for jitsi
             this.jitsiVideoElem = document.getElementById('cornerVideo');
+            this.jitsiVideoElem.className = 'flipVideo';
             this.jitsiVideoElem.style.position = 'absolute';
             this.jitsiVideoElem.style.borderRadius = '10px';
             this.jitsiVideoElem.style.top = '15px';
