@@ -7,7 +7,7 @@
  * Query the system a list of all tags in a scene:
  *   let apriltags = document.querySelector("a-scene").systems["apriltag"].getAll();
  *   apriltags.forEach(tag => {
- *      let tagPose = tag.el.object3D.matrixWorld; // a 4x4 matrix: https://threejs.org/docs/#api/en/math/Matrix4 
+ *      let tagPose = tag.el.object3D.matrixWorld; // a 4x4 matrix: https://threejs.org/docs/#api/en/math/Matrix4
  *      console.log(`tag id: ${tag.data.tagid}`, tagPose);
  *   });
  *
@@ -19,17 +19,19 @@
 AFRAME.registerSystem('apriltag', {
     schema: {},
     init: function() {
-        this.tags = [];
+        this.tags = {};
     },
     registerComponent: function(tag) {
-        this.tags.push(tag);
+        this.tags[tag.data.tagid] = tag;
     },
     unregisterComponent: function(tag) {
-        const index = this.tags.indexOf(tag);
-        this.tags.splice(index, 1);
+        delete this.tags[tag.data.tagid];
     },
     getAll: function() {
         return this.tags;
+    },
+    get: function(tagid) {
+        return this.tags[tagid];
     },
 });
 
