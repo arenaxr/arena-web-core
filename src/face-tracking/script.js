@@ -124,8 +124,8 @@ ARENA.FaceTracker = (function() {
 
         let numZeros = 0;
         for (let i = 0; i < landmarks.length; i++) {
-            if (i % 2 == 0 && landmarks[i] > width) return false;
-            if (i % 2 == 1 && landmarks[i] > height) return false;
+            // if (i % 2 == 0 && landmarks[i] > width) return false;
+            // if (i % 2 == 1 && landmarks[i] > height) return false;
             if (landmarks[i] == 0) numZeros++;
         }
         return numZeros <= landmarks.length / 2;
