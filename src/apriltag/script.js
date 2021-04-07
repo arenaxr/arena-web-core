@@ -73,6 +73,25 @@ const vioFilter = (vioPrev, vioCur) => {
     return true;
 };
 
+/**
+ * Retrieves apriltags, first from local scene objects, then from ATLAS request
+ * @param {number} id - numeric id of tag
+ * @return {*} - tag or undefined
+ */
+function getAllTags(id) {
+    const tagSystem = document.querySelector('a-scene').systems['apriltag'];
+    const sysTag = tagSystem.get(id);
+    if (sysTag !== undefined) {
+        return {
+            id: sysTag.data.tagid,
+            uuid: `apriltag_${sysTag.el.id}`,
+            pose: sysTag.el.object3D.matrixWorld,
+        };
+    } else {
+        return ARENA.aprilTags[id];
+    }
+}
+
 
 window.processCV = async function(frame) {
     const ARENA = window.ARENA;
@@ -137,8 +156,9 @@ window.processCV = async function(frame) {
                 delete d.corners;
                 delete d.center;
                 // Known tag from ATLAS (includes Origin tag)
-                if (ARENA.aprilTags[d.id] && ARENA.aprilTags[d.id].pose) {
-                    d.refTag = ARENA.aprilTags[d.id];
+                const indexedTag = getAllTags(d.id);
+                if (indexedTag?.pose) {
+                    d.refTag = indexedTag;
                 }
                 jsonMsg.detections.push(d);
             }
@@ -164,8 +184,9 @@ window.processCV = async function(frame) {
                 const dtagid = detection.id;
                 let refTag = null;
                 // Known tag from ATLAS (includes Origin tag)
-                if (ARENA.aprilTags[dtagid] && ARENA.aprilTags[dtagid].pose) {
-                    refTag = ARENA.aprilTags[dtagid];
+                const indexedTag = getAllTags(dtagid);
+                if (indexedTag?.pose) {
+                    refTag = indexedTag;
                     /* ** No known result, try query if local solver **
                     } else if (ARENA.localTagSolver && await updateAprilTags()) {
                         refTag = ARENA.aprilTags[dtagid];
