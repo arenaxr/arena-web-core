@@ -631,7 +631,73 @@
                 "cast": false,
                 "receive": false
             }
-        }
+        },
+        "armarker":{
+            "title":"ARMArker",
+            "description":"A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes in the real world. ",
+            "type":"object",
+            "properties":{
+               "markertype":{
+                  "type":"string",
+                  "title":"The marker type (apriltag_36h11, lightanchor, uwb)",
+                  "enum":[
+                     "apriltag_36h11",
+                     "lightanchor",
+                     "uwb"
+                  ],
+                  "default":"apriltag_36h11"
+               },
+               "markerid":{
+                  "type":"string",
+                  "title":"The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
+                  "default":0
+               },
+               "size":{
+                  "type":"number",
+                  "title":"Tag size (mm)",
+                  "default":150
+               },
+               "url":{
+                  "type":"string",
+                  "title":"URL associated with the tag",
+                  "default":""
+               },
+               "lat":{
+                  "type":"number",
+                  "title":"Tag latitude",
+                  "minimum":-90,
+                  "maximum":90,
+                  "default":0
+               },
+               "lon":{
+                  "type":"number",
+                  "title":"Tag longitude",
+                  "minimum":-180,
+                  "maximum":180,
+                  "default":0
+               },
+               "ele":{
+                  "type":"number",
+                  "title":"Tag elevation (m)",
+                  "default":0
+               }
+            },
+            "default":{
+               "markertype":"apriltag_36h11",
+               "markerid":"0",
+               "size":150,
+               "lat":40.4432,
+               "lon":79.9428,
+               "ele":200
+            },
+            "required":[
+               "markertype",
+               "markerid",
+               "size",
+               "lat",
+               "lon"
+            ]
+         }
     },
     "title": "Tetrahedron",
     "description": "Tetrahedron Geometry",
@@ -738,9 +804,12 @@
                 },
                 "shadow": {
                     "$ref": "#/definitions/shadow"
+                },
+                "armarker": {
+                    "$ref": "#/definitions/armarker"
                 }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "default": {
                 "object_type": "tetrahedron",
                 "radius": 1,

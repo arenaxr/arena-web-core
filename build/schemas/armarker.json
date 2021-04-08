@@ -633,8 +633,8 @@
             }
         }
     },
-    "title": "AprilTag",
-    "description": "An AprilTag (36h11 family). AprilTag is a visual fiducial system, used in the ARENA to anchor scenes in the real world.",
+    "title": "ARMarker",
+    "description": "A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes in the real world.",
     "properties": {
         "object_id": {
             "type": "string",
@@ -671,12 +671,18 @@
                     "title": "3D object type",
                     "description": "3D object type (derived from 'type' select above).",
                     "enum": [
-                        "apriltag"
+                        "armarker"
                     ]
                 },
-                "tagid": {
-                    "type": "number",
-                    "title": "The tag id [0, 586]",
+                "markertype": {
+                    "type": "string",
+                    "title": "The marker type (apriltag_36h11, lightanchor, uwb)",
+                    "enum" : ["apriltag_36h11", "lightanchor", "uwb"],
+                    "default": "apriltag_36h11"
+                },
+                "markerid": {
+                    "type": "string",
+                    "title": "The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
                     "default": 0
                 },
                 "size": {
@@ -769,10 +775,11 @@
                     "$ref": "#/definitions/shadow"
                 }
             },
-            "additionalProperties": false,
+            "additionalProperties": true,
             "default": {
-                "object_type": "apriltag",
-                "tagid": 0,
+                "object_type": "armarker",
+                "markertype": "apriltag_36h11",
+                "markerid": "0",
                 "size": 150,
                 "lat": 40.4432,
                 "lon": 79.9428,
@@ -780,11 +787,13 @@
             },
             "required": [
                 "object_type",
+                "markertype",
+                "markerid",
                 "size",
                 "lat",
                 "lon"
             ],
-            "title": "Apriltag Data"
+            "title": "ARMarker Data"
         }
     },
     "required": [
