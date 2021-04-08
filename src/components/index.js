@@ -10,7 +10,7 @@
  * ARENA A-Frame components and systems
  */
 
-import './apriltag.js';
+import './armarker.js';
 import './arena-camera.js';
 import './arena-user.js';
 import './arena-vive.js';
