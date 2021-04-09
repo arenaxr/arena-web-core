@@ -57,7 +57,7 @@ Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-F
 <dt><a href="#module_material-extras">material-extras</a></dt>
 <dd><p>Allows to set extra material properties, namely texture encoding, whether to render the material&#39;s color and render order.
 The properties set here access directly <a href="https://threejs.org/docs/#api/en/materials/Material">Three.js material</a>.
-Timeout scheme in lack of better understanding of the timming/events causing properties to not be available</p>
+Implements a timeout scheme in lack of better understanding of the timming/events causing properties to not be available.</p>
 </dd>
 <dt><a href="#module_network-latency">network-latency</a></dt>
 <dd><p>Publish with qos of 2 for network graph to update latency</p>
@@ -70,7 +70,7 @@ Based off <a href="https://github.com/aframevr/aframe/blob/master/src/components
 <dd><p>Opens an HTML prompt when clicked. Sends text input as an event on MQTT</p>
 </dd>
 <dt><a href="#module_threejs-scene">threejs-scene</a></dt>
-<dd><p>Load a [THREE.js scene]{<a href="https://threejs.org/docs/#api/en/scenes/Scene%7D">https://threejs.org/docs/#api/en/scenes/Scene}</a>. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
+<dd><p>Load a <a href="https://threejs.org/docs/#api/en/scenes/Scene">THREE.js scene</a>. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
 For a move portable format, using glTF is preferred.</p>
 </dd>
 <dt><a href="#module_ttl">ttl</a></dt>
@@ -408,18 +408,18 @@ Load scene from persistence.
 ## material-extras
 Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
 The properties set here access directly [Three.js material](https://threejs.org/docs/#api/en/materials/Material).
-Timeout scheme in lack of better understanding of the timming/events causing properties to not be available
+Implements a timeout scheme in lack of better understanding of the timming/events causing properties to not be available.
 
 **Properties**
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| [encoding] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking' |
-| [needsUpdate] | <code>boolean</code> | <code>false</code> | Specifies that the material needs to be recompiled. |
-| [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. This can be used in conjunction with a mesh's renderOrder property to create invisible objects that occlude other objects. Default is true. |
-| [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden although opaque and transparent objects remain sorted independently. When this property is set for an instance of Group, all descendants objects will be sorted and rendered together. Sorting is from lowest to highest renderOrder. |
+| [encoding] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [needsUpdate] | <code>boolean</code> | <code>false</code> | Specifies that the material needs to be recompiled. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder](https://threejs.org/docs/#api/en/core/Object3D.renderOrder). |
 | [transparentOccluder] | <code>boolean</code> | <code>false</code> | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder. |
-| [defaultRenderOrder] | <code>number</code> | <code>1</code> | Used as the renderOrder when transparentOccluder is set to `false`. |
+| [defaultRenderOrder] | <code>number</code> | <code>1</code> | Used as the renderOrder when transparentOccluder is reset to `false`. |
 
 <a name="module_network-latency"></a>
 
@@ -463,7 +463,7 @@ Opens an HTML prompt when clicked. Sends text input as an event on MQTT
 <a name="module_threejs-scene"></a>
 
 ## threejs-scene
-Load a [THREE.js scene]{https://threejs.org/docs/#api/en/scenes/Scene}. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
+Load a [THREE.js scene](https://threejs.org/docs/#api/en/scenes/Scene). THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
 For a move portable format, using glTF is preferred.
 
 **Properties**
