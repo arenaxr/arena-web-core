@@ -12,14 +12,14 @@
 /**
  * Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
  * The properties set here access directly [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
- * Timeout scheme in lack of better understanding of the timming/events causing properties to not be available
+ * Implements a timeout scheme in lack of better understanding of the timming/events causing properties to not be available.
  * @module material-extras
- * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'
- * @property {boolean} [needsUpdate=false] - Specifies that the material needs to be recompiled.
- * @property {boolean} [colorWrite=true] - Whether to render the material's color. This can be used in conjunction with a mesh's renderOrder property to create invisible objects that occlude other objects. Default is true.
- * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden although opaque and transparent objects remain sorted independently. When this property is set for an instance of Group, all descendants objects will be sorted and rendered together. Sorting is from lowest to highest renderOrder.
+ * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
+ * @property {boolean} [needsUpdate=false] - Specifies that the material needs to be recompiled. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
+ * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
+ * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
- * @property {number} [defaultRenderOrder=1] - Used as the renderOrder when transparentOccluder is set to `false`.
+ * @property {number} [defaultRenderOrder=1] - Used as the renderOrder when transparentOccluder is reset to `false`.
 */
 AFRAME.registerComponent('material-extras', {
     dependencies: ['material'],
@@ -76,7 +76,6 @@ AFRAME.registerComponent('material-extras', {
     retryUpdateMaterial() {
         if (this.retryIndex < this.retryTimeouts.length) {
             setTimeout(async () => {
-                //console.log('retry!');
                 this.retryIndex++;
                 this.updateMaterial();
             }, this.retryTimeouts[this.retryIndex]); // try again in a bit
