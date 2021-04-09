@@ -83,6 +83,7 @@ async function enableChromeAEC(gainNode) {
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
  * @module arena-user
  * @property {color} [color=white] - The color for the user's name text.
+ * @property {string} [headModelPath=/store/models/robobit.glb] - Path to user head model
  * @property {string} [jitsiId] - User jitsi id.
  * @property {string} [displayName] - User display name.
  * @property {boolean} [hasAudio=false] - Weather the user has audio on.
@@ -92,6 +93,7 @@ async function enableChromeAEC(gainNode) {
 AFRAME.registerComponent('arena-user', {
     schema: {
         color: {type: 'color', default: 'white'},
+        headModelPath: {type: 'string', default: '/store/models/robobit.glb'},
         jitsiId: {type: 'string', default: ''},
         displayName: {type: 'string', default: ''},
         hasAudio: {type: 'boolean', default: false},
@@ -126,7 +128,8 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('rotation', '0 180 0');
         this.headModel.object3D.scale.set(1, 1, 1);
         this.headModel.setAttribute('dynamic-body', 'type', 'static');
-        this.headModel.setAttribute('gltf-model', 'url(/store/models/Head.gltf)'); // actually a face mesh
+        this.headModel.setAttribute('gltf-model', `url(${data.headModelPath})`);
+        this.headModel.setAttribute('attribution', 'extractAssetExtras', true);
 
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
