@@ -1,12 +1,19 @@
 /* global AFRAME, ARENA */
 
+/**
+ * @fileoverview Component that detects multi-finger touch gestures. 
+ * Based off of work from 8th Wall at https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
+ *
+ */
+
 import {
     ARENAUtils,
 } from '../utils.js';
 
 /**
- * Component that detects multi-finger touch gestures. Based off of work from 8th Wall at:
- * https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
+ * Detect multi-finger touch gestures. Publish events accordingly.
+ * Based off 8th Wall's [gesture-detector]{@link https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js}
+ * @module gesture-detector
  */
 AFRAME.registerComponent('gesture-detector', {
     // Without throttling, touchmove publishes at ~20ms

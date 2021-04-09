@@ -3,14 +3,25 @@
 import {ARENAUtils} from '../utils.js';
 
 /**
- * Listen for clicks, call defined function on event evt
+ * @fileoverview Component to listen for mouse events and publish corresponding events
  *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+/**
+ * Keep track of mouse events and publish corresponding events
+ * @module click-listener
  */
 AFRAME.registerComponent('click-listener', {
-    // listen for clicks, call defined function on event evt
-    init: function() {
+        /**
+         * Setup event listners for mouse events; listners publish events to MQTT
+         * @alias module:click-listener
+         * @todo Consolidate event listners (they are very similar)
+         */
+         init: function() {
         const self = this;
-
         this.el.addEventListener('mousedown', function(evt) {
             const camera = document.getElementById('my-camera');
             const position = camera.getAttribute('position');

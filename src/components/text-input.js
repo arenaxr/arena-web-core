@@ -1,16 +1,28 @@
 /* global AFRAME, ARENA */
 
+/**
+ * @fileoverview Present an HTML prompt to user
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 import Swal from 'sweetalert2';
 
 /**
- * Opens an HTML prompt when clicked.
- *
+ * Opens an HTML prompt when clicked. Sends text input as an event on MQTT
+ * @module textinput
+ * @property {string} [on=mousedown] - A case-sensitive string representing the [event type]{@link https://developer.mozilla.org/en-US/docs/Web/Events} to listen for, e.g. 'mousedown', 'mouseup'
+ * @property {string} [title=Text Input] - The prompt title
+ * @property {string} [label=Input text below (max is 140 characters)] - Text prompt label
+ * @property {string} [placeholder=Type here] - Text input place hoText
  */
 AFRAME.registerComponent('textinput', {
     schema: {
         on: {
             default: 'mousedown',
-        }, // event to listen 'on'
+        }, 
         title: {
             default: 'Text Input',
         },

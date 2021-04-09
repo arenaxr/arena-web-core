@@ -1,10 +1,19 @@
 /* global AFRAME, ARENA */
 
 /**
+ * @fileoverview Tracking Vive controller movement in real time.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+/**
  * Generates a vive event
  * @param {Object} evt event
  * @param {string} eventName name of event, i.e. 'triggerup'
  * @param {Object} myThis reference to object that generated the event
+ * @private
  */
 function eventAction(evt, eventName, myThis) {
     const newPosition = myThis.object3D.position;
@@ -30,7 +39,12 @@ function eventAction(evt, eventName, myThis) {
 }
 
 /**
- * Tracking Vive controller movement in real time.
+ *  Tracking Vive controller movement in real time.
+ * @module arena-vive
+ * @property {boolean} enabled - Controller enabled.
+ * @property {string} name - Name used to publish controller pose.
+ * @property {string} hand - Controller hand.
+ * @property {string} color - Controller color.
  *
  */
 AFRAME.registerComponent('arena-vive', {

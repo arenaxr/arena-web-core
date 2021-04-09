@@ -1,9 +1,18 @@
 /* global AFRAME, ARENA, THREE */
 
 /**
+ * @fileoverview Another user's camera in the ARENA. Handles Jitsi and display name updates.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+/**
  * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
  * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
  * @param {Object} gainNode
+ * @private
  */
 async function enableChromeAEC(gainNode) {
     /**
@@ -72,6 +81,12 @@ async function enableChromeAEC(gainNode) {
 
 /**
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
+ * @module arena-user
+ * @property {color} [color=white] - The color for the user's name text.
+ * @property {string} [jitsiId] - User jitsi id.
+ * @property {string} [displayName] - User display name.
+ * @property {boolean} [hasAudio=false] - Weather the user has audio on.
+ * @property {boolean} [hasVideo=false] - Weather the user has video on.
  *
  */
 AFRAME.registerComponent('arena-user', {

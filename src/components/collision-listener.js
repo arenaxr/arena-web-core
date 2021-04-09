@@ -1,10 +1,18 @@
 /* global AFRAME, ARENA */
 
-// import {ARENAUtils} from '../utils.js';
+/**
+ * @fileoverview Listen for collisions, callback on event.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
 
 /**
  * Listen for collisions, callback on event.
- *
+ * Requires [Physics for A-Frame VR]{@link https://github.com/n5ro/aframe-physics-system}
+ * @module collision-listener
+ * @requires aframe-physics-system
  */
 AFRAME.registerComponent('collision-listener', {
     // listen for collisions, call defined function on event evt

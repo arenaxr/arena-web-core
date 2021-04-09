@@ -1,7 +1,20 @@
 /* global AFRAME, ARENA */
 
 /**
+ * @fileoverview Adds a video to an entity and controls its playback.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+/**
  * Adds a video to an entity and controls its playback.
+ * @module video-control
+ * @property {string} video_object - the object id of the element where to display the video
+ * @property {string} video_path - path/url to the video
+ * @property {boolean} [anyone_clicks=true] - anyone clicks
+ * @property {boolean} [video_loop=true] - video loop
  *
  */
 AFRAME.registerComponent('video-control', {

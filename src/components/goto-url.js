@@ -1,10 +1,21 @@
 /* global AFRAME */
 
+/**
+ * @fileoverview Goto URL Component.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 import Swal from 'sweetalert2';
 
 /**
- * Load new URL if clicked
- *
+ * Load new URL when object is clicked
+ * @module goto-url
+ * @property {string} on - A case-sensitive string representing the [event type]{@link https://developer.mozilla.org/en-US/docs/Web/Events} to listen for, e.g. 'mousedown', 'mouseup'
+ * @property {string} url - The destination url e.g. https://some-site.com
+ * @property {string} [dest=sametab] - Where to open the URL; one of 'popup', 'newtab', 'sametab'
  */
 AFRAME.registerComponent('goto-url', {
     // load new URL if clicked
@@ -16,7 +27,7 @@ AFRAME.registerComponent('goto-url', {
             default: '',
         }, // http:// style url
         dest: {
-            default: 'sametab',
+            default: 'sametab', oneOf: ['popup', 'newtab', 'sametab']
         }, // newtab
     },
 

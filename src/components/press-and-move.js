@@ -1,13 +1,22 @@
 /* global AFRAME, ARENA */
 
+/**
+ * @fileoverview Support user camera movement with the mouse.
+ * Adapted from: https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js
+ *
+ */
+
 const MAX_DELTA = 0.2;
 const CLAMP_VELOCITY = 0.00001;
 const LONG_PRESS_DURATION_THRESHOLD = 1000; // pressing for 1 second counts as long press
 
 /**
- * Support user camera movement with the mouse.
- * Adapted from: https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js
- *
+ * Press and move camera; User camera movement with the mouse.
+ * Based off [wasd conntrols]{@link https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js}
+ * @module press-and-move
+ * @property {number} [acceleration=30] - Movement acceleration.
+ * @property {boolean} [enabled=true] - Is the camera movement component enabled.
+ * @property {boolean} [fly=true] - Is the camera at a fixed height (`fly=false`) or not (`fly=true`)
  */
 AFRAME.registerComponent('press-and-move', {
     schema: {

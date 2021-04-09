@@ -1,9 +1,19 @@
 /* global AFRAME */
 
 /**
+ * @fileoverview Component to apply an impulse to an object to set it in motion
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+/**
  * One physics feature is applying an impulse to an object to set it in motion.
  * This happens in conjunction with an event.
- * Works along physics system (aframe-physics-system).
+ * Requires [Physics for A-Frame VR]{@link https://github.com/n5ro/aframe-physics-system}
+ * @module impulse
+ * @requires aframe-physics-system
  *
  */
 AFRAME.registerComponent('impulse', {

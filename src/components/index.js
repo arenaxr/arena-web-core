@@ -1,5 +1,5 @@
 /**
- * @fileoverview Import A-Frame Componets used
+ * @fileoverview Import A-Frame Components used
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
