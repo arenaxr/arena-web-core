@@ -1,40 +1,503 @@
-# A-Frame components added to support ARENA core functionality
+# A-Frame components (modules) added to support ARENA core functionality
 
-# arena-camera
-Tracking camera movement in real time. Directly publishes camera pose.
+## Modules
 
-# arena-user
-Jistsi and display name handling for arena users.
+<dl>
+<dt><a href="#module_arena-camera">arena-camera</a></dt>
+<dd><p>Tracking camera movement in real time. Emits camera pose change and VIO change events.</p>
+</dd>
+<dt><a href="#module_arena-user">arena-user</a></dt>
+<dd><p>Another user&#39;s camera in the ARENA. Handles Jitsi and display name updates.</p>
+</dd>
+<dt><a href="#module_arena-vive">arena-vive</a></dt>
+<dd><p>Tracking Vive controller movement in real time.</p>
+</dd>
+<dt><a href="#module_armarker-system">armarker-system</a></dt>
+<dd><p>ARMarker System. Supports ARMarkers in a scene.</p>
+</dd>
+<dt><a href="#module_armarker">armarker</a></dt>
+<dd><p>ARMarker Component. Supports ARMarkers in a scene</p>
+</dd>
+<dt><a href="#module_attribution-system">attribution-system</a></dt>
+<dd><p>Attribution Component/System. Add attribution message to any entity.
+Tries to extract author, license, source and title (assuming format used in sketchfab downloaded models)</p>
+<p>Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
+If both asset.extras and scene.extra exist, gives preference to asset.extras.</p>
+</dd>
+<dt><a href="#module_attribution">attribution</a></dt>
+<dd><p>Attribution Component. Saves attribution data in any entity. The folowing properties can be saved.
+If <code>extractAssetExtras=true</code> (default), the <a href="attribution-system">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
+</dd>
+<dt><a href="#module_click-listener">click-listener</a></dt>
+<dd><p>Keep track of mouse events and publish corresponding events</p>
+</dd>
+<dt><a href="#module_collision-listener">collision-listener</a></dt>
+<dd><p>Listen for collisions, callback on event.
+Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-Frame VR</a></p>
+</dd>
+<dt><a href="#module_gesture-detector">gesture-detector</a></dt>
+<dd><p>Detect multi-finger touch gestures. Publish events accordingly.
+Based off 8th Wall&#39;s <a href="https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js">gesture-detector</a></p>
+</dd>
+<dt><a href="#module_goto-url">goto-url</a></dt>
+<dd><p>Load new URL when object is clicked</p>
+</dd>
+<dt><a href="#module_hide-in-ar-mode">hide-in-ar-mode</a></dt>
+<dd><p>Hide in AR component. When set to an entity, it will make the entity disappear when entering AR mode.
+Based on <a href="https://github.com/aframevr/aframe/pull/4356">this example</a></p>
+</dd>
+<dt><a href="#module_impulse">impulse</a></dt>
+<dd><p>One physics feature is applying an impulse to an object to set it in motion.
+This happens in conjunction with an event.
+Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-Frame VR</a></p>
+</dd>
+<dt><a href="#module_load-scene">load-scene</a></dt>
+<dd><p>Load scene from persistence.</p>
+</dd>
+<dt><a href="#module_material-extras">material-extras</a></dt>
+<dd><p>Allows to set extra material properties, namely texture encoding, whether to render the material&#39;s color and render order.
+The properties set here access directly <a href="https://threejs.org/docs/#api/en/materials/Material">Three.js material</a>.
+Timeout scheme in lack of better understanding of the timming/events causing properties to not be available</p>
+</dd>
+<dt><a href="#module_network-latency">network-latency</a></dt>
+<dd><p>Publish with qos of 2 for network graph to update latency</p>
+</dd>
+<dt><a href="#module_press-and-move">press-and-move</a></dt>
+<dd><p>Press and move camera; User camera movement with the mouse.
+Based off <a href="https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js">wasd conntrols</a></p>
+</dd>
+<dt><a href="#module_textinput">textinput</a></dt>
+<dd><p>Opens an HTML prompt when clicked. Sends text input as an event on MQTT</p>
+</dd>
+<dt><a href="#module_threejs-scene">threejs-scene</a></dt>
+<dd><p>Load a [THREE.js scene]{<a href="https://threejs.org/docs/#api/en/scenes/Scene%7D">https://threejs.org/docs/#api/en/scenes/Scene}</a>. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
+For a move portable format, using glTF is preferred.</p>
+</dd>
+<dt><a href="#module_ttl">ttl</a></dt>
+<dd><p>Time To Live (TTL) component.</p>
+<p>When applied to an entity, the entity will remove itself from DOM after the specified number of seconds.
+Update <em>is</em> allowed, which will reset the timer to start from that moment.</p>
+</dd>
+<dt><a href="#module_video-control">video-control</a></dt>
+<dd><p>Adds a video to an entity and controls its playback.</p>
+</dd>
+</dl>
+
+<a name="module_arena-camera"></a>
+
+## arena-camera
+Tracking camera movement in real time. Emits camera pose change and VIO change events.
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| enabled | <code>boolean</code> | Indicates whether camera tracking is enabled. |
+| vioEnabled | <code>boolean</code> | Indicates whether to publish VIO on every tick (if true). |
+| displayName | <code>string</code> | User display name (used to publish camera data). |
+| color | <code>string</code> | Head text color. |
+| rotation | <code>Array.&lt;number&gt;</code> | Last camera rotation value. |
+| position | <code>Array.&lt;number&gt;</code> | Last camera position value. |
+| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value. |
+| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value. |
+
+<a name="module_arena-user"></a>
+
+## arena-user
+Another user's camera in the ARENA. Handles Jitsi and display name updates.
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [color] | <code>color</code> | <code>white</code> | The color for the user's name text. |
+| [jitsiId] | <code>string</code> |  | User jitsi id. |
+| [displayName] | <code>string</code> |  | User display name. |
+| [hasAudio] | <code>boolean</code> | <code>false</code> | Weather the user has audio on. |
+| [hasVideo] | <code>boolean</code> | <code>false</code> | Weather the user has video on. |
+
+<a name="module_arena-vive"></a>
 
 ## arena-vive
-Tracking Vive controller movement and events in real time.
+Tracking Vive controller movement in real time.
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| enabled | <code>boolean</code> | Controller enabled. |
+| name | <code>string</code> | Name used to publish controller pose. |
+| hand | <code>string</code> | Controller hand. |
+| color | <code>string</code> | Controller color. |
+
+<a name="module_armarker-system"></a>
+
+## armarker-system
+ARMarker System. Supports ARMarkers in a scene.
+
+
+* [armarker-system](#module_armarker-system)
+    * [registerComponent(marker)](#exp_module_armarker-system--registerComponent) ⏏
+    * [unregisterComponent(marker)](#exp_module_armarker-system--unregisterComponent) ⏏
+    * [getAll(mtype)](#exp_module_armarker-system--getAll) ⇒ <code>object</code> ⏏
+    * [get(markerid)](#exp_module_armarker-system--get) ⇒ <code>object</code> ⏏
+
+<a name="exp_module_armarker-system--registerComponent"></a>
+
+### registerComponent(marker) ⏏
+Register an ARMarker component with the system
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| marker | <code>object</code> | The marker component object to register. |
+
+<a name="exp_module_armarker-system--unregisterComponent"></a>
+
+### unregisterComponent(marker) ⏏
+Unregister an ARMarker component
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| marker | <code>object</code> | The marker component object to unregister. |
+
+<a name="exp_module_armarker-system--getAll"></a>
+
+### getAll(mtype) ⇒ <code>object</code> ⏏
+Get all markers registered with the system
+
+**Kind**: Exported function  
+**Returns**: <code>object</code> - - a dictionary of markers  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mtype | <code>object</code> | The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for; No argument or undefined will return all |
+
+**Example** *(Query the system a list of all markers in a scene)*  
+```js
+    let markers = document.querySelector("a-scene").systems["armarker"].getAll();
+    Object.keys(markers).forEach(function(key) {
+      console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
+    });
+```
+**Example** *(getAll() also accepts a marker type argument to filter by a given type)*  
+```js
+    let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
+```
+<a name="exp_module_armarker-system--get"></a>
+
+### get(markerid) ⇒ <code>object</code> ⏏
+Get a marker given is markerid
+
+**Kind**: Exported function  
+**Returns**: <code>object</code> - - the marker with the markerid given  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| markerid | <code>object</code> | The marker id to return |
+
+<a name="module_armarker"></a>
+
+## armarker
+ARMarker Component. Supports ARMarkers in a scene
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [markertype] | <code>string</code> | <code>&quot;apriltag_36h11&quot;</code> | The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb' |
+| [markerid] | <code>string</code> |  | Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]) |
+| [size] | <code>number</code> | <code>150</code> | Size of the marker (assumed to be a square), if applicable (mm). |
+| [url] | <code>string</code> |  | A URL associated with the marker. |
+| [lat] | <code>number</code> | <code>0</code> | Marker latitude. |
+| [long] | <code>number</code> | <code>0</code> | Marker longitude. |
+| [ele] | <code>number</code> | <code>0</code> | Marker elevation. |
+
+<a name="module_attribution-system"></a>
+
+## attribution-system
+Attribution Component/System. Add attribution message to any entity.
+Tries to extract author, license, source and title (assuming format used in sketchfab downloaded models)
+
+Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
+If both asset.extras and scene.extra exist, gives preference to asset.extras.
+
+**Example** *(Sketfab downloaded model attributes - asset.extra)*  
+```js
+   author: "AuthorName (https://link-to-author)"
+   license: "CC-BY-4.0 (http://link-to-license)"
+   source: "https://link-to-model-website"
+   title: "Model Title"
+```
+
+* [attribution-system](#module_attribution-system)
+    * [registerComponent(el)](#exp_module_attribution-system--registerComponent) ⏏
+    * [unregisterComponent(el)](#exp_module_attribution-system--unregisterComponent) ⏏
+    * [getAttributionTable()](#exp_module_attribution-system--getAttributionTable) ⇒ <code>string</code> ⏏
+    * [extractAttributionFromGtlfAsset(el, gltfComponent)](#exp_module_attribution-system--extractAttributionFromGtlfAsset) ⏏
+    * [parseExtrasAttributes(extras)](#exp_module_attribution-system--parseExtrasAttributes) ⇒ <code>object</code> ⏏
+    * [parseAttribute(extras, attribution, attribute)](#exp_module_attribution-system--parseAttribute) ⇒ <code>boolean</code> ⏏
+
+<a name="exp_module_attribution-system--registerComponent"></a>
+
+### registerComponent(el) ⏏
+Register an attribution component with the system
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>object</code> | The attribution a-frame element to register. |
+
+<a name="exp_module_attribution-system--unregisterComponent"></a>
+
+### unregisterComponent(el) ⏏
+Unregister an attribution component
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>object</code> | The attribution a-frame element. |
+
+<a name="exp_module_attribution-system--getAttributionTable"></a>
+
+### getAttributionTable() ⇒ <code>string</code> ⏏
+Collect all attribution components and return an HTML table with credits
+
+**Kind**: Exported function  
+**Returns**: <code>string</code> - - an HTML table with the scene credits  
+**Example** *(Query the system for an HTML table of credits:)*  
+```js
+   document.querySelector("a-scene").systems["attribution"].getAttributionTable();
+```
+<a name="exp_module_attribution-system--extractAttributionFromGtlfAsset"></a>
+
+### extractAttributionFromGtlfAsset(el, gltfComponent) ⏏
+Extract author, license, source and title assuming sketchfab format:
+  author: "AuthorName (https://link-to-author)"
+  license: "CC-BY-4.0 (http://link-to-license)"
+  source: "https://link-to-model-website"
+  title: "Model Title"
+
+It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
+If both are found, data will be merged with preference to properties in asset.extras
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>object</code> | the aframe element to set the attribution |
+| gltfComponent | <code>object</code> | the GLTF model to extract properties from |
+
+<a name="exp_module_attribution-system--parseExtrasAttributes"></a>
+
+### parseExtrasAttributes(extras) ⇒ <code>object</code> ⏏
+Parse author, license, source and title attributes.
+
+**Kind**: Exported function  
+**Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| extras | <code>object</code> | the source for the attribute data (asset.extras or scene.userData) |
+
+<a name="exp_module_attribution-system--parseAttribute"></a>
+
+### parseAttribute(extras, attribution, attribute) ⇒ <code>boolean</code> ⏏
+Parse attribute given as parameter. Tries to find the attribute and add it to 'attribution' dictionary
+
+**Kind**: Exported function  
+**Returns**: <code>boolean</code> - - true/false if it could find the attribute  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| extras | <code>object</code> | the source for the attribute data |
+| attribution | <code>object</code> | the destination attribute dictionary |
+| attribute | <code>object</code> | which attribute to parse |
+
+<a name="module_attribution"></a>
+
+## attribution
+Attribution Component. Saves attribution data in any entity. The folowing properties can be saved.
+If `extractAssetExtras=true` (default), the [attribution system](attribution-system) attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [author] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Author name; e.g. "Vaptor-Studio" |
+| [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. "https://sketchfab.com/VapTor" |
+| [license] | <code>string</code> | <code>&quot;Unknown&quot;</code> | License summary/short name; e.g. "CC-BY-4.0". |
+| [licenseURL] | <code>string</code> |  | License URL; e.g. "http://creativecommons.org/licenses/by/4.0/" |
+| [source] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Model source e.g. "Sketchfab". |
+| [sourceURL] | <code>string</code> |  | Model source URL; e.g. "https://sketchfab.com/models/2135501583704537907645bf723685e7". |
+| [title] | <code>string</code> | <code>&quot;No Title&quot;</code> | Model title; e.g. "Spinosaurus". |
+| id | <code>string</code> |  | The entity id in the scene; automatically filled in on component init |
+| [extractAssetExtras] | <code>boolean</code> | <code>true</code> | Extract attribution info from asset extras; will override attribution info given (default: true) |
+
+<a name="module_click-listener"></a>
 
 ## click-listener
-Call a given callback when object is clicked.
+Keep track of mouse events and publish corresponding events
+
+<a name="exp_module_click-listener--init"></a>
+
+### init() ⏏
+Setup event listners for mouse events; listners publish events to MQTT
+
+**Kind**: Exported function  
+**Todo**
+
+- [ ] Consolidate event listners (they are very similar)
+
+<a name="module_collision-listener"></a>
 
 ## collision-listener
 Listen for collisions, callback on event.
+Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
+
+**Requires**: <code>module:aframe-physics-system</code>  
+<a name="module_gesture-detector"></a>
+
+## gesture-detector
+Detect multi-finger touch gestures. Publish events accordingly.
+Based off 8th Wall's [gesture-detector](https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js)
+
+<a name="module_goto-url"></a>
 
 ## goto-url
-Set click handler on object that exits to a given URL.
+Load new URL when object is clicked
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| on | <code>string</code> |  | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
+| url | <code>string</code> |  | The destination url e.g. https://some-site.com |
+| [dest] | <code>string</code> | <code>&quot;sametab&quot;</code> | Where to open the URL; one of 'popup', 'newtab', 'sametab' |
+
+<a name="module_hide-in-ar-mode"></a>
+
+## hide-in-ar-mode
+Hide in AR component. When set to an entity, it will make the entity disappear when entering AR mode.
+Based on [this example](https://github.com/aframevr/aframe/pull/4356)
+
+<a name="module_impulse"></a>
 
 ## impulse
-One physics feature is applying an impulse to an object to set it in motion. This happens in conjunction with an event (needs aframe-physics-system).
+One physics feature is applying an impulse to an object to set it in motion.
+This happens in conjunction with an event.
+Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
+
+**Requires**: <code>module:aframe-physics-system</code>  
+<a name="module_load-scene"></a>
 
 ## load-scene
 Load scene from persistence.
 
+**Todo**
+
+- [ ] this component is currently not used and probably needs to be updated
+
+<a name="module_material-extras"></a>
+
 ## material-extras
-Allows to set extra material properties, namely texture encoding.
+Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
+The properties set here access directly [Three.js material](https://threejs.org/docs/#api/en/materials/Material).
+Timeout scheme in lack of better understanding of the timming/events causing properties to not be available
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [encoding] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking' |
+| [needsUpdate] | <code>boolean</code> | <code>false</code> | Specifies that the material needs to be recompiled. |
+| [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. This can be used in conjunction with a mesh's renderOrder property to create invisible objects that occlude other objects. Default is true. |
+| [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden although opaque and transparent objects remain sorted independently. When this property is set for an instance of Group, all descendants objects will be sorted and rendered together. Sorting is from lowest to highest renderOrder. |
+| [transparentOccluder] | <code>boolean</code> | <code>false</code> | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder. |
+| [defaultRenderOrder] | <code>number</code> | <code>1</code> | Used as the renderOrder when transparentOccluder is set to `false`. |
+
+<a name="module_network-latency"></a>
 
 ## network-latency
-Pings pubsub server periodically, allowing to collect per-client network connection data.
+Publish with qos of 2 for network graph to update latency
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| UPDATE_INTERVAL_MS | <code>number</code> | <code>10000</code> | Interval to send the periodic pings (ms) |
+
+<a name="module_press-and-move"></a>
 
 ## press-and-move
-Support user camera movement with the mouse.
+Press and move camera; User camera movement with the mouse.
+Based off [wasd conntrols](https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js)
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [acceleration] | <code>number</code> | <code>30</code> | Movement acceleration. |
+| [enabled] | <code>boolean</code> | <code>true</code> | Is the camera movement component enabled. |
+| [fly] | <code>boolean</code> | <code>true</code> | Is the camera at a fixed height (`fly=false`) or not (`fly=true`) |
+
+<a name="module_textinput"></a>
+
+## textinput
+Opens an HTML prompt when clicked. Sends text input as an event on MQTT
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [on] | <code>string</code> | <code>&quot;mousedown&quot;</code> | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
+| [title] | <code>string</code> | <code>&quot;Text Input&quot;</code> | The prompt title |
+| [label] | <code>string</code> | <code>&quot;Input text below (max is 140 characters)&quot;</code> | Text prompt label |
+| [placeholder] | <code>string</code> | <code>&quot;Type here&quot;</code> | Text input place hoText |
+
+<a name="module_threejs-scene"></a>
+
+## threejs-scene
+Load a [THREE.js scene]{https://threejs.org/docs/#api/en/scenes/Scene}. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
+For a move portable format, using glTF is preferred.
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | the three.js scene to load |
+
+<a name="module_ttl"></a>
 
 ## ttl
+Time To Live (TTL) component.
+
 When applied to an entity, the entity will remove itself from DOM after the specified number of seconds.
+Update *is* allowed, which will reset the timer to start from that moment.
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| seconds | <code>number</code> | Seconds until entity is removed |
+| expireAt | <code>object</code> | Expiration time [Date object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) |
+
+<a name="module_video-control"></a>
 
 ## video-control
 Adds a video to an entity and controls its playback.
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| video_object | <code>string</code> |  | the object id of the element where to display the video |
+| video_path | <code>string</code> |  | path/url to the video |
+| [anyone_clicks] | <code>boolean</code> | <code>true</code> | anyone clicks |
+| [video_loop] | <code>boolean</code> | <code>true</code> | video loop |
+

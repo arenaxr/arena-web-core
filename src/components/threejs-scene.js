@@ -8,6 +8,13 @@
 
 /* global AFRAME, THREE */
 
+/**
+ * Load a [THREE.js scene]{https://threejs.org/docs/#api/en/scenes/Scene}. THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
+ * For a move portable format, using glTF is preferred.
+ * @module threejs-scene
+ * @property {string} url - the three.js scene to load
+ *
+ */
 AFRAME.registerComponent('threejs-scene', {
     schema: {
         url: {type: 'string', default: ''},

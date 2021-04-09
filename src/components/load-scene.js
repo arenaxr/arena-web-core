@@ -1,9 +1,18 @@
 /* global AFRAME, ARENA */
 
 /**
- * Load scene from persistence.
+ * @fileoverview Load scene from persistence.
  * TODO: this component is currently not used and probably needs to be updated
- *
+ * 
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+/**
+ * Load scene from persistence.
+ * @todo this component is currently not used and probably needs to be updated
+ * @module load-scene
  */
 AFRAME.registerComponent('load-scene', {
     // load scene from persistence db

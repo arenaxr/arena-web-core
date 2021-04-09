@@ -11,10 +11,19 @@
 import {ARENAUtils} from '../utils.js';
 
 /**
- * Tracking camera movement in real time. Emits camera pose change and vio change events.
- *
+ * Tracking camera movement in real time. Emits camera pose change and VIO change events.
+ * @module arena-camera
+ * @property {boolean} enabled - Indicates whether camera tracking is enabled.
+ * @property {boolean} vioEnabled - Indicates whether to publish VIO on every tick (if true).
+ * @property {string} displayName - User display name (used to publish camera data).
+ * @property {string} color - Head text color.
+ * @property {number[]} rotation - Last camera rotation value.
+ * @property {number[]} position - Last camera position value.
+ * @property {number[]} vioRotation - Last VIO rotation value.
+ * @property {number[]} vioPosition - Last VIO position value.
+ * 
  */
-AFRAME.registerComponent('arena-camera', {
+ AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: {type: 'boolean', default: false},
         vioEnabled: {type: 'boolean', default: false},
@@ -25,7 +34,10 @@ AFRAME.registerComponent('arena-camera', {
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
     },
-
+    /**
+     * Send initial camera create message; Setup heartbeat timer
+     * @ignore
+     */
     init: function() {
         this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
@@ -59,7 +71,11 @@ AFRAME.registerComponent('arena-camera', {
             }
         });
     },
-
+    /**
+     * Publish user camera pose
+     * @param {string} action One of 'update' or 'create' actions sent in the publish message
+     * @ignore
+     */
     publishPose(action = 'update') {
         const data = this.data;
         if (!data.enabled) return;
@@ -98,7 +114,11 @@ AFRAME.registerComponent('arena-camera', {
 
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
-
+    /**
+     * Publish user VIO
+     * @param {string} action One of 'update' or 'create' actions sent in the publish message
+     * @ignore
+     */
     publishVio(action = 'update') {
         const data = this.data;
 
@@ -124,11 +144,18 @@ AFRAME.registerComponent('arena-camera', {
         };
         ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
-
+    /**
+     * Update component data
+     * @ignore
+     */
     update(oldData) {
         const data = this.data;
     },
-
+    /**
+     * Every tick, update rotation and position of the camera
+     * If a position or rotation change is detected, or time for a heartbet, trigger message publish
+     * @ignore
+     */
     tick: function(t, dt) {
         const data = this.data;
         const el = this.el;
