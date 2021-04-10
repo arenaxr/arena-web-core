@@ -20,6 +20,7 @@
     "aframe-thickline-component": "^0.0.3",
     "chat": "^1.0.8",
     "core-js": "^3.9.1",
+    "he": "^1.2.0",
     "jquery": "^3.6.0",
     "linkifyjs": "^2.1.9",
     "paho-mqtt": "^1.1.0",

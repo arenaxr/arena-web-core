@@ -190,8 +190,6 @@ window.addEventListener('onauth', async function (e) {
 
     // Open new scene modal
     openAddSceneButton.addEventListener("click", async function() {
-        //document.getElementById("newSceneModalLabel").innerHTML = `Add scene to user/org: ${namespacelist.value}`;
-        //new_scene_modal.style.display = "block";
         Swal.fire({
             title: 'Add New Scene',
             html: `<div class="input-prepend">
@@ -352,8 +350,8 @@ window.addEventListener('onauth', async function (e) {
         objTypeFilter[objFilterSel.value] = !objTypeFilter[objFilterSel.value];
         var opts = objFilterSel.options;
         let opt = objFilterSel.namedItem('objfilter_' + objFilterSel.value);
-        let text = ((objTypeFilter[objFilterSel.value]) ? 'Hide':'Show') + opt.innerHTML.substring(4);
-        opt.innerHTML = text;
+        let text = ((objTypeFilter[objFilterSel.value]) ? 'Hide':'Show') + opt.textContent.substring(4);
+        opt.textContent = text;
         await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
     });
 

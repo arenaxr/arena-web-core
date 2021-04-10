@@ -1,4 +1,5 @@
 import './style.css'
+import he from 'he';
 
 /**
  * Wrapper for GLTF progress loader
@@ -24,11 +25,11 @@ export class GLTFProgress {
         let innerHTML = 'Loading 3D model:<br/>';
         for (const [src, progress] of Object.entries(this.progMsgs)) {
             if (progress === 'failed') {
-                innerHTML += `<b>"${src}"<br/>Failed!</b><br/>`;
+                innerHTML += `<b>"${he.encode(src)}"<br/>Failed!</b><br/>`;
             } else {
                 const shortName = src.length < this.MAX_LENGTH ?
                                     src : `…${src.substring(src.length - this.MAX_LENGTH)}`;
-                innerHTML += `${shortName}<br/>${parseFloat(progress.toFixed(1))}%<br/>`;
+                innerHTML += `${he.encode(shortName)}<br/>${parseFloat(progress.toFixed(1))}%<br/>`;
             }
         }
 
