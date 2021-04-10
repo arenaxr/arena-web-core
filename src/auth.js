@@ -307,7 +307,7 @@ function showProfile() {
 function showPerms() {
     const overlayDiv = document.querySelector('#perms-overlay');
     const dataDiv = document.querySelector('#perms-data');
-    dataDiv.innerHTML = `${formatPerms(AUTH.token_payload)}`;
+    dataDiv.textContent = `${formatPerms(AUTH.token_payload)}`;
     overlayDiv.style.display = 'block';
 }
 

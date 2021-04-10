@@ -460,11 +460,11 @@ export class SideMenu {
         function loadSettings() {
             usernameInput.value = localStorage.getItem('display_name');
             const auth = getAuthStatus();
-            sceneName.innerHTML = ARENA.sceneName;
-            authType.innerHTML = auth.type;
-            authUsername.innerHTML = auth.username;
-            authFullname.innerHTML = auth.fullname;
-            authEmail.innerHTML = auth.email;
+            sceneName.textContent = ARENA.sceneName;
+            authType.textContent = auth.type;
+            authUsername.textContent = auth.username;
+            authFullname.textContent = auth.fullname;
+            authEmail.textContent = auth.email;
         }
 
         /**
