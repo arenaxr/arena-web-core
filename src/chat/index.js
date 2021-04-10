@@ -45,16 +45,12 @@ export class ARENAChat {
             persist_uri:
                 st.persist_uri !== undefined
                     ? st.persist_uri
-                    : location.protocol +
-                      '//' +
-                      location.hostname +
-                      (location.port ? ':' + location.port : '') +
-                      '/persist/',
+                    : `${location.protocol}//${location.hostname}${(location.port ? `:${location.port}` : '')}/persist/'`,
             keepalive_interval_ms: st.keepalive_interval_ms !== undefined ? st.keepalive_interval_ms : 30000,
             mqtt_host:
                 st.mqtt_host !== undefined
                     ? st.mqtt_host
-                    : 'wss://' + location.hostname + (location.port ? ':' + location.port : '') + '/mqtt/',
+                    : `wss://${location.hostname}${(location.port ? `:${location.port}` : '')}/mqtt/`,
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false,
@@ -95,17 +91,17 @@ export class ARENAChat {
         this.settings.subscribePublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/#`; 
 
         // send private messages to a user (publish only)
-        this.settings.publishPrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/\{to_uid\}/${this.settings.userid+btoa(this.settings.userid)}`;
+        this.settings.publishPrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/\{to_uid\}/${`${this.settings.userid}${btoa(this.settings.userid)}`}`;
 
         // send open messages (chat keepalive, messages to all/scene) (publish only)
-        this.settings.publishPublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/${this.settings.userid+btoa(this.settings.userid)}`;
+        this.settings.publishPublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/${`${this.settings.userid}${btoa(this.settings.userid)}`}`;
 
         // counter for unread msgs
         this.unreadMsgs = 0;
 
         this.alertBox = document.createElement('div');
         this.alertBox.className = 'chat-alert-box';
-        this.alertBox.innerHTML = '';
+        this.alertBox.innerText = '';
         document.body.appendChild(this.alertBox);
 
         let btnGroup = document.createElement('div');
@@ -119,7 +115,7 @@ export class ARENAChat {
 
         this.chatDot = document.createElement('span');
         this.chatDot.className = 'dot';
-        this.chatDot.innerHTML = '...';
+        this.chatDot.innerText = '...';
         this.chatBtn.appendChild(this.chatDot);
 
         this.usersBtn = document.createElement('div');
@@ -129,7 +125,7 @@ export class ARENAChat {
 
         this.usersDot = document.createElement('span');
         this.usersDot.className = 'dot';
-        this.usersDot.innerHTML = '1';
+        this.usersDot.innerText = '1';
         this.usersBtn.appendChild(this.usersDot);
 
         this.lmBtn = document.createElement('div');
@@ -144,7 +140,7 @@ export class ARENAChat {
 
         this.closeChatBtn = document.createElement('span');
         this.closeChatBtn.className = 'close';
-        this.closeChatBtn.innerHTML = '×';
+        this.closeChatBtn.innerText = '×';
         this.chatPopup.appendChild(this.closeChatBtn);
 
         this.msgList = document.createElement('div');
@@ -178,7 +174,7 @@ export class ARENAChat {
 
         this.closeUsersBtn = document.createElement('span');
         this.closeUsersBtn.className = 'close';
-        this.closeUsersBtn.innerHTML = '×';
+        this.closeUsersBtn.innerText = '×';
         this.usersPopup.appendChild(this.closeUsersBtn);
 
         let muteAllDiv = document.createElement('div');
@@ -200,7 +196,7 @@ export class ARENAChat {
         this.usersPopup.appendChild(this.nSceneUserslabel);
 
         label = document.createElement('span');
-        label.innerHTML = ' Users (you can find and mute users):';
+        label.innerText = ' Users (you can find and mute users):';
         label.style.fontSize = 'small';
         this.usersPopup.appendChild(label);
 
@@ -435,7 +431,7 @@ export class ARENAChat {
 
     async connect(force = false) {
         if (this.connected == true && force == false) return;
-        this.mqttc = new Paho.Client(this.settings.mqtt_host, 'chat-' + this.settings.userid);
+        this.mqttc = new Paho.Client(this.settings.mqtt_host, `chat-${this.settings.userid}`);
 
         var _this = this; /* save reference to class instance */
         let msg = {
@@ -502,12 +498,7 @@ export class ARENAChat {
             from_uid: this.settings.userid,
             from_un: this.settings.username,
             from_scene: this.settings.scene,
-            from_desc:
-                decodeURI(this.settings.username) +
-                ' (' +
-                this.toSel.options[this.toSel.selectedIndex].text +
-                ') ' +
-                new Date().toLocaleTimeString(),
+            from_desc: `${decodeURI(this.settings.username)} (${this.toSel.options[this.toSel.selectedIndex].text}) ${new Date().toLocaleTimeString()}`,
             cameraid: this.settings.cameraid,
             text: msgTxt,
         };
@@ -538,16 +529,11 @@ export class ARENAChat {
         // ignore spoofed messages
         if (
             !mqttMsg.destinationName ===
-            this.settings.realm +
-                ARENAChat.PRIVATE_TOPIC_PREFIX +
-                this.settings.userid +
-                '/' +
-                msg.from_uid +
-                btoa(msg.from_uid)
+            `${this.settings.realm}${ARENAChat.PRIVATE_TOPIC_PREFIX}${this.settings.userid}/${msg.from_uid}${btoa(msg.from_uid)}`
         )
             if (
                 !mqttMsg.destinationName ===
-                this.settings.realm + ARENAChat.PUBLIC_TOPIC_PREFIX + msg.from_uid + btoa(msg.from_uid)
+                `${this.settings.realm}${ARENAChat.PUBLIC_TOPIC_PREFIX}${msg.from_uid}${btoa(msg.from_uid)}`
             )
                 return;
 
@@ -599,7 +585,7 @@ export class ARENAChat {
         this.txtAddMsg(msg.text, msg.from_desc, 'other');
 
         this.unreadMsgs++;
-        this.chatDot.innerHTML = this.unreadMsgs < 100 ? this.unreadMsgs : '...';
+        this.chatDot.textContent = this.unreadMsgs < 100 ? this.unreadMsgs : '...';
 
         // check if chat is visible
         if (this.chatPopup.style.display == 'none') {
@@ -608,13 +594,14 @@ export class ARENAChat {
     }
 
     txtAddMsg(msg, status, whoClass) {
+        if (whoClass !== 'self' && whoClass !== 'other') whoClass='other';
         let statusSpan = document.createElement('span');
-        statusSpan.className = 'status ' + whoClass; // "self" | "other"
-        statusSpan.innerHTML = status;
+        statusSpan.className = `status ${whoClass}`; // "self" | "other"
+        statusSpan.textContent = status; 
         this.msgList.appendChild(statusSpan);
 
         let msgSpan = document.createElement('span');
-        msgSpan.className = 'msg ' + whoClass; // "self" | "other"
+        msgSpan.className = `msg ${whoClass}`; // "self" | "other"
         let host = window.location.host.replace('.', '\\.');
         let pattern = `${host}(.*scene=.*|\\/\n|\\/$)`;
         let regex = new RegExp(pattern);
@@ -629,7 +616,7 @@ export class ARENAChat {
                 target: '_blank',
             });
         }
-        msgSpan.innerHTML = msg;
+        msgSpan.textContent = msg;
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
@@ -637,9 +624,9 @@ export class ARENAChat {
     }
 
     populateUserList(newUser = undefined) {
-        this.usersList.innerHTML = '';
+        this.usersList.textContent = '';
         let selVal = this.toSel.value;
-        this.toSel.innerHTML = '';
+        this.toSel.textContent = '';
         this.addToSelOptions();
 
         let _this = this;
@@ -659,16 +646,16 @@ export class ARENAChat {
             });
         });
 
-        userList.sort((a, b) => ('' + a.sort_key + a.scene + a.un).localeCompare(b.sort_key + b.scene + b.un));
+        userList.sort((a, b) => (`${a.sort_key}${a.scene}${a.un}`).localeCompare(`${b.sort_key}${b.scene}${b.un}`));
 
-        this.nSceneUserslabel.innerHTML = nTotalUsers;
-        this.usersDot.innerHTML = nSceneUsers < 100 ? nSceneUsers : '...';
+        this.nSceneUserslabel.textContent = nTotalUsers;
+        this.usersDot.textContent = nSceneUsers < 100 ? nSceneUsers : '...';
         if (newUser) {
-            var msg = "";
+            var msg = '';
             if (newUser.type !== ARENAChat.userType.SCREENSHARE) {
-                msg = newUser.un + ((newUser.type === ARENAChat.userType.EXTERNAL) ? ' (external)' : '') + ' joined.';
+                msg = `${newUser.un}${((newUser.type === ARENAChat.userType.EXTERNAL) ? ' (external)' : '')} joined.`;
             } else {
-                msg = newUser.un + " started screen sharing.";
+                msg = `${newUser.un} started screen sharing.`;
             }
             this.displayAlert(
                 msg,
@@ -678,7 +665,7 @@ export class ARENAChat {
         }
 
         let uli = document.createElement('li');
-        uli.innerHTML = this.settings.username + ' (Me)';
+        uli.textContent = `${this.settings.username} (Me)`;
         _this.usersList.appendChild(uli);
         let uBtnCtnr = document.createElement('div');
         uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -698,11 +685,8 @@ export class ARENAChat {
         // list users
         userList.forEach((user) => {
             let uli = document.createElement('li');
-
-            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : user.un + '\'s Screen Share';
-            uli.innerHTML = ((user.scene == _this.settings.scene) ? '' : user.scene + '/') +
-                                    decodeURI(name) + (user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '');
-
+            let name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : `${user.un}\'s Screen Share`;
+            uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 let uBtnCtnr = document.createElement('div');
                 uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -741,8 +725,8 @@ export class ARENAChat {
                 }
                 let op = document.createElement('option');
                 op.value = user.uid;
-                op.innerHTML =
-                    'to: ' + decodeURI(user.un) + (user.scene != _this.settings.scene ? ' (' + user.scene + ')' : '');
+                op.textContent =
+                    `to: ${decodeURI(user.un)}${(user.scene != _this.settings.scene ? ` (${user.scene})` : '')}`;
                 _this.toSel.appendChild(op);    
             }
             _this.usersList.appendChild(uli);
@@ -752,7 +736,7 @@ export class ARENAChat {
 
     async populateLandmarkList() {
         try {
-            let data = await fetch(this.settings.persist_uri + this.settings.scene + '?type=landmarks');
+            let data = await fetch(`${encodeURI(this.settings.persist_uri)}${encodeURI(this.settings.scene)}?type=landmarks`);
             if (!data) {
                 console.error('Could not fetch landmarks from persist!');
                 return;
@@ -781,7 +765,7 @@ export class ARENAChat {
         let _this = this;
         this.landmarks.forEach((lm) => {
             let uli = document.createElement('li');
-            uli.innerHTML = lm.label.length > 45 ? lm.label.substring(0, 45) + '...' : lm.label;
+            uli.textContent = lm.label.length > 45 ? `${lm.label.substring(0, 45)}...` : lm.label;
 
             let lmBtnCtnr = document.createElement('div');
             lmBtnCtnr.className = 'lm-list-btn-ctnr';
@@ -804,12 +788,12 @@ export class ARENAChat {
     addToSelOptions() {
         let op = document.createElement('option');
         op.value = 'scene';
-        op.innerHTML = 'to: scene ' + this.settings.scene;
+        op.textContent = `to: scene ${this.settings.scene}`;
         this.toSel.appendChild(op);
 
         op = document.createElement('option');
         op.value = 'all';
-        op.innerHTML = 'to: namespace';
+        op.textContent = 'to: namespace';
         this.toSel.appendChild(op);
     }
 
@@ -853,9 +837,10 @@ export class ARENAChat {
     }
 
     displayAlert(msg, timeMs, type='') {
-        this.alertBox.innerHTML = msg;
+        if (type !== '' && type !== 'arena' && type !== 'external') type = 'external'
+        this.alertBox.textContent = msg;
         this.alertBox.style.display = 'block';
-        this.alertBox.className = "chat-alert-box " + type;
+        this.alertBox.className = `chat-alert-box ${type}`;
         setTimeout(() => {
             this.alertBox.style.display = 'none';
         }, timeMs); // clear message in timeMs milliseconds
@@ -869,7 +854,7 @@ export class ARENAChat {
             return;
         }
 
-        let landmarkObj = sceneEl.querySelector('[id="' + objectId + '"]');
+        let landmarkObj = sceneEl.querySelector(`[id="${objectId}"]`);
 
         let myCamera = document.getElementById('my-camera');
 
@@ -909,13 +894,7 @@ export class ARENAChat {
                 }
             }
             var href = new URL(
-                document.location.protocol +
-                    '//' +
-                    document.location.hostname +
-                    document.location.port +
-                    '/' +
-                    devPath +
-                    scene
+                `${document.location.protocol}//${document.location.hostname}${(document.location.port) ? `:${document.location.port}`:''}/${devPath}${scene}`
             );
             document.location.href = href.toString();
             return;
@@ -927,7 +906,7 @@ export class ARENAChat {
             return;
         }
 
-        let toCam = sceneEl.querySelector('[id="' + cameraId + '"]');
+        let toCam = sceneEl.querySelector(`[id="${cameraId}"]`);
 
         if (!toCam) {
             // TODO: find a better way to do this
