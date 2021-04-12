@@ -17,10 +17,10 @@
  * Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
  * If both asset.extras and scene.extra exist, gives preference to asset.extras.
  *
- * @example <caption>Sketfab downloaded model attributes - asset.extra</caption>
- *    author: "AuthorName (https://link-to-author)"
- *    license: "CC-BY-4.0 (http://link-to-license)"
- *    source: "https://link-to-model-website"
+ * @example <caption>Sketchfab downloaded model attributes - asset.extra</caption>
+ *    author: "AuthorName (https:// link-to-author)"
+ *    license: "CC-BY-4.0 (https:// link-to-license)"
+ *    source: "https:// link-to-model-website"
  *    title: "Model Title"
  * @module attribution-system
  */
@@ -79,9 +79,9 @@ AFRAME.registerSystem('attribution', {
     },
     /**
      * Extract author, license, source and title assuming sketchfab format:
-     *   author: "AuthorName (https://link-to-author)"
-     *   license: "CC-BY-4.0 (http://link-to-license)"
-     *   source: "https://link-to-model-website"
+     *   author: "AuthorName (https:// link-to-author)"
+     *   license: "CC-BY-4.0 (https:// link-to-license)"
+     *   source: "https:// link-to-model-website"
      *   title: "Model Title"
      *
      * It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
@@ -141,7 +141,7 @@ AFRAME.registerSystem('attribution', {
 
 /**
  * Attribution Component. Saves attribution data in any entity. The folowing properties can be saved.
- * If `extractAssetExtras=true` (default), the [attribution system]{@link attribution-system} attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
+ * If `extractAssetExtras=true` (default), the [attribution system]{@link https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties} attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
  * @module attribution
  * @property {string} [author=Unknown] - Author name; e.g. "Vaptor-Studio"
  * @property {string} [authorURL] - Author homepage/profile; e.g. "https://sketchfab.com/VapTor"
