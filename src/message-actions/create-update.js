@@ -173,7 +173,7 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
-            // add load event listners
+            // add load event listeners
             entityEl.addEventListener('model-progress', (evt) => {
                 GLTFProgress.updateProgress(false, evt);
             });

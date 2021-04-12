@@ -25,7 +25,7 @@ Tries to extract author, license, source and title (assuming format used in sket
 If both asset.extras and scene.extra exist, gives preference to asset.extras.</p>
 </dd>
 <dt><a href="#module_attribution">attribution</a></dt>
-<dd><p>Attribution Component. Saves attribution data in any entity. The folowing properties can be saved.
+<dd><p>Attribution Component. Saves attribution data in any entity. The following properties can be saved.
 If <code>extractAssetExtras=true</code> (default), the <a href="attribution-system">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
 </dd>
 <dt><a href="#module_click-listener">click-listener</a></dt>
@@ -57,14 +57,14 @@ Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-F
 <dt><a href="#module_material-extras">material-extras</a></dt>
 <dd><p>Allows to set extra material properties, namely texture encoding, whether to render the material&#39;s color and render order.
 The properties set here access directly <a href="https://threejs.org/docs/#api/en/materials/Material">Three.js material</a>.
-Implements a timeout scheme in lack of better understanding of the timming/events causing properties to not be available.</p>
+Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.</p>
 </dd>
 <dt><a href="#module_network-latency">network-latency</a></dt>
 <dd><p>Publish with qos of 2 for network graph to update latency</p>
 </dd>
 <dt><a href="#module_press-and-move">press-and-move</a></dt>
 <dd><p>Press and move camera; User camera movement with the mouse.
-Based off <a href="https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js">wasd conntrols</a></p>
+Based off <a href="https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js">wasd controls</a></p>
 </dd>
 <dt><a href="#module_textinput">textinput</a></dt>
 <dd><p>Opens an HTML prompt when clicked. Sends text input as an event on MQTT</p>
@@ -278,9 +278,9 @@ Collect all attribution components and return an HTML table with credits
 
 ### extractAttributionFromGtlfAsset(el, gltfComponent) ⏏
 Extract author, license, source and title assuming sketchfab format:
-  author: "AuthorName (https://link-to-author)"
-  license: "CC-BY-4.0 (http://link-to-license)"
-  source: "https://link-to-model-website"
+  author: "AuthorName (https:// link-to-author)"
+  license: "CC-BY-4.0 (http:// link-to-license)"
+  source: "https:// link-to-model-website"
   title: "Model Title"
 
 It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
@@ -322,7 +322,7 @@ Parse attribute given as parameter. Tries to find the attribute and add it to 'a
 <a name="module_attribution"></a>
 
 ## attribution
-Attribution Component. Saves attribution data in any entity. The folowing properties can be saved.
+Attribution Component. Saves attribution data in any entity. The following properties can be saved.
 If `extractAssetExtras=true` (default), the [attribution system](https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties) attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
 
 **Properties**
@@ -347,12 +347,12 @@ Keep track of mouse events and publish corresponding events
 <a name="exp_module_click-listener--init"></a>
 
 ### init() ⏏
-Setup event listners for mouse events; listners publish events to MQTT
+Setup event listeners for mouse events; listeners publish events to MQTT
 
 **Kind**: Exported function
 **Todo**
 
-- [ ] Consolidate event listners (they are very similar)
+- [ ] Consolidate event listeners (they are very similar)
 
 <a name="module_collision-listener"></a>
 
@@ -408,7 +408,7 @@ Load scene from persistence.
 ## material-extras
 Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
 The properties set here access directly [Three.js material](https://threejs.org/docs/#api/en/materials/Material).
-Implements a timeout scheme in lack of better understanding of the timming/events causing properties to not be available.
+Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.
 
 **Properties**
 
@@ -436,7 +436,7 @@ Publish with qos of 2 for network graph to update latency
 
 ## press-and-move
 Press and move camera; User camera movement with the mouse.
-Based off [wasd conntrols](https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js)
+Based off [wasd controls](https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js)
 
 **Properties**
 

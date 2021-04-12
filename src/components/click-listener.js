@@ -16,9 +16,9 @@ import {ARENAUtils} from '../utils.js';
  */
 AFRAME.registerComponent('click-listener', {
         /**
-         * Setup event listners for mouse events; listners publish events to MQTT
+         * Setup event listeners for mouse events; listeners publish events to MQTT
          * @alias module:click-listener
-         * @todo Consolidate event listners (they are very similar)
+         * @todo Consolidate event listeners (they are very similar)
          */
          init: function() {
         const self = this;

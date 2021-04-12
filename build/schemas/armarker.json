@@ -528,7 +528,7 @@
         },
         "goto-url": {
             "title": "Goto URL",
-            "description": "Goto given URL; Requires click-listner",
+            "description": "Goto given URL; Requires click-listener",
             "type": "object",
             "properties": {
                 "dest": {
@@ -708,12 +708,12 @@
                     "minimum": -180,
                     "maximum": 180,
                     "default": 0
-                },    
+                },
                 "ele": {
                     "type": "number",
                     "title": "Tag elevation (m)",
                     "default": 0
-                },                 
+                },
                 "position": {
                     "$ref": "#/definitions/position"
                 },

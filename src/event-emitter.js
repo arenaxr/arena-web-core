@@ -10,7 +10,7 @@ export class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback onNewSettingsCallback
-         * @param updated {object} dictionary of changed properties 
+         * @param updated {object} dictionary of changed properties
          */
         NEW_SETTINGS: 'new_settings',
 
@@ -74,7 +74,7 @@ export class ARENAEventEmitter {
          * @param mqtt_token {string} the mqtt token (used to login into the server)
          */
         ONAUTH: 'onauth',
-        
+
         /**
          * Indicates user location is available (or if an error was returned). The event provides
          * the following parameters to its listeners (event.detail object):
@@ -82,16 +82,16 @@ export class ARENAEventEmitter {
          * @callback onAuthCallback
          * @param error {object} GeolocationPositionError with details of the error
          */
-        ONLOCATION: 'onlocation',   
+        ONLOCATION: 'onlocation',
 
         /**
          * Indicates when scene is successfully fully loaded
          * the following parameters to its listeners (event.detail object):
-         * 
+         *
          * @callback onSceneLoadedCallback
          * @param result {boolean} Should alwasy be true
          */
-        SCENE_LOADED: 'scene_loaded'          
+        SCENE_LOADED: 'scene_loaded'
     };
 
     /**
@@ -112,7 +112,7 @@ export class ARENAEventEmitter {
     }
 
     /**
-     * Add a listner
+     * Add a listener
      *
      * Ussage example:
      *
@@ -137,7 +137,7 @@ export class ARENAEventEmitter {
     }
 
     /**
-     * Event listner that is removed after being called once
+     * Event listener that is removed after being called once
      *
      * @param {string} eventName name of the event
      * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback
@@ -148,7 +148,7 @@ export class ARENAEventEmitter {
     }
 
     /**
-     * Remove listner
+     * Remove listener
      *
      * @param {string} eventName name of the event
      * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback

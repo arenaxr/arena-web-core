@@ -66,7 +66,7 @@ export class ARENAUtils {
     /**
      * Register a callback for the geolocation of user's device
      *
-     * The callback should take the folowing arguments
+     * The callback should take the following arguments
      * @callback onLocationCallback
      * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successfull; "default" location if error
      * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error

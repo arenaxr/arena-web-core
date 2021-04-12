@@ -340,21 +340,21 @@
                 "type":"array",
                 "description":"Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
                 "default":[
-                   
+
                 ]
              },
              "pauseEvents":{
                 "type":"array",
                 "description":"Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
                 "default":[
-                   
+
                 ]
              },
              "resumeEvents":{
                 "type":"array",
                 "description":"Comma-separated list of events to listen to trigger resume after pausing.",
                 "default":[
-                   
+
                 ]
              },
              "round":{
@@ -534,7 +534,7 @@
        },
        "goto-url":{
           "title":"Goto URL",
-          "description":"Goto given URL; Requires click-listner",
+          "description":"Goto given URL; Requires click-listener",
           "type":"object",
           "properties":{
              "dest":{

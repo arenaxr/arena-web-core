@@ -12,7 +12,7 @@
 /**
  * Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
  * The properties set here access directly [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
- * Implements a timeout scheme in lack of better understanding of the timming/events causing properties to not be available.
+ * Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.
  * @module material-extras
  * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [needsUpdate=false] - Specifies that the material needs to be recompiled. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.

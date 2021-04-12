@@ -12,7 +12,7 @@ const LONG_PRESS_DURATION_THRESHOLD = 1000; // pressing for 1 second counts as l
 
 /**
  * Press and move camera; User camera movement with the mouse.
- * Based off [wasd conntrols]{@link https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js}
+ * Based off [wasd controls]{@link https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js}
  * @module press-and-move
  * @property {number} [acceleration=30] - Movement acceleration.
  * @property {boolean} [enabled=true] - Is the camera movement component enabled.

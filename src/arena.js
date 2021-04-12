@@ -51,7 +51,7 @@ export class Arena {
         // set mqttHost and mqttHostURI from url params or defaults
         this.setmqttHost()
 
-        // setup event listner
+        // setup event listener
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
     }
 
