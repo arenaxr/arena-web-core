@@ -26,7 +26,7 @@ If both asset.extras and scene.extra exist, gives preference to asset.extras.</p
 </dd>
 <dt><a href="#module_attribution">attribution</a></dt>
 <dd><p>Attribution Component. Saves attribution data in any entity. The following properties can be saved.
-If <code>extractAssetExtras=true</code> (default), the <a href="attribution-system">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
+If <code>extractAssetExtras=true</code> (default), the <a href="https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
 </dd>
 <dt><a href="#module_click-listener">click-listener</a></dt>
 <dd><p>Keep track of mouse events and publish corresponding events</p>
@@ -111,6 +111,7 @@ Another user's camera in the ARENA. Handles Jitsi and display name updates.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [color] | <code>color</code> | <code>white</code> | The color for the user's name text. |
+| [headModelPath] | <code>string</code> | <code>&quot;/store/models/robobit.glb&quot;</code> | Path to user head model |
 | [jitsiId] | <code>string</code> |  | User jitsi id. |
 | [displayName] | <code>string</code> |  | User display name. |
 | [hasAudio] | <code>boolean</code> | <code>false</code> | Weather the user has audio on. |
@@ -279,7 +280,7 @@ Collect all attribution components and return an HTML table with credits
 ### extractAttributionFromGtlfAsset(el, gltfComponent) ⏏
 Extract author, license, source and title assuming sketchfab format:
   author: "AuthorName (https:// link-to-author)"
-  license: "CC-BY-4.0 (http:// link-to-license)"
+  license: "CC-BY-4.0 (https:// link-to-license)"
   source: "https:// link-to-model-website"
   title: "Model Title"
 
@@ -329,11 +330,11 @@ If `extractAssetExtras=true` (default), the [attribution system](https://help.sk
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| [author] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Author name; e.g. "Vaptor-Studio" |
+| [author] | <code>string</code> |  | Author name; e.g. "Vaptor-Studio" |
 | [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. "https://sketchfab.com/VapTor". |
-| [license] | <code>string</code> | <code>&quot;Unknown&quot;</code> | License summary/short name; e.g. "CC-BY-4.0". |
+| [license] | <code>string</code> |  | License summary/short name; e.g. "CC-BY-4.0". |
 | [licenseURL] | <code>string</code> |  | License URL; e.g. "http://creativecommons.org/licenses/by/4.0/". |
-| [source] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Model source e.g. "Sketchfab". |
+| [source] | <code>string</code> |  | Model source e.g. "Sketchfab". |
 | [sourceURL] | <code>string</code> |  | Model source URL; e.g. "https://sketchfab.com/models/2135501583704537907645bf723685e7". |
 | [title] | <code>string</code> | <code>&quot;No Title&quot;</code> | Model title; e.g. "Spinosaurus". |
 | id | <code>string</code> |  | The entity id in the scene; automatically filled in on component init |
