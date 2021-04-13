@@ -330,9 +330,9 @@ If `extractAssetExtras=true` (default), the [attribution system](https://help.sk
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [author] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Author name; e.g. "Vaptor-Studio" |
-| [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. "https://sketchfab.com/VapTor" |
+| [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. "https://sketchfab.com/VapTor". |
 | [license] | <code>string</code> | <code>&quot;Unknown&quot;</code> | License summary/short name; e.g. "CC-BY-4.0". |
-| [licenseURL] | <code>string</code> |  | License URL; e.g. "http://creativecommons.org/licenses/by/4.0/" |
+| [licenseURL] | <code>string</code> |  | License URL; e.g. "http://creativecommons.org/licenses/by/4.0/". |
 | [source] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Model source e.g. "Sketchfab". |
 | [sourceURL] | <code>string</code> |  | Model source URL; e.g. "https://sketchfab.com/models/2135501583704537907645bf723685e7". |
 | [title] | <code>string</code> | <code>&quot;No Title&quot;</code> | Model title; e.g. "Spinosaurus". |

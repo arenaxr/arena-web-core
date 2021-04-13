@@ -1,4 +1,5 @@
 name: Check Markdown links
+# Syntax: https://github.com/marketplace/actions/markdown-link-check
 
 on: push
 
