@@ -10,14 +10,13 @@
 //  <script src="./vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="./conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
 //  <script src="./src/auth.js"></script>  <!-- browser authorization flow -->
-//  <script type="text/javascript">authCheck();</script>
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
 // can be present when making a broker connection which will need username (email) and
 // password (access token).
 //
-// window.addEventListener('onauth', function (e) {
+// window.addEventListener('onauth', async function (e) {
 //     client.connect({
 //         onSuccess: onConnect,
 //         userName: e.detail.mqtt_username,
@@ -392,3 +391,6 @@ function storageAvailable(type) {
             (storage && storage.length !== 0);
     }
 }
+
+// start authentication flow
+authCheck();
