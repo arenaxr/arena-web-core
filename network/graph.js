@@ -1,4 +1,7 @@
 window.addEventListener('onauth', function(e) {
+    // add page header
+    $("#header").load("../header.html");
+
     var cy = window.cy = cytoscape({
         container: document.getElementById('cy'),
         boxSelectionEnabled: false,

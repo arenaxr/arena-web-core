@@ -45,7 +45,10 @@ window.addEventListener('onauth', async function (e) {
     var clearselButton = document.getElementById("clearlist");
     var refreshButton = document.getElementById("refreshlist");
     var refreshSlButton = document.getElementById("refreshscenelist");
-    
+
+    // add page header
+    $("#header").load("../header.html");
+
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
         text: function() {
@@ -87,11 +90,11 @@ window.addEventListener('onauth', async function (e) {
     // return uris assuming persist and mqtt are accessed through the webhost; use arenadefaults if defined
     var mqttAndPersistURI = function() {
         if (ARENADefaults) {
-            return { 
+            return {
                 host: ARENADefaults.mqttHost,
                 persist_uri: location.protocol + "//"+ ARENADefaults.persistHost + ARENADefaults.persistPath,
                 mqtt_uri: "wss://"+ ARENADefaults.mqttHost + "/mqtt/"
-            };    
+            };
         }
         return {
             host: ARENADefaults.mqttHost,
@@ -130,7 +133,7 @@ window.addEventListener('onauth', async function (e) {
         let typeSel = document.getElementsByName("root[type]")[0];
         let objTypeSel = document.getElementsByName("root[data][object_type]")[0];
         if (typeSel) typeSel.disabled = true;
-        if (objTypeSel) objTypeSel.disabled = true;        
+        if (objTypeSel) objTypeSel.disabled = true;
     };
 
     var getARENAObject = function(obj, action="create", persist=true) {
@@ -174,7 +177,7 @@ window.addEventListener('onauth', async function (e) {
             title: 'Loaded.',
             html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/><button class="btn btn-primary btn-mini" type="button" title="Add or Update Object" onClick="addObjHandler()"><i class="icon-plus"></i> Add/Update Object</a> </button> when done.',
             timer: 10000,
-        });        
+        });
     }
 
     // Start the output textarea empty
@@ -199,8 +202,8 @@ window.addEventListener('onauth', async function (e) {
                   <div class="input-prepend">
                     <span class="add-on" style="width:125px">Scene</span>
                     <input type="text" style="width:200px" id="modalscenename" placeholder="Scene Name">
-                  </div>  
-                  <p><small>Scene will be created with default permissions.</small></p>`,    
+                  </div>
+                  <p><small>Scene will be created with default permissions.</small></p>`,
             confirmButtonText: 'Add Scene',
             focusConfirm: false,
             showCancelButton: true,
@@ -211,15 +214,15 @@ window.addEventListener('onauth', async function (e) {
             willOpen: () => {
                 const modalNsList = Swal.getPopup().querySelector('#modalnamespacelist');
                 PersistObjects.populateNewSceneNamespaces(modalNsList);
-              },            
+              },
             preConfirm: () => {
               const ns = Swal.getPopup().querySelector('#modalnamespacelist').value;
               const scene = Swal.getPopup().querySelector('#modalscenename').value;
               const addobjs = !!Swal.getPopup().querySelector('#swal2-checkbox').checked;
-      
+
               if (!scene) {
                 Swal.showValidationMessage(`Please enter a new scene name`)
-              }    
+              }
               return { ns: ns, scene: scene, addobjs: addobjs}
             }
           }).then(async (result) => {
@@ -231,7 +234,7 @@ window.addEventListener('onauth', async function (e) {
                 reload();
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
-          })        
+          })
     });
 
     deleteSceneButton.addEventListener("click", async function() {
@@ -254,12 +257,12 @@ window.addEventListener('onauth', async function (e) {
               setTimeout(async () => {
                 await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
                 reload();
-                updateLink();    
+                updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
             }
           });
     });
-    
+
     // close modal
     document.querySelectorAll('.close-modal').forEach(item => {
         item.addEventListener("click", function() {
@@ -279,10 +282,10 @@ window.addEventListener('onauth', async function (e) {
                 title: 'Invalid JSON input',
                 html: `Error: ${err}`,
                 timer: 8000,
-            });    
+            });
             return;
         }
-    
+
         editObject(obj, obj.action);
     });
 
@@ -290,7 +293,7 @@ window.addEventListener('onauth', async function (e) {
     clearformButton.addEventListener("click", function() {
       reload();
     });
- 
+
     // generate a random object_id
     genidButton.addEventListener("click", function() {
         let obj;
@@ -302,7 +305,7 @@ window.addEventListener('onauth', async function (e) {
                 title: 'Invalid JSON input',
                 html: `Error: ${err}`,
                 timer: 8000,
-            });    
+            });
             return;
         }
         // if object has an object_id field, auto create a uuid
@@ -314,7 +317,7 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // Change listener for object type
-    selectSchema.addEventListener("change", async function() {        
+    selectSchema.addEventListener("change", async function() {
         let schemaFile = selectSchema.value;
         let data = await fetch(schemaFile);
         schema = await data.json();
@@ -372,7 +375,7 @@ window.addEventListener('onauth', async function (e) {
     refreshSlButton.addEventListener("click", async function() {
         await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
         reload();
-        updateLink();    
+        updateLink();
     });
 
     delButton.addEventListener("click", async function() {
@@ -416,7 +419,7 @@ window.addEventListener('onauth', async function (e) {
                 icon: 'info',
                 title: 'Objects copied',
                 timer: 5000,
-            });    
+            });
           })
     });
 
@@ -427,7 +430,7 @@ window.addEventListener('onauth', async function (e) {
                 icon: 'error',
                 title: 'Please check validation errors.',
                 timer: 8000,
-            });              
+            });
             return;
         }
         let obj;
@@ -439,13 +442,13 @@ window.addEventListener('onauth', async function (e) {
                 title: 'Invalid JSON input',
                 html: `Error: ${err}`,
                 timer: 8000,
-            });    
+            });
             return;
         }
         await PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
         setTimeout(async () => {
-            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter); 
-        }, 500); // refresh after a while, so that new object messages are processed        
+            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+        }, 500); // refresh after a while, so that new object messages are processed
     };
     document.querySelectorAll('.addobj').forEach(item => {
       item.addEventListener("click", addObjHandler);
@@ -462,7 +465,7 @@ window.addEventListener('onauth', async function (e) {
         console.error("Error loading defaults:", err.message);
         return;
       }
-  
+
       try {
           let data = await fetch(dfts.schema_definitions);
           objSchemas = await data.json();
@@ -470,7 +473,7 @@ window.addEventListener('onauth', async function (e) {
           console.error("Error loading schema definitions:", err.message);
           return;
       }
-      
+
       for (let objtype in objSchemas) {
           // add schema files to select
           let ofile = document.createElement("option");
@@ -479,7 +482,7 @@ window.addEventListener('onauth', async function (e) {
           ofile.id = 'objtype_' + objtype;
           ofile.appendChild(document.createTextNode(objSchemas[objtype].title));
           selectSchema.appendChild(ofile);
-  
+
           let ofilter = document.createElement("option");
           ofilter.value = objtype;
           ofilter.title = `Show/Hide ${objSchemas[objtype].title}`;
@@ -488,11 +491,11 @@ window.addEventListener('onauth', async function (e) {
           objFilterSel.appendChild(ofilter);
           objTypeFilter[objtype] = true;
       }
-  
+
       // load values from defaults or local storage, if they exist
       selectSchema.value = localStorage.getItem("schema_file") === null ? dfts.schema_file : localStorage.getItem("schema_file");
       selectSchema.dispatchEvent(new Event("change"));
-  
+
       // Scene config schema
       if (!schema) {
           let data = await fetch(dfts.schema_file);
@@ -537,17 +540,17 @@ window.addEventListener('onauth', async function (e) {
     if (sceneParam) {
         let sn = sceneParam.split('/');
         namespacelist.value = sn[0];
-        scenelist.value = sn[1];    
+        scenelist.value = sn[1];
     } else {
         namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
-        scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");    
-    }    
-    // do initial update 
+        scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+    }
+    // do initial update
     if (ns !== namespacelist.value) { // if we changed namespace
         PersistObjects.populateSceneList(namespacelist.value, scenelist);
         localStorage.setItem("namespace", namespacelist.value );
     }
-    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter); 
+    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
     localStorage.setItem("scene", scenelist.value );
     reload();
     updateLink();
