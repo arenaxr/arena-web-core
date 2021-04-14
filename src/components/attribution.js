@@ -18,9 +18,9 @@
  * If both asset.extras and scene.extra exist, gives preference to asset.extras.
  *
  * @example <caption>Sketchfab downloaded model attributes - asset.extra</caption>
- *    author: "AuthorName (https:// link-to-author)"
- *    license: "CC-BY-4.0 (https:// link-to-license)"
- *    source: "https:// link-to-model-website"
+ *    author: "AuthorName (url-link-to-author)"
+ *    license: "CC-BY-4.0 (url-link-to-license)"
+ *    source: "url-link-to-model-website"
  *    title: "Model Title"
  * @module attribution-system
  */
@@ -79,9 +79,9 @@ AFRAME.registerSystem('attribution', {
     },
     /**
      * Extract author, license, source and title assuming sketchfab format:
-     *   author: "AuthorName (https:// link-to-author)"
-     *   license: "CC-BY-4.0 (https:// link-to-license)"
-     *   source: "https:// link-to-model-website"
+     *   author: "AuthorName (url-link-to-author)"
+     *   license: "CC-BY-4.0 (url-link-to-license)"
+     *   source: "url-link-to-model-website"
      *   title: "Model Title"
      *
      * It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
@@ -143,12 +143,12 @@ AFRAME.registerSystem('attribution', {
  * Attribution Component. Saves attribution data in any entity. The following properties can be saved.
  * If `extractAssetExtras=true` (default), the [attribution system]{@link https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties} attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
  * @module attribution
- * @property {string} [author] - Author name; e.g. "Vaptor-Studio"
- * @property {string} [authorURL] - Author homepage/profile; e.g. "https://sketchfab.com/VapTor".
- * @property {string} [license] - License summary/short name; e.g. "CC-BY-4.0".
- * @property {string} [licenseURL] - License URL; e.g. "http://creativecommons.org/licenses/by/4.0/".
- * @property {string} [source] - Model source e.g. "Sketchfab".
- * @property {string} [sourceURL] - Model source URL; e.g. "https://sketchfab.com/models/2135501583704537907645bf723685e7".
+ * @property {string} [author=Unknown] - Author name; e.g. "Vaptor-Studio"
+ * @property {string} [authorURL] - Author homepage/profile; e.g. https://sketchfab.com/VapTor
+ * @property {string} [license=Unknown] - License summary/short name; e.g. "CC-BY-4.0".
+ * @property {string} [licenseURL] - License URL; e.g. http://creativecommons.org/licenses/by/4.0/
+ * @property {string} [source=Unknown] - Model source e.g. "Sketchfab".
+ * @property {string} [sourceURL] - Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7
  * @property {string} [title=No Title] - Model title; e.g. "Spinosaurus".
  * @property {string} id - The entity id in the scene; automatically filled in on component init
  * @property {boolean} [extractAssetExtras=true] - Extract attribution info from asset extras; will override attribution info given (default: true)

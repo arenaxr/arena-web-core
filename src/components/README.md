@@ -228,9 +228,9 @@ If both asset.extras and scene.extra exist, gives preference to asset.extras.
 
 **Example** *(Sketchfab downloaded model attributes - asset.extra)*
 ```js
-   author: "AuthorName (https:// link-to-author)"
-   license: "CC-BY-4.0 (https:// link-to-license)"
-   source: "https:// link-to-model-website"
+   author: "AuthorName (url-link-to-author)"
+   license: "CC-BY-4.0 (url-link-to-license)"
+   source: "url-link-to-model-website"
    title: "Model Title"
 ```
 
@@ -279,9 +279,9 @@ Collect all attribution components and return an HTML table with credits
 
 ### extractAttributionFromGtlfAsset(el, gltfComponent) ⏏
 Extract author, license, source and title assuming sketchfab format:
-  author: "AuthorName (https:// link-to-author)"
-  license: "CC-BY-4.0 (https:// link-to-license)"
-  source: "https:// link-to-model-website"
+  author: "AuthorName (url-link-to-author)"
+  license: "CC-BY-4.0 (url-link-to-license)"
+  source: "url-link-to-model-website"
   title: "Model Title"
 
 It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
@@ -330,12 +330,12 @@ If `extractAssetExtras=true` (default), the [attribution system](https://help.sk
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| [author] | <code>string</code> |  | Author name; e.g. "Vaptor-Studio" |
-| [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. "https://sketchfab.com/VapTor". |
-| [license] | <code>string</code> |  | License summary/short name; e.g. "CC-BY-4.0". |
-| [licenseURL] | <code>string</code> |  | License URL; e.g. "http://creativecommons.org/licenses/by/4.0/". |
-| [source] | <code>string</code> |  | Model source e.g. "Sketchfab". |
-| [sourceURL] | <code>string</code> |  | Model source URL; e.g. "https://sketchfab.com/models/2135501583704537907645bf723685e7". |
+| [author] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Author name; e.g. "Vaptor-Studio" |
+| [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. https://sketchfab.com/VapTor |
+| [license] | <code>string</code> | <code>&quot;Unknown&quot;</code> | License summary/short name; e.g. "CC-BY-4.0". |
+| [licenseURL] | <code>string</code> |  | License URL; e.g. http://creativecommons.org/licenses/by/4.0/ |
+| [source] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Model source e.g. "Sketchfab". |
+| [sourceURL] | <code>string</code> |  | Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7 |
 | [title] | <code>string</code> | <code>&quot;No Title&quot;</code> | Model title; e.g. "Spinosaurus". |
 | id | <code>string</code> |  | The entity id in the scene; automatically filled in on component init |
 | [extractAssetExtras] | <code>boolean</code> | <code>true</code> | Extract attribution info from asset extras; will override attribution info given (default: true) |
