@@ -7,8 +7,8 @@
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <title>Scene Editor</title>
   <!-- bootstrap and font-awesome -->
-  <link rel='stylesheet' href='https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css'>
-  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+  <link rel='stylesheet' href='../vendor/bootstrap-2.3.2/bootstrap-combined.min.css'>
+  <link rel='stylesheet' href='../vendor/fontawesome/all.min.css'>
   <link rel="stylesheet" type="text/css" href="list.css">
   <style>
     [class*="foundicon-"] {
@@ -18,9 +18,9 @@
   </style>
 
   <!-- Navbar Header -->
-  <script src="https://getbootstrap.com/2.3.2/assets/js/jquery.js"></script>
-  <script src="https://getbootstrap.com/2.3.2/assets/js/bootstrap-dropdown.js"></script>
-  <script src="https://getbootstrap.com/2.3.2/assets/js/bootstrap-collapse.js"></script>
+  <script src="../vendor/jquery-2.1.1.min.js"></script>
+  <script src="../vendor/bootstrap-2.3.2/bootstrap-dropdown.js"></script>
+  <script src="../vendor/bootstrap-2.3.2/bootstrap-collapse.js"></script>
   <script>
     $(function() {
       $("#header").load("../header.html");
@@ -28,8 +28,8 @@
   </script>
 
   <!-- Include sweet alert bootstrap theme -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css">
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+  <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-bootstrap-4/bootstrap-4.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
   <!-- jsoneditor -->
   <script language="javascript" src="third-party/jsoneditor.min.js"></script>
   <!-- clipboard; for easy copy-paste -->
@@ -116,7 +116,7 @@
         </select>
       </div>
     </div> <!-- row 2-->
-    <div id='addeditsection' style="display: none"> 
+    <div id='addeditsection' style="display: none">
     <div class='row' >
       <div class='span8 col-md-8 columns eight large-8' id="edit_section">
         <h3>Add/Edit Object</h3>
@@ -164,7 +164,7 @@
       </div>
     </div> <!-- row 4-->
     </div> <!-- addeditsection-->
-  </div> 
+  </div>
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="../conf/defaults.js"></script>

@@ -87,7 +87,7 @@ window.addEventListener('onauth', function(e) {
         if (ARENADefaults && ARENADefaults.mqttHost) { // prefer deployed custom config
             brokerAddr = `wss://${ARENADefaults.mqttHost}${ARENADefaults.mqttPath[0]}`;
         }
-        window.client = new Paho.MQTT.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
+        window.client = new Paho.Client(brokerAddr, "graphViewer-" + (+new Date).toString(36));
         window.graphTopic = ARENADefaults.graphTopic;
         window.latencyTopic = window.graphTopic + "/latency";
 
@@ -126,7 +126,7 @@ window.addEventListener('onauth', function(e) {
     }
 
     function publish(client, dest, msg, qos) {
-        let message = new Paho.MQTT.Message(msg);
+        let message = new Paho.Message(msg);
         message.destinationName = dest;
         message.qos = qos;
         client.send(message);
