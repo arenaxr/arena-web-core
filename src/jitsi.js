@@ -35,7 +35,7 @@ export class ARENAJitsi {
         this.serverName = jitsiServer;
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.arenaConferenceName = ARENA.sceneName.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        this.arenaConferenceName = ARENA.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         this.connectOptions = {
             hosts: {
@@ -252,7 +252,7 @@ export class ARENAJitsi {
                         id: participantId,
                         dn: dn,
                         cn: camName,
-                        scene: ARENA.sceneName,
+                        scene: ARENA.namespacedScene,
                         src: ARENAEventEmitter.sources.JITSI,
                     });
                     objectIds = objectIds.split(',');
@@ -271,7 +271,7 @@ export class ARENAJitsi {
                         id: participantId,
                         dn: dn,
                         cn: undefined,
-                        scene: ARENA.sceneName,
+                        scene: ARENA.namespacedScene,
                         src: ARENAEventEmitter.sources.JITSI,
                     });
                     return;
@@ -327,7 +327,7 @@ export class ARENAJitsi {
             }
         });
         ARENA.events.emit(ARENAEventEmitter.events.JITSI_CONNECT, {
-            scene: ARENA.sceneName,
+            scene: ARENA.namespacedScene,
             pl: pl,
         });
     }
@@ -349,7 +349,7 @@ export class ARENAJitsi {
                 id: arenaId,
                 dn: arenaDisplayName,
                 cn: arenaCameraName,
-                scene: ARENA.sceneName,
+                scene: ARENA.namespacedScene,
                 src: ARENAEventEmitter.sources.JITSI,
             });
         } else {
@@ -360,7 +360,7 @@ export class ARENAJitsi {
                 id: id,
                 dn: dn,
                 cn: undefined,
-                scene: ARENA.sceneName,
+                scene: ARENA.namespacedScene,
                 src: ARENAEventEmitter.sources.JITSI,
             }
             // this might be a jitsi-only user; emit event if name does not have the arena tag

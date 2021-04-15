@@ -190,7 +190,7 @@ function requestMqttToken(authType, mqttUsername) {
     }
     if (typeof ARENA !== 'undefined') {
         if (ARENA.sceneName) {
-            params += `&scene=${ARENA.sceneName}`;
+            params += `&scene=${ARENA.namespacedScene}`;
         }
         params += `&userid=true`;
         params += `&camid=true`;
