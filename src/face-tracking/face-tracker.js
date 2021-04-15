@@ -1,6 +1,8 @@
 /* global ARENA */
 
-ARENA.FaceTracker = (function() {
+import {FaceTracker, FaceTrackerSource} from './dist/face-tracker.min.js';
+
+const ARENAFaceTracker = (function() {
     // ==================================================
     // PRIVATE VARIABLES
     // ==================================================
@@ -267,11 +269,11 @@ ARENA.FaceTracker = (function() {
             displayBbox = _displayBbox;
             flipped = true;
 
-            faceTrackerSource = new FaceTracker.FaceTrackerSource({
+            faceTrackerSource = new FaceTrackerSource({
                 width: width,
                 height: height,
             });
-            faceTracker = new FaceTracker.FaceTracker(faceTrackerSource);
+            faceTracker = new FaceTracker(faceTrackerSource);
 
             window.addEventListener('onFaceTrackerInit', (e) => {
                 const video = e.detail.source;
@@ -353,3 +355,5 @@ ARENA.FaceTracker = (function() {
         },
     };
 })();
+
+export {ARENAFaceTracker};

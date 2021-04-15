@@ -497,7 +497,10 @@ export class Arena {
         });
 
         // initialize face tracking if not on mobile
-        if (this.FaceTracker && !AFRAME.utils.device.isMobile()) {
+        if (!AFRAME.utils.device.isMobile()) {
+            const faceTrackerModule = await import('./face-tracking/face-tracker.js');
+            this.FaceTracker = faceTrackerModule.ARENAFaceTracker;
+
             const displayBbox = false;
             const flipped = true;
             this.FaceTracker.init(displayBbox, flipped);
