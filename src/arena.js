@@ -95,7 +95,7 @@ export class Arena {
      */
     setSceneName = () => {
         // private function to set scenename, namespacedScene and namespace
-        let setNames = (ns, sn) => {
+        let _setNames = (ns, sn) => {
             this.namespacedScene = `${ns}/${sn}`;
             this.scene = sn;
             this.nameSpace = ns;            
@@ -110,22 +110,21 @@ export class Arena {
         }
         if (path === '' || path === 'index.html') {
             scenename = ARENAUtils.getUrlParam('scene', scenename);
-            setNames(namespace, scenename)
+            _setNames(namespace, scenename)
         } else {
             try {
                 const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
                 const matches = r.exec(path).groups;
                 // Only first group is given, namespace is actually the scene name
                 if (matches.scenename === undefined) {
-                    scenename = matches.namespace;
-                    setNames(namespace, scenename);
+                    _setNames(namespace, matches.namespace);
                 } else {
                     // Both scene and namespace are defined, return regex as-is
-                    setNames(matches.namespace, matches.scenename);
+                    _setNames(matches.namespace, matches.scenename);
                 }
             } catch (e) {
                 scenename = ARENAUtils.getUrlParam('scene', scenename);
-                setNames(namespace, scenename);
+                _setNames(namespace, scenename);
             }
         }
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
@@ -242,6 +241,7 @@ export class Arena {
                         // arena variables that are replaced; keys are the variable names e.g. ${scene}, ${cameraid}, ...
                         const avars = {
                             scene: ARENA.sceneName,
+                            namespace: ARENA.nameSpace,
                             cameraid: ARENA.camName,
                             username: ARENA.getDisplayName,
                             mqtth: ARENA.mqttHost
