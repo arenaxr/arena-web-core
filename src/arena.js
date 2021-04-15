@@ -447,78 +447,80 @@ export class Arena {
         // id tag including name is set from authentication service
         this.setIdTag(args.ids.userid);
 
-        this.Mqtt = ARENAMqtt.init(); // mqtt API (after this.* above, are defined)
-        this.Mqtt.connect({
-            onSuccess: function() {
-                console.info('MQTT scene connection success.');
-            },
-            onFailure: function(res) {
-                console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
-            },
-            reconnect: true,
-            userName: this.username,
-            password: this.mqttToken,
-        },
-            // last will message
-            JSON.stringify({ object_id: this.camName, action: 'delete' }),
-            // last will topic
-            this.outputTopic + this.camName,
-        );
+        ARENAMqtt.init().then(async (Mqtt) => {
+            this.Mqtt = Mqtt;
+            await Mqtt.connect({
+                    onSuccess: function() {
+                        console.info('MQTT scene connection success.');
+                    },
+                    onFailure: function(res) {
+                        console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
+                    },
+                    reconnect: true,
+                    userName: this.username,
+                    password: this.mqttToken,
+                },
+                // last will message
+                JSON.stringify({ object_id: this.camName, action: 'delete' }),
+                // last will topic
+                this.outputTopic + this.camName,
+            );
 
-        // init runtime manager
-        this.RuntimeManager = RuntimeMngr;
-        this.RuntimeManager.init({
-            mqtt_uri: this.mqttHostURI,
-            onInitCallback: function() {
-                console.info('Runtime init done.');
-            },
-            name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.username,
-            dbg: false,
-            mqtt_username: this.username,
-            mqtt_token: this.mqttToken,
-        });
-
-        // init chat after
-        this.chat = new ARENAChat({
-            userid: this.idTag,
-            cameraid: this.camName,
-            username: this.getDisplayName(),
-            realm: this.defaults.realm,
-            namespace: this.nameSpace,
-            scene: this.namespacedScene,
-            persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
-            keepalive_interval_ms: 30000,
-            mqtt_host: this.mqttHostURI,
-            mqtt_username: this.username,
-            mqtt_token: this.mqttToken,
-            supportDevFolders: this.defaults.supportDevFolders,
-        });
-        this.chat.start();
-
-        const url = new URL(window.location.href);
-        const skipav = url.searchParams.get('skipav');
-        if (!skipav) {
-            window.setupAV(() => {
-                // initialize Jitsi videoconferencing
-                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+            // init runtime manager
+            this.RuntimeManager = RuntimeMngr;
+            this.RuntimeManager.init({
+                mqtt_uri: this.mqttHostURI,
+                onInitCallback: function() {
+                    console.info('Runtime init done.');
+                },
+                name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.username,
+                dbg: false,
+                mqtt_username: this.username,
+                mqtt_token: this.mqttToken,
             });
-        } else {
-            this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-        }
 
-        // initialize face tracking if not on mobile
-        if (!AFRAME.utils.device.isMobile()) {
-            const faceTrackerModule = await import('./face-tracking/face-tracker.js');
-            this.FaceTracker = faceTrackerModule.ARENAFaceTracker;
+            // init chat after
+            this.chat = new ARENAChat({
+                userid: this.idTag,
+                cameraid: this.camName,
+                username: this.getDisplayName(),
+                realm: this.defaults.realm,
+                namespace: this.nameSpace,
+                scene: this.namespacedScene,
+                persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
+                keepalive_interval_ms: 30000,
+                mqtt_host: this.mqttHostURI,
+                mqtt_username: this.username,
+                mqtt_token: this.mqttToken,
+                supportDevFolders: this.defaults.supportDevFolders,
+            });
+            await this.chat.start();
 
-            const displayBbox = false;
-            const flipped = true;
-            this.FaceTracker.init(displayBbox, flipped);
-        }
+            const url = new URL(window.location.href);
+            const skipav = url.searchParams.get('skipav');
+            if (!skipav) {
+                window.setupAV(() => {
+                    // initialize Jitsi videoconferencing
+                    this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+                });
+            } else {
+                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+            }
 
-        SideMenu.setupIcons();
+            // initialize face tracking if not on mobile
+            if (!AFRAME.utils.device.isMobile()) {
+                const faceTrackerModule = await import('./face-tracking/face-tracker.js');
+                this.FaceTracker = faceTrackerModule.ARENAFaceTracker;
 
-        console.info("ARENA Started; ARENA=", ARENA);
+                const displayBbox = false;
+                const flipped = true;
+                this.FaceTracker.init(displayBbox, flipped);
+            }
+
+            SideMenu.setupIcons();
+
+            console.info("ARENA Started; ARENA=", ARENA);
+        }); // mqtt API (after this.* above, are defined)
     }
 }
 
