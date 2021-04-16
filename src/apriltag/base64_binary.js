@@ -27,19 +27,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * at the moment just decodes a binary base64 encoded
  * into either an ArrayBuffer (decodeArrayBuffer)
  * or into an Uint8Array (decode)
- * 
+ *
  * References:
  * https://developer.mozilla.org/en/JavaScript_typed_arrays/ArrayBuffer
  * https://developer.mozilla.org/en/JavaScript_typed_arrays/Uint8Array
  */
 
-var Base64Binary = {
+export const Base64Binary = {
 	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-	
+
   charCode: function (char) {
     switch(char) {
-      case 'A': return 0;        
-      case 'B': return 1;      
+      case 'A': return 0;
+      case 'B': return 1;
       case 'C': return 2;
       case 'D': return 3;
       case 'E': return 4;
@@ -102,16 +102,16 @@ var Base64Binary = {
       case '9': return 61;
       case '+': return 62;
       case '/': return 63;
-      case '=': return 64;     
+      case '=': return 64;
     };
-  },  
-  
+  },
+
 	/* will return a  Uint8Array type */
 	decodeArrayBuffer: function(input) {
 		var bytes = (input.length/4) * 3;
 		var ab = new ArrayBuffer(bytes);
 		this.decode(input, ab);
-		
+
 		return ab;
 	},
 
@@ -129,21 +129,21 @@ var Base64Binary = {
 		input = this.removePaddingChars(input);
 
 		var bytes = parseInt((input.length / 4) * 3, 10);
-		
+
 		var uarray;
 		var chr1, chr2, chr3;
 		var enc1, enc2, enc3, enc4;
 		var i = 0;
 		var j = 0;
-		
+
 		if (arrayBuffer)
 			uarray = new Uint8Array(arrayBuffer);
 		else
 			uarray = new Uint8Array(bytes);
-		
+
 		input = input.replace(/[^A-Za-z0-9\+\/\=]/g, "");
-		
-		for (i=0; i<bytes; i+=3) {	
+
+		for (i=0; i<bytes; i+=3) {
 			//get the 3 octects in 4 ascii chars
 			//enc1 = this._keyStr.indexOf(input.charAt(j++));
 			//enc2 = this._keyStr.indexOf(input.charAt(j++));
@@ -154,16 +154,16 @@ var Base64Binary = {
 			enc2 = this.charCode(input.charAt(j++));
 			enc3 = this.charCode(input.charAt(j++));
 			enc4 = this.charCode(input.charAt(j++));
-      
+
 			chr1 = (enc1 << 2) | (enc2 >> 4);
 			chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
 			chr3 = ((enc3 & 3) << 6) | enc4;
-	
-			uarray[i] = chr1;			
+
+			uarray[i] = chr1;
 			if (enc3 != 64) uarray[i+1] = chr2;
 			if (enc4 != 64) uarray[i+2] = chr3;
 		}
-	
-		return uarray;	
+
+		return uarray;
 	}
 }

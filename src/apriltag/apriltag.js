@@ -1,6 +1,6 @@
-importScripts('./apriltag_wasm.js');
-importScripts('https://unpkg.com/comlink/dist/umd/comlink.js');
-// importScripts("https://unpkg.com/comlink@alpha/dist/umd/comlink.js");
+importScripts('src/apriltag/apriltag_wasm.js');
+import * as Comlink from 'comlink';
+
 /*
 This is a wrapper class that calls apriltag_wasm to load the WASM module and wraps the c implementation calls.
 
@@ -12,7 +12,6 @@ The apriltag dectector uses the tag36h11 family. For tag pose estimation, tag si
 ]450,587]   -> size==20mm;
 
 */
-
 
 class Apriltag {
     constructor(onDetectorReadyCallback) {

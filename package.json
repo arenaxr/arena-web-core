@@ -19,6 +19,7 @@
     "aframe-spe-particles-component": "^1.0.4",
     "aframe-thickline-component": "^0.0.3",
     "chat": "^1.0.8",
+    "comlink": "^4.3.0",
     "core-js": "^3.9.1",
     "he": "^1.2.0",
     "jquery": "^3.6.0",

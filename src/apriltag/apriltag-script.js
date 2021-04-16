@@ -3,7 +3,8 @@
 'use strict';
 
 /* this is an example of processCV() that calls the wasm apriltag implementation */
-import * as Comlink from 'https://unpkg.com/comlink/dist/esm/comlink.mjs';
+import * as Comlink from 'comlink';
+import {Base64Binary} from './base64_binary.js';
 
 const bufIndex = 0;
 let cvThrottle = 0;
@@ -80,16 +81,17 @@ const vioFilter = (vioPrev, vioCur) => {
  */
 function getAllTags(id) {
     const tagSystem = document.querySelector('a-scene').systems['apriltag'];
-    const sysTag = tagSystem.get(id);
-    if (sysTag !== undefined) {
-        return {
-            id: sysTag.data.tagid,
-            uuid: `apriltag_${sysTag.el.id}`,
-            pose: sysTag.el.object3D.matrixWorld,
-        };
-    } else {
-        return ARENA.aprilTags[id];
+    if (tagSystem !== undefined) {
+        const sysTag = tagSystem.get(id);
+        if (sysTag !== undefined) {
+            return {
+                id: sysTag.data.tagid,
+                uuid: `apriltag_${sysTag.el.id}`,
+                pose: sysTag.el.object3D.matrixWorld,
+            };
+        }
     }
+    return ARENA.aprilTags[id];
 }
 
 
@@ -381,7 +383,7 @@ Initializes aprilTag worker
 async function init() {
     const ARENA = window.ARENA;
     // WebWorkers use `postMessage` and therefore work with Comlink.
-    const Apriltag = Comlink.wrap(new Worker('./src/apriltag/apriltag.js'));
+    const Apriltag = Comlink.wrap(new Worker('./apriltag.js'));
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('builder')) {
         ARENA.builder = true;
