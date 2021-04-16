@@ -55,7 +55,7 @@
              },
              "env":{
                 "type":"array",
-                "description":"Environment variables. Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
+                "description":"Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
                 "uniqueItems":false,
                 "items":{
                    "type":"string",
@@ -64,6 +64,7 @@
                 "default":[
                    "MID=${moduleid}",
                    "SCENE=${scene}",
+                   "NAMESPACE=${namespace}",
                    "MQTTH=${mqtth}",
                    "REALM=realm"
                 ]
