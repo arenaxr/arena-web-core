@@ -98,7 +98,7 @@ export class Arena {
         let _setNames = (ns, sn) => {
             this.namespacedScene = `${ns}/${sn}`;
             this.scene = sn;
-            this.nameSpace = ns;            
+            this.nameSpace = ns;
         }
         let path = window.location.pathname.substring(1);
         let { namespace: namespace, sceneName: scenename } = this.defaults;
@@ -493,10 +493,16 @@ export class Arena {
         });
         this.chat.start();
 
-        window.setupAV(() => {
-            // initialize Jitsi videoconferencing
+        const url = new URL(window.location.href);
+        const skipav = url.searchParams.get('skipav');
+        if (!skipav) {
+            window.setupAV(() => {
+                // initialize Jitsi videoconferencing
+                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+            });
+        } else {
             this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-        });
+        }
 
         // initialize face tracking if not on mobile
         if (!AFRAME.utils.device.isMobile()) {
