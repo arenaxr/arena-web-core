@@ -89,11 +89,17 @@ export class Arena {
     }
 
     /**
-     * Sets this.sceneName from url. Includes namespace prefix (e.g. `namespace/foo`)
+     * Sets this.sceneName and this.namespacedScene from url. this.namespacedScene includes namespace prefix (e.g. `namespace/foo`)
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
      * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
      */
     setSceneName = () => {
+        // private function to set scenename, namespacedScene and namespace
+        let _setNames = (ns, sn) => {
+            this.namespacedScene = `${ns}/${sn}`;
+            this.scene = sn;
+            this.nameSpace = ns;            
+        }
         let path = window.location.pathname.substring(1);
         let { namespace: namespace, sceneName: scenename } = this.defaults;
         if (this.defaults.supportDevFolders && path.length > 0) {
@@ -104,33 +110,28 @@ export class Arena {
         }
         if (path === '' || path === 'index.html') {
             scenename = ARENAUtils.getUrlParam('scene', scenename);
-            this.sceneName = `${namespace}/${scenename}`;
-            this.nameSpace = namespace;
+            _setNames(namespace, scenename)
         } else {
             try {
                 const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
                 const matches = r.exec(path).groups;
                 // Only first group is given, namespace is actually the scene name
                 if (matches.scenename === undefined) {
-                    scenename = matches.namespace;
-                    this.sceneName = `${namespace}/${scenename}`;
-                    this.nameSpace = namespace;
+                    _setNames(namespace, matches.namespace);
                 } else {
                     // Both scene and namespace are defined, return regex as-is
-                    this.sceneName = `${matches.namespace}/${matches.scenename}`;
-                    this.nameSpace = matches.namespace;
+                    _setNames(matches.namespace, matches.scenename);
                 }
             } catch (e) {
                 scenename = ARENAUtils.getUrlParam('scene', scenename);
-                this.sceneName = `${namespace}/${scenename}`;
-                this.nameSpace = namespace;
+                _setNames(namespace, scenename);
             }
         }
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
-        this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.sceneName;
-        this.outputTopic = this.defaults.realm + '/s/' + this.sceneName + '/';
+        this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.namespacedScene;
+        this.outputTopic = this.defaults.realm + '/s/' + this.namespacedScene + '/';
         this.renderTopic = this.outputTopic + '#';
-        this.vioTopic = this.defaults.realm + '/vio/' + this.sceneName + '/';
+        this.vioTopic = this.defaults.realm + '/vio/' + this.namespacedScene + '/';
     }
 
     /**
@@ -240,6 +241,7 @@ export class Arena {
                         // arena variables that are replaced; keys are the variable names e.g. ${scene}, ${cameraid}, ...
                         const avars = {
                             scene: ARENA.sceneName,
+                            namespace: ARENA.nameSpace,
                             cameraid: ARENA.camName,
                             username: ARENA.getDisplayName,
                             mqtth: ARENA.mqttHost
@@ -481,7 +483,7 @@ export class Arena {
             username: this.getDisplayName(),
             realm: this.defaults.realm,
             namespace: this.nameSpace,
-            scene: this.sceneName,
+            scene: this.namespacedScene,
             persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
             keepalive_interval_ms: 30000,
             mqtt_host: this.mqttHostURI,
