@@ -173,14 +173,15 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
-            // add load event listeners
-            entityEl.addEventListener('model-progress', (evt) => {
-                GLTFProgress.updateProgress(false, evt);
-            });
-            entityEl.addEventListener('model-error', (evt) => {
-                GLTFProgress.updateProgress(true, evt);
-            });
-
+            if (!AFRAME.THREE.Cache.files[data.src]) {
+                // add load event listeners, only if not already cached
+                entityEl.addEventListener('model-progress', (evt) => {
+                    GLTFProgress.updateProgress(false, evt);
+                });
+                entityEl.addEventListener('model-error', (evt) => {
+                    GLTFProgress.updateProgress(true, evt);
+                });
+            }
             break;
         case 'headtext':
             // handle changes to other users head text
@@ -308,7 +309,7 @@ export class CreateUpdate {
      */
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
-            //console.info("Set entity attribute [id type -  attr value]:", entityEl.getAttribute('id'), attribute, value);
+            // console.info("Set entity attribute [id type -  attr value]:", entityEl.getAttribute('id'), attribute, value);
 
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
