@@ -97,7 +97,7 @@ export class Arena {
         // private function to set scenename, namespacedScene and namespace
         let _setNames = (ns, sn) => {
             this.namespacedScene = `${ns}/${sn}`;
-            this.scene = sn;
+            this.sceneName = sn;
             this.nameSpace = ns;            
         }
         let path = window.location.pathname.substring(1);
