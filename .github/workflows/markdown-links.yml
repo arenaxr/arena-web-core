@@ -1,5 +1,11 @@
-name: Check Markdown links
 # Syntax: https://github.com/marketplace/actions/markdown-link-check
+
+# Source: https://github.com/tcort/markdown-link-check
+# Local install: npm install -g markdown-link-check
+# Local check one: markdown-link-check ./README.md
+# Local check many: find . -name \*.md -exec markdown-link-check {} \;
+
+name: Check Markdown links
 
 on: push
 
@@ -9,3 +15,6 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: 'yes'
+        use-verbose-mode: 'yes'
