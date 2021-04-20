@@ -15,6 +15,7 @@ import linkifyStr from 'linkifyjs/string';
 import Swal from 'sweetalert2';
 import './style.css';
 import { SideMenu } from '../icons/index.js';
+import he from 'he';
 
 var mqttc;
 // generate an uuid
@@ -602,21 +603,22 @@ export class ARENAChat {
 
         let msgSpan = document.createElement('span');
         msgSpan.className = `msg ${whoClass}`; // "self" | "other"
-        let host = window.location.host.replace('.', '\\.');
-        let pattern = `${host}(.*scene=.*|\\/\n|\\/$)`;
+        let host = `https:\/\/${window.location.host.replace(/\./g, '\\.')}`;
+        let pattern = `${host}\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*(.*)*`; // permissive regex for a scene
         let regex = new RegExp(pattern);
 
-        if (msg.match(regex) != null) {
+        let emsg = he.encode(msg) 
+        if (emsg.match(regex) != null) {
             // no new tab if we have a link to an arena scene
-            msg = msg.linkify({
+            emsg = emsg.linkify({
                 target: '_parent',
             });
         } else {
-            msg = msg.linkify({
+            emsg = emsg.linkify({
                 target: '_blank',
             });
         }
-        msgSpan.textContent = msg;
+        msgSpan.innerHTML = emsg;
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
