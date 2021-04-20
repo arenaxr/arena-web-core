@@ -425,7 +425,7 @@ function startConnect() {
     statusMsg('Using the following mqttc value: ' + clientID);
 
     // Initialize new Paho client connection
-    mqttc = new Paho.MQTT.Client(host, Number(port), clientID);
+    mqttc = new Paho.Client(host, Number(port), clientID);
 
     // Set callback handlers
     mqttc.onConnectionLost = onConnectionLost;
@@ -550,7 +550,7 @@ function createModule() {
 
     req_json = JSON.stringify(req);
     statusMsg("Publishing (" + topic['ctl'] + "):" + JSON.stringify(req, null, 2));
-    message = new Paho.MQTT.Message(req_json);
+    message = new Paho.Message(req_json);
     message.destinationName = req_json;
     mqttc.send(topic['ctl'], req_json);
 
@@ -587,7 +587,7 @@ function deleteModule(rtuuid) {
 
     req_json = JSON.stringify(req);
     statusMsg("Publishing (" + topic['ctl'] + "):" + JSON.stringify(req, null, 2));
-    message = new Paho.MQTT.Message(req_json);
+    message = new Paho.Message(req_json);
     message.destinationName = req_json;
     mqttc.send(topic['ctl'], req_json);
 
@@ -616,7 +616,7 @@ function deleteRuntime() {
 
     req_json = JSON.stringify(req);
     statusMsg("Publishing (" + topic['reg'] + "):" + JSON.stringify(req, null, 2));
-    message = new Paho.MQTT.Message(req_json);
+    message = new Paho.Message(req_json);
     message.destinationName = req_json;
     mqttc.send(topic['reg'], req_json);
 
@@ -666,7 +666,7 @@ async function DemoMigrateModule() {
 
     req_json = JSON.stringify(req);
     statusMsg("Publishing (" + topic['reg'] + "):" + JSON.stringify(req, null, 2));
-    message = new Paho.MQTT.Message(req_json);
+    message = new Paho.Message(req_json);
     message.destinationName = req_json;
     mqttc.send(topic['ctl'], req_json);
 
@@ -690,7 +690,7 @@ async function DemoMigrateModule() {
 
     req_json = JSON.stringify(req);
     statusMsg("Publishing (" + topic['ctl'] + "):" + JSON.stringify(req, null, 2));
-    message = new Paho.MQTT.Message(req_json);
+    message = new Paho.Message(req_json);
     message.destinationName = req_json;
     mqttc.send(topic['ctl'], req_json);
 
@@ -713,7 +713,7 @@ async function DemoMigrateModule() {
 
     req_json = JSON.stringify(req);
     statusMsg("Publishing (" + topic['ctl'] + "):" + JSON.stringify(req, null, 2));
-    message = new Paho.MQTT.Message(req_json);
+    message = new Paho.Message(req_json);
     message.destinationName = req_json;
     mqttc.send(topic['ctl'], req_json);
 
