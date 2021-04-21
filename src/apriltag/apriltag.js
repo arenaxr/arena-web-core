@@ -1,4 +1,4 @@
-importScripts('src/apriltag/apriltag_wasm.js');
+importScripts('./apriltag_wasm.js');
 import * as Comlink from 'comlink';
 
 /*
