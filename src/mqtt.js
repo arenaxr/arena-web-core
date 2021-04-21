@@ -10,7 +10,6 @@
 
 // 'use strict';
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
-import {ARENAUtils} from './utils.js';
 import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
 
 /**
@@ -111,10 +110,9 @@ export class ARENAMqtt {
         let theMessage = {};
 
         if (message) {
-            if (!ARENAUtils.isJson(message.payloadString)) {
-                return;
-            }
-            theMessage = JSON.parse(message.payloadString);
+            try {
+                theMessage = JSON.parse(message.payloadString);
+            } catch { }
         } else if (jsonMessage) {
             theMessage = jsonMessage;
         }
