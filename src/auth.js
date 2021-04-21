@@ -274,7 +274,8 @@ function formatPerms(perms) {
         const date = new Date(perms.exp * 1000);
         lines.push(`Expires: ${date.toLocaleString()}`);
     }
-    lines.push(`<br>Publish topics:`);
+    lines.push('');
+    lines.push(`Publish topics:`);
     if (perms.publ && perms.publ.length > 0) {
         perms.publ.forEach((pub) => {
             lines.push(`- ${pub}`);
@@ -282,7 +283,8 @@ function formatPerms(perms) {
     } else {
         lines.push(`- `);
     }
-    lines.push(`<br>Subscribe topics:`);
+    lines.push('');
+    lines.push(`Subscribe topics:`);
     if (perms.subs && perms.subs.length > 0) {
         perms.subs.forEach((sub) => {
             lines.push(`- ${sub}`);
@@ -290,7 +292,7 @@ function formatPerms(perms) {
     } else {
         lines.push(`- `);
     }
-    return lines.join('<br>');
+    return lines.join('\r\n');
 }
 
 /**
@@ -352,6 +354,7 @@ function initAuthPanel() {
     dataDiv.style.overflow = 'auto';
     dataDiv.style.overflowWrap = 'break-word';
     dataDiv.style.font = '11px monospace';
+    dataDiv.style.whiteSpace = 'pre';
     modalDiv.appendChild(dataDiv);
 
     const closeBtn = document.createElement('button');
