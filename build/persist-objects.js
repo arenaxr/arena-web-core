@@ -458,7 +458,7 @@ export function selectedObjsPerformAction(action, scene, all = false) {
             type: obj.type,
             data: obj.attributes != undefined ? obj.attributes : obj.data,
         });
-        var topic = 'realm/s/' + scene;
+        var topic = `realm/s/${scene}/${obj.object_id}`;
         console.info('Publish [ ' + topic + ']: ' + actionObj);
         try {
             persist.mc.publish(topic, actionObj);
@@ -527,7 +527,7 @@ export async function addObject(obj, scene) {
 
     let persistAlert = obj.persist == false ? '<br/><strong>Object not persisted.</strong>' : '';
     let objJson = JSON.stringify(obj);
-    var topic = 'realm/s/' + scene;
+    var topic = `realm/s/${scene}/${obj.object_id}`;
     console.info('Publish [ ' + topic + ']: ' + objJson);
     try {
         persist.mc.publish(topic, objJson);

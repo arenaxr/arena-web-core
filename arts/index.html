@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <meta name="viewport"
+        content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+    <title>CONIX Visualization Demo</title>
+
+    <!-- Navbar Header -->
+    <script src="../vendor/jquery-2.1.1.min.js"></script>
+    <script src="../vendor/bootstrap-2.3.2/js/bootstrap-dropdown.js"></script>
+    <script src="../vendor/bootstrap-2.3.2/js/bootstrap-collapse.js"></script>
+    <link rel='stylesheet' href='../vendor/bootstrap-2.3.2/css/bootstrap-combined.min.css'>
+
+    <link href="style.css" rel="stylesheet" />
+    <!-- d3 -->
+    <script src="/vendor/graphs/d3.v4.min.js"></script>
+    <!-- paho mqtt -->
+    <script src="/vendor/paho-mqtt.js" type="text/javascript"></script>
+    <!-- lodash (json .isEqual) -->
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
+</head>
+
+<body>
+    <div id="header"></div>
+    <div id="arts-container">
+        <div id="panel" class="panel"></div>
+        <div id="config" class="config">
+            <div id="config-top" class="config-top">
+                <div class="preamble">
+                    Runtime Visualization/Control
+                    <a class="small" href="/arts-admin">ARTS Admin Interface</a>
+                </div>
+
+                <div class="tab">
+                    <button id="mod_tablink" class="tablinks" onclick="openTab(event, 'modules')">Modules</button>
+                    <button class="tablinks" onclick="openTab(event, 'runtimes')">Runtimes</button>
+                    <button class="tablinks" onclick="openTab(event, 'misc')">Misc/Demos</button>
+                </div>
+                <div id="modules" class="tabcontent">
+                    <p class="label">Create Module:</p>
+                    <select id="file_select" onchange="onFileSelectChange('file_select')">
+                        <option
+                            value='{ "name": "counter-cwlib", "filename": "cwlib_example.wasm", "fileid":"na", "filetype": "WA", "args": "", "env": "", "channels": ""}'>
+                            counter-cwlib (wasm)</option>
+                        <option
+                            value='{ "name": "counter", "filename": "counter.wasm", "fileid":"na", "filetype": "WA", "args": "", "env": "", "channels": ""}'>
+                            counter (wasm)</option>
+                        <option
+                            value='{ "name": "npereira/pytest", "filename": "test.py", "fileid":"na", "filetype": "PY", "args": "", "env": "", "channels": ""}'>
+                            test (python)</option>
+                    </select>
+                    <p />
+                    <table>
+                        <tr>
+                            <td>Name:</td>
+                            <td><input type="text" id="mname" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Filename:</td>
+                            <td><input type="text" id="filename" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Fileid:</td>
+                            <td><input type="text" id="fileid" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Filetype:</td>
+                            <td><input type="text" id="filetype" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Args:</td>
+                            <td><input type="text" id="args" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Env:</td>
+                            <td><input type="text" id="env" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Channels:</td>
+                            <td><input type="text" id="channels" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Runtime:</td>
+                            <td><select class="small" id="runtime_select"></select></td>
+                        </tr>
+                    </table>
+                    <button onclick="createModule()">Create</button>
+                    <br /><br />
+                    <p class="label">Delete/Migrate Module:</p>
+                    Module:<select class="small" id="module_select"></select><br />
+                    Migrate to:<select class="small" id="sendto_runtime_select"></select>
+                    <button onclick="deleteModule()">Delete/Migrate</button>
+                    <br /><br />
+                    <p class="label" id="module_label">Module Stdout: <p class="small">(Select module by clicking on it
+                            on
+                            the tree)
+                            <p />
+                        </p>
+                        <textarea id="stdout-box" rows="10" cols="50"></textarea>
+                </div>
+
+                <div id="runtimes" class="tabcontent">
+                    <p class="label">Delete Runtime:</p>
+                    Runtime:<select class="small" id="del_runtime_select"></select>
+                    <button class="button" onclick="deleteRuntime()">Delete</button>
+                    <p />
+                    Delete the runtime from ARTS database; does not terminate the runtime itself
+                </div>
+
+                <div id="misc" class="tabcontent">
+                    <p class="label">MQTT</p>
+                    <p style="display:inline">Server: </p>
+                    <input type="text" size=27 id="mqtt_server" value="oz.andrew.cmu.edu">:
+                    <input type="text" size=4 id="mqtt_port" value="9001">
+                    <button onclick="reConnect()">Connect</button>
+
+                    <p class="label">Force tree refresh</p>
+                    <button class="button" onclick="loadTreeData()">Force Refresh</button>
+                    <p />
+
+                    <p class="label">Demos</p>
+                    <ul>
+                        <li /><span class="small"><button class="button" onclick="DemoMigrateModule()">Migrate
+                                Counter</button>
+                            <p />Start cwlib_example.wasm (program that outputs a counter value). After 5 seconds,
+                            migrate
+                            to a random runtime. </span>
+
+                    </ul>
+                </div>
+
+            </div>
+
+            <div class="status">
+                <textarea id="status-box" rows="10"></textarea>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- demo src-->
+    <script src="script.js"></script>
+
+    <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
+    <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+    <script src="../conf/defaults.js"></script>
+    <script src="../src/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,214 @@
+html {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font: 12px helvetica neue, helvetica, arial, sans-serif;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#arts-container {
+  width: 100%;
+  height: 100%;
+}
+
+.panel {
+  float: left;
+  left: 0;
+  top: 0;
+  width: 70%;
+  height: 100%;
+}
+
+.config {
+  float: right;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 30%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.666);
+  box-sizing: border-box;
+  padding: 1em;
+  color: #fff;
+  transition-property: opacity;
+  transition-duration: 250ms;
+  transition-timing-function: ease-out;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.config-top {
+  height: 80%;
+  overflow: auto;
+}
+
+.status {
+  width: 100%;
+  height: 20%;
+  float: inline-start
+}
+
+#status-box {
+  width: 100%;
+  height: 75%;
+}
+
+textarea {
+  width: 100%;
+  height: 100px;
+  font-size: 8px;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.param {
+  margin-bottom: 1em;
+}
+
+.preamble {
+  margin-bottom: 2em;
+  font-size: 1.5em;
+}
+
+p {
+  margin: 0.5em 0;
+  font-size: 1.2em;
+}
+
+.param button {
+  width: 3em;
+  margin-right: 0.25em;
+  text-align: center;
+}
+
+a,
+a:hover {
+  color: #8BB0D0;
+}
+
+.label {
+  display: block;
+  top: 2pt;
+  color: cornflowerblue;
+}
+
+.small {
+  display: block;
+  top: 2pt;
+  font-size: .7em;
+}
+
+.slider {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.config-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  padding: 1em;
+  margin: 0.2em;
+  cursor: pointer;
+  color: #fff;
+  z-index: 9999999;
+}
+
+.config-closed .config {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.config-closed #cy {
+  right: 0;
+}
+
+.tip-link {
+  display: block;
+}
+
+@media (max-width: 600px) {
+  #cy {
+    right: 0;
+  }
+}
+
+
+.node circle {
+  fill: #fff;
+  stroke: steelblue;
+  stroke-width: 3px;
+}
+
+.node text {
+  font: 10px sans-serif;
+}
+
+.link {
+  fill: none;
+  stroke: #ccc;
+  stroke-width: 2px;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: left;
+  width: 300px;
+  height: 50px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  /* border: 1px solid #ccc; */
+  /* background-color: #f1f1f1; */
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  border: 1px solid #AAA;
+  background: #D1D1D1;
+  background: -o-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+  background: -ms-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+  background: -moz-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+  background: -webkit-linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+  background: linear-gradient(top, #ECECEC 50%, #D1D1D1 100%);
+  display: inline-block;
+  position: relative;
+  z-index: 0;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #FFF;
+  text-shadow: 0 1px #FFF;
+  /* margin: 0 -5px; */
+  padding: 0 20px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
