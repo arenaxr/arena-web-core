@@ -51,7 +51,7 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
         return;
     }
 
-    if (data.constrainToNavMesh) {
+    if (data.constrainToNavMesh && !this.data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
         start.copy(el.object3D.position);
