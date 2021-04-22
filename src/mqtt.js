@@ -228,6 +228,6 @@ export class ARENAMqtt {
     isConnected(jsonMessage) {
         return this.mqttClient.isConnected();
     }
-};
+}
 
 

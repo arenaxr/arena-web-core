@@ -1,7 +1,73 @@
 /* global AFRAME */
 
+const bind = AFRAME.utils.bind;
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
+const EPS = 10e-6;
+
+AFRAME.components['wasd-controls'].Component.prototype.init = function() {
+    // Navigation
+    this.navGroup = null;
+    this.navNode = null;
+    // To keep track of the pressed keys.
+    this.keys = {};
+    this.easing = 1.1;
+
+    this.velocity = new THREE.Vector3();
+
+    // Bind methods and add event listeners.
+    this.onBlur = bind(this.onBlur, this);
+    this.onContextMenu = bind(this.onContextMenu, this);
+    this.onFocus = bind(this.onFocus, this);
+    this.onKeyDown = bind(this.onKeyDown, this);
+    this.onKeyUp = bind(this.onKeyUp, this);
+    this.onVisibilityChange = bind(this.onVisibilityChange, this);
+    this.attachVisibilityEventListeners();
+};
+
+const wasdSchema = AFRAME.components['wasd-controls'].Component.prototype.schema;
+Object.assign(wasdSchema, {constrainToNavMesh: {default: false}});
+AFRAME.components['wasd-controls'].Component.prototype.schema = AFRAME.schema.process(wasdSchema);
+
+AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, delta) {
+    const data = this.data;
+    const el = this.el;
+    const velocity = this.velocity;
+
+    const start = new THREE.Vector3();
+    const end = new THREE.Vector3();
+    const clampedEnd = new THREE.Vector3();
+
+    if (!velocity[data.adAxis] && !velocity[data.wsAxis] &&
+        isEmptyObject(this.keys)) {
+        return;
+    }
+
+    // Update velocity.
+    delta = delta / 1000;
+    this.updateVelocity(delta);
+
+    if (!velocity[data.adAxis] && !velocity[data.wsAxis]) {
+        return;
+    }
+
+    if (data.constrainToNavMesh) {
+        if (velocity.lengthSq() < EPS) return;
+
+        start.copy(el.object3D.position);
+        end.copy(start).add(this.getMovementVector(delta));
+
+        const nav = el.sceneEl.systems.nav;
+        this.navGroup = this.navGroup === null ? nav.getGroup(start) : this.navGroup;
+        this.navNode = this.navNode || nav.getNode(start, this.navGroup);
+        this.navNode = nav.clampStep(start, end, this.navGroup, this.navNode, clampedEnd);
+        el.object3D.position.copy(clampedEnd);
+    } else {
+        // Get movement vector and translate position.
+        el.object3D.position.add(this.getMovementVector(delta));
+    }
+};
+
 
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
     let adSign;
@@ -63,3 +129,16 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
         }
     }
 };
+
+/**
+ * @param {object} keys
+ * @return {boolean}
+ */
+function isEmptyObject(keys) {
+    let key;
+    // eslint-disable-next-line guard-for-in
+    for (key in keys) {
+        return false;
+    }
+    return true;
+}
