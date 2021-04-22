@@ -9,7 +9,7 @@
 const MAX_DELTA = 0.2;
 const CLAMP_VELOCITY = 0.00001;
 const LONG_PRESS_DURATION_THRESHOLD = 1000; // pressing for 1 second counts as long press
-
+const EPS = 10e-6;
 /**
  * Press and move camera; User camera movement with the mouse.
  * Based off [wasd controls]{@link https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js}
@@ -21,11 +21,19 @@ const LONG_PRESS_DURATION_THRESHOLD = 1000; // pressing for 1 second counts as l
 AFRAME.registerComponent('press-and-move', {
     schema: {
         acceleration: {default: 30},
+        constrainToNavMesh: {default: false},
         enabled: {default: true},
         fly: {default: false},
     },
 
     init: function() {
+        // Navigation
+        this.navGroup = null;
+        this.navNode = null;
+        this.navStart = new THREE.Vector3();
+        this.navEnd = new THREE.Vector3();
+        this.clampedEnd = new THREE.Vector3();
+
         this.timer = null;
         this.drag = false;
         this.longTouch = false;
@@ -122,6 +130,7 @@ AFRAME.registerComponent('press-and-move', {
     })(),
 
     tick: function(time, delta) {
+        const data = this.data;
         const el = this.el;
         const velocity = this.velocity;
 
@@ -135,7 +144,21 @@ AFRAME.registerComponent('press-and-move', {
                 return;
             }
 
-            el.object3D.position.add(this.getMovementVector(delta));
+            const nav = el.sceneEl.systems.nav;
+            if (nav.navMesh && data.constrainToNavMesh && !data.fly) {
+                if (velocity.lengthSq() < EPS) return;
+
+                this.navStart.copy(el.object3D.position);
+                this.navEnd.copy(this.navStart).add(this.getMovementVector(delta));
+
+                this.navGroup = this.navGroup === null ? nav.getGroup(this.navStart) : this.navGroup;
+                this.navNode = this.navNode || nav.getNode(this.navStart, this.navGroup);
+                this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
+                el.object3D.position.copy(this.clampedEnd);
+            } else {
+                // Get movement vector and translate position.
+                el.object3D.position.add(this.getMovementVector(delta));
+            }
         }
     },
 });
