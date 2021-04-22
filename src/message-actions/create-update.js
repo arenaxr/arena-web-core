@@ -111,7 +111,7 @@ export class CreateUpdate {
 
         case 'rig':
             if (id === ARENA.camName) { // our camera Rig
-                const entityEl = document.getElementById('CameraRig');
+                const entityEl = document.getElementById('cameraRig');
 
                 this.updateObject(entityEl, message);
             }
