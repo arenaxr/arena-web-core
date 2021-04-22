@@ -9,6 +9,10 @@ AFRAME.components['wasd-controls'].Component.prototype.init = function() {
     // Navigation
     this.navGroup = null;
     this.navNode = null;
+    this.navStart = new THREE.Vector3();
+    this.navEnd = new THREE.Vector3();
+    this.clampedEnd = new THREE.Vector3();
+
     // To keep track of the pressed keys.
     this.keys = {};
     this.easing = 1.1;
@@ -34,10 +38,6 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
     const el = this.el;
     const velocity = this.velocity;
 
-    const start = new THREE.Vector3();
-    const end = new THREE.Vector3();
-    const clampedEnd = new THREE.Vector3();
-
     if (!velocity[data.adAxis] && !velocity[data.wsAxis] &&
         isEmptyObject(this.keys)) {
         return;
@@ -51,16 +51,16 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
         return;
     }
     const nav = el.sceneEl.systems.nav;
-    if (nav.navMesh && data.constrainToNavMesh && !this.data.fly) {
+    if (nav.navMesh && data.constrainToNavMesh && !data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
-        start.copy(el.object3D.position);
-        end.copy(start).add(this.getMovementVector(delta));
+        this.navStart.copy(el.object3D.position);
+        this.navEnd.copy(this.navStart).add(this.getMovementVector(delta));
 
-        this.navGroup = this.navGroup === null ? nav.getGroup(start) : this.navGroup;
-        this.navNode = this.navNode || nav.getNode(start, this.navGroup);
-        this.navNode = nav.clampStep(start, end, this.navGroup, this.navNode, clampedEnd);
-        el.object3D.position.copy(clampedEnd);
+        this.navGroup = this.navGroup === null ? nav.getGroup(this.navStart) : this.navGroup;
+        this.navNode = this.navNode || nav.getNode(this.navStart, this.navGroup);
+        this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
+        el.object3D.position.copy(this.clampedEnd);
     } else {
         // Get movement vector and translate position.
         el.object3D.position.add(this.getMovementVector(delta));
