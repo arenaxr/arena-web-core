@@ -50,14 +50,13 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
     if (!velocity[data.adAxis] && !velocity[data.wsAxis]) {
         return;
     }
-
-    if (data.constrainToNavMesh && !this.data.fly) {
+    const nav = el.sceneEl.systems.nav;
+    if (nav.navMesh && data.constrainToNavMesh && !this.data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
         start.copy(el.object3D.position);
         end.copy(start).add(this.getMovementVector(delta));
 
-        const nav = el.sceneEl.systems.nav;
         this.navGroup = this.navGroup === null ? nav.getGroup(start) : this.navGroup;
         this.navNode = this.navNode || nav.getNode(start, this.navGroup);
         this.navNode = nav.clampStep(start, end, this.navGroup, this.navNode, clampedEnd);
