@@ -155,6 +155,9 @@ export class ARENAMqtt {
             case 'delete':
                 Delete.handle(theMessage);
                 break;
+            case 'getPersist':
+            case 'returnPersist':
+                break;
             default:
                 console.warn('Malformed message (invalid action field):', JSON.stringify(message));
                 break;
