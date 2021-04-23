@@ -93,7 +93,7 @@ AFRAME.registerComponent('armarker', {
         }, // size in mm
         url: {
             type: 'string',
-            default: undefined,
+            default: '',
         }, // url associated with the marker
         lat: {
             type: 'number',
