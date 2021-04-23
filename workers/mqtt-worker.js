@@ -54,30 +54,22 @@ class MQTTWorker {
     }
 
     /**
-     * Direct call to mqtt client send
-     * @param {object} msg
-     */
-    async send(msg) {
-        if (!this.mqttClient.isConnected()) return;
-        return this.mqttClient.send(msg);
-    }
-    /**
      * Publish to given dest topic
-     * @param {string} dest
-     * @param {object} msg
+     * @param {string} topic
+     * @param {string|object} payload
+     * @param {number} qos
+     * @param {boolean} retained
      */
-    async publish(dest, msg) {
+    async publish(topic, payload, qos=0, retained=false) {
         if (!this.mqttClient.isConnected()) return;
 
-        if (typeof msg === 'object') {
+        if (typeof payload === 'object') {
             // add timestamp to all published messages
-            msg['timestamp'] = new Date().toISOString();
+            payload['timestamp'] = new Date().toISOString();
 
-            msg = JSON.stringify(msg);
+            payload = JSON.stringify(payload);
         }
-        const message = new Paho.Message(msg);
-        message.destinationName = dest;
-        return this.mqttClient.send(message);
+        this.mqttClient.publish(topic, payload, qos, retained);
     }
 
     /**

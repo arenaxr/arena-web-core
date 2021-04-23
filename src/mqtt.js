@@ -123,11 +123,8 @@ export class ARENAMqtt {
     async connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
         await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
     }
-    async send(msg) {
-        await this.MQTTWorker.send(msg);
-    }
-    async publish(dest, msg) {
-        await this.MQTTWorker.publish(dest, msg);
+    async publish(topic, payload, qos, retained) {
+        await this.MQTTWorker.publish(topic, payload, qos, retained);
     }
     /**
      * Send a message to internal receive handler
@@ -137,6 +134,6 @@ export class ARENAMqtt {
         return this._onMessageArrived(undefined, jsonMessage);
     }
     async isConnected() {
-        return await this.MQTTWorker.isConnected();
+        return await this.mqttClient.isConnected();
     }
 };
