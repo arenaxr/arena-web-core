@@ -9,7 +9,7 @@
 /* global THREE, ARENA */
 
 // 'use strict';
-import * as Comlink from '../vendor/comlink/comlink.mjs';
+import * as Comlink from 'comlink';
 import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
 
 /**
