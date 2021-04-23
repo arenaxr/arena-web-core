@@ -16,13 +16,12 @@ class MQTTWorker {
      */
     constructor(ARENAConfig, initScene, mainOnMessageArrived, restartJitsi) {
         this.initScene = initScene;
-        this.mainOnMessageArrived = mainOnMessageArrived;
         this.restartJitsi = restartJitsi;
         this.ARENA = ARENAConfig;
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, 'webClient-' + ARENAConfig.idTag);
-        mqttClient.onConnected = this.onConnected;
+        mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
         mqttClient.onConnectionLost = this.onConnectionLost;
-        mqttClient.onMessageArrived = this.onMessageArrived;
+        mqttClient.onMessageArrived = async (msg) => await mainOnMessageArrived(msg);
         this.mqttClient = mqttClient;
     }
     /**
@@ -98,7 +97,6 @@ class MQTTWorker {
         this.mqttClient.subscribe(this.ARENA.renderTopic);
     }
 
-
     /**
      * MQTT onConnectionLost callback
      * @param {Object} responseObject paho response object
@@ -111,29 +109,6 @@ class MQTTWorker {
         }
         console.warn('MQTT scene automatically reconnecting...');
         // no need to connect manually here, "reconnect: true" already set
-    }
-
-    /**
-     * Call internal MessageArrived handler; Isolates message error handling
-     * Also called to handle persist objects
-     * @param {Object} message
-     * @param {String} jsonMessage
-     */
-    async onMessageArrived(message, jsonMessage) {
-        try {
-            await this.mainOnMessageArrived(message, jsonMessage);
-        } catch (err) {
-            if (message) {
-                if (message.payloadString) {
-                    console.error('onMessageArrived Error!', err, message.payloadString);
-                } else {
-                    console.error('onMessageArrived Error!', err,
-                        new TextDecoder('utf-8').decode(message.payloadBytes), message.payloadBytes);
-                }
-            } else if (jsonMessage) {
-                console.error('onMessageArrived Error!', err, JSON.stringify(jsonMessage));
-            }
-        }
     }
 }
 

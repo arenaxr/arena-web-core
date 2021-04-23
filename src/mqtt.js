@@ -39,11 +39,9 @@ export class ARENAMqtt {
             Comlink.proxy(ARENA.initScene),
             Comlink.proxy(this._onMessageArrived),
             Comlink.proxy(() => {
-                if (ARENA.Jitsi) {
-                    if (!ARENA.Jitsi.ready) {
-                        ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
-                        console.warn(`ARENA Jitsi restarting...`);
-                    }
+                if (!ARENA.Jitsi?.ready) {
+                    ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
+                    console.warn(`ARENA Jitsi restarting...`);
                 }
             }),
         );
@@ -136,4 +134,4 @@ export class ARENAMqtt {
     async isConnected() {
         return await this.mqttClient.isConnected();
     }
-};
+}
