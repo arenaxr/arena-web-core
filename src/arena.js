@@ -98,7 +98,7 @@ export class Arena {
         let _setNames = (ns, sn) => {
             this.namespacedScene = `${ns}/${sn}`;
             this.sceneName = sn;
-            this.nameSpace = ns;            
+            this.nameSpace = ns;
         }
         let path = window.location.pathname.substring(1);
         let { namespace: namespace, sceneName: scenename } = this.defaults;
@@ -182,7 +182,9 @@ export class Arena {
                 }
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
-            camera.setAttribute('position', ARENA.startCoords); // an x, y, z object or a space-separated string
+            const startPos = new AFRAME.THREE.Vector3;
+            startPos.copy(ARENA.startCoords).y += ARENA.defaults.camHeight;
+            camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
 
             // enable vio if fixedCamera is given
             if (ARENA.fixedCamera !== '') {

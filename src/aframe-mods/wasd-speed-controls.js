@@ -54,12 +54,13 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
     if (nav.navMesh && data.constrainToNavMesh && !data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
-        this.navStart.copy(el.object3D.position);
+        this.navStart.copy(el.object3D.position).y -= ARENA.defaults.camHeight;
         this.navEnd.copy(this.navStart).add(this.getMovementVector(delta));
 
         this.navGroup = this.navGroup === null ? nav.getGroup(this.navStart) : this.navGroup;
         this.navNode = this.navNode || nav.getNode(this.navStart, this.navGroup);
         this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
+        this.clampedEnd.y += ARENA.defaults.camHeight;
         el.object3D.position.copy(this.clampedEnd);
     } else {
         // Get movement vector and translate position.
