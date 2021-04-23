@@ -96,8 +96,11 @@ export class ARENAJitsi {
 
         JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, this.onDeviceListChanged.bind(this));
 
-        const prefAudioOutput = localStorage.getItem('prefAudioOutput') ;
-        JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+        // Firefox does not allow audio output device change
+        try {
+            const prefAudioOutput = localStorage.getItem('prefAudioOutput') ;
+            JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
+        } catch {}
 
         JitsiMeetJS.init(this.initOptions);
         console.info("Jitsi, connecting:", this.connectOptions);
