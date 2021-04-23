@@ -76,7 +76,7 @@ export class ARENAChat {
 
 		Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
 		Note: scene-only messages are sent to public topic and filtered at the client
-        Note: scene-namespace is the current scene namespace 
+        Note: scene-namespace is the current scene namespace
 
 		Summary of topics/permissions:
             <realm>/c/<scene-namespace>/p/<userid>/#  - receive private messages
@@ -89,7 +89,7 @@ export class ARENAChat {
         this.settings.subscribePrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/${this.settings.userid}/#`;
 
         // receive open messages to everyone and/or scene (subscribe only)
-        this.settings.subscribePublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/#`; 
+        this.settings.subscribePublicTopic = `${this.settings.realm}/c/${this.settings.namespace}/o/#`;
 
         // send private messages to a user (publish only)
         this.settings.publishPrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/\{to_uid\}/${`${this.settings.userid}${btoa(this.settings.userid)}`}`;
@@ -598,7 +598,7 @@ export class ARENAChat {
         if (whoClass !== 'self' && whoClass !== 'other') whoClass='other';
         let statusSpan = document.createElement('span');
         statusSpan.className = `status ${whoClass}`; // "self" | "other"
-        statusSpan.textContent = status; 
+        statusSpan.textContent = status;
         this.msgList.appendChild(statusSpan);
 
         let msgSpan = document.createElement('span');
@@ -607,7 +607,7 @@ export class ARENAChat {
         let pattern = `${host}\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*(.*)*`; // permissive regex for a scene
         let regex = new RegExp(pattern);
 
-        let emsg = he.encode(msg) 
+        let emsg = he.encode(msg)
         if (emsg.match(regex) != null) {
             // no new tab if we have a link to an arena scene
             emsg = emsg.linkify({
@@ -729,7 +729,7 @@ export class ARENAChat {
                 op.value = user.uid;
                 op.textContent =
                     `to: ${decodeURI(user.un)}${(user.scene != _this.settings.scene ? ` (${user.scene})` : '')}`;
-                _this.toSel.appendChild(op);    
+                _this.toSel.appendChild(op);
             }
             _this.usersList.appendChild(uli);
         });
@@ -872,7 +872,7 @@ export class ARENAChat {
         landmarkObj.object3D.getWorldPosition(pos);
         myCamera.object3D.position.copy(pos);
         myCamera.object3D.position.add(direction.multiplyScalar(distance));
-        myCamera.object3D.position.y = 1.6; // set at a fixed height
+        myCamera.object3D.position.y = ARENA.defaults.camHeight; // set at a fixed height
 
         // rotate our camera to face the object
         myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
