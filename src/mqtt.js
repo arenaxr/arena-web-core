@@ -6,14 +6,14 @@
  * @date 2020
  */
 
-/* global THREE, ARENA */
+/* global ARENA */
 
 // 'use strict';
-import * as Comlink from 'comlink';
+import {proxy, wrap} from 'comlink';
 import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
 
 /**
- * Main ARENA MQTT client
+ * Interface for MQTT webworker
  */
 export class ARENAMqtt {
     // eslint-disable-next-line require-jsdoc
@@ -23,23 +23,23 @@ export class ARENAMqtt {
         return mqtt;
     }
 
-    constructor() {
-        this.MQTTWorker = undefined;
-        this.mqttClient = undefined;
-    }
-
+    /**
+     * Initializes webworker for ARENAMQtt factory
+     * @private
+     */
     async _initWorker() {
-        const MQTTWorker = Comlink.wrap(new Worker('../workers/mqtt-worker.js'));
+        const MQTTWorker = wrap(new Worker('../workers/mqtt-worker.js'));
         const worker = await new MQTTWorker(
             {
                 renderTopic: ARENA.renderTopic,
                 mqttHostURI: ARENA.mqttHostURI,
                 idTag: ARENA.idTag,
             },
-            Comlink.proxy(ARENA.initScene),
-            Comlink.proxy(this._onMessageArrived),
-            Comlink.proxy(() => {
+            proxy(ARENA.initScene),
+            proxy(this._onMessageArrived),
+            proxy(() => {
                 if (!ARENA.Jitsi?.ready) {
+                    // eslint-disable-next-line new-cap
                     ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
                     console.warn(`ARENA Jitsi restarting...`);
                 }
@@ -61,7 +61,7 @@ export class ARENAMqtt {
         if (message) {
             try {
                 theMessage = JSON.parse(message.payloadString);
-            } catch { }
+            } catch {}
         } else if (jsonMessage) {
             theMessage = jsonMessage;
         }
@@ -118,19 +118,33 @@ export class ARENAMqtt {
      * @param {string} lwMsg
      * @param {string} lwTopic
      */
-    async connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
+    async connect(mqttClientOptions, lwMsg = undefined, lwTopic = undefined) {
         await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
     }
+
+    /**
+     * Publishes message to mqtt
+     * @param {string} topic
+     * @param {string|object} payload
+     * @param {number} qos
+     * @param {boolean} retained
+     */
     async publish(topic, payload, qos, retained) {
         await this.MQTTWorker.publish(topic, payload, qos, retained);
     }
+
     /**
      * Send a message to internal receive handler
      * @param {string} jsonMessage
      */
     processMessage(jsonMessage) {
-        return this._onMessageArrived(undefined, jsonMessage);
+        this._onMessageArrived(undefined, jsonMessage);
     }
+
+    /**
+     * Returns mqttClient connection state
+     * @return {boolean}
+     */
     async isConnected() {
         return await this.mqttClient.isConnected();
     }

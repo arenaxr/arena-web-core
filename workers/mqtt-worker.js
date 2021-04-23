@@ -1,11 +1,16 @@
-import * as Comlink from 'comlink';
-const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 /**
- * Main ARENA MQTT client
+ * @fileoverview Handle messaging from MQTT
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
  */
 
+import {expose} from 'comlink';
+const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
+
 /**
- * Initializes a MQTT Worker
+ * Main ARENA MQTT webworker client
  */
 class MQTTWorker {
     /**
@@ -112,4 +117,4 @@ class MQTTWorker {
     }
 }
 
-Comlink.expose(MQTTWorker);
+expose(MQTTWorker);
