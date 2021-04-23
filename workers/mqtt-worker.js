@@ -10,11 +10,11 @@ const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 class MQTTWorker {
     /**
      * @param {object} ARENAConfig
-     * @param {function}initScene
+     * @param {function} initScene
      * @param {function} mainOnMessageArrived
      * @param {function} restartJitsi
      */
-    constructor({ARENAConfig, initScene, mainOnMessageArrived, restartJitsi}) {
+    constructor(ARENAConfig, initScene, mainOnMessageArrived, restartJitsi) {
         this.initScene = initScene;
         this.mainOnMessageArrived = mainOnMessageArrived;
         this.restartJitsi = restartJitsi;
@@ -32,6 +32,15 @@ class MQTTWorker {
      * @param {string} lwTopic last will destination topic message
      */
     async connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
+        const opts = {
+            ...mqttClientOptions,
+            onSuccess: function() {
+                console.info('MQTT scene connection success.');
+            },
+            onFailure: function(res) {
+                console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
+            },
+        };
         if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
             // Last Will and Testament message sent to subscribers if this client loses connection
             const lwt = new Paho.Message(lwMsg);
@@ -41,7 +50,7 @@ class MQTTWorker {
 
             mqttClientOptions.willMessage = lwt;
         }
-        await this.mqttClient.connect(mqttClientOptions);
+        this.mqttClient.connect(opts);
     }
 
     /**

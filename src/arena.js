@@ -449,13 +449,8 @@ export class Arena {
 
         ARENAMqtt.init().then(async (Mqtt) => {
             this.Mqtt = Mqtt;
+            // Do not pass functions in mqttClientOptions
             await Mqtt.connect({
-                    onSuccess: function() {
-                        console.info('MQTT scene connection success.');
-                    },
-                    onFailure: function(res) {
-                        console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
-                    },
                     reconnect: true,
                     userName: this.username,
                     password: this.mqttToken,

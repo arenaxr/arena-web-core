@@ -30,15 +30,15 @@ export class ARENAMqtt {
 
     async _initWorker() {
         const MQTTWorker = Comlink.wrap(new Worker('../workers/mqtt-worker.js'));
-        const worker = await new MQTTWorker({
-            ARENAConfig: {
+        const worker = await new MQTTWorker(
+            {
                 renderTopic: ARENA.renderTopic,
                 mqttHostURI: ARENA.mqttHostURI,
                 idTag: ARENA.idTag,
             },
-            initScene: Comlink.proxy(ARENA.initScene),
-            mainOnMessageArrived: Comlink.proxy(this._onMessageArrived),
-            restartJitsi: Comlink.proxy(() => {
+            Comlink.proxy(ARENA.initScene),
+            Comlink.proxy(this._onMessageArrived),
+            Comlink.proxy(() => {
                 if (ARENA.Jitsi) {
                     if (!ARENA.Jitsi.ready) {
                         ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
@@ -115,8 +115,13 @@ export class ARENAMqtt {
         }
     }
 
+    /**
+     * @param {object} mqttClientOptions
+     * @param {string} lwMsg
+     * @param {string} lwTopic
+     */
     async connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
-        await this.MQTTWorker.connect(Comlink.proxy(mqttClientOptions), lwMsg, lwTopic);
+        await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
     }
     async send(msg) {
         await this.MQTTWorker.send(msg);
