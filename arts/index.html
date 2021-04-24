@@ -11,6 +11,7 @@
     <script src="../vendor/jquery-2.1.1.min.js"></script>
     <script src="../vendor/bootstrap-2.3.2/js/bootstrap-dropdown.js"></script>
     <script src="../vendor/bootstrap-2.3.2/js/bootstrap-collapse.js"></script>
+    <link rel='stylesheet' href='../vendor/fontawesome/all.min.css'>
     <link rel='stylesheet' href='../vendor/bootstrap-2.3.2/css/bootstrap-combined.min.css'>
 
     <link href="style.css" rel="stylesheet" />
@@ -30,99 +31,96 @@
             <div id="config-top" class="config-top">
                 <div class="preamble">
                     Runtime Visualization/Control
-                    <a class="small" href="/arts-admin">ARTS Admin Interface</a>
                 </div>
 
                 <div class="tab">
-                    <button id="mod_tablink" class="tablinks" onclick="openTab(event, 'modules')">Modules</button>
-                    <button class="tablinks" onclick="openTab(event, 'runtimes')">Runtimes</button>
-                    <button class="tablinks" onclick="openTab(event, 'misc')">Misc/Demos</button>
+                    <button id="_modules" class="tablinks">Modules</button>
+                    <button id="_runtimes" class="tablinks">Runtimes</button>
+                    <button id="_misc" class="tablinks">Misc/Demos</button>
                 </div>
                 <div id="modules" class="tabcontent">
-                    <p class="label">Create Module:</p>
-                    <select id="file_select" onchange="onFileSelectChange('file_select')">
-                        <option
-                            value='{ "name": "counter-cwlib", "filename": "cwlib_example.wasm", "fileid":"na", "filetype": "WA", "args": "", "env": "", "channels": ""}'>
-                            counter-cwlib (wasm)</option>
-                        <option
-                            value='{ "name": "counter", "filename": "counter.wasm", "fileid":"na", "filetype": "WA", "args": "", "env": "", "channels": ""}'>
-                            counter (wasm)</option>
-                        <option
-                            value='{ "name": "npereira/pytest", "filename": "test.py", "fileid":"na", "filetype": "PY", "args": "", "env": "", "channels": ""}'>
-                            test (python)</option>
-                    </select>
-                    <p />
-                    <table>
-                        <tr>
-                            <td>Name:</td>
-                            <td><input type="text" id="mname" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Filename:</td>
-                            <td><input type="text" id="filename" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Fileid:</td>
-                            <td><input type="text" id="fileid" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Filetype:</td>
-                            <td><input type="text" id="filetype" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Args:</td>
-                            <td><input type="text" id="args" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Env:</td>
-                            <td><input type="text" id="env" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Channels:</td>
-                            <td><input type="text" id="channels" value=""></td>
-                        </tr>
-                        <tr>
-                            <td>Runtime:</td>
-                            <td><select class="small" id="runtime_select"></select></td>
-                        </tr>
-                    </table>
-                    <button onclick="createModule()">Create</button>
-                    <br /><br />
-                    <p class="label">Delete/Migrate Module:</p>
-                    Module:<select class="small" id="module_select"></select><br />
-                    Migrate to:<select class="small" id="sendto_runtime_select"></select>
-                    <button onclick="deleteModule()">Delete/Migrate</button>
-                    <br /><br />
-                    <p class="label" id="module_label">Module Stdout: <p class="small">(Select module by clicking on it
-                            on
-                            the tree)
-                            <p />
-                        </p>
-                        <textarea id="stdout-box" rows="10" cols="50"></textarea>
+                 
+                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_create_mod' title="Press to toggle visibility of the section"><i
+                        class="fas fa-angle-down fa-lg" id='create_mod_icon'></i>&nbspCreate Module</a><p/>
+                        <div id="create_mod">
+                        <table>
+                            <tr>
+                                <td>Name:</td>
+                                <td><input type="text" id="mname" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Filename:</td>
+                                <td><input type="text" id="filename" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Fileid:</td>
+                                <td><input type="text" id="fileid" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Filetype:</td>
+                                <td><input type="text" id="filetype" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Args:</td>
+                                <td><input type="text" id="args" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Env:</td>
+                                <td><input type="text" id="env" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Channels:</td>
+                                <td><input type="text" id="channels" value=""></td>
+                            </tr>
+                            <tr>
+                                <td>Runtime:</td>
+                                <td><select class="small" id="runtime_select"></select></td>
+                            </tr>
+                        </table>
+                        <button id="create_module_btn">Create</button>
+                        <br /><br />
+                        Fill form above from examples:<p/> <select id="file_select">
+                        </select>
+
+                    </div>
+                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_migrate_mod' title="Press to toggle visibility of the section"><i
+                        class="fas fa-angle-down fa-lg" id='migrate_mod_icon'></i>&nbspDelete/Migrate Module</a><p/>
+                    <div id="migrate_mod">
+                        Module:<select class="small" id="module_select"></select><br />
+                        Migrate to:<select class="small" id="sendto_runtime_select"></select>
+                        <button id="delete_module_btn">Delete/Migrate</button>
+                        <br /><br />
+                    </div>
+                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_stdout_mod' title="Press to toggle visibility of the section"><i
+                        class="fas fa-angle-up fa-lg" id='stdout_mod_icon'></i>&nbspModule Stdout/Stdin</a><p/>
+                    <div id="stdout_mod" style='display: block'>
+                            <p class="small" id='module_label'>(Select module by clicking on it on the tree) <p />
+                            <textarea id="stdout_box" rows="20" cols="30"></textarea>
+                            <p/>
+                            <input type="text" id="stdin_input" placeholder="send to stdin"> <button id="stdin_snd_btn" style="margin-bottom:10px">Send</button></td>                            
+                    </div>
                 </div>
 
                 <div id="runtimes" class="tabcontent">
-                    <p class="label">Delete Runtime:</p>
+                    <p class="label">Delete Runtime</p>
                     Runtime:<select class="small" id="del_runtime_select"></select>
-                    <button class="button" onclick="deleteRuntime()">Delete</button>
+                    <button id="delete_rt_btn" class="button">Delete</button>
                     <p />
                     Delete the runtime from ARTS database; does not terminate the runtime itself
                 </div>
 
                 <div id="misc" class="tabcontent">
                     <p class="label">MQTT</p>
-                    <p style="display:inline">Server: </p>
-                    <input type="text" size=27 id="mqtt_server" value="oz.andrew.cmu.edu">:
-                    <input type="text" size=4 id="mqtt_port" value="9001">
-                    <button onclick="reConnect()">Connect</button>
+                    <p style="display:inline">Connect String: 
+                    <input type="text" size=27 id="mqtt_conn_str" value="wss://arenaxr.org/mqtt"> <button id="reconnect_btn" style="margin-bottom:10px">Connect</button>
 
-                    <p class="label">Force tree refresh</p>
-                    <button class="button" onclick="loadTreeData()">Force Refresh</button>
+                    <p class="label">Force Tree Refresh</p>
+                    <button id="load_tree_data" class="button">Force Refresh</button>
                     <p />
 
                     <p class="label">Demos</p>
                     <ul>
-                        <li /><span class="small"><button class="button" onclick="DemoMigrateModule()">Migrate
+                        <li /><span class="small"><button id="demo_migrate_mod_btn" class="button">Migrate
                                 Counter</button>
                             <p />Start cwlib_example.wasm (program that outputs a counter value). After 5 seconds,
                             migrate
@@ -133,8 +131,8 @@
 
             </div>
 
-            <div class="status">
-                <textarea id="status-box" rows="10"></textarea>
+            <div class="status" style="display: none">
+                <textarea id="status_box" rows="10" cols="50"></textarea>
             </div>
 
         </div>
