@@ -729,6 +729,12 @@
            "lat",
            "lon"
         ]
+     },
+     "nav-mesh":{
+        "title":"Nav Mesh",
+        "description":"Assigns model as a navigation mesh for the pathfinding system.",
+        "type":"boolean",
+        "default": false
      }
     },
     "title":"GLTF Model",
@@ -836,7 +842,10 @@
              },
              "attribution": {
                  "$ref": "#/definitions/attribution"
-             }
+             },
+             "nav-mesh":{
+                "$ref":"#/definitions/nav-mesh"
+             }             
           },
           "additionalProperties": true,
           "required":[
