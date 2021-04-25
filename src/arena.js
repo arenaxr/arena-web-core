@@ -183,7 +183,16 @@ export class Arena {
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
             const startPos = new AFRAME.THREE.Vector3;
-            startPos.copy(ARENA.startCoords).y += ARENA.defaults.camHeight;
+            const navSys = AFRAME.scenes[0].systems.nav;
+            startPos.copy(ARENA.startCoords);
+            if (navSys.navMesh) {
+                try {
+                    const closestNode = navSys.getNode(startPos, navSys.getGroup(startPos));
+                    //startPos.y += closestNode.centroid.z;
+                    console.log("Start Y:", startPos.y, ", closest nav node Y:", closestNode.centroid.z)
+                } catch {}
+            }
+            startPos.y += ARENA.defaults.camHeight;
             camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
 
             // enable vio if fixedCamera is given
