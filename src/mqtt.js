@@ -6,99 +6,48 @@
  * @date 2020
  */
 
-/* global THREE, ARENA */
+/* global ARENA */
 
 // 'use strict';
-const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
+import {proxy, wrap} from 'comlink';
 import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
 
 /**
- * Main ARENA MQTT client
+ * Interface for MQTT webworker
  */
 export class ARENAMqtt {
-    static mqtt = undefined;
-
-    static init() {
-        if (!this.mqtt) this.mqtt = new ARENAMqtt();
-        return this.mqtt;
+    // eslint-disable-next-line require-jsdoc
+    static async init() {
+        const mqtt = new ARENAMqtt();
+        await mqtt._initWorker();
+        return mqtt;
     }
 
     /**
-     * Constructor
+     * Initializes webworker for ARENAMQtt factory
+     * @private
      */
-    constructor() {
-        this.mqttClient = new Paho.Client(ARENA.mqttHostURI, 'webClient-' + ARENA.idTag);
-        this.mqttClient.onConnected = this.onConnected.bind(this);
-        this.mqttClient.onConnectionLost = this.onConnectionLost.bind(this);
-        this.mqttClient.onMessageArrived = this.onMessageArrived.bind(this);
-    }
-
-    /**
-     * MQTT onConnected callback
-     * @param {Boolean} reconnect is a reconnect
-     * @param {Object} uri uri used
-     */
-    onConnected(reconnect, uri) {
-        if (reconnect) {
-            // For reconnect, do not reinitialize user state, that will warp user back and lose
-            // current state. Instead, reconnection should naturally allow messages to continue.
-            // need to resubscribe however, to keep receiving messages
-            if (ARENA.Jitsi) {
-                if (!ARENA.Jitsi.ready) {
+    async _initWorker() {
+        const MQTTWorker = wrap(new Worker('../workers/mqtt-worker.js'));
+        const worker = await new MQTTWorker(
+            {
+                renderTopic: ARENA.renderTopic,
+                mqttHostURI: ARENA.mqttHostURI,
+                idTag: ARENA.idTag,
+            },
+            proxy(ARENA.initScene),
+            proxy(this._onMessageArrived),
+            proxy(() => {
+                if (!ARENA.Jitsi?.ready) {
+                    // eslint-disable-next-line new-cap
                     ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
                     console.warn(`ARENA Jitsi restarting...`);
                 }
-            }
-            this.mqttClient.subscribe(ARENA.renderTopic);
-            console.warn(`MQTT scene reconnected to ${uri}`);
-            return; // do not continue!
-        }
-
-        // first connection for this client
-        console.log(`MQTT scene init user state, connected to ${uri}`);
-
-        // do scene init before starting to receive messages
-        ARENA.initScene();
-
-        // start listening for MQTT messages
-        this.mqttClient.subscribe(ARENA.renderTopic);
-    }
-
-    /**
-     * MQTT onConnectionLost callback
-     * @param {Object} responseObject paho response object
-     */
-    onConnectionLost(responseObject) {
-        if (responseObject.errorCode !== 0) {
-            console.error(
-                `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
-            );
-        }
-        console.warn('MQTT scene automatically reconnecting...');
-        // no need to connect manually here, "reconnect: true" already set
-    }
-
-    /**
-     * Call internal MessageArrived handler; Isolates message error handling
-     * Also called to handle persist objects
-     * @param {Object} message
-     * @param {String} jsonMessage
-     */
-    onMessageArrived(message, jsonMessage) {
-        try {
-            this._onMessageArrived(message, jsonMessage);
-        } catch (err) {
-            if (message) {
-                if (message.payloadString) {
-                    console.error('onMessageArrived Error!', err, message.payloadString);
-                } else {
-                    console.error('onMessageArrived Error!', err,
-                        new TextDecoder('utf-8').decode(message.payloadBytes), message.payloadBytes);
-                }
-            } else if (jsonMessage) {
-                console.error('onMessageArrived Error!', err, JSON.stringify(jsonMessage));
-            }
-        }
+            }),
+        );
+        console.log('MQTT Worker initialized');
+        this.MQTTWorker = worker;
+        this.mqttClient = worker.mqttClient;
     }
 
     /**
@@ -112,7 +61,7 @@ export class ARENAMqtt {
         if (message) {
             try {
                 theMessage = JSON.parse(message.payloadString);
-            } catch { }
+            } catch {}
         } else if (jsonMessage) {
             theMessage = jsonMessage;
         }
@@ -137,97 +86,66 @@ export class ARENAMqtt {
         delete theMessage.object_id;
 
         switch (theMessage.action) { // clientEvent, create, delete, update
-            case 'clientEvent':
-                if (theMessage.data === undefined) {
-                    console.warn('Malformed message (no data field):', JSON.stringify(message));
-                    return;
-                }
-                ClientEvent.handle(theMessage);
-                break;
-            case 'create':
-            case 'update':
-                if (theMessage.data === undefined) {
-                    console.warn('Malformed message (no data field):', JSON.stringify(message));
-                    return;
-                }
-                CreateUpdate.handle(theMessage.action, theMessage);
-                break;
-            case 'delete':
-                Delete.handle(theMessage);
-                break;
-            case 'getPersist':
-            case 'returnPersist':
-                break;
-            default:
-                console.warn('Malformed message (invalid action field):', JSON.stringify(message));
-                break;
+        case 'clientEvent':
+            if (theMessage.data === undefined) {
+                console.warn('Malformed message (no data field):', JSON.stringify(message));
+                return;
+            }
+            ClientEvent.handle(theMessage);
+            break;
+        case 'create':
+        case 'update':
+            if (theMessage.data === undefined) {
+                console.warn('Malformed message (no data field):', JSON.stringify(message));
+                return;
+            }
+            CreateUpdate.handle(theMessage.action, theMessage);
+            break;
+        case 'delete':
+            Delete.handle(theMessage);
+            break;
+        case 'getPersist':
+        case 'returnPersist':
+            break;
+        default:
+            console.warn('Malformed message (invalid action field):', JSON.stringify(message));
+            break;
         }
     }
 
     /**
-     * Connect mqtt client; If given, setup a last will message given as argument
-     * @param {object} mqttClientOptions paho mqtt options
-     * @param {string} lwMsg last will message
-     * @param {string} lwTopic last will destination topic message
+     * @param {object} mqttClientOptions
+     * @param {string} lwMsg
+     * @param {string} lwTopic
      */
-    connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
-        if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
-            // Last Will and Testament message sent to subscribers if this client loses connection
-            let lwt = new Paho.Message(lwMsg);
-            lwt.destinationName = lwTopic;
-            lwt.qos = 2;
-            lwt.retained = false;
-
-            mqttClientOptions.willMessage = lwt;
-        }
-
-        this.mqttClient.connect(mqttClientOptions);
+    async connect(mqttClientOptions, lwMsg = undefined, lwTopic = undefined) {
+        await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
     }
 
     /**
-     * Direct call to mqtt client send
-     * @param {object} msg
+     * Publishes message to mqtt
+     * @param {string} topic
+     * @param {string|object} payload
+     * @param {number} qos
+     * @param {boolean} retained
      */
-    send(msg) {
-        if (!this.mqttClient.isConnected()) return;
-        return this.mqttClient.send(msg);
-    }
-    /**
-     * Publish to given dest topic
-     * @param {string} dest
-     * @param {object} msg
-     */
-    publish(dest, msg) {
-        if (!this.mqttClient.isConnected()) return;
-
-        if (typeof msg === 'object') {
-            // add timestamp to all published messages
-            const d = new Date();
-            const n = d.toISOString();
-            msg['timestamp'] = n;
-
-            msg = JSON.stringify(msg);
-        }
-        const message = new Paho.Message(msg);
-        message.destinationName = dest;
-        return this.mqttClient.send(message);
+    async publish(topic, payload, qos, retained) {
+        await this.MQTTWorker.publish(topic, payload, qos, retained);
     }
 
     /**
      * Send a message to internal receive handler
      * @param {string} jsonMessage
      */
-    processMessage = (jsonMessage) => {
-        return this.onMessageArrived(undefined, jsonMessage);
+    processMessage(jsonMessage) {
+        this._onMessageArrived(undefined, jsonMessage);
     }
 
     /**
-     * Check if client is connected
-     * @param {string} jsonMessage
+     * Returns mqttClient connection state
+     * @return {boolean}
      */
-    isConnected(jsonMessage) {
-        return this.mqttClient.isConnected();
+    async isConnected() {
+        return await this.mqttClient.isConnected();
     }
 }
-
-

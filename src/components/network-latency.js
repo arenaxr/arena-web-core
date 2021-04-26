@@ -21,19 +21,23 @@ AFRAME.registerComponent('network-latency', {
     init: function() {
         this.UPDATE_INTERVAL_MS = 10000; // updates every 10s
         this.tick = AFRAME.utils.throttleTick(this.tick, this.UPDATE_INTERVAL_MS, this);
-        this.message = new Paho.Message('{ "type": "latency" }'); // send message type latency
-        this.message.destinationName = ARENA.latencyTopic;
-        this.message.qos = 2;
+        const pahoMsg = new Paho.Message('{ "type": "latency" }'); // send message type latency
+        pahoMsg.destinationName = ARENA.latencyTopic;
+        pahoMsg.qos = 2;
+        this.pahoMsg = pahoMsg;
+        this.message = '{ "type": "latency" }'; // send message type latency
+        this.topic = ARENA.latencyTopic;
+        this.qos = 2;
     },
-    tick: (function(t, dt) {
+    tick: (function() {
         if (ARENA.Mqtt) {
             if (ARENA.Mqtt.isConnected()) {
-                ARENA.Mqtt.send(this.message);
+                ARENA.Mqtt.publish(this.topic, this.message, this.qos);
             }
         }
         if (ARENA.chat) {
             if (ARENA.chat.mqttc.isConnected()) {
-                ARENA.chat.mqttc.send(this.message);
+                ARENA.chat.mqttc.send(this.pahoMsg);
             }
         }
     }),
