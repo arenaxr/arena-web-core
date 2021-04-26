@@ -27,15 +27,17 @@ export class GLTFProgress {
             if (progress === 'failed') {
                 innerHTML += `<b>"${he.encode(src)}"<br/>Failed!</b><br/>`;
             } else {
+                let progessStr = 'Unknown';
+                if (evt.detail.progress !== Infinity) progessStr = `${parseFloat(progress.toFixed(1))}%`
                 const shortName = src.length < this.MAX_LENGTH ?
                                     src : `…${src.substring(src.length - this.MAX_LENGTH)}`;
-                innerHTML += `${he.encode(shortName)}<br/>${parseFloat(progress.toFixed(1))}%<br/>`;
+                innerHTML += `${he.encode(shortName)}<br/>${progessStr}<br/>`;
             }
         }
 
         gltfProgressEl.innerHTML = innerHTML;
         gltfProgressEl.className = 'show';
-        if (evt.detail.progress === 100 || failed) {
+        if (evt.detail.progress === 100 || evt.detail.progress === Infinity || failed) {
             setTimeout(() => {
                 this.progMsgs = {};
                 gltfProgressEl.className = 'hide';
