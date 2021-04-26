@@ -27,7 +27,7 @@ export class GLTFProgress {
             if (progress === 'failed') {
                 innerHTML += `<b>"${he.encode(src)}"<br/>Failed!</b><br/>`;
             } else {
-                let progessStr = 'Unknown';
+                let progessStr = '(unknown %)';
                 if (evt.detail.progress !== Infinity) progessStr = `${parseFloat(progress.toFixed(1))}%`
                 const shortName = src.length < this.MAX_LENGTH ?
                                     src : `…${src.substring(src.length - this.MAX_LENGTH)}`;
