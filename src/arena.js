@@ -160,6 +160,7 @@ export class Arena {
 
         // after scene is completely loaded, add user camera
         this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
+            const systems = AFRAME.scenes[0].systems;
             let color = Math.floor(Math.random() * 16777215).toString(16);
             if (color.length < 6) color = "0" + color;
             color = '#' + color
@@ -170,26 +171,26 @@ export class Arena {
             camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
             // try to define starting position if the scene has startPosition objects
-            if (!ARENA.startCoords) {
+            if (!ARENA.startCoords && systems.landmark) {
                 // get startPosition objects
-                const startPositions = Array.from(document.querySelectorAll('[id^="startPosition"]'));
-                if (startPositions.length > 0) {
-                    let posi = Math.floor(Math.random() * startPositions.length);
-                    ARENA.startCoords = startPositions[posi].getAttribute('position');
-
+                const startPosition = systems.landmark.getRandom(true);
+                if (startPosition) {
+                    console.log("Moving camera to start position", startPosition.el.id)
+                    startPosition.moveElTo(camera);
+                    ARENA.startCoords = camera.object3D.position;
                     // also set rotation
-                    camera.components['look-controls'].yawObject.rotation.copy(startPositions[posi].object3D.rotation);
+                    camera.components['look-controls'].yawObject.rotation.copy(startPosition.el.object3D.rotation);
                 }
             }
             if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
             const startPos = new AFRAME.THREE.Vector3;
-            const navSys = AFRAME.scenes[0].systems.nav;
+            const navSys = systems.nav;
             startPos.copy(ARENA.startCoords);
             if (navSys.navMesh) {
                 try {
-                    const closestNode = navSys.getNode(startPos, navSys.getGroup(startPos));
-                    //startPos.y += closestNode.centroid.z;
-                    console.log("Start Y:", startPos.y, ", closest nav node Y:", closestNode.centroid.z)
+                    const closestGroup = navSys.getGroup(startPos, false);
+                    const closestNode = navSys.getNode(startPos, closestGroup, false);
+                    navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
                 } catch {}
             }
             startPos.y += ARENA.defaults.camHeight;

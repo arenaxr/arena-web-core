@@ -21,6 +21,7 @@ import './gesture-detector.js';
 import './goto-url.js';
 import './hide-in-ar-mode.js';
 import './impulse.js';
+import './landmark.js';
 import './load-scene.js';
 import './material-extras.js';
 import './network-latency.js';
