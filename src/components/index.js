@@ -40,6 +40,7 @@ import 'webxr-polyfill'; // fallback for non-webXR browsers
 // import 'aframe-environment-component'; // pretty environments (npm version has a bug; imported from file instead)
 import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 import './vendor/animation-mixer.js'; // Override animation mixer
+import './vendor/nav-system.js'; // Override nav system
 
 // import 'aframe-particle-system-component';
 // import 'aframe-spe-particles-component';
