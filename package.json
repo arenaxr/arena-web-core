@@ -19,20 +19,20 @@
     "aframe-thickline-component": "^0.0.3",
     "chat": "^1.0.8",
     "comlink": "^4.3.0",
-    "core-js": "^3.9.1",
+    "core-js": "^3.11.1",
     "he": "^1.2.0",
     "jquery": "^3.6.0",
     "linkifyjs": "^2.1.9",
     "paho-mqtt": "^1.1.0",
-    "sweetalert2": "^10.15.5",
+    "sweetalert2": "^10.16.6",
     "three-pathfinding": "^0.14.1",
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
-    "eslint": "^7.21.0",
+    "eslint": "^7.25.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.6",
-    "jsdoc-to-markdown": "^7.0.0",
+    "jsdoc-to-markdown": "^7.0.1",
     "parcel-bundler": "^1.12.4"
   },
   "scripts": {
