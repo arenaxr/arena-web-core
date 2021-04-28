@@ -25,10 +25,6 @@ jobs:
              git pull
              npm ci
              npm run build
-             cd ..
-             git add ARENA-core
-             git commit -m "Github Action: Updated ARENA-core submodule to latest commit"
-             git push
              ./prod.sh stop arena-web
              ./prod.sh up --force-recreate -d arena-web
 
