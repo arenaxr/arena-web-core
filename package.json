@@ -24,6 +24,7 @@
     "jquery": "^3.6.0",
     "linkifyjs": "^2.1.9",
     "paho-mqtt": "^1.1.0",
+    "three-pathfinding": "^0.14.1",
     "sweetalert2": "^10.15.5",
     "webxr-polyfill": "^2.0.3"
   },
