@@ -182,20 +182,21 @@ export class Arena {
                     camera.components['look-controls'].yawObject.rotation.copy(startPosition.el.object3D.rotation);
                 }
             }
-            if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
-            const startPos = new AFRAME.THREE.Vector3;
-            const navSys = systems.nav;
-            startPos.copy(ARENA.startCoords);
-            if (navSys.navMesh) {
-                try {
-                    const closestGroup = navSys.getGroup(startPos, false);
-                    const closestNode = navSys.getNode(startPos, closestGroup, false);
-                    navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
-                } catch {}
+            if (!ARENA.startCoords) {
+                ARENA.startCoords = ARENA.defaults.startCoords; // default position
+                const startPos = new AFRAME.THREE.Vector3;
+                const navSys = systems.nav;
+                startPos.copy(ARENA.startCoords);
+                if (navSys.navMesh) {
+                    try {
+                        const closestGroup = navSys.getGroup(startPos, false);
+                        const closestNode = navSys.getNode(startPos, closestGroup, false);
+                        navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
+                    } catch {}
+                }
+                startPos.y += ARENA.defaults.camHeight;
+                camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
             }
-            startPos.y += ARENA.defaults.camHeight;
-            camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
-
             // enable vio if fixedCamera is given
             if (ARENA.fixedCamera !== '') {
                 camera.setAttribute('arena-camera', 'vioEnabled', true);
