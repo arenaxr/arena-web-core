@@ -52,7 +52,7 @@ class MQTTWorker {
             lwt.qos = 2;
             lwt.retained = false;
 
-            mqttClientOptions.willMessage = lwt;
+            opts.willMessage = lwt;
         }
         this.mqttClient.connect(opts);
     }
