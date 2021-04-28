@@ -25,6 +25,7 @@ jobs:
              git pull
              npm ci
              npm run build
+             cd ..
              ./prod.sh stop arena-web
              ./prod.sh up --force-recreate -d arena-web
 
