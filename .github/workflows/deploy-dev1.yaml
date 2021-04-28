@@ -25,5 +25,5 @@ jobs:
              git checkout master
              git reset --hard HEAD
              git pull
-             npm install
-             parcel build src/index.js -o arena-core.js --public-url /dist
+             npm ci
+             npm run build
