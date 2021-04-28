@@ -178,8 +178,6 @@ export class Arena {
                     console.log("Moving camera to start position", startPosition.el.id)
                     startPosition.moveElTo(camera);
                     ARENA.startCoords = camera.object3D.position;
-                    // also set rotation
-                    camera.components['look-controls'].yawObject.rotation.copy(startPosition.el.object3D.rotation);
                 }
             }
             if (!ARENA.startCoords) {

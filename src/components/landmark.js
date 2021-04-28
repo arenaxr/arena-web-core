@@ -10,10 +10,14 @@
 
 AFRAME.registerComponent('landmark', {
     schema: {
-        randomRadius: {
+        randomRadiusMax: {
             type: 'number',
             default: 0,
         }, // range in m
+        randomRadiusMin: {
+            type: 'number',
+            default: 0,
+        }, // range in m. Ignored if randomRadiusMax is not set
         constrainToNavMesh: {
             oneOf: ['false', 'any', 'coplanar'],
             default: 'false',
@@ -29,7 +33,11 @@ AFRAME.registerComponent('landmark', {
         baseHeight: {
             type: 'number',
             default: undefined,
-        }, // Set to 0 probably, since object position is often centered above ground plane
+        }, // Set optionally, since object position is often centered above ground plane
+        lookAtLandmark: {
+            type: 'boolean',
+            default: false,
+        },
     },
     init: function() {
         this.system.registerComponent(this);
@@ -41,9 +49,12 @@ AFRAME.registerComponent('landmark', {
         const dest = new THREE.Vector3;
         dest.copy(this.el.object3D.position);
         dest.y = isNaN(this.data.baseHeight) ? dest.y : this.data.baseHeight;
-        if (this.data.randomRadius > 0) {
-            dest.x = dest.x - this.data.randomRadius + (2 * Math.random() * this.data.randomRadius);
-            dest.z = dest.z - this.data.randomRadius + (2 * Math.random() * this.data.randomRadius);
+        if (this.data.randomRadiusMax > 0) {
+            const randomNorm = this.data.randomRadiusMin + (Math.random() *
+                (this.data.randomRadiusMax - this.data.randomRadiusMin));
+            const randomAngle = (-2 * Math.PI) + (Math.random() * 4 * Math.PI);
+            dest.x += Math.cos(randomAngle) * randomNorm;
+            dest.z += Math.sin(randomAngle) * randomNorm;
         }
         const navSys = this.el.sceneEl.systems.nav;
         if (this.data.constrainToNavMesh !== 'false' && navSys.navMesh) {
@@ -55,6 +66,15 @@ AFRAME.registerComponent('landmark', {
             }
         }
         moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
+        const myCamera = document.getElementById('my-camera');
+        if (this.data.lookAtLandmark) {
+            myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
+                myCamera.object3D.position.x - this.el.object3D.position.x,
+                myCamera.object3D.position.z - this.el.object3D.position.z,
+            );
+        } else {
+            myCamera.components['look-controls'].yawObject.rotation.copy(this.el.object3D.rotation);
+        }
     },
 });
 
