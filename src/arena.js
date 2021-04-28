@@ -269,6 +269,7 @@ export class Arena {
                                 sceneObserver.disconnect();
                                 if (topLoadTimer !== null) clearInterval(topLoadTimer);
                                 loadL2();
+                                this.chat.populateLandmarkList();
                             }
                         }
                     })
@@ -328,6 +329,7 @@ export class Arena {
                 topLoadTimer = window.setTimeout(() => {
                     sceneObserver.disconnect();
                     loadL2();
+                    this.chat.populateLandmarkList();
                 }, 3000)
             }
         };

@@ -88,17 +88,17 @@ AFRAME.registerSystem('landmark', {
     unregisterComponent: function(landmark) {
         delete this.landmarks[landmark.el.id];
     },
-    getAll: function(startingPosition = false) {
+    getAll: function(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);
-        if (startingPosition) {
-            landmarks = landmarks.filter((landmark) => landmark.data.startingPosition);
+        if (startingPosition !== undefined) {
+            landmarks = landmarks.filter((landmark) => landmark.data.startingPosition === startingPosition);
         }
         return landmarks;
     },
-    getRandom: function(startingPosition = false) {
+    getRandom: function(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);
-        if (startingPosition) {
-            landmarks = landmarks.filter((landmark) => landmark.data.startingPosition);
+        if (startingPosition !== undefined) {
+            landmarks = landmarks.filter((landmark) => landmark.data.startingPosition === startingPosition);
         }
         if (landmarks.length) {
             return landmarks[Math.floor(Math.random()*landmarks.length)];
