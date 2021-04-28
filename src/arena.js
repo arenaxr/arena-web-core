@@ -6,13 +6,13 @@
  * @date 2020
  */
 
-import { ARENAUtils } from './utils.js';
-import { ARENAMqtt } from './mqtt.js';
-import { ARENAJitsi } from './jitsi.js';
-import { ARENAChat } from './chat/';
-import { ARENAEventEmitter } from './event-emitter.js';
-import { SideMenu } from './icons/';
-import { RuntimeMngr } from './runtime-mngr';
+import {ARENAUtils} from './utils.js';
+import {ARENAMqtt} from './mqtt.js';
+import {ARENAJitsi} from './jitsi.js';
+import {ARENAChat} from './chat/';
+import {ARENAEventEmitter} from './event-emitter.js';
+import {SideMenu} from './icons/';
+import {RuntimeMngr} from './runtime-mngr';
 import Swal from 'sweetalert2';
 
 /**
@@ -61,7 +61,7 @@ export class Arena {
      */
     setUserName = (name = undefined) => {
         // set userName
-        if (name == undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
+        if (name === undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
         this.userName = name;
     }
 
@@ -71,7 +71,7 @@ export class Arena {
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
     setIdTag = (idTag = undefined) => {
-        if (idTag == undefined) throw "setIdTag: idTag not defined."; // idTag must be set
+        if (idTag === undefined) throw "setIdTag: idTag not defined."; // idTag must be set
         this.idTag = idTag;
 
         // set camName
@@ -215,7 +215,6 @@ export class Arena {
      * @param {Object} rotation initial rotation
      */
     loadScene = (urlToLoad, position, rotation) => {
-
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -223,7 +222,9 @@ export class Arena {
         xhr.send();
         xhr.responseType = 'json';
         const deferredObjects = [];
-        const Parents = {};
+        const topObjects = new Map();
+        const sceneEl = document.querySelector('a-scene');
+        let topLoadTimer = null;
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -234,15 +235,50 @@ export class Arena {
                     confirmButtonText: 'Ok',
                 });
             } else {
-                if (xhr.response == undefined) {
+                if (xhr.response === undefined) {
                     console.error("No scene objects found in persistence.")
                     return;
                 }
+                const loadL2 = () => {
+                    const l2 = deferredObjects.length;
+                    for (let i = 0; i < l2; i++) {
+                        const obj = deferredObjects[i];
+                        if (obj.attributes.parent === this.camName) {
+                            continue; // don't load our own camera/head assembly
+                        }
+                        const msg = {
+                            object_id: obj.object_id,
+                            action: 'create',
+                            type: obj.type,
+                            data: obj.attributes,
+                        };
+                        console.info('adding deferred object ' + obj.object_id +
+                            ' to parent ' + obj.attributes.parent);
+                        this.Mqtt.processMessage(msg);
+                    }
+                    ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED,
+                        true);
+                }
+                const sceneObserver = new MutationObserver((mutationList) => {
+                    const addedNodes = mutationList.filter(
+                        (mutation) => mutation.type === 'childList' &&
+                            mutation.addedNodes.length > 0);
+                    addedNodes.forEach((node) => {
+                        if (topObjects.has(node.id)) {
+                            topObjects.delete(node.id);
+                            if (topObjects.size === 0) {
+                                sceneObserver.disconnect();
+                                if (topLoadTimer !== null) clearInterval(topLoadTimer);
+                                loadL2();
+                            }
+                        }
+                    })
+                });
+                sceneObserver.observe(sceneEl, { childList: true });
                 const arenaObjects = xhr.response;
-                const l = arenaObjects.length;
-                for (let i = 0; i < l; i++) {
+                for (let i = 0; i < arenaObjects.length; i++) {
                     const obj = arenaObjects[i];
-                    if (obj.type == 'program') {
+                    if (obj.type === 'program') {
                         // construct program object for rt manager request
                         const pobj = {
                             'object_id': obj.object_id,
@@ -267,8 +303,8 @@ export class Arena {
                     }
                     if (obj.attributes.parent) {
                         deferredObjects.push(obj);
-                        Parents[obj.attributes.parent] = obj.attributes.parent;
                     } else {
+                        topObjects.set(obj.object_id, true);
                         const msg = {
                             object_id: obj.object_id,
                             action: 'create',
@@ -287,26 +323,13 @@ export class Arena {
                             r.multiply(q);
                             msg.data.rotation = r;
                         }
-
                         this.Mqtt.processMessage(msg);
                     }
                 }
-                const l2 = deferredObjects.length;
-                for (let i = 0; i < l2; i++) {
-                    const obj = deferredObjects[i];
-                    if (obj.attributes.parent === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
-                    const msg = {
-                        object_id: obj.object_id,
-                        action: 'create',
-                        type: obj.type,
-                        data: obj.attributes,
-                    };
-                    console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
-                    this.Mqtt.processMessage(msg);
-                }
-                ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
+                topLoadTimer = window.setTimeout(() => {
+                    sceneObserver.disconnect();
+                    loadL2();
+                }, 3000)
             }
         };
     };
@@ -374,7 +397,7 @@ export class Arena {
         xhr.send();
         xhr.responseType = 'json';
         xhr.onload = async () => {
-            if (xhr.status !== 200 || xhr.response == undefined) {
+            if (xhr.status !== 200 || xhr.response === undefined) {
                 console.info(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             } else {
                 const payload = xhr.response[xhr.response.length - 1];

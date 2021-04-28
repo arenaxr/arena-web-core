@@ -52,8 +52,8 @@ export class ARENAMqtt {
 
     /**
      * Internal MessageArrived handler; handles object create/delete/event/... messages
-     * @param {Object} message
-     * @param {String} jsonMessage
+     * @param {string} message
+     * @param {object} jsonMessage
      */
     _onMessageArrived(message, jsonMessage) {
         let theMessage = {};
@@ -135,7 +135,7 @@ export class ARENAMqtt {
 
     /**
      * Send a message to internal receive handler
-     * @param {string} jsonMessage
+     * @param {object} jsonMessage
      */
     processMessage(jsonMessage) {
         this._onMessageArrived(undefined, jsonMessage);
