@@ -303,7 +303,7 @@ export class Arena {
                     console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
                 }
-                ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
+                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true), 500);
             }
         };
     };
