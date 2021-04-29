@@ -222,7 +222,6 @@ export class Arena {
         xhr.responseType = 'json';
         const deferredObjects = [];
         const topObjects = new Map();
-        const sceneEl = document.querySelector('a-scene');
         let topLoadTimer = null;
         xhr.onload = () => {
             if (xhr.status !== 200) {
@@ -259,10 +258,8 @@ export class Arena {
                         true);
                 }
                 const sceneObserver = new MutationObserver((mutationList) => {
-                    const addedNodes = mutationList.filter(
-                        (mutation) => mutation.type === 'childList' &&
-                            mutation.addedNodes.length > 0);
-                    addedNodes.forEach((node) => {
+                    mutationList.forEach((mutation) => {
+                        mutation.addedNodes.forEach((node) => {
                         if (topObjects.has(node.id)) {
                             topObjects.delete(node.id);
                             if (topObjects.size === 0) {
@@ -272,9 +269,10 @@ export class Arena {
                                 this.chat.populateLandmarkList();
                             }
                         }
+                        })
                     })
                 });
-                sceneObserver.observe(sceneEl, { childList: true });
+                sceneObserver.observe(       document.getElementById('sceneRoot'), { childList: true });
                 const arenaObjects = xhr.response;
                 for (let i = 0; i < arenaObjects.length; i++) {
                     const obj = arenaObjects[i];
@@ -304,7 +302,9 @@ export class Arena {
                     if (obj.attributes.parent) {
                         deferredObjects.push(obj);
                     } else {
-                        topObjects.set(obj.object_id, true);
+                        if (obj.type === 'object') {
+                            topObjects.set(obj.object_id, true);
+                        }
                         const msg = {
                             object_id: obj.object_id,
                             action: 'create',
@@ -330,7 +330,7 @@ export class Arena {
                     sceneObserver.disconnect();
                     loadL2();
                     this.chat.populateLandmarkList();
-                }, 3000)
+                }, 1000)
             }
         };
     };
