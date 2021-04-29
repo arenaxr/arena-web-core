@@ -6,7 +6,7 @@
  * @date 2021
  */
 
-/* global AFRAME, THREE */
+/* global AFRAME, ARENA, THREE */
 
 AFRAME.registerComponent('landmark', {
     schema: {
@@ -86,9 +86,15 @@ AFRAME.registerSystem('landmark', {
     },
     registerComponent: function(landmark) {
         this.landmarks[landmark.el.id] = landmark;
+        if (landmark.data.startingPosition === false) {
+            ARENA.chat.addLandmark(landmark);
+        }
     },
     unregisterComponent: function(landmark) {
         delete this.landmarks[landmark.el.id];
+        if (landmark.data.startingPosition === false) {
+            ARENA.chat.removeLandmark(landmark);
+        }
     },
     getAll: function(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);

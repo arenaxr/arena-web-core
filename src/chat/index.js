@@ -132,6 +132,7 @@ export class ARENAChat {
         this.lmBtn = document.createElement('div');
         this.lmBtn.className = 'landmarks-button';
         btnGroup.appendChild(this.lmBtn);
+        this.lmBtn.style.display = 'none';
 
         // chat
         this.chatPopup = document.createElement('div');
@@ -733,35 +734,33 @@ export class ARENAChat {
         this.toSel.value = selVal; // preserve selected value
     }
 
-    populateLandmarkList() {
-        const landmarkSys = AFRAME.scenes[0].systems?.landmark;
-        this.landmarks = landmarkSys.getAll(false);
-        if (this.landmarks.length === 0) {
+    addLandmark(lm) {
+        let uli = document.createElement('li');
+        uli.id = `lmList_${lm.el.id}`
+        uli.textContent = lm.data.label.length > 45 ? `${lm.data.label.substring(0, 45)}...` : lm.data.label;
+
+        let lmBtnCtnr = document.createElement('div');
+        lmBtnCtnr.className = 'lm-list-btn-ctnr';
+        uli.appendChild(lmBtnCtnr);
+
+        let lspan = document.createElement('span');
+        lspan.className = 'lm-list-btn l';
+        lspan.title = 'Move to Landmark';
+        lmBtnCtnr.appendChild(lspan);
+
+        // setup click event
+        lspan.onclick = function () {
+            lm.teleportTo();
+        };
+        this.lmList.appendChild(uli);
+        this.lmBtn.style.display = 'block'
+    }
+
+    removeLandmark(lm){
+        document.getElementById(`lmList_${lm.el.id}`).remove();
+        if (this.lmList.childElementCount === 0) {
             this.lmBtn.style.display = 'none'; // hide landmarks button
-            return;
         }
-
-        let _this = this;
-        this.landmarks.forEach((lm) => {
-            let uli = document.createElement('li');
-            uli.textContent = lm.data.label.length > 45 ? `${lm.data.label.substring(0, 45)}...` : lm.data.label;
-
-            let lmBtnCtnr = document.createElement('div');
-            lmBtnCtnr.className = 'lm-list-btn-ctnr';
-            uli.appendChild(lmBtnCtnr);
-
-            let lspan = document.createElement('span');
-            lspan.className = 'lm-list-btn l';
-            lspan.title = 'Move to Landmark';
-            lmBtnCtnr.appendChild(lspan);
-
-            // setup click event
-            lspan.onclick = function () {
-                lm.teleportTo();
-            };
-
-            _this.lmList.appendChild(uli);
-        });
     }
 
     addToSelOptions() {

@@ -221,8 +221,6 @@ export class Arena {
         xhr.send();
         xhr.responseType = 'json';
         const deferredObjects = [];
-        const topObjects = new Map();
-        let topLoadTimer = null;
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -233,46 +231,10 @@ export class Arena {
                     confirmButtonText: 'Ok',
                 });
             } else {
-                if (xhr.response === undefined) {
+                if (xhr.response === undefined || xhr.response.length === 0) {
                     console.error("No scene objects found in persistence.")
                     return;
                 }
-                const loadL2 = () => {
-                    const l2 = deferredObjects.length;
-                    for (let i = 0; i < l2; i++) {
-                        const obj = deferredObjects[i];
-                        if (obj.attributes.parent === this.camName) {
-                            continue; // don't load our own camera/head assembly
-                        }
-                        const msg = {
-                            object_id: obj.object_id,
-                            action: 'create',
-                            type: obj.type,
-                            data: obj.attributes,
-                        };
-                        console.info('adding deferred object ' + obj.object_id +
-                            ' to parent ' + obj.attributes.parent);
-                        this.Mqtt.processMessage(msg);
-                    }
-                    ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED,
-                        true);
-                }
-                const sceneObserver = new MutationObserver((mutationList) => {
-                    mutationList.forEach((mutation) => {
-                        mutation.addedNodes.forEach((node) => {
-                        if (topObjects.has(node.id)) {
-                            topObjects.delete(node.id);
-                            if (topObjects.size === 0) {
-                                sceneObserver.disconnect();
-                                if (topLoadTimer !== null) clearInterval(topLoadTimer);
-                                loadL2();
-                                this.chat.populateLandmarkList();
-                            }
-                        }
-                        })
-                    })
-                });
-                sceneObserver.observe(       document.getElementById('sceneRoot'), { childList: true });
                 const arenaObjects = xhr.response;
                 for (let i = 0; i < arenaObjects.length; i++) {
                     const obj = arenaObjects[i];
@@ -302,9 +264,6 @@ export class Arena {
                     if (obj.attributes.parent) {
                         deferredObjects.push(obj);
                     } else {
-                        if (obj.type === 'object') {
-                            topObjects.set(obj.object_id, true);
-                        }
                         const msg = {
                             object_id: obj.object_id,
                             action: 'create',
@@ -323,14 +282,25 @@ export class Arena {
                             r.multiply(q);
                             msg.data.rotation = r;
                         }
+
                         this.Mqtt.processMessage(msg);
                     }
                 }
-                topLoadTimer = window.setTimeout(() => {
-                    sceneObserver.disconnect();
-                    loadL2();
-                    this.chat.populateLandmarkList();
-                }, 1000)
+                for (let i = 0; i < deferredObjects.length; i++) {
+                    const obj = deferredObjects[i];
+                    if (obj.attributes.parent === this.camName) {
+                        continue; // don't load our own camera/head assembly
+                    }
+                    const msg = {
+                        object_id: obj.object_id,
+                        action: 'create',
+                        type: obj.type,
+                        data: obj.attributes,
+                    };
+                    console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
+                    this.Mqtt.processMessage(msg);
+                }
+                ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
             }
         };
     };
