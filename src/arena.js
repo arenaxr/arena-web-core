@@ -15,6 +15,9 @@ import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
 import Swal from 'sweetalert2';
 
+/* global ARENA */
+
+
 /**
  * Arena Object
  */

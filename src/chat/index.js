@@ -872,6 +872,8 @@ export class ARENAChat {
         let distance = ARENA.userTeleportDistance ? ARENA.userTeleportDistance : 2; // distance to put you
         myCamera.object3D.position.copy(toCam.object3D.position.clone()).add(direction.multiplyScalar(-distance));
         myCamera.object3D.position.y = toCam.object3D.position.y;
+        // Reset navMesh data
+        myCamera.components['wasd-controls'].resetNav();
         // rotate our camera to face the other user
         myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
             myCamera.object3D.position.x - toCam.object3D.position.x,

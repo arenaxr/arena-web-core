@@ -57,7 +57,8 @@ AFRAME.registerComponent('landmark', {
         this.system.unregisterComponent(this);
     },
     teleportTo: function(moveEl = undefined) {
-        if (moveEl === undefined) moveEl = document.getElementById('my-camera');
+        const myCam = document.getElementById('my-camera'); ;
+        if (moveEl === undefined) moveEl = myCam;
         const dest = new THREE.Vector3;
         dest.copy(this.el.object3D.position).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
@@ -76,7 +77,7 @@ AFRAME.registerComponent('landmark', {
                 navSys.clampStep(dest, dest, closestGroup, closestNode, dest);
             }
         }
-        if (moveEl === document.getElementById('my-camera')) {
+        if (moveEl === myCam) {
             moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
             if (this.data.lookAtLandmark) {
                 moveEl.components['look-controls'].yawObject.rotation.y = Math.atan2(

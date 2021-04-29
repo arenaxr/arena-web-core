@@ -181,12 +181,12 @@ export class SideMenu {
         let flying = false;
         const flyingBtn = createIconButton('flying-off', 'Flying on/off.', () => {
             flying = !flying;
-            if (flying) { // toggled
+            if (flying) { // toggled on
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-on.png\')';
-            } else {
-                const groundedPos = document.getElementById('my-camera').getAttribute('position');
-                groundedPos.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
-                document.getElementById('my-camera').setAttribute('position', groundedPos);
+            } else { // toggled off
+                const myCam = document.getElementById('my-camera');
+                myCam.components['wasd-controls'].resetNav();
+                myCam.object3D.position.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-off.png\')';
             }
             document.getElementById('my-camera').setAttribute('wasd-controls', {'fly': flying});
