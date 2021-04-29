@@ -41,6 +41,7 @@
     "watch": "parcel watch src/index.js -o arena-core.js",
     "prebuild": "npm run collect-static",
     "build": "parcel build src/index.js -o arena-core.js --public-url ./dist",
+    "build-nominify": "parcel build src/index.js -o arena-core.js --public-url ./dist --no-minify",
     "prebuild-main": "npm run collect-static",
     "build-main": "parcel build src/index.js -o arena-core.js --public-url /dist",
     "predocs": "echo '# A-Frame components (modules) added to support ARENA core functionality\n' > src/components/README.md",
