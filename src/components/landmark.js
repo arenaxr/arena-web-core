@@ -8,6 +8,17 @@
 
 /* global AFRAME, ARENA, THREE */
 
+/**
+ * Component-System of teleport destination Landmarks
+ * @module landmark
+ * @property {number} [randomRadiusMin=0] - Min for a random range to teleport to. Max must > 0
+ * @property {number} [randomRadiusMax=0] - Max for a random range to teleport to.
+ * @property {THREE.Vector3} [offsetPosition={0,0,0}] - vector3 {x,y,z} to use as static teleport offset
+ * @property {boolean} [constrainToNavMesh='false'] - Teleports here should snap to navmesh. Valid values:  'false', 'any', 'coplanar'
+ * @property {boolean} [startingPosition=false] - True: use as a random scene load-in position
+ * @property {boolean} [lookAtLandmark=false] - True: After teleporting, user should rotate @ landmark
+ * @property {string} [label=''] - Display label for Landmarks UI menu
+ */
 AFRAME.registerComponent('landmark', {
     schema: {
         randomRadiusMax: {
