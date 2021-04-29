@@ -735,7 +735,6 @@ export class ARENAChat {
 
     populateLandmarkList() {
         const landmarkSys = AFRAME.scenes[0].systems?.landmark;
-        const myCamera = document.getElementById('my-camera');
         this.landmarks = landmarkSys.getAll(false);
         if (this.landmarks.length === 0) {
             this.lmBtn.style.display = 'none'; // hide landmarks button
@@ -758,7 +757,7 @@ export class ARENAChat {
 
             // setup click event
             lspan.onclick = function () {
-                lm.moveElTo(myCamera);
+                lm.teleportTo();
             };
 
             _this.lmList.appendChild(uli);

@@ -176,7 +176,7 @@ export class Arena {
                 const startPosition = systems.landmark.getRandom(true);
                 if (startPosition) {
                     console.log("Moving camera to start position", startPosition.el.id)
-                    startPosition.moveElTo(camera);
+                    startPosition.teleportTo();
                     ARENA.startCoords = camera.object3D.position;
                 }
             }

@@ -45,7 +45,8 @@ AFRAME.registerComponent('landmark', {
     remove: function() {
         this.system.unregisterComponent(this);
     },
-    moveElTo: function(moveEl) {
+    teleportTo: function(moveEl = undefined) {
+        if (moveEl === undefined) moveEl = document.getElementById('my-camera');
         const dest = new THREE.Vector3;
         dest.copy(this.el.object3D.position).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
@@ -64,15 +65,17 @@ AFRAME.registerComponent('landmark', {
                 navSys.clampStep(dest, dest, closestGroup, closestNode, dest);
             }
         }
-        moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
-        const myCamera = document.getElementById('my-camera');
-        if (this.data.lookAtLandmark) {
-            myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
-                myCamera.object3D.position.x - this.el.object3D.position.x,
-                myCamera.object3D.position.z - this.el.object3D.position.z,
-            );
-        } else {
-            myCamera.components['look-controls'].yawObject.rotation.copy(this.el.object3D.rotation);
+        if (moveEl === document.getElementById('my-camera')) {
+            moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
+            if (this.data.lookAtLandmark) {
+                moveEl.components['look-controls'].yawObject.rotation.y = Math.atan2(
+                    moveEl.object3D.position.x - this.el.object3D.position.x,
+                    moveEl.object3D.position.z - this.el.object3D.position.z,
+                );
+            } else {
+                moveEl.components['look-controls'].yawObject.rotation.copy(
+                    this.el.object3D.rotation);
+            }
         }
     },
 });
