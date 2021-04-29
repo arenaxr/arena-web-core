@@ -18,6 +18,10 @@ AFRAME.registerComponent('landmark', {
             type: 'number',
             default: 0,
         }, // range in m. Ignored if randomRadiusMax is not set
+        offsetPosition: {
+            type: 'vec3',
+            default: {x: 0, y: 0, z: 0},
+        },
         constrainToNavMesh: {
             oneOf: ['false', 'any', 'coplanar'],
             default: 'false',
@@ -30,10 +34,6 @@ AFRAME.registerComponent('landmark', {
             type: 'string',
             default: '',
         },
-        baseHeight: {
-            type: 'number',
-            default: undefined,
-        }, // Set optionally, since object position is often centered above ground plane
         lookAtLandmark: {
             type: 'boolean',
             default: false,
@@ -47,8 +47,7 @@ AFRAME.registerComponent('landmark', {
     },
     moveElTo: function(moveEl) {
         const dest = new THREE.Vector3;
-        dest.copy(this.el.object3D.position);
-        dest.y = isNaN(this.data.baseHeight) ? dest.y : this.data.baseHeight;
+        dest.copy(this.el.object3D.position).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
             const randomNorm = this.data.randomRadiusMin + (Math.random() *
                 (this.data.randomRadiusMax - this.data.randomRadiusMin));
