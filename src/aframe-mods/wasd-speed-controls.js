@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 const bind = AFRAME.utils.bind;
 const CLAMP_VELOCITY = 0.00001;
@@ -65,6 +65,22 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
     } else {
         // Get movement vector and translate position.
         el.object3D.position.add(this.getMovementVector(delta));
+    }
+};
+
+
+AFRAME.components['wasd-controls'].Component.prototype.resetNav = function(checkPolygon = false, clampStep = false) {
+    const nav = this.el.sceneEl.systems.nav;
+    if (nav.navMesh) {
+        this.navStart.copy(this.el.object3D.position).y -= ARENA.defaults.camHeight;
+        this.navEnd.copy(this.navStart);
+        this.navGroup = nav.getGroup(this.navStart, checkPolygon);
+        this.navNode = nav.getNode(this.navStart, this.navGroup, checkPolygon);
+        this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
+        if (clampStep) {
+            this.clampedEnd.y += ARENA.defaults.camHeight;
+            this.el.object3D.position.copy(this.clampedEnd);
+        }
     }
 };
 

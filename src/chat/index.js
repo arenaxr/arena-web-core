@@ -132,6 +132,7 @@ export class ARENAChat {
         this.lmBtn = document.createElement('div');
         this.lmBtn.className = 'landmarks-button';
         btnGroup.appendChild(this.lmBtn);
+        this.lmBtn.style.display = 'none';
 
         // chat
         this.chatPopup = document.createElement('div');
@@ -420,10 +421,7 @@ export class ARENAChat {
     // perform some async startup tasks
     async start(force = false) {
         // connect mqtt
-        this.connect();
-
-        // populate landmark list
-        this.populateLandmarkList();
+        await this.connect();
     }
 
     getUserList() {
@@ -736,55 +734,33 @@ export class ARENAChat {
         this.toSel.value = selVal; // preserve selected value
     }
 
-    async populateLandmarkList() {
-        try {
-            let data = await fetch(`${encodeURI(this.settings.persist_uri)}${encodeURI(this.settings.scene)}?type=landmarks`);
-            if (!data) {
-                console.error('Could not fetch landmarks from persist!');
-                return;
-            }
-            if (!data.ok) {
-                console.error('Could not fetch landmarks from persist!');
-                return;
-            }
-            let persistRes = await data.json();
-            // support multiple landmark list objects; merge all into a single array
-            this.landmarks = [];
-            persistRes.forEach((lmObj) => {
-                Array.prototype.push.apply(this.landmarks, lmObj.attributes.landmarks);
-            });
-        } catch (err) {
-            console.error('Could not fetch landmarks from persist!');
-            console.error(err);
-            return;
-        }
+    addLandmark(lm) {
+        let uli = document.createElement('li');
+        uli.id = `lmList_${lm.el.id}`
+        uli.textContent = lm.data.label.length > 45 ? `${lm.data.label.substring(0, 45)}...` : lm.data.label;
 
-        if (this.landmarks.length == 0) {
+        let lmBtnCtnr = document.createElement('div');
+        lmBtnCtnr.className = 'lm-list-btn-ctnr';
+        uli.appendChild(lmBtnCtnr);
+
+        let lspan = document.createElement('span');
+        lspan.className = 'lm-list-btn l';
+        lspan.title = 'Move to Landmark';
+        lmBtnCtnr.appendChild(lspan);
+
+        // setup click event
+        lspan.onclick = function () {
+            lm.teleportTo();
+        };
+        this.lmList.appendChild(uli);
+        this.lmBtn.style.display = 'block'
+    }
+
+    removeLandmark(lm){
+        document.getElementById(`lmList_${lm.el.id}`).remove();
+        if (this.lmList.childElementCount === 0) {
             this.lmBtn.style.display = 'none'; // hide landmarks button
-            return;
         }
-
-        let _this = this;
-        this.landmarks.forEach((lm) => {
-            let uli = document.createElement('li');
-            uli.textContent = lm.label.length > 45 ? `${lm.label.substring(0, 45)}...` : lm.label;
-
-            let lmBtnCtnr = document.createElement('div');
-            lmBtnCtnr.className = 'lm-list-btn-ctnr';
-            uli.appendChild(lmBtnCtnr);
-
-            let lspan = document.createElement('span');
-            lspan.className = 'lm-list-btn l';
-            lspan.title = 'Move to Landmark';
-            lmBtnCtnr.appendChild(lspan);
-
-            // setup click event
-            lspan.onclick = function () {
-                _this.moveToLandmark(lm.object_id);
-            };
-
-            _this.lmList.appendChild(uli);
-        });
     }
 
     addToSelOptions() {
@@ -848,39 +824,6 @@ export class ARENAChat {
         }, timeMs); // clear message in timeMs milliseconds
     }
 
-    moveToLandmark(objectId) {
-        let sceneEl = document.querySelector('a-scene');
-
-        if (!sceneEl) {
-            console.error('Could not find aframe scene');
-            return;
-        }
-
-        let landmarkObj = sceneEl.querySelector(`[id="${objectId}"]`);
-
-        let myCamera = document.getElementById('my-camera');
-
-        if (!myCamera) {
-            console.error('Could not find our camera');
-            return;
-        }
-
-        let direction = new THREE.Vector3();
-        landmarkObj.object3D.getWorldDirection(direction);
-        let distance = ARENA.landmarkTeleportDistance ? ARENA.landmarkTeleportDistance : 3.5; // distance to put you
-        let pos = new THREE.Vector3();
-        landmarkObj.object3D.getWorldPosition(pos);
-        myCamera.object3D.position.copy(pos);
-        myCamera.object3D.position.add(direction.multiplyScalar(distance));
-        myCamera.object3D.position.y = ARENA.defaults.camHeight; // set at a fixed height
-
-        // rotate our camera to face the object
-        myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
-            myCamera.object3D.position.x - pos.x,
-            myCamera.object3D.position.z - pos.z
-        );
-    }
-
     moveToFrontOfCamera(cameraId, scene) {
         //console.log("Move to near camera:", cameraId);
 
@@ -929,6 +872,8 @@ export class ARENAChat {
         let distance = ARENA.userTeleportDistance ? ARENA.userTeleportDistance : 2; // distance to put you
         myCamera.object3D.position.copy(toCam.object3D.position.clone()).add(direction.multiplyScalar(-distance));
         myCamera.object3D.position.y = toCam.object3D.position.y;
+        // Reset navMesh data
+        myCamera.components['wasd-controls'].resetNav();
         // rotate our camera to face the other user
         myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
             myCamera.object3D.position.x - toCam.object3D.position.x,

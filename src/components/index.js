@@ -21,6 +21,7 @@ import './gesture-detector.js';
 import './goto-url.js';
 import './hide-in-ar-mode.js';
 import './impulse.js';
+import './landmark.js';
 import './load-scene.js';
 import './material-extras.js';
 import './network-latency.js';
@@ -40,6 +41,7 @@ import 'webxr-polyfill'; // fallback for non-webXR browsers
 // import 'aframe-environment-component'; // pretty environments (npm version has a bug; imported from file instead)
 import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 import './vendor/animation-mixer.js'; // Override animation mixer
+import './vendor/nav-system.js'; // Override nav system
 
 // import 'aframe-particle-system-component';
 // import 'aframe-spe-particles-component';

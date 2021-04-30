@@ -120,7 +120,7 @@ export class CreateUpdate {
         case 'scene-options':
         case 'face-features':
         case 'landmarks':
-            // these message types are not for us; silently ignore them
+            // TODO : Remove once all existing persist landmark entities have converted
             return;
 
         default:
@@ -299,7 +299,7 @@ export class CreateUpdate {
                     entityEl.removeAttribute(cName);
                 } else {
                     entityEl.setAttribute(cName, attribute, value);
-                }                
+                }
                 delete data[attribute]; // we handled this attribute; remove it
             }
         }

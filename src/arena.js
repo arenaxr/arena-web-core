@@ -6,14 +6,17 @@
  * @date 2020
  */
 
-import { ARENAUtils } from './utils.js';
-import { ARENAMqtt } from './mqtt.js';
-import { ARENAJitsi } from './jitsi.js';
-import { ARENAChat } from './chat/';
-import { ARENAEventEmitter } from './event-emitter.js';
-import { SideMenu } from './icons/';
-import { RuntimeMngr } from './runtime-mngr';
+import {ARENAUtils} from './utils.js';
+import {ARENAMqtt} from './mqtt.js';
+import {ARENAJitsi} from './jitsi.js';
+import {ARENAChat} from './chat/';
+import {ARENAEventEmitter} from './event-emitter.js';
+import {SideMenu} from './icons/';
+import {RuntimeMngr} from './runtime-mngr';
 import Swal from 'sweetalert2';
+
+/* global ARENA */
+
 
 /**
  * Arena Object
@@ -61,7 +64,7 @@ export class Arena {
      */
     setUserName = (name = undefined) => {
         // set userName
-        if (name == undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
+        if (name === undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
         this.userName = name;
     }
 
@@ -71,7 +74,7 @@ export class Arena {
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
     setIdTag = (idTag = undefined) => {
-        if (idTag == undefined) throw "setIdTag: idTag not defined."; // idTag must be set
+        if (idTag === undefined) throw "setIdTag: idTag not defined."; // idTag must be set
         this.idTag = idTag;
 
         // set camName
@@ -160,6 +163,7 @@ export class Arena {
 
         // after scene is completely loaded, add user camera
         this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
+            const systems = AFRAME.scenes[0].systems;
             let color = Math.floor(Math.random() * 16777215).toString(16);
             if (color.length < 6) color = "0" + color;
             color = '#' + color
@@ -170,31 +174,30 @@ export class Arena {
             camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
             // try to define starting position if the scene has startPosition objects
-            if (!ARENA.startCoords) {
+            if (!ARENA.startCoords && systems.landmark) {
                 // get startPosition objects
-                const startPositions = Array.from(document.querySelectorAll('[id^="startPosition"]'));
-                if (startPositions.length > 0) {
-                    let posi = Math.floor(Math.random() * startPositions.length);
-                    ARENA.startCoords = startPositions[posi].getAttribute('position');
-
-                    // also set rotation
-                    camera.components['look-controls'].yawObject.rotation.copy(startPositions[posi].object3D.rotation);
+                const startPosition = systems.landmark.getRandom(true);
+                if (startPosition) {
+                    console.log("Moving camera to start position", startPosition.el.id)
+                    startPosition.teleportTo();
+                    ARENA.startCoords = camera.object3D.position;
                 }
             }
-            if (!ARENA.startCoords) ARENA.startCoords = ARENA.defaults.startCoords; // default position
-            const startPos = new AFRAME.THREE.Vector3;
-            const navSys = AFRAME.scenes[0].systems.nav;
-            startPos.copy(ARENA.startCoords);
-            if (navSys.navMesh) {
-                try {
-                    const closestNode = navSys.getNode(startPos, navSys.getGroup(startPos));
-                    //startPos.y += closestNode.centroid.z;
-                    console.log("Start Y:", startPos.y, ", closest nav node Y:", closestNode.centroid.z)
-                } catch {}
+            if (!ARENA.startCoords) {
+                ARENA.startCoords = ARENA.defaults.startCoords; // default position
+                const startPos = new AFRAME.THREE.Vector3;
+                const navSys = systems.nav;
+                startPos.copy(ARENA.startCoords);
+                if (navSys.navMesh) {
+                    try {
+                        const closestGroup = navSys.getGroup(startPos, false);
+                        const closestNode = navSys.getNode(startPos, closestGroup, false);
+                        navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
+                    } catch {}
+                }
+                startPos.y += ARENA.defaults.camHeight;
+                camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
             }
-            startPos.y += ARENA.defaults.camHeight;
-            camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
-
             // enable vio if fixedCamera is given
             if (ARENA.fixedCamera !== '') {
                 camera.setAttribute('arena-camera', 'vioEnabled', true);
@@ -214,7 +217,6 @@ export class Arena {
      * @param {Object} rotation initial rotation
      */
     loadScene = (urlToLoad, position, rotation) => {
-
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -222,7 +224,6 @@ export class Arena {
         xhr.send();
         xhr.responseType = 'json';
         const deferredObjects = [];
-        const Parents = {};
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -233,15 +234,14 @@ export class Arena {
                     confirmButtonText: 'Ok',
                 });
             } else {
-                if (xhr.response == undefined) {
+                if (xhr.response === undefined || xhr.response.length === 0) {
                     console.error("No scene objects found in persistence.")
                     return;
                 }
                 const arenaObjects = xhr.response;
-                const l = arenaObjects.length;
-                for (let i = 0; i < l; i++) {
+                for (let i = 0; i < arenaObjects.length; i++) {
                     const obj = arenaObjects[i];
-                    if (obj.type == 'program') {
+                    if (obj.type === 'program') {
                         // construct program object for rt manager request
                         const pobj = {
                             'object_id': obj.object_id,
@@ -266,7 +266,6 @@ export class Arena {
                     }
                     if (obj.attributes.parent) {
                         deferredObjects.push(obj);
-                        Parents[obj.attributes.parent] = obj.attributes.parent;
                     } else {
                         const msg = {
                             object_id: obj.object_id,
@@ -290,8 +289,7 @@ export class Arena {
                         this.Mqtt.processMessage(msg);
                     }
                 }
-                const l2 = deferredObjects.length;
-                for (let i = 0; i < l2; i++) {
+                for (let i = 0; i < deferredObjects.length; i++) {
                     const obj = deferredObjects[i];
                     if (obj.attributes.parent === this.camName) {
                         continue; // don't load our own camera/head assembly
@@ -305,7 +303,7 @@ export class Arena {
                     console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
                 }
-                ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
+                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true), 500);
             }
         };
     };
@@ -373,7 +371,7 @@ export class Arena {
         xhr.send();
         xhr.responseType = 'json';
         xhr.onload = async () => {
-            if (xhr.status !== 200 || xhr.response == undefined) {
+            if (xhr.status !== 200 || xhr.response === undefined) {
                 console.info(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
             } else {
                 const payload = xhr.response[xhr.response.length - 1];
