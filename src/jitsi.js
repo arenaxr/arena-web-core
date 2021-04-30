@@ -554,14 +554,22 @@ export class ARENAJitsi {
             if (vidbtn) vidbtn.remove();
             const audbtn = document.getElementById('btn-audio-off');
             if (audbtn) audbtn.remove();
-            Swal.fire({
-                title: 'No Webcam or Audio Input Device found!',
-                html: `You are now in <i>"spectator mode"</i>. This means you won\'t be able to share audio or video,
+            if (!localStorage.getItem('hideNoAV')) {
+                Swal.fire({
+                    title: 'No Webcam or Audio Input Device found!',
+                    html: `You are now in <i>"spectator mode"</i>. This means you won\'t be able to share audio or video,
                        but can still interact with other users.`,
-                icon: 'warning',
-                showConfirmButton: true,
-                confirmButtonText: 'Ok',
-            });
+                    icon: 'warning',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Ok',
+                    input: 'checkbox',
+                    inputPlaceholder: "Don't remind me again on this device.",
+                }).then((result) => {
+                    if (result.value) {
+                        localStorage.setItem('hideNoAV', 'true');
+                    }
+                });
+            }
         }
         this.avConnected = true;
 
