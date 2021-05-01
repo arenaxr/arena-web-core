@@ -331,18 +331,6 @@
                 "description":"false = scene will be visible; true = scene will not show in listings",
                 "default":"false"
              },
-             "userTeleportDistance":{
-                "type":"number",
-                "title":"User Teleport Distance",
-                "description":"Distance to put user when teleporting to be in front of another user",
-                "default":2
-             },
-             "landmarkTeleportDistance":{
-                "type":"number",
-                "title":"Landmark Teleport Distance",
-                "description":"Distance to put user when teleporting to be in front of a landmark",
-                "default":3.5
-             },
              "volume":{
                 "type":"number",
                 "title":"Positional Audio Volume",
