@@ -8,6 +8,7 @@
        {
           "properties":{
              "data":{
+                "title":"ARMarker Data",
                 "additionalProperties":true,
                 "properties":{
                    "object_type":{
@@ -79,8 +80,7 @@
                    "size",
                    "lat",
                    "lon"
-                ],
-                "title":"ARMarker Data"
+                ]
              }
           }
        }

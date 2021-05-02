@@ -51,6 +51,9 @@ Based on <a href="https://github.com/aframevr/aframe/pull/4356">this example</a>
 This happens in conjunction with an event.
 Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-Frame VR</a></p>
 </dd>
+<dt><a href="#module_landmark">landmark</a></dt>
+<dd><p>Component-System of teleport destination Landmarks</p>
+</dd>
 <dt><a href="#module_load-scene">load-scene</a></dt>
 <dd><p>Load scene from persistence.</p>
 </dd>
@@ -395,6 +398,23 @@ This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
 **Requires**: <code>module:aframe-physics-system</code>  
+<a name="module_landmark"></a>
+
+## landmark
+Component-System of teleport destination Landmarks
+
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [randomRadiusMin] | <code>number</code> | <code>0</code> | Min for a random range to teleport to. Max must > 0 |
+| [randomRadiusMax] | <code>number</code> | <code>0</code> | Max for a random range to teleport to. |
+| [offsetPosition] | <code>THREE.Vector3</code> | <code>{0,0,0}</code> | vector3 {x,y,z} to use as static teleport offset |
+| [constrainToNavMesh] | <code>string</code> | <code>&quot;&#x27;false&#x27;&quot;</code> | Teleports here should snap to navmesh. Valid values:  'false', 'any', 'coplanar' |
+| [startingPosition] | <code>boolean</code> | <code>false</code> | True: use as a random scene load-in position |
+| [lookAtLandmark] | <code>boolean</code> | <code>false</code> | True: After teleporting, user should rotate @ landmark |
+| [label] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Display label for Landmarks UI menu |
+
 <a name="module_load-scene"></a>
 
 ## load-scene

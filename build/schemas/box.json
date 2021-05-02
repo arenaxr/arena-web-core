@@ -1,99 +1,99 @@
 {
-    "description":"Box Geometry",
-    "allOf":[
-       {
-          "$ref":"./schemas/definitions-arena-object.json#/properties"
-       },
-       {
-          "properties":{
-             "data":{
-                "additionalProperties":true,
-                "allOf":[
-                   {
-                      "properties":{
-                        "object_type":{
-                            "description":"3D object type (derived from 'type' select above).",
-                            "enum":[
-                               "box"
-                            ],
-                            "title":"3D object type",
-                            "type":"string"
-                         },                          
-                         "depth":{
-                            "default":1,
-                            "title":"depth",
-                            "type":"number"
-                         },
-                         "height":{
-                            "default":1,
-                            "title":"height",
-                            "type":"number"
-                         },
-                         "segmentsDepth":{
-                            "default":1,
-                            "title":"segments depth",
-                            "type":"number"
-                         },
-                         "segmentsHeight":{
-                            "default":1,
-                            "title":"segments height",
-                            "type":"number"
-                         },
-                         "segmentsWidth":{
-                            "default":1,
-                            "title":"segments width",
-                            "type":"number"
-                         },
-                         "width":{
-                            "default":1,
-                            "title":"width",
-                            "type":"number"
-                         }
-                      }
-                   },
-                   {
-                      "$ref":"./schemas/definitions-common.json#/properties"
-                   },
-                   {
-                      "$ref":"./schemas/definitions-geometry.json#/properties"
-                   }
-                ],
-                "default":{
-                   "depth":1,
-                   "height":1,
-                   "material":{
-                      "color":"#7f7f7f"
-                   },
-                   "object_type":"box",
-                   "position":{
-                      "x":0,
-                      "y":0,
-                      "z":0
-                   },
-                   "rotation":{
-                      "x":0,
-                      "y":0,
-                      "z":0
-                   },
-                   "width":1
-                },
-                "required":[
-                   "object_type",
-                   "width",
-                   "height",
-                   "depth"
-                ],
-                "title":"Box Data"
-             }
-          }
-       }
+    "title": "Box",
+    "description": "Box Geometry",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "box"
+                                    ]
+                                },
+                                "depth": {
+                                    "type": "number",
+                                    "title": "depth",
+                                    "default": 1
+                                },
+                                "height": {
+                                    "type": "number",
+                                    "title": "height",
+                                    "default": 1
+                                },
+                                "segmentsDepth": {
+                                    "type": "number",
+                                    "title": "segments depth",
+                                    "default": 1
+                                },
+                                "segmentsHeight": {
+                                    "type": "number",
+                                    "title": "segments height",
+                                    "default": 1
+                                },
+                                "segmentsWidth": {
+                                    "type": "number",
+                                    "title": "segments width",
+                                    "default": 1
+                                },
+                                "width": {
+                                    "type": "number",
+                                    "title": "width",
+                                    "default": 1
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                        }
+                    ],
+                    "title": "Box Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "box",
+                        "depth": 1,
+                        "height": 1,
+                        "material": {
+                            "color": "#7f7f7f"
+                        },
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "width": 1
+                    },
+                    "required": [
+                        "object_type",
+                        "width",
+                        "height",
+                        "depth"
+                    ]
+                }
+            }
+        }
     ],
-    "required":[
-       "object_id",
-       "action",
-       "type",
-       "data",
-       "persist"
-    ],
-    "title":"Box"
- }
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}
