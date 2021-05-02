@@ -247,12 +247,12 @@
         "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is contrained by a navmesh (when it exists)",          
         "properties": {
             "randomRadiusMin": {
-                "default": 0,
+                "default": 1,
                 "description": "Minimum radius from the landmark to teleport to. (randomRadiusMax must > 0)",
                 "type": "number"
             },
             "randomRadiusMax": {
-                "default": 0,
+                "default": 1,
                 "description": "Maximum radius from the landmark to teleport to.",
                 "type": "number"
             },
@@ -292,7 +292,7 @@
                 "type": "boolean"
             },                
             "lookAtLandmark": {
-                "default": false,
+                "default": true,
                 "description": "Set to true to make users face the landmark when teleported to it.",
                 "type": "boolean"
             },                
@@ -301,7 +301,13 @@
                 "description": "Landmark description to display in the landmark list",
                 "type": "string"
             }
-        }
+        },
+        "default": {
+            "randomRadiusMin": 1,
+            "randomRadiusMax": 1,
+            "lookAtLandmark": true
+        },
+        "required": ["label"]
       },
       "parent": {
         "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
