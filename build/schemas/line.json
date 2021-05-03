@@ -19,10 +19,58 @@
                                         "line"
                                     ]
                                 },
+                                "end": {
+                                    "title": "vertex B (end)",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "z": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "z"
+                                    ],
+                                    "default": {
+                                        "x": -0.5,
+                                        "y": -0.5,
+                                        "z": 0
+                                    }
+                                },
                                 "opacity": {
                                     "type": "number",
                                     "title": "Line Opacity",
                                     "default": 1
+                                },
+                                "start": {
+                                    "title": "vertex A (start)",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "z": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "z"
+                                    ],
+                                    "default": {
+                                        "x": 0,
+                                        "y": 0.5,
+                                        "z": 0
+                                    }
                                 },
                                 "visible": {
                                     "type": "boolean",
@@ -42,7 +90,6 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "line",
-                        "color": "white",
                         "end": {
                             "x": -0.5,
                             "y": -0.5,
@@ -53,7 +100,8 @@
                             "y": 0.5,
                             "z": 0
                         },
-                        "visible": true
+                        "visible": true,
+                        "color": "#7f7f7f"
                     },
                     "required": [
                         "object_type",
