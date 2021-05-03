@@ -22,7 +22,6 @@ import Swal from 'sweetalert2';
  * Arena Object
  */
 export class Arena {
-
     static init() {
         return new Arena();
     }
@@ -52,7 +51,7 @@ export class Arena {
         this.setUserName();
 
         // set mqttHost and mqttHostURI from url params or defaults
-        this.setmqttHost()
+        this.setmqttHost();
 
         // setup event listener
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
@@ -74,7 +73,7 @@ export class Arena {
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
     setIdTag = (idTag = undefined) => {
-        if (idTag === undefined) throw "setIdTag: idTag not defined."; // idTag must be set
+        if (idTag === undefined) throw 'setIdTag: idTag not defined.'; // idTag must be set
         this.idTag = idTag;
 
         // set camName
@@ -98,13 +97,13 @@ export class Arena {
      */
     setSceneName = () => {
         // private function to set scenename, namespacedScene and namespace
-        let _setNames = (ns, sn) => {
+        const _setNames = (ns, sn) => {
             this.namespacedScene = `${ns}/${sn}`;
             this.sceneName = sn;
             this.nameSpace = ns;
-        }
+        };
         let path = window.location.pathname.substring(1);
-        let { namespace: namespace, sceneName: scenename } = this.defaults;
+        let {namespace: namespace, sceneName: scenename} = this.defaults;
         if (this.defaults.supportDevFolders && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
             if (devPrefix) {
@@ -113,7 +112,7 @@ export class Arena {
         }
         if (path === '' || path === 'index.html') {
             scenename = ARENAUtils.getUrlParam('scene', scenename);
-            _setNames(namespace, scenename)
+            _setNames(namespace, scenename);
         } else {
             try {
                 const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
@@ -165,8 +164,8 @@ export class Arena {
         this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
             const systems = AFRAME.scenes[0].systems;
             let color = Math.floor(Math.random() * 16777215).toString(16);
-            if (color.length < 6) color = "0" + color;
-            color = '#' + color
+            if (color.length < 6) color = '0' + color;
+            color = '#' + color;
 
             const camera = document.getElementById('my-camera');
             camera.setAttribute('arena-camera', 'enabled', true);
@@ -178,7 +177,7 @@ export class Arena {
                 // get startPosition objects
                 const startPosition = systems.landmark.getRandom(true);
                 if (startPosition) {
-                    console.log("Moving camera to start position", startPosition.el.id)
+                    console.log('Moving camera to start position', startPosition.el.id);
                     startPosition.teleportTo();
                     ARENA.startCoords = camera.object3D.position;
                 }
@@ -228,14 +227,14 @@ export class Arena {
             if (xhr.status !== 200) {
                 Swal.fire({
                     title: 'Error loading initial scene data',
-                    text:  `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
+                    text: `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
                     icon: 'error',
                     showConfirmButton: true,
                     confirmButtonText: 'Ok',
                 });
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
-                    console.error("No scene objects found in persistence.");
+                    console.error('No scene objects found in persistence.');
                     ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
                     return;
                 }
@@ -256,7 +255,7 @@ export class Arena {
                             namespace: ARENA.nameSpace,
                             cameraid: ARENA.camName,
                             username: ARENA.getDisplayName,
-                            mqtth: ARENA.mqttHost
+                            mqtth: ARENA.mqttHost,
                         };
                         // ask runtime manager to start this program
                         this.RuntimeManager.createModule(pobj, avars);
@@ -325,7 +324,7 @@ export class Arena {
             if (xhr.status !== 200) {
                 Swal.fire({
                     title: 'Error loading initial scene data',
-                    text:  `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
+                    text: `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
                     icon: 'error',
                     showConfirmButton: true,
                     confirmButtonText: 'Ok',
@@ -363,7 +362,7 @@ export class Arena {
         renderer.gammaFactor = 2.2;
         renderer.outputEncoding = THREE['sRGBEncoding'];
 
-        let environment = document.createElement('a-entity');
+        const environment = document.createElement('a-entity');
         environment.id = 'env';
 
         const xhr = new XMLHttpRequest();
@@ -382,7 +381,7 @@ export class Arena {
 
                     // deal with scene attribution
                     if (sceneOptions['attribution']) {
-                        let sceneAttr  = document.createElement('a-entity');
+                        const sceneAttr = document.createElement('a-entity');
                         sceneAttr.setAttribute('id', 'scene-options-attribution');
                         sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
                         sceneRoot.appendChild(sceneAttr);
@@ -459,14 +458,14 @@ export class Arena {
             this.Mqtt = Mqtt;
             // Do not pass functions in mqttClientOptions
             await Mqtt.connect({
-                    reconnect: true,
-                    userName: this.username,
-                    password: this.mqttToken,
-                },
-                // last will message
-                JSON.stringify({ object_id: this.camName, action: 'delete' }),
-                // last will topic
-                this.outputTopic + this.camName,
+                reconnect: true,
+                userName: this.username,
+                password: this.mqttToken,
+            },
+            // last will message
+            JSON.stringify({object_id: this.camName, action: 'delete'}),
+            // last will topic
+            this.outputTopic + this.camName,
             );
 
             // init runtime manager
@@ -522,7 +521,7 @@ export class Arena {
 
             SideMenu.setupIcons();
 
-            console.info("ARENA Started; ARENA=", ARENA);
+            console.info('ARENA Started; ARENA=', ARENA);
         }); // mqtt API (after this.* above, are defined)
     }
 }
