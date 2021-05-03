@@ -108,15 +108,11 @@ window.addEventListener('onauth', async function (e) {
         window.startval = undefined;
 
         if (jsoneditor) jsoneditor.destroy();
-        let jsoneditor = new JSONEditor(editor, {
+        jsoneditor = new JSONEditor(editor, {
             schema: schema,
             startval: startval,
             ajax: true
         });
-
-        await jsoneditor.on('ready',function() {
-            window.jsoneditor = jsoneditor;
-        });        
 
         // When the value of the editor changes, update the JSON output and validation message
         jsoneditor.on("change", function() {
