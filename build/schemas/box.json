@@ -64,6 +64,7 @@
                         "object_type": "box",
                         "depth": 1,
                         "height": 1,
+                        "width": 1,
                         "material": {
                             "color": "#7f7f7f"
                         },
@@ -76,8 +77,7 @@
                             "x": 0,
                             "y": 0,
                             "z": 0
-                        },
-                        "width": 1
+                        }
                     },
                     "required": [
                         "object_type",

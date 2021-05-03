@@ -156,8 +156,11 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "text",
-                        "color": "white",
                         "font": "roboto",
+                        "side": "double",
+                        "value": "",
+                        "width": 5,
+                        "color": "white",
                         "position": {
                             "x": 0,
                             "y": 0,
@@ -167,10 +170,7 @@
                             "x": 0,
                             "y": 0,
                             "z": 0
-                        },
-                        "side": "double",
-                        "value": "",
-                        "width": 5
+                        }
                     },
                     "required": [
                         "object_type"

@@ -47,10 +47,10 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "thickline",
-                        "color": "#7f7f7f",
                         "lineWidth": 5,
                         "lineWidthStyle": 1,
-                        "path": "-2 -1 0, 0 20 0, 10 -1 10"
+                        "path": "-2 -1 0, 0 20 0, 10 -1 10",
+                        "color": "#7f7f7f"
                     },
                     "required": [
                         "object_type",

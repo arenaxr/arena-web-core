@@ -52,6 +52,7 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "circle",
+                        "radius": 1,
                         "material": {
                             "color": "#7f7f7f"
                         },
@@ -60,7 +61,6 @@
                             "y": 0,
                             "z": 0
                         },
-                        "radius": 1,
                         "rotation": {
                             "x": 0,
                             "y": 0,

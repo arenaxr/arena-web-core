@@ -227,6 +227,7 @@
                         "object_type": "light",
                         "color": "#ffffff",
                         "intensity": 1,
+                        "type": "directional",
                         "position": {
                             "x": 0,
                             "y": 0,
@@ -241,8 +242,7 @@
                             "x": 1,
                             "y": 1,
                             "z": 1
-                        },
-                        "type": "directional"
+                        }
                     },
                     "required": [
                         "object_type"

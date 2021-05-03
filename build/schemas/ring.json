@@ -62,6 +62,8 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "ring",
+                        "radiusInner": 1,
+                        "radiusOuter": 1,
                         "material": {
                             "color": "#7f7f7f"
                         },
@@ -70,8 +72,6 @@
                             "y": 0,
                             "z": 0
                         },
-                        "radiusInner": 1,
-                        "radiusOuter": 1,
                         "rotation": {
                             "x": 0,
                             "y": 0,
