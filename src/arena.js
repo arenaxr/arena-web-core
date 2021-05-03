@@ -235,7 +235,8 @@ export class Arena {
                 });
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
-                    console.error("No scene objects found in persistence.")
+                    console.error("No scene objects found in persistence.");
+                    ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
                     return;
                 }
                 const arenaObjects = xhr.response;
