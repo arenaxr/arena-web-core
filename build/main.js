@@ -224,8 +224,8 @@ window.addEventListener('onauth', async function (e) {
               const scene = Swal.getPopup().querySelector('#modalscenename').value;
               const addobjs = !!Swal.getPopup().querySelector('#swal2-checkbox').checked;
 
-              if (!scene) {
-                Swal.showValidationMessage(`Please enter a new scene name`)
+              if (!scene.match(/^[a-zA-Z0-9_-]{3,20}$/g)) {
+                Swal.showValidationMessage(`Valid scene names are between 3 and 20 characters long, and only have letters, numbers, '_', or '-'.`)
               }
               return { ns: ns, scene: scene, addobjs: addobjs}
             }
