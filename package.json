@@ -29,6 +29,7 @@
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
+    "babel-eslint": "^10.1.0",
     "eslint": "^7.25.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.6",
