@@ -24,14 +24,16 @@
                                     "title": "Line width",
                                     "default": 1
                                 },
-                                "lineWidthStyle": {
+                                "lineWidthStyler": {
                                     "type": "number",
-                                    "title": "Line width Style",
+                                    "title": "Line width styler",
+                                    "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. The final, rendered width is scaled by lineWidth. You can use p in your function definition. It varies from 0 at the first vertex of the path to 1 at the last vertex of the path.",
                                     "default": 1
                                 },
                                 "path": {
                                     "type": "string",
-                                    "title": "Line Path",
+                                    "title": "Line path",
+                                    "description": "Comma-seperated list of x y z coordinates of the line vertices",
                                     "default": "-2 -1 0, 0 20 0, 10 -1 10"
                                 }
                             }
@@ -48,7 +50,7 @@
                     "default": {
                         "object_type": "thickline",
                         "lineWidth": 5,
-                        "lineWidthStyle": 1,
+                        "lineWidthStyler": 1,
                         "path": "-2 -1 0, 0 20 0, 10 -1 10",
                         "color": "#7f7f7f"
                     },

@@ -18,7 +18,79 @@
                                     "enum": [
                                         "triangle"
                                     ]
-                                }
+                                },
+                                "vertexA": {
+                                    "title": "vertex A",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "z": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "z"
+                                    ],
+                                    "default": {
+                                        "x": -0.5,
+                                        "y": -0.5,
+                                        "z": 0
+                                    }
+                                },                                
+                                "vertexB": {
+                                    "title": "vertex B",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "z": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "z"
+                                    ],
+                                    "default": {
+                                        "x": -0.5,
+                                        "y": -0.5,
+                                        "z": 0
+                                    }
+                                },                                
+                                "vertexC": {
+                                    "title": "vertex C",
+                                    "properties": {
+                                        "x": {
+                                            "type": "number"
+                                        },
+                                        "y": {
+                                            "type": "number"
+                                        },
+                                        "z": {
+                                            "type": "number"
+                                        }
+                                    },
+                                    "required": [
+                                        "x",
+                                        "y",
+                                        "z"
+                                    ],
+                                    "default": {
+                                        "x": -0.5,
+                                        "y": -0.5,
+                                        "z": 0
+                                    }
+                                }                             
                             }
                         },
                         {

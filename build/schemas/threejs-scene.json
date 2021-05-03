@@ -18,7 +18,13 @@
                                     "enum": [
                                         "threejs-scene"
                                     ]
-                                }
+                                },
+                                "url": {
+                                    "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+                                    "format": "uri",
+                                    "title": "Url",
+                                    "type": "string"
+                                }                                    
                             }
                         },
                         {
@@ -28,7 +34,22 @@
                     "title": "Three.js Scene Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "threejs-scene"
+                        "object_type": "threejs-scene",
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 1,
+                            "y": 1,
+                            "z": 1
+                        }
                     },
                     "required": [
                         "object_type",

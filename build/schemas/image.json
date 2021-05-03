@@ -19,7 +19,13 @@
                                         "image"
                                     ]
                                 }
-                            }
+                            },
+                            "url": {
+                                "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+                                "format": "uri",
+                                "title": "Url",
+                                "type": "string"
+                            }                       
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"
@@ -46,11 +52,11 @@
                             "x": 1,
                             "y": 1,
                             "z": 1
-                        },
-                        "url": "https://arena-cdn.conix.io/store/users/wiselab/images/conix-face-white.jpg"
+                        }
                     },
                     "required": [
                         "object_type",
+                        "url",
                         "position",
                         "rotation"
                     ]
