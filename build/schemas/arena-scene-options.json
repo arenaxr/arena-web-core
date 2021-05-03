@@ -1,6 +1,6 @@
 {
     "definitions":{
-       "coord3d":{
+       "Vector3":{
           "type":"object",
           "required":[
              "x",
@@ -111,7 +111,7 @@
                 "description":"Size of the shadow, if applied"
              },
              "lightPosition":{
-                "$ref":"#/definitions/coord3d",
+                "$ref":"#/definitions/Vector3",
                 "title":"Light Position",
                 "description":"Position of the main light. If skyType is atmospheric, only the orientation matters (is a directional light) and it can turn the scene into night when lowered towards the horizon.",
                 "default":{
@@ -157,7 +157,7 @@
                 ]
              },
              "groundScale":{
-                "$ref":"#/definitions/coord3d",
+                "$ref":"#/definitions/Vector3",
                 "default":{
                    "x":1,
                    "y":1,
@@ -244,7 +244,7 @@
                 "description":"Height (in meters) of dressing objects."
              },
              "dressingVariance":{
-                "$ref":"#/definitions/coord3d",
+                "$ref":"#/definitions/Vector3",
                 "default":{
                    "x":1,
                    "y":1,
@@ -294,7 +294,7 @@
                 "default":true,
                 "title":"Hide when entering AR",
                 "description":"If true, hide the environment when entering AR."
-             }             
+             }
           },
           "required":[
              "active",
@@ -330,18 +330,6 @@
                 "title":"Scene Privacy",
                 "description":"false = scene will be visible; true = scene will not show in listings",
                 "default":"false"
-             },
-             "userTeleportDistance":{
-                "type":"number",
-                "title":"User Teleport Distance",
-                "description":"Distance to put user when teleporting to be in front of another user",
-                "default":2
-             },
-             "landmarkTeleportDistance":{
-                "type":"number",
-                "title":"Landmark Teleport Distance",
-                "description":"Distance to put user when teleporting to be in front of a landmark",
-                "default":3.5
              },
              "volume":{
                 "type":"number",
@@ -439,56 +427,36 @@
     },
     "type":"object",
     "title":"Scene Config",
-    "properties":{
-       "object_id":{
-            "type":"string",
-            "minLength":3,
-            "description":"A uuid or otherwise unique identifier for this object",
-            "default": "scene-options"
+    "allOf":[
+       {
+          "$ref":"./schemas/definitions-arena-object.json#/properties"
        },
-       "action":{
-          "type":"string",
-          "description":"One of 3 basic Create/Update/Delete actions",
-          "enum":[
-             "create",
-             "delete",
-             "update"
-          ],
-          "default":"create"
-       },
-       "persist":{
-          "type":"boolean",
-          "description":"Persist this object in the database",
-          "default":"true"
-       },
-       "type":{
-          "type":"string",
-          "enum":[
-             "scene-options"
-          ]
-       },
-       "data":{
-          "title":"Scene Config Data",
+       {
           "properties":{
-             "env-presets":{
-                "$ref":"#/definitions/environment-presets",
-                "description":"A-Frame Environment presets"
-             },
-             "scene-options":{
-                "$ref":"#/definitions/scene-options",
-                "description":"ARENA Scene Options"
-             },
-             "renderer-settings":{
-                "$ref":"#/definitions/renderer-settings",
-                "description":"These settings are fed into three.js WebGLRenderer properties"
+             "data":{
+                "title":"Scene Config Data",
+                "properties":{
+                   "env-presets":{
+                      "$ref":"#/definitions/environment-presets",
+                      "description":"A-Frame Environment presets"
+                   },
+                   "scene-options":{
+                      "$ref":"#/definitions/scene-options",
+                      "description":"ARENA Scene Options"
+                   },
+                   "renderer-settings":{
+                      "$ref":"#/definitions/renderer-settings",
+                      "description":"These settings are fed into three.js WebGLRenderer properties"
+                   }
+                },
+                "required":[
+                   "env-presets",
+                   "scene-options"
+                ]
              }
-          },
-          "required":[
-             "env-presets",
-             "scene-options"
-          ]
+          }
        }
-    },
+    ],
     "required":[
        "object_id",
        "action",

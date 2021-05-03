@@ -1,0 +1,212 @@
+{
+    "properties": {
+      "buffer": {
+        "default": "true",
+        "description": "Transform geometry into a BufferGeometry to reduce memory usage at the cost of being harder to manipulate (geometries only: box, circle, cone, ...).",
+        "title": "Buffer",
+        "type": "boolean"
+      },
+      "material": {
+        "description": "The material properties of the object’s surface.",
+        "properties": {
+          "alphaTest": {
+            "default": 0,
+            "description": "Alpha test threshold for transparency.",
+            "type": "number"
+          },
+          "blending": {
+            "default": "normal",
+            "description": "The blending mode for the material’s RGB and Alpha sent to the WebGLRenderer. Can be one of none, normal, additive, subtractive or multiply",
+            "enum": [
+              "none",
+              "normal",
+              "additive",
+              "subtractive",
+              "multiply"
+            ],
+            "type": "string"
+          },
+          "color": {
+            "default": "#7f7f7f",
+            "description": "Base diffuse color.",
+            "format": "color",
+            "title": "color",
+            "type": "string"
+          },
+          "colorWrite": {
+            "description": "Color write",
+            "type": "boolean"
+          },
+          "depthTest": {
+            "default": true,
+            "description": "Whether depth testing is enabled when rendering the material.",
+            "type": "boolean"
+          },
+          "dithering": {
+            "default": true,
+            "description": "Whether material is dithered with noise. Removes banding from gradients like ones produced by lighting.",
+            "type": "boolean"
+          },
+          "flatShading": {
+            "default": false,
+            "description": "Use THREE.FlatShading rather than THREE.StandardShading.",
+            "type": "boolean"
+          },
+          "npot": {
+            "default": false,
+            "description": "Use settings for non-power-of-two (NPOT) texture.",
+            "type": "boolean"
+          },
+          "offset": {
+            "default": {
+              "x": 1,
+              "y": 1
+            },
+            "description": "Texture offset to be used.",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ],
+            "type": "object"
+          },
+          "opacity": {
+            "default": 1,
+            "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
+            "type": "number"
+          },
+          "render-order": {
+            "default": "0",
+            "description": "The render-order system takes a comma-delimited list of strings that name the render order layers. The render order layers will map to a number starting from 0 and counting up from there.",
+            "type": "string"
+          },
+          "repeat": {
+            "default": {
+              "x": 1,
+              "y": 1
+            },
+            "description": "Texture repeat to be used.",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ],
+            "type": "object"
+          },
+          "shader": {
+            "default": "standard",
+            "description": "Which material to use. Defaults to the standard material. Can be set to the flat material or to a registered custom shader material.",
+            "type": "string"
+          },
+          "side": {
+            "default": "front",
+            "description": "Which sides of the mesh to render. Can be one of front, back, or double.",
+            "enum": [
+              "front",
+              "back",
+              "double"
+            ],
+            "type": "string"
+          },
+          "src": {
+            "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+            "format": "uri",
+            "type": "string"
+          },
+          "transparent": {
+            "default": false,
+            "description": "Whether material is transparent. Transparent entities are rendered after non-transparent entities.",
+            "type": "boolean"
+          },
+          "vertexColors": {
+            "default": "none",
+            "description": "Whether to use vertex or face colors to shade the material. Can be one of none, vertex, or face.",
+            "enum": [
+              "none",
+              "vertex",
+              "face"
+            ],
+            "type": "string"
+          },
+          "visible": {
+            "default": true,
+            "description": "Whether material is visible. Raycasters will ignore invisible materials.",
+            "type": "boolean"
+          }
+        },
+        "title": "Material",
+        "type": "object"
+      },
+      "material-extras": {
+        "default": {
+          "encoding": "sRGBEncoding",
+          "needsUpdate": false
+        },
+        "description": "Define extra material properties.",
+        "properties": {
+          "encoding": {
+            "default": "sRGBEncoding",
+            "enum": [
+              "LinearEncoding",
+              "sRGBEncoding",
+              "GammaEncoding",
+              "RGBEEncoding",
+              "LogLuvEncoding",
+              "RGBM7Encoding",
+              "RGBM16Encoding",
+              "RGBDEncoding",
+              "BasicDepthPacking",
+              "RGBADepthPacking"
+            ],
+            "type": "string"
+          },
+          "needsUpdate": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "title": "Material extras",
+        "type": "object"
+      },
+      "multisrc": {
+        "description": "Define multiple visual sources applied to an object.",
+        "properties": {
+          "srcs": {
+            "description": "A comma-delimited list if URIs, e.g. “side1.png, side2.png, side3.png, side4.png, side5.png, side6.png” (required).",
+            "type": "string"
+          },
+          "srcspath": {
+            "description": "URI, relative or full path of a directory containing srcs, e.g. “store/users/wiselab/images/dice/” (required).",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "srcspath",
+          "srcs"
+        ],
+        "title": "Multi Source",
+        "type": "object"
+      },
+      "skipCache": {
+        "default": "true",
+        "description": "Disable retrieving the shared geometry object from the cache. (geometries only: box, circle, cone, ...).",
+        "title": "Skip Cache",
+        "type": "boolean"
+      }
+    }
+  }
