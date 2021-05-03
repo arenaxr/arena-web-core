@@ -27,11 +27,11 @@ export class GLTFProgress {
             if (progress === 'failed') {
                 innerHTML += `<b>"${he.encode(src)}"<br/>Failed!</b><br/>`;
             } else {
-                let progessStr = '(unknown %)';
-                if (evt.detail.progress !== Infinity) progessStr = `${parseFloat(progress.toFixed(1))}%`
+                let progessStr = '';
+                if (evt.detail.progress !== Infinity) progessStr = `<br/>${parseFloat(progress.toFixed(1))}%<br/>`
                 const shortName = src.length < this.MAX_LENGTH ?
                                     src : `…${src.substring(src.length - this.MAX_LENGTH)}`;
-                innerHTML += `${he.encode(shortName)}<br/>${progessStr}<br/>`;
+                innerHTML += `${he.encode(shortName)}${progessStr}`;
             }
         }
 
