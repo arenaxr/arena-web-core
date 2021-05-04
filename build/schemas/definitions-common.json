@@ -260,21 +260,23 @@
                 "description": "Use as a static teleport x,y,z offset",
                 "properties": {
                   "x": {
-                    "type": "number"
+                    "type": "number",
+                    "default": 0
                   },
                   "y": {
-                    "type": "number"
+                    "type": "number",
+                    "default": 0
                   },
                   "z": {
-                    "type": "number"
+                    "type": "number",
+                    "default": 0
                   }
                 },
                 "required": [
                   "x",
                   "y",
                   "z"
-                ],
-                "default": [ { "x": 0, "y": 0, "z": 0 } ]                
+                ]               
             },
             "constrainToNavMesh": {
                 "description": "Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
