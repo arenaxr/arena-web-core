@@ -14,7 +14,7 @@
  * @property {number} [randomRadiusMin=1] - Min for a random range to teleport to. Max must > 0
  * @property {number} [randomRadiusMax=1] - Max for a random range to teleport to.
  * @property {THREE.Vector3} [offsetPosition={0,0,0}] - vector3 {x,y,z} to use as static teleport offset
- * @property {string} [constrainToNavMesh='false'] - Teleports here should snap to navmesh. Valid values:  'false', 'any', 'coplanar'
+ * @property {string} [constrainToNavMesh='false'] - Teleports here should snap to navmesh. ['false', 'any', 'coplanar']
  * @property {boolean} [startingPosition=false] - True: use as a random scene load-in position
  * @property {boolean} [lookAtLandmark=true] - True: After teleporting, user should rotate @ landmark
  * @property {string} label='' - Display label for Landmarks UI menu
@@ -57,7 +57,7 @@ AFRAME.registerComponent('landmark', {
         this.system.unregisterComponent(this);
     },
     teleportTo: function(moveEl = undefined) {
-        const myCam = document.getElementById('my-camera'); ;
+        const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
         const dest = new THREE.Vector3;
         dest.copy(this.el.object3D.position).add(this.data.offsetPosition);
