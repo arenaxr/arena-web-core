@@ -13,7 +13,7 @@
  * @module landmark
  * @property {number} [randomRadiusMin=0] - Min for a random range to teleport to. Max must > 0
  * @property {number} [randomRadiusMax=0] - Max for a random range to teleport to.
- * @property {THREE.Vector3} [offsetPosition={0,0,0}] - vector3 {x,y,z} to use as static teleport offset
+ * @property {THREE.Vector3} [offsetPosition={0,1.6,0}] - vector3 {x,y,z} to use as static teleport offset
  * @property {string} [constrainToNavMesh='false'] - Teleports here should snap to navmesh. ['false', 'any', 'coplanar']
  * @property {boolean} [startingPosition=false] - True: use as a random scene load-in position
  * @property {boolean} [lookAtLandmark=true] - True: After teleporting, user should rotate @ landmark
@@ -31,7 +31,7 @@ AFRAME.registerComponent('landmark', {
         }, // range in m. Ignored if randomRadiusMax is not set
         offsetPosition: {
             type: 'vec3',
-            default: {x: 0, y: 0, z: 0},
+            default: {x: 0, y: 1.6, z: 0},
         },
         constrainToNavMesh: {
             oneOf: ['false', 'any', 'coplanar'],

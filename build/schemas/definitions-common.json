@@ -265,7 +265,7 @@
                   },
                   "y": {
                     "type": "number",
-                    "default": 0
+                    "default": 1.6
                   },
                   "z": {
                     "type": "number",
