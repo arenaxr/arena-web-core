@@ -60,7 +60,7 @@ AFRAME.registerComponent('landmark', {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
         const dest = new THREE.Vector3;
-        dest.copy(this.el.object3D.position).add(this.data.offsetPosition);
+        dest.setFromMatrixPosition(this.el.object3D.matrixWorld).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
             const randomNorm = this.data.randomRadiusMin + (Math.random() *
                 (this.data.randomRadiusMax - this.data.randomRadiusMin));
