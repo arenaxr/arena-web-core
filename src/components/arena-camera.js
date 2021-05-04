@@ -21,9 +21,9 @@ import {ARENAUtils} from '../utils.js';
  * @property {number[]} position - Last camera position value.
  * @property {number[]} vioRotation - Last VIO rotation value.
  * @property {number[]} vioPosition - Last VIO position value.
- * 
+ *
  */
- AFRAME.registerComponent('arena-camera', {
+AFRAME.registerComponent('arena-camera', {
     schema: {
         enabled: {type: 'boolean', default: false},
         vioEnabled: {type: 'boolean', default: false},
@@ -39,6 +39,7 @@ import {ARENAUtils} from '../utils.js';
      * @ignore
      */
     init: function() {
+        this.lastPos = new THREE.Vector3();
         this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
@@ -181,9 +182,17 @@ import {ARENAUtils} from '../utils.js';
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position if pose changed, or every 1 sec heartbeat
-        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) == 0) {
+        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
+            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+            this.lastPos.copy(this.el.object3D.position);
+            this.lastPos.y -= ARENA.defaults.camHeight;
+            sceneHist[ARENA.namespacedScene] = {
+                ...sceneHist[ARENA.namespacedScene],
+                lastPos: this.lastPos,
+            };
+            localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
         } else if (this.lastPose !== newPose) {
             this.publishPose();
         }
