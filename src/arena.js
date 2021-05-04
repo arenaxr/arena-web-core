@@ -34,9 +34,11 @@ export class Arena {
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
-        this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if URL parameter not given
+        this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if not specified
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
-        if (this.startCoords) this.startCoords = this.startCoords.replace(/,/g, ' ');
+        if (this.startCoords) {
+            this.startCoords = this.startCoords.split(',').map((i) => Number(i));
+        }
         this.jitsiHost = this.defaults.jitsiHost;
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
@@ -172,19 +174,34 @@ export class Arena {
             camera.setAttribute('arena-camera', 'color', color);
             camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
-            // try to define starting position if the scene has startPosition objects
-            if (!ARENA.startCoords && systems.landmark) {
+            const startPos = new THREE.Vector3;
+            if (ARENA.startCoords) {
+                startPos.set(...ARENA.startCoords);
+                camera.object3D.position.copy(startPos);
+                camera.object3D.position.y += ARENA.defaults.camHeight;
+                ARENA.startCoords = startPos;
+            } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
+                const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+                const lastPos = sceneHist[ARENA.namespacedScene]?.lastPos;
+                if (lastPos) {
+                    startPos.copy(lastPos);
+                    camera.object3D.position.copy(startPos);
+                    camera.object3D.position.y += ARENA.defaults.camHeight;
+                    ARENA.startCoords = startPos;
+                }
+            } else if (systems.landmark) { // try to define starting position if the scene has startPosition objects
                 // get startPosition objects
                 const startPosition = systems.landmark.getRandom(true);
                 if (startPosition) {
                     console.log('Moving camera to start position', startPosition.el.id);
                     startPosition.teleportTo();
-                    ARENA.startCoords = camera.object3D.position;
+                    startPos.copy(camera.object3D.position);
+                    startPos.y -= ARENA.defaults.camHeight;
+                    ARENA.startCoords = startPos;
                 }
             }
-            if (!ARENA.startCoords) {
+            if (!ARENA.startCoords) { // Also fallthrough for failures
                 ARENA.startCoords = ARENA.defaults.startCoords; // default position
-                const startPos = new AFRAME.THREE.Vector3;
                 const navSys = systems.nav;
                 startPos.copy(ARENA.startCoords);
                 if (navSys.navMesh) {
@@ -194,8 +211,8 @@ export class Arena {
                         navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
                     } catch {}
                 }
-                startPos.y += ARENA.defaults.camHeight;
-                camera.object3D.position.copy(startPos); // an x, y, z object or a space-separated string
+                camera.object3D.position.copy(startPos);
+                camera.object3D.position.y += ARENA.defaults.camHeight;
             }
             // enable vio if fixedCamera is given
             if (ARENA.fixedCamera !== '') {
