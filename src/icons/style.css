@@ -77,3 +77,16 @@
     font-size: small;
     overflow: auto;
 }
+
+.echo-name {
+    position: absolute;
+    display: none;
+    margin: 5px;
+    top: 15px;
+    left: 15px;
+    border-radius: 10px;
+    z-index: 9990;
+    font-size: small;
+    background-color: #101010;
+    color: #ffffff;
+}

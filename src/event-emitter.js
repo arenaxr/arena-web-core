@@ -89,7 +89,7 @@ export class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback onSceneLoadedCallback
-         * @param result {boolean} Should alwasy be true
+         * @param result {boolean} Should always be true
          */
         SCENE_LOADED: 'scene_loaded'
     };
@@ -114,7 +114,7 @@ export class ARENAEventEmitter {
     /**
      * Add a listener
      *
-     * Ussage example:
+     * Usage example:
      *
      *  on(ARENAEventEmitter.events.USER_JOINED, userJoinCallback);
      *

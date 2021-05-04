@@ -57,6 +57,11 @@ export class Arena {
 
         // setup event listener
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
+        this.events.on(ARENAEventEmitter.events.NEW_SETTINGS, (e) => {
+            const args = e.detail;
+            if (!args.userName) return // only handle a user name change
+            this.showEchoDisplayName();
+        });
     }
 
     /**
@@ -154,6 +159,21 @@ export class Arena {
         let displayName = localStorage.getItem('display_name');
         if (!displayName) displayName = decodeURI(this.userName);
         return displayName;
+    };
+
+    /**
+     * Renders/updates the display name in the top left corner of a scene.
+     */
+    showEchoDisplayName = () => {
+        const url = new URL(window.location.href);
+        const noname = url.searchParams.get('noname');
+        let echo = document.getElementById('echo-name');
+        echo.textContent = localStorage.getItem('display_name');
+        if (!noname) {
+            echo.style.display = 'block';
+        } else{
+            echo.style.display = 'none';
+        }
     };
 
     /**
@@ -521,9 +541,11 @@ export class Arena {
                 window.setupAV(() => {
                     // initialize Jitsi videoconferencing
                     this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+                    this.showEchoDisplayName();
                 });
             } else {
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+                this.showEchoDisplayName();
             }
 
             // initialize face tracking if not on mobile
