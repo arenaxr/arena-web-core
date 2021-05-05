@@ -125,7 +125,7 @@
   transform: translate(-50%, 0%);*/
     border-radius: 10px;
     font-family: Arial, Helvetica, sans-serif;
-    box-sizing: border-box;    
+    box-sizing: border-box;
 }
 
 
@@ -138,7 +138,7 @@
 	background-color: rgb(255, 255, 255);
 	/* Fallback color */
     background-color: rgba(255, 255, 255, 0);
-    box-sizing: border-box;    
+    box-sizing: border-box;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 12px;
 }
@@ -345,6 +345,10 @@
 	top: 50%;
 	right: 0px;
 	transform: translate(0%, -50%);
+}
+
+.users-list-btn.ko {
+	background: rgba(0, 0, 0, 0.1) url("/icons/images/logout-on.png") 50% 50% no-repeat;
 }
 
 .users-list-btn.fu {

@@ -570,6 +570,11 @@ export class ARENAChat {
                 if (ARENA.Jitsi.hasAudio) {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
+            } else if (msg.text == 'logout') {
+                displayAlert('You have been asked to leave in 5 seconds.', 5000, type = '');
+                setTimeout(() => {
+                    this.window.href = '/users/logout';
+                }, 5000);
             }
             return;
         }
@@ -705,6 +710,19 @@ export class ARENAChat {
                 };
 
                 if (user.scene == _this.settings.scene) {
+                    let kospan = document.createElement('span');
+                    kospan.className = 'users-list-btn ko';
+                    kospan.title = 'Remove User';
+                    uBtnCtnr.appendChild(kospan);
+                    kospan.onclick = function () {
+                        if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+                            _this.displayAlert('Anonymous users may not remove others.', 3000);
+                            return;
+                        }
+                        // message to target user
+                        _this.ctrlMsg(user.uid, 'logout');
+                    };
+
                     let sspan = document.createElement('span');
                     sspan.className = 'users-list-btn s';
                     sspan.title = 'Mute User';
