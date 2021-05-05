@@ -294,7 +294,7 @@
                 "default":true,
                 "title":"Hide when entering AR",
                 "description":"If true, hide the environment when entering AR."
-             }
+             }             
           },
           "required":[
              "active",
@@ -427,36 +427,56 @@
     },
     "type":"object",
     "title":"Scene Config",
-    "allOf":[
-       {
-          "$ref":"./schemas/definitions-arena-object.json#/properties"
+    "properties":{
+       "object_id":{
+            "type":"string",
+            "minLength":3,
+            "description":"A uuid or otherwise unique identifier for this object",
+            "default": "scene-options"
        },
-       {
+       "action":{
+          "type":"string",
+          "description":"One of 3 basic Create/Update/Delete actions",
+          "enum":[
+             "create",
+             "delete",
+             "update"
+          ],
+          "default":"create"
+       },
+       "persist":{
+          "type":"boolean",
+          "description":"Persist this object in the database",
+          "default":"true"
+       },
+       "type":{
+          "type":"string",
+          "enum":[
+             "scene-options"
+          ]
+       },
+       "data":{
+          "title":"Scene Config Data",
           "properties":{
-             "data":{
-                "title":"Scene Config Data",
-                "properties":{
-                   "env-presets":{
-                      "$ref":"#/definitions/environment-presets",
-                      "description":"A-Frame Environment presets"
-                   },
-                   "scene-options":{
-                      "$ref":"#/definitions/scene-options",
-                      "description":"ARENA Scene Options"
-                   },
-                   "renderer-settings":{
-                      "$ref":"#/definitions/renderer-settings",
-                      "description":"These settings are fed into three.js WebGLRenderer properties"
-                   }
-                },
-                "required":[
-                   "env-presets",
-                   "scene-options"
-                ]
+             "env-presets":{
+                "$ref":"#/definitions/environment-presets",
+                "description":"A-Frame Environment presets"
+             },
+             "scene-options":{
+                "$ref":"#/definitions/scene-options",
+                "description":"ARENA Scene Options"
+             },
+             "renderer-settings":{
+                "$ref":"#/definitions/renderer-settings",
+                "description":"These settings are fed into three.js WebGLRenderer properties"
              }
-          }
+          },
+          "required":[
+             "env-presets",
+             "scene-options"
+          ]
        }
-    ],
+    },
     "required":[
        "object_id",
        "action",
