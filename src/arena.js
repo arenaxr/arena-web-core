@@ -22,6 +22,10 @@ import Swal from 'sweetalert2';
  * Arena Object
  */
 export class Arena {
+    /**
+     * Factory for ARENA
+     * @return {Arena}
+     */
     static init() {
         return new Arena();
     }
@@ -70,7 +74,7 @@ export class Arena {
      * Sets this.userName using name given as argument, url parameter value, or default
      * @param {string} name user name to set; will use url parameter value or default is no name is given
      */
-    setUserName = (name = undefined) => {
+    setUserName(name = undefined) {
         // set userName
         if (name === undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
         this.userName = name;
@@ -79,9 +83,9 @@ export class Arena {
     /**
      * Sets this.idTag using name given as argument, url parameter value, or default
      * Important: Also sets amName, faceName, viveLName, viveRName which depend on idTag
-     * @param {string} name user name to set; will use url parameter value or default is no name is given
+     * @param {string} idTag user name to set; will use url parameter value or default is no name is given
      */
-    setIdTag = (idTag = undefined) => {
+    setIdTag(idTag = undefined) {
         if (idTag === undefined) throw 'setIdTag: idTag not defined.'; // idTag must be set
         this.idTag = idTag;
 
@@ -104,7 +108,7 @@ export class Arena {
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
      * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
      */
-    setSceneName = () => {
+    setSceneName() {
         // private function to set scenename, namespacedScene and namespace
         const _setNames = (ns, sn) => {
             this.namespacedScene = `${ns}/${sn}`;
@@ -148,7 +152,7 @@ export class Arena {
     /**
      * Sets this.mqttHost and this.mqttHostURI from url params or defaults
      */
-    setmqttHost = () => {
+    setmqttHost() {
         this.mqttHost = ARENAUtils.getUrlParam('mqttHost', this.defaults.mqttHost);
         this.mqttHostURI = 'wss://' + this.mqttHost + this.defaults.mqttPath[Math.floor(Math.random() * this.defaults.mqttPath.length)];
     }
@@ -157,7 +161,7 @@ export class Arena {
      * Gets display name either from local storage or from userName
      * @return {string} display name
      */
-    getDisplayName = () => {
+    getDisplayName() {
         let displayName = localStorage.getItem('display_name');
         if (!displayName) displayName = decodeURI(this.userName);
         return displayName;
@@ -182,8 +186,6 @@ export class Arena {
      * scene init before starting to receive messages
      */
     initScene = () => {
-        // add our camera to scene
-
         // after scene is completely loaded, add user camera
         this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
             const systems = AFRAME.scenes[0].systems;
@@ -254,7 +256,7 @@ export class Arena {
      * @param {Object} position initial position
      * @param {Object} rotation initial rotation
      */
-    loadScene = (urlToLoad, position, rotation) => {
+    loadScene(urlToLoad, position, rotation) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -352,7 +354,7 @@ export class Arena {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArenaScene = (urlToLoad) => {
+    unloadArenaScene(urlToLoad) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT;
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -390,8 +392,8 @@ export class Arena {
     /**
      * Loads and applies scene-options (if it exists), otherwise set to default environment
      */
-    loadSceneOptions = () => {
-        let sceneOptions;
+    loadSceneOptions() {
+        const sceneOptions = {};
 
         // we add all elements to our scene root
         const sceneRoot = document.getElementById('sceneRoot');
@@ -416,7 +418,7 @@ export class Arena {
                 const payload = xhr.response[xhr.response.length - 1];
                 if (payload) {
                     const options = payload['attributes'];
-                    sceneOptions = options['scene-options'];
+                    Object.assign(sceneOptions, options['scene-options']);
 
                     // deal with scene attribution
                     if (sceneOptions['attribution']) {
@@ -472,7 +474,6 @@ export class Arena {
                     sceneRoot.appendChild(light1);
                 }
             }
-
             this.sceneOptions = sceneOptions;
         };
     };
@@ -480,8 +481,9 @@ export class Arena {
     /**
      * When user auth is done, startup mqtt, runtime, chat and other ui elements;
      * Remaining init will be done once mqtt connection is done
+     * @param {event} e
      */
-    onAuth = async (e) => {
+    async onAuth(e) {
         const args = e.detail;
 
         this.username = args.mqtt_username;
