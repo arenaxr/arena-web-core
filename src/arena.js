@@ -242,6 +242,7 @@ export class Arena {
             if (ARENA.fixedCamera !== '') {
                 camera.setAttribute('arena-camera', 'vioEnabled', true);
             }
+            SideMenu.setupIcons();
         });
 
         // load scene
@@ -561,8 +562,6 @@ export class Arena {
                 const flipped = true;
                 this.FaceTracker.init(displayBbox, flipped);
             }
-
-            SideMenu.setupIcons();
 
             console.info('ARENA Started; ARENA=', ARENA);
         }); // mqtt API (after this.* above, are defined)
