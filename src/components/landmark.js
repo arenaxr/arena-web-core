@@ -11,9 +11,9 @@
 /**
  * Component-System of teleport destination Landmarks
  * @module landmark
- * @property {number} [randomRadiusMin=1] - Min for a random range to teleport to. Max must > 0
- * @property {number} [randomRadiusMax=1] - Max for a random range to teleport to.
- * @property {THREE.Vector3} [offsetPosition={0,0,0}] - vector3 {x,y,z} to use as static teleport offset
+ * @property {number} [randomRadiusMin=0] - Min for a random range to teleport to. Max must > 0
+ * @property {number} [randomRadiusMax=0] - Max for a random range to teleport to.
+ * @property {THREE.Vector3} [offsetPosition={0,1.6,0}] - vector3 {x,y,z} to use as static teleport offset
  * @property {string} [constrainToNavMesh='false'] - Teleports here should snap to navmesh. ['false', 'any', 'coplanar']
  * @property {boolean} [startingPosition=false] - True: use as a random scene load-in position
  * @property {boolean} [lookAtLandmark=true] - True: After teleporting, user should rotate @ landmark
@@ -23,15 +23,15 @@ AFRAME.registerComponent('landmark', {
     schema: {
         randomRadiusMax: {
             type: 'number',
-            default: 1,
+            default: 0,
         }, // range in m
         randomRadiusMin: {
             type: 'number',
-            default: 1,
+            default: 0,
         }, // range in m. Ignored if randomRadiusMax is not set
         offsetPosition: {
             type: 'vec3',
-            default: {x: 0, y: 0, z: 0},
+            default: {x: 0, y: 1.6, z: 0},
         },
         constrainToNavMesh: {
             oneOf: ['false', 'any', 'coplanar'],
@@ -60,7 +60,9 @@ AFRAME.registerComponent('landmark', {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
         const dest = new THREE.Vector3;
-        dest.setFromMatrixPosition(this.el.object3D.matrixWorld).add(this.data.offsetPosition);
+        const thisWorldPos = new THREE.Vector3;
+        thisWorldPos.setFromMatrixPosition(this.el.object3D.matrixWorld);
+        dest.copy(thisWorldPos).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
             const randomNorm = this.data.randomRadiusMin + (Math.random() *
                 (this.data.randomRadiusMax - this.data.randomRadiusMin));
@@ -81,8 +83,8 @@ AFRAME.registerComponent('landmark', {
             moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
             if (this.data.lookAtLandmark) {
                 moveEl.components['look-controls'].yawObject.rotation.y = Math.atan2(
-                    moveEl.object3D.position.x - this.el.object3D.position.x,
-                    moveEl.object3D.position.z - this.el.object3D.position.z,
+                    moveEl.object3D.position.x - thisWorldPos.x,
+                    moveEl.object3D.position.z - thisWorldPos.z,
                 );
             } else {
                 moveEl.components['look-controls'].yawObject.rotation.copy(
