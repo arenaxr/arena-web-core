@@ -43,7 +43,9 @@ export class Arena {
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
-        this.clientCoords = ARENAUtils.getLocation();
+        ARENAUtils.getLocation((coords, err) => {
+            if (!err) ARENA.clientCoords = coords;
+        });
         this.maxAVDist = 20;
 
         // set scene name from url
