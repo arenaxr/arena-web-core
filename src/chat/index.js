@@ -571,7 +571,7 @@ export class ARENAChat {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
-                displayAlert('You have been asked to leave in 5 seconds.', 5000, type = '');
+                this.displayAlert('You have been asked to leave in 5 seconds.', 5000);
                 setTimeout(() => {
                     signOut();
                 }, 5000);
@@ -725,12 +725,13 @@ export class ARENAChat {
                         _this.ctrlMsg(user.uid, 'sound:off');
                     };
 
+                    // TODO: remove user to be rendered for scene editors only
                     let kospan = document.createElement('span');
                     kospan.className = 'users-list-btn ko';
                     kospan.title = 'Remove User';
                     uBtnCtnr.appendChild(kospan);
-                    kospan.onclick = function () {
-                        if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
+                    kospan.onclick = function() {
+                        if (!_this.isUserAuthenticated(_this.settings.cameraid)) { // omit
                             _this.displayAlert('Anonymous users may not remove others.', 3000);
                             return;
                         }
