@@ -129,6 +129,21 @@ AFRAME.registerComponent('press-and-move', {
         };
     })(),
 
+    resetNav: function(checkPolygon = false, clampStep = false) {
+        const nav = this.el.sceneEl.systems.nav;
+        if (nav.navMesh) {
+            this.navStart.copy(this.el.object3D.position).y -= ARENA.defaults.camHeight;
+            this.navEnd.copy(this.navStart);
+            this.navGroup = nav.getGroup(this.navStart, checkPolygon);
+            this.navNode = nav.getNode(this.navStart, this.navGroup, checkPolygon);
+            this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
+            if (clampStep) {
+                this.clampedEnd.y += ARENA.defaults.camHeight;
+                this.el.object3D.position.copy(this.clampedEnd);
+            }
+        }
+    },
+
     tick: function(time, delta) {
         const data = this.data;
         const el = this.el;

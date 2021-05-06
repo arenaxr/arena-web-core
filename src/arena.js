@@ -65,7 +65,7 @@ export class Arena {
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
         this.events.on(ARENAEventEmitter.events.NEW_SETTINGS, (e) => {
             const args = e.detail;
-            if (!args.userName) return // only handle a user name change
+            if (!args.userName) return; // only handle a user name change
             this.showEchoDisplayName();
         });
     }
@@ -173,11 +173,11 @@ export class Arena {
     showEchoDisplayName = () => {
         const url = new URL(window.location.href);
         const noname = url.searchParams.get('noname');
-        let echo = document.getElementById('echo-name');
+        const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!noname) {
             echo.style.display = 'block';
-        } else{
+        } else {
             echo.style.display = 'none';
         }
     };
@@ -213,8 +213,10 @@ export class Arena {
                     camera.object3D.position.y += ARENA.defaults.camHeight;
                     ARENA.startCoords = startPos;
                 }
-            } else if (systems.landmark) { // try to define starting position if the scene has startPosition objects
-                // get startPosition objects
+            }
+            // Fallthrough failure if startLastPos fails
+            if (!ARENA.startCoords && systems.landmark) {
+                // Try to define starting position if the scene has startPosition objects
                 const startPosition = systems.landmark.getRandom(true);
                 if (startPosition) {
                     console.log('Moving camera to start position', startPosition.el.id);
@@ -224,7 +226,7 @@ export class Arena {
                     ARENA.startCoords = startPos;
                 }
             }
-            if (!ARENA.startCoords) { // Also fallthrough for failures
+            if (!ARENA.startCoords) { // Final fallthrough for failures
                 ARENA.startCoords = ARENA.defaults.startCoords; // default position
                 const navSys = systems.nav;
                 startPos.copy(ARENA.startCoords);

@@ -207,6 +207,7 @@ export class SideMenu {
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-on.png\')';
             } else { // toggled off
                 myCam.components['wasd-controls'].resetNav();
+                myCam.components['press-and-move'].resetNav();
                 myCam.object3D.position.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
                 flyingBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/flying-off.png\')';
             }
