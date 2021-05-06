@@ -446,6 +446,10 @@ export class SideMenu {
         saveSettingsBtn.className = 'btn btn-info btn-sm';
         formDiv.appendChild(saveSettingsBtn);
 
+        const iconCredits = document.createElement('p');
+        iconCredits.innerHTML = 'Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a>, <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>';
+        formDiv.appendChild(iconCredits);
+
         closeSettingsBtn.onclick = function() {
             settingsPopup.style.display = 'none'; // close settings panel
             saveSettings();
