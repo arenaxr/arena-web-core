@@ -6,6 +6,25 @@ import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
 
+// fullscreen exit handlers
+if (document.addEventListener) {
+    document.addEventListener('fullscreenchange', fullScreenExitHandler, false);
+    document.addEventListener('mozfullscreenchange', fullScreenExitHandler, false);
+    document.addEventListener('MSFullscreenChange', fullScreenExitHandler, false);
+    document.addEventListener('webkitfullscreenchange', fullScreenExitHandler, false);
+}
+
+/**
+ * Handle exit from full screen scenarios
+ */
+function fullScreenExitHandler() {
+    if (document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement !== null) {
+        // manually disable a-frame stats
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.removeAttribute('stats');
+    }
+}
+
 /**
  * Creates a button that will be displayed as an icon on the left of the screen
  * @param {string} initialImage name of initial image to be displayed
@@ -445,6 +464,10 @@ export class SideMenu {
         saveSettingsBtn.innerHTML = 'Save';
         saveSettingsBtn.className = 'btn btn-info btn-sm';
         formDiv.appendChild(saveSettingsBtn);
+
+        const iconCredits = document.createElement('p');
+        iconCredits.innerHTML = 'Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a>, <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>';
+        formDiv.appendChild(iconCredits);
 
         closeSettingsBtn.onclick = function() {
             settingsPopup.style.display = 'none'; // close settings panel

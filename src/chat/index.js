@@ -16,6 +16,7 @@ import Swal from 'sweetalert2';
 import './style.css';
 import { SideMenu } from '../icons/index.js';
 import he from 'he';
+import MQTTPattern from 'mqtt-pattern';
 
 var mqttc;
 // generate an uuid
@@ -55,6 +56,7 @@ export class ARENAChat {
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false,
+            isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
         };
 
         // users list
@@ -570,6 +572,11 @@ export class ARENAChat {
                 if (ARENA.Jitsi.hasAudio) {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
+            } else if (msg.text == 'logout') {
+                this.displayAlert(`You have been asked to leave in 5 seconds by ${msg.from_un}.`, 5000);
+                setTimeout(() => {
+                    signOut();
+                }, 5000);
             }
             return;
         }
@@ -590,6 +597,35 @@ export class ARENAChat {
         if (this.chatPopup.style.display == 'none') {
             this.chatDot.style.display = 'block';
         }
+    }
+
+    /**
+     * Utility to match JWT MQTT topic within rights.
+     */
+     matchJWT(topic, rights) {
+        const len = rights.length;
+        let valid = false;
+        for (let i = 0; i < len; i++) {
+            if (MQTTPattern.matches(rights[i], topic)) {
+                valid = true;
+                break;
+            }
+        }
+        return valid;
+    };
+
+    /**
+     * Checks loaded MQTT token for full scene object write permissions.
+     */
+    isUserSceneOwner(mqtt_token) {
+        if (mqtt_token) {
+            const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
+            const perms = tokenObj.payloadObj;
+            if (this.matchJWT(ARENA.renderTopic, perms.publ)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     txtAddMsg(msg, status, whoClass) {
@@ -719,6 +755,31 @@ export class ARENAChat {
                         // message to target user
                         _this.ctrlMsg(user.uid, 'sound:off');
                     };
+
+                    // remove user to be rendered for scene editors only
+                    if (_this.settings.isSceneWriter) {
+                        let kospan = document.createElement('span');
+                        kospan.className = 'users-list-btn ko';
+                        kospan.title = 'Remove User';
+                        uBtnCtnr.appendChild(kospan);
+                        kospan.onclick = function() {
+                            Swal.fire({
+                                    title: 'Are you sure?',
+                                    text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Yes',
+                                    reverseButtons: true,
+                                })
+                                .then((result) => {
+                                    if (result.isConfirmed) {
+                                        _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
+                                        _this.ctrlMsg(user.uid, 'logout');
+                                    }
+                                });
+                        };
+                    }
+
                     if (user.type === ARENAChat.userType.EXTERNAL) uli.className = 'external';
                 } else {
                     uli.className = 'oscene';
