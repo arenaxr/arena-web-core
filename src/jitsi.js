@@ -542,11 +542,17 @@ export class ARENAJitsi {
 
         try {
             let vidConstraint = true;
-            if  (perfVideoInput) {
-                vidConstraint = { deviceId: { exact : perfVideoInput}};
-                deviceOpts.cameraDeviceId = perfVideoInput;
+            if (perfVideoInput) {
+                vidConstraint = {deviceId: {exact: perfVideoInput}};
+                try {
+                    await navigator.mediaDevices.getUserMedia({video: vidConstraint});
+                    deviceOpts.cameraDeviceId = perfVideoInput;
+                } catch {
+                    await navigator.mediaDevices.getUserMedia({video: true});
+                }
+            } else {
+                await navigator.mediaDevices.getUserMedia({video: true});
             }
-            await navigator.mediaDevices.getUserMedia({video: vidConstraint});
             devices.push('video');
             this.withVideo = true;
         } catch (e) {
