@@ -602,7 +602,7 @@ export class ARENAChat {
     /**
      * Utility to match JWT MQTT topic within rights.
      */
-     matchJWT = (topic, rights) => {
+     matchJWT(topic, rights) {
         const len = rights.length;
         let valid = false;
         for (let i = 0; i < len; i++) {
@@ -621,7 +621,7 @@ export class ARENAChat {
         if (mqtt_token) {
             const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
             const perms = tokenObj.payloadObj;
-            if (matchJWT(ARENA.renderTopic, perms.publ)) {
+            if (this.matchJWT(ARENA.renderTopic, perms.publ)) {
                 return true;
             }
         }
