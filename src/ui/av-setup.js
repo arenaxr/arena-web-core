@@ -174,7 +174,7 @@ window.setupAV = (callback) => {
             prefAudioInput: localStorage.getItem('prefAudioInput'),
             prefVideoInput: localStorage.getItem('prefVideoInput'),
         };
-        getStream(preferredDevices).then(getDevices).then(gotDevices).catch(handleMediaError);
+        getStream(undefined, preferredDevices).then(getDevices).then(gotDevices).catch(handleMediaError);
     };
 
     /**
