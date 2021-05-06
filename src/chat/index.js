@@ -573,7 +573,7 @@ export class ARENAChat {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
-                this.displayAlert('You have been asked to leave in 5 seconds.', 5000);
+                this.displayAlert(`You have been asked to leave in 5 seconds by ${msg.from_un}.`, 5000);
                 setTimeout(() => {
                     signOut();
                 }, 5000);
@@ -763,7 +763,20 @@ export class ARENAChat {
                         kospan.title = 'Remove User';
                         uBtnCtnr.appendChild(kospan);
                         kospan.onclick = function() {
-                            _this.ctrlMsg(user.uid, 'logout');
+                            Swal.fire({
+                                    title: 'Are you sure?',
+                                    text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonText: 'Yes',
+                                    reverseButtons: true,
+                                })
+                                .then((result) => {
+                                    if (result.isConfirmed) {
+                                        _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
+                                        _this.ctrlMsg(user.uid, 'logout');
+                                    }
+                                });
                         };
                     }
 
