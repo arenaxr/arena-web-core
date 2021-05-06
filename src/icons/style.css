@@ -77,3 +77,18 @@
     font-size: small;
     overflow: auto;
 }
+
+/* Echo the user display name */
+.echo-name {
+    position: absolute;
+    display: none;
+    padding-left: 5px;
+    padding-right: 5px;
+    top: 15px;
+    left: 15px;
+    border-radius: 10px;
+    z-index: 10000; /* layered over video*/
+    font-size: small;
+    background-color: #0008;
+    color: #fff;
+}
