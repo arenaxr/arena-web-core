@@ -24,6 +24,8 @@ AFRAME.registerComponent('video-control', {
         video_path: {type: 'string', default: ''},
         anyone_clicks: {type: 'boolean', default: true},
         video_loop: {type: 'boolean', default: true},
+        autoplay: {type: 'boolean', default: false},
+        volume: {type: 'number', default: 1},
     },
 
     multiple: true,
@@ -34,6 +36,8 @@ AFRAME.registerComponent('video-control', {
         const videoPath = data.video_path;
         const anyoneClicks = data.anyone_clicks;
         const videoLoop = data.video_loop;
+        const autoplay = data.autoplay;
+        const volume = data.volume;
 
         let frameSrc = 'images/conix-face.white.jpg'; // default
         if (data.frame_object) {
@@ -47,7 +51,7 @@ AFRAME.registerComponent('video-control', {
         const videoId = this.videoNum + '_videoId';
         ;
         theAssets.append(
-            `<video id='${videoId}' src='${videoPath}' autoplay loop='${videoLoop}'/>`,
+            `<video id='${videoId}' src='${videoPath}' ${(autoplay) ? 'autoplay':''} loop='${videoLoop}'/>`,
         );
 
         const frameId = this.videoNum + '_frameId';
@@ -63,8 +67,15 @@ AFRAME.registerComponent('video-control', {
         thePlayer.setAttribute('videoId', videoId);
         thePlayer.setAttribute('frameId', frameId);
 
+
+        // start video
         const thevideo = document.getElementById(videoId);
-        thevideo.pause(); // start the video as paused initially or else audio will play when video is not shown!
+        this.video = thevideo;
+        const theVideoId = thePlayer.getAttribute('videoId');
+        thePlayer.setAttribute('material', 'src', `#${theVideoId}`);
+        thePlayer.setAttribute('arenaVideo', videoPath);
+        thevideo.volume = volume;
+        thevideo.play(); // play the html video elem ==> play aframe video elem
 
         this.el.addEventListener('mousedown', function(evt) {
             if (evt.detail.clicker == ARENA.camName ||
@@ -82,7 +93,7 @@ AFRAME.registerComponent('video-control', {
                     // VIDEO
                     thePlayer.setAttribute('material', 'src', `#${theVideoId}`);
                     thePlayer.setAttribute('arenaVideo', videoPath);
-                    thevideo.volume = 1; // default is 1; this just demonstrates how to change
+                    thevideo.volume = volume; // default is 1; this just demonstrates how to change
                     thevideo.play(); // play the html video elem ==> play aframe video elem
                 }
             }
@@ -90,7 +101,8 @@ AFRAME.registerComponent('video-control', {
     },
 
     update: function(oldData) {
-
+        const volume = this.data.volume;
+        this.video.volume = volume; // default is 1; this just demonstrates how to change
     },
 
     pause: function() {
