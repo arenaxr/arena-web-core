@@ -533,7 +533,7 @@
           },                                  
           "volume": {
             "description": "Video sound volume",
-            "type": "boolNumberean",
+            "type": "number",
             "default": 1
           }
         },
