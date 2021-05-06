@@ -29,7 +29,7 @@ export class ARENAJitsi {
 
     constructor(jitsiServer) {
         if (!window.JitsiMeetJS) {
-            console.warn("Jitsi is not found!");
+            console.warn('Jitsi is not found!');
             return;
         }
         this.serverName = jitsiServer;
@@ -39,7 +39,7 @@ export class ARENAJitsi {
 
         this.connectOptions = {
             hosts: {
-                domain: this.serverName.split(':')[0], //remove port, if exists.
+                domain: this.serverName.split(':')[0], // remove port, if exists.
                 muc: 'conference.' + this.serverName.split(':')[0], // remove port, if exists. FIXME: use XEP-0030
             },
             bosh: '//' + this.serverName + '/http-bind', // FIXME: use xep-0156 for that
@@ -98,12 +98,12 @@ export class ARENAJitsi {
 
         // Firefox does not allow audio output device change
         try {
-            const prefAudioOutput = localStorage.getItem('prefAudioOutput') ;
+            const prefAudioOutput = localStorage.getItem('prefAudioOutput');
             JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
         } catch {}
 
         JitsiMeetJS.init(this.initOptions);
-        console.info("Jitsi, connecting:", this.connectOptions);
+        console.info('Jitsi, connecting:', this.connectOptions);
         this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
         this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
             // console.log(`(connection) Dominant Speaker ID: ${id}`),
@@ -359,13 +359,13 @@ export class ARENAJitsi {
             let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
             // user join event args, to be emited below
-            let userJoinedArgs = {
+            const userJoinedArgs = {
                 id: id,
                 dn: dn,
                 cn: undefined,
                 scene: ARENA.namespacedScene,
                 src: ARENAEventEmitter.sources.JITSI,
-            }
+            };
             // this might be a jitsi-only user; emit event if name does not have the arena tag
             if (!dn.includes(ARENAJitsi.ARENA_USER)) {
                 if (!dn.includes(ARENAJitsi.SCREENSHARE_PREFIX)) {
@@ -563,7 +563,7 @@ export class ARENAJitsi {
                     showConfirmButton: true,
                     confirmButtonText: 'Ok',
                     input: 'checkbox',
-                    inputPlaceholder: "Don't remind me again on this device.",
+                    inputPlaceholder: 'Don\'t remind me again on this device.',
                 }).then((result) => {
                     if (result.value) {
                         localStorage.setItem('hideNoAV', 'true');
@@ -594,7 +594,7 @@ export class ARENAJitsi {
             this.jitsiVideoElem.style.display = 'none';
             this.jitsiVideoElem.style.width = ARENA.localVideoWidth + 'px';
 
-            let _this = this;
+            const _this = this;
             /**
              * set video element size
              */
@@ -702,17 +702,19 @@ export class ARENAJitsi {
     }
 
     getAudioTrack(jitsiId) {
-        if (this.remoteTracks[jitsiId])
+        if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][0];
-        else
+        } else {
             return null;
+        }
     }
 
     getVideoTrack(jitsiId) {
-        if (this.remoteTracks[jitsiId])
+        if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][1];
-        else
+        } else {
             return null;
+        }
     }
 
     leave() {
