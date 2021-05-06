@@ -515,6 +515,26 @@
             "description": "URL of the video file, e.g. 'store/users/wiselab/videos/kungfu.mp4'",
             "format": "uri",
             "type": "string"
+          },
+          "anyone_clicks": {
+            "description": "Responds to clicks from any user",
+            "type": "boolean",
+            "default": true
+          },
+          "video_loop": {
+            "description": "Video automatically loops",
+            "type": "boolean",
+            "default": true
+          },       
+          "autoplay": {
+            "description": "Video starts playing automatically",
+            "type": "boolean",
+            "default": false
+          },                                  
+          "volume": {
+            "description": "Video sound volume",
+            "type": "boolNumberean",
+            "default": 1
           }
         },
         "required": [
