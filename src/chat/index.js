@@ -16,6 +16,7 @@ import Swal from 'sweetalert2';
 import './style.css';
 import { SideMenu } from '../icons/index.js';
 import he from 'he';
+import MQTTPattern from 'mqtt-pattern';
 
 var mqttc;
 // generate an uuid
@@ -55,6 +56,7 @@ export class ARENAChat {
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false,
+            isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
         };
 
         // users list
@@ -597,6 +599,35 @@ export class ARENAChat {
         }
     }
 
+    /**
+     * Utility to match JWT MQTT topic within rights.
+     */
+     matchJWT = (topic, rights) => {
+        const len = rights.length;
+        let valid = false;
+        for (let i = 0; i < len; i++) {
+            if (MQTTPattern.matches(rights[i], topic)) {
+                valid = true;
+                break;
+            }
+        }
+        return valid;
+    };
+
+    /**
+     * Checks loaded MQTT token for full scene object write permissions.
+     */
+    isUserSceneOwner(mqtt_token) {
+        if (mqtt_token) {
+            const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
+            const perms = tokenObj.payloadObj;
+            if (matchJWT(ARENA.renderTopic, perms.publ)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     txtAddMsg(msg, status, whoClass) {
         if (whoClass !== 'self' && whoClass !== 'other') whoClass='other';
         let statusSpan = document.createElement('span');
@@ -725,19 +756,16 @@ export class ARENAChat {
                         _this.ctrlMsg(user.uid, 'sound:off');
                     };
 
-                    // TODO: remove user to be rendered for scene editors only
-                    let kospan = document.createElement('span');
-                    kospan.className = 'users-list-btn ko';
-                    kospan.title = 'Remove User';
-                    uBtnCtnr.appendChild(kospan);
-                    kospan.onclick = function() {
-                        if (!_this.isUserAuthenticated(_this.settings.cameraid)) { // omit
-                            _this.displayAlert('Anonymous users may not remove others.', 3000);
-                            return;
-                        }
-                        // message to target user
-                        _this.ctrlMsg(user.uid, 'logout');
-                    };
+                    // remove user to be rendered for scene editors only
+                    if (_this.settings.isSceneWriter) {
+                        let kospan = document.createElement('span');
+                        kospan.className = 'users-list-btn ko';
+                        kospan.title = 'Remove User';
+                        uBtnCtnr.appendChild(kospan);
+                        kospan.onclick = function() {
+                            _this.ctrlMsg(user.uid, 'logout');
+                        };
+                    }
 
                     if (user.type === ARENAChat.userType.EXTERNAL) uli.className = 'external';
                 } else {
