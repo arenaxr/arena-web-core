@@ -70,11 +70,11 @@ AFRAME.registerComponent('landmark', {
             dest.x += Math.cos(randomAngle) * randomNorm;
             dest.z += Math.sin(randomAngle) * randomNorm;
         }
-        const navSys = this.el.sceneEl.systems.nav;
+        const navSys = this.el.sceneEl.systems.nav; let closestNode;
         if (this.data.constrainToNavMesh !== 'false' && navSys.navMesh) {
             const checkPolygon = this.data.constrainToNavMesh === 'coplanar';
             const closestGroup = navSys.getGroup(dest, checkPolygon);
-            const closestNode = navSys.getNode(dest, closestGroup, checkPolygon);
+            closestNode = navSys.getNode(dest, closestGroup, checkPolygon);
             if (closestNode) {
                 navSys.clampStep(dest, dest, closestGroup, closestNode, dest);
             }
@@ -89,6 +89,10 @@ AFRAME.registerComponent('landmark', {
             } else {
                 moveEl.components['look-controls'].yawObject.rotation.copy(
                     this.el.object3D.rotation);
+            }
+            if (closestNode) {
+                moveEl.components['wasd-controls'].resetNav();
+                moveEl.components['press-and-move'].resetNav();
             }
         }
     },

@@ -936,6 +936,7 @@ export class ARENAChat {
         myCamera.object3D.position.y = toCam.object3D.position.y;
         // Reset navMesh data
         myCamera.components['wasd-controls'].resetNav();
+        myCamera.components['press-and-move'].resetNav();
         // rotate our camera to face the other user
         myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
             myCamera.object3D.position.x - toCam.object3D.position.x,
