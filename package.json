@@ -27,6 +27,7 @@
     "paho-mqtt": "^1.1.0",
     "sweetalert2": "^10.16.6",
     "three-pathfinding": "^0.14.1",
+    "three": "^0.128.0",
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
