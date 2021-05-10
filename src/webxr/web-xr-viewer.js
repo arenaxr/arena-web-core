@@ -4,6 +4,7 @@
  */
 
 window.addEventListener('enter-vr', async function(e) {
+    const urlParams = new URLSearchParams(window.location.search);
     const sceneEl = document.querySelector('a-scene');
     if (sceneEl.is('ar-mode')) {
         window.lastMouseTarget = undefined;
@@ -22,6 +23,9 @@ window.addEventListener('enter-vr', async function(e) {
             cursor.setAttribute('position', '0 0 -0.1');
             cursor.setAttribute('color', '#555');
             cursor.setAttribute('max-distance', '10000');
+            if (urlParams.get('noreticle')) {
+                cursor.setAttribute('material', 'transparent: true; opacity: 0');
+            }
             cursorParent.appendChild(cursor);
 
             // handle tap events
