@@ -23,9 +23,9 @@ window.addEventListener('enter-vr', async function(e) {
             cursor.setAttribute('position', '0 0 -0.1');
             cursor.setAttribute('max-distance', '10000');
             if (urlParams.get('noreticle')) {
-                cursor.setAttribute('material', 'transparent: true; opacity: 0');
+                cursor.setAttribute('material', 'transparent: "true"; opacity: 0');
             } else {
-                cursor.setAttribute('color', '#555');
+                cursor.setAttribute('color', '#f00');
             }
             cursorParent.appendChild(cursor);
 
