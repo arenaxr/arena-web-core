@@ -15,7 +15,6 @@ import linkifyStr from 'linkifyjs/string';
 import Swal from 'sweetalert2';
 import './style.css';
 import {SideMenu} from '../icons/index.js';
-import he from 'he';
 import MQTTPattern from 'mqtt-pattern';
 
 let mqttc;
@@ -642,18 +641,17 @@ export class ARENAChat {
         const pattern = `${host}\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*(.*)*`; // permissive regex for a scene
         const regex = new RegExp(pattern);
 
-        let emsg = he.encode(msg);
-        if (emsg.match(regex) != null) {
+        if (msg.match(regex) != null) {
             // no new tab if we have a link to an arena scene
-            emsg = emsg.linkify({
+            msg = msg.linkify({
                 target: '_parent',
             });
         } else {
-            emsg = emsg.linkify({
+            msg = msg.linkify({
                 target: '_blank',
             });
         }
-        msgSpan.innerHTML = emsg;
+        msgSpan.innerHTML = msg;
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
