@@ -25,7 +25,7 @@ window.addEventListener('enter-vr', async function(e) {
             if (urlParams.get('noreticle')) {
                 cursor.setAttribute('material', 'transparent: "true"; opacity: 0');
             } else {
-                cursor.setAttribute('color', '#f00');
+                cursor.setAttribute('color', '#555');
             }
             cursorParent.appendChild(cursor);
 
