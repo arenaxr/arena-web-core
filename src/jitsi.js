@@ -105,21 +105,6 @@ export class ARENAJitsi {
         JitsiMeetJS.init(this.initOptions);
         console.info('Jitsi, connecting:', this.connectOptions);
         this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
-        this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
-            console.log(`(connection) Dominant Speaker ID: ${id}`),
-            this.prevActiveSpeaker = this.activeSpeaker;
-            this.activeSpeaker = id;
-            let actArenaId = this.connection.getParticipantById(this.activeSpeaker);
-            if (actArenaId) actArenaId = actArenaId.getProperty('arenaId');
-            let prevArenaId = this.connection.getParticipantById(this.prevActiveSpeaker);
-            if (prevArenaId) prevArenaId = prevArenaId.getProperty('arenaId');
-            ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
-                id: actArenaId,
-                pid: prevArenaId,
-                scene: this.arenaConferenceName,
-                src: ARENAEventEmitter.sources.JITSI,
-            });
-        });
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect.bind(this));
@@ -443,6 +428,12 @@ export class ARENAJitsi {
                 pid: prevArenaId,
                 scene: this.arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI,
+            });
+        });
+        this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
+            Swal.fire({
+                title: 'TALK_WHILE_MUTED',
+                icon: 'warning',
             });
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
