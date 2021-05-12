@@ -431,9 +431,19 @@ export class ARENAJitsi {
             });
         });
         this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
+            console.log(`(conference) Speaking while muted.`);
             Swal.fire({
-                title: 'TALK_WHILE_MUTED',
+                title: 'Speaking while muted',
                 icon: 'warning',
+                timer: 2000,
+            });
+        });
+        this.conference.on(JitsiMeetJS.events.conference.NOISY_MIC, () => {
+            console.log(`(conference) Noisy mic (speaking).`);
+            Swal.fire({
+                title: 'Noisy mic (speaking).',
+                icon: 'warning',
+                timer: 2000,
             });
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
