@@ -684,6 +684,7 @@ export class ARENAChat {
     }
 
     populateUserList(newUser = undefined) {
+        console.log(`(chat) Updating list: ${newUser}`);
         this.usersList.textContent = '';
         const selVal = this.toSel.value;
         this.toSel.textContent = '';
