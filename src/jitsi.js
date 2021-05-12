@@ -106,7 +106,7 @@ export class ARENAJitsi {
         console.info('Jitsi, connecting:', this.connectOptions);
         this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
         this.connection.addEventListener(JitsiMeetJS.events.connection.DOMINANT_SPEAKER_CHANGED, (id) => {
-            // console.log(`(connection) Dominant Speaker ID: ${id}`),
+            console.log(`(connection) Dominant Speaker ID: ${id}`),
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
@@ -427,7 +427,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, (id) => {
-            // console.log(`(conference) Dominant Speaker ID: ${id}`);
+            console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
