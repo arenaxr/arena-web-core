@@ -425,15 +425,18 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
      dominantSpeakerCallback = (e) => {
+        console.log(`(chat) Dominant Speaker event received: ${e}`);
         const user = e.detail;
         // if speaker exists, show speaking graph in user list
         if (this.liveUsers[user.id]) {
+            console.log(`(chat) Active speaker: ${user.id}`);
             const _this = this;
             this.liveUsers[user.id].speaking = true;
             if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
         }
         // if previous speaker exists, show speaking graph in user list
         if (this.liveUsers[user.pid]) {
+            console.log(`(chat) Previous speaker: ${user.id}`);
             const _this = this;
             this.liveUsers[user.pid].speaking = false;
             if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.pid]);
