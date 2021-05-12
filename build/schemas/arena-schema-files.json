@@ -1,9 +1,4 @@
 {
-    "armarker":{
-       "description":"A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes in the real world.",
-       "file":"schemas/armarker.json",
-       "title":"ARMarker"
-    },
     "box":{
        "description":"Box Geometry",
        "file":"schemas/box.json",
