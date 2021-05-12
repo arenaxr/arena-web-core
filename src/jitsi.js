@@ -109,8 +109,10 @@ export class ARENAJitsi {
             console.log(`(connection) Dominant Speaker ID: ${id}`),
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
-            const actArenaId = this.connection && this.activeSpeaker ? this.connection.getParticipantById(this.activeSpeaker).getProperty('arenaId') : null;
-            const prevArenaId = this.connection && this.prevActiveSpeaker ? this.connection.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId') : null;
+            const actArenaId = this.connection.getParticipantById(this.activeSpeaker);
+            if (actArenaId) actArenaId = actArenaId.getProperty('arenaId');
+            const prevArenaId = this.connection.getParticipantById(this.prevActiveSpeaker);
+            if (prevArenaId) prevArenaId = prevArenaId.getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
                 id: actArenaId,
                 pid: prevArenaId,
@@ -432,8 +434,10 @@ export class ARENAJitsi {
             console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
-            const actArenaId = this.conference && this.activeSpeaker ? this.conference.getParticipantById(this.activeSpeaker).getProperty('arenaId') : null;
-            const prevArenaId = this.conference && this.prevActiveSpeaker ? this.conference.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId') : null;
+            const actArenaId = this.conference.getParticipantById(this.activeSpeaker);
+            if (actArenaId) actArenaId = actArenaId.getProperty('arenaId');
+            const prevArenaId = this.conference.getParticipantById(this.prevActiveSpeaker);
+            if (prevArenaId) prevArenaId = prevArenaId.getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
                 id: actArenaId,
                 pid: prevArenaId,
