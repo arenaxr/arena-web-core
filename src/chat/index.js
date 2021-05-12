@@ -426,21 +426,23 @@ export class ARENAChat {
      */
      dominantSpeakerCallback = (e) => {
         console.log(`(chat) Dominant Speaker event received: ${e}`);
+        let updateList = false;
         const user = e.detail;
         // if speaker exists, show speaking graph in user list
         if (this.liveUsers[user.id]) {
             console.log(`(chat) Active speaker: ${user.id}`);
             const _this = this;
             this.liveUsers[user.id].speaking = true;
-            if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
+            if (user.scene === this.settings.scene) updateList = true;
         }
         // if previous speaker exists, show speaking graph in user list
         if (this.liveUsers[user.pid]) {
             console.log(`(chat) Previous speaker: ${user.pid}`);
             const _this = this;
             this.liveUsers[user.pid].speaking = false;
-            if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.pid]);
+            if (user.scene === this.settings.scene) updateList = true;
         }
+        if (updateList) this.populateUserList();
     };
 
     // perform some async startup tasks
@@ -684,7 +686,6 @@ export class ARENAChat {
     }
 
     populateUserList(newUser = undefined) {
-        console.log(`(chat) Updating list: ${newUser}`);
         this.usersList.textContent = '';
         const selVal = this.toSel.value;
         this.toSel.textContent = '';
@@ -748,7 +749,10 @@ export class ARENAChat {
         userList.forEach((user) => {
             const uli = document.createElement('li');
             const name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : `${user.un}\'s Screen Share`;
-            if (user.speaking) uli.style.color = 'green';
+            if (user.speaking) {
+                console.log(`(chat) Updating green: ${user.cid}`);
+                uli.style.color = 'green';
+            }
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 const uBtnCtnr = document.createElement('div');
