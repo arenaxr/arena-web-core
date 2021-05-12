@@ -112,7 +112,6 @@ export class ARENAJitsi {
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
                 id: this.activeSpeaker,
                 pid: this.prevActiveSpeaker,
-                cn: user.getProperty('arenaCameraName'),
                 scene: this.arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI,
             });
@@ -434,7 +433,6 @@ export class ARENAJitsi {
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
                 id: this.activeSpeaker,
                 pid: this.prevActiveSpeaker,
-                cn: this.conference.getParticipantById(id).getProperty('arenaCameraName'),
                 scene: this.arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI,
             });
