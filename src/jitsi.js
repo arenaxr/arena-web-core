@@ -109,8 +109,8 @@ export class ARENAJitsi {
             console.log(`(connection) Dominant Speaker ID: ${id}`),
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
-            const actArenaId = this.activeSpeaker ? this.connection.getParticipantById(this.activeSpeaker).getProperty('arenaId') : null;
-            const prevArenaId = this.prevActiveSpeaker ? this.connection.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId') : null;
+            const actArenaId = this.connection ? this.connection.getParticipantById(this.activeSpeaker).getProperty('arenaId') : null;
+            const prevArenaId = this.connection ? this.connection.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId') : null;
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
                 id: actArenaId,
                 pid: prevArenaId,
@@ -432,8 +432,8 @@ export class ARENAJitsi {
             console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
-            const actArenaId = this.activeSpeaker ? this.conference.getParticipantById(this.activeSpeaker).getProperty('arenaId') : null;
-            const prevArenaId = this.prevActiveSpeaker ? this.conference.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId') : null;
+            const actArenaId = this.conference ? this.conference.getParticipantById(this.activeSpeaker).getProperty('arenaId') : null;
+            const prevArenaId = this.conference ? this.conference.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId') : null;
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
                 id: actArenaId,
                 pid: prevArenaId,

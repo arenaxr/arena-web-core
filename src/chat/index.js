@@ -436,7 +436,7 @@ export class ARENAChat {
         }
         // if previous speaker exists, show speaking graph in user list
         if (this.liveUsers[user.pid]) {
-            console.log(`(chat) Previous speaker: ${user.id}`);
+            console.log(`(chat) Previous speaker: ${user.pid}`);
             const _this = this;
             this.liveUsers[user.pid].speaking = false;
             if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.pid]);
