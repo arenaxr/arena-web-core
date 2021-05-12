@@ -109,9 +109,11 @@ export class ARENAJitsi {
             console.log(`(connection) Dominant Speaker ID: ${id}`),
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
+            const actArenaId = this.connection.getParticipantById(this.activeSpeaker).getProperty('arenaId');
+            const prevArenaId = this.connection.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
-                id: this.activeSpeaker,
-                pid: this.prevActiveSpeaker,
+                id: actArenaId,
+                pid: prevArenaId,
                 scene: this.arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI,
             });
@@ -430,9 +432,11 @@ export class ARENAJitsi {
             console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
+            const actArenaId = this.conference.getParticipantById(this.activeSpeaker).getProperty('arenaId');
+            const prevArenaId = this.conference.getParticipantById(this.prevActiveSpeaker).getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
-                id: this.activeSpeaker,
-                pid: this.prevActiveSpeaker,
+                id: actArenaId,
+                pid: prevArenaId,
                 scene: this.arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI,
             });
