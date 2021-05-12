@@ -109,6 +109,13 @@ export class ARENAJitsi {
             // console.log(`(connection) Dominant Speaker ID: ${id}`),
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
+            ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
+                id: this.activeSpeaker,
+                pid: this.prevActiveSpeaker,
+                cn: user.getProperty('arenaCameraName'),
+                scene: this.arenaConferenceName,
+                src: ARENAEventEmitter.sources.JITSI,
+            });
         });
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed.bind(this));
@@ -424,6 +431,13 @@ export class ARENAJitsi {
             // console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
+            ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
+                id: this.activeSpeaker,
+                pid: this.prevActiveSpeaker,
+                cn: this.conference.getParticipantById(id).getProperty('arenaCameraName'),
+                scene: this.arenaConferenceName,
+                src: ARENAEventEmitter.sources.JITSI,
+            });
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
             console.log(`${userID} - ${displayName}`),

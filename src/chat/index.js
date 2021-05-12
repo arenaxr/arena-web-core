@@ -332,6 +332,7 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, this.userJoinCallback);
         ARENA.events.on(ARENAEventEmitter.events.SCREENSHARE, this.screenshareCallback);
         ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, this.userLeftCallback);
+        ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, this.dominantSpeakerCallback);
     }
 
     /**
@@ -416,6 +417,27 @@ export class ARENAChat {
         if (this.liveUsers[user.id].type === ARENAChat.userType.ARENA) return; // will be handled through mqtt messaging
         delete this.liveUsers[user.id];
         this.populateUserList();
+    };
+
+    /**
+     * Called dominant speaker changes
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+     dominantSpeakerCallback = (e) => {
+        const user = e.detail;
+        // if speaker exists, show speaking graph in user list
+        if (this.liveUsers[user.id]) {
+            const _this = this;
+            this.liveUsers[user.id].speaking = true;
+            if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.id]);
+        }
+        // if previous speaker exists, show speaking graph in user list
+        if (this.liveUsers[user.pid]) {
+            const _this = this;
+            this.liveUsers[user.pid].speaking = false;
+            if (user.scene === this.settings.scene) this.populateUserList(this.liveUsers[user.pid]);
+        }
     };
 
     // perform some async startup tasks
@@ -678,6 +700,7 @@ export class ARENAChat {
                 un: _this.liveUsers[key].un,
                 cid: _this.liveUsers[key].cid,
                 type: _this.liveUsers[key].type,
+                speaking: _this.liveUsers[key].speaking,
             });
         });
 
@@ -721,6 +744,7 @@ export class ARENAChat {
         userList.forEach((user) => {
             const uli = document.createElement('li');
             const name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : `${user.un}\'s Screen Share`;
+            if (user.speaking) uli.style.color = 'green';
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 const uBtnCtnr = document.createElement('div');
