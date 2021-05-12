@@ -108,7 +108,7 @@ export class ARENAEventEmitter {
 
     /**
     * Modules that are possible event sources
-    * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|...}
+    * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback|...}
     *
     */
     static sources = {
@@ -141,7 +141,7 @@ export class ARENAEventEmitter {
      *    }
      *
      * @param {string} eventName name of the event
-     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback (see callback definitions)
+     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback} listener callback (see callback definitions)
      * @return {undefined}
      */
     on(eventName, listener) {
@@ -152,7 +152,7 @@ export class ARENAEventEmitter {
      * Event listener that is removed after being called once
      *
      * @param {string} eventName name of the event
-     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback
+     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback} listener callback
      * @return {undefined}
      */
     once(eventName, listener) {
@@ -163,7 +163,7 @@ export class ARENAEventEmitter {
      * Remove listener
      *
      * @param {string} eventName name of the event
-     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback
+     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback} listener callback
      * @return {undefined}
      */
     off(eventName, listener) {
