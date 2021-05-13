@@ -427,8 +427,9 @@ export class ARENAChat {
      */
     dominantSpeakerCallback = (e) => {
         const user = e.detail;
-        console.log(`(chat) Dominant Speaker event received: ${user.scene} ${this.settings.scene}`);
-        if (user.scene === this.settings.scene) {
+        const roomName = this.settings.scene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        console.log(`(chat) Dominant Speaker event received: ${user.scene} ${roomName}`);
+        if (user.scene === roomName) {
             // if speaker exists, show speaking graph in user list
             const speaking_id = user.id ? user.id : this.settings.userid; // or self is speaking
             if (this.liveUsers[speaking_id]) {
