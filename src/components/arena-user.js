@@ -86,8 +86,8 @@ async function enableChromeAEC(gainNode) {
  * @property {string} [headModelPath=/store/models/robobit.glb] - Path to user head model
  * @property {string} [jitsiId] - User jitsi id.
  * @property {string} [displayName] - User display name.
- * @property {boolean} [hasAudio=false] - Weather the user has audio on.
- * @property {boolean} [hasVideo=false] - Weather the user has video on.
+ * @property {boolean} [hasAudio=false] - Whether the user has audio on.
+ * @property {boolean} [hasVideo=false] - Whether the user has video on.
  *
  */
 AFRAME.registerComponent('arena-user', {
