@@ -426,8 +426,8 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     dominantSpeakerCallback = (e) => {
-        console.log(`(chat) Dominant Speaker event received: ${e}`);
         const user = e.detail;
+        console.log(`(chat) Dominant Speaker event received: ${user.scene} ${this.settings.scene}`);
         if (user.scene === this.settings.scene) {
             // if speaker exists, show speaking graph in user list
             const speaking_id = user.id ? user.id : this.settings.userid; // or self is speaking
