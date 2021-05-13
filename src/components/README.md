@@ -117,8 +117,8 @@ Another user's camera in the ARENA. Handles Jitsi and display name updates.
 | [headModelPath] | <code>string</code> | <code>&quot;/store/models/robobit.glb&quot;</code> | Path to user head model |
 | [jitsiId] | <code>string</code> |  | User jitsi id. |
 | [displayName] | <code>string</code> |  | User display name. |
-| [hasAudio] | <code>boolean</code> | <code>false</code> | Weather the user has audio on. |
-| [hasVideo] | <code>boolean</code> | <code>false</code> | Weather the user has video on. |
+| [hasAudio] | <code>boolean</code> | <code>false</code> | Whether the user has audio on. |
+| [hasVideo] | <code>boolean</code> | <code>false</code> | Whether the user has video on. |
 
 <a name="module_arena-vive"></a>
 
@@ -151,7 +151,7 @@ ARMarker System. Supports ARMarkers in a scene.
 ### registerComponent(marker) ⏏
 Register an ARMarker component with the system
 
-**Kind**: Exported function  
+**Kind**: Exported function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -162,7 +162,7 @@ Register an ARMarker component with the system
 ### unregisterComponent(marker) ⏏
 Unregister an ARMarker component
 
-**Kind**: Exported function  
+**Kind**: Exported function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -173,21 +173,21 @@ Unregister an ARMarker component
 ### getAll(mtype) ⇒ <code>object</code> ⏏
 Get all markers registered with the system
 
-**Kind**: Exported function  
-**Returns**: <code>object</code> - - a dictionary of markers  
+**Kind**: Exported function
+**Returns**: <code>object</code> - - a dictionary of markers
 
 | Param | Type | Description |
 | --- | --- | --- |
 | mtype | <code>object</code> | The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for; No argument or undefined will return all |
 
-**Example** *(Query the system a list of all markers in a scene)*  
+**Example** *(Query the system a list of all markers in a scene)*
 ```js
     let markers = document.querySelector("a-scene").systems["armarker"].getAll();
     Object.keys(markers).forEach(function(key) {
       console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
     });
 ```
-**Example** *(getAll() also accepts a marker type argument to filter by a given type)*  
+**Example** *(getAll() also accepts a marker type argument to filter by a given type)*
 ```js
     let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
 ```
@@ -196,8 +196,8 @@ Get all markers registered with the system
 ### get(markerid) ⇒ <code>object</code> ⏏
 Get a marker given is markerid
 
-**Kind**: Exported function  
-**Returns**: <code>object</code> - - the marker with the markerid given  
+**Kind**: Exported function
+**Returns**: <code>object</code> - - the marker with the markerid given
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -229,7 +229,7 @@ Tries to extract author, license, source and title (assuming format used in sket
 Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
 If both asset.extras and scene.extra exist, gives preference to asset.extras.
 
-**Example** *(Sketchfab downloaded model attributes - asset.extra)*  
+**Example** *(Sketchfab downloaded model attributes - asset.extra)*
 ```js
    author: "AuthorName (url-link-to-author)"
    license: "CC-BY-4.0 (url-link-to-license)"
@@ -250,7 +250,7 @@ If both asset.extras and scene.extra exist, gives preference to asset.extras.
 ### registerComponent(el) ⏏
 Register an attribution component with the system
 
-**Kind**: Exported function  
+**Kind**: Exported function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -261,7 +261,7 @@ Register an attribution component with the system
 ### unregisterComponent(el) ⏏
 Unregister an attribution component
 
-**Kind**: Exported function  
+**Kind**: Exported function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -272,9 +272,9 @@ Unregister an attribution component
 ### getAttributionTable() ⇒ <code>string</code> ⏏
 Collect all attribution components and return an HTML table with credits
 
-**Kind**: Exported function  
-**Returns**: <code>string</code> - - an HTML table with the scene credits  
-**Example** *(Query the system for an HTML table of credits:)*  
+**Kind**: Exported function
+**Returns**: <code>string</code> - - an HTML table with the scene credits
+**Example** *(Query the system for an HTML table of credits:)*
 ```js
    document.querySelector("a-scene").systems["attribution"].getAttributionTable();
 ```
@@ -290,7 +290,7 @@ Extract author, license, source and title assuming sketchfab format:
 It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
 If both are found, data will be merged with preference to properties in asset.extras
 
-**Kind**: Exported function  
+**Kind**: Exported function
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -302,8 +302,8 @@ If both are found, data will be merged with preference to properties in asset.ex
 ### parseExtrasAttributes(extras) ⇒ <code>object</code> ⏏
 Parse author, license, source and title attributes.
 
-**Kind**: Exported function  
-**Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed  
+**Kind**: Exported function
+**Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -314,8 +314,8 @@ Parse author, license, source and title attributes.
 ### parseAttribute(extras, attribution, attribute) ⇒ <code>boolean</code> ⏏
 Parse attribute given as parameter. Tries to find the attribute and add it to 'attribution' dictionary
 
-**Kind**: Exported function  
-**Returns**: <code>boolean</code> - - true/false if it could find the attribute  
+**Kind**: Exported function
+**Returns**: <code>boolean</code> - - true/false if it could find the attribute
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -353,7 +353,7 @@ Keep track of mouse events and publish corresponding events
 ### init() ⏏
 Setup event listeners for mouse events; listeners publish events to MQTT
 
-**Kind**: Exported function  
+**Kind**: Exported function
 **Todo**
 
 - [ ] Consolidate event listeners (they are very similar)
@@ -364,7 +364,7 @@ Setup event listeners for mouse events; listeners publish events to MQTT
 Listen for collisions, callback on event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>  
+**Requires**: <code>module:aframe-physics-system</code>
 <a name="module_gesture-detector"></a>
 
 ## gesture-detector
@@ -397,7 +397,7 @@ One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>  
+**Requires**: <code>module:aframe-physics-system</code>
 <a name="module_landmark"></a>
 
 ## landmark
