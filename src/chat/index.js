@@ -55,6 +55,7 @@ export class ARENAChat {
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false,
             isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
+            isSpeaking: false,
         };
 
         // users list
@@ -442,7 +443,10 @@ export class ARENAChat {
             this.liveUsers[user.pid].speaking = false;
             if (user.scene === this.settings.scene) updateList = true;
         }
-        if (updateList) this.populateUserList();
+        if (updateList) {
+            this.settings.isSpeaking = (speaking_id === this.settings.userid);
+            this.populateUserList();
+        }
     };
 
     // perform some async startup tasks
@@ -729,6 +733,10 @@ export class ARENAChat {
 
         const uli = document.createElement('li');
         uli.textContent = `${this.settings.username} (Me)`;
+        if (this.settings.isSpeaking) {
+            console.log(`(chat) Updating green: ${this.settings.userid}`);
+            uli.style.color = 'green';
+        }
         _this.usersList.appendChild(uli);
         const uBtnCtnr = document.createElement('div');
         uBtnCtnr.className = 'users-list-btn-ctnr';
