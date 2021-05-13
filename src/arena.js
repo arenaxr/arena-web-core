@@ -187,9 +187,9 @@ export class Arena {
             echo.style.display = 'none';
         }
         if (speaking) {
-            echo.style.color = 'green';
+            echo.style.backgroundColor = '#0F08'; // green alpha
         } else {
-            echo.style.color = 'white';
+            echo.style.backgroundColor = '#0008'; // black alpha
         }
     };
 
