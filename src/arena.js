@@ -68,6 +68,10 @@ export class Arena {
             if (!args.userName) return; // only handle a user name change
             this.showEchoDisplayName();
         });
+        this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, (e) => {
+            const speaking = (e.detail.id === this.idTag); // self is speaking
+            this.showEchoDisplayName(speaking);
+        });
     }
 
     /**
@@ -169,8 +173,9 @@ export class Arena {
 
     /**
      * Renders/updates the display name in the top left corner of a scene.
+     * @param {boolean} speaking If the user is the dominant speaker
      */
-    showEchoDisplayName = () => {
+    showEchoDisplayName = (speaking = false) => {
         const url = new URL(window.location.href);
         const noname = url.searchParams.get('noname');
         const echo = document.getElementById('echo-name');
@@ -179,6 +184,11 @@ export class Arena {
             echo.style.display = 'block';
         } else {
             echo.style.display = 'none';
+        }
+        if (speaking) {
+            echo.style.color = 'green';
+        } else {
+            echo.style.color = 'white';
         }
     };
 
