@@ -182,14 +182,14 @@ export class Arena {
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!noname) {
+            if (speaking) {
+                echo.style.backgroundColor = '#0F08'; // green alpha
+            } else {
+                echo.style.backgroundColor = '#0008'; // black alpha
+            }
             echo.style.display = 'block';
         } else {
             echo.style.display = 'none';
-        }
-        if (speaking) {
-            echo.style.backgroundColor = '#0F08'; // green alpha
-        } else {
-            echo.style.backgroundColor = '#0008'; // black alpha
         }
     };
 

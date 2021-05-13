@@ -418,21 +418,21 @@ export class ARENAChat {
         delete this.liveUsers[user.id];
         this.populateUserList();
     };
-
     /**
      * Called dominant speaker changes
      * Defined as a closure to capture 'this'
      * @param {Object} e event object; e.detail contains the callback arguments
      */
-     dominantSpeakerCallback = (e) => {
+    dominantSpeakerCallback = (e) => {
         console.log(`(chat) Dominant Speaker event received: ${e}`);
         let updateList = false;
         const user = e.detail;
         // if speaker exists, show speaking graph in user list
-        if (this.liveUsers[user.id]) {
-            console.log(`(chat) Active speaker: ${user.id}`);
+        const speaking_id = user.id ? user.id : this.settings.userid; // or self is speaking
+        if (this.liveUsers[speaking_id]) {
+            console.log(`(chat) Active speaker: ${speaking_id}`);
             const _this = this;
-            this.liveUsers[user.id].speaking = true;
+            this.liveUsers[speaking_id].speaking = true;
             if (user.scene === this.settings.scene) updateList = true;
         }
         // if previous speaker exists, show speaking graph in user list
