@@ -70,7 +70,7 @@ export class Arena {
         });
         this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, (e) => {
             console.log(`(arena) Dominant received, Me: ${this.idTag}, It: ${e.detail.id}`);
-            const speaking = (e.detail.id === this.idTag); // self is speaking
+            const speaking = (!e.detail.id || e.detail.id === this.idTag); // self is speaking
             this.showEchoDisplayName(speaking);
         });
     }
