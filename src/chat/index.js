@@ -427,23 +427,19 @@ export class ARENAChat {
      */
     dominantSpeakerCallback = (e) => {
         console.log(`(chat) Dominant Speaker event received: ${e}`);
-        let updateList = false;
         const user = e.detail;
-        // if speaker exists, show speaking graph in user list
-        const speaking_id = user.id ? user.id : this.settings.userid; // or self is speaking
-        if (this.liveUsers[speaking_id]) {
-            console.log(`(chat) Active speaker: ${speaking_id}`);
-            this.liveUsers[speaking_id].speaking = true;
-            if (user.scene === this.settings.scene) updateList = true;
-        }
-        // if previous speaker exists, show speaking graph in user list
-        if (this.liveUsers[user.pid]) {
-            console.log(`(chat) Previous speaker: ${user.pid}`);
-            this.liveUsers[user.pid].speaking = false;
-            if (user.scene === this.settings.scene) updateList = true;
-        }
-        if (updateList) {
-            console.log(`(chat) Update list: ${speaking_id} ${this.settings.userid}`);
+        if (user.scene === this.settings.scene) {
+            // if speaker exists, show speaking graph in user list
+            const speaking_id = user.id ? user.id : this.settings.userid; // or self is speaking
+            if (this.liveUsers[speaking_id]) {
+                console.log(`(chat) Active speaker: ${speaking_id}`);
+                this.liveUsers[speaking_id].speaking = true;
+            }
+            // if previous speaker exists, show speaking graph in user list
+            if (this.liveUsers[user.pid]) {
+                console.log(`(chat) Previous speaker: ${user.pid}`);
+                this.liveUsers[user.pid].speaking = false;
+            }
             this.settings.isSpeaking = (speaking_id === this.settings.userid);
             this.populateUserList();
         }
