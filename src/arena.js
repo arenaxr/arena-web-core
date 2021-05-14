@@ -80,7 +80,9 @@ export class Arena {
      */
     setUserName(name = undefined) {
         // set userName
-        if (name === undefined) name = ARENAUtils.getUrlParam('name', this.defaults.userName); // check url params, defaults
+        if (name === undefined) {
+            name = ARENAUtils.getUrlParam('name', this.defaults.userName);
+        } // check url params, defaults
         this.userName = name;
     }
 
@@ -108,7 +110,8 @@ export class Arena {
     }
 
     /**
-     * Sets this.sceneName and this.namespacedScene from url. this.namespacedScene includes namespace prefix (e.g. `namespace/foo`)
+     * Sets this.sceneName and this.namespacedScene from url. this.namespacedScene
+     * includes namespace prefix (e.g. `namespace/foo`)
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
      * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
      */
@@ -302,7 +305,7 @@ export class Arena {
                             'type': 'program',
                             'data': obj.attributes,
                         };
-                        // arena variables that are replaced; keys are the variable names e.g. ${scene}, ${cameraid}, ...
+                        // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
                         const avars = {
                             scene: ARENA.sceneName,
                             namespace: ARENA.nameSpace,
@@ -418,16 +421,13 @@ export class Arena {
         const environment = document.createElement('a-entity');
         environment.id = 'env';
 
-        const xhr = new XMLHttpRequest();
-        xhr.withCredentials = !this.defaults.disallowJWT;
-        xhr.open('GET', this.persistenceUrl + '?type=scene-options');
-        xhr.send();
-        xhr.responseType = 'json';
-        xhr.onload = async () => {
-            if (xhr.status !== 200 || xhr.response === undefined) {
-                console.info(`No scene-options object found: ${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`);
-            } else {
-                const payload = xhr.response[xhr.response.length - 1];
+        fetch(`${this.persistenceUrl}?type=scene-options`, {
+            method: 'GET',
+            credentials: this.defaults.disallowJWT? 'omit' : 'same-origin',
+        }).
+            then((res) => res.json()).
+            then((data) => {
+                const payload = data[data.length - 1];
                 if (payload) {
                     const options = payload['attributes'];
                     Object.assign(sceneOptions, options['scene-options']);
@@ -439,6 +439,14 @@ export class Arena {
                         sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
                         sceneRoot.appendChild(sceneAttr);
                         delete sceneOptions.attribution;
+                    }
+
+                    if (sceneOptions['navMesh']) {
+                        const navMesh = document.createElement('a-entity');
+                        navMesh.id = 'navMesh';
+                        navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
+                        navMesh.setAttribute('nav-mesh', '');
+                        sceneRoot.appendChild(navMesh);
                     }
 
                     // save scene options
@@ -455,39 +463,41 @@ export class Arena {
                     const rendererSettings = options['renderer-settings'];
                     if (rendererSettings) {
                         for (const [attribute, value] of Object.entries(rendererSettings)) {
-                            if (attribute === 'outputEncoding') renderer[attribute] = THREE[value];
-                            else renderer[attribute] = value;
+                            renderer[attribute] = (attribute === 'outputEncoding') ?
+                                renderer[attribute] = THREE[value] :
+                                renderer[attribute] = value;
                         }
                     }
                 } else {
-                    // set defaults
-                    environment.setAttribute('environment', 'preset', 'starry');
-                    environment.setAttribute('environment', 'seed', 3);
-                    environment.setAttribute('environment', 'flatShading', true);
-                    environment.setAttribute('environment', 'groundTexture', 'squares');
-                    environment.setAttribute('environment', 'grid', 'none');
-                    environment.setAttribute('environment', 'fog', 0);
-                    environment.setAttribute('environment', 'fog', 0);
-                    sceneRoot.appendChild(environment);
-
-                    // make default env have lights
-                    const light = document.createElement('a-light');
-                    light.id = 'ambient-light';
-                    light.setAttribute('type', 'ambient');
-                    light.setAttribute('color', '#363942');
-
-                    const light1 = document.createElement('a-light');
-                    light1.id = 'point-light';
-                    light1.setAttribute('type', 'point');
-                    light1.setAttribute('position', '-0.272 0.39 1.25');
-                    light1.setAttribute('color', '#C2E6C7');
-
-                    sceneRoot.appendChild(light);
-                    sceneRoot.appendChild(light1);
+                    throw new Error('No scene-options');
                 }
-            }
-            this.sceneOptions = sceneOptions;
-        };
+            }).
+            catch(() => {
+                environment.setAttribute('environment', 'preset', 'starry');
+                environment.setAttribute('environment', 'seed', 3);
+                environment.setAttribute('environment', 'flatShading', true);
+                environment.setAttribute('environment', 'groundTexture', 'squares');
+                environment.setAttribute('environment', 'grid', 'none');
+                environment.setAttribute('environment', 'fog', 0);
+                environment.setAttribute('environment', 'fog', 0);
+                sceneRoot.appendChild(environment);
+
+                // make default env have lights
+                const light = document.createElement('a-light');
+                light.id = 'ambient-light';
+                light.setAttribute('type', 'ambient');
+                light.setAttribute('color', '#363942');
+
+                const light1 = document.createElement('a-light');
+                light1.id = 'point-light';
+                light1.setAttribute('type', 'point');
+                light1.setAttribute('position', '-0.272 0.39 1.25');
+                light1.setAttribute('color', '#C2E6C7');
+
+                sceneRoot.appendChild(light);
+                sceneRoot.appendChild(light1);
+            }).
+            finally(() => this.sceneOptions = sceneOptions);
     };
 
     /**
