@@ -68,6 +68,10 @@ export class Arena {
             if (!args.userName) return; // only handle a user name change
             this.showEchoDisplayName();
         });
+        this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, (e) => {
+            const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
+            this.showEchoDisplayName(speaker);
+        });
     }
 
     /**
@@ -169,13 +173,19 @@ export class Arena {
 
     /**
      * Renders/updates the display name in the top left corner of a scene.
+     * @param {boolean} speaker If the user is the dominant speaker
      */
-    showEchoDisplayName = () => {
+    showEchoDisplayName = (speaker = false) => {
         const url = new URL(window.location.href);
         const noname = url.searchParams.get('noname');
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!noname) {
+            if (speaker) {
+                echo.style.backgroundColor = '#0F08'; // green alpha
+            } else {
+                echo.style.backgroundColor = '#0008'; // black alpha
+            }
             echo.style.display = 'block';
         } else {
             echo.style.display = 'none';

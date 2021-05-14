@@ -66,6 +66,18 @@ export class ARENAEventEmitter {
         USER_LEFT: 'user_left',
 
         /**
+         * Indicates the dominant speaker has changed. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback dominantSpeakerCallback
+         * @param id {string} the ARENA id of the dominant speaker
+         * @param pid {string} the ARENA id of the previous dominant speaker
+         * @param scene {string} the scene
+         * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
+         */
+        DOMINANT_SPEAKER: 'dominant_speaker',
+
+        /**
          * Indicates user authentication is done. The event provides
          * the following parameters to its listeners (event.detail object):
          *
