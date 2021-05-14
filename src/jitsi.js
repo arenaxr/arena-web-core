@@ -419,9 +419,11 @@ export class ARENAJitsi {
             // console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
-            let actJitsiId = this.conference.getParticipantById(this.activeSpeaker);
+            let actArenaId;
+            let prevArenaId;
+            const actJitsiId = this.conference.getParticipantById(this.activeSpeaker);
             if (actJitsiId) actArenaId = actJitsiId.getProperty('arenaId');
-            let prevJitsiId = this.conference.getParticipantById(this.prevActiveSpeaker);
+            const prevJitsiId = this.conference.getParticipantById(this.prevActiveSpeaker);
             if (prevJitsiId) prevArenaId = prevJitsiId.getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER, {
                 id: actArenaId,
