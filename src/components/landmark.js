@@ -31,7 +31,7 @@ AFRAME.registerComponent('landmark', {
         }, // range in m. Ignored if randomRadiusMax is not set
         offsetPosition: {
             type: 'vec3',
-            default: {x: 0, y: 1.6, z: 0},
+            default: {x: 0, y: 0, z: 0},
         },
         constrainToNavMesh: {
             oneOf: ['false', 'any', 'coplanar'],
