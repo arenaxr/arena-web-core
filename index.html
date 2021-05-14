@@ -134,12 +134,6 @@
         <!-- ground plane so falling objects don't fall through floor -->
         <a-box static-body position="0 -0.01 0" id="groundPlane" color="#FFAAEE" transparent="true" opacity=".01" height="0.01" depth="1000" width="1000"></a-box>
 
-        <!-- walls so rolling objects don't roll off edge -->
-        <a-box static-body position="-15 1 0" id="border1" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30"></a-box>
-        <a-box static-body position="15 1 0" id="border2" color="#111111" transparent="true" opacity=".01" scale="0.5 0.5 30"></a-box>
-        <a-box static-body position="0 1 15" id="border3" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
-        <a-box static-body position="0 1 -15" id="border4" color="#111111" transparent="true" opacity=".01" scale="30 0.5 0.5"></a-box>
-
         <a-entity position="0 0 0" id="cameraRig">
           <a-entity position="0 0 0" id="cameraSpinner" name="PerspectiveCamera" tag="MainCamera">
             <!-- this camera can 'fly': z axis follows pitch of head direction -->
