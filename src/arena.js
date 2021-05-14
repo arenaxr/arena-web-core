@@ -232,7 +232,6 @@ export class Arena {
                     console.log('Moving camera to start position', startPosition.el.id);
                     startPosition.teleportTo();
                     startPos.copy(camera.object3D.position);
-                    startPos.y -= ARENA.defaults.camHeight;
                     ARENA.startCoords = startPos;
                 }
             }
