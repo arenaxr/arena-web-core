@@ -55,7 +55,7 @@ export class ARENAChat {
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false,
             isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
-            isSpeaking: false,
+            isSpeaker: false,
         };
 
         // users list
@@ -333,7 +333,7 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, this.userJoinCallback);
         ARENA.events.on(ARENAEventEmitter.events.SCREENSHARE, this.screenshareCallback);
         ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, this.userLeftCallback);
-        ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, this.dominantSpeakerCallback);
+        ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, this.dominantSpeakerCallback);
     }
 
     /**
@@ -428,20 +428,17 @@ export class ARENAChat {
     dominantSpeakerCallback = (e) => {
         const user = e.detail;
         const roomName = this.settings.scene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
-        console.log(`(chat) Dominant Speaker event received: ${user.scene} ${roomName}`);
         if (user.scene === roomName) {
-            // if speaker exists, show speaking graph in user list
-            const speaking_id = user.id ? user.id : this.settings.userid; // or self is speaking
-            if (this.liveUsers[speaking_id]) {
-                console.log(`(chat) Active speaker: ${speaking_id}`);
-                this.liveUsers[speaking_id].speaking = true;
+            // if speaker exists, show speaker graph in user list
+            const speaker_id = user.id ? user.id : this.settings.userid; // or self is speaker
+            if (this.liveUsers[speaker_id]) {
+                this.liveUsers[speaker_id].speaker = true;
             }
-            // if previous speaker exists, show speaking graph in user list
+            // if previous speaker exists, show speaker graph in user list
             if (this.liveUsers[user.pid]) {
-                console.log(`(chat) Previous speaker: ${user.pid}`);
-                this.liveUsers[user.pid].speaking = false;
+                this.liveUsers[user.pid].speaker = false;
             }
-            this.settings.isSpeaking = (speaking_id === this.settings.userid);
+            this.settings.isSpeaker = (speaker_id === this.settings.userid);
             this.populateUserList();
         }
     };
@@ -706,7 +703,7 @@ export class ARENAChat {
                 un: _this.liveUsers[key].un,
                 cid: _this.liveUsers[key].cid,
                 type: _this.liveUsers[key].type,
-                speaking: _this.liveUsers[key].speaking,
+                speaker: _this.liveUsers[key].speaker,
             });
         });
 
@@ -730,8 +727,7 @@ export class ARENAChat {
 
         const uli = document.createElement('li');
         uli.textContent = `${this.settings.username} (Me)`;
-        if (this.settings.isSpeaking) {
-            console.log(`(chat) Updating green: ${this.settings.userid}`);
+        if (this.settings.isSpeaker) {
             uli.style.color = 'green';
         }
         _this.usersList.appendChild(uli);
@@ -754,8 +750,7 @@ export class ARENAChat {
         userList.forEach((user) => {
             const uli = document.createElement('li');
             const name = user.type !== ARENAChat.userType.SCREENSHARE ? user.un : `${user.un}\'s Screen Share`;
-            if (user.speaking) {
-                console.log(`(chat) Updating green: ${user.cid}`);
+            if (user.speaker) {
                 uli.style.color = 'green';
             }
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;

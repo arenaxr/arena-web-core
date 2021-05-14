@@ -70,12 +70,12 @@ export class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback dominantSpeakerCallback
-         * @param id {string} the ARENA id of the speaking user
-         * @param pid {string} the ARENA id of the previously speaking user
+         * @param id {string} the ARENA id of the dominant speaker
+         * @param pid {string} the ARENA id of the previous dominant speaker
          * @param scene {string} the scene
          * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
          */
-        DOMINANT_SPEAKER_CHANGED: 'dominant_speaker',
+        DOMINANT_SPEAKER: 'dominant_speaker',
 
         /**
          * Indicates user authentication is done. The event provides
@@ -108,7 +108,7 @@ export class ARENAEventEmitter {
 
     /**
     * Modules that are possible event sources
-    * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback|...}
+    * Used for events where the source is relevant/needed: {jitsiConnectCallback|userJoinCallback|userLeftCallback|...}
     *
     */
     static sources = {
@@ -141,7 +141,7 @@ export class ARENAEventEmitter {
      *    }
      *
      * @param {string} eventName name of the event
-     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback} listener callback (see callback definitions)
+     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback (see callback definitions)
      * @return {undefined}
      */
     on(eventName, listener) {
@@ -152,7 +152,7 @@ export class ARENAEventEmitter {
      * Event listener that is removed after being called once
      *
      * @param {string} eventName name of the event
-     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback} listener callback
+     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback
      * @return {undefined}
      */
     once(eventName, listener) {
@@ -163,7 +163,7 @@ export class ARENAEventEmitter {
      * Remove listener
      *
      * @param {string} eventName name of the event
-     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback|dominantSpeakerCallback} listener callback
+     * @param {jitsiConnectCallback|userJoinCallback|userLeftCallback} listener callback
      * @return {undefined}
      */
     off(eventName, listener) {

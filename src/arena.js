@@ -68,10 +68,9 @@ export class Arena {
             if (!args.userName) return; // only handle a user name change
             this.showEchoDisplayName();
         });
-        this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, (e) => {
-            console.log(`(arena) Dominant received, Me: ${this.idTag}, It: ${e.detail.id}`);
-            const speaking = (!e.detail.id || e.detail.id === this.idTag); // self is speaking
-            this.showEchoDisplayName(speaking);
+        this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, (e) => {
+            const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
+            this.showEchoDisplayName(speaker);
         });
     }
 
@@ -174,15 +173,15 @@ export class Arena {
 
     /**
      * Renders/updates the display name in the top left corner of a scene.
-     * @param {boolean} speaking If the user is the dominant speaker
+     * @param {boolean} speaker If the user is the dominant speaker
      */
-    showEchoDisplayName = (speaking = false) => {
+    showEchoDisplayName = (speaker = false) => {
         const url = new URL(window.location.href);
         const noname = url.searchParams.get('noname');
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!noname) {
-            if (speaking) {
+            if (speaker) {
                 echo.style.backgroundColor = '#0F08'; // green alpha
             } else {
                 echo.style.backgroundColor = '#0008'; // black alpha

@@ -416,34 +416,18 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, (id) => {
-            console.log(`(conference) Dominant Speaker ID: ${id}`);
+            // console.log(`(conference) Dominant Speaker ID: ${id}`);
             this.prevActiveSpeaker = this.activeSpeaker;
             this.activeSpeaker = id;
-            let actArenaId = this.conference.getParticipantById(this.activeSpeaker);
-            if (actArenaId) actArenaId = actArenaId.getProperty('arenaId');
-            let prevArenaId = this.conference.getParticipantById(this.prevActiveSpeaker);
-            if (prevArenaId) prevArenaId = prevArenaId.getProperty('arenaId');
-            ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER_CHANGED, {
+            let actJitsiId = this.conference.getParticipantById(this.activeSpeaker);
+            if (actJitsiId) actArenaId = actJitsiId.getProperty('arenaId');
+            let prevJitsiId = this.conference.getParticipantById(this.prevActiveSpeaker);
+            if (prevJitsiId) prevArenaId = prevJitsiId.getProperty('arenaId');
+            ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER, {
                 id: actArenaId,
                 pid: prevArenaId,
                 scene: this.arenaConferenceName,
                 src: ARENAEventEmitter.sources.JITSI,
-            });
-        });
-        this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
-            console.log(`(conference) Speaking while muted.`);
-            Swal.fire({
-                title: 'Speaking while muted',
-                icon: 'warning',
-                timer: 2000,
-            });
-        });
-        this.conference.on(JitsiMeetJS.events.conference.NOISY_MIC, () => {
-            console.log(`(conference) Noisy mic (speaking).`);
-            Swal.fire({
-                title: 'Noisy mic (speaking).',
-                icon: 'warning',
-                timer: 2000,
             });
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
