@@ -439,7 +439,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
-        this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged(this));
+        this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
             ARENA.events.emit(ARENAEventEmitter.events.TALK_WHILE_MUTED, true);
         });
