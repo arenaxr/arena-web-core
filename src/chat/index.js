@@ -334,6 +334,8 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.SCREENSHARE, this.screenshareCallback);
         ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, this.userLeftCallback);
         ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, this.dominantSpeakerCallback);
+        ARENA.events.on(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.talkWhileMutedCallback);
+        ARENA.events.on(ARENAEventEmitter.events.NOISY_MIC, this.noisyMicCallback);
     }
 
     /**
@@ -421,7 +423,7 @@ export class ARENAChat {
     };
 
     /**
-     * Called dominant speaker changes
+     * Called when dominant speaker changes.
      * Defined as a closure to capture 'this'
      * @param {Object} e event object; e.detail contains the callback arguments
      */
@@ -441,6 +443,24 @@ export class ARENAChat {
             this.settings.isSpeaker = (speaker_id === this.settings.userid);
             this.populateUserList();
         }
+    };
+
+    /**
+     * Called when user is talking on mute.
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    talkWhileMutedCallback = (e) => {
+        this.displayAlert(`You are talking on mute.`, 2000);
+    };
+
+    /**
+     * Called when user's microphone is very noisy.
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    noisyMicCallback = (e) => {
+        this.displayAlert(`Your microphone appears to be noisy.`, 2000);
     };
 
     // perform some async startup tasks
