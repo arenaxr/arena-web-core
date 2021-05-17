@@ -97,13 +97,31 @@ export class ARENAEventEmitter {
         ONLOCATION: 'onlocation',
 
         /**
-         * Indicates when scene is successfully fully loaded
+         * Indicates when scene is successfully fully loaded. The event provides
          * the following parameters to its listeners (event.detail object):
          *
          * @callback onSceneLoadedCallback
          * @param result {boolean} Should always be true
          */
-        SCENE_LOADED: 'scene_loaded'
+        SCENE_LOADED: 'scene_loaded',
+
+        /**
+         * Indicates when a user is talking on mute. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback talkWhileMutedCallback
+         * @param result {boolean} Should always be true
+         */
+        TALK_WHILE_MUTED: 'talk_while_muted',
+
+        /**
+         * Indicates when user's microphone is very noisy. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback noisyMicCallback
+         * @param result {boolean} Should always be true
+         */
+        NOISY_MIC: 'noisy_mic',
     };
 
     /**
