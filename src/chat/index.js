@@ -180,14 +180,16 @@ export class ARENAChat {
         this.closeUsersBtn.innerText = '×';
         this.usersPopup.appendChild(this.closeUsersBtn);
 
-        const muteAllDiv = document.createElement('div');
-        muteAllDiv.className = 'mute-all';
-        this.usersPopup.appendChild(muteAllDiv);
+        if (this.settings.isSceneWriter) {
+            const muteAllDiv = document.createElement('div');
+            muteAllDiv.className = 'mute-all';
+            this.usersPopup.appendChild(muteAllDiv);
 
-        this.silenceAllBtn = document.createElement('span');
-        this.silenceAllBtn.className = 'users-list-btn ma';
-        this.silenceAllBtn.title = 'Silence (Mute Everyone)';
-        muteAllDiv.appendChild(this.silenceAllBtn);
+            this.silenceAllBtn = document.createElement('span');
+            this.silenceAllBtn.className = 'users-list-btn ma';
+            this.silenceAllBtn.title = 'Silence (Mute Everyone)';
+            muteAllDiv.appendChild(this.silenceAllBtn);
+        }
 
         let label = document.createElement('span');
         label.innerHTML = '<br/>&nbsp';
@@ -293,11 +295,6 @@ export class ARENAChat {
 
         // send sound on/off msg to all
         this.silenceAllBtn.onclick = function() {
-            if (!_this.isUserAuthenticated(_this.settings.cameraid)) {
-                _this.displayAlert('Anonymous users may not mute others.', 3000);
-                return;
-            }
-
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'This will send a mute request to all users.',
@@ -682,7 +679,7 @@ export class ARENAChat {
         // scroll to bottom
         this.msgList.scrollTop = this.msgList.scrollHeight;
     }
-
+/
     populateUserList(newUser = undefined) {
         this.usersList.textContent = '';
         const selVal = this.toSel.value;
