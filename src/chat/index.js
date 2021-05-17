@@ -679,7 +679,7 @@ export class ARENAChat {
         // scroll to bottom
         this.msgList.scrollTop = this.msgList.scrollHeight;
     }
-/
+
     populateUserList(newUser = undefined) {
         this.usersList.textContent = '';
         const selVal = this.toSel.value;
