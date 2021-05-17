@@ -441,9 +441,11 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
+            console.log(`Talking on mute detected!`);
             ARENA.events.emit(ARENAEventEmitter.events.TALK_WHILE_MUTED, true);
         });
         this.conference.on(JitsiMeetJS.events.conference.NOISY_MIC, () => {
+            console.log(`Non-speech noise detected on microphone.`);
             ARENA.events.emit(ARENAEventEmitter.events.NOISY_MIC, true);
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
