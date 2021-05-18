@@ -1,4 +1,3 @@
-
 onmessage = (e) => {
     const msg = e.data;
     switch (msg.type) {
@@ -11,9 +10,8 @@ onmessage = (e) => {
 
 function createCyJSON(json) {
     let res = [];
-    let cnt = 0;
-    for (let i = 0; i < json["ips"].length; i++) {
-        let ip = json["ips"][i];
+
+    for (const ip of json["ips"]) {
         let ipId = ip["id"] ? ip["id"] : ip["address"];
 
         let ipJSON = {};
@@ -23,8 +21,7 @@ function createCyJSON(json) {
         ipJSON["group"] = "nodes";
         res.push(ipJSON);
 
-        for (let j = 0; j < ip["clients"].length; j++) {
-            let client = ip["clients"][j];
+        for (const client of ip["clients"]) {
             let clientJSON = {};
             clientJSON["data"] = {};
             clientJSON["data"]["id"] = client["name"];
@@ -34,8 +31,7 @@ function createCyJSON(json) {
             clientJSON["group"] = "nodes";
             res.push(clientJSON);
 
-            for (let k = 0; k < client["published"].length; k++) {
-                let pubEdge = client["published"][k];
+            for (const pubEdge of client["published"]) {
                 let pubEdgeJSON = {};
                 pubEdgeJSON["data"] = {};
                 pubEdgeJSON["data"]["id"] = "edge_"+(cnt++);
@@ -48,8 +44,8 @@ function createCyJSON(json) {
         }
     }
 
-    for (i = 0; i < json["topics"].length; i++) {
-        let topic = json["topics"][i];
+    let cnt = 0;
+    for (const topic of json["topics"]) {
         let topicJSON = {};
         topicJSON["data"] = {};
         topicJSON["data"]["id"] = topic["name"];
@@ -57,8 +53,7 @@ function createCyJSON(json) {
         topicJSON["group"] = "nodes";
         res.push(topicJSON);
 
-        for (j = 0; j < topic["subscriptions"].length; j++) {
-            let subEdge = topic["subscriptions"][j];
+        for (const subEdge of topic["subscriptions"]) {
             let subEdgeJSON = {};
             subEdgeJSON["data"] = {};
             subEdgeJSON["data"]["id"] = "edge_"+(cnt++);

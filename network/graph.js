@@ -85,7 +85,7 @@ window.addEventListener('onauth', function(e) {
     let spinnerUpdate = true;
     let paused = false;
 
-    var worker = new Worker('./network.worker.js');
+    var worker = new Worker('./graph.worker.js');
     worker.onmessage = (e) => {
         const msg = e.data
         switch (msg.type) {
@@ -98,7 +98,7 @@ window.addEventListener('onauth', function(e) {
                     console.log(err.message);
                     console.log(JSON.stringify(msg.json, undefined, 2));
                 }
-                break;
+                return;
             }
         }
     }
@@ -247,9 +247,9 @@ window.addEventListener('onauth', function(e) {
         }
     });
 
-    cy.on("tap", "node", function(event) {
-        let obj = event.target;
-        let tappedNode = cy.$id(obj.id()).data();
-        console.log(tappedNode["id"]);
-    });
+    // cy.on("tap", "node", function(event) {
+    //     let obj = event.target;
+    //     let tappedNode = cy.$id(obj.id()).data();
+    //     console.log(tappedNode["id"]);
+    // });
 });
