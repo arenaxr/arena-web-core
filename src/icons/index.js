@@ -153,7 +153,8 @@ export class SideMenu {
                         avatarBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/avatar3-on.png\')';
                         if (ARENA.Jitsi && ARENA.Jitsi.ready) {
                             ARENA.Jitsi.stopVideo().then(() => {
-                                videoBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/video-off.png\')';
+                                videoBtn.childNodes[0].style.backgroundImage =
+                                                                        'url(\'/src/icons/images/video-off.png\')';
                                 ARENA.Jitsi.hideVideo();
                             });
                         }
@@ -224,7 +225,6 @@ export class SideMenu {
         const screenShareButton = createIconButton('screen-on', 'Share your screen in a new window.', () => {
             if (!ARENA.Jitsi) return;
 
-            const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
             Swal.fire({
                 title: 'You clicked on screen share! Are you sure you want to share your screen?',
                 html: `In order to share your screen, ARENA will open a new tab.<br>
@@ -237,25 +237,20 @@ export class SideMenu {
                 .then((result) => {
                     if (!result.isConfirmed) return;
                     Swal.fire({
-                        title: 'You clicked on screen share!',
-                        text: 'Enter the name(s) of the object(s) you want to screenshare on (use commas for multiple objects):',
-                        input: 'text',
-                        inputValue: defaultScreenObj,
-                        inputAttributes: {
-                            autocapitalize: 'off',
+                        title: 'Select the object(s) you want to screenshare on:',
+                        html: document.querySelector('a-scene').systems[`screenshareable`].asHTMLSelect(),
+                        focusConfirm: false,
+                        preConfirm: () => {
+                            return Array.from(document.getElementById('screenshareables').
+                                querySelectorAll('option:checked'), (e) => e.value);
                         },
                         showCancelButton: true,
                         reverseButtons: true,
                     })
                         .then((result) => {
-                            if (!result.value) return;
-                            let objectIds = result.value;
-                            objectIds = objectIds.split(',');
-                            for (let i = 0; i < objectIds.length; i++) {
-                                if (objectIds[i]) {
-                                    objectIds[i] = objectIds[i].trim();
-                                }
-                            }
+                            if (!result.isConfirmed || result.value.length == 0) return;
+                            const objectIds = result.value;
+
                             const screenshareWindow = window.open('./screenshare', '_blank');
                             screenshareWindow.params = {
                                 connectOptions: ARENA.Jitsi.connectOptions,
