@@ -1,4 +1,4 @@
-/* global $, JitsiMeetJS */ 
+/* global $, JitsiMeetJS */
 
 if (!window.params) window.close();
 
@@ -151,6 +151,15 @@ function unload() {
 
 $(window).bind('beforeunload', unload);
 $(window).bind('unload', unload);
+
+// create exit button
+const exitButton = document.createElement('button');
+exitButton.id = "exitButton";
+exitButton.className = "leave-button";
+exitButton.title = "End Screen Sharing";
+exitButton.innerHTML = "Exit";
+exitButton.onclick = unload;
+document.body.appendChild(exitButton);
 
 JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 

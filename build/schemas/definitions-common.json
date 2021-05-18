@@ -244,7 +244,7 @@
       },
       "landmark": {
         "title": "Landmark",
-        "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is contrained by a navmesh (when it exists)",          
+        "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is contrained by a navmesh (when it exists)",
         "properties": {
             "randomRadiusMin": {
                 "default": 0,
@@ -276,7 +276,7 @@
                   "x",
                   "y",
                   "z"
-                ]               
+                ]
             },
             "constrainToNavMesh": {
                 "description": "Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
@@ -287,17 +287,17 @@
                   ],
                   "type": "string",
                   "default": "false"
-            },   
+            },
             "startingPosition": {
                 "default": false,
                 "description": "Set to true to use this landmark as a scene start (spawn) position. If several landmarks with startingPosition=true exist in a scene, one will be randomly selected.",
                 "type": "boolean"
-            },                
+            },
             "lookAtLandmark": {
                 "default": true,
                 "description": "Set to true to make users face the landmark when teleported to it.",
                 "type": "boolean"
-            },                
+            },
             "label": {
                 "default": "",
                 "description": "Landmark description to display in the landmark list",
@@ -390,7 +390,7 @@
         "title": "Scale"
       },
       "shadow": {
-        "title": "Shadow",          
+        "title": "Shadow",
         "default": {
           "cast": false,
           "receive": false
@@ -486,7 +486,7 @@
           },
           "volume": {
             "default": 1,
-            "description": "How loud to play the sound.",
+            "description": "How loud to play the sound",
             "type": "number"
           }
         },
@@ -498,6 +498,12 @@
         "format": "uri",
         "title": "Url",
         "type": "string"
+      },
+      "screenshareable": {
+        "default": true,
+        "description": "Whether or not a user can screenshare on an object",
+        "title": "Screenshare-able",
+        "type": "boolean"
       },
       "video-control": {
         "description": "Video Control",
@@ -525,12 +531,12 @@
             "description": "Video automatically loops",
             "type": "boolean",
             "default": true
-          },       
+          },
           "autoplay": {
             "description": "Video starts playing automatically",
             "type": "boolean",
             "default": false
-          },                                  
+          },
           "volume": {
             "description": "Video sound volume",
             "type": "number",
