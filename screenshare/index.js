@@ -2,6 +2,14 @@
 
 if (!window.params) window.close();
 
+// create exit button
+const exitButton = document.createElement('button');
+exitButton.id = "exitButton";
+exitButton.className = "leave-button";
+exitButton.title = "End Screen Sharing";
+exitButton.innerHTML = "Exit";
+exitButton.onclick = unload;
+
 const options = window.params.connectOptions;
 const appID = window.params.appID;
 const token = window.params.token;
@@ -153,14 +161,6 @@ function unload() {
 
 $(window).bind('beforeunload', unload);
 $(window).bind('unload', unload);
-
-// create exit button
-const exitButton = document.createElement('button');
-exitButton.id = "exitButton";
-exitButton.className = "leave-button";
-exitButton.title = "End Screen Sharing";
-exitButton.innerHTML = "Exit";
-exitButton.onclick = unload;
 
 JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
