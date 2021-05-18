@@ -294,22 +294,24 @@ export class ARENAChat {
         });
 
         // send sound on/off msg to all
-        this.silenceAllBtn.onclick = function() {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'This will send a mute request to all users.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes',
-                reverseButtons: true,
-            })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        // send to all scene topic
-                        _this.ctrlMsg('scene', 'sound:off');
-                    }
-                });
-        };
+        if (this.silenceAllBtn) {
+            this.silenceAllBtn.onclick = function() {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'This will send a mute request to all users.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    reverseButtons: true,
+                })
+                    .then((result) => {
+                        if (result.isConfirmed) {
+                            // send to all scene topic
+                            _this.ctrlMsg('scene', 'sound:off');
+                        }
+                    });
+            };
+        }
 
         // check if we jumped to a different scene from a "teleport"
         const moveToCamera = localStorage.getItem('moveToFrontOfCamera');
