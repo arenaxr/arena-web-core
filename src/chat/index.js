@@ -18,13 +18,20 @@ import {SideMenu} from '../icons/index.js';
 import MQTTPattern from 'mqtt-pattern';
 
 let mqttc;
-// generate an uuid
+
+/**
+ * Generate a UUID.
+ * @return {string} The generated UUID string.
+ */
 function uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
         (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
     );
 }
 
+/**
+ * A class to manage an instance of the ARENA chat MQTT and GUI message system.
+ */
 export class ARENAChat {
     static userType = {
         EXTERNAL: 'external',
@@ -32,6 +39,10 @@ export class ARENAChat {
         ARENA: 'arena',
     };
 
+    /**
+     * ARENAChat constructor connects to MQTT and generates GUI.
+     * @param {Object} st The Chat settings config object.
+     */
     constructor(st) {
         // handle default this.settings
         st = st || {};
@@ -65,26 +76,26 @@ export class ARENAChat {
         setInterval(this.userCleanup.bind(this), this.settings.keepalive_interval_ms * 3);
 
         /*
-	    Clients listen for chat messages on:
-			- global public (*o*pen) topic (<realm>/c/<scene-namespace>/o/#)
-			- a user (*p*rivate) topic (<realm>/c/<scene-namespace>/p/userhandle/#)
+        Clients listen for chat messages on:
+            - global public (*o*pen) topic (<realm>/c/<scene-namespace>/o/#)
+            - a user (*p*rivate) topic (<realm>/c/<scene-namespace>/p/userhandle/#)
 
-		Clients write always to a topic with its own userhandle:
-  		    - a topic for each user for private messages ( <realm>/c/<scene-namespace>/p/[other-cameraid]/userhandle)
-		    - a global topic (ugtopic; r<realm>/c/<scene-namespace>/o/userhandle);
+        Clients write always to a topic with its own userhandle:
+              - a topic for each user for private messages ( <realm>/c/<scene-namespace>/p/[other-cameraid]/userhandle)
+            - a global topic (ugtopic; r<realm>/c/<scene-namespace>/o/userhandle);
 
-		where userhandle = cameraid + btoa(cameraid)
+        where userhandle = cameraid + btoa(cameraid)
 
-		Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
-		Note: scene-only messages are sent to public topic and filtered at the client
+        Note: topic must always end with userhandle and match from_un in the message (check on client at receive, and/or on publish at pubsub server)
+        Note: scene-only messages are sent to public topic and filtered at the client
         Note: scene-namespace is the current scene namespace
 
-		Summary of topics/permissions:
+        Summary of topics/permissions:
             <realm>/c/<scene-namespace>/p/<userid>/#  - receive private messages
             <realm>/c/<scene-namespace>/o/#  - receive open messages to everyone and/or scene
             <realm>/c/<scene-namespace>/o/userhandle - send open messages (chat keepalive, messages to all/scene)
             <realm>/c/<scene-namespace>/p/[regex-matching-any-userid]/userhandle - private messages to user
-	    */
+        */
 
         // receive private messages  (subscribe only)
         this.settings.subscribePrivateTopic = `${this.settings.realm}/c/${this.settings.namespace}/p/${this.settings.userid}/#`;
@@ -462,16 +473,27 @@ export class ARENAChat {
         this.displayAlert(`Your microphone appears to be noisy.`, 2000);
     };
 
-    // perform some async startup tasks
+    /**
+     * Perform some async startup tasks.
+     * @param {boolean} force True to force the startup.
+     */
     async start(force = false) {
         // connect mqtt
         await this.connect();
     }
 
+    /**
+     * Getter to return the active user list state.
+     * @return {[Object]} The list of active users.
+     */
     getUserList() {
         return this.liveUsers;
     }
 
+    /**
+     * Connect to the MQTT broker and subscribe.
+     * @param {boolean} force True to force the connection.
+     */
     async connect(force = false) {
         if (this.connected == true && force == false) return;
         this.mqttc = new Paho.Client(this.settings.mqtt_host, `chat-${this.settings.userid}`);
@@ -524,15 +546,28 @@ export class ARENAChat {
         });
     }
 
+    /**
+     * Chat MQTT connection lost handler.
+     * @param {Object} message Broker message.
+     */
     onConnectionLost(message) {
         console.error('Chat disconnect.');
         this.connected = false;
     }
 
+    /**
+     * Utility to know if the user has been authenticated.
+     * @param {string} cameraId The user camera id.
+     * @return {boolean} True if non-anonymous.
+     */
     isUserAuthenticated(cameraId) {
         return !cameraId.includes('anonymous');
     }
 
+    /**
+     * Method to publish outgoing chat messages, gathers destination from UI.
+     * @param {*} msgTxt The message text.
+     */
     sendMsg(msgTxt) {
         const msg = {
             object_id: uuidv4(),
@@ -554,6 +589,10 @@ export class ARENAChat {
         this.txtAddMsg(msg.text, msg.from_desc, 'self');
     }
 
+    /**
+     * Handler for incoming subscription chat messages.
+     * @param {Object} mqttMsg The MQTT Paho message object.
+     */
     onMessageArrived(mqttMsg) {
         // console.log("Received:", mqttMsg);
         let msg;
@@ -644,7 +683,10 @@ export class ARENAChat {
     }
 
     /**
-     * Utility to match JWT MQTT topic within rights.
+     * Utility to match MQTT topic within permissions.
+     * @param {string} topic The MQTT topic to test.
+     * @param {string[]} rights The list of topic wild card permissions.
+     * @return {boolean} True if the topic matches the list of topic wildcards.
      */
     matchJWT(topic, rights) {
         const len = rights.length;
@@ -660,6 +702,8 @@ export class ARENAChat {
 
     /**
      * Checks loaded MQTT token for full scene object write permissions.
+     * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
+     * @return {boolean} True if the user has permission to write in this scene.
      */
     isUserSceneOwner(mqtt_token) {
         if (mqtt_token) {
@@ -672,6 +716,12 @@ export class ARENAChat {
         return false;
     }
 
+    /**
+     * Adds a text message to the to the text message panel.
+     * @param {string} msg The message text.
+     * @param {string} status The 'from' display user name.
+     * @param {string} whoClass Sender scope: self, other.
+     */
     txtAddMsg(msg, status, whoClass) {
         if (whoClass !== 'self' && whoClass !== 'other') whoClass='other';
         const statusSpan = document.createElement('span');
@@ -702,6 +752,11 @@ export class ARENAChat {
         this.msgList.scrollTop = this.msgList.scrollHeight;
     }
 
+    /**
+     * Draw the contents of the Chat user list panel given its current state.
+     * Adds a newUser if requested.
+     * @param {Object} newUser The new user object to add.
+     */
     populateUserList(newUser = undefined) {
         this.usersList.textContent = '';
         const selVal = this.toSel.value;
@@ -845,6 +900,10 @@ export class ARENAChat {
         this.toSel.value = selVal; // preserve selected value
     }
 
+    /**
+     * Add a landmark to the landmarks list.
+     * @param {Object} lm The landmark object.
+     */
     addLandmark(lm) {
         const uli = document.createElement('li');
         uli.id = `lmList_${lm.el.id}`;
@@ -867,6 +926,10 @@ export class ARENAChat {
         this.lmBtn.style.display = 'block';
     }
 
+    /**
+     * Remove a landmark from the landmarks list.
+     * @param {Object} lm The landmark object.
+     */
     removeLandmark(lm) {
         document.getElementById(`lmList_${lm.el.id}`).remove();
         if (this.lmList.childElementCount === 0) {
@@ -874,6 +937,9 @@ export class ARENAChat {
         }
     }
 
+    /**
+     * Adds UI elements to select dropdown message destination.
+     */
     addToSelOptions() {
         let op = document.createElement('option');
         op.value = 'scene';
@@ -886,10 +952,21 @@ export class ARENAChat {
         this.toSel.appendChild(op);
     }
 
+    /**
+     * Send a chat system keepalive control message.
+     * @param {boolean} tryconnect True, to first try connecting to MQTT.
+     */
     keepalive(tryconnect = false) {
         this.ctrlMsg('all', 'keepalive', tryconnect);
     }
 
+    /**
+     * Send a chat system control message for other users. Uses chat system topic structure
+     * to send a private message.
+     * @param {string} to Destination: all, scene, or the user id
+     * @param {string} text Body of the message/command.
+     * @param {boolean} tryconnect True, to first try connecting to MQTT.
+     */
     ctrlMsg(to, text, tryconnect = false) {
         // re-establish connection, in case client disconnected
         if (tryconnect) this.connect();
@@ -915,6 +992,10 @@ export class ARENAChat {
         this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
     }
 
+    /**
+     * Removes orphaned Jitsi users from visible user list.
+     * Is called periodically = keepalive_interval_ms * 3.
+     */
     userCleanup() {
         const now = new Date().getTime();
         const _this = this;
@@ -925,6 +1006,12 @@ export class ARENAChat {
         });
     }
 
+    /**
+     * Uses Sweetalert library to popup a toast message.
+     * @param {string} msg Text of the message.
+     * @param {number} timeMs Duration of message in milliseconds.
+     * @param {string} type Style of message: 'arena' - internal, 'external' - external
+     */
     displayAlert(msg, timeMs, type='') {
         if (type !== '' && type !== 'arena' && type !== 'external') type = 'external';
         this.alertBox.textContent = msg;
@@ -935,6 +1022,11 @@ export class ARENAChat {
         }, timeMs); // clear message in timeMs milliseconds
     }
 
+    /**
+     * Teleport method to move this user's camera to the front of another user's camera.
+     * @param {string} cameraId Camera object id of the target user
+     * @param {string} scene The scene name
+     */
     moveToFrontOfCamera(cameraId, scene) {
         // console.log("Move to near camera:", cameraId);
 
