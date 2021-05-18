@@ -85,6 +85,24 @@ window.addEventListener('onauth', function(e) {
     let spinnerUpdate = true;
     let paused = false;
 
+    var worker = new Worker('./network.worker.js');
+    worker.onmessage = (e) => {
+        const msg = e.data
+        switch (msg.type) {
+            case "result": {
+                try {
+                    cy.json({ elements: msg.json });
+                    runLayout();
+                }
+                catch (err) {
+                    console.log(err.message);
+                    console.log(JSON.stringify(msg.json, undefined, 2));
+                }
+                break;
+            }
+        }
+    }
+
     function init() {
         let brokerAddr;
         if (ARENADefaults && ARENADefaults.mqttHost) { // prefer deployed custom config
@@ -153,83 +171,17 @@ window.addEventListener('onauth', function(e) {
         }).run();
     }
 
-    function createCyJSON(json) {
-        let res = [];
-        let cnt = 0;
-        for (let i = 0; i < json["ips"].length; i++) {
-            let ip = json["ips"][i]
-            let ipJSON = {};
-            ipJSON["data"] = {};
-            ipJSON["data"]["id"] = ip["id"];
-            ipJSON["data"]["class"] = "ip";
-            ipJSON["group"] = "nodes";
-            res.push(ipJSON);
-
-            for (let j = 0; j < ip["clients"].length; j++) {
-                let client = ip["clients"][j];
-                let clientJSON = {};
-                clientJSON["data"] = {};
-                clientJSON["data"]["id"] = client["name"];
-                clientJSON["data"]["latency"] = client["latency"];
-                clientJSON["data"]["class"] = "client";
-                clientJSON["data"]["parent"] = ip["id"];
-                clientJSON["group"] = "nodes";
-                res.push(clientJSON);
-
-                for (let k = 0; k < client["published"].length; k++) {
-                    let pubEdge = client["published"][k];
-                    let pubEdgeJSON = {};
-                    pubEdgeJSON["data"] = {};
-                    pubEdgeJSON["data"]["id"] = "edge_"+(cnt++);
-                    pubEdgeJSON["data"]["bps"] = pubEdge["bps"];
-                    pubEdgeJSON["data"]["source"] = client["name"];
-                    pubEdgeJSON["data"]["target"] = pubEdge["topic"];
-                    pubEdgeJSON["group"] = "edges";
-                    res.push(pubEdgeJSON);
-                }
-            }
-        }
-
-        for (i = 0; i < json["topics"].length; i++) {
-            let topic = json["topics"][i];
-            let topicJSON = {};
-            topicJSON["data"] = {};
-            topicJSON["data"]["id"] = topic["name"];
-            topicJSON["data"]["class"] = "topic";
-            topicJSON["group"] = "nodes";
-            res.push(topicJSON);
-
-            for (j = 0; j < topic["subscriptions"].length; j++) {
-                let subEdge = topic["subscriptions"][j];
-                let subEdgeJSON = {};
-                subEdgeJSON["data"] = {};
-                subEdgeJSON["data"]["id"] = "edge_"+(cnt++);
-                subEdgeJSON["data"]["bps"] = subEdge["bps"];
-                subEdgeJSON["data"]["source"] = topic["name"];
-                subEdgeJSON["data"]["target"] = subEdge["client"];
-                subEdgeJSON["group"] = "edges";
-                res.push(subEdgeJSON);
-            }
-        }
-        return res;
-    }
-
-    function updateCy(json) {
-        try {
-            let cyJSON = createCyJSON(json);
-            cy.json({ elements: cyJSON });
-            runLayout();
-        }
-        catch (err) {
-            console.log(err.message);
-            console.log(JSON.stringify(json, undefined, 2));
-        }
+    function updateGraph(json) {
+        worker.postMessage({
+            type: "cy-json",
+            json: json
+        });
     }
 
     function onMessageArrived(message) {
         var newJSON = JSON.parse(message.payloadString);
 
-        if (!paused) updateCy(newJSON);
+        if (!paused) updateGraph(newJSON);
         prevJSON.push(newJSON);
         if (!paused) currIdx = prevJSON.length;
 
@@ -266,7 +218,7 @@ window.addEventListener('onauth', function(e) {
         paused = !paused;
         if (currIdx != prevJSON.length-1) {
             currIdx = prevJSON.length-1;
-            updateCy(prevJSON[currIdx]);
+            updateGraph(prevJSON[currIdx]);
         }
     });
 
@@ -279,7 +231,7 @@ window.addEventListener('onauth', function(e) {
             paused = false;
         }
         if (prevIdx != currIdx) {
-            updateCy(prevJSON[currIdx]);
+            updateGraph(prevJSON[currIdx]);
         }
     });
 
@@ -291,13 +243,13 @@ window.addEventListener('onauth', function(e) {
             currIdx = 0;
         }
         if (prevIdx != currIdx) {
-            updateCy(prevJSON[currIdx]);
+            updateGraph(prevJSON[currIdx]);
         }
     });
 
-    // cy.on("tap", "node", function(event) {
-    //     let obj = event.target;
-    //     let tapped_node = cy.$id(obj.id()).data();
-    //     console.log(tapped_node["id"]);
-    // });
+    cy.on("tap", "node", function(event) {
+        let obj = event.target;
+        let tappedNode = cy.$id(obj.id()).data();
+        console.log(tappedNode["id"]);
+    });
 });
