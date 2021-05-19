@@ -10,6 +10,7 @@ onmessage = (e) => {
 
 function createCyJSON(json) {
     let res = [];
+    let cnt = 0;
 
     for (const ip of json["ips"]) {
         let ipId = ip["id"] ? ip["id"] : ip["address"];
@@ -44,7 +45,6 @@ function createCyJSON(json) {
         }
     }
 
-    let cnt = 0;
     for (const topic of json["topics"]) {
         let topicJSON = {};
         topicJSON["data"] = {};
