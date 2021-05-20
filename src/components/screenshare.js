@@ -5,6 +5,11 @@
  *
  */
 
+/**
+ * Screenshare-able Component. Allows an object to be screenshared upon
+ * @module screenshareable
+ *
+ */
 AFRAME.registerSystem('screenshareable', {
     schema: {
 
@@ -33,13 +38,15 @@ AFRAME.registerSystem('screenshareable', {
     },
 
     asHTMLSelect: function() {
-        const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
+        // creates an HTML select list for usage in screen share icon
         let res = `<select id="screenshareables" class="swal2-select" multiple>`;
         if (Object.keys(this.screenshareables).length > 0) {
             for (const obj of Object.keys(this.screenshareables)) {
                 res += `<option value="${obj}">${obj}</option>`;
             }
         } else {
+            // add only one option: the default screen share object name
+            const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
             res += `<option value="${defaultScreenObj}">${defaultScreenObj}</option>`;
         }
         res += `</select>`;
@@ -58,6 +65,21 @@ AFRAME.registerComponent('screenshareable', {
     },
 
     init: function() {
+        this.update();
+    },
+
+    update: function(oldData) {
+        const register = this.data;
+        const prevRegistered = oldData;
+
+        if (register) {
+            this.register();
+        } else if (prevRegistered) {
+            this.remove();
+        }
+    },
+
+    register: function() {
         this.system.registerComponent(this);
     },
 
