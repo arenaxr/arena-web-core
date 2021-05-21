@@ -76,6 +76,7 @@ export class SideMenu {
         SPEED: 'speed',
         FLYING: 'fly',
         SCREENSHARE: 'screenshare',
+        AVSETTINGS: 'av-settings',
         LOGOUT: 'logout',
     };
 
@@ -270,6 +271,15 @@ export class SideMenu {
         this._buttonList[this.buttons.SCREENSHARE] = screenShareButton;
 
         /**
+         * Create AV Settings button
+         */
+        const avSettingsBtn = createIconButton('av-settings', 'Change A/V options',
+            () => window.setupAV(() => ARENA.Jitsi.avConnect()));
+        avSettingsBtn.style.display = 'none';
+        settingsButtons.push(avSettingsBtn);
+        this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;
+
+        /**
          * Create logout button
          */
         const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA.', () => {
@@ -327,6 +337,7 @@ export class SideMenu {
         if (!AFRAME.utils.device.isMobile()) {
             iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
         }
+        iconsDiv.appendChild(avSettingsBtn);
         iconsDiv.appendChild(logoutBtn);
         iconsDiv.appendChild(settingsBtn);
         document.body.appendChild(iconsDiv);

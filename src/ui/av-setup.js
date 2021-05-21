@@ -1,4 +1,5 @@
 import Swal from 'sweetalert2'; // Alerts
+/* global ARENA */
 
 // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
 window.setupAV = (callback) => {
@@ -12,21 +13,61 @@ window.setupAV = (callback) => {
     const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
     const micMeter = document.getElementById('micMeter');
     const displayName = document.getElementById('displayName-input');
+    const enterSceneBtn = document.getElementById('enterSceneAVBtn');
 
     let mediaStreamSource = null;
     let meterProcess = null;
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioContext();
 
-    audioInSelect.onchange = getStream;
-    videoSelect.onchange = getStream;
-    // This will fail on a lot of browsers :(
-    audioOutSelect.onchange = () => {
-        if (testAudioOut.setSinkId) {
+    /**
+     * Initialize listeners
+     */
+    function addListeners() {
+        audioInSelect.onchange = getStream;
+        videoSelect.onchange = getStream;
+        // This will fail on a lot of browsers :(
+        audioOutSelect.onchange = () => {
+            if (testAudioOut.setSinkId) {
+                localStorage.setItem('prefAudioOutput', audioOutSelect.value);
+                testAudioOut.setSinkId(audioOutSelect.value);
+            }
+        };
+        testAudioOutBtn.addEventListener('click', () => {
+            if (testAudioOut.paused) {
+                testAudioOutIcon.setAttribute('class', 'fas fa-volume-up');
+                testAudioOut.play();
+            } else {
+                testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
+                testAudioOut.pause();
+                testAudioOut.currentTime = 0;
+            }
+        });
+        testAudioOutBtn.addEventListener('ended', () => {
+            testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
+        });
+
+        document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
+        enterSceneBtn.addEventListener('click', () => {
+            // Stash preferred devices
+            localStorage.setItem('display_name', displayName.value);
+            localStorage.setItem('prefAudioInput', audioInSelect.value);
+            localStorage.setItem('prefVideoInput', videoSelect.value);
             localStorage.setItem('prefAudioOutput', audioOutSelect.value);
-            testAudioOut.setSinkId(audioOutSelect.value);
-        }
-    };
+            // Stop audio and video preview
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getAudioTracks()[0].stop();
+                videoElement.srcObject.getVideoTracks()[0].stop();
+            }
+            // Hide AV panel
+            setupPanel.classList.add('d-none');
+            // Change button name
+            enterSceneBtn.textContent = 'Return to Scene';
+            if (callback) callback();
+        });
+        document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
+        document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
+    }
 
     /**
      * Alias
@@ -189,38 +230,8 @@ window.setupAV = (callback) => {
         window.requestAnimationFrame( micDrawLoop );
     }
 
-    testAudioOutBtn.addEventListener('click', () => {
-        if (testAudioOut.paused) {
-            testAudioOutIcon.setAttribute('class', 'fas fa-volume-up');
-            testAudioOut.play();
-        } else {
-            testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
-            testAudioOut.pause();
-            testAudioOut.currentTime = 0;
-        }
-    });
-    testAudioOutBtn.addEventListener('ended', () => {
-        testAudioOutIcon.setAttribute('class', 'fas fa-volume-off');
-    });
-
-    document.getElementById('redetectAVBtn').addEventListener('click', detectDevices);
-    document.getElementById('enterSceneAVBtn').addEventListener('click', () => {
-        // Stash preferred devices
-        localStorage.setItem('display_name', displayName.value);
-        localStorage.setItem('prefAudioInput', audioInSelect.value);
-        localStorage.setItem('prefVideoInput', videoSelect.value);
-        localStorage.setItem('prefAudioOutput', audioOutSelect.value);
-        // Stop audio and video preview
-        if (videoElement.srcObject) {
-            videoElement.srcObject.getAudioTracks()[0].stop();
-            videoElement.srcObject.getVideoTracks()[0].stop();
-        }
-        // Hide AV panel
-        setupPanel.classList.add('d-none');
-        if (callback) callback();
-    });
-    document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
-    document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
+    // Add listeners if not yet attached
+    if (!document.getElementById('audioSourceSelect').onchange) addListeners();
 
     // Init
     setupPanel.classList.remove('d-none');
