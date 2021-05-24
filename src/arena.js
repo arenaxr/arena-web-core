@@ -564,15 +564,19 @@ export class Arena {
 
             const url = new URL(window.location.href);
             const skipav = url.searchParams.get('skipav');
-            if (!skipav) {
+            const noav = url.searchParams.get('noav');
+            if (noav) {
+                this.showEchoDisplayName();
+            } else if (skipav) {
+                // Directly initialize Jitsi videoconferencing
+                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+                this.showEchoDisplayName();
+            } else {
                 window.setupAV(() => {
-                    // initialize Jitsi videoconferencing
+                    // Initialize Jitsi videoconferencing after A/V setup window
                     this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                     this.showEchoDisplayName();
                 });
-            } else {
-                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-                this.showEchoDisplayName();
             }
 
             // initialize face tracking if not on mobile
