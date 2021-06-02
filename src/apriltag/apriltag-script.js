@@ -79,8 +79,8 @@ const vioFilter = (vioPrev, vioCur) => {
  * @param {number} id - numeric id of tag
  * @return {*} - tag or undefined
  */
-function getAllTags(id) {
-    const tagSystem = document.querySelector('a-scene').systems['apriltag'];
+function getAprilTag(id) {
+    const tagSystem = document.querySelector('a-scene').systems['armarker'];
     if (tagSystem !== undefined) {
         const sysTag = tagSystem.get(id);
         if (sysTag !== undefined) {
@@ -158,7 +158,7 @@ window.processCV = async function(frame) {
                 delete d.corners;
                 delete d.center;
                 // Known tag from ATLAS (includes Origin tag)
-                const indexedTag = getAllTags(d.id);
+                const indexedTag = getAprilTag(d.id);
                 if (indexedTag?.pose) {
                     d.refTag = indexedTag;
                 }
@@ -186,7 +186,7 @@ window.processCV = async function(frame) {
                 const dtagid = detection.id;
                 let refTag = null;
                 // Known tag from ATLAS (includes Origin tag)
-                const indexedTag = getAllTags(dtagid);
+                const indexedTag = getAprilTag(dtagid);
                 if (indexedTag?.pose) {
                     refTag = indexedTag;
                     /* ** No known result, try query if local solver **
