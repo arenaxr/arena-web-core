@@ -28,6 +28,7 @@ window.addEventListener('onauth', async function (e) {
     var scenelist = document.getElementById("scenelist");
     var namespacelist = document.getElementById("namespacelist");
     var sceneUrl = document.getElementById("scene_url");
+    var scenePermsUrl = document.getElementById("scene_perms_url");
     var objFilter = document.getElementById("objfilter");
     var objFilterSel = document.getElementById("objfiltersel");
     var arenaHostLbl = document.getElementById("arenahost");
@@ -78,7 +79,9 @@ window.addEventListener('onauth', async function (e) {
 
     var updateLink = function() {
         let dp = getDevPath();
+        let permsp = 'user/profile/scenes/';
         sceneUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespacelist.value}/${scenelist.value}`;
+        scenePermsUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${permsp}${namespacelist.value}/${scenelist.value}`;
     };
 
     var updateUrl = function() {
@@ -170,15 +173,15 @@ window.addEventListener('onauth', async function (e) {
             jsoneditor.setValue(updateobj);
             output.value = JSON.stringify(updateobj, null, 2);
             reload(true);
-    
+
             window.location.hash = "edit_section";
-    
+
             Alert.fire({
                 icon: 'info',
                 title: 'Loaded.',
                 html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/><button class="btn btn-primary btn-mini" type="button" title="Add or Update Object" onClick="addObjHandler()"><i class="icon-plus"></i> Add/Update Object</a> </button> when done.',
                 timer: 10000,
-            });    
+            });
         });
 
     }
