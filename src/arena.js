@@ -175,6 +175,20 @@ export class Arena {
     };
 
     /**
+     * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
+     * @param {string} mqttToken The JWT token for the user to connect to MQTT/Jitsi.
+     * @return {boolean} True if the user has permission to stream audio/video in this scene.
+     */
+    isJitsiPermitted(mqttToken) {
+        if (mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
+            const perms = tokenObj.payloadObj;
+            if (perms.room) return true;
+        }
+        return false;
+    }
+
+    /**
      * Renders/updates the display name in the top left corner of a scene.
      * @param {boolean} speaker If the user is the dominant speaker
      */
@@ -565,7 +579,7 @@ export class Arena {
             const url = new URL(window.location.href);
             const skipav = url.searchParams.get('skipav');
             const noav = url.searchParams.get('noav');
-            if (noav) {
+            if (noav || !this.isJitsiPermitted(this.mqttToken)) {
                 this.showEchoDisplayName();
             } else if (skipav) {
                 // Directly initialize Jitsi videoconferencing

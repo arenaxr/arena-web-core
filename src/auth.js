@@ -274,6 +274,14 @@ function formatPerms(perms) {
         const date = new Date(perms.exp * 1000);
         lines.push(`Expires: ${date.toLocaleString()}`);
     }
+    if (typeof ARENA !== 'undefined') {
+        lines.push('');
+        if (perms.room) {
+            lines.push(`Video Conference: allowed`);
+        } else {
+            lines.push(`Video Conference: disallowed`);
+        }
+    }
     lines.push('');
     lines.push(`Publish topics:`);
     if (perms.publ && perms.publ.length > 0) {
@@ -344,7 +352,7 @@ function initAuthPanel() {
 
     const title = document.createElement('h3');
     title.style.textAlign = 'center';
-    title.innerHTML = 'MQTT Permissions';
+    title.innerHTML = 'MQTT/Video Permissions';
     modalDiv.appendChild(title);
 
     const dataDiv = document.createElement('div');
