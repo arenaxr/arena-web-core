@@ -274,7 +274,7 @@ export class SideMenu {
          * Create AV Settings button
          */
         const avSettingsBtn = createIconButton('av-settings', 'Change A/V options',
-            () => window.setupAV(() => ARENA.Jitsi.avConnect()));
+            () => window.setupAV(() => ARENA.Jitsi.avConnect(true)));
         avSettingsBtn.style.display = 'none';
         settingsButtons.push(avSettingsBtn);
         this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;

@@ -408,7 +408,7 @@ export class ARENAJitsi {
      * Called when dominant speaker changes.
      * @param {string} id user Id
      */
-     onDominantSpeakerChanged(id) {
+    onDominantSpeakerChanged(id) {
         // console.log(`(conference) Dominant Speaker ID: ${id}`);
         this.prevActiveSpeaker = this.activeSpeaker;
         this.activeSpeaker = id;
@@ -550,26 +550,26 @@ export class ARENAJitsi {
      * Connect audio and video and start sending local tracks
      * @return {promise}
      */
-    async avConnect() {
-        if (this.avConnected) {
+    async avConnect(reset= false) {
+        if (this.avConnected && !reset) {
             return;
         }
 
-        const perfAudioInput = localStorage.getItem('prefAudioInput');
-        const perfVideoInput = localStorage.getItem('prefVideoInput');
+        const prefAudioInput = localStorage.getItem('prefAudioInput');
+        const prefVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
         const deviceOpts = {};
-        if (perfAudioInput) {
-            deviceOpts.micDeviceId = perfAudioInput;
+        if (prefAudioInput) {
+            deviceOpts.micDeviceId = prefAudioInput;
         }
 
         try {
             let vidConstraint = true;
-            if (perfVideoInput) {
-                vidConstraint = {deviceId: {exact: perfVideoInput}};
+            if (prefVideoInput) {
+                vidConstraint = {deviceId: {exact: prefVideoInput}};
                 try {
                     await navigator.mediaDevices.getUserMedia({video: vidConstraint});
-                    deviceOpts.cameraDeviceId = perfVideoInput;
+                    deviceOpts.cameraDeviceId = prefVideoInput;
                 } catch {
                     await navigator.mediaDevices.getUserMedia({video: true});
                 }
@@ -602,12 +602,21 @@ export class ARENAJitsi {
         }
         this.avConnected = true;
 
-        JitsiMeetJS.createLocalTracks({devices, ...deviceOpts})
-            .then((tracks) => {
+        if (reset && this.conference) {
+            for (const track of this.conference.getLocalTracks()) {
+                if (track.getType() === 'video') {
+                    // use already defined e.g. <video id="cornerVideo" ...>
+                    await track.detach($(`#cornerVideo`)[0]);
+                }
+                await track.dispose();
+            }
+        }
+        JitsiMeetJS.createLocalTracks({devices, ...deviceOpts}).
+            then((tracks) => {
                 this.onLocalTracks(tracks);
                 if (this.withVideo) setupCornerVideo.bind(this)();
-            })
-            .catch((err) => {
+            }).
+            catch((err) => {
                 this.ready = false;
                 console.warn(err);
             });

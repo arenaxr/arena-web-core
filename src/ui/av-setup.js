@@ -1,8 +1,10 @@
-import Swal from 'sweetalert2'; // Alerts
+import Swal from 'sweetalert2';
+import {SideMenu} from '../icons/index.js';
 /* global ARENA */
 
 // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
 window.setupAV = (callback) => {
+    window.setupAVCallback = callback;
     const setupPanel = document.getElementById('avSetup');
     const videoElement = document.getElementById('vidPreview');
     const audioInSelect = document.getElementById('audioSourceSelect');
@@ -63,7 +65,7 @@ window.setupAV = (callback) => {
             setupPanel.classList.add('d-none');
             // Change button name
             enterSceneBtn.textContent = 'Return to Scene';
-            if (callback) callback();
+            if (window.setupAVCallback) window.setupAVCallback();
         });
         document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
         document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
@@ -234,6 +236,10 @@ window.setupAV = (callback) => {
     if (!document.getElementById('audioSourceSelect').onchange) addListeners();
 
     // Init
+    // Stop video if currently in use
+    if (ARENA.Jitsi?.hasVideo) {
+        SideMenu.clickButton(SideMenu.buttons.VIDEO);
+    }
     setupPanel.classList.remove('d-none');
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
