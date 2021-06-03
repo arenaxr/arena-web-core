@@ -130,6 +130,7 @@ window.addEventListener('onauth', async function(e) {
     document.getElementById('migrate_mod').style.display = 'none';
     document.getElementById('create_mod').style.display = 'none';
 
+    // get config from arts
     cfg = await sendRequest('GET', '/arts-api/v1/config/');
     console.info(cfg);
 
@@ -137,7 +138,7 @@ window.addEventListener('onauth', async function(e) {
         topic[t.name] = t.topic;
     });
 
-    document.getElementById('mqtt_conn_str').value = `wss://${cfg.mqtt_server.host}/${cfg.mqtt_server.ws_path}`;
+    document.getElementById('mqtt_conn_str').value = `wss://${cfg.web_client_mqtt.host}/${cfg.web_client_mqtt.ws_path}`;
 
     if (e.detail) {
         if (e.detail.mqtt_username) {
