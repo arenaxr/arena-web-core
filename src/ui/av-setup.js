@@ -240,6 +240,9 @@ window.setupAV = (callback) => {
     if (ARENA.Jitsi?.hasVideo) {
         SideMenu.clickButton(SideMenu.buttons.VIDEO);
     }
+    if (ARENA.Jitsi?.hasAudio) {
+        SideMenu.clickButton(SideMenu.buttons.AUDIO);
+    }
     setupPanel.classList.remove('d-none');
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
