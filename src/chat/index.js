@@ -112,11 +112,18 @@ export class ARENAChat {
         // counter for unread msgs
         this.unreadMsgs = 0;
 
-        this.alertBox = document.createElement('div');
-        this.alertBox.className = 'chat-alert-box';
-        this.alertBox.innerText = '';
-        document.body.appendChild(this.alertBox);
+        // sweetalert mixin for our messages
+        this.Alert = Swal.mixin({
+            toast: true,
+            position: 'top',
+            showConfirmButton: false,
+            showCloseButton: true,
+            timerProgressBar: true,
+            timer: 1500,
+            background: '#d3e2e6'
+          })
 
+        // create chat html elements
         const btnGroup = document.createElement('div');
         btnGroup.className = 'chat-button-group';
         document.body.appendChild(btnGroup);
@@ -461,7 +468,7 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     talkWhileMutedCallback = (e) => {
-        this.displayAlert(`You are talking on mute.`, 2000);
+        this.displayAlert(`You are talking on mute.`, 2000, 'warning');
     };
 
     /**
@@ -470,7 +477,7 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     noisyMicCallback = (e) => {
-        this.displayAlert(`Your microphone appears to be noisy.`, 2000);
+        this.displayAlert(`Your microphone appears to be noisy.`, 2000, 'warning');
     };
 
     /**
@@ -656,7 +663,7 @@ export class ARENAChat {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
-                this.displayAlert(`You have been asked to leave in 5 seconds by ${msg.from_un}.`, 5000);
+                this.displayAlert(`You have been asked to leave in 5 seconds by ${msg.from_un}.`, 5000, 'warning');
                 setTimeout(() => {
                     signOut();
                 }, 5000);
@@ -678,6 +685,8 @@ export class ARENAChat {
 
         // check if chat is visible
         if (this.chatPopup.style.display == 'none') {
+            let msgText = (msg.text.length > 15) ? msg.text.substring(0, 15) + '...' : msg.text; 
+            this.displayAlert(`New message from ${msg.from_un}: ${msgText}.`, 3000);
             this.chatDot.style.display = 'block';
         }
     }
@@ -792,10 +801,12 @@ export class ARENAChat {
             } else {
                 msg = `${newUser.un} started screen sharing.`;
             }
+            let alertType = 'info';
+            if (newUser.type !== 'arena') alertType = 'warning';
             this.displayAlert(
                 msg,
                 5000,
-                newUser.type,
+                alertType,
             );
         }
 
@@ -1010,16 +1021,28 @@ export class ARENAChat {
      * Uses Sweetalert library to popup a toast message.
      * @param {string} msg Text of the message.
      * @param {number} timeMs Duration of message in milliseconds.
-     * @param {string} type Style of message: 'arena' - internal, 'external' - external
+     * @param {string} type Style of message: success, error, warning, info, question
      */
-    displayAlert(msg, timeMs, type='') {
-        if (type !== '' && type !== 'arena' && type !== 'external') type = 'external';
-        this.alertBox.textContent = msg;
-        this.alertBox.style.display = 'block';
-        this.alertBox.className = `chat-alert-box ${type}`;
-        setTimeout(() => {
-            this.alertBox.style.display = 'none';
-        }, timeMs); // clear message in timeMs milliseconds
+    displayAlert(msg, timeMs, type='info') {
+        if (type !== 'info' && type !== 'success' && type !== 'error' && type !== 'warning' && type !== 'question') type = 'error';
+        let backgroundColor=undefined;
+        let iconColor=undefined;
+        if (type == 'error') {
+            iconColor='#616161';
+            backgroundColor = '#ff9e9e';
+        }
+        if (type == 'warning') {
+            iconColor='#616161';
+            backgroundColor = '#f8bb86';
+        }
+
+        this.Alert.fire({
+            icon: type,
+            titleText: msg,
+            timer: timeMs,
+            iconColor: iconColor,
+            background: backgroundColor,
+        });
     }
 
     /**
