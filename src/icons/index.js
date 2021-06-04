@@ -329,9 +329,9 @@ export class SideMenu {
 
         const iconsDiv = document.createElement('div');
         iconsDiv.setAttribute('id', 'icons-div');
-        iconsDiv.appendChild(audioBtn);
-        iconsDiv.appendChild(videoBtn);
         if (!url.searchParams.get('noav')) {
+            iconsDiv.appendChild(audioBtn);
+            iconsDiv.appendChild(videoBtn);
             iconsDiv.appendChild(avSettingsBtn);
         }
         if (!AFRAME.utils.device.isMobile()) {
