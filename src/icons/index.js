@@ -141,6 +141,17 @@ export class SideMenu {
         });
         this._buttonList[this.buttons.VIDEO] = videoBtn;
 
+        /**
+         * Create AV Settings button
+         */
+        const url = new URL(window.location.href);
+        const avSettingsBtn = createIconButton('av-settings', 'Change A/V options',
+            () => window.setupAV(() => ARENA.Jitsi.avConnect(true)));
+        if (!url.searchParams.get('noav')) {
+            this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;
+        }
+
+
         const settingsButtons = [];
 
         /**
@@ -271,15 +282,6 @@ export class SideMenu {
         this._buttonList[this.buttons.SCREENSHARE] = screenShareButton;
 
         /**
-         * Create AV Settings button
-         */
-        const avSettingsBtn = createIconButton('av-settings', 'Change A/V options',
-            () => window.setupAV(() => ARENA.Jitsi.avConnect(true)));
-        avSettingsBtn.style.display = 'none';
-        settingsButtons.push(avSettingsBtn);
-        this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;
-
-        /**
          * Create logout button
          */
         const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA.', () => {
@@ -329,6 +331,9 @@ export class SideMenu {
         iconsDiv.setAttribute('id', 'icons-div');
         iconsDiv.appendChild(audioBtn);
         iconsDiv.appendChild(videoBtn);
+        if (!url.searchParams.get('noav')) {
+            iconsDiv.appendChild(avSettingsBtn);
+        }
         if (!AFRAME.utils.device.isMobile()) {
             iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
         }
@@ -337,7 +342,6 @@ export class SideMenu {
         if (!AFRAME.utils.device.isMobile()) {
             iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
         }
-        iconsDiv.appendChild(avSettingsBtn);
         iconsDiv.appendChild(logoutBtn);
         iconsDiv.appendChild(settingsBtn);
         document.body.appendChild(iconsDiv);
