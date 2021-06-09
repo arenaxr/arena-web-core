@@ -116,6 +116,13 @@ export class ARENAMqtt {
             CreateUpdate.handle(theMessage.action, theMessage);
             break;
         case 'delete':
+            // check topic
+            if (message) {
+                if (!message.destinationName.endsWith(theMessage.id)) {
+                    console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                    return;
+                } 
+            }              
             Delete.handle(theMessage);
             break;
         case 'getPersist':
