@@ -91,6 +91,13 @@ export class ARENAMqtt {
                 console.warn('Malformed message (no data field):', JSON.stringify(message));
                 return;
             }
+            // check topic
+            if (message) {
+                if (!message.destinationName.endsWith(theMessage.data.source)) {
+                    console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                    return;
+                }
+            }            
             ClientEvent.handle(theMessage);
             break;
         case 'create':
@@ -99,6 +106,13 @@ export class ARENAMqtt {
                 console.warn('Malformed message (no data field):', JSON.stringify(message));
                 return;
             }
+            // check topic
+            if (message) {
+                if (!message.destinationName.endsWith(theMessage.id)) {
+                    console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                    return;
+                } 
+            }            
             CreateUpdate.handle(theMessage.action, theMessage);
             break;
         case 'delete':
