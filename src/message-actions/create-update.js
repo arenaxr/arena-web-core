@@ -264,6 +264,8 @@ export class CreateUpdate {
             this.setComponentAttributes(entityEl, data, type);
         }
 
+        // TODO: set click-listener
+
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);
     }
