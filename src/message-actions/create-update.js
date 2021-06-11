@@ -264,10 +264,16 @@ export class CreateUpdate {
             this.setComponentAttributes(entityEl, data, type);
         }
 
-        // TODO: set click-listener
-
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);
+
+        if (!ARENA.clickableOnlyEvents) {
+            // unusual case: clickableOnlyEvents = true by default
+            if (!entityEl.hasOwnProperty('click-listener')) {
+                // attach click-listener to all objects that don't already have them
+                entityEl.setAttribute('click-listener', '');
+            }
+        }
     }
 
     /**

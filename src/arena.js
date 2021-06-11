@@ -464,10 +464,6 @@ export class Arena {
                         sceneRoot.appendChild(navMesh);
                     }
 
-                    if (sceneOptions['clickableOnlyEvents']) {
-                        // todo do the thing
-                    }
-
                     // save scene options
                     for (const [attribute, value] of Object.entries(sceneOptions)) {
                         ARENA[attribute] = value;
