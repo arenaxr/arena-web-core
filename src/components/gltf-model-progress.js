@@ -24,10 +24,6 @@ import './gltf-progress-style.css';
       this.alertBox.className = 'alert-box';
       document.body.appendChild(this.alertBox);
       
-      this.iconSpan = document.createElement('span');
-      this.iconSpan.innerHTML = '<i class="fa fa-refresh fa-spin alert-icon" aria-hidden="true"></i>';
-      this.alertBox.appendChild(this.iconSpan);
-      
       this.titleSpan = document.createElement('span');
       this.titleSpan.className = 'alert-title';
       this.alertBox.appendChild(this.titleSpan);
@@ -35,11 +31,6 @@ import './gltf-progress-style.css';
       this.bodySpan = document.createElement('div');
       this.bodySpan.className = 'alert-body';
       this.alertBox.appendChild(this.bodySpan);    
-  
-      this.closeAlertBox = document.createElement('span');
-      this.closeAlertBox.className = 'alert-closebtn';
-      this.closeAlertBox.innerHTML = '&times;';
-      this.alertBox.appendChild(this.closeAlertBox);
   
       this.progressBar = document.createElement('div');
       this.progressBar.className = 'alert-progress';
@@ -197,11 +188,11 @@ import './gltf-progress-style.css';
         files.push({cols:[shortName,progessStr], isError:lp.failed});
       }
       let percent = (pSum / Object.keys(this.loadProgress).length).toFixed(1);
-      let title = `Loading GLTF: ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${doneCount}/${Object.keys(this.loadProgress).length})`;
+      let title = `Loading GLTF: ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${doneCount}/${Object.keys(this.loadProgress).length}`;
       if (errors > 0) {
-        //title = `Loading GLTF: Error, failed ${errors}/${Object.keys(this.loadProgress).length}. Loaded ${parseFloat(percent)}%`;
-        title += ` (failed ${errors})`;
+        title += `; failed ${errors}`;
       }
+      title += `)`;
 
       this.loadAlert.display(title, files, percent);
     }
