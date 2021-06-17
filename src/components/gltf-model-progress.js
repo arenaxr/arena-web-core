@@ -16,9 +16,10 @@ import './gltf-progress-style.css';
  * @private
  */
  class LoadAlertTable {
-    constructor(maxRows=10, errorsOnTop=true) {
+    constructor(maxRows=10, errorsOnTop=true, timeoutMs=5000) {
       this.maxRows = maxRows;
       this.errorsOnTop = errorsOnTop;
+      this.timeMs = timeoutMs;
       this.alertBox = document.createElement('div');
       this.alertBox.className = 'alert-box';
       document.body.appendChild(this.alertBox);
@@ -94,8 +95,7 @@ import './gltf-progress-style.css';
             }, this.timeMs);    
     }
     
-    display(title, rows, progress=0, timeMs=5000) {
-            this.timeMs = timeMs;    
+    display(title, rows, progress=0) {
             this.title = title;
             this.progress = progress;
             if (rows) this.tableHTML = this.parseTableRows(rows);
@@ -117,14 +117,13 @@ import './gltf-progress-style.css';
      * @alias module:gltf-model-progress
      */     
     init: function() {
-      this.loadCount = 0;
       this.loadProgress = {};
-      this.loadAlert = new LoadAlertTable(this.ALERT_MAX_ROWS);
+      this.loadAlert = new LoadAlertTable(this.ALERT_MAX_ROWS, true, this.ALERT_TIMEOUT);
     },
     /**
      * Register a gltf-model to deal with load events
      * @param {object} el - The a-frame element to register.
-     * @alias module:gltf-model-system
+     * @alias module:gltf-model-progress
      */
     registerGltf: function(el) {
       const src = el.getAttribute("gltf-model");
@@ -145,20 +144,18 @@ import './gltf-progress-style.css';
       }
     },
     /**
-     * Unregister a gltf-model component
+     * Unregister a gltf-model
      * @param {object} el - The a-frame element.
-     * @alias module:gltf-model-system
+     * @alias module:gltf-model-progress
      */
     unregisterGltfBySrc: function(src) {
       delete this.loadProgress[src];
-      this.loadCount--;
-      if (this.loadProgress.length == 0) this.loadCount = 0;
     },
-
     /**
      * Updates GLTF Progress
      * @param {boolean} failed whether or not download was successful
      * @param {object} evt gltf event
+     * @alias module:gltf-model-progress
      */
     updateProgress: function(failed, evt) {
       this.loadProgress[evt.detail.src].failed = failed;
@@ -168,15 +165,15 @@ import './gltf-progress-style.css';
       if (failed || evt.detail.progress == Infinity || evt.detail.progress == 100) {
         if (this.loadProgress[evt.detail.src].done == false) {
           this.loadProgress[evt.detail.src].done = true;
-          this.loadCount++;
         }
         // remove from list after a timeout
         setTimeout(() => {
           this.unregisterGltfBySrc(evt.detail.src);
-        }, this.ALERT_TIMEOUT);
+        }, this.ALERT_TIMEOUT*2);
       }
 
       let pSum = 0;
+      let doneCount = 0;
       let files = [];
       let errors = 0;
       for (const [src, lp] of Object.entries(this.loadProgress)) {
@@ -196,13 +193,17 @@ import './gltf-progress-style.css';
           progessStr = "failed";
           errors++;
         }
+        if (lp.done) doneCount++;
         files.push({cols:[shortName,progessStr], isError:lp.failed});
       }
-      let title = `Loading GLTF: ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${this.loadCount}/${Object.keys(this.loadProgress).length})`;
+      let percent = (pSum / Object.keys(this.loadProgress).length).toFixed(1);
+      let title = `Loading GLTF: ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${doneCount}/${Object.keys(this.loadProgress).length})`;
       if (errors > 0) {
-        title = `Loading GLTF: Error, failed ${errors}/${Object.keys(this.loadProgress).length}. Loaded ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}%`;
+        //title = `Loading GLTF: Error, failed ${errors}/${Object.keys(this.loadProgress).length}. Loaded ${parseFloat(percent)}%`;
+        title += ` (failed ${errors})`;
       }
-      this.loadAlert.display(title, files, (pSum / Object.keys(this.loadProgress).length).toFixed(1), this.ALERT_TIMEOUT);
+
+      this.loadAlert.display(title, files, percent);
     }
     
   });
