@@ -93,11 +93,11 @@ export class ARENAMqtt {
             }
             // check topic
             if (message) {
-                if (!message.destinationName.endsWith(theMessage.data.source)) {
+                if (!message.destinationName.endsWith(`/${theMessage.data.source}`)) {
                     console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
                 }
-            }            
+            }
             ClientEvent.handle(theMessage);
             break;
         case 'create':
@@ -108,21 +108,21 @@ export class ARENAMqtt {
             }
             // check topic
             if (message) {
-                if (!message.destinationName.endsWith(theMessage.id)) {
+                if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
                     console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
-                } 
-            }            
+                }
+            }
             CreateUpdate.handle(theMessage.action, theMessage);
             break;
         case 'delete':
             // check topic
             if (message) {
-                if (!message.destinationName.endsWith(theMessage.id)) {
+                if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
                     console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
-                } 
-            }              
+                }
+            }
             Delete.handle(theMessage);
             break;
         case 'getPersist':
