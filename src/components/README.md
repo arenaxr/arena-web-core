@@ -37,7 +37,10 @@ Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-F
 </dd>
 <dt><a href="#module_gesture-detector">gesture-detector</a></dt>
 <dd><p>Detect multi-finger touch gestures. Publish events accordingly.
-Based off 8th Wall&#39;s <a href="https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js">gesture-detector</a></p>
+Based off 8th Wall&#39;s <a href="https://github.com/8thwall/web/tree/master/examples/aframe">gesture-detector</a></p>
+</dd>
+<dt><a href="#module_gltf-model-progress">gltf-model-progress</a></dt>
+<dd><p>GLTF model loading progress system. Manage GLTF load messages.</p>
 </dd>
 <dt><a href="#module_goto-url">goto-url</a></dt>
 <dd><p>Load new URL when object is clicked</p>
@@ -69,6 +72,9 @@ Implements a timeout scheme in lack of better understanding of the timing/events
 <dd><p>Press and move camera; User camera movement with the mouse.
 Based off <a href="https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js">wasd controls</a></p>
 </dd>
+<dt><a href="#module_screenshareable">screenshareable</a></dt>
+<dd><p>Screenshare-able Component. Allows an object to be screenshared upon</p>
+</dd>
 <dt><a href="#module_textinput">textinput</a></dt>
 <dd><p>Opens an HTML prompt when clicked. Sends text input as an event on MQTT</p>
 </dd>
@@ -83,6 +89,17 @@ Update <em>is</em> allowed, which will reset the timer to start from that moment
 </dd>
 <dt><a href="#module_video-control">video-control</a></dt>
 <dd><p>Adds a video to an entity and controls its playback.</p>
+</dd>
+</dl>
+
+## Functions
+
+<dl>
+<dt><a href="#exp_module_gltf-model-system--registerGltf">registerGltf(el)</a> ⏏</dt>
+<dd><p>Register a gltf-model to deal with load events</p>
+</dd>
+<dt><a href="#exp_module_gltf-model-system--unregisterGltfBySrc">unregisterGltfBySrc(el)</a> ⏏</dt>
+<dd><p>Unregister a gltf-model component</p>
 </dd>
 </dl>
 
@@ -151,7 +168,7 @@ ARMarker System. Supports ARMarkers in a scene.
 ### registerComponent(marker) ⏏
 Register an ARMarker component with the system
 
-**Kind**: Exported function
+**Kind**: Exported function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -162,7 +179,7 @@ Register an ARMarker component with the system
 ### unregisterComponent(marker) ⏏
 Unregister an ARMarker component
 
-**Kind**: Exported function
+**Kind**: Exported function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -173,21 +190,21 @@ Unregister an ARMarker component
 ### getAll(mtype) ⇒ <code>object</code> ⏏
 Get all markers registered with the system
 
-**Kind**: Exported function
-**Returns**: <code>object</code> - - a dictionary of markers
+**Kind**: Exported function  
+**Returns**: <code>object</code> - - a dictionary of markers  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | mtype | <code>object</code> | The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for; No argument or undefined will return all |
 
-**Example** *(Query the system a list of all markers in a scene)*
+**Example** *(Query the system a list of all markers in a scene)*  
 ```js
     let markers = document.querySelector("a-scene").systems["armarker"].getAll();
     Object.keys(markers).forEach(function(key) {
       console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
     });
 ```
-**Example** *(getAll() also accepts a marker type argument to filter by a given type)*
+**Example** *(getAll() also accepts a marker type argument to filter by a given type)*  
 ```js
     let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
 ```
@@ -196,8 +213,8 @@ Get all markers registered with the system
 ### get(markerid) ⇒ <code>object</code> ⏏
 Get a marker given is markerid
 
-**Kind**: Exported function
-**Returns**: <code>object</code> - - the marker with the markerid given
+**Kind**: Exported function  
+**Returns**: <code>object</code> - - the marker with the markerid given  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -229,7 +246,7 @@ Tries to extract author, license, source and title (assuming format used in sket
 Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
 If both asset.extras and scene.extra exist, gives preference to asset.extras.
 
-**Example** *(Sketchfab downloaded model attributes - asset.extra)*
+**Example** *(Sketchfab downloaded model attributes - asset.extra)*  
 ```js
    author: "AuthorName (url-link-to-author)"
    license: "CC-BY-4.0 (url-link-to-license)"
@@ -250,7 +267,7 @@ If both asset.extras and scene.extra exist, gives preference to asset.extras.
 ### registerComponent(el) ⏏
 Register an attribution component with the system
 
-**Kind**: Exported function
+**Kind**: Exported function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -261,7 +278,7 @@ Register an attribution component with the system
 ### unregisterComponent(el) ⏏
 Unregister an attribution component
 
-**Kind**: Exported function
+**Kind**: Exported function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -272,9 +289,9 @@ Unregister an attribution component
 ### getAttributionTable() ⇒ <code>string</code> ⏏
 Collect all attribution components and return an HTML table with credits
 
-**Kind**: Exported function
-**Returns**: <code>string</code> - - an HTML table with the scene credits
-**Example** *(Query the system for an HTML table of credits:)*
+**Kind**: Exported function  
+**Returns**: <code>string</code> - - an HTML table with the scene credits  
+**Example** *(Query the system for an HTML table of credits:)*  
 ```js
    document.querySelector("a-scene").systems["attribution"].getAttributionTable();
 ```
@@ -290,7 +307,7 @@ Extract author, license, source and title assuming sketchfab format:
 It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
 If both are found, data will be merged with preference to properties in asset.extras
 
-**Kind**: Exported function
+**Kind**: Exported function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -302,8 +319,8 @@ If both are found, data will be merged with preference to properties in asset.ex
 ### parseExtrasAttributes(extras) ⇒ <code>object</code> ⏏
 Parse author, license, source and title attributes.
 
-**Kind**: Exported function
-**Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed
+**Kind**: Exported function  
+**Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -314,8 +331,8 @@ Parse author, license, source and title attributes.
 ### parseAttribute(extras, attribution, attribute) ⇒ <code>boolean</code> ⏏
 Parse attribute given as parameter. Tries to find the attribute and add it to 'attribution' dictionary
 
-**Kind**: Exported function
-**Returns**: <code>boolean</code> - - true/false if it could find the attribute
+**Kind**: Exported function  
+**Returns**: <code>boolean</code> - - true/false if it could find the attribute  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -353,7 +370,7 @@ Keep track of mouse events and publish corresponding events
 ### init() ⏏
 Setup event listeners for mouse events; listeners publish events to MQTT
 
-**Kind**: Exported function
+**Kind**: Exported function  
 **Todo**
 
 - [ ] Consolidate event listeners (they are very similar)
@@ -364,12 +381,40 @@ Setup event listeners for mouse events; listeners publish events to MQTT
 Listen for collisions, callback on event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>
+**Requires**: <code>module:aframe-physics-system</code>  
 <a name="module_gesture-detector"></a>
 
 ## gesture-detector
 Detect multi-finger touch gestures. Publish events accordingly.
-Based off 8th Wall's [gesture-detector](https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js)
+Based off 8th Wall's [gesture-detector](https://github.com/8thwall/web/tree/master/examples/aframe)
+
+<a name="module_gltf-model-progress"></a>
+
+## gltf-model-progress
+GLTF model loading progress system. Manage GLTF load messages.
+
+
+* [gltf-model-progress](#module_gltf-model-progress)
+    * [init()](#exp_module_gltf-model-progress--init) ⏏
+        * [~updateProgress(failed, evt)](#module_gltf-model-progress--init..updateProgress)
+
+<a name="exp_module_gltf-model-progress--init"></a>
+
+### init() ⏏
+Init system
+
+**Kind**: Exported function  
+<a name="module_gltf-model-progress--init..updateProgress"></a>
+
+#### init~updateProgress(failed, evt)
+Updates GLTF Progress
+
+**Kind**: inner method of [<code>init</code>](#exp_module_gltf-model-progress--init)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| failed | <code>boolean</code> | whether or not download was successful |
+| evt | <code>object</code> | gltf event |
 
 <a name="module_goto-url"></a>
 
@@ -397,7 +442,7 @@ One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>
+**Requires**: <code>module:aframe-physics-system</code>  
 <a name="module_landmark"></a>
 
 ## landmark
@@ -409,7 +454,7 @@ Component-System of teleport destination Landmarks
 | --- | --- | --- | --- |
 | [randomRadiusMin] | <code>number</code> | <code>0</code> | Min for a random range to teleport to. Max must > 0 |
 | [randomRadiusMax] | <code>number</code> | <code>0</code> | Max for a random range to teleport to. |
-| [offsetPosition] | <code>THREE.Vector3</code> | <code>{0,0,0}</code> | vector3 {x,y,z} to use as static teleport offset |
+| [offsetPosition] | <code>THREE.Vector3</code> | <code>{0,1.6,0}</code> | vector3 {x,y,z} to use as static teleport offset |
 | [constrainToNavMesh] | <code>string</code> | <code>&quot;&#x27;false&#x27;&quot;</code> | Teleports here should snap to navmesh. ['false', 'any', 'coplanar'] |
 | [startingPosition] | <code>boolean</code> | <code>false</code> | True: use as a random scene load-in position |
 | [lookAtLandmark] | <code>boolean</code> | <code>true</code> | True: After teleporting, user should rotate @ landmark |
@@ -467,6 +512,11 @@ Based off [wasd controls](https://github.com/aframevr/aframe/blob/master/src/com
 | [enabled] | <code>boolean</code> | <code>true</code> | Is the camera movement component enabled. |
 | [fly] | <code>boolean</code> | <code>true</code> | Is the camera at a fixed height (`fly=false`) or not (`fly=true`) |
 
+<a name="module_screenshareable"></a>
+
+## screenshareable
+Screenshare-able Component. Allows an object to be screenshared upon
+
 <a name="module_textinput"></a>
 
 ## textinput
@@ -519,6 +569,9 @@ Adds a video to an entity and controls its playback.
 | --- | --- | --- | --- |
 | video_object | <code>string</code> |  | the object id of the element where to display the video |
 | video_path | <code>string</code> |  | path/url to the video |
+| [frame_object] | <code>string</code> |  | path/url to the keyframe to display |
 | [anyone_clicks] | <code>boolean</code> | <code>true</code> | anyone clicks |
 | [video_loop] | <code>boolean</code> | <code>true</code> | video loop |
+| [autoplay] | <code>boolean</code> | <code>false</code> | video autoplays on load |
+| [volume] | <code>number</code> | <code>1</code> | video sound volume |
 
