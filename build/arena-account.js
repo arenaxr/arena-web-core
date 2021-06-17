@@ -41,13 +41,16 @@ export class ARENAUserAccount {
     }
 
     /**
-     * Request user state data for client-side state management
      * @typedef {Object} UserAccountData
      * @param authenticated {boolean} is the user authenticated
      * @param type {string} auth type
      * @param username {string} user's name
      * @param fullname {string} user's full name
      * @param email {string} user's email
+     */
+
+    /**
+     * Request user state data for client-side state management
      * @return {UserAccountData} object with user account data
      */
     static async userAuthState() {

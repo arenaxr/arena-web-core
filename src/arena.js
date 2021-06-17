@@ -578,9 +578,24 @@ export class Arena {
 
             const url = new URL(window.location.href);
             const skipav = url.searchParams.get('skipav');
+            const armode = url.searchParams.get('armode');
             const noav = url.searchParams.get('noav');
             if (noav || !this.isJitsiPermitted(this.mqttToken)) {
                 this.showEchoDisplayName();
+            } else if (armode && AFRAME.utils.device.checkARSupport()) {
+                /*
+                Instantly enter AR mode for now.
+                TODO: incorporate AV selection for possible Jitsi and multicamera
+                 */
+                Swal.fire({
+                    title: 'Enter AR Mode',
+                    html: `This is an immersive AR scene that requires access to your camera and device sensors.`,
+                    icon: 'info',
+                    showConfirmButton: true,
+                    confirmButtonText: 'Enter',
+                }).then(() => {
+                    document.getElementsByTagName('a-scene')[0].enterAR();
+                });
             } else if (skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);

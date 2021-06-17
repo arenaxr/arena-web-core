@@ -173,15 +173,6 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
-            if (!AFRAME.THREE.Cache.files[data.src]) {
-                // add load event listeners, only if not already cached
-                entityEl.addEventListener('model-progress', (evt) => {
-                    GLTFProgress.updateProgress(false, evt);
-                });
-                entityEl.addEventListener('model-error', (evt) => {
-                    GLTFProgress.updateProgress(true, evt);
-                });
-            }
             break;
         case 'headtext':
             // handle changes to other users head text
@@ -266,6 +257,14 @@ export class CreateUpdate {
 
         // what remains in data are components we set as attributes of the entity
         this.setEntityAttributes(entityEl, data);
+
+        if (typeof ARENA.clickableOnlyEvents !== 'undefined' && !ARENA.clickableOnlyEvents) {
+            // unusual case: clickableOnlyEvents = true by default
+            if (!entityEl.hasOwnProperty('click-listener')) {
+                // attach click-listener to all objects that don't already have them
+                entityEl.setAttribute('click-listener', '');
+            }
+        }
     }
 
     /**
