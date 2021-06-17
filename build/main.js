@@ -3,7 +3,7 @@ import {ARENAUserAccount} from "./arena-account.js"
 
 const Alert = Swal.mixin({
     toast: true,
-    position: 'top-start',
+    position: 'bottom-end',
     showConfirmButton: false,
     timer: 5000,
     timerProgressBar: true,
