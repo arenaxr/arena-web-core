@@ -182,6 +182,7 @@ import './gltf-progress-style.css';
           }
         } else {
           progessStr = "failed";
+          pSum += 100;
           errors++;
         }
         if (lp.done) doneCount++;
