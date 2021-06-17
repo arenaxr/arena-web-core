@@ -18,6 +18,7 @@ import './attribution.js';
 import './click-listener.js';
 import './collision-listener.js';
 import './gesture-detector.js';
+import './gltf-model-progress.js';
 import './goto-url.js';
 import './hide-in-ar-mode.js';
 import './impulse.js';
