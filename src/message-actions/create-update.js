@@ -1,5 +1,4 @@
 import {Logger} from './logger.js';
-import {GLTFProgress} from '../gltf-progress/';
 
 // handle actions
 const ACTIONS = {
