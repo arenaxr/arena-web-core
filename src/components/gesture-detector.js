@@ -2,7 +2,7 @@
 
 /**
  * @fileoverview Component that detects multi-finger touch gestures. 
- * Based off of work from 8th Wall at https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js
+ * Based off of work from 8th Wall at https://github.com/8thwall/web/tree/master/examples/aframe
  *
  */
 
@@ -12,7 +12,7 @@ import {
 
 /**
  * Detect multi-finger touch gestures. Publish events accordingly.
- * Based off 8th Wall's [gesture-detector]{@link https://github.com/8thwall/web/blob/master/examples/aframe/manipulate/gesture-detector.js}
+ * Based off 8th Wall's [gesture-detector]{@link https://github.com/8thwall/web/tree/master/examples/aframe}
  * @module gesture-detector
  */
 AFRAME.registerComponent('gesture-detector', {
