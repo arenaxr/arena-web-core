@@ -173,15 +173,6 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
-            if (!AFRAME.THREE.Cache.files[data.src]) {
-                // add load event listeners, only if not already cached
-                entityEl.addEventListener('model-progress', (evt) => {
-                    GLTFProgress.updateProgress(false, evt);
-                });
-                entityEl.addEventListener('model-error', (evt) => {
-                    GLTFProgress.updateProgress(true, evt);
-                });
-            }
             break;
         case 'headtext':
             // handle changes to other users head text
