@@ -179,7 +179,7 @@ window.addEventListener('onauth', async function (e) {
             Alert.fire({
                 icon: 'info',
                 title: 'Loaded.',
-                html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/><button class="btn btn-primary btn-mini" type="button" title="Add or Update Object" onClick="addObjHandler()"><i class="icon-plus"></i> Add/Update Object</a> </button> when done.',
+                html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/> Press "Add or Update Object" button when done.',
                 timer: 10000,
             });
         });
