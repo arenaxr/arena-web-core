@@ -130,7 +130,6 @@ window.addEventListener('onauth', async function(e) {
     document.getElementById('migrate_mod').style.display = 'none';
     document.getElementById('create_mod').style.display = 'none';
 
-    // get config from arts
     cfg = await sendRequest('GET', '/arts-api/v1/config/');
     console.info(cfg);
 
