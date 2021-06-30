@@ -34,7 +34,7 @@
                 </div>
 
                 <div class="tab">
-                    <button id="_modules" class="tablinks">Modules</button>
+                    <button id="_modules" class="tablinks active">Modules</button>
                     <button id="_runtimes" class="tablinks">Runtimes</button>
                     <button id="_misc" class="tablinks">Misc/Demos</button>
                 </div>
@@ -107,6 +107,14 @@
                     <button id="delete_rt_btn" class="button">Delete</button>
                     <p />
                     Delete the runtime from ARTS database; does not terminate the runtime itself
+                    <p/>
+                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_dbg_rt' title="Press to toggle visibility of the section"><i
+                        class="fas fa-angle-up fa-lg" id='dbg_rt_icon'></i>&nbspRuntime Messages</a><p/>
+                    <div id="dbg_rt" style='display: block'>
+                            <p class="small" id='module_label'>(Select runtime by clicking on it on the tree) <p />
+                            <textarea id="dbg_rt_box" rows="50" cols="30"></textarea>
+                            <p/>
+                    </div>
                 </div>
 
                 <div id="misc" class="tabcontent">

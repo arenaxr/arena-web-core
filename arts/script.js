@@ -14,10 +14,13 @@ topic['stdin'] = topic['dbg'] + '/stdin';
 let pendingUuid = '';
 
 let stdout = [];
+let rtdbg = [];
 let deletedModules = [];
+let errorRts = [];
 
 let statusBox;
 let stdoutBox;
+let rtDebugBox;
 let moduleLabel;
 let runtimeSelect;
 let sendrtSelect;
@@ -25,6 +28,7 @@ let delrtSelect;
 let moduleSelect;
 
 let selectedMod;
+let selectedRt;
 let treeData;
 let mqttc;
 let mqttUsername;
@@ -54,6 +58,7 @@ programData = {
 window.addEventListener('onauth', async function(e) {
     statusBox = document.getElementById('status_box');
     stdoutBox = document.getElementById('stdout_box');
+    rtDebugBox = document.getElementById('dbg_rt_box');
     moduleLabel = document.getElementById('module_label');
     runtimeSelect = document.getElementById('runtime_select');
     sendrtSelect = document.getElementById('sendto_runtime_select');
@@ -150,8 +155,6 @@ window.addEventListener('onauth', async function(e) {
 
     loadTreeData();
 
-    //setInterval(loadTreeData, reloadIntervalMilli); // reload data periodically
-
     startConnect();
 });
 
@@ -166,6 +169,16 @@ function stdoutMsg(mId, msg) {
     if (selectedMod.uuid == mId) {
         stdoutBox.value += msg + '\n';
         stdoutBox.scrollTop = stdoutBox.scrollHeight;
+    }
+}
+
+function rtDbgMsg(rtId, msg) {
+    if (rtdbg[rtId] == undefined) rtdbg[rtId] = {ts: Date.now(), ml: []};
+    rtdbg[rtId].ml.push(msg);
+    if (selectedRt == undefined) return;
+    if (selectedRt.uuid == rtId) {
+        rtDebugBox.value += msg + '\n';
+        rtDebugBox.scrollTop = rtDebugBox.scrollHeight;
     }
 }
 
@@ -272,7 +285,7 @@ function displayTree(treeData) {
                 return d.id || (d.id = ++i);
             });
 
-        // Enter any new modes at the parent's previous position.
+        // Enter any new nodes at the parent's previous position.
         const nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr('transform', function(d) {
@@ -299,11 +312,7 @@ function displayTree(treeData) {
         nodeEnter.append('circle')
             .attr('class', 'node')
             .attr('r', 1e-6)
-            .style('fill', function(d) {
-                if (d.data.type === 'runtime') return '#fff';
-                if (d.data.type === 'module') return 'lightsteelblue';
-                return 'steelblue';
-            });
+            .style('fill', 'steelblue'); // these are updated bellow
 
         // Add labels for the nodes
         nodeEnter.append('text')
@@ -358,7 +367,11 @@ function displayTree(treeData) {
                 return 15;
             })
             .style('fill', function(d) {
-                if (d.data.type === 'runtime') return '#fff';
+                if (d.data.type === 'runtime') {
+                    let eRt = errorRts.filter(rt => rt.uuid === d.data.uuid);
+                    if (eRt.length > 0) return '#c94324';
+                    return '#fff';
+                }                    
                 if (d.data.type === 'module') {
                     if (d.data.deleted) return  'gray';
                     return 'lightsteelblue';
@@ -459,9 +472,7 @@ function displayTree(treeData) {
         }
 
         if (d.data.type === 'runtime') { // runtime clicked
-            runtimeSelect.value = d.data.uuid;
-            delrtSelect.value = d.data.uuid;
-            sendrtSelect.value = d.data.uuid;
+            runtimeSelected(d.data);
         } else if (d.data.type === 'module') { // module clicked
             moduleSelected(d.data);
         }
@@ -558,9 +569,10 @@ function onConnect() {
     // Print output for the user in the messages div
     console.info('Subscribing to: ' + topic['ctl']);
 
-    // Subscribe to the reg and request topics
+    // Subscribe to reg, ctl and dbg topics
     mqttc.subscribe(topic['ctl']);
     mqttc.subscribe(topic['reg']);
+    mqttc.subscribe(`${topic['dbg']}/#`);
 
     // Subscribe to the stdout topic
     mqttc.subscribe(topic['stdout'] + '/#');
@@ -578,7 +590,7 @@ function onConnectionLost(responseObject) {
 
 // Called when a message arrives
 function onMessageArrived(message) {
-    console.info('Received: ', message.payloadString, '[', message.destinationName, ']');
+    //console.info('Received: ', message.payloadString, '[', message.destinationName, ']');
 
     if (message.destinationName.startsWith(topic['stdout'])) {
         try {
@@ -626,6 +638,14 @@ function onMessageArrived(message) {
 
     if (message.destinationName == topic['reg']) {
         loadTreeData();
+    }
+
+    if (message.destinationName.startsWith(topic['dbg'])) {
+        let rtUuid = message.destinationName.replace(`${topic['dbg']}/`, '');
+        rtDbgMsg(rtUuid, message.payloadString);
+        if (message.payloadString.startsWith('ERROR:')) {
+            errorRts.push({uuid: rtUuid});
+        }
     }
 }
 
@@ -867,9 +887,13 @@ function toggleSection(section) {
 }
 
 function moduleSelected(modData) {
+    openTab({currentTarget: document.getElementById('_modules')}, 'modules');
+    selectedRt=undefined;
     if (selectedMod == undefined || selectedMod.uuid != modData.uuid) {
         moduleSelect.value = JSON.stringify(modData);
         selectedMod = modData;
+
+        // populate module stdout box
         stdoutBox.value = '';
         if (stdout[selectedMod.uuid]) {
             stdout[selectedMod.uuid].ml.forEach((l) => {
@@ -878,6 +902,27 @@ function moduleSelected(modData) {
             stdoutBox.scrollTop = stdoutBox.scrollHeight;
         }
         moduleLabel.innerText = 'Stdout for module \'' + selectedMod.name + '\' (' + selectedMod.uuid + ')' + ' :';
+    }
+
+}
+
+function runtimeSelected(rtData) {
+    openTab({currentTarget: document.getElementById('_runtimes')}, 'runtimes');
+    selectedMod=undefined;
+    if (selectedRt == undefined || selectedRt.uuid != rtData.uuid) {
+        selectedRt = rtData;
+        runtimeSelect.value = selectedRt.uuid;
+        delrtSelect.value = selectedRt.uuid;
+        sendrtSelect.value = selectedRt.uuid;
+
+        // populate runtime dbg box
+        rtDebugBox.value = '';
+        if (rtdbg[selectedRt.uuid]) {
+            rtdbg[selectedRt.uuid].ml.forEach((l) => {
+                rtDebugBox.value += l + '\n';
+            });
+            rtDebugBox.scrollTop = rtDebugBox.scrollHeight;
+        }
     }
 
 }
