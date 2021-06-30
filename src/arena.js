@@ -8,6 +8,7 @@
 
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
+import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
@@ -545,10 +546,11 @@ export class Arena {
             // last will topic
             this.outputTopic + this.camName,
             );
-
+            
             // init runtime manager
             this.RuntimeManager = RuntimeMngr;
             this.RuntimeManager.init({
+                realm: this.defaults.realm,
                 mqtt_uri: this.mqttHostURI,
                 onInitCallback: function() {
                     console.info('Runtime init done.');
@@ -559,7 +561,11 @@ export class Arena {
                 mqtt_token: this.mqttToken,
             });
 
-            // init chat after
+            // start sending console output to mqtt (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)
+            let rtInfo = this.RuntimeManager.info();
+            console.setOptions({dbgTopic: `${rtInfo.dbg_topic}/${rtInfo.uuid}`, publish: this.Mqtt.publish.bind(this.Mqtt)});
+            
+            // init chat 
             this.chat = new ARENAChat({
                 userid: this.idTag,
                 cameraid: this.camName,
@@ -617,8 +623,8 @@ export class Arena {
                 const flipped = true;
                 this.FaceTracker.init(displayBbox, flipped);
             }
-
-            console.info('ARENA Started; ARENA=', ARENA);
+            console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
+     
         }); // mqtt API (after this.* above, are defined)
     }
 }
