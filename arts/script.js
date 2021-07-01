@@ -645,6 +645,7 @@ function onMessageArrived(message) {
         rtDbgMsg(rtUuid, message.payloadString);
         if (message.payloadString.startsWith('ERROR:')) {
             errorRts.push({uuid: rtUuid});
+            loadTreeData();
         }
     }
 }
