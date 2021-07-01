@@ -64,7 +64,7 @@ export class ARENAChat {
                     `wss://${location.hostname}${(location.port ? `:${location.port}` : '')}/mqtt/`,
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
-            supportDevFolders: st.supportDevFolders !== undefined ? st.supportDevFolders : false,
+            devInstance: st.devInstance !== undefined ? st.devInstance : false,
             isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
             isSpeaker: false,
         };
@@ -1057,7 +1057,7 @@ export class ARENAChat {
             localStorage.setItem('moveToFrontOfCamera', cameraId);
             const path = window.location.pathname.substring(1);
             let devPath = '';
-            if (this.settings.supportDevFolders && path.length > 0) {
+            if (this.settings.devInstance && path.length > 0) {
                 try {
                     devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
                 } catch (e) {

@@ -5,7 +5,7 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-
+import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
@@ -34,6 +34,11 @@ export class Arena {
      * Constructor; init arena properties
      */
     constructor() {
+        // replace console with our logging (only when not in dev)
+        if (!ARENADefaults.devInstance) {
+            // will queue messages until MQTT connection is available (indicated by console.setOptions())
+            ARENAMqttConsole.init();
+        }
         this.defaults = ARENADefaults; // "get" arena defaults
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
@@ -124,7 +129,7 @@ export class Arena {
         };
         let path = window.location.pathname.substring(1);
         let {namespace: namespace, sceneName: scenename} = this.defaults;
-        if (this.defaults.supportDevFolders && path.length > 0) {
+        if (this.defaults.devInstance && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
             if (devPrefix) {
                 path = path.replace(devPrefix[0], '');
@@ -545,10 +550,11 @@ export class Arena {
             // last will topic
             this.outputTopic + this.camName,
             );
-
+            
             // init runtime manager
             this.RuntimeManager = RuntimeMngr;
             this.RuntimeManager.init({
+                realm: this.defaults.realm,
                 mqtt_uri: this.mqttHostURI,
                 onInitCallback: function() {
                     console.info('Runtime init done.');
@@ -559,7 +565,13 @@ export class Arena {
                 mqtt_token: this.mqttToken,
             });
 
-            // init chat after
+            // start sending console output to mqtt (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)
+            if (!ARENADefaults.devInstance) {
+                let rtInfo = this.RuntimeManager.info();
+                console.setOptions({dbgTopic: `${rtInfo.dbg_topic}/${rtInfo.uuid}`, publish: this.Mqtt.publish.bind(this.Mqtt)});
+            }
+
+            // init chat 
             this.chat = new ARENAChat({
                 userid: this.idTag,
                 cameraid: this.camName,
@@ -572,7 +584,7 @@ export class Arena {
                 mqtt_host: this.mqttHostURI,
                 mqtt_username: this.username,
                 mqtt_token: this.mqttToken,
-                supportDevFolders: this.defaults.supportDevFolders,
+                devInstance: this.defaults.devInstance,
             });
             await this.chat.start();
 
@@ -617,8 +629,8 @@ export class Arena {
                 const flipped = true;
                 this.FaceTracker.init(displayBbox, flipped);
             }
-
-            console.info('ARENA Started; ARENA=', ARENA);
+            console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
+     
         }); // mqtt API (after this.* above, are defined)
     }
 }
