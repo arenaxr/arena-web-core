@@ -33,10 +33,6 @@
             "title": "color",
             "type": "string"
           },
-          "colorWrite": {
-            "description": "Color write",
-            "type": "boolean"
-          },
           "depthTest": {
             "default": true,
             "description": "Whether depth testing is enabled when rendering the material.",
@@ -81,11 +77,6 @@
             "default": 1,
             "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
             "type": "number"
-          },
-          "render-order": {
-            "default": "0",
-            "description": "The render-order system takes a comma-delimited list of strings that name the render order layers. The render order layers will map to a number starting from 0 and counting up from there.",
-            "type": "string"
           },
           "repeat": {
             "default": {
@@ -176,6 +167,15 @@
           },
           "needsUpdate": {
             "default": false,
+            "type": "boolean"
+          },
+          "render-order": {
+            "default": "0",
+            "description": "The render-order system takes a comma-delimited list of strings that name the render order layers. The render order layers will map to a number starting from 0 and counting up from there.",
+            "type": "string"
+          },  
+          "colorWrite": {
+            "description": "Color write",
             "type": "boolean"
           }
         },
