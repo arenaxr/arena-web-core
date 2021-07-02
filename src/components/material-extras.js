@@ -41,7 +41,13 @@ AFRAME.registerComponent('material-extras', {
         this.retryIndex = 0;
 
         let transparentOccluder = false;
-        if (oldData) transparentOccluder = oldData.transparentOccluder;
+        if (oldData) {
+            transparentOccluder = oldData.transparentOccluder;
+            if (oldData.renderOrder !== this.data.renderOrder ||
+                oldData.colorWrite !== this.data.colorWrite) {
+                this.data.needsUpdate = true;
+            }
+        }
 
         if (transparentOccluder !== this.data.transparentOccluder) {
             // a transparent occluder has renderOrder=0 and colorWrite=false
@@ -52,6 +58,7 @@ AFRAME.registerComponent('material-extras', {
                 this.data.renderOrder = this.data.defaultRenderOrder; // default renderOrder used in the arena
                 this.data.colorWrite = true; // default colorWrite
             }
+            this.data.needsUpdate = true;
         }
         this.el.object3D.renderOrder=this.data.renderOrder;
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
