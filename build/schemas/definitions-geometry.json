@@ -170,14 +170,22 @@
             "type": "boolean"
           },
           "render-order": {
-            "default": "0",
-            "description": "The render-order system takes a comma-delimited list of strings that name the render order layers. The render order layers will map to a number starting from 0 and counting up from there.",
-            "type": "string"
+            "default": "1",
+            "description": "This value allows the default rendering order of scene graph objects to be overridden.",
+            "type": "number"
           },  
           "colorWrite": {
-            "description": "Color write",
+            "description": "Whether to render the material’s color",
             "type": "boolean"
-          }
+          },
+          "transparentOccluder": {
+            "description": "If true, will set colorWrite=false and renderOrder=0 to make the material a transparent occluder.",
+            "type": "boolean"
+          },
+          "defaultRenderOrder": {
+            "description": "Used as the renderOrder when transparentOccluder is reset to false.",
+            "type": "number"
+          }               
         },
         "title": "Material extras",
         "type": "object"
