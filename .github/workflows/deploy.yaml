@@ -26,6 +26,6 @@ jobs:
              npm ci
              npm run build
              cd ..
-             ./prod.sh stop arena-web
-             ./prod.sh up --force-recreate -d arena-web
+             ./prod.sh down
+             ./prod.sh up --force-recreate -d 
 
