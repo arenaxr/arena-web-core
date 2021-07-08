@@ -11,12 +11,12 @@ export class Delete {
     static handle(message) {
         const id = message.id;
         if (id === undefined) {
-            Logger.error('delete', 'Malformed message (no object_id):', JSON.stringify(message));
+            console.error('delete', 'Malformed message (no object_id):', JSON.stringify(message));
         }
 
         const entityEl = document.getElementById(id);
         if (!entityEl) {
-            Logger.error('delete', `Object with object_id "${id}" does not exist!`);
+            console.error('delete', `Object with object_id "${id}" does not exist!`);
             return;
         }
 
