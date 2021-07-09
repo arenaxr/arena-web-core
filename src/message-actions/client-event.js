@@ -33,7 +33,7 @@ export class ClientEvent {
                 parseFloat(data.position.z),
             );
         } else {
-            Logger.warning('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
+            Logger.warn('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
         }
 
         const clicker = data.source;

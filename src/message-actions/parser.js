@@ -12,19 +12,19 @@ export class Parser {
      */
     static parse(source, message) {
         if (!message) {
-            Logger.warn(source, 'Received empty message');
+            console.warn(source, 'Received empty message');
             return undefined;
         }
 
         const object_id = message.object_id;
         if (object_id === undefined) {
-            Logger.error(source, 'Malformed message (no object_id):', JSON.stringify(message));
+            console.error(source, 'Malformed message (no object_id):', JSON.stringify(message));
             return undefined;
         }
 
         const data = message.data;
         if (data === undefined) {
-            Logger.error(source, 'Malformed message (no data field):', JSON.stringify(message));
+            console.error(source, 'Malformed message (no data field):', JSON.stringify(message));
             return undefined;
         }
 

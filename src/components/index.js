@@ -22,6 +22,7 @@ import './gltf-model-progress.js';
 import './goto-url.js';
 import './hide-in-ar-mode.js';
 import './impulse.js';
+import './jitsi-video.js';
 import './landmark.js';
 import './load-scene.js';
 import './material-extras.js';
