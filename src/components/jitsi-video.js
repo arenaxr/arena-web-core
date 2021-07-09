@@ -44,7 +44,8 @@ AFRAME.registerComponent('jitsi-video', {
         }
         if (this.data.displayName === undefined) return;
         args.pl.forEach((user) => {
-            if (user.dn === this.data.displayName) {
+            console.log(user.dn);
+            if (user.dn === this.data.displayName) {                
                 this.data.jitsiId = user.jid;
                 this.updateVideo();
                 return;
@@ -58,10 +59,20 @@ AFRAME.registerComponent('jitsi-video', {
             this.updateVideo();
         }
     },
+    setVideoSrc: function(){
+        console.log('src', `#${this.videoID}`);
+        this.el.setAttribute('material','src', `#${this.videoID}`); // video only! (no audio)
+        this.el.setAttribute('material', 'shader', 'flat');
+        this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+        this.el.setAttribute('material-extras', 'needsUpdate', 'true');
+    },
     updateVideo: function() {
         const data = this.data;
         if (!data) return;        
-        if (!data.jitsiId) return;
+        if (!data.jitsiId) {
+            console.log('no jid');
+            return;
+        }
         if (!ARENA.Jitsi) {
             this.retryWaitVideoLoad();
             return;
@@ -76,17 +87,16 @@ AFRAME.registerComponent('jitsi-video', {
             this.retryWaitVideoLoad();
             return;
         }
-        let _this = this;
-        jitsiVideo.onloadeddata = function() {
-            console.log('src', `#${_this.videoID}`);
-            _this.el.setAttribute('material','src', `#${_this.videoID}`); // video only! (no audio)
-            _this.el.setAttribute('material', 'shader', 'flat');
-            _this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-            _this.el.setAttribute('material-extras', 'needsUpdate', 'true');
-        };        
+        if (jitsiVideo.readyState == 4) { // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+            this.setVideoSrc();
+            return;
+        }
+        // if not loaded yet, try to wait for load
+        this.retryWaitVideoLoad();
     },
     retryWaitVideoLoad: function() {
         setTimeout(async () => {
+            console.log('retry');
             this.updateVideo();
         }, 1000); // try again in a bit
     }
