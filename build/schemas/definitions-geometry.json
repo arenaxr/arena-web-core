@@ -6,6 +6,21 @@
         "title": "Buffer",
         "type": "boolean"
       },
+      "jitsi-video": {
+        "description": "Apply a jitsi video source to the geometry",
+        "title": "Jitsi Video",
+        "properties": {
+            "jitsiId": {
+                "description": "JitsiId of the video source; If defined will override displayName",
+                "type": "string"                
+            },
+            "displayName": {
+                "description": "ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given",
+                "type": "string"
+            }
+        },
+        "required": ["displayName"]
+      },      
       "material": {
         "description": "The material properties of the object’s surface.",
         "properties": {
