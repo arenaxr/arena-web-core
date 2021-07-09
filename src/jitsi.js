@@ -249,6 +249,7 @@ export class ARENAJitsi {
 
                 if (camName && objectIds) {
                     ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
+                        jid:participantId,
                         id: participantId,
                         dn: dn,
                         cn: camName,
@@ -268,6 +269,7 @@ export class ARENAJitsi {
                     }
                 } else { // display as external user; possible spoofer
                     ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                        jid: participantId,
                         id: participantId,
                         dn: dn,
                         cn: undefined,
@@ -320,6 +322,7 @@ export class ARENAJitsi {
             const arenaCameraName = user.getProperty('arenaCameraName');
             if (arenaId) {
                 pl.push({
+                    jid: user._id,
                     id: arenaId,
                     dn: arenaDisplayName,
                     cn: arenaCameraName,
@@ -346,6 +349,7 @@ export class ARENAJitsi {
         if (arenaId && arenaDisplayName && arenaCameraName) {
             // emit user joined event in the off chance we know all properties of this arena user
             ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                jid: id,
                 id: arenaId,
                 dn: arenaDisplayName,
                 cn: arenaCameraName,
@@ -357,6 +361,7 @@ export class ARENAJitsi {
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
             // user join event args, to be emited below
             const userJoinedArgs = {
+                jid: id,                
                 id: id,
                 dn: dn,
                 cn: undefined,
@@ -399,6 +404,7 @@ export class ARENAJitsi {
 
         // emit user left event
         ARENA.events.emit(ARENAEventEmitter.events.USER_LEFT, {
+            jid: id,
             id: arenaId,
             src: ARENAEventEmitter.sources.JITSI,
         });

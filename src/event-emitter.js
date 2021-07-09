@@ -18,6 +18,7 @@ export class ARENAEventEmitter {
         * Indicates we joined a jitsi conference (also on reconnect),
         * provides a list of current users/participants:
         * @typedef {Object} UserData
+        * @param jid {string} the Jitsi conference id of the user
         * @param id {string} the ARENA id of the user
         * @param dn {string} the display name of the user
         * @param cn {string} the camera name of the user
@@ -34,6 +35,7 @@ export class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback userJoinCallback
+         * @param jid {string} the Jitsi conference id of the user
          * @param id {string} the ARENA id of the user
          * @param dn {string} the display name of the user
          * @param cn {string} the camera name of the user
@@ -43,11 +45,12 @@ export class ARENAEventEmitter {
         USER_JOINED: 'user_joined',
 
         /**
-         * Indicates a user joined. The event provides
+         * Indicates a new screenshare was started joined. The event provides
          * the following parameters to its listeners (event.detail object):
          *
-         * @callback userJoinCallback
-         * @param id {string} the ARENA id of the user
+         * @callback screenshareCallback
+         * @param jid {string} the Jitsi conference id of the user
+         * @param id {string} the Jitsi conference id of the user (ARENA id not available)
          * @param dn {string} the display name of the user
          * @param cn {string} the camera name of the user
          * @param scene {string} the scene
@@ -60,6 +63,7 @@ export class ARENAEventEmitter {
          * the following parameters to its listeners (event.detail object):
          *
          * @callback userLeftCallback
+         * @param jid {string} the Jitsi conference id of the user
          * @param id {string} the ARENA id of the user
          * @param src {string} the source of the event (see ARENAEventEmitter.sources below)
          */
