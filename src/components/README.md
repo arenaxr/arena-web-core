@@ -54,6 +54,10 @@ Based on <a href="https://github.com/aframevr/aframe/pull/4356">this example</a>
 This happens in conjunction with an event.
 Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-Frame VR</a></p>
 </dd>
+<dt><a href="#module_jitsi-video">jitsi-video</a></dt>
+<dd><p>Apply a jitsi video to a geometry
+Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name</p>
+</dd>
 <dt><a href="#module_landmark">landmark</a></dt>
 <dd><p>Component-System of teleport destination Landmarks</p>
 </dd>
@@ -92,17 +96,6 @@ Update <em>is</em> allowed, which will reset the timer to start from that moment
 </dd>
 </dl>
 
-## Functions
-
-<dl>
-<dt><a href="#exp_module_gltf-model-system--registerGltf">registerGltf(el)</a> ⏏</dt>
-<dd><p>Register a gltf-model to deal with load events</p>
-</dd>
-<dt><a href="#exp_module_gltf-model-system--unregisterGltfBySrc">unregisterGltfBySrc(el)</a> ⏏</dt>
-<dd><p>Unregister a gltf-model component</p>
-</dd>
-</dl>
-
 <a name="module_arena-camera"></a>
 
 ## arena-camera
@@ -110,16 +103,18 @@ Tracking camera movement in real time. Emits camera pose change and VIO change e
 
 **Properties**
 
-| Name | Type | Description |
-| --- | --- | --- |
-| enabled | <code>boolean</code> | Indicates whether camera tracking is enabled. |
-| vioEnabled | <code>boolean</code> | Indicates whether to publish VIO on every tick (if true). |
-| displayName | <code>string</code> | User display name (used to publish camera data). |
-| color | <code>string</code> | Head text color. |
-| rotation | <code>Array.&lt;number&gt;</code> | Last camera rotation value. |
-| position | <code>Array.&lt;number&gt;</code> | Last camera position value. |
-| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value. |
-| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value. |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| enabled | <code>boolean</code> |  | Indicates whether camera tracking is enabled. |
+| vioEnabled | <code>boolean</code> |  | Indicates whether to publish VIO on every tick (if true). |
+| displayName | <code>string</code> |  | User display name (used to publish camera data). |
+| color | <code>string</code> |  | Head text color. |
+| [headModel] | <code>string</code> | <code>&quot;&#x27;robobit&#x27;&quot;</code> | Builtin head model (one of: 'robobit', 'grey-head') |
+| [videoShape] | <code>string</code> | <code>&quot;&#x27;default-box&#x27;&quot;</code> | Builtin video shape (one of: 'default-box', 'flat-box') |
+| rotation | <code>Array.&lt;number&gt;</code> |  | Last camera rotation value. |
+| position | <code>Array.&lt;number&gt;</code> |  | Last camera position value. |
+| vioRotation | <code>Array.&lt;number&gt;</code> |  | Last VIO rotation value. |
+| vioPosition | <code>Array.&lt;number&gt;</code> |  | Last VIO position value. |
 
 <a name="module_arena-user"></a>
 
@@ -131,7 +126,8 @@ Another user's camera in the ARENA. Handles Jitsi and display name updates.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [color] | <code>color</code> | <code>white</code> | The color for the user's name text. |
-| [headModelPath] | <code>string</code> | <code>&quot;/store/models/robobit.glb&quot;</code> | Path to user head model |
+| [headModel] | <code>string</code> | <code>&quot;&#x27;robobit&#x27;&quot;</code> | Builtin head model (one of: 'robobit', 'grey-head') |
+| [videoShape] | <code>string</code> | <code>&quot;&#x27;default-box&#x27;&quot;</code> | Builtin video shape (one of: 'default-box', 'flat-box') |
 | [jitsiId] | <code>string</code> |  | User jitsi id. |
 | [displayName] | <code>string</code> |  | User display name. |
 | [hasAudio] | <code>boolean</code> | <code>false</code> | Whether the user has audio on. |
@@ -396,7 +392,9 @@ GLTF model loading progress system. Manage GLTF load messages.
 
 * [gltf-model-progress](#module_gltf-model-progress)
     * [init()](#exp_module_gltf-model-progress--init) ⏏
-        * [~updateProgress(failed, evt)](#module_gltf-model-progress--init..updateProgress)
+    * [registerGltf(el)](#exp_module_gltf-model-progress--registerGltf) ⏏
+    * [unregisterGltfBySrc(el)](#exp_module_gltf-model-progress--unregisterGltfBySrc) ⏏
+    * [updateProgress(failed, evt)](#exp_module_gltf-model-progress--updateProgress) ⏏
 
 <a name="exp_module_gltf-model-progress--init"></a>
 
@@ -404,12 +402,34 @@ GLTF model loading progress system. Manage GLTF load messages.
 Init system
 
 **Kind**: Exported function  
-<a name="module_gltf-model-progress--init..updateProgress"></a>
+<a name="exp_module_gltf-model-progress--registerGltf"></a>
 
-#### init~updateProgress(failed, evt)
+### registerGltf(el) ⏏
+Register a gltf-model to deal with load events
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>object</code> | The a-frame element to register. |
+
+<a name="exp_module_gltf-model-progress--unregisterGltfBySrc"></a>
+
+### unregisterGltfBySrc(el) ⏏
+Unregister a gltf-model
+
+**Kind**: Exported function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| el | <code>object</code> | The a-frame element. |
+
+<a name="exp_module_gltf-model-progress--updateProgress"></a>
+
+### updateProgress(failed, evt) ⏏
 Updates GLTF Progress
 
-**Kind**: inner method of [<code>init</code>](#exp_module_gltf-model-progress--init)  
+**Kind**: Exported function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -443,6 +463,19 @@ This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
 **Requires**: <code>module:aframe-physics-system</code>  
+<a name="module_jitsi-video"></a>
+
+## jitsi-video
+Apply a jitsi video to a geometry
+Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [jitsiId] | <code>string</code> | JitsiId of the video source; If defined will override displayName |
+| [displayName] | <code>string</code> | ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. IMPORTANT: editing this property requires reload |
+
 <a name="module_landmark"></a>
 
 ## landmark

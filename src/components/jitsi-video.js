@@ -2,11 +2,20 @@
 import {ARENAEventEmitter} from '../event-emitter.js';
 
 /**
- * @fileoverview Display a jitsi video
+ * @fileoverview Apply a jitsi video to a geometry
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
  */
 
 /**
+ * Apply a jitsi video to a geometry
+ * Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name
  * @module jitsi-video
+ * @property {string} [jitsiId] - JitsiId of the video source; If defined will override displayName
+ * @property {string} [displayName] - ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. IMPORTANT: editing this property requires reload 
+ *
  */
 AFRAME.registerComponent('jitsi-video', {
     schema: {
