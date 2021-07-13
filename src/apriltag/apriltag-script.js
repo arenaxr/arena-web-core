@@ -95,7 +95,7 @@ function getAprilTag(id) {
 }
 
 
-window.processCV = async function(frame) {
+window.processCV = async function (frame) {
     const ARENA = window.ARENA;
     cvThrottle++;
     if (cvThrottle % ARENA.cvRate) {
@@ -143,7 +143,8 @@ window.processCV = async function(frame) {
     if (detections.length) {
         if (ARENA.networkedTagSolver || ARENA.publishDetections) {
             const jsonMsg = {
-                scene: ARENA.renderParam,
+                scene: ARENA.sceneName,
+                namespace: ARENA.nameSpace,
                 type: 'apriltag',
                 timestamp: timestamp,
                 camera_id: ARENA.camName,
@@ -180,7 +181,12 @@ window.processCV = async function(frame) {
                     // console.log('Move Threshold Exceeded: ' + detection.pose.e);
                     continue;
                 }
-                const jsonMsg = {scene: ARENA.renderParam, timestamp: timestamp, camera_id: ARENA.camName};
+                const jsonMsg = {
+                    scene: ARENA.sceneName,
+                    namespace: ARENA.nameSpace,
+                    timestamp: timestamp,
+                    camera_id: ARENA.camName
+                };
                 delete detection.corners;
                 delete detection.center;
                 const dtagid = detection.id;
@@ -235,9 +241,7 @@ window.processCV = async function(frame) {
                                 },
                             },
                         });
-                        ARENA.Mqtt.publish(
-                            'realm/s/' + ARENA.renderParam + '/apriltag_' +
-                            dtagid, JSON.stringify(jsonMsg));
+                        ARENA.Mqtt.publish(`realm/s/${ARENA.nameSpace}/${ARENA.sceneName}/apriltag_${dtagid}`, JSON.stringify(jsonMsg));
                     }
                 }
             }
@@ -306,7 +310,7 @@ function getTagPoseFromRig(dtag) {
 }
 
 /** show the image on a canvas; just for debug
-function showGrayscaleImage(canvasid, pixeldata, imgWidth, imgHeight) {
+ function showGrayscaleImage(canvasid, pixeldata, imgWidth, imgHeight) {
     const canvas = document.getElementById(canvasid);
     const ctx = canvas.getContext('2d');
     const imageData = ctx.createImageData(imgWidth, imgHeight);
@@ -378,7 +382,7 @@ async function updateAprilTags() {
 }
 
 /**
-Initializes aprilTag worker
+ Initializes aprilTag worker
  */
 async function init() {
     const ARENA = window.ARENA;
