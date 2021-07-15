@@ -34,7 +34,8 @@
                                 "pointColor": {
                                     "description": "Color of the points",
                                     "title": "Points Color",
-                                    "type": "color",
+                                    "format": "color",
+                                    "type": "string",
                                     "default": "#7f7f7f"
                                 }                                                                   
                             }
@@ -50,6 +51,8 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "pcd-model",
+                        "pointSize": 0.01,
+                        "pointColor": "#7f7f7f",
                         "position": {
                             "x": 0,
                             "y": 0,
@@ -69,6 +72,7 @@
                     "required": [
                         "object_type",
                         "url",
+                        "pointSize"
                         "position",
                         "rotation",
                         "scale"
