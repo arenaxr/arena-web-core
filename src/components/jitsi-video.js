@@ -14,7 +14,7 @@ import {ARENAEventEmitter} from '../event-emitter.js';
  * Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name
  * @module jitsi-video
  * @property {string} [jitsiId] - JitsiId of the video source; If defined will override displayName
- * @property {string} [displayName] - ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. IMPORTANT: editing this property requires reload 
+ * @property {string} [displayName] - ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. Editing this property requires reload 
  *
  */
 AFRAME.registerComponent('jitsi-video', {
@@ -24,6 +24,7 @@ AFRAME.registerComponent('jitsi-video', {
     },
     init: function() {
         const el = this.el;
+
         ARENA.events.on(ARENAEventEmitter.events.JITSI_CONNECT, (e) => this.jitsiConnect(e.detail));
         ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, (e) => this.jitsiNewUser(e.detail));
     },
@@ -34,7 +35,7 @@ AFRAME.registerComponent('jitsi-video', {
             this.updateVideo();
         }
         if (data.displayName !== oldData.displayName) {
-            this.updateVideo(); // note: user will need to enter the conference again
+            this.updateVideo(); // user will need to enter the conference again
         }        
     },
     jitsiConnect: function(args) {
@@ -44,7 +45,6 @@ AFRAME.registerComponent('jitsi-video', {
         }
         if (this.data.displayName === undefined) return;
         args.pl.forEach((user) => {
-            console.log(user.dn);
             if (user.dn === this.data.displayName) {                
                 this.data.jitsiId = user.jid;
                 this.updateVideo();
@@ -59,22 +59,18 @@ AFRAME.registerComponent('jitsi-video', {
             this.updateVideo();
         }
     },
-    setVideoSrc: function(){
-        console.log('src', `#${this.videoID}`);
+    setVideoSrc: function() {
         this.el.setAttribute('material','src', `#${this.videoID}`); // video only! (no audio)
         this.el.setAttribute('material', 'shader', 'flat');
         this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-        this.el.setAttribute('material-extras', 'needsUpdate', 'true');
     },
     updateVideo: function() {
         const data = this.data;
         if (!data) return;        
         if (!data.jitsiId) {
-            console.log('no jid');
             return;
         }
         if (!ARENA.Jitsi) {
-            this.retryWaitVideoLoad();
             return;
         }
         this.videoID = `video${data.jitsiId}`;
@@ -84,6 +80,7 @@ AFRAME.registerComponent('jitsi-video', {
         }
         const jitsiVideo = document.getElementById(this.videoID);
         if (!jitsiVideo) {
+            // if object not created yet, try to wait
             this.retryWaitVideoLoad();
             return;
         }
@@ -91,13 +88,12 @@ AFRAME.registerComponent('jitsi-video', {
             this.setVideoSrc();
             return;
         }
-        // if not loaded yet, try to wait for load
+        // if not loaded yet, try to wait
         this.retryWaitVideoLoad();
     },
     retryWaitVideoLoad: function() {
         setTimeout(async () => {
-            console.log('retry');
             this.updateVideo();
-        }, 1000); // try again in a bit
+        }, 500); // try again in a bit
     }
 });
