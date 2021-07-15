@@ -19,8 +19,8 @@ AFRAME.components['gltf-model'].Component.prototype.update = function() {
 
     this.remove();
 
-    // register with gltf-model-progress system to handle model loading events
-    document.querySelector("a-scene").systems["gltf-model-progress"].registerGltf(el);
+    // register with model-progress system to handle model loading events
+    document.querySelector("a-scene").systems["model-progress"].registerModel(el, src);
 
     this.loader.load(src, function gltfLoaded(gltfModel) {
         self.model = gltfModel.scene || gltfModel.scenes[0];
