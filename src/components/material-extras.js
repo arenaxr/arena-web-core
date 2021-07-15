@@ -47,6 +47,7 @@ AFRAME.registerComponent('material-extras', {
                 oldData.colorWrite !== this.data.colorWrite) {
                 this.data.needsUpdate = true;
             }
+            if (this.data.encoding != oldData.transparentOccluder) this.data.needsUpdate = true;
         }
 
         if (transparentOccluder !== this.data.transparentOccluder) {
@@ -61,8 +62,9 @@ AFRAME.registerComponent('material-extras', {
             this.data.needsUpdate = true;
         }
         this.el.object3D.renderOrder=this.data.renderOrder;
+
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
-        this.updateMaterial();
+        if (this.data.needsUpdate) this.updateMaterial();
     },
     updateMaterial: function() {
         const mesh = this.el.getObject3D('mesh');
@@ -77,6 +79,7 @@ AFRAME.registerComponent('material-extras', {
             mesh.material.colorWrite = this.data.colorWrite;
             if (mesh.material.map) {
                 mesh.material.map.encoding = THREE[this.data.encoding];
+                this.data.needsUpdate = false;
             } else this.retryUpdateMaterial();
         } else this.retryUpdateMaterial();
     },
