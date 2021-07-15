@@ -63,6 +63,7 @@ AFRAME.registerComponent('jitsi-video', {
         this.el.setAttribute('material','src', `#${this.videoID}`); // video only! (no audio)
         this.el.setAttribute('material', 'shader', 'flat');
         this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+        this.el.setAttribute('material-extras', 'needsUpdate', 'true');
     },
     updateVideo: function() {
         const data = this.data;
