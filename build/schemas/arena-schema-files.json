@@ -59,6 +59,11 @@
        "file":"schemas/octahedron.json",
        "title":"Octahedron"
     },
+    "pcd-model":{
+        "description":"Load a PCD model",
+        "file":"schemas/pcd-model.json",
+        "title":"PCD Model"
+     },    
     "plane":{
        "description":"Plane Geometry",
        "file":"schemas/plane.json",

@@ -1,6 +1,6 @@
 {
-    "title": "GLTF Model",
-    "description": "Load a GLTF model",
+    "title": "PCD Model",
+    "description": "Load a PCD model",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -16,15 +16,27 @@
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": [
-                                        "gltf-model"
+                                        "pcd-model"
                                     ]
                                 },
                                 "url": {
-                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under '/store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under 'store/users/<username>' (e.g. /store/users/wiselab/pcd-models/bunny.pcd); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/pcd-models/bunny.pcd).",
                                     "format": "uri",
                                     "title": "Url",
                                     "type": "string"
-                                }                             
+                                },
+                                "pointSize": {
+                                    "description": "Size of the points",
+                                    "title": "Points Size",
+                                    "type": "number",
+                                    "default":  0.01
+                                },                                
+                                "pointColor": {
+                                    "description": "Color of the points",
+                                    "title": "Points Color",
+                                    "type": "color",
+                                    "default": "#7f7f7f"
+                                }                                                                   
                             }
                         },
                         {
@@ -34,10 +46,10 @@
                             "$ref": "./schemas/definitions-gltf.json#/properties"
                         }
                     ],
-                    "title": "GLTF Model Data",
+                    "title": "PCD Model Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "gltf-model",
+                        "object_type": "pcd-model",
                         "position": {
                             "x": 0,
                             "y": 0,

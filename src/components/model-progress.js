@@ -1,10 +1,10 @@
 /* global AFRAME */
 import he from 'he';
 import Swal from 'sweetalert2';
-import './gltf-progress-style.css';
+import './model-load-progress-style.css';
 
 /**
- * @fileoverview GLTF model loading progress system. Manage GLTF load messages.
+ * @fileoverview Model loading progress system. Manage model load messages.
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
@@ -12,7 +12,7 @@ import './gltf-progress-style.css';
  */
 
 /**
- * Display and update an alert with load info; Used by the GLTF model loading progress system. 
+ * Display and update an alert with load info; Used by the model loading progress system. 
  * @private
  */
  class LoadAlertTable {
@@ -95,29 +95,28 @@ import './gltf-progress-style.css';
  }
 
 /**
- * GLTF model loading progress system. Manage GLTF load messages.
- * @module gltf-model-progress
+ * Model loading progress system. Manage model load messages.
+ * @module model-progress
  */
- AFRAME.registerSystem("gltf-model-progress", {
+ AFRAME.registerSystem("model-progress", {
     ALERT_TIMEOUT: 5000,
     ALERT_MAX_ROWS: 10,
     FN_MAX_LENGTH: 50,
     schema: {},
     /**
      * Init system
-     * @alias module:gltf-model-progress
+     * @alias module:model-progress
      */     
     init: function() {
       this.loadProgress = {};
       this.loadAlert = new LoadAlertTable(this.ALERT_MAX_ROWS, true, this.ALERT_TIMEOUT);
     },
     /**
-     * Register a gltf-model to deal with load events
+     * Register model to deal with load events
      * @param {object} el - The a-frame element to register.
-     * @alias module:gltf-model-progress
+     * @alias module:model-progress
      */
-    registerGltf: function(el) {
-      const src = el.getAttribute("gltf-model");
+    registerModel: function(el, src) {
       if (!AFRAME.THREE.Cache.files[src]) {
         this.loadProgress[src] = {
           done: false,
@@ -135,18 +134,18 @@ import './gltf-progress-style.css';
       }
     },
     /**
-     * Unregister a gltf-model
+     * Unregister a model
      * @param {object} el - The a-frame element.
-     * @alias module:gltf-model-progress
+     * @alias module:model-progress
      */
-    unregisterGltfBySrc: function(src) {
+    unregisterModelBySrc: function(src) {
       delete this.loadProgress[src];
     },
     /**
-     * Updates GLTF Progress
+     * Updates Model Progress
      * @param {boolean} failed whether or not download was successful
-     * @param {object} evt gltf event
-     * @alias module:gltf-model-progress
+     * @param {object} evt model event
+     * @alias module:model-progress
      */
     updateProgress: function(failed, evt) {
       this.loadProgress[evt.detail.src].failed = failed;
@@ -159,7 +158,7 @@ import './gltf-progress-style.css';
         }
         // remove from list after a timeout
         setTimeout(() => {
-          this.unregisterGltfBySrc(evt.detail.src);
+          this.unregisterModelBySrc(evt.detail.src);
         }, this.ALERT_TIMEOUT*2);
       }
 
@@ -189,7 +188,7 @@ import './gltf-progress-style.css';
         files.push({cols:[shortName,progessStr], isError:lp.failed});
       }
       let percent = (pSum / Object.keys(this.loadProgress).length).toFixed(1);
-      let title = `Loading GLTF: ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${doneCount}/${Object.keys(this.loadProgress).length}`;
+      let title = `Loading : ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${doneCount}/${Object.keys(this.loadProgress).length}`;
       if (errors > 0) {
         title += `; failed ${errors}`;
       }
