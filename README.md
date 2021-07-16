@@ -1,12 +1,12 @@
 
-<p align="center"> <img alt="" src="images/xr-logo.png" width="150px"> </p>
+<p align="center"> <img alt="" src="static/images/xr-logo.png" width="150px"> </p>
 <h2 align="center">ARENA browser client (ARENA-core)</h2>
 <p align="center"><b>An environment to view and interact in multiuser virtual and augmented reality</b></p>
 
 
-| <img alt="" src="images/a1.gif">         | <img alt="" src="images/a2.gif">         |
+| <img alt="" src="static/images/a1.gif">         | <img alt="" src=static/"images/a2.gif">         |
 |------------------------------------------|------------------------------------------|
-| <img alt="" src="images/a3.gif">         | <img alt="" src="images/a4.gif">         |
+| <img alt="" src="static/images/a3.gif">         | <img alt="" src="static/images/a4.gif">         |
 
 The [ARENA](https://conix.io/arena) is a platform for supporting real-time mixed reality (XR) interaction between multiple users and the physical world.
 
