@@ -304,10 +304,10 @@ var _require2 = __webpack_require__(4),
 
 var defaults = Object.freeze({
 
-  // 'draft', 'default' or 'proof' 
-  // - 'draft' only applies spectral layout 
+  // 'draft', 'default' or 'proof'
+  // - 'draft' only applies spectral layout
   // - 'default' improves the quality with subsequent CoSE layout (fast cooling rate)
-  // - 'proof' improves the quality with subsequent CoSE layout (slow cooling rate) 
+  // - 'proof' improves the quality with subsequent CoSE layout (slow cooling rate)
   quality: "default",
   // Use random node positions at beginning of layout
   // if this is set to false, then quality option must be "proof"
@@ -374,7 +374,7 @@ var defaults = Object.freeze({
   gravityCompound: 1.0,
   // Gravity range (constant)
   gravityRange: 3.8,
-  // Initial cooling factor for incremental layout  
+  // Initial cooling factor for incremental layout
   initialEnergyOnIncremental: 0.3,
 
   /* constraint options */
@@ -385,7 +385,7 @@ var defaults = Object.freeze({
   // Align required nodes in vertical/horizontal direction
   // {vertical: [['n1', 'n2')], ['n3', 'n4']], horizontal: ['n2', 'n4']}
   alignmentConstraint: undefined,
-  // Place two nodes relatively in vertical/horizontal direction 
+  // Place two nodes relatively in vertical/horizontal direction
   // [{top: 'n1', bottom: 'n2', gap: 100}, {left: 'n3', right: 'n4', gap: 75}]
   relativePlacementConstraint: undefined,
 
@@ -437,7 +437,7 @@ var Layout = function () {
         // if packing is not enabled, perform layout on the whole graph
         if (!packingEnabled) {
           if (options.randomize) {
-            var result = spectralLayout(options); // apply spectral layout        
+            var result = spectralLayout(options); // apply spectral layout
             spectralResult.push(result);
           }
           // apply cose layout as postprocessing
@@ -785,7 +785,7 @@ var coseLayout = function coseLayout(options, spectralResult) {
       theNode.paddingRight = parseInt(theChild.css('padding'));
       theNode.paddingBottom = parseInt(theChild.css('padding'));
 
-      //Attach the label properties to compound if labels will be included in node dimensions  
+      //Attach the label properties to compound if labels will be included in node dimensions
       if (options.nodeDimensionsIncludeLabels) {
         if (theChild.isParent()) {
           theNode.labelWidth = theChild.boundingBox({ includeLabels: true, includeNodes: false, includeOverlays: false }).w;
@@ -947,7 +947,7 @@ var spectralLayout = function spectralLayout(options) {
 
   var dummyNodes = new Map(); // map to keep dummy nodes and their neighbors
   var nodeIndexes = new Map(); // map to keep indexes to nodes
-  var parentChildMap = new Map(); // mapping btw. compound and its representative node 
+  var parentChildMap = new Map(); // mapping btw. compound and its representative node
   var allNodesNeighborhood = []; // array to keep neighborhood of all nodes
   var xCoords = [];
   var yCoords = [];
@@ -955,8 +955,8 @@ var spectralLayout = function spectralLayout(options) {
   var samplesColumn = []; // sampled vertices
   var minDistancesColumn = [];
   var C = []; // column sampling matrix
-  var PHI = []; // intersection of column and row sampling matrices 
-  var INV = []; // inverse of PHI 
+  var PHI = []; // intersection of column and row sampling matrices
+  var INV = []; // inverse of PHI
 
   var firstSample = void 0; // the first sampled node
   var nodeSize = void 0;
@@ -1118,7 +1118,7 @@ var spectralLayout = function spectralLayout(options) {
     INV = Matrix.multMat(Matrix.multMat(a_v, a_Sig), Matrix.transpose(a_u));
   };
 
-  // calculate final coordinates 
+  // calculate final coordinates
   var powerIteration = function powerIteration() {
     // two largest eigenvalues
     var theta1 = void 0;
@@ -1259,7 +1259,7 @@ var spectralLayout = function spectralLayout(options) {
     allNodesNeighborhood[_i13] = [];
   }
 
-  // form a parent-child map to keep representative node of each compound node  
+  // form a parent-child map to keep representative node of each compound node
   parentNodes.forEach(function (ele) {
     var children = ele.children();
 

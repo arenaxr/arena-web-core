@@ -8,17 +8,17 @@
     <title>CONIX Visualization Demo</title>
 
     <!-- Navbar Header -->
-    <script src="../vendor/jquery-2.1.1.min.js"></script>
-    <script src="../vendor/bootstrap-2.3.2/js/bootstrap-dropdown.js"></script>
-    <script src="../vendor/bootstrap-2.3.2/js/bootstrap-collapse.js"></script>
-    <link rel='stylesheet' href='../vendor/fontawesome/all.min.css'>
-    <link rel='stylesheet' href='../vendor/bootstrap-2.3.2/css/bootstrap-combined.min.css'>
+    <script src="../static/vendor/jquery-2.1.1.min.js"></script>
+    <script src="../static/vendor/bootstrap-2.3.2/js/bootstrap-dropdown.js"></script>
+    <script src="../static/vendor/bootstrap-2.3.2/js/bootstrap-collapse.js"></script>
+    <link rel='stylesheet' href='../static/vendor/fontawesome/all.min.css'>
+    <link rel='stylesheet' href='../static/vendor/bootstrap-2.3.2/css/bootstrap-combined.min.css'>
 
     <link href="style.css" rel="stylesheet" />
     <!-- d3 -->
-    <script src="/vendor/graphs/d3.v4.min.js"></script>
+    <script src="/static/vendor/graphs/d3.v4.min.js"></script>
     <!-- paho mqtt -->
-    <script src="/vendor/paho-mqtt.js" type="text/javascript"></script>
+    <script src="/static/vendor/paho-mqtt.js" type="text/javascript"></script>
     <!-- lodash (json .isEqual) -->
     <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.10/lodash.min.js"></script>
 </head>
@@ -39,7 +39,7 @@
                     <button id="_misc" class="tablinks">Misc/Demos</button>
                 </div>
                 <div id="modules" class="tabcontent">
-                 
+
                     <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_create_mod' title="Press to toggle visibility of the section"><i
                         class="fas fa-angle-down fa-lg" id='create_mod_icon'></i>&nbspCreate Module</a><p/>
                         <div id="create_mod">
@@ -97,7 +97,7 @@
                             <p class="small" id='module_label'>(Select module by clicking on it on the tree) <p />
                             <textarea id="stdout_box" rows="20" cols="30"></textarea>
                             <p/>
-                            <input type="text" id="stdin_input" placeholder="send to stdin"> <button id="stdin_snd_btn" style="margin-bottom:10px">Send</button></td>                            
+                            <input type="text" id="stdin_input" placeholder="send to stdin"> <button id="stdin_snd_btn" style="margin-bottom:10px">Send</button></td>
                     </div>
                 </div>
 
@@ -119,7 +119,7 @@
 
                 <div id="misc" class="tabcontent">
                     <p class="label">MQTT</p>
-                    <p style="display:inline">Connect String: 
+                    <p style="display:inline">Connect String:
                     <input type="text" size=27 id="mqtt_conn_str" value="wss://arenaxr.org/mqtt"> <button id="reconnect_btn" style="margin-bottom:10px">Connect</button>
 
                     <p class="label">Force Tree Refresh</p>
@@ -151,7 +151,7 @@
     <script src="script.js"></script>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-    <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+    <script src="../static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
     <script src="../conf/defaults.js"></script>
     <script src="../src/auth.js"></script>
 </body>
