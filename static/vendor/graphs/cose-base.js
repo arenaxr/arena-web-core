@@ -323,7 +323,7 @@ ConstraintHandler.handleConstraints = function (layout) {
     }
   }
 
-  // if there exists relative placement constraint without gap value, set it to default 
+  // if there exists relative placement constraint without gap value, set it to default
   if (constraints.relativePlacementConstraint) {
     constraints.relativePlacementConstraint.forEach(function (constraint) {
       if (!constraint.gap && constraint.gap != 0) {
@@ -357,8 +357,8 @@ ConstraintHandler.handleConstraints = function (layout) {
 
   // find an appropriate positioning for the nodes in a given graph according to relative placement constraints
   // this function also takes the fixed nodes and alignment constraints into account
-  // graph: dag to be evaluated, direction: "horizontal" or "vertical", 
-  // fixedNodes: set of fixed nodes to consider during evaluation, dummyPositions: appropriate coordinates of the dummy nodes  
+  // graph: dag to be evaluated, direction: "horizontal" or "vertical",
+  // fixedNodes: set of fixed nodes to consider during evaluation, dummyPositions: appropriate coordinates of the dummy nodes
   var findAppropriatePositionForRelativePlacement = function findAppropriatePositionForRelativePlacement(graph, direction, fixedNodes, dummyPositions, componentSources) {
 
     // find union of two sets
@@ -753,12 +753,12 @@ ConstraintHandler.handleConstraints = function (layout) {
 
   /****  apply transformation to the initial draft layout to better align with constrained nodes ****/
   // solve the Orthogonal Procrustean Problem to rotate and/or reflect initial draft layout
-  // here we follow the solution in Chapter 20.2 of Borg, I. & Groenen, P. (2005) Modern Multidimensional Scaling: Theory and Applications 
+  // here we follow the solution in Chapter 20.2 of Borg, I. & Groenen, P. (2005) Modern Multidimensional Scaling: Theory and Applications
 
   /* construct source and target configurations */
 
   var targetMatrix = []; // A - target configuration
-  var sourceMatrix = []; // B - source configuration 
+  var sourceMatrix = []; // B - source configuration
   var standardTransformation = false; // false for no transformation, true for standart (Procrustes) transformation (rotation and/or reflection)
   var reflectionType = false; // false/true for reflection check, 'reflectOnX', 'reflectOnY' or 'reflectOnBoth' for reflection type if necessary
   var fixedNodes = new Set();
@@ -773,7 +773,7 @@ ConstraintHandler.handleConstraints = function (layout) {
     });
   }
 
-  // construct dag from relative placement constraints 
+  // construct dag from relative placement constraints
   if (constraints.relativePlacementConstraint) {
     // construct both directed and undirected version of the dag
     constraints.relativePlacementConstraint.forEach(function (constraint) {
@@ -961,7 +961,7 @@ ConstraintHandler.handleConstraints = function (layout) {
 
       // do actual calculation for transformation matrix
       var tempMatrix = Matrix.multMat(targetMatrixTranspose, Matrix.transpose(sourceMatrixTranspose)); // tempMatrix = A'B
-      var SVDResult = SVD.svd(tempMatrix); // SVD(A'B) = USV', svd function returns U, S and V 
+      var SVDResult = SVD.svd(tempMatrix); // SVD(A'B) = USV', svd function returns U, S and V
       transformationMatrix = Matrix.multMat(SVDResult.V, Matrix.transpose(SVDResult.U)); // transformationMatrix = T = VU'
 
       /* apply found transformation matrix to obtain final draft layout */
@@ -1075,7 +1075,7 @@ ConstraintHandler.handleConstraints = function (layout) {
         var fixedNodesOnHorizontal = new Set();
         var fixedNodesOnVertical = new Set();
 
-        // fill maps and sets      
+        // fill maps and sets
         fixedNodes.forEach(function (nodeId) {
           fixedNodesOnHorizontal.add(nodeId);
           fixedNodesOnVertical.add(nodeId);
@@ -1423,7 +1423,7 @@ CoSELayout.prototype.classicLayout = function () {
     }
     // The graph associated with this layout is not flat or a forest
     else {
-        // Reduce the trees when incremental mode is not enabled and graph is not a forest 
+        // Reduce the trees when incremental mode is not enabled and graph is not a forest
         this.reduceTrees();
         // Update nodes that gravity will be applied
         this.graphManager.resetAllNodesToApplyGravitation();
@@ -1437,7 +1437,7 @@ CoSELayout.prototype.classicLayout = function () {
       }
   } else {
     if (CoSEConstants.TREE_REDUCTION_ON_INCREMENTAL) {
-      // Reduce the trees in incremental mode if only this constant is set to true 
+      // Reduce the trees in incremental mode if only this constant is set to true
       this.reduceTrees();
       // Update nodes that gravity will be applied
       this.graphManager.resetAllNodesToApplyGravitation();
@@ -1496,7 +1496,7 @@ CoSELayout.prototype.tick = function () {
     this.coolingFactor = Math.max(this.initialCoolingFactor - Math.pow(this.coolingCycle, Math.log(100 * (this.initialCoolingFactor - this.finalTemperature)) / Math.log(this.maxCoolingCycle)) / 100 * this.coolingAdjuster, this.finalTemperature);
     this.animationPeriod = Math.ceil(this.initialAnimationPeriod * Math.sqrt(this.coolingFactor));
   }
-  // Operations while tree is growing again 
+  // Operations while tree is growing again
   if (this.isTreeGrowing) {
     if (this.growTreeIterations % 10 == 0) {
       if (this.prunedNodesAll.length > 0) {
@@ -1589,7 +1589,7 @@ CoSELayout.prototype.moveNodes = function () {
   var lNodes = this.getAllNodes();
   var node;
 
-  // calculate displacement for each node 
+  // calculate displacement for each node
   for (var i = 0; i < lNodes.length; i++) {
     node = lNodes[i];
     node.calculateDisplacement();
@@ -1781,7 +1781,7 @@ CoSELayout.prototype.initConstraintVariables = function () {
       var subGraphOnHorizontal = new Map(); // subgraph from vertical RP constraints
       var subGraphOnVertical = new Map(); // subgraph from vertical RP constraints
 
-      // construct subgraphs from relative placement constraints 
+      // construct subgraphs from relative placement constraints
       this.constraints.relativePlacementConstraint.forEach(function (constraint) {
         if (constraint.left) {
           var left = nodeToDummyForVerticalAlignment.has(constraint.left) ? nodeToDummyForVerticalAlignment.get(constraint.left) : constraint.left;
@@ -1812,7 +1812,7 @@ CoSELayout.prototype.initConstraintVariables = function () {
         }
       });
 
-      // function to construct components from a given graph 
+      // function to construct components from a given graph
       // also returns an array that keeps whether each component contains fixed node
       var constructComponents = function constructComponents(graph, fixedNodes) {
         var components = [];
@@ -2295,7 +2295,7 @@ CoSELayout.prototype.groupZeroDegreeMembers = function () {
   // array of [parent_id x oneDegreeNode_id]
   var tempMemberGroups = {}; // A temporary map of parent node and its zero degree members
   this.memberGroups = {}; // A map of dummy parent node and its zero degree members whose parents are not to be tiled
-  this.idToDummyNode = {}; // A map of id to dummy node 
+  this.idToDummyNode = {}; // A map of id to dummy node
 
   var zeroDegree = []; // List of zero degree nodes whose parents are not to be tiled
   var allNodes = this.graphManager.getAllNodes();
@@ -2767,7 +2767,7 @@ CoSELayout.prototype.tilingPostLayout = function () {
 // -----------------------------------------------------------------------------
 // Section: Tree Reduction methods
 // -----------------------------------------------------------------------------
-// Reduce trees 
+// Reduce trees
 CoSELayout.prototype.reduceTrees = function () {
   var prunedNodesAll = [];
   var containsLeaf = true;
@@ -2801,7 +2801,7 @@ CoSELayout.prototype.reduceTrees = function () {
   this.prunedNodesAll = prunedNodesAll;
 };
 
-// Grow tree one step 
+// Grow tree one step
 CoSELayout.prototype.growTree = function (prunedNodesAll) {
   var lengthOfPrunedNodesInStep = prunedNodesAll.length;
   var prunedNodesInStep = prunedNodesAll[lengthOfPrunedNodesInStep - 1];

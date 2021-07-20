@@ -42,7 +42,7 @@ AFRAME.registerComponent('video-control', {
         const autoplay = data.autoplay;
         const volume = data.volume;
 
-        let frameSrc = 'images/conix-face.white.jpg'; // default
+        let frameSrc = 'static/images/conix-face.white.jpg'; // default
         if (data.frame_object) {
             frameSrc = data.frame_object;
         }

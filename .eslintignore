@@ -4,5 +4,5 @@ network/
 screenshare/
 signin/
 dist/
-**/vendor/**
+**/static/vendor/**
 *.min.js
