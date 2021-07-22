@@ -1,11 +1,29 @@
+#icons-div-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #404040;
+    opacity: 0.66;
+}
+
+#icons-div-container:hover {
+    opacity: 0.9;
+}
+
+#icons-div-expand {
+    width: 100%;
+    background-color: #111111;
+    font-size: 24px;
+}
+
 #icons-div {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
-    position: absolute;
-    top: 30px;
-    right: 30px;
+    padding: 5px 5px 0;
 }
+
+
 
 .flipVideo {
     position: absolute;

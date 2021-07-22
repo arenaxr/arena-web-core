@@ -26,15 +26,30 @@
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
-.chat-button-group {
+.chat-button-group-container {
 	position: fixed;
-	display: flex;
-	bottom: 21px;
 	z-index: 9999;
-	left: 10px;
-	/*left: 50%;
-  transform: translate(-50%, 0%);*/
+	left: 0;
+	bottom: 0;
+	background-color: #404040;
+	opacity: 0.66;
 }
+
+.chat-button-group-container:hover {
+	opacity:0.9;
+}
+
+.chat-button-group {
+	display: flex;
+	padding: 10px;
+}
+
+.chat-button-group-expand {
+	background-color: #111111;
+	font-size: 24px;
+	padding: 10px;
+}
+
 
 
 /* Button used to open the chat form - fixed at the bottom of the page */

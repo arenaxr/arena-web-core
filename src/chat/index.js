@@ -120,13 +120,12 @@ export class ARENAChat {
             showCloseButton: true,
             timerProgressBar: true,
             timer: 1500,
-            background: '#d3e2e6'
-          })
+            background: '#d3e2e6',
+        });
 
         // create chat html elements
-        const btnGroup = document.createElement('div');
-        btnGroup.className = 'chat-button-group';
-        document.body.appendChild(btnGroup);
+        const btnGroup = document.querySelector('.chat-button-group');
+        btnGroup.parentElement.classList.remove('d-none');
 
         this.chatBtn = document.createElement('div');
         this.chatBtn.className = 'chat-button';
@@ -685,7 +684,7 @@ export class ARENAChat {
 
         // check if chat is visible
         if (this.chatPopup.style.display == 'none') {
-            let msgText = (msg.text.length > 15) ? msg.text.substring(0, 15) + '...' : msg.text; 
+            const msgText = (msg.text.length > 15) ? msg.text.substring(0, 15) + '...' : msg.text;
             this.displayAlert(`New message from ${msg.from_un}: ${msgText}.`, 3000);
             this.chatDot.style.display = 'block';
         }

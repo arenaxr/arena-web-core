@@ -307,17 +307,18 @@ export class SideMenu {
          * Create additional setting button
          */
         let expanded = false;
-        const settingsBtn = createIconButton('more', 'Additional settings', () => {
+        const settingsBtn = document.getElementById('icons-div-expand-button');
+        document.getElementById('icons-div-expand').addEventListener('click', () => {
             expanded = !expanded;
             if (expanded) { // toggled
-                settingsBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/less.png\')';
+                settingsBtn.classList.replace('fa-angle-down', 'fa-angle-up');
                 for (let i = 0; i < settingsButtons.length; i++) {
                     settingsButtons[i].style.display = 'block';
                 }
                 settingsPopup.style.display = 'block'; // open settings panel
                 loadSettings();
             } else {
-                settingsBtn.childNodes[0].style.backgroundImage = 'url(\'/src/icons/images/more.png\')';
+                settingsBtn.classList.replace('fa-angle-up', 'fa-angle-down');
                 for (let i = 0; i < settingsButtons.length; i++) {
                     settingsButtons[i].style.display = 'none';
                 }
@@ -327,8 +328,7 @@ export class SideMenu {
         });
 
 
-        const iconsDiv = document.createElement('div');
-        iconsDiv.setAttribute('id', 'icons-div');
+        const iconsDiv = document.getElementById('icons-div');
         if (!url.searchParams.get('noav')) {
             iconsDiv.appendChild(audioBtn);
             iconsDiv.appendChild(videoBtn);
@@ -343,9 +343,7 @@ export class SideMenu {
             iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
         }
         iconsDiv.appendChild(logoutBtn);
-        iconsDiv.appendChild(settingsBtn);
-        document.body.appendChild(iconsDiv);
-
+        iconsDiv.parentElement.classList.remove('d-none');
 
         /**
          * Add settings panel
