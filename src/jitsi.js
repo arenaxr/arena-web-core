@@ -249,7 +249,7 @@ export class ARENAJitsi {
 
                 if (camName && objectIds) {
                     ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
-                        jid:participantId,
+                        jid: participantId,
                         id: participantId,
                         dn: dn,
                         cn: camName,
@@ -361,7 +361,7 @@ export class ARENAJitsi {
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
             // user join event args, to be emited below
             const userJoinedArgs = {
-                jid: id,                
+                jid: id,
                 id: id,
                 dn: dn,
                 cn: undefined,
@@ -587,12 +587,10 @@ export class ARENAJitsi {
         } catch (e) {
             const vidbtn = document.getElementById('btn-video-off');
             if (vidbtn) vidbtn.remove();
-            const audbtn = document.getElementById('btn-audio-off');
-            if (audbtn) audbtn.remove();
             if (!localStorage.getItem('hideNoAV')) {
                 Swal.fire({
                     title: 'No Webcam or Audio Input Device found!',
-                    html: `You are now in <i>"spectator mode"</i>. This means you won\'t be able to share audio or video,
+                    html: `You are now in <i>"spectator mode"</i>. This means you won\'t be able to share video,
                        but can still interact with other users.`,
                     icon: 'warning',
                     showConfirmButton: true,
