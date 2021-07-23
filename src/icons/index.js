@@ -145,7 +145,7 @@ export class SideMenu {
          * Create AV Settings button
          */
         const url = new URL(window.location.href);
-        const avSettingsBtn = createIconButton('av-settings', 'Change A/V options',
+        const avSettingsBtn = createIconButton('options', 'Change A/V options',
             () => window.setupAV(() => ARENA.Jitsi.avConnect(true)));
         if (!url.searchParams.get('noav')) {
             this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;
@@ -157,7 +157,7 @@ export class SideMenu {
         /**
          * Create face tracking button
          */
-        const avatarBtn = createIconButton('avatar3-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
+        const avatarBtn = createIconButton('avatar-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
             () => {
                 if (!ARENA.FaceTracker) return;
                 if (!ARENA.FaceTracker.running()) { // toggled
@@ -284,7 +284,7 @@ export class SideMenu {
         /**
          * Create logout button
          */
-        const logoutBtn = createIconButton('logout-on', 'Sign out of the ARENA.', () => {
+        const logoutBtn = createIconButton('logout', 'Sign out of the ARENA.', () => {
             Swal.fire({
                 title: 'You are about to sign out of the ARENA!',
                 text: 'Are you sure you want to sign out?',

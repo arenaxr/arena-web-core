@@ -14,6 +14,7 @@
     width: 100%;
     background-color: #111111;
     font-size: 24px;
+    cursor:pointer;
 }
 
 #icons-div {
@@ -38,11 +39,10 @@
 }
 
 .arena-icon-button {
-    background: rgba(0, 0, 0, 0.20) 50% 50% no-repeat;
-    background-size: 90% 90%;
+    background: rgba(0, 0, 0, 0) 50% 50% no-repeat;
+    background-size: 70% 70%;
     border: 0;
     margin-bottom: 10px;
-    border-radius: 10px;
     cursor: pointer;
     min-width: 55px;
     min-height: 55px;
@@ -51,7 +51,6 @@
     transition: background-color .25s ease;
     -webkit-transition: background-color .25s ease;
     z-index: 9999;
-    border-radius: 10px;
     touch-action: manipulation; /* Prevent iOS double tap zoom on the button */
     opacity: 0;
 

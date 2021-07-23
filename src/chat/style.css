@@ -4,7 +4,6 @@
 	position: fixed;
 	top: 21px;
 	z-index: 9999;
-	left: 10px;
 	border-radius: 20px;
 	border: 2px solid #1f7987;
 	background: #dbdbdb;
@@ -48,6 +47,7 @@
 	background-color: #111111;
 	font-size: 24px;
 	padding: 10px;
+	cursor:pointer;
 }
 
 
@@ -55,19 +55,19 @@
 /* Button used to open the chat form - fixed at the bottom of the page */
 
 .chat-button {
-	background: rgba(255, 255, 255, 1) url("data:image/svg+xml;utf8,%3Csvg version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 1000 1000' enable-background='new 0 0 1000 1000' xml:space='preserve'%3E%3Cmetadata%3E Svg Vector Icons : http://www.onlinewebfonts.com/icon %3C/metadata%3E%3Cg%3E%3Cpath d='M881.1,720.5H434.7L173.3,941V720.5h-54.4C58.8,720.5,10,671.1,10,610.2v-441C10,108.4,58.8,59,118.9,59h762.2C941.2,59,990,108.4,990,169.3v441C990,671.1,941.2,720.5,881.1,720.5L881.1,720.5z M935.6,169.3c0-30.4-24.4-55.2-54.5-55.2H118.9c-30.1,0-54.5,24.7-54.5,55.2v441c0,30.4,24.4,55.1,54.5,55.1h54.4h54.4v110.3l163.3-110.2H500h381.1c30.1,0,54.5-24.7,54.5-55.1V169.3L935.6,169.3z M717.8,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.5,24.7,54.5,55.2C772.2,420.2,747.8,444.8,717.8,444.8L717.8,444.8z M500,444.8c-30.1,0-54.4-24.7-54.4-55.1c0-30.4,24.3-55.2,54.4-55.2c30.1,0,54.4,24.7,54.4,55.2C554.4,420.2,530.1,444.8,500,444.8L500,444.8z M282.2,444.8c-30.1,0-54.5-24.7-54.5-55.1c0-30.4,24.4-55.2,54.5-55.2c30.1,0,54.4,24.7,54.4,55.2C336.7,420.2,312.3,444.8,282.2,444.8L282.2,444.8z'/%3E%3C/g%3E%3C/svg%3E") 50% 50% no-repeat;
+	background: rgba(0, 0, 0, 0) url("../../src/icons/images/message.png") 50% 50% no-repeat;
 	/*  -webkit-filter: invert(100%);
            filter: invert(100%);  */
 }
 
 .users-button {
-	background: rgba(255, 255, 255, 1) url("data:image/svg+xml;utf8,%3Csvg version='1.1' id='Capa_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 388.227 388.227' style='enable-background:new 0 0 388.227 388.227;' xml:space='preserve'%3E%3Cg%3E%3Cpath d='M194.113,190.505c36.691,0,66.438-36.129,66.438-80.695c0-44.567-9.768-80.696-66.438-80.696 c-56.672,0-66.438,36.129-66.438,80.696C127.676,154.376,157.422,190.505,194.113,190.505z'/%3E%3Cpath d='M319.455,310.459c-1.229-77.637-11.369-99.759-88.959-113.763c0,0-10.924,13.917-36.381,13.917 c-25.457,0-36.379-13.917-36.379-13.917c-76.744,13.85-87.502,35.645-88.916,111.24c-0.115,6.173-0.168,6.497-0.189,5.78 c0.004,1.343,0.01,3.826,0.01,8.157c0,0,18.473,37.239,125.475,37.239s125.477-37.239,125.477-37.239 c0-2.782,0.002-4.718,0.004-6.033C319.576,316.283,319.533,315.424,319.455,310.459z'/%3E%3Cpath d='M286.313,176.097c29.801,0,53.959-29.343,53.959-65.539c0-36.197-7.932-65.54-53.959-65.54 c-7.742,0-14.404,0.833-20.135,2.388c10.631,19.598,12.088,43.402,12.088,62.403c0,21.514-5.832,42.054-16.572,59.061 C269.076,173.48,277.441,176.097,286.313,176.097z'/%3E%3Cpath d='M388.111,273.521c-1-63.055-9.234-81.022-72.252-92.396c0,0-8.871,11.304-29.547,11.304c-0.855,0-1.684-0.026-2.5-0.063 c13.137,5.923,25.088,14.17,33.889,26.238c15.215,20.863,18.713,48.889,19.435,90.062c42.397-8.378,51.086-25.873,51.086-25.873 c0-2.28,0-3.844,0.004-4.913C388.209,278.256,388.174,277.582,388.111,273.521z'/%3E%3Cpath d='M101.912,176.097c8.873,0,17.236-2.617,24.621-7.226c-10.74-17.007-16.572-37.547-16.572-59.061 c0-19.002,1.457-42.806,12.086-62.403c-5.73-1.555-12.391-2.388-20.135-2.388c-46.027,0-53.957,29.343-53.957,65.54 C47.955,146.754,72.113,176.097,101.912,176.097z'/%3E%3Cpath d='M104.412,192.365c-0.814,0.037-1.643,0.063-2.5,0.063c-20.676,0-29.547-11.304-29.547-11.304 c-63.016,11.374-71.252,29.34-72.25,92.396c-0.065,4.062-0.098,4.735-0.115,4.358c0.002,1.069,0.004,2.633,0.004,4.913 c0,0,8.69,17.495,51.084,25.873c0.725-41.172,4.221-69.198,19.438-90.062C79.326,206.536,91.275,198.288,104.412,192.365z'/%3E%3C/g%3E%3C/svg%3E") 50% 50% no-repeat;
+	background: rgba(0, 0, 0, 0) url("../../src/icons/images/users.png") 50% 50% no-repeat;
 	/*  -webkit-filter: invert(100%);
            filter: invert(100%);  */
 }
 
 .landmarks-button {
-	background: rgba(255, 255, 255, 1) url("data:image/svg+xml;utf8,%3Csvg version='1.1' id='Capa_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 512.032 512.032' style='enable-background:new 0 0 512.032 512.032;' xml:space='preserve'%3E%3Cg%3E%3Cg%3E%3Cpath d='M496.016,224c-8.832,0-16,7.168-16,16v181.184l-128,51.2V304c0-8.832-7.168-16-16-16c-8.832,0-16,7.168-16,16v168.352 l-128-51.2V167.648l74.144,29.664c8.096,3.264,17.504-0.704,20.8-8.928c3.296-8.192-0.704-17.504-8.928-20.8l-95.776-38.336 c0,0,0,0-0.032,0l-0.256-0.096c-3.808-1.536-8.064-1.536-11.872,0l-0.288,0.096c0,0,0,0-0.032,0L10.064,193.152 C4.016,195.584,0.016,201.44,0.016,208v288c0,5.312,2.656,10.272,7.04,13.248c2.688,1.824,5.792,2.752,8.96,2.752 c2.016,0,4.032-0.384,5.952-1.152l154.048-61.6l153.76,61.504c0,0,0,0,0.032,0l0.288,0.128c3.808,1.536,8.064,1.536,11.872,0 l0.288-0.128c0,0,0,0,0.032,0L502,446.88c6.016-2.464,10.016-8.32,10.016-14.88V240C512.016,231.168,504.848,224,496.016,224z M160.016,421.152l-128,51.2V218.816l128-51.2V421.152z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M400.016,64c-26.464,0-48,21.536-48,48s21.536,48,48,48s48-21.536,48-48S426.48,64,400.016,64z M400.016,128 c-8.832,0-16-7.168-16-16c0-8.832,7.168-16,16-16c8.832,0,16,7.168,16,16C416.016,120.832,408.848,128,400.016,128z'/%3E%3C/g%3E%3C/g%3E%3Cg%3E%3Cg%3E%3Cpath d='M400.016,0c-61.76,0-112,50.24-112,112c0,57.472,89.856,159.264,100.096,170.688c3.04,3.36,7.36,5.312,11.904,5.312 s8.864-1.952,11.904-5.312C422.16,271.264,512.016,169.472,512.016,112C512.016,50.24,461.776,0,400.016,0z M400.016,247.584 c-34.944-41.44-80-105.056-80-135.584c0-44.096,35.904-80,80-80s80,35.904,80,80C480.016,142.496,434.96,206.144,400.016,247.584z '/%3E%3C/g%3E%3C/g%3E%3C/svg%3E%0A") 50% 50% no-repeat;
+	background: rgba(0, 0, 0, 0) url("../../src/icons/images/landmarks.png") 50% 50% no-repeat;
 	/*  -webkit-filter: invert(100%);
            filter: invert(100%);  */
 }
@@ -75,7 +75,7 @@
 .landmarks-button,
 .users-button,
 .chat-button {
-	background-size: 90% 90%;
+	background-size: 60% 60%;
 	border: 0;
 	bottom: 0;
 	cursor: pointer;
@@ -91,9 +91,7 @@
 	padding-top: 0;
 	transition: background-color .05s ease;
 	-webkit-transition: background-color .05s ease;
-	border: 5px solid white;
 	touch-action: manipulation;
-	border-radius: 10px;
 	/* Prevent iOS double tap zoom on the button */
 }
 
@@ -108,8 +106,7 @@
 .users-button:hover,
 .chat-button:active,
 .chat-button:hover {
-	/*background-color: #ef2d5e;*/
-	border: 5px solid #ef2d5e;
+	background-color: #ef2d5e;
 }
 
 .chat-button resethover {
@@ -164,7 +161,7 @@
 .form-container textarea,
 .form-container input {
 	width: 100%;
-	margin: 0px 0 0px 0;
+	margin: 0;
 	border: none;
 	resize: none;
 	height: 30px;
@@ -204,7 +201,7 @@
 }
 
 .form-container .sel {
-	padding: 0px 0px;
+	padding: 0;
 	border: none;
 	cursor: pointer;
 	margin-right: 29px;
@@ -287,7 +284,7 @@
 	font-weight: lighter;
 	font-size: small;
 	box-shadow: 1px 1px 2px rgba(0, 0, 0, .3);
-	margin: 0px;
+	margin: 0;
 	position: relative;
 	max-width: 250px;
 	word-wrap: break-word;
@@ -296,7 +293,7 @@
 .msg.other {
 	float: left;
 	clear: both;
-	border-top-left-radius: 0px;
+	border-top-left-radius: 0;
 	background-color: rgba(80, 180, 180, 0.5);
 	color: #3c3c3c;
 }
@@ -304,7 +301,7 @@
 .msg.self {
 	float: right;
 	clear: both;
-	border-top-right-radius: 0px;
+	border-top-right-radius: 0;
 	/*background: #00D025;*/
 	background-color: rgba(80, 180, 80, 0.5);
 	color: #3c3c3c;
@@ -313,7 +310,7 @@
 .status {
 	font-size: 11px;
 	opacity: 0.5;
-	margin: 0px;
+	margin: 0;
 }
 
 .status.other {
