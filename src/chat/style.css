@@ -32,6 +32,7 @@
 	bottom: 0;
 	background-color: #404040;
 	opacity: 0.66;
+	min-height: 65px;
 }
 
 .chat-button-group-container:hover {

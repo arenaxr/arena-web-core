@@ -255,6 +255,20 @@ export class ARENAChat {
 
         this.displayAlert('Not sending audio or video. Use icons on the right to start.', 5000);
 
+        let expanded = false;
+        const expandBtn = document.getElementById('chat-button-group-expand-icon');
+        document.querySelector('.chat-button-group-expand').addEventListener('click', () => {
+            expanded = !expanded;
+            if (expanded) { // toggled
+                expandBtn.classList.replace('fa-angle-left', 'fa-angle-right');
+                btnGroup.classList.add('d-none');
+            } else {
+                expandBtn.classList.replace('fa-angle-right', 'fa-angle-left');
+                btnGroup.classList.remove('d-none');
+            }
+        });
+
+
         this.chatBtn.onclick = function() {
             _this.chatPopup.style.display = 'block';
             _this.usersPopup.style.display = 'none';
