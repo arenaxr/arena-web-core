@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 /**
- * @fileoverview Tracking Vive controller movement in real time.
+ * @fileoverview Tracking Hand controller movement in real time.
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
@@ -9,7 +9,7 @@
  */
 
 /**
- * Generates a vive event
+ * Generates a hand event
  * @param {Object} evt event
  * @param {string} eventName name of event, i.e. 'triggerup'
  * @param {Object} myThis reference to object that generated the event
@@ -25,7 +25,7 @@ function eventAction(evt, eventName, myThis) {
     };
 
     // publish to MQTT
-    const objName = myThis.id + '_' + ARENA.idTag;
+    const objName = myThis.name;
     // publishing events attached to user id objects allows sculpting security
     ARENA.Mqtt.publish(ARENA.outputTopic + objName, {
         object_id: objName,
@@ -39,24 +39,26 @@ function eventAction(evt, eventName, myThis) {
 }
 
 /**
- *  Tracking Vive controller movement in real time.
- * @module arena-vive
+ *  Tracking Hand controller movement in real time.
+ * @module arena-hand
  * @property {boolean} enabled - Controller enabled.
  * @property {string} name - Name used to publish controller pose.
  * @property {string} hand - Controller hand.
  * @property {string} color - Controller color.
  *
  */
-AFRAME.registerComponent('arena-vive', {
+AFRAME.registerComponent('arena-hand', {
     schema: {
         enabled: {type: 'boolean', default: false},
         name: {type: 'string', default: ''},
-        hand: {type: 'string', default: 'left'},
+        hand: {type: 'string', default: 'Left'},
         color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
     },
 
     init: function() {
         const el = this.el;
+
+        this.data.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
 
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
@@ -107,7 +109,7 @@ AFRAME.registerComponent('arena-vive', {
             action: 'update',
             type: 'object',
             data: {
-                object_type: 'vive'+hand,
+                object_type: 'hand' + this.data.hand,
                 position: {
                     x: parseFloat(this.position.x.toFixed(3)),
                     y: parseFloat(this.position.y.toFixed(3)),
@@ -122,7 +124,7 @@ AFRAME.registerComponent('arena-vive', {
                 color: data.color,
             },
         };
-        ARENA.Mqtt.publish(ARENA.outputTopic + data.name, msg);
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.data.name}`, msg);
     },
 
     tick: (function(t, dt) {

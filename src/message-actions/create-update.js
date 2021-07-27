@@ -7,7 +7,7 @@ const ACTIONS = {
 };
 
 // path to controler models
-const viveControllerPath = {
+const handControllerPath = {
     handLeft: 'store/models/valve_index_left.gltf',
     handRight: 'store/models/valve_index_left.gltf',
 };
@@ -211,8 +211,8 @@ export class CreateUpdate {
             break;
         case 'handLeft':
         case 'handRight':
-            // entityEl.setAttribute('gltf-model', viveControllerPath[type]);
-            // delete data[type];
+            entityEl.setAttribute('gltf-model', handControllerPath[type]);
+            delete data[type];
             break;
         case 'cube':
             type='box'; // arena legacy! new libraries/persist objects should use box!

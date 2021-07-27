@@ -13,7 +13,7 @@
 import './armarker.js';
 import './arena-camera.js';
 import './arena-user.js';
-import './arena-vive.js';
+import './arena-hand.js';
 import './attribution.js';
 import './click-listener.js';
 import './collision-listener.js';

@@ -130,8 +130,8 @@
     <!-- stats physics -->
     <a-assets>
         <!-- Vive controller 3d model -->
-        <!-- <a-asset-item id="viveControl-obj" src="store/models/vr_controller_vive.obj"></a-asset-item>
-        <a-asset-item id="viveControl-mtl" src="store/models/vr_controller_vive.mtl"></a-asset-item> -->
+        <a-asset-item id="viveControl-obj" src="store/models/vr_controller_vive.obj"></a-asset-item>
+        <a-asset-item id="viveControl-mtl" src="store/models/vr_controller_vive.mtl"></a-asset-item>
     </a-assets>
 
     <a-entity id="sceneRoot">
@@ -153,8 +153,8 @@
             </a-entity>
         </a-entity>
 
-        <!-- <a-entity vive-listener vive-pose-listener id="vive-leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-        <a-entity vive-listener vive-pose-listener id="vive-rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity> -->
+        <a-entity arena-hand="hand:Left" id="leftHand" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
+        <a-entity arena-hand="hand:Right" id="rightHand" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
     </a-entity>
 </a-scene>
 
