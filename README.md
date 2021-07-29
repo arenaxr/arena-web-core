@@ -4,7 +4,7 @@
 <p align="center"><b>An environment to view and interact in multiuser virtual and augmented reality</b></p>
 
 
-| <img alt="" src="static/images/a1.gif">         | <img alt="" src=static/"images/a2.gif">         |
+| <img alt="" src="static/images/a1.gif">         | <img alt="" src=static/images/a2.gif">         |
 |------------------------------------------|------------------------------------------|
 | <img alt="" src="static/images/a3.gif">         | <img alt="" src="static/images/a4.gif">         |
 
