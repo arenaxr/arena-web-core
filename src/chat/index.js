@@ -130,6 +130,7 @@ export class ARENAChat {
         this.chatBtn = document.createElement('div');
         this.chatBtn.className = 'chat-button';
         this.chatBtn.setAttribute('title', 'Chat');
+        this.chatBtn.style.backgroundImage = 'url(\'src/icons/images/message.png\')';
         btnGroup.appendChild(this.chatBtn);
 
         this.chatDot = document.createElement('span');
@@ -140,6 +141,7 @@ export class ARENAChat {
         this.usersBtn = document.createElement('div');
         this.usersBtn.className = 'users-button';
         this.usersBtn.setAttribute('title', 'User List');
+        this.usersBtn.style.backgroundImage = 'url(\'src/icons/images/users.png\')';
         btnGroup.appendChild(this.usersBtn);
 
         this.usersDot = document.createElement('span');
@@ -149,6 +151,7 @@ export class ARENAChat {
 
         this.lmBtn = document.createElement('div');
         this.lmBtn.className = 'landmarks-button';
+        this.lmBtn.style.backgroundImage = 'url(\'src/icons/images/landmarks.png\')';
         btnGroup.appendChild(this.lmBtn);
         this.lmBtn.style.display = 'none';
 

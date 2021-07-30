@@ -55,27 +55,10 @@
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
-.chat-button {
-	background: rgba(0, 0, 0, 0) url("../../src/icons/images/message.png") 50% 50% no-repeat;
-	/*  -webkit-filter: invert(100%);
-           filter: invert(100%);  */
-}
-
-.users-button {
-	background: rgba(0, 0, 0, 0) url("../../src/icons/images/users.png") 50% 50% no-repeat;
-	/*  -webkit-filter: invert(100%);
-           filter: invert(100%);  */
-}
-
-.landmarks-button {
-	background: rgba(0, 0, 0, 0) url("../../src/icons/images/landmarks.png") 50% 50% no-repeat;
-	/*  -webkit-filter: invert(100%);
-           filter: invert(100%);  */
-}
-
 .landmarks-button,
 .users-button,
 .chat-button {
+	background: rgba(0, 0, 0, 0) 50% 50% no-repeat;
 	background-size: 52% 52%;
 	border: 0;
 	bottom: 0;
