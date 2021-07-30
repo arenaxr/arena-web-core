@@ -8,8 +8,8 @@ const ACTIONS = {
 
 // path to controler models
 const viveControllerPath = {
-    viveLeft: 'store/models/valve_index_left.gltf',
-    viveRight: 'store/models/valve_index_left.gltf',
+    handLeft: 'store/models/valve_index_left.gltf',
+    handRight: 'store/models/valve_index_left.gltf',
 };
 
 // default render order of objects; reserve 0 for occlusion
@@ -33,10 +33,10 @@ export class CreateUpdate {
             if (id === ARENA.camName) {
                 return;
             }
-            if (id === ARENA.viveLName) {
+            if (id === ARENA.handLName) {
                 return;
             }
-            if (id === ARENA.viveRName) {
+            if (id === ARENA.handRName) {
                 return;
             }
             if (id === ARENA.faceName) {
@@ -209,8 +209,8 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
             if (!data.hasOwnProperty('align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
             break;
-        case 'viveLeft':
-        case 'viveRight':
+        case 'handLeft':
+        case 'handRight':
             // entityEl.setAttribute('gltf-model', viveControllerPath[type]);
             // delete data[type];
             break;

@@ -93,7 +93,7 @@ export class Arena {
 
     /**
      * Sets this.idTag using name given as argument, url parameter value, or default
-     * Important: Also sets amName, faceName, viveLName, viveRName which depend on idTag
+     * Important: Also sets amName, faceName, handLName, handRName which depend on idTag
      * @param {string} idTag user name to set; will use url parameter value or default is no name is given
      */
     setIdTag(idTag = undefined) {
@@ -108,10 +108,10 @@ export class Arena {
             this.camName = this.fixedCamera;
         }
 
-        // set faceName, avatarName, viveLName, viveRName which depend on user name
+        // set faceName, avatarName, handLName, handRName which depend on user name
         this.faceName = 'face_' + this.idTag; // e.g. face_9240_X
-        this.viveLName = 'viveLeft_' + this.idTag; // e.g. viveLeft_9240_X
-        this.viveRName = 'viveRight_' + this.idTag; // e.g. viveRight_9240_X
+        this.handLName = 'handLeft_' + this.idTag; // e.g. handLeft_9240_X
+        this.handRName = 'handRight_' + this.idTag; // e.g. handRight_9240_X
     }
 
     /**
@@ -550,7 +550,7 @@ export class Arena {
             // last will topic
             this.outputTopic + this.camName,
             );
-            
+
             // init runtime manager
             this.RuntimeManager = RuntimeMngr;
             this.RuntimeManager.init({
@@ -571,7 +571,7 @@ export class Arena {
                 console.setOptions({dbgTopic: `${rtInfo.dbg_topic}/${rtInfo.uuid}`, publish: this.Mqtt.publish.bind(this.Mqtt)});
             }
 
-            // init chat 
+            // init chat
             this.chat = new ARENAChat({
                 userid: this.idTag,
                 cameraid: this.camName,
@@ -630,7 +630,7 @@ export class Arena {
                 this.FaceTracker.init(displayBbox, flipped);
             }
             console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
-     
+
         }); // mqtt API (after this.* above, are defined)
     }
 }

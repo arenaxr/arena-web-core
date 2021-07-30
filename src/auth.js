@@ -194,8 +194,8 @@ function requestMqttToken(authType, mqttUsername) {
         }
         params += `&userid=true`;
         params += `&camid=true`;
-        params += `&ctrlid1=true`;
-        params += `&ctrlid2=true`;
+        params += `&handleftid=true`;
+        params += `&handrightid=true`;
     }
     xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
