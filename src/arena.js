@@ -253,7 +253,7 @@ export class Arena {
             ARENA.startCoords = startPos;
         } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-            const lastPos = sceneHist[ARENA.namespacedScene] ? .lastPos;
+            const lastPos = sceneHist[ARENA.namespacedScene]?.lastPos;
             if (lastPos) {
                 startPos.copy(lastPos);
                 camera.object3D.position.copy(startPos);
