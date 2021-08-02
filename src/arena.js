@@ -218,70 +218,80 @@ export class Arena {
      * scene init before starting to receive messages
      */
     initScene = () => {
+        // load scene
+        ARENA.loadSceneOptions();
+
+        this.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
+            ARENA.loadSceneObjects();
+        });
+
         // after scene is completely loaded, add user camera
-        this.events.on(ARENAEventEmitter.events.SCENE_LOADED, () => {
-            const systems = AFRAME.scenes[0].systems;
-            let color = Math.floor(Math.random() * 16777215).toString(16);
-            if (color.length < 6) color = '0' + color;
-            color = '#' + color;
+        this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
+            ARENA.loadUser();
+        });
+    }
 
-            const camera = document.getElementById('my-camera');
-            camera.setAttribute('arena-camera', 'enabled', true);
-            camera.setAttribute('arena-camera', 'color', color);
-            camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
+    /**
+     * loads this user's presence and camera
+     */
+    loadUser() {
+        const systems = AFRAME.scenes[0].systems;
+        let color = Math.floor(Math.random() * 16777215).toString(16);
+        if (color.length < 6) color = '0' + color;
+        color = '#' + color;
 
-            const startPos = new THREE.Vector3;
-            if (ARENA.startCoords) {
-                startPos.set(...ARENA.startCoords);
+        const camera = document.getElementById('my-camera');
+        camera.setAttribute('arena-camera', 'enabled', true);
+        camera.setAttribute('arena-camera', 'color', color);
+        camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
+
+        const startPos = new THREE.Vector3;
+        if (ARENA.startCoords) {
+            startPos.set(...ARENA.startCoords);
+            camera.object3D.position.copy(startPos);
+            camera.object3D.position.y += ARENA.defaults.camHeight;
+            ARENA.startCoords = startPos;
+        } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
+            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+            const lastPos = sceneHist[ARENA.namespacedScene] ? .lastPos;
+            if (lastPos) {
+                startPos.copy(lastPos);
                 camera.object3D.position.copy(startPos);
                 camera.object3D.position.y += ARENA.defaults.camHeight;
                 ARENA.startCoords = startPos;
-            } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
-                const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-                const lastPos = sceneHist[ARENA.namespacedScene]?.lastPos;
-                if (lastPos) {
-                    startPos.copy(lastPos);
-                    camera.object3D.position.copy(startPos);
-                    camera.object3D.position.y += ARENA.defaults.camHeight;
-                    ARENA.startCoords = startPos;
-                }
             }
-            // Fallthrough failure if startLastPos fails
-            if (!ARENA.startCoords && systems.landmark) {
-                // Try to define starting position if the scene has startPosition objects
-                const startPosition = systems.landmark.getRandom(true);
-                if (startPosition) {
-                    console.log('Moving camera to start position', startPosition.el.id);
-                    startPosition.teleportTo();
-                    startPos.copy(camera.object3D.position);
-                    startPos.y -= ARENA.defaults.camHeight;
-                    ARENA.startCoords = startPos;
-                }
+        }
+        // Fallthrough failure if startLastPos fails
+        if (!ARENA.startCoords && systems.landmark) {
+            // Try to define starting position if the scene has startPosition objects
+            const startPosition = systems.landmark.getRandom(true);
+            if (startPosition) {
+                console.log('Moving camera to start position', startPosition.el.id);
+                startPosition.teleportTo();
+                startPos.copy(camera.object3D.position);
+                startPos.y -= ARENA.defaults.camHeight;
+                ARENA.startCoords = startPos;
             }
-            if (!ARENA.startCoords) { // Final fallthrough for failures
-                ARENA.startCoords = ARENA.defaults.startCoords; // default position
-                const navSys = systems.nav;
-                startPos.copy(ARENA.startCoords);
-                if (navSys.navMesh) {
-                    try {
-                        const closestGroup = navSys.getGroup(startPos, false);
-                        const closestNode = navSys.getNode(startPos, closestGroup, false);
-                        navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
-                    } catch {}
-                }
-                camera.object3D.position.copy(startPos);
-                camera.object3D.position.y += ARENA.defaults.camHeight;
+        }
+        if (!ARENA.startCoords) { // Final fallthrough for failures
+            ARENA.startCoords = ARENA.defaults.startCoords; // default position
+            const navSys = systems.nav;
+            startPos.copy(ARENA.startCoords);
+            if (navSys.navMesh) {
+                try {
+                    const closestGroup = navSys.getGroup(startPos, false);
+                    const closestNode = navSys.getNode(startPos, closestGroup, false);
+                    navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
+                } catch {}
             }
-            // enable vio if fixedCamera is given
-            if (ARENA.fixedCamera !== '') {
-                camera.setAttribute('arena-camera', 'vioEnabled', true);
-            }
-            SideMenu.setupIcons();
-        });
-
-        // load scene
-        ARENA.loadSceneOptions();
-        ARENA.loadScene();
+            camera.object3D.position.copy(startPos);
+            camera.object3D.position.y += ARENA.defaults.camHeight;
+        }
+        // enable vio if fixedCamera is given
+        if (ARENA.fixedCamera !== '') {
+            camera.setAttribute('arena-camera', 'vioEnabled', true);
+        }
+        SideMenu.setupIcons();
     }
 
     /**
@@ -291,7 +301,7 @@ export class Arena {
      * @param {Object} position initial position
      * @param {Object} rotation initial rotation
      */
-    loadScene(urlToLoad, position, rotation) {
+    loadSceneObjects(urlToLoad, position, rotation) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -311,7 +321,7 @@ export class Arena {
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
                     console.error('No scene objects found in persistence.');
-                    ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true);
+                    ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true);
                     return;
                 }
                 const arenaObjects = xhr.response;
@@ -379,7 +389,7 @@ export class Arena {
                     console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
                 }
-                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_LOADED, true), 500);
+                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true), 500);
             }
         };
     };
@@ -443,81 +453,84 @@ export class Arena {
 
         fetch(`${this.persistenceUrl}?type=scene-options`, {
             method: 'GET',
-            credentials: this.defaults.disallowJWT? 'omit' : 'same-origin',
+            credentials: this.defaults.disallowJWT ? 'omit' : 'same-origin',
         }).
-            then((res) => res.json()).
-            then((data) => {
-                const payload = data[data.length - 1];
-                if (payload) {
-                    const options = payload['attributes'];
-                    Object.assign(sceneOptions, options['scene-options']);
+        then((res) => res.json()).
+        then((data) => {
+            const payload = data[data.length - 1];
+            if (payload) {
+                const options = payload['attributes'];
+                Object.assign(sceneOptions, options['scene-options']);
 
-                    // deal with scene attribution
-                    if (sceneOptions['attribution']) {
-                        const sceneAttr = document.createElement('a-entity');
-                        sceneAttr.setAttribute('id', 'scene-options-attribution');
-                        sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
-                        sceneRoot.appendChild(sceneAttr);
-                        delete sceneOptions.attribution;
-                    }
-
-                    if (sceneOptions['navMesh']) {
-                        const navMesh = document.createElement('a-entity');
-                        navMesh.id = 'navMesh';
-                        navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
-                        navMesh.setAttribute('nav-mesh', '');
-                        sceneRoot.appendChild(navMesh);
-                    }
-
-                    // save scene options
-                    for (const [attribute, value] of Object.entries(sceneOptions)) {
-                        ARENA[attribute] = value;
-                    }
-
-                    const envPresets = options['env-presets'];
-                    for (const [attribute, value] of Object.entries(envPresets)) {
-                        environment.setAttribute('environment', attribute, value);
-                    }
-                    sceneRoot.appendChild(environment);
-
-                    const rendererSettings = options['renderer-settings'];
-                    if (rendererSettings) {
-                        for (const [attribute, value] of Object.entries(rendererSettings)) {
-                            renderer[attribute] = (attribute === 'outputEncoding') ?
-                                renderer[attribute] = THREE[value] :
-                                renderer[attribute] = value;
-                        }
-                    }
-                } else {
-                    throw new Error('No scene-options');
+                // deal with scene attribution
+                if (sceneOptions['attribution']) {
+                    const sceneAttr = document.createElement('a-entity');
+                    sceneAttr.setAttribute('id', 'scene-options-attribution');
+                    sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
+                    sceneRoot.appendChild(sceneAttr);
+                    delete sceneOptions.attribution;
                 }
-            }).
-            catch(() => {
-                environment.setAttribute('environment', 'preset', 'starry');
-                environment.setAttribute('environment', 'seed', 3);
-                environment.setAttribute('environment', 'flatShading', true);
-                environment.setAttribute('environment', 'groundTexture', 'squares');
-                environment.setAttribute('environment', 'grid', 'none');
-                environment.setAttribute('environment', 'fog', 0);
-                environment.setAttribute('environment', 'fog', 0);
+
+                if (sceneOptions['navMesh']) {
+                    const navMesh = document.createElement('a-entity');
+                    navMesh.id = 'navMesh';
+                    navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
+                    navMesh.setAttribute('nav-mesh', '');
+                    sceneRoot.appendChild(navMesh);
+                }
+
+                // save scene options
+                for (const [attribute, value] of Object.entries(sceneOptions)) {
+                    ARENA[attribute] = value;
+                }
+
+                const envPresets = options['env-presets'];
+                for (const [attribute, value] of Object.entries(envPresets)) {
+                    environment.setAttribute('environment', attribute, value);
+                }
                 sceneRoot.appendChild(environment);
 
-                // make default env have lights
-                const light = document.createElement('a-light');
-                light.id = 'ambient-light';
-                light.setAttribute('type', 'ambient');
-                light.setAttribute('color', '#363942');
+                const rendererSettings = options['renderer-settings'];
+                if (rendererSettings) {
+                    for (const [attribute, value] of Object.entries(rendererSettings)) {
+                        renderer[attribute] = (attribute === 'outputEncoding') ?
+                            renderer[attribute] = THREE[value] :
+                            renderer[attribute] = value;
+                    }
+                }
+            } else {
+                throw new Error('No scene-options');
+            }
+        }).
+        catch(() => {
+            environment.setAttribute('environment', 'preset', 'starry');
+            environment.setAttribute('environment', 'seed', 3);
+            environment.setAttribute('environment', 'flatShading', true);
+            environment.setAttribute('environment', 'groundTexture', 'squares');
+            environment.setAttribute('environment', 'grid', 'none');
+            environment.setAttribute('environment', 'fog', 0);
+            environment.setAttribute('environment', 'fog', 0);
+            sceneRoot.appendChild(environment);
 
-                const light1 = document.createElement('a-light');
-                light1.id = 'point-light';
-                light1.setAttribute('type', 'point');
-                light1.setAttribute('position', '-0.272 0.39 1.25');
-                light1.setAttribute('color', '#C2E6C7');
+            // make default env have lights
+            const light = document.createElement('a-light');
+            light.id = 'ambient-light';
+            light.setAttribute('type', 'ambient');
+            light.setAttribute('color', '#363942');
 
-                sceneRoot.appendChild(light);
-                sceneRoot.appendChild(light1);
-            }).
-            finally(() => this.sceneOptions = sceneOptions);
+            const light1 = document.createElement('a-light');
+            light1.id = 'point-light';
+            light1.setAttribute('type', 'point');
+            light1.setAttribute('position', '-0.272 0.39 1.25');
+            light1.setAttribute('color', '#C2E6C7');
+
+            sceneRoot.appendChild(light);
+            sceneRoot.appendChild(light1);
+        }).
+        finally(() => {
+            this.sceneOptions = sceneOptions;
+            ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
+        });
     };
 
     /**
