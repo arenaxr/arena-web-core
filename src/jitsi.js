@@ -48,22 +48,26 @@ export class ARENAJitsi {
             clientNode: 'http://jitsi.org/jitsimeet',
         };
 
-        // TODO: is this how to p2p.enabled false? https://github.com/jitsi/lib-jitsi-meet/blob/master/doc/API.md
+        // Connection recommendations and specs:
+        // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/
+        // https://github.com/jitsi/jitsi-meet/blob/master/config.js
         this.confOptions = {
             openBridgeChannel: true,
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
-            p2p: {enabled: false},
+            p2p: {
+                enabled: false
+            },
             constraints: {
                 video: {
-                    aspectRatio: 16 / 9,
                     height: {
                         ideal: 1080,
-                        max: 1080,
-                        min: 1080
+                        max: 2160,
+                        min: 240
                     }
                 }
             },
+            enableLayerSuspension: true,
         };
 
         this.initOptions = {
