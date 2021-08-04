@@ -67,7 +67,7 @@ export class ARENAJitsi {
                     }
                 }
             },
-            enableLayerSuspension: true,
+            //enableLayerSuspension: true,
         };
 
         this.initOptions = {
