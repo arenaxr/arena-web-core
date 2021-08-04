@@ -56,11 +56,11 @@ export class ARENAJitsi {
             p2p: {enabled: false},
             constraints: {
                 video: {
-                    aspectRatio: 2 / 1,
+                    aspectRatio: 16 / 9,
                     height: {
-                        ideal: 1920,
-                        max: 1920,
-                        min: 1920
+                        ideal: 1080,
+                        max: 1080,
+                        min: 1080
                     }
                 }
             },
