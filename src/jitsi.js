@@ -54,6 +54,16 @@ export class ARENAJitsi {
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
             p2p: {enabled: false},
+            constraints: {
+                video: {
+                    aspectRatio: 2 / 1,
+                    height: {
+                        ideal: 1920,
+                        max: 1920,
+                        min: 1920
+                    }
+                }
+            },
         };
 
         this.initOptions = {
