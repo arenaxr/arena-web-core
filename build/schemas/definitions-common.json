@@ -103,6 +103,8 @@
           "lon": 79.9428,
           "markerid": "0",
           "markertype": "apriltag_36h11",
+          "dynamic": false,
+          "buildable": false,
           "size": 150
         },
         "description": "A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes in the real world. ",
@@ -140,6 +142,16 @@
             ],
             "title": "The marker type (apriltag_36h11, lightanchor, uwb)",
             "type": "string"
+          },
+          "dynamic":{
+            "type":"boolean",
+            "title":"Dynamic tag, not used for localization",
+            "default": false
+          },
+          "buildable":{
+            "type":"boolean",
+            "title":"Buildable tag, can be moved by scene author",
+            "default": false
           },
           "size": {
             "default": 150,

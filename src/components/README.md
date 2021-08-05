@@ -226,6 +226,8 @@ ARMarker Component. Supports ARMarkers in a scene
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [markertype] | <code>string</code> | <code>&quot;apriltag_36h11&quot;</code> | The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb' |
+| [dynamic] | <code>boolean</code> | <code>&quot;false&quot;</code> | Whether tag is a static localizer, or dynamically changes position |
+| [buildable] | <code>boolean</code> | <code>&quot;false&quot;</code> | Allow tag to be reoriented by a scene author |
 | [markerid] | <code>string</code> |  | Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]) |
 | [size] | <code>number</code> | <code>150</code> | Size of the marker (assumed to be a square), if applicable (mm). |
 | [url] | <code>string</code> |  | A URL associated with the marker. |

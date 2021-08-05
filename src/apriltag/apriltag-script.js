@@ -85,9 +85,11 @@ function getAprilTag(id) {
         const sysTag = tagSystem.get(id);
         if (sysTag !== undefined) {
             return {
-                id: sysTag.data.tagid,
-                uuid: `apriltag_${sysTag.el.id}`,
+                id: sysTag.data.markerid,
+                uuid: sysTag.el.id,
                 pose: sysTag.el.object3D.matrixWorld,
+                dynamic: sysTag.data.dynamic,
+                buildable: sysTag.data.buildable,
             };
         }
     }
@@ -95,7 +97,7 @@ function getAprilTag(id) {
 }
 
 
-window.processCV = async function (frame) {
+window.processCV = async function(frame) {
     const ARENA = window.ARENA;
     cvThrottle++;
     if (cvThrottle % ARENA.cvRate) {
@@ -113,9 +115,7 @@ window.processCV = async function (frame) {
     vioMatrix.copy(camParent).invert(); // vioMatrix.getInverse(camParent);
     vioMatrix.multiply(cam);
     vioMatrixInv.copy(vioMatrix).invert(); // vioMatrixT.getInverse(vioMatrix);
-    if (!vioFilter(vioMatrixPrev, vioMatrixInv)) {
-        return;
-    }
+    const vioStable = vioFilter(vioMatrixPrev, vioMatrixInv);
 
     vioRot.setFromRotationMatrix(vioMatrix);
     vioPos.setFromMatrixPosition(vioMatrix);
@@ -185,7 +185,7 @@ window.processCV = async function (frame) {
                     scene: ARENA.sceneName,
                     namespace: ARENA.nameSpace,
                     timestamp: timestamp,
-                    camera_id: ARENA.camName
+                    camera_id: ARENA.camName,
                 };
                 delete detection.corners;
                 delete detection.center;
@@ -201,47 +201,56 @@ window.processCV = async function (frame) {
                     }
                     */
                 }
-                if (refTag) { // If reference tag pose is known to solve locally, solve for rig offset
-                    if (localizerTag) {
-                        continue;
-                        // Reconcile which localizer tag is better based on error?
-                    } else {
-                        const rigPose = getRigPoseFromAprilTag(detection.pose, refTag.pose);
-                        document.getElementById('cameraSpinner').object3D.quaternion.setFromRotationMatrix(rigPose);
-                        document.getElementById('cameraRig').object3D.position.setFromMatrixPosition(rigPose);
-                        localizerTag = true;
-                        /* ** Rig update for networked solver, disable for now **
-                        rigMatrixT.copy(rigPose)
-                         // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
-                        rigMatrixT.transpose();
-                         */
-                    }
-                } else { // Unknown tag, dynamic place it
-                    if (rigMatrix.equals(identityMatrix)) {
-                        console.log('Client apriltag solver no calculated rigMatrix yet, zero on origin tag first');
-                    } else {
-                        const tagPose = getTagPoseFromRig(detection.pose);
-                        tagPoseRot.setFromRotationMatrix(tagPose);
-                        // Send update directly to scene
-                        Object.assign(jsonMsg, {
-                            object_id: 'apriltag_' + dtagid,
-                            action: 'update',
-                            type: 'object',
-                            data: {
-                                'position': {
-                                    'x': tagPose.elements[12],
-                                    'y': tagPose.elements[13],
-                                    'z': tagPose.elements[14],
+                if (refTag) {
+                    if (!refTag.dynamic && !refTag.buildable) {
+                        if (vioStable && !localizerTag) {
+                            const rigPose = getRigPoseFromAprilTag(
+                                detection.pose, refTag.pose);
+                            document.getElementById('cameraSpinner').
+                                object3D.
+                                quaternion.
+                                setFromRotationMatrix(rigPose);
+                            document.getElementById('cameraRig').
+                                object3D.
+                                position.
+                                setFromMatrixPosition(rigPose);
+                            localizerTag = true;
+                            /* Rig update for networked solver, disable for now **
+                            rigMatrixT.copy(rigPose)
+                             // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
+                            rigMatrixT.transpose();
+                            */
+                        }
+                    } else if (refTag.dynamic && ARENA.chat.settings.isSceneWriter) { // Dynamic + writable, push update
+                        if (rigMatrix.equals(identityMatrix)) {
+                            console.log('Client apriltag solver no calculated rigMatrix yet, zero on origin tag first');
+                        } else {
+                            const tagPose = getTagPoseFromRig(detection.pose);
+                            tagPoseRot.setFromRotationMatrix(tagPose);
+                            // Send update directly to scene
+                            Object.assign(jsonMsg, {
+                                object_id: refTag.uuid,
+                                action: 'update',
+                                type: 'object',
+                                persist: true,
+                                data: {
+                                    'position': {
+                                        'x': tagPose.elements[12],
+                                        'y': tagPose.elements[13],
+                                        'z': tagPose.elements[14],
+                                    },
+                                    'rotation': {
+                                        'x': tagPoseRot.x,
+                                        'y': tagPoseRot.y,
+                                        'z': tagPoseRot.z,
+                                        'w': tagPoseRot.w,
+                                    },
                                 },
-                                'rotation': {
-                                    'x': tagPoseRot.x,
-                                    'y': tagPoseRot.y,
-                                    'z': tagPoseRot.z,
-                                    'w': tagPoseRot.w,
-                                },
-                            },
-                        });
-                        ARENA.Mqtt.publish(`realm/s/${ARENA.nameSpace}/${ARENA.sceneName}/apriltag_${dtagid}`, JSON.stringify(jsonMsg));
+                            });
+                            ARENA.Mqtt.publish(
+                                `realm/s/${ARENA.nameSpace}/${ARENA.sceneName}/${refTag.uuid}`,
+                                JSON.stringify(jsonMsg));
+                        }
                     }
                 }
             }

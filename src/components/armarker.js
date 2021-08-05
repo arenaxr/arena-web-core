@@ -50,9 +50,9 @@ AFRAME.registerSystem('armarker', {
      *
      */
     getAll: function(mtype=undefined) {
-        if (mtype==undefined) return this.markers;
+        if (mtype === undefined) return this.markers;
         const filtered = Object.assign({}, ...Object.entries(this.markers).filter(([k, v]) =>
-            v.data.markertype == mtype).map(([k, v]) => ({[k]: v})));
+            v.data.markertype === mtype).map(([k, v]) => ({[k]: v})));
         return filtered;
     },
     /**
@@ -70,6 +70,8 @@ AFRAME.registerSystem('armarker', {
  * ARMarker Component. Supports ARMarkers in a scene
  * @module armarker
  * @property {string} [markertype=apriltag_36h11] - The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb'
+ * @property {boolean} [dynamic=false] - Whether tag is a static localizer, or dynamically changes position
+ * @property {boolean} [buildable=false] - Allow tag to be reoriented by a scene author
  * @property {string} [markerid] - Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])
  * @property {number} [size=150] - Size of the marker (assumed to be a square), if applicable (mm).
  * @property {string} [url] - A URL associated with the marker.
@@ -83,6 +85,12 @@ AFRAME.registerComponent('armarker', {
         markertype: {
             default: 'apriltag_36h11', oneOf: ['apriltag_36h11', 'lightanchor', 'uwb'],
         }, // markertype: apriltag_36h11, lightanchor, uwb
+        dynamic: {
+            default: false, type: 'boolean',
+        },
+        buildable: {
+            default: false, type: 'boolean',
+        },
         markerid: {
             type: 'string',
             default: '',
@@ -111,11 +119,18 @@ AFRAME.registerComponent('armarker', {
     init: function() {
         this.update();
         this.system.registerComponent(this);
+        if (this.data.buildable) { // Toggle clientside dynamic
+            this.el.setAttribute('click-listener', '');
+            this.el.addEventListener('click', () => {
+                this.data.dynamic = !this.data.dynamic;
+                this.el.setAttribute('material', 'wireframe', this.data.dynamic);
+            });
+        }
     },
     update: function() {
         // try to assign a marker id based on the object id: name_markerid
-        if (this.data.markerid == '') {
-            regex = /(?<name>\w+)_(?<markerid>\w+)/g;
+        if (this.data.markerid === '') {
+            const regex = /(?<name>\w+)_(?<markerid>\w+)/g;
             const match = regex.exec(this.el.getAttribute('id'));
             this.data.markerid = match.groups.markerid;
         }
