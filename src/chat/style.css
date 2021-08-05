@@ -378,8 +378,7 @@
 
 .chat-button .dot {
 	position: absolute;
-	top: -5px;
-	left: 2px;
+	top: 5px;
 	padding: 3px 7px;
 	border-radius: 50%;
 	background: red;
@@ -391,8 +390,7 @@
 
 .users-button .dot {
   position: absolute;
-  top: -5px;
-  left: 52px;
+  top: 5px;
   padding: 3px 7px;
   border-radius: 50%;
   background:#c4c4c4;
