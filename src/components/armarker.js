@@ -120,7 +120,7 @@ AFRAME.registerComponent('armarker', {
         this.update();
         this.system.registerComponent(this);
         if (this.data.buildable) { // Toggle clientside dynamic
-            this.el.setAttribute('click-listener', '');
+            this.el.setAttribute('click-listener-local', '');
             this.el.addEventListener('click', () => {
                 this.data.dynamic = !this.data.dynamic;
                 this.el.setAttribute('material', 'wireframe', this.data.dynamic);
