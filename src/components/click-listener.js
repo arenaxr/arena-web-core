@@ -15,12 +15,12 @@ import {ARENAUtils} from '../utils.js';
  * @module click-listener
  */
 AFRAME.registerComponent('click-listener', {
-        /**
-         * Setup event listeners for mouse events; listeners publish events to MQTT
-         * @alias module:click-listener
-         * @todo Consolidate event listeners (they are very similar)
-         */
-         init: function() {
+    /**
+     * Setup event listeners for mouse events; listeners publish events to MQTT
+     * @alias module:click-listener
+     * @todo Consolidate event listeners (they are very similar)
+     */
+    init: function() {
         const self = this;
         this.el.addEventListener('mousedown', function(evt) {
             const camera = document.getElementById('my-camera');

@@ -120,10 +120,12 @@ AFRAME.registerComponent('armarker', {
         this.update();
         this.system.registerComponent(this);
         if (this.data.buildable) { // Toggle clientside dynamic
-            this.el.setAttribute('click-listener-local', '');
-            this.el.addEventListener('click', () => {
-                this.data.dynamic = !this.data.dynamic;
-                this.el.setAttribute('material', 'wireframe', this.data.dynamic);
+            this.el.setAttribute('click-listener', true);
+            this.el.addEventListener('mousedown', (evt) => {
+                if (evt.detail.cursorEl) { // Only track native click event
+                    this.data.dynamic = !this.data.dynamic;
+                    this.el.setAttribute('material', 'wireframe', this.data.dynamic);
+                }
             });
         }
     },
