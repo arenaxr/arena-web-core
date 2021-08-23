@@ -47,8 +47,8 @@
     "build-nominify": "parcel build src/index.js -o arena-core.js --public-url ./dist --no-minify",
     "prebuild-main": "npm run collect-static",
     "build-main": "parcel build src/index.js -o arena-core.js --public-url /dist",
-    "predocs": "echo '# A-Frame components (modules) added to support ARENA core functionality\n' > src/components/README.md",
-    "docs": "jsdoc2md src/components/*.js >> src/components/README.md"
+    "predocs": "echo '# A-Frame components (modules) added to support ARENA core functionality\n' > src/components/README.md; echo '# A-Frame systems (modules) added to support ARENA core functionality\n' > src/systems/README.md",
+    "docs": "jsdoc2md src/components/*.js >> src/components/README.md; jsdoc2md src/systems/*.js >> src/systems/README.md"
   },
   "repository": {
     "type": "git",
