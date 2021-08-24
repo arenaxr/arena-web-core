@@ -29,6 +29,16 @@
                       ],
                       "default":"apriltag_36h11"
                    },
+                   "dynamic":{
+                      "type":"boolean",
+                      "title":"Dynamic tag, not used for localization",
+                      "default": false
+                   },
+                   "buildable":{
+                      "type":"boolean",
+                      "title":"Buildable tag, can be moved by scene author",
+                      "default": false
+                   },
                    "markerid":{
                       "type":"string",
                       "title":"The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
@@ -67,6 +77,8 @@
                 "default":{
                    "object_type":"armarker",
                    "markertype":"apriltag_36h11",
+                   "dynamic": false,
+                   "buildable": false,
                    "markerid":"0",
                    "size":150,
                    "lat":40.4432,
