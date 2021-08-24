@@ -24,6 +24,7 @@
  AFRAME.registerSystem("armarker", {
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
+     debugCameraCapture: { default: false },
      debugCameraCapture: { default: true },
      /* relocalization debug messages output */
      debugRelocalization: { default: true },
@@ -97,6 +98,7 @@
          this.webXRSessionStarted(sceneEl.xrSession);
        });
      }
+     
    },
    /**
     * WebXR session started callback
@@ -146,11 +148,7 @@
      if (!this.cameraCapture) {
        console.info("Setting up WebXR-based passthrough AR camera capture.");
        try {
-         this.cameraCapture = new WebXRCameraCapture(
-           this.webXRSession,
-           this.gl,
-           this.data.debugCameraCapture
-         );
+         this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl, this.data.debugCameraCapture);
        } catch (err) {
          console.warn(`Could not create WebXR camera capture. ${err}`);
        }
@@ -160,9 +158,7 @@
      if (!this.cameraCapture) {
        console.info("Falling back to WebARViewer camera capture.");
        try {
-         this.cameraCapture = new WebARViewerCameraCapture(
-           this.data.debugCameraCapture
-         );
+         this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
        } catch (err) {
          console.error(`No valid CV camera capture found. ${err}`);
  
@@ -179,13 +175,15 @@
      this.cvWorker.addEventListener("message", this.cvWorkerMessage.bind(this));
      
      // setup ar marker relocalization that will listen to ar marker detection events
-     this.markerReloc = new ARMarkerRelocalization(
-       this,
-       this.data.networkedTagSolver,
-       this.data.publishDetections,
-       this.data.builder,
-       this.data.debugRelocalization
-     );
+     this.markerReloc = new ARMarkerRelocalization({
+       getArMaker: this.get.bind(this),
+       detectionsEventTarget: this.detectionEvts,
+       networkedTagSolver: this.data.networkedTagSolver,
+       publishDetections: this.data.publishDetections,
+       builder: this.data.builder,
+       debug: this.data.debugRelocalization
+     });
+ 
    },
    /**
     * Handle messages from cvWorker (detector)
@@ -197,17 +195,21 @@
  
      switch (cvWorkerMsg.type) {
        case CVWorkerMsgs.type.FRAME_RESULTS:
-         let detectionEvent = new CustomEvent("armarker-detection", {
-           detections: cvWorkerMsg.detections
-         });
-         this.detectionEvts.dispatchEvent(detectionEvent);
+         // pass detections and original frame timestamp to relocalization
+         if (cvWorkerMsg.detections.length) {
+           let detectionEvent = new CustomEvent("armarker-detection", { detail: {
+             detections: cvWorkerMsg.detections,
+             ts: cvWorkerMsg.ts
+           }});
+           this.detectionEvts.dispatchEvent(detectionEvent);
+         }
          // request next camera frame and return image buffer to camera capture
-         this.cameraCapture.requestFrame(cvWorkerMsg);
+         this.cameraCapture.requestCameraFrame(cvWorkerMsg.grayscalePixels);
          break;
        case CVWorkerMsgs.type.INIT_DONE:
        case CVWorkerMsgs.type.NEXT_FRAME_REQ:
          // request next camera frame
-         this.cameraCapture.requestFrame();
+         this.cameraCapture.requestCameraFrame();
          break;
        default:
          console.warn("ARMarker System: unknow message from CV worker.");
