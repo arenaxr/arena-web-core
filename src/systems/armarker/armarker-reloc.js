@@ -12,45 +12,45 @@
 /**
  *
  */
- export default class ARMarkerRelocalization {
+ export class ARMarkerRelocalization {
     /* singleton instance */
-    static #instance = null;
+    static instance = null;
     /* ARMarker system function that takes a marker id and returns its details */
-    #getArMaker;
+    getArMaker;
     /* let relocalization up to a networked solver */
-    #networkedTagSolver;
+    networkedTagSolver;
     /* publish detections */
-    #publishDetections;
+    publishDetections;
     /* build mode */
-    #builder;
+    builder;
     /* debug; output debug messages */
-    #debug;
+    debug;
     /* cameraSpinner and cameraRig scene object3D instances */
-    #cameraSpinnerObj3D;
-    #cameraRigObj3D;
+    cameraSpinnerObj3D;
+    cameraRigObj3D;
     /* matrices used for relocalization */
-    #dtagMatrix = new THREE.Matrix4();
-    #rigMatrix = new THREE.Matrix4();
-    #vioMatrixPrev = new THREE.Matrix4();
-    #vioMatrix = new THREE.Matrix4();
-    #vioMatrixInv = new THREE.Matrix4();
-    #vioMatrixDiff = new THREE.Matrix4();
-    #tagPoseMatrix = new THREE.Matrix4();
-    #identityMatrix = new THREE.Matrix4();
-    #vioRot = new THREE.Quaternion();
-    #vioPos = new THREE.Vector3();
-    #vioPosDiff = new THREE.Vector3();
-    #tagPoseRot = new THREE.Quaternion();
-    #flipMatrix = new THREE.Matrix4().set(
+    dtagMatrix = new THREE.Matrix4();
+    rigMatrix = new THREE.Matrix4();
+    vioMatrixPrev = new THREE.Matrix4();
+    vioMatrix = new THREE.Matrix4();
+    vioMatrixInv = new THREE.Matrix4();
+    vioMatrixDiff = new THREE.Matrix4();
+    tagPoseMatrix = new THREE.Matrix4();
+    identityMatrix = new THREE.Matrix4();
+    vioRot = new THREE.Quaternion();
+    vioPos = new THREE.Vector3();
+    vioPosDiff = new THREE.Vector3();
+    tagPoseRot = new THREE.Quaternion();
+    flipMatrix = new THREE.Matrix4().set(
             1,  0,  0, 0,
             0, -1,  0, 0,
             0,  0, -1, 0,
             0,  0,  0, 1);
     
     /* error and movement thresholds */
-    #DTAG_ERROR_THRESH = 5e-6;
-    #MOVE_THRESH = 0.05;
-    #ROT_THRESH = 0.087;
+    DTAG_ERROR_THRESH = 5e-6;
+    MOVE_THRESH = 0.05;
+    ROT_THRESH = 0.087;
   
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
@@ -72,26 +72,26 @@
       if (getArMaker === undefined) throw "Please provide a marker lookup function";
       if (detectionsEventTarget === undefined) throw "Please provide a detection event target";
       // singleton
-      if (ARMarkerRelocalization.#instance) {
-        return ARMarkerRelocalization.#instance;
+      if (ARMarkerRelocalization.instance) {
+        return ARMarkerRelocalization.instance;
       }
-      ARMarkerRelocalization.#instance = this;
+      ARMarkerRelocalization.instance = this;
   
       // check/init internal options
       if ((publishDetections || networkedTagSolver || builder) && !window.ARENA) {
         throw "Publish detections, networked tag solver and builder mode require ARENA functionality.";
       }
-      this.#networkedTagSolver = networkedTagSolver;
-      this.#publishDetections = publishDetections;
-      this.#builder = builder;
-      this.#debug = debug;
-      this.#cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
-      this.#cameraRigObj3D = document.getElementById("cameraRig").object3D;
-      if (!this.#cameraSpinnerObj3D || !this.#cameraRigObj3D)
+      this.networkedTagSolver = networkedTagSolver;
+      this.publishDetections = publishDetections;
+      this.builder = builder;
+      this.debug = debug;
+      this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
+      this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
+      if (!this.cameraSpinnerObj3D || !this.cameraRigObj3D)
         throw "Camera rig and camera spinner are required for relocalization!";
   
       // save ARMarker system function to lookup markers
-      this.#getArMaker = getArMaker;
+      this.getArMaker = getArMaker;
   
       // setup marker detection event listener
       detectionsEventTarget.addEventListener(
@@ -107,19 +107,19 @@
      * @return {boolean} - boolean indicating if we should ignore a detecion or not
      */
     vioFilter(vioPrev, vioCur) {
-      this.#vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
-      const moveDiff = this.#vioPosDiff.setFromMatrixPosition(this.#vioMatrixDiff).length(); // np.linalg.norm(posediff[0:3, 3])
-      if (moveDiff > this.#MOVE_THRESH) {
+      this.vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
+      const moveDiff = this.vioPosDiff.setFromMatrixPosition(this.vioMatrixDiff).length(); // np.linalg.norm(posediff[0:3, 3])
+      if (moveDiff > this.MOVE_THRESH) {
         return false;
       }
       const rotDiff = Math.acos(
-        (this.#vioMatrixDiff.elements[0] +
-          this.#vioMatrixDiff.elements[5] +
-          this.#vioMatrixDiff.elements[10] -
+        (this.vioMatrixDiff.elements[0] +
+          this.vioMatrixDiff.elements[5] +
+          this.vioMatrixDiff.elements[10] -
           1) /
           2
       ); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
-      if (rotDiff > this.#ROT_THRESH) {
+      if (rotDiff > this.ROT_THRESH) {
         return false;
       }
       return true;
@@ -164,7 +164,7 @@
      */
     markerDetection(e) {
         const ARENA = window.ARENA;
-        if (this.#debug) console.log("Tag detected:", e.detail);
+        if (this.debug) console.log("Tag detected:", e.detail);
         const detections = e.detail.detections; 
         const timestamp = e.detail.ts; // detection timestamp = when frame was captured
       
@@ -172,21 +172,21 @@
         /*
               // Save vio before processing apriltag. Don't touch global though
 
-              this.#vioMatrixPrev.copy(this.#vioMatrix);
+              this.vioMatrixPrev.copy(this.vioMatrix);
               const camParent = document.getElementById('my-camera').object3D.parent.matrixWorld;
               const cam = document.getElementById('my-camera').object3D.matrixWorld;
-              this.#vioMatrix.copy(camParent).invert(); // this.#vioMatrix.getInverse(camParent);
-              this.#vioMatrix.multiply(cam);
-              this.#vioMatrixInv.copy(this.#vioMatrix).invert(); // vioMatrixT.getInverse(this.#vioMatrix);
-              const vioStable = vioFilter(this.#vioMatrixPrev, this.#vioMatrixInv);
+              this.vioMatrix.copy(camParent).invert(); // this.vioMatrix.getInverse(camParent);
+              this.vioMatrix.multiply(cam);
+              this.vioMatrixInv.copy(this.vioMatrix).invert(); // vioMatrixT.getInverse(this.vioMatrix);
+              const vioStable = vioFilter(this.vioMatrixPrev, this.vioMatrixInv);
 
-              this.#vioRot.setFromRotationMatrix(this.#vioMatrix);
-              this.#vioPos.setFromMatrixPosition(this.#vioMatrix);
+              this.vioRot.setFromRotationMatrix(this.vioMatrix);
+              this.vioPos.setFromMatrixPosition(this.vioMatrix);
 
-              const vio = {position: this.#vioPos, rotation: this.#vioRot};
+              const vio = {position: this.vioPos, rotation: this.vioRot};
               */
 
-        if (this.#networkedTagSolver || this.#publishDetections) {
+        if (this.networkedTagSolver || this.publishDetections) {
             // TODO: change message to 'armarker' ?
             const jsonMsg = {
                 scene: ARENA.sceneName,
@@ -199,19 +199,19 @@
             jsonMsg.detections = [];
             for (const detection of detections) {
                 const d = detection;
-                if (d.pose.e > this.#DTAG_ERROR_THRESH) {
+                if (d.pose.e > this.DTAG_ERROR_THRESH) {
                     continue;
                 }
                 delete d.corners;
                 delete d.center;
                 // get marker info
-                const indexedTag = this.#getArMaker(d.id);
+                const indexedTag = this.getArMaker(d.id);
                 if (indexedTag?.pose) {
                     d.refTag = indexedTag;
                 }
                 jsonMsg.detections.push(d);
             }
-            if (this.#builder) {
+            if (this.builder) {
                 jsonMsg.geolocation = {
                     latitude: ARENA.clientCoords.latitude,
                     longitude: ARENA.clientCoords.longitude
@@ -223,11 +223,11 @@
                 JSON.stringify(jsonMsg)
             );
         }
-        if (!this.#networkedTagSolver) {
+        if (!this.networkedTagSolver) {
             let localizerTag;
             for (const detection of detections) {
-                if (detection.pose.e > this.#DTAG_ERROR_THRESH) {
-                    if (this.#debug) console.warn(`Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`);
+                if (detection.pose.e > this.DTAG_ERROR_THRESH) {
+                    if (this.debug) console.warn(`Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`);
                     continue;
                 }
               /*
@@ -236,15 +236,15 @@
               */
                 let refTag = null;
                 // get marker data
-                const indexedTag = this.#getArMaker(detection.id);
+                const indexedTag = this.getArMaker(detection.id);
                 if (indexedTag?.pose) refTag = indexedTag;
-                if (this.#debug) console.log("ARMarker system found tag:", refTag);
+                if (this.debug) console.log("ARMarker system found tag:", refTag);
                 if (refTag) {
                     if (!refTag.dynamic && !refTag.buildable) {
                         if (vioStable && !localizerTag) {
-                            const rigPose = this.#getRigPoseFromAprilTag(detection.pose,refTag.pose);
-                            this.#cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
-                            this.#cameraRigObj3D.position.setFromMatrixPosition(rigPose);
+                            const rigPose = this.getRigPoseFromAprilTag(detection.pose,refTag.pose);
+                            this.cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
+                            this.cameraRigObj3D.position.setFromMatrixPosition(rigPose);
                             localizerTag = true;
                             /* Rig update for networked solver, disable for now **
                               rigMatrixT.copy(rigPose)
@@ -254,18 +254,18 @@
                         }
                     } else if (refTag.dynamic && ARENA && ARENA.chat.settings.isSceneWriter) {
                         // Dynamic + writable, push marker update
-                        if (this.#rigMatrix.equals(this.#identityMatrix)) {
-                            if (this.#debug) console.warn("Client apriltag solver no calculated this.#rigMatrix yet, zero on origin tag first");
+                        if (this.rigMatrix.equals(this.identityMatrix)) {
+                            if (this.debug) console.warn("Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first");
                         } else {
-                            if (this.#debug) console.log(`Build mode; Pushing update for tag ${detection.id}`)
+                            if (this.debug) console.log(`Build mode; Pushing update for tag ${detection.id}`)
                             const jsonMsg = {
                                 scene: ARENA.sceneName,
                                 namespace: ARENA.nameSpace,
                                 timestamp: timestamp,
                                 camera_id: ARENA.camName
                             };                          
-                            const tagPose = this.#getArMaker(detection.pose);
-                            this.#tagPoseRot.setFromRotationMatrix(tagPose);
+                            const tagPose = this.getArMaker(detection.pose);
+                            this.tagPoseRot.setFromRotationMatrix(tagPose);
                             // Send update directly to scene
                             Object.assign(jsonMsg, {
                                 object_id: refTag.uuid,
@@ -279,10 +279,10 @@
                                         z: tagPose.elements[14]
                                     },
                                     rotation: {
-                                        x: this.#tagPoseRot.x,
-                                        y: this.#tagPoseRot.y,
-                                        z: this.#tagPoseRot.z,
-                                        w: this.#tagPoseRot.w
+                                        x: this.tagPoseRot.x,
+                                        y: this.tagPoseRot.y,
+                                        z: this.tagPoseRot.z,
+                                        w: this.tagPoseRot.w
                                     }
                                 }
                             });
@@ -303,28 +303,28 @@
      * @param {Array.<Array.<number>>} dtag.R - 2D rotation array
      * @param {Array.<number>} dtag.t - 1D translation array
      * @param {THREE.Matrix4} refTag - Tag pose from scene origin
-     * @return {THREE.Matrix4} this.#rigMatrix
+     * @return {THREE.Matrix4} this.rigMatrix
      */
-    #getRigPoseFromAprilTag(dtag, refTag) {
+    getRigPoseFromAprilTag(dtag, refTag) {
       const r = dtag.R;
       const t = dtag.t;
   
-      this.#dtagMatrix.set( // Transposed rotation
+      this.dtagMatrix.set( // Transposed rotation
           r[0][0], r[1][0], r[2][0], t[0],
           r[0][1], r[1][1], r[2][1], t[1],
           r[0][2], r[1][2], r[2][2], t[2],
           0      , 0      , 0      , 1   ,
       );
-      this.#dtagMatrix.premultiply(this.#flipMatrix);
-      this.#dtagMatrix.multiply(this.#flipMatrix);
+      this.dtagMatrix.premultiply(this.flipMatrix);
+      this.dtagMatrix.multiply(this.flipMatrix);
   
       // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
-      this.#dtagMatrix.copy(this.#dtagMatrix).invert(); // this.#dtagMatrix.getInverse(this.#dtagMatrix);
-      this.#rigMatrix.identity();
-      this.#rigMatrix.multiplyMatrices(refTag, this.#dtagMatrix);
-      this.#rigMatrix.multiply(this.#vioMatrixInv);
+      this.dtagMatrix.copy(this.dtagMatrix).invert(); // this.dtagMatrix.getInverse(this.dtagMatrix);
+      this.rigMatrix.identity();
+      this.rigMatrix.multiplyMatrices(refTag, this.dtagMatrix);
+      this.rigMatrix.multiply(this.vioMatrixInv);
   
-      return this.#rigMatrix;
+      return this.rigMatrix;
     }
   
     /**
@@ -332,26 +332,26 @@
      * @param {Object} dtag - Detected tag pose from camera
      * @param {Array.<Array.<number>>} dtag.R - 2D rotation array
      * @param {Array.<number>} dtag.t - 1D translation array
-     * @return {THREE.Matrix4} this.#rigMatrix
+     * @return {THREE.Matrix4} this.rigMatrix
      */
-    #getTagPoseFromRig(dtag) {
+    getTagPoseFromRig(dtag) {
       const r = dtag.R;
       const t = dtag.t;
-      this.#dtagMatrix.set( // Transposed rotation
+      this.dtagMatrix.set( // Transposed rotation
           r[0][0], r[1][0], r[2][0], t[0],
           r[0][1], r[1][1], r[2][1], t[1],
           r[0][2], r[1][2], r[2][2], t[2],
           0      , 0      , 0      , 1   ,
       );
-      this.#dtagMatrix.premultiply(flipMatrix);
-      this.#dtagMatrix.multiply(flipMatrix);
+      this.dtagMatrix.premultiply(flipMatrix);
+      this.dtagMatrix.multiply(flipMatrix);
   
       // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
-      this.#tagPoseMatrix.copy(this.#rigMatrix);
-      this.#tagPoseMatrix.multiply(this.#vioMatrix);
-      this.#tagPoseMatrix.multiply(this.#dtagMatrix);
+      this.tagPoseMatrix.copy(this.rigMatrix);
+      this.tagPoseMatrix.multiply(this.vioMatrix);
+      this.tagPoseMatrix.multiply(this.dtagMatrix);
   
-      return this.#tagPoseMatrix;
+      return this.tagPoseMatrix;
     }
   }
   

@@ -5,17 +5,17 @@
  * Attempts to detect device and setup camera capture accordingly:
  *   AR Headset: capture camera facing forward using getUserMedia
  *   Phone/tablet with WebXR Camera Capture API support: capture passthrough camera frames using the WebXR camera capture API (only in Android Chrome v93+)
- *   iPhone/iPad with custom browser: camera capture for WebXRViewer/WebARViewer
+ *   iPhone/iPad with custom browser: camera capture for Mozilla's WebXRViewer/WebARViewer
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
 
- import WebXRCameraCapture from "./ccwebxr.js";
- import ARHeadsetCameraCapture from "./ccarheadset.js";
- import WebARViewerCameraCapture from "./ccwebarviewer.js";
- import ARMarkerRelocalization from "./armarker-reloc.js";
+ import {WebXRCameraCapture} from "./camera-capture/ccwebxr.js";
+ import {ARHeadsetCameraCapture} from "./camera-capture/ccarheadset.js";
+ import {WebARViewerCameraCapture} from "./camera-capture/ccwebarviewer.js";
+ import {ARMarkerRelocalization} from "./armarker-reloc.js";
  
  /**
   * ARMarker System. Supports ARMarkers in a scene.
@@ -25,7 +25,6 @@
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
      debugCameraCapture: { default: false },
-     debugCameraCapture: { default: true },
      /* relocalization debug messages output */
      debugRelocalization: { default: true },
      /* builder mode flag; also looks at builder=true/false URL parameter */
@@ -93,7 +92,7 @@
      );
  
      // listner for xr session start
-     if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
+     if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {      
        sceneEl.addEventListener("enter-vr", () => {
          this.webXRSessionStarted(sceneEl.xrSession);
        });
@@ -106,7 +105,6 @@
     */
    async webXRSessionStarted(xrSession) {
      this.webXRSession = xrSession;
- 
      this.gl = this.el.renderer.getContext();
      try {
        await this.gl.makeXRCompatible();
@@ -126,7 +124,7 @@
     *   WebARViewerCameraCapture: camera capture for custom iOS browser (WebXRViewer/WebARViewer)
     *
     */
-   initCVPipeline() {
+   async initCVPipeline() {
      if (this.cvPipelineInitialized == true) return;
      if (this.webXRSession == undefined) return;
      if (this.gl == undefined) return;
@@ -156,7 +154,6 @@
  
      // as a fallback, try to setup a WebARViewer (custom iOS browser) camera capture pipeline
      if (!this.cameraCapture) {
-       console.info("Falling back to WebARViewer camera capture.");
        try {
          this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
        } catch (err) {
@@ -167,7 +164,7 @@
      }
  
      // create cv worker for apriltag detection
-     this.cvWorker = new Worker("./apriltag/apriltag_worker.js");
+     this.cvWorker = new Worker("./apriltag-detector/apriltag_worker.js");
      console.log("aprilTagWorker", this.cvWorker);
      this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
  
