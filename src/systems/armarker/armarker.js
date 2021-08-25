@@ -48,8 +48,6 @@
    webXRSession: null,
    // gl context used for webxr camera access; initialized once the xr session starts
    webXRGlContext: null,
-   // for now, try to detect magic leap and hololens (hololens reliable detection is tbd)
-   isARHeadset: window.mlWorld || (navigator.xr && navigator.userAgent.includes("Edge")),
    // cv worker instance
    cvWorker: undefined,
    // detection events are sent here
@@ -106,11 +104,6 @@
    async webXRSessionStarted(xrSession) {
      this.webXRSession = xrSession;
      this.gl = this.el.renderer.getContext();
-     try {
-       await this.gl.makeXRCompatible();
-     } catch (err) {
-       console.error("Could not make make gl context xr compatible!", err);
-     }
  
      // init cv pipeline only if we have ar markers in scene (?)
      //if (this.markers.length)
@@ -129,8 +122,22 @@
      if (this.webXRSession == undefined) return;
      if (this.gl == undefined) return;
  
+     // try to setup a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
+     const isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
+     if (!isWebARViewer) {
+       try {
+         this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
+       } catch (err) {
+         console.warn(`Could not create WebXRViewer/WebARViewer camera capture. ${err}`);
+         return; // we are done here
+       }
+     }
+
+     // for now, try to detect magic leap and hololens (hololens reliable detection is tbd)
+     let isARHeadset = window.mlWorld || (navigator.xr && navigator.userAgent.includes("Edge")),
+
      // if we are on a AR headset, use camera facing forward
-     if (this.isARHeadset) {
+     if (isARHeadset) {
        // try to setup a camera facing forward capture (using getUserMedia)
        console.info("Setting up AR Headset camera capture.");
        try {
@@ -138,31 +145,21 @@
            this.data.debugCameraCapture
          );
        } catch (err) {
-         console.warn(`Could not create WebXR camera capture. ${err}`);
+         console.warn(`Could not create AR Headset camera capture. ${err}`);
        }
      }
  
-     // try to setup a webxr camera capture (default; e.g. passthrough AR on a phone)
-     if (!this.cameraCapture) {
+     // fallback to setup a webxr camera capture (e.g. passthrough AR on a phone)
+     if (!this.cameraCapture && window.XRWebGLBinding) {
        console.info("Setting up WebXR-based passthrough AR camera capture.");
        try {
          this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl, this.data.debugCameraCapture);
-       } catch (err) {
-         console.warn(`Could not create WebXR camera capture. ${err}`);
-       }
+        } catch (err) {
+            console.error(`No valid CV camera capture found. ${err}`);
+            return; // no valid cv camera capture; we are done here
+        }
      }
- 
-     // as a fallback, try to setup a WebARViewer (custom iOS browser) camera capture pipeline
-     if (!this.cameraCapture) {
-       try {
-         this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
-       } catch (err) {
-         console.error(`No valid CV camera capture found. ${err}`);
- 
-         return; // no valid cv camera capture; we are done here
-       }
-     }
- 
+
      // create cv worker for apriltag detection
      this.cvWorker = new Worker("./apriltag-detector/apriltag_worker.js");
      console.log("aprilTagWorker", this.cvWorker);
