@@ -6,11 +6,10 @@ $(document).ready(function() {
 
     // TODO(mwfarb): remove debug serving store below...
     // $.ajax({
-    //     url: '/storesrv',
-    //     // url: 'http://127.0.0.1:8080',
+    //     url: '/storemng',
     //     type: 'GET',
     //     beforeSend: function(xhr) {
-    //         xhr.setRequestHeader('X-Filebrowser-Auth', 'testusername1');
+    //         xhr.setRequestHeader('X-Filebrowser-Auth', 'testuser1');
     //     },
     //     crossDomain: true,
     //     success: function(response) {
