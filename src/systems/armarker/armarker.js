@@ -24,9 +24,9 @@
  AFRAME.registerSystem("armarker", {
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
-     debugCameraCapture: { default: true },
+     debugCameraCapture: { default: false },
      /* relocalization debug messages output */
-     debugRelocalization: { default: true },
+     debugRelocalization: { default: false },
      /* builder mode flag; also looks at builder=true/false URL parameter */
      builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */

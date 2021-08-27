@@ -176,7 +176,7 @@
         this.vioMatrix.copy(camParent).invert(); // this.vioMatrix.getInverse(camParent);
         this.vioMatrix.multiply(cam);
         this.vioMatrixInv.copy(this.vioMatrix).invert(); // vioMatrixT.getInverse(this.vioMatrix);
-        vioStable = vioFilter(this.vioMatrixPrev, this.vioMatrixInv);
+        const vioStable = this.vioFilter(this.vioMatrixPrev, this.vioMatrixInv);
 
         this.vioRot.setFromRotationMatrix(this.vioMatrix);
         this.vioPos.setFromMatrixPosition(this.vioMatrix);
