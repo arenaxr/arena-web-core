@@ -59,6 +59,8 @@
      0, -1, 0, 0,
      0,  0, 0, 1,  
    ),
+   // if we detected WebXRViewer/WebARViewer
+   isWebARViewer: false,
    /*
     * Init system
     * @param {object} marker - The marker component object to register.
@@ -67,6 +69,9 @@
    init: function() {
      // init this.ATLASMarkers with list of markers within range
      this.getARMArkersFromATLAS(true);
+
+     // check if this is WebXRViewer/WebARViewer
+     this.isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
 
      // check URL parameters
      const urlParams = new URLSearchParams(window.location.search);
@@ -80,14 +85,15 @@
        this.data.publishDetections = !!urlParams.get("publishDetections"); // Force into boolean
      }
  
-     // add camera-access to optional webxr features
+     // request camera acess features
      let sceneEl = this.el;
      let optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
-     optionalFeatures.push("camera-access");
+     if (this.isWebARViewer) optionalFeatures.push("computerVision"); // request custom 'computerVision' feature in WebXRViewer/WebARViewer
+     else optionalFeatures.push("camera-access"); // request WebXR 'camera-access' otherwise
      sceneEl.systems.webxr.sceneEl.setAttribute(
-       "optionalFeatures",
-       optionalFeatures
-     );
+        "optionalFeatures",
+        optionalFeatures
+      );
  
      // listner for xr session start
      if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {      
@@ -130,8 +136,7 @@
      if (this.gl == undefined) return;
  
      // try to setup a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
-     const isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
-     if (isWebARViewer) {
+     if (this.isWebARViewer) {
        try {
          this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
        } catch (err) {
