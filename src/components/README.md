@@ -12,21 +12,13 @@
 <dt><a href="#module_arena-vive">arena-vive</a></dt>
 <dd><p>Tracking Vive controller movement in real time.</p>
 </dd>
-<dt><a href="#module_armarker-system">armarker-system</a></dt>
-<dd><p>ARMarker System. Supports ARMarkers in a scene.</p>
-</dd>
 <dt><a href="#module_armarker">armarker</a></dt>
 <dd><p>ARMarker Component. Supports ARMarkers in a scene</p>
 </dd>
-<dt><a href="#module_attribution-system">attribution-system</a></dt>
-<dd><p>Attribution Component/System. Add attribution message to any entity.
-Tries to extract author, license, source and title (assuming format used in sketchfab downloaded models)</p>
-<p>Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
-If both asset.extras and scene.extra exist, gives preference to asset.extras.</p>
-</dd>
 <dt><a href="#module_attribution">attribution</a></dt>
-<dd><p>Attribution Component. Saves attribution data in any entity. The following properties can be saved.
-If <code>extractAssetExtras=true</code> (default), the <a href="https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
+<dd><p>Attribution Component. Saves attribution data in any entity. The following properties can be saved.</p>
+<!-- markdown-link-check-disable-next-line -->
+<p>If <code>extractAssetExtras=true</code> (default), the <a href="https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
 </dd>
 <dt><a href="#module_click-listener">click-listener</a></dt>
 <dd><p>Keep track of mouse events and publish corresponding events</p>
@@ -38,9 +30,6 @@ Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-F
 <dt><a href="#module_gesture-detector">gesture-detector</a></dt>
 <dd><p>Detect multi-finger touch gestures. Publish events accordingly.
 Based off 8th Wall&#39;s <a href="https://github.com/8thwall/web/tree/master/examples/aframe">gesture-detector</a></p>
-</dd>
-<dt><a href="#module_gltf-model-progress">gltf-model-progress</a></dt>
-<dd><p>GLTF model loading progress system. Manage GLTF load messages.</p>
 </dd>
 <dt><a href="#module_goto-url">goto-url</a></dt>
 <dd><p>Load new URL when object is clicked</p>
@@ -71,6 +60,11 @@ Implements a timeout scheme in lack of better understanding of the timing/events
 </dd>
 <dt><a href="#module_network-latency">network-latency</a></dt>
 <dd><p>Publish with qos of 2 for network graph to update latency</p>
+</dd>
+<dt><a href="#module_pcd-model">pcd-model</a></dt>
+<dd><p>Load Point Cloud Data (PCD) models using three.js example loader
+Point Cloud Data is a file format for Point Cloud Library.
+<a href="https://en.wikipedia.org/wiki/Point_Cloud_Library">https://en.wikipedia.org/wiki/Point_Cloud_Library</a></p>
 </dd>
 <dt><a href="#module_press-and-move">press-and-move</a></dt>
 <dd><p>Press and move camera; User camera movement with the mouse.
@@ -147,75 +141,6 @@ Tracking Vive controller movement in real time.
 | hand | <code>string</code> | Controller hand. |
 | color | <code>string</code> | Controller color. |
 
-<a name="module_armarker-system"></a>
-
-## armarker-system
-ARMarker System. Supports ARMarkers in a scene.
-
-
-* [armarker-system](#module_armarker-system)
-    * [registerComponent(marker)](#exp_module_armarker-system--registerComponent) ⏏
-    * [unregisterComponent(marker)](#exp_module_armarker-system--unregisterComponent) ⏏
-    * [getAll(mtype)](#exp_module_armarker-system--getAll) ⇒ <code>object</code> ⏏
-    * [get(markerid)](#exp_module_armarker-system--get) ⇒ <code>object</code> ⏏
-
-<a name="exp_module_armarker-system--registerComponent"></a>
-
-### registerComponent(marker) ⏏
-Register an ARMarker component with the system
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| marker | <code>object</code> | The marker component object to register. |
-
-<a name="exp_module_armarker-system--unregisterComponent"></a>
-
-### unregisterComponent(marker) ⏏
-Unregister an ARMarker component
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| marker | <code>object</code> | The marker component object to unregister. |
-
-<a name="exp_module_armarker-system--getAll"></a>
-
-### getAll(mtype) ⇒ <code>object</code> ⏏
-Get all markers registered with the system
-
-**Kind**: Exported function  
-**Returns**: <code>object</code> - - a dictionary of markers  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| mtype | <code>object</code> | The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for; No argument or undefined will return all |
-
-**Example** *(Query the system a list of all markers in a scene)*  
-```js
-    let markers = document.querySelector("a-scene").systems["armarker"].getAll();
-    Object.keys(markers).forEach(function(key) {
-      console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
-    });
-```
-**Example** *(getAll() also accepts a marker type argument to filter by a given type)*  
-```js
-    let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
-```
-<a name="exp_module_armarker-system--get"></a>
-
-### get(markerid) ⇒ <code>object</code> ⏏
-Get a marker given is markerid
-
-**Kind**: Exported function  
-**Returns**: <code>object</code> - - the marker with the markerid given  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| markerid | <code>object</code> | The marker id to return |
-
 <a name="module_armarker"></a>
 
 ## armarker
@@ -226,8 +151,8 @@ ARMarker Component. Supports ARMarkers in a scene
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [markertype] | <code>string</code> | <code>&quot;apriltag_36h11&quot;</code> | The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb' |
-| [dynamic] | <code>boolean</code> | <code>&quot;false&quot;</code> | Whether tag is a static localizer, or dynamically changes position |
-| [buildable] | <code>boolean</code> | <code>&quot;false&quot;</code> | Allow tag to be reoriented by a scene author by clicking on it |
+| [dynamic] | <code>boolean</code> | <code>false</code> | Whether tag is a static localizer, or dynamically changes position |
+| [buildable] | <code>boolean</code> | <code>false</code> | Allow tag to be reoriented by a scene author by clicking on it |
 | [markerid] | <code>string</code> |  | Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]) |
 | [size] | <code>number</code> | <code>150</code> | Size of the marker (assumed to be a square), if applicable (mm). |
 | [url] | <code>string</code> |  | A URL associated with the marker. |
@@ -235,113 +160,11 @@ ARMarker Component. Supports ARMarkers in a scene
 | [long] | <code>number</code> | <code>0</code> | Marker longitude. |
 | [ele] | <code>number</code> | <code>0</code> | Marker elevation. |
 
-<a name="module_attribution-system"></a>
-
-## attribution-system
-Attribution Component/System. Add attribution message to any entity.
-Tries to extract author, license, source and title (assuming format used in sketchfab downloaded models)
-
-Looks for authorship metadata in both asset.extras (sketchfab models) and scene.extra (manually added attributes in blender).
-If both asset.extras and scene.extra exist, gives preference to asset.extras.
-
-**Example** *(Sketchfab downloaded model attributes - asset.extra)*  
-```js
-   author: "AuthorName (url-link-to-author)"
-   license: "CC-BY-4.0 (url-link-to-license)"
-   source: "url-link-to-model-website"
-   title: "Model Title"
-```
-
-* [attribution-system](#module_attribution-system)
-    * [registerComponent(el)](#exp_module_attribution-system--registerComponent) ⏏
-    * [unregisterComponent(el)](#exp_module_attribution-system--unregisterComponent) ⏏
-    * [getAttributionTable()](#exp_module_attribution-system--getAttributionTable) ⇒ <code>string</code> ⏏
-    * [extractAttributionFromGtlfAsset(el, gltfComponent)](#exp_module_attribution-system--extractAttributionFromGtlfAsset) ⏏
-    * [parseExtrasAttributes(extras)](#exp_module_attribution-system--parseExtrasAttributes) ⇒ <code>object</code> ⏏
-    * [parseAttribute(extras, attribution, attribute)](#exp_module_attribution-system--parseAttribute) ⇒ <code>boolean</code> ⏏
-
-<a name="exp_module_attribution-system--registerComponent"></a>
-
-### registerComponent(el) ⏏
-Register an attribution component with the system
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| el | <code>object</code> | The attribution a-frame element to register. |
-
-<a name="exp_module_attribution-system--unregisterComponent"></a>
-
-### unregisterComponent(el) ⏏
-Unregister an attribution component
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| el | <code>object</code> | The attribution a-frame element. |
-
-<a name="exp_module_attribution-system--getAttributionTable"></a>
-
-### getAttributionTable() ⇒ <code>string</code> ⏏
-Collect all attribution components and return an HTML table with credits
-
-**Kind**: Exported function  
-**Returns**: <code>string</code> - - an HTML table with the scene credits  
-**Example** *(Query the system for an HTML table of credits:)*  
-```js
-   document.querySelector("a-scene").systems["attribution"].getAttributionTable();
-```
-<a name="exp_module_attribution-system--extractAttributionFromGtlfAsset"></a>
-
-### extractAttributionFromGtlfAsset(el, gltfComponent) ⏏
-Extract author, license, source and title assuming sketchfab format:
-  author: "AuthorName (url-link-to-author)"
-  license: "CC-BY-4.0 (url-link-to-license)"
-  source: "url-link-to-model-website"
-  title: "Model Title"
-
-It will try to get exttributes from gltf's asset.extras (sketchfab) and scene.userData (blender)
-If both are found, data will be merged with preference to properties in asset.extras
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| el | <code>object</code> | the aframe element to set the attribution |
-| gltfComponent | <code>object</code> | the GLTF model to extract properties from |
-
-<a name="exp_module_attribution-system--parseExtrasAttributes"></a>
-
-### parseExtrasAttributes(extras) ⇒ <code>object</code> ⏏
-Parse author, license, source and title attributes.
-
-**Kind**: Exported function  
-**Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| extras | <code>object</code> | the source for the attribute data (asset.extras or scene.userData) |
-
-<a name="exp_module_attribution-system--parseAttribute"></a>
-
-### parseAttribute(extras, attribution, attribute) ⇒ <code>boolean</code> ⏏
-Parse attribute given as parameter. Tries to find the attribute and add it to 'attribution' dictionary
-
-**Kind**: Exported function  
-**Returns**: <code>boolean</code> - - true/false if it could find the attribute  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| extras | <code>object</code> | the source for the attribute data |
-| attribution | <code>object</code> | the destination attribute dictionary |
-| attribute | <code>object</code> | which attribute to parse |
-
 <a name="module_attribution"></a>
 
 ## attribution
 Attribution Component. Saves attribution data in any entity. The following properties can be saved.
+<!-- markdown-link-check-disable-next-line -->
 If `extractAssetExtras=true` (default), the [attribution system](https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties) attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
 
 **Properties**
@@ -386,58 +209,6 @@ Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 Detect multi-finger touch gestures. Publish events accordingly.
 Based off 8th Wall's [gesture-detector](https://github.com/8thwall/web/tree/master/examples/aframe)
 
-<a name="module_gltf-model-progress"></a>
-
-## gltf-model-progress
-GLTF model loading progress system. Manage GLTF load messages.
-
-
-* [gltf-model-progress](#module_gltf-model-progress)
-    * [init()](#exp_module_gltf-model-progress--init) ⏏
-    * [registerGltf(el)](#exp_module_gltf-model-progress--registerGltf) ⏏
-    * [unregisterGltfBySrc(el)](#exp_module_gltf-model-progress--unregisterGltfBySrc) ⏏
-    * [updateProgress(failed, evt)](#exp_module_gltf-model-progress--updateProgress) ⏏
-
-<a name="exp_module_gltf-model-progress--init"></a>
-
-### init() ⏏
-Init system
-
-**Kind**: Exported function  
-<a name="exp_module_gltf-model-progress--registerGltf"></a>
-
-### registerGltf(el) ⏏
-Register a gltf-model to deal with load events
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| el | <code>object</code> | The a-frame element to register. |
-
-<a name="exp_module_gltf-model-progress--unregisterGltfBySrc"></a>
-
-### unregisterGltfBySrc(el) ⏏
-Unregister a gltf-model
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| el | <code>object</code> | The a-frame element. |
-
-<a name="exp_module_gltf-model-progress--updateProgress"></a>
-
-### updateProgress(failed, evt) ⏏
-Updates GLTF Progress
-
-**Kind**: Exported function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| failed | <code>boolean</code> | whether or not download was successful |
-| evt | <code>object</code> | gltf event |
-
 <a name="module_goto-url"></a>
 
 ## goto-url
@@ -476,7 +247,7 @@ Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name
 | Name | Type | Description |
 | --- | --- | --- |
 | [jitsiId] | <code>string</code> | JitsiId of the video source; If defined will override displayName |
-| [displayName] | <code>string</code> | ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. IMPORTANT: editing this property requires reload |
+| [displayName] | <code>string</code> | ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. Editing this property requires reload |
 
 <a name="module_landmark"></a>
 
@@ -532,6 +303,13 @@ Publish with qos of 2 for network graph to update latency
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | UPDATE_INTERVAL_MS | <code>number</code> | <code>10000</code> | Interval to send the periodic pings (ms) |
+
+<a name="module_pcd-model"></a>
+
+## pcd-model
+Load Point Cloud Data (PCD) models using three.js example loader
+Point Cloud Data is a file format for Point Cloud Library.
+https://en.wikipedia.org/wiki/Point_Cloud_Library
 
 <a name="module_press-and-move"></a>
 

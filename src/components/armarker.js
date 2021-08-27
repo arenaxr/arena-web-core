@@ -11,62 +11,6 @@
  */
 
 /**
- * ARMarker System. Supports ARMarkers in a scene.
- * @module armarker-system
-*/
-AFRAME.registerSystem('armarker', {
-    schema: {},
-    init: function() {
-        this.markers = {};
-    },
-    /**
-     * Register an ARMarker component with the system
-     * @param {object} marker - The marker component object to register.
-     * @alias module:armarker-system
-     */
-    registerComponent: function(marker) {
-        this.markers[marker.data.markerid] = marker;
-    },
-    /**
-     * Unregister an ARMarker component
-     * @param {object} marker - The marker component object to unregister.
-     * @alias module:armarker-system
-     */
-    unregisterComponent: function(marker) {
-        delete this.markers[marker.data.markerid];
-    },
-    /**
-     * Get all markers registered with the system
-     * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for; No argument or undefined will return all
-     * @return {object} - a dictionary of markers
-     * @alias module:armarker-system
-     * @example <caption>Query the system a list of all markers in a scene</caption>
-     *     let markers = document.querySelector("a-scene").systems["armarker"].getAll();
-     *     Object.keys(markers).forEach(function(key) {
-     *       console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
-     *     });
-     * @example <caption>getAll() also accepts a marker type argument to filter by a given type</caption>
-     *     let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
-     *
-     */
-    getAll: function(mtype=undefined) {
-        if (mtype === undefined) return this.markers;
-        const filtered = Object.assign({}, ...Object.entries(this.markers).filter(([k, v]) =>
-            v.data.markertype === mtype).map(([k, v]) => ({[k]: v})));
-        return filtered;
-    },
-    /**
-     * Get a marker given is markerid
-     * @param {object} markerid - The marker id to return
-     * @return {object} - the marker with the markerid given
-     * @alias module:armarker-system
-     */
-    get: function(markerid) {
-        return this.markers[markerid];
-    },
-});
-
-/**
  * ARMarker Component. Supports ARMarkers in a scene
  * @module armarker
  * @property {string} [markertype=apriltag_36h11] - The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb'

@@ -1,19 +1,33 @@
 importScripts('./apriltag_wasm.js');
-import * as Comlink from 'comlink';
 
-/*
-This is a wrapper class that calls apriltag_wasm to load the WASM module and wraps the c implementation calls.
+// CV Worker message types
+const CVWorkerMsgs = {
+    type: {
+        /* sent from worker */
+        INIT_DONE: 0, // worker is ready
+        FRAME_RESULTS: 1, // worker finished processing frame
+        NEXT_FRAME_REQ: 2, // worker requests a new frame
+        /* sent to worker */
+        PROCESS_GSFRAME: 3, // process grayscale image
+    },
+};
 
-The apriltag dectector uses the tag36h11 family. For tag pose estimation, tag sizes are assumed according to the tag id:
-
-[0,150]     -> size=150mm;
-]150,300]   -> size==100mm;
-]300,450]   -> size==50mm;
-]450,587]   -> size==20mm;
-
-*/
-
+/**
+ * This is a wrapper class that calls apriltag_wasm to load the WASM module and wraps the c implementation calls.
+ * The apriltag dectector uses the tag36h11 family.
+ * For tag pose estimation, tag sizes are assumed according to the tag id:
+ *
+ * [0,150]     -> size=150mm;
+ * ]150,300]   -> size==100mm;
+ * ]300,450]   -> size==50mm;
+ * ]450,587]   -> size==20mm;
+ *
+ */
 class Apriltag {
+    /**
+     * Contructor
+     * @param {function} onDetectorReadyCallback Callback when the detector is ready
+     */
     constructor(onDetectorReadyCallback) {
         // detectorOptions = detectorOptions || {};
 
@@ -44,6 +58,10 @@ class Apriltag {
         });
     }
 
+    /**
+     * Init warapper calls
+     * @param {*} Module WASM module instance
+     */
     onWasmInit(Module) {
         // save a reference to the module here
         this._Module = Module;
@@ -64,7 +82,6 @@ class Apriltag {
         // inits detector
         this._init();
 
-
         // set max_detections = 0, meaning no max; will return all detections
         // options: float decimate, float sigma, int nthreads, int refine_edges, int max_detections, int return_pose, int return_solutions
         this._set_detector_options(
@@ -79,10 +96,18 @@ class Apriltag {
         this.onDetectorReadyCallback();
     }
 
-    // **public** detect method
+    /**
+     * **public** detect method
+     * @param {Array} grayscaleImg grayscale image buffer
+     * @param {Number} imgWidth image with
+     * @param {Number} imgHeight image height
+     * @return {detection} detection object
+     */
     detect(grayscaleImg, imgWidth, imgHeight) {
-        // set_img_buffer allocates the buffer for image and returns it; just returns the previously allocated buffer if size has not changed
+        // set_img_buffer allocates the buffer for image and returns it;
+        // just returns the previously allocated buffer if size has not changed
         const imgBuffer = this._set_img_buffer(imgWidth, imgHeight, imgWidth);
+        if (imgBuffer == 0) return {result: 'Could not allocate memory for image.'};
         if (imgWidth * imgHeight < grayscaleImg.length) return {result: 'Image data too large.'};
         this._Module.HEAPU8.set(grayscaleImg, imgBuffer); // copy grayscale image data
         const strJsonPtr = this._detect();
@@ -100,18 +125,26 @@ class Apriltag {
         for (let i = 0; i < strJsonLen; i++) {
             detectionsJson += String.fromCharCode(strJsonView[i]);
         }
-        // console.log(detectionsJson);
         const detections = JSON.parse(detectionsJson);
 
         return detections;
     }
 
-    // **public** set camera parameters
+    /**
+     * **public** set camera parameters
+     * @param {Number} fx camera focal length
+     * @param {Number} fy camera focal length
+     * @param {Number} cx camera principal point
+     * @param {Number} cy camera principal point
+     */
     set_camera_info(fx, fy, cx, cy) {
         this._set_pose_info(fx, fy, cx, cy);
     }
 
-    // **public** set maximum detections to return (0=return all)
+    /**
+     * **public** set maximum detections to return (0=return all)
+     * @param {Number} maxDetections
+     */
     set_max_detections(maxDetections) {
         this._opt.max_detections = maxDetections;
         this._set_detector_options(
@@ -124,7 +157,10 @@ class Apriltag {
             this._opt.return_solutions);
     }
 
-    // **public** set return pose estimate (0=do not return; 1=return)
+    /**
+     * **public** set return pose estimate (0=do not return; 1=return)
+     * @param {Number} returnPose
+     */
     set_return_pose(returnPose) {
         this._opt.return_pose = returnPose;
         this._set_detector_options(
@@ -137,7 +173,10 @@ class Apriltag {
             this._opt.return_solutions);
     }
 
-    // **public** set return pose estimate alternative solution details (0=do not return; 1=return)
+    /**
+     * **public** set return pose estimate alternative solution details (0=do not return; 1=return)
+     * @param {Number} returnSolutions
+     */
     set_return_solutions(returnSolutions) {
         this._opt.return_solutions = returnSolutions;
         this._set_detector_options(
@@ -151,4 +190,71 @@ class Apriltag {
     }
 }
 
-Comlink.expose(Apriltag);
+// create detector instance and process messages
+let initDone = false;
+let pendingCvWorkerMsg = undefined;
+
+// init apriltag detector; argument is a callback for when it is done loading
+const aprilTag = new Apriltag(() => {
+    self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
+    initDone = true;
+    if (pendingCvWorkerMsg) {
+        processGsFrame(pendingCvWorkerMsg);
+        pendingCvWorkerMsg = undefined;
+    }
+    console.log('CV Worker ready!');
+});
+
+// process worker messages
+onmessage = async function(e) {
+    const cvWorkerMsg = e.data;
+
+    // console.log('CV Worker received message');
+    switch (cvWorkerMsg.type ) {
+        // process a new image frame
+        case CVWorkerMsgs.type.PROCESS_GSFRAME:
+            if (!initDone) {
+                pendingCvWorkerMsg = cvWorkerMsg;
+                return;
+            }
+            processGsFrame(cvWorkerMsg);
+            break;
+        default:
+            console.warn('CVWorker: unknow message received.');
+    }
+};
+
+/**
+ * Process grayscale camera frame
+ * @param {object} frame - The received camera frame
+ * @param {*} frame.type message type
+ * @param {DOMHighResTimeStamp} frame.ts timestamp
+ * @param {Number} frame.width image width
+ * @param {Number} frame.height image height
+ * @param {Uint8ClampedArray} frame.grayscalePixels grayscale image pixels (Uint8ClampedArray[width x height])
+ * @param {object} frame.camera camera properties: camera's focal length (fx, fy) and principal point (cx, cy)
+ */
+async function processGsFrame(frame) {
+    const c = frame.camera;
+
+    //console.log('Frame!', frame);
+
+    // camera info to determine pose
+    aprilTag.set_camera_info(c.fx, c.fy, c.cx, c.cy);
+
+    //console.log(frame.grayscalePixels, frame.width, frame.height);
+    // detect aprilTag in the grayscale image given by grayscalePixels
+    const detections = await aprilTag.detect(frame.grayscalePixels, frame.width, frame.height);
+
+    // construct detection result message
+    const resMsg = {
+        type: CVWorkerMsgs.type.FRAME_RESULTS,
+        detections: detections,
+        ts: frame.ts,
+        grayscalePixels: frame.grayscalePixels,
+    };
+
+    //console.log('Detections:', detections);
+    // post detection results, returning ownership of the pixel buffer
+    self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
+}
