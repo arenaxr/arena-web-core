@@ -48,7 +48,7 @@
             0,  0,  0, 1);
     
     /* error and movement thresholds */
-    DTAG_ERROR_THRESH = 5e-6;
+    DTAG_ERROR_THRESH = 7e-6;
     MOVE_THRESH = 0.05;
     ROT_THRESH = 0.087;
   
@@ -85,6 +85,7 @@
       this.publishDetections = publishDetections;
       this.builder = builder;
       this.debug = debug;
+      this.cameraObject3D = document.getElementById('my-camera').object3D;
       this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
       this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
       if (!this.cameraSpinnerObj3D || !this.cameraRigObj3D)
@@ -168,24 +169,20 @@
         const detections = e.detail.detections; 
         const timestamp = e.detail.ts; // detection timestamp = when frame was captured
       
-        const vioStable = true;
-        /*
-              // Save vio before processing apriltag. Don't touch global though
+        // Save vio before processing apriltag
+        this.vioMatrixPrev.copy(this.vioMatrix);
+        const camParent = this.cameraObject3D.parent.matrixWorld;
+        const cam = this.cameraObject3D.matrixWorld;
+        this.vioMatrix.copy(camParent).invert(); // this.vioMatrix.getInverse(camParent);
+        this.vioMatrix.multiply(cam);
+        this.vioMatrixInv.copy(this.vioMatrix).invert(); // vioMatrixT.getInverse(this.vioMatrix);
+        vioStable = vioFilter(this.vioMatrixPrev, this.vioMatrixInv);
 
-              this.vioMatrixPrev.copy(this.vioMatrix);
-              const camParent = document.getElementById('my-camera').object3D.parent.matrixWorld;
-              const cam = document.getElementById('my-camera').object3D.matrixWorld;
-              this.vioMatrix.copy(camParent).invert(); // this.vioMatrix.getInverse(camParent);
-              this.vioMatrix.multiply(cam);
-              this.vioMatrixInv.copy(this.vioMatrix).invert(); // vioMatrixT.getInverse(this.vioMatrix);
-              const vioStable = vioFilter(this.vioMatrixPrev, this.vioMatrixInv);
+        this.vioRot.setFromRotationMatrix(this.vioMatrix);
+        this.vioPos.setFromMatrixPosition(this.vioMatrix);
 
-              this.vioRot.setFromRotationMatrix(this.vioMatrix);
-              this.vioPos.setFromMatrixPosition(this.vioMatrix);
-
-              const vio = {position: this.vioPos, rotation: this.vioRot};
-              */
-
+        const vio = {position: this.vioPos, rotation: this.vioRot};
+        
         if (this.networkedTagSolver || this.publishDetections) {
             // TODO: change message to 'armarker' ?
             const jsonMsg = {
@@ -224,7 +221,7 @@
             );
         }
         if (!this.networkedTagSolver) {
-            let localizerTag;
+            let localizerTag = false;
             for (const detection of detections) {
                 if (detection.pose.e > this.DTAG_ERROR_THRESH) {
                     if (this.debug) console.warn(`Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`);
@@ -243,13 +240,14 @@
                     if (!refTag.dynamic && !refTag.buildable) {
                         if (vioStable && !localizerTag) {
                             const rigPose = this.getRigPoseFromAprilTag(detection.pose,refTag.pose);
+                            if (this.debug) console.log("Applying transform:", rigPose);
                             this.cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
                             this.cameraRigObj3D.position.setFromMatrixPosition(rigPose);
                             localizerTag = true;
                             /* Rig update for networked solver, disable for now **
-                              rigMatrixT.copy(rigPose)
+                              this.rigMatrixT.copy(rigPose)
                               // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
-                              rigMatrixT.transpose();
+                              this.rigMatrixT.transpose();
                             */
                         }
                     } else if (refTag.dynamic && ARENA && ARENA.chat.settings.isSceneWriter) {
@@ -343,8 +341,8 @@
           r[0][2], r[1][2], r[2][2], t[2],
           0      , 0      , 0      , 1   ,
       );
-      this.dtagMatrix.premultiply(flipMatrix);
-      this.dtagMatrix.multiply(flipMatrix);
+      this.dtagMatrix.premultiply(this.flipMatrix);
+      this.dtagMatrix.multiply(this.flipMatrix);
   
       // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
       this.tagPoseMatrix.copy(this.rigMatrix);

@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * https://developer.mozilla.org/en/JavaScript_typed_arrays/Uint8Array
  */
 
-export const Base64Binary = {
+ export const Base64Binary = {
 	_keyStr : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
 
   charCode: function (char) {
@@ -167,4 +167,3 @@ export const Base64Binary = {
 		return uarray;
 	}
 }
-

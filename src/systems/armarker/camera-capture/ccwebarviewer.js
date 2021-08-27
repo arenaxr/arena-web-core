@@ -9,20 +9,23 @@
  * @date 2021
  */
  import {Base64Binary} from './base64-binary.js';
+ import {CVWorkerMsgs} from '../worker-msgs.js';
 
  /**
   *
   */
  export class WebARViewerCameraCapture {
      static instance = null;
+     /* buffer we process in the frames received  */
+     buffIndex = 0;
      /* last captured frame width */
      frameWidth;
      /* last captured frame height */
      frameHeight;
      /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]); this is the grayscale image we will pass to the detector */
-     frameGsPixels;
+     frameGsPixels = undefined;
      /* last captured frame camera properties */
-     frameCamera;
+     frameCamera = undefined;
      /* cv worker requested another frame */
      frameRequested = true;
      /* worker to send images captured */
@@ -38,7 +41,6 @@
          }
          WebARViewerCameraCapture.instance = this;
  
-         console.log("**HERE");
          // WebXRViewer/WebARViewer deliver camera frames to 'processCV'
          window.processCV = this.processCV.bind(this);
      }
@@ -61,19 +63,58 @@
       */
      requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
          if (grayscalePixels)
-             this.frameGsPixels = grayscalePixels;
+            this.frameGsPixels = grayscalePixels;
          if (worker) this.cvWorker = worker;
          this.frameRequested = true;
      }
  
      /*
       * WebXRViewer/WebARViewer deliver camera frames to this 'processCV' function
-      * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
+      * @param {object} frame - the frame object given by WebXRViewer/WebARViewer 
+      * @example <caption>Frame object example:</caption>
+      * {
+      * "_buffers": [{
+      * "size": {
+      *     "bytesPerRow": 320,
+      *     "width": 320,
+      *     "height": 180,
+      *     "bytesPerPixel": 1
+      * },
+      * "buffer": null,
+      * "_buffer": ""  // base64-encoded image buffer
+      * }, {
+      * "size": {
+      *     "bytesPerRow": 320,
+      *     "width": 160,
+      *     "bytesPerPixel": 2,
+      *     "height": 90
+      * },
+      * "buffer": null,
+      * "_buffer": "..." // base64-encoded image buffer
+      * }],
+      * "_pixelFormat": "YUV420P",
+      * "_timestamp": 56838.57325050002,
+      * "_camera": {
+      * "cameraIntrinsics": [246.94888305664062, 0, 0, 0, 246.94888305664062, 0, 154.91513061523438, 89.52093505859375, 1],
+      * "interfaceOrientation": 1,
+      * "cameraImageResolution": {
+      *     "height": 720,
+      *     "width": 1280
+      * },
+      * "viewMatrix": [ ... ], // 4x4 matrix as an 16-element array
+      * "inverse_viewMatrix": [ ... ], // 4x4 matrix as an 16-element array
+      * "projectionMatrix": [ ... ], // 4x4 matrix as an 16-element array
+      * "arCamera": true,
+      * "cameraOrientation": -90
+      * }
+      * };
       */
      async processCV(frame) {
-         console.log("frame!");
          if (!this.frameRequested) return;
- 
+        
+         // only capture next frame on request
+         this.frameRequested = false;
+
          this.getCameraImagePixels(frame);
      }
  
@@ -82,18 +123,21 @@
       * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
       */
      getCameraImagePixels(frame) {
- 
+        // we expect the image at _buffers[this.buffIndex]
+        if (!frame._buffers[this.buffIndex]) {
+            console.warn("No image buffer received.");
+            return; 
+        }
          // check if camera frame changed size
-         if (
+         if ( this.frameGsPixels == undefined ||
              this.frameCamera == undefined ||
-             this.frameWidth != frame._buffers[0].size.width ||
-             this.frameHeight != frame._buffers[0].size.height
+             this.frameWidth != frame._buffers[this.buffIndex].size.width ||
+             this.frameHeight != frame._buffers[this.buffIndex].size.height
          ) {
-             //const viewport = session.renderState.baseLayer.getViewport(view);
  
-             this.frameWidth = frame._buffers[0].size.width;
-             this.frameHeight = frame._buffers[0].size.height;
-             this.frameGsPixels = new Uint8ClampedArray(
+             this.frameWidth = frame._buffers[this.buffIndex].size.width;
+             this.frameHeight = frame._buffers[this.buffIndex].size.height;
+             this.frameGsPixels = new Uint8Array(
                  this.frameWidth * this.frameHeight
              ); // grayscale (1 value per pixel)
  
@@ -101,16 +145,22 @@
              this.frameCamera = this.getCameraIntrinsics(frame._camera);
          }
  
-         // frame is received as base64; convert to a YUV byteArray
-         const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[bufIndex]._buffer);
-         // cut U and V values; grayscale image is just the Y values
-         this.frameGsPixels.set(byteArray.slice(0, imgWidth * imgHeight));
+         const imgWidth = frame._buffers[this.buffIndex].size.width;
+         const imgHeight = frame._buffers[this.buffIndex].size.height;
+
+         // frame is received as a YUV pixel buffer that is base64 encoded; convert to a YUV Uint8Array and get grayscale pixels
+         const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
+         const byteArrayView = new Uint8Array(byteArray);
+         // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
+         for (let i = 0; i<this.frameWidth * this.frameHeight; i++) {
+            this.frameGsPixels[i] = byteArrayView[i];
+         }
  
          // construct cam frame data to send to worker
          let camFrameMsg = {
              type: CVWorkerMsgs.type.PROCESS_GSFRAME,
              // timestamp 
-             ts: Date.now(),
+             ts: frame._timestamp,
              // image width
              width: this.frameWidth,
              // image height
@@ -121,6 +171,7 @@
              camera: this.frameCamera
          };
  
+         //if (this.debug) console.log(`Post frame to worker: ${this.frameWidth}x${this.frameHeight}`);
          // post frame data to worker, marking the pixel buffer as transferable
          this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
      }
@@ -144,7 +195,3 @@
      }
  
  }
- /*
- window.processCV = async function(frame) {
-   console.log("##FRAME");
- }*/

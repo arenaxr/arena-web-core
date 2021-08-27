@@ -16,7 +16,7 @@
  import {ARHeadsetCameraCapture} from "./camera-capture/ccarheadset.js";
  import {WebARViewerCameraCapture} from "./camera-capture/ccwebarviewer.js";
  import {ARMarkerRelocalization} from "./armarker-reloc.js";
- 
+ import {CVWorkerMsgs} from './worker-msgs.js';
  /**
   * ARMarker System. Supports ARMarkers in a scene.
   * @module armarker-system
@@ -24,7 +24,7 @@
  AFRAME.registerSystem("armarker", {
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
-     debugCameraCapture: { default: false },
+     debugCameraCapture: { default: true },
      /* relocalization debug messages output */
      debugRelocalization: { default: true },
      /* builder mode flag; also looks at builder=true/false URL parameter */
@@ -67,7 +67,7 @@
    init: function() {
      // init this.ATLASMarkers with list of markers within range
      this.getARMArkersFromATLAS(true);
- 
+
      // check URL parameters
      const urlParams = new URLSearchParams(window.location.search);
      if (urlParams.get("builder")) {
@@ -105,6 +105,13 @@
      this.webXRSession = xrSession;
      this.gl = this.el.renderer.getContext();
  
+     // make sure gl context is XR compatible
+     try {
+        await this.gl.makeXRCompatible();
+     } catch (err) {
+        console.error("Could not make make gl context XR compatible!", err);
+     }
+
      // init cv pipeline only if we have ar markers in scene (?)
      //if (this.markers.length)
      this.initCVPipeline();
@@ -124,7 +131,7 @@
  
      // try to setup a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
      const isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
-     if (!isWebARViewer) {
+     if (isWebARViewer) {
        try {
          this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
        } catch (err) {
@@ -133,10 +140,9 @@
        }
      }
 
-     // for now, try to detect magic leap and hololens (hololens reliable detection is tbd)
-     let isARHeadset = window.mlWorld || (navigator.xr && navigator.userAgent.includes("Edge")),
-
-     // if we are on a AR headset, use camera facing forward
+     /* if we are on a AR headset, use camera facing forward
+        try to detect magic leap and hololens (hololens reliable detection is tbd; other devices to be added) */
+     let isARHeadset = window.mlWorld || (navigator.xr && navigator.userAgent.includes("Edge"));
      if (isARHeadset) {
        // try to setup a camera facing forward capture (using getUserMedia)
        console.info("Setting up AR Headset camera capture.");
@@ -148,7 +154,7 @@
          console.warn(`Could not create AR Headset camera capture. ${err}`);
        }
      }
- 
+
      // fallback to setup a webxr camera capture (e.g. passthrough AR on a phone)
      if (!this.cameraCapture && window.XRWebGLBinding) {
        console.info("Setting up WebXR-based passthrough AR camera capture.");
@@ -159,15 +165,14 @@
             return; // no valid cv camera capture; we are done here
         }
      }
-
+    
      // create cv worker for apriltag detection
-     this.cvWorker = new Worker("./apriltag-detector/apriltag_worker.js");
-     console.log("aprilTagWorker", this.cvWorker);
+     this.cvWorker = new Worker("./apriltag-detector/apriltag.js");
      this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
- 
+
      // listen for worker messages
      this.cvWorker.addEventListener("message", this.cvWorkerMessage.bind(this));
-     
+
      // setup ar marker relocalization that will listen to ar marker detection events
      this.markerReloc = new ARMarkerRelocalization({
        getArMaker: this.get.bind(this),
@@ -186,7 +191,7 @@
     */
    cvWorkerMessage(msg) {
      let cvWorkerMsg = msg.data;
- 
+    
      switch (cvWorkerMsg.type) {
        case CVWorkerMsgs.type.FRAME_RESULTS:
          // pass detections and original frame timestamp to relocalization

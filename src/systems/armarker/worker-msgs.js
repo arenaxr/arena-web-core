@@ -1,5 +1,5 @@
-class CVWorkerMsgs {
-  static type = {
+const CVWorkerMsgs = {
+  type: {
     /* sent from worker */
     INIT_DONE: 0,         // worker is ready
     FRAME_RESULTS: 1,     // worker finished processing frame
@@ -9,4 +9,4 @@ class CVWorkerMsgs {
   }
 }
 
-window.CVWorkerMsgs = CVWorkerMsgs;
+export {CVWorkerMsgs};

@@ -10,7 +10,7 @@
  * @date 2021
  */
 
-//import CVWorkerMsgs from "./worker-msgs.js";
+import {CVWorkerMsgs} from '../worker-msgs.js';
 
 /**
  *
@@ -34,22 +34,23 @@
     fb;
     /* reference space returned on xr session start */
     xrRefSpace;
-    // last captured frame timestamp (Date.now())
-    frameTs;
-    // last captured frame width
+    /* last captured frame width */
     frameWidth;
-    // last captured frame height
+    /* last captured frame height */
     frameHeight;
-    // last captured frame grayscale image pixels (Uint8ClampedArray[width x height]); this is the grayscale image we will pass to the detector
+    /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]); this is the grayscale image we will pass to the detector */
     frameGsPixels;
-    // last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4])
+    /* last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4]) */
     framePixels;
-    // last captured frame camera properties
+    /* last captured frame camera properties */
     frameCamera;
+    /* last received detections (debug only) */
+    lastDetections;
     /* worker to send images captured */
     cvWorker;
   
     /**
+     * Setup camera frame capture
      */
     constructor(xrSession, gl, debug = false) {
       // singleton
@@ -58,8 +59,7 @@
       }
       WebXRCameraCapture.instance = this;
   
-      this.gl = gl;
-  
+      console.log("DEBUG:",debug);
       if (debug) {
         let cameraEl = document.getElementById("my-camera"); // assume camera is called 'my-camera' (ARENA)
         if (cameraEl) {
@@ -69,8 +69,9 @@
             "geometry",
             "primitive: plane; width:.05; height: .05;"
           );
-          this.debugEl.setAttribute("material", "color: white; opacity: .9");
-          this.debugEl.setAttribute("position", "0 0 -.1");
+          this.debugEl.setAttribute("material", "color: white; opacity: .8");
+          //this.debugEl.setAttribute("position", "0 0 -.057");
+          this.debugEl.setAttribute("position", ".05 .02 -.15");
           cameraEl.appendChild(this.debugEl);
           this.dbgPixelRatio = 25000; // determined by looking at the screen size
           this.debug = true;
@@ -78,11 +79,11 @@
           console.warn("Could not find `my-camera` element for debug.");
           this.debug = false;
         }
+        this.lastDetections = undefined;
       }
-  
-      this.debug = debug;
-      if (debug) this.debugEl = undefined;
-  
+
+      this.gl = gl;
+ 
       let webGlBinding = window.XRWebGLBinding;
       // check if we have webXR camera capture available
       if (webGlBinding) {
@@ -97,22 +98,44 @@
       } else throw "XRWebGLBinding not found!";
     }
   
+    /**
+     * Indicate CV worker to send frames to (ar marker system expects this call to be implemented)
+     * @param {object} worker - the worker instance to whom we post frame messages
+     * @param {boolean} [requestFrame=true] - set request frame flag
+     */    
     setCVWorker(worker, frameRequested = true) {
       this.cvWorker = worker;
   
       if (frameRequested) this.frameRequested = true;
+
+      if (this.debug) {
+        // listen for detection messages too so we can draw the corners
+        this.cvWorker.addEventListener("message", this.cvWorkerMessage.bind(this));          
+      }
     }
   
+    /**
+     * Request next camera frame; we let the CV worker indicate when its ready (ar marker system expects this call to be implemented)
+     * @param {object} [grayscalePixels=undefined] - the pixel buffer intance we posted (to return ownership to us)
+     * @param {boolean} [requestFrame=undefined] - replace the worker instance to send frames to
+     */    
     requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
       if (grayscalePixels)
         this.frameGsPixels = grayscalePixels;
-      if (worker) this.cvWorker = worker;
-      this.frameRequested = true;
+
+      if (worker) this.setCVWorker(worker);
+      else this.frameRequested = true;
     }
   
+    /*
+     * Compute camera intrisics from a projection matrix and viewport
+     * https://storage.googleapis.com/chromium-webxr-test/r886480/proposals/camera-access-barebones.html
+     * @param {object} projectionMatrix - the view's projection matrix
+     * @param {object} viewport - the viewport
+     * @return {object} - camera's focal length (fx, fy), principal point (cx, cy) and skew (gamma)
+     * @private
+     */    
     getCameraIntrinsics(projectionMatrix, viewport) {
-      //Calculates the camera intrinsics matrix from a projection matrix and viewport
-      //https://storage.googleapis.com/chromium-webxr-test/r886480/proposals/camera-access-barebones.html
       const p = projectionMatrix;
       return {
         // Focal lengths in pixels (these are equal for square pixels)
@@ -125,15 +148,23 @@
         gamma: (viewport.width / 2) * p[4]
       };
     }
-  
-    getCameraFramePixels(session, view) {
+
+    /*
+     * Process received frames to extract grayscale pixels and post them to cv worker
+     * @param {object} time - DOMHighResTimeStamp of the frame
+     * @param {object} session -  XRSession for the frame
+     * @param {object} view - WebXR view for the frame
+     * @private
+     */
+    getCameraFramePixels(time, session, view) {
+      const glLayer = session.renderState.baseLayer;
       // check if camera frame changed size
       if (
         this.frameCamera == undefined ||
         this.frameWidth  != view.camera.width ||
         this.frameHeight != view.camera.height
       ) {
-        //const viewport = session.renderState.baseLayer.getViewport(view);
+        //const viewport = glLayer.getViewport(view);
   
         this.frameWidth = view.camera.width;
         this.frameHeight = view.camera.height;
@@ -162,7 +193,7 @@
   
       // bind the framebuffer, attach texture and read pixels
       this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.fb);
-      this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
+      //this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
       this.gl.framebufferTexture2D(
         this.gl.FRAMEBUFFER,
         this.gl.COLOR_ATTACHMENT0,
@@ -179,10 +210,47 @@
         this.gl.UNSIGNED_BYTE,
         this.framePixels
       );
-      this.frameTs = Date.now(); // save timestamp
-      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null); // unbind framebuffer
+      // bind back to xr session's framebuffer
+      this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glLayer.framebuffer);
   
+      // grayscale and mirror image
+      for (
+        let r = this.frameWidth * (this.frameHeight - 1), j = 0;
+        r >= 0;
+        r -= this.frameWidth
+      ) {
+        for (let i = r * 4; i < (r + this.frameWidth) * 4; i += 4) {
+          let grayscale = Math.round(
+            (this.framePixels[i] +
+              this.framePixels[i + 1] +
+              this.framePixels[i + 2]) /
+              3
+          );
+          this.frameGsPixels[j++] = grayscale;
+        }
+      }
+
       if (this.debug) {
+        
+        // draw last detection corners
+        if (this.lastDetections && this.lastDetections[0]) {   
+            for (let j = 0; j< this.lastDetections.length; j++) {
+                for (let c=0; c<4; c++) {
+                    let x = Math.floor(this.lastDetections[j].corners[c].x);
+                    let y = Math.floor(this.frameHeight - this.lastDetections[j].corners[c].y);
+                    for (let dx=x-20; dx <= x+20; dx++) {
+                        for (let dy=y-20; dy <= y+20; dy++) {
+                            let i = (dy*this.frameWidth + dx)*4;
+                            this.framePixels[i] = 255;
+                            this.framePixels[i+1] = 0;
+                            this.framePixels[i+2] = 0;
+                            this.framePixels[i+3] = 255;
+                        }
+                    }
+                }
+            }
+        }
+        
         const tTexture = new THREE.DataTexture(
           this.framePixels,
           this.frameWidth,
@@ -202,33 +270,13 @@
         let mesh = this.debugEl.getObject3D("mesh");
         mesh.material.map = tTexture;
         mesh.material.needsUpdate = true;
-      }
-  
-      // grayscale and mirror image
-      console.log(this.frameWidth, this.frameHeight);
-      for (
-        let r = this.frameWidth * (this.frameHeight - 1), j = 0;
-        r >= 0;
-        r -= this.frameWidth
-      ) {
-        for (let i = r * 4; i < (r + this.frameWidth) * 4; i += 4) {
-          let grayscale = Math.round(
-            (this.framePixels[i] +
-              this.framePixels[i + 1] +
-              this.framePixels[i + 2]) /
-              3
-          );
-          this.frameGsPixels[j++] = grayscale;
-        }
-      }
-  
-      //log.info(this.frameGsPixels.toString());
+      }      
   
       // construct cam frame data to send to worker
       let camFrameMsg = {
         type: CVWorkerMsgs.type.PROCESS_GSFRAME,
         // timestamp
-        ts: this.frameTs,
+        ts: time,
         // image width
         width: this.frameWidth,
         // image height
@@ -239,14 +287,21 @@
         camera: this.frameCamera
       };
   
+      //if (this.debug) console.log(`Post frame to worker: ${this.frameWidth}x${this.frameHeight}`);
       // post frame data, marking the pixel buffer as transferable
       this.cvWorker.postMessage(camFrameMsg, [
         camFrameMsg.grayscalePixels.buffer
       ]);
     }
   
-    onXRFrame(t, frame) {
-      let session = frame.session;
+    /*
+     * animationFrameCallback on a new frame
+     * @param {object} time - the time at which the updated viewer state was received from the device
+     * @param {object} frame - XRFrame object describing the state of the objects being tracked by the session
+     * @private
+     */    
+    onXRFrame(time, frame) {
+      const session = frame.session;
       session.requestAnimationFrame(this.onXRFrame.bind(this));
       if (!this.frameRequested) return;
   
@@ -257,9 +312,19 @@
           // only capture next frame on request
           this.frameRequested = false;
   
-          this.getCameraFramePixels(session, view);
+          this.getCameraFramePixels(time, session, view);
         }
       }
     }
+
+    /*
+     * CV Worker message callback; save last detections (debug only)
+     * @param {object} msg - msg.data contains a cv worker msg with the detections
+     * @private
+     */       
+    cvWorkerMessage(msg) {
+        let cvWorkerMsg = msg.data;    
+        if (cvWorkerMsg.detections) this.lastDetections = cvWorkerMsg.detections;
+    }  
   }
   
