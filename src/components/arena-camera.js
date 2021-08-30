@@ -113,6 +113,10 @@ AFRAME.registerComponent('arena-camera', {
             msg.hasAvatar = ARENA.FaceTracker.running();
         }
 
+        if (localStorage.getItem('headModelPath')) {
+            msg.data.headModelPath = localStorage.getItem('headModelPath');
+        }
+
         ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
     },
     /**

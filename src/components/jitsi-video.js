@@ -14,7 +14,7 @@ import {ARENAEventEmitter} from '../event-emitter.js';
  * Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name
  * @module jitsi-video
  * @property {string} [jitsiId] - JitsiId of the video source; If defined will override displayName
- * @property {string} [displayName] - ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. Editing this property requires reload 
+ * @property {string} [displayName] - ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. Editing this property requires reload
  *
  */
 AFRAME.registerComponent('jitsi-video', {
@@ -37,15 +37,16 @@ AFRAME.registerComponent('jitsi-video', {
         }
         if (data.displayName !== oldData.displayName) {
             this.updateVideo(); // user will need to enter the conference again
-        }        
+        }
     },
     jitsiConnect: function(args) {
         if (this.data.jitsiId !== '') {
             this.updateVideo();
             return;
         }
+        if (this.data.displayName === '') return;
         args.pl.forEach((user) => {
-            if (user.dn === this.data.displayName) {                
+            if (user.dn === this.data.displayName) {
                 this.data.jitsiId = user.jid;
                 this.updateVideo();
                 return;
@@ -54,14 +55,17 @@ AFRAME.registerComponent('jitsi-video', {
         this.updateVideo();
     },
     jitsiNewUser: function(user) {
-        if (user.dn === this.data.displayName) this.data.jitsiId = user.jid;
-        this.updateVideo();
+        if (this.data.displayName === '') return;
+        if (user.dn === this.data.displayName) {
+            this.data.jitsiId = user.jid;
+            this.updateVideo();
+        }
     },
     jitsiUserLeft: function(details) {
         if (details.jid === this.data.jitsiId) {
             this.el.removeAttribute('material','src');
         }
-    },    
+    },
     setVideoSrc: function() {
         this.el.setAttribute('material','src', `#${this.videoID}`); // video only! (no audio)
         this.el.setAttribute('material', 'shader', 'flat');
@@ -70,7 +74,7 @@ AFRAME.registerComponent('jitsi-video', {
     },
     updateVideo: function() {
         const data = this.data;
-        if (!data) return;        
+        if (!data) return;
         if (!data.jitsiId) {
             return;
         }
@@ -99,5 +103,5 @@ AFRAME.registerComponent('jitsi-video', {
         setTimeout(async () => {
             this.updateVideo();
         }, 500); // try again in a bit
-    }
+    },
 });

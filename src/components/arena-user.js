@@ -93,7 +93,7 @@ async function enableChromeAEC(gainNode) {
 AFRAME.registerComponent('arena-user', {
     schema: {
         color: {type: 'color', default: 'white'},
-        headModelPath: {type: 'string', default: '/store/models/robobit.glb'},
+        headModelPath: {type: 'string', default: ARENA.defaults.headModelPath},
         jitsiId: {type: 'string', default: ''},
         displayName: {type: 'string', default: ''},
         hasAudio: {type: 'boolean', default: false},
@@ -126,9 +126,9 @@ AFRAME.registerComponent('arena-user', {
         this.headModel = document.createElement('a-entity');
         this.headModel.setAttribute('id', 'head-model_' + name);
         this.headModel.setAttribute('rotation', '0 180 0');
-        this.headModel.object3D.scale.set(1, 1, 1);
+        this.headModel.setAttribute('scale', '1 1 1');
         this.headModel.setAttribute('dynamic-body', 'type', 'static');
-        this.headModel.setAttribute('gltf-model', `url(${data.headModelPath})`);
+        this.headModel.setAttribute('gltf-model', data.headModelPath);
         this.headModel.setAttribute('attribution', 'extractAssetExtras', true);
 
         el.appendChild(this.headText);
@@ -334,13 +334,17 @@ AFRAME.registerComponent('arena-user', {
     update: function(oldData) {
         const data = this.data;
 
+        if (data.color !== oldData.color) {
+            this.headText.setAttribute('color', data.color);
+        }
+
+        if (data.headModelPath !== oldData.headModelPath) {
+            this.headModel.setAttribute('gltf-model', data.headModelPath); // TODO: maybe check this exists?
+        }
+
         if (data.displayName !== oldData.displayName) {
             const name = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.headText.setAttribute('value', name);
-        }
-
-        if (data.color !== oldData.color) {
-            this.headText.setAttribute('color', data.color);
         }
     },
 

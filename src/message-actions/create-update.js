@@ -142,12 +142,16 @@ export class CreateUpdate {
         }
 
         // handle geometries and some type special cases
-        // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the special cases
+        // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the
+        // special cases
         let isGeometry = false;
         switch (type) {
         case 'camera':
             if (data.hasOwnProperty('color')) {
                 entityEl.setAttribute('arena-user', 'color', data.color);
+            }
+            if (data.hasOwnProperty('headModelPath')) {
+                entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
             }
             // decide if we need draw or delete videoCube around head
             if (message.hasOwnProperty('jitsiId')) {
@@ -162,7 +166,7 @@ export class CreateUpdate {
         case 'gltf-model':
             // support both url and src property
             if (data.hasOwnProperty('url')) {
-                data.src=data.url; // make src=url
+                data.src = data.url; // make src=url
                 delete data.url; // remove attribute so we don't set it later
             }
             if (data.hasOwnProperty('src')) {
