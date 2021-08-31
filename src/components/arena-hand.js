@@ -27,7 +27,7 @@ function eventAction(evt, eventName, myThis) {
     // publish to MQTT
     const objName = myThis.name;
     // publishing events attached to user id objects allows sculpting security
-    ARENA.Mqtt.publish(ARENA.outputTopic + objName, {
+    ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, {
         object_id: objName,
         action: 'clientEvent',
         type: eventName,
@@ -67,7 +67,7 @@ AFRAME.registerComponent('arena-hand', {
         this.lastPose = '';
 
         el.addEventListener('controllerconnected', () => {
-            el.setAttribute('visible',true);
+            el.setAttribute('visible', true);
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.data.name}`, {
                 object_id: this.data.name,
                 action: 'create',
@@ -82,8 +82,8 @@ AFRAME.registerComponent('arena-hand', {
         });
 
         el.addEventListener('controllerdisconnected', () => {
-            el.setAttribute('visible', false)
-        })
+            el.setAttribute('visible', false);
+        });
 
         el.addEventListener('triggerup', function(evt) {
             eventAction(evt, 'triggerup', this);
@@ -129,7 +129,7 @@ AFRAME.registerComponent('arena-hand', {
             action: 'update',
             type: 'object',
             data: {
-                object_type: 'hand' + this.data.hand,
+                object_type: `hand${this.data.hand}`,
                 position: {
                     x: parseFloat(this.position.x.toFixed(3)),
                     y: parseFloat(this.position.y.toFixed(3)),
