@@ -146,6 +146,10 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     tick: (function(t, dt) {
+        if (!this.name) {
+            this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+        }
+
         this.rotation = this.el.object3D.quaternion;
         this.position = this.el.object3D.position;
 
