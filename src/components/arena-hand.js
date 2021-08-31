@@ -48,6 +48,7 @@ function eventAction(evt, eventName, myThis) {
  *
  */
 AFRAME.registerComponent('arena-hand', {
+    dependencies: ['laser-controls'],
     schema: {
         enabled: {type: 'boolean', default: false},
         name: {type: 'string', default: ''},
