@@ -42,7 +42,6 @@ function eventAction(evt, eventName, myThis) {
  *  Tracking Hand controller movement in real time.
  * @module arena-hand
  * @property {boolean} enabled - Controller enabled.
- * @property {string} name - Name used to publish controller pose.
  * @property {string} hand - Controller hand.
  * @property {string} color - Controller color.
  *
@@ -51,7 +50,6 @@ AFRAME.registerComponent('arena-hand', {
     dependencies: ['laser-controls'],
     schema: {
         enabled: {type: 'boolean', default: false},
-        name: {type: 'string', default: ''},
         hand: {type: 'string', default: 'Left'},
         color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
     },
@@ -59,17 +57,17 @@ AFRAME.registerComponent('arena-hand', {
     init: function() {
         const el = this.el;
 
-        this.data.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
-
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
 
         this.lastPose = '';
 
+        this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+
         el.addEventListener('controllerconnected', () => {
             el.setAttribute('visible', true);
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.data.name}`, {
-                object_id: this.data.name,
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
+                object_id: this.name,
                 action: 'create',
                 type: 'object',
                 data: {
@@ -125,7 +123,7 @@ AFRAME.registerComponent('arena-hand', {
         // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
         const msg = {
-            object_id: data.name,
+            object_id: this.name,
             action: 'update',
             type: 'object',
             data: {
@@ -144,7 +142,7 @@ AFRAME.registerComponent('arena-hand', {
                 color: data.color,
             },
         };
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.data.name}`, msg);
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
     },
 
     tick: (function(t, dt) {
