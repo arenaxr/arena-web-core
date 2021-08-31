@@ -19,14 +19,15 @@ import {ARENAEventEmitter} from '../event-emitter.js';
  */
 AFRAME.registerComponent('jitsi-video', {
     schema: {
-        jitsiId: {type: 'string', default: undefined},
-        displayName: {type: 'string', default: undefined},
+        jitsiId: {type: 'string', default: ''},
+        displayName: {type: 'string', default: ''},
     },
     init: function() {
         const el = this.el;
 
         ARENA.events.on(ARENAEventEmitter.events.JITSI_CONNECT, (e) => this.jitsiConnect(e.detail));
         ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, (e) => this.jitsiNewUser(e.detail));
+        ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, (e) => this.jitsiUserLeft(e.detail));
     },
     update: function(oldData) {
         const data = this.data;
@@ -39,11 +40,10 @@ AFRAME.registerComponent('jitsi-video', {
         }        
     },
     jitsiConnect: function(args) {
-        if (this.data.jitsiId !== undefined) {
+        if (this.data.jitsiId !== '') {
             this.updateVideo();
             return;
         }
-        if (this.data.displayName === undefined) return;
         args.pl.forEach((user) => {
             if (user.dn === this.data.displayName) {                
                 this.data.jitsiId = user.jid;
@@ -51,14 +51,18 @@ AFRAME.registerComponent('jitsi-video', {
                 return;
             }
         });
+        this.updateVideo();
     },
     jitsiNewUser: function(user) {
-        if (this.data.displayName === undefined) return;
-        if (user.dn === this.data.displayName) {
-            this.data.jitsiId = user.jid;
-            this.updateVideo();
-        }
+        if (user.dn === this.data.displayName) this.data.jitsiId = user.jid;
+        this.updateVideo();
     },
+    jitsiUserLeft: function(details) {
+        if (details.jid === this.data.jitsiId) {
+            console.log("here!");
+            this.el.removeAttribute('material','src');
+        }
+    },    
     setVideoSrc: function() {
         this.el.setAttribute('material','src', `#${this.videoID}`); // video only! (no audio)
         this.el.setAttribute('material', 'shader', 'flat');
