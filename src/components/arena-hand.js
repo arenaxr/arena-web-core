@@ -66,6 +66,25 @@ AFRAME.registerComponent('arena-hand', {
 
         this.lastPose = '';
 
+        el.addEventListener('controllerconnected', () => {
+            el.setAttribute('visible',true);
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.data.name}`, {
+                object_id: this.data.name,
+                action: 'create',
+                type: 'object',
+                data: {
+                    object_type: `hand${this.data.hand}`,
+                    position: {x: 0, y: -1, z: 0},
+                    color: this.data.color,
+                },
+            });
+            this.data.enabled = true;
+        });
+
+        el.addEventListener('controllerdisconnected', () => {
+            el.setAttribute('visible', false)
+        })
+
         el.addEventListener('triggerup', function(evt) {
             eventAction(evt, 'triggerup', this);
         });
@@ -103,7 +122,7 @@ AFRAME.registerComponent('arena-hand', {
     publishPose() {
         const data = this.data;
         if (!data.enabled || !data.hand) return;
-        const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
+        // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
         const msg = {
             object_id: data.name,
