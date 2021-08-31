@@ -59,7 +59,6 @@ AFRAME.registerComponent('jitsi-video', {
     },
     jitsiUserLeft: function(details) {
         if (details.jid === this.data.jitsiId) {
-            console.log("here!");
             this.el.removeAttribute('material','src');
         }
     },    
