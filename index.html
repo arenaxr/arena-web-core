@@ -151,10 +151,9 @@
                               raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
                 </a-camera>
             </a-entity>
+            <a-entity arena-hand="hand:Left" blink-controls="cameraRig: #cameraRig; collisionEntries:[nav-mesh]" visible=false id="leftHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
+            <a-entity arena-hand="hand:Right" visible=false id="rightHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
         </a-entity>
-
-        <a-entity arena-hand="hand:Left" blink-controls="cameraRig: #cameraRig; collisionEntries:[nav-mesh]" visible=false id="leftHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-        <a-entity arena-hand="hand:Right" visible=false id="rightHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
     </a-entity>
 </a-scene>
 
