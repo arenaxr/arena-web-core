@@ -26,16 +26,18 @@ function eventAction(evt, eventName, myThis) {
 
     // publish to MQTT
     const objName = myThis.name;
-    // publishing events attached to user id objects allows sculpting security
-    ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, {
-        object_id: objName,
-        action: 'clientEvent',
-        type: eventName,
-        data: {
-            position: coordsData,
-            source: ARENA.camName,
-        },
-    });
+    if (objName) {
+        // publishing events attached to user id objects allows sculpting security
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, {
+            object_id: objName,
+            action: 'clientEvent',
+            type: eventName,
+            data: {
+                position: coordsData,
+                source: ARENA.camName,
+            },
+        });
+    }
 }
 
 /**
@@ -83,6 +85,7 @@ AFRAME.registerComponent('arena-hand', {
             el.setAttribute('visible', false);
         });
 
+        /*
         el.addEventListener('triggerup', function(evt) {
             eventAction(evt, 'triggerup', this);
         });
@@ -113,6 +116,7 @@ AFRAME.registerComponent('arena-hand', {
         el.addEventListener('trackpaddown', function(evt) {
             eventAction(evt, 'trackpaddown', this);
         });
+         */
 
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },
