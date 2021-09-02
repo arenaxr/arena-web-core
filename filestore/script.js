@@ -3,34 +3,59 @@
 $(document).ready(function() {
     // add page header
     $('#header').load('../header.html');
-
-    // TODO(mwfarb): remove debug serving store below...
-
-    // $.ajax({
-    //     url: '/storemng',
-    //     type: 'GET',
-    //     beforeSend: function(xhr) {
-    //         xhr.setRequestHeader('X-Filebrowser-Auth', 'testuser1');
-    //     },
-    //     crossDomain: true,
-    //     success: function(response) {
-    //         console.log('Success!');
-    //         // document.storeIframe.document.body.innerHTML = response;
-    //         document.getElementById('storeIframe').contentWindow.document.write(response);
-    //     },
-    // });
-
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', '/storemng');
-    xhr.setRequestHeader('X-Filebrowser-Auth', 'testuser1');
-    xhr.send();
-    xhr.onload = () => {
-        if (xhr.status !== 200) {
-            console.log('Failure!');
-        } else {
-            console.log('Success!');
-            // document.storeIframe.document.body.innerHTML = xhr.response;
-            document.getElementById('storeIframe').contentWindow.document.write(xhr.response);
-        }
-    };
+    updateStoreLogin();
 });
+
+function updateStoreLogin() {
+    $.ajax({
+        url: '/user/storelogin',
+        type: 'GET',
+        beforeSend: function(xhr) {
+            const csrftoken = getCookie('csrftoken');
+            xhr.setRequestHeader('X-CSRFToken', csrftoken);
+        },
+        crossDomain: true,
+        success: function(response) {
+            console.log('storelogin success!');
+            loadStoreFront();
+        },
+    });
+}
+
+function loadStoreFront() {
+    const auth = getCookie('auth');
+    localStorage.setItem('jwt', auth);
+    $.ajax({
+        url: '/storemng',
+        type: 'GET',
+        xhrFields: {
+            withCredentials: true,
+        },
+        crossDomain: true,
+        success: function(response) {
+            console.log('storemng success!');
+            document.getElementById('storeIframe').contentWindow.document.write(response);
+        },
+    });
+}
+
+/**
+ * Utility function to get cookie value
+ * @param {string} name cookie name
+ * @return {string} cookie value
+ */
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
