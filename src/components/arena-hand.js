@@ -76,7 +76,7 @@ AFRAME.registerComponent('arena-hand', {
                     object_type: `hand${this.data.hand}`,
                     position: {x: 0, y: -1, z: 0},
                     color: this.data.color,
-                    parent: ARENA.camName,
+                    dep: ARENA.camName,
                 },
             });
             this.data.enabled = true;
@@ -126,7 +126,6 @@ AFRAME.registerComponent('arena-hand', {
         const data = this.data;
         if (!data.enabled || !data.hand) return;
         // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
-        const camYOffset = document.getElementById("my-camera").object3D.position.y;
 
         const msg = {
             object_id: this.name,
@@ -136,7 +135,7 @@ AFRAME.registerComponent('arena-hand', {
                 object_type: `hand${this.data.hand}`,
                 position: {
                     x: parseFloat(this.position.x.toFixed(3)),
-                    y: parseFloat((this.position.y - camYOffset).toFixed(3)),
+                    y: parseFloat(this.position.y.toFixed(3)),
                     z: parseFloat(this.position.z.toFixed(3)),
                 },
                 rotation: {
@@ -146,7 +145,7 @@ AFRAME.registerComponent('arena-hand', {
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
                 color: data.color,
-                parent: ARENA.camName,
+                dep: ARENA.camName,
             },
         };
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
@@ -157,8 +156,8 @@ AFRAME.registerComponent('arena-hand', {
             this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
         }
 
-        this.rotation = this.el.object3D.quaternion;
-        this.position = this.el.object3D.position;
+        this.rotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+        this.position.setFromMatrixPosition(this.el.object3D.matrixWorld);
 
         const rotationCoords = AFRAME.utils.coordinates.stringify(this.rotation);
         const positionCoords = AFRAME.utils.coordinates.stringify(this.position);
