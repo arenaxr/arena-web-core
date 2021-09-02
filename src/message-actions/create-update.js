@@ -153,6 +153,9 @@ export class CreateUpdate {
             if (data.hasOwnProperty('headModelPath')) {
                 entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
             }
+            if (data.hasOwnProperty('presence')) {
+                entityEl.setAttribute('arena-user', 'presence', data.presence); // update presence
+            }
             // decide if we need draw or delete videoCube around head
             if (message.hasOwnProperty('jitsiId')) {
                 entityEl.setAttribute('arena-user', 'jitsiId', message.jitsiId);
