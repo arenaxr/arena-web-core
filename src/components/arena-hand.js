@@ -126,6 +126,7 @@ AFRAME.registerComponent('arena-hand', {
         const data = this.data;
         if (!data.enabled || !data.hand) return;
         // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
+        const camYOffset = document.getElementById("my-camera").object3D.position.y;
 
         const msg = {
             object_id: this.name,
@@ -135,7 +136,7 @@ AFRAME.registerComponent('arena-hand', {
                 object_type: `hand${this.data.hand}`,
                 position: {
                     x: parseFloat(this.position.x.toFixed(3)),
-                    y: parseFloat(this.position.y.toFixed(3)),
+                    y: parseFloat((this.position.y - camYOffset).toFixed(3)),
                     z: parseFloat(this.position.z.toFixed(3)),
                 },
                 rotation: {
