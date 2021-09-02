@@ -76,7 +76,7 @@ AFRAME.registerComponent('arena-hand', {
                     object_type: `hand${this.data.hand}`,
                     position: {x: 0, y: -1, z: 0},
                     color: this.data.color,
-                    dep: ARENA.camName,
+                    parent: ARENA.camName,
                 },
             });
             this.data.enabled = true;
@@ -145,7 +145,7 @@ AFRAME.registerComponent('arena-hand', {
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
                 color: data.color,
-                dep: ARENA.camName,
+                parent: ARENA.camName,
             },
         };
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
