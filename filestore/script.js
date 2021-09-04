@@ -16,7 +16,6 @@ function updateStoreLogin() {
         },
         crossDomain: true,
         success: function(response) {
-            console.log('storelogin success!');
             loadStoreFront();
         },
     });
@@ -24,19 +23,24 @@ function updateStoreLogin() {
 
 function loadStoreFront() {
     const auth = getCookie('auth');
-    localStorage.setItem('jwt', auth);
-    $.ajax({
-        url: '/storemng',
-        type: 'GET',
-        xhrFields: {
-            withCredentials: true,
-        },
-        crossDomain: true,
-        success: function(response) {
-            console.log('storemng success!');
-            document.getElementById('storeIframe').contentWindow.document.write(response);
-        },
-    });
+    if (auth && auth.length !== 0) {
+        localStorage.setItem('jwt', auth);
+        $.ajax({
+            url: '/storemng',
+            type: 'GET',
+            xhrFields: {
+                withCredentials: true,
+            },
+            crossDomain: true,
+            success: function(response) {
+                document.getElementById('storeIframe').contentWindow.document.write(response);
+            },
+        });
+    } else {
+        localStorage.removeItem('jwt');
+        document.getElementById('storeIframe').contentWindow.document.write(
+            '<div style="text-align:center;">Login with a user account to manage files.</div>');
+    }
 }
 
 /**
