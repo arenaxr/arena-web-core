@@ -24,9 +24,8 @@ $(document).ready(function() {
 
     // highlight active page in navbar
     $('.nav-item a').filter(function() {
-        const link = this.href.split('/');
-        const loc = location.pathname.replace(/[\/\\]/g, '');
-        console.log(link, loc);
-        return link.includes(loc);
+        const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
+        const loc = location.pathname.replace(/^\/+|\/+$/g, '');
+        return link == loc;
     }).parent().addClass('active');
 });
