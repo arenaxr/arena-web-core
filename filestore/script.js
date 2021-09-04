@@ -16,15 +16,18 @@ function updateStoreLogin() {
         },
         crossDomain: true,
         success: function(response) {
+            const jwt = getCookie('auth');
+            loadStoreFront(jwt);
+        },
+        error: function(xhr, status, msg) {
             loadStoreFront();
         },
     });
 }
 
-function loadStoreFront() {
-    const auth = getCookie('auth');
-    if (auth && auth.length !== 0) {
-        localStorage.setItem('jwt', auth);
+function loadStoreFront(jwt) {
+    if (jwt && jwt.length !== 0) {
+        localStorage.setItem('jwt', jwt);
         $.ajax({
             url: '/storemng',
             type: 'GET',

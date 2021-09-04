@@ -21,4 +21,12 @@ $(document).ready(function() {
                 $('#auth-dropdown').attr('href', `${host}/user/login`);
             }
         });
+
+    // highlight active page in navbar
+    $('.nav-item a').filter(function() {
+        const link = this.href.split('/');
+        const loc = location.pathname.replace(/[\/\\]/g, '');
+        console.log(link, loc);
+        return link.includes(loc);
+    }).parent().addClass('active');
 });
