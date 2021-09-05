@@ -7,38 +7,33 @@ $(document).ready(function() {
 });
 
 function updateStoreLogin() {
-    $.ajax({
-        url: '/user/storelogin',
-        type: 'GET',
-        beforeSend: function(xhr) {
-            const csrftoken = getCookie('csrftoken');
-            xhr.setRequestHeader('X-CSRFToken', csrftoken);
-        },
-        crossDomain: true,
-        success: function(response) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', '/user/storelogin');
+    const csrftoken = getCookie('csrftoken');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    xhr.send();
+    xhr.onload = () => {
+        if (xhr.status == 200) {
             const jwt = getCookie('auth');
             loadStoreFront(jwt);
-        },
-        error: function(xhr, status, msg) {
+        } else {
             loadStoreFront();
-        },
-    });
+        }
+    };
 }
 
 function loadStoreFront(jwt) {
     if (jwt && jwt.length !== 0) {
         localStorage.setItem('jwt', jwt);
-        $.ajax({
-            url: '/storemng',
-            type: 'GET',
-            xhrFields: {
-                withCredentials: true,
-            },
-            crossDomain: true,
-            success: function(response) {
-                document.getElementById('storeIframe').contentWindow.document.write(response);
-            },
-        });
+        const xhr = new XMLHttpRequest();
+        xhr.withCredentials = true;
+        xhr.open('GET', '/storemng');
+        xhr.send();
+        xhr.onload = () => {
+            if (xhr.status == 200) {
+                document.getElementById('storeIframe').contentWindow.document.write(xhr.response);
+            }
+        };
     } else {
         localStorage.removeItem('jwt');
         document.getElementById('storeIframe').contentWindow.document.write(
