@@ -7,7 +7,7 @@
  */
 
 /**
- * ARENA A-Frame components and systems
+ * ARENA A-Frame components
  */
 
 import './armarker.js';
@@ -18,7 +18,6 @@ import './attribution.js';
 import './click-listener.js';
 import './collision-listener.js';
 import './gesture-detector.js';
-import './model-progress.js';
 import './goto-url.js';
 import './hide-in-ar-mode.js';
 import './impulse.js';
