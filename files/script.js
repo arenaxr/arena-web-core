@@ -35,7 +35,7 @@ function loadStoreFront(jwt) {
             }
         };
     } else {
-        localStorage.removeItem('jwt');
+        localStorage.setItem('jwt', null);
         document.getElementById('storeIframe').contentWindow.document.write(
             '<div style="text-align:center;">Login with a user account to manage files.</div>');
     }
