@@ -23,7 +23,8 @@ function updateStoreLogin() {
 }
 
 function loadStoreFront(jwt) {
-    if (jwt && jwt.length !== 0) {
+    try {
+        parseToken(jwt);
         localStorage.setItem('jwt', jwt);
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
@@ -34,11 +35,21 @@ function loadStoreFront(jwt) {
                 document.getElementById('storeIframe').contentWindow.document.write(xhr.response);
             }
         };
-    } else {
+    } catch (err) {
+        console.warn(err);
         localStorage.setItem('jwt', null);
         document.getElementById('storeIframe').contentWindow.document.write(
             '<div style="text-align:center;">Login with a user account to manage files.</div>');
     }
+}
+
+function parseToken(token) {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+        throw new Error('filestore jwt invalid');
+    }
+    const tokenObj = KJUR.jws.JWS.parse(token);
+    return tokenObj.payloadObj;
 }
 
 /**
