@@ -17,7 +17,9 @@ $(document).ready(function() {
                     window.showPerms();
                 });
             } else {
-                $('#auth-dropdown').html('Login');
+                $('#auth-dropdown').html('Login').on('click', function(e) {
+                    localStorage.setItem('request_uri', location.href);
+                });
                 $('#auth-dropdown').attr('href', `${host}/user/login`);
             }
         });
