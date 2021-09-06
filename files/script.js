@@ -32,14 +32,19 @@ function loadStoreFront(jwt) {
         xhr.send();
         xhr.onload = () => {
             if (xhr.status == 200) {
-                document.getElementById('storeIframe').contentWindow.document.write(xhr.response);
+                const doc = document.getElementById('storeframe').contentWindow.document;
+                doc.open();
+                doc.write(xhr.response);
+                doc.close();
             }
         };
     } catch (err) {
         console.warn(err);
         localStorage.setItem('jwt', null);
-        document.getElementById('storeIframe').contentWindow.document.write(
-            '<div style="text-align:center;">Login with a user account to manage files.</div>');
+        const doc = document.getElementById('storeframe').contentWindow.document;
+        doc.open();
+        doc.write('<div style="text-align:center;">Login with a user account to manage files.</div>');
+        doc.close();
     }
 }
 
