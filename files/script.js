@@ -1,11 +1,15 @@
-/* eslint-disable require-jsdoc */
-
+/**
+ * Script to connect to filestore auth endpoint and then load filestore proxy when fs auth completes.
+ */
 $(document).ready(function() {
     // add page header
     $('#header').load('../header.html');
     updateStoreLogin();
 });
 
+/**
+ * Connection to arena-account endpoint to request filestore auth token.
+ */
 function updateStoreLogin() {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', '/user/storelogin');
@@ -14,46 +18,61 @@ function updateStoreLogin() {
     xhr.send();
     xhr.onload = () => {
         if (xhr.status == 200) {
-            const jwt = getCookie('auth');
-            loadStoreFront(jwt);
+            const authToken = getCookie('auth');
+            loadStoreFront(authToken);
         } else {
             loadStoreFront();
         }
     };
 }
 
-function loadStoreFront(jwt) {
+/**
+ * Connection to get the filestore proxy url served base html template into the iframe.
+ * @param {*} authToken The auth token from filestore. 'None' when not authorized.
+ */
+function loadStoreFront(authToken) {
     try {
-        parseToken(jwt);
-        localStorage.setItem('jwt', jwt);
+        // determine the token is formatted well
+        parseJwt(authToken);
+        localStorage.setItem('jwt', authToken);
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = true;
         xhr.open('GET', '/storemng');
         xhr.send();
         xhr.onload = () => {
             if (xhr.status == 200) {
-                const doc = document.getElementById('storeframe').contentWindow.document;
-                doc.open();
-                doc.write(xhr.response);
-                doc.close();
+                loadHtmlToFrame(xhr.response);
             }
         };
     } catch (err) {
         console.warn(err);
         localStorage.setItem('jwt', null);
-        const doc = document.getElementById('storeframe').contentWindow.document;
-        doc.open();
-        doc.write('<div style="text-align:center;">Login with a user account to manage files.</div>');
-        doc.close();
+        loadHtmlToFrame('<div style="text-align:center;">Login with a user account to manage files.</div>');
     }
 }
 
-function parseToken(token) {
-    const parts = token.split('.');
+/**
+ * Loads the html into the page iframe to completion.
+ * @param {*} html The HTML code tio apply into the iframe.
+ */
+function loadHtmlToFrame(html) {
+    const doc = document.getElementById('storeframe').contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+}
+
+/**
+ *
+ * @param {*} jwt The JWT
+ * @return {Object} the JSON payload
+ */
+function parseJwt(jwt) {
+    const parts = jwt.split('.');
     if (parts.length !== 3) {
         throw new Error('filestore jwt invalid');
     }
-    const tokenObj = KJUR.jws.JWS.parse(token);
+    const tokenObj = KJUR.jws.JWS.parse(jwt);
     return tokenObj.payloadObj;
 }
 
