@@ -17,8 +17,17 @@ $(document).ready(function() {
                     window.showPerms();
                 });
             } else {
-                $('#auth-dropdown').html('Login');
+                $('#auth-dropdown').html('Login').on('click', function(e) {
+                    localStorage.setItem('request_uri', location.href);
+                });
                 $('#auth-dropdown').attr('href', `${host}/user/login`);
             }
         });
+
+    // highlight active page in navbar
+    $('.nav-item a').filter(function() {
+        const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
+        const loc = location.pathname.replace(/^\/+|\/+$/g, '');
+        return link == loc;
+    }).parent().addClass('active');
 });
