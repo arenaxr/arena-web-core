@@ -11,11 +11,13 @@ $(document).ready(function() {
                 $('#auth-dropdown').after(
                     '<ul class=\'dropdown-menu\' role=\'menu\' aria-labelledby=\'dropdownMenu\'></ul>');
                 $('ul .dropdown-menu').append(`<li><a href="${host}/user/profile">Profile</a></li>`);
-                $('ul .dropdown-menu').append(`<li><a id="show_perms" href="#">MQTT Permissions</a></li>`);
+                if (typeof window.showPerms !== 'undefined') {
+                    $('ul .dropdown-menu').append(`<li><a id="show_perms" href="#">MQTT Permissions</a></li>`);
+                    $('#show_perms').on('click', function() {
+                        window.showPerms();
+                    });
+                }
                 $('ul .dropdown-menu').append(`<li><a href="${host}/user/logout">Logout</a></li>`);
-                $('#show_perms').on('click', function() {
-                    window.showPerms();
-                });
             } else {
                 $('#auth-dropdown').html('Login').on('click', function(e) {
                     localStorage.setItem('request_uri', location.href);
