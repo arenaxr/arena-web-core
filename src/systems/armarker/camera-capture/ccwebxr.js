@@ -13,7 +13,7 @@
 import {CVWorkerMsgs} from '../worker-msgs.js';
 
 /**
- *
+ * Grab camera frames using WebXR Raw Camera Access API
  */
  export class WebXRCameraCapture {
     /* singleton instance */
@@ -59,7 +59,9 @@ import {CVWorkerMsgs} from '../worker-msgs.js';
       }
       WebXRCameraCapture.instance = this;
   
-      console.log("DEBUG:",debug);
+      if (xrSession == undefined) throw "WebXRCC: No XRSession!";
+      if (gl == undefined) throw "WebXRCC: No gl handle!";
+
       if (debug) {
         let cameraEl = document.getElementById("my-camera"); // assume camera is called 'my-camera' (ARENA)
         if (cameraEl) {
@@ -94,8 +96,8 @@ import {CVWorkerMsgs} from '../worker-msgs.js';
             this.xrRefSpace = xrRefSpace;
             xrSession.requestAnimationFrame(this.onXRFrame.bind(this));
           });
-        } else throw "WebXR camera access not found!";
-      } else throw "XRWebGLBinding not found!";
+        } else throw "WebXRCC: WebXR camera access not found!";
+      } else throw "WebXRCC: XRWebGLBinding not found!";
     }
   
     /**
