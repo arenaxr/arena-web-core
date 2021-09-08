@@ -88,9 +88,16 @@
       this.cameraObject3D = document.getElementById('my-camera').object3D;
       this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
       this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
-      if (!this.cameraSpinnerObj3D || !this.cameraRigObj3D)
-        throw "Camera rig and camera spinner are required for relocalization!";
-  
+      if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) {
+        // wait for scene to load and try again
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            this.cameraObject3D = document.getElementById('my-camera').object3D;
+            this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
+            this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
+            if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) throw "Camera rig and camera spinner are required for relocalization!";            
+        })  
+      }
+        
       // save ARMarker system function to lookup markers
       this.getArMaker = getArMaker;
   

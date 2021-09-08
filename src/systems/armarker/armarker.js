@@ -17,6 +17,7 @@
  import {WebARViewerCameraCapture} from "./camera-capture/ccwebarviewer.js";
  import {ARMarkerRelocalization} from "./armarker-reloc.js";
  import {CVWorkerMsgs} from './worker-msgs.js';
+
  /**
   * ARMarker System. Supports ARMarkers in a scene.
   * @module armarker-system
@@ -101,7 +102,6 @@
          this.webXRSessionStarted(sceneEl.xrSession);
        });
      }
-     
    },
    /**
     * WebXR session started callback
@@ -130,11 +130,7 @@
     *   WebARViewerCameraCapture: camera capture for custom iOS browser (WebXRViewer/WebARViewer)
     *
     */
-   async initCVPipeline() {
-     if (this.cvPipelineInitialized == true) return;
-     if (this.webXRSession == undefined) return;
-     if (this.gl == undefined) return;
- 
+   async initCVPipeline() { 
      // try to setup a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
      if (this.isWebARViewer) {
        try {
@@ -145,14 +141,13 @@
        }
      }
 
-     /* if we are on a AR headset, use camera facing forward
-        try to detect magic leap and hololens (hololens reliable detection is tbd; other devices to be added) */
-     let isARHeadset = window.mlWorld || (navigator.xr && navigator.userAgent.includes("Edge"));
-     if (isARHeadset) {
+     // if we are on a AR headset, use camera facing forward
+     let arHeadset = this.detectARHeadset();
+     if (arHeadset !== "unknown") {
        // try to setup a camera facing forward capture (using getUserMedia)
        console.info("Setting up AR Headset camera capture.");
        try {
-         this.cameraCapture = new ARHeadsetCameraCapture(
+         this.cameraCapture = new ARHeadsetCameraCapture(arHeadset,
            this.data.debugCameraCapture
          );
        } catch (err) {
@@ -162,7 +157,7 @@
 
      // fallback to setup a webxr camera capture (e.g. passthrough AR on a phone)
      if (!this.cameraCapture && window.XRWebGLBinding) {
-       console.info("Setting up WebXR-based passthrough AR camera capture.");
+        console.info("Setting up WebXR-based passthrough AR camera capture.");
        try {
          this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl, this.data.debugCameraCapture);
         } catch (err) {
@@ -285,6 +280,20 @@
        });
      return true;
    },
+   /**
+    * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
+    * Hololens reliable detection is tbd
+    * 
+    * ARHeadeset camera capture uses returned value as a key to projection matrix array
+    * 
+    * @return {string} "ml", "hl", "unknown".
+    * @alias module:armarker-system
+    */
+    detectARHeadset() {
+        if (window.mlWorld) return "ml";
+        if (navigator.xr && navigator.userAgent.includes("Edge")) return "hl";
+        return "unknown";
+    },
    /**
     * Register an ARMarker component with the system
     * @param {object} marker - The marker component object to register.
