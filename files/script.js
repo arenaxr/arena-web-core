@@ -53,9 +53,9 @@ function loadStoreFront(authToken) {
 
 /**
  * Loads the html into the page iframe to completion.
- * @param {*} html The HTML code tio apply into the iframe.
+ * @param {*} html The HTML code to apply into the iframe.
  */
-function loadHtmlToFrame(html) {
+async function loadHtmlToFrame(html) {
     const doc = document.getElementById('storeframe').contentWindow.document;
     doc.open();
     doc.write(html);
