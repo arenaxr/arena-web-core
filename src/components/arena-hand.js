@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 /**
- * @fileoverview Tracking Vive controller movement in real time.
+ * @fileoverview Tracking Hand controller movement in real time.
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
@@ -9,7 +9,7 @@
  */
 
 /**
- * Generates a vive event
+ * Generates a hand event
  * @param {Object} evt event
  * @param {string} eventName name of event, i.e. 'triggerup'
  * @param {Object} myThis reference to object that generated the event
@@ -25,33 +25,34 @@ function eventAction(evt, eventName, myThis) {
     };
 
     // publish to MQTT
-    const objName = myThis.id + '_' + ARENA.idTag;
-    // publishing events attached to user id objects allows sculpting security
-    ARENA.Mqtt.publish(ARENA.outputTopic + objName, {
-        object_id: objName,
-        action: 'clientEvent',
-        type: eventName,
-        data: {
-            position: coordsData,
-            source: ARENA.camName,
-        },
-    });
+    const objName = myThis.name;
+    if (objName) {
+        // publishing events attached to user id objects allows sculpting security
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, {
+            object_id: objName,
+            action: 'clientEvent',
+            type: eventName,
+            data: {
+                position: coordsData,
+                source: ARENA.camName,
+            },
+        });
+    }
 }
 
 /**
- *  Tracking Vive controller movement in real time.
- * @module arena-vive
+ *  Tracking Hand controller movement in real time.
+ * @module arena-hand
  * @property {boolean} enabled - Controller enabled.
- * @property {string} name - Name used to publish controller pose.
  * @property {string} hand - Controller hand.
  * @property {string} color - Controller color.
  *
  */
-AFRAME.registerComponent('arena-vive', {
+AFRAME.registerComponent('arena-hand', {
+    dependencies: ['laser-controls'],
     schema: {
         enabled: {type: 'boolean', default: false},
-        name: {type: 'string', default: ''},
-        hand: {type: 'string', default: 'left'},
+        hand: {type: 'string', default: 'Left'},
         color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
     },
 
@@ -63,6 +64,29 @@ AFRAME.registerComponent('arena-vive', {
 
         this.lastPose = '';
 
+        this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+
+        el.addEventListener('controllerconnected', () => {
+            el.setAttribute('visible', true);
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
+                object_id: this.name,
+                action: 'create',
+                type: 'object',
+                data: {
+                    object_type: `hand${this.data.hand}`,
+                    position: {x: 0, y: -1, z: 0},
+                    color: this.data.color,
+                    dep: ARENA.camName,
+                },
+            });
+            this.data.enabled = true;
+        });
+
+        el.addEventListener('controllerdisconnected', () => {
+            el.setAttribute('visible', false);
+        });
+
+        /*
         el.addEventListener('triggerup', function(evt) {
             eventAction(evt, 'triggerup', this);
         });
@@ -93,6 +117,7 @@ AFRAME.registerComponent('arena-vive', {
         el.addEventListener('trackpaddown', function(evt) {
             eventAction(evt, 'trackpaddown', this);
         });
+         */
 
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },
@@ -100,14 +125,14 @@ AFRAME.registerComponent('arena-vive', {
     publishPose() {
         const data = this.data;
         if (!data.enabled || !data.hand) return;
-        const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
+        // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
         const msg = {
-            object_id: data.name,
+            object_id: this.name,
             action: 'update',
             type: 'object',
             data: {
-                object_type: 'vive'+hand,
+                object_type: `hand${this.data.hand}`,
                 position: {
                     x: parseFloat(this.position.x.toFixed(3)),
                     y: parseFloat(this.position.y.toFixed(3)),
@@ -120,14 +145,19 @@ AFRAME.registerComponent('arena-vive', {
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
                 color: data.color,
+                dep: ARENA.camName,
             },
         };
-        ARENA.Mqtt.publish(ARENA.outputTopic + data.name, msg);
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
     },
 
     tick: (function(t, dt) {
-        this.rotation = this.el.object3D.quaternion;
-        this.position = this.el.object3D.position;
+        if (!this.name) {
+            this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+        }
+
+        this.rotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+        this.position.setFromMatrixPosition(this.el.object3D.matrixWorld);
 
         const rotationCoords = AFRAME.utils.coordinates.stringify(this.rotation);
         const positionCoords = AFRAME.utils.coordinates.stringify(this.position);

@@ -20,6 +20,15 @@ export class Delete {
             return;
         }
 
+        // CLean up linked dependants
+        document.querySelectorAll(`[dep=${id}]`).forEach((depEl) => {
+            const depParentEl = depEl.parentEl;
+            if (depParentEl) {
+                depParentEl.removeChild(depEl);
+            }
+        })
+
+        // Remove element itself
         const parentEl = entityEl.parentEl;
         if (parentEl) {
             parentEl.removeChild(entityEl);

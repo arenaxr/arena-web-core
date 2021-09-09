@@ -13,6 +13,7 @@
   ],
   "dependencies": {
     "aframe": "^1.2.0",
+    "aframe-blink-controls": "^0.2.0",
     "aframe-extras": "git+https://github.com/n5ro/aframe-extras.git#351608a",
     "aframe-particle-system-component": "^1.1.3",
     "aframe-spe-particles-component": "^1.0.4",

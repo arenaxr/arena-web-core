@@ -9,8 +9,8 @@
 <dt><a href="#module_arena-user">arena-user</a></dt>
 <dd><p>Another user&#39;s camera in the ARENA. Handles Jitsi and display name updates.</p>
 </dd>
-<dt><a href="#module_arena-vive">arena-vive</a></dt>
-<dd><p>Tracking Vive controller movement in real time.</p>
+<dt><a href="#module_arena-hand">arena-hand</a></dt>
+<dd><p>Tracking VR hand controller movement in real time.</p>
 </dd>
 <dt><a href="#module_armarker">armarker</a></dt>
 <dd><p>ARMarker Component. Supports ARMarkers in a scene</p>
@@ -127,10 +127,10 @@ Another user's camera in the ARENA. Handles Jitsi and display name updates.
 | [hasAudio] | <code>boolean</code> | <code>false</code> | Whether the user has audio on. |
 | [hasVideo] | <code>boolean</code> | <code>false</code> | Whether the user has video on. |
 
-<a name="module_arena-vive"></a>
+<a name="module_arena-hand"></a>
 
-## arena-vive
-Tracking Vive controller movement in real time.
+## arena-hand
+Tracking VR Hand controller movement in real time.
 
 **Properties**
 
