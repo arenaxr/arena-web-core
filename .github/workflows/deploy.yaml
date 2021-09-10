@@ -26,6 +26,7 @@ jobs:
              npm ci
              npm run build
              cd ..
+             cp -R ./ARENA-website/* ./ARENA-core/
              ./prod.sh down
              ./prod.sh up --force-recreate -d 
 
