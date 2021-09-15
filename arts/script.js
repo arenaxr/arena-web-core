@@ -70,7 +70,7 @@ window.addEventListener('onauth', async function(e) {
     for (const [key, pData] of Object.entries(programData)) {
         const option = document.createElement('option');
         option.text = `${pData.name} (${pData.filetype})`;
-        option.value= JSON.stringify(pData); // must be stored as a string 
+        option.value= JSON.stringify(pData); // must be stored as a string
         fileSelect.add(option);
     }
 
@@ -312,7 +312,7 @@ function displayTree(treeData) {
         nodeEnter.append('circle')
             .attr('class', 'node')
             .attr('r', 1e-6)
-            .style('fill', 'steelblue'); // these are updated bellow
+            .style('fill', 'steelblue'); // these are updated below
 
         // Add labels for the nodes
         nodeEnter.append('text')
@@ -371,7 +371,7 @@ function displayTree(treeData) {
                     let eRt = errorRts.filter(rt => rt.uuid === d.data.uuid);
                     if (eRt.length > 0) return '#c94324';
                     return '#fff';
-                }                    
+                }
                 if (d.data.type === 'module') {
                     if (d.data.deleted) return  'gray';
                     return 'lightsteelblue';
@@ -385,7 +385,7 @@ function displayTree(treeData) {
                     return 'blue';
                 }
                 return 'steelblue';
-            })            
+            })
             .attr('cursor', 'pointer');
 
         // Remove any exiting nodes

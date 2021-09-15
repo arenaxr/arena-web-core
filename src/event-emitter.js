@@ -1,6 +1,6 @@
 
 /** Class encapsulating an EventTarget for ARENA events.
- * See events and documentation of callbacks bellow
+ * See events and documentation of callbacks below
 */
 export class ARENAEventEmitter {
     static events = {
