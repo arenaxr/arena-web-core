@@ -11,6 +11,11 @@ import $ from 'jquery';
 import Swal from 'sweetalert2';
 import {ARENAEventEmitter} from './event-emitter.js';
 
+// log lib-jitsi-meet.js version
+if (JitsiMeetJS) {
+    console.info(`JitsiMeetJS version https://github.com/jitsi/lib-jitsi-meet/commit/${JitsiMeetJS.version}`);
+}
+
 export class ARENAJitsi {
     static ARENA_APP_ID = 'arena';
     static SCREENSHARE_PREFIX = '#5cr33n5h4r3'; // unique prefix for screenshare clients
