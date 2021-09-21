@@ -169,8 +169,6 @@ AFRAME.registerComponent('arena-user', {
         const el = this.el;
         const data = this.data;
 
-        if (data.presence == 'Hidden') return;
-
         const name = 'muted_' + el.id;
         let micIconEl = document.querySelector('#' + name);
         if (!micIconEl) {
@@ -201,7 +199,6 @@ AFRAME.registerComponent('arena-user', {
         const el = this.el;
         const data = this.data;
 
-        if (data.presence === 'Hidden') return;
 
         // attach video to head
         const videoCube = document.createElement('a-box');
@@ -250,7 +247,7 @@ AFRAME.registerComponent('arena-user', {
             el.removeChild(vidCubeDark);
         }
 
-        if (data.presence !== 'Hidden') this.headModel.setAttribute('visible', true);
+        this.headModel.setAttribute('visible', true);
     },
 
     updateVideo() {
@@ -363,7 +360,6 @@ AFRAME.registerComponent('arena-user', {
         }
 
         if (data.headModelPath !== oldData.headModelPath) {
-            console.log(data.headModelPath);
             this.headModel.setAttribute('gltf-model', data.headModelPath); // TODO: maybe check this exists?
         }
 
@@ -374,12 +370,6 @@ AFRAME.registerComponent('arena-user', {
 
         if (data.presence !== oldData.presence) {
             switch (data.presence) {
-            case 'Hidden':
-                this.headText.setAttribute('visible', false);
-                this.headModel.setAttribute('visible', false);
-                this.removeVideoCube();
-                this.removeMicrophone();
-                break;
             case 'Standard':
                 this.headText.setAttribute('visible', true);
                 this.headModel.setAttribute('visible', true);
