@@ -14,6 +14,7 @@
  * The properties set here access directly [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.
  * @module material-extras
+ * @property {string} [overrideSrc=''] - Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF).
  * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [needsUpdate=false] - Specifies that the material needs to be recompiled. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
@@ -24,6 +25,7 @@
 AFRAME.registerComponent('material-extras', {
     dependencies: ['material'],
     schema: {
+        overrideSrc: {default: ''},
         encoding: {default: 'sRGBEncoding', oneOf: [
             'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding',
             'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking']},
@@ -35,7 +37,12 @@ AFRAME.registerComponent('material-extras', {
     },
     retryTimeouts: [1000, 2000, 5000, 10000],
     init: function() {
+        this.loader = new THREE.TextureLoader();
+        this.needsUpdate = true;
+        if (this.data.overrideSrc.length > 0) this.loadTexture(this.data.overrideSrc);
         this.update();
+        this.el.addEventListener('model-loaded', () => this.update());
+        this.el.addEventListener('load', () => this.update());
     },
     update: function(oldData) {
         this.retryIndex = 0;
@@ -44,10 +51,14 @@ AFRAME.registerComponent('material-extras', {
         if (oldData) {
             transparentOccluder = oldData.transparentOccluder;
             if (oldData.renderOrder !== this.data.renderOrder ||
-                oldData.colorWrite !== this.data.colorWrite) {
-                this.data.needsUpdate = true;
+                oldData.colorWrite !== this.data.colorWrite ||
+                oldData.encoding !== this.data.encoding ||
+                oldData.overrideSrc !== this.data.overrideSrc) {
+                this.needsUpdate = true;
             }
-            if (this.data.encoding != oldData.transparentOccluder) this.data.needsUpdate = true;
+            if (oldData.overrideSrc !== this.data.overrideSrc) {
+                this.loadTexture(this.data.overrideSrc);
+            }
         }
 
         if (transparentOccluder !== this.data.transparentOccluder) {
@@ -59,29 +70,58 @@ AFRAME.registerComponent('material-extras', {
                 this.data.renderOrder = this.data.defaultRenderOrder; // default renderOrder used in the arena
                 this.data.colorWrite = true; // default colorWrite
             }
-            this.data.needsUpdate = true;
+            this.needsUpdate = true;
         }
         this.el.object3D.renderOrder=this.data.renderOrder;
 
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
-        if (this.data.needsUpdate) this.updateMaterial();
+        if (this.needsUpdate) this.updateMaterial();
+    },
+    loadTexture(src) {
+        this.loader.load(
+            this.data.overrideSrc,
+            // onLoad callback
+            (texture) => {
+                this.texture = texture;
+                this.needsUpdate = true;
+                this.update();
+            },
+            // onProgress callback currently not supported
+            undefined,
+            // onError callback
+            (err) => console.error(`Error loading texture ${this.data.overrideSrc}: ${err}`));
     },
     updateMaterial: function() {
         const mesh = this.el.getObject3D('mesh');
-
         if (!mesh) {
-            console.error('could not find mesh!');
+            console.warn('Could not find mesh!');
             this.retryUpdateMaterial();
+            return;
         }
-
+        if (this.texture) {
+            mesh.traverse((node) => {
+                if (node.isMesh) {
+                    if (node.material.map) {
+                        node.material.map = this.texture;
+                        mesh.material.needsUpdate = true;
+                    }
+                }
+            });
+        }
         if (mesh.material) {
-            mesh.material.needsUpdate = this.data.needsUpdate;
             mesh.material.colorWrite = this.data.colorWrite;
             if (mesh.material.map) {
                 mesh.material.map.encoding = THREE[this.data.encoding];
                 this.data.needsUpdate = false;
-            } else this.retryUpdateMaterial();
-        } else this.retryUpdateMaterial();
+            } else {
+                this.retryUpdateMaterial();
+                return;
+            }
+            mesh.material.needsUpdate = true;
+        } else {
+            this.retryUpdateMaterial();
+            return;
+        }
     },
     retryUpdateMaterial() {
         if (this.retryIndex < this.retryTimeouts.length) {

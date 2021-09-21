@@ -103,8 +103,6 @@
           "lon": 79.9428,
           "markerid": "0",
           "markertype": "apriltag_36h11",
-          "dynamic": false,
-          "buildable": false,
           "size": 150
         },
         "description": "A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes in the real world. ",
@@ -142,16 +140,6 @@
             ],
             "title": "The marker type (apriltag_36h11, lightanchor, uwb)",
             "type": "string"
-          },
-          "dynamic":{
-            "type":"boolean",
-            "title":"Dynamic tag, not used for localization",
-            "default": false
-          },
-          "buildable":{
-            "type":"boolean",
-            "title":"Buildable tag, can be moved by scene author",
-            "default": false
           },
           "size": {
             "default": 150,
@@ -322,6 +310,42 @@
             "lookAtLandmark": true
         },
         "required": ["label"]
+      },
+      "material-extras": {
+        "default": {
+          "encoding": "sRGBEncoding",
+          "needsUpdate": false
+        },
+        "description": "Define extra material properties.",
+        "properties": {
+          "overrideSrc": {  
+            "type": "string",
+            "default": "",
+            "description": "Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+          },
+          "encoding": {
+            "default": "sRGBEncoding",
+            "enum": [
+              "LinearEncoding",
+              "sRGBEncoding",
+              "GammaEncoding",
+              "RGBEEncoding",
+              "LogLuvEncoding",
+              "RGBM7Encoding",
+              "RGBM16Encoding",
+              "RGBDEncoding",
+              "BasicDepthPacking",
+              "RGBADepthPacking"
+            ],
+            "type": "string"
+          },
+          "needsUpdate": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "title": "Material extras",
+        "type": "object"
       },
       "parent": {
         "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
