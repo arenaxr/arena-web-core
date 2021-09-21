@@ -84,6 +84,7 @@ async function enableChromeAEC(gainNode) {
  * @module arena-user
  * @property {color} [color=white] - The color for the user's name text.
  * @property {string} [headModelPath=/store/models/robobit.glb] - Path to user head model
+ * @property {string} [presence] - type of presence for user
  * @property {string} [jitsiId] - User jitsi id.
  * @property {string} [displayName] - User display name.
  * @property {boolean} [hasAudio=false] - Whether the user has audio on.
@@ -93,7 +94,8 @@ async function enableChromeAEC(gainNode) {
 AFRAME.registerComponent('arena-user', {
     schema: {
         color: {type: 'color', default: 'white'},
-        headModelPath: {type: 'string', default: '/store/models/robobit.glb'},
+        headModelPath: {type: 'string', default: ARENA.defaults.headModelPath},
+        presence: {type: 'string', default: 'Standard'},
         jitsiId: {type: 'string', default: ''},
         displayName: {type: 'string', default: ''},
         hasAudio: {type: 'boolean', default: false},
@@ -126,9 +128,9 @@ AFRAME.registerComponent('arena-user', {
         this.headModel = document.createElement('a-entity');
         this.headModel.setAttribute('id', 'head-model_' + name);
         this.headModel.setAttribute('rotation', '0 180 0');
-        this.headModel.object3D.scale.set(1, 1, 1);
+        this.headModel.setAttribute('scale', '1 1 1');
         this.headModel.setAttribute('dynamic-body', 'type', 'static');
-        this.headModel.setAttribute('gltf-model', `url(${data.headModelPath})`);
+        this.headModel.setAttribute('gltf-model', data.headModelPath);
         this.headModel.setAttribute('attribution', 'extractAssetExtras', true);
 
         el.appendChild(this.headText);
@@ -165,6 +167,7 @@ AFRAME.registerComponent('arena-user', {
 
     drawMicrophone() {
         const el = this.el;
+        const data = this.data;
 
         const name = 'muted_' + el.id;
         let micIconEl = document.querySelector('#' + name);
@@ -172,7 +175,11 @@ AFRAME.registerComponent('arena-user', {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
             micIconEl.setAttribute('scale', '0.2 0.2 0.2');
-            micIconEl.setAttribute('position', '0 0.3 0.045');
+            if (data.presence !== 'Portal') {
+                micIconEl.setAttribute('position', '0 0.3 0.045');
+            } else {
+                micIconEl.setAttribute('position', '-0.75 1.25 -0.035');
+            }
             micIconEl.setAttribute('src', 'url(/src/icons/images/audio-off.png)');
             el.appendChild(micIconEl);
         }
@@ -190,32 +197,44 @@ AFRAME.registerComponent('arena-user', {
 
     drawVideoCube() {
         const el = this.el;
+        const data = this.data;
+
 
         // attach video to head
         const videoCube = document.createElement('a-box');
         videoCube.setAttribute('id', this.videoID + 'cube');
         videoCube.setAttribute('position', '0 0 0');
-        videoCube.setAttribute('scale', '0.6 0.4 0.6');
         videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
 
-        const videoCubeDark = document.createElement('a-box');
-        videoCubeDark.setAttribute('id', this.videoID + 'cubeDark');
-        videoCubeDark.setAttribute('position', '0 0 0.01');
-        videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
-        videoCubeDark.setAttribute('material', 'shader', 'flat');
-        videoCubeDark.setAttribute('transparent', 'true');
-        videoCubeDark.setAttribute('color', 'black');
-        videoCubeDark.setAttribute('opacity', '0.8');
+        if (data.presence !== 'Portal') {
+            videoCube.setAttribute('position', '0 0 0');
+            videoCube.setAttribute('scale', '0.6 0.4 0.6');
+
+            const videoCubeDark = document.createElement('a-box');
+            videoCubeDark.setAttribute('id', this.videoID + 'cubeDark');
+            videoCubeDark.setAttribute('position', '0 0 0.01');
+            videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
+            videoCubeDark.setAttribute('material', 'shader', 'flat');
+            videoCubeDark.setAttribute('transparent', 'true');
+            videoCubeDark.setAttribute('color', 'black');
+            videoCubeDark.setAttribute('opacity', '0.8');
+
+            el.appendChild(videoCubeDark);
+        } else {
+            videoCube.setAttribute('scale', '2 3 0.02');
+        }
 
         el.appendChild(videoCube);
-        el.appendChild(videoCubeDark);
+
+        this.headModel.setAttribute('visible', false);
     },
 
     removeVideoCube() {
         const el = this.el;
+        const data = this.data;
 
         // remove video cubes
         const vidCube = document.getElementById(this.videoID + 'cube');
@@ -227,6 +246,8 @@ AFRAME.registerComponent('arena-user', {
         if (el.contains(vidCubeDark)) {
             el.removeChild(vidCubeDark);
         }
+
+        this.headModel.setAttribute('visible', true);
     },
 
     updateVideo() {
@@ -334,13 +355,38 @@ AFRAME.registerComponent('arena-user', {
     update: function(oldData) {
         const data = this.data;
 
+        if (data.color !== oldData.color) {
+            this.headText.setAttribute('color', data.color);
+        }
+
+        if (data.headModelPath !== oldData.headModelPath) {
+            this.headModel.setAttribute('gltf-model', data.headModelPath); // TODO: maybe check this exists?
+        }
+
         if (data.displayName !== oldData.displayName) {
             const name = data.displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             this.headText.setAttribute('value', name);
         }
 
-        if (data.color !== oldData.color) {
-            this.headText.setAttribute('color', data.color);
+        if (data.presence !== oldData.presence) {
+            switch (data.presence) {
+            case 'Standard':
+                this.headText.setAttribute('visible', true);
+                this.headModel.setAttribute('visible', true);
+                this.headText.setAttribute('position', '0 0.45 0.05');
+                // redraw mic
+                this.removeMicrophone();
+                this.drawMicrophone();
+                break;
+            case 'Portal':
+                this.headText.setAttribute('position', '0 1.7 0.05');
+                // redraw mic
+                this.removeMicrophone();
+                this.drawMicrophone();
+                break;
+            default:
+                break;
+            }
         }
     },
 

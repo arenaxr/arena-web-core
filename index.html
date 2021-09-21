@@ -73,6 +73,13 @@
                             </select>
                             <label for="audioSourceSelect">Select Microphone</label>
                         </div>
+                        <div class="form-floating mb-3">
+                            <select aria-label="test" class="form-select mb-3" id="presenceSelect">
+                                <option value="Standard">Standard</option>
+                                <option value="Portal">Portal</option>
+                            </select>
+                            <label for="presenceSelect">Select Presence Type</label>
+                        </div>
                         <div class="progress mb-3" style="height: 20px;">
                             <div
                                     aria-valuemax="100"
@@ -113,6 +120,10 @@
                                     readonly
                                     type="text"
                             />
+                        </div>
+                        <div class="form-outline input-group mb-3" id="headModelPath">
+                            <input class="form-control" id="headModelPath-input" type="text">
+                            <label class="form-label " for="headModelPath-input" style="z-index:999">Head Model Path</label>
                         </div>
                         <div class="form-outline input-group mb-3" id="displayName">
                             <input class="form-control" id="displayName-input" type="text">
