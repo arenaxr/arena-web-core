@@ -32,4 +32,9 @@ $(document).ready(function() {
         const loc = location.pathname.replace(/^\/+|\/+$/g, '');
         return link == loc;
     }).parent().addClass('active');
+
+    $('.coming-soon').on('click', function(e) {
+        e.preventDefault();
+        alert('COMING SOON');
+    });
 });
