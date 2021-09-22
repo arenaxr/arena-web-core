@@ -313,8 +313,7 @@
       },
       "material-extras": {
         "default": {
-          "encoding": "sRGBEncoding",
-          "needsUpdate": false
+          "encoding": "sRGBEncoding"
         },
         "description": "Define extra material properties.",
         "properties": {
@@ -339,10 +338,21 @@
             ],
             "type": "string"
           },
-          "needsUpdate": {
+          "colorWrite": {  
+            "type": "boolean",
+            "default": true,
+            "description": "Whether to render the material's color."
+          },
+          "renderOrder": {  
+            "type": "number",
+            "default": 1,
+            "description": "Allows the default rendering order of scene graph objects to be overridden."
+          },
+          "transparentOccluder": {  
+            "type": "boolean",
             "default": false,
-            "type": "boolean"
-          }
+            "description": "If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.."
+          }                 
         },
         "title": "Material extras",
         "type": "object"
