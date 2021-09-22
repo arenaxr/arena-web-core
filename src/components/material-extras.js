@@ -82,6 +82,8 @@ AFRAME.registerComponent('material-extras', {
             (texture) => {
                 this.texture = texture;
                 this.doUpdate = true;
+                this.texture.encoding = THREE[this.data.encoding];
+                this.texture.flipY = false;
                 this.update();
             },
             // onProgress callback currently not supported
@@ -100,8 +102,6 @@ AFRAME.registerComponent('material-extras', {
             mesh.traverse((node) => {
                 if (node.isMesh) {
                     if (node.material.map) {
-                        this.texture.encoding = THREE[this.data.encoding];
-                        this.texture.flipY = false;
                         node.material.map = this.texture;
                         mesh.material.needsUpdate = true;
                     }
