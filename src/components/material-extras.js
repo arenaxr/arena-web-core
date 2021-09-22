@@ -100,6 +100,8 @@ AFRAME.registerComponent('material-extras', {
             mesh.traverse((node) => {
                 if (node.isMesh) {
                     if (node.material.map) {
+                        texture.encoding = THREE[this.data.encoding];
+                        texture.flipY = false;
                         node.material.map = this.texture;
                         mesh.material.needsUpdate = true;
                     }
