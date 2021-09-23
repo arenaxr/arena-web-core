@@ -483,6 +483,20 @@ export class ARENAJitsi {
             console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
         );
 
+        this.conference.on(
+            JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED,
+            (statsObject) => {
+                console.log('LOCAL_STATS_UPDATED')
+                console.log(statsObject)
+            });
+        this.conference.on(
+            JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED,
+            (id, statsObject) => {
+                console.log('REMOTE_STATS_UPDATED')
+                console.log(id)
+                console.log(statsObject)
+            });
+
         // set the ARENA user's name with a "unique" ARENA tag
         this.conference.setDisplayName(ARENA.displayName + ` (${ARENAJitsi.ARENA_USER}_${ARENA.idTag})`);
 

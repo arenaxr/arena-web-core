@@ -835,6 +835,15 @@ export class ARENAChat {
         const uBtnCtnr = document.createElement('div');
         uBtnCtnr.className = 'users-list-btn-ctnr';
         uli.appendChild(uBtnCtnr);
+
+        const statsspan = document.createElement('span');
+        statsspan.title = 'Connection Quality';
+        statsspan.className = 'users-list-btn ud';
+        statsspan.setAttribute('data-toggle', 'popover');
+        statsspan.setAttribute('data-trigger', 'hover');
+        statsspan.setAttribute('data-content', 'Connection content');
+        uBtnCtnr.appendChild(statsspan);
+
         const usspan = document.createElement('span');
         usspan.className = 'users-list-btn s';
         usspan.title = 'Mute User';
