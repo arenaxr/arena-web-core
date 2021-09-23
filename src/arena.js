@@ -462,6 +462,11 @@ export class Arena {
                 const options = payload['attributes'];
                 Object.assign(sceneOptions, options['scene-options']);
 
+                // deal with navMesh dropbox links
+                if (sceneOptions['navMesh']) {
+                    sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']); 
+                }
+
                 // deal with scene attribution
                 if (sceneOptions['attribution']) {
                     const sceneAttr = document.createElement('a-entity');

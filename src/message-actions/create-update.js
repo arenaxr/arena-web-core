@@ -1,4 +1,5 @@
 import {Logger} from './logger.js';
+import {ARENAUtils} from '../utils.js';
 
 // handle actions
 const ACTIONS = {
@@ -172,8 +173,10 @@ export class CreateUpdate {
                 data.src = data.url; // make src=url
                 delete data.url; // remove attribute so we don't set it later
             }
+            // gltf is a special case in that the src is applied to the component 'gltf-model'
             if (data.hasOwnProperty('src')) {
-                entityEl.setAttribute('gltf-model', this.crossOriginDropboxSrc(data.src));
+                entityEl.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(data.src));
+                delete data.src; // remove attribute so we don't set it later
             }
             // add attribution by default, if not given
             if (!data.hasOwnProperty('attribution')) {
@@ -191,19 +194,19 @@ export class CreateUpdate {
             // TODO: create an aframe component for this
             entityEl.setAttribute('geometry', 'primitive', 'plane');
             if (data.hasOwnProperty('url')) {
-                entityEl.setAttribute('material', 'src', this.crossOriginDropboxSrc(data.url)); // image src from url
-                delete data.url;
+                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url)); 
+                delete data.url; // remove attribute so we don't set it later
             }
             if (data.hasOwnProperty('src')) {
-                entityEl.setAttribute('material', 'src', this.crossOriginDropboxSrc(data.src)); // image src from url
-                delete data.src;
+                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.src)); 
+                delete data.src; // remove attribute so we don't set it later
             }
             if (!data.hasOwnProperty('material-extras')) {
                 // default images to sRGBEncoding, if not specified
                 entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
                 entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
             }
-            delete data.image;
+            delete data.image; // no other properties applicable to image; delete it
             break;
         case 'text':
             // Support legacy `data: { text: 'STRING TEXT' }`
@@ -318,7 +321,7 @@ export class CreateUpdate {
      */
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
-            // console.info("Set entity attribute [id type -  attr value]:", entityEl.getAttribute('id'), attribute, value);
+            console.info("Set entity attribute [id type -  attr value]:", entityEl.getAttribute('id'), attribute, value);
 
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
@@ -346,12 +349,14 @@ export class CreateUpdate {
             case 'ttl':
                 // ttl is applied to property 'seconds' of ttl component
                 entityEl.setAttribute('ttl', {seconds: value});
-            case 'material':
-            case 'sound':
-                if (value.hasOwnProperty('src')) {
-                    value.src = this.crossOriginDropboxSrc(value.src);
-                }
+                break;
+            case 'src':
+                // replace dropbox links in any 'src' attributes that get here
+                entityEl.setAttribute('src', ARENAUtils.crossOriginDropboxSrc(value));
+                return;
             default:
+                // replace dropbox links in any src attribute inside value
+                if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src); 
                 // all other attributes are pushed directly to aframe
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(attribute);
@@ -360,16 +365,6 @@ export class CreateUpdate {
                 }
             } // switch attribute
         }
-    }
-
-    /**
-     * Replace dropbox link to dl.dropboxusercontent, which
-     * supports crossOrigin content
-     * @param {string} src message to be parsed
-     * @return {string} new valur
-     */
-    static crossOriginDropboxSrc(src) {
-        return src.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
     }
 
     /**

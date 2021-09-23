@@ -203,4 +203,15 @@ export class ARENAUtils {
         }
         return true;
     };
+
+    /**
+     * Replace dropbox link to dl.dropboxusercontent, which
+     * supports cross origin content
+     * @param {string} dropboxShareUrl link to be parsed; a dropbox public share link
+     * @return {string} new dropbox link
+     */
+     static crossOriginDropboxSrc(dropboxShareUrl) {
+        return dropboxShareUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
+    }
+
 }
