@@ -61,18 +61,18 @@ export class ARENAJitsi {
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
             p2p: {
-                enabled: false
+                enabled: false,
             },
             constraints: {
                 video: {
                     height: {
                         ideal: 1080,
                         max: 2160,
-                        min: 240
-                    }
-                }
+                        min: 240,
+                    },
+                },
             },
-            //enableLayerSuspension: true,
+            // enableLayerSuspension: true,
         };
 
         this.initOptions = {
@@ -145,8 +145,8 @@ export class ARENAJitsi {
     /**
      * Handles local tracks.
      * @param {[]} tracks Array with JitsiTrack objects
-     */
-    onLocalTracks(tracks) {
+      */
+    async onLocalTracks(tracks) {
         this.localTracks = tracks;
 
         for (let i = 0; i < this.localTracks.length; i++) {
@@ -166,9 +166,20 @@ export class ARENAJitsi {
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
+                if (this.jitsiVideoTrack) {
+                    const oldTrack = this.jitsiVideoTrack;
+                    await oldTrack.detach($(`#cornerVideo`)[0]);
+                    await this.conference.replaceTrack(oldTrack, track);
+                    await oldTrack.dispose();
+                }
                 track.attach($(`#cornerVideo`)[0]);
                 this.jitsiVideoTrack = track;
             } else if (track.getType() === 'audio') {
+                if (this.jitsiAudioTrack) {
+                    const oldTrack = this.jitsiAudioTrack;
+                    await this.conference.replaceTrack(oldTrack, track);
+                    await oldTrack.dispose();
+                }
                 this.jitsiAudioTrack = track;
             }
             if (this.ready) {
@@ -575,11 +586,7 @@ export class ARENAJitsi {
      * Connect audio and video and start sending local tracks
      * @return {promise}
      */
-    async avConnect(reset= false) {
-        if (this.avConnected && !reset) {
-            return;
-        }
-
+    async avConnect() {
         const prefAudioInput = localStorage.getItem('prefAudioInput');
         const prefVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
@@ -625,15 +632,6 @@ export class ARENAJitsi {
         }
         this.avConnected = true;
 
-        if (reset && this.conference) {
-            for (const track of this.conference.getLocalTracks()) {
-                if (track.getType() === 'video') {
-                    // use already defined e.g. <video id="cornerVideo" ...>
-                    await track.detach($(`#cornerVideo`)[0]);
-                }
-                await track.dispose();
-            }
-        }
         JitsiMeetJS.createLocalTracks({devices, ...deviceOpts}).
             then((tracks) => {
                 this.onLocalTracks(tracks);
