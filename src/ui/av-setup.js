@@ -239,13 +239,13 @@ window.setupAV = (callback) => {
 
     // Init
     if (ARENA.Jitsi?.hasVideo) {
-        ARENA.Jitsi.prevVideoUnmuted = true;
         SideMenu.clickButton(SideMenu.buttons.VIDEO);
     }
     if (ARENA.Jitsi?.hasAudio) {
-        ARENA.Jitsi.prevAudioUnmuted = true;
         SideMenu.clickButton(SideMenu.buttons.AUDIO);
     }
+    ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi?.hasVideo;
+    ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi?.hasAudio;
     setupPanel.classList.remove('d-none');
     if (localStorage.getItem('headModelPath')) {
         headModelPath.value = localStorage.getItem('headModelPath');
