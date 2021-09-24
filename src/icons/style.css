@@ -25,8 +25,6 @@
     padding: 5px 5px 0;
 }
 
-
-
 .flipVideo {
     position: absolute;
     top: 15px;
@@ -109,4 +107,30 @@
     font-size: small;
     background-color: #0008;
     color: #fff;
+}
+
+.error-icon {
+    position: absolute;
+    /* display: none; */
+    padding-left: 5px;
+    padding-right: 5px;
+    top: 40px;
+    left: 15px;
+    width: 25px;
+    border-radius: 50%;
+    z-index: 99999;
+    font-size: large;
+    background: red;
+    color: white;
+    justify-content: center;
+    text-align: center;
+}
+
+.error-block {
+    display: none;
+}
+
+.error-icon:hover + .error-block {
+    display: block;
+    color: red;
 }
