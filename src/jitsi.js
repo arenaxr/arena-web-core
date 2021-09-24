@@ -541,14 +541,14 @@ export class ARENAJitsi {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_FAILED, {
             error: err
         });
-        displayConferenceHelp(err);
+        this.displayConferenceHelp(err);
     }
 
     onConferenceError(err) {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
             error: err
         });
-        displayConferenceHelp(err);
+        this.displayConferenceHelp(err);
     }
 
     displayConferenceHelp(err) {
