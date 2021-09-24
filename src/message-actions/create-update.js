@@ -194,11 +194,11 @@ export class CreateUpdate {
             // TODO: create an aframe component for this
             entityEl.setAttribute('geometry', 'primitive', 'plane');
             if (data.hasOwnProperty('url')) {
-                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url)); 
+                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url));
                 delete data.url; // remove attribute so we don't set it later
             }
             if (data.hasOwnProperty('src')) {
-                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.src)); 
+                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.src));
                 delete data.src; // remove attribute so we don't set it later
             }
             if (!data.hasOwnProperty('material-extras')) {
@@ -321,8 +321,6 @@ export class CreateUpdate {
      */
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
-            console.info("Set entity attribute [id type -  attr value]:", entityEl.getAttribute('id'), attribute, value);
-
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
             switch (attribute) {
@@ -356,7 +354,7 @@ export class CreateUpdate {
                 return;
             default:
                 // replace dropbox links in any src attribute inside value
-                if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src); 
+                if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                 // all other attributes are pushed directly to aframe
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(attribute);
