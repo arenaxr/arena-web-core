@@ -499,12 +499,11 @@ export class ARENAChat {
     };
 
     conferenceFailedCallback = (e) => {
-        //console.error(e.detail.error);
-        //this.displayAlert(e.detail.error, 5000, 'error');
     };
     conferenceErrorCallback = (e) => {
-        //console.error(e.detail.error);
-        //this.displayAlert(e.detail.error, 5000, 'error');
+        // display error to user
+        this.displayAlert(e.detail.error, 5000, 'error');
+        // TODO: place error in a list of self-tests/errors
     };
 
     /**
