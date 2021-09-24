@@ -136,8 +136,6 @@ export class ARENAEventEmitter {
          */
         NOISY_MIC: 'noisy_mic',
 
-        CONFERENCE_FAILED: 'conference_failed',
-
         CONFERENCE_ERROR: 'conference_error',
 
     };

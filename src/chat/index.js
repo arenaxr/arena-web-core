@@ -369,7 +369,6 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, this.dominantSpeakerCallback);
         ARENA.events.on(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.talkWhileMutedCallback);
         ARENA.events.on(ARENAEventEmitter.events.NOISY_MIC, this.noisyMicCallback);
-        ARENA.events.on(ARENAEventEmitter.events.CONFERENCE_FAILED, this.conferenceFailedCallback);
         ARENA.events.on(ARENAEventEmitter.events.CONFERENCE_ERROR, this.conferenceErrorCallback);
     }
 
@@ -498,12 +497,12 @@ export class ARENAChat {
         this.displayAlert(`Your microphone appears to be noisy.`, 2000, 'warning');
     };
 
-    conferenceFailedCallback = (e) => {
-    };
     conferenceErrorCallback = (e) => {
         // display error to user
-        this.displayAlert(e.detail.error, 5000, 'error');
+        this.displayAlert(e.detail.errorCode, 5000, 'error');
         // TODO: place error in a list of self-tests/errors
+        // errorCode: 'connection.connectionFailed'
+        // errorCode: 'conference.iceFailed'
     };
 
     /**

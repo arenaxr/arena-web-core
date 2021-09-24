@@ -541,7 +541,7 @@ export class ARENAJitsi {
     onConferenceError(err) {
         console.error(`Conference error ${err}!`);
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            error: err
+            errorCode: err
         });
     }
 
@@ -551,7 +551,7 @@ export class ARENAJitsi {
     onConnectionFailed() {
         console.error('Conference server connection failed!');
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            error: 'connection.CONNECTION_FAILED'
+            errorCode: 'connection.connectionFailed'
         });
     }
 
