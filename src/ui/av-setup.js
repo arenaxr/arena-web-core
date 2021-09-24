@@ -238,14 +238,16 @@ window.setupAV = (callback) => {
     if (!document.getElementById('audioSourceSelect').onchange) addListeners();
 
     // Init
-    if (ARENA.Jitsi?.hasVideo) {
-        SideMenu.clickButton(SideMenu.buttons.VIDEO);
+    if (ARENA.Jitsi) {
+        ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi.hasVideo;
+        ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi.hasAudio;
+        if (ARENA.Jitsi.hasVideo) {
+            SideMenu.clickButton(SideMenu.buttons.VIDEO);
+        }
+        if (ARENA.Jitsi?.hasAudio) {
+            SideMenu.clickButton(SideMenu.buttons.AUDIO);
+        }
     }
-    if (ARENA.Jitsi?.hasAudio) {
-        SideMenu.clickButton(SideMenu.buttons.AUDIO);
-    }
-    ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi?.hasVideo;
-    ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi?.hasAudio;
     setupPanel.classList.remove('d-none');
     if (localStorage.getItem('headModelPath')) {
         headModelPath.value = localStorage.getItem('headModelPath');
