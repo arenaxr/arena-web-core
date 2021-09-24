@@ -482,6 +482,8 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
             console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
         );
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceFailed.bind(this));
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
 
         // set the ARENA user's name with a "unique" ARENA tag
         this.conference.setDisplayName(ARENA.displayName + ` (${ARENAJitsi.ARENA_USER}_${ARENA.idTag})`);
@@ -533,6 +535,32 @@ export class ARENAJitsi {
                 this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
+    }
+
+    onConferenceFailed(err) {
+        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_FAILED, {
+            error: err
+        });
+        Swal.fire({
+            title: 'CONFERENCE FAILED',
+            html: `${err}`,
+            icon: 'error',
+            showConfirmButton: true,
+            confirmButtonText: 'Ok',
+        });
+    }
+
+    onConferenceError(err) {
+        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+            error: err
+        });
+        Swal.fire({
+            title: 'CONFERENCE Error',
+            html: `${err}`,
+            icon: 'warning',
+            showConfirmButton: true,
+            confirmButtonText: 'Ok',
+        });
     }
 
     /**

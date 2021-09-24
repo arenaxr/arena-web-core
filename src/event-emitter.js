@@ -107,7 +107,7 @@ export class ARENAEventEmitter {
          * @callback onSceneOptionsLoadedCallback
          * @param result {boolean} Should always be true
          */
-         SCENE_OPT_LOADED: 'scene_options_loaded',
+        SCENE_OPT_LOADED: 'scene_options_loaded',
 
         /**
           * Indicates when scene objects are successfully fully loaded. The event provides
@@ -116,7 +116,7 @@ export class ARENAEventEmitter {
           * @callback onSceneObjectsLoadedCallback
           * @param result {boolean} Should always be true
           */
-         SCENE_OBJ_LOADED: 'scene_objects_loaded',
+        SCENE_OBJ_LOADED: 'scene_objects_loaded',
 
         /**
          * Indicates when a user is talking on mute. The event provides
@@ -135,6 +135,11 @@ export class ARENAEventEmitter {
          * @param result {boolean} Should always be true
          */
         NOISY_MIC: 'noisy_mic',
+
+        CONFERENCE_FAILED: 'conference_failed',
+
+        CONFERENCE_ERROR: 'conference_error',
+
     };
 
     /**
