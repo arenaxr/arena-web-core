@@ -369,6 +369,7 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, this.dominantSpeakerCallback);
         ARENA.events.on(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.talkWhileMutedCallback);
         ARENA.events.on(ARENAEventEmitter.events.NOISY_MIC, this.noisyMicCallback);
+        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS, this.jitsiStatsCallback);
     }
 
     /**
@@ -494,6 +495,18 @@ export class ARENAChat {
      */
     noisyMicCallback = (e) => {
         this.displayAlert(`Your microphone appears to be noisy.`, 2000, 'warning');
+    };
+
+    /**
+     * Called when Jitsi stats are updated.
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    jitsiStatsCallback = (e) => {
+        const user = e.detail;
+        console.log(user);
+        if (!this.liveUsers[user.id]) return;
+        this.liveUsers[user.id].stats = user.stats;
     };
 
     /**

@@ -107,7 +107,7 @@ export class ARENAEventEmitter {
          * @callback onSceneOptionsLoadedCallback
          * @param result {boolean} Should always be true
          */
-         SCENE_OPT_LOADED: 'scene_options_loaded',
+        SCENE_OPT_LOADED: 'scene_options_loaded',
 
         /**
           * Indicates when scene objects are successfully fully loaded. The event provides
@@ -116,7 +116,7 @@ export class ARENAEventEmitter {
           * @callback onSceneObjectsLoadedCallback
           * @param result {boolean} Should always be true
           */
-         SCENE_OBJ_LOADED: 'scene_objects_loaded',
+        SCENE_OBJ_LOADED: 'scene_objects_loaded',
 
         /**
          * Indicates when a user is talking on mute. The event provides
@@ -135,6 +135,17 @@ export class ARENAEventEmitter {
          * @param result {boolean} Should always be true
          */
         NOISY_MIC: 'noisy_mic',
+
+        /**
+         * Indicates an update of local/remote user connection stats. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback jitsiStatsCallback
+         * @param jid {string} the Jitsi conference id of the user, undefined for self
+         * @param id {string} the ARENA id of the user, undefined for self
+         * @param stats {object} the statsObject obj of stats for the user
+         */
+        JITSI_STATS: 'jitsi_stats',
     };
 
     /**
