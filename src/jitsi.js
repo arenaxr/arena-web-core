@@ -541,25 +541,30 @@ export class ARENAJitsi {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_FAILED, {
             error: err
         });
-        Swal.fire({
-            title: 'CONFERENCE FAILED',
-            html: `${err}`,
-            icon: 'error',
-            showConfirmButton: true,
-            confirmButtonText: 'Ok',
-        });
+        displayConferenceHelp(err);
     }
 
     onConferenceError(err) {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
             error: err
         });
+        displayConferenceHelp(err);
+    }
+
+    displayConferenceHelp(err) {
         Swal.fire({
-            title: 'CONFERENCE Error',
+            title: 'CONFERENCE ERROR',
             html: `${err}`,
-            icon: 'warning',
+            icon: 'error',
             showConfirmButton: true,
             confirmButtonText: 'Ok',
+        }).then((result) => {
+            console.error(`displayConferenceHelp result ${result}`);
+            if (result.dismiss) {
+                Swal.fire(`${err} DISMISSED ${result.dismiss}!`, '', 'info')
+            } else if (result.isDismissed) {
+                Swal.fire(`${err} DISMISSED NO REASON!`, '', 'info')
+            }
         });
     }
 
