@@ -146,7 +146,7 @@ export class SideMenu {
          */
         const url = new URL(window.location.href);
         const avSettingsBtn = createIconButton('options', 'Change A/V options',
-            () => window.setupAV(ARENA.Jitsi.avConnect));
+            () => window.setupAV(ARENA.Jitsi.avConnect.bind(ARENA.Jitsi)));
         if (!url.searchParams.get('noav')) {
             this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;
         }

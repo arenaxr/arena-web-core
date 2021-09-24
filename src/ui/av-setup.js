@@ -238,11 +238,12 @@ window.setupAV = (callback) => {
     if (!document.getElementById('audioSourceSelect').onchange) addListeners();
 
     // Init
-    // Stop video if currently in use
     if (ARENA.Jitsi?.hasVideo) {
+        ARENA.Jitsi.prevVideoUnmuted = true;
         SideMenu.clickButton(SideMenu.buttons.VIDEO);
     }
     if (ARENA.Jitsi?.hasAudio) {
+        ARENA.Jitsi.prevAudioUnmuted = true;
         SideMenu.clickButton(SideMenu.buttons.AUDIO);
     }
     setupPanel.classList.remove('d-none');

@@ -10,6 +10,7 @@
 import $ from 'jquery';
 import Swal from 'sweetalert2';
 import {ARENAEventEmitter} from './event-emitter.js';
+import {SideMenu} from './icons/index.js';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {
@@ -184,12 +185,13 @@ export class ARENAJitsi {
             }
             if (this.ready) {
                 // mobile only?
+                track.mute();
                 this.conference.addTrack(track);
                 this.connectArena(this.conference.myUserId(), track.getType());
             }
         }
-        if (this.jitsiAudioTrack) this.jitsiAudioTrack.mute();
-        if (this.jitsiVideoTrack) this.jitsiVideoTrack.mute();
+        if (this.prevVideoUnmuted) SideMenu.clickButton(SideMenu.buttons.VIDEO);
+        if (this.prevAudioUnmuted) SideMenu.clickButton(SideMenu.buttons.AUDIO);
     }
 
     /**
@@ -633,8 +635,8 @@ export class ARENAJitsi {
         this.avConnected = true;
 
         JitsiMeetJS.createLocalTracks({devices, ...deviceOpts}).
-            then((tracks) => {
-                this.onLocalTracks(tracks);
+            then(async (tracks) => {
+                await this.onLocalTracks(tracks);
                 if (this.withVideo) setupCornerVideo.bind(this)();
             }).
             catch((err) => {
