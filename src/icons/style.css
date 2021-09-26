@@ -112,25 +112,27 @@
 .error-icon {
     position: absolute;
     /* display: none; */
-    padding-left: 5px;
-    padding-right: 5px;
     top: 40px;
     left: 15px;
-    width: 25px;
-    border-radius: 50%;
+    width: 20px;
     z-index: 99999;
-    font-size: large;
-    background: red;
-    color: white;
-    justify-content: center;
+}
+
+.error-icon .error-block {
+    visibility: hidden;
+    width: 120px;
+    background-color: #0008;
+    color: #fff;
     text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    font-size: small;
+    top: -5px;
+    left: 105%;
+    position: absolute;
+    z-index: 99999;
 }
 
-.error-block {
-    display: none;
-}
-
-.error-icon:hover + .error-block {
-    display: block;
-    color: red;
+.error-icon:hover .error-block {
+    visibility: visible;
 }
