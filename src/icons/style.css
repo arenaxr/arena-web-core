@@ -120,12 +120,12 @@
 
 .error-icon .error-block {
     visibility: hidden;
-    width: 120px;
+    width: 275px;
     background-color: #0008;
     color: #fff;
-    text-align: center;
+    text-align: left;
     border-radius: 6px;
-    padding: 5px 0;
+    padding: 10px;
     font-size: small;
     top: -5px;
     left: 105%;
@@ -135,4 +135,12 @@
 
 .error-icon:hover .error-block {
     visibility: visible;
+}
+
+.health-error-label {
+    color: red;
+}
+
+.health-warning-label {
+    color: orange;
 }

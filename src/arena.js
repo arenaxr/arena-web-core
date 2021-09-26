@@ -7,6 +7,7 @@
  */
 import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
+import {ARENAHealth} from './health/';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
@@ -77,6 +78,8 @@ export class Arena {
             const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
             this.showEchoDisplayName(speaker);
         });
+
+        this.health = new ARENAHealth();
     }
 
     /**
@@ -464,7 +467,7 @@ export class Arena {
 
                 // deal with navMesh dropbox links
                 if (sceneOptions['navMesh']) {
-                    sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']); 
+                    sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
                 }
 
                 // deal with scene attribution
