@@ -238,12 +238,15 @@ window.setupAV = (callback) => {
     if (!document.getElementById('audioSourceSelect').onchange) addListeners();
 
     // Init
-    // Stop video if currently in use
-    if (ARENA.Jitsi?.hasVideo) {
-        SideMenu.clickButton(SideMenu.buttons.VIDEO);
-    }
-    if (ARENA.Jitsi?.hasAudio) {
-        SideMenu.clickButton(SideMenu.buttons.AUDIO);
+    if (ARENA.Jitsi) {
+        ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi.hasVideo;
+        ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi.hasAudio;
+        if (ARENA.Jitsi.hasVideo) {
+            SideMenu.clickButton(SideMenu.buttons.VIDEO);
+        }
+        if (ARENA.Jitsi?.hasAudio) {
+            SideMenu.clickButton(SideMenu.buttons.AUDIO);
+        }
     }
     setupPanel.classList.remove('d-none');
     if (localStorage.getItem('headModelPath')) {
