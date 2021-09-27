@@ -9,6 +9,18 @@ const config = require('./health-config.json');
 
 /**
  * A class to manage an instance of ARENA's health/error reporting and troubleshooting.
+ * @example
+ * // Add your errors and help links to ./health-config.json
+ * {
+ *   // unique error code for indexing
+ *   "errorCode": "connection.connectionFailed"
+ *   // error class: health-error-label, health-warning-label
+ *   "class": "health-error-label"
+ *   // title for display purposes
+ *   "title": "Conference server connection failed"
+ *   // link to troubleshooting help page/section
+ *   "helpLink": "https://arena.conix.io/content/troubleshooting.html#error-conference-server-connection-failed"
+ * }
  */
 export class ARENAHealth {
     /**

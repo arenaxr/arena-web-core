@@ -136,8 +136,14 @@ export class ARENAEventEmitter {
          */
         NOISY_MIC: 'noisy_mic',
 
+        /**
+         * Indicates when an important conference error occurred. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback conferenceErrorCallback
+         * @param errorCode {string} the error code
+         */
         CONFERENCE_ERROR: 'conference_error',
-
     };
 
     /**
