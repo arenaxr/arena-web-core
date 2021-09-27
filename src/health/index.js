@@ -30,10 +30,6 @@ export class ARENAHealth {
         const instance = this;
         this.activeErrors = [];
 
-        $.getJSON('/src/health/health-config.json', function(json) {
-            instance.config = json;
-        });
-
         $(document).ready(function() {
             // hover, draw draw the errors box
             $('#error-icon').hover(
