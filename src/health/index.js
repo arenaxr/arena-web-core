@@ -35,6 +35,13 @@ export class ARENAHealth {
             $('#btn-error-reload').click(function() {
                 window.location.reload();
             });
+            // update icon display once doc is ready
+            const icon = document.getElementById('error-icon');
+            if (Object.keys(instance.activeErrors).length) {
+                icon.style.display = 'block';
+            } else {
+                icon.style.display = 'none';
+            }
         });
     }
 
@@ -45,7 +52,9 @@ export class ARENAHealth {
     addError(errorCode) {
         const err = config.find((el) => el.errorCode === errorCode);
         this.activeErrors[errorCode] = err;
-        // TODO: make error-icon visible
+        // make error-icon visible
+        const icon = document.getElementById('error-icon');
+        if (icon) icon.style.display = 'block';
     }
 
     /**
@@ -54,7 +63,11 @@ export class ARENAHealth {
      */
     removeError(errorCode) {
         delete this.activeErrors[errorCode];
-        // TODO: make error-icon invisible, when activeErrors = 0
+        // make error-icon invisible, when activeErrors = 0
+        if (!Object.keys(this.activeErrors).length) {
+            const icon = document.getElementById('error-icon');
+            if (icon) icon.style.display = 'none';
+        }
     }
 }
 
@@ -65,12 +78,6 @@ export class ARENAHealth {
 function drawErrorBlock(errors) {
     $('#error-block').append('<strong>Errors and Troubleshooting</strong><hr>');
     $('#error-block').append('<table id="error-list"><tbody></tbody></table><hr>');
-    const reload = $('<table>')
-        .append($('<tbody>')
-            .append($('<tr>')
-                .append($('<td><small>Click `Reload` once errors are resolved.</small></td>'))
-                .append('<td><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
-    $('#error-block').append(reload);
     // add list of errors
     for (const [k, v] of Object.entries(errors)) {
         $('#error-list').find('tbody')
@@ -78,4 +85,11 @@ function drawErrorBlock(errors) {
                 .append($(`<td><span class="${v.class}">${v.title}</span></td>`))
                 .append(`<td><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
     };
+    // add reload option
+    const reload = $('<table>')
+        .append($('<tbody>')
+            .append($('<tr>')
+                .append($('<td><small>Click `Reload` once errors are resolved.</small></td>'))
+                .append('<td><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
+    $('#error-block').append(reload);
 }

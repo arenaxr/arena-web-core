@@ -109,9 +109,10 @@
     color: #fff;
 }
 
+/* Health-check system */
 .error-icon {
     position: absolute;
-    /* display: none; */
+    display: none;
     top: 40px;
     left: 15px;
     width: 20px;
