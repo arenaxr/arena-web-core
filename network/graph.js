@@ -26,7 +26,7 @@ window.addEventListener('onauth', function(e) {
                     }
                     return elem.data('id') + additional_info;
                 },
-                "font-size": 3.5,
+                'font-size': 3.5,
                 'shape': 'round-rectangle',
                 'background-color': 'Coral',
                 'text-outline-color': 'Coral'
@@ -34,7 +34,10 @@ window.addEventListener('onauth', function(e) {
         }, {
             selector: 'node[class="topic"]',
             style: {
-                "font-size": 3.5,
+                'content': function(elem) {
+                    return elem.data('id').replaceAll('/', '/\n');
+                },
+                'font-size': 3.5,
                 'shape': 'ellipse',
                 'background-color': 'LightBlue',
                 'text-outline-color': 'LightBlue'
@@ -42,8 +45,8 @@ window.addEventListener('onauth', function(e) {
         }, {
             selector: 'node[class="ip"]',
             style: {
-                "font-size": 4.0,
-                'shape': 'barrel',
+                'font-size': 4.0,
+                'shape': 'round-rectangle',
                 'background-color': '#9e9199',
                 'text-outline-color': '#9e9199'
             }
@@ -60,14 +63,14 @@ window.addEventListener('onauth', function(e) {
                 'content': function(elem) {
                     return elem.data('bps') + " bytes/s";
                 },
-                "font-size": 3.5,
+                'font-size': 3.5,
                 'width': 1.0,
                 'arrow-scale': 0.5,
-                'font-family' : 'Courier',
+                'font-family': 'Courier',
                 'line-color': 'LightGray',
                 'target-arrow-color': 'LightGray',
                 'curve-style': 'bezier',
-                // 'text-rotation': 'autorotate',
+                'text-rotation': 'autorotate',
                 'target-arrow-shape': 'triangle-backcurve',
                 'text-outline-width': 0.5,
                 'text-outline-color': 'LightGray'
@@ -247,9 +250,9 @@ window.addEventListener('onauth', function(e) {
         }
     });
 
-    // cy.on("tap", "node", function(event) {
-    //     let obj = event.target;
-    //     let tappedNode = cy.$id(obj.id()).data();
-    //     console.log(tappedNode["id"]);
-    // });
+    cy.on("tap", "node", function(event) {
+        let obj = event.target;
+        let tappedNode = cy.$id(obj.id()).data();
+        console.log(tappedNode["id"]);
+    });
 });
