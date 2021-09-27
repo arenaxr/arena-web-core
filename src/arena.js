@@ -80,6 +80,8 @@ export class Arena {
         });
 
         this.health = new ARENAHealth();
+        this.health.addError('conference.iceFailed');
+        this.health.addError('connection.connectionFailed');
     }
 
     /**
