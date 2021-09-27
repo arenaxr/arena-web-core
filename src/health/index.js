@@ -31,10 +31,6 @@ export class ARENAHealth {
                 function() { // mouseleave
                     $('#error-block').empty();
                 });
-            // reload button
-            $('#btn-error-reload').click(function() {
-                window.location.reload();
-            });
             // update icon display once doc is ready
             const icon = document.getElementById('error-icon');
             if (Object.keys(instance.activeErrors).length) {
@@ -110,4 +106,7 @@ function drawErrorBlock(errors) {
                 .append($('<td><small>Click `Reload` once errors are resolved.</small></td>'))
                 .append('<td><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
     $('#error-block').append(reload);
+    $('#btn-error-reload').click(function() {
+        window.location.reload();
+    });
 }
