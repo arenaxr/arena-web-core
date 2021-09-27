@@ -13,6 +13,7 @@ import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
+import {ARENAHealth} from './health/';
 import Swal from 'sweetalert2';
 
 /* global ARENA */
@@ -77,6 +78,8 @@ export class Arena {
             const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
             this.showEchoDisplayName(speaker);
         });
+
+        this.health = new ARENAHealth();
     }
 
     /**
@@ -464,7 +467,7 @@ export class Arena {
 
                 // deal with navMesh dropbox links
                 if (sceneOptions['navMesh']) {
-                    sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']); 
+                    sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
                 }
 
                 // deal with scene attribution

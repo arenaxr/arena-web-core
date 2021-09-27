@@ -468,6 +468,7 @@ export class ARENAJitsi {
      * This function is called when connection is established successfully
      */
     onConnectionSuccess() {
+        console.log('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.arenaConferenceName, this.confOptions);
 
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
@@ -495,6 +496,8 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
             console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
         );
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
 
         // set the ARENA user's name with a "unique" ARENA tag
         this.conference.setDisplayName(ARENA.displayName + ` (${ARENAJitsi.ARENA_USER}_${ARENA.idTag})`);
@@ -546,13 +549,27 @@ export class ARENAJitsi {
                 this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
+        ARENA.health.removeError('connection.connectionFailed');
+    }
+
+    onConferenceError(err) {
+        console.error(`Conference error ${err}!`);
+        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+            errorCode: err
+        });
+        ARENA.health.addError(err);
     }
 
     /**
      * This function is called when the this.connection fails.
      */
     onConnectionFailed() {
-        console.error('Connection Failed!');
+        const err ='connection.connectionFailed';
+        console.error('Conference server connection failed!');
+        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+            errorCode: err
+        });
+        ARENA.health.addError(err);
     }
 
     /**
@@ -567,7 +584,7 @@ export class ARENAJitsi {
      * This function is called when we disconnect.
      */
     disconnect() {
-        console.log('disconnected!');
+        console.warning('Conference server disconnected!');
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
