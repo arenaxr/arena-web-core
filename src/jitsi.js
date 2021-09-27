@@ -549,6 +549,7 @@ export class ARENAJitsi {
                 this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
+        ARENA.health.removeError('connection.connectionFailed');
     }
 
     onConferenceError(err) {
@@ -556,16 +557,19 @@ export class ARENAJitsi {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
             errorCode: err
         });
+        ARENA.health.addError(err);
     }
 
     /**
      * This function is called when the this.connection fails.
      */
     onConnectionFailed() {
+        const err ='connection.connectionFailed';
         console.error('Conference server connection failed!');
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            errorCode: 'connection.connectionFailed'
+            errorCode: err
         });
+        ARENA.health.addError(err);
     }
 
     /**

@@ -12,7 +12,7 @@ const config = require('./health-config.json');
  */
 export class ARENAHealth {
     /**
-     *
+     * Construct a health object and begin monitoring for user events.
      */
     constructor() {
         const instance = this;
@@ -46,20 +46,19 @@ export class ARENAHealth {
     }
 
     /**
-     *
-     * @param {*} errorCode
+     * Add an error to health monitor and show the icon.
+     * @param {string} errorCode The error string matching errorCode in health-config.json
      */
     addError(errorCode) {
-        const err = config.find((el) => el.errorCode === errorCode);
-        this.activeErrors[errorCode] = err;
+        this.activeErrors[errorCode] = this.getErrorDetails(errorCode);
         // make error-icon visible
         const icon = document.getElementById('error-icon');
         if (icon) icon.style.display = 'block';
     }
 
     /**
-     *
-     * @param {*} errorCode
+     * Remove an error to health monitor and hide the icon when errors = 0.
+     * @param {string} errorCode The error string matching errorCode in health-config.json
      */
     removeError(errorCode) {
         delete this.activeErrors[errorCode];
@@ -69,11 +68,30 @@ export class ARENAHealth {
             if (icon) icon.style.display = 'none';
         }
     }
+
+    /**
+     * Lookup details of error code if any from health-config.json.
+     * @param {string} errorCode The error string matching errorCode in health-config.json
+     * @return {object} Details object for found/default error
+     */
+    getErrorDetails(errorCode) {
+        const err = config.find((el) => el.errorCode === errorCode);
+        if (err) {
+            return err;
+        } else {
+            return { // default for unknown problem, as warning
+                errorCode: errorCode,
+                class: 'health-warning-label',
+                title: errorCode,
+                helpLink: 'https://arena.conix.io/content/troubleshooting.html',
+            };
+        }
+    }
 }
 
 /**
- *
- * @param {*} errors
+ * Render the display of errors in #error-block for troubleshooting.
+ * @param {[objects]} errors Array of error Objects under errorCode key.
  */
 function drawErrorBlock(errors) {
     $('#error-block').append('<strong>Errors and Troubleshooting</strong><hr>');

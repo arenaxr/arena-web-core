@@ -499,10 +499,9 @@ export class ARENAChat {
 
     conferenceErrorCallback = (e) => {
         // display error to user
-        this.displayAlert(e.detail.errorCode, 5000, 'error');
-        // TODO: place error in a list of self-tests/errors
-        // errorCode: 'connection.connectionFailed'
-        // errorCode: 'conference.iceFailed'
+        const errorCode = e.detail.errorCode;
+        const err = ARENA.health.getErrorDetails(errorCode);
+        this.displayAlert(err.title, 5000, 'error');
     };
 
     /**

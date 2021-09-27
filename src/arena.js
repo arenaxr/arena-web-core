@@ -7,13 +7,13 @@
  */
 import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
-import {ARENAHealth} from './health/';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAChat} from './chat/';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
+import {ARENAHealth} from './health/';
 import Swal from 'sweetalert2';
 
 /* global ARENA */
@@ -80,8 +80,6 @@ export class Arena {
         });
 
         this.health = new ARENAHealth();
-        this.health.addError('conference.iceFailed');
-        this.health.addError('connection.connectionFailed');
     }
 
     /**
