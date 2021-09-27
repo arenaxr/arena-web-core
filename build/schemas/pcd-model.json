@@ -72,7 +72,7 @@
                     "required": [
                         "object_type",
                         "url",
-                        "pointSize"
+                        "pointSize",
                         "position",
                         "rotation",
                         "scale"

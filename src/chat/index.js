@@ -369,6 +369,7 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, this.dominantSpeakerCallback);
         ARENA.events.on(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.talkWhileMutedCallback);
         ARENA.events.on(ARENAEventEmitter.events.NOISY_MIC, this.noisyMicCallback);
+        ARENA.events.on(ARENAEventEmitter.events.CONFERENCE_ERROR, this.conferenceErrorCallback);
         ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS, this.jitsiStatsCallback);
     }
 
@@ -495,6 +496,13 @@ export class ARENAChat {
      */
     noisyMicCallback = (e) => {
         this.displayAlert(`Your microphone appears to be noisy.`, 2000, 'warning');
+    };
+
+    conferenceErrorCallback = (e) => {
+        // display error to user
+        const errorCode = e.detail.errorCode;
+        const err = ARENA.health.getErrorDetails(errorCode);
+        this.displayAlert(err.title, 5000, 'error');
     };
 
     /**
@@ -692,7 +700,8 @@ export class ARENAChat {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
-                this.displayAlert(`You have been asked to leave in 5 seconds by ${msg.from_un}.`, 5000, 'warning');
+                const warn = `You have been asked to leave in 5 seconds by ${msg.from_un}.`;
+                this.displayAlert(warn, 5000, 'warning');
                 setTimeout(() => {
                     signOut();
                 }, 5000);
@@ -929,6 +938,9 @@ export class ARENAChat {
                                     if (result.isConfirmed) {
                                         _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
                                         _this.ctrlMsg(user.uid, 'logout');
+                                        // kick jitsi channel directly as well
+                                        const warn = `You have been asked to leave by ${_this.settings.username}.`;
+                                        ARENA.Jitsi.kickout(user.uid, warn);
                                     }
                                 });
                         };

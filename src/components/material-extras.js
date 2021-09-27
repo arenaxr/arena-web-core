@@ -1,6 +1,8 @@
 /* eslint-disable max-len */
 /* global AFRAME */
 
+import {ARENAUtils} from '../utils.js';
+
 /**
  * @fileoverview Material extras component.
  *
@@ -77,11 +79,13 @@ AFRAME.registerComponent('material-extras', {
     },
     loadTexture(src) {
         this.loader.load(
-            this.data.overrideSrc,
+            ARENAUtils.crossOriginDropboxSrc(src),
             // onLoad callback
             (texture) => {
                 this.texture = texture;
                 this.doUpdate = true;
+                this.texture.encoding = THREE[this.data.encoding];
+                this.texture.flipY = false;
                 this.update();
             },
             // onProgress callback currently not supported
@@ -100,8 +104,6 @@ AFRAME.registerComponent('material-extras', {
             mesh.traverse((node) => {
                 if (node.isMesh) {
                     if (node.material.map) {
-                        texture.encoding = THREE[this.data.encoding];
-                        texture.flipY = false;
                         node.material.map = this.texture;
                         mesh.material.needsUpdate = true;
                     }

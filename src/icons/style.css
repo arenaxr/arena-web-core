@@ -25,8 +25,6 @@
     padding: 5px 5px 0;
 }
 
-
-
 .flipVideo {
     position: absolute;
     top: 15px;
@@ -109,4 +107,41 @@
     font-size: small;
     background-color: #0008;
     color: #fff;
+}
+
+/* Health-check system */
+.error-icon {
+    position: absolute;
+    display: none;
+    top: 40px;
+    left: 15px;
+    width: 20px;
+    z-index: 99999;
+}
+
+.error-icon .error-block {
+    visibility: hidden;
+    width: 275px;
+    background-color: #0008;
+    color: #fff;
+    text-align: left;
+    border-radius: 6px;
+    padding: 10px;
+    font-size: small;
+    top: -5px;
+    left: 105%;
+    position: absolute;
+    z-index: 99999;
+}
+
+.error-icon:hover .error-block {
+    visibility: visible;
+}
+
+.health-error-label {
+    color: red;
+}
+
+.health-warning-label {
+    color: orange;
 }

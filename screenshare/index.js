@@ -40,7 +40,7 @@ function onLocalTracks(tracks) {
         localTracks[i].addEventListener(
             JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED,
             () => {
-                console.log('local track stoped');
+                console.log('local track stopped');
                 window.close();
             });
         localTracks[i].addEventListener(

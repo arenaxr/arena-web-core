@@ -1,0 +1,11 @@
+[{
+    "errorCode": "connection.connectionFailed",
+    "class": "health-error-label",
+    "title": "Conference server connection failed",
+    "helpLink": "https://arena.conix.io/content/troubleshooting.html#error-conference-server-connection-failed"
+}, {
+    "errorCode": "conference.iceFailed",
+    "class": "health-error-label",
+    "title": "Conference stream failed",
+    "helpLink": "https://arena.conix.io/content/troubleshooting.html#error-conference-stream-failed"
+}]

@@ -365,7 +365,14 @@
                 "title":"Maximum Audio/Video Cut Off Distance",
                 "description":"Maximum distance between cameras/users until audio and video are cut off. For saving bandwidth on scenes with large amounts of user activity at once",
                 "default":20
-             }
+             },
+             "navMesh":{
+                "type":"string",
+                "title":"Nav. Mesh",
+                "description":"Navigation Mesh URL",
+                "minLength":5,
+                "default":""
+             }             
           },
           "required":[
              "maxAVDist",

@@ -10,6 +10,7 @@
 import $ from 'jquery';
 import Swal from 'sweetalert2';
 import {ARENAEventEmitter} from './event-emitter.js';
+import {SideMenu} from './icons/index.js';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {
@@ -61,18 +62,18 @@ export class ARENAJitsi {
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
             p2p: {
-                enabled: false
+                enabled: false,
             },
             constraints: {
                 video: {
                     height: {
                         ideal: 1080,
                         max: 2160,
-                        min: 240
-                    }
-                }
+                        min: 240,
+                    },
+                },
             },
-            //enableLayerSuspension: true,
+            // enableLayerSuspension: true,
         };
 
         this.initOptions = {
@@ -145,8 +146,8 @@ export class ARENAJitsi {
     /**
      * Handles local tracks.
      * @param {[]} tracks Array with JitsiTrack objects
-     */
-    onLocalTracks(tracks) {
+      */
+    async onLocalTracks(tracks) {
         this.localTracks = tracks;
 
         for (let i = 0; i < this.localTracks.length; i++) {
@@ -166,19 +167,31 @@ export class ARENAJitsi {
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
+                if (this.jitsiVideoTrack) {
+                    const oldTrack = this.jitsiVideoTrack;
+                    await oldTrack.detach($(`#cornerVideo`)[0]);
+                    await this.conference.replaceTrack(oldTrack, track);
+                    await oldTrack.dispose();
+                }
                 track.attach($(`#cornerVideo`)[0]);
                 this.jitsiVideoTrack = track;
             } else if (track.getType() === 'audio') {
+                if (this.jitsiAudioTrack) {
+                    const oldTrack = this.jitsiAudioTrack;
+                    await this.conference.replaceTrack(oldTrack, track);
+                    await oldTrack.dispose();
+                }
                 this.jitsiAudioTrack = track;
             }
             if (this.ready) {
                 // mobile only?
+                track.mute();
                 this.conference.addTrack(track);
                 this.connectArena(this.conference.myUserId(), track.getType());
             }
         }
-        if (this.jitsiAudioTrack) this.jitsiAudioTrack.mute();
-        if (this.jitsiVideoTrack) this.jitsiVideoTrack.mute();
+        if (this.prevVideoUnmuted) SideMenu.clickButton(SideMenu.buttons.VIDEO);
+        if (this.prevAudioUnmuted) SideMenu.clickButton(SideMenu.buttons.AUDIO);
     }
 
     /**
@@ -455,6 +468,7 @@ export class ARENAJitsi {
      * This function is called when connection is established successfully
      */
     onConnectionSuccess() {
+        console.log('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.arenaConferenceName, this.confOptions);
 
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
@@ -482,6 +496,8 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
             console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
         );
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
                 id: ARENA.idTag,
@@ -546,13 +562,27 @@ export class ARENAJitsi {
                 this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
+        ARENA.health.removeError('connection.connectionFailed');
+    }
+
+    onConferenceError(err) {
+        console.error(`Conference error ${err}!`);
+        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+            errorCode: err
+        });
+        ARENA.health.addError(err);
     }
 
     /**
      * This function is called when the this.connection fails.
      */
     onConnectionFailed() {
-        console.error('Connection Failed!');
+        const err ='connection.connectionFailed';
+        console.error('Conference server connection failed!');
+        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+            errorCode: err
+        });
+        ARENA.health.addError(err);
     }
 
     /**
@@ -567,7 +597,7 @@ export class ARENAJitsi {
      * This function is called when we disconnect.
      */
     disconnect() {
-        console.log('disconnected!');
+        console.warning('Conference server disconnected!');
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
@@ -588,11 +618,7 @@ export class ARENAJitsi {
      * Connect audio and video and start sending local tracks
      * @return {promise}
      */
-    async avConnect(reset= false) {
-        if (this.avConnected && !reset) {
-            return;
-        }
-
+    async avConnect() {
         const prefAudioInput = localStorage.getItem('prefAudioInput');
         const prefVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
@@ -638,18 +664,9 @@ export class ARENAJitsi {
         }
         this.avConnected = true;
 
-        if (reset && this.conference) {
-            for (const track of this.conference.getLocalTracks()) {
-                if (track.getType() === 'video') {
-                    // use already defined e.g. <video id="cornerVideo" ...>
-                    await track.detach($(`#cornerVideo`)[0]);
-                }
-                await track.dispose();
-            }
-        }
         JitsiMeetJS.createLocalTracks({devices, ...deviceOpts}).
-            then((tracks) => {
-                this.onLocalTracks(tracks);
+            then(async (tracks) => {
+                await this.onLocalTracks(tracks);
                 if (this.withVideo) setupCornerVideo.bind(this)();
             }).
             catch((err) => {
@@ -788,6 +805,12 @@ export class ARENAJitsi {
             return this.remoteTracks[jitsiId][1];
         } else {
             return null;
+        }
+    }
+
+    kickout(participantJitsiId, msg) {
+        if (this.conference) {
+            this.conference.kickParticipant(participantJitsiId, msg);
         }
     }
 
