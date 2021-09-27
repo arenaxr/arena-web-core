@@ -687,7 +687,8 @@ export class ARENAChat {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
-                this.displayAlert(`You have been asked to leave in 5 seconds by ${msg.from_un}.`, 5000, 'warning');
+                const warn = `You have been asked to leave in 5 seconds by ${msg.from_un}.`;
+                this.displayAlert(warn, 5000, 'warning');
                 setTimeout(() => {
                     signOut();
                 }, 5000);
@@ -915,6 +916,9 @@ export class ARENAChat {
                                     if (result.isConfirmed) {
                                         _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
                                         _this.ctrlMsg(user.uid, 'logout');
+                                        // kick jitsi channel directly as well
+                                        const warn = `You have been asked to leave by ${_this.settings.username}.`;
+                                        ARENA.Jitsi.kickout(user.uid, warn);
                                     }
                                 });
                         };

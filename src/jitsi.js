@@ -795,6 +795,12 @@ export class ARENAJitsi {
         }
     }
 
+    kickout(participantJitsiId, msg) {
+        if (this.conference) {
+            this.conference.kickParticipant(participantJitsiId, msg);
+        }
+    }
+
     leave() {
         this.unload();
         this.disconnect();
