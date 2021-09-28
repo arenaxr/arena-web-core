@@ -35,6 +35,8 @@ export class Arena {
      * Constructor; init arena properties
      */
     constructor() {
+        // load system health monitor
+        this.health = new ARENAHealth();
         // replace console with our logging (only when not in dev)
         if (!ARENADefaults.devInstance) {
             // will queue messages until MQTT connection is available (indicated by console.setOptions())
@@ -78,8 +80,6 @@ export class Arena {
             const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
             this.showEchoDisplayName(speaker);
         });
-
-        this.health = new ARENAHealth();
     }
 
     /**
