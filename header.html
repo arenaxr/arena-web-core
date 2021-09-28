@@ -1,70 +1,104 @@
-<!-- arena-core header for non-3d scene pages -->
 <style>
-    /* Allow space for navbar  */
-    body {
-        padding-top: 60px;
-        line-height: unset;
+    @media only screen and (min-width: 850px) {
+        .navbar-brand {
+            margin-right: 10%;
+        }
     }
 
-    /* Navbar styles need to disinherit from list.css */
-    #header ul li {
-        cursor: unset;
-        position: unset;
-        padding: unset;
-        list-style-type: unset;
-        background: unset;
-        font-size: unset;
-        transition: unset;
-        -webkit-user-select: unset;
-        -moz-user-select: unset;
-        -ms-user-select: unset;
-        user-select: unset;
+    .navbar-brand img {
+        max-height: 16px;
+    }
+    body {
+        padding-top: 60px;
+    }
+
+    /* fix padding under menu after resize */
+    @media screen and (max-width: 767px) {
+        body {
+            padding-top: 60px;
+        }
+    }
+
+    @media screen and (min-width:768px) and (max-width: 991px) {
+        body {
+            padding-top: 110px;
+        }
+    }
+
+    @media screen and (min-width: 992px) {
+        body {
+            padding-top: 60px;
+        }
     }
 </style>
 
-<!-- Bootstrap 2.3.2 styled header -->
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="navbar-inner">
-        <div class="container-fluid">
-            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="brand" href="/"><b>ARENA</b></a>
-            <div class="nav-collapse collapse">
-                <ul class="nav">
-                    <li class="nav-item">
-                        <a href="/user/scenes">Scenes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/build">Builder</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/arts">Runtime</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/network">Network</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="/files">File Store</a>
-                    </li>
-                    <li class="nav-item">
-                        <!--https://atlas.conix.io-->
-                        <a class="coming-soon" href="/">ATLAS</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="https://arena.conix.io">Documentation</a>
-                    </li>
-                </ul>
-                <ul class="nav pull-right">
-                    <li class="dropdown">
-                        <a href="#" id="auth-dropdown"></a>
-                    </li>
-                </ul>
-            </div>
-            <!--/.nav-collapse -->
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <!-- Container wrapper -->
+    <div class="container-fluid">
+        <!-- Navbar brand -->
+        <a class="navbar-brand" href="/">
+            <img alt="arena logo" src="static/images/arena-logo-white.png">
+        </a>
+
+        <!-- Toggle button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Collapsible wrapper -->
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <!-- Left links -->
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/user/scenes">Scenes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/build">Builder</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/arts">Runtime</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/network">Network</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/files">File Store</a>
+                </li>
+                <li class="nav-item">
+                    <!--https://atlas.conix.io-->
+                    <a class="nav-link coming-soon" href="/">ATLAS</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://arena.conix.io">Documentation</a>
+                </li>
+            </ul>
+            <!-- Left links -->
+
+            <!-- Navbar dropdown -->
+            <ul class="navbar-nav ml-auto">
+
+                <!-- Dropdown menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="auth-dropdown" role="button"> </a>
+                    <ul class="dropdown-menu" aria-labelledby="auth-dropdown">
+                        <li><a class="dropdown-item" href="/user/profile">Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/user/logout">Logout</a></li>
+                    </ul>
+                </li>
+
+            </ul>
+
         </div>
+        <!-- Collapsible wrapper -->
+    </div>
+    <!-- Container wrapper -->
+</nav>
+<!-- Navbar -->
+<div class="page-header">
+    <div class="clearfix">
     </div>
 </div>
 

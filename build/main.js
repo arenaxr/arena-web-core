@@ -31,14 +31,14 @@ window.addEventListener('onauth', async function (e) {
     var sceneinput = document.getElementById("sceneinput");
     var namespaceinput = document.getElementById("namespaceinput");
     var scenelist = document.getElementById("scenelist");
-    var namespacelist = document.getElementById("namespacelist");    
+    var namespacelist = document.getElementById("namespacelist");
     var sceneUrl = document.getElementById("scene_url");
     var scenePermsUrl = document.getElementById("scene_perms_url");
     var objFilter = document.getElementById("objfilter");
     var objFilterSel = document.getElementById("objfiltersel");
     var arenaHostLbl = document.getElementById("arenahost");
     var sceneLinks = document.getElementById("scenelinks");
-    
+
     // Buttons/s
     var openAddSceneButton = document.getElementById("openaddscene");
     var deleteSceneButton = document.getElementById("deletescene");
@@ -61,7 +61,7 @@ window.addEventListener('onauth', async function (e) {
     var saved_scene;
 
     // add page header
-    $("#header").load("../header.html");
+    $("#header").load("../header-old.html");
 
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
@@ -94,7 +94,7 @@ window.addEventListener('onauth', async function (e) {
         if (sceneinput.disabled == true) {
             sceneLinks.style = 'display:none';
             return;
-        } else sceneLinks.style = 'display:block';       
+        } else sceneLinks.style = 'display:block';
         let dp = getDevPath();
         let permsp = 'user/profile/scenes/';
         sceneUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespaceinput.value}/${sceneinput.value}`;
@@ -102,7 +102,7 @@ window.addEventListener('onauth', async function (e) {
     };
 
     var updateUrl = function() {
-        if (sceneinput.disabled == true) return;        
+        if (sceneinput.disabled == true) return;
         let newUrl = new URL(window.location.href);
         newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
         window.history.pushState({ path: newUrl.href }, '', newUrl.href);
@@ -248,15 +248,15 @@ window.addEventListener('onauth', async function (e) {
                 var savedModalNs;
                 modalNsInput.addEventListener('change', () => {
                     savedModalNs = modalNsInput.value;
-                });                
+                });
                 modalNsInput.addEventListener('focus', () => {
                     savedModalNs = modalNsInput.value;
                     modalNsInput.value = "";
-                });                
+                });
                 modalNsInput.addEventListener('focusout', () => {
                     if (savedModalNs && savedModalNs.length > 0) modalNsInput.value = savedModalNs;
                     if (modalNsInput && modalNsInput.value.length == 0 && modalNsList && modalNsList.options[0]) modalNsInput.value = modalNsList.options[0].value;
-                });                
+                });
               },
             preConfirm: () => {
               const ns = Swal.getPopup().querySelector('#modalnamespaceinput').value;
@@ -368,7 +368,7 @@ window.addEventListener('onauth', async function (e) {
                             timer: 8000,
                         });
                         return;
-                    } 
+                    }
                     return response.json();
                 })
                 .then((importObjs) => {
@@ -379,7 +379,7 @@ window.addEventListener('onauth', async function (e) {
                             title: 'New scene not requested.',
                             html: `Must import into an existing scene.`,
                             timer: 8000,
-                        });                        
+                        });
                         return;
                     }
                     let scene = `${namespaceinput.value}/${sceneinput.value}`;
@@ -482,13 +482,13 @@ window.addEventListener('onauth', async function (e) {
     // Focus listener for namespace
     namespaceinput.addEventListener("focus", async function() {
         saved_namespace = namespaceinput.value;
-        namespaceinput.value = "";        
-    });    
+        namespaceinput.value = "";
+    });
 
     // Focus out listener for namespace
     namespaceinput.addEventListener("focusout", async function() {
         if (saved_namespace && saved_namespace.length > 0) namespaceinput.value = saved_namespace;
-        if (saved_namespace && saved_namespace.length == 0 && namespacelist && namespacelist.options[0]) namespaceinput.value = namespacelist.options[0].value;        
+        if (saved_namespace && saved_namespace.length == 0 && namespacelist && namespacelist.options[0]) namespaceinput.value = namespacelist.options[0].value;
     });
 
     // Change listener for scene list
@@ -519,13 +519,13 @@ window.addEventListener('onauth', async function (e) {
     // Focus listener for scene
     sceneinput.addEventListener("focus", async function() {
         saved_scene = sceneinput.value;
-        sceneinput.value = "";        
-    });    
+        sceneinput.value = "";
+    });
 
     // Focus out listener for scene
     sceneinput.addEventListener("focusout", async function() {
         if (saved_scene && saved_scene.length > 0) sceneinput.value = saved_scene;
-        if (saved_scene && saved_scene.length == 0 && scenelist && scenelist.options[0]) sceneinput.value = scenelist.options[0].value;        
+        if (saved_scene && saved_scene.length == 0 && scenelist && scenelist.options[0]) sceneinput.value = scenelist.options[0].value;
     });
 
     // Change listener for object id filter regex
@@ -607,7 +607,7 @@ window.addEventListener('onauth', async function (e) {
             });
           })
     });
-    
+
     async function setAllTypes(showHide) {
         for (const [key, value] of Object.entries(objTypeFilter)) {
             objTypeFilter[key] = showHide; // true = show
@@ -663,7 +663,7 @@ window.addEventListener('onauth', async function (e) {
     document.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) addObjHandler();
     });
-    */    
+    */
 
     /**
      * Load defaults, setup initial state of the page
@@ -743,7 +743,7 @@ window.addEventListener('onauth', async function (e) {
     // load namespace and scene values
     let result = await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
     if (!result) return;
-    
+
     namespaceinput.value = username; // default to user namespace
 
     // load namespace from defaults or local storage, if they exist; prefer url parameter, if given

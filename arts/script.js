@@ -13,10 +13,10 @@ topic['stdin'] = topic['dbg'] + '/stdin';
 
 let pendingUuid = '';
 
-let stdout = [];
-let rtdbg = [];
-let deletedModules = [];
-let errorRts = [];
+const stdout = [];
+const rtdbg = [];
+const deletedModules = [];
+const errorRts = [];
 
 let statusBox;
 let stdoutBox;
@@ -126,7 +126,7 @@ window.addEventListener('onauth', async function(e) {
     });
 
     // add page header
-    $('#header').load('../header.html');
+    $('#header').load('../header-old.html');
 
     // activate modules tab
     openTab({currentTarget: document.getElementById('_modules')}, 'modules');
@@ -368,12 +368,12 @@ function displayTree(treeData) {
             })
             .style('fill', function(d) {
                 if (d.data.type === 'runtime') {
-                    let eRt = errorRts.filter(rt => rt.uuid === d.data.uuid);
+                    const eRt = errorRts.filter((rt) => rt.uuid === d.data.uuid);
                     if (eRt.length > 0) return '#c94324';
                     return '#fff';
                 }
                 if (d.data.type === 'module') {
-                    if (d.data.deleted) return  'gray';
+                    if (d.data.deleted) return 'gray';
                     return 'lightsteelblue';
                 }
                 return 'steelblue';
@@ -381,7 +381,7 @@ function displayTree(treeData) {
             .style('stroke', function(d) {
                 if (d.data.type === 'runtime') return 'blue';
                 if (d.data.type === 'module') {
-                    if (d.data.deleted) return  'darkgray';
+                    if (d.data.deleted) return 'darkgray';
                     return 'blue';
                 }
                 return 'steelblue';
@@ -590,7 +590,7 @@ function onConnectionLost(responseObject) {
 
 // Called when a message arrives
 function onMessageArrived(message) {
-    //console.info('Received: ', message.payloadString, '[', message.destinationName, ']');
+    // console.info('Received: ', message.payloadString, '[', message.destinationName, ']');
 
     if (message.destinationName.startsWith(topic['stdout'])) {
         try {
@@ -621,7 +621,7 @@ function onMessageArrived(message) {
         }
         if (msgReq.type == 'arts_req') {
             if (msgReq.action == 'delete') {
-                console.log("HERE", msgReq);
+                console.log('HERE', msgReq);
                 try {
                     // save deleted module
                     if (deletedModules[msgReq.data.parent.uuid] == undefined) {
@@ -641,7 +641,7 @@ function onMessageArrived(message) {
     }
 
     if (message.destinationName.startsWith(topic['dbg'])) {
-        let rtUuid = message.destinationName.replace(`${topic['dbg']}/`, '');
+        const rtUuid = message.destinationName.replace(`${topic['dbg']}/`, '');
         rtDbgMsg(rtUuid, message.payloadString);
         if (message.payloadString.startsWith('ERROR:')) {
             errorRts.push({uuid: rtUuid});
@@ -904,7 +904,6 @@ function moduleSelected(modData) {
         }
         moduleLabel.innerText = 'Stdout for module \'' + selectedMod.name + '\' (' + selectedMod.uuid + ')' + ' :';
     }
-
 }
 
 function runtimeSelected(rtData) {
@@ -925,5 +924,4 @@ function runtimeSelected(rtData) {
             rtDebugBox.scrollTop = rtDebugBox.scrollHeight;
         }
     }
-
 }

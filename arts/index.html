@@ -4,7 +4,7 @@
 <head>
     <meta charset=utf-8 />
     <meta name="viewport"
-        content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+          content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
     <title>CONIX Visualization Demo</title>
 
     <!-- Navbar Header -->
@@ -24,136 +24,136 @@
 </head>
 
 <body>
-    <div id="header"></div>
-    <div id="arts-container">
-        <div id="panel" class="panel"></div>
-        <div id="config" class="config">
-            <div id="config-top" class="config-top">
-                <div class="preamble">
-                    Runtime Visualization/Control
-                </div>
+<div id="header"></div>
+<div id="arts-container">
+    <div id="panel" class="panel"></div>
+    <div id="config" class="config">
+        <div id="config-top" class="config-top">
+            <div class="preamble">
+                Runtime Visualization/Control
+            </div>
 
-                <div class="tab">
-                    <button id="_modules" class="tablinks active">Modules</button>
-                    <button id="_runtimes" class="tablinks">Runtimes</button>
-                    <button id="_misc" class="tablinks">Misc/Demos</button>
-                </div>
-                <div id="modules" class="tabcontent">
+            <div class="tab">
+                <button id="_modules" class="tablinks active">Modules</button>
+                <button id="_runtimes" class="tablinks">Runtimes</button>
+                <button id="_misc" class="tablinks">Misc/Demos</button>
+            </div>
+            <div id="modules" class="tabcontent">
 
-                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_create_mod' title="Press to toggle visibility of the section"><i
+                <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_create_mod' title="Press to toggle visibility of the section"><i
                         class="fas fa-angle-down fa-lg" id='create_mod_icon'></i>&nbspCreate Module</a><p/>
-                        <div id="create_mod">
-                        <table>
-                            <tr>
-                                <td>Name:</td>
-                                <td><input type="text" id="mname" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Filename:</td>
-                                <td><input type="text" id="filename" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Fileid:</td>
-                                <td><input type="text" id="fileid" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Filetype:</td>
-                                <td><input type="text" id="filetype" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Args:</td>
-                                <td><input type="text" id="args" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Env:</td>
-                                <td><input type="text" id="env" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Channels:</td>
-                                <td><input type="text" id="channels" value=""></td>
-                            </tr>
-                            <tr>
-                                <td>Runtime:</td>
-                                <td><select class="small" id="runtime_select"></select></td>
-                            </tr>
-                        </table>
-                        <button id="create_module_btn">Create</button>
-                        <br /><br />
-                        Fill form above from examples:<p/> <select id="file_select">
-                        </select>
+                <div id="create_mod">
+                    <table>
+                        <tr>
+                            <td>Name:</td>
+                            <td><input type="text" id="mname" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Filename:</td>
+                            <td><input type="text" id="filename" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Fileid:</td>
+                            <td><input type="text" id="fileid" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Filetype:</td>
+                            <td><input type="text" id="filetype" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Args:</td>
+                            <td><input type="text" id="args" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Env:</td>
+                            <td><input type="text" id="env" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Channels:</td>
+                            <td><input type="text" id="channels" value=""></td>
+                        </tr>
+                        <tr>
+                            <td>Runtime:</td>
+                            <td><select class="small" id="runtime_select"></select></td>
+                        </tr>
+                    </table>
+                    <button id="create_module_btn">Create</button>
+                    <br /><br />
+                    Fill form above from examples:<p/> <select id="file_select">
+                </select>
 
-                    </div>
-                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_migrate_mod' title="Press to toggle visibility of the section"><i
+                </div>
+                <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_migrate_mod' title="Press to toggle visibility of the section"><i
                         class="fas fa-angle-down fa-lg" id='migrate_mod_icon'></i>&nbspDelete/Migrate Module</a><p/>
-                    <div id="migrate_mod">
-                        Module:<select class="small" id="module_select"></select><br />
-                        Migrate to:<select class="small" id="sendto_runtime_select"></select>
-                        <button id="delete_module_btn">Delete/Migrate</button>
-                        <br /><br />
-                    </div>
-                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_stdout_mod' title="Press to toggle visibility of the section"><i
+                <div id="migrate_mod">
+                    Module:<select class="small" id="module_select"></select><br />
+                    Migrate to:<select class="small" id="sendto_runtime_select"></select>
+                    <button id="delete_module_btn">Delete/Migrate</button>
+                    <br /><br />
+                </div>
+                <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_stdout_mod' title="Press to toggle visibility of the section"><i
                         class="fas fa-angle-up fa-lg" id='stdout_mod_icon'></i>&nbspModule Stdout/Stdin</a><p/>
-                    <div id="stdout_mod" style='display: block'>
-                            <p class="small" id='module_label'>(Select module by clicking on it on the tree) <p />
-                            <textarea id="stdout_box" rows="20" cols="30"></textarea>
-                            <p/>
-                            <input type="text" id="stdin_input" placeholder="send to stdin"> <button id="stdin_snd_btn" style="margin-bottom:10px">Send</button></td>
-                    </div>
-                </div>
-
-                <div id="runtimes" class="tabcontent">
-                    <p class="label">Delete Runtime</p>
-                    Runtime:<select class="small" id="del_runtime_select"></select>
-                    <button id="delete_rt_btn" class="button">Delete</button>
-                    <p />
-                    Delete the runtime from ARTS database; does not terminate the runtime itself
+                <div id="stdout_mod" style='display: block'>
+                    <p class="small" id='module_label'>(Select module by clicking on it on the tree) <p />
+                    <textarea id="stdout_box" rows="20" cols="30"></textarea>
                     <p/>
-                    <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_dbg_rt' title="Press to toggle visibility of the section"><i
-                        class="fas fa-angle-up fa-lg" id='dbg_rt_icon'></i>&nbspRuntime Messages</a><p/>
-                    <div id="dbg_rt" style='display: block'>
-                            <p class="small" id='module_label'>(Select runtime by clicking on it on the tree) <p />
-                            <textarea id="dbg_rt_box" rows="50" cols="30"></textarea>
-                            <p/>
-                    </div>
+                    <input type="text" id="stdin_input" placeholder="send to stdin"> <button id="stdin_snd_btn" style="margin-bottom:10px">Send</button></td>
                 </div>
+            </div>
 
-                <div id="misc" class="tabcontent">
-                    <p class="label">MQTT</p>
-                    <p style="display:inline">Connect String:
+            <div id="runtimes" class="tabcontent">
+                <p class="label">Delete Runtime</p>
+                Runtime:<select class="small" id="del_runtime_select"></select>
+                <button id="delete_rt_btn" class="button">Delete</button>
+                <p />
+                Delete the runtime from ARTS database; does not terminate the runtime itself
+                <p/>
+                <a class="btn btn-sm btn-dark btn-block btn-section" href="#" id='_dbg_rt' title="Press to toggle visibility of the section"><i
+                        class="fas fa-angle-up fa-lg" id='dbg_rt_icon'></i>&nbspRuntime Messages</a><p/>
+                <div id="dbg_rt" style='display: block'>
+                    <p class="small" id='module_label'>(Select runtime by clicking on it on the tree) <p />
+                    <textarea id="dbg_rt_box" rows="50" cols="30"></textarea>
+                    <p/>
+                </div>
+            </div>
+
+            <div id="misc" class="tabcontent">
+                <p class="label">MQTT</p>
+                <p style="display:inline">Connect String:
                     <input type="text" size=27 id="mqtt_conn_str" value="wss://arenaxr.org/mqtt"> <button id="reconnect_btn" style="margin-bottom:10px">Connect</button>
 
-                    <p class="label">Force Tree Refresh</p>
-                    <button id="load_tree_data" class="button">Force Refresh</button>
-                    <p />
+                <p class="label">Force Tree Refresh</p>
+                <button id="load_tree_data" class="button">Force Refresh</button>
+                <p />
 
-                    <p class="label">Demos</p>
-                    <ul>
-                        <li /><span class="small"><button id="demo_migrate_mod_btn" class="button">Migrate
+                <p class="label">Demos</p>
+                <ul>
+                    <li /><span class="small"><button id="demo_migrate_mod_btn" class="button">Migrate
                                 Counter</button>
                             <p />Start cwlib_example.wasm (program that outputs a counter value). After 5 seconds,
                             migrate
                             to a random runtime. </span>
 
-                    </ul>
-                </div>
-
-            </div>
-
-            <div class="status" style="display: none">
-                <textarea id="status_box" rows="10" cols="50"></textarea>
+                </ul>
             </div>
 
         </div>
 
+        <div class="status" style="display: none">
+            <textarea id="status_box" rows="10" cols="50"></textarea>
+        </div>
+
     </div>
 
-    <!-- demo src-->
-    <script src="script.js"></script>
+</div>
 
-    <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-    <script src="../static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
-    <script src="../conf/defaults.js"></script>
-    <script src="../src/auth.js"></script>
+<!-- demo src-->
+<script src="script.js"></script>
+
+<!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
+<script src="../static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+<script src="../conf/defaults.js"></script>
+<script src="../src/auth.js"></script>
 </body>
 
 </html>
