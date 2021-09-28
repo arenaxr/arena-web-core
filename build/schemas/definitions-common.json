@@ -226,6 +226,11 @@
         "title": "Goto URL",
         "type": "object"
       },
+      "hide-in-ar-mode": { 
+        "description": "Hide object when entering AR",
+        "title": "Hide in AR",
+        "type": "boolean"
+      },
       "impulse": {
         "description": "The force applied using physics. Requires click-listener",
         "properties": {
