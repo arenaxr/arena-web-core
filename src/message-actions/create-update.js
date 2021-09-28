@@ -301,8 +301,11 @@ export class CreateUpdate {
      */
     static setComponentAttributes(entityEl, data, cName) {
         if (!AFRAME.components[cName]) return; // no component registered with this name
-        for (const [attribute, value] of Object.entries(data)) {
+        for (let [attribute, value] of Object.entries(data)) {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
+                // replace dropbox links in any 'src' or 'url' attributes
+                if (attribute == 'src' || attribute == 'url') value = ARENAUtils.crossOriginDropboxSrc(value);
+                // set the attribute
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(cName);
                 } else {
@@ -349,12 +352,14 @@ export class CreateUpdate {
                 entityEl.setAttribute('ttl', {seconds: value});
                 break;
             case 'src':
-                // replace dropbox links in any 'src' attributes that get here
-                entityEl.setAttribute('src', ARENAUtils.crossOriginDropboxSrc(value));
-                return;
+            case 'url':
+                // replace dropbox links in any 'src' or 'url' attributes that get here
+                entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
+                break;
             default:
-                // replace dropbox links in any src attribute inside value
+                // replace dropbox links in any src or url attribute inside value
                 if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
+                else if (value.hasOwnProperty('url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                 // all other attributes are pushed directly to aframe
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(attribute);
