@@ -238,6 +238,14 @@ export class Arena {
      * loads this user's presence and camera
      */
     loadUser() {
+        // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
+        if (!AFRAME || !AFRAME.scenes[0] || !AFRAME.scenes[0].systems) {
+            if (this.health) {
+                this.health.addError('slow.network');
+                return;
+            }
+        }
+
         const systems = AFRAME.scenes[0].systems;
         let color = Math.floor(Math.random() * 16777215).toString(16);
         if (color.length < 6) color = '0' + color;
@@ -295,6 +303,11 @@ export class Arena {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
         SideMenu.setupIcons();
+
+        // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
+        if (this.health) {
+            this.health.removeError('slow.network');
+        }
     }
 
     /**
