@@ -78,7 +78,7 @@ export class CreateUpdate {
             entityEl.object3D.renderOrder = RENDER_ORDER;
 
             // handle attributes of object
-            addObj = addObj && this.setObjectAttributes(entityEl, message);
+            if (!this.setObjectAttributes(entityEl, message)) return;
 
             // add object to the scene after setting all attributes
             if (addObj) {
@@ -171,7 +171,7 @@ export class CreateUpdate {
             if (ARENA.armode && data.hasOwnProperty('hide-on-enter-ar')) {
                 console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
-            }
+            }            
             // support both url and src property
             if (data.hasOwnProperty('url')) {
                 data.src = data.url; // make src=url
@@ -306,11 +306,8 @@ export class CreateUpdate {
      */
     static setComponentAttributes(entityEl, data, cName) {
         if (!AFRAME.components[cName]) return; // no component registered with this name
-        for (let [attribute, value] of Object.entries(data)) {
+        for (const [attribute, value] of Object.entries(data)) {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
-                // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute == 'src' || attribute == 'url') value = ARENAUtils.crossOriginDropboxSrc(value);
-                // set the attribute
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(cName);
                 } else {
@@ -328,7 +325,6 @@ export class CreateUpdate {
      * @param {object} data data part of the message with the attributes
      */
     static setEntityAttributes(entityEl, data) {
-        //console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
         for (const [attribute, value] of Object.entries(data)) {
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
@@ -358,14 +354,12 @@ export class CreateUpdate {
                 entityEl.setAttribute('ttl', {seconds: value});
                 break;
             case 'src':
-            case 'url':
-                // replace dropbox links in any 'src' or 'url' attributes that get here
-                entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
-                break;
+                // replace dropbox links in any 'src' attributes that get here
+                entityEl.setAttribute('src', ARENAUtils.crossOriginDropboxSrc(value));
+                return;
             default:
-                // replace dropbox links in any src or url attribute inside value
+                // replace dropbox links in any src attribute inside value
                 if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
-                else if (value.hasOwnProperty('url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                 // all other attributes are pushed directly to aframe
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(attribute);
