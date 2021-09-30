@@ -78,7 +78,7 @@ export class CreateUpdate {
             entityEl.object3D.renderOrder = RENDER_ORDER;
 
             // handle attributes of object
-            this.setObjectAttributes(entityEl, message);
+            addObj = addObj && this.setObjectAttributes(entityEl, message);
 
             // add object to the scene after setting all attributes
             if (addObj) {
@@ -168,6 +168,10 @@ export class CreateUpdate {
             }
             break;
         case 'gltf-model':
+            if (ARENA.armode && data.hasOwnProperty('hide-on-enter-ar')) {
+                console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
+                return false; // do not add this object
+            }
             // support both url and src property
             if (data.hasOwnProperty('url')) {
                 data.src = data.url; // make src=url
@@ -274,6 +278,7 @@ export class CreateUpdate {
                 entityEl.setAttribute('click-listener', '');
             }
         }
+        return true;
     }
 
     /**
@@ -323,6 +328,7 @@ export class CreateUpdate {
      * @param {object} data data part of the message with the attributes
      */
     static setEntityAttributes(entityEl, data) {
+        //console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
         for (const [attribute, value] of Object.entries(data)) {
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
