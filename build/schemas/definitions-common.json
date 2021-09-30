@@ -227,9 +227,12 @@
         "type": "object"
       },
       "hide-on-enter-ar": { 
-        "description": "Hide object when entering AR",
+        "description": "Hide object when entering AR. Remove component to *not* hide",
         "title": "Hide in AR",
-        "type": "boolean"
+        "type": "boolean",
+        "enum": [
+            true
+        ]
       },
       "impulse": {
         "description": "The force applied using physics. Requires click-listener",
