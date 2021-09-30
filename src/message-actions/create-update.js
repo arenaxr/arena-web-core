@@ -358,12 +358,12 @@ export class CreateUpdate {
                 entityEl.setAttribute('src', ARENAUtils.crossOriginDropboxSrc(value));
                 return;
             default:
-                // replace dropbox links in any src attribute inside value
-                if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                 // all other attributes are pushed directly to aframe
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(attribute);
                 } else {
+                    // replace dropbox links in any src attribute inside value
+                    if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                     entityEl.setAttribute(attribute, value);
                 }
             } // switch attribute
