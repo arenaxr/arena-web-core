@@ -55,6 +55,12 @@ export class Arena {
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
+        // get url params
+        const url = new URL(window.location.href);
+        this.skipav = url.searchParams.get('skipav');
+        this.armode = url.searchParams.get('armode');
+        this.noav = url.searchParams.get('noav');
+
         ARENAUtils.getLocation((coords, err) => {
             if (!err) ARENA.clientCoords = coords;
         });
@@ -622,13 +628,9 @@ export class Arena {
             });
             await this.chat.start();
 
-            const url = new URL(window.location.href);
-            const skipav = url.searchParams.get('skipav');
-            const armode = url.searchParams.get('armode');
-            const noav = url.searchParams.get('noav');
-            if (noav || !this.isJitsiPermitted(this.mqttToken)) {
+            if (this.noav || !this.isJitsiPermitted(this.mqttToken)) {
                 this.showEchoDisplayName();
-            } else if (armode && AFRAME.utils.device.checkARSupport()) {
+            } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
                 /*
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
@@ -642,7 +644,7 @@ export class Arena {
                 }).then(() => {
                     document.getElementsByTagName('a-scene')[0].enterAR();
                 });
-            } else if (skipav) {
+            } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 this.showEchoDisplayName();
