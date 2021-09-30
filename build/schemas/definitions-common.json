@@ -226,7 +226,7 @@
         "title": "Goto URL",
         "type": "object"
       },
-      "hide-in-ar-mode": { 
+      "hide-on-enter-ar": { 
         "description": "Hide object when entering AR",
         "title": "Hide in AR",
         "type": "boolean"
