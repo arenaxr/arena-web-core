@@ -15,6 +15,7 @@ window.setupAV = (callback) => {
     const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
     const micMeter = document.getElementById('micMeter');
     const headModelPathSelect = document.getElementById('headModelPathSelect');
+    const reverseMouseDragCheckbox = document.getElementById('reverseMouseDragCheckbox');
     const displayName = document.getElementById('displayName-input');
     const enterSceneBtn = document.getElementById('enterSceneAVBtn');
 
@@ -58,6 +59,11 @@ window.setupAV = (callback) => {
             localStorage.setItem('prefAudioInput', audioInSelect.value);
             localStorage.setItem('prefVideoInput', videoSelect.value);
             localStorage.setItem('prefAudioOutput', audioOutSelect.value);
+
+            // default is reverse of aframe's default - we want to "drag world to pan"
+            const camera = document.getElementById('my-camera');
+            camera.setAttribute('look-controls', 'reverseMouseDrag', !reverseMouseDragCheckbox.checked);
+
             // Stop audio and video preview
             if (videoElement.srcObject) {
                 videoElement.srcObject.getAudioTracks()[0].stop();

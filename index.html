@@ -89,6 +89,10 @@
                             </select>
                             <label for="presenceSelect">Select Presence Type</label>
                         </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input mb-3" type="checkbox" id="reverseMouseDragCheckbox"/>
+                            <label for="reverseMouseDragCheckbox">Reverse Mouse Drag</label>
+                        </div>
                         <div class="progress mb-3" style="height: 20px;">
                             <div
                                     aria-valuemax="100"
@@ -159,7 +163,6 @@
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
                 <!-- this camera can 'fly': z axis follows pitch of head direction -->
                 <a-camera far="10000" gesture-detector id="my-camera"
-                          look-controls="reverseMouseDrag: true"
                           look-controls-arrow
                           mouse-cursor near="0.1" network-latency press-and-move="constrainToNavMesh:true"
                           wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true">
