@@ -114,8 +114,9 @@ AFRAME.registerComponent('arena-camera', {
             msg.hasAvatar = ARENA.FaceTracker.running();
         }
 
-        if (localStorage.getItem('headModelPath')) {
-            msg.data.headModelPath = localStorage.getItem('headModelPath');
+        const headModelPathSelect = document.getElementById('headModelPathSelect');
+        if (headModelPathSelect) {
+            msg.data.headModelPath = headModelPathSelect.value;
         } else {
             msg.data.headModelPath = ARENA.defaults.headModelPath;
         }

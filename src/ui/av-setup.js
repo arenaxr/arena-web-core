@@ -14,7 +14,7 @@ window.setupAV = (callback) => {
     const testAudioOutBtn = document.getElementById('playTestAudioOutBtn');
     const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
     const micMeter = document.getElementById('micMeter');
-    const headModelPath = document.getElementById('headModelPath-input');
+    const headModelPathSelect = document.getElementById('headModelPathSelect');
     const displayName = document.getElementById('displayName-input');
     const enterSceneBtn = document.getElementById('enterSceneAVBtn');
 
@@ -54,7 +54,7 @@ window.setupAV = (callback) => {
         enterSceneBtn.addEventListener('click', () => {
             // Stash preferred devices
             localStorage.setItem('display_name', displayName.value);
-            localStorage.setItem('headModelPath', headModelPath.value);
+            localStorage.setItem('headModelPathIdx', headModelPathSelect.selectedIndex);
             localStorage.setItem('prefAudioInput', audioInSelect.value);
             localStorage.setItem('prefVideoInput', videoSelect.value);
             localStorage.setItem('prefAudioOutput', audioOutSelect.value);
@@ -249,10 +249,8 @@ window.setupAV = (callback) => {
         }
     }
     setupPanel.classList.remove('d-none');
-    if (localStorage.getItem('headModelPath')) {
-        headModelPath.value = localStorage.getItem('headModelPath');
-    } else {
-        headModelPath.value = ARENA.defaults.headModelPath;
+    if (localStorage.getItem('headModelPathIdx')) {
+        headModelPathSelect.selectedIndex = localStorage.getItem('headModelPathIdx');
     }
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');

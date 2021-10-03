@@ -48,8 +48,17 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-7 mb-md-0 mb-3">
-                        <div>
+                        <div class="mb-3">
                             <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select aria-label="HeadModel" class="form-select mb-3" id="headModelPathSelect">
+                                <option value="/store/models/robobit.glb">Robot</option>
+                                <option value="/store/models/Head.gltf">Head</option>
+                                <option value="/store/models/Avocado.glb">Avocado</option>
+                                <option value="/store/models/Shuttle.glb">Shuttle</option>
+                            </select>
+                            <label for="presenceSelect">Select Head Model</label>
                         </div>
                     </div>
                     <div class="col-md-5">
@@ -74,7 +83,7 @@
                             <label for="audioSourceSelect">Select Microphone</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <select aria-label="test" class="form-select mb-3" id="presenceSelect">
+                            <select aria-label="Presence" class="form-select mb-3" id="presenceSelect">
                                 <option value="Standard">Standard</option>
                                 <option value="Portal">Portal</option>
                             </select>
@@ -120,10 +129,6 @@
                                     readonly
                                     type="text"
                             />
-                        </div>
-                        <div class="form-outline input-group mb-3" id="headModelPath">
-                            <input class="form-control" id="headModelPath-input" type="text">
-                            <label class="form-label " for="headModelPath-input" style="z-index:999">Head Model Path</label>
                         </div>
                         <div class="form-outline input-group mb-3" id="displayName">
                             <input class="form-control" id="displayName-input" type="text">
