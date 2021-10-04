@@ -211,6 +211,7 @@ export class ARENAUtils {
      * @return {string} new dropbox link
      */
      static crossOriginDropboxSrc(dropboxShareUrl) {
+        if (!dropboxShareUrl) return undefined;
         return dropboxShareUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
     }
 
