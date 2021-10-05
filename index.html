@@ -164,6 +164,7 @@
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
                 <!-- this camera can 'fly': z axis follows pitch of head direction -->
                 <a-camera far="10000" gesture-detector id="my-camera"
+                          look-controls="reverseMouseDrag: true"
                           look-controls-arrow
                           mouse-cursor near="0.1" network-latency press-and-move="constrainToNavMesh:true"
                           wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true">
