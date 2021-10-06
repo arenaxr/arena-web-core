@@ -104,14 +104,17 @@ window.setupAV = (callback) => {
             switch (deviceInfo.kind) {
             case 'audioinput':
                 option.text = deviceInfo.label || `Microphone ${audioInSelect.length + 1}`;
+                option.text = deviceInfo.deviceId ? option.text : 'No Microphone Detected';
                 audioInSelect.appendChild(option);
                 break;
             case 'audiooutput':
                 option.text = deviceInfo.label || `Speaker ${audioOutSelect.length + 1}`;
+                option.text = deviceInfo.deviceId ? option.text : 'Default Speaker';
                 audioOutSelect.appendChild(option);
                 break;
             case 'videoinput':
                 option.text = deviceInfo.label || `Camera ${videoSelect.length + 1}`;
+                option.text = deviceInfo.deviceId ? option.text : 'No Camera Detected';
                 videoSelect.appendChild(option);
                 break;
             default:
@@ -154,12 +157,14 @@ window.setupAV = (callback) => {
 
     /**
      * gUM's specified audio/video devices and passes stream to gotStream.
-     * @param {?event} _evt - Unused positional arg
-     * @param {?string} prefAudioInput - preferred audio deviceId
-     * @param {?string} prefVideoInput - preferred audio deviceId
+     * @param {?event} _evt - Unused positional
+     * @param {?object} preferredDevices - Preferred AV Devices
+     * @param {?string} preferredDevices.prefAudioInput - preferred audio deviceId
+     * @param {?string} preferredDevices.prefVideoInput - preferred audio deviceId
+     * @param {?boolean} silent - Pass on silent warning bool to handleMediaError
      * @return {Promise<MediaStream | void>}
      */
-    function getStream(_evt= undefined, {prefAudioInput, prefVideoInput} = {}) {
+    function getStream(_evt= undefined, {prefAudioInput, prefVideoInput} = {}, silent) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
                 track.stop();
@@ -175,9 +180,9 @@ window.setupAV = (callback) => {
             then(gotStream).catch((e) => {
                 // Prefer failed, don't popup alert, just fallback to detect-all
                 if (prefAudioInput || prefAudioInput) {
-                    return getStream();
+                    return getStream(e, {}, silent);
                 }
-                return handleMediaError(e);
+                return handleMediaError(e, silent);
             });
     }
 
@@ -206,26 +211,33 @@ window.setupAV = (callback) => {
      * Error handler, typically when gUM fails from nonexistent audio and/or
      * video input device
      * @param {Error} error
+     * @param {?Boolean} silent - Do not pop up error dialog
      * @return {Promise<void>}
      */
-    async function handleMediaError(error) {
+    async function handleMediaError(error, silent) {
         console.log('Error: ', error);
-        await Swal.fire({
-            title: 'Oops...',
-            html: `Could not initialize devices.<br/>
+        if (!silent) {
+            await Swal.fire({
+                title: 'Oops...',
+                html: `Could not initialize devices.<br/>
                 Please ensure your selected or previous preferred devices
                 are plugged in and allow browser audio and video access
                 permissions.<br/>
                 You can attempt to re-detect devices.`,
-            icon: 'error'});
+                icon: 'error',
+            });
+        }
     }
 
-    const detectDevices = () => {
+    const detectDevices = (_evt, silent = false) => {
         const preferredDevices = {
             prefAudioInput: localStorage.getItem('prefAudioInput'),
             prefVideoInput: localStorage.getItem('prefVideoInput'),
         };
-        getStream(undefined, preferredDevices).then(getDevices).then(gotDevices).catch(handleMediaError);
+        getStream(undefined, preferredDevices, silent).
+            then(getDevices).
+            then(gotDevices).
+            catch((e) => handleMediaError(e, silent));
     };
 
     /**
@@ -262,5 +274,5 @@ window.setupAV = (callback) => {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();
     }
-    detectDevices();
+    detectDevices(undefined, true);
 };

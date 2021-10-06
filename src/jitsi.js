@@ -555,7 +555,7 @@ export class ARENAJitsi {
     onConferenceError(err) {
         console.error(`Conference error ${err}!`);
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            errorCode: err
+            errorCode: err,
         });
         ARENA.health.addError(err);
     }
@@ -567,7 +567,7 @@ export class ARENAJitsi {
         const err ='connection.connectionFailed';
         console.error('Conference server connection failed!');
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            errorCode: err
+            errorCode: err,
         });
         ARENA.health.addError(err);
     }
@@ -632,6 +632,7 @@ export class ARENAJitsi {
         } catch (e) {
             const vidbtn = document.getElementById('btn-video-off');
             if (vidbtn) vidbtn.remove();
+            /*
             if (!localStorage.getItem('hideNoAV')) {
                 Swal.fire({
                     title: 'No Webcam or Audio Input Device found!',
@@ -647,7 +648,7 @@ export class ARENAJitsi {
                         localStorage.setItem('hideNoAV', 'true');
                     }
                 });
-            }
+            }*/
         }
         this.avConnected = true;
 

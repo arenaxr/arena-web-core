@@ -366,4 +366,3 @@
      return this.ATLASMarkers[markerid];
    }
  });
- 
