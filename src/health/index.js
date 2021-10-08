@@ -105,15 +105,15 @@ function drawErrorBlock(errors) {
     for (const [k, v] of Object.entries(errors)) {
         $('#error-list').find('tbody')
             .append($('<tr>')
-                .append($(`<td><span class="${v.class}">${v.title}</span></td>`))
-                .append(`<td><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
+                .append($(`<td class="w-75"><span class="${v.class}">${v.title}</span></td>`))
+                .append(`<td class="w-25"><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
     };
     // add reload option
     const reload = $('<table>')
         .append($('<tbody>')
             .append($('<tr>')
-                .append($('<td><small>Click `Reload` once errors are resolved.</small></td>'))
-                .append('<td><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
+                .append($('<td class="w-75"><small>Click `Reload` once errors are resolved.</small></td>'))
+                .append('<td class="w-25"><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
     $('#error-block').append(reload);
     $('#btn-error-reload').click(function() {
         window.location.reload();
