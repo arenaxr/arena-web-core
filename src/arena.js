@@ -507,6 +507,11 @@ export class Arena {
                     sceneRoot.appendChild(navMesh);
                 }
 
+                if (!sceneOptions['clickableOnlyEvents']) {
+                    // unusual case: clickableOnlyEvents = true by default, add warning...
+                    ARENA.health.addError('scene-options.allObjectsClickable');
+                }
+
                 // save scene options
                 for (const [attribute, value] of Object.entries(sceneOptions)) {
                     ARENA[attribute] = value;
