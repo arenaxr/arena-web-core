@@ -565,10 +565,12 @@ export class ARENAChat {
                     _this.keepalive(true);
                 }, this.settings.keepalive_interval_ms);
 
+                ARENA.health.removeError('mqttChat.connection');
                 this.connected = true;
             },
             onFailure: () => {
                 console.error('Chat failed to connect.');
+                ARENA.health.addError('mqttChat.connection');
                 this.connected = false;
             },
             willMessage: willMessage,
@@ -583,6 +585,7 @@ export class ARENAChat {
      */
     onConnectionLost(message) {
         console.error('Chat disconnect.');
+        ARENA.health.addError('mqttChat.connection');
         this.connected = false;
     }
 
