@@ -67,7 +67,6 @@ export class ARENAHealth {
             }
         };
         $('#error-svg').attr('src', imgSrc);
-        setTimeout(() => {}, 2000);
     }
 
     /**
