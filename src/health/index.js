@@ -28,7 +28,7 @@ export class ARENAHealth {
      */
     constructor() {
         const instance = this;
-        this.activeErrors = [];
+        this.activeErrors = {};
 
         $(document).ready(function() {
             // hover, draw draw the errors box
@@ -59,6 +59,15 @@ export class ARENAHealth {
         // make error-icon visible
         const icon = document.getElementById('error-icon');
         if (icon) icon.style.display = 'block';
+        // set error viewing level
+        let imgSrc = '/src/health/images/exclamation-warn.svg';
+        for (const [k, v] of Object.entries(this.activeErrors)) {
+            if (v.class == 'health-error-label') {
+                imgSrc = '/src/health/images/exclamation-error.svg';
+            }
+        };
+        $('#error-svg').attr('src', imgSrc);
+        setTimeout(() => {}, 2000);
     }
 
     /**
