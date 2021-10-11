@@ -27,7 +27,7 @@ class MQTTWorker {
         this.ARENA = ARENAConfig;
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, 'webClient-' + ARENAConfig.idTag);
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
-        mqttClient.onConnectionLost = this.onConnectionLost;
+        mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
         mqttClient.onMessageArrived = async (msg) => await mainOnMessageArrived(msg);
         this.mqttClient = mqttClient;
     }
