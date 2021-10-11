@@ -63,11 +63,10 @@ export class ARENAHealth {
         let imgSrc = '/src/health/images/exclamation-warn.svg';
         for (const [k, v] of Object.entries(this.activeErrors)) {
             if (v.class == 'health-error-label') {
-                imgSrc = '/src/health/images/exclamation-error.svg';
+                imgSrc = '/src/health/images/exclamation.svg';
             }
         };
         $('#error-svg').attr('src', imgSrc);
-        setTimeout(() => {}, 2000);
     }
 
     /**
