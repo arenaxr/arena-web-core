@@ -44,18 +44,20 @@ export class ARENAMqtt {
                     console.warn(`ARENA Jitsi restarting...`);
                 }
             }),
-            proxy((e) => {
-                console.error('healthCheck', e);
-                if (e[0] == 'addErrorHealth') {
-                    ARENA.health.addError(e[1]);
-                } else if (e[0] == 'removeErrorHealth') {
-                    ARENA.health.removeError(e[1]);
-                }
-            }),
+            proxy(this._mqttHealthCheck),
         );
         console.log('MQTT Worker initialized');
         this.MQTTWorker = worker;
         this.mqttClient = worker.mqttClient;
+    }
+
+    /**
+     * Internal callback to pass MQTT connection health to ARENAHealth.
+     * @param {object} msg Message object like: {addError: 'mqttScene.connection'}
+     */
+    _mqttHealthCheck(msg) {
+        if (msg.removeError) ARENA.health.removeError(msg.removeError);
+        else if (msg.addError) ARENA.health.addError(msg.addError);
     }
 
     /**

@@ -9,6 +9,11 @@
     "title": "Conference stream failed",
     "helpLink": "https://arena.conix.io/content/troubleshooting.html#error-conference-stream-failed"
 }, {
+    "errorCode": "mqttScene.connection",
+    "class": "health-error-label",
+    "title": "Scene MQTT connection failed",
+    "helpLink": "https://arena.conix.io/content/troubleshooting.html"
+}, {
     "errorCode": "mqttChat.connection",
     "class": "health-error-label",
     "title": "Chat MQTT connection failed",
