@@ -110,8 +110,8 @@ class MQTTWorker {
      * MQTT onConnectionLost callback
      * @param {Object} responseObject paho response object
      */
-    onConnectionLost(responseObject) {
-        this.healthCheck(['addErrorHealth', 'mqttScene.connection']);
+    async onConnectionLost(responseObject) {
+        await this.healthCheck(['addErrorHealth', 'mqttScene.connection']);
         if (responseObject.errorCode !== 0) {
             console.error(
                 `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
