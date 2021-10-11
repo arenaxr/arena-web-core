@@ -42,7 +42,7 @@ class MQTTWorker {
                 console.info('MQTT scene connection success.');
             },
             onFailure: function(res) {
-                postMessage({
+                this.postMessage({
                     addErrorHealth: 'mqttScene.connection',
                 });
                 console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
@@ -85,7 +85,7 @@ class MQTTWorker {
      * @param {Object} uri uri used
      */
     async onConnected(reconnect, uri) {
-        postMessage({
+        this.postMessage({
             removeErrorHealth: 'mqttScene.connection',
         });
         if (reconnect) {
@@ -113,7 +113,7 @@ class MQTTWorker {
      * @param {Object} responseObject paho response object
      */
     onConnectionLost(responseObject) {
-        postMessage({
+        this.postMessage({
             addErrorHealth: 'mqttScene.connection',
         });
         if (responseObject.errorCode !== 0) {
