@@ -44,15 +44,14 @@ export class ARENAMqtt {
                     console.warn(`ARENA Jitsi restarting...`);
                 }
             }),
+            proxy((e) => {
+                if (e[0] == 'addErrorHealth') {
+                    ARENA.health.addError(e[1]);
+                } else if (e[0] == 'removeErrorHealth') {
+                    ARENA.health.removeError(e[1]);
+                }
+            }),
         );
-        worker.onmessage = function(e) {
-            console.log(e)
-            // if (e.data.addErrorHealth) {
-            //     ARENA.health.addError(e.data.addErrorHealth);
-            // } else if (e.data.removeErrorHealth) {
-            //     ARENA.health.removeError(e.data.addErrorHealth);
-            // }
-        };
         console.log('MQTT Worker initialized');
         this.MQTTWorker = worker;
         this.mqttClient = worker.mqttClient;
