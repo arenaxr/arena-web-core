@@ -45,6 +45,10 @@ export class ARENAMqtt {
                 }
             }),
         );
+        worker.onmessage = function(e) {
+            if (e.data.addErrorHealth) ARENA.health.addError(e.data.addErrorHealth);
+            else if (e.data.removeErrorHealth) ARENA.health.removeError(e.data.addErrorHealth);
+        };
         console.log('MQTT Worker initialized');
         this.MQTTWorker = worker;
         this.mqttClient = worker.mqttClient;
