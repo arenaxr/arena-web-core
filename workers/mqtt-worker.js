@@ -42,6 +42,7 @@ class MQTTWorker {
                 console.info('MQTT scene connection success.');
             },
             onFailure: function(res) {
+                this.ARENA.health.addError('mqttScene.connection');
                 console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
             },
         };
@@ -82,6 +83,7 @@ class MQTTWorker {
      * @param {Object} uri uri used
      */
     async onConnected(reconnect, uri) {
+        this.ARENA.health.removeError('mqttScene.connection');
         if (reconnect) {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
@@ -107,6 +109,7 @@ class MQTTWorker {
      * @param {Object} responseObject paho response object
      */
     onConnectionLost(responseObject) {
+        this.ARENA.health.addError('mqttScene.connection');
         if (responseObject.errorCode !== 0) {
             console.error(
                 `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,

@@ -543,6 +543,7 @@ export class ARENAChat {
         willMessage.destinationName = this.settings.publishPublicTopic;
         this.mqttc.connect({
             onSuccess: () => {
+                ARENA.health.removeError('mqttChat.connection');
                 console.info(
                     'Chat connected. Subscribing to:',
                     this.settings.subscribePublicTopic,
@@ -565,12 +566,11 @@ export class ARENAChat {
                     _this.keepalive(true);
                 }, this.settings.keepalive_interval_ms);
 
-                ARENA.health.removeError('mqttChat.connection');
                 this.connected = true;
             },
             onFailure: () => {
-                console.error('Chat failed to connect.');
                 ARENA.health.addError('mqttChat.connection');
+                console.error('Chat failed to connect.');
                 this.connected = false;
             },
             willMessage: willMessage,
@@ -584,8 +584,8 @@ export class ARENAChat {
      * @param {Object} message Broker message.
      */
     onConnectionLost(message) {
-        console.error('Chat disconnect.');
         ARENA.health.addError('mqttChat.connection');
+        console.error('Chat disconnect.');
         this.connected = false;
     }
 
