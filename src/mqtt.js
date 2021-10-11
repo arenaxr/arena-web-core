@@ -45,6 +45,7 @@ export class ARENAMqtt {
                 }
             }),
             proxy((e) => {
+                console.error('healthCheck', e);
                 if (e[0] == 'addErrorHealth') {
                     ARENA.health.addError(e[1]);
                 } else if (e[0] == 'removeErrorHealth') {
