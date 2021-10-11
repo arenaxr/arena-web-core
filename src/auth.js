@@ -27,8 +27,8 @@
 window.AUTH = {}; // auth namespace
 
 if (!storageAvailable('localStorage')) {
-    const title = 'QUACK!';
-    const text = 'LocalStorage has been disabled, and the ARENA needs it.' +
+    const title = 'LocalStorage has been disabled';
+    const text = 'The ARENA needs LocalStorage. ' +
         'Bugs are coming! Perhaps you have disabled cookies?';
     authError(title, text);
 }
@@ -44,18 +44,11 @@ window.onload = function() {
  */
 function authError(title, text) {
     console.error(`${title}: ${text}`);
-    // TODO: add sweetalert if it can be imported from the package
-    // if (sweetalert2 !== 'undefined') {
-    //     Swal.fire({
-    //         title: title,
-    //         text: text,
-    //         icon: 'error',
-    //         showConfirmButton: true,
-    //         confirmButtonText: 'Ok',
-    //     });
-    // } else {
-    alert(`${title}\n\n${text}`);
-    // }
+    if (typeof ARENA !== 'undefined' && ARENA.health) {
+        ARENA.health.addError(title);
+    } else {
+        alert(`${title}\n\n${text}`);
+    }
 }
 
 /**
@@ -208,7 +201,6 @@ function requestMqttToken(authType, mqttUsername) {
             const title = 'Error loading MQTT token';
             const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
             authError(title, text);
-            signOut(); // critical error
         } else {
             AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;
