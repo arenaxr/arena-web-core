@@ -446,11 +446,19 @@ export async function deleteScene(ns, sceneName) {
 
 export function selectedObjsPerformAction(action, scene, all = false) {
     var items = persist.objList.getElementsByTagName('li');
+    var objList = [];
     for (var i = 0; i < items.length; i++) {
         if (!items[i].classList.contains('checked') && !all) continue;
         var objJson = items[i].getAttribute('data-obj');
         if (!objJson) continue;
-        var obj = JSON.parse(objJson);
+        objList.push(objJson);
+    }
+    performActionArgObjList(action, scene, objList);
+}
+
+export function performActionArgObjList(action, scene, objList, json=true) {
+    for (var i = 0; i < objList.length; i++) {
+        var obj = json ? JSON.parse(objList[i]):objList[i];
         var actionObj = JSON.stringify({
             object_id: obj.object_id,
             action: action,
@@ -458,6 +466,7 @@ export function selectedObjsPerformAction(action, scene, all = false) {
             type: obj.type,
             data: obj.attributes != undefined ? obj.attributes : obj.data,
         });
+        if (!scene) scene = `${obj.namespace}/${obj.sceneId}`
         var topic = `realm/s/${scene}/${obj.object_id}`;
         console.info('Publish [ ' + topic + ']: ' + actionObj);
         try {
@@ -465,7 +474,7 @@ export function selectedObjsPerformAction(action, scene, all = false) {
         } catch (error) {
             Alert.fire({
                 icon: 'error',
-                title: `Error deleting: ${JSON.stringify(error)}`,
+                title: `Error: ${JSON.stringify(error)}`,
                 timer: 5000,
             });
             return;

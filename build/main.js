@@ -21,6 +21,9 @@ window.addEventListener('onauth', async function (e) {
     var dftSceneObjects;
     var objTypeFilter = {};
 
+    var username = e.detail.mqtt_username;
+    var mqttToken = e.detail.mqtt_token;
+
     // Divs/textareas on the page
     var output = document.getElementById("output");
     var editor = document.getElementById("editor");
@@ -36,6 +39,7 @@ window.addEventListener('onauth', async function (e) {
     // Buttons/s
     var openAddSceneButton = document.getElementById("openaddscene");
     var deleteSceneButton = document.getElementById("deletescene");
+    var importSceneButton = document.getElementById("importscene");
     var setValueButton = document.getElementById("setvalue");
     var selectSchema = document.getElementById("objtype");
     var genidButton = document.getElementById("genid");
@@ -268,6 +272,69 @@ window.addEventListener('onauth', async function (e) {
               }, 500); // refresh after a while, so that delete messages are processed
             }
           });
+    });
+
+    importSceneButton.addEventListener("click", async function() {
+        Swal.fire({
+          title: 'Import from JSON',
+          html: `<div class="input-prepend">
+                  <span class="add-on" style="width:120px">JSON Path</span>
+                  <input type="text" style="width:320px" id="jsonpath" placeholder="/store/users/user/blender-exports/scene/scene.json">            
+                </div>
+                <p style="font-size:10px"><strong>You can enter the blender export scene name and use the default export path.<strong></p>`,
+          width: 700,  
+          confirmButtonText: 'Import',
+          focusConfirm: false,
+          showCancelButton: true,
+          cancelButtonText: 'Cancel',
+          input: 'checkbox',
+          inputValue: 0,
+          inputPlaceholder:'Create new scene from JSON data (add to current scene otherwise)',
+          willOpen: () => {
+            const path = Swal.getPopup().querySelector('#jsonpath');
+            path.value = `/store/users/${username}/blender-exports/scene/scene.json`
+          },
+          preConfirm: () => {
+            const path = Swal.getPopup().querySelector('#jsonpath').value;
+            const newScene = !!Swal.getPopup().querySelector('#swal2-checkbox').checked;
+            
+            if (!path) {
+              Swal.showValidationMessage(`Please enter a valid filestore path`)
+            }    
+            return { jsonpath: path, newscene: newScene }
+          }
+        }).then((result) => {
+          if (result.isDismissed) {
+            console.log("canceled");
+            return;
+          }          
+          let path = `${document.location.protocol}//${document.location.hostname}${document.location.port}${result.value.jsonpath.startsWith('/') ? result.value.jsonpath:'/'+result.value.jsonpath}`; // full path given
+          if (result.value.jsonpath.indexOf('/') == -1) { // blender folder name given
+            path = `${document.location.protocol}//${document.location.hostname}${document.location.port}/store/users/${username}/blender-exports/${result.value.jsonpath}/scene.json`
+          }
+          let import_objs;
+          try {
+            fetch(path)
+            .then(response => response.json())
+            .then(importObjs=> {
+                let scene = `${namespacelist.value}/${scenelist.value}`;
+                if (result.value.newscene) scene = undefined; // will get scene from importObjs data
+                PersistObjects.performActionArgObjList('create', scene, importObjs, false);
+                setTimeout(async () => {
+                    reload();
+                }, 500);                
+                
+            });
+          } catch (err) {
+            Alert.fire({
+                icon: 'error',
+                title: 'Error loading JSON.',
+                html: `Error: ${err}`,
+                timer: 8000,
+            });
+            return;              
+          } 
+        })        
     });
 
     // close modal
@@ -521,8 +588,8 @@ window.addEventListener('onauth', async function (e) {
         addEditSection: document.getElementById("addeditsection"),
         editObjHandler: editObject,
         authState: authState,
-        mqttUsername: e.detail.mqtt_username,
-        mqttToken: e.detail.mqtt_token,
+        mqttUsername: username,
+        mqttToken: mqttToken,
     });
 
     // load default objects, convert to mqtt wire format
