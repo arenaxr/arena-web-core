@@ -351,11 +351,13 @@ export async function populateNamespaceList(nsInput, nsList) {
 }
 
 export function disableSceneInput(sceneList) {
+    return;
     if (!sceneList) return;
     sceneList.disabled = true;
     let option = document.createElement('option');
     option.text = 'No scenes.';
-    sceneList.add(option);
+    sceneList.appendChild(option);
+    //sceneList.add(option);
     clearObjectList();
     persist.addEditSection.style = 'display:none';
 }
@@ -435,13 +437,15 @@ export async function addNewScene(ns, sceneName, newObjs) {
         title: 'Scene added',
         timer: 5000,
     });
-    persist.scenes.push({ ns: ns, name: sceneName });
-    if (!newObjs) return;
+    let exists = persist.scenes.find(scene => scene.ns == ns && scene.name == sceneName);
+    if (!exists) persist.scenes.push({ ns: ns, name: sceneName });
+    if (!newObjs) return exists;
 
     // add objects to the new scene
     newObjs.forEach((obj) => {
         addObject(obj, `${ns}/${sceneName}`);
     });
+    return exists;
 }
 
 export async function deleteScene(ns, sceneName) {

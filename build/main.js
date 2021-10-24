@@ -53,7 +53,9 @@ window.addEventListener('onauth', async function (e) {
     var refreshButton = document.getElementById("refreshlist");
     var refreshSlButton = document.getElementById("refreshscenelist");
 
-    var saved_namespace, saved_scene;
+    var newScene=true;
+    var saved_namespace;
+    var saved_scene;
 
     // add page header
     $("#header").load("../header.html");
@@ -242,7 +244,7 @@ window.addEventListener('onauth', async function (e) {
             }
           }).then(async (result) => {
             if (result.isDismissed) return;
-            await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dftSceneObjects : undefined);
+            let exists = await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dftSceneObjects : undefined);
             setTimeout(async () => {
                 await PersistObjects.populateSceneList(result.value.ns, sceneinput, scenelist, result.value.scene);
                 if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
@@ -271,8 +273,11 @@ window.addEventListener('onauth', async function (e) {
               await PersistObjects.deleteScene(namespaceinput.value, sceneinput.value, !!result.value);
               setTimeout(async () => {
                 await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
+                await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
                 reload();
                 updateLink();
+                localStorage.setItem("scene", sceneinput.value );
+                updateUrl();
               }, 500); // refresh after a while, so that delete messages are processed
             }
           });
@@ -427,6 +432,14 @@ window.addEventListener('onauth', async function (e) {
     // Change listener for scene list
     sceneinput.addEventListener("change", async function() {
         if (sceneinput.disabled === true) return;
+        let foundScene = false;
+        for (let i = 0; i < scenelist.options.length; i++) {
+            if (scenelist.options[i].value == sceneinput.value) {
+                foundScene = true;
+                break;
+            }
+        }
+        newScene = !foundScene;
         saved_scene = sceneinput.value;
         await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
         reload();
@@ -549,6 +562,9 @@ window.addEventListener('onauth', async function (e) {
             });
             return;
         }
+        // add scene if it does not exist
+        if (newScene) await PersistObjects.addNewScene(namespaceinput.value, sceneinput.value, undefined);
+
         await PersistObjects.addObject(obj, `${namespaceinput.value}/${sceneinput.value}`);
         setTimeout(async () => {
             PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
