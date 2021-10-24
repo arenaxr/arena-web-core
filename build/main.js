@@ -491,6 +491,7 @@ window.addEventListener('onauth', async function (e) {
 
     refreshSlButton.addEventListener("click", async function() {
         await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
+        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
         reload();
         updateLink();
     });
@@ -664,7 +665,7 @@ window.addEventListener('onauth', async function (e) {
         ns = sn[0];
         s = sn[1];
     } else {
-        ns = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
+        ns = localStorage.getItem("namespace") === null ? username : localStorage.getItem("namespace");
         s = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
     }
     // do initial update
