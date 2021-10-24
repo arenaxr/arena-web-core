@@ -43,12 +43,17 @@
         <h1>Scene Editor</h1>
         <form class="form-inline">
           <div class="input-prepend">
-            <span class="add-on">User or Organization</span>
-            <select id="namespacelist" class="input-medium">
-            </select>
-            <span class="add-on">Scene</span>
-            <select id="scenelist" class="input-medium">
-            </select>
+            <span class="add-on" style="width:80px;">Namespace</span>
+            <!--<select id="namespacelist" class="input-medium">-->
+            <input type="text" class="input-medium" list="namespacelist" placeholder="Select Namespace..." id="namespaceinput">
+            <datalist id="namespacelist"></datalist> 
+          </div><div class="input-prepend">
+            <!--</select>-->
+            <span class="add-on" style="width:80px;">Scene</span>
+            <!--<select id="scenelist" class="input-medium">-->
+            <input type="text" class="input-medium" list="scenelist" placeholder="Select Namespace..." id="sceneinput">
+            <datalist id="scenelist"></datalist>
+            <!--</select>-->
           </div>
           <a class="btn btn-small" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
           <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i

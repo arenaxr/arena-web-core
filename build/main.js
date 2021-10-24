@@ -28,8 +28,10 @@ window.addEventListener('onauth', async function (e) {
     var output = document.getElementById("output");
     var editor = document.getElementById("editor");
     var validate = document.getElementById("validate");
+    var sceneinput = document.getElementById("sceneinput");
+    var namespaceinput = document.getElementById("namespaceinput");
     var scenelist = document.getElementById("scenelist");
-    var namespacelist = document.getElementById("namespacelist");
+    var namespacelist = document.getElementById("namespacelist");    
     var sceneUrl = document.getElementById("scene_url");
     var scenePermsUrl = document.getElementById("scene_perms_url");
     var objFilter = document.getElementById("objfilter");
@@ -50,6 +52,8 @@ window.addEventListener('onauth', async function (e) {
     var clearselButton = document.getElementById("clearlist");
     var refreshButton = document.getElementById("refreshlist");
     var refreshSlButton = document.getElementById("refreshscenelist");
+
+    var saved_namespace, saved_scene;
 
     // add page header
     $("#header").load("../header.html");
@@ -84,13 +88,13 @@ window.addEventListener('onauth', async function (e) {
     var updateLink = function() {
         let dp = getDevPath();
         let permsp = 'user/profile/scenes/';
-        sceneUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespacelist.value}/${scenelist.value}`;
-        scenePermsUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${permsp}${namespacelist.value}/${scenelist.value}`;
+        sceneUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespaceinput.value}/${sceneinput.value}`;
+        scenePermsUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${permsp}${namespaceinput.value}/${sceneinput.value}`;
     };
 
     var updateUrl = function() {
         let newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('scene', `${namespacelist.value}/${scenelist.value}`);
+        newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
         window.history.pushState({ path: newUrl.href }, '', newUrl.href);
     };
 
@@ -208,7 +212,7 @@ window.addEventListener('onauth', async function (e) {
             title: 'Add New Scene',
             html: `<div class="input-prepend">
                     <span class="add-on" style="width:125px">User or Organization</span>
-                    <select id="modalnamespacelist" style="width:215px"> <option value="public">public</option></select>
+                    <select id="modalnamespaceinput" style="width:215px"> <option value="public">public</option></select>
                   </div>
                   <div class="input-prepend">
                     <span class="add-on" style="width:125px">Scene</span>
@@ -223,11 +227,11 @@ window.addEventListener('onauth', async function (e) {
             inputValue: 1,
             inputPlaceholder:`Add Objects from Default Scene: ${dfts.default_objs_scene}`,
             willOpen: () => {
-                const modalNsList = Swal.getPopup().querySelector('#modalnamespacelist');
+                const modalNsList = Swal.getPopup().querySelector('#modalnamespaceinput');
                 PersistObjects.populateNewSceneNamespaces(modalNsList);
               },
             preConfirm: () => {
-              const ns = Swal.getPopup().querySelector('#modalnamespacelist').value;
+              const ns = Swal.getPopup().querySelector('#modalnamespaceinput').value;
               const scene = Swal.getPopup().querySelector('#modalscenename').value;
               const addobjs = !!Swal.getPopup().querySelector('#swal2-checkbox').checked;
 
@@ -240,8 +244,8 @@ window.addEventListener('onauth', async function (e) {
             if (result.isDismissed) return;
             await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dftSceneObjects : undefined);
             setTimeout(async () => {
-                await PersistObjects.populateSceneList(result.value.ns, scenelist, result.value.scene);
-                if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+                await PersistObjects.populateSceneList(result.value.ns, sceneinput, scenelist, result.value.scene);
+                if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
                 reload();
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
@@ -264,9 +268,9 @@ window.addEventListener('onauth', async function (e) {
           }).then(async (result) => {
             if (result.isConfirmed) {
               // delete
-              await PersistObjects.deleteScene(namespacelist.value, scenelist.value, !!result.value);
+              await PersistObjects.deleteScene(namespaceinput.value, sceneinput.value, !!result.value);
               setTimeout(async () => {
-                await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
+                await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
                 reload();
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
@@ -317,13 +321,13 @@ window.addEventListener('onauth', async function (e) {
             fetch(path)
             .then(response => response.json())
             .then(importObjs=> {
-                let scene = `${namespacelist.value}/${scenelist.value}`;
+                let scene = `${namespaceinput.value}/${sceneinput.value}`;
                 if (result.value.newscene) scene = undefined; // will get scene from importObjs data
                 PersistObjects.performActionArgObjList('create', scene, importObjs, false);
                 setTimeout(async () => {
+                    await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
                     reload();
-                }, 500);                
-                
+                }, 500);                                
             });
           } catch (err) {
             Alert.fire({
@@ -400,27 +404,53 @@ window.addEventListener('onauth', async function (e) {
     });
 
     // Change listener for namespace
-    namespacelist.addEventListener("change", async function() {
-        PersistObjects.populateSceneList(namespacelist.value, scenelist);
+    namespaceinput.addEventListener("change", async function() {
+        PersistObjects.populateSceneList(namespaceinput.value, sceneinput, scenelist);
         updateLink();
-        localStorage.setItem("namespace", namespacelist.value );
-        scenelist.dispatchEvent(new Event('change'));
+        localStorage.setItem("namespace", namespaceinput.value );
+        sceneinput.dispatchEvent(new Event('change'));
+        saved_namespace = namespaceinput.value;
+    });
+
+    // Focus listener for namespace
+    namespaceinput.addEventListener("focus", async function() {
+        saved_namespace = namespaceinput.value;
+        namespaceinput.value = "";        
+    });    
+
+    // Focus out listener for namespace
+    namespaceinput.addEventListener("focusout", async function() {
+        if (saved_namespace && saved_namespace.length > 0) namespaceinput.value = saved_namespace;
+        if (saved_namespace && saved_namespace.length == 0 && namespacelist && namespacelist.options[0]) namespaceinput.value = namespacelist.options[0].value;        
     });
 
     // Change listener for scene list
-    scenelist.addEventListener("change", async function() {
-        if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+    sceneinput.addEventListener("change", async function() {
+        if (sceneinput.disabled === true) return;
+        saved_scene = sceneinput.value;
+        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
         reload();
         updateLink();
-        localStorage.setItem("scene", scenelist.value );
+        localStorage.setItem("scene", sceneinput.value );
         updateUrl();
+    });
+
+    // Focus listener for scene
+    sceneinput.addEventListener("focus", async function() {
+        saved_scene = sceneinput.value;
+        sceneinput.value = "";        
+    });    
+
+    // Focus out listener for scene
+    sceneinput.addEventListener("focusout", async function() {
+        if (saved_scene && saved_scene.length > 0) sceneinput.value = saved_scene;
+        if (saved_scene && saved_scene.length == 0 && scenelist && scenelist.options[0]) sceneinput.value = scenelist.options[0].value;        
     });
 
     // Change listener for object id filter regex
     objFilter.addEventListener("change", async function() {
-        if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+        if (sceneinput.disabled === true) return;
+        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
     });
 
     objFilterSel.addEventListener("click", async function() {
@@ -429,7 +459,7 @@ window.addEventListener('onauth', async function (e) {
         let opt = objFilterSel.namedItem('objfilter_' + objFilterSel.value);
         let text = ((objTypeFilter[objFilterSel.value]) ? 'Hide':'Show') + opt.textContent.substring(4);
         opt.textContent = text;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
     });
 
     // listeners for buttons
@@ -442,20 +472,20 @@ window.addEventListener('onauth', async function (e) {
     });
 
     refreshButton.addEventListener("click", async function() {
-        if (scenelist.disabled === true) return;
-        await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+        if (sceneinput.disabled === true) return;
+        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
     });
 
     refreshSlButton.addEventListener("click", async function() {
-        await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
+        await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
         reload();
         updateLink();
     });
 
     delButton.addEventListener("click", async function() {
-        PersistObjects.selectedObjsPerformAction('delete', `${namespacelist.value}/${scenelist.value}`);
+        PersistObjects.selectedObjsPerformAction('delete', `${namespaceinput.value}/${sceneinput.value}`);
         setTimeout(async () => {
-            if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+            if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
             reload();
         }, 500); // refresh after a while, so that delete messages are processed
     });
@@ -466,18 +496,18 @@ window.addEventListener('onauth', async function (e) {
             html: `<p>Copy to existing scene</p>
                    <div class="input-prepend">
                     <span class="add-on" style="width:120px">Destination Scene</span>
-                    <select id="modalscenelist" style="width:215px"></select>
+                    <select id="modalsceneinput" style="width:215px"></select>
                   </div>`,
             confirmButtonText: 'Copy Objects',
             focusConfirm: false,
             showCancelButton: true,
             cancelButtonText: 'Cancel',
             willOpen: () => {
-              const nsList = Swal.getPopup().querySelector('#modalscenelist');
-              PersistObjects.populateSceneList(undefined, nsList);
+              const nsList = Swal.getPopup().querySelector('#modalsceneinput');
+              PersistObjects.populateSceneList(undefined, nsList, nsList);
             },
             preConfirm: () => {
-              const scene = Swal.getPopup().querySelector('#modalscenelist').value;
+              const scene = Swal.getPopup().querySelector('#modalsceneinput').value;
               if (!scene) {
                 Swal.showValidationMessage(`Please select a destination scene`)
               }
@@ -519,9 +549,9 @@ window.addEventListener('onauth', async function (e) {
             });
             return;
         }
-        await PersistObjects.addObject(obj, `${namespacelist.value}/${scenelist.value}`);
+        await PersistObjects.addObject(obj, `${namespaceinput.value}/${sceneinput.value}`);
         setTimeout(async () => {
-            PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
+            PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
         }, 500); // refresh after a while, so that new object messages are processed
     };
     document.querySelectorAll('.addobj').forEach(item => {
@@ -604,28 +634,34 @@ window.addEventListener('onauth', async function (e) {
     }
 
     // load namespace and scene values
-    let result = await PersistObjects.populateSceneAndNsLists(namespacelist, scenelist);
+    let result = await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
     if (!result) return;
+    
+    namespaceinput.value = username; // default to user namespace
 
     // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
     let url = new URL(window.location.href);
     let sceneParam = url.searchParams.get('scene');
-    let ns = namespacelist.value;
+    let ns, s;
     if (sceneParam) {
         let sn = sceneParam.split('/');
-        namespacelist.value = sn[0];
-        scenelist.value = sn[1];
+        ns = sn[0];
+        s = sn[1];
     } else {
-        namespacelist.value = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
-        scenelist.value = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+        ns = localStorage.getItem("namespace") === null ? dfts.namespace : localStorage.getItem("namespace");
+        s = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
     }
     // do initial update
-    if (ns !== namespacelist.value) { // if we changed namespace
-        PersistObjects.populateSceneList(namespacelist.value, scenelist);
-        localStorage.setItem("namespace", namespacelist.value );
+    if (ns !== namespaceinput.value) { // if we changed namespace
+        namespaceinput.value = ns;
+        PersistObjects.populateSceneList(namespaceinput.value, sceneinput, scenelist, s);
+        localStorage.setItem("namespace", namespaceinput.value );
     }
-    if (scenelist.disabled === false) await PersistObjects.populateObjectList(`${namespacelist.value}/${scenelist.value}`, objFilter.value, objTypeFilter);
-    localStorage.setItem("scene", scenelist.value );
+    if (s !== sceneinput.value) { // if we changed scene
+        sceneinput.value = s;
+    }
+    if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
+    localStorage.setItem("scene", sceneinput.value );
     reload();
     updateLink();
     updateUrl();

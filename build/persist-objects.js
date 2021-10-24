@@ -86,7 +86,7 @@ export async function init(settings) {
     console.info('Connected.');
 }
 
-export async function populateSceneAndNsLists(nsList, sceneList) {
+export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
     try {
         persist.authState = await ARENAUserAccount.userAuthState();
     } catch (err) {
@@ -115,15 +115,15 @@ export async function populateSceneAndNsLists(nsList, sceneList) {
         option.text = '';
         nsList.add(option);
         nsList.disabled = true;
-        disableSceneList(sceneList);
+        disableSceneInput(sceneList);
         return undefined;
     }
 
-    let ns = await populateNamespaceList(nsList);
+    let ns = await populateNamespaceList(nsInput, nsList);
     if (ns) {
-        populateSceneList(ns, sceneList);
+        populateSceneList(ns, sceneInput, sceneList);
     } else {
-        disableSceneList(sceneList);
+        disableSceneInput(sceneList);
     }
     return ns;
 }
@@ -284,7 +284,7 @@ export async function populateObjectList(
     persist.addEditSection.style = 'display:block';
 }
 
-export async function populateNamespaceList(nsList) {
+export async function populateNamespaceList(nsInput, nsList) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
 
     let scenes;
@@ -327,20 +327,30 @@ export async function populateNamespaceList(nsList) {
     if (persist.namespaces.indexOf(persist.authState.username) < 0) {
         var option = document.createElement('option');
         option.text = persist.authState.username;
-        nsList.add(option);
+        nsList.appendChild(option);
+        //nsList.add(option);
+    }
+
+    // add public namespace if needed
+    if (persist.namespaces.indexOf('public') < 0) {
+        var option = document.createElement('option');
+        option.text = 'public';
+        nsList.appendChild(option);
+        //nsList.add(option);
     }
 
     // populate list
     for (let i = 0; i < persist.namespaces.length; i++) {
         var option = document.createElement('option');
         option.text = persist.namespaces[i];
-        nsList.add(option);
+        nsList.appendChild(option);
+        //nsList.add(option);
     }
-    nsList.value = persist.authState.username;
+    nsInput.value = persist.authState.username;
     return persist.authState.username;
 }
 
-export function disableSceneList(sceneList) {
+export function disableSceneInput(sceneList) {
     if (!sceneList) return;
     sceneList.disabled = true;
     let option = document.createElement('option');
@@ -350,10 +360,10 @@ export function disableSceneList(sceneList) {
     persist.addEditSection.style = 'display:none';
 }
 
-export function populateSceneList(ns, sceneList, selected = undefined) {
+export function populateSceneList(ns, sceneInput, sceneList, selected = undefined) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
     if (persist.scenes.length == 0) {
-        disableSceneList(sceneList);
+        disableSceneInput(sceneInput);
         return;
     }
 
@@ -362,20 +372,25 @@ export function populateSceneList(ns, sceneList, selected = undefined) {
         sceneList.removeChild(sceneList.firstChild);
     }
 
-    sceneList.disabled = false;
+    sceneInput.disabled = false;
     let first = undefined;
+    let selectedExists = false;
     for (let i = 0; i < persist.scenes.length; i++) {
         if (ns && persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
+        if (selected) {
+            if (selected == persist.scenes[i].name) selectedExists = true;
+        }
         let option = document.createElement('option');
         option.text = ns == undefined ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
-        sceneList.add(option);
+        //sceneList.add(option);
+        sceneList.appendChild(option);
     }
     if (!first) {
-        disableSceneList(sceneList);
+        disableSceneInput(sceneInput);
     } else {
-        if (!selected) sceneList.value = first;
-        else sceneList.value = selected;
+        if (!selected || !selectedExists) sceneInput.value = first;
+        else sceneInput.value = selected;
     }
 }
 
