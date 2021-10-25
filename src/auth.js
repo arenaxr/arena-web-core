@@ -189,6 +189,12 @@ function requestMqttToken(authType, mqttUsername) {
         params += `&camid=true`;
         params += `&handleftid=true`;
         params += `&handrightid=true`;
+    } else {
+        const url = new URL(window.location.href);
+        const urlNamespacedScene = url.searchParams.get('scene');
+        if (urlNamespacedScene) {
+            params += `&scene=${decodeURIComponent(urlNamespacedScene)}`;
+        }
     }
     xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
