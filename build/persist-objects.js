@@ -114,8 +114,8 @@ export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, scene
         var option = document.createElement('option');
         option.text = '';
         nsList.add(option);
-        nsList.disabled = true;
-        disableSceneInput(sceneList);
+        nsInput.disabled = true;
+        emptySceneInput(sceneInput);
         return undefined;
     }
 
@@ -123,7 +123,7 @@ export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, scene
     if (ns) {
         populateSceneList(ns, sceneInput, sceneList);
     } else {
-        disableSceneInput(sceneList);
+        emptySceneInput(sceneInput);
     }
     return ns;
 }
@@ -350,14 +350,8 @@ export async function populateNamespaceList(nsInput, nsList) {
     return persist.authState.username;
 }
 
-export function disableSceneInput(sceneList) {
-    return;
-    if (!sceneList) return;
-    sceneList.disabled = true;
-    let option = document.createElement('option');
-    option.text = 'No scenes.';
-    sceneList.appendChild(option);
-    //sceneList.add(option);
+export function emptySceneInput(sceneInput) {
+    sceneInput.value = 'new-scene';
     clearObjectList();
     persist.addEditSection.style = 'display:none';
 }
@@ -365,7 +359,7 @@ export function disableSceneInput(sceneList) {
 export function populateSceneList(ns, sceneInput, sceneList, selected = undefined) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
     if (persist.scenes.length == 0) {
-        disableSceneInput(sceneInput);
+        emptySceneInput(sceneInput);
         return;
     }
 
@@ -389,7 +383,7 @@ export function populateSceneList(ns, sceneInput, sceneList, selected = undefine
         sceneList.appendChild(option);
     }
     if (!first) {
-        disableSceneInput(sceneInput);
+        emptySceneInput(sceneInput);
     } else {
         if (!selected || !selectedExists) sceneInput.value = first;
         else sceneInput.value = selected;
@@ -519,7 +513,7 @@ export function clearSelected() {
 export async function addObject(obj, scene) {
     var found = false;
     if (!persist.mqttConnected) mqttReconnect();
-    
+
     for (let i = 0; i < persist.currentSceneObjs.length; i++) {
         if (persist.currentSceneObjs[i].object_id == obj.object_id) {
             found = true;
