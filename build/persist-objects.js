@@ -476,6 +476,7 @@ export function selectedObjsPerformAction(action, scene, all = false) {
 }
 
 export function performActionArgObjList(action, scene, objList, json=true) {
+    if (!persist.mqttConnected) mqttReconnect();
     for (var i = 0; i < objList.length; i++) {
         var obj = json ? JSON.parse(objList[i]):objList[i];
         var actionObj = JSON.stringify({
@@ -517,6 +518,8 @@ export function clearSelected() {
 
 export async function addObject(obj, scene) {
     var found = false;
+    if (!persist.mqttConnected) mqttReconnect();
+    
     for (let i = 0; i < persist.currentSceneObjs.length; i++) {
         if (persist.currentSceneObjs[i].object_id == obj.object_id) {
             found = true;
@@ -599,6 +602,7 @@ export function mqttReconnect(settings) {
     persist.mc = new MqttClient({
         uri: persist.mqttUri,
         onMessageCallback: onMqttMessage,
+        onConnectionLost: onMqttConnectionLost,
         mqtt_username: persist.mqttUsername,
         mqtt_token: persist.mqttToken,
     });
@@ -613,9 +617,13 @@ export function mqttReconnect(settings) {
         });
         return;
     }
-
+    persist.mqttConnected = true;
     console.info('Connected to ' + persist.mqttUri);
 }
 
 // callback from mqttclient; on reception of message
 function onMqttMessage(message) { }
+
+function onMqttConnectionLost() { 
+    persist.mqttConnected = false;
+}
