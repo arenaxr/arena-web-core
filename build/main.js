@@ -79,7 +79,7 @@ window.addEventListener('onauth', async function (e) {
     var getDevPath = function() {
         let path = window.location.pathname.substring(1);
         let devPath='';
-        if (ARENADefaults.supportDevFolders && path.length > 0) {
+        if (ARENADefaults && ARENADefaults.devInstance && path.length > 0) {
           try {
             devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
           } catch(e) {
@@ -191,7 +191,7 @@ window.addEventListener('onauth', async function (e) {
             Alert.fire({
                 icon: 'info',
                 title: 'Loaded.',
-                html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/> Press "Add or Update Object" button when done.',
+                html: 'Loaded&nbspinto&nbsp<b>Add/Edit&nbspObject</b>&nbspform. <br/> Press "<b>A</b>dd/Update Object" button when done.',
                 timer: 10000,
             });
         });
@@ -213,26 +213,42 @@ window.addEventListener('onauth', async function (e) {
     // Open new scene modal
     openAddSceneButton.addEventListener("click", async function() {
         Swal.fire({
-            title: 'Add New Scene',
+            title: 'Add Scene',
             html: `<div class="input-prepend">
-                    <span class="add-on" style="width:125px">User or Organization</span>
-                    <select id="modalnamespaceinput" style="width:215px"> <option value="public">public</option></select>
+                    <span class="add-on" style="width:125px">Namespace</span>
+                    <input type="text" class="input-medium" style="width:215px" list="modalnamespacelist" placeholder="Select Namespace..." id="modalnamespaceinput">
+                    <datalist id="modalnamespacelist"></datalist> 
                   </div>
                   <div class="input-prepend">
                     <span class="add-on" style="width:125px">Scene</span>
-                    <input type="text" style="width:200px" id="modalscenename" placeholder="Scene Name">
+                    <input type="text" style="width:215px" id="modalscenename" placeholder="New Scene Name">
                   </div>
-                  <p><small>Scene will be created with default permissions.</small></p>`,
+                  <p><small>You can enter an existing unlisted Scene. New Scenes will be created with default permissions.</small></p>`,
+            width: 600,
             confirmButtonText: 'Add Scene',
             focusConfirm: false,
             showCancelButton: true,
             cancelButtonText: 'Cancel',
             input: 'checkbox',
-            inputValue: 1,
+            inputValue: 0,
             inputPlaceholder:`Add Objects from Default Scene: ${dfts.default_objs_scene}`,
             willOpen: () => {
-                const modalNsList = Swal.getPopup().querySelector('#modalnamespaceinput');
-                PersistObjects.populateNewSceneNamespaces(modalNsList);
+                const modalNsList = Swal.getPopup().querySelector('#modalnamespacelist');
+                const modalNsInput = Swal.getPopup().querySelector('#modalnamespaceinput');
+                PersistObjects.populateNewSceneNamespaces(modalNsInput, modalNsList);
+                modalNsInput.value = namespaceinput.value;
+                var savedModalNs;
+                modalNsInput.addEventListener('change', () => {
+                    savedModalNs = modalNsInput.value;
+                });                
+                modalNsInput.addEventListener('focus', () => {
+                    savedModalNs = modalNsInput.value;
+                    modalNsInput.value = "";
+                });                
+                modalNsInput.addEventListener('focusout', () => {
+                    if (savedModalNs && savedModalNs.length > 0) modalNsInput.value = savedModalNs;
+                    if (modalNsInput && modalNsInput.value.length == 0 && modalNsList && modalNsList.options[0]) modalNsInput.value = modalNsList.options[0].value;
+                });                
               },
             preConfirm: () => {
               const ns = Swal.getPopup().querySelector('#modalnamespaceinput').value;
@@ -246,10 +262,15 @@ window.addEventListener('onauth', async function (e) {
             }
           }).then(async (result) => {
             if (result.isDismissed) return;
+            // TODO: check if add new objects is check on an existing unlisted scene? Might result in adding objects to the scene...
+            let namespacedScene = `${result.value.ns}/${result.value.scene}`;
+            ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
             let exists = await PersistObjects.addNewScene(result.value.ns, result.value.scene, (result.value.addobjs) ? dftSceneObjects : undefined);
+            namespaceinput.value = result.value.ns;
+            sceneinput.value = result.value.scene;
             setTimeout(async () => {
                 await PersistObjects.populateSceneList(result.value.ns, sceneinput, scenelist, result.value.scene);
-                if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
+                if (sceneinput.disabled === false) await PersistObjects.populateObjectList(namespacedScene, objFilter.value, objTypeFilter);
                 reload();
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
@@ -461,7 +482,10 @@ window.addEventListener('onauth', async function (e) {
         }
         newScene = !foundScene;
         saved_scene = sceneinput.value;
-        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
+        let namespacedScene = `${namespaceinput.value}/${sceneinput.value}`;
+        // TODO: trigger auth
+        ARENAUserAccount.refreshAuthToken('google', username, namespacedScene);
+        await PersistObjects.populateObjectList(namespacedScene, objFilter.value, objTypeFilter);
         reload();
         updateLink();
         localStorage.setItem("scene", sceneinput.value );
@@ -606,9 +630,14 @@ window.addEventListener('onauth', async function (e) {
             PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
         }, 500); // refresh after a while, so that new object messages are processed
     };
+
     document.querySelectorAll('.addobj').forEach(item => {
       item.addEventListener("click", addObjHandler);
     });
+
+    document.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) addObjHandler();
+    });    
 
     /**
      * Load defaults, setup initial state of the page

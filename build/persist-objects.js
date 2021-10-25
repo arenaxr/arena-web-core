@@ -326,10 +326,7 @@ export async function populateNamespaceList(nsInput, nsList) {
 
     // add user namespace if needed
     if (persist.namespaces.indexOf(persist.authState.username) < 0) {
-        var option = document.createElement('option');
-        option.text = persist.authState.username;
-        nsList.appendChild(option);
-        //nsList.add(option);
+        persist.namespaces.push(persist.authState.username);
     }
 
     // add public namespace if needed
@@ -337,7 +334,6 @@ export async function populateNamespaceList(nsInput, nsList) {
         var option = document.createElement('option');
         option.text = 'public';
         nsList.appendChild(option);
-        //nsList.add(option);
     }
 
     // populate list
@@ -345,14 +341,14 @@ export async function populateNamespaceList(nsInput, nsList) {
         var option = document.createElement('option');
         option.text = persist.namespaces[i];
         nsList.appendChild(option);
-        //nsList.add(option);
     }
     nsInput.value = persist.authState.username;
     return persist.authState.username;
 }
 
 export function emptySceneInput(sceneInput) {
-    sceneInput.value = 'new-scene';
+    sceneInput.value = '';
+    sceneInput.disabled=true;
     clearObjectList();
     persist.addEditSection.style = 'display:none';
 }
@@ -391,12 +387,12 @@ export function populateSceneList(ns, sceneInput, sceneList, selected = undefine
     }
 }
 
-export function populateNewSceneNamespaces(nsList) {
+export function populateNewSceneNamespaces(nsInput, nsList) {
     if (!persist.authState.authenticated) {
         throw 'User must be authenticated.';
     }
 
-    let ns = [persist.authState.username];
+    let ns = persist.namespaces;
     if (persist.namespaces.indexOf('public') > 0) {
         ns.push('public');
     }
@@ -410,9 +406,9 @@ export function populateNewSceneNamespaces(nsList) {
     for (let i = 0; i < ns.length; i++) {
         var option = document.createElement('option');
         option.text = ns[i];
-        nsList.add(option);
+        nsList.appendChild(option);
     }
-    nsList.value = persist.authState.username;
+    nsInput.value = persist.authState.username;
     return ns;
 }
 
