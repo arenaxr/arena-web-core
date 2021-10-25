@@ -52,6 +52,8 @@ window.addEventListener('onauth', async function (e) {
     var clearselButton = document.getElementById("clearlist");
     var refreshButton = document.getElementById("refreshlist");
     var refreshSlButton = document.getElementById("refreshscenelist");
+    var showAllTypesButton = document.getElementById("objfiltershowall");
+    var hideAllTypesButton = document.getElementById("objfilterhideall");
 
     var newScene=true;
     var saved_namespace;
@@ -486,7 +488,6 @@ window.addEventListener('onauth', async function (e) {
 
     objFilterSel.addEventListener("click", async function() {
         objTypeFilter[objFilterSel.value] = !objTypeFilter[objFilterSel.value];
-        var opts = objFilterSel.options;
         let opt = objFilterSel.namedItem('objfilter_' + objFilterSel.value);
         let text = ((objTypeFilter[objFilterSel.value]) ? 'Hide':'Show') + opt.textContent.substring(4);
         opt.textContent = text;
@@ -557,6 +558,22 @@ window.addEventListener('onauth', async function (e) {
                 timer: 5000,
             });
           })
+    });
+    
+    async function setAllTypes(showHide) {
+        for (const [key, value] of Object.entries(objTypeFilter)) {
+            objTypeFilter[key] = showHide; // true = show
+            let opt = objFilterSel.namedItem('objfilter_' + key);
+            let text = ((showHide) ? 'Hide':'Show') + opt.textContent.substring(4);
+            opt.textContent = text;
+        }
+        await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
+    }
+    showAllTypesButton.addEventListener("click", async function() {
+        setAllTypes(true);
+    });
+    hideAllTypesButton.addEventListener("click", async function() {
+        setAllTypes(false);
     });
 
     window.addObjHandler = async function() {
