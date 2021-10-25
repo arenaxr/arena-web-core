@@ -160,7 +160,7 @@ export async function fetchSceneObjects(scene) {
         }
         sceneObjs = await data.json();
     } catch (err) {
-        throw `Error fetching scene from database: ${JSON.stringify(err)}`
+        throw `${err}`
     }
     return sceneObjs;
 }
@@ -178,7 +178,7 @@ export async function populateObjectList(
     } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: 'Error fetching scene from database: ${err}',
+            title: `Error fetching scene from database. ${err}`,
             timer: 5000,
         });
         return;        
