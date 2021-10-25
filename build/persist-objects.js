@@ -83,6 +83,7 @@ export async function init(settings) {
         return;
     }
 
+    persist.mqttConnected = true;
     console.info('Connected.');
 }
 
