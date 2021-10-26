@@ -45,17 +45,17 @@
           <div class="input-prepend">
             <span class="add-on" style="width:80px;">Namespace</span>
             <!--<select id="namespacelist" class="input-medium">-->
-            <input type="text" class="input-medium" list="namespacelist" placeholder="Select Namespace..." id="namespaceinput">
+            <input type="text" class="input-medium" list="namespacelist" placeholder="Select Namespace..." autocomplete="off" id="namespaceinput">
             <datalist id="namespacelist"></datalist> 
           </div><div class="input-prepend">
             <!--</select>-->
             <span class="add-on" style="width:80px;">Scene</span>
             <!--<select id="scenelist" class="input-medium">-->
-            <input type="text" class="input-medium" list="scenelist" placeholder="Select Scene..." id="sceneinput">
+            <input type="text" class="input-medium" list="scenelist" placeholder="Select Scene..." autocomplete="off" id="sceneinput">
             <datalist id="scenelist"></datalist>
             <!--</select>-->
           </div>
-          <a class="btn btn-small" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
+          <a class="btn btn-small" href="#" id='openaddscene' title="Add new or unlisted scene."><i class="icon-plus"></i></a>
           <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i
               class="icon-trash"></i></a>
               <a class="btn btn-small" href="#" id='importscene' title="Import from JSON file"><i
@@ -63,9 +63,11 @@
             <a class="btn btn-small" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i
               class="icon-refresh"></i></a>
         </form>
+        <div id="scenelinks">
         <p><a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in Current Scene ARENA (new
           Window)</a></p>
         <a id="scene_perms_url" href="#"><i class="icon-lock"></i> Edit scene permissions</a>
+        </div>
         </div>
         <div class='span4 col-md-4 columns four large-4'>
           <p></p>
@@ -132,7 +134,7 @@
               class="icon-tag"></i>Gen object_id </button>
           <button class="btn btn-primary btn-small addobj" type="button" title="Add or Update Object"><i
               class="icon-plus"></i> Add/Update Object </button>
-              <small>(Press 'Enter' to add/update object)</small>
+              <!--<small>(Press 'Enter' to add/update object)</small>-->
         </form>
         </div>
         <div class='span4 col-md-4 columns four large-4'></div>
@@ -142,7 +144,7 @@
         <div id='editor'></div>
         <button class="btn btn-primary addobj" type="button" title="Add or Update Object"><i class="icon-plus"></i>
           Add/Update Object</button>
-        <small>(Press 'Enter' to add/update object)</small>
+        <!--<small>(Press 'Enter' to add/update object)</small>-->
         <br />
         <br />
       </div>

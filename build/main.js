@@ -37,7 +37,8 @@ window.addEventListener('onauth', async function (e) {
     var objFilter = document.getElementById("objfilter");
     var objFilterSel = document.getElementById("objfiltersel");
     var arenaHostLbl = document.getElementById("arenahost");
-
+    var sceneLinks = document.getElementById("scenelinks");
+    
     // Buttons/s
     var openAddSceneButton = document.getElementById("openaddscene");
     var deleteSceneButton = document.getElementById("deletescene");
@@ -90,6 +91,10 @@ window.addEventListener('onauth', async function (e) {
     };
 
     var updateLink = function() {
+        if (sceneinput.disabled == true) {
+            sceneLinks.style = 'display:none';
+            return;
+        } else sceneLinks.style = 'display:block';       
         let dp = getDevPath();
         let permsp = 'user/profile/scenes/';
         sceneUrl.href = `${document.location.protocol}//${document.location.hostname}${document.location.port}/${dp}${namespaceinput.value}/${sceneinput.value}`;
@@ -97,6 +102,7 @@ window.addEventListener('onauth', async function (e) {
     };
 
     var updateUrl = function() {
+        if (sceneinput.disabled == true) return;        
         let newUrl = new URL(window.location.href);
         newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
         window.history.pushState({ path: newUrl.href }, '', newUrl.href);
@@ -210,10 +216,10 @@ window.addEventListener('onauth', async function (e) {
     JSONEditor.defaults.options.show_errors = "interaction";
     JSONEditor.defaults.options.ajax = true;
 
-    // Open new scene modal
-    openAddSceneButton.addEventListener("click", async function() {
+    // show new scene modal
+    function newSceneModal(theNewScene=undefined) {
         Swal.fire({
-            title: 'Add Scene',
+            title: 'Add New or Unlisted Scene',
             html: `<div class="input-prepend">
                     <span class="add-on" style="width:125px">Namespace</span>
                     <input type="text" class="input-medium" style="width:215px" list="modalnamespacelist" placeholder="Select Namespace..." id="modalnamespaceinput">
@@ -235,6 +241,8 @@ window.addEventListener('onauth', async function (e) {
             willOpen: () => {
                 const modalNsList = Swal.getPopup().querySelector('#modalnamespacelist');
                 const modalNsInput = Swal.getPopup().querySelector('#modalnamespaceinput');
+                const modalScenename = Swal.getPopup().querySelector('#modalscenename');
+                if (theNewScene) modalScenename.value = theNewScene;
                 PersistObjects.populateNewSceneNamespaces(modalNsInput, modalNsList);
                 modalNsInput.value = namespaceinput.value;
                 var savedModalNs;
@@ -275,6 +283,10 @@ window.addEventListener('onauth', async function (e) {
                 updateLink();
               }, 500); // refresh after a while, so that delete messages are processed
           })
+    }
+
+    openAddSceneButton.addEventListener("click", async function() {
+        newSceneModal();
     });
 
     deleteSceneButton.addEventListener("click", async function() {
@@ -296,7 +308,7 @@ window.addEventListener('onauth', async function (e) {
               await PersistObjects.deleteScene(namespaceinput.value, sceneinput.value, !!result.value);
               setTimeout(async () => {
                 await PersistObjects.populateSceneAndNsLists(namespaceinput, namespacelist, sceneinput, scenelist);
-                await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
+                if (!sceneinput.disabled) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
                 reload();
                 updateLink();
                 localStorage.setItem("scene", sceneinput.value );
@@ -356,16 +368,27 @@ window.addEventListener('onauth', async function (e) {
                             timer: 8000,
                         });
                         return;
-                    } else response.json();
+                    } 
+                    return response.json();
                 })
                 .then((importObjs) => {
                     if (!importObjs) return;
+                    if (sceneinput.disabled == true && !result.value.newscene) {
+                        Alert.fire({
+                            icon: 'error',
+                            title: 'New scene not requested.',
+                            html: `Must import into an existing scene.`,
+                            timer: 8000,
+                        });                        
+                        return;
+                    }
                     let scene = `${namespaceinput.value}/${sceneinput.value}`;
                     if (result.value.newscene) {
                         scene = undefined; // will get scene from importObjs data
                     }
+                    let theNewScene;
                     try {
-                        PersistObjects.performActionArgObjList('create', scene, importObjs, false);
+                        theNewScene = PersistObjects.performActionArgObjList('create', scene, importObjs, false);
                     } catch (err) {
                         Alert.fire({
                             icon: 'error',
@@ -376,12 +399,10 @@ window.addEventListener('onauth', async function (e) {
                         return;
                     }
                     setTimeout(async () => {
-                        await PersistObjects.populateObjectList(
-                            `${namespaceinput.value}/${sceneinput.value}`,
-                            objFilter.value,
-                            objTypeFilter
-                        );
+                        await PersistObjects.populateSceneList(namespaceinput.value, sceneinput, scenelist, theNewScene);
+                        await PersistObjects.populateObjectList(`${namespaceinput.value}/${theNewScene}`, objFilter.value, objTypeFilter);
                         reload();
+                        updateLink();
                     }, 500);
                 });
         });
@@ -481,6 +502,9 @@ window.addEventListener('onauth', async function (e) {
             }
         }
         newScene = !foundScene;
+        if (newScene) {
+            newSceneModal(sceneinput.value);
+        }
         saved_scene = sceneinput.value;
         let namespacedScene = `${namespaceinput.value}/${sceneinput.value}`;
         // TODO: trigger auth
@@ -635,9 +659,11 @@ window.addEventListener('onauth', async function (e) {
       item.addEventListener("click", addObjHandler);
     });
 
+    /*
     document.addEventListener("keyup", function(event) {
         if (event.keyCode === 13) addObjHandler();
-    });    
+    });
+    */    
 
     /**
      * Load defaults, setup initial state of the page

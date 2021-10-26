@@ -129,16 +129,16 @@ export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, scene
     return ns;
 }
 
-export function clearObjectList(noObjNotification = true) {
+export function clearObjectList(noObjNotification = undefined) {
     persist.currentSceneObjs = [];
     while (persist.objList.firstChild) {
         persist.objList.removeChild(persist.objList.firstChild);
     }
 
-    if (!noObjNotification) return;
+    if (noObjNotification == undefined) return;
 
     let li = document.createElement('li');
-    let t = document.createTextNode('No objects in the scene');
+    let t = document.createTextNode(noObjNotification);
     li.appendChild(t);
 
     persist.objList.appendChild(li);
@@ -170,7 +170,7 @@ export async function populateObjectList(
     filter,
     objTypeFilter 
 ) {
-    clearObjectList(false);
+    clearObjectList();
 
     let sceneObjs;
     try {
@@ -347,9 +347,9 @@ export async function populateNamespaceList(nsInput, nsList) {
 }
 
 export function emptySceneInput(sceneInput) {
-    sceneInput.value = '';
+    sceneInput.value = 'No Scenes';
     sceneInput.disabled=true;
-    clearObjectList();
+    clearObjectList('No Scene Selected');
     persist.addEditSection.style = 'display:none';
 }
 
@@ -491,6 +491,7 @@ export function performActionArgObjList(action, scene, objList, json=true) {
             return;
         }
     }
+    return obj.sceneId;
 }
 
 export function selectAll() {
