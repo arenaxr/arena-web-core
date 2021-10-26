@@ -13,12 +13,13 @@ export class ARENAUserAccount {
     /**
      * Internal call to perform xhr request
      */
-    static _makeRequest(method, url, params = undefined) {
+    static _makeRequest(method, url, params = undefined, contentType = undefined) {
         return new Promise(function(resolve, reject) {
             let xhr = new XMLHttpRequest();
             xhr.open(method, url);
             const csrftoken = getCookie('csrftoken');
             xhr.setRequestHeader('X-CSRFToken', csrftoken);
+            if (contentType) xhr.setRequestHeader('Content-Type', contentType);
             xhr.responseType = 'json';
             xhr.onload = function() {
                 if (this.status >= 200 && this.status < 300) {
@@ -72,8 +73,9 @@ export class ARENAUserAccount {
      * @param {string} scene_namespace name of the scene without namespace
      * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
      */
-    static async requestUserNewScene(scene_namespace) {
+    static async requestUserNewScene(scene_namespace, is_public=false) {
         var params = new FormData();
+        // TODO: add public parameter
         let result = await ARENAUserAccount._makeRequest('POST', `/user/scenes/${scene_namespace}`);
         return result;
     }
@@ -86,4 +88,22 @@ export class ARENAUserAccount {
         let result = await ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${scene_namespace}`);
         return result;
     }
+
+    /**
+     * Request to delete scene permissions from user db
+     * @param {string} scene_namespace name of the scene without namespace
+     */
+     static async refreshAuthToken(authType, mqttUsername, namespacedScene) {
+        let params = 'username=' + mqttUsername;
+        params += `&id_auth=${authType}`;
+        params += `&realm=${ARENADefaults ? ARENADefaults.realm :'realm'}`;
+        params += `&scene=${namespacedScene}`;
+        let result = await ARENAUserAccount._makeRequest('POST', `/user/mqtt_auth`, params, 'application/x-www-form-urlencoded');
+        AUTH.user_type = authType;
+        AUTH.user_username = result.username;
+        // keep payload for later viewing
+        const tokenObj = KJUR.jws.JWS.parse(result.token);
+        AUTH.token_payload = tokenObj.payloadObj;        
+        return { mqtt_username: result.username, mqtt_token: result.token };
+    }    
 }

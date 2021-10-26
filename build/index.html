@@ -43,22 +43,31 @@
         <h1>Scene Editor</h1>
         <form class="form-inline">
           <div class="input-prepend">
-            <span class="add-on">User or Organization</span>
-            <select id="namespacelist" class="input-medium">
-            </select>
-            <span class="add-on">Scene</span>
-            <select id="scenelist" class="input-medium">
-            </select>
+            <span class="add-on" style="width:80px;">Namespace</span>
+            <!--<select id="namespacelist" class="input-medium">-->
+            <input type="text" class="input-medium" list="namespacelist" placeholder="Select Namespace..." autocomplete="off" id="namespaceinput">
+            <datalist id="namespacelist"></datalist> 
+          </div><div class="input-prepend">
+            <!--</select>-->
+            <span class="add-on" style="width:80px;">Scene</span>
+            <!--<select id="scenelist" class="input-medium">-->
+            <input type="text" class="input-medium" list="scenelist" placeholder="Select Scene..." autocomplete="off" id="sceneinput">
+            <datalist id="scenelist"></datalist>
+            <!--</select>-->
           </div>
-          <a class="btn btn-small" href="#" id='openaddscene' title="Add Scene"><i class="icon-plus"></i></a>
+          <a class="btn btn-small" href="#" id='openaddscene' title="Add new or unlisted scene."><i class="icon-plus"></i></a>
           <a class="btn btn-small btn-danger" href="#" id='deletescene' title="Delete Current Scene"><i
               class="icon-trash"></i></a>
-          <a class="btn btn-small" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i
+              <a class="btn btn-small" href="#" id='importscene' title="Import from JSON file"><i
+                class="icon-upload"></i></a>
+            <a class="btn btn-small" href="#" id='refreshscenelist' title="Refresh Scene List from User Account"><i
               class="icon-refresh"></i></a>
         </form>
+        <div id="scenelinks">
         <p><a id="scene_url" href="#" target="_blank"><i class="icon-eye-open"></i> Open in Current Scene ARENA (new
           Window)</a></p>
         <a id="scene_perms_url" href="#"><i class="icon-lock"></i> Edit scene permissions</a>
+        </div>
         </div>
         <div class='span4 col-md-4 columns four large-4'>
           <p></p>
@@ -100,8 +109,10 @@
       <div class='span4 col-md-4 columns four large-4'>
           <h3>Filter Object Type</h3>
           <p>Click to show/hide object type from scene object list</p>
-          <select id="objfiltersel" class='objtypelist' size='7' multiple>
-        </select>
+          <select id="objfiltersel" class='objtypelist' size='7' multiple></select>
+          <a class="btn btn-small" href="#" id='objfiltershowall' title="Selected All Types"><i class="icon-check"></i> Show All</a>
+        <a class="btn btn-small" href="#" id='objfilterhideall' title="Clear Types Selection"><i class="icon-remove"></i> Hide All</a>
+  
       </div>
     </div> <!-- row 2-->
     <div id='addeditsection' style="display: none">
@@ -123,6 +134,7 @@
               class="icon-tag"></i>Gen object_id </button>
           <button class="btn btn-primary btn-small addobj" type="button" title="Add or Update Object"><i
               class="icon-plus"></i> Add/Update Object </button>
+              <!--<small>(Press 'Enter' to add/update object)</small>-->
         </form>
         </div>
         <div class='span4 col-md-4 columns four large-4'></div>
@@ -132,6 +144,7 @@
         <div id='editor'></div>
         <button class="btn btn-primary addobj" type="button" title="Add or Update Object"><i class="icon-plus"></i>
           Add/Update Object</button>
+        <!--<small>(Press 'Enter' to add/update object)</small>-->
         <br />
         <br />
       </div>

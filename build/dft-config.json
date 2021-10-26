@@ -1,8 +1,7 @@
 {
     "schema_definitions":"schemas/arena-schema-files.json",
     "schema_file":"schemas/box.json",
-    "namespace":"public",
-    "scene":"lobby",
+    "scene":"new-scene",
     "arena_host":"arena.andrew.cmu.edu",
     "default_objs_scene":"public/default"
  }

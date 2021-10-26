@@ -83,10 +83,11 @@ export async function init(settings) {
         return;
     }
 
+    persist.mqttConnected = true;
     console.info('Connected.');
 }
 
-export async function populateSceneAndNsLists(nsList, sceneList) {
+export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, sceneList) {
     try {
         persist.authState = await ARENAUserAccount.userAuthState();
     } catch (err) {
@@ -114,30 +115,30 @@ export async function populateSceneAndNsLists(nsList, sceneList) {
         var option = document.createElement('option');
         option.text = '';
         nsList.add(option);
-        nsList.disabled = true;
-        disableSceneList(sceneList);
+        nsInput.disabled = true;
+        emptySceneInput(sceneInput);
         return undefined;
     }
 
-    let ns = await populateNamespaceList(nsList);
+    let ns = await populateNamespaceList(nsInput, nsList);
     if (ns) {
-        populateSceneList(ns, sceneList);
+        populateSceneList(ns, sceneInput, sceneList);
     } else {
-        disableSceneList(sceneList);
+        emptySceneInput(sceneInput);
     }
     return ns;
 }
 
-export function clearObjectList(noObjNotification = true) {
+export function clearObjectList(noObjNotification = undefined) {
     persist.currentSceneObjs = [];
     while (persist.objList.firstChild) {
         persist.objList.removeChild(persist.objList.firstChild);
     }
 
-    if (!noObjNotification) return;
+    if (noObjNotification == undefined) return;
 
     let li = document.createElement('li');
-    let t = document.createTextNode('No objects in the scene');
+    let t = document.createTextNode(noObjNotification);
     li.appendChild(t);
 
     persist.objList.appendChild(li);
@@ -159,7 +160,7 @@ export async function fetchSceneObjects(scene) {
         }
         sceneObjs = await data.json();
     } catch (err) {
-        throw `Error fetching scene from database: ${JSON.stringify(err)}`
+        throw `${err}`
     }
     return sceneObjs;
 }
@@ -169,7 +170,7 @@ export async function populateObjectList(
     filter,
     objTypeFilter 
 ) {
-    clearObjectList(false);
+    clearObjectList();
 
     let sceneObjs;
     try {
@@ -177,7 +178,7 @@ export async function populateObjectList(
     } catch (err) {
         Alert.fire({
             icon: 'error',
-            title: 'Error fetching scene from database: ${err}',
+            title: `Error fetching scene from database. ${err}`,
             timer: 5000,
         });
         return;        
@@ -284,7 +285,7 @@ export async function populateObjectList(
     persist.addEditSection.style = 'display:block';
 }
 
-export async function populateNamespaceList(nsList) {
+export async function populateNamespaceList(nsInput, nsList) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
 
     let scenes;
@@ -325,35 +326,37 @@ export async function populateNamespaceList(nsList) {
 
     // add user namespace if needed
     if (persist.namespaces.indexOf(persist.authState.username) < 0) {
+        persist.namespaces.push(persist.authState.username);
+    }
+
+    // add public namespace if needed
+    if (persist.namespaces.indexOf('public') < 0) {
         var option = document.createElement('option');
-        option.text = persist.authState.username;
-        nsList.add(option);
+        option.text = 'public';
+        nsList.appendChild(option);
     }
 
     // populate list
     for (let i = 0; i < persist.namespaces.length; i++) {
         var option = document.createElement('option');
         option.text = persist.namespaces[i];
-        nsList.add(option);
+        nsList.appendChild(option);
     }
-    nsList.value = persist.authState.username;
+    nsInput.value = persist.authState.username;
     return persist.authState.username;
 }
 
-export function disableSceneList(sceneList) {
-    if (!sceneList) return;
-    sceneList.disabled = true;
-    let option = document.createElement('option');
-    option.text = 'No scenes.';
-    sceneList.add(option);
-    clearObjectList();
+export function emptySceneInput(sceneInput) {
+    sceneInput.value = 'No Scenes';
+    sceneInput.disabled=true;
+    clearObjectList('No Scene Selected');
     persist.addEditSection.style = 'display:none';
 }
 
-export function populateSceneList(ns, sceneList, selected = undefined) {
+export function populateSceneList(ns, sceneInput, sceneList, selected = undefined) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
     if (persist.scenes.length == 0) {
-        disableSceneList(sceneList);
+        emptySceneInput(sceneInput);
         return;
     }
 
@@ -362,29 +365,34 @@ export function populateSceneList(ns, sceneList, selected = undefined) {
         sceneList.removeChild(sceneList.firstChild);
     }
 
-    sceneList.disabled = false;
+    sceneInput.disabled = false;
     let first = undefined;
+    let selectedExists = false;
     for (let i = 0; i < persist.scenes.length; i++) {
         if (ns && persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
+        if (selected) {
+            if (selected == persist.scenes[i].name) selectedExists = true;
+        }
         let option = document.createElement('option');
         option.text = ns == undefined ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
-        sceneList.add(option);
+        //sceneList.add(option);
+        sceneList.appendChild(option);
     }
     if (!first) {
-        disableSceneList(sceneList);
+        emptySceneInput(sceneInput);
     } else {
-        if (!selected) sceneList.value = first;
-        else sceneList.value = selected;
+        if (!selected || !selectedExists) sceneInput.value = first;
+        else sceneInput.value = selected;
     }
 }
 
-export function populateNewSceneNamespaces(nsList) {
+export function populateNewSceneNamespaces(nsInput, nsList) {
     if (!persist.authState.authenticated) {
         throw 'User must be authenticated.';
     }
 
-    let ns = [persist.authState.username];
+    let ns = persist.namespaces;
     if (persist.namespaces.indexOf('public') > 0) {
         ns.push('public');
     }
@@ -398,9 +406,9 @@ export function populateNewSceneNamespaces(nsList) {
     for (let i = 0; i < ns.length; i++) {
         var option = document.createElement('option');
         option.text = ns[i];
-        nsList.add(option);
+        nsList.appendChild(option);
     }
-    nsList.value = persist.authState.username;
+    nsInput.value = persist.authState.username;
     return ns;
 }
 
@@ -420,13 +428,15 @@ export async function addNewScene(ns, sceneName, newObjs) {
         title: 'Scene added',
         timer: 5000,
     });
-    persist.scenes.push({ ns: ns, name: sceneName });
-    if (!newObjs) return;
+    let exists = persist.scenes.find(scene => scene.ns == ns && scene.name == sceneName);
+    if (!exists) persist.scenes.push({ ns: ns, name: sceneName });
+    if (!newObjs) return exists;
 
     // add objects to the new scene
     newObjs.forEach((obj) => {
         addObject(obj, `${ns}/${sceneName}`);
     });
+    return exists;
 }
 
 export async function deleteScene(ns, sceneName) {
@@ -446,11 +456,20 @@ export async function deleteScene(ns, sceneName) {
 
 export function selectedObjsPerformAction(action, scene, all = false) {
     var items = persist.objList.getElementsByTagName('li');
+    var objList = [];
     for (var i = 0; i < items.length; i++) {
         if (!items[i].classList.contains('checked') && !all) continue;
         var objJson = items[i].getAttribute('data-obj');
         if (!objJson) continue;
-        var obj = JSON.parse(objJson);
+        objList.push(objJson);
+    }
+    performActionArgObjList(action, scene, objList);
+}
+
+export function performActionArgObjList(action, scene, objList, json=true) {
+    if (!persist.mqttConnected) mqttReconnect();
+    for (var i = 0; i < objList.length; i++) {
+        var obj = json ? JSON.parse(objList[i]):objList[i];
         var actionObj = JSON.stringify({
             object_id: obj.object_id,
             action: action,
@@ -458,6 +477,7 @@ export function selectedObjsPerformAction(action, scene, all = false) {
             type: obj.type,
             data: obj.attributes != undefined ? obj.attributes : obj.data,
         });
+        if (!scene) scene = `${obj.namespace}/${obj.sceneId}`
         var topic = `realm/s/${scene}/${obj.object_id}`;
         console.info('Publish [ ' + topic + ']: ' + actionObj);
         try {
@@ -465,12 +485,13 @@ export function selectedObjsPerformAction(action, scene, all = false) {
         } catch (error) {
             Alert.fire({
                 icon: 'error',
-                title: `Error deleting: ${JSON.stringify(error)}`,
+                title: `Error: ${JSON.stringify(error)}`,
                 timer: 5000,
             });
             return;
         }
     }
+    return obj.sceneId;
 }
 
 export function selectAll() {
@@ -489,6 +510,8 @@ export function clearSelected() {
 
 export async function addObject(obj, scene) {
     var found = false;
+    if (!persist.mqttConnected) mqttReconnect();
+
     for (let i = 0; i < persist.currentSceneObjs.length; i++) {
         if (persist.currentSceneObjs[i].object_id == obj.object_id) {
             found = true;
@@ -571,6 +594,7 @@ export function mqttReconnect(settings) {
     persist.mc = new MqttClient({
         uri: persist.mqttUri,
         onMessageCallback: onMqttMessage,
+        onConnectionLost: onMqttConnectionLost,
         mqtt_username: persist.mqttUsername,
         mqtt_token: persist.mqttToken,
     });
@@ -585,9 +609,13 @@ export function mqttReconnect(settings) {
         });
         return;
     }
-
+    persist.mqttConnected = true;
     console.info('Connected to ' + persist.mqttUri);
 }
 
 // callback from mqttclient; on reception of message
 function onMqttMessage(message) { }
+
+function onMqttConnectionLost() { 
+    persist.mqttConnected = false;
+}
