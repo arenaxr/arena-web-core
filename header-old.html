@@ -1,11 +1,5 @@
 <!-- arena-core header for non-3d scene pages -->
 <style>
-    /* Allow space for navbar  */
-    body {
-        padding-top: 60px;
-        line-height: unset;
-    }
-
     /* Navbar styles need to disinherit from list.css */
     #header ul li {
         cursor: unset;
@@ -20,6 +14,32 @@
         -ms-user-select: unset;
         user-select: unset;
     }
+
+    @media only screen and (min-width: 850px) {
+        .brand {
+            margin-right: 10%;
+        }
+    }
+
+    .navbar .brand img {
+        max-height: 16px;
+    }
+
+    .navbar .brand {
+        padding-left: 12px;
+    }
+
+    .navbar-inner {
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    /* fix padding under menu after resize */
+    @media screen and (min-width: 767px) {
+        body {
+            padding-top: 60px;
+        }
+    }
 </style>
 
 <!-- Bootstrap 2.3.2 styled header -->
@@ -31,7 +51,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="brand" href="/"><b>ARENA</b></a>
+            <a class="brand" href="/"><img alt="arena logo" src="static/images/arena-logo-white.png"></a>
             <div class="nav-collapse collapse">
                 <ul class="nav">
                     <li class="nav-item">
@@ -68,4 +88,4 @@
     </div>
 </div>
 
-<script src="navbar-auth-state.js"></script>
+<script src="navbar-auth-state-old.js"></script>
