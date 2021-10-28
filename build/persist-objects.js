@@ -467,6 +467,7 @@ export function selectedObjsPerformAction(action, scene, all = false) {
 }
 
 export function performActionArgObjList(action, scene, objList, json=true) {
+    let theNewScene = scene;
     if (!persist.mqttConnected) mqttReconnect();
     for (var i = 0; i < objList.length; i++) {
         var obj = json ? JSON.parse(objList[i]):objList[i];
@@ -477,7 +478,10 @@ export function performActionArgObjList(action, scene, objList, json=true) {
             type: obj.type,
             data: obj.attributes != undefined ? obj.attributes : obj.data,
         });
-        if (!scene) scene = `${obj.namespace}/${obj.sceneId}`
+        if (!scene) {
+            scene = `${obj.namespace}/${obj.sceneId}`
+            theNewScene = obj.sceneId;
+        }
         var topic = `realm/s/${scene}/${obj.object_id}`;
         console.info('Publish [ ' + topic + ']: ' + actionObj);
         try {
@@ -491,7 +495,7 @@ export function performActionArgObjList(action, scene, objList, json=true) {
             return;
         }
     }
-    return obj.sceneId;
+    return theNewScene;
 }
 
 export function selectAll() {
