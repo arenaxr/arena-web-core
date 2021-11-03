@@ -128,3 +128,11 @@ ul li.checked::before {
   font-size: 11px;
   line-height: 95%;
 }
+
+.isDisabled {
+  color: currentColor;
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: none;
+  pointer-events: none;
+}

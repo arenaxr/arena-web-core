@@ -223,7 +223,7 @@ window.addEventListener('onauth', async function (e) {
             html: `<div class="input-prepend">
                     <span class="add-on" style="width:125px">Namespace</span>
                     <input type="text" class="input-medium" style="width:215px" list="modalnamespacelist" placeholder="Select Namespace..." id="modalnamespaceinput">
-                    <datalist id="modalnamespacelist"></datalist> 
+                    <datalist id="modalnamespacelist"></datalist>
                   </div>
                   <div class="input-prepend">
                     <span class="add-on" style="width:125px">Scene</span>
@@ -323,7 +323,7 @@ window.addEventListener('onauth', async function (e) {
             title: 'Import from JSON',
             html: `<div class="input-prepend">
                   <span class="add-on" style="width:120px">JSON Path</span>
-                  <input type="text" style="width:320px" id="jsonpath" placeholder="/store/users/user/blender-exports/scene/scene.json">            
+                  <input type="text" style="width:320px" id="jsonpath" placeholder="/store/users/user/blender-exports/scene/scene.json">
                 </div>
                 <p style="font-size:10px"><strong>You can enter the blender export scene name and use the default export path.<strong></p>`,
             width: 700,
@@ -769,6 +769,17 @@ window.addEventListener('onauth', async function (e) {
     }
     if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
     localStorage.setItem("scene", sceneinput.value );
+
+    // disabled some "publish" buttons by token access
+    const objectsTopic = `realm/s/${ns}/${s}`;
+    if (!isUserSceneOwner(mqttToken, objectsTopic)) {
+        delButton.classList.add('isDisabled');
+        deleteSceneButton.classList.add('isDisabled');
+        document.querySelectorAll('.addobj').forEach((item) => {
+            item.disabled = true;
+        });
+    }
+
     reload();
     updateLink();
     updateUrl();
@@ -795,3 +806,37 @@ Swal.fire({
         });
     }
 });
+
+/**
+ * Utility to match MQTT topic within permissions.
+ * @param {string} topic The MQTT topic to test.
+ * @param {string[]} rights The list of topic wild card permissions.
+ * @return {boolean} True if the topic matches the list of topic wildcards.
+ */
+function matchJWT(topic, rights) {
+    const len = rights.length;
+    let valid = false;
+    for (let i = 0; i < len; i++) {
+        if (MQTTPattern.matches(rights[i], topic)) {
+            valid = true;
+            break;
+        }
+    }
+    return valid;
+};
+
+/**
+ * Checks loaded MQTT token for full scene object write permissions.
+ * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
+ * @return {boolean} True if the user has permission to write in this scene.
+ */
+function isUserSceneOwner(mqtt_token, objectsTopic) {
+    if (mqtt_token) {
+        const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
+        const perms = tokenObj.payloadObj;
+        if (matchJWT(objectsTopic, perms.publ)) {
+            return true;
+        }
+    }
+    return false;
+}
