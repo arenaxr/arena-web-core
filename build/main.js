@@ -314,7 +314,8 @@ window.addEventListener('onauth', async function (e) {
                 updateLink();
                 localStorage.setItem("scene", sceneinput.value );
                 updateUrl();
-              }, 500); // refresh after a while, so that delete messages are processed
+                updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
+            }, 500); // refresh after a while, so that delete messages are processed
             }
           });
     });
@@ -515,6 +516,7 @@ window.addEventListener('onauth', async function (e) {
         updateLink();
         localStorage.setItem("scene", sceneinput.value );
         updateUrl();
+        updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
     });
 
     // Focus listener for scene
@@ -771,19 +773,10 @@ window.addEventListener('onauth', async function (e) {
     if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
     localStorage.setItem("scene", sceneinput.value );
 
-    // disabled some "publish" buttons by token access
-    const objectsTopic = `realm/s/${ns}/${s}`;
-    if (!isUserSceneOwner(mqttToken, objectsTopic)) {
-        delButton.classList.add('isDisabled');
-        deleteSceneButton.classList.add('isDisabled');
-        document.querySelectorAll('.addobj').forEach((item) => {
-            item.disabled = true;
-        });
-    }
-
     reload();
     updateLink();
     updateUrl();
+    updatePublishControlsByToken(ns, s, mqttToken);
 
     Swal.close();
 });
@@ -809,6 +802,29 @@ Swal.fire({
 });
 
 /**
+ * Enable some "publish" buttons by token access
+ * @param {string} namespace
+ * @param {string} scenename
+ * @param {string} mqttToken
+ */
+function updatePublishControlsByToken(namespace, scenename, mqttToken) {
+    const objectsTopic = `realm/s/${namespace}/${scenename}`;
+    const editor = isUserSceneEditor(mqttToken, objectsTopic);
+    const delButton = document.getElementById('delobj');
+    const deleteSceneButton = document.getElementById('deletescene');
+    if (editor) {
+        delButton.classList.remove('isDisabled');
+        deleteSceneButton.classList.remove('isDisabled');
+    } else {
+        delButton.classList.add('isDisabled');
+        deleteSceneButton.classList.add('isDisabled');
+    }
+    document.querySelectorAll('.addobj').forEach((item) => {
+        item.disabled = !editor;
+    });
+}
+
+/**
  * Utility to match MQTT topic within permissions.
  * @param {string} topic The MQTT topic to test.
  * @param {string[]} rights The list of topic wild card permissions.
@@ -829,9 +845,10 @@ function matchJWT(topic, rights) {
 /**
  * Checks loaded MQTT token for full scene object write permissions.
  * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
+ * @param {string} objectsTopic
  * @return {boolean} True if the user has permission to write in this scene.
  */
-function isUserSceneOwner(mqtt_token, objectsTopic) {
+function isUserSceneEditor(mqtt_token, objectsTopic) {
     if (mqtt_token) {
         const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
         const perms = tokenObj.payloadObj;
