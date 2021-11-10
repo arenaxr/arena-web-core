@@ -315,7 +315,7 @@ window.addEventListener('onauth', async function (e) {
                 localStorage.setItem("scene", sceneinput.value );
                 updateUrl();
                 updatePublishControlsByToken(namespaceinput.value, sceneinput.value, mqttToken);
-            }, 500); // refresh after a while, so that delete messages are processed
+              }, 500); // refresh after a while, so that delete messages are processed
             }
           });
     });
@@ -772,7 +772,6 @@ window.addEventListener('onauth', async function (e) {
     }
     if (sceneinput.disabled === false) await PersistObjects.populateObjectList(`${namespaceinput.value}/${sceneinput.value}`, objFilter.value, objTypeFilter);
     localStorage.setItem("scene", sceneinput.value );
-
     reload();
     updateLink();
     updateUrl();
