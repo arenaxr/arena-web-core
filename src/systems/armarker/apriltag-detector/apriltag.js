@@ -1,3 +1,17 @@
+/* eslint-disable camelcase */
+/* eslint-disable max-len */
+
+/**
+ * @fileoverview Process grayscale camera frames in WASM detector.
+ *
+ * See https://github.com/conix-center/apriltag-js-standalone
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
+ * @date 2021
+ * @authors Nuno Pereira
+ */
+
 importScripts('./apriltag_wasm.js');
 
 // CV Worker message types
@@ -15,7 +29,8 @@ const CVWorkerMsgs = {
 /**
  * This is a wrapper class that calls apriltag_wasm to load the WASM module and wraps the c implementation calls.
  * The apriltag dectector uses the tag36h11 family.
- * For tag pose estimation, tag sizes are assumed according to the tag id:
+ * For tag pose estimation, call set_tag_size allows to indicate the size of known tags.
+ * If size is not defined using set_tag_size() will default to tag sizes assumed according to the tag id:
  *
  * [0,150]     -> size=150mm;
  * ]150,300]   -> size==100mm;
@@ -59,9 +74,9 @@ class Apriltag {
     }
 
     /**
-     * Init warapper calls
-     * @param {*} Module WASM module instance
-     */
+       * Init warapper calls
+       * @param {*} Module WASM module instance
+       */
     onWasmInit(Module) {
         // save a reference to the module here
         this._Module = Module;
@@ -75,12 +90,15 @@ class Apriltag {
         this._set_pose_info = Module.cwrap('atagjs_set_pose_info', 'number', ['number', 'number', 'number', 'number']);
         // uint8_t* atagjs_set_img_buffer(int width, int height, int stride); Creates/changes size of the image buffer where we receive the images to process
         this._set_img_buffer = Module.cwrap('atagjs_set_img_buffer', 'number', ['number', 'number', 'number']);
+        // void *atagjs_set_tag_size(int tagid, double size)
+        this._atagjs_set_tag_size = Module.cwrap('atagjs_set_tag_size', null, ['number', 'number']);
         // t_str_json* atagjs_detect(); Detect tags in image previously stored in the buffer.
         // returns pointer to buffer starting with an int32 indicating the size of the remaining buffer (a string of chars with the json describing the detections)
         this._detect = Module.cwrap('atagjs_detect', 'number', []);
 
         // inits detector
         this._init();
+
 
         // set max_detections = 0, meaning no max; will return all detections
         // options: float decimate, float sigma, int nthreads, int refine_edges, int max_detections, int return_pose, int return_solutions
@@ -97,24 +115,22 @@ class Apriltag {
     }
 
     /**
-     * **public** detect method
-     * @param {Array} grayscaleImg grayscale image buffer
-     * @param {Number} imgWidth image with
-     * @param {Number} imgHeight image height
-     * @return {detection} detection object
-     */
+         * **public** detect method
+         * @param {Array} grayscaleImg grayscale image buffer
+         * @param {Number} imgWidth image with
+         * @param {Number} imgHeight image height
+         * @return {detection} detection object
+         */
     detect(grayscaleImg, imgWidth, imgHeight) {
-        // set_img_buffer allocates the buffer for image and returns it;
-        // just returns the previously allocated buffer if size has not changed
+        // set_img_buffer allocates the buffer for image and returns it; just returns the previously allocated buffer if size has not changed
         const imgBuffer = this._set_img_buffer(imgWidth, imgHeight, imgWidth);
-        if (imgBuffer == 0) return {result: 'Could not allocate memory for image.'};
         if (imgWidth * imgHeight < grayscaleImg.length) return {result: 'Image data too large.'};
         this._Module.HEAPU8.set(grayscaleImg, imgBuffer); // copy grayscale image data
         const strJsonPtr = this._detect();
         /* detect returns a pointer to a t_str_json c struct as follows
-            size_t len; // string length
-            char *str;
-            size_t alloc_size; // allocated size */
+              size_t len; // string length
+              char *str;
+              size_t alloc_size; // allocated size */
         const strJsonLen = this._Module.getValue(strJsonPtr, 'i32'); // get len from struct
         if (strJsonLen == 0) { // returned empty string
             return [];
@@ -125,26 +141,36 @@ class Apriltag {
         for (let i = 0; i < strJsonLen; i++) {
             detectionsJson += String.fromCharCode(strJsonView[i]);
         }
+        // console.log(detectionsJson);
         const detections = JSON.parse(detectionsJson);
 
         return detections;
     }
 
     /**
-     * **public** set camera parameters
-     * @param {Number} fx camera focal length
-     * @param {Number} fy camera focal length
-     * @param {Number} cx camera principal point
-     * @param {Number} cy camera principal point
-     */
+       * **public** set camera parameters
+       * @param {Number} fx camera focal length
+       * @param {Number} fy camera focal length
+       * @param {Number} cx camera principal point
+       * @param {Number} cy camera principal point
+       */
     set_camera_info(fx, fy, cx, cy) {
         this._set_pose_info(fx, fy, cx, cy);
     }
 
     /**
-     * **public** set maximum detections to return (0=return all)
-     * @param {Number} maxDetections
-     */
+       * **public** set size of known tag (size in meters)
+       * @param {Number} tagid the tag id
+       * @param {Number} size the size of the tag in meters
+       */
+    set_tag_size(tagid, size) {
+        this._atagjs_set_tag_size(tagid, size);
+    }
+
+    /**
+       * **public** set maximum detections to return (0=return all)
+       * @param {Number} maxDetections
+       */
     set_max_detections(maxDetections) {
         this._opt.max_detections = maxDetections;
         this._set_detector_options(
@@ -158,9 +184,9 @@ class Apriltag {
     }
 
     /**
-     * **public** set return pose estimate (0=do not return; 1=return)
-     * @param {Number} returnPose
-     */
+       * **public** set return pose estimate (0=do not return; 1=return)
+       * @param {Number} returnPose
+       */
     set_return_pose(returnPose) {
         this._opt.return_pose = returnPose;
         this._set_detector_options(
@@ -174,9 +200,9 @@ class Apriltag {
     }
 
     /**
-     * **public** set return pose estimate alternative solution details (0=do not return; 1=return)
-     * @param {Number} returnSolutions
-     */
+       * **public** set return pose estimate alternative solution details (0=do not return; 1=return)
+       * @param {Number} returnSolutions
+       */
     set_return_solutions(returnSolutions) {
         this._opt.return_solutions = returnSolutions;
         this._set_detector_options(
@@ -211,16 +237,16 @@ onmessage = async function(e) {
 
     // console.log('CV Worker received message');
     switch (cvWorkerMsg.type ) {
-        // process a new image frame
-        case CVWorkerMsgs.type.PROCESS_GSFRAME:
-            if (!initDone) {
-                pendingCvWorkerMsg = cvWorkerMsg;
-                return;
-            }
-            processGsFrame(cvWorkerMsg);
-            break;
-        default:
-            console.warn('CVWorker: unknow message received.');
+    // process a new image frame
+    case CVWorkerMsgs.type.PROCESS_GSFRAME:
+        if (!initDone) {
+            pendingCvWorkerMsg = cvWorkerMsg;
+            return;
+        }
+        processGsFrame(cvWorkerMsg);
+        break;
+    default:
+        console.warn('CVWorker: unknow message received.');
     }
 };
 
@@ -237,12 +263,10 @@ onmessage = async function(e) {
 async function processGsFrame(frame) {
     const c = frame.camera;
 
-    //console.log('Frame!', frame);
-
     // camera info to determine pose
     aprilTag.set_camera_info(c.fx, c.fy, c.cx, c.cy);
 
-    //console.log(frame.grayscalePixels, frame.width, frame.height);
+    // console.log(frame.grayscalePixels, frame.width, frame.height);
     // detect aprilTag in the grayscale image given by grayscalePixels
     const detections = await aprilTag.detect(frame.grayscalePixels, frame.width, frame.height);
 
@@ -254,7 +278,7 @@ async function processGsFrame(frame) {
         grayscalePixels: frame.grayscalePixels,
     };
 
-    //console.log('Detections:', detections);
+    // console.log('Detections:', detections);
     // post detection results, returning ownership of the pixel buffer
     self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
 }

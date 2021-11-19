@@ -1,12 +1,16 @@
-// import Apriltag from "./apriltag/apriltag.js";
-// import CVWorkerMsgs from "../worker-msgs.js";
-/* global Apriltag, CVWorkerMsgs */
+/**
+ * @fileoverview Init WASM detector; send frames to detector worker.
+ *
+ * See https://github.com/conix-center/apriltag-js-standalone
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
+ * @date 2021
+ * @authors Nuno Pereira
+ */
 
 importScripts('./apriltag.js');
 importScripts('../worker-msgs.js');
-
-// import Apriltag from './apriltag.js';
-// import CVWorkerMsgs from '../worker-msgs.js';
 
 let initDone = false;
 let pendingCvWorkerMsg = undefined;
