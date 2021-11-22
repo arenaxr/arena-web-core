@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
 
@@ -14,7 +15,7 @@
 
 importScripts('./apriltag_wasm.js');
 
-// CV Worker message types
+// CV Worker message types (**copy of worker-msgs.js**)
 const CVWorkerMsgs = {
     type: {
         /* sent from worker */
@@ -23,6 +24,8 @@ const CVWorkerMsgs = {
         NEXT_FRAME_REQ: 2, // worker requests a new frame
         /* sent to worker */
         PROCESS_GSFRAME: 3, // process grayscale image
+        KNOWN_MARKER_ADD: 4, // indicate known marker data (size)
+        KNOWN_MARKER_DEL: 5, // remove known marker data (size)
     },
 };
 
@@ -219,13 +222,15 @@ class Apriltag {
 // create detector instance and process messages
 let initDone = false;
 let pendingCvWorkerMsg = undefined;
+const pendingMarkerMsgs = [];
 
 // init apriltag detector; argument is a callback for when it is done loading
 const aprilTag = new Apriltag(() => {
     self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
     initDone = true;
     if (pendingCvWorkerMsg) {
-        processGsFrame(pendingCvWorkerMsg);
+        pendingMarkerMsgs.forEach( (msg) => { aprilTag.set_tag_size(msg.markerid, msg.size); console.log("Setting size", msg.markerid, msg.size); }); // process pending marker data msgs
+        processGsFrame(pendingCvWorkerMsg); // last pending frame
         pendingCvWorkerMsg = undefined;
     }
     console.log('CV Worker ready!');
@@ -237,16 +242,28 @@ onmessage = async function(e) {
 
     // console.log('CV Worker received message');
     switch (cvWorkerMsg.type ) {
-    // process a new image frame
-    case CVWorkerMsgs.type.PROCESS_GSFRAME:
-        if (!initDone) {
-            pendingCvWorkerMsg = cvWorkerMsg;
-            return;
-        }
-        processGsFrame(cvWorkerMsg);
-        break;
-    default:
-        console.warn('CVWorker: unknow message received.');
+        // process a new image frame
+        case CVWorkerMsgs.type.PROCESS_GSFRAME:
+            if (!initDone) {
+                pendingCvWorkerMsg = cvWorkerMsg;
+                return;
+            }
+            processGsFrame(cvWorkerMsg);
+            break;
+        case CVWorkerMsgs.type.KNOWN_MARKER_ADD:
+            if (!initDone) {
+                pendingMarkerMsgs.push(cvWorkerMsg);
+                return;
+            }
+            console.log("Setting size", msg.markerid, msg.size);
+            // let the detector know the size of markers, so it can compute their pose
+            aprilTag.set_tag_size(msg.markerid, msg.size);
+            break;
+        case CVWorkerMsgs.type.KNOWN_MARKER_DEL:
+            // TODO (maybe we don't need to remove?)
+            break;
+        default:
+            console.warn('CVWorker: unknow message received.', cvWorkerMsg);
     }
 };
 
@@ -278,7 +295,8 @@ async function processGsFrame(frame) {
         grayscalePixels: frame.grayscalePixels,
     };
 
-    // console.log('Detections:', detections);
+    if (detections.length > 0) console.log('Detections:', detections);
+
     // post detection results, returning ownership of the pixel buffer
     self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
 }

@@ -131,10 +131,11 @@
     *
     */
    async initCVPipeline() { 
+     if (this.cvPipelineInitialized) return;
      // try to setup a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
      if (this.isWebARViewer) {
        try {
-         this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
+         this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture); 
        } catch (err) {
          console.warn(`Could not create WebXRViewer/WebARViewer camera capture. ${err}`);
          return; // we are done here
@@ -170,6 +171,20 @@
      this.cvWorker = new Worker("./apriltag-detector/apriltag.js");
      this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
 
+     // send size of known markers to cvWorker (so it can compute pose)
+     console.log("Posting:", this.markers);
+     for (const [mid, marker] of Object.entries(this.markers)) {
+        let newMarker = {
+            type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
+            // marker id
+            markerid: mid,
+            // marker size in meters (marker component size is mm)
+            size: marker.data.size/1000,
+          };
+          this.cvWorker.postMessage(newMarker); 
+          console.log("Posting Marker", mid, marker.data.size/1000);   
+     }
+
      // listen for worker messages
      this.cvWorker.addEventListener("message", this.cvWorkerMessage.bind(this));
 
@@ -182,7 +197,8 @@
        builder: this.data.builder,
        debug: this.data.debugRelocalization
      });
- 
+
+     this.cvPipelineInitialized = true;
    },
    /**
     * Handle messages from cvWorker (detector)
@@ -300,7 +316,7 @@
     * @alias module:armarker-system
     */
    registerComponent: function(marker) {
-     this.markers[marker.data.markerid] = marker;
+     this.markers[marker.data.markerid] = marker;    
      this.initCVPipeline();
    },
    /**
@@ -309,6 +325,13 @@
     * @alias module:armarker-system
     */
    unregisterComponent: function(marker) {
+     // indicate marker was removed to cv worker
+     let delMarker = {
+        type: CVWorkerMsgs.KNOWN_MARKER_DEL,
+        // marker id
+        markerid: marker.data.markerid,
+     };
+     this.cvWorker.postMessage(marker);     
      delete this.markers[marker.data.markerid];
    },
    /**
