@@ -221,18 +221,13 @@ class Apriltag {
 
 // create detector instance and process messages
 let initDone = false;
-let pendingCvWorkerMsg = undefined;
 const pendingMarkerMsgs = [];
 
 // init apriltag detector; argument is a callback for when it is done loading
 const aprilTag = new Apriltag(() => {
     self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
     initDone = true;
-    if (pendingCvWorkerMsg) {
-        pendingMarkerMsgs.forEach( (msg) => { aprilTag.set_tag_size(msg.markerid, msg.size); console.log("Setting size", msg.markerid, msg.size); }); // process pending marker data msgs
-        processGsFrame(pendingCvWorkerMsg); // last pending frame
-        pendingCvWorkerMsg = undefined;
-    }
+    pendingMarkerMsgs.forEach( (msg) => { aprilTag.set_tag_size(msg.markerid, msg.size); console.log("Setting size", msg.markerid, msg.size); }); // process pending marker data msgs
     console.log('CV Worker ready!');
 });
 
@@ -245,7 +240,15 @@ onmessage = async function(e) {
         // process a new image frame
         case CVWorkerMsgs.type.PROCESS_GSFRAME:
             if (!initDone) {
-                pendingCvWorkerMsg = cvWorkerMsg;
+                // return empty detection result
+                const resMsg = {
+                    type: CVWorkerMsgs.type.FRAME_RESULTS,
+                    detections: [],
+                    ts: frame.ts,
+                    grayscalePixels: frame.grayscalePixels,
+                };
+                // post detection results, returning ownership of the pixel buffer
+                self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
                 return;
             }
             processGsFrame(cvWorkerMsg);
