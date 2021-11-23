@@ -172,7 +172,6 @@
      this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
 
      // send size of known markers to cvWorker (so it can compute pose)
-     console.log("Posting:", this.markers);
      for (const [mid, marker] of Object.entries(this.markers)) {
         let newMarker = {
             type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
@@ -182,7 +181,6 @@
             size: marker.data.size/1000,
           };
           this.cvWorker.postMessage(newMarker); 
-          console.log("Posting Marker", mid, marker.data.size/1000);   
      }
 
      // listen for worker messages
