@@ -364,12 +364,6 @@
     * @alias module:armarker-system
     */
    get: function(markerid) {
-     if (markerid == 0)
-       return {
-         id: "ORIGIN",
-         uuid: "ORIGIN",
-         pose: this.originMatrix
-       };
      const sysTag = this.markers[markerid];
      if (sysTag !== undefined) {
        return {
@@ -380,6 +374,13 @@
          buildable: sysTag.data.buildable
        };
      }
+     // default pose for tag 0
+     if (markerid == 0)
+       return {
+         id: "ORIGIN",
+         uuid: "ORIGIN",
+         pose: this.originMatrix
+       };    
      if (!this.ATLASMarkers[markerid]) {
        // force update from ATLAS if not found
        this.getARMArkersFromATLAS();
