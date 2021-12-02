@@ -1,609 +1,626 @@
 {
-    "properties": {
-      "animation": {
-        "description": "Animate and tween values",
-        "properties": {
-          "autoplay": {
-            "default": true,
-            "description": "Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
-            "type": "boolean"
+    "properties":{
+       "animation":{
+          "description":"Animate and tween values",
+          "properties":{
+             "autoplay":{
+                "default":true,
+                "description":"Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
+                "type":"boolean"
+             },
+             "delay":{
+                "default":0,
+                "description":"How long (milliseconds) to wait before starting.",
+                "type":"number"
+             },
+             "dir":{
+                "default":"normal",
+                "description":"Which dir to go from from to to.",
+                "enum":[
+                   "normal",
+                   "alternate",
+                   "reverse"
+                ],
+                "type":"string"
+             },
+             "dur":{
+                "default":1000,
+                "description":"How long (milliseconds) each cycle of the animation is.",
+                "type":"number"
+             },
+             "easing":{
+                "default":"easeInQuad",
+                "description":"Easing function of animation. To ease in, ease out, ease in and out.",
+                "type":"string"
+             },
+             "elasticity":{
+                "default":400,
+                "description":"How much to bounce (higher is stronger).",
+                "type":"number"
+             },
+             "enabled":{
+                "default":true,
+                "description":"If disabled, animation will stop and startEvents will not trigger animation start.",
+                "type":"boolean"
+             },
+             "from":{
+                "default":"",
+                "description":"Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
+                "type":"string"
+             },
+             "isRawProperty":{
+                "default":false,
+                "description":"Flag to animate an arbitrary object property outside of A-Frame components for better performance. If set to true, for example, we can set property to like components.material.material.opacity. If property starts with components or object3D, this will be inferred to true.",
+                "type":"boolean"
+             },
+             "loop":{
+                "default":0,
+                "description":"How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
+                "type":"number"
+             },
+             "pauseEvents":{
+                "default":[
+                   
+                ],
+                "description":"Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
+                "type":"array"
+             },
+             "property":{
+                "description":"Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute.",
+                "type":"string"
+             },
+             "resumeEvents":{
+                "default":[
+                   
+                ],
+                "description":"Comma-separated list of events to listen to trigger resume after pausing.",
+                "type":"array"
+             },
+             "round":{
+                "default":false,
+                "description":"Whether to round values.",
+                "type":"boolean"
+             },
+             "startEvents":{
+                "default":[
+                   
+                ],
+                "description":"Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
+                "type":"array"
+             },
+             "to":{
+                "default":"",
+                "description":"Target value at end of animation.",
+                "type":"string"
+             },
+             "type":{
+                "default":"",
+                "description":"Right now only supports color for tweening isRawProperty color XYZ/RGB vector values.",
+                "type":"string"
+             }
           },
-          "delay": {
-            "default": 0,
-            "description": "How long (milliseconds) to wait before starting.",
-            "type": "number"
+          "title":"Animation",
+          "type":"object"
+       },
+       "armarker":{
+          "default":{
+             "buildable": false,
+             "dynamic": false,
+             "markerid":"0",
+             "markertype":"apriltag_36h11",
+             "size":150
           },
-          "dir": {
-            "default": "normal",
-            "description": "Which dir to go from from to to.",
-            "enum": [
-              "normal",
-              "alternate",
-              "reverse"
-            ],
-            "type": "string"
+          "description":"A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes, or scene objects, in the real world.",
+          "properties":{
+             "buildable":{
+                "type":"boolean",
+                "title":"Buildable tag, can be moved by scene author",
+                "default":false
+             },
+             "dynamic":{
+                "type":"boolean",
+                "title":"Dynamic tag (e.g. to move objects in the scene), not used for localization",
+                "default":false
+             },
+             "ele":{
+                "default":0,
+                "title":"Tag elevation in meters.",
+                "type":"number"
+             },
+             "lat":{
+                "default":0,
+                "maximum":90,
+                "minimum":-90,
+                "title":"Tag latitude",
+                "type":"number"
+             },
+             "lon":{
+                "default":0,
+                "maximum":180,
+                "minimum":-180,
+                "title":"Tag longitude",
+                "type":"number"
+             },
+             "markerid":{
+                "default":0,
+                "title":"The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
+                "type":"string"
+             },
+             "markertype":{
+                "default":"apriltag_36h11",
+                "enum":[
+                   "apriltag_36h11",
+                   "lightanchor",
+                   "uwb"
+                ],
+                "title":"The marker type (apriltag_36h11, lightanchor, uwb)",
+                "type":"string"
+             },
+             "size":{
+                "default":150,
+                "title":"Tag size in millimeters",
+                "type":"number"
+             },
+             "url":{
+                "default":"",
+                "title":"URL associated with the tag",
+                "type":"string"
+             }
           },
-          "dur": {
-            "default": 1000,
-            "description": "How long (milliseconds) each cycle of the animation is.",
-            "type": "number"
+          "required":[
+             "markertype",
+             "markerid",
+             "size",
+             "lat",
+             "lon"
+          ],
+          "title":"ARMArker",
+          "type":"object"
+       },
+       "click-listener":{
+          "description":"Object will listen for clicks",
+          "title":"Click Listener",
+          "type":"boolean"
+       },
+       "collision-listener":{
+          "description":"Name of the collision-listener, default can be empty string",
+          "title":"Collision Listener",
+          "type":"string"
+       },
+       "color":{
+          "default":"#ffa500",
+          "format":"color",
+          "title":"Color",
+          "type":"string"
+       },
+       "dynamic-body":{
+          "description":"Physics type attached to the object.",
+          "properties":{
+             "type":{
+                "enum":[
+                   "static",
+                   "dynamic"
+                ],
+                "type":"string"
+             }
           },
-          "easing": {
-            "default": "easeInQuad",
-            "description": "Easing function of animation. To ease in, ease out, ease in and out.",
-            "type": "string"
+          "required":[
+             "type"
+          ],
+          "title":"Physics",
+          "type":"object"
+       },
+       "goto-url":{
+          "description":"Goto given URL; Requires click-listener",
+          "properties":{
+             "dest":{
+                "enum":[
+                   "popup",
+                   "newtab",
+                   "sametab"
+                ],
+                "type":"string"
+             },
+             "on":{
+                "enum":[
+                   "mousedown",
+                   "mouseup"
+                ],
+                "type":"string"
+             },
+             "url":{
+                "format":"uri",
+                "type":"string"
+             }
           },
-          "elasticity": {
-            "default": 400,
-            "description": "How much to bounce (higher is stronger).",
-            "type": "number"
+          "required":[
+             "dest",
+             "on",
+             "url"
+          ],
+          "title":"Goto URL",
+          "type":"object"
+       },
+       "hide-on-enter-ar":{
+          "description":"Hide object when entering AR. Remove component to *not* hide",
+          "title":"Hide in AR",
+          "type":"boolean",
+          "enum":[
+             true
+          ]
+       },
+       "impulse":{
+          "description":"The force applied using physics. Requires click-listener",
+          "properties":{
+             "force":{
+                "type":"string"
+             },
+             "on":{
+                "type":"string"
+             },
+             "position":{
+                "type":"string"
+             }
           },
-          "enabled": {
-            "default": true,
-            "description": "If disabled, animation will stop and startEvents will not trigger animation start.",
-            "type": "boolean"
-          },
-          "from": {
-            "default": "",
-            "description": "Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
-            "type": "string"
-          },
-          "isRawProperty": {
-            "default": false,
-            "description": "Flag to animate an arbitrary object property outside of A-Frame components for better performance. If set to true, for example, we can set property to like components.material.material.opacity. If property starts with components or object3D, this will be inferred to true.",
-            "type": "boolean"
-          },
-          "loop": {
-            "default": 0,
-            "description": "How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
-            "type": "number"
-          },
-          "pauseEvents": {
-            "default": [],
-            "description": "Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
-            "type": "array"
-          },
-          "property": {
-            "description": "Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute.",
-            "type": "string"
-          },
-          "resumeEvents": {
-            "default": [],
-            "description": "Comma-separated list of events to listen to trigger resume after pausing.",
-            "type": "array"
-          },
-          "round": {
-            "default": false,
-            "description": "Whether to round values.",
-            "type": "boolean"
-          },
-          "startEvents": {
-            "default": [],
-            "description": "Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
-            "type": "array"
-          },
-          "to": {
-            "default": "",
-            "description": "Target value at end of animation.",
-            "type": "string"
-          },
-          "type": {
-            "default": "",
-            "description": "Right now only supports color for tweening isRawProperty color XYZ/RGB vector values.",
-            "type": "string"
-          }
-        },
-        "title": "Animation",
-        "type": "object"
-      },
-      "armarker": {
-        "default": {
-          "ele": 200,
-          "lat": 40.4432,
-          "lon": 79.9428,
-          "markerid": "0",
-          "markertype": "apriltag_36h11",
-          "size": 150
-        },
-        "description": "A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes in the real world. ",
-        "properties": {
-          "ele": {
-            "default": 0,
-            "title": "Tag elevation (m)",
-            "type": "number"
-          },
-          "lat": {
-            "default": 0,
-            "maximum": 90,
-            "minimum": -90,
-            "title": "Tag latitude",
-            "type": "number"
-          },
-          "lon": {
-            "default": 0,
-            "maximum": 180,
-            "minimum": -180,
-            "title": "Tag longitude",
-            "type": "number"
-          },
-          "markerid": {
-            "default": 0,
-            "title": "The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
-            "type": "string"
-          },
-          "markertype": {
-            "default": "apriltag_36h11",
-            "enum": [
-              "apriltag_36h11",
-              "lightanchor",
-              "uwb"
-            ],
-            "title": "The marker type (apriltag_36h11, lightanchor, uwb)",
-            "type": "string"
-          },
-          "size": {
-            "default": 150,
-            "title": "Tag size (mm)",
-            "type": "number"
-          },
-          "url": {
-            "default": "",
-            "title": "URL associated with the tag",
-            "type": "string"
-          }
-        },
-        "required": [
-          "markertype",
-          "markerid",
-          "size",
-          "lat",
-          "lon"
-        ],
-        "title": "ARMArker",
-        "type": "object"
-      },
-      "click-listener": {
-        "description": "Object will listen for clicks",
-        "title": "Click Listener",
-        "type": "boolean"
-      },
-      "collision-listener": {
-        "description": "Name of the collision-listener, default can be empty string",
-        "title": "Collision Listener",
-        "type": "string"
-      },
-      "color": {
-        "default": "#ffa500",
-        "format": "color",
-        "title": "Color",
-        "type": "string"
-      },
-      "dynamic-body": {
-        "description": "Physics type attached to the object.",
-        "properties": {
-          "type": {
-            "enum": [
-              "static",
-              "dynamic"
-            ],
-            "type": "string"
-          }
-        },
-        "required": [
-          "type"
-        ],
-        "title": "Physics",
-        "type": "object"
-      },
-      "goto-url": {
-        "description": "Goto given URL; Requires click-listener",
-        "properties": {
-          "dest": {
-            "enum": [
-              "popup",
-              "newtab",
-              "sametab"
-            ],
-            "type": "string"
-          },
-          "on": {
-            "enum": [
-              "mousedown",
-              "mouseup"
-            ],
-            "type": "string"
-          },
-          "url": {
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "required": [
-          "dest",
-          "on",
-          "url"
-        ],
-        "title": "Goto URL",
-        "type": "object"
-      },
-      "hide-on-enter-ar": { 
-        "description": "Hide object when entering AR. Remove component to *not* hide",
-        "title": "Hide in AR",
-        "type": "boolean",
-        "enum": [
-            true
-        ]
-      },
-      "impulse": {
-        "description": "The force applied using physics. Requires click-listener",
-        "properties": {
-          "force": {
-            "type": "string"
-          },
-          "on": {
-            "type": "string"
-          },
-          "position": {
-            "type": "string"
-          }
-        },
-        "title": "Impulse",
-        "type": "object"
-      },
-      "landmark": {
-        "title": "Landmark",
-        "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is contrained by a navmesh (when it exists)",
-        "properties": {
-            "randomRadiusMin": {
-                "default": 0,
-                "description": "Minimum radius from the landmark to teleport to. (randomRadiusMax must > 0)",
-                "type": "number"
-            },
-            "randomRadiusMax": {
-                "default": 0,
-                "description": "Maximum radius from the landmark to teleport to.",
-                "type": "number"
-            },
-            "offsetPosition": {
-                "description": "Use as a static teleport x,y,z offset",
-                "properties": {
-                  "x": {
-                    "type": "number",
-                    "default": 0
-                  },
-                  "y": {
-                    "type": "number",
-                    "default": 1.6
-                  },
-                  "z": {
-                    "type": "number",
-                    "default": 0
-                  }
+          "title":"Impulse",
+          "type":"object"
+       },
+       "landmark":{
+          "title":"Landmark",
+          "description":"Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is contrained by a navmesh (when it exists)",
+          "properties":{
+             "randomRadiusMin":{
+                "default":0,
+                "description":"Minimum radius from the landmark to teleport to. (randomRadiusMax must > 0)",
+                "type":"number"
+             },
+             "randomRadiusMax":{
+                "default":0,
+                "description":"Maximum radius from the landmark to teleport to.",
+                "type":"number"
+             },
+             "offsetPosition":{
+                "description":"Use as a static teleport x,y,z offset",
+                "properties":{
+                   "x":{
+                      "type":"number",
+                      "default":0
+                   },
+                   "y":{
+                      "type":"number",
+                      "default":1.6
+                   },
+                   "z":{
+                      "type":"number",
+                      "default":0
+                   }
                 },
-                "required": [
-                  "x",
-                  "y",
-                  "z"
+                "required":[
+                   "x",
+                   "y",
+                   "z"
                 ]
-            },
-            "constrainToNavMesh": {
-                "description": "Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
-                "enum": [
-                    "false",
-                    "any",
-                    "coplanar"
-                  ],
-                  "type": "string",
-                  "default": "false"
-            },
-            "startingPosition": {
-                "default": false,
-                "description": "Set to true to use this landmark as a scene start (spawn) position. If several landmarks with startingPosition=true exist in a scene, one will be randomly selected.",
-                "type": "boolean"
-            },
-            "lookAtLandmark": {
-                "default": true,
-                "description": "Set to true to make users face the landmark when teleported to it.",
-                "type": "boolean"
-            },
-            "label": {
-                "default": "",
-                "description": "Landmark description to display in the landmark list",
-                "type": "string"
-            }
-        },
-        "default": {
-            "randomRadiusMin": 0,
-            "randomRadiusMax": 0,
-            "lookAtLandmark": true
-        },
-        "required": ["label"]
-      },
-      "material-extras": {
-        "default": {
-          "encoding": "sRGBEncoding"
-        },
-        "description": "Define extra material properties.",
-        "properties": {
-          "overrideSrc": {  
-            "type": "string",
-            "default": "",
-            "description": "Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+             },
+             "constrainToNavMesh":{
+                "description":"Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
+                "enum":[
+                   "false",
+                   "any",
+                   "coplanar"
+                ],
+                "type":"string",
+                "default":"false"
+             },
+             "startingPosition":{
+                "default":false,
+                "description":"Set to true to use this landmark as a scene start (spawn) position. If several landmarks with startingPosition=true exist in a scene, one will be randomly selected.",
+                "type":"boolean"
+             },
+             "lookAtLandmark":{
+                "default":true,
+                "description":"Set to true to make users face the landmark when teleported to it.",
+                "type":"boolean"
+             },
+             "label":{
+                "default":"",
+                "description":"Landmark description to display in the landmark list",
+                "type":"string"
+             }
           },
-          "encoding": {
-            "default": "sRGBEncoding",
-            "enum": [
-              "LinearEncoding",
-              "sRGBEncoding",
-              "GammaEncoding",
-              "RGBEEncoding",
-              "LogLuvEncoding",
-              "RGBM7Encoding",
-              "RGBM16Encoding",
-              "RGBDEncoding",
-              "BasicDepthPacking",
-              "RGBADepthPacking"
-            ],
-            "type": "string"
+          "default":{
+             "randomRadiusMin":0,
+             "randomRadiusMax":0,
+             "lookAtLandmark":true
           },
-          "colorWrite": {  
-            "type": "boolean",
-            "default": true,
-            "description": "Whether to render the material's color."
+          "required":[
+             "label"
+          ]
+       },
+       "material-extras":{
+          "default":{
+             "encoding":"sRGBEncoding"
           },
-          "renderOrder": {  
-            "type": "number",
-            "default": 1,
-            "description": "Allows the default rendering order of scene graph objects to be overridden."
+          "description":"Define extra material properties.",
+          "properties":{
+             "overrideSrc":{
+                "type":"string",
+                "default":"",
+                "description":"Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+             },
+             "encoding":{
+                "default":"sRGBEncoding",
+                "enum":[
+                   "LinearEncoding",
+                   "sRGBEncoding",
+                   "GammaEncoding",
+                   "RGBEEncoding",
+                   "LogLuvEncoding",
+                   "RGBM7Encoding",
+                   "RGBM16Encoding",
+                   "RGBDEncoding",
+                   "BasicDepthPacking",
+                   "RGBADepthPacking"
+                ],
+                "type":"string"
+             },
+             "colorWrite":{
+                "type":"boolean",
+                "default":true,
+                "description":"Whether to render the material's color."
+             },
+             "renderOrder":{
+                "type":"number",
+                "default":1,
+                "description":"Allows the default rendering order of scene graph objects to be overridden."
+             },
+             "transparentOccluder":{
+                "type":"boolean",
+                "default":false,
+                "description":"If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.."
+             }
           },
-          "transparentOccluder": {  
-            "type": "boolean",
-            "default": false,
-            "description": "If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.."
-          }                 
-        },
-        "title": "Material extras",
-        "type": "object"
-      },
-      "parent": {
-        "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
-        "title": "Parent",
-        "type": "string"
-      },
-      "position": {
-        "description": "3D object position",
-        "properties": {
-          "x": {
-            "type": "number"
+          "title":"Material extras",
+          "type":"object"
+       },
+       "parent":{
+          "description":"Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
+          "title":"Parent",
+          "type":"string"
+       },
+       "position":{
+          "description":"3D object position",
+          "properties":{
+             "x":{
+                "type":"number"
+             },
+             "y":{
+                "type":"number"
+             },
+             "z":{
+                "type":"number"
+             }
           },
-          "y": {
-            "type": "number"
+          "required":[
+             "x",
+             "y",
+             "z"
+          ],
+          "title":"Position"
+       },
+       "rotation":{
+          "description":"3D object rotation in degrees by default; Right-handed coordinate system. Switches to quaternion representation if 'w' is given",
+          "properties":{
+             "w":{
+                "default":1,
+                "type":"number"
+             },
+             "x":{
+                "default":0,
+                "type":"number"
+             },
+             "y":{
+                "default":0,
+                "type":"number"
+             },
+             "z":{
+                "default":0,
+                "type":"number"
+             }
           },
-          "z": {
-            "type": "number"
+          "required":[
+             "x",
+             "y",
+             "z"
+          ],
+          "title":"Rotation"
+       },
+       "scale":{
+          "default":{
+             "x":1,
+             "y":1,
+             "z":1
+          },
+          "description":"3D object scale",
+          "id":"scale",
+          "properties":{
+             "x":{
+                "type":"number"
+             },
+             "y":{
+                "type":"number"
+             },
+             "z":{
+                "type":"number"
+             }
+          },
+          "required":[
+             "x",
+             "y",
+             "z"
+          ],
+          "title":"Scale"
+       },
+       "shadow":{
+          "title":"Shadow",
+          "default":{
+             "cast":false,
+             "receive":false
+          },
+          "properties":{
+             "cast":{
+                "default":false,
+                "description":"Whether the entity casts shadows onto the surrounding scene",
+                "title":"cast shadow",
+                "type":"boolean"
+             },
+             "receive":{
+                "default":false,
+                "description":"Whether the entity receives shadows from the surrounding scene",
+                "title":"receive shadow",
+                "type":"boolean"
+             }
           }
-        },
-        "required": [
-          "x",
-          "y",
-          "z"
-        ],
-        "title": "Position"
-      },
-      "rotation": {
-        "description": "3D object rotation in degrees by default; Right-handed coordinate system. Switches to quaternion representation if 'w' is given",
-        "properties": {
-          "w": {
-            "default": 1,
-            "type": "number"
+       },
+       "sound":{
+          "description":"The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the components-position.",
+          "properties":{
+             "autoplay":{
+                "default":false,
+                "description":"Whether to automatically play sound once set.",
+                "type":"boolean"
+             },
+             "distanceModel":{
+                "default":"inverse",
+                "description":"Sound model: linear, inverse, or exponential.",
+                "enum":[
+                   "linear",
+                   "inverse",
+                   "exponential"
+                ],
+                "type":"string"
+             },
+             "loop":{
+                "default":false,
+                "description":"Whether to loop the sound once the sound finishes playing.",
+                "type":"boolean"
+             },
+             "maxDistance":{
+                "default":10000,
+                "description":"Maximum distance between the audio source and the listener, after which the volume is not reduced any further.",
+                "type":"number"
+             },
+             "on":{
+                "default":"mousedown",
+                "description":"An event for the entity to listen to before playing sound.",
+                "enum":[
+                   "mousedown",
+                   "mouseup",
+                   "mouseenter",
+                   "mouseleave",
+                   "triggerdown",
+                   "triggerup",
+                   "gripdown",
+                   "gripup",
+                   "menudown",
+                   "menuup",
+                   "systemdown",
+                   "systemup",
+                   "trackpaddown",
+                   "trackpadup"
+                ],
+                "type":"string"
+             },
+             "poolSize":{
+                "default":1,
+                "description":"Numbers of simultaneous instances of this sound that can be playing at the same time",
+                "type":"number"
+             },
+             "positional":{
+                "default":true,
+                "description":"Whether or not the audio is positional (movable).",
+                "type":"boolean"
+             },
+             "refDistance":{
+                "default":1,
+                "description":"Reference distance for reducing volume as the audio source moves further from the listener.",
+                "type":"number"
+             },
+             "rolloffFactor":{
+                "default":1,
+                "description":"Describes how quickly the volume is reduced as the source moves away from the listener.",
+                "type":"number"
+             },
+             "src":{
+                "description":"URL path to sound file e.g. 'store/users/wiselab/sound/wave.mp3'",
+                "format":"uri",
+                "type":"string"
+             },
+             "volume":{
+                "default":1,
+                "description":"How loud to play the sound",
+                "type":"number"
+             }
           },
-          "x": {
-            "default": 0,
-            "type": "number"
+          "title":"Positional Sound",
+          "type":"object"
+       },
+       "url":{
+          "description":"Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+          "format":"uri",
+          "title":"Url",
+          "type":"string"
+       },
+       "screenshareable":{
+          "default":true,
+          "description":"Whether or not a user can screenshare on an object",
+          "title":"Screenshare-able",
+          "type":"boolean"
+       },
+       "video-control":{
+          "description":"Video Control",
+          "properties":{
+             "frame_object":{
+                "description":"URL of a thumbnail image, e.g. 'store/users/wiselab/images/conix-face-white.jpg'",
+                "format":"uri",
+                "type":"string"
+             },
+             "video_object":{
+                "description":"Name of object where to put the video, e.g. 'square_vid6'",
+                "type":"string"
+             },
+             "video_path":{
+                "description":"URL of the video file, e.g. 'store/users/wiselab/videos/kungfu.mp4'",
+                "format":"uri",
+                "type":"string"
+             },
+             "anyone_clicks":{
+                "description":"Responds to clicks from any user",
+                "type":"boolean",
+                "default":true
+             },
+             "video_loop":{
+                "description":"Video automatically loops",
+                "type":"boolean",
+                "default":true
+             },
+             "autoplay":{
+                "description":"Video starts playing automatically",
+                "type":"boolean",
+                "default":false
+             },
+             "volume":{
+                "description":"Video sound volume",
+                "type":"number",
+                "default":1
+             }
           },
-          "y": {
-            "default": 0,
-            "type": "number"
-          },
-          "z": {
-            "default": 0,
-            "type": "number"
-          }
-        },
-        "required": [
-          "x",
-          "y",
-          "z"
-        ],
-        "title": "Rotation"
-      },
-      "scale": {
-        "default": {
-          "x": 1,
-          "y": 1,
-          "z": 1
-        },
-        "description": "3D object scale",
-        "id": "scale",
-        "properties": {
-          "x": {
-            "type": "number"
-          },
-          "y": {
-            "type": "number"
-          },
-          "z": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "x",
-          "y",
-          "z"
-        ],
-        "title": "Scale"
-      },
-      "shadow": {
-        "title": "Shadow",
-        "default": {
-          "cast": false,
-          "receive": false
-        },
-        "properties": {
-          "cast": {
-            "default": false,
-            "description": "Whether the entity casts shadows onto the surrounding scene",
-            "title": "cast shadow",
-            "type": "boolean"
-          },
-          "receive": {
-            "default": false,
-            "description": "Whether the entity receives shadows from the surrounding scene",
-            "title": "receive shadow",
-            "type": "boolean"
-          }
-        }
-      },
-      "sound": {
-        "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the components-position.",
-        "properties": {
-          "autoplay": {
-            "default": false,
-            "description": "Whether to automatically play sound once set.",
-            "type": "boolean"
-          },
-          "distanceModel": {
-            "default": "inverse",
-            "description": "Sound model: linear, inverse, or exponential.",
-            "enum": [
-              "linear",
-              "inverse",
-              "exponential"
-            ],
-            "type": "string"
-          },
-          "loop": {
-            "default": false,
-            "description": "Whether to loop the sound once the sound finishes playing.",
-            "type": "boolean"
-          },
-          "maxDistance": {
-            "default": 10000,
-            "description": "Maximum distance between the audio source and the listener, after which the volume is not reduced any further.",
-            "type": "number"
-          },
-          "on": {
-            "default": "mousedown",
-            "description": "An event for the entity to listen to before playing sound.",
-            "enum": [
-              "mousedown",
-              "mouseup",
-              "mouseenter",
-              "mouseleave",
-              "triggerdown",
-              "triggerup",
-              "gripdown",
-              "gripup",
-              "menudown",
-              "menuup",
-              "systemdown",
-              "systemup",
-              "trackpaddown",
-              "trackpadup"
-            ],
-            "type": "string"
-          },
-          "poolSize": {
-            "default": 1,
-            "description": "Numbers of simultaneous instances of this sound that can be playing at the same time",
-            "type": "number"
-          },
-          "positional": {
-            "default": true,
-            "description": "Whether or not the audio is positional (movable).",
-            "type": "boolean"
-          },
-          "refDistance": {
-            "default": 1,
-            "description": "Reference distance for reducing volume as the audio source moves further from the listener.",
-            "type": "number"
-          },
-          "rolloffFactor": {
-            "default": 1,
-            "description": "Describes how quickly the volume is reduced as the source moves away from the listener.",
-            "type": "number"
-          },
-          "src": {
-            "description": "URL path to sound file e.g. 'store/users/wiselab/sound/wave.mp3'",
-            "format": "uri",
-            "type": "string"
-          },
-          "volume": {
-            "default": 1,
-            "description": "How loud to play the sound",
-            "type": "number"
-          }
-        },
-        "title": "Positional Sound",
-        "type": "object"
-      },
-      "url": {
-        "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with 'https://arena-cdn.conix.io/' (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
-        "format": "uri",
-        "title": "Url",
-        "type": "string"
-      },
-      "screenshareable": {
-        "default": true,
-        "description": "Whether or not a user can screenshare on an object",
-        "title": "Screenshare-able",
-        "type": "boolean"
-      },
-      "video-control": {
-        "description": "Video Control",
-        "properties": {
-          "frame_object": {
-            "description": "URL of a thumbnail image, e.g. 'store/users/wiselab/images/conix-face-white.jpg'",
-            "format": "uri",
-            "type": "string"
-          },
-          "video_object": {
-            "description": "Name of object where to put the video, e.g. 'square_vid6'",
-            "type": "string"
-          },
-          "video_path": {
-            "description": "URL of the video file, e.g. 'store/users/wiselab/videos/kungfu.mp4'",
-            "format": "uri",
-            "type": "string"
-          },
-          "anyone_clicks": {
-            "description": "Responds to clicks from any user",
-            "type": "boolean",
-            "default": true
-          },
-          "video_loop": {
-            "description": "Video automatically loops",
-            "type": "boolean",
-            "default": true
-          },
-          "autoplay": {
-            "description": "Video starts playing automatically",
-            "type": "boolean",
-            "default": false
-          },
-          "volume": {
-            "description": "Video sound volume",
-            "type": "number",
-            "default": 1
-          }
-        },
-        "required": [
-          "video_object",
-          "frame_object",
-          "video_path"
-        ],
-        "title": "Video",
-        "type": "object"
-      }
+          "required":[
+             "video_object",
+             "frame_object",
+             "video_path"
+          ],
+          "title":"Video",
+          "type":"object"
+       }
     }
-  }
+ }
