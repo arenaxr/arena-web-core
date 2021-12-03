@@ -114,36 +114,42 @@
           "properties":{
              "buildable":{
                 "type":"boolean",
-                "title":"Buildable tag, can be moved by scene author",
+                "title":"buildable",
+                "description":"Buildable tag, can be moved by scene author",
                 "default":false
              },
              "dynamic":{
                 "type":"boolean",
-                "title":"Dynamic tag (e.g. to move objects in the scene), not used for localization",
+                "title":"dynamic",
+                "description":"Dynamic tag (e.g. to move objects in the scene), not used for localization",
                 "default":false
              },
              "ele":{
                 "default":0,
-                "title":"Tag elevation in meters.",
+                "title":"elevation",
+                "description":"Tag elevation in meters.",
                 "type":"number"
              },
              "lat":{
                 "default":0,
                 "maximum":90,
                 "minimum":-90,
-                "title":"Tag latitude",
+                "title":"latitude",
+                "description":"Tag latitude.",
                 "type":"number"
              },
-             "lon":{
+             "long":{
                 "default":0,
                 "maximum":180,
                 "minimum":-180,
-                "title":"Tag longitude",
+                "title":"longitude",
+                "description":"Tag longitude.",
                 "type":"number"
              },
              "markerid":{
                 "default":0,
-                "title":"The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
+                "title":"markerid",
+                "description":"The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
                 "type":"string"
              },
              "markertype":{
@@ -153,17 +159,20 @@
                    "lightanchor",
                    "uwb"
                 ],
-                "title":"The marker type (apriltag_36h11, lightanchor, uwb)",
+                "title":"markertype",
+                "description":"The marker type (apriltag_36h11, lightanchor, uwb)",
                 "type":"string"
              },
              "size":{
                 "default":150,
-                "title":"Tag size in millimeters",
+                "title":"size",
+                "description":"Tag size in millimeters",
                 "type":"number"
              },
              "url":{
                 "default":"",
-                "title":"URL associated with the tag",
+                "url":"size",
+                "description":"URL associated with the tag",
                 "type":"string"
              }
           },
