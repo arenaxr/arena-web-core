@@ -27,7 +27,7 @@
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
      debugCameraCapture: { default: false },
      /* relocalization debug messages output */
-     debugRelocalization: { default: true },
+     debugRelocalization: { default: false },
      /* builder mode flag; also looks at builder=true/false URL parameter */
      builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
@@ -201,7 +201,6 @@
 
      // send size of known markers to cvWorker (so it can compute pose)
      for (const [mid, marker] of Object.entries(this.markers)) {
-        console.log("**marker:", marker.data.markerid, marker.data.size) 
         let newMarker = {
             type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
             // marker id
@@ -211,7 +210,6 @@
           };
           this.cvWorker.postMessage(newMarker); 
      }
-
    },
    /**
     * Handle messages from cvWorker (detector)
@@ -328,19 +326,18 @@
     * @param {object} marker - The marker component object to register.
     * @alias module:armarker-system
     */
-   registerComponent: function(marker) {
+   registerComponent: async function(marker) {
     this.markers[marker.data.markerid] = marker;
     if (this.cvPipelineInitialized) {
-        console.log("**register marker:", marker.data.markerid, marker.data.size)
         // indicate cv worker that a marker was added
-        let marker = {
-            type: CVWorkerMsgs.KNOWN_MARKER_ADD,
+        let newMarker = {
+            type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
             // marker id
             markerid: marker.data.markerid,
             // marker size in meters (marker component size is mm)
             size: marker.data.size/1000,            
         };
-        this.cvWorker.postMessage(marker);
+        this.cvWorker.postMessage(newMarker);
     } else this.initCVPipeline();
    },
    /**
@@ -351,7 +348,7 @@
    unregisterComponent: function(marker) {
      // indicate marker was removed to cv worker
      let delMarker = {
-        type: CVWorkerMsgs.KNOWN_MARKER_DEL,
+        type: CVWorkerMsgs.type.KNOWN_MARKER_DEL,
         // marker id
         markerid: marker.data.markerid,
      };

@@ -290,13 +290,13 @@
                                     }
                                 }
                             });
-                            console.info("Publish", JSON.stringify(jsonMsg), "to", `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`);
+                            if (this.debug) console.info("Publish", JSON.stringify(jsonMsg), "to", `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`);
                             ARENA.Mqtt.publish(
                                 `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`,
                                 JSON.stringify(jsonMsg)
                             );
                         }
-                    }
+                    } else if (ARENA && !ARENA.chat.settings.isSceneWriter) console.error("Object update not sent; User does not have write permissions!");
                 }
             }
         }
