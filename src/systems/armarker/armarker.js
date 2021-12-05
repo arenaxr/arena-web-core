@@ -6,7 +6,7 @@
  *   AR Headset: capture camera facing forward using getUserMedia
  *   Phone/tablet with WebXR Camera Capture API support: capture passthrough camera frames using the WebXR camera capture API (only in Android Chrome v93+)
  *   iPhone/iPad with custom browser: camera capture for Mozilla's WebXRViewer/WebARViewer
- *
+ * 
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
@@ -25,9 +25,9 @@
  AFRAME.registerSystem("armarker", {
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
-     debugCameraCapture: { default: false },
+     debugCameraCapture: { default: true },
      /* relocalization debug messages output */
-     debugRelocalization: { default: false },
+     debugRelocalization: { default: true },
      /* builder mode flag; also looks at builder=true/false URL parameter */
      builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
@@ -57,7 +57,7 @@
    originMatrix: new THREE.Matrix4().set(
      1,  0, 0, 0,
      0,  0, 1, 0,
-     0, -1, 0, 0,
+     0,  -1, 0, 0,
      0,  0, 0, 1,  
    ),
    // if we detected WebXRViewer/WebARViewer
@@ -103,6 +103,20 @@
        });
      }
    },
+   /*
+    * System attribute update
+    * @param {object} marker - The marker component object to register.
+    * @alias module:armarker-system
+    */   
+   update: function (oldData) {
+    // TODO: Do stuff with `this.data`...
+    // TODO: pass along changes to networkedTagSolver, publishDetections, builder to ARMarkerRelocalization
+   },
+   /*
+   // Getter
+   area: get() {
+    return this.calcArea();
+   },*/
    /**
     * WebXR session started callback
     * @param {object} xrSession - Handle to the WebXR session
@@ -118,9 +132,8 @@
         console.error("Could not make make gl context XR compatible!", err);
      }
 
-     // init cv pipeline only if we have ar markers in scene (?)
-     //if (this.markers.length)
-     this.initCVPipeline();
+     // init cv pipeline only if we have ar markers in scene, or in builder mode (?)
+     if (this.markers.length || this.builder) this.initCVPipeline();
    },
    /**
     * Setup cv pipeline (camera capture and cv worker)
@@ -171,6 +184,21 @@
      this.cvWorker = new Worker("./apriltag-detector/apriltag.js");
      this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
 
+     // listen for worker messages
+     this.cvWorker.addEventListener("message", this.cvWorkerMessage.bind(this));
+
+     // setup ar marker relocalization that will listen to ar marker detection events
+     this.markerReloc = new ARMarkerRelocalization({
+       arMakerSys: this,
+       detectionsEventTarget: this.detectionEvts,
+       networkedTagSolver: this.data.networkedTagSolver,
+       publishDetections: this.data.publishDetections,
+       builder: this.data.builder,
+       debug: this.data.debugRelocalization
+     });
+
+     this.cvPipelineInitialized = true;
+
      // send size of known markers to cvWorker (so it can compute pose)
      for (const [mid, marker] of Object.entries(this.markers)) {
         let newMarker = {
@@ -182,21 +210,6 @@
           };
           this.cvWorker.postMessage(newMarker); 
      }
-
-     // listen for worker messages
-     this.cvWorker.addEventListener("message", this.cvWorkerMessage.bind(this));
-
-     // setup ar marker relocalization that will listen to ar marker detection events
-     this.markerReloc = new ARMarkerRelocalization({
-       getArMaker: this.get.bind(this),
-       detectionsEventTarget: this.detectionEvts,
-       networkedTagSolver: this.data.networkedTagSolver,
-       publishDetections: this.data.publishDetections,
-       builder: this.data.builder,
-       debug: this.data.debugRelocalization
-     });
-
-     this.cvPipelineInitialized = true;
    },
    /**
     * Handle messages from cvWorker (detector)
@@ -313,9 +326,19 @@
     * @param {object} marker - The marker component object to register.
     * @alias module:armarker-system
     */
-   registerComponent: function(marker) {
-     this.markers[marker.data.markerid] = marker;    
-     this.initCVPipeline();
+   registerComponent: async function(marker) {
+    this.markers[marker.data.markerid] = marker;
+    if (this.cvPipelineInitialized) {
+        // indicate cv worker that a marker was added
+        let newMarker = {
+            type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
+            // marker id
+            markerid: marker.data.markerid,
+            // marker size in meters (marker component size is mm)
+            size: marker.data.size/1000,            
+        };
+        this.cvWorker.postMessage(newMarker);
+    } else this.initCVPipeline();
    },
    /**
     * Unregister an ARMarker component
@@ -325,11 +348,11 @@
    unregisterComponent: function(marker) {
      // indicate marker was removed to cv worker
      let delMarker = {
-        type: CVWorkerMsgs.KNOWN_MARKER_DEL,
+        type: CVWorkerMsgs.type.KNOWN_MARKER_DEL,
         // marker id
         markerid: marker.data.markerid,
      };
-     this.cvWorker.postMessage(marker);     
+     this.cvWorker.postMessage(delMarker);     
      delete this.markers[marker.data.markerid];
    },
    /**
@@ -359,32 +382,35 @@
    /**
     * Get a marker given its markerid; first lookup local scene objects, then ATLAS
     * Marker with ID 0 is assumed to be at (x, y, z) 0, 0, 0
-    * @param {object} markerid - The marker id to return
+    * @param {string} markerid - The marker id to return (converts to string, if a string is not given)
     * @return {object} - the marker with the markerid given or undefined
     * @alias module:armarker-system
     */
-   get: function(markerid) {
-     const sysTag = this.markers[markerid];
-     if (sysTag !== undefined) {
+   getMarker: function(markerid) {
+     if (!(typeof markerid === 'string' || markerid instanceof String)) markerid = String(markerid); // convert markerid to string
+     const sceneTag = this.markers[markerid];
+     if (sceneTag !== undefined) {
        return {
-         id: sysTag.data.markerid,
-         uuid: sysTag.el.id,
-         pose: sysTag.el.object3D.matrixWorld,
-         dynamic: sysTag.data.dynamic,
-         buildable: sysTag.data.buildable
+         id: sceneTag.data.markerid,
+         uuid: sceneTag.el.id,
+         pose: sceneTag.el.object3D.matrixWorld, // get object world matrix
+         dynamic: sceneTag.data.dynamic,
+         buildable: sceneTag.data.buildable
        };
      }
      // default pose for tag 0
-     if (markerid == 0)
+     if (markerid === '0')
        return {
-         id: "ORIGIN",
+         id: String(markerid),
          uuid: "ORIGIN",
-         pose: this.originMatrix
+         pose: this.originMatrix,
+         dynamic: false,
+         buildable: false
        };    
      if (!this.ATLASMarkers[markerid]) {
        // force update from ATLAS if not found
        this.getARMArkersFromATLAS();
      }
-     return this.ATLASMarkers[markerid];
+     return this.ATLASMarkers[String(markerid)];
    }
  });

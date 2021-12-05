@@ -162,7 +162,16 @@ class Apriltag {
        * @param {Number} size the size of the tag in meters
        */
     set_tag_size(tagid, size) {
-        this._atagjs_set_tag_size(tagid, size);
+        let _tagid = tagid;
+        if (isNaN(_tagid)) {
+             // try to convert to number
+            _tagid = parseInt(tagid);
+            if (isNaN(_tagid)) {
+                console.warn(`Apriltag Tagid must be a number! Ignoring given size for tagId '${tagid}'.`);
+                return;
+            }
+        }
+        this._atagjs_set_tag_size(_tagid, size);
     }
 
     /**
@@ -223,7 +232,7 @@ const aprilTag = new Apriltag(() => {
     self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
     initDone = true;
     console.log('CV Worker ready!');
-    pendingMarkerMsgs.forEach( (msg) => aprilTag.set_tag_size(msg.markerid, msg.size)); // process pending marker data msgs
+    pendingMarkerMsgs.forEach( (msg) => { aprilTag.set_tag_size(msg.markerid, msg.size); console.log('Setting marker size', msg.markerid, msg.size); }); // process pending marker data msgs
 });
 
 // process worker messages
@@ -239,8 +248,8 @@ onmessage = async function(e) {
                 const resMsg = {
                     type: CVWorkerMsgs.type.FRAME_RESULTS,
                     detections: [],
-                    ts: frame.ts,
-                    grayscalePixels: frame.grayscalePixels,
+                    ts: performance.now(),
+                    grayscalePixels: cvWorkerMsg.grayscalePixels,
                 };
                 // post detection results, returning ownership of the pixel buffer
                 self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
@@ -253,9 +262,9 @@ onmessage = async function(e) {
                 pendingMarkerMsgs.push(cvWorkerMsg);
                 return;
             }
-            console.log('Setting marker size', msg.markerid, msg.size);
+            console.log('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
             // let the detector know the size of markers, so it can compute their pose
-            aprilTag.set_tag_size(msg.markerid, msg.size);
+            aprilTag.set_tag_size(cvWorkerMsg.markerid, cvWorkerMsg.size);
             break;
         case CVWorkerMsgs.type.KNOWN_MARKER_DEL:
             // TODO (maybe we don't need to remove?)
@@ -293,7 +302,8 @@ async function processGsFrame(frame) {
         grayscalePixels: frame.grayscalePixels,
     };
 
-    //if (detections.length > 0) console.log('Detections:', detections);
+    //if (detections.length > 0) 
+    //console.log('Detections:', detections);
 
     // post detection results, returning ownership of the pixel buffer
     self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
