@@ -562,7 +562,7 @@ export async function addObject(obj, scene) {
         console.error(error);
         Alert.fire({
             icon: 'error',
-            title: `Error adding object. MQTT Error: ${error.message}`,
+            title: `Error adding object. MQTT Error: ${error.message}. Try reloading.`,
             timer: 5000,
         });
         return;
