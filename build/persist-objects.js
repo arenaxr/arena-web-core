@@ -413,23 +413,24 @@ export function populateNewSceneNamespaces(nsInput, nsList) {
 }
 
 export async function addNewScene(ns, sceneName, newObjs) {
-    try {
-        let result = await ARENAUserAccount.requestUserNewScene(`${ns}/${sceneName}`);
-    } catch (err) {
+    let exists = persist.scenes.find(scene => scene.ns == ns && scene.name == sceneName);
+    if (!exists) {
+        try {
+            let result = await ARENAUserAccount.requestUserNewScene(`${ns}/${sceneName}`);
+        } catch (err) {
+            Alert.fire({
+                icon: 'error',
+                title: `Error adding scene: ${err.statusText}`,
+                timer: 5000,
+            });
+        }
         Alert.fire({
-            icon: 'error',
-            title: `Error adding scene: ${err.statusText}`,
+            icon: 'info',
+            title: 'Scene added',
             timer: 5000,
         });
-        console.error(err);
+        persist.scenes.push({ ns: ns, name: sceneName })
     }
-    Alert.fire({
-        icon: 'info',
-        title: 'Scene added',
-        timer: 5000,
-    });
-    let exists = persist.scenes.find(scene => scene.ns == ns && scene.name == sceneName);
-    if (!exists) persist.scenes.push({ ns: ns, name: sceneName });
     if (!newObjs) return exists;
 
     // add objects to the new scene
@@ -537,7 +538,6 @@ export async function addObject(obj, scene) {
             if (result.isConfirmed) {
                 obj.action = 'create';
             } else if (result.isDismissed) {
-                console.log('here');
                 Alert.fire({
                     icon: 'warning',
                     title: 'Canceled',
@@ -559,9 +559,10 @@ export async function addObject(obj, scene) {
     try {
         persist.mc.publish(topic, objJson);
     } catch (error) {
+        console.error(error);
         Alert.fire({
             icon: 'error',
-            title: `Error adding object: ${JSON.stringify(error)}`,
+            title: `Error adding object. (MQTT timeout/disconnect? Try reloading)`,
             timer: 5000,
         });
         return;
