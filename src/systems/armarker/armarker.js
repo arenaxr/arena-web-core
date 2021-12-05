@@ -25,9 +25,9 @@
  AFRAME.registerSystem("armarker", {
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
-     debugCameraCapture: { default: false },
+     debugCameraCapture: { default: true },
      /* relocalization debug messages output */
-     debugRelocalization: { default: false },
+     debugRelocalization: { default: true },
      /* builder mode flag; also looks at builder=true/false URL parameter */
      builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
@@ -57,7 +57,7 @@
    originMatrix: new THREE.Matrix4().set(
      1,  0, 0, 0,
      0,  0, 1, 0,
-     0, -1, 0, 0,
+     0,  -1, 0, 0,
      0,  0, 0, 1,  
    ),
    // if we detected WebXRViewer/WebARViewer
@@ -352,7 +352,7 @@
         // marker id
         markerid: marker.data.markerid,
      };
-     this.cvWorker.postMessage(marker);     
+     this.cvWorker.postMessage(delMarker);     
      delete this.markers[marker.data.markerid];
    },
    /**
@@ -382,23 +382,24 @@
    /**
     * Get a marker given its markerid; first lookup local scene objects, then ATLAS
     * Marker with ID 0 is assumed to be at (x, y, z) 0, 0, 0
-    * @param {number} markerid - The marker id to return
+    * @param {string} markerid - The marker id to return (converts to string, if a string is not given)
     * @return {object} - the marker with the markerid given or undefined
     * @alias module:armarker-system
     */
    getMarker: function(markerid) {
-     const sceneTag = this.markers[String(markerid)];
+     if (!(typeof markerid === 'string' || markerid instanceof String)) markerid = String(markerid); // convert markerid to string
+     const sceneTag = this.markers[markerid];
      if (sceneTag !== undefined) {
        return {
          id: sceneTag.data.markerid,
          uuid: sceneTag.el.id,
-         pose: this.originMatrix,
+         pose: sceneTag.el.object3D.matrixWorld, // get object world matrix
          dynamic: sceneTag.data.dynamic,
          buildable: sceneTag.data.buildable
        };
      }
      // default pose for tag 0
-     if (markerid == 0)
+     if (markerid === '0')
        return {
          id: String(markerid),
          uuid: "ORIGIN",

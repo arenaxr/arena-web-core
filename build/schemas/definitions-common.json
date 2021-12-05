@@ -115,13 +115,13 @@
              "buildable":{
                 "type":"boolean",
                 "title":"buildable",
-                "description":"Buildable tag, can be moved by scene author",
+                "description":"Buildable tag, can be moved when in builder mode (url parameter builder=true to enable builder mode; requires permissions to update the scene)",
                 "default":false
              },
              "dynamic":{
                 "type":"boolean",
                 "title":"dynamic",
-                "description":"Dynamic tag (e.g. to move objects in the scene), not used for localization",
+                "description":"Dynamic tag, not used for localization. E.g., to move object to which this ARMarker component is attached to. Requires permissions to update the scene.",
                 "default":false
              },
              "ele":{
@@ -179,9 +179,7 @@
           "required":[
              "markertype",
              "markerid",
-             "size",
-             "lat",
-             "lon"
+             "size"
           ],
           "title":"ARMArker",
           "type":"object"
