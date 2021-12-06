@@ -27,7 +27,7 @@
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
      debugCameraCapture: { default: false },
      /* relocalization debug messages output */
-     debugRelocalization: { default: false },
+     debugRelocalization: { default: true },
      /* builder mode flag; also looks at builder=true/false URL parameter */
      builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
@@ -392,10 +392,12 @@
      if (!(typeof markerid === 'string' || markerid instanceof String)) markerid = String(markerid); // convert markerid to string
      const sceneTag = this.markers[markerid];
      if (sceneTag !== undefined) {
+        let markerPose = sceneTag.el.object3D.matrixWorld; // get object world matrix
+        markerPose.makeScale(1, 1, 1); // ignore object scale; set it to 1
        return {
          id: sceneTag.data.markerid,
          uuid: sceneTag.el.id,
-         pose: sceneTag.el.object3D.matrixWorld, // get object world matrix
+         pose: markerPose, 
          dynamic: sceneTag.data.dynamic,
          buildable: sceneTag.data.buildable
        };
