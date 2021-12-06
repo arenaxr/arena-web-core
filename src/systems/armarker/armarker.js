@@ -393,11 +393,17 @@
      const sceneTag = this.markers[markerid];
      if (sceneTag !== undefined) {
         let markerPose = sceneTag.el.object3D.matrixWorld; // get object world matrix
-        markerPose.makeScale(1, 1, 1); // ignore object scale; set it to 1
+        const pos = new THREE.Vector3();
+        const quat = new THREE.Quaternion();
+        const scale = new THREE.Vector3();
+        markerPose.decompose ( pos, quat, scale )
+        const markerPoseNoScale = new THREE.Matrix4(); // create a world matrix with only position and rotation
+        markerPoseNoScale.setRotationFromQuaternion( quat );
+        markerPoseNoScale.setPosition( pos );
        return {
          id: sceneTag.data.markerid,
          uuid: sceneTag.el.id,
-         pose: markerPose, 
+         pose: markerPoseNoScale, 
          dynamic: sceneTag.data.dynamic,
          buildable: sceneTag.data.buildable
        };
