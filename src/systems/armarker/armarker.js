@@ -25,9 +25,9 @@
  AFRAME.registerSystem("armarker", {
    schema: {
      /* camera capture debug: creates a plane texture-mapped with the camera frames */
-     debugCameraCapture: { default: true },
+     debugCameraCapture: { default: false },
      /* relocalization debug messages output */
-     debugRelocalization: { default: true },
+     debugRelocalization: { default: false },
      /* builder mode flag; also looks at builder=true/false URL parameter */
      builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
@@ -132,8 +132,8 @@
         console.error("Could not make make gl context XR compatible!", err);
      }
 
-     // init cv pipeline only if we have ar markers in scene, or in builder mode (?)
-     if (this.markers.length || this.builder) this.initCVPipeline();
+     // init cv pipeline 
+     this.initCVPipeline();
    },
    /**
     * Setup cv pipeline (camera capture and cv worker)
@@ -327,7 +327,7 @@
     * @alias module:armarker-system
     */
    registerComponent: async function(marker) {
-    this.markers[marker.data.markerid] = marker;
+    this.markers[marker.data.markerid] = marker; 
     if (this.cvPipelineInitialized) {
         // indicate cv worker that a marker was added
         let newMarker = {
@@ -338,7 +338,9 @@
             size: marker.data.size/1000,            
         };
         this.cvWorker.postMessage(newMarker);
-    } else this.initCVPipeline();
+    } else {
+        // nothing to do; upon cv pipeline init the marker will be indicated to cv worker (see initCVPipeline())
+    }
    },
    /**
     * Unregister an ARMarker component
