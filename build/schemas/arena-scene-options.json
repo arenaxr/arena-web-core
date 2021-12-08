@@ -1,12 +1,418 @@
 {
     "definitions":{
-       "Vector3":{
-          "type":"object",
+       "environment-presets":{
+          "properties":{
+             "active":{
+                "default":true,
+                "description":"Show/hides the environment presets component. Use this instead of using the visible attribute.",
+                "title":"Active",
+                "type":"boolean"
+             },
+             "dressing":{
+                "default":"none",
+                "description":"Dressing is the term we use here for the set of additional objects that are put on the ground for decoration.",
+                "enum":[
+                   "apparatus",
+                   "arches",
+                   "cubes",
+                   "cylinders",
+                   "hexagons",
+                   "mushrooms",
+                   "none",
+                   "pyramids",
+                   "stones",
+                   "torii",
+                   "towers",
+                   "trees"
+                ],
+                "title":"Dressing",
+                "type":"string"
+             },
+             "dressingAmount":{
+                "default":10,
+                "description":"Number of objects used for dressing",
+                "max":1000,
+                "min":0,
+                "title":"Dressing Amount",
+                "type":"number"
+             },
+             "dressingColor":{
+                "default":"#795449",
+                "description":"Base color of dressing objects.",
+                "format":"color",
+                "title":"Dressing Color",
+                "type":"string"
+             },
+             "dressingOnPlayArea":{
+                "default":0,
+                "description":"Amount of dressing on play area.",
+                "max":1,
+                "min":0,
+                "title":"Dressing on Play Area",
+                "type":"number"
+             },
+             "dressingScale":{
+                "default":5,
+                "description":"Height (in meters) of dressing objects.",
+                "max":100,
+                "min":0,
+                "title":"Dressing Scale",
+                "type":"number"
+             },
+             "dressingUniformScale":{
+                "default":true,
+                "description":"If false, a different value is used for each coordinate x, y, z in the random variance of size.",
+                "title":"Dressing Uniform Scale",
+                "type":"boolean"
+             },
+             "dressingVariance":{
+                "$ref":"#/definitions/Vector3",
+                "default":{
+                   "x":1,
+                   "y":1,
+                   "z":1
+                },
+                "description":"Maximum x,y,z meters to randomize the size and rotation of each dressing object. Use 0 0 0 for no variation in size nor rotation.",
+                "title":"Dressing Variance"
+             },
+             "flatShading":{
+                "default":false,
+                "description":"Whether to show everything smoothed (false) or polygonal (true).",
+                "title":"Flat Shading",
+                "type":"boolean"
+             },
+             "fog":{
+                "default":0,
+                "description":"Amount of fog (0 = none, 1 = full fog). The color is estimated automatically.",
+                "max":1,
+                "min":0,
+                "title":"Fog",
+                "type":"number"
+             },
+             "grid":{
+                "default":"none",
+                "description":"1x1 and 2x2 are rectangular grids of 1 and 2 meters side, respectively.",
+                "enum":[
+                   "1x1",
+                   "2x2",
+                   "crosses",
+                   "dots",
+                   "none",
+                   "xlines",
+                   "ylines"
+                ],
+                "title":"Grid",
+                "type":"string"
+             },
+             "gridColor":{
+                "default":"#ccc",
+                "description":"Color of the grid.",
+                "format":"color",
+                "title":"Grid Color",
+                "type":"string"
+             },
+             "ground":{
+                "default":"hills",
+                "description":"Orography style.",
+                "enum":[
+                   "canyon",
+                   "flat",
+                   "hills",
+                   "noise",
+                   "none",
+                   "spikes"
+                ],
+                "title":"Ground",
+                "type":"string"
+             },
+             "groundColor":{
+                "default":"#553e35",
+                "description":"Main color of the ground.",
+                "format":"color",
+                "title":"Ground Color",
+                "type":"string"
+             },
+             "groundColor2":{
+                "default":"#694439",
+                "description":"Secondary color of the ground. Used for textures, ignored if groundTexture is none.",
+                "format":"color",
+                "title":"Ground Color (secondary)",
+                "type":"string"
+             },
+             "groundScale":{
+                "$ref":"#/definitions/Vector3",
+                "default":{
+                   "x":1,
+                   "y":1,
+                   "z":1
+                },
+                "description":"Ground dimensions (in meters).",
+                "title":"Ground Dimensions"
+             },
+             "groundTexture":{
+                "default":"none",
+                "description":"Texture applied to the ground.",
+                "enum":[
+                   "checkerboard",
+                   "none",
+                   "squares",
+                   "walkernoise"
+                ],
+                "title":"Ground Texture",
+                "type":"string"
+             },
+             "groundYScale":{
+                "default":3,
+                "description":"Maximum height (in meters) of ground's features (hills, mountains, peaks..).",
+                "max":50,
+                "min":0,
+                "title":"Ground Features Height",
+                "type":"number"
+             },
+             "hideInAR":{
+                "default":true,
+                "description":"If true, hide the environment when entering AR.",
+                "title":"Hide when entering AR",
+                "type":"boolean"
+             },
+             "horizonColor":{
+                "default":"#ffa500",
+                "format":"color",
+                "title":"Horizon Color",
+                "type":"string"
+             },
+             "lighting":{
+                "default":"distant",
+                "description":"A hemisphere light and a key light (directional or point) are added to the scene automatically when using the component. Use none if you don't want this automatic lighting set being added. The color and intensity are estimated automatically.",
+                "enum":[
+                   "distant",
+                   "none",
+                   "point"
+                ],
+                "title":"Lighting",
+                "type":"string"
+             },
+             "lightPosition":{
+                "$ref":"#/definitions/Vector3",
+                "default":{
+                   "x":0,
+                   "y":1,
+                   "z":-0.2
+                },
+                "description":"Position of the main light. If skyType is atmospheric, only the orientation matters (is a directional light) and it can turn the scene into night when lowered towards the horizon.",
+                "title":"Light Position"
+             },
+             "playArea":{
+                "default":1,
+                "description":"Radius of the area in the center reserved for the player and the gameplay. The ground is flat in there and no objects are placed inside.",
+                "max":10,
+                "min":0.5,
+                "title":"Play Area",
+                "type":"number"
+             },
+             "preset":{
+                "default":"default",
+                "description":"An A-frame preset environment.",
+                "enum":[
+                   "arches",
+                   "checkerboard",
+                   "contact",
+                   "default",
+                   "dream",
+                   "egypt",
+                   "forest",
+                   "goaland",
+                   "goldmine",
+                   "japan",
+                   "none",
+                   "osiris",
+                   "poison",
+                   "starry",
+                   "threetowers",
+                   "tron",
+                   "volcano",
+                   "yavapai"
+                ],
+                "title":"Preset Environment",
+                "type":"string"
+             },
+             "seed":{
+                "default":1,
+                "description":"Seed for randomization. If you don't like the layout of the elements, try another value for the seed.",
+                "max":1000,
+                "min":0,
+                "title":"Randomization Seed",
+                "type":"number"
+             },
+             "shadow":{
+                "default":false,
+                "description":"Shadows on/off. Sky light casts shadows on the ground of all those objects with shadow component applied",
+                "title":"Shadow",
+                "type":"boolean"
+             },
+             "shadowSize":{
+                "default":10,
+                "description":"Size of the shadow, if applied",
+                "title":"Shadow size",
+                "type":"number"
+             },
+             "skyColor":{
+                "default":"#ffa500",
+                "format":"color",
+                "title":"Sky Color",
+                "type":"string"
+             },
+             "skyType":{
+                "default":"color",
+                "description":"A sky type",
+                "enum":[
+                   "atmosphere",
+                   "color",
+                   "gradient",
+                   "none"
+                ],
+                "title":"Sky Type",
+                "type":"string"
+             }
+          },
           "required":[
-             "x",
-             "y",
-             "z"
+             "active",
+             "preset"
           ],
+          "title":"Environment Presets",
+          "type":"object"
+       },
+       "renderer-settings":{
+          "properties":{
+             "gammaFactor":{
+                "default":2.2,
+                "description":"Gamma factor (three.js default is 2.0; we use 2.2 as default)",
+                "title":"Gamma Factor",
+                "type":"number"
+             },
+             "localClippingEnabled":{
+                "default":false,
+                "description":"Defines whether the renderer respects object-level clipping planes",
+                "title":"Local Clipping Enabled",
+                "type":"boolean"
+             },
+             "outputEncoding":{
+                "default":"sRGBEncoding",
+                "description":"Defines the output encoding of the renderer (three.js default is LinearEncoding; we use sRGBEncoding as default)",
+                "enum":[
+                   "BasicDepthPacking",
+                   "GammaEncoding",
+                   "LinearEncoding",
+                   "LogLuvEncoding",
+                   "RGBADepthPacking",
+                   "RGBDEncoding",
+                   "RGBEEncoding",
+                   "RGBM16Encoding",
+                   "RGBM7Encoding",
+                   "sRGBEncoding"
+                ],
+                "title":"Output Encoding",
+                "type":"string"
+             },
+             "physicallyCorrectLights":{
+                "default":false,
+                "description":"Whether to use physically correct lighting mode.",
+                "title":"Physically Correct Lights",
+                "type":"boolean"
+             },
+             "sortObjects":{
+                "default":true,
+                "description":"Defines whether the renderer should sort objects",
+                "title":"Sort Objects",
+                "type":"boolean"
+             }
+          },
+          "required":[
+             "outputEncoding"
+          ],
+          "title":"Renderer Settings",
+          "type":"object"
+       },
+       "scene-options":{
+          "properties":{
+             "clickableOnlyEvents":{
+                "default":"true",
+                "description":"true = publish only mouse events for objects with click-listeners; false = all objects publish mouse events",
+                "title":"Events Publish Behavior",
+                "type":"boolean"
+             },
+             "distanceModel":{
+                "default":"inverse",
+                "description":"Algorithm to use to reduce the volume of the audio source as it moves away from the listener",
+                "enum":[
+                   "exponential",
+                   "inverse",
+                   "linear"
+                ],
+                "title":"Positional Audio Distance Model",
+                "type":"string"
+             },
+             "jitsiHost":{
+                "default":"jitsi0.andrew.cmu.edu:8443",
+                "description":"Jitsi host used for this scene.",
+                "minLength":5,
+                "title":"Scene Jitsi Host",
+                "type":"string"
+             },
+             "maxAVDist":{
+                "default":20,
+                "description":"Maximum distance between cameras/users until audio and video are cut off. For saving bandwidth on scenes with large amounts of user activity at once",
+                "title":"Maximum Audio/Video Cut Off Distance",
+                "type":"number"
+             },
+             "navMesh":{
+                "default":"",
+                "description":"Navigation Mesh URL",
+                "minLength":5,
+                "title":"Nav. Mesh",
+                "type":"string"
+             },
+             "privateScene":{
+                "default":"false",
+                "description":"false = scene will be visible; true = scene will not show in listings",
+                "title":"Scene Privacy",
+                "type":"boolean"
+             },
+             "refDistance":{
+                "default":1,
+                "description":"Distance at which the volume reduction starts taking effect",
+                "title":"Positional Audio Reference Distance",
+                "type":"number"
+             },
+             "rolloffFactor":{
+                "default":1,
+                "description":"How quickly the volume is reduced as the source moves away from the listener",
+                "title":"Positional Audio Rolloff Factor",
+                "type":"number"
+             },
+             "screenshare":{
+                "default":"screenshare",
+                "description":"Name of the 3D object used when sharing desktop",
+                "minLength":5,
+                "title":"Screenshare object name",
+                "type":"string"
+             },
+             "volume":{
+                "default":1,
+                "description":"Volume for users in a scene",
+                "title":"Positional Audio Volume",
+                "type":"number"
+             }
+          },
+          "required":[
+             "clickableOnlyEvents",
+             "maxAVDist",
+             "privateScene"
+          ],
+          "title":"Scene Options",
+          "type":"object"
+       },
+       "Vector3":{
           "properties":{
              "x":{
                 "type":"number"
@@ -17,478 +423,72 @@
              "z":{
                 "type":"number"
              }
-          }
-       },
-       "environment-presets":{
-          "type":"object",
-          "title":"Environment Presets",
-          "properties":{
-             "active":{
-                "type":"boolean",
-                "default":true,
-                "title":"Active",
-                "description":"Show/hides the environment presets component. Use this instead of using the visible attribute."
-             },
-             "preset":{
-                "default":"default",
-                "type":"string",
-                "title":"Preset Environment",
-                "description":"An A-frame preset environment.",
-                "enum":[
-                   "none",
-                   "default",
-                   "contact",
-                   "egypt",
-                   "checkerboard",
-                   "forest",
-                   "goaland",
-                   "yavapai",
-                   "goldmine",
-                   "arches",
-                   "threetowers",
-                   "poison",
-                   "tron",
-                   "japan",
-                   "dream",
-                   "volcano",
-                   "starry",
-                   "osiris"
-                ]
-             },
-             "seed":{
-                "type":"number",
-                "default":1,
-                "min":0,
-                "max":1000,
-                "title":"Randomization Seed",
-                "description":"Seed for randomization. If you don't like the layout of the elements, try another value for the seed."
-             },
-             "skyType":{
-                "default":"color",
-                "type":"string",
-                "title":"Sky Type",
-                "description":"A sky type",
-                "enum":[
-                   "none",
-                   "color",
-                   "gradient",
-                   "atmosphere"
-                ]
-             },
-             "skyColor":{
-                "type":"string",
-                "format":"color",
-                "title":"Sky Color",
-                "default":"#ffa500"
-             },
-             "horizonColor":{
-                "type":"string",
-                "format":"color",
-                "title":"Horizon Color",
-                "default":"#ffa500"
-             },
-             "lighting":{
-                "type":"string",
-                "default":"distant",
-                "title":"Lighting",
-                "description":"A hemisphere light and a key light (directional or point) are added to the scene automatically when using the component. Use none if you don't want this automatic lighting set being added. The color and intensity are estimated automatically.",
-                "enum":[
-                   "none",
-                   "distant",
-                   "point"
-                ]
-             },
-             "shadow":{
-                "type":"boolean",
-                "default":false,
-                "title":"Shadow",
-                "description":"Shadows on/off. Sky light casts shadows on the ground of all those objects with shadow component applied"
-             },
-             "shadowSize":{
-                "type":"number",
-                "default":10,
-                "title":"Shadow size",
-                "description":"Size of the shadow, if applied"
-             },
-             "lightPosition":{
-                "$ref":"#/definitions/Vector3",
-                "title":"Light Position",
-                "description":"Position of the main light. If skyType is atmospheric, only the orientation matters (is a directional light) and it can turn the scene into night when lowered towards the horizon.",
-                "default":{
-                   "x":0,
-                   "y":1,
-                   "z":-0.2
-                }
-             },
-             "fog":{
-                "type":"number",
-                "default":0,
-                "min":0,
-                "max":1,
-                "title":"Fog",
-                "description":"Amount of fog (0 = none, 1 = full fog). The color is estimated automatically."
-             },
-             "flatShading":{
-                "type":"boolean",
-                "default":false,
-                "title":"Flat Shading",
-                "description":"Whether to show everything smoothed (false) or polygonal (true)."
-             },
-             "playArea":{
-                "type":"number",
-                "default":1,
-                "min":0.5,
-                "max":10,
-                "title":"Play Area",
-                "description":"Radius of the area in the center reserved for the player and the gameplay. The ground is flat in there and no objects are placed inside."
-             },
-             "ground":{
-                "default":"hills",
-                "type":"string",
-                "title":"Ground",
-                "description":"Orography style.",
-                "enum":[
-                   "none",
-                   "flat",
-                   "hills",
-                   "canyon",
-                   "spikes",
-                   "noise"
-                ]
-             },
-             "groundScale":{
-                "$ref":"#/definitions/Vector3",
-                "default":{
-                   "x":1,
-                   "y":1,
-                   "z":1
-                },
-                "title":"Ground Dimensions",
-                "description":"Ground dimensions (in meters)."
-             },
-             "groundYScale":{
-                "type":"number",
-                "default":3,
-                "min":0,
-                "max":50,
-                "title":"Ground Features Height",
-                "description":"Maximum height (in meters) of ground's features (hills, mountains, peaks..)."
-             },
-             "groundTexture":{
-                "default":"none",
-                "type":"string",
-                "enum":[
-                   "none",
-                   "checkerboard",
-                   "squares",
-                   "walkernoise"
-                ],
-                "title":"Ground Texture",
-                "description":"Texture applied to the ground."
-             },
-             "groundColor":{
-                "type":"string",
-                "format":"color",
-                "title":"Ground Color",
-                "description":"Main color of the ground.",
-                "default":"#553e35"
-             },
-             "groundColor2":{
-                "type":"string",
-                "format":"color",
-                "title":"Ground Color (secondary)",
-                "description":"Secondary color of the ground. Used for textures, ignored if groundTexture is none.",
-                "default":"#694439"
-             },
-             "dressing":{
-                "type":"string",
-                "default":"none",
-                "enum":[
-                   "none",
-                   "cubes",
-                   "pyramids",
-                   "cylinders",
-                   "hexagons",
-                   "stones",
-                   "trees",
-                   "mushrooms",
-                   "towers",
-                   "apparatus",
-                   "arches",
-                   "torii"
-                ],
-                "title":"Dressing",
-                "description":"Dressing is the term we use here for the set of additional objects that are put on the ground for decoration."
-             },
-             "dressingAmount":{
-                "type":"number",
-                "default":10,
-                "min":0,
-                "max":1000,
-                "title":"Dressing Amount",
-                "description":"Number of objects used for dressing"
-             },
-             "dressingColor":{
-                "type":"string",
-                "format":"color",
-                "default":"#795449",
-                "title":"Dressing Color",
-                "description":"Base color of dressing objects."
-             },
-             "dressingScale":{
-                "type":"number",
-                "default":5,
-                "min":0,
-                "max":100,
-                "title":"Dressing Scale",
-                "description":"Height (in meters) of dressing objects."
-             },
-             "dressingVariance":{
-                "$ref":"#/definitions/Vector3",
-                "default":{
-                   "x":1,
-                   "y":1,
-                   "z":1
-                },
-                "title":"Dressing Variance",
-                "description":"Maximum x,y,z meters to randomize the size and rotation of each dressing object. Use 0 0 0 for no variation in size nor rotation."
-             },
-             "dressingUniformScale":{
-                "type":"boolean",
-                "default":true,
-                "title":"Dressing Uniform Scale",
-                "description":"If false, a different value is used for each coordinate x, y, z in the random variance of size."
-             },
-             "dressingOnPlayArea":{
-                "type":"number",
-                "default":0,
-                "min":0,
-                "max":1,
-                "title":"Dressing on Play Area",
-                "description":"Amount of dressing on play area."
-             },
-             "grid":{
-                "type":"string",
-                "default":"none",
-                "enum":[
-                   "none",
-                   "1x1",
-                   "2x2",
-                   "crosses",
-                   "dots",
-                   "xlines",
-                   "ylines"
-                ],
-                "title":"Grid",
-                "description":"1x1 and 2x2 are rectangular grids of 1 and 2 meters side, respectively."
-             },
-             "gridColor":{
-                "type":"string",
-                "format":"color",
-                "default":"#ccc",
-                "title":"Grid Color",
-                "description":"Color of the grid."
-             },
-             "hideInAR":{
-                "type":"boolean",
-                "default":true,
-                "title":"Hide when entering AR",
-                "description":"If true, hide the environment when entering AR."
-             }             
           },
           "required":[
-             "active",
-             "preset"
-          ]
-       },
-       "scene-options":{
-          "type":"object",
-          "title":"Scene Options",
-          "properties":{
-             "jitsiHost":{
-                "type":"string",
-                "title":"Scene Jitsi Host",
-                "description":"Jitsi host used for this scene.",
-                "minLength":5,
-                "default":"jitsi0.andrew.cmu.edu:8443"
-             },
-             "screenshare":{
-                "type":"string",
-                "title":"Screenshare object name",
-                "description":"Name of the 3D object used when sharing desktop",
-                "minLength":5,
-                "default":"screenshare"
-             },
-             "clickableOnlyEvents":{
-                "type":"boolean",
-                "title":"Events Publish Behavior",
-                "description":"true = publish only mouse events for objects with click-listeners; false = all objects publish mouse events",
-                "default":"true"
-             },
-             "privateScene":{
-                "type":"boolean",
-                "title":"Scene Privacy",
-                "description":"false = scene will be visible; true = scene will not show in listings",
-                "default":"false"
-             },
-             "volume":{
-                "type":"number",
-                "title":"Positional Audio Volume",
-                "description":"Volume for users in a scene",
-                "default":1
-             },
-             "distanceModel":{
-                "type":"string",
-                "title":"Positional Audio Distance Model",
-                "description":"Algorithm to use to reduce the volume of the audio source as it moves away from the listener",
-                "enum":[
-                   "inverse",
-                   "linear",
-                   "exponential"
-                ],
-                "default":"inverse"
-             },
-             "refDistance":{
-                "type":"number",
-                "title":"Positional Audio Reference Distance",
-                "description":"Distance at which the volume reduction starts taking effect",
-                "default":1
-             },
-             "rolloffFactor":{
-                "type":"number",
-                "title":"Positional Audio Rolloff Factor",
-                "description":"How quickly the volume is reduced as the source moves away from the listener",
-                "default":1
-             },
-             "maxAVDist":{
-                "type":"number",
-                "title":"Maximum Audio/Video Cut Off Distance",
-                "description":"Maximum distance between cameras/users until audio and video are cut off. For saving bandwidth on scenes with large amounts of user activity at once",
-                "default":20
-             },
-             "navMesh":{
-                "type":"string",
-                "title":"Nav. Mesh",
-                "description":"Navigation Mesh URL",
-                "minLength":5,
-                "default":""
-             }             
-          },
-          "required":[
-             "maxAVDist",
-             "clickableOnlyEvents",
-             "privateScene"
-          ]
-       },
-       "renderer-settings":{
-          "type":"object",
-          "title":"Renderer Settings",
-          "properties":{
-             "gammaFactor":{
-                "type":"number",
-                "title":"Gamma Factor",
-                "description":"Gamma factor (three.js default is 2.0; we use 2.2 as default)",
-                "default":2.2
-             },
-             "localClippingEnabled":{
-                "type":"boolean",
-                "title":"Local Clipping Enabled",
-                "description":"Defines whether the renderer respects object-level clipping planes",
-                "default":false
-             },
-             "outputEncoding":{
-                "type":"string",
-                "title":"Output Encoding",
-                "description":"Defines the output encoding of the renderer (three.js default is LinearEncoding; we use sRGBEncoding as default)",
-                "enum":[
-                   "LinearEncoding",
-                   "sRGBEncoding",
-                   "GammaEncoding",
-                   "RGBEEncoding",
-                   "LogLuvEncoding",
-                   "RGBM7Encoding",
-                   "RGBM16Encoding",
-                   "RGBDEncoding",
-                   "BasicDepthPacking",
-                   "RGBADepthPacking"
-                ],
-                "default":"sRGBEncoding"
-             },
-             "physicallyCorrectLights":{
-                "type":"boolean",
-                "title":"Physically Correct Lights",
-                "description":"Whether to use physically correct lighting mode.",
-                "default":false
-             },
-             "sortObjects":{
-                "type":"boolean",
-                "title":"Sort Objects",
-                "description":"Defines whether the renderer should sort objects",
-                "default":true
-             }
-          },
-          "required":[
-             "outputEncoding"
-          ]
+             "x",
+             "y",
+             "z"
+          ],
+          "type":"object"
        }
     },
-    "type":"object",
-    "title":"Scene Config",
     "properties":{
-       "object_id":{
-            "type":"string",
-            "minLength":3,
-            "description":"A uuid or otherwise unique identifier for this object",
-            "default": "scene-options"
-       },
        "action":{
-          "type":"string",
+          "default":"create",
           "description":"One of 3 basic Create/Update/Delete actions",
           "enum":[
              "create",
              "delete",
              "update"
           ],
-          "default":"create"
-       },
-       "persist":{
-          "type":"boolean",
-          "description":"Persist this object in the database",
-          "default":"true"
-       },
-       "type":{
-          "type":"string",
-          "enum":[
-             "scene-options"
-          ]
+          "type":"string"
        },
        "data":{
-          "title":"Scene Config Data",
           "properties":{
              "env-presets":{
                 "$ref":"#/definitions/environment-presets",
                 "description":"A-Frame Environment presets"
              },
-             "scene-options":{
-                "$ref":"#/definitions/scene-options",
-                "description":"ARENA Scene Options"
-             },
              "renderer-settings":{
                 "$ref":"#/definitions/renderer-settings",
                 "description":"These settings are fed into three.js WebGLRenderer properties"
+             },
+             "scene-options":{
+                "$ref":"#/definitions/scene-options",
+                "description":"ARENA Scene Options"
              }
           },
           "required":[
              "env-presets",
              "scene-options"
-          ]
+          ],
+          "title":"Scene Config Data"
+       },
+       "object_id":{
+          "default":"scene-options",
+          "description":"A uuid or otherwise unique identifier for this object",
+          "minLength":3,
+          "type":"string"
+       },
+       "persist":{
+          "default":"true",
+          "description":"Persist this object in the database",
+          "type":"boolean"
+       },
+       "type":{
+          "enum":[
+             "scene-options"
+          ],
+          "type":"string"
        }
     },
     "required":[
-       "object_id",
        "action",
+       "data",
+       "object_id",
        "persist",
-       "type",
-       "data"
-    ]
+       "type"
+    ],
+    "title":"Scene Config",
+    "type":"object"
  }
