@@ -28,12 +28,8 @@
      debugCameraCapture: { default: false },
      /* relocalization debug messages output */
      debugRelocalization: { default: true },
-     /* builder mode flag; also looks at builder=true/false URL parameter */
-     builder: { default: false },
      /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
      networkedTagSolver: { default: false },
-     /* publish ar marker detections; also looks at publishDetections=true/false URL parameter */
-     publishDetections: { default: false },
      /* how often we update markers from ATLAS; 0=never */
      ATLASUpdateIntervalSecs: { default:  30 },
      /* how often we tigger a device location update; 0=never */
@@ -75,16 +71,7 @@
      this.isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
 
      // check URL parameters
-     const urlParams = new URLSearchParams(window.location.search);
-     if (urlParams.get("builder")) {
-       this.data.builder = true;
-       //thisc = true;
-     } else {
-       this.data.networkedTagSolver = !!urlParams.get("networkedTagSolver"); // Force into boolean
-     }
-     if (!this.data.networkedTagSolver) {
-       this.data.publishDetections = !!urlParams.get("publishDetections"); // Force into boolean
-     }
+     this.data.networkedTagSolver = !!urlParams.get("networkedTagSolver"); // Force into boolean
  
      // request camera acess features
      let sceneEl = this.el;
@@ -105,12 +92,11 @@
    },
    /*
     * System attribute update
-    * @param {object} marker - The marker component object to register.
+    * @param {object} oldData - previous attribute values.
     * @alias module:armarker-system
     */   
    update: function (oldData) {
     // TODO: Do stuff with `this.data`...
-    // TODO: pass along changes to networkedTagSolver, publishDetections, builder to ARMarkerRelocalization
    },
    /*
    // Getter
@@ -192,8 +178,6 @@
        arMakerSys: this,
        detectionsEventTarget: this.detectionEvts,
        networkedTagSolver: this.data.networkedTagSolver,
-       publishDetections: this.data.publishDetections,
-       builder: this.data.builder,
        debug: this.data.debugRelocalization
      });
 

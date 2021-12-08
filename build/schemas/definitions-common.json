@@ -112,10 +112,10 @@
           },
           "description":"A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes, or scene objects, in the real world.",
           "properties":{
-             "buildable":{
+             "publish":{
                 "type":"boolean",
-                "title":"buildable",
-                "description":"Buildable tag, can be moved when in builder mode (url parameter builder=true to enable builder mode; requires permissions to update the scene)",
+                "title":"publish",
+                "description":"Publish detections. Send detections to external agents (e.g. external builder script that places new markers in the scene).",
                 "default":false
              },
              "dynamic":{

@@ -19,15 +19,13 @@
     arMarkerSystem;
     /* let relocalization up to a networked solver */
     networkedTagSolver;
-    /* publish detections */
-    publishDetections;
-    /* build mode */
-    builder;
     /* debug; output debug messages */
     debug;
     /* cameraSpinner and cameraRig scene object3D instances */
     cameraSpinnerObj3D;
     cameraRigObj3D;
+    /* base/default detection msg attributes; initialized in constructor */
+    DFT_DETECTION_MSG;
     /* matrices used for relocalization */
     dtagMatrix = new THREE.Matrix4();
     rigMatrix = new THREE.Matrix4();
@@ -57,16 +55,12 @@
      * @param {function} arMakerSys - ARMarker system; to lookup markers     
      * @param {object} detectionsEventTarget - Detections event target
      * @param {boolean} [networkedTagSolver=false] - If true, send detection messages to pubsub and do not perform relocalization
-     * @param {boolean} [publishDetections=false] - If true, send detection messages to pubsub
-     * @param {boolean} [builder=false]- If true, persist detected tags (build mode)
      * @param {boolean} [debug=false]- If true, output debug messages
      */
     constructor({
       arMakerSys,
       detectionsEventTarget,
       networkedTagSolver = false,
-      publishDetections = false,
-      builder = false,
       debug = false
     }) {
       if (detectionsEventTarget === undefined) throw "Please provide a detection event target";
@@ -77,17 +71,23 @@
       ARMarkerRelocalization.instance = this;
   
       // check/init internal options
-      if ((publishDetections || networkedTagSolver || builder) && !window.ARENA) {
-        throw "Publish detections, networked tag solver and builder mode require ARENA functionality.";
+      if (networkedTagSolver && !window.ARENA) {
+        throw "Networked tag solver requires ARENA functionality.";
       }
       this.arMakerSystem = arMakerSys;
       this.networkedTagSolver = networkedTagSolver;
-      this.publishDetections = publishDetections;
-      this.builder = builder;
       this.debug = debug;
       this.cameraObject3D = document.getElementById('my-camera').object3D;
       this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
       this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
+      // init base/default detection msg attributes and freeze it; we create copies of it object
+      Object.assign(this.DFT_DETECTION_MSG, {
+        scene: ARENA.sceneName,
+        namespace: ARENA.nameSpace,
+        camera_id: ARENA.camName,
+        type: 'armarker'
+      });
+      Object.freeze(this.DFT_DETECTION_MSG); // no more changes
       if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) {
         // wait for scene to load and try again
         document.querySelector('a-scene').addEventListener('loaded', () => {
@@ -97,7 +97,7 @@
             if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) throw "Camera rig and camera spinner are required for relocalization!";            
         })  
       }
-  
+
       // setup marker detection event listener
       detectionsEventTarget.addEventListener(
         "armarker-detection",
@@ -172,8 +172,6 @@
         if (this.debug) console.log("Tag detected:", e.detail);
         const detections = e.detail.detections; 
         const timestamp = e.detail.ts; // detection timestamp = when frame was captured
-      
-        //console.log('Detections (markerDetection):', detections);
 
         // Save vio before processing apriltag
         this.vioMatrixPrev.copy(this.vioMatrix);
@@ -189,17 +187,13 @@
 
         const vio = {position: this.vioPos, rotation: this.vioRot};
         
-        if (this.networkedTagSolver || this.publishDetections) {
-            // TODO: change message to 'armarker' ?
-            const jsonMsg = {
-                scene: ARENA.sceneName,
-                namespace: ARENA.nameSpace,
-                type: "apriltag",
+        if (this.networkedTagSolver) {
+            // create message
+            const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, { 
                 timestamp: timestamp,
-                camera_id: ARENA.camName
-            };
-            jsonMsg.vio = vio;
-            jsonMsg.detections = [];
+                vio: vio,
+                detections: []
+            });
             for (const detection of detections) {
                 const d = detection;
                 if (d.pose.e > this.DTAG_ERROR_THRESH) {
@@ -214,67 +208,67 @@
                 }
                 jsonMsg.detections.push(d);
             }
-            if (this.builder) {
-                jsonMsg.geolocation = {
-                    latitude: ARENA.clientCoords.latitude,
-                    longitude: ARENA.clientCoords.longitude
-                };
-                jsonMsg.localize_tag = true;
-            }
             ARENA.Mqtt.publish(
-                ARENA.defaults.realm + "/g/a/" + ARENA.camName,
+                `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
                 JSON.stringify(jsonMsg)
             );
         }
+        
         if (!this.networkedTagSolver) {
             let localizerTag = false;
+            let pubDetList = [];
             for (const detection of detections) {
                 if (detection.pose.e > this.DTAG_ERROR_THRESH) {
                     if (this.debug) console.warn(`Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`);
                     continue;
                 }
-              /*
                 delete detection.corners;
                 delete detection.center;
-              */
                 let refTag = null;
                 // get marker data
                 const indexedTag = this.arMakerSystem.getMarker(detection.id);
                 if (indexedTag?.pose) refTag = indexedTag;
-                if (this.debug) console.log("ARMarker system found tag:", refTag);
-                if (refTag) {
-                    if (!refTag.dynamic && !refTag.buildable) {
-                        if (vioStable && !localizerTag) {
-                            const rigPose = this.getRigPoseFromAprilTag(detection.pose,refTag.pose);
-                            if (this.debug) console.log("Applying transform:", rigPose);
-                            this.cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
-                            this.cameraRigObj3D.position.setFromMatrixPosition(rigPose);
-                            localizerTag = true;
-                            /* Rig update for networked solver, disable for now **
-                              this.rigMatrixT.copy(rigPose)
-                              // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
-                              this.rigMatrixT.transpose();
-                            */
-                        }
-                    } else if (refTag.dynamic && ARENA && ARENA.chat.settings.isSceneWriter) {
+                if (!refTag) {
+                    if (this.debug) console.log("ARMarker system has no data about tag id:", detection.id);
+                    continue; 
+                } else if (this.debug) console.log("ARMarker system found tag:", refTag);
+
+                // publish this detection ?
+                if (!refTag.publish) {
+                    pubDetList.push(detection);
+                    if (indexedTag?.pose) {
+                        detection.refTag = indexedTag;
+                    }                    
+                };
+
+                // tag is static ?
+                if (!refTag.dynamic) {
+                    if (vioStable && !localizerTag) {
+                        const rigPose = this.getRigPoseFromAprilTag(detection.pose,refTag.pose);
+                        if (this.debug) console.log("Applying transform:", rigPose);
+                        this.cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
+                        this.cameraRigObj3D.position.setFromMatrixPosition(rigPose);
+                        localizerTag = true;
+                        /* Rig update for networked solver, disable for now **
+                          this.rigMatrixT.copy(rigPose)
+                          // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
+                          this.rigMatrixT.transpose();
+                        */
+                    }
+                } else if (refTag.dynamic) {
+                    if (ARENA && ARENA.chat.settings.isSceneWriter) {
                         // Dynamic + writable, push marker update
                         if (this.rigMatrix.equals(this.identityMatrix)) {
                             if (this.debug) console.warn("Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first");
                         } else {
-                            if (this.debug) console.log(`Pushing update for tag ${detection.id}`)
-                            const jsonMsg = {
-                                scene: ARENA.sceneName,
-                                namespace: ARENA.nameSpace,
-                                timestamp: timestamp,
-                                camera_id: ARENA.camName
-                            };                          
+                            if (this.debug) console.log(`Pushing update for tag ${detection.id}`)                       
                             const tagPose = this.getTagPoseFromRig(detection.pose);
                             this.tagPoseRot.setFromRotationMatrix(tagPose);
-                            // Send update directly to scene
-                            Object.assign(jsonMsg, {
+                            // Send update directly to scene (arguments order such that we overwrite 'type')
+                            const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
                                 object_id: refTag.uuid,
-                                action: "update",
-                                type: "object",
+                                action: 'update',
+                                type: 'object',
                                 persist: true,
                                 data: {
                                     position: {
@@ -296,7 +290,25 @@
                                 JSON.stringify(jsonMsg)
                             );
                         }
-                    } else if (ARENA && !ARENA.chat.settings.isSceneWriter) console.error("Object update not sent; User does not have write permissions!");
+                    } else console.error("Object update not sent; User does not have write permissions!");
+                }
+                
+                // do we have detected markers to publish ?
+                if (pubDetList.length > 0 && ARENA) {
+                    const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
+                        timestamp: timestamp,
+                        vio = vio,               
+                        detections: pubDetList, 
+                        geolocation: {
+                            latitude: ARENA.clientCoords.latitude,
+                            longitude: ARENA.clientCoords.longitude    
+                        },
+                        localize_tag: true
+                    });
+                    ARENA.Mqtt.publish(
+                        `${ARENA.defaults.realm}/g/a/${ARENA.camName}`  ,
+                        JSON.stringify(jsonMsg)
+                    );                    
                 }
             }
         }

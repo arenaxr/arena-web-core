@@ -14,8 +14,8 @@
  * ARMarker Component. Supports ARMarkers in a scene
  * @module armarker
  * @property {string} [markertype=apriltag_36h11] - The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb'
- * @property {boolean} [dynamic=false] - Whether tag is a static localizer, or dynamically changes position
- * @property {boolean} [buildable=false] - Allow tag to be reoriented by a scene author by clicking on it
+ * @property {boolean} [dynamic=false] - Whether tag is a static and used to for camera relocalization, or dynamically changes position
+ * @property {boolean} [publish=false] - Publish tag detections.
  * @property {string} [markerid] - Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])
  * @property {number} [size=150] - Size of the marker (assumed to be a square), if applicable (mm).
  * @property {string} [url] - A URL associated with the marker.
