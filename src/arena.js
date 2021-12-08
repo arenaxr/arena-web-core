@@ -191,14 +191,28 @@ export class Arena {
 
     /**
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
-     * @param {string} mqttToken The JWT token for the user to connect to MQTT/Jitsi.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted(mqttToken) {
-        if (mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
+    isJitsiPermitted() {
+        if (this.mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
             const perms = tokenObj.payloadObj;
             if (perms.room) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks loaded MQTT token for full scene object write permissions.
+     * @return {boolean} True if the user has permission to write in this scene.
+     */
+     isUserSceneWriter(mqtt_token=this.mqttToken) {
+        if (this.mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
+            const perms = tokenObj.payloadObj;
+            if (this.matchJWT(ARENA.renderTopic, perms.publ)) {
+                return true;
+            }
         }
         return false;
     }
@@ -631,10 +645,11 @@ export class Arena {
                 mqtt_username: this.username,
                 mqtt_token: this.mqttToken,
                 devInstance: this.defaults.devInstance,
+                isSceneWriter: this.isUserSceneWriter(),
             });
             await this.chat.start();
 
-            if (this.noav || !this.isJitsiPermitted(this.mqttToken)) {
+            if (this.noav || !this.isJitsiPermitted()) {
                 this.showEchoDisplayName();
             } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
                 /*

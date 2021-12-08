@@ -65,7 +65,7 @@ export class ARENAChat {
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             devInstance: st.devInstance !== undefined ? st.devInstance : false,
-            isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
+            isSceneWriter: st.isSceneWriter !== undefined ? st.isSceneWriter : false,
             isSpeaker: false,
         };
 

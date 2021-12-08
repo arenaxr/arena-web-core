@@ -256,7 +256,7 @@
                         */
                     }
                 } else if (refTag.dynamic) {
-                    if (ARENA && ARENA.chat.settings.isSceneWriter) {
+                    if (ARENA && ARENA.isUserSceneWriter()) {
                         // Dynamic + writable, push marker update
                         if (this.rigMatrix.equals(this.identityMatrix)) {
                             if (this.debug) console.warn("Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first");
@@ -306,7 +306,7 @@
                         localize_tag: true
                     });
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/g/a/${ARENA.camName}`  ,
+                        `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
                         JSON.stringify(jsonMsg)
                     );                    
                 }
