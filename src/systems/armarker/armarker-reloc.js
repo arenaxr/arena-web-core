@@ -18,7 +18,7 @@
     /* reference to ARMarker system (we ask the ARMarker system data about known markers) */
     arMarkerSystem;
     /* let relocalization up to a networked solver */
-    networkedTagSolver;
+    networkedLocationSolver;
     /* debug; output debug messages */
     debug;
     /* cameraSpinner and cameraRig scene object3D instances */
@@ -54,13 +54,13 @@
      * Singleton constructor; init internal options and other data; setup detection event handler
      * @param {function} arMakerSys - ARMarker system; to lookup markers     
      * @param {object} detectionsEventTarget - Detections event target
-     * @param {boolean} [networkedTagSolver=false] - If true, send detection messages to pubsub and do not perform relocalization
+     * @param {boolean} [networkedLocationSolver=false] - If true, send detection messages to pubsub and do not perform relocalization
      * @param {boolean} [debug=false]- If true, output debug messages
      */
     constructor({
       arMakerSys,
       detectionsEventTarget,
-      networkedTagSolver = false,
+      networkedLocationSolver = false,
       debug = false
     }) {
       if (detectionsEventTarget === undefined) throw "Please provide a detection event target";
@@ -71,11 +71,11 @@
       ARMarkerRelocalization.instance = this;
   
       // check/init internal options
-      if (networkedTagSolver && !window.ARENA) {
+      if (networkedLocationSolver && !window.ARENA) {
         throw "Networked tag solver requires ARENA functionality.";
       }
       this.arMakerSystem = arMakerSys;
-      this.networkedTagSolver = networkedTagSolver;
+      this.networkedLocationSolver = networkedLocationSolver;
       this.debug = debug;
       this.cameraObject3D = document.getElementById('my-camera').object3D;
       this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
@@ -187,7 +187,7 @@
 
         const vio = {position: this.vioPos, rotation: this.vioRot};
         
-        if (this.networkedTagSolver) {
+        if (this.networkedLocationSolver) {
             // create message
             const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, { 
                 timestamp: timestamp,
@@ -214,7 +214,7 @@
             );
         }
         
-        if (!this.networkedTagSolver) {
+        if (!this.networkedLocationSolver) {
             let localizerTag = false;
             let pubDetList = [];
             for (const detection of detections) {

@@ -336,7 +336,7 @@
        "scene-options":{
           "properties":{
              "clickableOnlyEvents":{
-                "default":"true",
+                "default":true,
                 "description":"true = publish only mouse events for objects with click-listeners; false = all objects publish mouse events",
                 "title":"Events Publish Behavior",
                 "type":"boolean"
@@ -372,8 +372,14 @@
                 "title":"Nav. Mesh",
                 "type":"string"
              },
+             "networkedLocationSolver":{
+                "default":false,
+                "description":"ARMarker location solver parameter. By default (networkedLocationSolver=false) clients solve camera location locally when a static marker is detected. When true, publishes marker detections (to realm/g/a/camera-name) and defers all tag solving of client camera to a solver sitting on pubsub.",
+                "title":"Networked Location Solver",
+                "type":"boolean"
+             },
              "privateScene":{
-                "default":"false",
+                "default":false,
                 "description":"false = scene will be visible; true = scene will not show in listings",
                 "title":"Scene Privacy",
                 "type":"boolean"
@@ -433,6 +439,23 @@
        }
     },
     "properties":{
+       "object_id":{
+          "default":"scene-options",
+          "description":"A uuid or otherwise unique identifier for this object",
+          "minLength":3,
+          "type":"string"
+       },
+       "persist":{
+          "default":"true",
+          "description":"Persist this object in the database",
+          "type":"boolean"
+       },
+       "type":{
+          "enum":[
+             "scene-options"
+          ],
+          "type":"string"
+       },
        "action":{
           "default":"create",
           "description":"One of 3 basic Create/Update/Delete actions",
@@ -463,23 +486,6 @@
              "scene-options"
           ],
           "title":"Scene Config Data"
-       },
-       "object_id":{
-          "default":"scene-options",
-          "description":"A uuid or otherwise unique identifier for this object",
-          "minLength":3,
-          "type":"string"
-       },
-       "persist":{
-          "default":"true",
-          "description":"Persist this object in the database",
-          "type":"boolean"
-       },
-       "type":{
-          "enum":[
-             "scene-options"
-          ],
-          "type":"string"
        }
     },
     "required":[

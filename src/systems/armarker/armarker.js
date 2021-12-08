@@ -28,8 +28,8 @@
      debugCameraCapture: { default: false },
      /* relocalization debug messages output */
      debugRelocalization: { default: true },
-     /* network tag solver flag; also looks at networkedTagSolver=true/false URL parameter */
-     networkedTagSolver: { default: false },
+     /* networked marker solver flag; let relocalization up to a networked solver */
+     networkedLocationSolver: { default: false },
      /* how often we update markers from ATLAS; 0=never */
      ATLASUpdateIntervalSecs: { default:  30 },
      /* how often we tigger a device location update; 0=never */
@@ -67,11 +67,11 @@
      // init this.ATLASMarkers with list of markers within range
      this.getARMArkersFromATLAS(true);
 
+     // init networkedLocationSolver flag from ARENA scene options, if available
+     if (ARENA && ARENA['networkedLocationSolver']) this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
+
      // check if this is WebXRViewer/WebARViewer
      this.isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
-
-     // check URL parameters
-     this.data.networkedTagSolver = !!urlParams.get("networkedTagSolver"); // Force into boolean
  
      // request camera acess features
      let sceneEl = this.el;
@@ -177,7 +177,7 @@
      this.markerReloc = new ARMarkerRelocalization({
        arMakerSys: this,
        detectionsEventTarget: this.detectionEvts,
-       networkedTagSolver: this.data.networkedTagSolver,
+       networkedLocationSolver: this.data.networkedLocationSolver,
        debug: this.data.debugRelocalization
      });
 
