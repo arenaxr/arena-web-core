@@ -158,7 +158,7 @@ const ARENAFaceTracker = (function() {
         const faceJSON = {};
         faceJSON['object_id'] = ARENA.faceName;
         faceJSON['type'] = 'face-features';
-        faceJSON['action'] = 'create';
+        faceJSON['action'] = 'update';
 
         faceJSON['data'] = {};
 
@@ -326,7 +326,8 @@ const ARENAFaceTracker = (function() {
 
                 const faceJSON = createFaceJSON(valid, landmarks, bbox, pose);
                 if (faceJSON !== prevJSON) {
-                    ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName + '/face', faceJSON);
+                    const FACE_TOPIC = `${ARENA.outputTopic}${ARENA.camName}/face/${faceJSON.object_id}`;
+                    ARENA.Mqtt.publish(FACE_TOPIC, faceJSON);
                     prevJSON = faceJSON;
                 }
 
