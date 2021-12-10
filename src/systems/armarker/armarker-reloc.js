@@ -1,4 +1,5 @@
-/* global AFRAME, ARENA */
+/* eslint-disable no-throw-literal */
+/* global ARENA */
 
 /**
  * @fileoverview Relocalization from AR Marker detection events
@@ -12,7 +13,7 @@
 /**
  *
  */
- export class ARMarkerRelocalization {
+export class ARMarkerRelocalization {
     /* singleton instance */
     static instance = null;
     /* reference to ARMarker system (we ask the ARMarker system data about known markers) */
@@ -40,100 +41,104 @@
     vioPosDiff = new THREE.Vector3();
     tagPoseRot = new THREE.Quaternion();
     flipMatrix = new THREE.Matrix4().set(
-            1,  0,  0, 0,
-            0, -1,  0, 0,
-            0,  0, -1, 0,
-            0,  0,  0, 1);
-    
+        1, 0, 0, 0,
+        0, -1, 0, 0,
+        0, 0, -1, 0,
+        0, 0, 0, 1);
+
     /* error and movement thresholds */
     DTAG_ERROR_THRESH = 7e-6;
     MOVE_THRESH = 0.05;
     ROT_THRESH = 0.087;
-  
+
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
-     * @param {function} arMakerSys - ARMarker system; to lookup markers     
+     * @param {function} arMakerSys - ARMarker system; to lookup markers
      * @param {object} detectionsEventTarget - Detections event target
-     * @param {boolean} [networkedLocationSolver=false] - If true, send detection messages to pubsub and do not perform relocalization
-     * @param {boolean} [debug=false]- If true, output debug messages
+     * @param {boolean} [networkedLocationSolver=false] - If true, send detection messages to pubsub
+     * @param {boolean} [debug=false] - If true, output debug messages
      */
     constructor({
-      arMakerSys,
-      detectionsEventTarget,
-      networkedLocationSolver = false,
-      debug = false
+        arMakerSys,
+        detectionsEventTarget,
+        networkedLocationSolver = false,
+        debug = false,
     }) {
-      if (detectionsEventTarget === undefined) throw "Please provide a detection event target";
-      // singleton
-      if (ARMarkerRelocalization.instance) {
-        return ARMarkerRelocalization.instance;
-      }
-      ARMarkerRelocalization.instance = this;
-  
-      // check/init internal options
-      if (networkedLocationSolver && !window.ARENA) {
-        throw "Networked tag solver requires ARENA functionality.";
-      }
-      this.arMakerSystem = arMakerSys;
-      this.networkedLocationSolver = networkedLocationSolver;
-      this.debug = debug;
-      this.cameraObject3D = document.getElementById('my-camera').object3D;
-      this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
-      this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
-      // init base/default detection msg attributes and freeze it; we create copies of it object
-      Object.assign(this.DFT_DETECTION_MSG, {
-        scene: ARENA.sceneName,
-        namespace: ARENA.nameSpace,
-        camera_id: ARENA.camName,
-        type: 'armarker'
-      });
-      Object.freeze(this.DFT_DETECTION_MSG); // no more changes
-      if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) {
+        if (detectionsEventTarget === undefined) throw 'Please provide a detection event target';
+        // singleton
+        if (ARMarkerRelocalization.instance) {
+            return ARMarkerRelocalization.instance;
+        }
+        ARMarkerRelocalization.instance = this;
+
+        // check/init internal options
+        if (networkedLocationSolver==true) {
+            if (!ARENA) throw 'Networked tag solver requires ARENA functionality.';
+            console.info('networkedLocationSolver = true; letting relocalization up to a networked solver.');
+        }
+        this.arMakerSystem = arMakerSys;
+        this.networkedLocationSolver = networkedLocationSolver;
+        this.debug = debug;
+        this.cameraObject3D = document.getElementById('my-camera').object3D;
+        this.cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
+        this.cameraRigObj3D = document.getElementById('cameraRig').object3D;
+        // init base/default detection msg attributes and freeze it; we create copies of it object
+        this.DFT_DETECTION_MSG = {
+            scene: ARENA.sceneName,
+            namespace: ARENA.nameSpace,
+            camera_id: ARENA.camName,
+            type: 'armarker',
+        };
+        Object.freeze(this.DFT_DETECTION_MSG); // no more changes
+        if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) {
         // wait for scene to load and try again
-        document.querySelector('a-scene').addEventListener('loaded', () => {
-            this.cameraObject3D = document.getElementById('my-camera').object3D;
-            this.cameraSpinnerObj3D = document.getElementById("cameraSpinner").object3D;
-            this.cameraRigObj3D = document.getElementById("cameraRig").object3D;
-            if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) throw "Camera rig and camera spinner are required for relocalization!";            
-        })  
-      }
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                this.cameraObject3D = document.getElementById('my-camera').object3D;
+                this.cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
+                this.cameraRigObj3D = document.getElementById('cameraRig').object3D;
+                // eslint-disable-next-line max-len
+                if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) throw 'Camera rig and camera spinner are required for relocalization!';
+            });
+        }
 
-      // setup marker detection event listener
-      detectionsEventTarget.addEventListener(
-        "armarker-detection",
-        this.markerDetection.bind(this)
-      );
-
+        // setup marker detection event listener
+        detectionsEventTarget.addEventListener(
+            'armarker-detection',
+            this.markerDetection.bind(this),
+        );
     }
-  
+
     /**
      * Used to filter out detections while shaking/moving too much
-     * @param {number} id - numeric id of tag
+     * @param {number} vioPrev - previous VIO Matrix
+     * @param {number} vioCur - current VIO Matrix
      * @return {boolean} - boolean indicating if we should ignore a detecion or not
      */
     vioFilter(vioPrev, vioCur) {
-      this.vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
-      const moveDiff = this.vioPosDiff.setFromMatrixPosition(this.vioMatrixDiff).length(); // np.linalg.norm(posediff[0:3, 3])
-      if (moveDiff > this.MOVE_THRESH) {
-        return false;
-      }
-      const rotDiff = Math.acos(
-        (this.vioMatrixDiff.elements[0] +
+        this.vioMatrixDiff.multiplyMatrices(vioPrev, vioCur); // posediff = pose2 @ np.linalg.inv(pose1)
+        // eslint-disable-next-line max-len
+        const moveDiff = this.vioPosDiff.setFromMatrixPosition(this.vioMatrixDiff).length(); // np.linalg.norm(posediff[0:3, 3])
+        if (moveDiff > this.MOVE_THRESH) {
+            return false;
+        }
+        const rotDiff = Math.acos(
+            (this.vioMatrixDiff.elements[0] +
           this.vioMatrixDiff.elements[5] +
           this.vioMatrixDiff.elements[10] -
           1) /
-          2
-      ); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
-      if (rotDiff > this.ROT_THRESH) {
-        return false;
-      }
-      return true;
+          2,
+        ); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
+        if (rotDiff > this.ROT_THRESH) {
+            return false;
+        }
+        return true;
     }
-  
+
     /**
      * Marker detection handler as setup in class constructor
      * @param {object} e - event data in the format below
-     * @example <caption>event.detail contains a detections array and a timestamp (of when frame was captured) as follows:</caption>
+     * @example <caption>event.detail contains a detections array and a
+     *          timestamp (of when frame was captured) as follows:</caption>
      *   detections: [
      *     {
      *       id: 0,
@@ -169,8 +174,8 @@
      */
     markerDetection(e) {
         const ARENA = window.ARENA;
-        if (this.debug) console.log("Tag detected:", e.detail);
-        const detections = e.detail.detections; 
+        if (this.debug) console.log('Tag detected:', e.detail);
+        const detections = e.detail.detections;
         const timestamp = e.detail.ts; // detection timestamp = when frame was captured
 
         // Save vio before processing apriltag
@@ -186,13 +191,13 @@
         this.vioPos.setFromMatrixPosition(this.vioMatrix);
 
         const vio = {position: this.vioPos, rotation: this.vioRot};
-        
+
         if (this.networkedLocationSolver) {
             // create message
-            const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, { 
+            const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
                 timestamp: timestamp,
                 vio: vio,
-                detections: []
+                detections: [],
             });
             for (const detection of detections) {
                 const d = detection;
@@ -210,15 +215,16 @@
             }
             ARENA.Mqtt.publish(
                 `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
-                JSON.stringify(jsonMsg)
+                JSON.stringify(jsonMsg),
             );
         }
-        
+
         if (!this.networkedLocationSolver) {
             let localizerTag = false;
-            let pubDetList = [];
+            const pubDetList = [];
             for (const detection of detections) {
                 if (detection.pose.e > this.DTAG_ERROR_THRESH) {
+                    // eslint-disable-next-line max-len
                     if (this.debug) console.warn(`Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`);
                     continue;
                 }
@@ -229,23 +235,23 @@
                 const indexedTag = this.arMakerSystem.getMarker(detection.id);
                 if (indexedTag?.pose) refTag = indexedTag;
                 if (!refTag) {
-                    if (this.debug) console.log("ARMarker system has no data about tag id:", detection.id);
-                    continue; 
-                } else if (this.debug) console.log("ARMarker system found tag:", refTag);
+                    if (this.debug) console.log('ARMarker system has no data about tag id:', detection.id);
+                    continue;
+                } else if (this.debug) console.log('ARMarker system found tag:', refTag);
 
                 // publish this detection ?
                 if (!refTag.publish) {
                     pubDetList.push(detection);
                     if (indexedTag?.pose) {
                         detection.refTag = indexedTag;
-                    }                    
+                    }
                 };
 
                 // tag is static ?
                 if (!refTag.dynamic) {
                     if (vioStable && !localizerTag) {
-                        const rigPose = this.getRigPoseFromAprilTag(detection.pose,refTag.pose);
-                        if (this.debug) console.log("Applying transform:", rigPose);
+                        const rigPose = this.getRigPoseFromAprilTag(detection.pose, refTag.pose);
+                        if (this.debug) console.log('Applying transform:', rigPose);
                         this.cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
                         this.cameraRigObj3D.position.setFromMatrixPosition(rigPose);
                         localizerTag = true;
@@ -259,9 +265,10 @@
                     if (ARENA && ARENA.isUserSceneWriter()) {
                         // Dynamic + writable, push marker update
                         if (this.rigMatrix.equals(this.identityMatrix)) {
-                            if (this.debug) console.warn("Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first");
+                            // eslint-disable-next-line max-len
+                            if (this.debug) console.warn('Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first');
                         } else {
-                            if (this.debug) console.log(`Pushing update for tag ${detection.id}`)                       
+                            if (this.debug) console.log(`Pushing update for tag ${detection.id}`);
                             const tagPose = this.getTagPoseFromRig(detection.pose);
                             this.tagPoseRot.setFromRotationMatrix(tagPose);
                             // Send update directly to scene (arguments order such that we overwrite 'type')
@@ -274,46 +281,47 @@
                                     position: {
                                         x: tagPose.elements[12],
                                         y: tagPose.elements[13],
-                                        z: tagPose.elements[14]
+                                        z: tagPose.elements[14],
                                     },
                                     rotation: {
                                         x: this.tagPoseRot.x,
                                         y: this.tagPoseRot.y,
                                         z: this.tagPoseRot.z,
-                                        w: this.tagPoseRot.w
-                                    }
-                                }
+                                        w: this.tagPoseRot.w,
+                                    },
+                                },
                             });
-                            if (this.debug) console.info("Publish", JSON.stringify(jsonMsg), "to", `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`);
+                            // eslint-disable-next-line max-len
+                            if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`);
                             ARENA.Mqtt.publish(
                                 `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`,
-                                JSON.stringify(jsonMsg)
+                                JSON.stringify(jsonMsg),
                             );
                         }
-                    } else console.error("Object update not sent; User does not have write permissions!");
+                    } else console.error('Object update not sent; User does not have write permissions!');
                 }
-                
+
                 // do we have detected markers to publish ?
                 if (pubDetList.length > 0 && ARENA) {
                     const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
                         timestamp: timestamp,
-                        vio = vio,               
-                        detections: pubDetList, 
+                        vio: vio,
+                        detections: pubDetList,
                         geolocation: {
                             latitude: ARENA.clientCoords.latitude,
-                            longitude: ARENA.clientCoords.longitude    
+                            longitude: ARENA.clientCoords.longitude,
                         },
-                        localize_tag: true
+                        localize_tag: true,
                     });
                     ARENA.Mqtt.publish(
                         `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
-                        JSON.stringify(jsonMsg)
-                    );                    
+                        JSON.stringify(jsonMsg),
+                    );
                 }
             }
         }
     }
-  
+
     /**
      * Calculates the correct rigPose from detected aprilTag
      * @param {Object} dtag - Detected tag pose from camera
@@ -323,27 +331,27 @@
      * @return {THREE.Matrix4} this.rigMatrix
      */
     getRigPoseFromAprilTag(dtag, refTag) {
-      const r = dtag.R;
-      const t = dtag.t;
-  
-      this.dtagMatrix.set( // Transposed rotation
-          r[0][0], r[1][0], r[2][0], t[0],
-          r[0][1], r[1][1], r[2][1], t[1],
-          r[0][2], r[1][2], r[2][2], t[2],
-          0      , 0      , 0      , 1   ,
-      );
-      this.dtagMatrix.premultiply(this.flipMatrix);
-      this.dtagMatrix.multiply(this.flipMatrix);
-  
-      // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
-      this.dtagMatrix.copy(this.dtagMatrix).invert(); // this.dtagMatrix.getInverse(this.dtagMatrix);
-      this.rigMatrix.identity();
-      this.rigMatrix.multiplyMatrices(refTag, this.dtagMatrix);
-      this.rigMatrix.multiply(this.vioMatrixInv);
-  
-      return this.rigMatrix;
+        const r = dtag.R;
+        const t = dtag.t;
+
+        this.dtagMatrix.set( // Transposed rotation
+            r[0][0], r[1][0], r[2][0], t[0],
+            r[0][1], r[1][1], r[2][1], t[1],
+            r[0][2], r[1][2], r[2][2], t[2],
+            0, 0, 0, 1,
+        );
+        this.dtagMatrix.premultiply(this.flipMatrix);
+        this.dtagMatrix.multiply(this.flipMatrix);
+
+        // Python rig_pose = ref_tag_pose @ np.linalg.inv(dtag_pose) @ np.linalg.inv(vio_pose)
+        this.dtagMatrix.copy(this.dtagMatrix).invert(); // this.dtagMatrix.getInverse(this.dtagMatrix);
+        this.rigMatrix.identity();
+        this.rigMatrix.multiplyMatrices(refTag, this.dtagMatrix);
+        this.rigMatrix.multiply(this.vioMatrixInv);
+
+        return this.rigMatrix;
     }
-  
+
     /**
      * Calculates the pose of a detected AprilTag from scene origin
      * @param {Object} dtag - Detected tag pose from camera
@@ -352,23 +360,23 @@
      * @return {THREE.Matrix4} this.rigMatrix
      */
     getTagPoseFromRig(dtag) {
-      const r = dtag.R;
-      const t = dtag.t;
-      this.dtagMatrix.set( // Transposed rotation
-          r[0][0], r[1][0], r[2][0], t[0],
-          r[0][1], r[1][1], r[2][1], t[1],
-          r[0][2], r[1][2], r[2][2], t[2],
-          0      , 0      , 0      , 1   ,
-      );
-      this.dtagMatrix.premultiply(this.flipMatrix);
-      this.dtagMatrix.multiply(this.flipMatrix);
-  
-      // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
-      this.tagPoseMatrix.copy(this.rigMatrix);
-      this.tagPoseMatrix.multiply(this.vioMatrix);
-      this.tagPoseMatrix.multiply(this.dtagMatrix);
-  
-      return this.tagPoseMatrix;
+        const r = dtag.R;
+        const t = dtag.t;
+        this.dtagMatrix.set( // Transposed rotation
+            r[0][0], r[1][0], r[2][0], t[0],
+            r[0][1], r[1][1], r[2][1], t[1],
+            r[0][2], r[1][2], r[2][2], t[2],
+            0, 0, 0, 1,
+        );
+        this.dtagMatrix.premultiply(this.flipMatrix);
+        this.dtagMatrix.multiply(this.flipMatrix);
+
+        // Python ref_tag_pose = rig_pose @ vio_pose @ dtag_pose
+        this.tagPoseMatrix.copy(this.rigMatrix);
+        this.tagPoseMatrix.multiply(this.vioMatrix);
+        this.tagPoseMatrix.multiply(this.dtagMatrix);
+
+        return this.tagPoseMatrix;
     }
-  }
-  
+}
+
