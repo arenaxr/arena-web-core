@@ -18,7 +18,7 @@ import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset.js';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer.js';
 import {ARMarkerRelocalization} from './armarker-reloc.js';
 import {CVWorkerMsgs} from './worker-msgs.js';
-
+import {ARENAEventEmitter} from '/event-emitter.js';
 /**
   * ARMarker System. Supports ARMarkers in a scene.
   * @module armarker-system
@@ -29,7 +29,8 @@ AFRAME.registerSystem('armarker', {
         debugCameraCapture: {default: false},
         /* relocalization debug messages output */
         debugRelocalization: {default: false},
-        /* networked marker solver flag; let relocalization up to a networked solver */
+        /* networked marker solver flag; let relocalization up to a networked solver;
+           NOTE: at armarker init time, we lookup scene options to set this flag */
         networkedLocationSolver: {default: false},
         /* how often we update markers from ATLAS; 0=never */
         ATLASUpdateIntervalSecs: {default: 30},
@@ -68,13 +69,17 @@ AFRAME.registerSystem('armarker', {
         // init this.ATLASMarkers with list of markers within range
         this.getARMArkersFromATLAS(true);
 
-        // init networkedLocationSolver flag from ARENA scene options, if available
-        if (ARENA && ARENA['networkedLocationSolver']) {
-            this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
-        }
-
         // check if this is WebXRViewer/WebARViewer
         this.isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
+
+        // init networkedLocationSolver flag from ARENA scene options, if available
+        if (ARENA) {
+            console.log("ARENA found");
+            ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
+                console.log("ARENA scene options loaded", ARENA['networkedLocationSolver']);
+                this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
+            });
+        }
 
         // request camera acess features
         const sceneEl = this.el;

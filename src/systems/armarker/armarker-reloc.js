@@ -72,6 +72,7 @@ export class ARMarkerRelocalization {
         ARMarkerRelocalization.instance = this;
 
         // check/init internal options
+        console.log("HERE", networkedLocationSolver);
         if (networkedLocationSolver==true) {
             if (!ARENA) throw 'Networked tag solver requires ARENA functionality.';
             console.info('networkedLocationSolver = true; letting relocalization up to a networked solver.');
