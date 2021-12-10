@@ -115,13 +115,13 @@
              "publish":{
                 "type":"boolean",
                 "title":"publish",
-                "description":"Publish detections. Send detections to external agents (e.g. external builder script that places new markers in the scene).",
+                "description":"Publish detections. Send detections to external agents (e.g. external builder script that places new markers in the scene). If dynamic=true and publish=true, object position is not updated (left up to external agent).",
                 "default":false
              },
              "dynamic":{
                 "type":"boolean",
                 "title":"dynamic",
-                "description":"Dynamic tag, not used for localization. E.g., to move object to which this ARMarker component is attached to. Requires permissions to update the scene.",
+                "description":"Dynamic tag, not used for localization. E.g., to move object to which this ARMarker component is attached to. Requires permissions to update the scene (if dynamic=true).",
                 "default":false
              },
              "ele":{

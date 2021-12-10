@@ -32,7 +32,7 @@ AFRAME.registerComponent('armarker', {
         dynamic: {
             default: false, type: 'boolean',
         },
-        buildable: {
+        publish: {
             default: false, type: 'boolean',
         },
         markerid: {

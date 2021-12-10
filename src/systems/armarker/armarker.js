@@ -392,13 +392,11 @@ AFRAME.registerSystem('armarker', {
             const markerPoseNoScale = new THREE.Matrix4(); // create a world matrix with only position and rotation
             markerPoseNoScale.setRotationFromQuaternion( quat );
             markerPoseNoScale.setPosition( pos );
-            return {
-                id: sceneTag.data.markerid,
-                uuid: sceneTag.el.id,
+            const marker = Object.assign({}, sceneTag.data, {
+                obj_id: sceneTag.el.id,
                 pose: markerPoseNoScale,
-                dynamic: sceneTag.data.dynamic,
-                buildable: sceneTag.data.buildable,
-            };
+            });
+            return marker;
         }
         // default pose for tag 0
         if (markerid === '0') {

@@ -72,7 +72,6 @@ export class ARMarkerRelocalization {
         ARMarkerRelocalization.instance = this;
 
         // check/init internal options
-        console.log("HERE", networkedLocationSolver);
         if (networkedLocationSolver==true) {
             if (!ARENA) throw 'Networked tag solver requires ARENA functionality.';
             console.info('networkedLocationSolver = true; letting relocalization up to a networked solver.');
@@ -241,11 +240,9 @@ export class ARMarkerRelocalization {
                 } else if (this.debug) console.log('ARMarker system found tag:', refTag);
 
                 // publish this detection ?
-                if (!refTag.publish) {
+                if (refTag.publish == true) {
+                    detection.refTag = refTag;
                     pubDetList.push(detection);
-                    if (indexedTag?.pose) {
-                        detection.refTag = indexedTag;
-                    }
                 };
 
                 // tag is static ?
@@ -262,7 +259,7 @@ export class ARMarkerRelocalization {
                           this.rigMatrixT.transpose();
                         */
                     }
-                } else if (refTag.dynamic) {
+                } else if (refTag.dynamic && refTag.publish==false) { // tag is dynamic? push update if publish=false
                     if (ARENA && ARENA.isUserSceneWriter()) {
                         // Dynamic + writable, push marker update
                         if (this.rigMatrix.equals(this.identityMatrix)) {
@@ -274,7 +271,7 @@ export class ARMarkerRelocalization {
                             this.tagPoseRot.setFromRotationMatrix(tagPose);
                             // Send update directly to scene (arguments order such that we overwrite 'type')
                             const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
-                                object_id: refTag.uuid,
+                                object_id: refTag.obj_id,
                                 action: 'update',
                                 type: 'object',
                                 persist: true,
@@ -293,9 +290,9 @@ export class ARMarkerRelocalization {
                                 },
                             });
                             // eslint-disable-next-line max-len
-                            if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`);
+                            if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`);
                             ARENA.Mqtt.publish(
-                                `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.uuid}`,
+                                `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`,
                                 JSON.stringify(jsonMsg),
                             );
                         }
@@ -314,6 +311,8 @@ export class ARMarkerRelocalization {
                         },
                         localize_tag: true,
                     });
+                    // eslint-disable-next-line max-len
+                    if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', `${ARENA.defaults.realm}/g/a/${ARENA.camName}`);
                     ARENA.Mqtt.publish(
                         `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
                         JSON.stringify(jsonMsg),
