@@ -74,9 +74,7 @@ AFRAME.registerSystem('armarker', {
 
         // init networkedLocationSolver flag from ARENA scene options, if available
         if (ARENA) {
-            console.log("ARENA found");
             ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
-                console.log("ARENA scene options loaded", ARENA['networkedLocationSolver']);
                 this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
             });
         }
