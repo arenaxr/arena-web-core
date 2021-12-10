@@ -15,7 +15,6 @@ import linkifyStr from 'linkifyjs/string';
 import Swal from 'sweetalert2';
 import './style.css';
 import {SideMenu} from '../icons/index.js';
-import MQTTPattern from 'mqtt-pattern';
 
 let mqttc;
 
@@ -717,40 +716,6 @@ export class ARENAChat {
             this.displayAlert(`New message from ${msg.from_un}: ${msgText}.`, 3000);
             this.chatDot.style.display = 'block';
         }
-    }
-
-    /**
-     * Utility to match MQTT topic within permissions.
-     * @param {string} topic The MQTT topic to test.
-     * @param {string[]} rights The list of topic wild card permissions.
-     * @return {boolean} True if the topic matches the list of topic wildcards.
-     */
-    matchJWT(topic, rights) {
-        const len = rights.length;
-        let valid = false;
-        for (let i = 0; i < len; i++) {
-            if (MQTTPattern.matches(rights[i], topic)) {
-                valid = true;
-                break;
-            }
-        }
-        return valid;
-    };
-
-    /**
-     * Checks loaded MQTT token for full scene object write permissions.
-     * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
-     * @return {boolean} True if the user has permission to write in this scene.
-     */
-    isUserSceneOwner(mqtt_token) {
-        if (mqtt_token) {
-            const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
-            const perms = tokenObj.payloadObj;
-            if (this.matchJWT(ARENA.renderTopic, perms.publ)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
