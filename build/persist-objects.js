@@ -66,6 +66,7 @@ export async function init(settings) {
         onMessageCallback: onMqttMessage,
         mqtt_username: persist.mqttUsername,
         mqtt_token: persist.mqttToken,
+        dbg: true
     });
 
     console.info('Starting connection to ' + persist.mqttUri + '...');

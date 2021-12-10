@@ -6,6 +6,8 @@
  * @date 2020
  */
 
+import MQTTPattern from 'mqtt-pattern';
+
 /**
  * Wrapper class for various utility functions
  */
@@ -210,9 +212,27 @@ export class ARENAUtils {
      * @param {string} dropboxShareUrl link to be parsed; a dropbox public share link
      * @return {string} new dropbox link
      */
-     static crossOriginDropboxSrc(dropboxShareUrl) {
+    static crossOriginDropboxSrc(dropboxShareUrl) {
         if (!dropboxShareUrl) return undefined;
+        // eslint-disable-next-line max-len
         return dropboxShareUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
-    }
+    };
 
+    /**
+     * Utility to match MQTT topic within permissions.
+     * @param {string} topic The MQTT topic to test.
+     * @param {string[]} rights The list of topic wild card permissions.
+     * @return {boolean} True if the topic matches the list of topic wildcards.
+     */
+    static matchJWT(topic, rights) {
+        const len = rights.length;
+        let valid = false;
+        for (let i = 0; i < len; i++) {
+            if (MQTTPattern.matches(rights[i], topic)) {
+                valid = true;
+                break;
+            }
+        }
+        return valid;
+    };
 }

@@ -232,7 +232,9 @@ const aprilTag = new Apriltag(() => {
     self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
     initDone = true;
     console.log('CV Worker ready!');
-    pendingMarkerMsgs.forEach( (msg) => { aprilTag.set_tag_size(msg.markerid, msg.size); console.log('Setting marker size', msg.markerid, msg.size); }); // process pending marker data msgs
+    pendingMarkerMsgs.forEach( (msg) => {
+        aprilTag.set_tag_size(msg.markerid, msg.size); console.log('Setting marker size', msg.markerid, msg.size); 
+    }); // process pending marker data msgs
 });
 
 // process worker messages
@@ -302,8 +304,11 @@ async function processGsFrame(frame) {
         grayscalePixels: frame.grayscalePixels,
     };
 
-    //if (detections.length > 0) 
-    //console.log('Detections:', detections);
+    /*
+    if (detections.length > 0) {
+        console.log('Detections:', detections);
+    }
+    */
 
     // post detection results, returning ownership of the pixel buffer
     self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
