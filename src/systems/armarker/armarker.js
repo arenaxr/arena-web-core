@@ -103,11 +103,6 @@ AFRAME.registerSystem('armarker', {
     update: function(oldData) {
     // TODO: Do stuff with `this.data`...
     },
-    /*
-   // Getter
-   area: get() {
-    return this.calcArea();
-   },*/
     /**
     * WebXR session started callback
     * @param {object} xrSession - Handle to the WebXR session
