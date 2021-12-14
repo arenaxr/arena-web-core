@@ -110,8 +110,9 @@ AFRAME.registerComponent('arena-camera', {
             msg.hasVideo = ARENA.Jitsi.hasVideo;
         }
 
-        if (ARENA.FaceTracker) {
-            msg.hasAvatar = ARENA.FaceTracker.running();
+        const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
+        if (faceTracker && faceTracker.isEnabled()) {
+            msg.hasAvatar = faceTracker.isRunning();
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');

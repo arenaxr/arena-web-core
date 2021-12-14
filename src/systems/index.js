@@ -13,4 +13,5 @@
 import './armarker/armarker.js';
 import './attribution.js';
 import './model-progress/model-progress.js';
+import './face-tracking';
 import './screenshare.js';

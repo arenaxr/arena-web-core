@@ -677,16 +677,8 @@ export class Arena {
                 });
             }
 
-            // initialize face tracking if not on mobile
-            if (!AFRAME.utils.device.isMobile()) {
-                const faceTrackerModule = await import('./face-tracking/face-tracker.js');
-                this.FaceTracker = faceTrackerModule.ARENAFaceTracker;
-
-                const displayBbox = false;
-                const flipped = true;
-                this.FaceTracker.init(displayBbox, flipped);
-            }
-            console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
+            console.info(
+                `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
         }); // mqtt API (after this.* above, are defined)
     }
 }

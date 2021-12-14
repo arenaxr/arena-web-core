@@ -118,11 +118,12 @@ export class SideMenu {
             if (!ARENA.Jitsi.hasVideo) { // toggled
                 ARENA.Jitsi.startVideo()
                     .then(() => {
+                        const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
                         videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/video-on.png\')';
                         avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar-off.png\')';
                         ARENA.Jitsi.showVideo();
-                        if (ARENA.FaceTracker.running()) {
-                            ARENA.FaceTracker.stop();
+                        if (faceTracker.isRunning()) {
+                            faceTracker.stop();
                         }
                     })
                     .catch((err) => {
@@ -159,9 +160,10 @@ export class SideMenu {
          */
         const avatarBtn = createIconButton('avatar-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
             () => {
-                if (!ARENA.FaceTracker) return;
-                if (!ARENA.FaceTracker.running()) { // toggled
-                    ARENA.FaceTracker.run().then(() => {
+                const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
+                if (!faceTracker) return;
+                if (!faceTracker.isRunning()) { // toggled
+                    faceTracker.run().then(() => {
                         avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar-on.png\')';
                         if (ARENA.Jitsi && ARENA.Jitsi.ready) {
                             ARENA.Jitsi.stopVideo().then(() => {
@@ -172,7 +174,7 @@ export class SideMenu {
                         }
                     });
                 } else {
-                    ARENA.FaceTracker.stop().then(() => {
+                    faceTracker.stop().then(() => {
                         avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/icons/images/avatar-off.png\')';
                     });
                 }
@@ -250,7 +252,7 @@ export class SideMenu {
                     if (!result.isConfirmed) return;
                     Swal.fire({
                         title: 'Select the object(s) you want to screenshare on:',
-                        html: document.querySelector('a-scene').systems[`screenshareable`].asHTMLSelect(),
+                        html: document.querySelector('a-scene').systems['screenshareable'].asHTMLSelect(),
                         focusConfirm: false,
                         preConfirm: () => {
                             return Array.from(document.getElementById('screenshareables').

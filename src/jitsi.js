@@ -671,16 +671,16 @@ export class ARENAJitsi {
             this.jitsiVideoElem.className = 'flipVideo';
             this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
             this.jitsiVideoElem.style.display = 'none';
-            this.jitsiVideoElem.style.width = ARENA.localVideoWidth + 'px';
 
-            const _this = this;
             /**
              * set video element size
              */
+            const _this = this;
             function setCornerVideoHeight() {
-                const videoWidth = _this.jitsiVideoElem.style.width;
+                const videoWidth = ARENA.localVideoWidth;
                 const videoHeight = _this.jitsiVideoElem.videoHeight /
                                         (_this.jitsiVideoElem.videoWidth / videoWidth);
+                _this.jitsiVideoElem.style.width = videoWidth + 'px';
                 _this.jitsiVideoElem.style.height = videoHeight + 'px';
             }
 
