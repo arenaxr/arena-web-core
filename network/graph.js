@@ -13,7 +13,7 @@ window.addEventListener('onauth', function(e) {
                 'text-valign': 'center',
                 'text-halign': 'center',
                 'text-wrap': 'wrap',
-                'font-family' : 'Courier',
+                'font-family' : 'Roboto',
                 'text-outline-width': 0.5
             }
         }, {
@@ -66,7 +66,7 @@ window.addEventListener('onauth', function(e) {
                 'font-size': 3.5,
                 'width': 1.0,
                 'arrow-scale': 0.5,
-                'font-family': 'Courier',
+                'font-family': 'Roboto',
                 'line-color': 'LightGray',
                 'target-arrow-color': 'LightGray',
                 'curve-style': 'bezier',
