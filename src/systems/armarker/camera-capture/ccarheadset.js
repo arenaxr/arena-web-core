@@ -131,7 +131,7 @@ export class ARHeadsetCameraCapture {
     }
 
     /**
-     * Request next camera frame; we let the CV worker indicate when its ready (ar marker system expects this 
+     * Request next camera frame; we let the CV worker indicate when its ready (ar marker system expects this
      * call to be implemented)
      * @param {object} [grayscalePixels=undefined] - the pixel buffer intance we posted (to return ownership to us)
      * @param {boolean} [worker=undefined] - the worker instance to send frames to

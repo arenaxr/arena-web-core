@@ -37,7 +37,7 @@ export class WebXRCameraCapture {
     frameWidth;
     /* last captured frame height */
     frameHeight;
-    /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]); 
+    /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
        this is the grayscale image we will pass to the detector */
     frameGsPixels;
     /* last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4]) */
@@ -51,7 +51,7 @@ export class WebXRCameraCapture {
 
     /**
      * Setup camera frame capture
-     * @param {object} xrSession -  WebXR Device API's XRSession 
+     * @param {object} xrSession -  WebXR Device API's XRSession
      * @param {object} gl - the open gl context
      * @param {boolean} debug - debug messages on/off
      */

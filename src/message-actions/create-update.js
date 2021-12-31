@@ -171,7 +171,7 @@ export class CreateUpdate {
             if (ARENA.ar && data.hasOwnProperty('hide-on-enter-ar')) {
                 console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
-            }            
+            }
             // support both url and src property
             if (data.hasOwnProperty('url')) {
                 data.src = data.url; // make src=url
@@ -328,7 +328,7 @@ export class CreateUpdate {
      */
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
-            //console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
+            // console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
             switch (attribute) {
