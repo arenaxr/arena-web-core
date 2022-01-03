@@ -7,7 +7,7 @@
        },
        "persist":{
           "default":"true",
-          "description":"Persist this object in the database (default false = do not persist)",
+          "description":"Persist this object in the database (default true = persist on server)",
           "type":"boolean"
        },
        "type":{
