@@ -11,7 +11,7 @@ window.addEventListener('enter-vr', async function(e) {
         const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
 
         if (isWebXRViewer) {
-            //await import('../apriltag/apriltag-script.js');
+            // await import('../apriltag/apriltag-script.js');
 
             // create psuedo-cursor
             let cursor = document.getElementById('mouse-cursor');

@@ -233,7 +233,7 @@ const aprilTag = new Apriltag(() => {
     initDone = true;
     console.log('CV Worker ready!');
     pendingMarkerMsgs.forEach( (msg) => {
-        aprilTag.set_tag_size(msg.markerid, msg.size); console.log('Setting marker size', msg.markerid, msg.size); 
+        aprilTag.set_tag_size(msg.markerid, msg.size); console.log('Setting marker size', msg.markerid, msg.size);
     }); // process pending marker data msgs
 });
 

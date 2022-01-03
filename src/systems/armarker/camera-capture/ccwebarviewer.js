@@ -22,7 +22,7 @@ export class WebARViewerCameraCapture {
      frameWidth;
      /* last captured frame height */
      frameHeight;
-     /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]); 
+     /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
         this is the grayscale image we will pass to the detector */
      frameGsPixels = undefined;
      /* last captured frame camera properties */
@@ -59,7 +59,7 @@ export class WebARViewerCameraCapture {
      }
 
      /**
-      * Request next camera frame; we let the CV worker indicate when its ready 
+      * Request next camera frame; we let the CV worker indicate when its ready
       * (ar marker system expects this call to be implemented)
       * @param {object} [grayscalePixels=undefined] - the pixel buffer intance we posted (to return ownership to us)
       * @param {boolean} [worker=undefined] - replace the worker instance to send frames to

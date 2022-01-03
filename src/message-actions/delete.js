@@ -26,7 +26,7 @@ export class Delete {
             if (depParentEl) {
                 depParentEl.removeChild(depEl);
             }
-        })
+        });
 
         // Remove element itself
         const parentEl = entityEl.parentEl;

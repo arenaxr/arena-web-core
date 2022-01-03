@@ -22,7 +22,7 @@ AFRAME.registerComponent('textinput', {
     schema: {
         on: {
             default: 'mousedown',
-        }, 
+        },
         title: {
             default: 'Text Input',
         },

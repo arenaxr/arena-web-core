@@ -27,7 +27,7 @@ AFRAME.registerComponent('goto-url', {
             default: '',
         }, // http:// style url
         dest: {
-            default: 'sametab', oneOf: ['popup', 'newtab', 'sametab']
+            default: 'sametab', oneOf: ['popup', 'newtab', 'sametab'],
         }, // newtab
     },
 
