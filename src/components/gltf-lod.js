@@ -6,11 +6,12 @@
  *
  */
 
-AFRAME.registerComponent('gltf-lod', {
+const LOD_THRESHOLD = 1;
+
+AFRAME.registerComponent('gltf-lod-advanced', {
     schema: {
         updateRate: {type: 'number', default: 333},
         fade: {type: 'number', default: 0},
-        retainCache: {type: 'boolean', default: false},
     },
     init: function() {
         this.camDistance = new THREE.Vector3();
@@ -23,7 +24,7 @@ AFRAME.registerComponent('gltf-lod', {
     },
     updateLevels: function() {
         this.levels = Array.from(this.el.children).filter((child) => child.hasAttribute('lod-level'));
-        // Sort desc  by distance
+        // Sort desc by distance
         this.levels.sort((a, b) => b.getAttribute('lod-level').distance - a.getAttribute('lod-level').distance);
         for (const level of this.levels) {
             if (level !== this.currentLevel) {
@@ -51,7 +52,7 @@ AFRAME.registerComponent('gltf-lod', {
                     this.currentLevel.removeAttribute('gltf-model', false);
                     /* TODO: Add a buffer range or delay from unloading to avoid janky
                         behavior from jitter at threshold of two lod levels */
-                    if (!this.data.retainCache) {
+                    if (!nextLevel.components['lod-level']?.data.retainCache) {
                         THREE.Cache.remove(cacheKey);
                     }
                 }
@@ -81,11 +82,55 @@ AFRAME.registerComponent('lod-level', {
     schema: {
         'distance': {type: 'number', default: 0},
         'gltf-model': {type: 'string'},
+        'retainCache': {type: 'boolean', default: false},
     },
     init: function() {
         const lodParent = this.el.parentEl.components['gltf-lod'];
         if (lodParent?.levels && !lodParent.levels.includes(this.el)) {
             lodParent.updateLevels();
+        }
+    },
+});
+
+
+/**
+ * @brief Simple LOD swap between default (low) and detailed (high) models
+ */
+AFRAME.registerComponent('gltf-model-lod', {
+    schema: {
+        updateRate: {type: 'number', default: 333},
+        retainCache: {type: 'boolean', default: false},
+        detailedUrl: {type: 'string'},
+        detailedDistance: {type: 'number', default: 0},
+    },
+    init: function() {
+        this.camDistance = new THREE.Vector3();
+        this.tempDistance = new THREE.Vector3();
+        this.showDetailed = false;
+        this.defaultUrl = this.el.getAttribute('gltf-model');
+        this.cameraPos = document.getElementById('my-camera').object3D.position;
+        this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
+    },
+    tick: function() {
+        if (!this.defaultUrl) {
+            return;
+        }
+        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);
+        if (this.tempDistance !== this.camDistance) {
+            this.camDistance = this.tempDistance;
+            const distDiff = this.camDistance - this.data.detailedDistance;
+            // Switch from default to detailed when inside (dist - threshold)
+            if (!this.showDetailed && distDiff <= -LOD_THRESHOLD ) {
+                this.el.setAttribute('gltf-model', this.data.detailedUrl);
+                this.showDetailed = true;
+            // Switch from detailed to default when outside (dist + threshold)
+            } else if (this.showDetailed && distDiff >= LOD_THRESHOLD) {
+                this.el.setAttribute('gltf-model', this.defaultUrl);
+                this.showDetailed = false;
+                if (!this.data.retainCache) {
+                    THREE.Cache.remove(this.defaultUrl);
+                }
+            }
         }
     },
 });
