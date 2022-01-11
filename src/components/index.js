@@ -18,6 +18,7 @@ import './attribution.js';
 import './click-listener.js';
 import './collision-listener.js';
 import './gesture-detector.js';
+import './gltf-lod.js';
 import './goto-url.js';
 import './impulse.js';
 import './jitsi-video.js';
