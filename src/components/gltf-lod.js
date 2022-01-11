@@ -80,7 +80,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
 
 AFRAME.registerComponent('lod-level', {
     schema: {
-        'distance': {type: 'number', default: 0},
+        'distance': {type: 'number', default: 10},
         'gltf-model': {type: 'string'},
         'retainCache': {type: 'boolean', default: false},
     },
@@ -101,7 +101,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         updateRate: {type: 'number', default: 333},
         retainCache: {type: 'boolean', default: false},
         detailedUrl: {type: 'string'},
-        detailedDistance: {type: 'number', default: 0},
+        detailedDistance: {type: 'number', default: 10},
     },
     init: function() {
         this.camDistance = new THREE.Vector3();
