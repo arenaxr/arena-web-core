@@ -6,7 +6,8 @@
  *
  */
 
-const LOD_THRESHOLD = 1;
+const LOD_THRESHOLD = 1; // meters
+const CACHE_FREE_DELAY = 3000; // ms
 
 AFRAME.registerComponent('gltf-lod-advanced', {
     schema: {
@@ -18,7 +19,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         this.tempDistance = new THREE.Vector3();
         this.currentLevel = undefined;
         this.cameraPos = document.getElementById('my-camera').object3D.position;
-
+        this.cacheFreeTimers = {};
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
         this.updateLevels();
     },
@@ -45,19 +46,23 @@ AFRAME.registerComponent('gltf-lod-advanced', {
                 }
             }
             if (nextLevel && nextLevel !== this.currentLevel) {
+                const nextModel = nextLevel.getAttribute('lod-level')['gltf-model'];
+                window.clearTimeout(this.cacheFreeTimers[nextModel]); // Stop next model from unloading, if pending
+
                 // Hide previous. TODO: Fade out animation, then unload
                 if (this.currentLevel) {
                     const cacheKey = this.currentLevel.getAttribute('gltf-model');
                     this.currentLevel.object3D.visible = false;
                     this.currentLevel.removeAttribute('gltf-model', false);
-                    /* TODO: Add a buffer range or delay from unloading to avoid janky
-                        behavior from jitter at threshold of two lod levels */
                     if (!nextLevel.components['lod-level']?.data.retainCache) {
-                        THREE.Cache.remove(cacheKey);
+                        window.clearTimeout(this.cacheFreeTimers[cacheKey]); // Reset any existing timers if pending
+                        this.cacheFreeTimers[cacheKey] = window.setTimeout(() => {
+                            THREE.Cache.remove(cacheKey);
+                            this.cacheFreeTimers[cacheKey] = null;
+                        }, CACHE_FREE_DELAY);
                     }
                 }
                 // Show next
-                const nextModel = nextLevel.getAttribute('lod-level')['gltf-model'];
                 if (nextModel) {
                     nextLevel.setAttribute('gltf-model', nextModel);
                     nextLevel.object3D.visible = true;
@@ -109,6 +114,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         this.showDetailed = false;
         this.defaultUrl = this.el.getAttribute('gltf-model');
         this.cameraPos = document.getElementById('my-camera').object3D.position;
+        this.cacheFreeTimer = null;
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
     },
     tick: function() {
@@ -121,6 +127,7 @@ AFRAME.registerComponent('gltf-model-lod', {
             const distDiff = this.camDistance - this.data.detailedDistance;
             // Switch from default to detailed when inside (dist - threshold)
             if (!this.showDetailed && distDiff <= -LOD_THRESHOLD ) {
+                window.clearTimeout(this.cacheFreeTimer); // Stop cache freeing timer, if active
                 this.el.setAttribute('gltf-model', this.data.detailedUrl);
                 this.showDetailed = true;
             // Switch from detailed to default when outside (dist + threshold)
@@ -128,7 +135,11 @@ AFRAME.registerComponent('gltf-model-lod', {
                 this.el.setAttribute('gltf-model', this.defaultUrl);
                 this.showDetailed = false;
                 if (!this.data.retainCache) {
-                    THREE.Cache.remove(this.defaultUrl);
+                    window.clearTimeout(this.cacheFreeTimer);
+                    this.cacheFreeTimer = window.setTimeout(() => {
+                        THREE.Cache.remove(this.data.detailedUrl);
+                        this.cacheFreeTimer = null;
+                    }, CACHE_FREE_DELAY);
                 }
             }
         }
