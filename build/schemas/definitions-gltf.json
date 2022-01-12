@@ -75,7 +75,9 @@
           "description": "Whether to skip freeing the detailed model from browser cache (default false)",
           "default": false
         }
-      }
+      },
+      "title": "GLTF Model Level of Detail",
+      "type": "object"
     }
   }
 }
