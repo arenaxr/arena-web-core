@@ -18,6 +18,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         this.camDistance = new THREE.Vector3();
         this.tempDistance = new THREE.Vector3();
         this.currentLevel = undefined;
+        this.previousLevel = undefined;
         this.cameraPos = document.getElementById('my-camera').object3D.position;
         this.cacheFreeTimers = {};
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
@@ -38,18 +39,25 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         if (this.tempDistance !== this.camDistance) {
             this.camDistance = this.tempDistance;
             let nextLevel;
+            let nextDistance;
             for (const level of this.levels) {
-                if (this.camDistance <= level.getAttribute('lod-level').distance) {
+                nextDistance = level.getAttribute('lod-level').distance;
+                if (this.camDistance <= nextDistance) {
                     nextLevel = level;
                 } else {
                     break;
                 }
             }
             if (nextLevel && nextLevel !== this.currentLevel) {
+                // Check threshold if returning to previous level
+                if (nextLevel === this.previousLevel && Math.abs(this.camDistance - nextDistance) <= LOD_THRESHOLD) {
+                    return;
+                }
+
                 const nextModel = nextLevel.getAttribute('lod-level')['gltf-model'];
                 window.clearTimeout(this.cacheFreeTimers[nextModel]); // Stop next model from unloading, if pending
 
-                // Hide previous. TODO: Fade out animation, then unload
+                // Hide previous. TODO: Cross-fade, then unload current level
                 if (this.currentLevel) {
                     const cacheKey = this.currentLevel.getAttribute('gltf-model');
                     this.currentLevel.object3D.visible = false;
@@ -77,7 +85,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
                         });
                     }
                 }
-                this.currentLevel = nextLevel;
+                [this.previousLevel, this.currentLevel] = [this.currentLevel, nextLevel];
             }
         }
     },
