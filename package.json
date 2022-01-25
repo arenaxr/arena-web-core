@@ -2,14 +2,11 @@
   "name": "arena-core",
   "version": "1.0.0",
   "description": "Core browser client for ARENA",
-  "browser": "index.js",
+  "author": "CONIX Center",
+  "license": "BSD-3-Clause",
+  "default": "dist/arena-core.js",
   "browserslist": [
-    "last 3 firefox versions",
-    "last 3 and_chr versions",
-    "last 3 chrome versions",
-    "last 3 opera versions",
-    "last 3 ios_saf versions",
-    "last 3 safari versions"
+    "last 2 firefox versions"
   ],
   "overrides": {
     "aframe": "^1.2.0",
@@ -38,22 +35,22 @@
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
+    "@parcel/babel-plugin-transform-runtime": "^2.2.1",
+    "@parcel/babel-preset-env": "^2.2.1",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.25.0",
     "eslint-config-google": "^0.14.0",
     "jsdoc": "^3.6.6",
     "jsdoc-to-markdown": "^7.0.1",
-    "parcel-bundler": "^1.12.5"
+    "parcel": "^2.2.1"
   },
   "scripts": {
     "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag_wasm.* dist/",
     "prewatch": "npm run collect-static",
-    "watch": "parcel watch src/index.js -o arena-core.js",
+    "watch": "parcel watch src/index.js",
     "prebuild": "npm run collect-static",
-    "build": "parcel build src/index.js -o arena-core.js --public-url ./dist",
-    "build-nominify": "parcel build src/index.js -o arena-core.js --public-url ./dist --no-minify",
-    "prebuild-main": "npm run collect-static",
-    "build-main": "parcel build src/index.js -o arena-core.js --public-url /dist",
+    "build": "parcel build src/index.js --public-url ./dist",
+    "build-nominify": "parcel build src/index.js --public-url ./dist --no-optimize",
     "predocs": "echo '# A-Frame components (modules) added to support ARENA core functionality\n' > src/components/README.md; echo '# A-Frame systems (modules) added to support ARENA core functionality\n' > src/systems/README.md",
     "docs": "jsdoc2md src/components/*.js >> src/components/README.md; jsdoc2md src/systems/*.js >> src/systems/README.md"
   },
@@ -61,8 +58,6 @@
     "type": "git",
     "url": "git+https://github.com/conix-center/ARENA-core.git"
   },
-  "author": "CONIX Center",
-  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/conix-center/ARENA-core/issues"
   },
