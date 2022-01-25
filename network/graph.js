@@ -88,7 +88,7 @@ window.addEventListener('onauth', function(e) {
     let spinnerUpdate = true;
     let paused = false;
 
-    var worker = new Worker('./graph.worker.js');
+    var worker = new Worker(new URL('./graph.worker.js', import.meta.url));
     worker.onmessage = (e) => {
         const msg = e.data
         switch (msg.type) {

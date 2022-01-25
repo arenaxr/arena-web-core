@@ -28,7 +28,7 @@ export class ARENAMqtt {
      * @private
      */
     async _initWorker() {
-        const MQTTWorker = wrap(new Worker('../workers/mqtt-worker.js'));
+        const MQTTWorker = wrap(new Worker(new URL('../workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
         const worker = await new MQTTWorker(
             {
                 renderTopic: ARENA.renderTopic,
