@@ -41,9 +41,8 @@ import './video-control.js';
 // from npm, when available
 import 'aframe-thickline-component'; // our version of aframe-meshline-component
 import 'webxr-polyfill'; // fallback for non-webXR browsers
-// import 'aframe-environment-component'; // pretty environments (npm version has a bug; imported from file instead)
+import 'aframe-environment-component'; // pretty environments
 import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
-import 'aframe-physics-system'; //  Physics system
 import 'aframe-blink-controls'; // Controller teleport
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
@@ -53,7 +52,7 @@ import './vendor/nav-system.js'; // Override nav system
 // import 'aframe-spe-particles-component';
 
 // direct file imports
-import './vendor/aframe-environment-component.min.js'; // pretty environments (buggy on npm)
+import './vendor/aframe-physics-system.min.js'; // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
 import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
 import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
 import './vendor/morphTarget.js'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component
