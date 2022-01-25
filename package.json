@@ -22,7 +22,6 @@
     "aframe-environment-component": "^1.3.1",
     "aframe-extras": "n5ro/aframe-extras#ebae62f",
     "aframe-particle-system-component": "^1.1.3",
-    "aframe-physics-system": "github:n5ro/aframe-physics-system#59100ac83033cf337d26925de1f92854c2988b75",
     "aframe-spe-particles-component": "^1.0.4",
     "aframe-thickline-component": "^0.0.3",
     "chat": "^1.0.8",
