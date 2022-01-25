@@ -19,6 +19,7 @@
   "dependencies": {
     "aframe": "1.2.0",
     "aframe-blink-controls": "^0.2.0",
+    "aframe-environment-component": "^1.3.1",
     "aframe-extras": "n5ro/aframe-extras#ebae62f",
     "aframe-particle-system-component": "^1.1.3",
     "aframe-physics-system": "github:n5ro/aframe-physics-system#59100ac83033cf337d26925de1f92854c2988b75",
