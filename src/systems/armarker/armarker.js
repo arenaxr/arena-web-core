@@ -18,7 +18,7 @@ import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset.js';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer.js';
 import {ARMarkerRelocalization} from './armarker-reloc.js';
 import {CVWorkerMsgs} from './worker-msgs.js';
-import {ARENAEventEmitter} from '/event-emitter.js';
+import {ARENAEventEmitter} from '../../event-emitter.js';
 /**
   * ARMarker System. Supports ARMarkers in a scene.
   * @module armarker-system
@@ -171,7 +171,7 @@ AFRAME.registerSystem('armarker', {
         }
 
         // create cv worker for apriltag detection
-        this.cvWorker = new Worker('./apriltag-detector/apriltag.js');
+        this.cvWorker = new Worker(new URL('./apriltag-detector/apriltag.js', import.meta.url), {type: 'module'});
         this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
 
         // listen for worker messages

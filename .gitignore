@@ -4,7 +4,7 @@ conf/
 
 ## parcel build
 dist/
-.cache/
+.parcel-cache
 
 # private repos
 models/

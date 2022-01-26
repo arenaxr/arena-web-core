@@ -167,13 +167,14 @@ export class ARENAJitsi {
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
+                const cornerVidEl = document.getElementById('#cornerVideo');
                 if (this.jitsiVideoTrack) {
                     const oldTrack = this.jitsiVideoTrack;
-                    await oldTrack.detach($(`#cornerVideo`)[0]);
+                    await oldTrack.detach(cornerVidEl);
                     await this.conference.replaceTrack(oldTrack, track);
                     await oldTrack.dispose();
                 }
-                track.attach($(`#cornerVideo`)[0]);
+                track.attach(cornerVidEl);
                 this.jitsiVideoTrack = track;
             } else if (track.getType() === 'audio') {
                 if (this.jitsiAudioTrack) {
