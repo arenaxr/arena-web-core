@@ -167,7 +167,7 @@ export class ARENAJitsi {
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
-                const cornerVidEl = document.getElementById('#cornerVideo');
+                const cornerVidEl = document.getElementById('cornerVideo');
                 if (this.jitsiVideoTrack) {
                     const oldTrack = this.jitsiVideoTrack;
                     await oldTrack.detach(cornerVidEl);
