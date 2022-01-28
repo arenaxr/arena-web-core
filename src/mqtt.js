@@ -95,6 +95,11 @@ export class ARENAMqtt {
         theMessage.id = theMessage.object_id;
         delete theMessage.object_id;
 
+        let topicUser;
+        if (message) {
+            topicUser = message.destinationName.split('/')[4];
+        }
+
         switch (theMessage.action) { // clientEvent, create, delete, update
         case 'clientEvent':
             if (theMessage.data === undefined) {
@@ -103,7 +108,7 @@ export class ARENAMqtt {
             }
             // check topic
             if (message) {
-                if (!message.destinationName.endsWith(`/${theMessage.data.source}`)) {
+                if (topicUser !== theMessage.data.source) {
                     console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
                 }
