@@ -6,6 +6,10 @@
  * @date 2020
  */
 
+// ARENA version from automated scripts
+import './arena-version.js';
+console.info(ARENA_VERSION_MSG);
+
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
 import 'aframe'; // AFRAME
 import './arena.js'; // ARENA
@@ -14,3 +18,4 @@ import './aframe-mods/'; // AFRAME modifications
 import './systems/'; // custom AFRAME systems
 import './components/'; // custom AFRAME components
 import './webxr/'; // spedial handler for webxr devices
+
