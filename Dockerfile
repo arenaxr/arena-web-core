@@ -5,7 +5,7 @@ WORKDIR /arena-core
 COPY ./package.json .
 RUN npm install --legacy-peer-deps 
 COPY . . 
-RUN export VERSION=$(git describe) && echo ARENA_VERSION_MSG=\"ARENA $VERSION commit hash $(git rev-parse --short HEAD)\" > src/arena-version.js
+RUN export VERSION=$(git describe) && echo var ARENA_VERSION_MSG=\"ARENA $VERSION commit hash $(git rev-parse --short HEAD)\" > src/arena-version.js
 RUN mkdir -p dist && npm run build
 RUN rm -fr node_modules src
 
