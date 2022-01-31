@@ -7,7 +7,7 @@
  */
 
 // ARENA version from automated scripts
-import './arena-version.js';
+import {ARENA_VERSION_MSG} from './arena-version.js';
 console.info(ARENA_VERSION_MSG);
 
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA

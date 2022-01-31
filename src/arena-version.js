@@ -1,2 +1,3 @@
+/* eslint-disable no-unused-vars */
 // this message is replaced by the build scripts
-var ARENA_VERSION_MSG="ARENA dev version";
+export const ARENA_VERSION_MSG='ARENA dev version';
