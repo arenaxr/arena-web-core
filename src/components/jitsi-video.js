@@ -63,11 +63,11 @@ AFRAME.registerComponent('jitsi-video', {
     },
     jitsiUserLeft: function(details) {
         if (details.jid === this.data.jitsiId) {
-            this.el.removeAttribute('material','src');
+            this.el.removeAttribute('material', 'src');
         }
     },
     setVideoSrc: function() {
-        this.el.setAttribute('material','src', `#${this.videoID}`); // video only! (no audio)
+        this.el.setAttribute('material', 'src', `#${this.videoID}`); // video only! (no audio)
         this.el.setAttribute('material', 'shader', 'flat');
         this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         this.el.setAttribute('material-extras', 'needsUpdate', 'true');

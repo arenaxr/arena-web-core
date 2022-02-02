@@ -28,7 +28,7 @@ export class ARENAHealth {
      */
     constructor() {
         const instance = this;
-        this.activeErrors = [];
+        this.activeErrors = {};
 
         $(document).ready(function() {
             // hover, draw draw the errors box
@@ -59,6 +59,14 @@ export class ARENAHealth {
         // make error-icon visible
         const icon = document.getElementById('error-icon');
         if (icon) icon.style.display = 'block';
+        // set error viewing level
+        let imgSrc = '/src/health/images/exclamation-warn.svg';
+        for (const [k, v] of Object.entries(this.activeErrors)) {
+            if (v.class == 'health-error-label') {
+                imgSrc = '/src/health/images/exclamation.svg';
+            }
+        };
+        $('#error-svg').attr('src', imgSrc);
     }
 
     /**
@@ -105,15 +113,15 @@ function drawErrorBlock(errors) {
     for (const [k, v] of Object.entries(errors)) {
         $('#error-list').find('tbody')
             .append($('<tr>')
-                .append($(`<td><span class="${v.class}">${v.title}</span></td>`))
-                .append(`<td><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
+                .append($(`<td class="w-75"><span class="${v.class}">${v.title}</span></td>`))
+                .append(`<td class="w-25"><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
     };
     // add reload option
     const reload = $('<table>')
         .append($('<tbody>')
             .append($('<tr>')
-                .append($('<td><small>Click `Reload` once errors are resolved.</small></td>'))
-                .append('<td><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
+                .append($('<td class="w-75"><small>Click `Reload` once errors are resolved.</small></td>'))
+                .append('<td class="w-25"><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
     $('#error-block').append(reload);
     $('#btn-error-reload').click(function() {
         window.location.reload();

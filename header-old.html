@@ -1,0 +1,108 @@
+<!-- arena-core header for non-3d scene pages -->
+<style>
+    /* Navbar styles need to disinherit from list.css */
+    #header ul li {
+        cursor: unset;
+        position: unset;
+        padding: unset;
+        list-style-type: unset;
+        background: unset;
+        font-size: unset;
+        transition: unset;
+        -webkit-user-select: unset;
+        -moz-user-select: unset;
+        -ms-user-select: unset;
+        user-select: unset;
+    }
+
+    @media only screen and (min-width: 850px) {
+        .brand {
+            margin-right: 9%;
+        }
+    }
+
+    .navbar .brand img {
+        max-height: 16px;
+    }
+
+    .navbar .brand {
+        padding-left: 12px;
+    }
+
+    .navbar-inner {
+        padding-top: 8px;
+        padding-bottom: 8px;
+        font-size: 16px !important;
+    }
+
+    /* fix padding under menu after resize */
+    @media screen and (min-width: 767px) {
+        body {
+            padding-top: 60px;
+        }
+        .navbar-inner {
+           padding-right: 40px;
+        }
+        .navbar .nav>li>a {
+           padding-left: 8px;
+           padding-right: 8px;
+       }
+    }
+
+    #btn-copy-store-path {
+        display: none;
+    }
+</style>
+
+<!-- Bootstrap 2.3.2 styled header -->
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container-fluid">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="brand" href="/"><img alt="arena logo" src="static/images/arena-logo-white.png"></a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a href="/user/scenes">Scenes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/build">Builder</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/arts">Runtime</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/network">Network</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/files">File Store</a>
+                    </li>
+                    <li class="nav-item">
+                        <!--https://atlas.conix.io-->
+                        <a class="coming-soon" href="/">ATLAS</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="https://arena.conix.io">Documentation</a>
+                    </li>
+                </ul>
+                <ul class="nav pull-right">
+                    <!-- Copy Filestore Path -->
+                    <li class="nav-item">
+                        <a href="#" id="btn-copy-store-path"><i class="nav-link fa fa-link" title="Copy Store Path"></i></a>
+                    </li>
+
+                    <li class="dropdown">
+                        <a href="#" id="auth-dropdown"></a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </div>
+</div>
+
+<script src="navbar-auth-state-old.js"></script>

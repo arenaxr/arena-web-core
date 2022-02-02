@@ -63,6 +63,15 @@ async function loadHtmlToFrame(html) {
 }
 
 /**
+ * Get the path location of the iframe for filebrowser
+ * @return {string} path
+ */
+function getStorePath() {
+    const loc = document.getElementById('storeframe').contentWindow.location.pathname;
+    return loc;
+}
+
+/**
  *
  * @param {*} jwt The JWT
  * @return {Object} the JSON payload

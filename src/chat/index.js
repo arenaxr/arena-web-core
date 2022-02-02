@@ -15,7 +15,6 @@ import linkifyStr from 'linkifyjs/string';
 import Swal from 'sweetalert2';
 import './style.css';
 import {SideMenu} from '../icons/index.js';
-import MQTTPattern from 'mqtt-pattern';
 
 let mqttc;
 
@@ -65,7 +64,7 @@ export class ARENAChat {
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             devInstance: st.devInstance !== undefined ? st.devInstance : false,
-            isSceneWriter: this.isUserSceneOwner(st.mqtt_token),
+            isSceneWriter: st.isSceneWriter !== undefined ? st.isSceneWriter : false,
             isSpeaker: false,
         };
 
@@ -556,6 +555,7 @@ export class ARENAChat {
         willMessage.destinationName = this.settings.publishPublicTopic;
         this.mqttc.connect({
             onSuccess: () => {
+                ARENA.health.removeError('mqttChat.connection');
                 console.info(
                     'Chat connected. Subscribing to:',
                     this.settings.subscribePublicTopic,
@@ -581,6 +581,7 @@ export class ARENAChat {
                 this.connected = true;
             },
             onFailure: () => {
+                ARENA.health.addError('mqttChat.connection');
                 console.error('Chat failed to connect.');
                 this.connected = false;
             },
@@ -595,6 +596,7 @@ export class ARENAChat {
      * @param {Object} message Broker message.
      */
     onConnectionLost(message) {
+        ARENA.health.addError('mqttChat.connection');
         console.error('Chat disconnect.');
         this.connected = false;
     }
@@ -727,40 +729,6 @@ export class ARENAChat {
             this.displayAlert(`New message from ${msg.from_un}: ${msgText}.`, 3000);
             this.chatDot.style.display = 'block';
         }
-    }
-
-    /**
-     * Utility to match MQTT topic within permissions.
-     * @param {string} topic The MQTT topic to test.
-     * @param {string[]} rights The list of topic wild card permissions.
-     * @return {boolean} True if the topic matches the list of topic wildcards.
-     */
-    matchJWT(topic, rights) {
-        const len = rights.length;
-        let valid = false;
-        for (let i = 0; i < len; i++) {
-            if (MQTTPattern.matches(rights[i], topic)) {
-                valid = true;
-                break;
-            }
-        }
-        return valid;
-    };
-
-    /**
-     * Checks loaded MQTT token for full scene object write permissions.
-     * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
-     * @return {boolean} True if the user has permission to write in this scene.
-     */
-    isUserSceneOwner(mqtt_token) {
-        if (mqtt_token) {
-            const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
-            const perms = tokenObj.payloadObj;
-            if (this.matchJWT(ARENA.renderTopic, perms.publ)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

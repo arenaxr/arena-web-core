@@ -110,12 +110,14 @@ AFRAME.registerComponent('arena-camera', {
             msg.hasVideo = ARENA.Jitsi.hasVideo;
         }
 
-        if (ARENA.FaceTracker) {
-            msg.hasAvatar = ARENA.FaceTracker.running();
+        const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
+        if (faceTracker && faceTracker.isEnabled()) {
+            msg.hasAvatar = faceTracker.isRunning();
         }
 
-        if (localStorage.getItem('headModelPath')) {
-            msg.data.headModelPath = localStorage.getItem('headModelPath');
+        const headModelPathSelect = document.getElementById('headModelPathSelect');
+        if (headModelPathSelect) {
+            msg.data.headModelPath = headModelPathSelect.value;
         } else {
             msg.data.headModelPath = ARENA.defaults.headModelPath;
         }

@@ -16,8 +16,7 @@ import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
 import Swal from 'sweetalert2';
 
-/* global ARENA */
-
+/* global ARENA, KJUR */
 
 /**
  * Arena Object
@@ -55,6 +54,13 @@ export class Arena {
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
+        // get url params
+        const url = new URL(window.location.href);
+        this.skipav = url.searchParams.get('skipav');
+        this.armode = url.searchParams.get('armode');
+        this.noav = url.searchParams.get('noav');
+        this.ar = url.searchParams.get('ar');
+
         ARENAUtils.getLocation((coords, err) => {
             if (!err) ARENA.clientCoords = coords;
         });
@@ -184,14 +190,29 @@ export class Arena {
 
     /**
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
-     * @param {string} mqttToken The JWT token for the user to connect to MQTT/Jitsi.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted(mqttToken) {
-        if (mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
+    isJitsiPermitted() {
+        if (this.mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
             const perms = tokenObj.payloadObj;
             if (perms.room) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks token for full scene object write permissions.
+     * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
+     * @return {boolean} True if the user has permission to write in this scene.
+     */
+    isUserSceneWriter(mqttToken=ARENA.mqttToken) {
+        if (mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
+            const perms = tokenObj.payloadObj;
+            if (ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ)) {
+                return true;
+            }
         }
         return false;
     }
@@ -224,12 +245,12 @@ export class Arena {
         // load scene
         ARENA.loadSceneOptions();
 
-        this.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
+        ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
             ARENA.loadSceneObjects();
         });
 
         // after scene is completely loaded, add user camera
-        this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
+        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
             ARENA.loadUser();
         });
     }
@@ -238,6 +259,14 @@ export class Arena {
      * loads this user's presence and camera
      */
     loadUser() {
+        // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
+        if (!AFRAME || !AFRAME.scenes[0] || !AFRAME.scenes[0].systems) {
+            if (this.health) {
+                this.health.addError('slow.network');
+                return;
+            }
+        }
+
         const systems = AFRAME.scenes[0].systems;
         let color = Math.floor(Math.random() * 16777215).toString(16);
         if (color.length < 6) color = '0' + color;
@@ -295,6 +324,11 @@ export class Arena {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
         SideMenu.setupIcons();
+
+        // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
+        if (this.health) {
+            this.health.removeError('slow.network');
+        }
     }
 
     /**
@@ -458,87 +492,92 @@ export class Arena {
             method: 'GET',
             credentials: this.defaults.disallowJWT ? 'omit' : 'same-origin',
         }).
-        then((res) => res.json()).
-        then((data) => {
-            const payload = data[data.length - 1];
-            if (payload) {
-                const options = payload['attributes'];
-                Object.assign(sceneOptions, options['scene-options']);
+            then((res) => res.json()).
+            then((data) => {
+                const payload = data[data.length - 1];
+                if (payload) {
+                    const options = payload['attributes'];
+                    Object.assign(sceneOptions, options['scene-options']);
 
-                // deal with navMesh dropbox links
-                if (sceneOptions['navMesh']) {
-                    sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
-                }
+                    // deal with navMesh dropbox links
+                    if (sceneOptions['navMesh']) {
+                        sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
+                    }
 
-                // deal with scene attribution
-                if (sceneOptions['attribution']) {
-                    const sceneAttr = document.createElement('a-entity');
-                    sceneAttr.setAttribute('id', 'scene-options-attribution');
-                    sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
-                    sceneRoot.appendChild(sceneAttr);
-                    delete sceneOptions.attribution;
-                }
+                    // deal with scene attribution
+                    if (sceneOptions['attribution']) {
+                        const sceneAttr = document.createElement('a-entity');
+                        sceneAttr.setAttribute('id', 'scene-options-attribution');
+                        sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
+                        sceneRoot.appendChild(sceneAttr);
+                        delete sceneOptions.attribution;
+                    }
 
-                if (sceneOptions['navMesh']) {
-                    const navMesh = document.createElement('a-entity');
-                    navMesh.id = 'navMesh';
-                    navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
-                    navMesh.setAttribute('nav-mesh', '');
-                    sceneRoot.appendChild(navMesh);
-                }
+                    if (sceneOptions['navMesh']) {
+                        const navMesh = document.createElement('a-entity');
+                        navMesh.id = 'navMesh';
+                        navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
+                        navMesh.setAttribute('nav-mesh', '');
+                        sceneRoot.appendChild(navMesh);
+                    }
 
-                // save scene options
-                for (const [attribute, value] of Object.entries(sceneOptions)) {
-                    ARENA[attribute] = value;
-                }
+                    if (!sceneOptions['clickableOnlyEvents']) {
+                    // unusual case: clickableOnlyEvents = true by default, add warning...
+                        ARENA.health.addError('scene-options.allObjectsClickable');
+                    }
 
-                const envPresets = options['env-presets'];
-                for (const [attribute, value] of Object.entries(envPresets)) {
-                    environment.setAttribute('environment', attribute, value);
+                    // save scene options
+                    for (const [attribute, value] of Object.entries(sceneOptions)) {
+                        ARENA[attribute] = value;
+                    }
+
+                    const envPresets = options['env-presets'];
+                    for (const [attribute, value] of Object.entries(envPresets)) {
+                        environment.setAttribute('environment', attribute, value);
+                    }
+                    sceneRoot.appendChild(environment);
+
+                    const rendererSettings = options['renderer-settings'];
+                    if (rendererSettings) {
+                        for (const [attribute, value] of Object.entries(rendererSettings)) {
+                            renderer[attribute] = (attribute === 'outputEncoding') ?
+                                renderer[attribute] = THREE[value] :
+                                renderer[attribute] = value;
+                        }
+                    }
+                } else {
+                    throw new Error('No scene-options');
                 }
+            }).
+            catch(() => {
+                environment.setAttribute('environment', 'preset', 'starry');
+                environment.setAttribute('environment', 'seed', 3);
+                environment.setAttribute('environment', 'flatShading', true);
+                environment.setAttribute('environment', 'groundTexture', 'squares');
+                environment.setAttribute('environment', 'grid', 'none');
+                environment.setAttribute('environment', 'fog', 0);
+                environment.setAttribute('environment', 'fog', 0);
                 sceneRoot.appendChild(environment);
 
-                const rendererSettings = options['renderer-settings'];
-                if (rendererSettings) {
-                    for (const [attribute, value] of Object.entries(rendererSettings)) {
-                        renderer[attribute] = (attribute === 'outputEncoding') ?
-                            renderer[attribute] = THREE[value] :
-                            renderer[attribute] = value;
-                    }
-                }
-            } else {
-                throw new Error('No scene-options');
-            }
-        }).
-        catch(() => {
-            environment.setAttribute('environment', 'preset', 'starry');
-            environment.setAttribute('environment', 'seed', 3);
-            environment.setAttribute('environment', 'flatShading', true);
-            environment.setAttribute('environment', 'groundTexture', 'squares');
-            environment.setAttribute('environment', 'grid', 'none');
-            environment.setAttribute('environment', 'fog', 0);
-            environment.setAttribute('environment', 'fog', 0);
-            sceneRoot.appendChild(environment);
+                // make default env have lights
+                const light = document.createElement('a-light');
+                light.id = 'ambient-light';
+                light.setAttribute('type', 'ambient');
+                light.setAttribute('color', '#363942');
 
-            // make default env have lights
-            const light = document.createElement('a-light');
-            light.id = 'ambient-light';
-            light.setAttribute('type', 'ambient');
-            light.setAttribute('color', '#363942');
+                const light1 = document.createElement('a-light');
+                light1.id = 'point-light';
+                light1.setAttribute('type', 'point');
+                light1.setAttribute('position', '-0.272 0.39 1.25');
+                light1.setAttribute('color', '#C2E6C7');
 
-            const light1 = document.createElement('a-light');
-            light1.id = 'point-light';
-            light1.setAttribute('type', 'point');
-            light1.setAttribute('position', '-0.272 0.39 1.25');
-            light1.setAttribute('color', '#C2E6C7');
-
-            sceneRoot.appendChild(light);
-            sceneRoot.appendChild(light1);
-        }).
-        finally(() => {
-            this.sceneOptions = sceneOptions;
-            ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
-        });
+                sceneRoot.appendChild(light);
+                sceneRoot.appendChild(light1);
+            }).
+            finally(() => {
+                this.sceneOptions = sceneOptions;
+                ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
+            });
     };
 
     /**
@@ -588,7 +627,7 @@ export class Arena {
 
             // start sending console output to mqtt (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)
             if (!ARENADefaults.devInstance) {
-                let rtInfo = this.RuntimeManager.info();
+                const rtInfo = this.RuntimeManager.info();
                 console.setOptions({dbgTopic: `${rtInfo.dbg_topic}/${rtInfo.uuid}`, publish: this.Mqtt.publish.bind(this.Mqtt)});
             }
 
@@ -606,16 +645,13 @@ export class Arena {
                 mqtt_username: this.username,
                 mqtt_token: this.mqttToken,
                 devInstance: this.defaults.devInstance,
+                isSceneWriter: this.isUserSceneWriter(),
             });
             await this.chat.start();
 
-            const url = new URL(window.location.href);
-            const skipav = url.searchParams.get('skipav');
-            const armode = url.searchParams.get('armode');
-            const noav = url.searchParams.get('noav');
-            if (noav || !this.isJitsiPermitted(this.mqttToken)) {
+            if (this.noav || !this.isJitsiPermitted()) {
                 this.showEchoDisplayName();
-            } else if (armode && AFRAME.utils.device.checkARSupport()) {
+            } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
                 /*
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
@@ -629,7 +665,7 @@ export class Arena {
                 }).then(() => {
                     document.getElementsByTagName('a-scene')[0].enterAR();
                 });
-            } else if (skipav) {
+            } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 this.showEchoDisplayName();
@@ -641,17 +677,8 @@ export class Arena {
                 });
             }
 
-            // initialize face tracking if not on mobile
-            if (!AFRAME.utils.device.isMobile()) {
-                const faceTrackerModule = await import('./face-tracking/face-tracker.js');
-                this.FaceTracker = faceTrackerModule.ARENAFaceTracker;
-
-                const displayBbox = false;
-                const flipped = true;
-                this.FaceTracker.init(displayBbox, flipped);
-            }
-            console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
-
+            console.info(
+                `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
         }); // mqtt API (after this.* above, are defined)
     }
 }

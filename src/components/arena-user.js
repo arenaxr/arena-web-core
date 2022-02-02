@@ -224,7 +224,7 @@ AFRAME.registerComponent('arena-user', {
 
             el.appendChild(videoCubeDark);
         } else {
-            videoCube.setAttribute('scale', '2 3 0.02');
+            videoCube.setAttribute('scale', '0.9 1.5 0.02');
         }
 
         el.appendChild(videoCube);

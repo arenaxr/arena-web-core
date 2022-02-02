@@ -28,7 +28,7 @@ export class ARENAMqtt {
      * @private
      */
     async _initWorker() {
-        const MQTTWorker = wrap(new Worker('../workers/mqtt-worker.js'));
+        const MQTTWorker = wrap(new Worker(new URL('../workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
         const worker = await new MQTTWorker(
             {
                 renderTopic: ARENA.renderTopic,
@@ -44,10 +44,20 @@ export class ARENAMqtt {
                     console.warn(`ARENA Jitsi restarting...`);
                 }
             }),
+            proxy(this._mqttHealthCheck),
         );
         console.log('MQTT Worker initialized');
         this.MQTTWorker = worker;
         this.mqttClient = worker.mqttClient;
+    }
+
+    /**
+     * Internal callback to pass MQTT connection health to ARENAHealth.
+     * @param {object} msg Message object like: {addError: 'mqttScene.connection'}
+     */
+    _mqttHealthCheck(msg) {
+        if (msg.removeError) ARENA.health.removeError(msg.removeError);
+        else if (msg.addError) ARENA.health.addError(msg.addError);
     }
 
     /**
@@ -85,6 +95,11 @@ export class ARENAMqtt {
         theMessage.id = theMessage.object_id;
         delete theMessage.object_id;
 
+        let topicUser;
+        if (message) {
+            topicUser = message.destinationName.split('/')[4];
+        }
+
         switch (theMessage.action) { // clientEvent, create, delete, update
         case 'clientEvent':
             if (theMessage.data === undefined) {
@@ -93,7 +108,7 @@ export class ARENAMqtt {
             }
             // check topic
             if (message) {
-                if (!message.destinationName.endsWith(`/${theMessage.data.source}`)) {
+                if (topicUser !== theMessage.data.source) {
                     console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
                 }

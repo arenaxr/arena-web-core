@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 /**
- * @fileoverview Component that detects multi-finger touch gestures. 
+ * @fileoverview Component that detects multi-finger touch gestures.
  * Based off of work from 8th Wall at https://github.com/8thwall/web/tree/master/examples/aframe
  *
  */

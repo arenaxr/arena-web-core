@@ -24,9 +24,9 @@
     <script src="conf/defaults.js"></script>
 
     <!-- main arena bundle -->
-    <script src="dist/arena-core.js"></script>
+    <script src="dist/index.js"></script>
     <!-- main arena stylesheet -->
-    <link href="dist/arena-core.css" rel="stylesheet">
+    <link href="dist/index.css" rel="stylesheet">
 
     <!-- 2D UI -->
     <link href="static/vendor/mdb/mdb.min.css" rel="stylesheet"/>
@@ -48,8 +48,18 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-7 mb-md-0 mb-3">
-                        <div>
+                        <div class="mb-3">
                             <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <select aria-label="HeadModel" class="form-select mb-3" id="headModelPathSelect">
+                                <option value="/store/models/avatars/robobit.glb">Robot</option>
+                                <option value="/store/models/avatars/DamagedHelmet.glb">Damaged Helmet</option>
+                                <option value="/store/models/avatars/Avocado.glb">Avocado</option>
+                                <option value="/store/models/avatars/Duck.glb">Duck</option>
+                                <option value="/store/models/avatars/suzanne.glb">Suzanne</option>
+                            </select>
+                            <label for="presenceSelect">Select Head Model</label>
                         </div>
                     </div>
                     <div class="col-md-5">
@@ -60,7 +70,6 @@
                         </div>
                         <div class="form-floating">
                             <select aria-label="Speaker Device" class="form-select mb-3" id="audioOutSelect">
-                                <option selected>No Device Detected</option>
                             </select>
                             <label for="audioOutSelect">Select Speaker</label>
                         </div>
@@ -74,11 +83,15 @@
                             <label for="audioSourceSelect">Select Microphone</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <select aria-label="test" class="form-select mb-3" id="presenceSelect">
+                            <select aria-label="Presence" class="form-select mb-3" id="presenceSelect">
                                 <option value="Standard">Standard</option>
                                 <option value="Portal">Portal</option>
                             </select>
                             <label for="presenceSelect">Select Presence Type</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input mb-3" type="checkbox" id="reverseMouseDragCheckbox"/>
+                            <label for="reverseMouseDragCheckbox">Reverse Mouse Drag</label>
                         </div>
                         <div class="progress mb-3" style="height: 20px;">
                             <div
@@ -120,10 +133,6 @@
                                     readonly
                                     type="text"
                             />
-                        </div>
-                        <div class="form-outline input-group mb-3" id="headModelPath">
-                            <input class="form-control" id="headModelPath-input" type="text">
-                            <label class="form-label " for="headModelPath-input" style="z-index:999">Head Model Path</label>
                         </div>
                         <div class="form-outline input-group mb-3" id="displayName">
                             <input class="form-control" id="displayName-input" type="text">
@@ -182,11 +191,11 @@
 </div>
 
 <div class="error-icon" id="error-icon">
-    <img src="/src/health/images/exclamation.svg">
+    <img id="error-svg" src="/src/health/images/exclamation.svg">
     <div id="error-block" class="error-block"></div>
 </div>
 <span class="echo-name" id="echo-name"></span>
-<video autoplay="1" crossorigin="anonymous" id="cornerVideo" muted="true" playsinline="1" src="" volume="0"></video>
+<video autoplay="1" crossorigin="anonymous" id="cornerVideo" muted="true" playsinline="1" volume="0"></video>
 
 <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
 <script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>

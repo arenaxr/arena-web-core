@@ -1,17 +1,15 @@
-html,
-body {
-    font-family: "Lato", sans-serif;
-}
-
-#container {
-    width: 200px;
-    position: fixed;
-    padding: 5px;
+html {
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
 }
 
 #title {
     color: white;
     margin-left: 10px;
+}
+
+#cy-container {
+    overflow: hidden;
 }
 
 #cy {
@@ -24,8 +22,11 @@ body {
     z-index: -1;
 }
 
-#cy-container {
-    overflow: hidden;
+#container {
+    width: 200px;
+    position: fixed;
+    padding: 5px;
+    z-index: 0;
 }
 
 .timeButton {

@@ -167,13 +167,14 @@ export class ARENAJitsi {
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
+                const cornerVidEl = document.getElementById('cornerVideo');
                 if (this.jitsiVideoTrack) {
                     const oldTrack = this.jitsiVideoTrack;
-                    await oldTrack.detach($(`#cornerVideo`)[0]);
+                    await oldTrack.detach(cornerVidEl);
                     await this.conference.replaceTrack(oldTrack, track);
                     await oldTrack.dispose();
                 }
-                track.attach($(`#cornerVideo`)[0]);
+                track.attach(cornerVidEl);
                 this.jitsiVideoTrack = track;
             } else if (track.getType() === 'audio') {
                 if (this.jitsiAudioTrack) {
@@ -568,7 +569,7 @@ export class ARENAJitsi {
     onConferenceError(err) {
         console.error(`Conference error ${err}!`);
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            errorCode: err
+            errorCode: err,
         });
         ARENA.health.addError(err);
     }
@@ -580,7 +581,7 @@ export class ARENAJitsi {
         const err ='connection.connectionFailed';
         console.error('Conference server connection failed!');
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
-            errorCode: err
+            errorCode: err,
         });
         ARENA.health.addError(err);
     }
@@ -645,6 +646,7 @@ export class ARENAJitsi {
         } catch (e) {
             const vidbtn = document.getElementById('btn-video-off');
             if (vidbtn) vidbtn.remove();
+            /*
             if (!localStorage.getItem('hideNoAV')) {
                 Swal.fire({
                     title: 'No Webcam or Audio Input Device found!',
@@ -660,7 +662,7 @@ export class ARENAJitsi {
                         localStorage.setItem('hideNoAV', 'true');
                     }
                 });
-            }
+            }*/
         }
         this.avConnected = true;
 
@@ -683,16 +685,16 @@ export class ARENAJitsi {
             this.jitsiVideoElem.className = 'flipVideo';
             this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
             this.jitsiVideoElem.style.display = 'none';
-            this.jitsiVideoElem.style.width = ARENA.localVideoWidth + 'px';
 
-            const _this = this;
             /**
              * set video element size
              */
+            const _this = this;
             function setCornerVideoHeight() {
-                const videoWidth = _this.jitsiVideoElem.style.width;
+                const videoWidth = ARENA.localVideoWidth;
                 const videoHeight = _this.jitsiVideoElem.videoHeight /
                                         (_this.jitsiVideoElem.videoWidth / videoWidth);
+                _this.jitsiVideoElem.style.width = videoWidth + 'px';
                 _this.jitsiVideoElem.style.height = videoHeight + 'px';
             }
 
