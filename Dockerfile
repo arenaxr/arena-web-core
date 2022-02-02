@@ -7,7 +7,7 @@ RUN npm install --legacy-peer-deps
 COPY . . 
 RUN export VERSION=$(git describe) && echo export const ARENA_VERSION_MSG=\"ARENA $VERSION commit hash $(git rev-parse --short HEAD)\" > src/arena-version.js
 RUN mkdir -p dist && npm run build
-RUN rm -fr node_modules src
+RUN rm -fr node_modules
 
 # create the final container
 FROM nginx
