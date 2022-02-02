@@ -30,8 +30,27 @@ $(document).ready(function() {
     $('.nav-item a').filter(function() {
         const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
         const loc = location.pathname.replace(/^\/+|\/+$/g, '');
+        if (loc == 'files') {
+            $('#btn-copy-store-path').show();
+        } else {
+            $('#btn-copy-store-path').hide();
+        }
         return link == loc;
     }).parent().addClass('active');
+
+    // copy the file store public path
+    $('#btn-copy-store-path').on('click', function(e) {
+        e.preventDefault();
+        let storePath = getStorePath();
+        if (storePath.startsWith('/storemng/files')) {
+            storePath = storePath.replace('/storemng/files', '/store');
+            const fullPath = `${window.location.protocol}//${window.location.host}${storePath}`;
+            navigator.clipboard.writeText(fullPath);
+            Swal.fire( 'Copied!', fullPath, 'success' );
+        } else {
+            Swal.fire( 'Invalid path', 'Please navigate to another File Store file or folder', 'warning' );
+        }
+    });
 
     $('.coming-soon').on('click', function(e) {
         e.preventDefault();
