@@ -513,10 +513,14 @@ export class ARENAChat {
     jitsiStatsCallback = (e) => {
         const id = e.detail.id;
         const stats = e.detail.stats;
-        console.warn('jitsiStatsCallback', id, stats)
-        if (id === this.settings.userid) this.settings.stats = stats;
-        if (!this.liveUsers[id]) return;
-        this.liveUsers[id].stats = stats;
+        console.warn('jitsiStatsCallback', id, stats);
+        if (id === this.settings.userid) {
+            this.settings.stats = stats;
+        }
+        if (this.liveUsers[id]) {
+            this.liveUsers[id].stats = stats;
+        }
+        this.populateUserList();
     };
 
     /**
@@ -927,13 +931,13 @@ export class ARENAChat {
     }
 
     /**
-     *
-     * @param {*} uli
-     * @param {*} stats
-     * @param {*} name
+     * Apply a jitsi signal icon after the user name in list item 'uli'.
+     * @param {Element} uli List item with only name, not buttons yet.
+     * @param {Object} stats The jisti video stata object if any
+     * @param {string} name The display name of the user
      */
     addJitsiStats(uli, stats, name) {
-        const _this = this;
+        if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
         iconStats.style.color = (stats ? this.getConnectionColor(stats.connectionQuality) : 'gray');
@@ -942,12 +946,14 @@ export class ARENAChat {
         const spanStats = document.createElement('span');
         uli.appendChild(spanStats);
 
+        // show current stats on hover/mouseover
+        const _this = this;
         iconStats.onmouseover = function() {
             // TODO: format text from stats
             spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
-            console.warn('stats', stats)
+            console.warn('stats', stats);
             const offset = $(this).offset();
-            console.warn('offset', offset)
+            console.warn('offset', offset);
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
             $(this).next('span').css('left', offset.left + 'px');
         };
@@ -957,11 +963,11 @@ export class ARENAChat {
     }
 
     /**
-     *
-     * @param {*} quality
-     * @returns
+     * Get color based on 0-100% connection quality.
+     * @param {int} quality Connection Quality
+     * @return {string} Color string
      */
-     getConnectionColor(quality) {
+    getConnectionColor(quality) {
         if (quality > 67) {
             return 'green';
         } else if (quality > 33) {
@@ -974,16 +980,16 @@ export class ARENAChat {
     }
 
     /**
-     *
-     * @param {*} name
-     * @param {*} stats
-     * @returns
+     * Get readable video stats.
+     * @param {string} name The display name of the user
+     * @param {Object} stats The jisti video stata object if any
+     * @return {string} Readable stats
      */
     getConnectionText(name, stats) {
         const lines = [];
         lines.push(`${name}`);
         lines.push(`quality: ${stats.connectionQuality}%`);
-        lines.push(`resolution: ${this._extractResolutionString(stats)}`);
+        // lines.push(`resolution: ${this._extractResolutionString(stats)}`);
         lines.push(`bitrate: ${stats.bitrate.upload} up, ${stats.bitrate.download} dn`);
         lines.push(`br audio: ${stats.bitrate.audio.upload} up, ${stats.bitrate.audio.download} dn`);
         lines.push(`br video: ${stats.bitrate.video.upload} up, ${stats.bitrate.video.download} dn`);
@@ -996,7 +1002,7 @@ export class ARENAChat {
      *
      * @param {Object} stats - Connection stats from the library.
      * @private
-     * @returns {string}
+     * @return {string}
      */
     _extractResolutionString(stats) {
         const {
