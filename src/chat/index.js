@@ -513,7 +513,7 @@ export class ARENAChat {
     jitsiStatsCallback = (e) => {
         const id = e.detail.id;
         const stats = e.detail.stats;
-        console.log('jitsiStatsCallback', id, stats);
+        console.warn('jitsiStatsCallback', id, stats)
         if (id === this.settings.userid) this.settings.stats = stats;
         if (!this.liveUsers[id]) return;
         this.liveUsers[id].stats = stats;
@@ -944,8 +944,9 @@ export class ARENAChat {
         iconStats.onmouseover = function() {
             // TODO: format text from stats
             spanStats.textContent = `${name}'s Connection Quality: ${JSON.stringify(stats)}`;
-            console.warn(stats);
+            console.warn('stats', stats)
             const offset = $(this).offset();
+            console.warn('offset', offset)
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
             $(this).next('span').css('left', offset.left + 'px');
         };
