@@ -66,6 +66,7 @@ export class ARENAChat {
             devInstance: st.devInstance !== undefined ? st.devInstance : false,
             isSceneWriter: st.isSceneWriter !== undefined ? st.isSceneWriter : false,
             isSpeaker: false,
+            stats: undefined,
         };
 
         // users list
@@ -510,10 +511,12 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiStatsCallback = (e) => {
-        const user = e.detail;
-        console.log(user);
-        if (!this.liveUsers[user.id]) return;
-        this.liveUsers[user.id].stats = user.stats;
+        const id = e.detail.id;
+        const stats = e.detail.stats;
+        console.log('jitsiStatsCallback', id, stats);
+        if (id === this.settings.userid) this.settings.stats = stats;
+        if (!this.liveUsers[id]) return;
+        this.liveUsers[id].stats = stats;
     };
 
     /**
@@ -822,17 +825,10 @@ export class ARENAChat {
             uli.style.color = 'green';
         }
         _this.usersList.appendChild(uli);
+        this.addJitsiStats(uli, this.settings.stats, uli.textContent);
         const uBtnCtnr = document.createElement('div');
         uBtnCtnr.className = 'users-list-btn-ctnr';
         uli.appendChild(uBtnCtnr);
-
-        const statsspan = document.createElement('span');
-        statsspan.title = 'Connection Quality';
-        statsspan.className = 'users-list-btn ud';
-        statsspan.setAttribute('data-toggle', 'popover');
-        statsspan.setAttribute('data-trigger', 'hover');
-        statsspan.setAttribute('data-content', 'Connection content');
-        uBtnCtnr.appendChild(statsspan);
 
         const usspan = document.createElement('span');
         usspan.className = 'users-list-btn s';
@@ -854,6 +850,7 @@ export class ARENAChat {
                 uli.style.color = 'green';
             }
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
+            this.addJitsiStats(uli, user.stats, uli.textContent);
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 const uBtnCtnr = document.createElement('div');
                 uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -927,6 +924,34 @@ export class ARENAChat {
             _this.usersList.appendChild(uli);
         });
         this.toSel.value = selVal; // preserve selected value
+    }
+
+    /**
+     *
+     * @param {*} uli
+     * @param {*} stats
+     * @param {*} name
+     */
+    addJitsiStats(uli, stats, name) {
+        const iconStats = document.createElement('i');
+        iconStats.className = 'videoStats fa fa-signal';
+        iconStats.style.color = 'gray'; // TODO: format color from stats
+        iconStats.style.paddingLeft = '5px';
+        uli.appendChild(iconStats);
+        const spanStats = document.createElement('span');
+        uli.appendChild(spanStats);
+
+        iconStats.onmouseover = function() {
+            // TODO: format text from stats
+            spanStats.textContent = `${name}'s Connection Quality: ${JSON.stringify(stats)}`;
+            console.warn(stats);
+            const offset = $(this).offset();
+            $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
+            $(this).next('span').css('left', offset.left + 'px');
+        };
+        iconStats.onmouseleave = function() {
+            $(this).next('span').fadeOut(200);
+        };
     }
 
     /**

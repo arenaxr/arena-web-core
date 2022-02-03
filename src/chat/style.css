@@ -372,6 +372,34 @@
 	background: rgba(0, 0, 0, 0.1) url("data:image/svg+xml,%3Csvg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 477.427 477.427' style='enable-background:new 0 0 477.427 477.427;' xml:space='preserve'%3E%3Cg%3E%3Cpolygon points='143.372,419.754 143.372,1.213 113.372,1.213 113.372,420.246 68.732,375.607 47.519,396.82 128.126,477.427,208.732,396.82 187.519,375.607'/%3E%3Cpolygon points='429.907,80.606 349.301,0 268.694,80.606 289.907,101.82 334.301,57.426 334.301,476.213 364.301,476.213,364.301,57.426 408.694,101.82'/%3E%3C/g%3E") 50% 50% no-repeat;
 }
 
+.videoStats+span {
+	display: none;
+}
+
+.videoTextTooltip {
+	background-color: black;
+	color: white;
+	padding: 5px;
+	margin-top: 1.3em;
+	position: absolute;
+	max-width: 200px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	z-index: 99999;
+}
+
+.videoTextTooltip::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	right: 100%;
+	margin-top: -5px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: transparent black transparent transparent;
+}
+
 .lm-list-btn,
 .users-list-btn {
 	cursor: pointer;

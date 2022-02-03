@@ -34,7 +34,7 @@ export class Arena {
      * Constructor; init arena properties
      */
     constructor() {
-        // load system health monitor
+        // start client health monitor
         this.health = new ARENAHealth();
         // replace console with our logging (only when not in dev)
         if (!ARENADefaults.devInstance) {
