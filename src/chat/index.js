@@ -66,6 +66,7 @@ export class ARENAChat {
             devInstance: st.devInstance !== undefined ? st.devInstance : false,
             isSceneWriter: st.isSceneWriter !== undefined ? st.isSceneWriter : false,
             isSpeaker: false,
+            stats: undefined,
         };
 
         // users list
@@ -369,6 +370,7 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.talkWhileMutedCallback);
         ARENA.events.on(ARENAEventEmitter.events.NOISY_MIC, this.noisyMicCallback);
         ARENA.events.on(ARENAEventEmitter.events.CONFERENCE_ERROR, this.conferenceErrorCallback);
+        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS, this.jitsiStatsCallback);
     }
 
     /**
@@ -501,6 +503,24 @@ export class ARENAChat {
         const errorCode = e.detail.errorCode;
         const err = ARENA.health.getErrorDetails(errorCode);
         this.displayAlert(err.title, 5000, 'error');
+    };
+
+    /**
+     * Called when Jitsi stats are updated.
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    jitsiStatsCallback = (e) => {
+        const id = e.detail.id;
+        const stats = e.detail.stats;
+        console.warn('jitsiStatsCallback', id, stats);
+        if (id === this.settings.userid) {
+            this.settings.stats = stats;
+        }
+        if (this.liveUsers[id]) {
+            this.liveUsers[id].stats = stats;
+        }
+        this.populateUserList();
     };
 
     /**
@@ -809,9 +829,11 @@ export class ARENAChat {
             uli.style.color = 'green';
         }
         _this.usersList.appendChild(uli);
+        this.addJitsiStats(uli, this.settings.stats, uli.textContent);
         const uBtnCtnr = document.createElement('div');
         uBtnCtnr.className = 'users-list-btn-ctnr';
         uli.appendChild(uBtnCtnr);
+
         const usspan = document.createElement('span');
         usspan.className = 'users-list-btn s';
         usspan.title = 'Mute User';
@@ -832,6 +854,7 @@ export class ARENAChat {
                 uli.style.color = 'green';
             }
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
+            this.addJitsiStats(uli, user.stats, uli.textContent);
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 const uBtnCtnr = document.createElement('div');
                 uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -905,6 +928,104 @@ export class ARENAChat {
             _this.usersList.appendChild(uli);
         });
         this.toSel.value = selVal; // preserve selected value
+    }
+
+    /**
+     * Apply a jitsi signal icon after the user name in list item 'uli'.
+     * @param {Element} uli List item with only name, not buttons yet.
+     * @param {Object} stats The jisti video stata object if any
+     * @param {string} name The display name of the user
+     */
+    addJitsiStats(uli, stats, name) {
+        if (!stats) return;
+        const iconStats = document.createElement('i');
+        iconStats.className = 'videoStats fa fa-signal';
+        iconStats.style.color = (stats ? this.getConnectionColor(stats.connectionQuality) : 'gray');
+        iconStats.style.paddingLeft = '5px';
+        uli.appendChild(iconStats);
+        const spanStats = document.createElement('span');
+        uli.appendChild(spanStats);
+
+        // show current stats on hover/mouseover
+        const _this = this;
+        iconStats.onmouseover = function() {
+            // TODO: format text from stats
+            spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
+            console.warn('stats', stats);
+            const offset = $(this).offset();
+            console.warn('offset', offset);
+            $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
+            $(this).next('span').css('left', offset.left + 'px');
+        };
+        iconStats.onmouseleave = function() {
+            $(this).next('span').fadeOut(200);
+        };
+    }
+
+    /**
+     * Get color based on 0-100% connection quality.
+     * @param {int} quality Connection Quality
+     * @return {string} Color string
+     */
+    getConnectionColor(quality) {
+        if (quality > 67) {
+            return 'green';
+        } else if (quality > 33) {
+            return 'orange';
+        } else if (quality > 0) {
+            return 'yellow';
+        } else {
+            return 'red';
+        }
+    }
+
+    /**
+     * Get readable video stats.
+     * @param {string} name The display name of the user
+     * @param {Object} stats The jisti video stata object if any
+     * @return {string} Readable stats
+     */
+    getConnectionText(name, stats) {
+        const lines = [];
+        lines.push(`${name}`);
+        lines.push(`quality: ${stats.connectionQuality}%`);
+        // lines.push(`resolution: ${this._extractResolutionString(stats)}`);
+        lines.push(`bitrate: ${stats.bitrate.upload} up, ${stats.bitrate.download} dn`);
+        lines.push(`br audio: ${stats.bitrate.audio.upload} up, ${stats.bitrate.audio.download} dn`);
+        lines.push(`br video: ${stats.bitrate.video.upload} up, ${stats.bitrate.video.download} dn`);
+        return lines.join('\r\n');
+    }
+
+    // https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js#L281
+    /**
+     * Extracts the resolution and framerate.
+     *
+     * @param {Object} stats - Connection stats from the library.
+     * @private
+     * @return {string}
+     */
+    _extractResolutionString(stats) {
+        const {
+            framerate,
+            resolution,
+        } = stats;
+
+        const resolutionString = Object.keys(resolution || {})
+            .map((ssrc) => {
+                const {
+                    width,
+                    height,
+                } = resolution[ssrc];
+
+                return `${width}x${height}`;
+            })
+            .join(', ') || null;
+
+        const frameRateString = Object.keys(framerate || {})
+            .map((ssrc) => framerate[ssrc])
+            .join(', ') || null;
+
+        return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
     }
 
     /**
