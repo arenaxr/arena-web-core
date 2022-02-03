@@ -933,9 +933,10 @@ export class ARENAChat {
      * @param {*} name
      */
     addJitsiStats(uli, stats, name) {
+        const _this = this;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
-        iconStats.style.color = 'gray'; // TODO: format color from stats
+        iconStats.style.color = (stats ? this.getConnectionColor(stats.connectionQuality) : 'gray');
         iconStats.style.paddingLeft = '5px';
         uli.appendChild(iconStats);
         const spanStats = document.createElement('span');
@@ -943,7 +944,7 @@ export class ARENAChat {
 
         iconStats.onmouseover = function() {
             // TODO: format text from stats
-            spanStats.textContent = `${name}'s Connection Quality: ${JSON.stringify(stats)}`;
+            spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
             console.warn('stats', stats)
             const offset = $(this).offset();
             console.warn('offset', offset)
@@ -953,6 +954,72 @@ export class ARENAChat {
         iconStats.onmouseleave = function() {
             $(this).next('span').fadeOut(200);
         };
+    }
+
+    /**
+     *
+     * @param {*} quality
+     * @returns
+     */
+     getConnectionColor(quality) {
+        if (quality > 67) {
+            return 'green';
+        } else if (quality > 33) {
+            return 'orange';
+        } else if (quality > 0) {
+            return 'yellow';
+        } else {
+            return 'red';
+        }
+    }
+
+    /**
+     *
+     * @param {*} name
+     * @param {*} stats
+     * @returns
+     */
+    getConnectionText(name, stats) {
+        const lines = [];
+        lines.push(`${name}`);
+        lines.push(`quality: ${stats.connectionQuality}%`);
+        lines.push(`resolution: ${this._extractResolutionString(stats)}`);
+        lines.push(`bitrate: ${stats.bitrate.upload} up, ${stats.bitrate.download} dn`);
+        lines.push(`br audio: ${stats.bitrate.audio.upload} up, ${stats.bitrate.audio.download} dn`);
+        lines.push(`br video: ${stats.bitrate.video.upload} up, ${stats.bitrate.video.download} dn`);
+        return lines.join('\r\n');
+    }
+
+    // https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js#L281
+    /**
+     * Extracts the resolution and framerate.
+     *
+     * @param {Object} stats - Connection stats from the library.
+     * @private
+     * @returns {string}
+     */
+    _extractResolutionString(stats) {
+        const {
+            framerate,
+            resolution,
+        } = stats;
+
+        const resolutionString = Object.keys(resolution || {})
+            .map((ssrc) => {
+                const {
+                    width,
+                    height,
+                } = resolution[ssrc];
+
+                return `${width}x${height}`;
+            })
+            .join(', ') || null;
+
+        const frameRateString = Object.keys(framerate || {})
+            .map((ssrc) => framerate[ssrc])
+            .join(', ') || null;
+
+        return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
     }
 
     /**
