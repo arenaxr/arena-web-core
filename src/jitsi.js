@@ -17,6 +17,9 @@ if (JitsiMeetJS) {
     console.info(`JitsiMeetJS version https://github.com/jitsi/lib-jitsi-meet/commit/${JitsiMeetJS.version}`);
 }
 
+/**
+ * The ARENA Jitsi client connection class.
+ */
 export class ARENAJitsi {
     static ARENA_APP_ID = 'arena';
     static SCREENSHARE_PREFIX = '#5cr33n5h4r3'; // unique prefix for screenshare clients
@@ -24,6 +27,11 @@ export class ARENAJitsi {
     static NEW_USER_TIMEOUT_MS = 2000;
     static jitsi = undefined;
 
+    /**
+     * Initialize the Jitsi connection.
+     * @param {*} jitsiServer The jitsi server url.
+     * @return {*} Instantiated ARENAJitsi object.
+     */
     static init(jitsiServer) {
         if (!this.jitsi) {
             this.jitsi = new ARENAJitsi(jitsiServer);
@@ -33,6 +41,10 @@ export class ARENAJitsi {
         return this.jitsi;
     }
 
+    /**
+     * Configure the ARENA Jitsi client before connecting.
+     * @param {*} jitsiServer The jitsi server url.
+     */
     constructor(jitsiServer) {
         if (!window.JitsiMeetJS) {
             console.warn('Jitsi is not found!');
@@ -110,6 +122,9 @@ export class ARENAJitsi {
         this.newUserTimers = [];
     }
 
+    /**
+     * Connect to the Jitsi server.
+     */
     connect() {
         $(window).bind('beforeunload', this.unload.bind(this));
         $(window).bind('unload', this.unload.bind(this));
@@ -199,7 +214,7 @@ export class ARENAJitsi {
      * Update screen share object
      * @param {string} screenShareId JitsiTrack object
      * @param {string} videoId Jitsi video Id
-     * @param {string} participantId Jitsi participand Id
+     * @param {string} participantId Jitsi participant Id
      * @return {object} screenShare scene object
      */
     updateScreenShareObject(screenShareId, videoId, participantId) {
@@ -566,6 +581,10 @@ export class ARENAJitsi {
         ARENA.health.removeError('connection.connectionFailed');
     }
 
+    /**
+     * Called for conference errors/failures
+     * @param {*} err
+     */
     onConferenceError(err) {
         console.error(`Conference error ${err}!`);
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
@@ -686,10 +705,10 @@ export class ARENAJitsi {
             this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
             this.jitsiVideoElem.style.display = 'none';
 
+            const _this = this;
             /**
              * set video element size
              */
-            const _this = this;
             function setCornerVideoHeight() {
                 const videoWidth = ARENA.localVideoWidth;
                 const videoHeight = _this.jitsiVideoElem.videoHeight /
@@ -710,22 +729,40 @@ export class ARENAJitsi {
         }
     }
 
+    /**
+     * Show the client user's video
+     */
     showVideo() {
         if (this.jitsiVideoElem) this.jitsiVideoElem.style.display = 'block';
     }
 
+    /**
+     * Hide the client user's video
+     */
     hideVideo() {
         if (this.jitsiVideoElem) this.jitsiVideoElem.style.display = 'none';
     }
 
+    /**
+     * Getter for the client users Jitsi Id
+     * @return {string} The Jitsi Id
+     */
     getJitsiId() {
         return this.jitsiId;
     }
 
+    /**
+     * Has the active speaker changed
+     * @return {boolean} if the active speaker has changed
+     */
     activeSpeakerChanged() {
         return this.prevActiveSpeaker !== this.activeSpeaker;
     }
 
+    /**
+     * Begin the audio feed
+     * @return {*} Promise for the track unmute
+     */
     unmuteAudio() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiAudioTrack) {
@@ -743,6 +780,10 @@ export class ARENAJitsi {
         }.bind(this));
     }
 
+    /**
+     * End the audio feed
+     * @return {*} Promise for the track mute
+     */
     muteAudio() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiAudioTrack) {
@@ -760,6 +801,10 @@ export class ARENAJitsi {
         }.bind(this));
     }
 
+    /**
+     * Begin the video feed
+     * @return {*} Promise for the track unmute
+     */
     startVideo() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiVideoTrack) {
@@ -777,6 +822,10 @@ export class ARENAJitsi {
         }.bind(this));
     }
 
+    /**
+     * End the video feed
+     * @return {*} Promise for the track mute
+     */
     stopVideo() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiVideoTrack) {
@@ -794,6 +843,11 @@ export class ARENAJitsi {
         }.bind(this));
     }
 
+    /**
+     * Getter for the audio feed by jisti id
+     * @param {*} jitsiId The jitsi user id
+     * @return {*} remote track object
+     */
     getAudioTrack(jitsiId) {
         if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][0];
@@ -802,6 +856,11 @@ export class ARENAJitsi {
         }
     }
 
+    /**
+     * Getter for the video feed by jisti id
+     * @param {*} jitsiId The jitsi user id
+     * @return {*} remote track object
+     */
     getVideoTrack(jitsiId) {
         if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][1];
@@ -810,23 +869,42 @@ export class ARENAJitsi {
         }
     }
 
+    /**
+     * Remove a user from the conference
+     * @param {*} participantJitsiId The user to kick out
+     * @param {*} msg The message for the user
+     */
     kickout(participantJitsiId, msg) {
         if (this.conference) {
             this.conference.kickParticipant(participantJitsiId, msg);
         }
     }
 
+    /**
+     * Disconnect from the conference
+     */
     leave() {
         this.unload();
         this.disconnect();
     }
 
+    /**
+     *
+     * @param {*} participantJitsiId
+     * @returns
+     */
     getUserId(participantJitsiId) {
         if (this.jitsiId == participantJitsiId) return ARENA.camName;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
     }
 
+    /**
+     *
+     * @param {*} participantJitsiId
+     * @param {*} property
+     * @returns
+     */
     getProperty(participantJitsiId, property) {
         return this.conference.getParticipantById(participantJitsiId).getProperty(property);
     }
