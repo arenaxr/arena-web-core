@@ -71,8 +71,11 @@ export class ARENAJitsi {
         // https://github.com/jitsi/jitsi-meet/blob/master/config.js
         this.confOptions = {
             openBridgeChannel: true,
+            enableNoAudioDetection: true,
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
+            startWithAudioMuted: true,
+            startWithVideoMuted: true,
             p2p: {
                 enabled: false,
             },
@@ -85,7 +88,8 @@ export class ARENAJitsi {
                     },
                 },
             },
-            // enableLayerSuspension: true,
+            enableLayerSuspension: true,
+            backgroundAlpha: 0.5,
         };
 
         this.initOptions = {
