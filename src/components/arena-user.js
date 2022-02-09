@@ -129,9 +129,9 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('id', 'head-model_' + name);
         this.headModel.setAttribute('rotation', '0 180 0');
         this.headModel.setAttribute('scale', '1 1 1');
-        this.headModel.setAttribute('dynamic-body', 'type', 'static');
         this.headModel.setAttribute('gltf-model', data.headModelPath);
         this.headModel.setAttribute('attribution', 'extractAssetExtras', true);
+        this.headModel.setAttribute('dynamic-body', 'type', 'static');
 
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
