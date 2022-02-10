@@ -1,5 +1,5 @@
 # build the js
-FROM node:latest
+FROM node:current-buster
 ARG chash
 ARG version
 RUN mkdir -p /arena-core
