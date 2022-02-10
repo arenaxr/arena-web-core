@@ -5,7 +5,7 @@ ARG version
 RUN mkdir -p /arena-core
 WORKDIR /arena-core
 COPY . .
-RUN npm install --legacy-peer-deps
+RUN npm ci
 RUN echo export const ARENA_VERSION_MSG=\"ARENA $version commit hash $chash\" > src/arena-version.js
 RUN mkdir -p dist && npm run build
 RUN rm -fr node_modules
