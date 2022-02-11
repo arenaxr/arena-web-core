@@ -74,22 +74,24 @@ export class ARENAJitsi {
             enableNoAudioDetection: true,
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
-            startWithAudioMuted: true,
-            startWithVideoMuted: true,
+            //startWithAudioMuted: true,
+            //startWithVideoMuted: true,
             p2p: {
                 enabled: false,
             },
+            maxFullResolutionParticipants: -1,
+            resolution: 960,
             constraints: {
                 video: {
                     height: {
-                        ideal: 1080,
-                        max: 2160,
-                        min: 240,
+                        ideal: 1920,
+                        max: 1920,
+                        min: 960,
                     },
                 },
             },
             enableLayerSuspension: true,
-            backgroundAlpha: 0.5,
+            //backgroundAlpha: 0.5,
         };
 
         this.initOptions = {

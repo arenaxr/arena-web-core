@@ -15,6 +15,10 @@ window.setupAV = (callback) => {
     const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
     const micMeter = document.getElementById('micMeter');
     const headModelPathSelect = document.getElementById('headModelPathSelect');
+    const videoObjectName = document.getElementById('videoObjectName');
+    const videoWidth = document.getElementById('videoWidth');
+    const videoHeight = document.getElementById('videoHeight');
+
     const reverseMouseDragCheckbox = document.getElementById('reverseMouseDragCheckbox');
     const displayName = document.getElementById('displayName-input');
     const enterSceneBtn = document.getElementById('enterSceneAVBtn');
