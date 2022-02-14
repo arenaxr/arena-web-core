@@ -44,6 +44,8 @@ AFRAME.registerComponent('arena-camera', {
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
+        this.frustum = new THREE.Frustum();
+        this.frustMatrix = new THREE.Matrix4();
 
         this.lastPose = '';
 
@@ -189,6 +191,11 @@ AFRAME.registerComponent('arena-camera', {
         const rotationCoords = ARENAUtils.rotToText(data.rotation);
         const positionCoords = ARENAUtils.coordsToText(data.position);
         const newPose = rotationCoords + ' ' + positionCoords;
+
+        const cam = el.components['camera'].camera;
+        this.frustum.setFromProjectionMatrix(
+            this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
+        );
 
         // update position if pose changed, or every 1 sec heartbeat
         if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) === 0) {
