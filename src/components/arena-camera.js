@@ -192,11 +192,6 @@ AFRAME.registerComponent('arena-camera', {
         const positionCoords = ARENAUtils.coordsToText(data.position);
         const newPose = rotationCoords + ' ' + positionCoords;
 
-        const cam = el.components['camera'].camera;
-        this.frustum.setFromProjectionMatrix(
-            this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
-        );
-
         // update position if pose changed, or every 1 sec heartbeat
         if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
@@ -210,6 +205,11 @@ AFRAME.registerComponent('arena-camera', {
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
         } else if (this.lastPose !== newPose) {
+            // Only update frustum if camera pose has changed
+            const cam = el.components['camera'].camera;
+            this.frustum.setFromProjectionMatrix(
+                this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
+            );
             this.publishPose();
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
