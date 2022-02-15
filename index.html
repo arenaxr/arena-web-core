@@ -145,10 +145,9 @@
         </div>
     </div>
 </div>
-<a-scene background='color: black; directionalLightEl:a-light[type="directional"];probeLightEl:a-light[type="probe"]' name="ARENAScene"
+<a-scene background='color: black; directionalLightEl:a-light[type="directional"]' name="ARENAScene"
          stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision, light-estimation; overlayElement: overlay">
-    <a-light type="probe"></a-light>
-    <a-light light="castShadow:true" type="directional" position="1 2 1"></a-light>
+    <a-light type="directional" light="castShadow:true" intensity="0.6" position="0 2 -0.2"></a-light>
 
     <a-assets>
         <!-- Vive controller 3d model -->
