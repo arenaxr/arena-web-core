@@ -145,9 +145,11 @@
         </div>
     </div>
 </div>
-<a-scene background="color: black" name="ARENAScene"
-         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">
-    <!-- stats physics -->
+<a-scene background='color: black; directionalLightEl:a-light[type="directional"];probeLightEl:a-light[type="probe"]' name="ARENAScene"
+         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay; light-estimation">
+    <a-light type="probe"></a-light>
+    <a-light light="castShadow:true" type="directional" position="1 2 1"></a-light>
+
     <a-assets>
         <!-- Vive controller 3d model -->
         <a-asset-item id="viveControl-obj" src="store/models/vr_controller_vive.obj"></a-asset-item>
