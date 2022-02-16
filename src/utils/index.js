@@ -1,0 +1,2 @@
+import './aframe-srcloader';
+
