@@ -12,7 +12,6 @@ console.info(ARENA_VERSION_MSG);
 
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
 import 'aframe'; // AFRAME
-import './utils/'; // AFRAME
 import './arena.js'; // ARENA
 import './ui/'; // 2D UI
 import './aframe-mods/'; // AFRAME modifications
