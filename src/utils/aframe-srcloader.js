@@ -44,12 +44,14 @@ function checkIsImage(src, onResult) {
 
     // Skip network request from utils.validateSrc
     // WARNING: Will obviously produce incorrect behavior if file is not correctly named
-    const pathSplit = new URL(src).pathname.split('.');
-    const srcExt = pathSplit[pathSplit.length - 1];
-    if (IMG_EXTENSIONS.includes(srcExt)) {
-        onResult(true);
-        return;
-    }
+    try {
+        const pathSplit = new URL(src, window.location.origin).pathname.split('.');
+        const srcExt = pathSplit[pathSplit.length - 1];
+        if (IMG_EXTENSIONS.includes(srcExt)) {
+            onResult(true);
+            return;
+        }
+    } catch {};
 
     request = new XMLHttpRequest();
 
