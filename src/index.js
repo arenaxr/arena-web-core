@@ -18,4 +18,3 @@ import './aframe-mods/'; // AFRAME modifications
 import './systems/'; // custom AFRAME systems
 import './components/'; // custom AFRAME components
 import './webxr/'; // spedial handler for webxr devices
-
