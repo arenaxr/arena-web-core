@@ -141,7 +141,7 @@ AFRAME.registerComponent('arena-user', {
         this.audioID = null;
         this.distReached = null;
 
-        this.frustum = new THREE.Frustum();
+        this.bbox = new THREE.Box3();
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -400,7 +400,8 @@ AFRAME.registerComponent('arena-user', {
             this.updateAudio();
         }
 
-        const camPos = document.getElementById('my-camera').object3D.position;
+        const myCam = document.getElementById('my-camera');
+        const camPos = myCam.object3D.position;
         const entityPos = el.object3D.position;
         const distance = camPos.distanceTo(entityPos);
 
@@ -409,12 +410,9 @@ AFRAME.registerComponent('arena-user', {
             const vidCube = document.getElementById(this.videoID + 'cube');
             let inFieldOfView = true;
             if (el.contains(vidCube)) {
-                const cam = document.getElementById('my-camera').sceneEl.camera;
-                this.frustum.setFromProjectionMatrix(
-                    new THREE.Matrix4().multiplyMatrices(
-                        cam.projectionMatrix, cam.matrixWorldInverse));
-                const bbox = new THREE.Box3().setFromObject(vidCube.object3D);
-                inFieldOfView = this.frustum.intersectsBox(bbox);
+                const cam = myCam.components['arena-camera'];
+                this.bbox.setFromObject(vidCube.object3D);
+                inFieldOfView = cam.frustum.intersectsBox(this.bbox);
             }
 
             // check if A/V cut off distance has been reached

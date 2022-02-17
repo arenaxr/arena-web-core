@@ -513,7 +513,7 @@ export class ARENAChat {
     jitsiStatsCallback = (e) => {
         const id = e.detail.id;
         const stats = e.detail.stats;
-        //console.log('jitsiStatsCallback', id, stats);
+        // console.log('jitsiStatsCallback', id, stats);
         if (id === this.settings.userid) {
             this.settings.stats = stats;
         }
@@ -622,6 +622,7 @@ export class ARENAChat {
      * @param {*} msgTxt The message text.
      */
     sendMsg(msgTxt) {
+        const now = new Date();
         const msg = {
             object_id: uuidv4(),
             type: 'chat',
@@ -629,7 +630,8 @@ export class ARENAChat {
             from_uid: this.settings.userid,
             from_un: this.settings.username,
             from_scene: this.settings.scene,
-            from_desc: `${decodeURI(this.settings.username)} (${this.toSel.options[this.toSel.selectedIndex].text}) ${new Date().toLocaleTimeString()}`,
+            from_desc: `${decodeURI(this.settings.username)} (${this.toSel.options[this.toSel.selectedIndex].text})`,
+            from_time: now.toJSON(),
             cameraid: this.settings.cameraid,
             text: msgTxt,
         };
@@ -639,7 +641,7 @@ export class ARENAChat {
                 this.settings.publishPrivateTopic.replace('{to_uid}', this.toSel.value);
         // console.log("sending", msg, "to", dstTopic);
         this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
-        this.txtAddMsg(msg.text, msg.from_desc, 'self');
+        this.txtAddMsg(msg.text, msg.from_desc + ' ' + now.toLocaleTimeString(), 'self');
     }
 
     /**
@@ -725,13 +727,13 @@ export class ARENAChat {
         // drop messages to scenes different from our scene
         if (msg.to_uid === 'scene' && msg.from_scene != this.settings.scene) return;
 
-        this.txtAddMsg(msg.text, msg.from_desc, 'other');
+        this.txtAddMsg(msg.text, msg.from_desc + ' ' + new Date(msg.from_time).toLocaleTimeString(), 'other');
 
         this.unreadMsgs++;
         this.chatDot.textContent = this.unreadMsgs < 100 ? this.unreadMsgs : '...';
 
         // check if chat is visible
-        if (this.chatPopup.style.display == 'none') {
+        if (this.chatPopup.style.display === 'none') {
             const msgText = (msg.text.length > 15) ? msg.text.substring(0, 15) + '...' : msg.text;
             this.displayAlert(`New message from ${msg.from_un}: ${msgText}.`, 3000);
             this.chatDot.style.display = 'block';

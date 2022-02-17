@@ -44,6 +44,8 @@ AFRAME.registerComponent('arena-camera', {
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
+        this.frustum = new THREE.Frustum();
+        this.frustMatrix = new THREE.Matrix4();
 
         this.lastPose = '';
 
@@ -203,6 +205,11 @@ AFRAME.registerComponent('arena-camera', {
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
         } else if (this.lastPose !== newPose) {
+            // Only update frustum if camera pose has changed
+            const cam = el.components['camera'].camera;
+            this.frustum.setFromProjectionMatrix(
+                this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
+            );
             this.publishPose();
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
