@@ -35,8 +35,6 @@ function validateSrc(src, isImageCb, isVideoCb) {
  * @param {function} onResult - Callback with whether `src` is an image.
  */
 function checkIsImage(src, onResult) {
-    let request;
-
     if (src.tagName) {
         onResult(src.tagName === 'IMG');
         return;
@@ -47,13 +45,13 @@ function checkIsImage(src, onResult) {
     try {
         const pathSplit = new URL(src, window.location.origin).pathname.split('.');
         const srcExt = pathSplit[pathSplit.length - 1];
-        if (IMG_EXTENSIONS.includes(srcExt)) {
+        if (IMG_EXTENSIONS.includes(srcExt.toLowerCase())) {
             onResult(true);
             return;
         }
-    } catch {};
+    } catch {}
 
-    request = new XMLHttpRequest();
+    const request = new XMLHttpRequest();
 
     // Try to send HEAD request to check if image first.
     request.open('HEAD', src);
