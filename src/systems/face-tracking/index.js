@@ -13,11 +13,11 @@ AFRAME.registerSystem('face-tracking', {
         flipped: {default: true},
     },
 
-    init: function() {
+    init: async function() {
         this.enabled = !AFRAME.utils.device.isMobile();
         if (!this.enabled) return;
 
-        const {FaceTracker, FaceTrackerSource} = require('./face-tracker.min.js');
+        const {FaceTracker, FaceTrackerSource} = await import('./face-tracker.min.js');
 
         this.width = ARENA.localVideoWidth;
         this.height = Math.ceil((window.screen.height / window.screen.width) * this.width);
