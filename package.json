@@ -46,6 +46,7 @@
     "jsdoc": "^3.6.6",
     "jsdoc-to-markdown": "^7.0.1",
     "parcel": "^2.2.1",
+    "parcel-resolver-ignore": "^2.0.0",
     "path-browserify": "^1.0.1",
     "stream-browserify": "^3.0.0"
   },
@@ -66,5 +67,10 @@
   "bugs": {
     "url": "https://github.com/conix-center/ARENA-core/issues"
   },
-  "homepage": "https://github.com/conix-center/ARENA-core#readme"
+  "homepage": "https://github.com/conix-center/ARENA-core#readme",
+  "parcelIgnore": [
+    "apriltag.js",
+    "apriltag_wasm.js",
+    "apriltag_wasm.wasm"
+  ]
 }
