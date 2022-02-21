@@ -3,8 +3,9 @@ name: Release to Docker Hub
 on:
   release:
     types:
-      - created
-      
+      - published
+  workflow_dispatch:
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -23,7 +24,7 @@ jobs:
         uses: bruceadams/get-release@v1.2.3
         env:
           GITHUB_TOKEN: ${{ github.token }}
-  
+
       - name: Build and push Docker image
         id:   docker_build
         uses: docker/build-push-action@v2
@@ -32,7 +33,7 @@ jobs:
             chash=${{ github.sha }}
             version=${{ steps.get_release.outputs.tag_name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core:${{ steps.get_release.outputs.tag_name }} 
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core:${{ steps.get_release.outputs.tag_name }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
