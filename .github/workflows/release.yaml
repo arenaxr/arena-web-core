@@ -5,10 +5,6 @@ on:
     types:
       - published
   workflow_dispatch:
-    inputs:
-      tags:
-        description: 'Release Tag'
-        required: true
 
 jobs:
   release:
