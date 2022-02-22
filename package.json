@@ -1,6 +1,6 @@
 {
   "name": "arena-core",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "Core browser client for ARENA",
   "author": "CONIX Center",
   "license": "BSD-3-Clause",
@@ -46,11 +46,12 @@
     "jsdoc": "^3.6.6",
     "jsdoc-to-markdown": "^7.0.1",
     "parcel": "^2.2.1",
+    "parcel-resolver-ignore": "^2.0.0",
     "path-browserify": "^1.0.1",
     "stream-browserify": "^3.0.0"
   },
   "scripts": {
-    "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag_wasm.* dist/",
+    "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag*.* dist/",
     "prewatch": "npm run collect-static",
     "watch": "parcel watch src/index.js",
     "prebuild": "npm run collect-static",
@@ -66,5 +67,10 @@
   "bugs": {
     "url": "https://github.com/conix-center/ARENA-core/issues"
   },
-  "homepage": "https://github.com/conix-center/ARENA-core#readme"
+  "homepage": "https://github.com/conix-center/ARENA-core#readme",
+  "parcelIgnore": [
+    "apriltag.js",
+    "apriltag_wasm.js",
+    "apriltag_wasm.wasm"
+  ]
 }
