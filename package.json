@@ -51,7 +51,7 @@
     "stream-browserify": "^3.0.0"
   },
   "scripts": {
-    "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag_wasm.* dist/",
+    "collect-static": "cp src/systems/armarker/apriltag-detector/apriltag*.* dist/",
     "prewatch": "npm run collect-static",
     "watch": "parcel watch src/index.js",
     "prebuild": "npm run collect-static",
