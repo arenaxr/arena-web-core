@@ -199,7 +199,6 @@ AFRAME.registerComponent('arena-user', {
         const el = this.el;
         const data = this.data;
 
-
         // attach video to head
         const videoCube = document.createElement('a-box');
         videoCube.setAttribute('id', this.videoID + 'cube');
@@ -226,6 +225,27 @@ AFRAME.registerComponent('arena-user', {
         } else {
             videoCube.setAttribute('scale', '0.9 1.5 0.02');
         }
+
+        el.appendChild(videoCube);
+
+        this.headModel.setAttribute('visible', false);
+    },
+
+    drawVideoPano() {
+        const el = this.el;
+        const data = this.data;
+
+        // attach video to head
+        const videoCube = document.createElement('a-sphere');
+        videoCube.setAttribute('id', this.videoID + 'cube');
+        videoCube.setAttribute('position', '0 0 0');
+        // videoCube.setAttribute('material', 'shader', 'flat');
+        videoCube.setAttribute('material', 'side', 'back');
+        videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
+        videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+        videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
+        videoCube.setAttribute('position', '0 0 0');
+        videoCube.setAttribute('scale', '100 100 100');
 
         el.appendChild(videoCube);
 
@@ -265,7 +285,12 @@ AFRAME.registerComponent('arena-user', {
             if (jistiVideo) {
                 const vidCube = document.getElementById(this.videoID + 'cube');
                 if (!vidCube) {
-                    this.drawVideoCube();
+                    console.log('video', data.presence);
+                    if (data.presence === 'Panoramic') {
+                        this.drawVideoPano();
+                    } else {
+                        this.drawVideoCube();
+                    }
                 }
             }
         } else {

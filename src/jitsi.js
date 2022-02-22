@@ -79,18 +79,24 @@ export class ARENAJitsi {
             p2p: {
                 enabled: false,
             },
-            maxFullResolutionParticipants: -1,
-            resolution: 960,
+            //maxFullResolutionParticipants: 10,
+            //resolution: 960,
             constraints: {
                 video: {
+                    aspectRatio: 2 / 1,
                     height: {
-                        ideal: 1920,
+                        ideal: 960,
                         max: 1920,
                         min: 960,
                     },
+                    width: {
+                        ideal: 1920,
+                        max: 3840,
+                        min: 1920,
+                    },
                 },
             },
-            enableLayerSuspension: true,
+            //enableLayerSuspension: true,
             //backgroundAlpha: 0.5,
         };
 
@@ -492,6 +498,12 @@ export class ARENAJitsi {
     onConnectionSuccess() {
         console.log('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.arenaConferenceName, this.confOptions);
+        //if (ARENA.presense) {
+            this.conference.setSenderVideoConstraint(960);
+        //} else {
+            this.conference.setReceiverVideoConstraint(960);
+        //}
+
 
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
@@ -521,12 +533,15 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+            //console.log('LOCAL_STATS_UPDATED', ARENA.idTag, stats);
+            this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
                 id: ARENA.idTag,
                 stats: stats,
             });
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
+            console.log('REMOTE_STATS_UPDATED', id, stats);
             const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
                 id: arenaId,
