@@ -1,5 +1,15 @@
 # Changelog
 
+### [1.1.4](https://github.com/conix-center/ARENA-core/compare/v1.1.2...v1.1.4) (2022-02-21)
+
+
+### Bug Fixes
+
+* apriltag wasm import part 2: namespaced scenes ([c6e0492](https://github.com/conix-center/ARENA-core/commit/c6e049205a3db44dd1a409ffd92b3accfc3476e1))
+
+
+# Changelog
+
 ### [1.1.2](https://github.com/conix-center/ARENA-core/compare/v1.1.1...v1.1.2) (2022-02-21)
 
 
