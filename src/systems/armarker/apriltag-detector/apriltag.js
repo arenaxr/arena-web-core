@@ -13,7 +13,7 @@
  * @authors Nuno Pereira
  */
 
-import AprilTagWasm from './apriltag_wasm.js';
+importScripts('./apriltag_wasm.js');
 
 // CV Worker message types (**copy of worker-msgs.js**)
 const CVWorkerMsgs = {
