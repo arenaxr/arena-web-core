@@ -30,6 +30,7 @@ import './pcd-model.js';
 import './press-and-move.js';
 import './screenshare.js';
 import './text-input.js';
+import './thickline/index.js';
 import './threejs-scene.js';
 import './ttl.js';
 import './video-control.js';
@@ -39,7 +40,6 @@ import './video-control.js';
  */
 
 // from npm, when available
-import 'aframe-thickline-component'; // our version of aframe-meshline-component
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
