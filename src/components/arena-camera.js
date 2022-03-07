@@ -33,6 +33,7 @@ AFRAME.registerComponent('arena-camera', {
         position: {type: 'vec3', default: new THREE.Vector3()},
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
+        showStats: {type: 'boolean', default: false},
     },
     /**
      * Send initial camera create message; Setup heartbeat timer
@@ -73,6 +74,10 @@ AFRAME.registerComponent('arena-camera', {
                 }, 1000);
             }
         });
+
+        if (this.data.showStats) {
+            document.getElementById('pose-stats').style.display = 'block';
+        }
     },
     /**
      * Publish user camera pose
@@ -162,6 +167,9 @@ AFRAME.registerComponent('arena-camera', {
      */
     update(oldData) {
         const data = this.data;
+        if (oldData.showStats !== data.showStats) {
+            document.getElementById('pose-stats').style.display = (data.showStats) ? 'block' : 'none';
+        }
     },
     /**
      * Every tick, update rotation and position of the camera
@@ -211,6 +219,10 @@ AFRAME.registerComponent('arena-camera', {
                 this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
             );
             this.publishPose();
+            if (this.data.showStats) {
+                document.getElementById('pose-stats').textContent =
+                    `Position: ${positionCoords}\r\nRotation: ${rotationCoords}`;
+            }
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;

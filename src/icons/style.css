@@ -109,6 +109,22 @@
     color: #fff;
 }
 
+/* Pose data of camera */
+.pose-stats {
+    position: absolute;
+    display: none;
+    padding: 7px;
+    top: 285px;
+    left: 25px;
+    border-radius: 10px;
+    z-index: 10000; /* layered over video*/
+    font-size: small;
+    background-color: #333;
+    color: #fafafa;
+    white-space: pre;
+    opacity: .85;
+}
+
 /* Health-check system */
 .error-icon {
     position: absolute;
