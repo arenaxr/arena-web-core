@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/conix-center/ARENA-core/compare/v1.1.4...v1.2.0) (2022-03-07)
+
+
+### Features
+
+* Add pose stats display to arena-camera ([a5411d8](https://github.com/conix-center/ARENA-core/commit/a5411d8aae8f61d9efea22b4de0f2c74e823a892)), closes [#213](https://github.com/conix-center/ARENA-core/issues/213)
+
+
+### Bug Fixes
+
+* add thickline to components; fix instantiation issue ([048d133](https://github.com/conix-center/ARENA-core/commit/048d1331d330ec353bb19b235c98b7c8f0613d74))
+
 ### [1.1.4](https://github.com/conix-center/ARENA-core/compare/v1.1.2...v1.1.4) (2022-02-21)
 
 
