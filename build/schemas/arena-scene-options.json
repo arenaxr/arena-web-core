@@ -352,6 +352,13 @@
                 "title":"Positional Audio Distance Model",
                 "type":"string"
              },
+             "headModel":{
+               "default":"",
+               "description":"Define a default model for the scene. You must scale and rotate your source GLTF appropriately.",
+               "minLength":5,
+               "title":"Head Model URL",
+               "type":"string"
+             },
              "jitsiHost":{
                 "default":"jitsi0.andrew.cmu.edu:8443",
                 "description":"Jitsi host used for this scene.",

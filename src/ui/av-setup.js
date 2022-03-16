@@ -255,6 +255,9 @@ window.setupAV = (callback) => {
     // Add listeners if not yet attached
     if (!document.getElementById('audioSourceSelect').onchange) addListeners();
 
+    console.warn('ARENA.headModel', ARENA.headModel);
+    console.warn('ARENA.[headModel]', ARENA['headModel']);
+
     // Init
     if (ARENA.Jitsi) {
         ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi.hasVideo;
