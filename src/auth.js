@@ -136,6 +136,11 @@ function requestAuthState() {
             authError(title, text);
         } else {
             AUTH.user_type = xhr.response.type; // user database auth state
+            const url = new URL(window.location.href);
+            const urlAuthType = url.searchParams.get('auth');
+            if (urlAuthType) { // provide url auth choice override
+                localStorage.setItem('auth_choice', urlAuthType);
+            }
             const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
             if (xhr.response.authenticated) {
                 // auth user login
