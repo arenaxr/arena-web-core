@@ -511,10 +511,8 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiStatsCallback = (e) => {
-        console.log('jitsiStatsCallback', this.liveUsers);
-	const id = e.detail.id;
+        const id = e.detail.id;
         const stats = e.detail.stats;
-        console.log('jitsiStatsCallback', id, stats);
         if (id === this.settings.userid) {
             this.settings.stats = stats;
         }

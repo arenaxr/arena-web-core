@@ -519,7 +519,6 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
-            console.log('LOCAL_STATS_UPDATED', ARENA.idTag, stats);
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
                 id: ARENA.idTag,
@@ -528,7 +527,6 @@ export class ARENAJitsi {
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
             const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
-            console.log('REMOTE_STATS_UPDATED', arenaId, id, stats);
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
                 id: arenaId,
                 stats: stats,
