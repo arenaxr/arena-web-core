@@ -511,9 +511,10 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiStatsCallback = (e) => {
-        const id = e.detail.id;
+        console.log('jitsiStatsCallback', this.liveUsers);
+	const id = e.detail.id;
         const stats = e.detail.stats;
-        // console.log('jitsiStatsCallback', id, stats);
+        console.log('jitsiStatsCallback', id, stats);
         if (id === this.settings.userid) {
             this.settings.stats = stats;
         }
@@ -856,7 +857,6 @@ export class ARENAChat {
                 uli.style.color = 'green';
             }
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
-            this.addJitsiStats(uli, user.stats, uli.textContent);
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 const uBtnCtnr = document.createElement('div');
                 uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -928,6 +928,7 @@ export class ARENAChat {
                 _this.toSel.appendChild(op);
             }
             _this.usersList.appendChild(uli);
+            this.addJitsiStats(uli, user.stats, uli.textContent);
         });
         this.toSel.value = selVal; // preserve selected value
     }
@@ -939,7 +940,8 @@ export class ARENAChat {
      * @param {string} name The display name of the user
      */
     addJitsiStats(uli, stats, name) {
-        if (!stats) return;
+        console.log(name, stats);
+	if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
         iconStats.style.color = (stats ? this.getConnectionColor(stats.connectionQuality) : 'gray');
