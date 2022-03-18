@@ -939,8 +939,7 @@ export class ARENAChat {
      * @param {string} name The display name of the user
      */
     addJitsiStats(uli, stats, name) {
-        console.log(name, stats);
-	if (!stats) return;
+        if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
         iconStats.style.color = (stats ? this.getConnectionColor(stats.connectionQuality) : 'gray');
@@ -954,7 +953,6 @@ export class ARENAChat {
         iconStats.onmouseover = function() {
             // TODO: format text from stats
             spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
-            console.warn('stats', stats);
             const offset = $(this).offset();
             console.warn('offset', offset);
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
@@ -989,13 +987,26 @@ export class ARENAChat {
      * @return {string} Readable stats
      */
     getConnectionText(name, stats) {
+        console.log('reading jitsi stats', name, stats);
         const lines = [];
         lines.push(`${name}`);
-        lines.push(`quality: ${stats.connectionQuality}%`);
-        // lines.push(`resolution: ${this._extractResolutionString(stats)}`);
-        lines.push(`bitrate: ${stats.bitrate.upload} up, ${stats.bitrate.download} dn`);
-        lines.push(`br audio: ${stats.bitrate.audio.upload} up, ${stats.bitrate.audio.download} dn`);
-        lines.push(`br video: ${stats.bitrate.video.upload} up, ${stats.bitrate.video.download} dn`);
+        lines.push(`Quality: ${stats.connectionQuality}%`);
+        if (stats.bitrate) {
+            lines.push(`Bitrate: ↓${stats.bitrate.download} ↑${stats.bitrate.upload}`);
+        }
+        if (stats.packetLoss) {
+            lines.push(`Packet Loss: ↓${stats.packetLoss.download}% ↑${stats.packetLoss.upload}%`);
+        }
+        if (stats.resolution) {
+            for (const id1 in stats.resolution) {
+                for (const id2 in stats.resolution[id1]) {
+                    lines.push(`Video: ${stats.resolution[id1][id2].width}x${stats.resolution[id1][id2].height}, ${stats.framerate[id1][id2]} fps`);
+                }
+            }
+        }
+        if (stats.maxEnabledResolution) {
+            lines.push(`Max Enabled Resolution: ${stats.maxEnabledResolution}`);
+        }
         return lines.join('\r\n');
     }
 
