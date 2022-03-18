@@ -85,7 +85,11 @@ export class ARENAJitsi {
                     },
                 },
             },
-            // enableLayerSuspension: true,
+
+            // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/#recommended_enable_layer_suspension
+            // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
+            // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
+            enableLayerSuspension: true,
         };
 
         this.initOptions = {
