@@ -997,6 +997,7 @@ export class ARENAChat {
         if (stats.packetLoss) {
             lines.push(`Packet Loss: ↓${stats.packetLoss.download}% ↑${stats.packetLoss.upload}%`);
         }
+        lines.push(`Bridge RTT: ${stats.jvbRTT} ms`);
         if (stats.resolution) {
             for (const id1 in stats.resolution) {
                 for (const id2 in stats.resolution[id1]) {
