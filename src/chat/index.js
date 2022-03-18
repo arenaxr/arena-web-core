@@ -803,6 +803,7 @@ export class ARENAChat {
                 cid: _this.liveUsers[key].cid,
                 type: _this.liveUsers[key].type,
                 speaker: _this.liveUsers[key].speaker,
+                stats: _this.liveUsers[key].stats,
             });
         });
 
