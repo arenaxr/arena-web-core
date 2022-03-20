@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.3.0](https://github.com/conix-center/ARENA-core/compare/v1.2.0...v1.3.0) (2022-03-20)
+
+
+### Features
+
+* Add anonymous login url parameter ([52f7dc0](https://github.com/conix-center/ARENA-core/commit/52f7dc065c1c7dc8c5cc24c194cd78da1a0ccb3b))
+* add video culling on/off flag; Default to off ([0086749](https://github.com/conix-center/ARENA-core/commit/00867497d97eb1af747a1ea651ead031ebb19b6a))
+* Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth ([a83706d](https://github.com/conix-center/ARENA-core/commit/a83706d7e0f69b90fd57d8aef0cf84eaea5ffefd))
+* send local conference stats to remotes ([177ab2f](https://github.com/conix-center/ARENA-core/commit/177ab2fb654d01cd4150b4eb8b11d1fdbb9a2402))
+
+
+### Bug Fixes
+
+* ensure anonymous users have a display name ([0a03d09](https://github.com/conix-center/ARENA-core/commit/0a03d094e06333f9749d4f85735c57d4490c45e7))
+* **jitsi:** show remote stats for other users ([#412](https://github.com/conix-center/ARENA-core/issues/412)) ([a93e518](https://github.com/conix-center/ARENA-core/commit/a93e518d49eeffc9dab8b4bb3756e96eee8ddbd8))
+
 ## [1.2.0](https://github.com/conix-center/ARENA-core/compare/v1.1.4...v1.2.0) (2022-03-07)
 
 
