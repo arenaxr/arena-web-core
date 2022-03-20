@@ -406,13 +406,16 @@ AFRAME.registerComponent('arena-user', {
         const distance = camPos.distanceTo(entityPos);
 
         if (this.videoID) {
-            // frustum culling for WebRTC video streams
+            // frustum culling for WebRTC video streams;
             const vidCube = document.getElementById(this.videoID + 'cube');
             let inFieldOfView = true;
             if (el.contains(vidCube)) {
                 const cam = myCam.components['arena-camera'];
-                this.bbox.setFromObject(vidCube.object3D);
-                inFieldOfView = cam.frustum.intersectsBox(this.bbox);
+                if (cam.frustum) { // cam.frustum will be instanciated if av culling is enabled
+                    // TODO: check if we have to transform these bbox coordinates
+                    this.bbox.setFromObject(vidCube.object3D);
+                    inFieldOfView = cam.frustum.intersectsBox(this.bbox);
+                }
             }
 
             // check if A/V cut off distance has been reached
