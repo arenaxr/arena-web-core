@@ -21,6 +21,8 @@ import {ARENAUtils} from '../utils.js';
  * @property {number[]} position - Last camera position value.
  * @property {number[]} vioRotation - Last VIO rotation value.
  * @property {number[]} vioPosition - Last VIO position value.
+ * @property {boolean} showStats - Display camera position on the screen.
+ * @property {boolean} videoCulling - Turn on frustrum video culling.
  *
  */
 AFRAME.registerComponent('arena-camera', {
@@ -34,6 +36,7 @@ AFRAME.registerComponent('arena-camera', {
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
         showStats: {type: 'boolean', default: false},
+        videoCulling: {type: 'boolean', default: false},
     },
     /**
      * Send initial camera create message; Setup heartbeat timer
@@ -45,7 +48,10 @@ AFRAME.registerComponent('arena-camera', {
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
-        this.frustum = new THREE.Frustum();
+        // instanciate frustrum obj if video culling is enabled
+        if (this.data.videoCulling) { 
+            this.frustum = new THREE.Frustum();
+        }
         this.frustMatrix = new THREE.Matrix4();
 
         this.lastPose = '';
@@ -212,7 +218,7 @@ AFRAME.registerComponent('arena-camera', {
                 lastPos: this.lastPos,
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
-        } else if (this.lastPose !== newPose) {
+        } else if (this.lastPose !== newPose && this.frustum) {
             // Only update frustum if camera pose has changed
             const cam = el.components['camera'].camera;
             this.frustum.setFromProjectionMatrix(

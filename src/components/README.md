@@ -6,11 +6,11 @@
 <dt><a href="#module_arena-camera">arena-camera</a></dt>
 <dd><p>Tracking camera movement in real time. Emits camera pose change and VIO change events.</p>
 </dd>
+<dt><a href="#module_arena-hand">arena-hand</a></dt>
+<dd><p>Tracking Hand controller movement in real time.</p>
+</dd>
 <dt><a href="#module_arena-user">arena-user</a></dt>
 <dd><p>Another user&#39;s camera in the ARENA. Handles Jitsi and display name updates.</p>
-</dd>
-<dt><a href="#module_arena-hand">arena-hand</a></dt>
-<dd><p>Tracking VR hand controller movement in real time.</p>
 </dd>
 <dt><a href="#module_armarker">armarker</a></dt>
 <dd><p>ARMarker Component. Supports ARMarkers in a scene</p>
@@ -33,10 +33,6 @@ Based off 8th Wall&#39;s <a href="https://github.com/8thwall/web/tree/master/exa
 </dd>
 <dt><a href="#module_goto-url">goto-url</a></dt>
 <dd><p>Load new URL when object is clicked</p>
-</dd>
-<dt><a href="#module_hide-in-ar-mode">hide-in-ar-mode</a></dt>
-<dd><p>Hide in AR component. When set to an entity, it will make the entity disappear when entering AR mode.
-Based on <a href="https://github.com/aframevr/aframe/pull/4356">this example</a></p>
 </dd>
 <dt><a href="#module_impulse">impulse</a></dt>
 <dd><p>One physics feature is applying an impulse to an object to set it in motion.
@@ -97,18 +93,31 @@ Tracking camera movement in real time. Emits camera pose change and VIO change e
 
 **Properties**
 
-| Name | Type | Default | Description |
-| --- | --- | --- | --- |
-| enabled | <code>boolean</code> |  | Indicates whether camera tracking is enabled. |
-| vioEnabled | <code>boolean</code> |  | Indicates whether to publish VIO on every tick (if true). |
-| displayName | <code>string</code> |  | User display name (used to publish camera data). |
-| color | <code>string</code> |  | Head text color. |
-| [headModel] | <code>string</code> | <code>&quot;&#x27;robobit&#x27;&quot;</code> | Builtin head model (one of: 'robobit', 'grey-head') |
-| [videoShape] | <code>string</code> | <code>&quot;&#x27;default-box&#x27;&quot;</code> | Builtin video shape (one of: 'default-box', 'flat-box') |
-| rotation | <code>Array.&lt;number&gt;</code> |  | Last camera rotation value. |
-| position | <code>Array.&lt;number&gt;</code> |  | Last camera position value. |
-| vioRotation | <code>Array.&lt;number&gt;</code> |  | Last VIO rotation value. |
-| vioPosition | <code>Array.&lt;number&gt;</code> |  | Last VIO position value. |
+| Name | Type | Description |
+| --- | --- | --- |
+| enabled | <code>boolean</code> | Indicates whether camera tracking is enabled. |
+| vioEnabled | <code>boolean</code> | Indicates whether to publish VIO on every tick (if true). |
+| displayName | <code>string</code> | User display name (used to publish camera data). |
+| color | <code>string</code> | Head text color. |
+| rotation | <code>Array.&lt;number&gt;</code> | Last camera rotation value. |
+| position | <code>Array.&lt;number&gt;</code> | Last camera position value. |
+| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value. |
+| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value. |
+| showStats | <code>boolean</code> | Display camera position on the screen. |
+| videoCulling | <code>boolean</code> | Turn on frustrum video culling. |
+
+<a name="module_arena-hand"></a>
+
+## arena-hand
+Tracking Hand controller movement in real time.
+
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| enabled | <code>boolean</code> | Controller enabled. |
+| hand | <code>string</code> | Controller hand. |
+| color | <code>string</code> | Controller color. |
 
 <a name="module_arena-user"></a>
 
@@ -120,26 +129,12 @@ Another user's camera in the ARENA. Handles Jitsi and display name updates.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [color] | <code>color</code> | <code>white</code> | The color for the user's name text. |
-| [headModel] | <code>string</code> | <code>&quot;&#x27;robobit&#x27;&quot;</code> | Builtin head model (one of: 'robobit', 'grey-head') |
-| [videoShape] | <code>string</code> | <code>&quot;&#x27;default-box&#x27;&quot;</code> | Builtin video shape (one of: 'default-box', 'flat-box') |
+| [headModelPath] | <code>string</code> | <code>&quot;/store/models/robobit.glb&quot;</code> | Path to user head model |
+| [presence] | <code>string</code> |  | type of presence for user |
 | [jitsiId] | <code>string</code> |  | User jitsi id. |
 | [displayName] | <code>string</code> |  | User display name. |
 | [hasAudio] | <code>boolean</code> | <code>false</code> | Whether the user has audio on. |
 | [hasVideo] | <code>boolean</code> | <code>false</code> | Whether the user has video on. |
-
-<a name="module_arena-hand"></a>
-
-## arena-hand
-Tracking VR Hand controller movement in real time.
-
-**Properties**
-
-| Name | Type | Description |
-| --- | --- | --- |
-| enabled | <code>boolean</code> | Controller enabled. |
-| name | <code>string</code> | Name used to publish controller pose. |
-| hand | <code>string</code> | Controller hand. |
-| color | <code>string</code> | Controller color. |
 
 <a name="module_armarker"></a>
 
@@ -151,8 +146,8 @@ ARMarker Component. Supports ARMarkers in a scene
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [markertype] | <code>string</code> | <code>&quot;apriltag_36h11&quot;</code> | The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb' |
-| [dynamic] | <code>boolean</code> | <code>false</code> | Whether tag is a static localizer, or dynamically changes position |
-| [buildable] | <code>boolean</code> | <code>false</code> | Allow tag to be reoriented by a scene author by clicking on it |
+| [dynamic] | <code>boolean</code> | <code>false</code> | Whether tag is a static and used to for camera relocalization, or dynamically changes position |
+| [publish] | <code>boolean</code> | <code>false</code> | Publish tag detections. |
 | [markerid] | <code>string</code> |  | Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]) |
 | [size] | <code>number</code> | <code>150</code> | Size of the marker (assumed to be a square), if applicable (mm). |
 | [url] | <code>string</code> |  | A URL associated with the marker. |
@@ -222,12 +217,6 @@ Load new URL when object is clicked
 | url | <code>string</code> |  | The destination url e.g. https://some-site.com |
 | [dest] | <code>string</code> | <code>&quot;sametab&quot;</code> | Where to open the URL; one of 'popup', 'newtab', 'sametab' |
 
-<a name="module_hide-in-ar-mode"></a>
-
-## hide-in-ar-mode
-Hide in AR component. When set to an entity, it will make the entity disappear when entering AR mode.
-Based on [this example](https://github.com/aframevr/aframe/pull/4356)
-
 <a name="module_impulse"></a>
 
 ## impulse
@@ -286,8 +275,8 @@ Implements a timeout scheme in lack of better understanding of the timing/events
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
+| [overrideSrc] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF). |
 | [encoding] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
-| [needsUpdate] | <code>boolean</code> | <code>false</code> | Specifies that the material needs to be recompiled. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
 | [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
 | [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder](https://threejs.org/docs/#api/en/core/Object3D.renderOrder). |
 | [transparentOccluder] | <code>boolean</code> | <code>false</code> | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder. |
