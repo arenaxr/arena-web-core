@@ -218,12 +218,14 @@ AFRAME.registerComponent('arena-camera', {
                 lastPos: this.lastPos,
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
-        } else if (this.lastPose !== newPose && this.frustum) {
+        } else if (this.lastPose !== newPose) {
             // Only update frustum if camera pose has changed
-            const cam = el.components['camera'].camera;
-            this.frustum.setFromProjectionMatrix(
-                this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
-            );
+            if (this.frustum) {
+                const cam = el.components['camera'].camera;
+                this.frustum.setFromProjectionMatrix(
+                    this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
+                );
+            }
             this.publishPose();
             if (this.data.showStats) {
                 document.getElementById('pose-stats').textContent =
