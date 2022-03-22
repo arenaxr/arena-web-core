@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.3.1](https://github.com/conix-center/ARENA-core/compare/v1.3.0...v1.3.1) (2022-03-22)
+
+
+### Bug Fixes
+
+* disable video frustrum caused pose updates to be skipped ([d26b7e6](https://github.com/conix-center/ARENA-core/commit/d26b7e66b5ec45fc238182d8c816a9505512c6de))
+
 ## [1.3.0](https://github.com/conix-center/ARENA-core/compare/v1.2.0...v1.3.0) (2022-03-20)
 
 
