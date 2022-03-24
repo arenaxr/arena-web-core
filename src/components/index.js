@@ -29,6 +29,7 @@ import './network-latency.js';
 import './pcd-model.js';
 import './press-and-move.js';
 import './screenshare.js';
+import './sound-control.js';
 import './text-input.js';
 import './thickline/index.js';
 import './threejs-scene.js';
