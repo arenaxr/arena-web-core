@@ -513,7 +513,6 @@ export class ARENAChat {
     jitsiStatsCallback = (e) => {
         const id = e.detail.id;
         const stats = e.detail.stats;
-        // console.log('jitsiStatsCallback', id, stats);
         if (id === this.settings.userid) {
             this.settings.stats = stats;
         }
@@ -802,6 +801,7 @@ export class ARENAChat {
                 cid: _this.liveUsers[key].cid,
                 type: _this.liveUsers[key].type,
                 speaker: _this.liveUsers[key].speaker,
+                stats: _this.liveUsers[key].stats,
             });
         });
 
@@ -856,7 +856,6 @@ export class ARENAChat {
                 uli.style.color = 'green';
             }
             uli.textContent = `${((user.scene == _this.settings.scene) ? '' : `${user.scene}/`)}${decodeURI(name)}${(user.type === ARENAChat.userType.EXTERNAL ? ' (external)' : '')}`;
-            this.addJitsiStats(uli, user.stats, uli.textContent);
             if (user.type !== ARENAChat.userType.SCREENSHARE) {
                 const uBtnCtnr = document.createElement('div');
                 uBtnCtnr.className = 'users-list-btn-ctnr';
@@ -928,6 +927,7 @@ export class ARENAChat {
                 _this.toSel.appendChild(op);
             }
             _this.usersList.appendChild(uli);
+            this.addJitsiStats(uli, user.stats, uli.textContent);
         });
         this.toSel.value = selVal; // preserve selected value
     }
@@ -953,7 +953,6 @@ export class ARENAChat {
         iconStats.onmouseover = function() {
             // TODO: format text from stats
             spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
-            console.warn('stats', stats);
             const offset = $(this).offset();
             console.warn('offset', offset);
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
@@ -988,13 +987,27 @@ export class ARENAChat {
      * @return {string} Readable stats
      */
     getConnectionText(name, stats) {
+        console.log('reading jitsi stats', name, stats);
         const lines = [];
         lines.push(`${name}`);
-        lines.push(`quality: ${stats.connectionQuality}%`);
-        // lines.push(`resolution: ${this._extractResolutionString(stats)}`);
-        lines.push(`bitrate: ${stats.bitrate.upload} up, ${stats.bitrate.download} dn`);
-        lines.push(`br audio: ${stats.bitrate.audio.upload} up, ${stats.bitrate.audio.download} dn`);
-        lines.push(`br video: ${stats.bitrate.video.upload} up, ${stats.bitrate.video.download} dn`);
+        lines.push(`Quality: ${stats.connectionQuality}%`);
+        if (stats.bitrate) {
+            lines.push(`Bitrate: ↓${stats.bitrate.download} ↑${stats.bitrate.upload}`);
+        }
+        if (stats.packetLoss) {
+            lines.push(`Packet Loss: ↓${stats.packetLoss.download}% ↑${stats.packetLoss.upload}%`);
+        }
+        lines.push(`Bridge RTT: ${stats.jvbRTT} ms`);
+        if (stats.resolution) {
+            for (const id1 in stats.resolution) {
+                for (const id2 in stats.resolution[id1]) {
+                    lines.push(`Video: ${stats.resolution[id1][id2].width}x${stats.resolution[id1][id2].height}, ${stats.framerate[id1][id2]} fps`);
+                }
+            }
+        }
+        if (stats.maxEnabledResolution) {
+            lines.push(`Max Enabled Resolution: ${stats.maxEnabledResolution}`);
+        }
         return lines.join('\r\n');
     }
 

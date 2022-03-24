@@ -378,6 +378,7 @@
 	-webkit-border-radius: 5px;
 	border-radius: 5px;
 	white-space: pre-line;
+	line-height: 16px;
 	z-index: 999999;
 }
 

@@ -85,7 +85,11 @@ export class ARENAJitsi {
                     },
                 },
             },
-            // enableLayerSuspension: true,
+
+            // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/#recommended_enable_layer_suspension
+            // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
+            // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
+            enableLayerSuspension: true,
         };
 
         this.initOptions = {
@@ -515,6 +519,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+            this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
                 id: ARENA.idTag,
                 stats: stats,
