@@ -36,7 +36,7 @@ AFRAME.registerComponent('arena-camera', {
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
         showStats: {type: 'boolean', default: false},
-        videoCulling: {type: 'boolean', default: false},
+        videoCulling: {type: 'boolean', default: true},
     },
     /**
      * Send initial camera create message; Setup heartbeat timer
@@ -49,10 +49,10 @@ AFRAME.registerComponent('arena-camera', {
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
         // instanciate frustrum obj if video culling is enabled
-        if (this.data.videoCulling) { 
+        if (this.data.videoCulling) {
             this.frustum = new THREE.Frustum();
+            this.frustMatrix = new THREE.Matrix4();
         }
-        this.frustMatrix = new THREE.Matrix4();
 
         this.lastPose = '';
 
