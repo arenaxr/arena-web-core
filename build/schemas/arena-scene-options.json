@@ -406,7 +406,7 @@
              "disableVideoCulling":{
                 "default":false,
                 "description":"If true will disable video frustum culling (video frustum culling stops video from users outside of view)",
-                "title":"Disable Video Frustrum Culling",
+                "title":"Disable Video Frustum Culling",
                 "type":"boolean"
              },             
              "volume":{
