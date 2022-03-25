@@ -141,15 +141,8 @@ AFRAME.registerComponent('arena-user', {
         this.audioID = null;
         this.distReached = null;
 
-        this.bbox = new THREE.Box3();
-
-        // init attributes used in tick()
-        const myCam = document.getElementById('my-camera');
-        this.myCamPos = myCam.object3D.position;
-        this.entityPos = el.object3D.position;
-        const arenaCameraComponent = myCam.components['arena-camera'];
-        this.cameraVideoCulling = arenaCameraComponent.data.videoCulling;
-        if (this.cameraVideoCulling) this.cameraFrustum = arenaCameraComponent.frustum;
+        // used in tick()
+        this.entityPos = this.el.object3D.position;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -404,20 +397,22 @@ AFRAME.registerComponent('arena-user', {
             this.updateAudio();
         }
 
-        const distance = this.myCamPos.distanceTo(this.entityPos);
+        const myCam = document.getElementById('my-camera');
+        const myCamPos = myCam.object3D.position;
+        const arenaCameraComponent = myCam.components['arena-camera'];
+
+        const distance = myCamPos.distanceTo(this.entityPos);
 
         // frustum culling for WebRTC video streams;
         if (this.videoID) {
             let inFieldOfView = true;
-            if (this.cameraVideoCulling) { // video culling enabled ?
-                if (el.contains(this.videoCube)) {
-                    // note: compute the world-axis-aligned bounding box of the video cube
-                    this.bbox.setFromObject(this.videoCube.object3D);
-                    inFieldOfView = this.cameraFrustum.intersectsBox(this.bbox);
+            if (arenaCameraComponent.isVideoCullingEnabled()) {
+                if (this.el.contains(this.videoCube)) {
+                    inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
             // check if A/V cut off distance has been reached
-            if (!inFieldOfView || distance > ARENA.maxAVDist) {
+            if (inFieldOfView == false || distance > ARENA.maxAVDist) {
                 this.muteVideo();
             } else {
                 this.unmuteVideo();
