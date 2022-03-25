@@ -399,7 +399,7 @@ AFRAME.registerComponent('arena-user', {
 
     tick: function() {
         // do periodic a/v updates
-        if (ARENA.Jitsi && ARENA.Jitsi.ready && data.jitsiId) {
+        if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
             this.updateVideo();
             this.updateAudio();
         }
