@@ -410,6 +410,12 @@
                 "title":"Screenshare object name",
                 "type":"string"
              },
+             "disableVideoCulling":{
+                "default":false,
+                "description":"If true will disable video frustum culling (video frustum culling stops video from users outside of view)",
+                "title":"Disable Video Frustum Culling",
+                "type":"boolean"
+             },             
              "volume":{
                 "default":1,
                 "description":"Volume for users in a scene",
@@ -420,7 +426,8 @@
           "required":[
              "clickableOnlyEvents",
              "maxAVDist",
-             "privateScene"
+             "privateScene",
+             "disableVideoCulling"
           ],
           "title":"Scene Options",
           "type":"object"
