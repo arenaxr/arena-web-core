@@ -142,7 +142,7 @@ window.addEventListener('onauth', async function(e) {
         topic[t.name] = t.topic;
     });
 
-    document.getElementById('mqtt_conn_str').value = `wss://${cfg.web_client_mqtt.host}/${cfg.web_client_mqtt.ws_path}`;
+    document.getElementById('mqtt_conn_str').value = cfg.wc_conn_str;
 
     if (e.detail) {
         if (e.detail.mqtt_username) {
