@@ -783,8 +783,10 @@ export class ARENAChat {
     populateUserList(newUser = undefined) {
         this.usersList.textContent = '';
         const selVal = this.toSel.value;
-        this.toSel.textContent = '';
-        this.addToSelOptions();
+        if (newUser) { // only update 'to' select for new users
+            this.toSel.textContent = '';
+            this.addToSelOptions();
+        }
 
         const _this = this;
         const userList = [];
@@ -920,11 +922,13 @@ export class ARENAChat {
                 } else {
                     uli.className = 'oscene';
                 }
-                const op = document.createElement('option');
-                op.value = user.uid;
-                op.textContent =
-                    `to: ${decodeURI(user.un)}${(user.scene != _this.settings.scene ? ` (${user.scene})` : '')}`;
-                _this.toSel.appendChild(op);
+                if (newUser) { // only update 'to' select for new users
+                    const op = document.createElement('option');
+                    op.value = user.uid;
+                    op.textContent =
+                        `to: ${decodeURI(user.un)}${(user.scene != _this.settings.scene ? ` (${user.scene})` : '')}`;
+                    _this.toSel.appendChild(op);
+                }
             }
             _this.usersList.appendChild(uli);
             this.addJitsiStats(uli, user.stats, uli.textContent);
