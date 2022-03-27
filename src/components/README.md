@@ -104,7 +104,7 @@ Tracking camera movement in real time. Emits camera pose change and VIO change e
 | vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value. |
 | vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value. |
 | showStats | <code>boolean</code> | Display camera position on the screen. |
-| videoCulling | <code>boolean</code> | Turn on frustrum video culling. |
+| videoCulling | <code>boolean</code> | Turn on frustum video culling. |
 
 <a name="module_arena-hand"></a>
 
@@ -186,7 +186,7 @@ Keep track of mouse events and publish corresponding events
 ### init() ⏏
 Setup event listeners for mouse events; listeners publish events to MQTT
 
-**Kind**: Exported function  
+**Kind**: Exported function
 **Todo**
 
 - [ ] Consolidate event listeners (they are very similar)
@@ -197,7 +197,7 @@ Setup event listeners for mouse events; listeners publish events to MQTT
 Listen for collisions, callback on event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>  
+**Requires**: <code>module:aframe-physics-system</code>
 <a name="module_gesture-detector"></a>
 
 ## gesture-detector
@@ -224,7 +224,7 @@ One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>  
+**Requires**: <code>module:aframe-physics-system</code>
 <a name="module_jitsi-video"></a>
 
 ## jitsi-video
@@ -376,4 +376,3 @@ Adds a video to an entity and controls its playback.
 | [video_loop] | <code>boolean</code> | <code>true</code> | video loop |
 | [autoplay] | <code>boolean</code> | <code>false</code> | video autoplays on load |
 | [volume] | <code>number</code> | <code>1</code> | video sound volume |
-

@@ -89,7 +89,7 @@ window.setupAV = (callback) => {
     }
 
     /**
-     * Populates select dropdowns with detected devuces
+     * Populates select dropdowns with detected devices
      * @param {MediaDeviceInfo[]} deviceInfos - List of enumerated devices
      */
     function gotDevices(deviceInfos) {
@@ -254,9 +254,6 @@ window.setupAV = (callback) => {
 
     // Add listeners if not yet attached
     if (!document.getElementById('audioSourceSelect').onchange) addListeners();
-
-    console.warn('ARENA.headModel', ARENA.headModel);
-    console.warn('ARENA.[headModel]', ARENA['headModel']);
 
     // Init
     if (ARENA.Jitsi) {

@@ -47,7 +47,7 @@ AFRAME.registerComponent('arena-camera', {
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
 
-        // instanciate frustrum objs 
+        // instantiate frustum objs
         this.frustum = new THREE.Frustum();
         this.frustMatrix = new THREE.Matrix4();
         this.bbox = new THREE.Box3();
@@ -127,7 +127,9 @@ AFRAME.registerComponent('arena-camera', {
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (headModelPathSelect) {
+        if (ARENA.headModel) {
+            msg.data.headModelPath = ARENA.headModel;
+        } else if (headModelPathSelect) {
             msg.data.headModelPath = headModelPathSelect.value;
         } else {
             msg.data.headModelPath = ARENA.defaults.headModelPath;

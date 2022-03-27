@@ -352,7 +352,7 @@
                 "title":"Positional Audio Distance Model",
                 "type":"string"
              },
-             "headModel":{
+             "sceneHeadModel":{
                "default":"",
                "description":"Define a default model for the scene. You must scale and rotate your source GLTF appropriately.",
                "minLength":5,
@@ -415,7 +415,7 @@
                 "description":"If true will disable video frustum culling (video frustum culling stops video from users outside of view)",
                 "title":"Disable Video Frustum Culling",
                 "type":"boolean"
-             },             
+             },
              "volume":{
                 "default":1,
                 "description":"Volume for users in a scene",
