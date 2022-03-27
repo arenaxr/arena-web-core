@@ -89,7 +89,7 @@ window.setupAV = (callback) => {
     }
 
     /**
-     * Populates select dropdowns with detected devuces
+     * Populates select dropdowns with detected devices
      * @param {MediaDeviceInfo[]} deviceInfos - List of enumerated devices
      */
     function gotDevices(deviceInfos) {
@@ -270,6 +270,7 @@ window.setupAV = (callback) => {
     if (localStorage.getItem('headModelPathIdx')) {
         headModelPathSelect.selectedIndex = localStorage.getItem('headModelPathIdx');
     }
+    headModelPathSelect.disabled = ARENA.sceneHeadModel; // custom scene-options head in use
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();
