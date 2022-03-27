@@ -127,8 +127,8 @@ AFRAME.registerComponent('arena-camera', {
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (ARENA.headModel) {
-            msg.data.headModelPath = ARENA.headModel;
+        if (ARENA.sceneHeadModel) {
+            msg.data.headModelPath = ARENA.sceneHeadModel;
         } else if (headModelPathSelect) {
             msg.data.headModelPath = headModelPathSelect.value;
         } else {
