@@ -66,7 +66,7 @@ export class ARENAChat {
             devInstance: st.devInstance !== undefined ? st.devInstance : false,
             isSceneWriter: st.isSceneWriter !== undefined ? st.isSceneWriter : false,
             isSpeaker: false,
-            stats: undefined,
+            stats: {},
         };
 
         // users list
@@ -370,7 +370,8 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.talkWhileMutedCallback);
         ARENA.events.on(ARENAEventEmitter.events.NOISY_MIC, this.noisyMicCallback);
         ARENA.events.on(ARENAEventEmitter.events.CONFERENCE_ERROR, this.conferenceErrorCallback);
-        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS, this.jitsiStatsCallback);
+        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback);
+        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_REMOTE, this.jitsiStatsRemoteCallback);
     }
 
     /**
@@ -506,19 +507,44 @@ export class ARENAChat {
     };
 
     /**
-     * Called when Jitsi stats are updated.
+     * Called when Jitsi local stats are updated.
      * Defined as a closure to capture 'this'
      * @param {Object} e event object; e.detail contains the callback arguments
      */
-    jitsiStatsCallback = (e) => {
-        const id = e.detail.id;
+    jitsiStatsLocalCallback = (e) => {
+        const jid = e.detail.jid;
         const stats = e.detail.stats;
-        if (id === this.settings.userid) {
-            this.settings.stats = stats;
-        }
-        if (this.liveUsers[id]) {
-            this.liveUsers[id].stats = stats;
-        }
+        // local
+        if (!this.settings.stats) this.settings.stats = {};
+        this.settings.stats.conn = stats;
+        this.settings.stats.resolution = stats.resolution[jid];
+        this.settings.stats.framerate = stats.framerate[jid];
+        this.settings.stats.codec = stats.codec[jid];
+        // local and remote
+        const _this = this;
+        Object.keys(this.liveUsers).forEach(function(arenaId) {
+            if (!_this.liveUsers[arenaId].stats) _this.liveUsers[arenaId].stats = {};
+            const jid = _this.liveUsers[arenaId].jid;
+            _this.liveUsers[arenaId].stats.resolution = stats.resolution[jid];
+            _this.liveUsers[arenaId].stats.framerate = stats.framerate[jid];
+            _this.liveUsers[arenaId].stats.codec = stats.codec[jid];
+        });
+        this.populateUserList();
+    };
+
+    /**
+     * Called when Jitsi remote stats are updated.
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    jitsiStatsRemoteCallback = (e) => {
+        const jid = e.detail.jid;
+        const arenaId = e.detail.id;
+        const stats = e.detail.stats;
+        // remote
+        if (!this.liveUsers[arenaId].stats) this.liveUsers[arenaId].stats = {};
+        this.liveUsers[arenaId].stats.conn = stats;
+        this.liveUsers[arenaId].jid = jid;
         this.populateUserList();
     };
 
@@ -943,10 +969,10 @@ export class ARENAChat {
      * @param {string} name The display name of the user
      */
     addJitsiStats(uli, stats, name) {
-        if (!stats) return;
+        if (!stats || !stats.conn) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
-        iconStats.style.color = (stats ? this.getConnectionColor(stats.connectionQuality) : 'gray');
+        iconStats.style.color = (stats.conn ? this.getConnectionColor(stats.conn.connectionQuality) : 'gray');
         iconStats.style.paddingLeft = '5px';
         uli.appendChild(iconStats);
         const spanStats = document.createElement('span');
@@ -955,10 +981,8 @@ export class ARENAChat {
         // show current stats on hover/mouseover
         const _this = this;
         iconStats.onmouseover = function() {
-            // TODO: format text from stats
-            spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
+            spanStats.textContent = (stats.conn ? _this.getConnectionText(name, stats) : 'None');
             const offset = $(this).offset();
-            console.warn('offset', offset);
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
             $(this).next('span').css('left', offset.left + 'px');
         };
@@ -978,7 +1002,7 @@ export class ARENAChat {
         } else if (quality > 33) {
             return 'orange';
         } else if (quality > 0) {
-            return 'yellow';
+            return 'gold';
         } else {
             return 'red';
         }
@@ -991,31 +1015,32 @@ export class ARENAChat {
      * @return {string} Readable stats
      */
     getConnectionText(name, stats) {
-        console.log('reading jitsi stats', name, stats);
         const lines = [];
-        lines.push(`${name}`);
-        lines.push(`Quality: ${stats.connectionQuality}%`);
-        if (stats.bitrate) {
-            lines.push(`Bitrate: ↓${stats.bitrate.download} ↑${stats.bitrate.upload}`);
+        lines.push(`Name: ${name}`);
+        lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
+        if (stats.conn.bitrate) {
+            lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload} Kbps`);
         }
-        if (stats.packetLoss) {
-            lines.push(`Packet Loss: ↓${stats.packetLoss.download}% ↑${stats.packetLoss.upload}%`);
+        if (stats.conn.packetLoss) {
+            lines.push(`Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
         }
-        lines.push(`Bridge RTT: ${stats.jvbRTT} ms`);
+        if (stats.conn.jvbRTT) {
+            lines.push(`RTT: ${stats.conn.jvbRTT} ms`);
+        }
         if (stats.resolution) {
-            for (const id1 in stats.resolution) {
-                for (const id2 in stats.resolution[id1]) {
-                    lines.push(`Video: ${stats.resolution[id1][id2].width}x${stats.resolution[id1][id2].height}, ${stats.framerate[id1][id2]} fps`);
-                }
+            let sendmax = '';
+            if (stats.conn.maxEnabledResolution) {
+                sendmax = ` (max↑ ${stats.conn.maxEnabledResolution}p)`;
             }
+            lines.push(`Video: ${this._extractResolutionString(stats)}${sendmax}`);
         }
-        if (stats.maxEnabledResolution) {
-            lines.push(`Max Enabled Resolution: ${stats.maxEnabledResolution}`);
+        if (stats.codec) {
+            lines.push(`Codecs (A/V): ${this._extractCodecs(stats)}`);
         }
         return lines.join('\r\n');
     }
 
-    // https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js#L281
+    // From https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js
     /**
      * Extracts the resolution and framerate.
      *
@@ -1045,6 +1070,34 @@ export class ARENAChat {
             .join(', ') || null;
 
         return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
+    }
+
+    /**
+     * Extracts the audio and video codecs names.
+     *
+     * @param {Object} stats - Connection stats from the library.
+     * @private
+     * @return {string}
+     */
+    _extractCodecs(stats) {
+        const {
+            codec,
+        } = stats;
+
+        let codecString;
+
+        // Only report one codec, in case there are multiple for a user.
+        Object.keys(codec || {})
+            .forEach((ssrc) => {
+                const {
+                    audio,
+                    video,
+                } = codec[ssrc];
+
+                codecString = `${audio}, ${video}`;
+            });
+
+        return codecString;
     }
 
     /**

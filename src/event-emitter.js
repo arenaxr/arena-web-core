@@ -146,15 +146,26 @@ export class ARENAEventEmitter {
         CONFERENCE_ERROR: 'conference_error',
 
         /**
-         * Indicates an update of local/remote user connection stats. The event provides
+         * Indicates an update of local Jitsi user connection stats. The event provides
          * the following parameters to its listeners (event.detail object):
          *
-         * @callback jitsiStatsCallback
+         * @callback jitsiStatsLocalCallback
          * @param jid {string} the Jitsi conference id of the user, undefined for self
          * @param id {string} the ARENA id of the user, undefined for self
          * @param stats {object} the statsObject obj of stats for the user
          */
-        JITSI_STATS: 'jitsi_stats',
+        JITSI_STATS_LOCAL: 'jitsi_stats_local',
+
+        /**
+         * Indicates an update of remote Jitsi user connection stats. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
+         * @callback jitsiStatsRemoteCallback
+         * @param jid {string} the Jitsi conference id of the user, undefined for self
+         * @param id {string} the ARENA id of the user, undefined for self
+         * @param stats {object} the statsObject obj of stats for the user
+         */
+        JITSI_STATS_REMOTE: 'jitsi_stats_remote',
     };
 
     /**
