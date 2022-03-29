@@ -512,21 +512,22 @@ export class ARENAChat {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiStatsLocalCallback = (e) => {
+        const jid = e.detail.jid;
         const stats = e.detail.stats;
         // local
         if (!this.settings.stats) this.settings.stats = {};
         this.settings.stats.conn = stats;
+        this.settings.stats.resolution = stats.resolution[jid];
+        this.settings.stats.framerate = stats.framerate[jid];
+        this.settings.stats.codec = stats.codec[jid];
         // local and remote
-        console.warn('1',this.liveUsers);
         const _this = this;
         Object.keys(this.liveUsers).forEach(function(arenaId) {
-            console.warn('2', arenaId);
             if (!_this.liveUsers[arenaId].stats) _this.liveUsers[arenaId].stats = {};
             const jid = _this.liveUsers[arenaId].jid;
             _this.liveUsers[arenaId].stats.resolution = stats.resolution[jid];
             _this.liveUsers[arenaId].stats.framerate = stats.framerate[jid];
             _this.liveUsers[arenaId].stats.codec = stats.codec[jid];
-            console.warn('9', _this.liveUsers[arenaId].stats);
         });
         this.populateUserList();
     };
@@ -1014,27 +1015,27 @@ export class ARENAChat {
      * @return {string} Readable stats
      */
     getConnectionText(name, stats) {
-        console.log('reading jitsi stats', name, stats);
         const lines = [];
-        lines.push(`${name}`);
-        lines.push(`Quality: ${stats.conn.connectionQuality}%`);
+        lines.push(`Name: ${name}`);
+        lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
         if (stats.conn.bitrate) {
-            lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload}`);
+            lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload} Kbps`);
         }
         if (stats.conn.packetLoss) {
-            lines.push(`Packet Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
+            lines.push(`Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
         }
         if (stats.conn.jvbRTT) {
-            lines.push(`Bridge RTT: ${stats.conn.jvbRTT} ms`);
+            lines.push(`RTT: ${stats.conn.jvbRTT} ms`);
         }
         if (stats.resolution) {
-            lines.push(this._extractResolutionString(stats));
+            let sendmax = '';
+            if (stats.conn.maxEnabledResolution) {
+                sendmax = ` (max↑ ${stats.conn.maxEnabledResolution}p)`;
+            }
+            lines.push(`Video: ${this._extractResolutionString(stats)}${sendmax}`);
         }
         if (stats.codec) {
-            lines.push(this._extractCodecs(stats));
-        }
-        if (stats.conn.maxEnabledResolution) {
-            lines.push(`Send Max Resolution: ${stats.conn.maxEnabledResolution}p`);
+            lines.push(`Codecs (A/V): ${this._extractCodecs(stats)}`);
         }
         return lines.join('\r\n');
     }
@@ -1052,34 +1053,39 @@ export class ARENAChat {
             framerate,
             resolution,
         } = stats;
+
         const resolutionString = Object.keys(resolution || {})
             .map((ssrc) => {
                 const {
                     width,
                     height,
                 } = resolution[ssrc];
+
                 return `${width}x${height}`;
             })
             .join(', ') || null;
+
         const frameRateString = Object.keys(framerate || {})
             .map((ssrc) => framerate[ssrc])
             .join(', ') || null;
+
         return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
     }
 
-    // From https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js
     /**
      * Extracts the audio and video codecs names.
      *
      * @param {Object} stats - Connection stats from the library.
      * @private
-     * @returns {string}
+     * @return {string}
      */
     _extractCodecs(stats) {
         const {
             codec,
         } = stats;
+
         let codecString;
+
         // Only report one codec, in case there are multiple for a user.
         Object.keys(codec || {})
             .forEach((ssrc) => {
@@ -1087,8 +1093,10 @@ export class ARENAChat {
                     audio,
                     video,
                 } = codec[ssrc];
+
                 codecString = `${audio}, ${video}`;
             });
+
         return codecString;
     }
 
