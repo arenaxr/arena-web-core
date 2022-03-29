@@ -135,7 +135,7 @@ AFRAME.registerComponent('arena-camera', {
             msg.data.headModelPath = ARENA.defaults.headModelPath;
         }
 
-        ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, msg); // extra timestamp info at end for debugging
     },
     /**
      * Publish user VIO
@@ -165,7 +165,7 @@ AFRAME.registerComponent('arena-camera', {
                 color: data.color,
             },
         };
-        ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+        ARENA.Mqtt.publish(`${ARENA.vioTopic}${ARENA.camName}`, msg); // extra timestamp info at end for debugging
     },
     /**
      * Update component data

@@ -43,7 +43,7 @@ AFRAME.registerComponent('collision-listener', {
                 },
             };
             // publishing events attached to user id objects allows sculpting security
-            ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, thisMsg);
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
         });
     },
 });

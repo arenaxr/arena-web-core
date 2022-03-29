@@ -60,6 +60,7 @@ export class Arena {
         this.armode = url.searchParams.get('armode');
         this.noav = url.searchParams.get('noav');
         this.ar = url.searchParams.get('ar');
+        this.confstats = url.searchParams.get('confstats');
 
         ARENAUtils.getLocation((coords, err) => {
             if (!err) ARENA.clientCoords = coords;
@@ -86,6 +87,23 @@ export class Arena {
             const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
             this.showEchoDisplayName(speaker);
         });
+        this.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, (e) => {
+            if (this.confstats) this.publishJitsiStats(e);
+        });
+    }
+
+    /**
+     * log Jitsi stats to MQTT if requested
+     * @param {*} e The JITSI_STATS_LOCAL event details
+     */
+    publishJitsiStats(e) {
+        ARENAUtils.debug(({
+            jitsiStats: {
+                arenaId: e.detail.id,
+                jitsiId: e.detail.jid,
+                stats: e.detail.stats,
+            },
+        }));
     }
 
     /**

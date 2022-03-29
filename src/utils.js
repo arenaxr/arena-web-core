@@ -107,7 +107,13 @@ export class ARENAUtils {
      * @param {Object} msg msg to debug
      */
     static debug(msg) {
-        ARENA.Mqtt.publish(ARENA.outputTopic, '{"object_id":"debug","message":"' + msg + '"}');
+        const message = {
+            object_id: 'debug',
+            type: 'debug',
+            action: 'update',
+            data: msg,
+        };
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}/debug`, message);
     };
 
     /**
