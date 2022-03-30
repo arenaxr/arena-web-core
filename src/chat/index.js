@@ -386,6 +386,7 @@ export class ARENAChat {
             // check if jitsi knows about someone we don't; add to user list
             if (!this.liveUsers[user.id]) {
                 this.liveUsers[user.id] = {
+                    jid: args.jid,
                     un: user.dn,
                     scene: args.scene,
                     cid: user.cn,
@@ -410,6 +411,7 @@ export class ARENAChat {
         if (!this.liveUsers[user.id]) {
             const _this = this;
             this.liveUsers[user.id] = {
+                jid: user.jid,
                 un: user.dn,
                 scene: user.scene,
                 cid: user.cn,
@@ -433,6 +435,7 @@ export class ARENAChat {
         if (!this.liveUsers[user.id]) {
             const _this = this;
             this.liveUsers[user.id] = {
+                jid: user.jid,
                 un: user.dn,
                 scene: user.scene,
                 cid: user.cn,
@@ -539,13 +542,15 @@ export class ARENAChat {
      */
     jitsiStatsRemoteCallback = (e) => {
         const jid = e.detail.jid;
-        const arenaId = e.detail.id;
+        const arenaId = e.detail.id ? e.detail.id : e.detail.jid;
         const stats = e.detail.stats;
         // remote
-        if (!this.liveUsers[arenaId].stats) this.liveUsers[arenaId].stats = {};
-        this.liveUsers[arenaId].stats.conn = stats;
-        this.liveUsers[arenaId].jid = jid;
-        this.populateUserList();
+        if (this.liveUsers[arenaId]) {
+            if (!this.liveUsers[arenaId].stats) this.liveUsers[arenaId].stats = {};
+            this.liveUsers[arenaId].stats.conn = stats;
+            this.liveUsers[arenaId].jid = jid;
+            this.populateUserList();
+        }
     };
 
     /**
@@ -969,7 +974,7 @@ export class ARENAChat {
      * @param {string} name The display name of the user
      */
     addJitsiStats(uli, stats, name) {
-        if (!stats || !stats.conn) return;
+        if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
         iconStats.style.color = (stats.conn ? this.getConnectionColor(stats.conn.connectionQuality) : 'gray');
@@ -981,7 +986,7 @@ export class ARENAChat {
         // show current stats on hover/mouseover
         const _this = this;
         iconStats.onmouseover = function() {
-            spanStats.textContent = (stats.conn ? _this.getConnectionText(name, stats) : 'None');
+            spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
             const offset = $(this).offset();
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
             $(this).next('span').css('left', offset.left + 'px');
@@ -1016,22 +1021,24 @@ export class ARENAChat {
      */
     getConnectionText(name, stats) {
         const lines = [];
+        let sendmax = '';
         lines.push(`Name: ${name}`);
-        lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
-        if (stats.conn.bitrate) {
-            lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload} Kbps`);
-        }
-        if (stats.conn.packetLoss) {
-            lines.push(`Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
-        }
-        if (stats.conn.jvbRTT) {
-            lines.push(`RTT: ${stats.conn.jvbRTT} ms`);
-        }
-        if (stats.resolution) {
-            let sendmax = '';
+        if (stats.conn) {
+            lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
+            if (stats.conn.bitrate) {
+                lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload} Kbps`);
+            }
+            if (stats.conn.packetLoss) {
+                lines.push(`Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
+            }
+            if (stats.conn.jvbRTT) {
+                lines.push(`RTT: ${stats.conn.jvbRTT} ms`);
+            }
             if (stats.conn.maxEnabledResolution) {
                 sendmax = ` (max↑ ${stats.conn.maxEnabledResolution}p)`;
             }
+        }
+        if (stats.resolution) {
             lines.push(`Video: ${this._extractResolutionString(stats)}${sendmax}`);
         }
         if (stats.codec) {
