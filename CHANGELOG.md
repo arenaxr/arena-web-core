@@ -1,5 +1,47 @@
 # Changelog
 
+### [1.3.2](https://github.com/conix-center/ARENA-core/compare/v1.3.1...v1.3.2) (2022-03-23)
+
+
+### Bug Fixes
+
+* Arena camerra video culling on/off check ([18b4cf1](https://github.com/conix-center/ARENA-core/commit/18b4cf15e11ae5aacfcd97f5ca39f1e38742bf2a))
+
+### [1.3.1](https://github.com/conix-center/ARENA-core/compare/v1.3.0...v1.3.1) (2022-03-22)
+
+
+### Bug Fixes
+
+* disable video frustrum caused pose updates to be skipped ([d26b7e6](https://github.com/conix-center/ARENA-core/commit/d26b7e66b5ec45fc238182d8c816a9505512c6de))
+
+## [1.3.0](https://github.com/conix-center/ARENA-core/compare/v1.2.0...v1.3.0) (2022-03-20)
+
+
+### Features
+
+* Add anonymous login url parameter ([52f7dc0](https://github.com/conix-center/ARENA-core/commit/52f7dc065c1c7dc8c5cc24c194cd78da1a0ccb3b))
+* add video culling on/off flag; Default to off ([0086749](https://github.com/conix-center/ARENA-core/commit/00867497d97eb1af747a1ea651ead031ebb19b6a))
+* Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth ([a83706d](https://github.com/conix-center/ARENA-core/commit/a83706d7e0f69b90fd57d8aef0cf84eaea5ffefd))
+* send local conference stats to remotes ([177ab2f](https://github.com/conix-center/ARENA-core/commit/177ab2fb654d01cd4150b4eb8b11d1fdbb9a2402))
+
+
+### Bug Fixes
+
+* ensure anonymous users have a display name ([0a03d09](https://github.com/conix-center/ARENA-core/commit/0a03d094e06333f9749d4f85735c57d4490c45e7))
+* **jitsi:** show remote stats for other users ([#412](https://github.com/conix-center/ARENA-core/issues/412)) ([a93e518](https://github.com/conix-center/ARENA-core/commit/a93e518d49eeffc9dab8b4bb3756e96eee8ddbd8))
+
+## [1.2.0](https://github.com/conix-center/ARENA-core/compare/v1.1.4...v1.2.0) (2022-03-07)
+
+
+### Features
+
+* Add pose stats display to arena-camera ([a5411d8](https://github.com/conix-center/ARENA-core/commit/a5411d8aae8f61d9efea22b4de0f2c74e823a892)), closes [#213](https://github.com/conix-center/ARENA-core/issues/213)
+
+
+### Bug Fixes
+
+* add thickline to components; fix instantiation issue ([048d133](https://github.com/conix-center/ARENA-core/commit/048d1331d330ec353bb19b235c98b7c8f0613d74))
+
 ### [1.1.4](https://github.com/conix-center/ARENA-core/compare/v1.1.2...v1.1.4) (2022-02-21)
 
 

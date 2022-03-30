@@ -374,17 +374,18 @@
 	margin-top: 1.3em;
 	position: absolute;
 	max-width: 200px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	border-radius: 5px;
+	-moz-border-radius: 0px 5px 5px 5px;
+	-webkit-border-radius: 0px 5px 5px 5px;
+	border-radius: 0px 5px 5px 5px;
 	white-space: pre-line;
+	line-height: 16px;
 	z-index: 999999;
 }
 
 .videoTextTooltip::after {
 	content: "";
 	position: absolute;
-	top: 50%;
+	top: 5px;
 	right: 100%;
 	margin-top: -5px;
 	border-width: 5px;

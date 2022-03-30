@@ -136,6 +136,14 @@ function requestAuthState() {
             authError(title, text);
         } else {
             AUTH.user_type = xhr.response.type; // user database auth state
+
+            // provide url auth choice override
+            const url = new URL(window.location.href);
+            const urlAuthType = url.searchParams.get('auth');
+            if (urlAuthType !== null) {
+                localStorage.setItem('auth_choice', urlAuthType);
+            }
+
             const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
             if (xhr.response.authenticated) {
                 // auth user login
@@ -147,7 +155,14 @@ function requestAuthState() {
                 requestMqttToken(xhr.response.type, xhr.response.username);
             } else {
                 if (savedAuthType == 'anonymous') {
-                    // user chose to login as 'anonymous'
+                    // user chose to login as 'anonymous', a name is required
+                    const urlName = url.searchParams.get('name');
+                    if (urlName !== null) {
+                        localStorage.setItem('display_name', urlName);
+                    } else if (localStorage.getItem('display_name') === null) {
+                        localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
+                    }
+
                     // prefix all anon users with "anonymous-"
                     const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
                     AUTH.user_username = anonName;

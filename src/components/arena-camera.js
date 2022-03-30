@@ -21,6 +21,7 @@ import {ARENAUtils} from '../utils.js';
  * @property {number[]} position - Last camera position value.
  * @property {number[]} vioRotation - Last VIO rotation value.
  * @property {number[]} vioPosition - Last VIO position value.
+ * @property {boolean} showStats - Display camera position on the screen.
  *
  */
 AFRAME.registerComponent('arena-camera', {
@@ -33,6 +34,7 @@ AFRAME.registerComponent('arena-camera', {
         position: {type: 'vec3', default: new THREE.Vector3()},
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
+        showStats: {type: 'boolean', default: false},
     },
     /**
      * Send initial camera create message; Setup heartbeat timer
@@ -44,8 +46,11 @@ AFRAME.registerComponent('arena-camera', {
         this.camParent = new THREE.Matrix4();
         this.cam = new THREE.Matrix4();
         this.cpi = new THREE.Matrix4();
+
+        // instantiate frustum objs
         this.frustum = new THREE.Frustum();
         this.frustMatrix = new THREE.Matrix4();
+        this.bbox = new THREE.Box3();
 
         this.lastPose = '';
 
@@ -73,6 +78,10 @@ AFRAME.registerComponent('arena-camera', {
                 }, 1000);
             }
         });
+
+        if (this.data.showStats) {
+            document.getElementById('pose-stats').style.display = 'block';
+        }
     },
     /**
      * Publish user camera pose
@@ -118,13 +127,15 @@ AFRAME.registerComponent('arena-camera', {
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (headModelPathSelect) {
+        if (ARENA.sceneHeadModel) {
+            msg.data.headModelPath = ARENA.sceneHeadModel;
+        } else if (headModelPathSelect) {
             msg.data.headModelPath = headModelPathSelect.value;
         } else {
             msg.data.headModelPath = ARENA.defaults.headModelPath;
         }
 
-        ARENA.Mqtt.publish(ARENA.outputTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, msg); // extra timestamp info at end for debugging
     },
     /**
      * Publish user VIO
@@ -154,7 +165,7 @@ AFRAME.registerComponent('arena-camera', {
                 color: data.color,
             },
         };
-        ARENA.Mqtt.publish(ARENA.vioTopic + ARENA.camName, msg); // extra timestamp info at end for debugging
+        ARENA.Mqtt.publish(`${ARENA.vioTopic}${ARENA.camName}`, msg); // extra timestamp info at end for debugging
     },
     /**
      * Update component data
@@ -162,6 +173,9 @@ AFRAME.registerComponent('arena-camera', {
      */
     update(oldData) {
         const data = this.data;
+        if (oldData.showStats !== data.showStats) {
+            document.getElementById('pose-stats').style.display = (data.showStats) ? 'block' : 'none';
+        }
     },
     /**
      * Every tick, update rotation and position of the camera
@@ -205,14 +219,28 @@ AFRAME.registerComponent('arena-camera', {
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
         } else if (this.lastPose !== newPose) {
-            // Only update frustum if camera pose has changed
-            const cam = el.components['camera'].camera;
-            this.frustum.setFromProjectionMatrix(
-                this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
-            );
+            // Only update frustum if camera pose has changed and video culling is enabled
+            if (this.isVideoCullingEnabled()) {
+                const cam = el.components['camera'].camera;
+                this.frustum.setFromProjectionMatrix(
+                    this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
+                );
+            }
             this.publishPose();
+            if (this.data.showStats) {
+                document.getElementById('pose-stats').textContent =
+                    `Position: ${positionCoords}\r\nRotation: ${rotationCoords}`;
+            }
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
+    },
+    isVideoCullingEnabled() {
+        return ARENA && !ARENA.disableVideoCulling;
+    },
+    viewIntersectsObject3D(obj3D) {
+        // note: bbox.setFromObject computes the world-axis-aligned bounding box of the video cube
+        this.bbox.setFromObject(obj3D);
+        return this.frustum.intersectsBox(this.bbox);
     },
 });

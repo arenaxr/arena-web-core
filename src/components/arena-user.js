@@ -14,7 +14,7 @@
  * @param {Object} gainNode
  * @private
  */
-async function enableChromeAEC(gainNode) {
+ async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -141,7 +141,8 @@ AFRAME.registerComponent('arena-user', {
         this.audioID = null;
         this.distReached = null;
 
-        this.bbox = new THREE.Box3();
+        // used in tick()
+        this.entityPos = this.el.object3D.position;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
@@ -222,11 +223,13 @@ AFRAME.registerComponent('arena-user', {
             videoCubeDark.setAttribute('opacity', '0.8');
 
             el.appendChild(videoCubeDark);
+            this.videoCubeDark = videoCubeDark;
         } else {
             videoCube.setAttribute('scale', '0.9 1.5 0.02');
         }
 
         el.appendChild(videoCube);
+        this.videoCube = videoCube;
 
         this.headModel.setAttribute('visible', false);
     },
@@ -257,14 +260,12 @@ AFRAME.registerComponent('arena-user', {
         const data = this.data;
 
         // remove video cubes
-        const vidCube = document.getElementById(this.videoID + 'cube');
-        if (el.contains(vidCube)) {
-            el.removeChild(vidCube);
+        if (el.contains(this.videoCube)) {
+            el.removeChild(this.videoCube);
         }
 
-        const vidCubeDark = document.getElementById(this.videoID + 'cubeDark');
-        if (el.contains(vidCubeDark)) {
-            el.removeChild(vidCubeDark);
+        if (el.contains(this.videoCubeDark)) {
+            el.removeChild(this.videoCubeDark);
         }
 
         this.headModel.setAttribute('visible', true);
@@ -283,8 +284,7 @@ AFRAME.registerComponent('arena-user', {
 
             const jistiVideo = document.getElementById(this.videoID);
             if (jistiVideo) {
-                const vidCube = document.getElementById(this.videoID + 'cube');
-                if (!vidCube) {
+                if (!this.videoCube) {
                     console.log('video', data.presence);
                     if (data.presence === 'Panoramic') {
                         this.drawVideoPano();
@@ -416,32 +416,28 @@ AFRAME.registerComponent('arena-user', {
     },
 
     tick: function() {
-        const data = this.data;
-        const el = this.el;
-
         // do periodic a/v updates
-        if (ARENA.Jitsi && ARENA.Jitsi.ready && data.jitsiId) {
+        if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
             this.updateVideo();
             this.updateAudio();
         }
 
         const myCam = document.getElementById('my-camera');
-        const camPos = myCam.object3D.position;
-        const entityPos = el.object3D.position;
-        const distance = camPos.distanceTo(entityPos);
+        const myCamPos = myCam.object3D.position;
+        const arenaCameraComponent = myCam.components['arena-camera'];
 
+        const distance = myCamPos.distanceTo(this.entityPos);
+
+        // frustum culling for WebRTC video streams;
         if (this.videoID) {
-            // frustum culling for WebRTC video streams
-            const vidCube = document.getElementById(this.videoID + 'cube');
             let inFieldOfView = true;
-            if (el.contains(vidCube)) {
-                const cam = myCam.components['arena-camera'];
-                this.bbox.setFromObject(vidCube.object3D);
-                inFieldOfView = cam.frustum.intersectsBox(this.bbox);
+            if (arenaCameraComponent.isVideoCullingEnabled()) {
+                if (this.el.contains(this.videoCube)) {
+                    inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
+                }
             }
-
             // check if A/V cut off distance has been reached
-            if (!inFieldOfView || distance > ARENA.maxAVDist) {
+            if (inFieldOfView == false || distance > ARENA.maxAVDist) {
                 this.muteVideo();
             } else {
                 this.unmuteVideo();

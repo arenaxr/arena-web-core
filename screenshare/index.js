@@ -105,6 +105,9 @@ function onConnectionSuccess() {
     conference.on(
         JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED,
         () => console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`));
+    conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+        conference.sendEndpointStatsMessage(stats); // send to remote
+    });
 
     conference.setDisplayName(
         `${(+new Date).toString(36)} ${window.params.screenSharePrefix}_${window.params.camName}`,

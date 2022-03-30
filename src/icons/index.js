@@ -410,6 +410,9 @@ export class SideMenu {
             const sceneEl = document.querySelector('a-scene');
             const statsEl = sceneEl.getAttribute('stats');
             sceneEl.setAttribute('stats', !statsEl);
+            const cam = document.getElementById('my-camera');
+            const showStats = cam.getAttribute('arena-camera').showStats;
+            cam.setAttribute('arena-camera', {showStats: !showStats});
         };
         formDiv.appendChild(stats);
 

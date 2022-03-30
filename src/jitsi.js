@@ -96,7 +96,11 @@ export class ARENAJitsi {
                     },
                 },
             },
-            //enableLayerSuspension: true,
+
+            // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/#recommended_enable_layer_suspension
+            // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
+            // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
+            enableLayerSuspension: true,
             //backgroundAlpha: 0.5,
         };
 
@@ -533,9 +537,9 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
-            //console.log('LOCAL_STATS_UPDATED', ARENA.idTag, stats);
             this.conference.sendEndpointStatsMessage(stats); // send to remote
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
+                jid: this.jitsiId,
                 id: ARENA.idTag,
                 stats: stats,
             });
@@ -543,7 +547,8 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
             console.log('REMOTE_STATS_UPDATED', id, stats);
             const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_REMOTE, {
+                jid: id,
                 id: arenaId,
                 stats: stats,
             });
