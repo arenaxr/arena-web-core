@@ -74,8 +74,8 @@ export class ARENAJitsi {
             enableNoAudioDetection: true,
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
-            //startWithAudioMuted: true,
-            //startWithVideoMuted: true,
+            // startWithAudioMuted: true,
+            // startWithVideoMuted: true,
             p2p: {
                 enabled: false,
             },
@@ -83,22 +83,12 @@ export class ARENAJitsi {
             // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
             // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
             enableLayerSuspension: true,
-            //backgroundAlpha: 0.5,
+            // backgroundAlpha: 0.5,
         };
 
         if (pano) {
-            this.confOptions.constraints = {
-                video: {
-                    height: {
-                        ideal: 1080,
-                        max: 2160,
-                        min: 240,
-                    },
-                },
-            };
-        } else {
-            //this.confOptions.maxFullResolutionParticipants: 10;
-            //this.confOptions.resolution: 960;
+            // his.confOptions.maxFullResolutionParticipants: 10;
+            // this.confOptions.resolution: 960;
             this.confOptions.constraints = {
                 video: {
                     aspectRatio: 2 / 1,
@@ -114,6 +104,16 @@ export class ARENAJitsi {
                     },
                 },
             };
+        } else {
+            // this.confOptions.constraints = {
+            //     video: {
+            //         height: {
+            //             ideal: 1080,
+            //             max: 2160,
+            //             min: 240,
+            //         },
+            //     },
+            // };
         }
 
         this.initOptions = {
