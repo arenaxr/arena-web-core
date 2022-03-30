@@ -46,6 +46,7 @@ export class ARENAJitsi {
      * @param {*} jitsiServer The jitsi server url.
      */
     constructor(jitsiServer, pano = false) {
+        this.pano = pano;
         if (!window.JitsiMeetJS) {
             console.warn('Jitsi is not found!');
             return;
@@ -684,7 +685,23 @@ export class ARENAJitsi {
         if (prefAudioInput) {
             deviceOpts.micDeviceId = prefAudioInput;
         }
-
+        if (this.pano) {
+            deviceOpts.constraints = {
+                video: {
+                    aspectRatio: 2 / 1,
+                    height: {
+                        ideal: 960,
+                        max: 1920,
+                        min: 960,
+                    },
+                    width: {
+                        ideal: 1920,
+                        max: 3840,
+                        min: 1920,
+                    },
+                },
+            };
+        }
         try {
             let vidConstraint = true;
             if (prefVideoInput) {
