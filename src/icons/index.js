@@ -366,92 +366,88 @@ export class SideMenu {
         let label = document.createElement('span');
         label.innerHTML = 'Settings';
         label.style.fontSize = 'medium';
+        label.style.fontStyle = 'bold';
         formDiv.appendChild(label);
+
+        // Scene status dialogs
+        const statusDiv = document.createElement('div');
+        appendBold(statusDiv, 'Status: ');
+        formDiv.appendChild(statusDiv);
 
         const credits = document.createElement('a');
         credits.href = '#';
-        credits.innerHTML = 'Scene Credits';
-        credits.className = 'd-block py-1';
-        credits.onclick = function() {
-            settingsPopup.style.display = 'none'; // close settings panel
-            const attrSystem = document.querySelector('a-scene').systems['attribution'];
-            let attrTable = undefined;
-            if (attrSystem) {
-                attrTable = attrSystem.getAttributionTable();
-            }
-            if (attrTable === undefined) {
-                Swal.fire({
-                    title: 'Scene Credits',
-                    text: 'Could not find any attributions (did you add an attribution component to models?).',
-                    icon: 'error',
-                }).then(() => {
-                    settingsPopup.style.display = 'block'; // show settings panel
-                });
-                return;
-            }
-            Swal.fire({
-                title: 'Scene Credits',
-                html: attrTable,
-                width: 800,
-                focusConfirm: false,
-                showCancelButton: false,
-                cancelButtonText: 'Cancel',
-            }).then(() => {
-                settingsPopup.style.display = 'block'; // show settings panel
-            });
-        };
-        formDiv.appendChild(credits);
+        credits.innerHTML = 'Credits';
+        credits.onclick = showCredits;
+        statusDiv.appendChild(credits);
+
+        statusDiv.append(' | ');
 
         const stats = document.createElement('a');
         stats.href = '#';
-        stats.innerHTML = 'Toggle Stats';
-        stats.className = 'd-block pb-1';
-        stats.onclick = function() {
-            const sceneEl = document.querySelector('a-scene');
-            const statsEl = sceneEl.getAttribute('stats');
-            sceneEl.setAttribute('stats', !statsEl);
-            const cam = document.getElementById('my-camera');
-            const showStats = cam.getAttribute('arena-camera').showStats;
-            cam.setAttribute('arena-camera', {showStats: !showStats});
-        };
-        formDiv.appendChild(stats);
+        stats.innerHTML = 'Stats';
+        stats.onclick = showStats;
+        statusDiv.append(stats);
+
+        statusDiv.append(' | ');
+
+        const perms = document.createElement('a');
+        perms.href = '#';
+        perms.innerHTML = 'Permissions';
+        perms.onclick = showPerms;
+        statusDiv.appendChild(perms);
+
+        // Page links
+        const pagesDiv = document.createElement('div');
+        appendBold(pagesDiv, 'Pages: ');
+        formDiv.appendChild(pagesDiv);
+
+        const edit = document.createElement('a');
+        edit.href = `/build/?scene=${ARENA.namespacedScene}`;
+        edit.target = '_blank';
+        edit.rel = 'noopener noreferrer';
+        edit.innerHTML = 'Editor';
+        pagesDiv.appendChild(edit);
+
+        pagesDiv.append(' | ');
 
         const profile = document.createElement('a');
         profile.href = '#';
         profile.innerHTML = 'Profile';
         profile.onclick = showProfile;
-        profile.className='d-block pb-1';
-        formDiv.appendChild(profile);
+        pagesDiv.append(profile);
 
-        const perms = document.createElement('a');
-        perms.href = '#';
-        perms.innerHTML = 'MQTT/Video Permissions';
-        perms.onclick = showPerms;
-        perms.className='d-block pb-1';
-        formDiv.appendChild(perms);
+        pagesDiv.append(' | ');
 
-        formDiv.append('Scene: ');
+        const docs = document.createElement('a');
+        docs.href = 'https://arena.conix.io';
+        docs.target = '_blank';
+        docs.rel = 'noopener noreferrer';
+        docs.innerHTML = 'Docs';
+        pagesDiv.appendChild(docs);
+
+        // Auth status
+        appendBold(formDiv, 'Scene: ');
         const sceneName = document.createElement('span');
         formDiv.appendChild(sceneName);
         formDiv.appendChild(document.createElement('br'));
 
-        formDiv.append('Authenticator: ');
+        appendBold(formDiv, 'Authenticator: ');
         const authType = document.createElement('span');
         authType.style.textTransform = 'capitalize';
         formDiv.appendChild(authType);
         formDiv.appendChild(document.createElement('br'));
 
-        formDiv.append('ARENA Username: ');
+        appendBold(formDiv, 'ARENA Username: ');
         const authUsername = document.createElement('span');
         formDiv.appendChild(authUsername);
         formDiv.appendChild(document.createElement('br'));
 
-        formDiv.append('Email: ');
+        appendBold(formDiv, 'Email: ');
         const authEmail = document.createElement('span');
         formDiv.appendChild(authEmail);
         formDiv.appendChild(document.createElement('br'));
 
-        formDiv.append('Name: ');
+        appendBold(formDiv, 'Name: ');
         const authFullname = document.createElement('span');
         formDiv.appendChild(authFullname);
 
@@ -491,6 +487,65 @@ export class SideMenu {
         saveSettingsBtn.onclick = function() {
             saveSettings();
         };
+
+        /**
+         * Embolden text.
+         * @param {*} el Element object
+         * @param {*} text Text to bold
+         */
+        function appendBold(el, text) {
+            const b = document.createElement('b');
+            b.innerText = text;
+            el.append(b);
+        }
+
+        /**
+         * Show the Aframe stats and camera pose.
+         */
+        function showStats(e) {
+            e.preventDefault();
+            const sceneEl = document.querySelector('a-scene');
+            const statsEl = sceneEl.getAttribute('stats');
+            sceneEl.setAttribute('stats', !statsEl);
+            const cam = document.getElementById('my-camera');
+            const showStats = cam.getAttribute('arena-camera').showStats;
+            cam.setAttribute('arena-camera', {
+                showStats: !showStats
+            });
+        }
+
+        /**
+         * Show the modeling credits.
+         */
+        function showCredits(e) {
+            e.preventDefault();
+            settingsPopup.style.display = 'none'; // close settings panel
+            const attrSystem = document.querySelector('a-scene').systems['attribution'];
+            let attrTable = undefined;
+            if (attrSystem) {
+                attrTable = attrSystem.getAttributionTable();
+            }
+            if (attrTable === undefined) {
+                Swal.fire({
+                    title: 'Scene Credits',
+                    text: 'Could not find any attributions (did you add an attribution component to models?).',
+                    icon: 'error',
+                }).then(() => {
+                    settingsPopup.style.display = 'block'; // show settings panel
+                });
+                return;
+            }
+            Swal.fire({
+                title: 'Scene Credits',
+                html: attrTable,
+                width: 800,
+                focusConfirm: false,
+                showCancelButton: false,
+                cancelButtonText: 'Cancel',
+            }).then(() => {
+                settingsPopup.style.display = 'block';
+            });
+        }
 
         /**
          * Loads the settings popup
