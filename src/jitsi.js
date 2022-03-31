@@ -72,11 +72,8 @@ export class ARENAJitsi {
         // https://github.com/jitsi/jitsi-meet/blob/master/config.js
         this.confOptions = {
             openBridgeChannel: true,
-            enableNoAudioDetection: true,
             enableTalkWhileMuted: true,
             enableNoisyMicDetection: true,
-            // startWithAudioMuted: true,
-            // startWithVideoMuted: true,
             p2p: {
                 enabled: false,
             },
@@ -84,41 +81,10 @@ export class ARENAJitsi {
             // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
             // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
             enableLayerSuspension: true,
-            // backgroundAlpha: 0.5,
 
             // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
             useNewBandwidthAllocationStrategy: true,
         };
-
-        if (pano) {
-            // his.confOptions.maxFullResolutionParticipants: 10;
-            // this.confOptions.resolution: 960;
-            // this.confOptions.constraints = {
-            //     video: {
-            //         aspectRatio: 2 / 1,
-            //         height: {
-            //             ideal: 960,
-            //             max: 1920,
-            //             min: 960,
-            //         },
-            //         width: {
-            //             ideal: 1920,
-            //             max: 3840,
-            //             min: 1920,
-            //         },
-            //     },
-            // };
-        } else {
-            // this.confOptions.constraints = {
-            //     video: {
-            //         height: {
-            //             ideal: 1080,
-            //             max: 2160,
-            //             min: 240,
-            //         },
-            //     },
-            // };
-        }
 
         this.initOptions = {
             disableAudioLevels: true,
@@ -682,17 +648,16 @@ export class ARENAJitsi {
         }
         if (this.pano) {
             deviceOpts.minFps = 5;
-            deviceOpts.maxFps = 5;
             deviceOpts.constraints = {
                 video: {
                     aspectRatio: 2 / 1,
                     height: {
-                        ideal: 960,
+                        ideal: 1920,
                         max: 1920,
                         min: 960,
                     },
                     width: {
-                        ideal: 1920,
+                        ideal: 3840,
                         max: 3840,
                         min: 1920,
                     },
@@ -943,7 +908,7 @@ export class ARENAJitsi {
             'constraints': {},
         };
         videoConstraints.constraints[jitsiId] = {
-            'maxHeight': 960,
+            'maxHeight': 1920,
         };
         this.conference.setReceiverConstraints(videoConstraints);
     }
