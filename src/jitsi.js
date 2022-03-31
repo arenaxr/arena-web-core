@@ -682,7 +682,7 @@ export class ARENAJitsi {
         }
         if (this.pano) {
             deviceOpts.minFps = 5;
-            deviceOpts.maxFps = 5;
+            // deviceOpts.maxFps = 20;
             deviceOpts.constraints = {
                 video: {
                     aspectRatio: 2 / 1,
