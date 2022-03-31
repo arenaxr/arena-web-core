@@ -248,7 +248,7 @@ AFRAME.registerComponent('arena-user', {
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
         videoCube.setAttribute('position', '0 0 0');
-        videoCube.setAttribute('scale', '100 100 100');
+        videoCube.setAttribute('scale', '25 25 25');
 
         el.appendChild(videoCube);
 
@@ -285,9 +285,10 @@ AFRAME.registerComponent('arena-user', {
             const jistiVideo = document.getElementById(this.videoID);
             if (jistiVideo) {
                 if (!this.videoCube) {
-                    console.log('video', data.presence);
                     if (data.presence === 'Panoramic') {
                         this.drawVideoPano();
+                        // TODO (mwfarb): too frequent?
+                        ARENA.Jitsi.setResolutionPanoramic(data.jitsiId);
                     } else {
                         this.drawVideoCube();
                     }

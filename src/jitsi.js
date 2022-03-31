@@ -85,26 +85,29 @@ export class ARENAJitsi {
             // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
             enableLayerSuspension: true,
             // backgroundAlpha: 0.5,
+
+            // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
+            useNewBandwidthAllocationStrategy: true,
         };
 
         if (pano) {
             // his.confOptions.maxFullResolutionParticipants: 10;
             // this.confOptions.resolution: 960;
-            this.confOptions.constraints = {
-                video: {
-                    aspectRatio: 2 / 1,
-                    height: {
-                        ideal: 960,
-                        max: 1920,
-                        min: 960,
-                    },
-                    width: {
-                        ideal: 1920,
-                        max: 3840,
-                        min: 1920,
-                    },
-                },
-            };
+            // this.confOptions.constraints = {
+            //     video: {
+            //         aspectRatio: 2 / 1,
+            //         height: {
+            //             ideal: 960,
+            //             max: 1920,
+            //             min: 960,
+            //         },
+            //         width: {
+            //             ideal: 1920,
+            //             max: 3840,
+            //             min: 1920,
+            //         },
+            //     },
+            // };
         } else {
             // this.confOptions.constraints = {
             //     video: {
@@ -515,13 +518,6 @@ export class ARENAJitsi {
     onConnectionSuccess() {
         console.log('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.arenaConferenceName, this.confOptions);
-        //if (ARENA.presense) {
-            this.conference.setSenderVideoConstraint(960);
-        //} else {
-            this.conference.setReceiverVideoConstraint(960);
-        //}
-
-
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.log(`track removed!!!${track}`);
@@ -558,7 +554,6 @@ export class ARENAJitsi {
             });
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
-            console.log('REMOTE_STATS_UPDATED', id, stats);
             const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_REMOTE, {
                 jid: id,
@@ -686,6 +681,8 @@ export class ARENAJitsi {
             deviceOpts.micDeviceId = prefAudioInput;
         }
         if (this.pano) {
+            deviceOpts.minFps = 5;
+            deviceOpts.maxFps = 5;
             deviceOpts.constraints = {
                 video: {
                     aspectRatio: 2 / 1,
@@ -922,6 +919,33 @@ export class ARENAJitsi {
         } else {
             return null;
         }
+    }
+
+    /**
+     *
+     * @param {*} jitsiId
+     */
+    setResolutionPanoramic(jitsiId) {
+        const videoConstraints = {
+            'colibriClass': 'ReceiverVideoConstraints',
+            // Number of videos requested from the bridge.
+            // 'lastN': 20,
+            // The endpoints ids of the participants that are prioritized first.
+            // 'selectedEndpoints': ['A', 'B', 'C'],
+            // The endpoint ids of the participants that are prioritized up to a higher resolution.
+            // 'onStageEndpoints': ['A'],
+            'onStageEndpoints': [jitsiId],
+            // Default resolution requested for all endpoints.
+            'defaultConstraints': {
+                'maxHeight': 180,
+            },
+            // Endpoint specific resolution.
+            'constraints': {},
+        };
+        videoConstraints.constraints[jitsiId] = {
+            'maxHeight': 960,
+        };
+        this.conference.setReceiverConstraints(videoConstraints);
     }
 
     /**
