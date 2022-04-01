@@ -889,19 +889,18 @@ export class ARENAJitsi {
     }
 
     /**
-     *
-     * @param {*} jitsiId
+     * Set received resolution of remote video. Used to prioritize high, medium, low, drop
+     * resolution. Can be expanded. these settings likely overwrite all previous calls to
+     * setReceiverConstraints. Setting the order of these id arrays is important. Examples at:
+     * https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md
+     * @param {*} panoIds Array of jitsi ids panoramic, first is 'on-stage', others get lower res.
+     * @param {*} dropIds Array of jitsi ids to remove by setting res to 0.
      */
-    setResolutionPanoramic(jitsiId) {
+    setResolutionRemotes(panoIds = [], dropIds = []) {
         const videoConstraints = {
             'colibriClass': 'ReceiverVideoConstraints',
-            // Number of videos requested from the bridge.
-            // 'lastN': 20,
-            // The endpoints ids of the participants that are prioritized first.
-            // 'selectedEndpoints': ['A', 'B', 'C'],
             // The endpoint ids of the participants that are prioritized up to a higher resolution.
-            // 'onStageEndpoints': ['A'],
-            'onStageEndpoints': [jitsiId],
+            'onStageEndpoints': panoIds.slice(0, 1), // only first 360 cam on stage at a time
             // Default resolution requested for all endpoints.
             'defaultConstraints': {
                 'maxHeight': 360,
@@ -909,9 +908,17 @@ export class ARENAJitsi {
             // Endpoint specific resolution.
             'constraints': {},
         };
-        videoConstraints.constraints[jitsiId] = {
-            'maxHeight': 1920,
+        // only first 360 cam on stage at a time
+        videoConstraints.constraints[panoIds[0]] = {
+            'maxHeight': 1920, // 4K 2:1 ratio 360 cam video
         };
+        // dropped from bandwidth
+        dropIds.forEach((dropId) => {
+            videoConstraints.constraints[dropId] = {
+                'maxHeight': 0, // video disabled
+            };
+        });
+
         this.conference.setReceiverConstraints(videoConstraints);
     }
 

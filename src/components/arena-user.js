@@ -287,9 +287,14 @@ AFRAME.registerComponent('arena-user', {
             if (jistiVideo) {
                 if (!this.videoCube) {
                     if (data.presence === 'Panoramic') {
+                        // TODO (mwfarb): call to setResolutionRemotes should move to a centralized
+                        // place to consider all users
+                        // update remote resolutions for panoramic
+                        const panoIds = [data.jitsiId];
+                        const dropIds = [];
+                        ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
+
                         this.drawVideoPano();
-                        // TODO (mwfarb): too frequent?
-                        ARENA.Jitsi.setResolutionPanoramic(data.jitsiId);
                     } else {
                         this.drawVideoCube();
                     }

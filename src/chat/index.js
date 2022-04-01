@@ -397,6 +397,10 @@ export class ARENAChat {
                 else this.populateUserList();
             }
         });
+        // set initial remote resolutions for all to defaults
+        const panoIds = [];
+        const dropIds = [];
+        ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
     };
 
     /**
