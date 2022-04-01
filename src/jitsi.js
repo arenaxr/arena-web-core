@@ -484,6 +484,7 @@ export class ARENAJitsi {
     onConnectionSuccess() {
         console.log('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.arenaConferenceName, this.confOptions);
+
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.log(`track removed!!!${track}`);
@@ -664,6 +665,7 @@ export class ARENAJitsi {
                 },
             };
         }
+
         try {
             let vidConstraint = true;
             if (prefVideoInput) {
@@ -902,7 +904,7 @@ export class ARENAJitsi {
             'onStageEndpoints': [jitsiId],
             // Default resolution requested for all endpoints.
             'defaultConstraints': {
-                'maxHeight': 180,
+                'maxHeight': 360,
             },
             // Endpoint specific resolution.
             'constraints': {},

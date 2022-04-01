@@ -200,6 +200,7 @@ AFRAME.registerComponent('arena-user', {
         const el = this.el;
         const data = this.data;
 
+
         // attach video to head
         const videoCube = document.createElement('a-box');
         videoCube.setAttribute('id', this.videoID + 'cube');

@@ -397,28 +397,6 @@ export class ARENAChat {
                 else this.populateUserList();
             }
         });
-
-        const videoObjectName = localStorage.getItem('videoObjectName');
-        if (ARENA.Jitsi && videoObjectName) {
-            if (ARENA.Jitsi.getJitsiId()) {
-                const msg = {
-                    object_id: videoObjectName,
-                    action: 'update',
-                    type: 'object',
-                    persist: true,
-                    data: {
-                        object_type: 'sphere',
-                        material: {
-                            src: `video${ARENA.Jitsi.getJitsiId()}`,
-                        },
-                        // jitsi-video: {
-                        //     src: `#video${ARENA.Jitsi.getJitsiId()}`,
-                        // },
-                    },
-                };
-                ARENA.Mqtt.publish(ARENA.outputTopic + videoObjectName, msg);
-            }
-        }
     };
 
     /**
