@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 import {
-    ARENAUtils
+    ARENAUtils,
 } from '../utils.js';
 
 /**
@@ -17,7 +17,10 @@ AFRAME.registerComponent('stats-monitor', {
         enabled: {
             default: true,
         },
-        fps: {
+        fps: { // A-Frame stats, Frames rendered in the last second.
+            default: 0,
+        },
+        raf: { // A-Frame stats, Milliseconds needed to render a frame. (latency)
             default: 0,
         },
     },
@@ -36,18 +39,26 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     tick: function(time, timeDelta) {
+        if (!this.rafDiv) {
+            this.rafDiv = document.querySelector('.rs-counter-base:nth-child(1) .rs-counter-value');
+            return;
+        }
+        this.raf = parseFloat(this.rafDiv.innerHTML, 10);
+
         if (!this.fpsDiv) {
             this.fpsDiv = document.querySelector('.rs-counter-base:nth-child(2) .rs-counter-value');
             return;
         }
         this.fps = parseFloat(this.fpsDiv.innerHTML, 10);
+
         if (ARENA.confstats) {
             if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
                 ARENAUtils.debug(({
                     jitsiStats: {
                         arenaId: ARENA.idTag, // ARENA local participant id
                         jitsiId: ARENA.Jitsi.jitsiId, // Jitsi local participant id
-                        renderFps: this.fps, // A-Frame stats render FPS
+                        renderFps: this.fps,
+                        requestAnimationFrame: this.raf,
                         stats: ARENA.chat.settings.stats, // Jitsi LOCAL_STATS_UPDATED result
                     },
                 }));
