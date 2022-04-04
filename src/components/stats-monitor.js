@@ -1,8 +1,8 @@
-/* global AFRAME, ARENA, ARENAUtils */
+/* global AFRAME, ARENA */
 
 import {
-    ARENAChat
-} from "../chat";
+    ARENAUtils
+} from '../utils.js';
 
 /**
  * @fileoverview Component to monitor client-performance: fps, memory, etc.
@@ -23,35 +23,35 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     init: function() {
+        this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
+
         if (!this.data.enabled) {
             this.el.sceneEl.removeBehavior(this);
             return;
         }
         this.el.sceneEl.setAttribute('stats', '');
-
-        // this.el.addEventListener(ARENAEventEmitter.events.JITSI_STATS_LOCAL, function(e) {
-        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, function(e) {
-            console.warn('JITSI_STATS_LOCAL', e);
-
-            if (ARENA.confstats) {
-                ARENAUtils.debug(({
-                    jitsiStats: {
-                        arenaId: e.detail.id,
-                        jitsiId: e.detail.jid,
-                        renderFps: this.fps,
-                        stats: e.detail.stats,
-                    },
-                }));
-            }
-        });
     },
 
-    tick: function(t, dt) {
+    update: function() {
+    },
+
+    tick: function(time, timeDelta) {
         if (!this.fpsDiv) {
             this.fpsDiv = document.querySelector('.rs-counter-base:nth-child(2) .rs-counter-value');
             return;
         }
         this.fps = parseFloat(this.fpsDiv.innerHTML, 10);
-        // console.warn('fps', this.fps);
+        if (ARENA.confstats) {
+            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
+                ARENAUtils.debug(({
+                    jitsiStats: {
+                        arenaId: ARENA.idTag, // ARENA local participant id
+                        jitsiId: ARENA.Jitsi.jitsiId, // Jitsi local participant id
+                        renderFps: this.fps, // A-Frame stats render FPS
+                        stats: ARENA.chat.settings.stats, // Jitsi LOCAL_STATS_UPDATED result
+                    },
+                }));
+            }
+        }
     },
 });
