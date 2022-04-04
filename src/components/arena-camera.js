@@ -179,7 +179,7 @@ AFRAME.registerComponent('arena-camera', {
     },
     /**
      * Every tick, update rotation and position of the camera
-     * If a position or rotation change is detected, or time for a heartbet, trigger message publish
+     * If a position or rotation change is detected, or time for a heartbeat, trigger message publish
      * @ignore
      */
     tick: function(t, dt) {
