@@ -522,6 +522,17 @@ export class Arena {
                         sceneRoot.appendChild(navMesh);
                     }
 
+                    if (sceneOptions['sceneHeadModels']) {
+                        const sceneHeads = sceneOptions['sceneHeadModels'];
+                        const headModelPathSelect = document.getElementById('headModelPathSelect');
+                        sceneHeads.forEach((head) => {
+                            const opt = document.createElement('option');
+                            opt.value = head;
+                            opt.text = head;
+                            headModelPathSelect.add(opt, null);
+                        });
+                    }
+
                     if (!sceneOptions['clickableOnlyEvents']) {
                     // unusual case: clickableOnlyEvents = true by default, add warning...
                         ARENA.health.addError('scene-options.allObjectsClickable');
