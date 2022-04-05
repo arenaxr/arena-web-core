@@ -674,7 +674,11 @@ export class ARENAChat {
                 this.settings.publishPublicTopic :
                 this.settings.publishPrivateTopic.replace('{to_uid}', this.toSel.value);
         // console.log("sending", msg, "to", dstTopic);
-        this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
+        try {
+            this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
+        } catch (err) {
+            console.error('chat msg send failed:', err.message);
+        }
         this.txtAddMsg(msg.text, msg.from_desc + ' ' + now.toLocaleTimeString(), 'self');
     }
 
@@ -1200,7 +1204,11 @@ export class ARENAChat {
             text: text,
         };
         // console.info("ctrl", msg, "to", dstTopic);
-        this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
+        try {
+            this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
+        } catch (err) {
+            console.error('chat-ctrl send failed:', err.message);
+        }
     }
 
     /**
