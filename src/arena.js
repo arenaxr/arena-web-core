@@ -529,7 +529,7 @@ export class Arena {
                         sceneHeads.forEach((head) => {
                             const opt = document.createElement('option');
                             opt.value = head;
-                            opt.text = head;
+                            opt.text = `${head} (scene-options)`;
                             headModelPathSelect.add(opt, null);
                         });
                         if (headModelPathSelect.selectedIndex == 0) {
