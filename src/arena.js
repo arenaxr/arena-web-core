@@ -523,17 +523,19 @@ export class Arena {
                     }
 
                     if (sceneOptions['sceneHeadModels']) {
+                        // add scene custom scene heads to selection list
                         const sceneHeads = sceneOptions['sceneHeadModels'];
                         const headModelPathSelect = document.getElementById('headModelPathSelect');
-                        const currentLen = headModelPathSelect.length;
+                        const defaultHeadsLen = headModelPathSelect.length;
                         sceneHeads.forEach((head) => {
                             const opt = document.createElement('option');
-                            opt.value = head;
-                            opt.text = `${head} (scene-options)`;
+                            opt.value = head.url;
+                            opt.text = `${head.name} (scene-options)`;
                             headModelPathSelect.add(opt, null);
                         });
+                        // if default ARENA head used, replace with default scene head
                         if (headModelPathSelect.selectedIndex == 0) {
-                            headModelPathSelect.selectedIndex = currentLen;
+                            headModelPathSelect.selectedIndex = defaultHeadsLen;
                         }
                     }
 
