@@ -525,12 +525,16 @@ export class Arena {
                     if (sceneOptions['sceneHeadModels']) {
                         const sceneHeads = sceneOptions['sceneHeadModels'];
                         const headModelPathSelect = document.getElementById('headModelPathSelect');
+                        const currentLen = headModelPathSelect.length;
                         sceneHeads.forEach((head) => {
                             const opt = document.createElement('option');
                             opt.value = head;
                             opt.text = head;
                             headModelPathSelect.add(opt, null);
                         });
+                        if (headModelPathSelect.selectedIndex == 0) {
+                            headModelPathSelect.selectedIndex = currentLen;
+                        }
                     }
 
                     if (!sceneOptions['clickableOnlyEvents']) {
