@@ -279,18 +279,9 @@ window.setupAV = (callback) => {
         }
     }
     setupPanel.classList.remove('d-none');
-    let headModelPathIdx = 0;
-    if (ARENA.sceneHeadModels) {
-        const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-        const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
-        if (sceneHeadModelPathIdx) {
-            headModelPathIdx = sceneHeadModelPathIdx;
-        }
-    } else if (localStorage.getItem('headModelPathIdx')) {
-        headModelPathIdx = localStorage.getItem('headModelPathIdx');
+    if (localStorage.getItem('headModelPathIdx')) {
+        headModelPathSelect.selectedIndex = localStorage.getItem('headModelPathIdx');
     }
-    console.warn('headModelPathIdx', headModelPathIdx);
-    headModelPathSelect.selectedIndex = headModelPathIdx <= headModelPathSelect.length ? headModelPathIdx : 0;
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();
