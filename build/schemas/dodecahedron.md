@@ -1,4 +1,11 @@
----title: Dodecahedronnav_order: 5layout: defaultparent: ARENA Options---# Dodecahedron
+---
+title: Dodecahedron
+nav_order: 5
+layout: default
+parent: ARENA Options
+---
+
+# Dodecahedron
 
 *dodecahedron Geometry*
 

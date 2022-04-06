@@ -1,4 +1,11 @@
----title: Torusnav_order: 22layout: defaultparent: ARENA Options---# Torus
+---
+title: Torus
+nav_order: 22
+layout: default
+parent: ARENA Options
+---
+
+# Torus
 
 *Torus Geometry*
 

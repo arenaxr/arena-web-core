@@ -1,4 +1,11 @@
----title: Textnav_order: 19layout: defaultparent: ARENA Options---# Text
+---
+title: Text
+nav_order: 19
+layout: default
+parent: ARENA Options
+---
+
+# Text
 
 *Display text*
 

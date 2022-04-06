@@ -1,4 +1,11 @@
----title: Planenav_order: 13layout: defaultparent: ARENA Options---# Plane
+---
+title: Plane
+nav_order: 13
+layout: default
+parent: ARENA Options
+---
+
+# Plane
 
 *Plane Geometry*
 

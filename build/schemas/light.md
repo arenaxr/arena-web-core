@@ -1,4 +1,11 @@
----title: Lightnav_order: 9layout: defaultparent: ARENA Options---# Light
+---
+title: Light
+nav_order: 9
+layout: default
+parent: ARENA Options
+---
+
+# Light
 
 *A light*
 

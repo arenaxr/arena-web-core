@@ -1,4 +1,11 @@
----title: Programnav_order: 14layout: defaultparent: ARENA Options---# Program
+---
+title: Program
+nav_order: 14
+layout: default
+parent: ARENA Options
+---
+
+# Program
 
 ## Properties
 

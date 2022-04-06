@@ -1,4 +1,11 @@
----title: Tetrahedronnav_order: 18layout: defaultparent: ARENA Options---# Tetrahedron
+---
+title: Tetrahedron
+nav_order: 18
+layout: default
+parent: ARENA Options
+---
+
+# Tetrahedron
 
 *Tetrahedron Geometry*
 

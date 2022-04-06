@@ -1,4 +1,11 @@
----title: Scene Optionsnav_order: 16layout: defaultparent: ARENA Options---# Scene Config
+---
+title: Scene Options
+nav_order: 16
+layout: default
+parent: ARENA Options
+---
+
+# Scene Config
 
 ## Properties
 
@@ -51,7 +58,10 @@
 - **`scene-options`** *(object)*
   - **`clickableOnlyEvents`** *(boolean)*: true = publish only mouse events for objects with click-listeners; false = all objects publish mouse events. Default: `True`.
   - **`distanceModel`** *(string)*: Algorithm to use to reduce the volume of the audio source as it moves away from the listener. Must be one of: `['exponential', 'inverse', 'linear']`. Default: `inverse`.
-  - **`sceneHeadModel`** *(string)*: Define a default model for the scene. You must scale and rotate your source GLTF appropriately. Default: ``.
+  - **`sceneHeadModels`** *(array)*: Define the default head model(s) for the scene in a list. Users may still choose from the ARENA default list of head models as well. Default: ``.
+    - **Items** *(object)*
+      - **`name`** *(string)*: A head model name for the selection GUI.
+      - **`url`** *(string)*: The head model GLTF URL. You must scale and rotate your source GLTFs appropriately.
   - **`jitsiHost`** *(string)*: Jitsi host used for this scene. Default: `jitsi0.andrew.cmu.edu:8443`.
   - **`maxAVDist`** *(number)*: Maximum distance between cameras/users until audio and video are cut off. For saving bandwidth on scenes with large amounts of user activity at once. Default: `20`.
   - **`navMesh`** *(string)*: Navigation Mesh URL. Default: ``.

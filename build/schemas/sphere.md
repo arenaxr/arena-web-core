@@ -1,4 +1,11 @@
----title: Spherenav_order: 17layout: defaultparent: ARENA Options---# Sphere
+---
+title: Sphere
+nav_order: 17
+layout: default
+parent: ARENA Options
+---
+
+# Sphere
 
 *Sphere Geometry*
 

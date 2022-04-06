@@ -1,4 +1,11 @@
----title: Trianglenav_order: 24layout: defaultparent: ARENA Options---# Triangle
+---
+title: Triangle
+nav_order: 24
+layout: default
+parent: ARENA Options
+---
+
+# Triangle
 
 *Triangle Geometry*
 

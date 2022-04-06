@@ -14,17 +14,17 @@ for file in files:
     fn = files[file]["file"]
     t = files[file]["title"]
 
-    md_lines = ''
-    md_lines+=('---\n')
-    md_lines+=(f'title: {t}\n')
-    md_lines+=(f'nav_order: {idx}\n')
-    md_lines+=('layout: default\n')
-    md_lines+=('parent: ARENA Optionsv')
-    md_lines+=('---\n')
-    md_lines+=('\n')
+    md_lines = []
+    md_lines.append('---\n')
+    md_lines.append(f'title: {t}\n')
+    md_lines.append(f'nav_order: {idx}\n')
+    md_lines.append('layout: default\n')
+    md_lines.append('parent: ARENA Options\n')
+    md_lines.append('---\n')
+    md_lines.append('\n')
 
     with open(fn, "r") as json_file:
-        md_lines+=(parser.parse_schema(json.load(json_file)))
+        md_lines.extend(parser.parse_schema(json.load(json_file)))
     out = ''.join(md_lines)
     print(out)
     f = open(f"{fn[:-5]}.md", "w")

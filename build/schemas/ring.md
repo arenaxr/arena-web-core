@@ -1,4 +1,11 @@
----title: Ringnav_order: 15layout: defaultparent: ARENA Options---# Ring
+---
+title: Ring
+nav_order: 15
+layout: default
+parent: ARENA Options
+---
+
+# Ring
 
 *Ring Geometry*
 

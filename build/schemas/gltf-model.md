@@ -1,4 +1,11 @@
----title: GLTF Modelnav_order: 7layout: defaultparent: ARENA Options---# GLTF Model
+---
+title: GLTF Model
+nav_order: 7
+layout: default
+parent: ARENA Options
+---
+
+# GLTF Model
 
 *Load a GLTF model*
 
