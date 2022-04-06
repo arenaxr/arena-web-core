@@ -526,7 +526,7 @@ export class Arena {
                         // add scene custom scene heads to selection list
                         const sceneHeads = sceneOptions['sceneHeadModels'];
                         const headModelPathSelect = document.getElementById('headModelPathSelect');
-                        const defaultHeadsLen = headModelPathSelect.length;
+                        const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
                         sceneHeads.forEach((head) => {
                             const opt = document.createElement('option');
                             opt.value = head.url;
@@ -534,7 +534,7 @@ export class Arena {
                             headModelPathSelect.add(opt, null);
                         });
                         // if default ARENA head used, replace with default scene head
-                        if (headModelPathSelect.selectedIndex == 0) {
+                        if (headModelPathSelect.selectedIndex <= 0) {
                             headModelPathSelect.selectedIndex = defaultHeadsLen;
                         }
                     }
