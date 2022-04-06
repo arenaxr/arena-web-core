@@ -522,6 +522,11 @@ export class Arena {
                         sceneRoot.appendChild(navMesh);
                     }
 
+                    if (sceneOptions['sceneHeadModels']) {
+                        // add scene custom scene heads to selection list
+                        setupSceneHeadModels();
+                    }
+
                     if (!sceneOptions['clickableOnlyEvents']) {
                     // unusual case: clickableOnlyEvents = true by default, add warning...
                         ARENA.health.addError('scene-options.allObjectsClickable');
@@ -579,6 +584,33 @@ export class Arena {
                 this.sceneOptions = sceneOptions;
                 ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
             });
+
+        /**
+         * Update the list of scene-specific heads the user can select from
+         */
+        function setupSceneHeadModels() {
+            const sceneHeads = sceneOptions['sceneHeadModels'];
+            const headModelPathSelect = document.getElementById('headModelPathSelect');
+            const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
+            sceneHeads.forEach((head) => {
+                const opt = document.createElement('option');
+                opt.value = head.url;
+                opt.text = `${head.name} (scene-options)`;
+                headModelPathSelect.add(opt, null);
+            });
+            let headModelPathIdx = 0;
+            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+            const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
+            if (sceneHeadModelPathIdx != undefined) {
+                headModelPathIdx = sceneHeadModelPathIdx;
+            } else if (headModelPathSelect.selectedIndex == 0) {
+                // if default ARENA head used, replace with default scene head
+                headModelPathIdx = defaultHeadsLen;
+            } else if (localStorage.getItem('headModelPathIdx')) {
+                headModelPathIdx = localStorage.getItem('headModelPathIdx');
+            }
+            headModelPathSelect.selectedIndex = headModelPathIdx < headModelPathSelect.length ? headModelPathIdx : 0;
+        }
     };
 
     /**

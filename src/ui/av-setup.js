@@ -56,10 +56,21 @@ window.setupAV = (callback) => {
         enterSceneBtn.addEventListener('click', () => {
             // Stash preferred devices
             localStorage.setItem('display_name', displayName.value);
-            localStorage.setItem('headModelPathIdx', headModelPathSelect.selectedIndex);
             localStorage.setItem('prefAudioInput', audioInSelect.value);
             localStorage.setItem('prefVideoInput', videoSelect.value);
             localStorage.setItem('prefAudioOutput', audioOutSelect.value);
+
+            // save preferred head model, globally, or per scene
+            if (ARENA.sceneHeadModels) {
+                const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+                sceneHist[ARENA.namespacedScene] = {
+                    ...sceneHist[ARENA.namespacedScene],
+                    headModelPathIdx: headModelPathSelect.selectedIndex,
+                };
+                localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
+            } else {
+                localStorage.setItem('headModelPathIdx', headModelPathSelect.selectedIndex);
+            }
 
             // default is reverse of aframe's default - we want to "drag world to pan"
             const camera = document.getElementById('my-camera');
@@ -271,7 +282,6 @@ window.setupAV = (callback) => {
     if (localStorage.getItem('headModelPathIdx')) {
         headModelPathSelect.selectedIndex = localStorage.getItem('headModelPathIdx');
     }
-    headModelPathSelect.disabled = ARENA.sceneHeadModel; // custom scene-options head in use
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();

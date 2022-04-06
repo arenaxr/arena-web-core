@@ -352,12 +352,31 @@
                 "title":"Positional Audio Distance Model",
                 "type":"string"
              },
-             "sceneHeadModel":{
+             "sceneHeadModels":{
                "default":"",
-               "description":"Define a default model for the scene. You must scale and rotate your source GLTF appropriately.",
+               "description":"Define the default head model(s) for the scene in a list. Users may still choose from the ARENA default list of head models as well.",
                "minLength":5,
-               "title":"Head Model URL",
-               "type":"string"
+               "title":"Head Model URLs",
+               "type":"array",
+               "minItems":1,
+               "maxItems":10,
+               "items":{
+                  "type":"object",
+                  "properties":{
+                     "name":{
+                        "type":"string",
+                        "description":"A head model name for the selection GUI."
+                     },
+                     "url":{
+                        "type":"string",
+                        "description":"The head model GLTF URL. You must scale and rotate your source GLTFs appropriately."
+                     }
+                  },
+                  "required":[
+                     "name",
+                     "url"
+                  ]
+               }
              },
              "jitsiHost":{
                 "default":"jitsi0.andrew.cmu.edu:8443",
