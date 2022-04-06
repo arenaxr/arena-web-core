@@ -65,17 +65,17 @@ export class ClientEvent {
                 },
             }, false);
             break;
-        case 'sound-play':
+        case 'soundplay':
             if (entityEl.components.sound) {
                 entityEl.components.sound.playSound();
             }
             break;
-        case 'sound-pause':
+        case 'soundpause':
             if (entityEl.components.sound) {
                 entityEl.components.sound.pauseSound();
             }
             break;
-        case 'sound-stop':
+        case 'soundstop':
             if (entityEl.components.sound) {
                 entityEl.components.sound.stopSound();
             }
