@@ -279,9 +279,20 @@ window.setupAV = (callback) => {
         }
     }
     setupPanel.classList.remove('d-none');
-    if (localStorage.getItem('headModelPathIdx')) {
-        headModelPathSelect.selectedIndex = localStorage.getItem('headModelPathIdx');
+    let headModelPathIdx = 0;
+    if (ARENA.sceneHeadModels) {
+        const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+        const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
+        if (sceneHeadModelPathIdx != undefined) {
+            headModelPathIdx = sceneHeadModelPathIdx;
+        } else if (headModelPathSelect.selectedIndex == 0) {
+            // if default ARENA head used, replace with default scene head
+            headModelPathIdx = defaultHeadsLen;
+        }
+    } else if (localStorage.getItem('headModelPathIdx')) {
+        headModelPathIdx = localStorage.getItem('headModelPathIdx');
     }
+    headModelPathSelect.selectedIndex = headModelPathIdx < headModelPathSelect.length ? headModelPathIdx : 0;
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();
