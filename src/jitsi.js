@@ -32,9 +32,9 @@ export class ARENAJitsi {
      * @param {*} jitsiServer The jitsi server url.
      * @return {*} Instantiated ARENAJitsi object.
      */
-    static init(jitsiServer) {
+    static init(jitsiServer, pano = false) {
         if (!this.jitsi) {
-            this.jitsi = new ARENAJitsi(jitsiServer);
+            this.jitsi = new ARENAJitsi(jitsiServer, pano);
             this.jitsi.connect();
             this.jitsi.avConnect();
         }
@@ -45,7 +45,8 @@ export class ARENAJitsi {
      * Configure the ARENA Jitsi client before connecting.
      * @param {*} jitsiServer The jitsi server url.
      */
-    constructor(jitsiServer) {
+    constructor(jitsiServer, pano = false) {
+        this.pano = pano;
         if (!window.JitsiMeetJS) {
             console.warn('Jitsi is not found!');
             return;
@@ -76,20 +77,13 @@ export class ARENAJitsi {
             p2p: {
                 enabled: false,
             },
-            constraints: {
-                video: {
-                    height: {
-                        ideal: 1080,
-                        max: 2160,
-                        min: 240,
-                    },
-                },
-            },
 
-            // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/#recommended_enable_layer_suspension
             // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
             // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
             enableLayerSuspension: true,
+
+            // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
+            useNewBandwidthAllocationStrategy: true,
         };
 
         this.initOptions = {
@@ -520,14 +514,16 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
             this.conference.sendEndpointStatsMessage(stats); // send to remote
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
+                jid: this.jitsiId,
                 id: ARENA.idTag,
                 stats: stats,
             });
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
             const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS, {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_REMOTE, {
+                jid: id,
                 id: arenaId,
                 stats: stats,
             });
@@ -650,6 +646,24 @@ export class ARENAJitsi {
         const deviceOpts = {};
         if (prefAudioInput) {
             deviceOpts.micDeviceId = prefAudioInput;
+        }
+        if (this.pano) {
+            deviceOpts.minFps = 5;
+            deviceOpts.constraints = {
+                video: {
+                    aspectRatio: 2 / 1,
+                    height: {
+                        ideal: 1920,
+                        max: 1920,
+                        min: 960,
+                    },
+                    width: {
+                        ideal: 3840,
+                        max: 3840,
+                        min: 1920,
+                    },
+                },
+            };
         }
 
         try {
@@ -872,6 +886,40 @@ export class ARENAJitsi {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Set received resolution of remote video. Used to prioritize high, medium, low, drop
+     * resolution. Can be expanded. these settings likely overwrite all previous calls to
+     * setReceiverConstraints. Setting the order of these id arrays is important. Examples at:
+     * https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md
+     * @param {*} panoIds Array of jitsi ids panoramic, first is 'on-stage', others get lower res.
+     * @param {*} dropIds Array of jitsi ids to remove by setting res to 0.
+     */
+    setResolutionRemotes(panoIds = [], dropIds = []) {
+        const videoConstraints = {
+            'colibriClass': 'ReceiverVideoConstraints',
+            // The endpoint ids of the participants that are prioritized up to a higher resolution.
+            'onStageEndpoints': panoIds.slice(0, 1), // only first 360 cam on stage at a time
+            // Default resolution requested for all endpoints.
+            'defaultConstraints': {
+                'maxHeight': 360,
+            },
+            // Endpoint specific resolution.
+            'constraints': {},
+        };
+        // only first 360 cam on stage at a time
+        videoConstraints.constraints[panoIds[0]] = {
+            'maxHeight': 1920, // 4K 2:1 ratio 360 cam video
+        };
+        // dropped from bandwidth
+        dropIds.forEach((dropId) => {
+            videoConstraints.constraints[dropId] = {
+                'maxHeight': 0, // video disabled
+            };
+        });
+
+        this.conference.setReceiverConstraints(videoConstraints);
     }
 
     /**

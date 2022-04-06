@@ -352,6 +352,32 @@
                 "title":"Positional Audio Distance Model",
                 "type":"string"
              },
+             "sceneHeadModels":{
+               "default":"",
+               "description":"Define the default head model(s) for the scene in a list. Users may still choose from the ARENA default list of head models as well.",
+               "minLength":5,
+               "title":"Head Model URLs",
+               "type":"array",
+               "minItems":1,
+               "maxItems":10,
+               "items":{
+                  "type":"object",
+                  "properties":{
+                     "name":{
+                        "type":"string",
+                        "description":"A head model name for the selection GUI."
+                     },
+                     "url":{
+                        "type":"string",
+                        "description":"The head model GLTF URL. You must scale and rotate your source GLTFs appropriately."
+                     }
+                  },
+                  "required":[
+                     "name",
+                     "url"
+                  ]
+               }
+             },
              "jitsiHost":{
                 "default":"jitsi0.andrew.cmu.edu:8443",
                 "description":"Jitsi host used for this scene.",
@@ -403,6 +429,12 @@
                 "title":"Screenshare object name",
                 "type":"string"
              },
+             "disableVideoCulling":{
+                "default":false,
+                "description":"If true will disable video frustum culling (video frustum culling stops video from users outside of view)",
+                "title":"Disable Video Frustum Culling",
+                "type":"boolean"
+             },
              "volume":{
                 "default":1,
                 "description":"Volume for users in a scene",
@@ -413,7 +445,8 @@
           "required":[
              "clickableOnlyEvents",
              "maxAVDist",
-             "privateScene"
+             "privateScene",
+             "disableVideoCulling"
           ],
           "title":"Scene Options",
           "type":"object"

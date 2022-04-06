@@ -10,10 +10,10 @@
  * ARENA A-Frame components
  */
 
-import './armarker.js';
 import './arena-camera.js';
-import './arena-user.js';
 import './arena-hand.js';
+import './arena-user.js';
+import './armarker.js';
 import './attribution.js';
 import './click-listener.js';
 import './collision-listener.js';
@@ -30,6 +30,7 @@ import './pcd-model.js';
 import './press-and-move.js';
 import './screenshare.js';
 import './sound-control.js';
+import './stats-monitor.js';
 import './text-input.js';
 import './thickline/index.js';
 import './threejs-scene.js';
