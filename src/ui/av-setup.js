@@ -15,6 +15,7 @@ window.setupAV = (callback) => {
     const testAudioOutIcon = document.getElementById('playTestAudioOutIcon');
     const micMeter = document.getElementById('micMeter');
     const headModelPathSelect = document.getElementById('headModelPathSelect');
+
     const reverseMouseDragCheckbox = document.getElementById('reverseMouseDragCheckbox');
     const displayName = document.getElementById('displayName-input');
     const enterSceneBtn = document.getElementById('enterSceneAVBtn');
@@ -55,10 +56,21 @@ window.setupAV = (callback) => {
         enterSceneBtn.addEventListener('click', () => {
             // Stash preferred devices
             localStorage.setItem('display_name', displayName.value);
-            localStorage.setItem('headModelPathIdx', headModelPathSelect.selectedIndex);
             localStorage.setItem('prefAudioInput', audioInSelect.value);
             localStorage.setItem('prefVideoInput', videoSelect.value);
             localStorage.setItem('prefAudioOutput', audioOutSelect.value);
+
+            // save preferred head model, globally, or per scene
+            if (ARENA.sceneHeadModels) {
+                const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+                sceneHist[ARENA.namespacedScene] = {
+                    ...sceneHist[ARENA.namespacedScene],
+                    headModelPathIdx: headModelPathSelect.selectedIndex,
+                };
+                localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
+            } else {
+                localStorage.setItem('headModelPathIdx', headModelPathSelect.selectedIndex);
+            }
 
             // default is reverse of aframe's default - we want to "drag world to pan"
             const camera = document.getElementById('my-camera');
@@ -267,10 +279,20 @@ window.setupAV = (callback) => {
         }
     }
     setupPanel.classList.remove('d-none');
-    if (localStorage.getItem('headModelPathIdx')) {
-        headModelPathSelect.selectedIndex = localStorage.getItem('headModelPathIdx');
+    let headModelPathIdx = 0;
+    if (ARENA.sceneHeadModels) {
+        const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+        const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
+        if (sceneHeadModelPathIdx != undefined) {
+            headModelPathIdx = sceneHeadModelPathIdx;
+        } else if (headModelPathSelect.selectedIndex == 0) {
+            // if default ARENA head used, replace with default scene head
+            headModelPathIdx = defaultHeadsLen;
+        }
+    } else if (localStorage.getItem('headModelPathIdx')) {
+        headModelPathIdx = localStorage.getItem('headModelPathIdx');
     }
-    headModelPathSelect.disabled = ARENA.sceneHeadModel; // custom scene-options head in use
+    headModelPathSelect.selectedIndex = headModelPathIdx < headModelPathSelect.length ? headModelPathIdx : 0;
     if (localStorage.getItem('display_name')) {
         displayName.value = localStorage.getItem('display_name');
         displayName.focus();

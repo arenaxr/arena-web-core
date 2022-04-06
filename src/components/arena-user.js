@@ -235,6 +235,27 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('visible', false);
     },
 
+    drawVideoPano() {
+        const el = this.el;
+        const data = this.data;
+
+        // attach video to head
+        const videoCube = document.createElement('a-sphere');
+        videoCube.setAttribute('id', this.videoID + 'cube');
+        videoCube.setAttribute('position', '0 0 0');
+        // videoCube.setAttribute('material', 'shader', 'flat');
+        videoCube.setAttribute('material', 'side', 'back');
+        videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
+        videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+        videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
+        videoCube.setAttribute('position', '0 0 0');
+        videoCube.setAttribute('scale', '25 25 25');
+
+        el.appendChild(videoCube);
+
+        this.headModel.setAttribute('visible', false);
+    },
+
     removeVideoCube() {
         const el = this.el;
         const data = this.data;
@@ -265,7 +286,18 @@ AFRAME.registerComponent('arena-user', {
             const jistiVideo = document.getElementById(this.videoID);
             if (jistiVideo) {
                 if (!this.videoCube) {
-                    this.drawVideoCube();
+                    if (data.presence === 'Panoramic') {
+                        // TODO (mwfarb): call to setResolutionRemotes should move to a centralized
+                        // place to consider all users
+                        // update remote resolutions for panoramic
+                        const panoIds = [data.jitsiId];
+                        const dropIds = [];
+                        ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
+
+                        this.drawVideoPano();
+                    } else {
+                        this.drawVideoCube();
+                    }
                 }
             }
         } else {

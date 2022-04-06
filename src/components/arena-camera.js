@@ -127,9 +127,7 @@ AFRAME.registerComponent('arena-camera', {
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');
-        if (ARENA.sceneHeadModel) {
-            msg.data.headModelPath = ARENA.sceneHeadModel;
-        } else if (headModelPathSelect) {
+        if (headModelPathSelect) {
             msg.data.headModelPath = headModelPathSelect.value;
         } else {
             msg.data.headModelPath = ARENA.defaults.headModelPath;
@@ -179,7 +177,7 @@ AFRAME.registerComponent('arena-camera', {
     },
     /**
      * Every tick, update rotation and position of the camera
-     * If a position or rotation change is detected, or time for a heartbet, trigger message publish
+     * If a position or rotation change is detected, or time for a heartbeat, trigger message publish
      * @ignore
      */
     tick: function(t, dt) {

@@ -65,6 +65,21 @@ export class ClientEvent {
                 },
             }, false);
             break;
+        case 'soundplay':
+            if (entityEl.components.sound) {
+                entityEl.components.sound.playSound();
+            }
+            break;
+        case 'soundpause':
+            if (entityEl.components.sound) {
+                entityEl.components.sound.pauseSound();
+            }
+            break;
+        case 'soundstop':
+            if (entityEl.components.sound) {
+                entityEl.components.sound.stopSound();
+            }
+            break;
         default: // handle others here like mouseenter / mouseleave
             break;
         }
