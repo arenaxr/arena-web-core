@@ -25,7 +25,11 @@ jobs:
              git pull
              npm ci
              npm run build
-             cd ..
+             cd ../ARENA-website
+             git checkout main
+             git reset --hard HEAD
+             git pull
+             cd ..           
              cp -R ./ARENA-website/* ./ARENA-core/
              ./prod.sh down
              ./prod.sh up --force-recreate -d 
