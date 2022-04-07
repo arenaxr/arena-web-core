@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.4.0](https://github.com/conix-center/ARENA-core/compare/v1.3.2...v1.4.0) (2022-04-07)
+
+
+### Features
+
+* Add disableVideoCulling flag to scene optionns ([1b95e74](https://github.com/conix-center/ARENA-core/commit/1b95e7404a9ccf91b2bd90210acea26fe8700f66))
+* **avatar:** Added ability to set multiple custom head models per scene ([#432](https://github.com/conix-center/ARENA-core/issues/432)) ([7dbc378](https://github.com/conix-center/ARENA-core/commit/7dbc378e05e1e0bfab22475651ee0b232fb6bfa0))
+* **avatar:** Added custom scene head model ([#425](https://github.com/conix-center/ARENA-core/issues/425)) ([2ac029e](https://github.com/conix-center/ARENA-core/commit/2ac029ed3d5a984f745c39df0ed8ee4d5cf39318))
+* **jitsi:** Add 360 panoramic streaming video sphere ([#427](https://github.com/conix-center/ARENA-core/issues/427)) ([dff4823](https://github.com/conix-center/ARENA-core/commit/dff48237f5ef42355abb475355ee331b4d7ed239))
+* **jitsi:** Add full resolution stats to user-list per participant ([#426](https://github.com/conix-center/ARENA-core/issues/426)) ([0ea0f1a](https://github.com/conix-center/ARENA-core/commit/0ea0f1a3ca2608743de7acfa0970ad36f3fedd58))
+* **jitsi:** add quality stats for screenshare and external ([4536a97](https://github.com/conix-center/ARENA-core/commit/4536a976fa340857dc6eb282977e7ba2496154db))
+* **jitsi:** Added MQTT Jitsi stats debug logging with urlParam ([e507439](https://github.com/conix-center/ARENA-core/commit/e5074399d5411f3ea8daa35dbf7ab18d0d24a1fb))
+* **settings:** Added links for Editor and Docs ([3588926](https://github.com/conix-center/ARENA-core/commit/35889260a2b00059f8da0c561165758a400cf532))
+* **sound:** Add clientEvents: soundplay, soundpause, soundstop ([#433](https://github.com/conix-center/ARENA-core/issues/433)) ([d313202](https://github.com/conix-center/ARENA-core/commit/d31320230365b34fd5c82410b4c3daf046a23e98))
+* **stats:** Add confstats logging of render FPS, RAF, memory ([#431](https://github.com/conix-center/ARENA-core/issues/431)) ([4533bac](https://github.com/conix-center/ARENA-core/commit/4533bac4e0e0358b2b8975f5a1b3c8a6d59ebd7a))
+
+
+### Bug Fixes
+
+* **avatar:** load correct scene head mid-scene ([2f1aeaf](https://github.com/conix-center/ARENA-core/commit/2f1aeaf4245ebe6cb82a68ddefc543a9537d5d95))
+* **chat:** 'to' refresh, only update 'to' select for new users ([b403490](https://github.com/conix-center/ARENA-core/commit/b403490d4715246d0c9718e078ae861336b5bcae))
+* dtitle typo ([84e96e3](https://github.com/conix-center/ARENA-core/commit/84e96e30ab9b572da83fa272aae5f68067ec61aa))
+* enable frstrum culling by default ([fcc9084](https://github.com/conix-center/ARENA-core/commit/fcc9084267eafc8d490cebfd6d0071a0f94ad8c3))
+* minor ([659a24c](https://github.com/conix-center/ARENA-core/commit/659a24c1e3216aec25f1cef9757417bf0f83aafb))
+* update arts viz connection string ([3b9f43a](https://github.com/conix-center/ARENA-core/commit/3b9f43a19683abd5a4167e94cab035d9c4756d45))
+* update webrtc test link ([fa55807](https://github.com/conix-center/ARENA-core/commit/fa5580731c4815a28b845aabfc8f5c705c22b94e))
+* video frustum culling handling ([4eca471](https://github.com/conix-center/ARENA-core/commit/4eca4715a95faceade7ede3ec4741b76fe5eda9f))
+
 ### [1.3.2](https://github.com/conix-center/ARENA-core/compare/v1.3.1...v1.3.2) (2022-03-23)
 
 
