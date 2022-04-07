@@ -27,9 +27,5 @@ jobs:
              git pull
              npm ci
              npm run build
-             cd ../ARENA-website
-             git checkout main
-             git reset --hard HEAD
-             git pull
-             cd  $TARGET
-             cp -R ../ARENA-website/* ${TARGET}/
+             cd ..
+             ./update-custom-website.sh
