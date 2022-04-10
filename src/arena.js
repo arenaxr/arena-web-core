@@ -630,10 +630,10 @@ export class Arena {
                     console.info('Runtime init done.');
                 },
                 name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.username,
-                mqtt_username: this.username,
-                mqtt_token: this.mqttToken,
+                mqttUsername: this.username,
+                mqttToken: this.mqttToken,
             });
-            rtMngr.init();
+            this.RuntimeManager.init();
 
             // start sending console output to mqtt
             // (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)

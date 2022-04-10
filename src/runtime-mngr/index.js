@@ -67,7 +67,7 @@ export class RuntimeMngr {
     uuid = UUID.generate(),
     name = `rt-${Math.round(Math.random() * 10000)}@${navigator.product}`,
     maxNmodules = 0, // TMP: cannot run any modules
-    apis = ["wasi:unstable"],
+    apis = [],
     regTopic = `${realm}/proc/reg`,
     ctlTopic = `${realm}/proc/control`,
     dbgTopic = `${realm}/proc/debug`,
