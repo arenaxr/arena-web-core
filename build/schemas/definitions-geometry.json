@@ -9,10 +9,11 @@
       "jitsi-video": {
         "description": "Apply a jitsi video source to the geometry",
         "title": "Jitsi Video",
+        "type":"object",
         "properties": {
             "jitsiId": {
                 "description": "JitsiId of the video source; If defined will override displayName",
-                "type": "string"                
+                "type": "string"
             },
             "displayName": {
                 "description": "ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. (* change requires reload* ) ",
@@ -20,9 +21,9 @@
             }
         },
         "required": ["displayName"]
-      },      
+      },
       "material": {
-        "description": "The material properties of the object’s surface.",
+        "description": "The material properties of the object’s surface. \n\nMore properties at https://aframe.io/docs/1.3.0/components/material.html",
         "properties": {
           "alphaTest": {
             "default": 0,
@@ -162,7 +163,7 @@
           "encoding": "sRGBEncoding",
           "needsUpdate": false
         },
-        "description": "Define extra material properties.",
+        "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at https://threejs.org/docs/#api/en/materials/Material",
         "properties": {
           "encoding": {
             "default": "sRGBEncoding",
@@ -188,7 +189,7 @@
             "default": "1",
             "description": "This value allows the default rendering order of scene graph objects to be overridden.",
             "type": "number"
-          },  
+          },
           "colorWrite": {
             "description": "Whether to render the material’s color",
             "type": "boolean"
@@ -200,7 +201,7 @@
           "defaultRenderOrder": {
             "description": "Used as the renderOrder when transparentOccluder is reset to false.",
             "type": "number"
-          }               
+          }
         },
         "title": "Material extras",
         "type": "object"
