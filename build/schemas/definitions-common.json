@@ -348,7 +348,7 @@
           "default":{
              "encoding":"sRGBEncoding"
           },
-          "description":"Define extra material properties. See more properties at https://threejs.org/docs/#api/en/materials/Material",
+          "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at https://threejs.org/docs/#api/en/materials/Material",
           "properties":{
              "overrideSrc":{
                 "type":"string",
