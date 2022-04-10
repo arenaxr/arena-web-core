@@ -1,48 +1,352 @@
-parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcelRequire,u="function"==typeof require&&require;function f(t,n){if(!r[t]){if(!e[t]){var i="function"==typeof parcelRequire&&parcelRequire;if(!n&&i)return i(t,!0);if(o)return o(t,!0);if(u&&"string"==typeof t)return u(t);var c=new Error("Cannot find module '"+t+"'");throw c.code="MODULE_NOT_FOUND",c}p.resolve=function(r){return e[t][1][r]||r},p.cache={};var l=r[t]=new f.Module(t);e[t][0].call(l.exports,p,l,l.exports,this)}return r[t].exports;function p(e){return f(p.resolve(e))}}f.isParcelRequire=!0,f.Module=function(e){this.id=e,this.bundle=f,this.exports={}},f.modules=e,f.cache=r,f.parent=o,f.register=function(r,t){e[r]=[function(e,r){r.exports=t},{}]};for(var c=0;c<t.length;c++)try{f(t[c])}catch(e){i||(i=e)}if(t.length){var l=f(t[t.length-1]);"object"==typeof exports&&"undefined"!=typeof module?module.exports=l:"function"==typeof define&&define.amd?define(function(){return l}):n&&(this[n]=l)}if(parcelRequire=f,i)throw i;return f}({"gKk3":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=o;var e="undefined"!=typeof crypto&&crypto.getRandomValues&&crypto.getRandomValues.bind(crypto)||"undefined"!=typeof msCrypto&&"function"==typeof msCrypto.getRandomValues&&msCrypto.getRandomValues.bind(msCrypto),t=new Uint8Array(16);function o(){if(!e)throw new Error("crypto.getRandomValues() not supported. See https://github.com/uuidjs/uuid#getrandomvalues-not-supported");return e(t)}
-},{}],"jqeo":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;for(var e=[],r=0;r<256;++r)e[r]=(r+256).toString(16).substr(1);function t(r,t){var o=t||0,s=e;return[s[r[o++]],s[r[o++]],s[r[o++]],s[r[o++]],"-",s[r[o++]],s[r[o++]],"-",s[r[o++]],s[r[o++]],"-",s[r[o++]],s[r[o++]],"-",s[r[o++]],s[r[o++]],s[r[o++]],s[r[o++]],s[r[o++]],s[r[o++]]].join("")}var o=t;exports.default=o;
-},{}],"qgnI":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var e,r,s=u(require("./rng.js")),o=u(require("./bytesToUuid.js"));function u(e){return e&&e.__esModule?e:{default:e}}var t=0,n=0;function a(u,a,d){var l=a&&d||0,i=a||[],c=(u=u||{}).node||e,v=void 0!==u.clockseq?u.clockseq:r;if(null==c||null==v){var f=u.random||(u.rng||s.default)();null==c&&(c=e=[1|f[0],f[1],f[2],f[3],f[4],f[5]]),null==v&&(v=r=16383&(f[6]<<8|f[7]))}var m=void 0!==u.msecs?u.msecs:(new Date).getTime(),q=void 0!==u.nsecs?u.nsecs:n+1,p=m-t+(q-n)/1e4;if(p<0&&void 0===u.clockseq&&(v=v+1&16383),(p<0||m>t)&&void 0===u.nsecs&&(q=0),q>=1e4)throw new Error("uuid.v1(): Can't create more than 10M uuids/sec");t=m,n=q,r=v;var _=(1e4*(268435455&(m+=122192928e5))+q)%4294967296;i[l++]=_>>>24&255,i[l++]=_>>>16&255,i[l++]=_>>>8&255,i[l++]=255&_;var g=m/4294967296*1e4&268435455;i[l++]=g>>>8&255,i[l++]=255&g,i[l++]=g>>>24&15|16,i[l++]=g>>>16&255,i[l++]=v>>>8|128,i[l++]=255&v;for(var j=0;j<6;++j)i[l+j]=c[j];return a||(0,o.default)(i)}var d=a;exports.default=d;
-},{"./rng.js":"gKk3","./bytesToUuid.js":"jqeo"}],"Y6ie":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=u,exports.URL=exports.DNS=void 0;var r=e(require("./bytesToUuid.js"));function e(r){return r&&r.__esModule?r:{default:r}}function t(r){var e=[];return r.replace(/[a-fA-F0-9]{2}/g,function(r){e.push(parseInt(r,16))}),e}function a(r){r=unescape(encodeURIComponent(r));for(var e=new Array(r.length),t=0;t<r.length;t++)e[t]=r.charCodeAt(t);return e}var n="6ba7b810-9dad-11d1-80b4-00c04fd430c8";exports.DNS=n;var o="6ba7b811-9dad-11d1-80b4-00c04fd430c8";function u(e,u,s){var f=function(e,n,o,f){var c=o&&f||0;if("string"==typeof e&&(e=a(e)),"string"==typeof n&&(n=t(n)),!Array.isArray(e))throw TypeError("value must be an array of bytes");if(!Array.isArray(n)||16!==n.length)throw TypeError("namespace must be uuid string or an Array of 16 byte values");var i=s(n.concat(e));if(i[6]=15&i[6]|u,i[8]=63&i[8]|128,o)for(var d=0;d<16;++d)o[c+d]=i[d];return o||(0,r.default)(i)};try{f.name=e}catch(c){}return f.DNS=n,f.URL=o,f}exports.URL=o;
-},{"./bytesToUuid.js":"jqeo"}],"bGV3":[function(require,module,exports) {
-"use strict";function n(n){if("string"==typeof n){var u=unescape(encodeURIComponent(n));n=new Array(u.length);for(var o=0;o<u.length;o++)n[o]=u.charCodeAt(o)}return r(t(e(n),8*n.length))}function r(n){var r,t,e,u=[],o=32*n.length;for(r=0;r<o;r+=8)t=n[r>>5]>>>r%32&255,e=parseInt("0123456789abcdef".charAt(t>>>4&15)+"0123456789abcdef".charAt(15&t),16),u.push(e);return u}function t(n,r){var t,e,o,f,l;n[r>>5]|=128<<r%32,n[14+(r+64>>>9<<4)]=r;var v=1732584193,d=-271733879,s=-1732584194,g=271733878;for(t=0;t<n.length;t+=16)e=v,o=d,f=s,l=g,v=a(v,d,s,g,n[t],7,-680876936),g=a(g,v,d,s,n[t+1],12,-389564586),s=a(s,g,v,d,n[t+2],17,606105819),d=a(d,s,g,v,n[t+3],22,-1044525330),v=a(v,d,s,g,n[t+4],7,-176418897),g=a(g,v,d,s,n[t+5],12,1200080426),s=a(s,g,v,d,n[t+6],17,-1473231341),d=a(d,s,g,v,n[t+7],22,-45705983),v=a(v,d,s,g,n[t+8],7,1770035416),g=a(g,v,d,s,n[t+9],12,-1958414417),s=a(s,g,v,d,n[t+10],17,-42063),d=a(d,s,g,v,n[t+11],22,-1990404162),v=a(v,d,s,g,n[t+12],7,1804603682),g=a(g,v,d,s,n[t+13],12,-40341101),s=a(s,g,v,d,n[t+14],17,-1502002290),v=c(v,d=a(d,s,g,v,n[t+15],22,1236535329),s,g,n[t+1],5,-165796510),g=c(g,v,d,s,n[t+6],9,-1069501632),s=c(s,g,v,d,n[t+11],14,643717713),d=c(d,s,g,v,n[t],20,-373897302),v=c(v,d,s,g,n[t+5],5,-701558691),g=c(g,v,d,s,n[t+10],9,38016083),s=c(s,g,v,d,n[t+15],14,-660478335),d=c(d,s,g,v,n[t+4],20,-405537848),v=c(v,d,s,g,n[t+9],5,568446438),g=c(g,v,d,s,n[t+14],9,-1019803690),s=c(s,g,v,d,n[t+3],14,-187363961),d=c(d,s,g,v,n[t+8],20,1163531501),v=c(v,d,s,g,n[t+13],5,-1444681467),g=c(g,v,d,s,n[t+2],9,-51403784),s=c(s,g,v,d,n[t+7],14,1735328473),v=i(v,d=c(d,s,g,v,n[t+12],20,-1926607734),s,g,n[t+5],4,-378558),g=i(g,v,d,s,n[t+8],11,-2022574463),s=i(s,g,v,d,n[t+11],16,1839030562),d=i(d,s,g,v,n[t+14],23,-35309556),v=i(v,d,s,g,n[t+1],4,-1530992060),g=i(g,v,d,s,n[t+4],11,1272893353),s=i(s,g,v,d,n[t+7],16,-155497632),d=i(d,s,g,v,n[t+10],23,-1094730640),v=i(v,d,s,g,n[t+13],4,681279174),g=i(g,v,d,s,n[t],11,-358537222),s=i(s,g,v,d,n[t+3],16,-722521979),d=i(d,s,g,v,n[t+6],23,76029189),v=i(v,d,s,g,n[t+9],4,-640364487),g=i(g,v,d,s,n[t+12],11,-421815835),s=i(s,g,v,d,n[t+15],16,530742520),v=h(v,d=i(d,s,g,v,n[t+2],23,-995338651),s,g,n[t],6,-198630844),g=h(g,v,d,s,n[t+7],10,1126891415),s=h(s,g,v,d,n[t+14],15,-1416354905),d=h(d,s,g,v,n[t+5],21,-57434055),v=h(v,d,s,g,n[t+12],6,1700485571),g=h(g,v,d,s,n[t+3],10,-1894986606),s=h(s,g,v,d,n[t+10],15,-1051523),d=h(d,s,g,v,n[t+1],21,-2054922799),v=h(v,d,s,g,n[t+8],6,1873313359),g=h(g,v,d,s,n[t+15],10,-30611744),s=h(s,g,v,d,n[t+6],15,-1560198380),d=h(d,s,g,v,n[t+13],21,1309151649),v=h(v,d,s,g,n[t+4],6,-145523070),g=h(g,v,d,s,n[t+11],10,-1120210379),s=h(s,g,v,d,n[t+2],15,718787259),d=h(d,s,g,v,n[t+9],21,-343485551),v=u(v,e),d=u(d,o),s=u(s,f),g=u(g,l);return[v,d,s,g]}function e(n){var r,t=[];for(t[(n.length>>2)-1]=void 0,r=0;r<t.length;r+=1)t[r]=0;var e=8*n.length;for(r=0;r<e;r+=8)t[r>>5]|=(255&n[r/8])<<r%32;return t}function u(n,r){var t=(65535&n)+(65535&r);return(n>>16)+(r>>16)+(t>>16)<<16|65535&t}function o(n,r){return n<<r|n>>>32-r}function f(n,r,t,e,f,a){return u(o(u(u(r,n),u(e,a)),f),t)}function a(n,r,t,e,u,o,a){return f(r&t|~r&e,n,r,u,o,a)}function c(n,r,t,e,u,o,a){return f(r&e|t&~e,n,r,u,o,a)}function i(n,r,t,e,u,o,a){return f(r^t^e,n,r,u,o,a)}function h(n,r,t,e,u,o,a){return f(t^(r|~e),n,r,u,o,a)}Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var l=n;exports.default=l;
-},{}],"vJdu":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var e=t(require("./v35.js")),r=t(require("./md5.js"));function t(e){return e&&e.__esModule?e:{default:e}}var u=(0,e.default)("v3",48,r.default),d=u;exports.default=d;
-},{"./v35.js":"Y6ie","./md5.js":"bGV3"}],"K7Zs":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var e=t(require("./rng.js")),r=t(require("./bytesToUuid.js"));function t(e){return e&&e.__esModule?e:{default:e}}function u(t,u,n){var a=u&&n||0;"string"==typeof t&&(u="binary"===t?new Array(16):null,t=null);var o=(t=t||{}).random||(t.rng||e.default)();if(o[6]=15&o[6]|64,o[8]=63&o[8]|128,u)for(var l=0;l<16;++l)u[a+l]=o[l];return u||(0,r.default)(o)}var n=u;exports.default=n;
-},{"./rng.js":"gKk3","./bytesToUuid.js":"jqeo"}],"MvYZ":[function(require,module,exports) {
-"use strict";function r(r,e,t,n){switch(r){case 0:return e&t^~e&n;case 1:return e^t^n;case 2:return e&t^e&n^t&n;case 3:return e^t^n}}function e(r,e){return r<<e|r>>>32-e}function t(t){var n=[1518500249,1859775393,2400959708,3395469782],a=[1732584193,4023233417,2562383102,271733878,3285377520];if("string"==typeof t){var o=unescape(encodeURIComponent(t));t=new Array(o.length);for(var f=0;f<o.length;f++)t[f]=o.charCodeAt(f)}t.push(128);var u=t.length/4+2,c=Math.ceil(u/16),s=new Array(c);for(f=0;f<c;f++){s[f]=new Array(16);for(var h=0;h<16;h++)s[f][h]=t[64*f+4*h]<<24|t[64*f+4*h+1]<<16|t[64*f+4*h+2]<<8|t[64*f+4*h+3]}s[c-1][14]=8*(t.length-1)/Math.pow(2,32),s[c-1][14]=Math.floor(s[c-1][14]),s[c-1][15]=8*(t.length-1)&4294967295;for(f=0;f<c;f++){for(var l=new Array(80),v=0;v<16;v++)l[v]=s[f][v];for(v=16;v<80;v++)l[v]=e(l[v-3]^l[v-8]^l[v-14]^l[v-16],1);var i=a[0],p=a[1],d=a[2],g=a[3],w=a[4];for(v=0;v<80;v++){var y=Math.floor(v/20),A=e(i,5)+r(y,p,d,g)+w+n[y]+l[v]>>>0;w=g,g=d,d=e(p,30)>>>0,p=i,i=A}a[0]=a[0]+i>>>0,a[1]=a[1]+p>>>0,a[2]=a[2]+d>>>0,a[3]=a[3]+g>>>0,a[4]=a[4]+w>>>0}return[a[0]>>24&255,a[0]>>16&255,a[0]>>8&255,255&a[0],a[1]>>24&255,a[1]>>16&255,a[1]>>8&255,255&a[1],a[2]>>24&255,a[2]>>16&255,a[2]>>8&255,255&a[2],a[3]>>24&255,a[3]>>16&255,a[3]>>8&255,255&a[3],a[4]>>24&255,a[4]>>16&255,a[4]>>8&255,255&a[4]]}Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var n=t;exports.default=n;
-},{}],"K2oB":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var e=t(require("./v35.js")),r=t(require("./sha1.js"));function t(e){return e&&e.__esModule?e:{default:e}}var u=(0,e.default)("v5",80,r.default),s=u;exports.default=s;
-},{"./v35.js":"Y6ie","./sha1.js":"MvYZ"}],"UeUD":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),Object.defineProperty(exports,"v1",{enumerable:!0,get:function(){return e.default}}),Object.defineProperty(exports,"v3",{enumerable:!0,get:function(){return r.default}}),Object.defineProperty(exports,"v4",{enumerable:!0,get:function(){return t.default}}),Object.defineProperty(exports,"v5",{enumerable:!0,get:function(){return u.default}});var e=n(require("./v1.js")),r=n(require("./v3.js")),t=n(require("./v4.js")),u=n(require("./v5.js"));function n(e){return e&&e.__esModule?e:{default:e}}
-},{"./v1.js":"qgnI","./v3.js":"vJdu","./v4.js":"K7Zs","./v5.js":"K2oB"}],"tgmD":[function(require,module,exports) {
-"use strict";module.exports=(e=>encodeURIComponent(e).replace(/[!'()*]/g,e=>`%${e.charCodeAt(0).toString(16).toUpperCase()}`));
-},{}],"YtoU":[function(require,module,exports) {
-"use strict";var e="%[a-f0-9]{2}",t=new RegExp(e,"gi"),r=new RegExp("("+e+")+","gi");function n(e,t){try{return decodeURIComponent(e.join(""))}catch(c){}if(1===e.length)return e;t=t||1;var r=e.slice(0,t),o=e.slice(t);return Array.prototype.concat.call([],n(r),n(o))}function o(e){try{return decodeURIComponent(e)}catch(c){for(var r=e.match(t),o=1;o<r.length;o++)r=(e=n(r,o).join("")).match(t);return e}}function c(e){for(var t={"%FE%FF":"��","%FF%FE":"��"},n=r.exec(e);n;){try{t[n[0]]=decodeURIComponent(n[0])}catch(u){var c=o(n[0]);c!==n[0]&&(t[n[0]]=c)}n=r.exec(e)}t["%C2"]="�";for(var a=Object.keys(t),p=0;p<a.length;p++){var i=a[p];e=e.replace(new RegExp(i,"g"),t[i])}return e}module.exports=function(e){if("string"!=typeof e)throw new TypeError("Expected `encodedURI` to be of type `string`, got `"+typeof e+"`");try{return e=e.replace(/\+/g," "),decodeURIComponent(e)}catch(t){return c(e)}};
-},{}],"SVkH":[function(require,module,exports) {
-"use strict";module.exports=((e,t)=>{if("string"!=typeof e||"string"!=typeof t)throw new TypeError("Expected the arguments to be of type `string`");if(""===t)return[e];const r=e.indexOf(t);return-1===r?[e]:[e.slice(0,r),e.slice(r+t.length)]});
-},{}],"TuMS":[function(require,module,exports) {
-"use strict";const r=require("strict-uri-encode"),e=require("decode-uri-component"),t=require("split-on-first"),n=r=>null==r;function o(r){switch(r.arrayFormat){case"index":return e=>(t,n)=>{const o=t.length;return void 0===n||r.skipNull&&null===n||r.skipEmptyString&&""===n?t:null===n?[...t,[i(e,r),"[",o,"]"].join("")]:[...t,[i(e,r),"[",i(o,r),"]=",i(n,r)].join("")]};case"bracket":return e=>(t,n)=>void 0===n||r.skipNull&&null===n||r.skipEmptyString&&""===n?t:null===n?[...t,[i(e,r),"[]"].join("")]:[...t,[i(e,r),"[]=",i(n,r)].join("")];case"comma":case"separator":return e=>(t,n)=>null==n||0===n.length?t:0===t.length?[[i(e,r),"=",i(n,r)].join("")]:[[t,i(n,r)].join(r.arrayFormatSeparator)];default:return e=>(t,n)=>void 0===n||r.skipNull&&null===n||r.skipEmptyString&&""===n?t:null===n?[...t,i(e,r)]:[...t,[i(e,r),"=",i(n,r)].join("")]}}function s(r){let e;switch(r.arrayFormat){case"index":return(r,t,n)=>{e=/\[(\d*)\]$/.exec(r),r=r.replace(/\[\d*\]$/,""),e?(void 0===n[r]&&(n[r]={}),n[r][e[1]]=t):n[r]=t};case"bracket":return(r,t,n)=>{e=/(\[\])$/.exec(r),r=r.replace(/\[\]$/,""),e?void 0!==n[r]?n[r]=[].concat(n[r],t):n[r]=[t]:n[r]=t};case"comma":case"separator":return(e,t,n)=>{const o="string"==typeof t&&t.includes(r.arrayFormatSeparator),s="string"==typeof t&&!o&&c(t,r).includes(r.arrayFormatSeparator);t=s?c(t,r):t;const a=o||s?t.split(r.arrayFormatSeparator).map(e=>c(e,r)):null===t?t:c(t,r);n[e]=a};default:return(r,e,t)=>{void 0!==t[r]?t[r]=[].concat(t[r],e):t[r]=e}}}function a(r){if("string"!=typeof r||1!==r.length)throw new TypeError("arrayFormatSeparator must be single character string")}function i(e,t){return t.encode?t.strict?r(e):encodeURIComponent(e):e}function c(r,t){return t.decode?e(r):r}function u(r){return Array.isArray(r)?r.sort():"object"==typeof r?u(Object.keys(r)).sort((r,e)=>Number(r)-Number(e)).map(e=>r[e]):r}function l(r){const e=r.indexOf("#");return-1!==e&&(r=r.slice(0,e)),r}function p(r){let e="";const t=r.indexOf("#");return-1!==t&&(e=r.slice(t)),e}function f(r){const e=(r=l(r)).indexOf("?");return-1===e?"":r.slice(e+1)}function y(r,e){return e.parseNumbers&&!Number.isNaN(Number(r))&&"string"==typeof r&&""!==r.trim()?r=Number(r):!e.parseBooleans||null===r||"true"!==r.toLowerCase()&&"false"!==r.toLowerCase()||(r="true"===r.toLowerCase()),r}function m(r,e){a((e=Object.assign({decode:!0,sort:!0,arrayFormat:"none",arrayFormatSeparator:",",parseNumbers:!1,parseBooleans:!1},e)).arrayFormatSeparator);const n=s(e),o=Object.create(null);if("string"!=typeof r)return o;if(!(r=r.trim().replace(/^[?#&]/,"")))return o;for(const s of r.split("&")){let[r,a]=t(e.decode?s.replace(/\+/g," "):s,"=");a=void 0===a?null:["comma","separator"].includes(e.arrayFormat)?a:c(a,e),n(c(r,e),a,o)}for(const t of Object.keys(o)){const r=o[t];if("object"==typeof r&&null!==r)for(const t of Object.keys(r))r[t]=y(r[t],e);else o[t]=y(r,e)}return!1===e.sort?o:(!0===e.sort?Object.keys(o).sort():Object.keys(o).sort(e.sort)).reduce((r,e)=>{const t=o[e];return Boolean(t)&&"object"==typeof t&&!Array.isArray(t)?r[e]=u(t):r[e]=t,r},Object.create(null))}exports.extract=f,exports.parse=m,exports.stringify=((r,e)=>{if(!r)return"";a((e=Object.assign({encode:!0,strict:!0,arrayFormat:"none",arrayFormatSeparator:","},e)).arrayFormatSeparator);const t=t=>e.skipNull&&n(r[t])||e.skipEmptyString&&""===r[t],s=o(e),c={};for(const n of Object.keys(r))t(n)||(c[n]=r[n]);const u=Object.keys(c);return!1!==e.sort&&u.sort(e.sort),u.map(t=>{const n=r[t];return void 0===n?"":null===n?i(t,e):Array.isArray(n)?n.reduce(s(t),[]).join("&"):i(t,e)+"="+i(n,e)}).filter(r=>r.length>0).join("&")}),exports.parseUrl=((r,e)=>{e=Object.assign({decode:!0},e);const[n,o]=t(r,"#");return Object.assign({url:n.split("?")[0]||"",query:m(f(r),e)},e&&e.parseFragmentIdentifier&&o?{fragmentIdentifier:c(o,e)}:{})}),exports.stringifyUrl=((r,e)=>{e=Object.assign({encode:!0,strict:!0},e);const t=l(r.url).split("?")[0]||"",n=exports.extract(r.url),o=exports.parse(n,{sort:!1}),s=Object.assign(o,r.query);let a=exports.stringify(s,e);a&&(a=`?${a}`);let c=p(r.url);return r.fragmentIdentifier&&(c=`#${i(r.fragmentIdentifier,e)}`),`${t}${a}${c}`});
-},{"strict-uri-encode":"tgmD","decode-uri-component":"YtoU","split-on-first":"SVkH"}],"KWZs":[function(require,module,exports) {
-var define;
-var global = arguments[3];
-var e,t=arguments[3];!function(t,s){"object"==typeof exports&&"object"==typeof module?module.exports=s():"function"==typeof e&&e.amd?e(s):"object"==typeof exports?exports=s():t.Paho=s()}(this,function(){return function(e){var t,s=e.localStorage||(t={},{setItem:function(e,s){t[e]=s},getItem:function(e){return t[e]},removeItem:function(e){delete t[e]}}),n={CONNECT:1,CONNACK:2,PUBLISH:3,PUBACK:4,PUBREC:5,PUBREL:6,PUBCOMP:7,SUBSCRIBE:8,SUBACK:9,UNSUBSCRIBE:10,UNSUBACK:11,PINGREQ:12,PINGRESP:13,DISCONNECT:14},i=function(e,t){for(var s in e)if(e.hasOwnProperty(s)){if(!t.hasOwnProperty(s)){var n="Unknown property, "+s+". Valid properties are:";for(var i in t)t.hasOwnProperty(i)&&(n=n+" "+i);throw new Error(n)}if(typeof e[s]!==t[s])throw new Error(a(r.INVALID_TYPE,[typeof e[s],s]))}},o=function(e,t){return function(){return e.apply(t,arguments)}},r={OK:{code:0,text:"AMQJSC0000I OK."},CONNECT_TIMEOUT:{code:1,text:"AMQJSC0001E Connect timed out."},SUBSCRIBE_TIMEOUT:{code:2,text:"AMQJS0002E Subscribe timed out."},UNSUBSCRIBE_TIMEOUT:{code:3,text:"AMQJS0003E Unsubscribe timed out."},PING_TIMEOUT:{code:4,text:"AMQJS0004E Ping timed out."},INTERNAL_ERROR:{code:5,text:"AMQJS0005E Internal error. Error Message: {0}, Stack trace: {1}"},CONNACK_RETURNCODE:{code:6,text:"AMQJS0006E Bad Connack return code:{0} {1}."},SOCKET_ERROR:{code:7,text:"AMQJS0007E Socket error:{0}."},SOCKET_CLOSE:{code:8,text:"AMQJS0008I Socket closed."},MALFORMED_UTF:{code:9,text:"AMQJS0009E Malformed UTF data:{0} {1} {2}."},UNSUPPORTED:{code:10,text:"AMQJS0010E {0} is not supported by this browser."},INVALID_STATE:{code:11,text:"AMQJS0011E Invalid state {0}."},INVALID_TYPE:{code:12,text:"AMQJS0012E Invalid type {0} for {1}."},INVALID_ARGUMENT:{code:13,text:"AMQJS0013E Invalid argument {0} for {1}."},UNSUPPORTED_OPERATION:{code:14,text:"AMQJS0014E Unsupported operation."},INVALID_STORED_DATA:{code:15,text:"AMQJS0015E Invalid data in local storage key={0} value={1}."},INVALID_MQTT_MESSAGE_TYPE:{code:16,text:"AMQJS0016E Invalid MQTT message type {0}."},MALFORMED_UNICODE:{code:17,text:"AMQJS0017E Malformed Unicode string:{0} {1}."},BUFFER_FULL:{code:18,text:"AMQJS0018E Message buffer is full, maximum buffer size: {0}."}},c={0:"Connection Accepted",1:"Connection Refused: unacceptable protocol version",2:"Connection Refused: identifier rejected",3:"Connection Refused: server unavailable",4:"Connection Refused: bad user name or password",5:"Connection Refused: not authorized"},a=function(e,t){var s=e.text;if(t)for(var n,i,o=0;o<t.length;o++)if(n="{"+o+"}",(i=s.indexOf(n))>0){var r=s.substring(0,i),c=s.substring(i+n.length);s=r+t[o]+c}return s},h=[0,6,77,81,73,115,100,112,3],u=[0,4,77,81,84,84,4],d=function(e,t){for(var s in this.type=e,t)t.hasOwnProperty(s)&&(this[s]=t[s])};function l(e,t){var s,i=t,o=e[t],r=o>>4,c=o&=15;t+=1;var a=0,h=1;do{if(t==e.length)return[null,i];a+=(127&(s=e[t++]))*h,h*=128}while(0!=(128&s));var u=t+a;if(u>e.length)return[null,i];var l=new d(r);switch(r){case n.CONNACK:1&e[t++]&&(l.sessionPresent=!0),l.returnCode=e[t++];break;case n.PUBLISH:var f=c>>1&3,_=g(e,t),p=E(e,t+=2,_);t+=_,f>0&&(l.messageIdentifier=g(e,t),t+=2);var I=new w(e.subarray(t,u));1==(1&c)&&(I.retained=!0),8==(8&c)&&(I.duplicate=!0),I.qos=f,I.destinationName=p,l.payloadMessage=I;break;case n.PUBACK:case n.PUBREC:case n.PUBREL:case n.PUBCOMP:case n.UNSUBACK:l.messageIdentifier=g(e,t);break;case n.SUBACK:l.messageIdentifier=g(e,t),t+=2,l.returnCode=e.subarray(t,u)}return[l,u]}function f(e,t,s){return t[s++]=e>>8,t[s++]=e%256,s}function _(e,t,s,n){return I(e,s,n=f(t,s,n)),n+t}function g(e,t){return 256*e[t]+e[t+1]}function p(e){for(var t=0,s=0;s<e.length;s++){var n=e.charCodeAt(s);n>2047?(55296<=n&&n<=56319&&(s++,t++),t+=3):n>127?t+=2:t++}return t}function I(e,t,s){for(var n=s,i=0;i<e.length;i++){var o=e.charCodeAt(i);if(55296<=o&&o<=56319){var c=e.charCodeAt(++i);if(isNaN(c))throw new Error(a(r.MALFORMED_UNICODE,[o,c]));o=c-56320+(o-55296<<10)+65536}o<=127?t[n++]=o:o<=2047?(t[n++]=o>>6&31|192,t[n++]=63&o|128):o<=65535?(t[n++]=o>>12&15|224,t[n++]=o>>6&63|128,t[n++]=63&o|128):(t[n++]=o>>18&7|240,t[n++]=o>>12&63|128,t[n++]=o>>6&63|128,t[n++]=63&o|128)}return t}function E(e,t,s){for(var n,i="",o=t;o<t+s;){var c=e[o++];if(c<128)n=c;else{var h=e[o++]-128;if(h<0)throw new Error(a(r.MALFORMED_UTF,[c.toString(16),h.toString(16),""]));if(c<224)n=64*(c-192)+h;else{var u=e[o++]-128;if(u<0)throw new Error(a(r.MALFORMED_UTF,[c.toString(16),h.toString(16),u.toString(16)]));if(c<240)n=4096*(c-224)+64*h+u;else{var d=e[o++]-128;if(d<0)throw new Error(a(r.MALFORMED_UTF,[c.toString(16),h.toString(16),u.toString(16),d.toString(16)]));if(!(c<248))throw new Error(a(r.MALFORMED_UTF,[c.toString(16),h.toString(16),u.toString(16),d.toString(16)]));n=262144*(c-240)+4096*h+64*u+d}}}n>65535&&(n-=65536,i+=String.fromCharCode(55296+(n>>10)),n=56320+(1023&n)),i+=String.fromCharCode(n)}return i}d.prototype.encode=function(){var e,t=(15&this.type)<<4,s=0,i=[],o=0;switch(void 0!==this.messageIdentifier&&(s+=2),this.type){case n.CONNECT:switch(this.mqttVersion){case 3:s+=h.length+3;break;case 4:s+=u.length+3}s+=p(this.clientId)+2,void 0!==this.willMessage&&(s+=p(this.willMessage.destinationName)+2,(e=this.willMessage.payloadBytes)instanceof Uint8Array||(e=new Uint8Array(c)),s+=e.byteLength+2),void 0!==this.userName&&(s+=p(this.userName)+2),void 0!==this.password&&(s+=p(this.password)+2);break;case n.SUBSCRIBE:t|=2;for(var r=0;r<this.topics.length;r++)i[r]=p(this.topics[r]),s+=i[r]+2;s+=this.requestedQos.length;break;case n.UNSUBSCRIBE:t|=2;for(r=0;r<this.topics.length;r++)i[r]=p(this.topics[r]),s+=i[r]+2;break;case n.PUBREL:t|=2;break;case n.PUBLISH:this.payloadMessage.duplicate&&(t|=8),t=t|=this.payloadMessage.qos<<1,this.payloadMessage.retained&&(t|=1),s+=(o=p(this.payloadMessage.destinationName))+2;var c=this.payloadMessage.payloadBytes;s+=c.byteLength,c instanceof ArrayBuffer?c=new Uint8Array(c):c instanceof Uint8Array||(c=new Uint8Array(c.buffer));break;case n.DISCONNECT:}var a=function(e){var t=new Array(1),s=0;do{var n=e%128;(e>>=7)>0&&(n|=128),t[s++]=n}while(e>0&&s<4);return t}(s),d=a.length+1,l=new ArrayBuffer(s+d),g=new Uint8Array(l);if(g[0]=t,g.set(a,1),this.type==n.PUBLISH)d=_(this.payloadMessage.destinationName,o,g,d);else if(this.type==n.CONNECT){switch(this.mqttVersion){case 3:g.set(h,d),d+=h.length;break;case 4:g.set(u,d),d+=u.length}var I=0;this.cleanSession&&(I=2),void 0!==this.willMessage&&(I|=4,I|=this.willMessage.qos<<3,this.willMessage.retained&&(I|=32)),void 0!==this.userName&&(I|=128),void 0!==this.password&&(I|=64),g[d++]=I,d=f(this.keepAliveInterval,g,d)}switch(void 0!==this.messageIdentifier&&(d=f(this.messageIdentifier,g,d)),this.type){case n.CONNECT:d=_(this.clientId,p(this.clientId),g,d),void 0!==this.willMessage&&(d=_(this.willMessage.destinationName,p(this.willMessage.destinationName),g,d),d=f(e.byteLength,g,d),g.set(e,d),d+=e.byteLength),void 0!==this.userName&&(d=_(this.userName,p(this.userName),g,d)),void 0!==this.password&&(d=_(this.password,p(this.password),g,d));break;case n.PUBLISH:g.set(c,d);break;case n.SUBSCRIBE:for(r=0;r<this.topics.length;r++)d=_(this.topics[r],i[r],g,d),g[d++]=this.requestedQos[r];break;case n.UNSUBSCRIBE:for(r=0;r<this.topics.length;r++)d=_(this.topics[r],i[r],g,d)}return l};var v=function(e,t){this._client=e,this._keepAliveInterval=1e3*t,this.isReset=!1;var s=new d(n.PINGREQ).encode(),i=function(e){return function(){return o.apply(e)}},o=function(){this.isReset?(this.isReset=!1,this._client._trace("Pinger.doPing","send PINGREQ"),this._client.socket.send(s),this.timeout=setTimeout(i(this),this._keepAliveInterval)):(this._client._trace("Pinger.doPing","Timed out"),this._client._disconnected(r.PING_TIMEOUT.code,a(r.PING_TIMEOUT)))};this.reset=function(){this.isReset=!0,clearTimeout(this.timeout),this._keepAliveInterval>0&&(this.timeout=setTimeout(i(this),this._keepAliveInterval))},this.cancel=function(){clearTimeout(this.timeout)}},m=function(e,t,s,n){t||(t=30);this.timeout=setTimeout(function(e,t,s){return function(){return e.apply(t,s)}}(s,e,n),1e3*t),this.cancel=function(){clearTimeout(this.timeout)}},y=function(t,n,i,o,c){if(!("WebSocket"in e&&null!==e.WebSocket))throw new Error(a(r.UNSUPPORTED,["WebSocket"]));if(!("ArrayBuffer"in e&&null!==e.ArrayBuffer))throw new Error(a(r.UNSUPPORTED,["ArrayBuffer"]));for(var h in this._trace("Paho.Client",t,n,i,o,c),this.host=n,this.port=i,this.path=o,this.uri=t,this.clientId=c,this._wsuri=null,this._localKey=n+":"+i+("/mqtt"!=o?":"+o:"")+":"+c+":",this._msg_queue=[],this._buffered_msg_queue=[],this._sentMessages={},this._receivedMessages={},this._notify_msg_sent={},this._message_identifier=1,this._sequence=0,s)0!==h.indexOf("Sent:"+this._localKey)&&0!==h.indexOf("Received:"+this._localKey)||this.restore(h)};y.prototype.host=null,y.prototype.port=null,y.prototype.path=null,y.prototype.uri=null,y.prototype.clientId=null,y.prototype.socket=null,y.prototype.connected=!1,y.prototype.maxMessageIdentifier=65536,y.prototype.connectOptions=null,y.prototype.hostIndex=null,y.prototype.onConnected=null,y.prototype.onConnectionLost=null,y.prototype.onMessageDelivered=null,y.prototype.onMessageArrived=null,y.prototype.traceFunction=null,y.prototype._msg_queue=null,y.prototype._buffered_msg_queue=null,y.prototype._connectTimeout=null,y.prototype.sendPinger=null,y.prototype.receivePinger=null,y.prototype._reconnectInterval=1,y.prototype._reconnecting=!1,y.prototype._reconnectTimeout=null,y.prototype.disconnectedPublishing=!1,y.prototype.disconnectedBufferSize=5e3,y.prototype.receiveBuffer=null,y.prototype._traceBuffer=null,y.prototype._MAX_TRACE_ENTRIES=100,y.prototype.connect=function(e){var t=this._traceMask(e,"password");if(this._trace("Client.connect",t,this.socket,this.connected),this.connected)throw new Error(a(r.INVALID_STATE,["already connected"]));if(this.socket)throw new Error(a(r.INVALID_STATE,["already connected"]));this._reconnecting&&(this._reconnectTimeout.cancel(),this._reconnectTimeout=null,this._reconnecting=!1),this.connectOptions=e,this._reconnectInterval=1,this._reconnecting=!1,e.uris?(this.hostIndex=0,this._doConnect(e.uris[0])):this._doConnect(this.uri)},y.prototype.subscribe=function(e,t){if(this._trace("Client.subscribe",e,t),!this.connected)throw new Error(a(r.INVALID_STATE,["not connected"]));var s=new d(n.SUBSCRIBE);s.topics=e.constructor===Array?e:[e],void 0===t.qos&&(t.qos=0),s.requestedQos=[];for(var i=0;i<s.topics.length;i++)s.requestedQos[i]=t.qos;t.onSuccess&&(s.onSuccess=function(e){t.onSuccess({invocationContext:t.invocationContext,grantedQos:e})}),t.onFailure&&(s.onFailure=function(e){t.onFailure({invocationContext:t.invocationContext,errorCode:e,errorMessage:a(e)})}),t.timeout&&(s.timeOut=new m(this,t.timeout,t.onFailure,[{invocationContext:t.invocationContext,errorCode:r.SUBSCRIBE_TIMEOUT.code,errorMessage:a(r.SUBSCRIBE_TIMEOUT)}])),this._requires_ack(s),this._schedule_message(s)},y.prototype.unsubscribe=function(e,t){if(this._trace("Client.unsubscribe",e,t),!this.connected)throw new Error(a(r.INVALID_STATE,["not connected"]));var s=new d(n.UNSUBSCRIBE);s.topics=e.constructor===Array?e:[e],t.onSuccess&&(s.callback=function(){t.onSuccess({invocationContext:t.invocationContext})}),t.timeout&&(s.timeOut=new m(this,t.timeout,t.onFailure,[{invocationContext:t.invocationContext,errorCode:r.UNSUBSCRIBE_TIMEOUT.code,errorMessage:a(r.UNSUBSCRIBE_TIMEOUT)}])),this._requires_ack(s),this._schedule_message(s)},y.prototype.send=function(e){this._trace("Client.send",e);var t=new d(n.PUBLISH);if(t.payloadMessage=e,this.connected)e.qos>0?this._requires_ack(t):this.onMessageDelivered&&(this._notify_msg_sent[t]=this.onMessageDelivered(t.payloadMessage)),this._schedule_message(t);else{if(!this._reconnecting||!this.disconnectedPublishing)throw new Error(a(r.INVALID_STATE,["not connected"]));if(Object.keys(this._sentMessages).length+this._buffered_msg_queue.length>this.disconnectedBufferSize)throw new Error(a(r.BUFFER_FULL,[this.disconnectedBufferSize]));e.qos>0?this._requires_ack(t):(t.sequence=++this._sequence,this._buffered_msg_queue.unshift(t))}},y.prototype.disconnect=function(){if(this._trace("Client.disconnect"),this._reconnecting&&(this._reconnectTimeout.cancel(),this._reconnectTimeout=null,this._reconnecting=!1),!this.socket)throw new Error(a(r.INVALID_STATE,["not connecting or connected"]));var e=new d(n.DISCONNECT);this._notify_msg_sent[e]=o(this._disconnected,this),this._schedule_message(e)},y.prototype.getTraceLog=function(){if(null!==this._traceBuffer){for(var e in this._trace("Client.getTraceLog",new Date),this._trace("Client.getTraceLog in flight messages",this._sentMessages.length),this._sentMessages)this._trace("_sentMessages ",e,this._sentMessages[e]);for(var e in this._receivedMessages)this._trace("_receivedMessages ",e,this._receivedMessages[e]);return this._traceBuffer}},y.prototype.startTrace=function(){null===this._traceBuffer&&(this._traceBuffer=[]),this._trace("Client.startTrace",new Date,"@VERSION@-@BUILDLEVEL@")},y.prototype.stopTrace=function(){delete this._traceBuffer},y.prototype._doConnect=function(e){if(this.connectOptions.useSSL){var t=e.split(":");t[0]="wss",e=t.join(":")}this._wsuri=e,this.connected=!1,this.connectOptions.mqttVersion<4?this.socket=new WebSocket(e,["mqttv3.1"]):this.socket=new WebSocket(e,["mqtt"]),this.socket.binaryType="arraybuffer",this.socket.onopen=o(this._on_socket_open,this),this.socket.onmessage=o(this._on_socket_message,this),this.socket.onerror=o(this._on_socket_error,this),this.socket.onclose=o(this._on_socket_close,this),this.sendPinger=new v(this,this.connectOptions.keepAliveInterval),this.receivePinger=new v(this,this.connectOptions.keepAliveInterval),this._connectTimeout&&(this._connectTimeout.cancel(),this._connectTimeout=null),this._connectTimeout=new m(this,this.connectOptions.timeout,this._disconnected,[r.CONNECT_TIMEOUT.code,a(r.CONNECT_TIMEOUT)])},y.prototype._schedule_message=function(e){this._msg_queue.unshift(e),this.connected&&this._process_queue()},y.prototype.store=function(e,t){var i={type:t.type,messageIdentifier:t.messageIdentifier,version:1};switch(t.type){case n.PUBLISH:t.pubRecReceived&&(i.pubRecReceived=!0),i.payloadMessage={};for(var o="",c=t.payloadMessage.payloadBytes,h=0;h<c.length;h++)c[h]<=15?o=o+"0"+c[h].toString(16):o+=c[h].toString(16);i.payloadMessage.payloadHex=o,i.payloadMessage.qos=t.payloadMessage.qos,i.payloadMessage.destinationName=t.payloadMessage.destinationName,t.payloadMessage.duplicate&&(i.payloadMessage.duplicate=!0),t.payloadMessage.retained&&(i.payloadMessage.retained=!0),0===e.indexOf("Sent:")&&(void 0===t.sequence&&(t.sequence=++this._sequence),i.sequence=t.sequence);break;default:throw Error(a(r.INVALID_STORED_DATA,[e+this._localKey+t.messageIdentifier,i]))}s.setItem(e+this._localKey+t.messageIdentifier,JSON.stringify(i))},y.prototype.restore=function(e){var t=s.getItem(e),i=JSON.parse(t),o=new d(i.type,i);switch(i.type){case n.PUBLISH:for(var c=i.payloadMessage.payloadHex,h=new ArrayBuffer(c.length/2),u=new Uint8Array(h),l=0;c.length>=2;){var f=parseInt(c.substring(0,2),16);c=c.substring(2,c.length),u[l++]=f}var _=new w(u);_.qos=i.payloadMessage.qos,_.destinationName=i.payloadMessage.destinationName,i.payloadMessage.duplicate&&(_.duplicate=!0),i.payloadMessage.retained&&(_.retained=!0),o.payloadMessage=_;break;default:throw Error(a(r.INVALID_STORED_DATA,[e,t]))}0===e.indexOf("Sent:"+this._localKey)?(o.payloadMessage.duplicate=!0,this._sentMessages[o.messageIdentifier]=o):0===e.indexOf("Received:"+this._localKey)&&(this._receivedMessages[o.messageIdentifier]=o)},y.prototype._process_queue=function(){for(var e=null;e=this._msg_queue.pop();)this._socket_send(e),this._notify_msg_sent[e]&&(this._notify_msg_sent[e](),delete this._notify_msg_sent[e])},y.prototype._requires_ack=function(e){var t=Object.keys(this._sentMessages).length;if(t>this.maxMessageIdentifier)throw Error("Too many messages:"+t);for(;void 0!==this._sentMessages[this._message_identifier];)this._message_identifier++;e.messageIdentifier=this._message_identifier,this._sentMessages[e.messageIdentifier]=e,e.type===n.PUBLISH&&this.store("Sent:",e),this._message_identifier===this.maxMessageIdentifier&&(this._message_identifier=1)},y.prototype._on_socket_open=function(){var e=new d(n.CONNECT,this.connectOptions);e.clientId=this.clientId,this._socket_send(e)},y.prototype._on_socket_message=function(e){this._trace("Client._on_socket_message",e.data);for(var t=this._deframeMessages(e.data),s=0;s<t.length;s+=1)this._handleMessage(t[s])},y.prototype._deframeMessages=function(e){var t=new Uint8Array(e),s=[];if(this.receiveBuffer){var n=new Uint8Array(this.receiveBuffer.length+t.length);n.set(this.receiveBuffer),n.set(t,this.receiveBuffer.length),t=n,delete this.receiveBuffer}try{for(var i=0;i<t.length;){var o=l(t,i),c=o[0];if(i=o[1],null===c)break;s.push(c)}i<t.length&&(this.receiveBuffer=t.subarray(i))}catch(u){var h="undefined"==u.hasOwnProperty("stack")?u.stack.toString():"No Error Stack Available";return void this._disconnected(r.INTERNAL_ERROR.code,a(r.INTERNAL_ERROR,[u.message,h]))}return s},y.prototype._handleMessage=function(e){this._trace("Client._handleMessage",e);try{switch(e.type){case n.CONNACK:if(this._connectTimeout.cancel(),this._reconnectTimeout&&this._reconnectTimeout.cancel(),this.connectOptions.cleanSession){for(var t in this._sentMessages){var i=this._sentMessages[t];s.removeItem("Sent:"+this._localKey+i.messageIdentifier)}for(var t in this._sentMessages={},this._receivedMessages){var o=this._receivedMessages[t];s.removeItem("Received:"+this._localKey+o.messageIdentifier)}this._receivedMessages={}}if(0!==e.returnCode){this._disconnected(r.CONNACK_RETURNCODE.code,a(r.CONNACK_RETURNCODE,[e.returnCode,c[e.returnCode]]));break}this.connected=!0,this.connectOptions.uris&&(this.hostIndex=this.connectOptions.uris.length);var h=[];for(var u in this._sentMessages)this._sentMessages.hasOwnProperty(u)&&h.push(this._sentMessages[u]);if(this._buffered_msg_queue.length>0)for(var l=null;l=this._buffered_msg_queue.pop();)h.push(l),this.onMessageDelivered&&(this._notify_msg_sent[l]=this.onMessageDelivered(l.payloadMessage));h=h.sort(function(e,t){return e.sequence-t.sequence});for(var f=0,_=h.length;f<_;f++){if((i=h[f]).type==n.PUBLISH&&i.pubRecReceived){var g=new d(n.PUBREL,{messageIdentifier:i.messageIdentifier});this._schedule_message(g)}else this._schedule_message(i)}this.connectOptions.onSuccess&&this.connectOptions.onSuccess({invocationContext:this.connectOptions.invocationContext});var p=!1;this._reconnecting&&(p=!0,this._reconnectInterval=1,this._reconnecting=!1),this._connected(p,this._wsuri),this._process_queue();break;case n.PUBLISH:this._receivePublish(e);break;case n.PUBACK:(i=this._sentMessages[e.messageIdentifier])&&(delete this._sentMessages[e.messageIdentifier],s.removeItem("Sent:"+this._localKey+e.messageIdentifier),this.onMessageDelivered&&this.onMessageDelivered(i.payloadMessage));break;case n.PUBREC:if(i=this._sentMessages[e.messageIdentifier]){i.pubRecReceived=!0;g=new d(n.PUBREL,{messageIdentifier:e.messageIdentifier});this.store("Sent:",i),this._schedule_message(g)}break;case n.PUBREL:o=this._receivedMessages[e.messageIdentifier];s.removeItem("Received:"+this._localKey+e.messageIdentifier),o&&(this._receiveMessage(o),delete this._receivedMessages[e.messageIdentifier]);var I=new d(n.PUBCOMP,{messageIdentifier:e.messageIdentifier});this._schedule_message(I);break;case n.PUBCOMP:i=this._sentMessages[e.messageIdentifier];delete this._sentMessages[e.messageIdentifier],s.removeItem("Sent:"+this._localKey+e.messageIdentifier),this.onMessageDelivered&&this.onMessageDelivered(i.payloadMessage);break;case n.SUBACK:(i=this._sentMessages[e.messageIdentifier])&&(i.timeOut&&i.timeOut.cancel(),128===e.returnCode[0]?i.onFailure&&i.onFailure(e.returnCode):i.onSuccess&&i.onSuccess(e.returnCode),delete this._sentMessages[e.messageIdentifier]);break;case n.UNSUBACK:(i=this._sentMessages[e.messageIdentifier])&&(i.timeOut&&i.timeOut.cancel(),i.callback&&i.callback(),delete this._sentMessages[e.messageIdentifier]);break;case n.PINGRESP:this.sendPinger.reset();break;case n.DISCONNECT:this._disconnected(r.INVALID_MQTT_MESSAGE_TYPE.code,a(r.INVALID_MQTT_MESSAGE_TYPE,[e.type]));break;default:this._disconnected(r.INVALID_MQTT_MESSAGE_TYPE.code,a(r.INVALID_MQTT_MESSAGE_TYPE,[e.type]))}}catch(v){var E="undefined"==v.hasOwnProperty("stack")?v.stack.toString():"No Error Stack Available";return void this._disconnected(r.INTERNAL_ERROR.code,a(r.INTERNAL_ERROR,[v.message,E]))}},y.prototype._on_socket_error=function(e){this._reconnecting||this._disconnected(r.SOCKET_ERROR.code,a(r.SOCKET_ERROR,[e.data]))},y.prototype._on_socket_close=function(){this._reconnecting||this._disconnected(r.SOCKET_CLOSE.code,a(r.SOCKET_CLOSE))},y.prototype._socket_send=function(e){if(1==e.type){var t=this._traceMask(e,"password");this._trace("Client._socket_send",t)}else this._trace("Client._socket_send",e);this.socket.send(e.encode()),this.sendPinger.reset()},y.prototype._receivePublish=function(e){switch(e.payloadMessage.qos){case"undefined":case 0:this._receiveMessage(e);break;case 1:var t=new d(n.PUBACK,{messageIdentifier:e.messageIdentifier});this._schedule_message(t),this._receiveMessage(e);break;case 2:this._receivedMessages[e.messageIdentifier]=e,this.store("Received:",e);var s=new d(n.PUBREC,{messageIdentifier:e.messageIdentifier});this._schedule_message(s);break;default:throw Error("Invaild qos="+e.payloadMessage.qos)}},y.prototype._receiveMessage=function(e){this.onMessageArrived&&this.onMessageArrived(e.payloadMessage)},y.prototype._connected=function(e,t){this.onConnected&&this.onConnected(e,t)},y.prototype._reconnect=function(){this._trace("Client._reconnect"),this.connected||(this._reconnecting=!0,this.sendPinger.cancel(),this.receivePinger.cancel(),this._reconnectInterval<128&&(this._reconnectInterval=2*this._reconnectInterval),this.connectOptions.uris?(this.hostIndex=0,this._doConnect(this.connectOptions.uris[0])):this._doConnect(this.uri))},y.prototype._disconnected=function(e,t){if(this._trace("Client._disconnected",e,t),void 0!==e&&this._reconnecting)this._reconnectTimeout=new m(this,this._reconnectInterval,this._reconnect);else if(this.sendPinger.cancel(),this.receivePinger.cancel(),this._connectTimeout&&(this._connectTimeout.cancel(),this._connectTimeout=null),this._msg_queue=[],this._buffered_msg_queue=[],this._notify_msg_sent={},this.socket&&(this.socket.onopen=null,this.socket.onmessage=null,this.socket.onerror=null,this.socket.onclose=null,1===this.socket.readyState&&this.socket.close(),delete this.socket),this.connectOptions.uris&&this.hostIndex<this.connectOptions.uris.length-1)this.hostIndex++,this._doConnect(this.connectOptions.uris[this.hostIndex]);else if(void 0===e&&(e=r.OK.code,t=a(r.OK)),this.connected){if(this.connected=!1,this.onConnectionLost&&this.onConnectionLost({errorCode:e,errorMessage:t,reconnect:this.connectOptions.reconnect,uri:this._wsuri}),e!==r.OK.code&&this.connectOptions.reconnect)return this._reconnectInterval=1,void this._reconnect()}else 4===this.connectOptions.mqttVersion&&!1===this.connectOptions.mqttVersionExplicit?(this._trace("Failed to connect V4, dropping back to V3"),this.connectOptions.mqttVersion=3,this.connectOptions.uris?(this.hostIndex=0,this._doConnect(this.connectOptions.uris[0])):this._doConnect(this.uri)):this.connectOptions.onFailure&&this.connectOptions.onFailure({invocationContext:this.connectOptions.invocationContext,errorCode:e,errorMessage:t})},y.prototype._trace=function(){if(this.traceFunction){var e=Array.prototype.slice.call(arguments);for(var t in e)void 0!==e[t]&&e.splice(t,1,JSON.stringify(e[t]));var s=e.join("");this.traceFunction({severity:"Debug",message:s})}if(null!==this._traceBuffer){t=0;for(var n=arguments.length;t<n;t++)this._traceBuffer.length==this._MAX_TRACE_ENTRIES&&this._traceBuffer.shift(),0===t?this._traceBuffer.push(arguments[t]):void 0===arguments[t]?this._traceBuffer.push(arguments[t]):this._traceBuffer.push("  "+JSON.stringify(arguments[t]))}},y.prototype._traceMask=function(e,t){var s={};for(var n in e)e.hasOwnProperty(n)&&(s[n]=n==t?"******":e[n]);return s};var w=function(e){var t,s;if(!("string"==typeof e||e instanceof ArrayBuffer||ArrayBuffer.isView(e)&&!(e instanceof DataView)))throw a(r.INVALID_ARGUMENT,[e,"newPayload"]);t=e;var n=0,i=!1,o=!1;Object.defineProperties(this,{payloadString:{enumerable:!0,get:function(){return"string"==typeof t?t:E(t,0,t.length)}},payloadBytes:{enumerable:!0,get:function(){if("string"==typeof t){var e=new ArrayBuffer(p(t)),s=new Uint8Array(e);return I(t,s,0),s}return t}},destinationName:{enumerable:!0,get:function(){return s},set:function(e){if("string"!=typeof e)throw new Error(a(r.INVALID_ARGUMENT,[e,"newDestinationName"]));s=e}},qos:{enumerable:!0,get:function(){return n},set:function(e){if(0!==e&&1!==e&&2!==e)throw new Error("Invalid argument:"+e);n=e}},retained:{enumerable:!0,get:function(){return i},set:function(e){if("boolean"!=typeof e)throw new Error(a(r.INVALID_ARGUMENT,[e,"newRetained"]));i=e}},topic:{enumerable:!0,get:function(){return s},set:function(e){s=e}},duplicate:{enumerable:!0,get:function(){return o},set:function(e){o=e}}})};return{Client:function(e,t,s,n){var o;if("string"!=typeof e)throw new Error(a(r.INVALID_TYPE,[typeof e,"host"]));if(2==arguments.length){n=t;var c=(o=e).match(/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/);if(!c)throw new Error(a(r.INVALID_ARGUMENT,[e,"host"]));e=c[4]||c[2],t=parseInt(c[7]),s=c[8]}else{if(3==arguments.length&&(n=s,s="/mqtt"),"number"!=typeof t||t<0)throw new Error(a(r.INVALID_TYPE,[typeof t,"port"]));if("string"!=typeof s)throw new Error(a(r.INVALID_TYPE,[typeof s,"path"]));var h=-1!==e.indexOf(":")&&"["!==e.slice(0,1)&&"]"!==e.slice(-1);o="ws://"+(h?"["+e+"]":e)+":"+t+s}for(var u=0,d=0;d<n.length;d++){var l=n.charCodeAt(d);55296<=l&&l<=56319&&d++,u++}if("string"!=typeof n||u>65535)throw new Error(a(r.INVALID_ARGUMENT,[n,"clientId"]));var f=new y(o,e,t,s,n);Object.defineProperties(this,{host:{get:function(){return e},set:function(){throw new Error(a(r.UNSUPPORTED_OPERATION))}},port:{get:function(){return t},set:function(){throw new Error(a(r.UNSUPPORTED_OPERATION))}},path:{get:function(){return s},set:function(){throw new Error(a(r.UNSUPPORTED_OPERATION))}},uri:{get:function(){return o},set:function(){throw new Error(a(r.UNSUPPORTED_OPERATION))}},clientId:{get:function(){return f.clientId},set:function(){throw new Error(a(r.UNSUPPORTED_OPERATION))}},onConnected:{get:function(){return f.onConnected},set:function(e){if("function"!=typeof e)throw new Error(a(r.INVALID_TYPE,[typeof e,"onConnected"]));f.onConnected=e}},disconnectedPublishing:{get:function(){return f.disconnectedPublishing},set:function(e){f.disconnectedPublishing=e}},disconnectedBufferSize:{get:function(){return f.disconnectedBufferSize},set:function(e){f.disconnectedBufferSize=e}},onConnectionLost:{get:function(){return f.onConnectionLost},set:function(e){if("function"!=typeof e)throw new Error(a(r.INVALID_TYPE,[typeof e,"onConnectionLost"]));f.onConnectionLost=e}},onMessageDelivered:{get:function(){return f.onMessageDelivered},set:function(e){if("function"!=typeof e)throw new Error(a(r.INVALID_TYPE,[typeof e,"onMessageDelivered"]));f.onMessageDelivered=e}},onMessageArrived:{get:function(){return f.onMessageArrived},set:function(e){if("function"!=typeof e)throw new Error(a(r.INVALID_TYPE,[typeof e,"onMessageArrived"]));f.onMessageArrived=e}},trace:{get:function(){return f.traceFunction},set:function(e){if("function"!=typeof e)throw new Error(a(r.INVALID_TYPE,[typeof e,"onTrace"]));f.traceFunction=e}}}),this.connect=function(e){if(i(e=e||{},{timeout:"number",userName:"string",password:"string",willMessage:"object",keepAliveInterval:"number",cleanSession:"boolean",useSSL:"boolean",invocationContext:"object",onSuccess:"function",onFailure:"function",hosts:"object",ports:"object",reconnect:"boolean",mqttVersion:"number",mqttVersionExplicit:"boolean",uris:"object"}),void 0===e.keepAliveInterval&&(e.keepAliveInterval=60),e.mqttVersion>4||e.mqttVersion<3)throw new Error(a(r.INVALID_ARGUMENT,[e.mqttVersion,"connectOptions.mqttVersion"]));if(void 0===e.mqttVersion?(e.mqttVersionExplicit=!1,e.mqttVersion=4):e.mqttVersionExplicit=!0,void 0!==e.password&&void 0===e.userName)throw new Error(a(r.INVALID_ARGUMENT,[e.password,"connectOptions.password"]));if(e.willMessage){if(!(e.willMessage instanceof w))throw new Error(a(r.INVALID_TYPE,[e.willMessage,"connectOptions.willMessage"]));if(e.willMessage.stringPayload=null,void 0===e.willMessage.destinationName)throw new Error(a(r.INVALID_TYPE,[typeof e.willMessage.destinationName,"connectOptions.willMessage.destinationName"]))}if(void 0===e.cleanSession&&(e.cleanSession=!0),e.hosts){if(!(e.hosts instanceof Array))throw new Error(a(r.INVALID_ARGUMENT,[e.hosts,"connectOptions.hosts"]));if(e.hosts.length<1)throw new Error(a(r.INVALID_ARGUMENT,[e.hosts,"connectOptions.hosts"]));for(var t=!1,n=0;n<e.hosts.length;n++){if("string"!=typeof e.hosts[n])throw new Error(a(r.INVALID_TYPE,[typeof e.hosts[n],"connectOptions.hosts["+n+"]"]));if(/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/.test(e.hosts[n])){if(0===n)t=!0;else if(!t)throw new Error(a(r.INVALID_ARGUMENT,[e.hosts[n],"connectOptions.hosts["+n+"]"]))}else if(t)throw new Error(a(r.INVALID_ARGUMENT,[e.hosts[n],"connectOptions.hosts["+n+"]"]))}if(t)e.uris=e.hosts;else{if(!e.ports)throw new Error(a(r.INVALID_ARGUMENT,[e.ports,"connectOptions.ports"]));if(!(e.ports instanceof Array))throw new Error(a(r.INVALID_ARGUMENT,[e.ports,"connectOptions.ports"]));if(e.hosts.length!==e.ports.length)throw new Error(a(r.INVALID_ARGUMENT,[e.ports,"connectOptions.ports"]));for(e.uris=[],n=0;n<e.hosts.length;n++){if("number"!=typeof e.ports[n]||e.ports[n]<0)throw new Error(a(r.INVALID_TYPE,[typeof e.ports[n],"connectOptions.ports["+n+"]"]));var c=e.hosts[n],h=e.ports[n],u=-1!==c.indexOf(":");o="ws://"+(u?"["+c+"]":c)+":"+h+s,e.uris.push(o)}}}f.connect(e)},this.subscribe=function(e,t){if("string"!=typeof e&&e.constructor!==Array)throw new Error("Invalid argument:"+e);if(i(t=t||{},{qos:"number",invocationContext:"object",onSuccess:"function",onFailure:"function",timeout:"number"}),t.timeout&&!t.onFailure)throw new Error("subscribeOptions.timeout specified with no onFailure callback.");if(void 0!==t.qos&&0!==t.qos&&1!==t.qos&&2!==t.qos)throw new Error(a(r.INVALID_ARGUMENT,[t.qos,"subscribeOptions.qos"]));f.subscribe(e,t)},this.unsubscribe=function(e,t){if("string"!=typeof e&&e.constructor!==Array)throw new Error("Invalid argument:"+e);if(i(t=t||{},{invocationContext:"object",onSuccess:"function",onFailure:"function",timeout:"number"}),t.timeout&&!t.onFailure)throw new Error("unsubscribeOptions.timeout specified with no onFailure callback.");f.unsubscribe(e,t)},this.send=function(e,t,s,n){var i;if(0===arguments.length)throw new Error("Invalid argument.length");if(1==arguments.length){if(!(e instanceof w)&&"string"!=typeof e)throw new Error("Invalid argument:"+typeof e);if(void 0===(i=e).destinationName)throw new Error(a(r.INVALID_ARGUMENT,[i.destinationName,"Message.destinationName"]));f.send(i)}else(i=new w(t)).destinationName=e,arguments.length>=3&&(i.qos=s),arguments.length>=4&&(i.retained=n),f.send(i)},this.publish=function(e,t,s,n){var i;if(0===arguments.length)throw new Error("Invalid argument.length");if(1==arguments.length){if(!(e instanceof w)&&"string"!=typeof e)throw new Error("Invalid argument:"+typeof e);if(void 0===(i=e).destinationName)throw new Error(a(r.INVALID_ARGUMENT,[i.destinationName,"Message.destinationName"]));f.send(i)}else(i=new w(t)).destinationName=e,arguments.length>=3&&(i.qos=s),arguments.length>=4&&(i.retained=n),f.send(i)},this.disconnect=function(){f.disconnect()},this.getTraceLog=function(){return f.getTraceLog()},this.startTrace=function(){f.startTrace()},this.stopTrace=function(){f.stopTrace()},this.isConnected=function(){return f.connected}},Message:w}}(void 0!==t?t:"undefined"!=typeof self?self:"undefined"!=typeof window?window:{})});
-},{}],"tZLP":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;var t,e=n(require("paho-mqtt"));function s(){if("function"!=typeof WeakMap)return null;var t=new WeakMap;return s=function(){return t},t}function n(t){if(t&&t.__esModule)return t;if(null===t||"object"!=typeof t&&"function"!=typeof t)return{default:t};var e=s();if(e&&e.has(t))return e.get(t);var n={},i=Object.defineProperty&&Object.getOwnPropertyDescriptor;for(var o in t)if(Object.prototype.hasOwnProperty.call(t,o)){var c=i?Object.getOwnPropertyDescriptor(t,o):null;c&&(c.get||c.set)?Object.defineProperty(n,o,c):n[o]=t[o]}return n.default=t,e&&e.set(t,n),n}class i{constructor(s){s=s||{},this.settings={uri:void 0!==s.uri?s.uri:"wss://arena.andrew.cmu.edu/mqtt/",host:void 0!==s.host?s.host:"arena.andrew.cmu.edu",port:void 0!==s.port?s.port:8083,path:void 0!==s.path?s.path:"/mqtt/",clientid:void 0!==s.clientid?s.clientid:"this.mqttc-client-"+Math.round(1e4*Math.random()),subscribeTopics:s.subscribeTopics,onConnectCallback:s.onConnectCallback,onConnectCallbackContext:s.onConnectCallbackContext,onMessageCallback:s.onMessageCallback,willMessage:void 0!==s.willMessage?new e.Message(s.willMessage):void 0,dbg:void 0!==s.dbg&&s.dbg,reconnect:void 0===s.reconnect||s.reconnect,useSSL:void 0===s.useSSL||s.useSSL,mqtt_username:s.mqtt_username,mqtt_token:s.mqtt_token},void 0!==this.settings.willMessage&&(this.settings.willMessage.destinationName=s.willMessageTopic),1==this.settings.dbg&&console.log(this.settings),t=this}async connect(){if(this.settings.uri)1==this.settings.dbg&&console.log("Connecting [uri]: ",this.settings.uri),this.mqttc=new e.Client(this.settings.uri,this.settings.clientid);else{let t=1==this.settings.useSSL?"wss://":"ws://";console.log("Connecting [host,port,path]: "+t+this.settings.host+":"+this.settings.port+this.settings.path),this.mqttc=new e.Client(this.settings.host,Number(this.settings.port),this.settings.path,this.settings.clientid)}this.mqttc.onConnectionLost=this.onConnectionLost.bind(this),this.mqttc.onMessageArrived=this.onMessageArrived.bind(this);let t=this;return new Promise(function(e,s){t.mqttc.connect({onSuccess:()=>{null!=t.settings.subscribeTopics&&t.settings.subscribeTopics.length>0&&(1==t.settings.dbg&&console.log("Subscribing to: "+t.settings.subscribeTopics+"\n"),t.mqttc.subscribe(t.settings.subscribeTopics)),null!=t.settings.onConnectCallback&&t.settings.onConnectCallback(t.settings.onConnectCallbackContext),e()},onFailure:()=>{throw new Error("Could not connect!")},willMessage:t.settings.willMessage,reconnect:t.settings.reconnect,useSSL:t.settings.useSSL,userName:t.settings.mqtt_username,password:t.settings.mqtt_token})})}directMesssage(s,n){"string"!=typeof n&&(n=JSON.stringify(n));let i=new e.Message(n);i.destinationName=s,t.settings.onMessageCallback(i)}disconnect(){try{this.mqttc.disconnect()}catch(t){console.error("MQTT Disconnected.")}}reConnect(){try{this.mqttc.disconnect()}catch(t){console.error("MQTT Disconnected.")}clientConnect()}onConnectionLost(t){console.error("Mqtt client disconnected..."),0!==t.errorCode&&console.error("Mqtt ERROR: "+t.errorMessage+"\n")}onMessageArrived(t){1==this.settings.dbg&&console.log("Mqtt Msg ["+t.destinationName+"]: "+t.payloadString+"\n"),null!=this.settings.onMessageCallback&&this.settings.onMessageCallback(t)}publish(t,e){"string"!=typeof e&&(e=JSON.stringify(e)),1==this.settings.dbg&&console.log("Publishing ("+t+"):"+e),this.mqttc.send(t,e,0,!1)}subscribe(t){1==this.settings.dbg&&console.log("Subscribing :"+t),this.mqttc.subscribe(t)}unsubscribe(t){1==this.settings.dbg&&console.log("Unsubscribing :"+t),this.mqttc.unsubscribe(t)}}exports.default=i,exports.MqttClient=i;
-},{"paho-mqtt":"KWZs"}],"C6AW":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.rt=i,exports.mod=n,exports.req=d,exports.Result=exports.Type=exports.ObjType=exports.Action=void 0;var e=require("uuid"),t={create:"create",delete:"delete"};exports.Action=t;var r={rt:"runtime",mod:"module"};exports.ObjType=r;var a={req:"arts_req",resp:"arts_resp"};exports.Type=a;var o={ok:"ok",err:"error"};function i(e,t){let a=d(t);return a.data={type:r.rt,uuid:e.uuid,name:e.name,max_nmodules:e.max_nmodules,apis:e.apis},a}function n(t,a){let o=d(a);return t=t||{},o.data={type:r.mod,uuid:void 0!==t.uuid?t.uuid:(0,e.v4)(),name:void 0!==t.name?t.name:void 0!==t.filename?t.filename+"@"+navigator.product:"mod-"+Math.round(1e4*Math.random())+"@"+navigator.product,parent:void 0!==t.parent?t.parent:"{}",filename:void 0!==t.filename?t.filename:"",fileid:void 0!==t.fileid?t.fileid:"na",filetype:void 0!==t.filetype?t.filetype:"WA",env:void 0!==t.env?t.env:"",args:void 0!==t.args?t.args:"",channels:void 0!==t.channels?t.channels:[],wait_state:void 0!==t.wait_state?t.wait_state:"false",memory:t.memory},o}function d(t){return{object_id:(0,e.v4)(),action:t,type:"arts_req"}}exports.Result=o;
-},{"uuid":"UeUD"}],"Lcuk":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.msgType=void 0;var s={start:0,stop:1,pub_msg:2,sub_msg:3,new_stream:4,signal:5,finish:6};exports.msgType=s;
-},{}],"o9I1":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.default=void 0;const t=2048;class i{static createSharedBuffer(i=t){let r=new SharedArrayBuffer(4*Uint32Array.BYTES_PER_ELEMENT+1+i),e=new Uint32Array(r,0,4),s=new Uint8Array(r,4*Uint32Array.BYTES_PER_ELEMENT,1);return e[0]=0,e[1]=0,e[2]=i,e[3]=0,s[0]=0,r}constructor(t,i){if(null==t)throw new Error("Must provide a SharedArrayBuffer instance");this.buffer=t;let r=t.byteLength-(4*Uint32Array.BYTES_PER_ELEMENT+1);this.uint32=new Uint32Array(this.buffer,0,4),this.spinlock=new Uint8Array(this.buffer,4*Uint32Array.BYTES_PER_ELEMENT,1),this.bytes=new Uint8Array(this.buffer,4*Uint32Array.BYTES_PER_ELEMENT+1,r),this.logOverwrite=!0,this.desc=i}pop(t){for(var i=[];0!=Atomics.compareExchange(this.spinlock,0,0,1););if((t=Math.min(t,this.uint32[3]))>0){for(var r=0;r<t;r++)i[r]=this.bytes[(this.uint32[1]+r)%this.uint32[2]];this.uint32[1]=(this.uint32[1]+r)%this.uint32[2],this.uint32[3]-=t}return this.spinlock[0]=0,i}push(t){var i=0;if(void 0===this.buffer)throw new Error("Must create a shared array instance");if(0==this.uint32[2])throw new Error("Must create a shared array instance with size >0");for(;0!=Atomics.compareExchange(this.spinlock,0,0,1););for(i=0;i<t.length;i++){let r=(this.uint32[0]+i)%this.uint32[2];this.bytes[r]=t[i]}return this.uint32[0]=(this.uint32[0]+i)%this.uint32[2],t.length>this.uint32[2]-this.uint32[3]&&(this.uint32[1]=this.uint32[0],1==this.logOverwrite&&console.log("Circular buffer overwrite:",this.desc)),this.uint32[3]+=t.length,this.uint32[3]>this.uint32[2]&&(this.uint32[3]=this.uint32[2]),this.spinlock[0]=0,this.uint32[3]}length(){return this.uint32[3]}size(){return this.uint32[2]}setOverwriteLog(t){this.logOverwrite=t}}exports.default=i;
-},{}],"HrMX":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.SIGNO=void 0;var e={QUIT:3,KILL:4};exports.SIGNO=e;
-},{}],"xxFB":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.init=h,exports.info=M,exports.signal=q,exports.createModule=w;var e,t,i,o=require("uuid"),n=m(require("query-string")),r=l(require("./mqtt-client.js")),a=m(require("./arts-msgs.js")),s=m(require("./worker-msgs.js")),d=l(require("./sa-cbuffer.js")),u=require("./signal.js");function l(e){return e&&e.__esModule?e:{default:e}}function c(){if("function"!=typeof WeakMap)return null;var e=new WeakMap;return c=function(){return e},e}function m(e){if(e&&e.__esModule)return e;if(null===e||"object"!=typeof e&&"function"!=typeof e)return{default:e};var t=c();if(t&&t.has(e))return t.get(e);var i={},o=Object.defineProperty&&Object.getOwnPropertyDescriptor;for(var n in e)if(Object.prototype.hasOwnProperty.call(e,n)){var r=o?Object.getOwnPropertyDescriptor(e,n):null;r&&(r.get||r.set)?Object.defineProperty(i,n,r):i[n]=e[n]}return i.default=e,t&&t.set(e,i),i}const p="realm",g="proc/reg",_="proc/control",f="proc/debug",b=["wasi:unstable"],v="/store/users/",y={id:1,name:"John Doe",age:20,isActive:!0};async function h(n){let s=void 0!==(n=n||{}).realm?n.realm:p,d=void 0!==n.uuid?n.uuid:(0,o.v4)();e={realm:s,uuid:d,name:!1!==n.name?n.name:"rt-"+Math.round(1e4*Math.random())+"@"+navigator.product,max_nmodules:void 0!==n.max_nmodules?n.max_nmodules:10,apis:void 0!==n.apis?n.apis:b,reg_topic:void 0!==n.reg_topic?n.reg_topic:s+"/"+g,ctl_topic:void 0!==n.ctl_topic?n.ctl_topic:s+"/"+_+"/"+d+"/#",dbg_topic:void 0!==n.dbg_topic?n.dbg_topic:s+"/"+f,arts_ctl_topic:void 0!==n.arts_ctl_topic?n.arts_ctl_topic:s+"/"+_,reg_timeout_seconds:void 0!==n.reg_timeout_seconds?n.reg_timeout_seconds:30,mqtt_uri:n.mqtt_uri,onInitCallback:n.onInitCallback,filestore_location:null!=n.filestore_location?n.filestore_location:v,dbg:void 0!==n.dbg&&n.dbg,mqtt_username:void 0!==n.mqtt_username?n.mqtt_username:"non_auth",mqtt_token:void 0!==n.mqtt_token?n.mqtt_token:null,modules:[],pendingModulesArgs:[],clientModules:[],isRegistered:!1},console.info(e);let u=JSON.stringify(a.rt(e,a.Action.delete));window.onbeforeunload=function(){e.clientModules.forEach(i=>{let o=a.mod(i,a.Action.delete);t.publish(e.arts_ctl_topic,o)})},t=new r.default({uri:e.mqtt_uri,clientid:e.uuid,willMessageTopic:e.reg_topic,willMessage:u,subscribeTopics:[e.reg_topic],onMessageCallback:O,dbg:e.dbg,mqtt_username:e.mqtt_username,mqtt_token:e.mqtt_token});try{await t.connect()}catch(l){return void console.error(l)}k(),i=new Worker(new URL("./moduleio-worker.1b1158a6.js", import.meta.url), {type:'module'})}function M(){return e}function q(e,t){i.postMessage({type:s.msgType.signal,mod_uuid:e,signo:t})}function w(i,r){let s=i.data;if(0==e.isRegistered)return void e.pendingModulesArgs.push({persist_mod:i,arena_vars:r});function d(e,t){let i;for(const[o,n]of Object.entries(t))if(void 0!==n){let t=new RegExp("\\$\\{"+o+"\\}","g");i=e.replace(t,n),e=i}return i}let u=(0,o.v4)();if("single"==s.instantiate){/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(i.object_id)?u=i.object_id:console.error("Error! Object id must be a valid uuid (for instantiate=single)!")}let l,c,m,p=n.parse(location.search),g={runtimeid:e.uuid,moduleid:u,...r,...p};if(s.args&&(l=s.args.map(e=>d(e,g))),s.env&&(c=s.env.map(e=>d(e,g))),s.channels)for(let e=0;e<s.channels.length;e++)s.channels[e].path=d(s.channels[e].path,g),s.channels[e].params.topic=d(s.channels[e].params.topic,g);m="WA"==s.filetype?[e.filestore_location,s.name,s.filename].join("/").replace(/([^:])(\/\/+)/g,"$1/"):s.filename;let _=a.mod({name:s.name,uuid:u,parent:"client"==s.affinity?{uuid:e.uuid}:void 0,filename:m,filetype:s.filetype,channels:s.channels,env:c,args:l},a.Action.create);if("single"==s.affinity){/^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(i.object_id)?_.data.uuid=i.object_id:console.error("Error! Object id must be a valid uuid!")}"client"==s.instantiate&&(1==e.dbg&&console.log("Saving:",_.data),e.clientModules.push(_.data)),console.info(_),t.publish(e.arts_ctl_topic,_)}function j(){0!=e.isRegistered?(e.pendingModulesArgs.length>0&&e.pendingModulesArgs.forEach(function(e){console.info("Starting:",e.persist_mod.data.name),w(e.persist_mod,e.arena_vars)}),e.pendingModulesArgs=[]):console.error("Called processPendingModules before runtime is initialized!")}function k(){if(1!=e.isRegistered){var i=a.rt(e,a.Action.create);e.reg_uuid=i.object_id,t.publish(e.reg_topic,JSON.stringify(i)),setTimeout(k,1e3*e.reg_timeout_seconds)}}function O(t){if(t.destinationName.startsWith(e.dbg_topic+"/stdout/"))console.info("["+t.destinationName+"] "+t.payloadString);else{try{var i=JSON.parse(t.payloadString)}catch(o){return void console.error("Could not parse message: ["+t.destinationName+"==NaN",t.payloadString,o)}S(i)}}function S(o){if(1==e.dbg&&console.log("Runtime-Mngr - rcv msg:",o),o.type===a.Type.resp&&o.object_id==e.reg_uuid)return o.data.result!=a.Result.ok?void console.error("Error registering runtime:"+o.data):(e.isRegistered=!0,t.unsubscribe(e.reg_topic),t.subscribe(e.ctl_topic),void(null!=e.onInitCallback&&(j(),e.onInitCallback())));if(o.type==a.Type.req&&o.data.type==a.ObjType.mod){if(o.action===a.Action.create){let n=e.modules[o.data.uuid];if(void 0===n){if("WA"!==(n=o.data).filetype)return void console.error("Received module request for filetype not supported.");e.modules[n.uuid]=n,n.reg_topic=e.reg_topic,n.stdin_topic=e.dbg_topic+"/stdin/"+n.uuid,n.stdout_topic=e.dbg_topic+"/stdout/"+n.uuid,n.sb=d.default.createSharedBuffer(),n.channel=new MessageChannel,i.postMessage({type:s.msgType.start,arts_mod_instance_data:{uuid:n.uuid,reg_topic:n.reg_topic,stdin_topic:n.stdin_topic,mqtt_username:e.mqtt_username,mqtt_token:e.mqtt_token},worker_port:n.channel.port2,shared_array_buffer:n.sb},[n.channel.port2])}if(1==o.data.wait_state)return;let r=new Worker(new URL("./module-worker.083b10f1.js", import.meta.url), {type:'module'});return 1==e.dbg&&console.log("Runtime-Mngr - msg:",o),o.migratetx_start&&console.log("|T: Migration - State Publish to Module Startup:",Date.now()-o.migratetx_start,"ms"),r.postMessage({type:s.msgType.start,arts_mod_instance_data:{uuid:n.uuid,filename:n.filename,stdin_topic:n.stdin_topic,stdout_topic:n.stdout_topic,env:n.env,args:n.args,channels:n.channels},worker_port:n.channel.port1,shared_array_buffer:n.sb,wait_state:o.data.wait_state,memory:o.data.memory},[n.channel.port1]),r.addEventListener("message",T),e.modules[n.uuid].mworker=r,void t.subscribe(e.dbg_topic+"/stdout/"+n.uuid)}o.action===a.Action.delete&&(e.modules[o.data.uuid].send_to_runtime=o.send_to_runtime,e.modules[o.data.uuid].del_start=Date.now(),console.info("Posting kill to module uuid",o.data.uuid),i.postMessage({type:s.msgType.signal,mod_uuid:o.data.uuid,signo:u.SIGNO.QUIT}))}else console.info("Runtime mngr: ignoring non module request msg.")}function T(i){if(1==e.dbg&&console.log("Runtime-Mngr - Module done:",i.data),i.data.type!=s.msgType.finish)return;let o=e.modules[i.data.mod_uuid];if(void 0===o)return void console.error("Could not find module.");if(t.unsubscribe(e.dbg_topic+"/stdout/"+o.uuid),o.mworker.terminate(),delete e.modules[i.data.mod_uuid],void 0===o.send_to_runtime)return;let n=a.mod(o,a.Action.create);n.data.memory=i.data.memory,n.migratetx_start=Date.now(),console.log("|T: Module Terminate/Serialize/Post State:",Date.now()-o.del_start,"ms"),o.send_to_runtime!==e.uuid?(console.time("|T: Publish (part of State Publish)"),t.publish(_+"/"+o.send_to_runtime,JSON.stringify(n)),console.timeEnd("|T: Publish (part of State Publish)")):S(n)}
-},{"uuid":"UeUD","query-string":"TuMS","./mqtt-client.js":"tZLP","./arts-msgs.js":"C6AW","./worker-msgs.js":"Lcuk","./sa-cbuffer.js":"o9I1","./signal.js":"HrMX","./moduleio-worker.js":[["moduleio-worker.1b1158a6.js","BaiX"],"moduleio-worker.1b1158a6.js.map","BaiX"],"./module-worker.js":[["module-worker.083b10f1.js","WuVl"],"module-worker.083b10f1.js.map","WuVl"]}],"Focm":[function(require,module,exports) {
-"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.RuntimeMngr=void 0;var e=t(require("./runtime-mngr.js"));function r(){if("function"!=typeof WeakMap)return null;var e=new WeakMap;return r=function(){return e},e}function t(e){if(e&&e.__esModule)return e;if(null===e||"object"!=typeof e&&"function"!=typeof e)return{default:e};var t=r();if(t&&t.has(e))return t.get(e);var n={},o=Object.defineProperty&&Object.getOwnPropertyDescriptor;for(var u in e)if(Object.prototype.hasOwnProperty.call(e,u)){var i=o?Object.getOwnPropertyDescriptor(e,u):null;i&&(i.get||i.set)?Object.defineProperty(n,u,i):n[u]=e[u]}return n.default=e,t&&t.set(e,n),n}exports.RuntimeMngr=e;
-},{"./runtime-mngr.js":"xxFB"}]},{},["Focm"], null)
-//# sourceMappingURL=/runtime-mngr/index.js.map
+/**
+ * @fileoverview Create modules from persist objects; send request message to orchestrator
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
+ * @date 2022
+ */
+import UUID from "uuidjs";
+import MQTTClient from "./mqtt-client.js";
+import RuntimeMsgs from "./runtime-msgs.js";
+
+/**
+ * Create modules from persist objects; send request message to orchestrator
+ * TODO: register  as a runtime itself and start modules on the browser
+ *       (integrate code from https://github.com/SilverLineFramework/runtime-browser/)
+ */
+export class RuntimeMngr {
+  /* singleton instance */
+  static instance = null;
+  /* @property {object} [mc=null] - mqtt client instance */
+  mc;
+  /* @property {string} [realm="realm"] - realm to use */
+  realm;
+  /* @property {string} [uuid=uuid4()] - runtime uuid */
+  uuid;
+  /* @property {string} [name="rt-XXXXX@Browser"] - runtime name */
+  name;
+  /* @property {number} [maxNmodules=10] - maximum number of modules */
+  maxNmodules;
+  /* @property {string[]} [apis=["wasi:unstable"]] - apis supported by the runtime */
+  apis;
+  /* @property {string} [regTopic="realm/proc/reg"] - pubsub topic where the runtime sends register messages */
+  regTopic;
+  /*  @property {string} [ctlTopic="realm/proc/ctl"] - pubsub topic where the runtime listens for control messages (module create/delete) */
+  ctlTopic;
+  /* @property {string} [dbgTopic="realm/proc/debug"] - pubsub topic where the runtime sends/receives output (stdout/stdin) */
+  dbgTopic;
+  /* @property {number} [regTimeoutSeconds=30] - how long we wait for responses to register msgs */
+  regTimeoutSeconds;
+  /* @property {number} regRequestUuid - last registration request identifier; to check upon chegistration confirmation */
+  regRequestUuid;
+  /* @property {boolean} [isRegistered=false] - if true, indicates the runtime is already registered */
+  isRegistered;
+  /* @property {rtInitCallback} [onInitCallback] - callback when the runtime is done initializing/registering */
+  onInitCallback;
+  /* @property {string} [fsLocation="/store/users/"] - filestore location, for program files */
+  fsLocation;
+  /* @property {array} [modules=[]] - list of modules running */
+  modules;
+  /* @property {array} [pendingModulesArgs=[]] - list of create arguments for modules waiting to be started (waiting for runtime init) */
+  pendingModulesArgs;
+  /* @property {array} [clientModules=[]] - list of client modules that need to be deleted when the client finishes */
+  clientModules;
+  /* @property {boolean} [debug=false] - debug flagl more verbose console.log */
+  debug;
+
+  /**
+   * Start runtime manager
+   * @param {object} mc -  mqtt client object
+   * @param {boolean} debug - debug messages on/off
+   */
+  constructor({
+    mqttHost = "wss://arenaxr.org/mqtt/",
+    mqttUsername = "noauth",
+    mqttToken = "noauth",
+    realm = "realm",
+    uuid = UUID.generate(),
+    name = `rt-${Math.round(Math.random() * 10000)}@${navigator.product}`,
+    maxNmodules = 0, // TMP: cannot run any modules
+    apis = [],
+    regTopic = `${realm}/proc/reg`,
+    ctlTopic = `${realm}/proc/control`,
+    dbgTopic = `${realm}/proc/debug`,
+    regTimeoutSeconds = 5,
+    onInitCallback = null,
+    fsLocation = "/store/users/",
+    debug = false,
+  }) {
+    // singleton
+    if (RuntimeMngr.instance) {
+      return RuntimeMngr.instance;
+    }
+    RuntimeMngr.instance = this;
+
+    this.mqttHost = mqttHost;
+    this.mqttUsername = mqttUsername;
+    this.mqttToken = mqttToken;
+    this.realm = realm;
+    this.uuid = uuid;
+    this.name = name;
+    this.maxNmodules = maxNmodules;
+    this.apis = apis;
+    this.regTopic = regTopic;
+    this.ctlTopic = ctlTopic;
+    this.dbgTopic = dbgTopic;
+    this.regTimeoutSeconds = regTimeoutSeconds;
+    this.onInitCallback = onInitCallback;
+    this.fsLocation = fsLocation;
+    this.debug = debug;
+
+    this.modules = [];
+    this.pendingModulesArgs = [];
+    this.clientModules = [];
+    this.isRegistered = false;
+
+    // instanciate runtime messages factory
+    this.rtMsgs = new RuntimeMsgs(this);
+
+    // on unload, send delete client modules requests
+    let rt = this;
+    window.onbeforeunload = function () {
+      rt.cleanup();
+    };
+  }
+
+  setOptions({
+    mc = this.mc,
+    realm = this.realm,
+    name = this.name,
+    maxNmodules = this.maxNmodules,
+    apis = this.apis,
+    regTopic = this.regTopic,
+    ctlTopic = this.ctlTopic,
+    dbgTopic = this.dbgTopic,
+    regTimeoutSeconds = this.regTimeoutSeconds,
+    onInitCallback = this.onInitCallback,
+    fsLocation = this.fsLocation,
+    debug = this.debug,
+  }) {
+    // TODO: handle changes
+    this.mc = mc;
+    this.realm = realm;
+    this.name = name;
+    this.maxNmodules = maxNmodules;
+    this.apis = apis;
+    this.regTopic = regTopic;
+    this.ctlTopic = ctlTopic;
+    this.dbgTopic = dbgTopic;
+    this.regTimeoutSeconds = regTimeoutSeconds;
+    this.onInitCallback = onInitCallback;
+    this.fsLocation = fsLocation;
+    this.debug = debug;
+  }
+
+  async init() {
+    // mqtt connect
+    let rtMngr = this;
+    this.mc = new MQTTClient({
+      mqtt_host: rtMngr.mqttHost,
+      mqtt_username: rtMngr.mqttUsername,
+      mqtt_token: rtMngr.mqttToken,
+      onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
+    });
+
+    await this.mc.connect();
+
+    // subscribe to reg to receive registration confirmation
+    this.mc.subscribe(this.regTopic);
+
+    // registration
+    this.register();
+  }
+
+  /**
+   * Register runtime with orchestrator
+   */
+  register() {
+    if (this.isRegistered == true) return;
+
+    if (this.debug == true) console.info("Runtime-Mngr: Registering...");
+
+    let regMsg = this.rtMsgs.registerRuntime();
+    this.regRequestUuid = regMsg.object_id; // save message uuid for confirmation
+
+    this.mc.publish(this.regTopic, JSON.stringify(regMsg));
+
+    setTimeout(this.register.bind(this), this.regTimeoutSeconds * 1000); // try register again
+  }
+
+  onMqttMessage(message) {
+    let msg;
+    try {
+      msg = JSON.parse(message.payloadString);
+    } catch (err) {
+      console.error(
+        "Runtime-Mngr: Could not parse message: [" +
+          message.destinationName +
+          "==" +
+          +"]",
+        message.payloadString,
+        err
+      );
+      return;
+    }
+
+    if (this.debug == true) console.info("Runtime-Mngr: rcv msg", msg);
+
+    if (this.isRegistered == false) {
+      // response from orchestrator
+      if (msg.type === RuntimeMsgs.Type.resp) {
+        // response to reg request ?
+        if (this.regRequestUuid && msg.object_id == this.regRequestUuid) {
+          // check if result was ok
+          if (msg.data.result != RuntimeMsgs.Result.ok) {
+            console.error("Error registering runtime:" + msg.data);
+            return;
+          }
+          // finish up registration
+          this.onRuntimeRegistered();
+        }
+      }
+      // if we are not registered, nothing else to do
+      return;
+    }
+
+    /***************
+     * TODO: process module create/delete requests here
+     * from: https://github.com/SilverLineFramework/runtime-browser
+    ***************/
+
+}
+
+  /**
+   * Called once the runtime is initialized; create modules requested meantime
+   */
+  onRuntimeRegistered() {
+    this.isRegistered = true;
+
+    console.info("Runtime-Mngr: Registered.");
+
+    this.mc.unsubscribe(this.regTopic);
+    // subscribe to ctl/runtime_uuid
+    this.mc.subscribe(`${this.getRtCtlTopic()}/#`);
+
+    // check if we have modules to start
+    if (this.pendingModulesArgs.length > 0) {
+      let rtMngr = this;
+      this.pendingModulesArgs.forEach(function (args) {
+        if (rtMngr.debug == true)
+          console.info(
+            "Runtime-Mngr: Starting module",
+            args.persistObj
+          );
+        rtMngr.createModuleFromPersist(args.persistObj, args.replaceVars);
+      });
+    }
+    this.pendingModulesArgs = [];
+
+    // signal init is done and ready to roll
+    if (this.onInitCallback != undefined) {
+      this.onInitCallback();
+    }
+  }
+
+  /**
+   * Send create module message from persist object
+   * @param {object} persistObj - module persist data (See example)
+   * @param {object} replaceVars - dictionary of extra variables to replace (e.g. {scene: "ascene"})
+   * @example Persisted module example
+   *   {
+   *     "object_id": "38bffa0e-b3ab-4f5b-854f-b9dc6b52ec0c",
+   *     "action": "create",
+   *     "persist": true,
+   *     "type": "program",
+   *     "attributes": {
+   *       "name": "arena/py/moving-box",
+   *       "instantiate": "client",
+   *       "filename": "box.py",
+   *       "filetype": "PY",
+   *       "env": [
+   *         "SCENE=${scene}",
+   *         "MQTTH=${mqtth}",
+   *         "REALM=realm",
+   *         "NAMESPACE=${namespace}"
+   *        ],
+   *       "channels": []
+   *     }
+   *   }
+   */
+  createModuleFromPersist(persistObj, replaceVars = {}) {
+    // if runtime is not registered yet, add to pending modules list so they are processed later
+    if (!this.isRegistered) {
+      this.pendingModulesArgs.push({
+        persistObj: persistObj,
+        replaceVars: replaceVars,
+      });
+      return;
+    }
+
+    // instanciate create module message
+    let modCreateMsg = this.rtMsgs.createModuleFromPersistObj(
+      persistObj,
+      replaceVars
+    );
+
+    // if instantiate 'per client', save this module uuid to delete before exit
+    if (persistObj.attributes.instantiate == "client") {
+      this.clientModules.push(modCreateMsg);
+    }
+
+    // TODO: save pending req uuid and check orchestrator responses
+    // NOTE: object_id in runtime messages are used as a transaction id
+    // this.pendingReq.push(modCreateMsg.object_id); // pending_req is a list with object_id of requests waiting arts response
+
+    console.info("Sending create module request:", modCreateMsg);
+    this.mc.publish(this.ctlTopic, JSON.stringify(modCreateMsg));
+  }
+
+  /**
+   * Send delete module messages for all 'per client' modules; called on 'before unload' event
+   */
+  cleanup() {
+    this.clientModules.forEach((mod) => {
+      let modDelMsg = this.rtMsgs.deleteModule(mod);
+      this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
+    });
+
+    let delRtMsg = this.rtMsgs.deleteRuntime();
+    this.mc.publish(this.regTopic, JSON.stringify(delRtMsg));
+  }
+
+  /* public getters */
+
+  getUuid() {
+    return this.uuid;
+  }
+
+  getName() {
+    return this.name;
+  }
+
+  getMaxNmodules() {
+    return this.maxNmodules;
+  }
+
+  getApis() {
+    return this.apis;
+  }
+
+  getFSLocation() {
+    return this.fsLocation;
+  }
+
+  getRtDbgTopic() {
+    return `${this.dbgTopic}/${this.uuid}`;
+  }  
+
+  /* pubsub topic where the runtime sends unregister messages (ctl_topic+module uuid) */
+  getRtCtlTopic() {
+    return `${this.ctlTopic}/${this.uuid}`;
+  }    
+}
