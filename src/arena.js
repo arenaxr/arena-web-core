@@ -366,13 +366,6 @@ export class Arena {
                 for (let i = 0; i < arenaObjects.length; i++) {
                     const obj = arenaObjects[i];
                     if (obj.type === 'program') {
-                        // construct program object for rt manager request
-                        const pobj = {
-                            'object_id': obj.object_id,
-                            'action': 'create',
-                            'type': 'program',
-                            'data': obj.attributes,
-                        };
                         // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
                         const avars = {
                             scene: ARENA.sceneName,
@@ -382,7 +375,7 @@ export class Arena {
                             mqtth: ARENA.mqttHost,
                         };
                         // ask runtime manager to start this program
-                        this.RuntimeManager.createModule(pobj, avars);
+                        this.RuntimeManager.createModuleFromPersist(obj, avars);
                         continue;
                     }
                     if (obj.object_id === this.camName) {
@@ -645,23 +638,25 @@ export class Arena {
             );
 
             // init runtime manager
-            this.RuntimeManager = RuntimeMngr;
-            this.RuntimeManager.init({
+            this.RuntimeManager = new RuntimeMngr({
                 realm: this.defaults.realm,
-                mqtt_uri: this.mqttHostURI,
+                mqttHost: this.mqttHostURI,
                 onInitCallback: function() {
                     console.info('Runtime init done.');
                 },
                 name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.username,
-                dbg: false,
-                mqtt_username: this.username,
-                mqtt_token: this.mqttToken,
+                mqttUsername: this.username,
+                mqttToken: this.mqttToken,
             });
+            this.RuntimeManager.init();
 
-            // start sending console output to mqtt (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)
+            // start sending console output to mqtt
+            // (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)
             if (!ARENADefaults.devInstance) {
-                const rtInfo = this.RuntimeManager.info();
-                console.setOptions({dbgTopic: `${rtInfo.dbg_topic}/${rtInfo.uuid}`, publish: this.Mqtt.publish.bind(this.Mqtt)});
+                console.setOptions({
+                    dbgTopic: this.RuntimeManager.getRtDbgTopic(),
+                    publish: this.Mqtt.publish.bind(this.Mqtt)},
+                );
             }
 
             // init chat
