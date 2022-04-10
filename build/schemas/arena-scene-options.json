@@ -503,7 +503,7 @@
           "properties":{
              "env-presets":{
                 "$ref":"#/definitions/environment-presets",
-                "description":"A-Frame Environment presets"
+                "description":"A-Frame Environment presets. \n\nMore properties at https://github.com/supermedium/aframe-environment-component"
              },
              "renderer-settings":{
                 "$ref":"#/definitions/renderer-settings",
