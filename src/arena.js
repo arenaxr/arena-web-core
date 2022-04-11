@@ -254,7 +254,7 @@ export class Arena {
         ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
             ARENA.loadUser();
         });
-    }
+    };
 
     /**
      * loads this user's presence and camera

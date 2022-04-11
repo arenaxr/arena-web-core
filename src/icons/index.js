@@ -510,7 +510,7 @@ export class SideMenu {
             const cam = document.getElementById('my-camera');
             const showStats = cam.getAttribute('arena-camera').showStats;
             cam.setAttribute('arena-camera', {
-                showStats: !showStats
+                showStats: !showStats,
             });
         }
 
