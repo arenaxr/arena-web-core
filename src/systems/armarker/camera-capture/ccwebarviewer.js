@@ -15,64 +15,64 @@ import {CVWorkerMsgs} from '../worker-msgs.js';
   *
   */
 export class WebARViewerCameraCapture {
-     static instance = null;
-     /* buffer we process in the frames received  */
-     buffIndex = 0;
-     /* last captured frame width */
-     frameWidth;
-     /* last captured frame height */
-     frameHeight;
-     /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
+    static instance = null;
+    /* buffer we process in the frames received  */
+    buffIndex = 0;
+    /* last captured frame width */
+    frameWidth;
+    /* last captured frame height */
+    frameHeight;
+    /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
         this is the grayscale image we will pass to the detector */
-     frameGsPixels = undefined;
-     /* last captured frame camera properties */
-     frameCamera = undefined;
-     /* cv worker requested another frame */
-     frameRequested = true;
-     /* worker to send images captured */
-     cvWorker;
+    frameGsPixels = undefined;
+    /* last captured frame camera properties */
+    frameCamera = undefined;
+    /* cv worker requested another frame */
+    frameRequested = true;
+    /* worker to send images captured */
+    cvWorker;
 
-     /**
+    /**
       * Setup camera frame capture
       * @param {boolean} [debug=false] - debug messages on/off
       */
-     constructor(debug = false) {
-         // singleton
-         if (WebARViewerCameraCapture.instance) {
-             return WebARViewerCameraCapture.instance;
-         }
-         WebARViewerCameraCapture.instance = this;
+    constructor(debug = false) {
+        // singleton
+        if (WebARViewerCameraCapture.instance) {
+            return WebARViewerCameraCapture.instance;
+        }
+        WebARViewerCameraCapture.instance = this;
 
-         // WebXRViewer/WebARViewer deliver camera frames to 'processCV'
-         window.processCV = this.processCV.bind(this);
-     }
+        // WebXRViewer/WebARViewer deliver camera frames to 'processCV'
+        window.processCV = this.processCV.bind(this);
+    }
 
-     /**
+    /**
       * Indicate CV worker to send frames to (ar marker system expects this call to be implemented)
       * @param {object} worker - the worker instance to whom we post frame messages
       * @param {boolean} [requestFrame=true] - set request frame flag
       */
-     setCVWorker(worker, requestFrame = true) {
-         this.cvWorker = worker;
+    setCVWorker(worker, requestFrame = true) {
+        this.cvWorker = worker;
 
-         if (requestFrame) this.frameRequested = true;
-     }
+        if (requestFrame) this.frameRequested = true;
+    }
 
-     /**
+    /**
       * Request next camera frame; we let the CV worker indicate when its ready
       * (ar marker system expects this call to be implemented)
       * @param {object} [grayscalePixels=undefined] - the pixel buffer intance we posted (to return ownership to us)
       * @param {boolean} [worker=undefined] - replace the worker instance to send frames to
       */
-     requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
-         if (grayscalePixels) {
-             this.frameGsPixels = grayscalePixels;
-         }
-         if (worker) this.cvWorker = worker;
-         this.frameRequested = true;
-     }
+    requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
+        if (grayscalePixels) {
+            this.frameGsPixels = grayscalePixels;
+        }
+        if (worker) this.cvWorker = worker;
+        this.frameRequested = true;
+    }
 
-     /**
+    /**
       * WebXRViewer/WebARViewer deliver camera frames to this 'processCV' function
       * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
       * @example <caption>Frame object example:</caption>
@@ -114,85 +114,85 @@ export class WebARViewerCameraCapture {
       * }
       * };
       */
-     async processCV(frame) {
-         if (!this.frameRequested) return;
+    async processCV(frame) {
+        if (!this.frameRequested) return;
 
-         // only capture next frame on request
-         this.frameRequested = false;
+        // only capture next frame on request
+        this.frameRequested = false;
 
-         this.getCameraImagePixels(frame);
-     }
+        this.getCameraImagePixels(frame);
+    }
 
-     /**
+    /**
       * Process received frames to extract grayscale pixels and post them to cv worker
       * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
       */
-     getCameraImagePixels(frame) {
-         // we expect the image at _buffers[this.buffIndex]
-         if (!frame._buffers[this.buffIndex]) {
-             console.warn('No image buffer received.');
-             return;
-         }
-         // check if camera frame changed size
-         if ( this.frameGsPixels == undefined ||
+    getCameraImagePixels(frame) {
+        // we expect the image at _buffers[this.buffIndex]
+        if (!frame._buffers[this.buffIndex]) {
+            console.warn('No image buffer received.');
+            return;
+        }
+        // check if camera frame changed size
+        if ( this.frameGsPixels == undefined ||
              this.frameCamera == undefined ||
              this.frameWidth != frame._buffers[this.buffIndex].size.width ||
              this.frameHeight != frame._buffers[this.buffIndex].size.height
-         ) {
-             this.frameWidth = frame._buffers[this.buffIndex].size.width;
-             this.frameHeight = frame._buffers[this.buffIndex].size.height;
-             this.frameGsPixels = new Uint8Array(
-                 this.frameWidth * this.frameHeight,
-             ); // grayscale (1 value per pixel)
+        ) {
+            this.frameWidth = frame._buffers[this.buffIndex].size.width;
+            this.frameHeight = frame._buffers[this.buffIndex].size.height;
+            this.frameGsPixels = new Uint8Array(
+                this.frameWidth * this.frameHeight,
+            ); // grayscale (1 value per pixel)
 
-             // update camera intrinsics
-             this.frameCamera = this.getCameraIntrinsics(frame._camera);
-         }
+            // update camera intrinsics
+            this.frameCamera = this.getCameraIntrinsics(frame._camera);
+        }
 
-         // frame is received as a YUV pixel buffer that is base64 encoded;
-         // convert to a YUV Uint8Array and get grayscale pixels
-         const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
-         const byteArrayView = new Uint8Array(byteArray);
-         // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
-         for (let i = 0; i<this.frameWidth * this.frameHeight; i++) {
-             this.frameGsPixels[i] = byteArrayView[i];
-         }
+        // frame is received as a YUV pixel buffer that is base64 encoded;
+        // convert to a YUV Uint8Array and get grayscale pixels
+        const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
+        const byteArrayView = new Uint8Array(byteArray);
+        // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
+        for (let i = 0; i<this.frameWidth * this.frameHeight; i++) {
+            this.frameGsPixels[i] = byteArrayView[i];
+        }
 
-         // construct cam frame data to send to worker
-         const camFrameMsg = {
-             type: CVWorkerMsgs.type.PROCESS_GSFRAME,
-             // timestamp
-             ts: frame._timestamp,
-             // image width
-             width: this.frameWidth,
-             // image height
-             height: this.frameHeight,
-             // grayscale image pixels we will pass to the detector (Uint8ClampedArray[width x height])
-             grayscalePixels: this.frameGsPixels,
-             // camera properties
-             camera: this.frameCamera,
-         };
+        // construct cam frame data to send to worker
+        const camFrameMsg = {
+            type: CVWorkerMsgs.type.PROCESS_GSFRAME,
+            // timestamp
+            ts: frame._timestamp,
+            // image width
+            width: this.frameWidth,
+            // image height
+            height: this.frameHeight,
+            // grayscale image pixels we will pass to the detector (Uint8ClampedArray[width x height])
+            grayscalePixels: this.frameGsPixels,
+            // camera properties
+            camera: this.frameCamera,
+        };
 
-         // if (this.debug) console.log(`Post frame to worker: ${this.frameWidth}x${this.frameHeight}`);
-         // post frame data to worker, marking the pixel buffer as transferable
-         this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
-     }
+        // if (this.debug) console.log(`Post frame to worker: ${this.frameWidth}x${this.frameHeight}`);
+        // post frame data to worker, marking the pixel buffer as transferable
+        this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
+    }
 
-     /**
+    /**
       * Extract camera intrinsics from matrix provided by WebXRViewer/WebARViewer
       * @param {object} camera - the frame's camera object given by WebXRViewer/WebARViewer
       * @return {object} - camera's focal length (fx, fy) and principal point (cx, cy)
       */
-     getCameraIntrinsics(camera) {
-         return {
-             // Focal lengths in pixels (these are equal for square pixels)
-             fx: camera.cameraIntrinsics[0],
-             fy: camera.cameraIntrinsics[4],
-             // Principal point in pixels (typically at or near the center of the viewport)
-             cx: camera.cameraIntrinsics[6],
-             cy: camera.cameraIntrinsics[7],
-             // Skew factor in pixels
-             gamma: 0,
-         };
-     }
+    getCameraIntrinsics(camera) {
+        return {
+            // Focal lengths in pixels (these are equal for square pixels)
+            fx: camera.cameraIntrinsics[0],
+            fy: camera.cameraIntrinsics[4],
+            // Principal point in pixels (typically at or near the center of the viewport)
+            cx: camera.cameraIntrinsics[6],
+            cy: camera.cameraIntrinsics[7],
+            // Skew factor in pixels
+            gamma: 0,
+        };
+    }
 }
