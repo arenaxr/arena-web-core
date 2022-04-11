@@ -42,7 +42,7 @@
                                         "y": -0.5,
                                         "z": 0
                                     }
-                                },                                
+                                },
                                 "vertexB": {
                                     "title": "vertex B",
                                     "properties": {
@@ -66,7 +66,7 @@
                                         "y": -0.5,
                                         "z": 0
                                     }
-                                },                                
+                                },
                                 "vertexC": {
                                     "title": "vertex C",
                                     "properties": {
@@ -90,7 +90,7 @@
                                         "y": -0.5,
                                         "z": 0
                                     }
-                                }                             
+                                }
                             }
                         },
                         {
