@@ -27,4 +27,5 @@ jobs:
              git pull
              npm ci
              npm run build
-             cp -R ../ARENA-website/* .
+             cd ..
+             ./update-custom-website.sh
