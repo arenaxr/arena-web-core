@@ -1,7 +1,7 @@
 {
   "properties": {
     "animation-mixer": {
-      "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'. \n\nMore properties at https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation",
+      "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'. \n\nMore properties at <a href='https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation'>https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation</a>",
       "properties": {
         "clampWhenFinished": {
           "default": false,

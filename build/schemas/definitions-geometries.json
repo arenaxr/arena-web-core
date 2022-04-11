@@ -7,7 +7,7 @@
         "type": "boolean"
       },
       "material": {
-        "description": "The material properties of the object’s surface. \n\nMore properties at https://aframe.io/docs/1.3.0/components/material.html",
+        "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.3.0/components/material.html'>https://aframe.io/docs/1.3.0/components/material.html</a>",
         "properties": {
           "alphaTest": {
             "default": 0,

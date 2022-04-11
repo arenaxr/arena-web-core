@@ -3,6 +3,7 @@
        "program":{
           "type":"object",
           "title":"Program Data",
+          "description":"Object data payload; Program config data",
           "properties":{
              "name":{
                 "type":"string",
