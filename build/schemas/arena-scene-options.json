@@ -280,8 +280,9 @@
              "preset"
           ],
           "title":"Environment Presets",
-          "type":"object"
-       },
+          "type":"object",
+          "description":"A-Frame Environment presets. \n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>https://github.com/supermedium/aframe-environment-component</a>"
+          },
        "renderer-settings":{
           "properties":{
              "gammaFactor":{
@@ -331,7 +332,8 @@
              "outputEncoding"
           ],
           "title":"Renderer Settings",
-          "type":"object"
+          "type":"object",
+          "description":"These settings are fed into three.js WebGLRenderer properties"
        },
        "scene-options":{
           "properties":{
@@ -449,7 +451,8 @@
              "disableVideoCulling"
           ],
           "title":"Scene Options",
-          "type":"object"
+          "type":"object",
+          "description":"ARENA Scene Options"
        },
        "Vector3":{
           "properties":{
@@ -502,16 +505,13 @@
        "data":{
           "properties":{
              "env-presets":{
-                "$ref":"#/definitions/environment-presets",
-                "description":"A-Frame Environment presets. \n\nMore properties at https://github.com/supermedium/aframe-environment-component"
+                "$ref":"#/definitions/environment-presets"
              },
              "renderer-settings":{
-                "$ref":"#/definitions/renderer-settings",
-                "description":"These settings are fed into three.js WebGLRenderer properties"
+                "$ref":"#/definitions/renderer-settings"
              },
              "scene-options":{
-                "$ref":"#/definitions/scene-options",
-                "description":"ARENA Scene Options"
+                "$ref":"#/definitions/scene-options"
              }
           },
           "required":[
