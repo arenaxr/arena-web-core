@@ -1,0 +1,74 @@
+{
+    "title": "Event",
+    "description": "Generate an event message for an object.",
+    "allOf": [{
+            "$ref": "./schemas/definitions-arena-event.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "properties": {
+                        "source": {
+                            "title": "Source ID",
+                            "description": "The `object_id` of event origination. e.g camera or client program connection id.",
+                            "type": "string"
+                        },
+                        "position": {
+                            "description": "The event destination position in 3D.",
+                            "properties": {
+                                "x": {
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "type": "number"
+                                },
+                                "z": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y",
+                                "z"
+                            ],
+                            "type": "object",
+                            "title": "Position"
+                        },
+                        "clickPos": {
+                            "description": "The event origination position in 3D.",
+                            "properties": {
+                                "x": {
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "type": "number"
+                                },
+                                "z": {
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "x",
+                                "y",
+                                "z"
+                            ],
+                            "title": "Click Position"
+                        }
+                    },
+                    "title": "Event Data",
+                    "additionalProperties": true,
+                    "required": [
+                        "position",
+                        "source"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data"
+    ]
+}

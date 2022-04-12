@@ -34,6 +34,11 @@
        "file":"schemas/entity.json",
        "title":"Entity (generic object)"
     },
+    "event":{
+       "description":"Events are ephemeral messages used to send user events like mouse movements or controller actions.",
+       "file":"schemas/event.json",
+       "title":"Event (non-persist)"
+    },
     "gltf-model":{
        "description":"Load a GLTF model",
        "file":"schemas/gltf-model.json",
@@ -60,10 +65,10 @@
        "title":"Octahedron"
     },
     "pcd-model":{
-        "description":"Load a PCD model",
-        "file":"schemas/pcd-model.json",
-        "title":"PCD Model"
-     },    
+       "description":"Load a PCD model",
+       "file":"schemas/pcd-model.json",
+       "title":"PCD Model"
+    },
     "plane":{
        "description":"Plane Geometry",
        "file":"schemas/plane.json",
@@ -124,4 +129,4 @@
        "file":"schemas/triangle.json",
        "title":"Triangle"
     }
- }
+}

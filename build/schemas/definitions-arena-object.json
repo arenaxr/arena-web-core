@@ -11,7 +11,7 @@
           "type":"boolean"
        },
        "type":{
-          "description":"One of the message types: object (3D A-Frame Object), scene-options, landmarks, program (derived from 'type' select above)",
+          "description":"One of the message types: object (3D A-Frame Object), scene-options, program (derived from 'type' select above)",
           "enum":[
              "object"
           ],
