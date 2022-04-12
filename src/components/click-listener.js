@@ -97,7 +97,6 @@ AFRAME.registerComponent('click-listener', {
                     // publishing events attached to user id objects allows sculpting security
                     ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
                 }
-                window.lastMouseTarget = this.id;
             }
         });
 
@@ -124,7 +123,6 @@ AFRAME.registerComponent('click-listener', {
                     // publishing events attached to user id objects allows sculpting security
                     ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
                 }
-                window.lastMouseTarget = undefined;
             }
         });
     },
