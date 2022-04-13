@@ -10,30 +10,30 @@
  * ARENA A-Frame components
  */
 
-import './arena-camera.js';
-import './arena-hand.js';
-import './arena-user.js';
-import './armarker.js';
-import './attribution.js';
-import './click-listener.js';
-import './collision-listener.js';
-import './gesture-detector.js';
-import './gltf-lod.js';
-import './goto-url.js';
+// import './arena-camera.js';
+// import './arena-hand.js';
+// import './arena-user.js';
+// import './armarker.js';
+// import './attribution.js';
+// import './click-listener.js';
+// import './collision-listener.js';
+// import './gesture-detector.js';
+// import './gltf-lod.js';
+// import './goto-url.js';
 import './impulse.js';
-import './jitsi-video.js';
-import './landmark.js';
+// import './jitsi-video.js';
+// import './landmark.js';
 import './load-scene.js';
 import './material-extras.js';
 import './network-latency.js';
 import './pcd-model.js';
 import './press-and-move.js';
-import './screenshare.js';
-import './stats-monitor.js';
+// import './screenshare.js';
+// import './stats-monitor.js';
 import './text-input.js';
 import './thickline/index.js';
 import './threejs-scene.js';
-import './ttl.js';
+// import './ttl.js';
 import './video-control.js';
 
 /**
