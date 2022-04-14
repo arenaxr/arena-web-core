@@ -57,7 +57,7 @@
     "watch": "parcel watch src/index.js",
     "prebuild": "npm run collect-static",
     "build": "parcel build src/index.js --public-url ./dist",
-    "build-3d": "parcel build build-3d/index.js; cp dist/index.* ./build-3d/dist",
+    "build-3d": "parcel build build-3d/scene.js; cp dist/* ./build-3d/dist",
     "build-nominify": "parcel build src/index.js --public-url ./dist --no-optimize",
     "predocs": "echo '# A-Frame components (modules) added to support ARENA core functionality\n' > src/components/README.md; echo '# A-Frame systems (modules) added to support ARENA core functionality\n' > src/systems/README.md",
     "docs": "jsdoc2md src/components/*.js >> src/components/README.md; jsdoc2md src/systems/*.js >> src/systems/README.md"

@@ -16,5 +16,5 @@ import './build-3d.js'; // ARENA
 // import '../src/ui/'; // 2D UI
 import '../src/aframe-mods/'; // AFRAME modifications
 import '../src/systems/'; // custom AFRAME systems
-import '../src/components/'; // custom AFRAME components
+import './components.js'; // custom AFRAME components
 // import '../src/webxr/'; // special handler for webxr devices

@@ -568,11 +568,8 @@ export class Arena {
 
         // auto load the a-frame inspector
         const sceneEl = document.querySelector('a-scene');
-        // sceneEl.addEventListener('loaded', function() {
-        //     console.log('build-3d', 'a-scene loaded');
-            sceneEl.components.inspector.openInspector();
-            console.log('build-3d', 'a-scene inspector loaded');
-        // });
+        sceneEl.components.inspector.openInspector();
+        console.log('build-3d', 'a-scene inspector loaded')
 
         // match name on the end of the id tag
         this.setUserName(args.mqtt_username);
