@@ -39,25 +39,12 @@
 
 <body>
 
-  <a-scene background="color: black" name="ARENAScene" stats="false"
-    webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">
+  <a-scene background="color: black" name="ARENAScene" build-watcher debug>
 
     <a-entity id="sceneRoot">
       <!-- ground plane so falling objects don't fall through floor -->
       <a-box color="#FFAAEE" depth="1000" height="0.01" id="groundPlane" opacity=".01" position="0 -0.01 0" static-body
         transparent="true" width="1000"></a-box>
-
-      <a-entity id="cameraRig" position="0 0 0">
-        <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
-          <!-- this camera can 'fly': z axis follows pitch of head direction -->
-          <a-camera far="10000" gesture-detector id="my-camera" look-controls="reverseMouseDrag: true"
-            look-controls-arrow mouse-cursor near="0.1" network-latency press-and-move="constrainToNavMesh:false"
-            wasd-controls="fly: true; acceleration: 30; constrainToNavMesh:false">
-            <a-entity cursor="rayOrigin: mouse" id="mouse-cursor"
-              raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
-          </a-camera>
-        </a-entity>
-      </a-entity>
     </a-entity>
 
   </a-scene>

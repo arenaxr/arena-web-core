@@ -65,11 +65,6 @@ export class Arena {
 
         // setup event listener
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
-        this.events.on(ARENAEventEmitter.events.NEW_SETTINGS, (e) => {
-            const args = e.detail;
-            if (!args.userName) return; // only handle a user name change
-            this.showEchoDisplayName();
-        });
     }
 
     /**
@@ -95,16 +90,6 @@ export class Arena {
 
         // set camName
         this.camName = 'camera_' + this.idTag; // e.g. camera_1234_eric
-        // if fixedCamera is given, then camName must be set accordingly
-        this.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', '');
-        if (this.fixedCamera !== '') {
-            this.camName = this.fixedCamera;
-        }
-
-        // set faceName, avatarName, handLName, handRName which depend on user name
-        this.faceName = 'face_' + this.idTag; // e.g. face_9240_X
-        this.handLName = 'handLeft_' + this.idTag; // e.g. handLeft_9240_X
-        this.handRName = 'handRight_' + this.idTag; // e.g. handRight_9240_X
     }
 
     /**
@@ -131,7 +116,7 @@ export class Arena {
                 path = path.replace(devPrefix[0], '');
             }
         }
-        if (path === '' || path === 'index.html') {
+        if (path === '' || path === 'scene.html') {
             scenename = ARENAUtils.getUrlParam('scene', scenename);
             _setNames(namespace, scenename);
         } else {
@@ -150,6 +135,21 @@ export class Arena {
                 _setNames(namespace, scenename);
             }
         }
+
+        // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
+        let url = new URL(window.location.href);
+        let sceneParam = url.searchParams.get('scene');
+        let ns, s;
+        if (sceneParam) {
+            let sn = sceneParam.split('/');
+            ns = sn[0];
+            s = sn[1];
+        } else {
+            ns = localStorage.getItem("namespace") === null ? username : localStorage.getItem("namespace");
+            s = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+        }
+        _setNames(ns, s);
+
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
         this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.namespacedScene;
         this.outputTopic = this.defaults.realm + '/s/' + this.namespacedScene + '/';
@@ -176,19 +176,6 @@ export class Arena {
     };
 
     /**
-     * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
-     * @return {boolean} True if the user has permission to stream audio/video in this scene.
-     */
-    isJitsiPermitted() {
-        if (this.mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
-            const perms = tokenObj.payloadObj;
-            if (perms.room) return true;
-        }
-        return false;
-    }
-
-    /**
      * Checks token for full scene object write permissions.
      * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      * @return {boolean} True if the user has permission to write in this scene.
@@ -203,27 +190,6 @@ export class Arena {
         }
         return false;
     }
-
-    /**
-     * Renders/updates the display name in the top left corner of a scene.
-     * @param {boolean} speaker If the user is the dominant speaker
-     */
-    showEchoDisplayName = (speaker = false) => {
-        const url = new URL(window.location.href);
-        const noname = url.searchParams.get('noname');
-        const echo = document.getElementById('echo-name');
-        echo.textContent = localStorage.getItem('display_name');
-        if (!noname) {
-            if (speaker) {
-                echo.style.backgroundColor = '#0F08'; // green alpha
-            } else {
-                echo.style.backgroundColor = '#0008'; // black alpha
-            }
-            echo.style.display = 'block';
-        } else {
-            echo.style.display = 'none';
-        }
-    };
 
     /**
      * scene init before starting to receive messages
@@ -247,42 +213,11 @@ export class Arena {
      */
     loadUser() {
         const systems = AFRAME.scenes[0].systems;
-        let color = Math.floor(Math.random() * 16777215).toString(16);
-        if (color.length < 6) color = '0' + color;
-        color = '#' + color;
-
-        const camera = document.getElementById('my-camera');
-        camera.setAttribute('arena-camera', 'enabled', true);
-        camera.setAttribute('arena-camera', 'color', color);
-        camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
         const startPos = new THREE.Vector3;
         if (ARENA.startCoords) {
             startPos.set(...ARENA.startCoords);
-            camera.object3D.position.copy(startPos);
-            camera.object3D.position.y += ARENA.defaults.camHeight;
             ARENA.startCoords = startPos;
-        } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
-            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-            const lastPos = sceneHist[ARENA.namespacedScene]?.lastPos;
-            if (lastPos) {
-                startPos.copy(lastPos);
-                camera.object3D.position.copy(startPos);
-                camera.object3D.position.y += ARENA.defaults.camHeight;
-                ARENA.startCoords = startPos;
-            }
-        }
-        // Fallthrough failure if startLastPos fails
-        if (!ARENA.startCoords && systems.landmark) {
-            // Try to define starting position if the scene has startPosition objects
-            const startPosition = systems.landmark.getRandom(true);
-            if (startPosition) {
-                console.log('Moving camera to start position', startPosition.el.id);
-                startPosition.teleportTo();
-                startPos.copy(camera.object3D.position);
-                startPos.y -= ARENA.defaults.camHeight;
-                ARENA.startCoords = startPos;
-            }
         }
         if (!ARENA.startCoords) { // Final fallthrough for failures
             ARENA.startCoords = ARENA.defaults.startCoords; // default position
@@ -295,12 +230,6 @@ export class Arena {
                     navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
                 } catch {}
             }
-            camera.object3D.position.copy(startPos);
-            camera.object3D.position.y += ARENA.defaults.camHeight;
-        }
-        // enable vio if fixedCamera is given
-        if (ARENA.fixedCamera !== '') {
-            camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
     }
 
