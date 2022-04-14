@@ -356,6 +356,7 @@ function initAuthPanel() {
     const modalDiv = document.createElement('div');
     modalDiv.style.textAlign = 'left';
     modalDiv.style.marginTop = '27vh';
+    modalDiv.style.color = 'black';
     modalDiv.style.backgroundColor = 'white';
     modalDiv.style.width = '50%';
     modalDiv.style.height = '50%';
