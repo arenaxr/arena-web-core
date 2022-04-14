@@ -60,23 +60,28 @@ AFRAME.registerComponent('build-watcher', {
                                 object_type: obj_type,
                             },
                         };
+                        let pub = true;
                         switch (mutation.attributeName) {
                             case 'position':
                                 msg.data.position = mutation.target.getAttribute('position');
-                                console.log(msg)
-                                ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                                 break;
                             case 'rotation':
                                 msg.data.rotation = mutation.target.getAttribute('rotation');
-                                console.log(msg)
-                                ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                                 break;
                             case 'scale':
                                 msg.data.scale = mutation.target.getAttribute('scale');
-                                console.log(msg)
-                                ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+                                break;
+                            // case 'material':
+                            //     msg.data.material = {
+                            //         color: mutation.target.getAttribute('material').color
+                            //     };
+                            //     break;
+                            default:
+                                pub = false;
                                 break;
                         }
+                        console.log(msg)
+                        if (pub) ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                     }
                     break;
             }

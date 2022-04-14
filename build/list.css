@@ -66,13 +66,21 @@ ul li.checked::before {
   position: absolute;
   right: 0px;
   top: 0;
-  padding: 3px 16px 3px 16px;
+  padding: 3px 10px 3px 10px;
   /*background-color: #D6EAF8 ;*/
   color: black;
 }
-
-.edit:hover {
-  background-color: #AED6F1 ;
+.edit3d {
+  position: absolute;
+  right: 36px;
+  top: 0;
+  padding: 3px 10px 3px 10px;
+  /*background-color: #D6EAF8 ;*/
+  color: black;
+}
+.edit:hover,
+.edit3d:hover {
+  background-color: #AED6F1;
   color: black;
 }
 

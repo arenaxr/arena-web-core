@@ -154,10 +154,10 @@ export async function fetchSceneObjects(scene) {
         let persistOpt = ARENADefaults.disallowJWT ? {} : { credentials: 'include' };
         let data = await fetch(persist.persistUri + scene, persistOpt);
         if (!data) {
-            throw 'Could not fetch data'; 
+            throw 'Could not fetch data';
         }
         if (!data.ok) {
-            throw 'Fetch request result not ok'; 
+            throw 'Fetch request result not ok';
         }
         sceneObjs = await data.json();
     } catch (err) {
@@ -169,9 +169,12 @@ export async function fetchSceneObjects(scene) {
 export async function populateObjectList(
     scene,
     filter,
-    objTypeFilter 
+    objTypeFilter
 ) {
     clearObjectList();
+
+    let url = new URL(window.location.href);
+    let sceneParam = url.searchParams.get('scene');
 
     let sceneObjs;
     try {
@@ -182,7 +185,7 @@ export async function populateObjectList(
             title: `Error fetching scene from database. ${err}`,
             timer: 5000,
         });
-        return;        
+        return;
     }
     persist.currentSceneObjs = sceneObjs;
 
@@ -271,6 +274,7 @@ export async function populateObjectList(
         let ielem = document.createElement('i');
         ielem.className = 'icon-edit';
         editspan.className = 'edit';
+        editspan.title = 'Edit JSON';
         editspan.appendChild(ielem);
         li.appendChild(editspan);
 
@@ -280,6 +284,20 @@ export async function populateObjectList(
                 persist.editObjHandler(obj);
             };
         })();
+
+        // add 3d edit "button"
+        let editspan3d = document.createElement('span');
+        let ielem3d = document.createElement('i');
+        ielem3d.className = 'icon-picture';
+        editspan3d.className = 'edit3d';
+        editspan3d.title = 'Edit 3D View';
+        editspan3d.appendChild(ielem3d);
+        li.appendChild(editspan3d);
+
+        editspan3d.onclick = function() {
+            let obj = sceneObjs[i];
+            window.location.href = `../build-3d/?scene=${sceneParam}&object_id=${obj.object_id}`;
+        };
 
         persist.objList.appendChild(li);
     }
@@ -622,6 +640,6 @@ export function mqttReconnect(settings) {
 // callback from mqttclient; on reception of message
 function onMqttMessage(message) { }
 
-function onMqttConnectionLost() { 
+function onMqttConnectionLost() {
     persist.mqttConnected = false;
 }

@@ -1,7 +1,15 @@
-import {ARENAUtils} from '../src/utils.js';
-import {ARENAMqtt} from '../src/mqtt.js';
-import {ARENAEventEmitter} from '../src/event-emitter.js';
-import {ARENAHealth} from '../src/health/';
+import {
+    ARENAUtils
+} from '../src/utils.js';
+import {
+    ARENAMqtt
+} from '../src/mqtt.js';
+import {
+    ARENAEventEmitter
+} from '../src/event-emitter.js';
+import {
+    ARENAHealth
+} from '../src/health/';
 import Swal from 'sweetalert2';
 
 /* global ARENA, KJUR */
@@ -205,6 +213,18 @@ export class Arena {
         // after scene is completely loaded, add user camera
         ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
             ARENA.loadUser();
+
+            // auto load the a-frame inspector
+            const sceneEl = document.querySelector('a-scene');
+            const object_id = ARENAUtils.getUrlParam('object_id', '');
+            if (object_id) {
+                console.log(`object_id`, object_id)
+                const el = document.querySelector(`#${object_id}`);
+                sceneEl.components.inspector.openInspector(el);
+            } else {
+                sceneEl.components.inspector.openInspector();
+            }
+            console.log('build-3d', 'a-scene inspector loaded')
         });
     };
 
@@ -494,11 +514,6 @@ export class Arena {
 
         // add page header
         $('#header').load('../header-old.html');
-
-        // auto load the a-frame inspector
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.components.inspector.openInspector();
-        console.log('build-3d', 'a-scene inspector loaded')
 
         // match name on the end of the id tag
         this.setUserName(args.mqtt_username);
