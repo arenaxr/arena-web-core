@@ -72,7 +72,7 @@ AFRAME.registerComponent('build-watcher', {
                                 ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                                 break;
                             case 'scale':
-                                msg.data.position = mutation.target.getAttribute('scale');
+                                msg.data.scale = mutation.target.getAttribute('scale');
                                 console.log(msg)
                                 ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                                 break;
