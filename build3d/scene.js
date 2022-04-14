@@ -12,7 +12,7 @@
 
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
 import 'aframe'; // AFRAME
-import './build-3d.js'; // ARENA
+import './build3d.js'; // ARENA
 // import '../src/ui/'; // 2D UI
 import '../src/aframe-mods/'; // AFRAME modifications
 import '../src/systems/'; // custom AFRAME systems

@@ -224,7 +224,7 @@ export class Arena {
             } else {
                 sceneEl.components.inspector.openInspector();
             }
-            console.log('build-3d', 'a-scene inspector loaded')
+            console.log('build3d', 'a-scene inspector loaded')
         });
     };
 

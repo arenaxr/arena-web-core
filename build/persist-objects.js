@@ -296,7 +296,7 @@ export async function populateObjectList(
 
         editspan3d.onclick = function() {
             let obj = sceneObjs[i];
-            window.location.href = `../build-3d/?scene=${sceneParam}&object_id=${obj.object_id}`;
+            window.location.href = `../build3d/?scene=${sceneParam}&object_id=${obj.object_id}`;
         };
 
         persist.objList.appendChild(li);
