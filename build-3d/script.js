@@ -1,6 +1,6 @@
 $(document).ready(function() {
     // add page header
-    $('#header').load('../header.html');
+    $("#header").load("../header.html");
 
     let build3dframe = document.getElementById('build3dframe');
     const build3dUrl = `./scene.html${window.parent.location.search}`;

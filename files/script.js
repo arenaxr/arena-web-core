@@ -3,7 +3,7 @@
  */
 $(document).ready(function() {
     // add page header
-    $('#header').load('../header.html');
+    $("#header").load("../header.html");
     updateStoreLogin();
 });
 

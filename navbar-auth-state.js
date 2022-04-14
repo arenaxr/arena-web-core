@@ -12,7 +12,7 @@ $(document).ready(function() {
                 authDrop.attr('aria-haspopup', 'true');
                 authDrop.attr('aria-expanded', 'false');
                 $('#auth-dropdown').after(
-                    '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdow\'></ul>');
+                    '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
                 $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="${host}/user/profile">Profile</a></li>`);
                 if (typeof window.showPerms !== 'undefined') {
                     $('ul .dropdown-menu').append(`<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>`);
