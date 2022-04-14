@@ -66,13 +66,13 @@ AFRAME.registerComponent('build-watcher', {
                         };
                         let pub = true;
                         switch (mutation.attributeName) {
-                            case 'id':
-                                // TODO: handle id
-                                pub = false;
-                                break;
-                            case 'geometry':
-                                // geometry updated above
-                                break;
+                            // case 'id':
+                            //     // TODO: handle id
+                            //     pub = false;
+                            //     break;
+                            // case 'geometry':
+                            //     // geometry updated above
+                            //     break;
                             case 'position':
                                 msg.data.position = mutation.target.getAttribute('position');
                                 break;
