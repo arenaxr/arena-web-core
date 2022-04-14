@@ -38,7 +38,7 @@ AFRAME.registerComponent('build-watcher', {
                     if (mutation.addedNodes.length > 0)
                         console.log(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
                     if (mutation.removedNodes.length > 0)
-                        console.log(`${mutation.removedNodes.length} child nodes has=ve been removed.`, mutation.removedNodes);
+                        console.log(`${mutation.removedNodes.length} child nodes have been removed.`, mutation.removedNodes);
                     break;
                 case 'attributes':
                     // mutation.target
@@ -48,9 +48,13 @@ AFRAME.registerComponent('build-watcher', {
                         return;
                     if (mutation.target.id && !staticIds.includes(mutation.target.id)) {
                         console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
-                        if (!mutation.target.getAttribute('geometry'))
+                        if (mutation.target.getAttribute('gltf-model')) {
+                            obj_type = 'gltf-model';
+                        } else if (mutation.target.getAttribute('geometry')) {
+                            obj_type = mutation.target.getAttribute('geometry').primitive;
+                        } else {
                             return;
-                        const obj_type = mutation.target.getAttribute('geometry').primitive;
+                        }
                         const msg = {
                             object_id: mutation.target.id,
                             action: 'update',
@@ -62,6 +66,13 @@ AFRAME.registerComponent('build-watcher', {
                         };
                         let pub = true;
                         switch (mutation.attributeName) {
+                            case 'id':
+                                // TODO: handle id
+                                pub = false;
+                                break;
+                            case 'geometry':
+                                // geometry updated above
+                                break;
                             case 'position':
                                 msg.data.position = mutation.target.getAttribute('position');
                                 break;
