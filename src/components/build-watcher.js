@@ -62,12 +62,17 @@ AFRAME.registerComponent('build-watcher', {
                         };
                         switch (mutation.attributeName) {
                             case 'position':
-                                const position = mutation.target.getAttribute('position');
-                                msg.data.position = {
-                                    'x': `${position.x}`,
-                                    'y': `${position.y}`,
-                                    'z': `${position.z}`,
-                                };
+                                msg.data.position = mutation.target.getAttribute('position');
+                                console.log(msg)
+                                ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+                                break;
+                            case 'rotation':
+                                msg.data.rotation = mutation.target.getAttribute('rotation');
+                                console.log(msg)
+                                ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+                                break;
+                            case 'scale':
+                                msg.data.position = mutation.target.getAttribute('scale');
                                 console.log(msg)
                                 ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                                 break;
