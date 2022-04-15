@@ -100,6 +100,7 @@ AFRAME.registerComponent('arena-user', {
         displayName: {type: 'string', default: ''},
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
+        jitsiQuality: {type: 'number', default: 100.0},
     },
 
     init: function() {
@@ -136,6 +137,7 @@ AFRAME.registerComponent('arena-user', {
         el.appendChild(this.headText);
         el.appendChild(this.headModel);
         this.drawMicrophone();
+        this.drawQuality();
 
         this.videoID = null;
         this.audioID = null;
@@ -175,6 +177,7 @@ AFRAME.registerComponent('arena-user', {
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
+            micIconEl.setAttribute('material', 'shader', 'flat');
             micIconEl.setAttribute('scale', '0.2 0.2 0.2');
             if (data.presence !== 'Portal') {
                 micIconEl.setAttribute('position', '0 0.3 0.045');
@@ -196,10 +199,40 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
-    drawVideoCube() {
+    drawQuality() {
         const el = this.el;
         const data = this.data;
 
+        const name = 'quality_' + el.id;
+        let qualIconEl = document.querySelector('#' + name);
+        if (!qualIconEl) {
+            qualIconEl = document.createElement('a-image');
+            qualIconEl.setAttribute('id', name);
+            qualIconEl.setAttribute('material', 'shader', 'flat');
+            qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
+            if (data.presence !== 'Portal') {
+                qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
+            } else {
+                qualIconEl.setAttribute('position', `${-0.75 - 0.2}-0.75 1.25 -0.035`);
+            }
+            qualIconEl.setAttribute('src', 'url(/src/icons/images/signal-good.svg)');
+            el.appendChild(qualIconEl);
+        }
+    },
+
+    removeQuality() {
+        const el = this.el;
+
+        const name = 'quality_' + el.id;
+        const qualIconEl = document.querySelector('#' + name);
+        if (qualIconEl) {
+            el.removeChild(qualIconEl);
+        }
+    },
+
+    drawVideoCube() {
+        const el = this.el;
+        const data = this.data;
 
         // attach video to head
         const videoCube = document.createElement('a-box');
