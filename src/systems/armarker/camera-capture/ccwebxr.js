@@ -95,7 +95,8 @@ export class WebXRCameraCapture {
             this.glBinding = new webGlBinding(xrSession, gl);
             if (this.glBinding && this.glBinding.getCameraImage) {
                 this.fb = gl.createFramebuffer();
-                xrSession.requestReferenceSpace('local').then((xrRefSpace) => {
+                const webxrSystem = document.getElementById('ARENAScene').systems.webxr;
+                xrSession.requestReferenceSpace(webxrSystem.sessionReferenceSpaceType).then((xrRefSpace) => {
                     this.xrRefSpace = xrRefSpace;
                     xrSession.requestAnimationFrame(this.onXRFrame.bind(this));
                 });
