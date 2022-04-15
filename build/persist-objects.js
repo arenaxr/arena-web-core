@@ -173,9 +173,6 @@ export async function populateObjectList(
 ) {
     clearObjectList();
 
-    let url = new URL(window.location.href);
-    let sceneParam = url.searchParams.get('scene');
-
     let sceneObjs;
     try {
         sceneObjs = await fetchSceneObjects(scene);
@@ -296,7 +293,7 @@ export async function populateObjectList(
 
         editspan3d.onclick = function() {
             let obj = sceneObjs[i];
-            window.location.href = `../build3d/?scene=${sceneParam}&object_id=${obj.object_id}`;
+            window.location.href = `../build3d/?scene=${scene}&object_id=${obj.object_id}`;
         };
 
         persist.objList.appendChild(li);
