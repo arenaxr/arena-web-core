@@ -225,6 +225,11 @@ export class Arena {
                 sceneEl.components.inspector.openInspector();
             }
             console.log('build3d', 'a-scene inspector loaded')
+
+            // TODO: (mwfarb) fix inspector layout, for now force TRS buttons visibility
+            setTimeout(() => {
+                $('#aframeInspector #viewportBar').css('align-items', 'unset');
+            }, 1000);
         });
     };
 
