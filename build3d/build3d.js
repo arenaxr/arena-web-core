@@ -50,7 +50,7 @@ export class Arena {
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
         // get url params
-        const url = new URL(window.location.href);
+        const url = new URL(window.parent.window.location.href);
         this.skipav = url.searchParams.get('skipav');
         this.armode = url.searchParams.get('armode');
         this.noav = url.searchParams.get('noav');
@@ -113,7 +113,7 @@ export class Arena {
             this.sceneName = sn;
             this.nameSpace = ns;
         };
-        let path = window.location.pathname.substring(1);
+        let path = window.parent.window.location.pathname.substring(1);
         let {
             namespace: namespace,
             sceneName: scenename
@@ -145,8 +145,8 @@ export class Arena {
         }
 
         // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
-        let url = new URL(window.location.href);
-        let sceneParam = url.searchParams.get('scene');
+        let url = new URL(window.parent.window.location.href);
+        let sceneParam = decodeURI(url.searchParams.get('scene'));
         let ns, s;
         if (sceneParam) {
             let sn = sceneParam.split('/');
@@ -159,13 +159,11 @@ export class Arena {
         localStorage.setItem("namespace", ns);
         localStorage.setItem("scene", s);
         // pass updated scene param back to address bar url
-        if (window.parent) {
-            let newUrl = new URL(window.parent.window.location.href);
-            newUrl.searchParams.set('scene', `${ns}/${s}`);
-            window.parent.window.history.pushState({
-                path: newUrl.href
-            }, '', newUrl.href);
-        }
+        let newUrl = new URL(window.parent.window.location.href);
+        newUrl.searchParams.set('scene', `${ns}/${s}`);
+        window.parent.window.history.pushState({
+            path: newUrl.href
+        }, '', newUrl.href);
 
         _setNames(ns, s);
 
@@ -235,12 +233,18 @@ export class Arena {
             } else {
                 sceneEl.components.inspector.openInspector();
             }
-            console.log('build3d', 'a-scene inspector loaded')
+            console.log('build3d', 'A-Frame Inspector loaded')
 
-            // TODO: (mwfarb) fix inspector layout, for now force TRS buttons visibility
+            // TODO: (mwfarb) fix hack to modify a-frame
             setTimeout(() => {
+                // force TRS buttons visibility
                 $('#aframeInspector #viewportBar').css('align-items', 'unset');
-            }, 1000);
+                // use "Back to Scene" to send to real ARENA scene
+                $('a.toggle-edit').click(function() {
+                    const scene = decodeURI(ARENAUtils.getUrlParam('scene', ''));
+                    window.parent.window.location.href = `https://${window.parent.window.location.host}/${scene}`;
+                });
+            }, 2000);
         });
     };
 
