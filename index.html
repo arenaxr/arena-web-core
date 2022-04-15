@@ -146,9 +146,9 @@
         </div>
     </div>
 </div>
-<a-scene background="color: black" name="ARENAScene" stats-monitor="true"
-         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;">
-    <!-- stats physics -->
+<a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
+         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
+         ar-hit-test="enabled: true">
     <a-assets>
         <!-- Vive controller 3d model -->
         <a-asset-item id="viveControl-obj" src="store/models/vr_controller_vive.obj"></a-asset-item>
@@ -158,7 +158,7 @@
     <a-entity id="sceneRoot">
         <!-- ground plane so falling objects don't fall through floor -->
         <a-box color="#FFAAEE" depth="1000" height="0.01" id="groundPlane" opacity=".01" position="0 -0.01 0"
-               static-body transparent="true" width="1000"></a-box>
+               transparent="true" width="1000"></a-box>
 
         <a-entity id="cameraRig" position="0 0 0">
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">

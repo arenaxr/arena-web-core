@@ -53,7 +53,6 @@ import './vendor/nav-system.js'; // Override nav system
 // import 'aframe-spe-particles-component';
 
 // direct file imports
-import './vendor/aframe-physics-system.min.js'; // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
 import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
 import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
 import './vendor/morphTarget.js'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component
