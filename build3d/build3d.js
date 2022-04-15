@@ -156,6 +156,17 @@ export class Arena {
             ns = localStorage.getItem("namespace") === null ? username : localStorage.getItem("namespace");
             s = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
         }
+        localStorage.setItem("namespace", ns);
+        localStorage.setItem("scene", s);
+        // pass updated scene param back to address bar url
+        if (window.parent) {
+            let newUrl = new URL(window.parent.window.location.href);
+            newUrl.searchParams.set('scene', `${ns}/${s}`);
+            window.parent.window.history.pushState({
+                path: newUrl.href
+            }, '', newUrl.href);
+        }
+
         _setNames(ns, s);
 
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
