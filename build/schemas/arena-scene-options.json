@@ -384,7 +384,7 @@
                 "default":"jitsi0.andrew.cmu.edu:8443",
                 "description":"Jitsi host used for this scene.",
                 "minLength":5,
-                "title":"Scene Jitsi Host",
+                "title":"Jitsi Host",
                 "type":"string"
              },
              "maxAVDist":{
@@ -397,7 +397,7 @@
                 "default":"",
                 "description":"Navigation Mesh URL",
                 "minLength":5,
-                "title":"Nav. Mesh",
+                "title":"Navigation Mesh",
                 "type":"string"
              },
              "networkedLocationSolver":{
@@ -445,8 +445,8 @@
              },
              "physics":{
                 "default":false,
-                "description":"If true will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
-                "title":"Enable the A-Frame physics system.",
+                "description":"If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
+                "title":"Physics System",
                 "type":"boolean"
              }
           },
