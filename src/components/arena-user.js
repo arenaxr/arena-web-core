@@ -217,7 +217,7 @@ AFRAME.registerComponent('arena-user', {
             el.appendChild(qualIconEl);
         }
         // update signal strength
-        qualIconEl.setAttribute('src', this.getQualityIcon(this.jitsiQuality));
+        qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality));
     },
 
     removeQuality() {
@@ -231,14 +231,15 @@ AFRAME.registerComponent('arena-user', {
     },
 
     getQualityIcon(quality) {
-        if (quality > 66.7)
+        if (quality > 66.7) {
             return 'url(/src/icons/images/signal-good.svg)';
-        else if (quality > 33.3)
+        } else if (quality > 33.3) {
             return 'url(/src/icons/images/signal-poor.svg)';
-        else if (quality > 0)
+        } else if (quality > 0) {
             return 'url(/src/icons/images/signal-weak.svg)';
-        else
+        } else {
             return 'url(/src/icons/images/signal-bad.svg)';
+        }
     },
 
     drawVideoCube() {
@@ -464,6 +465,12 @@ AFRAME.registerComponent('arena-user', {
                 break;
             }
         }
+
+        if (data.jitsiQuality < 66.7) {
+            this.drawQuality();
+        } else{
+            this.removeQuality();
+        }
     },
 
     tick: function() {
@@ -471,11 +478,6 @@ AFRAME.registerComponent('arena-user', {
         if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
             this.updateVideo();
             this.updateAudio();
-        }
-        if (this.jitsiQuality < 66.7) {
-            this.drawQuality();
-        } else{
-            this.removeQuality();
         }
 
         const myCam = document.getElementById('my-camera');

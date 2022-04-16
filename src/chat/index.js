@@ -1018,9 +1018,9 @@ export class ARENAChat {
      * @return {string} Color string
      */
     getConnectionColor(quality) {
-        if (quality > 67) {
+        if (quality > 66.7) {
             return 'green';
-        } else if (quality > 33) {
+        } else if (quality > 33.3) {
             return 'orange';
         } else if (quality > 0) {
             return 'gold';
