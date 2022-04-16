@@ -492,10 +492,16 @@ export class Arena {
                 if (payload) {
                     const options = payload['attributes'];
                     Object.assign(sceneOptions, options['scene-options']);
+                    const arenaScene = document.getElementById('ARENAScene');
 
-                    // deal with navMesh dropbox links
-                    if (sceneOptions['navMesh']) {
-                        sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
+                    if (sceneOptions['physics']) {
+                        // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
+                        import('./components/vendor/aframe-physics-system.min.js');
+                        document.getElementById('groundPlanets').setAttribute('static-body', 'true');
+                    }
+
+                    if (sceneOptions['ar-hit-test']) {
+                        arenaScene.setAttribute('ar-hit-test', sceneOptions['ar-hit-test']);
                     }
 
                     // deal with scene attribution
@@ -508,6 +514,7 @@ export class Arena {
                     }
 
                     if (sceneOptions['navMesh']) {
+                        sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
                         const navMesh = document.createElement('a-entity');
                         navMesh.id = 'navMesh';
                         navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
