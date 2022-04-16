@@ -442,6 +442,12 @@
                 "description":"Volume for users in a scene",
                 "title":"Positional Audio Volume",
                 "type":"number"
+             },
+             "physics":{
+                "default":false,
+                "description":"If true will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
+                "title":"Enable the A-Frame physics system.",
+                "type":"boolean"
              }
           },
           "required":[
