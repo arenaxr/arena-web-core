@@ -554,6 +554,14 @@ export class ARENAChat {
             this.liveUsers[arenaId].stats.conn = stats;
             this.liveUsers[arenaId].jid = jid;
             this.populateUserList();
+            // update arena-user connection quality
+            if (stats && stats.connectionQuality) {
+                const userCamId = `camera_${arenaId}`;
+                const userCamEl = document.querySelector(`[id="${userCamId}"]`);
+                if (userCamEl) {
+                    userCamEl.setAttribute('arena-user', 'jitsiQuality', stats.connectionQuality);
+                }
+            }
         }
     };
 
