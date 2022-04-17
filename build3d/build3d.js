@@ -307,16 +307,7 @@ export class Arena {
                 for (let i = 0; i < arenaObjects.length; i++) {
                     const obj = arenaObjects[i];
                     if (obj.type === 'program') {
-                        // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                        const avars = {
-                            scene: ARENA.sceneName,
-                            namespace: ARENA.nameSpace,
-                            cameraid: ARENA.camName,
-                            username: ARENA.getDisplayName,
-                            mqtth: ARENA.mqttHost,
-                        };
-                        // ask runtime manager to start this program
-                        this.RuntimeManager.createModuleFromPersist(obj, avars);
+                        console.warn(`Ignoring program '${obj.attributes.name}' for build3d.`);
                         continue;
                     }
                     if (obj.object_id === this.camName) {
@@ -456,16 +447,6 @@ export class Arena {
                     sceneRoot.appendChild(navMesh);
                 }
 
-                if (sceneOptions['sceneHeadModels']) {
-                    // add scene custom scene heads to selection list
-                    setupSceneHeadModels();
-                }
-
-                if (!sceneOptions['clickableOnlyEvents']) {
-                    // unusual case: clickableOnlyEvents = true by default, add warning...
-                    ARENA.health.addError('scene-options.allObjectsClickable');
-                }
-
                 // save scene options
                 for (const [attribute, value] of Object.entries(sceneOptions)) {
                     ARENA[attribute] = value;
@@ -522,7 +503,7 @@ export class Arena {
     };
 
     /**
-     * When user auth is done, startup mqtt, runtime, chat and other ui elements;
+     * When user auth is done, startup mqtt...
      * Remaining init will be done once mqtt connection is done
      * @param {event} e
      */
@@ -557,15 +538,6 @@ export class Arena {
                 // last will topic
                 this.outputTopic + this.camName,
             );
-
-            // start sending console output to mqtt
-            // (topic: debug-topic/rt-uuid; e.g. realm/proc/debug/71ee5bad-f0d2-4abb-98a7-e4336daf628a)
-            if (!ARENADefaults.devInstance) {
-                console.setOptions({
-                    dbgTopic: this.RuntimeManager.getRtDbgTopic(),
-                    publish: this.Mqtt.publish.bind(this.Mqtt)
-                }, );
-            }
 
             console.info(
                 `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);

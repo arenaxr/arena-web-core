@@ -190,7 +190,7 @@
           "type":"boolean"
        },
        "collision-listener":{
-          "description":"Name of the collision-listener, default can be empty string.. \n\nMore properties at <a href='https://github.com/n5ro/aframe-physics-system#collisions'>https://github.com/n5ro/aframe-physics-system#collisions</a>",
+          "description":"Name of the collision-listener, default can be empty string. \n\nMore properties at <a href='https://github.com/n5ro/aframe-physics-system#collisions'>https://github.com/n5ro/aframe-physics-system#collisions</a>",
           "title":"Collision Listener",
           "type":"string"
        },

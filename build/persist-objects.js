@@ -283,18 +283,23 @@ export async function populateObjectList(
         })();
 
         // add 3d edit "button"
-        let editspan3d = document.createElement('span');
-        let ielem3d = document.createElement('i');
-        ielem3d.className = 'icon-picture';
-        editspan3d.className = 'edit3d';
-        editspan3d.title = 'Edit 3D View';
-        editspan3d.appendChild(ielem3d);
-        li.appendChild(editspan3d);
+        if (sceneObjs[i].type != 'program') {
+            let editspan3d = document.createElement('span');
+            let ielem3d = document.createElement('i');
+            ielem3d.className = 'icon-picture';
+            editspan3d.className = 'edit3d';
+            editspan3d.title = 'Edit 3D View';
+            editspan3d.appendChild(ielem3d);
+            li.appendChild(editspan3d);
 
-        editspan3d.onclick = function() {
-            let obj = sceneObjs[i];
-            window.location.href = `../build3d/?scene=${scene}&object_id=${obj.object_id}`;
-        };
+            editspan3d.onclick = function() {
+                if (sceneObjs[i].type == 'scene-options'){
+                    window.location.href = `../build3d/?scene=${scene}&object_id=env`;
+                }else{
+                    window.location.href = `../build3d/?scene=${scene}&object_id=${sceneObjs[i].object_id}`;
+                }
+            };
+        }
 
         persist.objList.appendChild(li);
     }
