@@ -466,7 +466,7 @@ AFRAME.registerComponent('arena-user', {
             }
         }
 
-        if (data.jitsiQuality < 66.7) {
+        if (data.jitsiQuality < 66.7 && ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
             this.drawQuality();
         } else{
             this.removeQuality();
