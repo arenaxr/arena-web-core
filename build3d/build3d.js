@@ -86,7 +86,7 @@ export class Arena {
      * Sets this.sceneName and this.namespacedScene from url. this.namespacedScene
      * includes namespace prefix (e.g. `namespace/foo`)
      * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
-     * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
+     * Also sets persistenceUrl, outputTopic, renderTopic which depend on scene name
      */
     setSceneName() {
         // private function to set scenename, namespacedScene and namespace
@@ -135,11 +135,11 @@ export class Arena {
             ns = sn[0];
             s = sn[1];
         } else {
-            ns = localStorage.getItem("namespace") === null ? username : localStorage.getItem("namespace");
-            s = localStorage.getItem("scene") === null ? dfts.scene : localStorage.getItem("scene");
+            ns = localStorage.getItem('namespace') === null ? username : localStorage.getItem('namespace');
+            s = localStorage.getItem('scene') === null ? dfts.scene : localStorage.getItem('scene');
         }
-        localStorage.setItem("namespace", ns);
-        localStorage.setItem("scene", s);
+        localStorage.setItem('namespace', ns);
+        localStorage.setItem('scene', s);
         // pass updated scene param back to address bar url
         let newUrl = new URL(window.parent.window.location.href);
         newUrl.searchParams.set('scene', `${ns}/${s}`);
@@ -149,11 +149,10 @@ export class Arena {
 
         _setNames(ns, s);
 
-        // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
+        // Sets namespace, persistenceUrl, outputTopic, renderTopic
         this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.namespacedScene;
         this.outputTopic = this.defaults.realm + '/s/' + this.namespacedScene + '/';
         this.renderTopic = this.outputTopic + '#';
-        this.vioTopic = this.defaults.realm + '/vio/' + this.namespacedScene + '/';
     }
 
     /**
