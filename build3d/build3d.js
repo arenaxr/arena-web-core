@@ -203,56 +203,35 @@ export class Arena {
 
         // after scene is completely loaded, add user camera
         ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
-            ARENA.loadUser();
-
-            // auto load the a-frame inspector
-            const sceneEl = document.querySelector('a-scene');
-            const object_id = ARENAUtils.getUrlParam('object_id', '');
-            if (object_id) {
-                console.log(`object_id`, object_id)
-                const el = document.querySelector(`#${object_id}`);
-                sceneEl.components.inspector.openInspector(el);
-            } else {
-                sceneEl.components.inspector.openInspector();
-            }
-            console.log('build3d', 'A-Frame Inspector loaded')
-
-            // TODO: (mwfarb) fix hack to modify a-frame
-            setTimeout(() => {
-                // force TRS buttons visibility
-                $('#aframeInspector #viewportBar').css('align-items', 'unset');
-                // use "Back to Scene" to send to real ARENA scene
-                $('a.toggle-edit').click(function() {
-                    const scene = decodeURI(ARENAUtils.getUrlParam('scene', ''));
-                    window.parent.window.location.href = `https://${window.parent.window.location.host}/${scene}`;
-                });
-            }, 2000);
+            ARENA.loadSceneInspector();
         });
     };
 
     /**
-     * loads this user's presence and camera
+     * Auto load the a-frame inspector, expects all known object to be loaded first
      */
-    loadUser() {
-        const systems = AFRAME.scenes[0].systems;
+    loadSceneInspector() {
+        const sceneEl = document.querySelector('a-scene');
+        const object_id = ARENAUtils.getUrlParam('object_id', '');
+        if (object_id) {
+            console.log(`object_id`, object_id);
+            const el = document.querySelector(`#${object_id}`);
+            sceneEl.components.inspector.openInspector(el);
+        } else {
+            sceneEl.components.inspector.openInspector();
+        }
+        console.log('build3d', 'A-Frame Inspector loaded');
 
-        const startPos = new THREE.Vector3;
-        if (ARENA.startCoords) {
-            startPos.set(...ARENA.startCoords);
-            ARENA.startCoords = startPos;
-        }
-        if (!ARENA.startCoords) { // Final fallthrough for failures
-            ARENA.startCoords = ARENA.defaults.startCoords; // default position
-            const navSys = systems.nav;
-            startPos.copy(ARENA.startCoords);
-            if (navSys && navSys.navMesh) {
-                try {
-                    const closestGroup = navSys.getGroup(startPos, false);
-                    const closestNode = navSys.getNode(startPos, closestGroup, false);
-                    navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
-                } catch {}
-            }
-        }
+        // TODO: (mwfarb) fix hack to modify a-frame
+        setTimeout(() => {
+            // force TRS buttons visibility
+            $('#aframeInspector #viewportBar').css('align-items', 'unset');
+            // use "Back to Scene" to send to real ARENA scene
+            $('a.toggle-edit').click(function() {
+                const scene = decodeURI(ARENAUtils.getUrlParam('scene', ''));
+                window.parent.window.location.href = `https://${window.parent.window.location.host}/${scene}`;
+            });
+        }, 2000);
     }
 
     /**
@@ -406,6 +385,12 @@ export class Arena {
             if (payload) {
                 const options = payload['attributes'];
                 Object.assign(sceneOptions, options['scene-options']);
+
+                if (sceneOptions['physics']) {
+                    // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
+                    import('../src/components/vendor/aframe-physics-system.min.js');
+                    document.getElementById('groundPlane').setAttribute('static-body', 'true');
+                }
 
                 // deal with navMesh dropbox links
                 if (sceneOptions['navMesh']) {

@@ -102,7 +102,7 @@ AFRAME.registerComponent('build-watcher', {
         this.system.unregisterComponent(this.el);
     },
     tick: function() {
-        const sceneRoot = document.getElementById('sceneRoot');
-        sceneRoot.flushToDOM(true);
+        // const sceneRoot = document.getElementById('sceneRoot');
+        // sceneRoot.flushToDOM(true);
     },
 });
