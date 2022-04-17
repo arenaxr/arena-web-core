@@ -41,26 +41,8 @@ export class Arena {
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
-        this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if not specified
-        // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
-        if (this.startCoords) {
-            this.startCoords = this.startCoords.split(',').map((i) => Number(i));
-        }
-        this.jitsiHost = this.defaults.jitsiHost;
-        this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
-        this.latencyTopic = this.defaults.latencyTopic;
-        // get url params
-        const url = new URL(window.parent.window.location.href);
-        this.skipav = url.searchParams.get('skipav');
-        this.armode = url.searchParams.get('armode');
-        this.noav = url.searchParams.get('noav');
-        this.ar = url.searchParams.get('ar');
-        this.confstats = url.searchParams.get('confstats');
 
-        ARENAUtils.getLocation((coords, err) => {
-            if (!err) ARENA.clientCoords = coords;
-        });
-        this.maxAVDist = 20;
+        this.latencyTopic = this.defaults.latencyTopic;
 
         // set scene name from url
         this.setSceneName();
