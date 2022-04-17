@@ -466,10 +466,12 @@ AFRAME.registerComponent('arena-user', {
             }
         }
 
-        if (data.jitsiQuality < 66.7 && ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
-            this.drawQuality();
-        } else{
-            this.removeQuality();
+        if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
+            if (data.jitsiQuality < 66.7) {
+                this.drawQuality();
+            } else {
+                this.removeQuality();
+            }
         }
     },
 
