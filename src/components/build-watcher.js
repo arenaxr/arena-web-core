@@ -1,7 +1,7 @@
 /* global AFRAME, ARENA */
 
 /**
- * @fileoverview Create an observer to listen for changes mde locally in the A-Frame Inspector and publish them to MQTT.
+ * @fileoverview Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
@@ -9,11 +9,11 @@
  */
 
 /**
- * Create an observer to listen for changes mde locally in the A-Frame Inspector and publish them to MQTT.
+ * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build-watcher
  */
 AFRAME.registerComponent('build-watcher', {
-    // create an observer to listen for changes mde locally in the a-frame inspector and publish them to mqtt.
+    // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     multiple: false,
     init: function() {
         const sceneEl = document.querySelector('a-scene');
