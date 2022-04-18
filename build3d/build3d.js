@@ -173,7 +173,6 @@ export class Arena {
         const sceneEl = document.querySelector('a-scene');
         const object_id = ARENAUtils.getUrlParam('object_id', '');
         if (object_id) {
-            console.log(`object_id`, object_id);
             const el = document.querySelector(`#${object_id}`);
             sceneEl.components.inspector.openInspector(el);
         } else {

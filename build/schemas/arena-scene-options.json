@@ -448,6 +448,12 @@
                 "description":"If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
                 "title":"Physics System",
                 "type":"boolean"
+             },
+             "ar-hit-test":{
+                "default":"enabled: true",
+                "description":"If 'enabled: true', allows click events to intersect to physical objects.",
+                "title":"AR Hit Test",
+                "type":"string"
              }
           },
           "required":[
