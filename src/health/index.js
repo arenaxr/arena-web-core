@@ -60,10 +60,10 @@ export class ARENAHealth {
         const icon = document.getElementById('error-icon');
         if (icon) icon.style.display = 'block';
         // set error viewing level
-        let imgSrc = '/src/icons/health/exclamation-warn.svg';
+        let imgSrc = '/src/health/images/exclamation-warn.svg';
         for (const [k, v] of Object.entries(this.activeErrors)) {
             if (v.class == 'health-error-label') {
-                imgSrc = '/src/icons/health/exclamation.svg';
+                imgSrc = '/src/health/images/exclamation.svg';
             }
         };
         $('#error-svg').attr('src', imgSrc);
