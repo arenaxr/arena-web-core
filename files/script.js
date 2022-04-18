@@ -60,6 +60,13 @@ async function loadHtmlToFrame(html) {
     doc.open();
     doc.write(html);
     doc.close();
+
+    // Since filebrowser load will overwrite some style, after fs load, force any style we require
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = 'style.css';
+    document.getElementsByTagName('head')[0].appendChild(link);
 }
 
 /**
