@@ -14,15 +14,16 @@ $(document).ready(function() {
                 $('#auth-dropdown').after(
                     '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
                 $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="${host}/user/profile">Profile</a></li>`);
-                const win = window;
-                const frame = document.getElementsByTagName('iframe');
-                if (frame && frame.length < 0) win = document.getElementsByTagName('iframe')[0].contentWindow;
-                if (typeof win.showPerms !== 'undefined') {
-                    $('ul .dropdown-menu').append(`<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>`);
-                    $('#show_perms').on('click', function() {
+                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>`);
+                $('#show_perms').on('click', function() {
+                    const frame = document.getElementsByTagName('iframe');
+                    const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
+                    if (typeof win.showPerms !== 'undefined') {
                         win.showPerms();
-                    });
-                }
+                    } else {
+                        alert('No MQTT permissions');
+                    }
+                });
                 $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="${host}/user/logout">Logout</a></li>`);
             } else {
                 $('#auth-dropdown').html('Login').on('click', function(e) {
