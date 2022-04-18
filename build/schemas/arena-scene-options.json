@@ -384,7 +384,7 @@
                 "default":"jitsi0.andrew.cmu.edu:8443",
                 "description":"Jitsi host used for this scene.",
                 "minLength":5,
-                "title":"Jitsi Host",
+                "title":"Scene Jitsi Host",
                 "type":"string"
              },
              "maxAVDist":{
@@ -397,7 +397,7 @@
                 "default":"",
                 "description":"Navigation Mesh URL",
                 "minLength":5,
-                "title":"Navigation Mesh",
+                "title":"Nav. Mesh",
                 "type":"string"
              },
              "networkedLocationSolver":{
