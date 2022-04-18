@@ -497,7 +497,7 @@ export class Arena {
                     if (sceneOptions['physics']) {
                         // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
                         import('./components/vendor/aframe-physics-system.min.js');
-                        document.getElementById('groundPlanets').setAttribute('static-body', 'true');
+                        document.getElementById('groundPlane').setAttribute('static-body', 'true');
                     }
 
                     if (sceneOptions['ar-hit-test']) {
