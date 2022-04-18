@@ -401,23 +401,25 @@ export class SideMenu {
         appendBold(pagesDiv, 'Pages: ');
         formDiv.appendChild(pagesDiv);
 
+        pagesDiv.append('Build (');
+
         const edit = document.createElement('a');
         edit.href = `/build/?scene=${ARENA.namespacedScene}`;
         edit.target = '_blank';
         edit.rel = 'noopener noreferrer';
-        edit.innerHTML = 'Edit JSON';
+        edit.innerHTML = 'Text';
         pagesDiv.appendChild(edit);
 
-        pagesDiv.append(' | ');
+        pagesDiv.append(', ');
 
         const edit3d = document.createElement('a');
         edit3d.href = `/build3d/?scene=${ARENA.namespacedScene}`;
         edit3d.target = '_blank';
         edit3d.rel = 'noopener noreferrer';
-        edit3d.innerHTML = 'Edit 3D';
+        edit3d.innerHTML = '3D';
         pagesDiv.appendChild(edit3d);
 
-        pagesDiv.append(' | ');
+        pagesDiv.append(') | ');
 
         const profile = document.createElement('a');
         profile.href = '#';

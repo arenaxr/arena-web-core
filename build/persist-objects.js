@@ -288,7 +288,7 @@ export async function populateObjectList(
             let ielem3d = document.createElement('i');
             ielem3d.className = 'icon-picture';
             editspan3d.className = 'edit3d';
-            editspan3d.title = 'Edit 3D View';
+            editspan3d.title = 'Edit 3D';
             editspan3d.appendChild(ielem3d);
             li.appendChild(editspan3d);
 

@@ -106,7 +106,7 @@ window.addEventListener('onauth', async function (e) {
         if (sceneinput.disabled == true) return;
         let newUrl = new URL(window.location.href);
         newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
-        window.history.pushState({ path: newUrl.href }, '', newUrl.href);
+        window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
     };
 
     // return uris assuming persist and mqtt are accessed through the webhost; use arenadefaults if defined

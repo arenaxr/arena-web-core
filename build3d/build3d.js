@@ -143,9 +143,7 @@ export class Arena {
         // pass updated scene param back to address bar url
         let newUrl = new URL(window.parent.window.location.href);
         newUrl.searchParams.set('scene', `${ns}/${s}`);
-        window.parent.window.history.pushState({
-            path: newUrl.href
-        }, '', newUrl.href);
+        window.parent.window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
 
         _setNames(ns, s);
 
