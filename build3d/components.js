@@ -15,7 +15,8 @@
 // import '../src/components/arena-user.js';
 // import '../src/components/armarker.js';
 // import '../src/components/attribution.js';
-import '../src/components/build-watcher.js';
+import '../src/components/build-watch-object.js';
+import '../src/components/build-watch-scene.js';
 // import '../src/components/click-listener.js';
 // import '../src/components/collision-listener.js';
 // import '../src/components/gesture-detector.js';

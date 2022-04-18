@@ -10,17 +10,17 @@
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
- * @module build-watcher
+ * @module build-watch-scene
  */
-AFRAME.registerComponent('build-watcher', {
+AFRAME.registerComponent('build-watch-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     multiple: false,
     init: function() {
         const sceneEl = document.querySelector('a-scene');
         const observerOptions = {
             childList: true,
-            attributes: true,
-            subtree: true,
+            attributes: false,
+            subtree: false,
         }
 
         const observer = new MutationObserver(this.callback);

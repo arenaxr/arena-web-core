@@ -47,39 +47,11 @@ export class Arena {
         // set scene name from url
         this.setSceneName();
 
-        // set user name from url params or defaults
-        this.setUserName();
-
         // set mqttHost and mqttHostURI from url params or defaults
         this.setmqttHost();
 
         // setup event listener
         this.events.on(ARENAEventEmitter.events.ONAUTH, this.onAuth.bind(this));
-    }
-
-    /**
-     * Sets this.userName using name given as argument, url parameter value, or default
-     * @param {string} name user name to set; will use url parameter value or default is no name is given
-     */
-    setUserName(name = undefined) {
-        // set userName
-        if (name === undefined) {
-            name = ARENAUtils.getUrlParam('name', this.defaults.userName);
-        } // check url params, defaults
-        this.userName = name;
-    }
-
-    /**
-     * Sets this.idTag using name given as argument, url parameter value, or default
-     * Important: Also sets amName, faceName, handLName, handRName which depend on idTag
-     * @param {string} idTag user name to set; will use url parameter value or default is no name is given
-     */
-    setIdTag(idTag = undefined) {
-        if (idTag === undefined) throw 'setIdTag: idTag not defined.'; // idTag must be set
-        this.idTag = idTag;
-
-        // set camName
-        this.camName = 'camera_' + this.idTag; // e.g. camera_1234_eric
     }
 
     /**
@@ -135,8 +107,8 @@ export class Arena {
             ns = sn[0];
             s = sn[1];
         } else {
-            ns = localStorage.getItem('namespace') === null ? username : localStorage.getItem('namespace');
-            s = localStorage.getItem('scene') === null ? dfts.scene : localStorage.getItem('scene');
+            ns = localStorage.getItem('namespace') === null ? this.defaults.namespace : localStorage.getItem('namespace');
+            s = localStorage.getItem('scene') === null ? this.defaults.sceneName : localStorage.getItem('scene');
         }
         localStorage.setItem('namespace', ns);
         localStorage.setItem('scene', s);
@@ -160,16 +132,6 @@ export class Arena {
         this.mqttHost = ARENAUtils.getUrlParam('mqttHost', this.defaults.mqttHost);
         this.mqttHostURI = 'wss://' + this.mqttHost + this.defaults.mqttPath[Math.floor(Math.random() * this.defaults.mqttPath.length)];
     }
-
-    /**
-     * Gets display name either from local storage or from userName
-     * @return {string} display name
-     */
-    getDisplayName() {
-        let displayName = localStorage.getItem('display_name');
-        if (!displayName) displayName = decodeURI(this.userName);
-        return displayName;
-    };
 
     /**
      * Checks token for full scene object write permissions.
@@ -268,9 +230,6 @@ export class Arena {
                         console.warn(`Ignoring program '${obj.attributes.name}' for build3d.`);
                         continue;
                     }
-                    if (obj.object_id === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
                     if (obj.attributes.parent) {
                         deferredObjects.push(obj);
                     } else {
@@ -298,9 +257,6 @@ export class Arena {
                 }
                 for (let i = 0; i < deferredObjects.length; i++) {
                     const obj = deferredObjects[i];
-                    if (obj.attributes.parent === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
                     const msg = {
                         object_id: obj.object_id,
                         action: 'create',
@@ -341,15 +297,11 @@ export class Arena {
                 const l = arenaObjects.length;
                 for (let i = 0; i < l; i++) {
                     const obj = arenaObjects[i];
-                    if (obj.object_id === this.camName) {
-                        // don't load our own camera/head assembly
-                    } else {
-                        const msg = {
-                            object_id: obj.object_id,
-                            action: 'delete',
-                        };
-                        onMessageArrived(undefined, msg);
-                    }
+                    const msg = {
+                        object_id: obj.object_id,
+                        action: 'delete',
+                    };
+                    onMessageArrived(undefined, msg);
                 }
             }
         };
@@ -477,15 +429,6 @@ export class Arena {
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
 
-        // add page header
-        $('#header').load('../header-old.html');
-
-        // match name on the end of the id tag
-        this.setUserName(args.mqtt_username);
-
-        // id tag including name is set from authentication service
-        this.setIdTag(args.ids.userid);
-
         ARENAMqtt.init().then(async (Mqtt) => {
             this.Mqtt = Mqtt;
             // Do not pass functions in mqttClientOptions
@@ -494,13 +437,6 @@ export class Arena {
                     userName: this.username,
                     password: this.mqttToken,
                 },
-                // last will message
-                JSON.stringify({
-                    object_id: this.camName,
-                    action: 'delete'
-                }),
-                // last will topic
-                this.outputTopic + this.camName,
             );
 
             console.info(

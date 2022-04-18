@@ -38,7 +38,7 @@ export class ARENAMqtt {
             proxy(ARENA.initScene),
             proxy(this._onMessageArrived),
             proxy(() => {
-                if (!ARENA.Jitsi?.ready) {
+                if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
                     // eslint-disable-next-line new-cap
                     ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
                     console.warn(`ARENA Jitsi restarting...`);
