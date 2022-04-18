@@ -22,14 +22,12 @@ AFRAME.registerComponent('build-watch-scene', {
             attributes: false,
             subtree: false,
         }
-
         const observer = new MutationObserver(this.callback);
         observer.observe(sceneEl, observerOptions);
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     callback: function(mutationList, observer) {
-        const staticIds = ['groundPlane', 'env', 'stars', 'ambient-light', 'point-light', 'aframeInspectorMouseCursor'];
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
@@ -44,58 +42,9 @@ AFRAME.registerComponent('build-watch-scene', {
                     // mutation.target
                     // mutation.attributeName
                     // mutation.oldValue
-                    if (mutation.target.getAttribute('arena-user'))
-                        return;
-                    if (mutation.target.id && !staticIds.includes(mutation.target.id)) {
-                        console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
-                        if (mutation.target.getAttribute('gltf-model')) {
-                            obj_type = 'gltf-model';
-                        } else if (mutation.target.getAttribute('geometry')) {
-                            obj_type = mutation.target.getAttribute('geometry').primitive;
-                        } else {
-                            return;
-                        }
-                        const msg = {
-                            object_id: mutation.target.id,
-                            action: 'update',
-                            type: 'object',
-                            persist: true,
-                            data: {
-                                object_type: obj_type,
-                            },
-                        };
-                        let pub = true;
-                        switch (mutation.attributeName) {
-                            // case 'id':
-                            //     // TODO: handle id
-                            //     pub = false;
-                            //     break;
-                            // case 'geometry':
-                            //     // geometry updated above
-                            //     break;
-                            case 'position':
-                                msg.data.position = mutation.target.getAttribute('position');
-                                break;
-                            case 'rotation':
-                                msg.data.rotation = mutation.target.getAttribute('rotation');
-                                break;
-                            case 'scale':
-                                msg.data.scale = mutation.target.getAttribute('scale');
-                                break;
-                            // case 'material':
-                            //     msg.data.material = {
-                            //         color: mutation.target.getAttribute('material').color
-                            //     };
-                            //     break;
-                            default:
-                                pub = false;
-                                break;
-                        }
-                        console.log(msg)
-                        if (pub) ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
-                    }
+                    console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
                     break;
-            }
+                }
         });
     },
     remove: function() {

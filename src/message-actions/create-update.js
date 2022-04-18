@@ -7,7 +7,7 @@ const ACTIONS = {
     UPDATE: 'update',
 };
 
-// path to controler models
+// path to controller models
 const handControllerPath = {
     handLeft: 'store/models/valve_index_left.gltf',
     handRight: 'store/models/valve_index_right.gltf',
@@ -44,6 +44,8 @@ export class CreateUpdate {
                 return;
             }
 
+            const buildWatch = document.querySelector('a-scene').getAttribute('build-watch-scene');
+
             let entityEl = document.getElementById(id);
 
             if (action === ACTIONS.CREATE) {
@@ -74,6 +76,9 @@ export class CreateUpdate {
                 addObj = true;
             }
 
+            // disable build-watch when applying remote updates to this object
+            if (buildWatch) entityEl.setAttribute('build-watch-object', 'enabled', false);
+
             // set to default render order
             entityEl.object3D.renderOrder = RENDER_ORDER;
 
@@ -101,6 +106,9 @@ export class CreateUpdate {
             if (message.ttl !== undefined) { // Allow falsy value of 0
                 entityEl.setAttribute('ttl', {seconds: message.ttl});
             }
+
+            // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
+            if (buildWatch) entityEl.setAttribute('build-watch-object', 'enabled', true);
 
             return;
 

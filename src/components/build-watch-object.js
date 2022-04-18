@@ -14,22 +14,18 @@
  */
 AFRAME.registerComponent('build-watch-object', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
-    multiple: false,
+    schema: {
+        enabled: {
+            type: 'boolean',
+            default: false
+        },
+    },
     init: function() {
-        const sceneEl = document.querySelector('a-scene');
-        const observerOptions = {
-            childList: true,
-            attributes: true,
-            subtree: true,
-        }
-
-        const observer = new MutationObserver(this.callback);
-        observer.observe(sceneEl, observerOptions);
+        this.observer = new MutationObserver(this.callback);
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     callback: function(mutationList, observer) {
-        const staticIds = ['groundPlane', 'env', 'stars', 'ambient-light', 'point-light', 'aframeInspectorMouseCursor'];
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
@@ -44,10 +40,8 @@ AFRAME.registerComponent('build-watch-object', {
                     // mutation.target
                     // mutation.attributeName
                     // mutation.oldValue
-                    if (mutation.target.getAttribute('arena-user'))
-                        return;
-                    if (mutation.target.id && !staticIds.includes(mutation.target.id)) {
-                        console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
+                    console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
+                    if (mutation.target.id) {
                         if (mutation.target.getAttribute('gltf-model')) {
                             obj_type = 'gltf-model';
                         } else if (mutation.target.getAttribute('geometry')) {
@@ -82,11 +76,11 @@ AFRAME.registerComponent('build-watch-object', {
                             case 'scale':
                                 msg.data.scale = mutation.target.getAttribute('scale');
                                 break;
-                            // case 'material':
-                            //     msg.data.material = {
-                            //         color: mutation.target.getAttribute('material').color
-                            //     };
-                            //     break;
+                                // case 'material':
+                                //     msg.data.material = {
+                                //         color: mutation.target.getAttribute('material').color
+                                //     };
+                                //     break;
                             default:
                                 pub = false;
                                 break;
@@ -97,6 +91,18 @@ AFRAME.registerComponent('build-watch-object', {
                     break;
             }
         });
+    },
+    update: function() {
+        console.log('this.observer',this.observer);
+        if (this.data.enabled) {
+            this.observer.observe(this.el, {
+                childList: true,
+                attributes: true,
+                subtree: true,
+            });
+        } else {
+            this.observer.disconnect();
+        }
     },
     remove: function() {
         this.system.unregisterComponent(this.el);
