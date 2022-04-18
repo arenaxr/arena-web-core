@@ -17,13 +17,12 @@ AFRAME.registerComponent('build-watch-scene', {
     multiple: false,
     init: function() {
         const sceneEl = document.querySelector('a-scene');
-        const observerOptions = {
+        const observer = new MutationObserver(this.callback);
+        observer.observe(sceneEl, {
             childList: true,
             attributes: false,
             subtree: false,
-        }
-        const observer = new MutationObserver(this.callback);
-        observer.observe(sceneEl, observerOptions);
+        });
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },

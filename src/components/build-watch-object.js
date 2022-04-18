@@ -22,7 +22,6 @@ AFRAME.registerComponent('build-watch-object', {
     },
     init: function() {
         this.observer = new MutationObserver(this.callback);
-
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     callback: function(mutationList, observer) {
@@ -41,6 +40,9 @@ AFRAME.registerComponent('build-watch-object', {
                     // mutation.attributeName
                     // mutation.oldValue
                     console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
+                    if (mutation.attributeName === 'build-watch-object') {
+                        return; // no need to handle on/off mutations to our own component
+                    }
                     if (mutation.target.id) {
                         if (mutation.target.getAttribute('gltf-model')) {
                             obj_type = 'gltf-model';
@@ -93,14 +95,15 @@ AFRAME.registerComponent('build-watch-object', {
         });
     },
     update: function() {
-        console.log('this.observer',this.observer);
         if (this.data.enabled) {
+            console.log(this.el.id, this.observer.observe);
             this.observer.observe(this.el, {
                 childList: true,
                 attributes: true,
                 subtree: true,
             });
         } else {
+            console.log(this.el.id, this.observer.disconnect);
             this.observer.disconnect();
         }
     },
