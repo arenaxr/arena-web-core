@@ -14,7 +14,7 @@
  * @param {Object} gainNode
  * @private
  */
-async function enableChromeAEC(gainNode) {
+ async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
