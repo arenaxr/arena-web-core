@@ -14,7 +14,7 @@
  * @param {Object} gainNode
  * @private
  */
-async function enableChromeAEC(gainNode) {
+ async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -100,6 +100,7 @@ AFRAME.registerComponent('arena-user', {
         displayName: {type: 'string', default: ''},
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
+        jitsiQuality: {type: 'number', default: 100.0},
     },
 
     init: function() {
@@ -175,6 +176,7 @@ AFRAME.registerComponent('arena-user', {
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
+            micIconEl.setAttribute('material', 'shader', 'flat');
             micIconEl.setAttribute('scale', '0.2 0.2 0.2');
             if (data.presence !== 'Portal') {
                 micIconEl.setAttribute('position', '0 0.3 0.045');
@@ -196,10 +198,53 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
-    drawVideoCube() {
+    drawQuality() {
         const el = this.el;
         const data = this.data;
 
+        const name = 'quality_' + el.id;
+        let qualIconEl = document.querySelector('#' + name);
+        if (!qualIconEl) {
+            qualIconEl = document.createElement('a-image');
+            qualIconEl.setAttribute('id', name);
+            qualIconEl.setAttribute('material', 'shader', 'flat');
+            qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
+            if (data.presence !== 'Portal') {
+                qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
+            } else {
+                qualIconEl.setAttribute('position', `${-0.75 - 0.2}-0.75 1.25 -0.035`);
+            }
+            el.appendChild(qualIconEl);
+        }
+        // update signal strength
+        qualIconEl.setAttribute('src', this.getQualityIcon(data.jitsiQuality));
+    },
+
+    removeQuality() {
+        const el = this.el;
+
+        const name = 'quality_' + el.id;
+        const qualIconEl = document.querySelector('#' + name);
+        if (qualIconEl) {
+            el.removeChild(qualIconEl);
+        }
+    },
+
+    getQualityIcon(quality) {
+        if (quality > 66.7) {
+            return 'url(/src/icons/images/signal-good.svg)';
+        } else if (quality > 33.3) {
+            return 'url(/src/icons/images/signal-poor.svg)';
+        } else if (quality > 0) {
+            return 'url(/src/icons/images/signal-weak.svg)';
+        } else {
+            return 'url(/src/icons/images/signal-bad.svg)';
+        }
+    },
+
+    drawVideoCube() {
+        const el = this.el;
+        const data = this.data;
 
         // attach video to head
         const videoCube = document.createElement('a-box');
@@ -418,6 +463,14 @@ AFRAME.registerComponent('arena-user', {
                 break;
             default:
                 break;
+            }
+        }
+
+        if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
+            if (data.jitsiQuality < 66.7) {
+                this.drawQuality();
+            } else {
+                this.removeQuality();
             }
         }
     },
