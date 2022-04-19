@@ -291,9 +291,9 @@ export class RuntimeMngr {
       replaceVars
     );
 
-    // if instantiate 'per client', save this module uuid to delete before exit
+    // if instantiate 'per client', save this module data to delete before exit
     if (persistObj.attributes.instantiate == "client") {
-      this.clientModules.push(modCreateMsg);
+      this.clientModules.push(modCreateMsg.data);
     }
 
     // TODO: save pending req uuid and check orchestrator responses
