@@ -154,12 +154,12 @@ export class Arena {
 
         // TODO: (mwfarb) fix hack to modify a-frame
         setTimeout(() => {
-            if (this.isUserSceneWriter()) {
-                // force TRS buttons visibility
-                $('#aframeInspector #viewportBar').css('align-items', 'unset');
-            } else {
+            // force TRS buttons visibility
+            $('#aframeInspector #viewportBar').css('align-items', 'unset');
+            if (!this.isUserSceneWriter()) {
                 // otherwise, disable controls
-                $('#aframeInspector').css('pointer-events', 'none');
+                $('#inspectorContainer #rightPanel').css('pointer-events', 'none');
+                $('#inspectorContainer #rightPanel').css('opacity', '.5');
             }
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(function() {
