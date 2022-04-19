@@ -17,7 +17,7 @@ AFRAME.registerComponent('build-watch-object', {
     schema: {
         enabled: {
             type: 'boolean',
-            default: false
+            default: true
         },
     },
     init: function() {
@@ -62,13 +62,6 @@ AFRAME.registerComponent('build-watch-object', {
                         };
                         let pub = true;
                         switch (mutation.attributeName) {
-                            // case 'id':
-                            //     // TODO: handle id
-                            //     pub = false;
-                            //     break;
-                            // case 'geometry':
-                            //     // geometry updated above
-                            //     break;
                             case 'position':
                                 msg.data.position = mutation.target.getAttribute('position');
                                 break;
@@ -78,16 +71,21 @@ AFRAME.registerComponent('build-watch-object', {
                             case 'scale':
                                 msg.data.scale = mutation.target.getAttribute('scale');
                                 break;
-                                // case 'material':
-                                //     msg.data.material = {
-                                //         color: mutation.target.getAttribute('material').color
-                                //     };
-                                //     break;
+                            case 'geometry':
+                                // TODO: create system of checking which geometry item was changed, all is too much
+                                msg.data = mutation.target.getAttribute('geometry')
+                                break;
+                            case 'material':
+                                // TODO: create system of checking which material item was changed, all is too much
+                                msg.data.material = {
+                                    color: mutation.target.getAttribute('material').color
+                                };
+                                break;
                             default:
                                 pub = false;
                                 break;
                         }
-                        console.log(msg)
+                        console.log('pub:', msg);
                         if (pub) ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                     }
                     break;
@@ -96,14 +94,12 @@ AFRAME.registerComponent('build-watch-object', {
     },
     update: function() {
         if (this.data.enabled) {
-            console.log(this.el.id, this.observer.observe);
             this.observer.observe(this.el, {
                 childList: true,
                 attributes: true,
                 subtree: true,
             });
         } else {
-            console.log(this.el.id, this.observer.disconnect);
             this.observer.disconnect();
         }
     },
@@ -111,7 +107,6 @@ AFRAME.registerComponent('build-watch-object', {
         this.system.unregisterComponent(this.el);
     },
     tick: function() {
-        // const sceneRoot = document.getElementById('sceneRoot');
-        // sceneRoot.flushToDOM(true);
+        // this.el.flushToDOM(true);
     },
 });

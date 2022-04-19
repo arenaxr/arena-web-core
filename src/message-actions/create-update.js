@@ -77,7 +77,7 @@ export class CreateUpdate {
             }
 
             // disable build-watch when applying remote updates to this object
-            if (buildWatch) entityEl.setAttribute('build-watch-object', 'enabled', false);
+            if (buildWatch) enableBuildWatcher(entityEl, message, false);
 
             // set to default render order
             entityEl.object3D.renderOrder = RENDER_ORDER;
@@ -108,7 +108,7 @@ export class CreateUpdate {
             }
 
             // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
-            if (buildWatch) entityEl.setAttribute('build-watch-object', 'enabled', true);
+            if (buildWatch) enableBuildWatcher(entityEl, message, true);
 
             return;
 
@@ -133,6 +133,18 @@ export class CreateUpdate {
 
         default:
             Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknown type:', JSON.stringify(message));
+        }
+
+        /**
+         * Enable/Disable object MutationObserver for build-3d watcher.
+         * @param {*} entityEl The scene object to observe mutations
+         * @param {*} msg Incoming ARENA message payload.
+         * @param {*} enable true=start mutation observer, false=pause mutation observer
+         */
+        function enableBuildWatcher(entityEl, msg, enable) {
+            if (msg.persist) {
+                entityEl.setAttribute('build-watch-object', 'enabled', enable);
+            }
         }
     }
 

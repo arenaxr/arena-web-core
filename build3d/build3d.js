@@ -236,6 +236,7 @@ export class Arena {
                             object_id: obj.object_id,
                             action: 'create',
                             type: obj.type,
+                            persist: true,
                             data: obj.attributes,
                         };
                         if (position) {
@@ -260,6 +261,7 @@ export class Arena {
                         object_id: obj.object_id,
                         action: 'create',
                         type: obj.type,
+                        persist: true,
                         data: obj.attributes,
                     };
                     console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
