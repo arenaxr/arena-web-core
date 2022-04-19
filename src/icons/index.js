@@ -401,13 +401,13 @@ export class SideMenu {
         appendBold(pagesDiv, 'Pages: ');
         formDiv.appendChild(pagesDiv);
 
-        pagesDiv.append('Build (');
+        pagesDiv.append('Edit (');
 
         const edit = document.createElement('a');
         edit.href = `/build/?scene=${ARENA.namespacedScene}`;
         edit.target = '_blank';
         edit.rel = 'noopener noreferrer';
-        edit.innerHTML = 'Text';
+        edit.innerHTML = 'JSON';
         pagesDiv.appendChild(edit);
 
         pagesDiv.append(', ');
