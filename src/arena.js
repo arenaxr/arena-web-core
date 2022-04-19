@@ -629,7 +629,7 @@ export class Arena {
                 onInitCallback: function() {
                     console.info('Runtime init done.');
                 },
-                name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.username,
+                name: 'rt-' + Math.round(Math.random() * 10000) + '-' + this.idTag,
                 mqttUsername: this.username,
                 mqttToken: this.mqttToken,
             });
