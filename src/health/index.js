@@ -66,7 +66,7 @@ export class ARENAHealth {
                 imgSrc = '/src/health/images/exclamation-error.png';
             }
         };
-        $('#error-svg').attr('src', imgSrc);
+        $('#error-img').attr('src', imgSrc);
     }
 
     /**
