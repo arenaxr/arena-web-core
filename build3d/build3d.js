@@ -44,6 +44,8 @@ export class Arena {
 
         this.latencyTopic = this.defaults.latencyTopic;
 
+        this.idTag = `build3d-${Math.floor(Math.random() * 100000)}`;
+
         // set scene name from url
         this.setSceneName();
 
@@ -67,43 +69,11 @@ export class Arena {
             this.sceneName = sn;
             this.nameSpace = ns;
         };
-        let path = window.parent.window.location.pathname.substring(1);
-        let {
-            namespace: namespace,
-            sceneName: scenename
-        } = this.defaults;
-        if (this.defaults.devInstance && path.length > 0) {
-            const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
-            if (devPrefix) {
-                path = path.replace(devPrefix[0], '');
-            }
-        }
-        if (path === '' || path === 'scene.html') {
-            scenename = ARENAUtils.getUrlParam('scene', scenename);
-            _setNames(namespace, scenename);
-        } else {
-            try {
-                const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
-                const matches = r.exec(path).groups;
-                // Only first group is given, namespace is actually the scene name
-                if (matches.scenename === undefined) {
-                    _setNames(namespace, matches.namespace);
-                } else {
-                    // Both scene and namespace are defined, return regex as-is
-                    _setNames(matches.namespace, matches.scenename);
-                }
-            } catch (e) {
-                scenename = ARENAUtils.getUrlParam('scene', scenename);
-                _setNames(namespace, scenename);
-            }
-        }
-
         // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
-        let url = new URL(window.parent.window.location.href);
-        let sceneParam = decodeURI(url.searchParams.get('scene'));
+        let sceneParam = ARENAUtils.getUrlParam('scene', undefined);
         let ns, s;
         if (sceneParam) {
-            let sn = sceneParam.split('/');
+            let sn = decodeURI(sceneParam).split('/');
             ns = sn[0];
             s = sn[1];
         } else {
@@ -112,12 +82,14 @@ export class Arena {
         }
         localStorage.setItem('namespace', ns);
         localStorage.setItem('scene', s);
+        _setNames(ns, s);
+
         // pass updated scene param back to address bar url
         let newUrl = new URL(window.parent.window.location.href);
         newUrl.searchParams.set('scene', `${ns}/${s}`);
-        window.parent.window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
-
-        _setNames(ns, s);
+        window.parent.window.history.pushState({
+            path: newUrl.href
+        }, '', decodeURIComponent(newUrl.href));
 
         // Sets namespace, persistenceUrl, outputTopic, renderTopic
         this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.namespacedScene;
@@ -182,8 +154,13 @@ export class Arena {
 
         // TODO: (mwfarb) fix hack to modify a-frame
         setTimeout(() => {
-            // force TRS buttons visibility
-            $('#aframeInspector #viewportBar').css('align-items', 'unset');
+            if (this.isUserSceneWriter()) {
+                // force TRS buttons visibility
+                $('#aframeInspector #viewportBar').css('align-items', 'unset');
+            } else {
+                // otherwise, disable controls
+                $('#aframeInspector').css('pointer-events', 'none');
+            }
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(function() {
                 const scene = decodeURI(ARENAUtils.getUrlParam('scene', ''));
@@ -434,14 +411,13 @@ export class Arena {
             this.Mqtt = Mqtt;
             // Do not pass functions in mqttClientOptions
             await Mqtt.connect({
-                    reconnect: true,
-                    userName: this.username,
-                    password: this.mqttToken,
-                },
-            );
+                reconnect: true,
+                userName: this.username,
+                password: this.mqttToken,
+            }, );
 
             console.info(
-                `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
+                `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.username}; idTag:${ARENA.idTag} `);
         }); // mqtt API (after this.* above, are defined)
     }
 }

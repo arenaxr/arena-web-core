@@ -46,7 +46,7 @@ export class ARENAUtils {
      * Extracts URL params
      * @param {string} parameter URL parameter
      * @param {string} defaultValue default value in case parameter doesnt exist
-     * @return {[]} list of indicies
+     * @return {[]} list of indices
      */
     static getUrlParams(parameter, defaultValue) {
         const indexes = [];
