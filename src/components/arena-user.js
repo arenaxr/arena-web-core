@@ -232,13 +232,13 @@ AFRAME.registerComponent('arena-user', {
 
     getQualityIcon(quality) {
         if (quality > 66.7) {
-            return 'url(/src/icons/images/signal-good.svg)';
+            return 'url(/src/icons/images/signal-good.png)';
         } else if (quality > 33.3) {
-            return 'url(/src/icons/images/signal-poor.svg)';
+            return 'url(/src/icons/images/signal-poor.png)';
         } else if (quality > 0) {
-            return 'url(/src/icons/images/signal-weak.svg)';
+            return 'url(/src/icons/images/signal-weak.png)';
         } else {
-            return 'url(/src/icons/images/signal-bad.svg)';
+            return 'url(/src/icons/images/signal-bad.png)';
         }
     },
 
