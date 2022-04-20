@@ -313,6 +313,7 @@ export class RuntimeMngr {
       this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
     });
 
+    // TODO: make this a last will message ?
     let delRtMsg = this.rtMsgs.deleteRuntime();
     this.mc.publish(this.regTopic, JSON.stringify(delRtMsg));
   }
