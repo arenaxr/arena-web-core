@@ -105,6 +105,9 @@ export class RuntimeMngr {
 
     // instanciate runtime messages factory
     this.rtMsgs = new RuntimeMsgs(this);
+    
+    // create a last will message (delete runtime)
+    this.lastWillStringMsg = JSON.stringify(this.rtMsgs.deleteRuntime());
 
     // on unload, send delete client modules requests
     let rt = this;
@@ -141,13 +144,15 @@ export class RuntimeMngr {
   }
 
   async init() {
-    // mqtt connect
+    // mqtt connect; setup delete runtime msg as last will 
     let rtMngr = this;
     this.mc = new MQTTClient({
       mqtt_host: rtMngr.mqttHost,
       mqtt_username: rtMngr.mqttUsername,
       mqtt_token: rtMngr.mqttToken,
       onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
+      willMessage: rtMngr.lastWillStringMsg,
+      willMessageTopic: rtMngr.regTopic,
     });
 
     await this.mc.connect();
@@ -313,9 +318,8 @@ export class RuntimeMngr {
       this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
     });
 
-    // TODO: make this a last will message ?
-    let delRtMsg = this.rtMsgs.deleteRuntime();
-    this.mc.publish(this.regTopic, JSON.stringify(delRtMsg));
+    // sent in case last will fails (this will be a duplicate of last will)
+    this.mc.publish(this.regTopic, lastWillStringMsg);
   }
 
   /* public getters */

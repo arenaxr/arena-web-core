@@ -70,8 +70,8 @@ export default class MQTTClient {
             _this.connected = false;
             throw "MQTT: Error connecting.";
           },
-          //willMessage: _this.settings.willMessage,
-          //reconnect: _this.settings.reconnect,
+          willMessage: _this.settings.willMessage,
+          reconnect: _this.settings.reconnect,
           useSSL: _this.settings.useSSL,
           userName: _this.settings.mqtt_username,
           password: _this.settings.mqtt_token,
