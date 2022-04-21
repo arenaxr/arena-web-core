@@ -151,6 +151,7 @@ export class ARENAChat {
 
         this.lmBtn = document.createElement('div');
         this.lmBtn.className = 'landmarks-button';
+        this.lmBtn.setAttribute('title', 'Landmarks');
         this.lmBtn.style.backgroundImage = 'url(\'src/icons/images/landmarks.png\')';
         btnGroup.appendChild(this.lmBtn);
         this.lmBtn.style.display = 'none';
@@ -273,27 +274,35 @@ export class ARENAChat {
 
 
         this.chatBtn.onclick = function() {
-            _this.chatPopup.style.display = 'block';
-            _this.usersPopup.style.display = 'none';
-            _this.chatDot.style.display = 'none';
-            _this.lmPopup.style.display = 'none';
-            _this.unreadMsgs = 0;
+            if (_this.chatPopup.style.display == 'none') {
+                _this.chatPopup.style.display = 'block';
+                _this.usersPopup.style.display = 'none';
+                _this.chatDot.style.display = 'none';
+                _this.lmPopup.style.display = 'none';
+                _this.unreadMsgs = 0;
 
-            // scroll to bottom
-            _this.msgList.scrollTop = _this.msgList.scrollHeight;
+                // scroll to bottom
+                _this.msgList.scrollTop = _this.msgList.scrollHeight;
 
-            // focus on textbox
-            _this.msgTxt.focus();
+                // focus on textbox
+                _this.msgTxt.focus();
 
-            // re-establish connection, in case client disconnected
-            _this.connect();
+                // re-establish connection, in case client disconnected
+                _this.connect();
+            } else {
+                _this.chatPopup.style.display = 'none';
+            }
         };
 
         this.usersBtn.onclick = function() {
-            _this.chatPopup.style.display = 'none';
-            _this.usersPopup.style.display = 'block';
-            _this.lmPopup.style.display = 'none';
-            _this.populateUserList();
+            if (_this.usersPopup.style.display == 'none') {
+                _this.chatPopup.style.display = 'none';
+                _this.usersPopup.style.display = 'block';
+                _this.lmPopup.style.display = 'none';
+                _this.populateUserList();
+            } else {
+                _this.usersPopup.style.display = 'none';
+            }
         };
 
         this.closeChatBtn.onclick = function() {
@@ -310,9 +319,13 @@ export class ARENAChat {
         };
 
         this.lmBtn.onclick = function() {
-            _this.chatPopup.style.display = 'none';
-            _this.usersPopup.style.display = 'none';
-            _this.lmPopup.style.display = 'block';
+            if (_this.lmPopup.style.display == 'none') {
+                _this.chatPopup.style.display = 'none';
+                _this.usersPopup.style.display = 'none';
+                _this.lmPopup.style.display = 'block';
+            } else {
+                _this.lmPopup.style.display = 'none';
+            }
         };
 
         this.closeLmBtn.onclick = function() {
