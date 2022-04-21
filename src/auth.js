@@ -196,7 +196,13 @@ function requestMqttToken(authType, mqttUsername) {
             params += `&realm=${ARENADefaults.realm}`;
         }
     }
-    if (typeof ARENA !== 'undefined') {
+    const url = new URL(window.location.href);
+    const urlNamespacedScene = url.searchParams.get('scene');
+    if (urlNamespacedScene) {
+        // handle build, build3d scene-specific
+        params += `&scene=${decodeURIComponent(urlNamespacedScene)}`;
+    } else if (typeof ARENA !== 'undefined') {
+        // handle full ARENA scene
         if (ARENA.sceneName) {
             params += `&scene=${ARENA.namespacedScene}`;
         }
@@ -204,12 +210,6 @@ function requestMqttToken(authType, mqttUsername) {
         params += `&camid=true`;
         params += `&handleftid=true`;
         params += `&handrightid=true`;
-    } else {
-        const url = new URL(window.location.href);
-        const urlNamespacedScene = url.searchParams.get('scene');
-        if (urlNamespacedScene) {
-            params += `&scene=${decodeURIComponent(urlNamespacedScene)}`;
-        }
     }
     xhr.open('POST', `/user/mqtt_auth`);
     const csrftoken = getCookie('csrftoken');
@@ -356,6 +356,7 @@ function initAuthPanel() {
     const modalDiv = document.createElement('div');
     modalDiv.style.textAlign = 'left';
     modalDiv.style.marginTop = '27vh';
+    modalDiv.style.color = 'black';
     modalDiv.style.backgroundColor = 'white';
     modalDiv.style.width = '50%';
     modalDiv.style.height = '50%';
@@ -402,8 +403,8 @@ function storageAvailable(type) {
         return true;
     } catch (e) {
         return e instanceof DOMException && (
-        // everything except Firefox
-            e.code === 22 ||
+                // everything except Firefox
+                e.code === 22 ||
                 // Firefox
                 e.code === 1014 ||
                 // test name field too, because code might not be present
