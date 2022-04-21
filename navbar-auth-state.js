@@ -42,8 +42,9 @@ $(document).ready(function() {
         } else {
             $('#btn-copy-store-path').hide();
         }
+        console.warn(link, loc);
         return link == loc;
-    }).parent().addClass('active');
+    }).addClass('active');
 
     // copy the file store public path
     $('#btn-copy-store-path').on('click', function(e) {
