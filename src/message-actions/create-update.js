@@ -44,7 +44,7 @@ export class CreateUpdate {
                 return;
             }
 
-            const buildWatch = document.querySelector('a-scene').getAttribute('build-watch-scene');
+            const buildWatchScene = document.querySelector('a-scene').getAttribute('build-watch-scene');
 
             let entityEl = document.getElementById(id);
 
@@ -77,7 +77,7 @@ export class CreateUpdate {
             }
 
             // disable build-watch when applying remote updates to this object
-            if (buildWatch) enableBuildWatcher(entityEl, message, false);
+            if (buildWatchScene) enableBuildWatchObject(entityEl, message, false);
 
             // set to default render order
             entityEl.object3D.renderOrder = RENDER_ORDER;
@@ -108,7 +108,7 @@ export class CreateUpdate {
             }
 
             // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
-            if (buildWatch) enableBuildWatcher(entityEl, message, true);
+            if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
             return;
 
@@ -141,7 +141,7 @@ export class CreateUpdate {
          * @param {*} msg Incoming ARENA message payload.
          * @param {*} enable true=start mutation observer, false=pause mutation observer
          */
-        function enableBuildWatcher(entityEl, msg, enable) {
+        function enableBuildWatchObject(entityEl, msg, enable) {
             if (msg.persist) {
                 entityEl.setAttribute('build-watch-object', 'enabled', enable);
             }
