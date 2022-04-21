@@ -158,8 +158,8 @@ export class Arena {
             $('#aframeInspector #viewportBar').css('align-items', 'unset');
             if (!this.isUserSceneWriter()) {
                 // otherwise, disable controls
-                $('#inspectorContainer #rightPanel').css('pointer-events', 'none');
-                $('#inspectorContainer #rightPanel').css('opacity', '.5');
+                disablePanel('#inspectorContainer #viewportBar #transformToolbar');
+                disablePanel('#inspectorContainer #rightPanel');
             }
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(function() {
@@ -167,6 +167,12 @@ export class Arena {
                 window.parent.window.location.href = `https://${window.parent.window.location.host}/${scene}`;
             });
         }, 2000);
+
+        function disablePanel(jqSelect) {
+            $(jqSelect).css('pointer-events', 'none');
+            $(jqSelect).css('opacity', '.5');
+            $(`${jqSelect} :input`).attr('disabled', true);
+        }
     }
 
     /**
