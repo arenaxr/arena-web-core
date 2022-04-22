@@ -194,6 +194,7 @@ export class ARENAChat {
         // users
         this.usersPopup = document.createElement('div');
         this.usersPopup.className = 'users-popup';
+        this.usersPopup.style.display = 'none';
         document.body.appendChild(this.usersPopup);
 
         this.closeUsersBtn = document.createElement('span');
@@ -236,6 +237,7 @@ export class ARENAChat {
         // landmarks
         this.lmPopup = document.createElement('div');
         this.lmPopup.className = 'users-popup';
+        this.lmPopup.style.display = 'none';
         document.body.appendChild(this.lmPopup);
 
         this.closeLmBtn = document.createElement('span');
