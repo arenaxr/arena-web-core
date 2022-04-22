@@ -1,14 +1,14 @@
-node_modules/
+/node_modules
 defaults.js
-conf/
+/conf
 
 ## parcel build
-dist/
+/dist
 .parcel-cache
 
 # private repos
-models/
-store
+/models
+/store
 
 # arena test versions
 *dev.*
