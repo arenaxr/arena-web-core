@@ -327,7 +327,7 @@ function displayTree(treeData) {
                 dispText = d.data.name;
                 if (d.data.type === 'runtime') {
                     dispText = 'Runtime: ' + dispText + '<br/>' + 'uuid:' +
-                        d.data.uuid + '<br/>' + 'nmodules:' + d.data.nmodules + '<br/>';
+                        d.data.uuid + '<br/>' + 'nmodules:' + d.data.children.length + '<br/>';
                 } else if (d.data.type === 'module') {
                     dispText = 'Runtime: ' + dispText + '<br/>' + 'uuid:' +
                         d.data.uuid + '<br/>' + 'filename:' + d.data.filename + '<br/>';
