@@ -228,13 +228,7 @@ export class WebXRCameraCapture {
             r -= this.frameWidth
         ) {
             for (let i = r * 4; i < (r + this.frameWidth) * 4; i += 4) {
-                const grayscale = Math.round(
-                    (this.framePixels[i] +
-              this.framePixels[i + 1] +
-              this.framePixels[i + 2]) /
-              3,
-                );
-                this.frameGsPixels[j++] = grayscale;
+                this.frameGsPixels[j++] = this.framePixels[i + 1];
             }
         }
 
