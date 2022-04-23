@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.6.0](https://github.com/conix-center/ARENA-core/compare/v1.5.1...v1.6.0) (2022-04-23)
+## [1.6.0](https://github.com/conix-center/ARENA-core/compare/v1.4.0...v1.6.0) (2022-04-23)
 
 
 ### Features
@@ -96,56 +96,6 @@
 ### Reverts
 
 * background light-estimate pending AFRAME fix ([dcbec36](https://github.com/conix-center/ARENA-core/commit/dcbec36cb5c302260995fa9fcc077c370abb58e4))
-
-### [1.5.1](https://github.com/conix-center/ARENA-core/compare/v1.5.0...v1.5.1) (2022-04-23)
-
-
-### Bug Fixes
-
-* node version ([43bde22](https://github.com/conix-center/ARENA-core/commit/43bde227224763fd59bf60f5e1bcd5b8f51ef4fc))
-
-## [1.5.0](https://github.com/conix-center/ARENA-core/compare/v1.4.0...v1.5.0) (2022-04-23)
-
-
-### Features
-
-* **chat:** chat buttons toggle open/close ([8371bf0](https://github.com/conix-center/ARENA-core/commit/8371bf0018999dad14e95bbf26de64126eab7e87))
-* **chore:** Update build schema with links and object types ([#435](https://github.com/conix-center/ARENA-core/issues/435)) ([72d07fd](https://github.com/conix-center/ARENA-core/commit/72d07fdd7846c2c6699a3e57c1a733b054cef195))
-* **jitsi:** add poor connection avatar icon only for poor connections ([ee9733e](https://github.com/conix-center/ARENA-core/commit/ee9733e79f3cf34613d71c06a5d939b74cfd96d0))
-* **jitsi:** upgrade lib-jitsi-meet v1420.0.0+53132888, https://github.com/jitsi/lib-jitsi-meet/releases/tag/v1420.0.0%2B53132888 ([22786f3](https://github.com/conix-center/ARENA-core/commit/22786f377b0d3c2f7ba52442200d34b119be84ce))
-* move runtime manager codde from seperate repo ([72b5574](https://github.com/conix-center/ARENA-core/commit/72b5574456cf321892b71602c7c00e4420b84211))
-* set ar-hit-test opts through sceneOptions ([f092f8b](https://github.com/conix-center/ARENA-core/commit/f092f8b1a14a3f80e524e1a57cf1ec9669ead915))
-
-
-### Bug Fixes
-
-* add uuid js depeendency ([0fe6df8](https://github.com/conix-center/ARENA-core/commit/0fe6df86d1fc2cc4f46eea7ec9b5b3299a460b21))
-* **auth:** fix inherited perms text color, permissions for future build3d ([2abd1e0](https://github.com/conix-center/ARENA-core/commit/2abd1e0173032f4d745dfb568027b68a7c290305))
-* **avatar:** keep critical models in arena-core ([cb9dd47](https://github.com/conix-center/ARENA-core/commit/cb9dd47fd30a356db2993e37fc4c73ad3ba6f678))
-* **build:** add missing titles for sceneHeadModels ([1a76e61](https://github.com/conix-center/ARENA-core/commit/1a76e61db01279ed79a638e4a46fd96f82a409ad))
-* **build:** add tooltip for edit json button ([5a412b5](https://github.com/conix-center/ARENA-core/commit/5a412b59fe537ae7438dfbf2f87ffbae1ca1f553))
-* **build:** decode scene name slash in url ([359f516](https://github.com/conix-center/ARENA-core/commit/359f51696f504034843d206bfb5b4f8dabb3c525))
-* **build:** Make schema description URLs linkable ([#438](https://github.com/conix-center/ARENA-core/issues/438)) ([de9ae0b](https://github.com/conix-center/ARENA-core/commit/de9ae0b6bb60b232be79ed07e8a6c4ef795ea82b))
-* **chat:** fix initial chat buttons display state ([fd434d3](https://github.com/conix-center/ARENA-core/commit/fd434d3fb853017f296369e0ec7b45af1f5b1e3b))
-* **chat:** restore kickout icon ([cd45792](https://github.com/conix-center/ARENA-core/commit/cd4579233d9adc7f2a09783f9bc3797e8c741713))
-* client module delete message ([c1ab92f](https://github.com/conix-center/ARENA-core/commit/c1ab92fabf6bff893354ebe07ad00ad79d77b98f))
-* get nmodules from children list ([fcc61f6](https://github.com/conix-center/ARENA-core/commit/fcc61f67b66aaaeda301901749b4840aeb8dad67))
-* health icon size ([b6eccc6](https://github.com/conix-center/ARENA-core/commit/b6eccc61b7e50ffb7d48a783a022cda5250ca758))
-* **icons:** Use .png over .svg for icons for firefox ([e7aa585](https://github.com/conix-center/ARENA-core/commit/e7aa585526fcfed20b9ffd236a78251d6efe854d))
-* last will message ([6e47695](https://github.com/conix-center/ARENA-core/commit/6e476955cca06f36e8455ae54cecc0d062a3d961))
-* minor edits ([9740f05](https://github.com/conix-center/ARENA-core/commit/9740f05edeec239af48e83fa8666fd5813e34e0e))
-* minor edits ([6d9b1a3](https://github.com/conix-center/ARENA-core/commit/6d9b1a358d4ddb30cf0901170aff4fec389a5181))
-* minor fixes ([27d24aa](https://github.com/conix-center/ARENA-core/commit/27d24aa96fbee10408ce9029ccdfa1fbc37e960e))
-* **nav-bar:** fixed current page highlight, rework perms ([373c51a](https://github.com/conix-center/ARENA-core/commit/373c51a97e03b602f12db310053716150b4790e3))
-* **physics:** enabling physics selector ([2831fc5](https://github.com/conix-center/ARENA-core/commit/2831fc5abe4b99df6a631265057838287e778904))
-* Properly check for Jitsi before restart func ([594e30a](https://github.com/conix-center/ARENA-core/commit/594e30adb863a86d0eb43f377e95fb709a7e09e2))
-* remove old runtime mngr code ([5e54b67](https://github.com/conix-center/ARENA-core/commit/5e54b674e019f7586bb8a5e851a2acf85bd70f7f))
-* runtime name uses idTag ([e062014](https://github.com/conix-center/ARENA-core/commit/e062014eb1428fb34264dda865018acbcf1bdbe0))
-* runtime name uses idTag ([fb527a3](https://github.com/conix-center/ARENA-core/commit/fb527a3d08ddcf7187e5e8b97316079126bd936c))
-* **store:** fixed missing content at bottom of store frame ([04a21c0](https://github.com/conix-center/ARENA-core/commit/04a21c0ab6826c9bffac7d21428579b92dac5cef))
-* **store:** fixed missing content at bottom of store frame ([0a1dc98](https://github.com/conix-center/ARENA-core/commit/0a1dc98a18f2e287e9fe5db0dfc7a6246f70094e))
-* **store:** fixed missing content at bottom of store frame ([be2fa39](https://github.com/conix-center/ARENA-core/commit/be2fa39908dc1dead35f6177a44b67ef28b032f1))
-* update to new runtime manageer code ([dadf773](https://github.com/conix-center/ARENA-core/commit/dadf773376f7b97defafd6a64f4b02e3eb446366))
 
 ## [1.4.0](https://github.com/conix-center/ARENA-core/compare/v1.3.2...v1.4.0) (2022-04-07)
 
