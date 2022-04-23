@@ -22,7 +22,7 @@
 * **jitsi:** add preliminary connection stats to user list ([#388](https://github.com/conix-center/ARENA-core/issues/388)) ([77e5cd2](https://github.com/conix-center/ARENA-core/commit/77e5cd21f5c9619e095a4993fb1031ed7975061f))
 * **jitsi:** add quality stats for screenshare and external ([4536a97](https://github.com/conix-center/ARENA-core/commit/4536a976fa340857dc6eb282977e7ba2496154db))
 * **jitsi:** Added MQTT Jitsi stats debug logging with urlParam ([e507439](https://github.com/conix-center/ARENA-core/commit/e5074399d5411f3ea8daa35dbf7ab18d0d24a1fb))
-* **jitsi:** upgrade lib-jitsi-meet v1420.0.0+53132888, https://github.com/jitsi/lib-jitsi-meet/releases/tag/v1420.0.0%2B53132888 ([22786f3](https://github.com/conix-center/ARENA-core/commit/22786f377b0d3c2f7ba52442200d34b119be84ce))
+* **jitsi:** upgrade lib-jitsi-meet v1420.0.0+53132888 ([22786f3](https://github.com/conix-center/ARENA-core/commit/22786f377b0d3c2f7ba52442200d34b119be84ce))
 * move runtime manager codde from seperate repo ([72b5574](https://github.com/conix-center/ARENA-core/commit/72b5574456cf321892b71602c7c00e4420b84211))
 * Provide THREE.frustum from arena-camera ([d57b259](https://github.com/conix-center/ARENA-core/commit/d57b259a5a285f8a6ae1ce8fd1fda3d4c7998f66))
 * send local conference stats to remotes ([177ab2f](https://github.com/conix-center/ARENA-core/commit/177ab2fb654d01cd4150b4eb8b11d1fdbb9a2402))
