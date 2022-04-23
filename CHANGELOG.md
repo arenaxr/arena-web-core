@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.5.1](https://github.com/conix-center/ARENA-core/compare/v1.5.0...v1.5.1) (2022-04-23)
+
+
+### Bug Fixes
+
+* node version ([43bde22](https://github.com/conix-center/ARENA-core/commit/43bde227224763fd59bf60f5e1bcd5b8f51ef4fc))
+
 ## [1.5.0](https://github.com/conix-center/ARENA-core/compare/v1.4.0...v1.5.0) (2022-04-23)
 
 
