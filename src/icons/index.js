@@ -425,6 +425,15 @@ export class SideMenu {
         docs.innerHTML = 'Docs';
         pagesDiv.appendChild(docs);
 
+        pagesDiv.append(' | ');
+
+        const version = document.createElement('a');
+        version.href = '/conf/versions.html';
+        version.target = '_blank';
+        version.rel = 'noopener noreferrer';
+        version.innerHTML = 'Version';
+        pagesDiv.appendChild(version);
+
         // Auth status
         appendBold(formDiv, 'Scene: ');
         const sceneName = document.createElement('span');
