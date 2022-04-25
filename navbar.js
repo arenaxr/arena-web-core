@@ -1,6 +1,4 @@
 $(document).ready(function() {
-    // add page header
-    $('#header').load('/header.html');
     // update auth state in nav bar
     fetch('/user/user_state')
         .then((response) => response.json())
@@ -34,34 +32,40 @@ $(document).ready(function() {
             }
         });
 
-    // highlight active page in navbar
-    $('.nav-item a').filter(function() {
-        const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
-        const loc = location.pathname.replace(/^\/+|\/+$/g, '');
-        if (loc == 'files') {
-            $('#btn-copy-store-path').show();
-        } else {
-            $('#btn-copy-store-path').hide();
-        }
-        return link == loc;
-    }).addClass('active');
+    // add page header
+    $('#header').load('/header.html', function() {
+        // highlight active page in navbar
+        $('.nav-item a').filter(function() {
+            console.log("$('.nav-item a').filter")
+            const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
+            const loc = location.pathname.replace(/^\/+|\/+$/g, '');
+            if (loc == 'files') {
+                $('#btn-copy-store-path').show();
+            } else {
+                $('#btn-copy-store-path').hide();
+            }
+            console.log(link, loc)
+            return link == loc;
+        }).addClass('active');
 
-    // copy the file store public path
-    $('#btn-copy-store-path').on('click', function(e) {
-        e.preventDefault();
-        let storePath = getStorePath();
-        if (storePath.startsWith('/storemng/files')) {
-            storePath = storePath.replace('/storemng/files', '/store');
-            const fullPath = `${window.location.protocol}//${window.location.host}${storePath}`;
-            navigator.clipboard.writeText(fullPath);
-            Swal.fire('Copied!', fullPath, 'success');
-        } else {
-            Swal.fire('Invalid path', 'Please navigate to another File Store file or folder', 'warning');
-        }
-    });
+        // copy the file store public path
+        $('#btn-copy-store-path').on('click', function(e) {
+            console.log(" $('#btn-copy-store-path').on('click'")
+            e.preventDefault();
+            let storePath = getStorePath();
+            if (storePath.startsWith('/storemng/files')) {
+                storePath = storePath.replace('/storemng/files', '/store');
+                const fullPath = `${window.location.protocol}//${window.location.host}${storePath}`;
+                navigator.clipboard.writeText(fullPath);
+                Swal.fire('Copied!', fullPath, 'success');
+            } else {
+                Swal.fire('Invalid path', 'Please navigate to another File Store file or folder', 'warning');
+            }
+        });
 
-    $('.coming-soon').on('click', function(e) {
-        e.preventDefault();
-        alert('COMING SOON');
+        $('.coming-soon').on('click', function(e) {
+            e.preventDefault();
+            alert('COMING SOON');
+        });
     });
 });
