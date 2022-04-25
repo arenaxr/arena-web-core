@@ -2,8 +2,6 @@
  * Script to connect to filestore auth endpoint and then load filestore proxy when fs auth completes.
  */
 $(document).ready(function() {
-    // add page header
-    $('#header').load('../header.html');
     updateStoreLogin();
 });
 

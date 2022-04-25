@@ -125,9 +125,6 @@ window.addEventListener('onauth', async function(e) {
         } else alert('Select a module to send input to.');
     });
 
-    // add page header
-    $('#header').load('../header-old.html');
-
     // activate modules tab
     openTab({currentTarget: document.getElementById('_modules')}, 'modules');
 

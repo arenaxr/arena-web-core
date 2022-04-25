@@ -1,20 +1,18 @@
-// update auth state in nav bar
 $(document).ready(function() {
+    // add page header
+    $('#header').load('/header-old.html');
+    // update auth state in nav bar
     fetch('/user/user_state')
         .then((response) => response.json())
         .then((data) => {
-            const host = `${window.location.protocol}//${window.location.host}`;
             if (data.authenticated) {
-                const authDrop = $('#auth-dropdown');
-                authDrop.html(`${data.username}`);
-                authDrop.addClass('dropdown-toggle');
-                authDrop.attr('data-bs-toggle', 'dropdown');
-                authDrop.attr('aria-haspopup', 'true');
-                authDrop.attr('aria-expanded', 'false');
+                $('#auth-dropdown').html(`${data.username} <b class='caret'></b>`);
+                $('#auth-dropdown').attr('class', 'dropdown-toggle');
+                $('#auth-dropdown').attr('data-toggle', 'dropdown');
                 $('#auth-dropdown').after(
-                    '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
-                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="${host}/user/profile">Profile</a></li>`);
-                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>`);
+                    '<ul class=\'dropdown-menu\' role=\'menu\' aria-labelledby=\'dropdownMenu\'></ul>');
+                $('ul .dropdown-menu').append(`<li><a href="/user/profile">Profile</a></li>`);
+                $('ul .dropdown-menu').append(`<li><a id="show_perms" href="#">MQTT Permissions</a></li>`);
                 $('#show_perms').on('click', function() {
                     const frame = document.getElementsByTagName('iframe');
                     const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
@@ -24,12 +22,12 @@ $(document).ready(function() {
                         alert('No MQTT permissions');
                     }
                 });
-                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="${host}/user/logout">Logout</a></li>`);
+                $('ul .dropdown-menu').append(`<li><a href="/user/logout">Logout</a></li>`);
             } else {
                 $('#auth-dropdown').html('Login').on('click', function(e) {
                     localStorage.setItem('request_uri', location.href);
                 });
-                $('#auth-dropdown').attr('href', `${host}/user/login`);
+                $('#auth-dropdown').attr('href', `/user/login`);
             }
         });
 
@@ -43,7 +41,7 @@ $(document).ready(function() {
             $('#btn-copy-store-path').hide();
         }
         return link == loc;
-    }).addClass('active');
+    }).parent().addClass('active');
 
     // copy the file store public path
     $('#btn-copy-store-path').on('click', function(e) {

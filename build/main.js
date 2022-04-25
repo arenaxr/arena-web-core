@@ -61,9 +61,6 @@ window.addEventListener('onauth', async function (e) {
     var saved_namespace;
     var saved_scene;
 
-    // add page header
-    $("#header").load("../header-old.html");
-
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector("#copy_json"), {
         text: function() {
