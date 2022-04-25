@@ -918,7 +918,7 @@ export class ARENAJitsi {
                 'maxHeight': 0, // video disabled
             };
         });
-
+        console.log('videoConstraints', videoConstraints);
         this.conference.setReceiverConstraints(videoConstraints);
     }
 

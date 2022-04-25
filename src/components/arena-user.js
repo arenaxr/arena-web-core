@@ -101,6 +101,7 @@ AFRAME.registerComponent('arena-user', {
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
         jitsiQuality: {type: 'number', default: 100.0},
+        resolution: {type: 'number', default: 0},
     },
 
     init: function() {
@@ -332,13 +333,7 @@ AFRAME.registerComponent('arena-user', {
             if (jistiVideo) {
                 if (!this.videoCube) {
                     if (data.presence === 'Panoramic') {
-                        // TODO (mwfarb): call to setResolutionRemotes should move to a centralized
-                        // place to consider all users
-                        // update remote resolutions for panoramic
-                        const panoIds = [data.jitsiId];
-                        const dropIds = [];
-                        ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
-
+                        this.evaluateRemoteResolution(1920);
                         this.drawVideoPano();
                     } else {
                         this.drawVideoCube();
@@ -429,6 +424,25 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
+    evaluateRemoteResolution(resolution) {
+        if (resolution != this.data.resolution) {
+            this.data.resolution = resolution;
+            let panoIds = [];
+            let dropIds = [];
+            const users = document.querySelectorAll('[arena-user]')
+            users.forEach(user => {
+                const data = user.components.arena-user.data;
+                if (data.presence === 'Panoramic') {
+                    // update remote resolutions for panoramic
+                    panoIds.push(data.jitsiId);
+                } else if (data.resolution === 0 ){
+                    dropIds.push(data.jitsiId);
+                }
+            });
+            ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
+        }
+    },
+
     update: function(oldData) {
         const data = this.data;
 
@@ -499,8 +513,10 @@ AFRAME.registerComponent('arena-user', {
             // check if A/V cut off distance has been reached
             if (inFieldOfView == false || distance > ARENA.maxAVDist) {
                 this.muteVideo();
+                this.evaluateRemoteResolution(0);
             } else {
                 this.unmuteVideo();
+                this.evaluateRemoteResolution(360);
             }
         }
 
