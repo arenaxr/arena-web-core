@@ -1,41 +1,41 @@
 $(document).ready(function() {
-    // update auth state in nav bar
-    fetch('/user/user_state')
-        .then((response) => response.json())
-        .then((data) => {
-            const authDrop = $('#auth-dropdown');
-            authDrop.addClass('dropdown-toggle');
-            authDrop.attr('data-bs-toggle', 'dropdown');
-            authDrop.attr('aria-haspopup', 'true');
-            authDrop.attr('aria-expanded', 'false');
-            $('#auth-dropdown').after(
-                '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
-            $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/conf/versions.html">Version</a></li>');
-            if (data.authenticated) {
-                authDrop.html(data.username);
-                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
-                $('ul .dropdown-menu').append('<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>');
-                $('#show_perms').on('click', function() {
-                    const frame = document.getElementsByTagName('iframe');
-                    const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
-                    if (typeof win.showPerms !== 'undefined') {
-                        win.showPerms();
-                    } else {
-                        alert('No MQTT permissions');
-                    }
-                });
-                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/logout">Logout</a></li>');
-            } else {
-                authDrop.html('Login');
-                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/login">Login</a></li>')
-                    .on('click', function(e) {
-                        localStorage.setItem('request_uri', location.href);
-                    });
-            }
-        });
-
     // add page header
     $('#header').load('/header.html', function() {
+        // update auth state in nav bar
+        fetch('/user/user_state')
+            .then((response) => response.json())
+            .then((data) => {
+                const authDrop = $('#auth-dropdown');
+                authDrop.addClass('dropdown-toggle');
+                authDrop.attr('data-bs-toggle', 'dropdown');
+                authDrop.attr('aria-haspopup', 'true');
+                authDrop.attr('aria-expanded', 'false');
+                $('#auth-dropdown').after(
+                    '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
+                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/conf/versions.html">Version</a></li>');
+                if (data.authenticated) {
+                    authDrop.html(data.username);
+                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
+                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>');
+                    $('#show_perms').on('click', function() {
+                        const frame = document.getElementsByTagName('iframe');
+                        const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
+                        if (typeof win.showPerms !== 'undefined') {
+                            win.showPerms();
+                        } else {
+                            alert('No MQTT permissions');
+                        }
+                    });
+                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/logout">Logout</a></li>');
+                } else {
+                    authDrop.html('Login');
+                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/login">Login</a></li>')
+                        .on('click', function(e) {
+                            localStorage.setItem('request_uri', location.href);
+                        });
+                }
+            });
+
         // highlight active page in navbar
         $('.nav-item a').filter(function() {
             const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
