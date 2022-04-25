@@ -3,17 +3,18 @@ $(document).ready(function() {
     fetch('/user/user_state')
         .then((response) => response.json())
         .then((data) => {
+            const authDrop = $('#auth-dropdown');
+            authDrop.addClass('dropdown-toggle');
+            authDrop.attr('data-bs-toggle', 'dropdown');
+            authDrop.attr('aria-haspopup', 'true');
+            authDrop.attr('aria-expanded', 'false');
+            $('#auth-dropdown').after(
+                '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
+            $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/conf/versions.html">Version</a></li>');
             if (data.authenticated) {
-                const authDrop = $('#auth-dropdown');
-                authDrop.html(`${data.username}`);
-                authDrop.addClass('dropdown-toggle');
-                authDrop.attr('data-bs-toggle', 'dropdown');
-                authDrop.attr('aria-haspopup', 'true');
-                authDrop.attr('aria-expanded', 'false');
-                $('#auth-dropdown').after(
-                    '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
-                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="/user/profile">Profile</a></li>`);
-                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>`);
+                authDrop.html(data.username);
+                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
+                $('ul .dropdown-menu').append('<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>');
                 $('#show_perms').on('click', function() {
                     const frame = document.getElementsByTagName('iframe');
                     const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
@@ -23,12 +24,13 @@ $(document).ready(function() {
                         alert('No MQTT permissions');
                     }
                 });
-                $('ul .dropdown-menu').append(`<li><a class="dropdown-item" href="/user/logout">Logout</a></li>`);
+                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/logout">Logout</a></li>');
             } else {
-                $('#auth-dropdown').html('Login').on('click', function(e) {
-                    localStorage.setItem('request_uri', location.href);
-                });
-                $('#auth-dropdown').attr('href', `/user/login`);
+                authDrop.html('Login');
+                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/login">Login</a></li>')
+                    .on('click', function(e) {
+                        localStorage.setItem('request_uri', location.href);
+                    });
             }
         });
 
@@ -36,7 +38,6 @@ $(document).ready(function() {
     $('#header').load('/header.html', function() {
         // highlight active page in navbar
         $('.nav-item a').filter(function() {
-            console.log("$('.nav-item a').filter")
             const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
             const loc = location.pathname.replace(/^\/+|\/+$/g, '');
             if (loc == 'files') {
@@ -44,13 +45,11 @@ $(document).ready(function() {
             } else {
                 $('#btn-copy-store-path').hide();
             }
-            console.log(link, loc)
             return link == loc;
         }).addClass('active');
 
         // copy the file store public path
         $('#btn-copy-store-path').on('click', function(e) {
-            console.log(" $('#btn-copy-store-path').on('click'")
             e.preventDefault();
             let storePath = getStorePath();
             if (storePath.startsWith('/storemng/files')) {
