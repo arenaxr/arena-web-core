@@ -65,7 +65,7 @@ export class RuntimeMngr {
     mqttToken = "noauth",
     realm = "realm",
     uuid = UUID.generate(),
-    name = `rt-${Math.round(Math.random() * 10000)}@${navigator.product}`,
+    name = `rt-${(Math.random() + 1).toString(36).substring(2)}`,
     maxNmodules = 0, // TMP: cannot run any modules
     apis = [],
     regTopic = `${realm}/proc/reg`,
@@ -105,7 +105,7 @@ export class RuntimeMngr {
 
     // instanciate runtime messages factory
     this.rtMsgs = new RuntimeMsgs(this);
-    
+
     // create a last will message (delete runtime)
     this.lastWillStringMsg = JSON.stringify(this.rtMsgs.deleteRuntime());
 
@@ -144,7 +144,7 @@ export class RuntimeMngr {
   }
 
   async init() {
-    // mqtt connect; setup delete runtime msg as last will 
+    // mqtt connect; setup delete runtime msg as last will
     let rtMngr = this;
     this.mc = new MQTTClient({
       mqtt_host: rtMngr.mqttHost,
@@ -153,6 +153,7 @@ export class RuntimeMngr {
       onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
       willMessage: rtMngr.lastWillStringMsg,
       willMessageTopic: rtMngr.regTopic,
+      userid: rtMngr.name,
     });
 
     await this.mc.connect();
@@ -346,10 +347,10 @@ export class RuntimeMngr {
 
   getRtDbgTopic() {
     return `${this.dbgTopic}/${this.uuid}`;
-  }  
+  }
 
   /* pubsub topic where the runtime sends unregister messages (ctl_topic+module uuid) */
   getRtCtlTopic() {
     return `${this.ctlTopic}/${this.uuid}`;
-  }    
+  }
 }
