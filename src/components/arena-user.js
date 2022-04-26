@@ -436,7 +436,7 @@ AFRAME.registerComponent('arena-user', {
                     // update remote resolutions for panoramic
                     panoIds.push(data.jitsiId);
                 } else {
-                    constraints[data.jitsiId] = {'maxHeight': resolution};
+                    constraints[data.jitsiId] = {'maxHeight': data.resolution};
                 }
             });
             ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
