@@ -894,19 +894,15 @@ export class ARENAJitsi {
      * setReceiverConstraints. Setting the order of these id arrays is important. Examples at:
      * https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md
      * @param {*} panoIds Array of jitsi ids panoramic, first is 'on-stage', others get lower res.
-     * @param {*} dropIds Array of jitsi ids to remove by setting res to 0.
-     */
-    setResolutionRemotes(panoIds = [], dropIds = []) {
-        console.log('videoConstraints2', panoIds, dropIds);
-        const defaultHeight = 360;
+     * @param {*} constraints Dictionary of all Jitsi ids with their max resolution.
+    */
+    setResolutionRemotes(panoIds = [], constraints = {}) {
+        const defaultHeight = 0; // set resolution to 0 unlit we are told better from 'constraints'
         const videoConstraints = {
             'colibriClass': 'ReceiverVideoConstraints',
-            // Default resolution requested for all endpoints.
             'defaultConstraints': {
                 'maxHeight': defaultHeight,
             },
-            // Endpoint specific resolution.
-            'constraints': {},
         };
         panoIds.forEach((panoId, idx) => {
             if (panoId != undefined) {
@@ -914,21 +910,10 @@ export class ARENAJitsi {
                 if (idx == 0) {
                     // The endpoint ids of the participants that are prioritized up to a higher resolution.
                     videoConstraints.onStageEndpoints = [panoId]; // only first 360 cam on stage at a time
-                    videoConstraints.constraints[panoId] = {
-                        'maxHeight': 1920, // 4K 2:1 ratio 360 cam video
-                    };
                 }
             }
         });
-        dropIds.forEach((dropId) => {
-            if (dropId != undefined) {
-                // dropped from bandwidth
-                videoConstraints.constraints[dropId] = {
-                    'maxHeight': 0, // video disabled
-                };
-            }
-        });
-        console.log('videoConstraints2', videoConstraints);
+        videoConstraints.constraints = constraints;
         this.conference.setReceiverConstraints(videoConstraints);
     }
 

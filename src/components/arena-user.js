@@ -428,19 +428,18 @@ AFRAME.registerComponent('arena-user', {
         if (resolution != this.data.resolution) {
             this.data.resolution = resolution;
             let panoIds = [];
-            let dropIds = [];
+            let constraints = {};
             const users = document.querySelectorAll('[arena-user]')
             users.forEach(user => {
                 const data = user.components['arena-user'].data;
-                console.log('constraints data', data)
                 if (data.presence === 'Panoramic') {
                     // update remote resolutions for panoramic
                     panoIds.push(data.jitsiId);
-                } else if (data.resolution === 0 ){
-                    dropIds.push(data.jitsiId);
+                } else {
+                    constraints[data.jitsiId] = {'maxHeight': resolution};
                 }
             });
-            ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
+            ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
         }
     },
 
