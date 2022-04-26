@@ -65,7 +65,7 @@ export class RuntimeMngr {
     mqttToken = "noauth",
     realm = "realm",
     uuid = UUID.generate(),
-    name = `rt-${Math.round(Math.random() * 10000)}@${navigator.product}`,
+    name = `rt-${(Math.random() + 1).toString(36).substring(2)}`,
     maxNmodules = 0, // TMP: cannot run any modules
     apis = [],
     regTopic = `${realm}/proc/reg`,
@@ -153,7 +153,7 @@ export class RuntimeMngr {
       onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
       willMessage: rtMngr.lastWillStringMsg,
       willMessageTopic: rtMngr.regTopic,
-      name: rtMngr.name, // TODO(mwfarb): review
+      userid: rtMngr.name,
     });
 
     await this.mc.connect();

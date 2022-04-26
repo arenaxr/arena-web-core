@@ -33,7 +33,7 @@ export default class MQTTClient {
         willMessageTopic:
           st.willMessageTopic !== undefined ? st.willMessageTopic : "lastwill",
         dbg: st.dbg !== undefined ? st.dbg : false,
-        userid: st.name, // TODO(mwfarb): review
+        userid: st.userid !== undefined ? st.userid : (Math.random() + 1).toString(36).substring(2)
       };
 
       if (this.settings.willMessage !== undefined) {
@@ -51,8 +51,7 @@ export default class MQTTClient {
       if (this.connected == true && force == false) return;
       this.mqttc = new Paho.Client(
         this.settings.mqtt_host,
-        "rtmngr-" + this.settings.userid,
-
+        this.settings.userid,
       );
 
       this.mqttc.onConnectionLost = this.onConnectionLost.bind(this);
