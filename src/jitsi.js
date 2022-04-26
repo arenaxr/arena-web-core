@@ -897,10 +897,9 @@ export class ARENAJitsi {
      * @param {*} dropIds Array of jitsi ids to remove by setting res to 0.
      */
     setResolutionRemotes(panoIds = [], dropIds = []) {
+        console.log('videoConstraints2', panoIds, dropIds);
         const videoConstraints = {
             'colibriClass': 'ReceiverVideoConstraints',
-            // The endpoint ids of the participants that are prioritized up to a higher resolution.
-            'onStageEndpoints': panoIds.slice(0, 1), // only first 360 cam on stage at a time
             // Default resolution requested for all endpoints.
             'defaultConstraints': {
                 'maxHeight': 360,
@@ -908,17 +907,27 @@ export class ARENAJitsi {
             // Endpoint specific resolution.
             'constraints': {},
         };
-        // only first 360 cam on stage at a time
-        videoConstraints.constraints[panoIds[0]] = {
-            'maxHeight': 1920, // 4K 2:1 ratio 360 cam video
-        };
-        // dropped from bandwidth
-        dropIds.forEach((dropId) => {
-            videoConstraints.constraints[dropId] = {
-                'maxHeight': 0, // video disabled
-            };
+        panoIds.forEach((panoId, idx) => {
+            if (panoId != undefined) {
+                // only first 360 cam on stage at a time
+                if (idx == 0) {
+                    // The endpoint ids of the participants that are prioritized up to a higher resolution.
+                    videoConstraints.onStageEndpoints = [panoId]; // only first 360 cam on stage at a time
+                    videoConstraints.constraints[panoId] = {
+                        'maxHeight': 1920, // 4K 2:1 ratio 360 cam video
+                    };
+                }
+            }
         });
-        console.log('videoConstraints', videoConstraints);
+        dropIds.forEach((dropId) => {
+            if (dropId != undefined) {
+                // dropped from bandwidth
+                videoConstraints.constraints[dropId] = {
+                    'maxHeight': 0, // video disabled
+                };
+            }
+        });
+        console.log('videoConstraints2', videoConstraints);
         this.conference.setReceiverConstraints(videoConstraints);
     }
 

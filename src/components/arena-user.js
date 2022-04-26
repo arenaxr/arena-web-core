@@ -431,7 +431,8 @@ AFRAME.registerComponent('arena-user', {
             let dropIds = [];
             const users = document.querySelectorAll('[arena-user]')
             users.forEach(user => {
-                const data = user.components.arena-user.data;
+                const data = user.components['arena-user'].data;
+                console.log('constraints data', data)
                 if (data.presence === 'Panoramic') {
                     // update remote resolutions for panoramic
                     panoIds.push(data.jitsiId);
