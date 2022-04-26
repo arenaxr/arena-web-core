@@ -1,5 +1,5 @@
 /**
- * @fileoverview Create modules from persist objects; send request message to orchestrator
+ * @fileoverview Register as a runtime; Send requests to orchestrator
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
@@ -10,9 +10,9 @@ import MQTTClient from "./mqtt-client.js";
 import RuntimeMsgs from "./runtime-msgs.js";
 
 /**
- * Create modules from persist objects; send request message to orchestrator
- * TODO: register  as a runtime itself and start modules on the browser
- *       (integrate code from https://github.com/SilverLineFramework/runtime-browser/)
+ * Send requests to orchestrator: register as a runtime, create modules from persist objects.
+ * TODO: start modules on the browser
+ * (code from https://github.com/SilverLineFramework/runtime-browser/)
  */
 export class RuntimeMngr {
   /* singleton instance */
@@ -27,7 +27,7 @@ export class RuntimeMngr {
   name;
   /* @property {number} [maxNmodules=10] - maximum number of modules */
   maxNmodules;
-  /* @property {string[]} [apis=["wasi:unstable"]] - apis supported by the runtime */
+  /* @property {string[]} [apis=[]] - apis supported by the runtime (TODO: add apis once we support running modules) */
   apis;
   /* @property {string} [regTopic="realm/proc/reg"] - pubsub topic where the runtime sends register messages */
   regTopic;
@@ -51,7 +51,7 @@ export class RuntimeMngr {
   pendingModulesArgs;
   /* @property {array} [clientModules=[]] - list of client modules that need to be deleted when the client finishes */
   clientModules;
-  /* @property {boolean} [debug=false] - debug flagl more verbose console.log */
+  /* @property {boolean} [debug=false] - debug flag; more verbose console.log */
   debug;
 
   /**
@@ -65,7 +65,7 @@ export class RuntimeMngr {
     mqttToken = "noauth",
     realm = "realm",
     uuid = UUID.generate(),
-    name = `rt-${Math.round(Math.random() * 10000)}@${navigator.product}`,
+    name = `rt-${(Math.random() + 1).toString(36).substring(2)}`,
     maxNmodules = 0, // TMP: cannot run any modules
     apis = [],
     regTopic = `${realm}/proc/reg`,
@@ -106,6 +106,9 @@ export class RuntimeMngr {
     // instanciate runtime messages factory
     this.rtMsgs = new RuntimeMsgs(this);
 
+    // create a last will message (delete runtime)
+    this.lastWillStringMsg = JSON.stringify(this.rtMsgs.deleteRuntime());
+
     // on unload, send delete client modules requests
     let rt = this;
     window.onbeforeunload = function () {
@@ -114,7 +117,6 @@ export class RuntimeMngr {
   }
 
   setOptions({
-    mc = this.mc,
     realm = this.realm,
     name = this.name,
     maxNmodules = this.maxNmodules,
@@ -128,7 +130,6 @@ export class RuntimeMngr {
     debug = this.debug,
   }) {
     // TODO: handle changes
-    this.mc = mc;
     this.realm = realm;
     this.name = name;
     this.maxNmodules = maxNmodules;
@@ -143,13 +144,16 @@ export class RuntimeMngr {
   }
 
   async init() {
-    // mqtt connect
+    // mqtt connect; setup delete runtime msg as last will
     let rtMngr = this;
     this.mc = new MQTTClient({
       mqtt_host: rtMngr.mqttHost,
       mqtt_username: rtMngr.mqttUsername,
       mqtt_token: rtMngr.mqttToken,
       onMessageCallback: rtMngr.onMqttMessage.bind(rtMngr),
+      willMessage: rtMngr.lastWillStringMsg,
+      willMessageTopic: rtMngr.regTopic,
+      userid: rtMngr.name,
     });
 
     await this.mc.connect();
@@ -293,9 +297,9 @@ export class RuntimeMngr {
       replaceVars
     );
 
-    // if instantiate 'per client', save this module uuid to delete before exit
+    // if instantiate 'per client', save this module data to delete before exit
     if (persistObj.attributes.instantiate == "client") {
-      this.clientModules.push(modCreateMsg);
+      this.clientModules.push(modCreateMsg.data);
     }
 
     // TODO: save pending req uuid and check orchestrator responses
@@ -315,8 +319,8 @@ export class RuntimeMngr {
       this.mc.publish(this.ctlTopic, JSON.stringify(modDelMsg));
     });
 
-    let delRtMsg = this.rtMsgs.deleteRuntime();
-    this.mc.publish(this.regTopic, JSON.stringify(delRtMsg));
+    // sent in case last will fails (this will be a duplicate of last will)
+    this.mc.publish(this.regTopic, lastWillStringMsg);
   }
 
   /* public getters */
@@ -343,10 +347,10 @@ export class RuntimeMngr {
 
   getRtDbgTopic() {
     return `${this.dbgTopic}/${this.uuid}`;
-  }  
+  }
 
   /* pubsub topic where the runtime sends unregister messages (ctl_topic+module uuid) */
   getRtCtlTopic() {
     return `${this.ctlTopic}/${this.uuid}`;
-  }    
+  }
 }

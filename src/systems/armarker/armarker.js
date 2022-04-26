@@ -390,7 +390,7 @@ AFRAME.registerSystem('armarker', {
             const scale = new THREE.Vector3();
             markerPose.decompose( pos, quat, scale );
             const markerPoseNoScale = new THREE.Matrix4(); // create a world matrix with only position and rotation
-            markerPoseNoScale.setRotationFromQuaternion( quat );
+            markerPoseNoScale.makeRotationFromQuaternion( quat );
             markerPoseNoScale.setPosition( pos );
             const marker = Object.assign({}, sceneTag.data, {
                 obj_id: sceneTag.el.id,
