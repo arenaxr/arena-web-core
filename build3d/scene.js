@@ -13,6 +13,6 @@
 // load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
 import 'aframe'; // AFRAME
 import './build3d.js'; // ARENA
-import '../src/aframe-mods/'; // AFRAME modifications
-import '../src/systems/model-progress/model-progress.js';
+import '/src/aframe-mods/'; // AFRAME modifications
+import '/src/systems/model-progress/model-progress.js';
 import './components.js'; // custom AFRAME components
