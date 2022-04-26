@@ -898,11 +898,12 @@ export class ARENAJitsi {
      */
     setResolutionRemotes(panoIds = [], dropIds = []) {
         console.log('videoConstraints2', panoIds, dropIds);
+        const defaultHeight = 360;
         const videoConstraints = {
             'colibriClass': 'ReceiverVideoConstraints',
             // Default resolution requested for all endpoints.
             'defaultConstraints': {
-                'maxHeight': 360,
+                'maxHeight': defaultHeight,
             },
             // Endpoint specific resolution.
             'constraints': {},

@@ -517,7 +517,16 @@ AFRAME.registerComponent('arena-user', {
                 this.evaluateRemoteResolution(0);
             } else {
                 this.unmuteVideo();
-                this.evaluateRemoteResolution(360);
+                // at 0.5m distance, video fills window height
+                if (distance < 0.65) {
+                    this.evaluateRemoteResolution(720); // full at 0.5m
+                } else if (distance < 0.8) {
+                    this.evaluateRemoteResolution(540); // 3/4 0.65
+                } else if (distance < 1.2) {
+                    this.evaluateRemoteResolution(360); // 1/2 0.8
+                } else {
+                    this.evaluateRemoteResolution(180); // 1/4 1.2
+                }
             }
         }
 
