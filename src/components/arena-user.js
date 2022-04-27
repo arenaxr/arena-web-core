@@ -453,7 +453,6 @@ AFRAME.registerComponent('arena-user', {
         const frustumHeightAtVideo = 2 * actualDist * Math.tan(fov * 0.5 * Math.PI / 180);
         const videoRatio2Window = cubeHeight / frustumHeightAtVideo;
         const actualCubeRes = winHeight * videoRatio2Window;
-        console.log(actualCubeRes);
         // provide max video resolution for distance and screen resolution
         if (actualCubeRes < 180) {
             return 180;
@@ -469,6 +468,8 @@ AFRAME.registerComponent('arena-user', {
             return 1080;
         } else if (actualCubeRes < 1260) {
             return 1260;
+        } else {
+            return 1440;
         }
     },
 

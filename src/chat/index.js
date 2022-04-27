@@ -1009,8 +1009,6 @@ export class ARENAChat {
         iconStats.style.color = (stats.conn ? this.getConnectionColor(stats.conn.connectionQuality) : 'gray');
         iconStats.style.paddingLeft = '5px';
         uli.appendChild(iconStats);
-        if (stats.conn && stats.conn.maxEnabledResolution)
-            uli.append(stats.conn.maxEnabledResolution);
         const spanStats = document.createElement('span');
         uli.appendChild(spanStats);
 
