@@ -119,9 +119,9 @@ export class CreateUpdate {
                         cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
                     } else { // otherwise its a rotation given in degrees
                         cameraSpinnerObj3D.rotation.set(
-                            THREE.Math.degToRad(position.x),
-                            THREE.Math.degToRad(position.y),
-                            THREE.Math.degToRad(position.z),
+                            THREE.Math.degToRad(rotation.x),
+                            THREE.Math.degToRad(rotation.y),
+                            THREE.Math.degToRad(rotation.z),
                         );
                     }
                 }
