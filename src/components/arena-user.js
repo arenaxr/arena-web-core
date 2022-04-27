@@ -341,6 +341,7 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
         } else {
+            this.evaluateRemoteResolution(0);
             this.removeVideoCube();
         }
     },
@@ -444,15 +445,30 @@ AFRAME.registerComponent('arena-user', {
     },
 
     getOptimalResolution(distance, winHeight) {
-        // at 0.5m distance, video fills window height
-        if (distance < 0.65) {
-            return (720); // full
-        } else if (distance < 0.8) {
-            return (540); // 3/4
-        } else if (distance < 1.2) {
-            return (360); // 1/2
-        } else {
-            return (180);
+        // video cube W x H x D is 0.6m x 0.4m x 0.6m
+        const fov = 80;
+        const cubeHeight = 0.4;
+        const cubeDepth = 0.6;
+        const actualDist = distance - (cubeDepth / 2);
+        const frustumHeightAtVideo = 2 * actualDist * Math.tan(fov * 0.5 * Math.PI / 180);
+        const videoRatio2Window = cubeHeight / frustumHeightAtVideo;
+        const actualCubeRes = winHeight * videoRatio2Window;
+        console.log(actualCubeRes);
+        // provide max video resolution for distance and screen resolution
+        if (actualCubeRes < 180) {
+            return 180;
+        } else if (actualCubeRes < 360) {
+            return 360;
+        } else if (actualCubeRes < 540) {
+            return 540;
+        } else if (actualCubeRes < 720) {
+            return 720;
+        } else if (actualCubeRes < 900) {
+            return 900;
+        } else if (actualCubeRes < 1080) {
+            return 1080;
+        } else if (actualCubeRes < 1260) {
+            return 1260;
         }
     },
 
@@ -529,7 +545,7 @@ AFRAME.registerComponent('arena-user', {
                 this.evaluateRemoteResolution(0);
             } else {
                 this.unmuteVideo();
-                this.evaluateRemoteResolution(this.getOptimalResolution(distance, window.winHeight));
+                this.evaluateRemoteResolution(this.getOptimalResolution(distance, window.innerHeight));
             }
         }
 
