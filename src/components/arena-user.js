@@ -289,7 +289,7 @@ AFRAME.registerComponent('arena-user', {
         const videoCube = document.createElement('a-sphere');
         videoCube.setAttribute('id', this.videoID + 'cube');
         videoCube.setAttribute('position', '0 0 0');
-        // videoCube.setAttribute('material', 'shader', 'flat');
+        videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('material', 'side', 'back');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');

@@ -235,6 +235,7 @@ export class ARENAJitsi {
         screenShareEl.setAttribute('autoplay', 'true');
         screenShareEl.setAttribute('playsinline', 'true');
         screenShareEl.setAttribute('material', 'src', `#${videoId}`);
+        screenShareEl.setAttribute('material', 'shader', 'flat');
         screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
         this.screenShareDict[participantId] = screenShareEl;
