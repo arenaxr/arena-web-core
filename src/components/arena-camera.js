@@ -218,7 +218,7 @@ AFRAME.registerComponent('arena-camera', {
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
         } else if (this.lastPose !== newPose) {
             // Only update frustum if camera pose has changed and video culling is enabled
-            if (this.isVideoCullingEnabled()) {
+            if (this.isVideoFrustumCullingEnabled()) {
                 const cam = el.components['camera'].camera;
                 this.frustum.setFromProjectionMatrix(
                     this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
@@ -233,8 +233,11 @@ AFRAME.registerComponent('arena-camera', {
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
     },
-    isVideoCullingEnabled() {
-        return ARENA && !ARENA.disableVideoCulling;
+    isVideoFrustumCullingEnabled() {
+        return ARENA && ARENA.videoFrustumCulling;
+    },
+    isVideoDistanceConstraintsEnabled() {
+        return ARENA && ARENA.videoDistanceConstraints;
     },
     viewIntersectsObject3D(obj3D) {
         // note: bbox.setFromObject computes the world-axis-aligned bounding box of the video cube

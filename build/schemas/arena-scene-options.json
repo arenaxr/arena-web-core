@@ -433,10 +433,16 @@
                 "title":"Screenshare object name",
                 "type":"string"
              },
-             "disableVideoCulling":{
-                "default":false,
-                "description":"If true will disable video frustum culling (video frustum culling stops video from users outside of view)",
-                "title":"Disable Video Frustum Culling",
+             "videoFrustumCulling":{
+                "default":true,
+                "description":"If false, will disable video frustum culling (video frustum culling stops video from users outside of view)",
+                "title":"Video Frustum Culling",
+                "type":"boolean"
+             },
+             "videoDistanceConstraints":{
+                "default":true,
+                "description":"If false, will disable video distance constraints (video resolution decreases with distance from users in view)",
+                "title":"Video Distance Constraints",
                 "type":"boolean"
              },
              "volume":{
@@ -456,7 +462,8 @@
              "clickableOnlyEvents",
              "maxAVDist",
              "privateScene",
-             "disableVideoCulling"
+             "videoFrustumCulling",
+             "videoDistanceConstraints"
           ],
           "title":"Scene Options",
           "type":"object",

@@ -900,6 +900,9 @@ export class ARENAJitsi {
     setResolutionRemotes(panoIds = [], constraints = {}) {
         const videoConstraints = {
             'colibriClass': 'ReceiverVideoConstraints',
+            'defaultConstraints': {
+                'maxHeight': 180,
+            },
         };
         panoIds.forEach((panoId, idx) => {
             if (panoId != undefined) {
