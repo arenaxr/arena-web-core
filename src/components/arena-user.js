@@ -550,7 +550,7 @@ AFRAME.registerComponent('arena-user', {
                 }
             } else {
                 this.unmuteVideo();
-                this.evaluateRemoteResolution(this.data.resolution.default);
+                this.evaluateRemoteResolution(180); // default
             }
         }
 
