@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.7.1](https://github.com/conix-center/ARENA-core/compare/v1.7.0...v1.7.1) (2022-04-29)
+
+
+### Bug Fixes
+
+* **jitsi:** restore screenshare, do not use default res 0p ([b85d6f4](https://github.com/conix-center/ARENA-core/commit/b85d6f4c3b5d7bf5be06fedfe437871bdffc3dd9))
+* **jitsi:** separate frustum/distance scene flags ([1f58d4d](https://github.com/conix-center/ARENA-core/commit/1f58d4d634e1cf38802240d9397cba906c0d56bd))
+
 ## [1.7.0](https://github.com/conix-center/ARENA-core/compare/v1.6.0...v1.7.0) (2022-04-28)
 
 
