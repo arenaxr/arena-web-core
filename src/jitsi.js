@@ -898,12 +898,8 @@ export class ARENAJitsi {
      * @param {*} constraints Dictionary of all Jitsi ids with their max resolution.
     */
     setResolutionRemotes(panoIds = [], constraints = {}) {
-        const defaultHeight = 0; // set resolution to 0 unlit we are told better from 'constraints'
         const videoConstraints = {
             'colibriClass': 'ReceiverVideoConstraints',
-            'defaultConstraints': {
-                'maxHeight': defaultHeight,
-            },
         };
         panoIds.forEach((panoId, idx) => {
             if (panoId != undefined) {

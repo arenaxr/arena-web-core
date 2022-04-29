@@ -14,7 +14,7 @@
  * @param {Object} gainNode
  * @private
  */
- async function enableChromeAEC(gainNode) {
+async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -101,7 +101,7 @@ AFRAME.registerComponent('arena-user', {
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
         jitsiQuality: {type: 'number', default: 100.0},
-        resolution: {type: 'number', default: 0},
+        resolution: {type: 'number', default: 180},
     },
 
     init: function() {
@@ -429,17 +429,13 @@ AFRAME.registerComponent('arena-user', {
         if (resolution != this.data.resolution) {
             this.data.resolution = resolution;
             let panoIds = [];
+            if (this.data.presence === 'Panoramic') {
+                panoIds = [this.data.jitsiId];
+            }
             let constraints = {};
-            const users = document.querySelectorAll('[arena-user]')
-            users.forEach(user => {
-                const data = user.components['arena-user'].data;
-                if (data.presence === 'Panoramic') {
-                    // update remote resolutions for panoramic
-                    panoIds.push(data.jitsiId);
-                } else {
-                    constraints[data.jitsiId] = {'maxHeight': data.resolution};
-                }
-            });
+            constraints[this.data.jitsiId] = {
+                'maxHeight': this.data.resolution
+            };
             ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
         }
     },
