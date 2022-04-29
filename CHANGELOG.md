@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.7.2](https://github.com/conix-center/ARENA-core/compare/v1.7.1...v1.7.2) (2022-04-29)
+
+
+### Bug Fixes
+
+* **jitsi:** correct bad user resolution default ([6e237dd](https://github.com/conix-center/ARENA-core/commit/6e237dd860c46eddda57d506f4aefc25fac60c21))
+
 ### [1.7.1](https://github.com/conix-center/ARENA-core/compare/v1.7.0...v1.7.1) (2022-04-29)
 
 
