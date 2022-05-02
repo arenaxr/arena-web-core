@@ -32,6 +32,7 @@
     "mqtt-pattern": "^1.2.0",
     "paho-mqtt": "^1.1.0",
     "sweetalert2": "^10.16.6",
+    "super-three": "^0.137.0",
     "three": "npm:super-three@0.137.0",
     "three-pathfinding": "^1.1.0",
     "uuidjs": "^4.2.11",
