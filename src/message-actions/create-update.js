@@ -119,9 +119,23 @@ export class CreateUpdate {
 
         case 'rig':
             if (id === ARENA.camName) { // our camera Rig
-                const entityEl = document.getElementById('cameraRig');
-
-                this.updateObject(entityEl, message);
+                const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
+                const cameraRigObj3D = document.getElementById('cameraRig').object3D;
+                const {position, rotation} = message.data;
+                if (rotation) {
+                    if (rotation.hasOwnProperty('w')) { // has 'w' coordinate: a quaternion
+                        cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+                    } else { // otherwise its a rotation given in degrees
+                        cameraSpinnerObj3D.rotation.set(
+                            THREE.Math.degToRad(rotation.x),
+                            THREE.Math.degToRad(rotation.y),
+                            THREE.Math.degToRad(rotation.z),
+                        );
+                    }
+                }
+                if (position) {
+                    cameraRigObj3D.position.set(position.x, position.y, position.z);
+                }
             }
             return;
 

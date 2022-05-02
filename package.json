@@ -1,6 +1,6 @@
 {
   "name": "arena-core",
-  "version": "1.6.0",
+  "version": "1.7.2",
   "description": "Core browser client for ARENA",
   "author": "CONIX Center",
   "license": "BSD-3-Clause",
@@ -10,7 +10,7 @@
   ],
   "overrides": {
     "aframe": "^1.3.0",
-    "super-three": "0.128.0",
+    "super-three": "0.137.0",
     "three": "npm:super-three@0.137.0",
     "three-pathfinding": "^1.1.0"
   },

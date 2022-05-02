@@ -136,3 +136,33 @@ AFRAME.registerSystem('landmark', {
         return this.landmarks[id];
     },
 });
+
+// Teleport to landmark on click/etc
+AFRAME.registerComponent('goto-landmark', {
+    schema: {
+        on: {type: 'string', default: ''}, // event to listen 'on'
+        landmark: {type: 'string', default: ''}, // id of landmark to teleport to
+    },
+    eventHandlerFn: function() {
+        const targetEl = document.getElementById(this.data.landmark);
+        if (targetEl?.components?.landmark) {
+            targetEl.components.landmark.teleportTo();
+        }
+    },
+    init: function() {
+        this.eventHandlerFn = this.eventHandlerFn.bind(this);
+    },
+    update: function(oldData) {
+        if (oldData.on) {
+            this.el.removeEventListener(oldData.on, this.eventHandlerFn);
+        }
+        if (this.data.on) {
+            this.el.addEventListener(this.data.on, this.eventHandlerFn);
+        }
+    },
+    remove: function() { // handle component removal
+        if (this.data.on) {
+            this.el.removeEventListener(this.data.on, this.eventHandlerFn);
+        }
+    },
+});

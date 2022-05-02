@@ -65,7 +65,14 @@ export class Arena {
         ARENAUtils.getLocation((coords, err) => {
             if (!err) ARENA.clientCoords = coords;
         });
+
+        // setup required scene-options defaults
+        // TODO: pull these from a schema
+        this.clickableOnlyEvents = true;
         this.maxAVDist = 20;
+        this.privateScene = false;
+        this.videoFrustumCulling = true;
+        this.videoDistanceConstraints = true;
 
         // set scene name from url
         this.setSceneName();

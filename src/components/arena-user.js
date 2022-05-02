@@ -14,7 +14,7 @@
  * @param {Object} gainNode
  * @private
  */
- async function enableChromeAEC(gainNode) {
+async function enableChromeAEC(gainNode) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -101,6 +101,7 @@ AFRAME.registerComponent('arena-user', {
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
         jitsiQuality: {type: 'number', default: 100.0},
+        resolution: {type: 'number', default: 180},
     },
 
     init: function() {
@@ -288,7 +289,7 @@ AFRAME.registerComponent('arena-user', {
         const videoCube = document.createElement('a-sphere');
         videoCube.setAttribute('id', this.videoID + 'cube');
         videoCube.setAttribute('position', '0 0 0');
-        // videoCube.setAttribute('material', 'shader', 'flat');
+        videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('material', 'side', 'back');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
@@ -332,13 +333,7 @@ AFRAME.registerComponent('arena-user', {
             if (jistiVideo) {
                 if (!this.videoCube) {
                     if (data.presence === 'Panoramic') {
-                        // TODO (mwfarb): call to setResolutionRemotes should move to a centralized
-                        // place to consider all users
-                        // update remote resolutions for panoramic
-                        const panoIds = [data.jitsiId];
-                        const dropIds = [];
-                        ARENA.Jitsi.setResolutionRemotes(panoIds, dropIds);
-
+                        this.evaluateRemoteResolution(1920);
                         this.drawVideoPano();
                     } else {
                         this.drawVideoCube();
@@ -346,6 +341,7 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
         } else {
+            this.evaluateRemoteResolution(0);
             this.removeVideoCube();
         }
     },
@@ -429,6 +425,50 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
+    evaluateRemoteResolution(resolution) {
+        if (resolution != this.data.resolution) {
+            this.data.resolution = resolution;
+            let panoIds = [];
+            if (this.data.presence === 'Panoramic') {
+                panoIds = [this.data.jitsiId];
+            }
+            let constraints = {};
+            constraints[this.data.jitsiId] = {
+                'maxHeight': this.data.resolution
+            };
+            ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
+        }
+    },
+
+    getOptimalResolution(distance, winHeight) {
+        // video cube W x H x D is 0.6m x 0.4m x 0.6m
+        const fov = 80;
+        const cubeHeight = 0.4;
+        const cubeDepth = 0.6;
+        const actualDist = distance - (cubeDepth / 2);
+        const frustumHeightAtVideo = 2 * actualDist * Math.tan(fov * 0.5 * Math.PI / 180);
+        const videoRatio2Window = cubeHeight / frustumHeightAtVideo;
+        const actualCubeRes = winHeight * videoRatio2Window;
+        // provide max video resolution for distance and screen resolution
+        if (actualCubeRes < 180) {
+            return 180;
+        } else if (actualCubeRes < 360) {
+            return 360;
+        } else if (actualCubeRes < 540) {
+            return 540;
+        } else if (actualCubeRes < 720) {
+            return 720;
+        } else if (actualCubeRes < 900) {
+            return 900;
+        } else if (actualCubeRes < 1080) {
+            return 1080;
+        } else if (actualCubeRes < 1260) {
+            return 1260;
+        } else {
+            return 1440;
+        }
+    },
+
     update: function(oldData) {
         const data = this.data;
 
@@ -491,16 +531,26 @@ AFRAME.registerComponent('arena-user', {
         // frustum culling for WebRTC video streams;
         if (this.videoID) {
             let inFieldOfView = true;
-            if (arenaCameraComponent.isVideoCullingEnabled()) {
+            if (arenaCameraComponent.isVideoFrustumCullingEnabled()) {
                 if (this.el.contains(this.videoCube)) {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
-            // check if A/V cut off distance has been reached
-            if (inFieldOfView == false || distance > ARENA.maxAVDist) {
+            if (inFieldOfView == false) {
                 this.muteVideo();
+                this.evaluateRemoteResolution(0);
+            } else if (arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
+                // check if A/V cut off distance has been reached
+                if (distance > ARENA.maxAVDist) {
+                    this.muteVideo();
+                    this.evaluateRemoteResolution(0);
+                } else {
+                    this.unmuteVideo();
+                    this.evaluateRemoteResolution(this.getOptimalResolution(distance, window.innerHeight));
+                }
             } else {
                 this.unmuteVideo();
+                this.evaluateRemoteResolution(180); // default
             }
         }
 

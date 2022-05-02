@@ -1,5 +1,41 @@
 # Changelog
 
+### [1.7.2](https://github.com/conix-center/ARENA-core/compare/v1.7.1...v1.7.2) (2022-04-29)
+
+
+### Bug Fixes
+
+* **jitsi:** correct bad user resolution default ([6e237dd](https://github.com/conix-center/ARENA-core/commit/6e237dd860c46eddda57d506f4aefc25fac60c21))
+
+### [1.7.1](https://github.com/conix-center/ARENA-core/compare/v1.7.0...v1.7.1) (2022-04-29)
+
+
+### Bug Fixes
+
+* **jitsi:** restore screenshare, do not use default res 0p ([b85d6f4](https://github.com/conix-center/ARENA-core/commit/b85d6f4c3b5d7bf5be06fedfe437871bdffc3dd9))
+* **jitsi:** separate frustum/distance scene flags ([1f58d4d](https://github.com/conix-center/ARENA-core/commit/1f58d4d634e1cf38802240d9397cba906c0d56bd))
+
+## [1.7.0](https://github.com/conix-center/ARENA-core/compare/v1.6.0...v1.7.0) (2022-04-28)
+
+
+### Features
+
+* **jitsi:** add distance and frustum based resolution constraints ([#446](https://github.com/conix-center/ARENA-core/issues/446)) ([e3b55a8](https://github.com/conix-center/ARENA-core/commit/e3b55a8162ff1dc1e9972b1dbb201bfad46dfe29))
+* **settings:** add versions link to settings dialog ([814399b](https://github.com/conix-center/ARENA-core/commit/814399b6ccbbc9e69dffa09cbc3e36ee2c573572))
+
+
+### Bug Fixes
+
+* Align xrRefSpace for camcapture w/ AFRAME ([393efe2](https://github.com/conix-center/ARENA-core/commit/393efe2735bba8f663ba6dbd2b900ab79236b5a3))
+* **jitsi:** reduce glare on videosphere and screenshare ([b8d8423](https://github.com/conix-center/ARENA-core/commit/b8d8423c2a6ef67e4babc60737ae0b669d8fa287))
+* Remove CHANGELOG link to lib-jitsi-meet ([870bd27](https://github.com/conix-center/ARENA-core/commit/870bd2783c5b75e41a9deee6da141abe0f9f3e33))
+* Remove v1.5.x from CHANGELOG ([4cf37ad](https://github.com/conix-center/ARENA-core/commit/4cf37ada282cefceb228837949ba2b09b3eec3a5))
+* restore working rig transform msg handling ([0041a15](https://github.com/conix-center/ARENA-core/commit/0041a15675488553819a48801f27415428395899))
+* **runtime-mngr:** runtime userid ([aa94175](https://github.com/conix-center/ARENA-core/commit/aa94175b02be9266d135956ffdbb2cf7bf4aa9d0))
+* **runtime:** runtime mqtt client id name undefined ([ed5faff](https://github.com/conix-center/ARENA-core/commit/ed5faffd9fa6bf6e0feee8fa7df2919755c4c289))
+* typo on rig props ([2f681d9](https://github.com/conix-center/ARENA-core/commit/2f681d9f4b97e6d19115c4a69edb7fae7af4104c))
+* Update deprecated setRotationFromQuaternion ([2b0d0c8](https://github.com/conix-center/ARENA-core/commit/2b0d0c87aebc0ec60450929de82d24c818bb4026))
+
 ## [1.6.0](https://github.com/conix-center/ARENA-core/compare/v1.4.0...v1.6.0) (2022-04-23)
 
 
