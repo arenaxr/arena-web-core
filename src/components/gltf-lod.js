@@ -10,6 +10,7 @@ const LOD_THRESHOLD = 1; // meters
 const CACHE_FREE_DELAY = 3000; // ms
 
 AFRAME.registerComponent('gltf-lod-advanced', {
+    dependencies: ['gltf-model'],
     schema: {
         updateRate: {type: 'number', default: 333},
         fade: {type: 'number', default: 0},
@@ -110,6 +111,7 @@ AFRAME.registerComponent('lod-level', {
  * @brief Simple LOD swap between default (low) and detailed (high) models
  */
 AFRAME.registerComponent('gltf-model-lod', {
+    dependencies: ['gltf-model'],
     schema: {
         updateRate: {type: 'number', default: 333},
         retainCache: {type: 'boolean', default: false},
