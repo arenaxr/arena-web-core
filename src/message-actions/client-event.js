@@ -15,7 +15,7 @@ export class ClientEvent {
         const data = message.data;
 
         // ignore goto-url and textinput events
-        if (message.type == 'goto-url' || message.type == 'textinput') {
+        if (message.type === 'goto-url' || message.type === 'textinput') {
             return;
         }
 
@@ -48,6 +48,9 @@ export class ClientEvent {
             }, false);
             break;
         case 'mousedown':
+            if (clicker === ARENA.camName) { // ignore clicks from the camera
+                return;
+            }
             // emit a synthetic click event with ugly data syntax
             entityEl.emit('mousedown', {
                 'clicker': clicker,
@@ -57,6 +60,9 @@ export class ClientEvent {
             }, false);
             break;
         case 'mouseup':
+            if (clicker === ARENA.camName) { // ignore clicks from the camera
+                return;
+            }
             // emit a synthetic click event with ugly data syntax
             entityEl.emit('mouseup', {
                 'clicker': clicker,
