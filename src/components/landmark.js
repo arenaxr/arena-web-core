@@ -143,7 +143,10 @@ AFRAME.registerComponent('goto-landmark', {
         on: {type: 'string', default: ''}, // event to listen 'on'
         landmark: {type: 'string', default: ''}, // id of landmark to teleport to
     },
-    eventHandlerFn: function() {
+    eventHandlerFn: function(evt) {
+        if (evt.detail.clicker) { // this is synthetic click event from network, not from our own user
+            return;
+        }
         const targetEl = document.getElementById(this.data.landmark);
         if (targetEl?.components?.landmark) {
             targetEl.components.landmark.teleportTo();
