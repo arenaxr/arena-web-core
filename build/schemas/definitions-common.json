@@ -248,6 +248,29 @@
           "title":"Goto URL",
           "type":"object"
        },
+      "goto-landmark":{
+         "description":"Teleport to landmark; Requires click-listener",
+         "properties":{
+            "on":{
+               "enum":[
+                  "mousedown",
+                  "mouseup"
+               ],
+               "type":"string",
+               "description":"Event to listen 'on'"
+            },
+            "landmark":{
+               "type":"string",
+               "description":"Id of landmark to teleport to"
+            }
+         },
+         "required":[
+            "on",
+            "landmark"
+         ],
+         "title":"Goto Landmark",
+         "type":"object"
+      },
        "hide-on-enter-ar":{
           "description":"Hide object when entering AR. Remove component to *not* hide",
           "title":"Hide in AR",
