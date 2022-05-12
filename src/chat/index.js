@@ -412,8 +412,6 @@ export class ARENAChat {
                 else this.populateUserList();
             }
         });
-        // set initial remote resolutions for all to defaults
-        ARENA.Jitsi.setResolutionRemotes();
     };
 
     /**

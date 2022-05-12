@@ -891,19 +891,15 @@ export class ARENAJitsi {
 
     /**
      * Set received resolution of remote video. Used to prioritize high, medium, low, drop
-     * resolution. Can be expanded. these settings likely overwrite all previous calls to
+     * resolution. Can be expanded. Individual resolution per ID overwrites previous calls to
      * setReceiverConstraints. Setting the order of these id arrays is important. Examples at:
      * https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md
      * @param {*} panoIds Array of jitsi ids panoramic, first is 'on-stage', others get lower res.
-     * @param {*} constraints Dictionary of all Jitsi ids with their max resolution.
+     * @param {*} constraints ID and resolution value object to update.
     */
     setResolutionRemotes(panoIds = [], constraints = {}) {
-        const videoConstraints = {
-            'colibriClass': 'ReceiverVideoConstraints',
-            'defaultConstraints': {
-                'maxHeight': 180,
-            },
-        };
+        const videoConstraints = {};
+        videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         panoIds.forEach((panoId, idx) => {
             if (panoId != undefined) {
                 // only first 360 cam on stage at a time
@@ -915,6 +911,17 @@ export class ARENAJitsi {
         });
         videoConstraints.constraints = constraints;
         this.conference.setReceiverConstraints(videoConstraints);
+        console.log("setResolutionRemotes", videoConstraints);
+    }
+
+    setDefaultResolutionRemotes(resolution) {
+        const videoConstraints = {};
+        videoConstraints.colibriClass = 'ReceiverVideoConstraints';
+        videoConstraints.defaultConstraints = {
+            "maxHeight": resolution
+        };
+        this.conference.setReceiverConstraints(videoConstraints);
+        console.log("setDefaultResolutionRemotes", videoConstraints);
     }
 
     /**
