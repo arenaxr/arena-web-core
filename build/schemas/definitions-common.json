@@ -256,6 +256,14 @@
              true
           ]
        },
+       "hide-on-enter-vr":{
+          "description":"Hide object when entering VR. Remove component to *not* hide",
+          "title":"Hide in VR",
+          "type":"boolean",
+          "enum":[
+             true
+          ]
+       },
        "impulse":{
           "description":"The force applied using physics. Requires click-listener",
           "properties":{
