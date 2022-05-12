@@ -59,7 +59,6 @@ export class Arena {
         this.skipav = url.searchParams.get('skipav');
         this.armode = url.searchParams.get('armode');
         this.noav = url.searchParams.get('noav');
-        this.ar = url.searchParams.get('ar');
         this.confstats = url.searchParams.get('confstats');
 
         ARENAUtils.getLocation((coords, err) => {
