@@ -232,6 +232,10 @@
                 "type":"string"
              }
           },
+          "required":[
+             "landmark",
+             "on"
+          ],
           "title":"Goto Landmark",
           "type":"object"
        },
