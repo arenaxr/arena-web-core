@@ -412,8 +412,6 @@ export class ARENAChat {
                 else this.populateUserList();
             }
         });
-        // set initial remote resolutions for all to defaults
-        ARENA.Jitsi.setResolutionRemotes();
     };
 
     /**
@@ -570,7 +568,7 @@ export class ARENAChat {
             // update arena-user connection quality
             if (stats && stats.connectionQuality) {
                 const userCamId = `camera_${arenaId}`;
-                const userCamEl = document.querySelector(`[id="${userCamId}"]`);
+                const userCamEl = document.querySelector(`[id='${userCamId}']`);
                 if (userCamEl) {
                     userCamEl.setAttribute('arena-user', 'jitsiQuality', stats.connectionQuality);
                 }
@@ -694,7 +692,7 @@ export class ARENAChat {
             this.toSel.value == 'scene' || this.toSel.value == 'all' ?
                 this.settings.publishPublicTopic :
                 this.settings.publishPrivateTopic.replace('{to_uid}', this.toSel.value);
-        // console.log("sending", msg, "to", dstTopic);
+        // console.log('sending', msg, 'to', dstTopic);
         try {
             this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
         } catch (err) {
@@ -708,7 +706,7 @@ export class ARENAChat {
      * @param {Object} mqttMsg The MQTT Paho message object.
      */
     onMessageArrived(mqttMsg) {
-        // console.log("Received:", mqttMsg);
+        // console.log('Received:', mqttMsg);
         let msg;
         try {
             msg = JSON.parse(mqttMsg.payloadString);
@@ -764,7 +762,7 @@ export class ARENAChat {
         // process commands
         if (msg.type == 'chat-ctrl') {
             if (msg.text == 'sound:off') {
-                // console.log("muteAudio", ARENA.Jitsi.hasAudio);
+                // console.log('muteAudio', ARENA.Jitsi.hasAudio);
                 // only mute
                 if (ARENA.Jitsi.hasAudio) {
                     SideMenu.clickButton(SideMenu.buttons.AUDIO);
@@ -1014,11 +1012,16 @@ export class ARENAChat {
 
         // show current stats on hover/mouseover
         const _this = this;
+        const midpoint_w = $('.users-popup').width() / 2;
+        const midpoint_h = $('.users-popup').height() / 2;
         iconStats.onmouseover = function() {
             spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
             const offset = $(this).offset();
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
-            $(this).next('span').css('left', offset.left + 'px');
+            const off_left = offset.left < midpoint_w ? offset.left : 10;
+            const off_top = offset.top < midpoint_h ? 10 : 65 - offset.top;
+            $(this).next('span').css('left', off_left + 'px');
+            $(this).next('span').css('top', off_top + 'px');
         };
         iconStats.onmouseleave = function() {
             $(this).next('span').fadeOut(200);
@@ -1224,7 +1227,7 @@ export class ARENAChat {
             cameraid: this.settings.cameraid,
             text: text,
         };
-        // console.info("ctrl", msg, "to", dstTopic);
+        // console.info('ctrl', msg, 'to', dstTopic);
         try {
             this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
         } catch (err) {
@@ -1280,7 +1283,7 @@ export class ARENAChat {
      * @param {string} scene The scene name
      */
     moveToFrontOfCamera(cameraId, scene) {
-        // console.log("Move to near camera:", cameraId);
+        // console.log('Move to near camera:', cameraId);
 
         if (scene !== this.settings.scene) {
             localStorage.setItem('moveToFrontOfCamera', cameraId);
@@ -1306,7 +1309,7 @@ export class ARENAChat {
             return;
         }
 
-        const toCam = sceneEl.querySelector(`[id="${cameraId}"]`);
+        const toCam = sceneEl.querySelector(`[id='${cameraId}']`);
 
         if (!toCam) {
             // TODO: find a better way to do this

@@ -445,6 +445,13 @@
                 "title":"Video Distance Constraints",
                 "type":"boolean"
              },
+             "videoDefaultResolutionConstraint": {
+                "default": 180,
+                "min": 180,
+                "description": "Sets the default max resolution for all users. Ignored when videoDistanceConstraints = true.",
+                "title": "Video Default Resolution Constraint",
+                "type": "number"
+             },
              "volume":{
                 "default":1,
                 "description":"Volume for users in a scene",
@@ -463,7 +470,8 @@
              "maxAVDist",
              "privateScene",
              "videoFrustumCulling",
-             "videoDistanceConstraints"
+             "videoDistanceConstraints",
+             "videoDefaultResolutionConstraint"
           ],
           "title":"Scene Options",
           "type":"object",
