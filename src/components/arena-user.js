@@ -101,7 +101,7 @@ AFRAME.registerComponent('arena-user', {
         hasAudio: {type: 'boolean', default: false},
         hasVideo: {type: 'boolean', default: false},
         jitsiQuality: {type: 'number', default: 100.0},
-        resolution: {type: 'number', default: 180},
+        resolutionStep: {type: 'number', default: 180},
     },
 
     init: function() {
@@ -341,7 +341,6 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
         } else {
-            this.evaluateRemoteResolution(0);
             this.removeVideoCube();
         }
     },
@@ -425,17 +424,24 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
-    evaluateRemoteResolution(resolution) {
-        if (resolution != this.data.resolution) {
-            this.data.resolution = resolution;
+    evaluateRemoteResolution(resolutionStep) {
+        if (resolutionStep != this.data.resolutionStep) {
+            this.data.resolutionStep = resolutionStep;
             let panoIds = [];
             if (this.data.presence === 'Panoramic') {
                 panoIds = [this.data.jitsiId];
             }
             let constraints = {};
-            constraints[this.data.jitsiId] = {
-                'maxHeight': this.data.resolution
-            };
+            if (resolutionStep < 180) {
+                constraints[this.data.jitsiId] = {
+                    'maxHeight': 180,
+                    'maxFrameRate': resolutionStep,
+                }; // start dropping FPS, not res
+            } else {
+                constraints[this.data.jitsiId] = {
+                    'maxHeight': resolutionStep,
+                }; // use distance based res
+            }
             ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
         }
     },
@@ -451,22 +457,26 @@ AFRAME.registerComponent('arena-user', {
         const actualCubeRes = winHeight * videoRatio2Window;
         // provide max video resolution for distance and screen resolution,
         // use approximate gradations of actual camera heights
-        if (actualCubeRes < 180) {
-            return 180;
+        if (actualCubeRes < 45) {
+            return 5; // below 180p, overload with FPS
+        } else if (actualCubeRes < 90) {
+            return 15; // below 180p, overload with FPS
+        } else if (actualCubeRes < 180) {
+            return 180; // Thumbnail
         } else if (actualCubeRes < 360) {
             return 360;
         } else if (actualCubeRes < 480) {
-            return 480;
+            return 480; // SD (standard definition)
         } else if (actualCubeRes < 720) {
-            return 720;
+            return 720; // HD (high definition)
         } else if (actualCubeRes < 1080) {
-            return 1080;
+            return 1080; // Full HD
         } else if (actualCubeRes < 1440) {
             return 1440;
         } else if (actualCubeRes < 1800) {
             return 1800;
         } else {
-            return 2160;
+            return 2160; // UHD/4K
         }
     },
 
@@ -547,7 +557,8 @@ AFRAME.registerComponent('arena-user', {
                     this.evaluateRemoteResolution(0);
                 } else {
                     this.unmuteVideo();
-                    this.evaluateRemoteResolution(this.getOptimalResolution(distance, window.innerHeight));
+                    const resolutionStep = this.getOptimalResolution(distance, window.innerHeight);
+                    this.evaluateRemoteResolution(resolutionStep);
                 }
             } else {
                 this.unmuteVideo();
