@@ -217,6 +217,28 @@
           "title":"Physics",
           "type":"object"
        },
+       "goto-landmark": {
+          "description": "Teleports user to the landmark with the given name; Requires click-listener",
+          "properties": {
+             "on":{
+                "enum":[
+                   "mousedown",
+                   "mouseup"
+                ],
+                "type":"string"
+             },
+             "landmark": {
+                "default": "",
+                "type":"string"
+             }
+          },
+          "required":[
+             "landmark",
+             "on"
+          ],
+          "title":"Goto Landmark",
+          "type":"object"
+       },
        "goto-url":{
           "description":"Goto given URL; Requires click-listener",
           "properties":{
