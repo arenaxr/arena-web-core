@@ -231,7 +231,9 @@
                 "default": "",
                 "type":"string"
              }
-          }
+          },
+          "title":"Goto Landmark",
+          "type":"object"
        },
        "goto-url":{
           "description":"Goto given URL; Requires click-listener",
