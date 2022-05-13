@@ -432,7 +432,7 @@ AFRAME.registerComponent('arena-user', {
                 panoIds = [this.data.jitsiId];
             }
             let constraints = {};
-            if (resolutionStep < 180) {
+            if (resolutionStep > 0 && resolutionStep < 180) {
                 constraints[this.data.jitsiId] = {
                     'maxHeight': 180,
                     'maxFrameRate': resolutionStep,
@@ -440,13 +440,13 @@ AFRAME.registerComponent('arena-user', {
             } else {
                 constraints[this.data.jitsiId] = {
                     'maxHeight': resolutionStep,
-                }; // use distance based res
+                }; // use distance based res for 0 and 180+
             }
             ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
         }
     },
 
-    getOptimalResolution(distance, winHeight) {
+    getOptimalResolutionStep(distance, winHeight) {
         // video cube W x H x D is 0.6m x 0.4m x 0.6m
         const fov = 80;
         const cubeHeight = 0.4;
@@ -557,12 +557,12 @@ AFRAME.registerComponent('arena-user', {
                     this.evaluateRemoteResolution(0);
                 } else {
                     this.unmuteVideo();
-                    const resolutionStep = this.getOptimalResolution(distance, window.innerHeight);
+                    const resolutionStep = this.getOptimalResolutionStep(distance, window.innerHeight);
                     this.evaluateRemoteResolution(resolutionStep);
                 }
             } else {
                 this.unmuteVideo();
-                this.evaluateRemoteResolution(180); // default
+                this.evaluateRemoteResolution(ARENA.videoDefaultResolutionConstraint); // default
             }
         }
 
