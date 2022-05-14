@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.8.0](https://github.com/conix-center/ARENA-core/compare/v1.7.2...v1.8.0) (2022-05-14)
+
+
+### Features
+
+* Add addt'l hide-on-enter-ar gltf behavior ([49eeb16](https://github.com/conix-center/ARENA-core/commit/49eeb16f2fbc2c4c9de55e7eed1428820dcee1b4)), closes [#450](https://github.com/conix-center/ARENA-core/issues/450)
+* add goto-landmark component ([834a78a](https://github.com/conix-center/ARENA-core/commit/834a78ad2519b0f1c3aba10b82726afb63baf0d0))
+* add hide-on-enter-vr component ([d09d65c](https://github.com/conix-center/ARENA-core/commit/d09d65c23c2eae219ca5026266151d4c51934aa5))
+* **jitsi:** Adds videoDefaultResolutionConstraint option, Adds FPS drop after 180p ([#458](https://github.com/conix-center/ARENA-core/issues/458)) ([3632d86](https://github.com/conix-center/ARENA-core/commit/3632d869318cfd39a100154487972738af0e81a3))
+
+
+### Bug Fixes
+
+* add gltf-model as dep of gltf-model-lod ([bdd28b9](https://github.com/conix-center/ARENA-core/commit/bdd28b958a26126e090ee40ec3352356f7796719))
+* add missing super-three dependency ([cd70072](https://github.com/conix-center/ARENA-core/commit/cd70072712cba018c597d45cbc33342da6fa7d2d))
+* dev folders relative links ([49d6583](https://github.com/conix-center/ARENA-core/commit/49d65833e5000d71e69a7e671108f1ed1d373786))
+* dev folders relative links ([dbd5833](https://github.com/conix-center/ARENA-core/commit/dbd583369a2b87c229c766b20e78643927ac06e7))
+* don't double-fire our own mouseup/down evts ([14a6d73](https://github.com/conix-center/ARENA-core/commit/14a6d7372a74050cf4b2d635fd9d271e096b64e1))
+* **jitsi:** improved visibility of video stats ([c686536](https://github.com/conix-center/ARENA-core/commit/c686536d241f30cd980d9362d1c05e05354ab749))
+* only goto-landmark on non-synth click ([95fea9b](https://github.com/conix-center/ARENA-core/commit/95fea9b20e115e4a906322627f83f997a0f3e594))
+* properly register hide-on-enter-vr component ([48b1379](https://github.com/conix-center/ARENA-core/commit/48b13791d1e9680be5ca7c365836cbe4d3111d53))
+* **vr-mode:** fix hide-on-enter-vr exception ([8bbb0b6](https://github.com/conix-center/ARENA-core/commit/8bbb0b63241bd1330e7f1b683a6882d77bda73cf))
+
+
+### Reverts
+
+* cd700727 (super-three inc via override) ([669173d](https://github.com/conix-center/ARENA-core/commit/669173dfb5820fa784f1fb3137d78d2fcdfbe525))
+
 ### [1.7.2](https://github.com/conix-center/ARENA-core/compare/v1.7.1...v1.7.2) (2022-04-29)
 
 
