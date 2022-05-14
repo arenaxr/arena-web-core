@@ -1018,8 +1018,8 @@ export class ARENAChat {
             const midpoint_w = offset_ul.left + ($('.user-list').width() / 2);
             const midpoint_h = offset_ul.top + ($('.user-list').height() / 2);
             const offset_sig = $(this).offset();
-            const off_left = offset_sig.left < midpoint_w ? offset_sig.left : offset_ul.left;
-            const off_top = offset_sig.top < midpoint_h ? 0 : offset_ul.top - offset_sig.top;
+            const off_left = offset_sig.left < midpoint_w ? offset_sig.left : 0;
+            const off_top = offset_sig.top < midpoint_h ? 10 : offset_ul.top - offset_sig.top;
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
             $(this).next('span').css('left', off_left + 'px');
             $(this).next('span').css('top', off_top + 'px');
