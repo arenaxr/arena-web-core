@@ -1012,14 +1012,15 @@ export class ARENAChat {
 
         // show current stats on hover/mouseover
         const _this = this;
-        const midpoint_w = $('.users-popup').width() / 2;
-        const midpoint_h = $('.users-popup').height() / 2;
         iconStats.onmouseover = function() {
             spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
-            const offset = $(this).offset();
+            const offset_ul = $('.user-list').offset();
+            const midpoint_w = offset_ul.left + ($('.user-list').width() / 2);
+            const midpoint_h = offset_ul.top + ($('.user-list').height() / 2);
+            const offset_sig = $(this).offset();
+            const off_left = offset_sig.left < midpoint_w ? offset_sig.left : offset_ul.left;
+            const off_top = offset_sig.top < midpoint_h ? 0 : offset_ul.top - offset_sig.top;
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
-            const off_left = offset.left < midpoint_w ? offset.left : 10;
-            const off_top = offset.top < midpoint_h ? 10 : 65 - offset.top;
             $(this).next('span').css('left', off_left + 'px');
             $(this).next('span').css('top', off_top + 'px');
         };
