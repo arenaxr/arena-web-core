@@ -53,6 +53,7 @@ AFRAME.registerComponent('arena-camera', {
         this.bbox = new THREE.Box3();
 
         this.lastPose = '';
+        this.videoDefaultResolutionSet = false;
 
         this.heartBeatCounter = 0;
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
@@ -232,6 +233,12 @@ AFRAME.registerComponent('arena-camera', {
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
+
+        if (!this.videoDefaultResolutionSet && ARENA && ARENA.Jitsi && ARENA.Jitsi.ready && ARENA.videoDefaultResolutionConstraint) {
+            // set scene-options, videoDefaultResolutionConstraint, only once
+            ARENA.Jitsi.setDefaultResolutionRemotes(ARENA.videoDefaultResolutionConstraint);
+            this.videoDefaultResolutionSet = true;
+        }
     },
     isVideoFrustumCullingEnabled() {
         return ARENA && ARENA.videoFrustumCulling;

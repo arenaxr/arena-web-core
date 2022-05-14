@@ -373,10 +373,10 @@
 	padding: 5px;
 	margin-top: 1.3em;
 	position: absolute;
-	max-width: 200px;
-	-moz-border-radius: 0px 5px 5px 5px;
-	-webkit-border-radius: 0px 5px 5px 5px;
-	border-radius: 0px 5px 5px 5px;
+	max-width: 140px;
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
 	white-space: pre-line;
 	line-height: 16px;
 	z-index: 999999;
@@ -390,7 +390,6 @@
 	margin-top: -5px;
 	border-width: 5px;
 	border-style: solid;
-	border-color: transparent #000b transparent transparent;
 }
 
 .lm-list-btn,

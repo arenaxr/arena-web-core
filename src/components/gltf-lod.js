@@ -14,6 +14,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
     schema: {
         updateRate: {type: 'number', default: 333},
         fade: {type: 'number', default: 0},
+        enabled: {type: 'boolean', default: true},
     },
     init: function() {
         this.camDistance = new THREE.Vector3();
@@ -36,6 +37,9 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         }
     },
     tick: function() {
+        if (!this.data.enabled) {
+            return;
+        }
         this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);
         if (this.tempDistance !== this.camDistance) {
             this.camDistance = this.tempDistance;
@@ -117,6 +121,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         retainCache: {type: 'boolean', default: false},
         detailedUrl: {type: 'string'},
         detailedDistance: {type: 'number', default: 10},
+        enabled: {type: 'boolean', default: true},
     },
     init: function() {
         this.camDistance = new THREE.Vector3();
@@ -128,7 +133,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
     },
     tick: function() {
-        if (!this.defaultUrl) {
+        if (!this.data.enabled || !this.defaultUrl) {
             return;
         }
         this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);

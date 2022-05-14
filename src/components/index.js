@@ -20,6 +20,7 @@ import './collision-listener.js';
 import './gesture-detector.js';
 import './gltf-lod.js';
 import './goto-url.js';
+import './hide-on-enter-vr.js';
 import './impulse.js';
 import './jitsi-video.js';
 import './landmark.js';
