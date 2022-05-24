@@ -295,7 +295,7 @@ AFRAME.registerComponent('arena-user', {
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
         videoCube.setAttribute('position', '0 0 0');
-        videoCube.setAttribute('scale', '25 25 25');
+        videoCube.setAttribute('scale', '2 2 2');
 
         el.appendChild(videoCube);
 
