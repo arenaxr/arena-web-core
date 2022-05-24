@@ -910,6 +910,7 @@ export class ARENAJitsi {
             }
         });
         videoConstraints.constraints = constraints;
+        console.log("setResolutionRemotes", videoConstraints);
         this.conference.setReceiverConstraints(videoConstraints);
     }
 
@@ -919,6 +920,7 @@ export class ARENAJitsi {
         videoConstraints.defaultConstraints = {
             "maxHeight": resolution
         };
+        console.log("setDefaultResolutionRemotes", videoConstraints);
         this.conference.setReceiverConstraints(videoConstraints);
     }
 
