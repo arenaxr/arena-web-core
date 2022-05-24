@@ -58,8 +58,8 @@ export class Arena {
         const url = new URL(window.location.href);
         this.skipav = url.searchParams.get('skipav');
         this.armode = url.searchParams.get('armode');
+        this.vr = url.searchParams.get('vr');
         this.noav = url.searchParams.get('noav');
-        this.ar = url.searchParams.get('ar');
         this.confstats = url.searchParams.get('confstats');
 
         ARENAUtils.getLocation((coords, err) => {
