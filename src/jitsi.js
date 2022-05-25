@@ -900,15 +900,8 @@ export class ARENAJitsi {
     setResolutionRemotes(panoIds = [], constraints = {}) {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
-        panoIds.forEach((panoId, idx) => {
-            if (panoId != undefined) {
-                // only first 360 cam on stage at a time
-                if (idx == 0) {
-                    // The endpoint ids of the participants that are prioritized up to a higher resolution.
-                    videoConstraints.onStageEndpoints = [panoId]; // only first 360 cam on stage at a time
-                }
-            }
-        });
+        // The endpoint ids of the participants that are prioritized up to a higher resolution.
+        videoConstraints.onStageEndpoints = panoIds;
         videoConstraints.constraints = constraints;
         this.conference.setReceiverConstraints(videoConstraints);
     }
