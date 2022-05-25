@@ -287,7 +287,6 @@ AFRAME.registerComponent('arena-user', {
         // attach video to head
         const videoCube = document.createElement('a-videosphere');
         videoCube.setAttribute('id', this.videoID + 'cube');
-        videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('material', 'side', 'back');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
