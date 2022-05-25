@@ -910,7 +910,7 @@ export class ARENAJitsi {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         videoConstraints.defaultConstraints = {
-            "maxHeight": resolution
+            'maxHeight': resolution,
         };
         this.conference.setReceiverConstraints(videoConstraints);
     }

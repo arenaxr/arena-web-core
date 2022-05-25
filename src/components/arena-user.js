@@ -425,10 +425,10 @@ AFRAME.registerComponent('arena-user', {
     evaluateRemoteResolution(resolutionStep) {
         if (resolutionStep != this.data.resolutionStep) {
             this.data.resolutionStep = resolutionStep;
-            let panoIds = [];
-            let constraints = {};
-            const users = document.querySelectorAll('[arena-user]')
-            users.forEach(user => {
+            const panoIds = [];
+            const constraints = {};
+            const users = document.querySelectorAll('[arena-user]');
+            users.forEach((user) => {
                 const data = user.components['arena-user'].data;
                 if (data.presence === 'Panoramic') {
                     panoIds.push(data.jitsiId);
