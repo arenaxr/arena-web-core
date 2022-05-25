@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.8.1](https://github.com/conix-center/ARENA-core/compare/v1.8.0...v1.8.1) (2022-05-25)
+
+
+### Bug Fixes
+
+* **jitsi:** fix video culling, mirrored panoramic video ([9ca7c7d](https://github.com/conix-center/ARENA-core/commit/9ca7c7d1150b17ab23a199ec3d02ce2e7fe579b0))
+
 ## [1.8.0](https://github.com/conix-center/ARENA-core/compare/v1.7.2...v1.8.0) (2022-05-14)
 
 
