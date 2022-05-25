@@ -333,7 +333,6 @@ AFRAME.registerComponent('arena-user', {
             if (jistiVideo) {
                 if (!this.videoCube) {
                     if (data.presence === 'Panoramic') {
-                        this.evaluateRemoteResolution(1920);
                         this.drawVideoPano();
                     } else {
                         this.drawVideoCube();
@@ -428,13 +427,13 @@ AFRAME.registerComponent('arena-user', {
         if (resolutionStep != this.data.resolutionStep) {
             this.data.resolutionStep = resolutionStep;
             let panoIds = [];
-            if (this.data.presence === 'Panoramic') {
-                panoIds = [this.data.jitsiId];
-            }
             let constraints = {};
             const users = document.querySelectorAll('[arena-user]')
             users.forEach(user => {
                 const data = user.components['arena-user'].data;
+                if (data.presence === 'Panoramic') {
+                    panoIds.push(data.jitsiId);
+                }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
                     constraints[data.jitsiId] = {
                         'maxHeight': 180,
@@ -551,7 +550,9 @@ AFRAME.registerComponent('arena-user', {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
-            if (inFieldOfView == false) {
+            if (this.data.presence === 'Panoramic') {
+                this.evaluateRemoteResolution(1920);
+            } else if (inFieldOfView == false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
             } else if (arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
