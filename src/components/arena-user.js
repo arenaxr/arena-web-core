@@ -287,14 +287,13 @@ AFRAME.registerComponent('arena-user', {
         // attach video to head
         const videoCube = document.createElement('a-videosphere');
         videoCube.setAttribute('id', this.videoID + 'cube');
-        videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('material', 'side', 'back');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
         videoCube.setAttribute('position', '0 0 0');
-        videoCube.setAttribute('radius', '1.5');
+        videoCube.setAttribute('radius', '100');
 
         el.appendChild(videoCube);
         this.videoCube = videoCube;
