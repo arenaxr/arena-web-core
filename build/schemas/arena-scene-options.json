@@ -468,6 +468,7 @@
           "required":[
              "clickableOnlyEvents",
              "maxAVDist",
+             "physics",
              "privateScene",
              "videoFrustumCulling",
              "videoDistanceConstraints",
