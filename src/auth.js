@@ -135,6 +135,7 @@ function requestAuthState() {
             const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
             authError(title, text);
         } else {
+            AUTH.authenticated = xhr.response.authenticated;
             AUTH.user_type = xhr.response.type; // user database auth state
 
             // provide url auth choice override
@@ -266,6 +267,7 @@ function completeAuth(response) {
  */
 function getAuthStatus() {
     return {
+        type: AUTH.user_type,
         type: AUTH.user_type,
         username: AUTH.user_username,
         fullname: AUTH.user_fullname,
