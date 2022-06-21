@@ -18,6 +18,8 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
     <link rel="stylesheet" href="style.css">
     <script type="text/javascript" src="scenes.js"></script>
 
@@ -42,16 +44,12 @@
                     <div class="row">
                         <div class="col-md-9 offset-md-3">
                             <ul class="nav nav-tabs  mb-3" id="myTab" role="tablist">
-                                <!-- {% if user.is_authenticated %} -->
-                                <!-- anon users may not edit scenes -->
-                                <!-- <li class="nav-item" role="presentation">
+                                <li class="nav-item" role="presentation">
                                     <button class="nav-link" id="myscenes-tab" data-bs-toggle="tab"
                                         data-bs-target="#myscenes" type="button" role="tab" aria-controls="myscenes"
                                         aria-selected="true">My Scenes
                                     </button>
-                                </li> -->
-                                <!-- {% endif %} -->
-                                <!-- if user.is_authenticated -->
+                                </li>
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link active" id="publicscenes-tab" data-bs-toggle="tab"
                                         data-bs-target="#publicscenes" type="button" role="tab"
@@ -143,10 +141,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-9 offset-md-3">
-                                <!-- {% if not user.is_authenticated %} -->
-                                <small style="color: grey">To create or clone scenes, please login with an
-                                    authenticated account.</small>
-                                <!-- {% endif %} -->
+                                <small id="userNoteSpan" style="color: grey"></small>
                             </div>
                         </div>
                     </div>
