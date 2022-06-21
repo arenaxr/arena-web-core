@@ -125,13 +125,10 @@ window.addEventListener('onauth', async function(e) {
     )
 
     deleteUserSceneBtn.addEventListener('click', () => {
-        const csrfmiddlewaretoken = document.getElementsByName("csrfmiddlewaretoken")[0].value
         if (confirm(`Are you sure you want to delete ${deleteUserSceneBtn.value}?`)) {
             const deletes = [
                 axios.delete(`scenes/${deleteUserSceneBtn.value}`, {
-                    headers: {
-                        'X-CSRFToken': csrfmiddlewaretoken
-                    },
+                    withCredentials: true
                 }),
                 axios.delete(`/persist/${deleteUserSceneBtn.value}`)
             ]

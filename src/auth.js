@@ -278,7 +278,7 @@ function completeAuth(response) {
  */
 function getAuthStatus() {
     return {
-        type: AUTH.user_type,
+        authenticated: AUTH.authenticated,
         type: AUTH.user_type,
         username: AUTH.user_username,
         fullname: AUTH.user_fullname,
