@@ -242,7 +242,7 @@ window.addEventListener('onauth', async function(e) {
         withCredentials: true
     }).then((res) => {
         res.data.forEach(ns => {
-            userSceneSelect.options.add(new Option(ns.name, ns.name));
+            publicSceneSelect.options.add(new Option(ns, ns));
         });
     }).catch((err) => {
         Swal.fire('Public Scene Load Failed!', err.response.data, 'warning');
