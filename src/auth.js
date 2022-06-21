@@ -33,10 +33,6 @@ if (!storageAvailable('localStorage')) {
     authError(title, text);
 }
 
-window.onload = function() {
-    initAuthPanel(); // add auth details panel
-};
-
 /**
  * Display user-friendly error message.
  * @param {string} title Title of error
@@ -47,7 +43,11 @@ function authError(title, text) {
     if (typeof ARENA !== 'undefined' && ARENA.health) {
         ARENA.health.addError(title);
     } else {
-        alert(`${title}\n\n${text}`);
+        Swal.fire({
+            icon: 'error',
+            title: title,
+            html: text,
+        });
     }
 }
 
@@ -329,64 +329,10 @@ function showProfile() {
  * Present a div with token permissions
  */
 function showPerms() {
-    const overlayDiv = document.querySelector('#perms-overlay');
-    const dataDiv = document.querySelector('#perms-data');
-    dataDiv.textContent = `${formatPerms(AUTH.token_payload)}`;
-    overlayDiv.style.display = 'block';
-}
-
-/**
- * Create auth ui panel
- */
-function initAuthPanel() {
-    const body = document.querySelector('body');
-    const overlayDiv = document.createElement('div');
-    overlayDiv.id = 'perms-overlay';
-    overlayDiv.style.position = 'fixed';
-    overlayDiv.style.width = '100%';
-    overlayDiv.style.height = '100%';
-    overlayDiv.style.top = '0';
-    overlayDiv.style.left = '0';
-    overlayDiv.style.right = '0';
-    overlayDiv.style.bottom = '0';
-    overlayDiv.style.backgroundColor = 'rgba(0,0,0,0.5)';
-    overlayDiv.style.zIndex = '10';
-    overlayDiv.style.textAlign = '-webkit-center';
-    overlayDiv.style.display = 'none';
-    body.appendChild(overlayDiv);
-
-    const modalDiv = document.createElement('div');
-    modalDiv.style.textAlign = 'left';
-    modalDiv.style.marginTop = '27vh';
-    modalDiv.style.color = 'black';
-    modalDiv.style.backgroundColor = 'white';
-    modalDiv.style.width = '50%';
-    modalDiv.style.height = '50%';
-    modalDiv.style.padding = '5px';
-    modalDiv.style.borderRadius = '5px';
-    overlayDiv.appendChild(modalDiv);
-
-    const title = document.createElement('h3');
-    title.style.textAlign = 'center';
-    title.innerHTML = 'MQTT/Video Permissions';
-    modalDiv.appendChild(title);
-
-    const dataDiv = document.createElement('div');
-    dataDiv.id = 'perms-data';
-    dataDiv.style.height = '75%';
-    dataDiv.style.width = '100%';
-    dataDiv.style.overflow = 'auto';
-    dataDiv.style.overflowWrap = 'break-word';
-    dataDiv.style.font = '11px monospace';
-    dataDiv.style.whiteSpace = 'pre';
-    modalDiv.appendChild(dataDiv);
-
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = 'Close';
-    closeBtn.addEventListener('click', (event) => {
-        overlayDiv.style.display = 'none';
+    Swal.fire({
+        title: 'MQTT Permissions',
+        html: `<pre style="text-align: left;">${formatPerms(AUTH.token_payload)}</pre>`,
     });
-    modalDiv.appendChild(closeBtn);
 }
 
 /**
@@ -405,8 +351,8 @@ function storageAvailable(type) {
         return true;
     } catch (e) {
         return e instanceof DOMException && (
-        // everything except Firefox
-            e.code === 22 ||
+                // everything except Firefox
+                e.code === 22 ||
                 // Firefox
                 e.code === 1014 ||
                 // test name field too, because code might not be present

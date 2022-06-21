@@ -240,17 +240,17 @@ window.addEventListener('onauth', async function(e) {
         console.log(err);
     });
 
-    // // Request public scenes...
-    // axios.get('/persist/public/all', {
-    //     withCredentials: true
-    // }).then((res) => {
-    //     res.data.forEach(ns => {
-    //         userSceneSelect.options.add(new Option(ns.name, ns.name));
-    //     });
-    // }).catch((err) => {
-    //     Swal.fire('Public Scene Load Failed!', err.response.data, 'warning');
-    //     console.log(err);
-    // });
+    // Request public scenes...
+    axios.get('/persist/public/!allscenes', {
+        withCredentials: true
+    }).then((res) => {
+        res.data.forEach(ns => {
+            userSceneSelect.options.add(new Option(ns.name, ns.name));
+        });
+    }).catch((err) => {
+        Swal.fire('Public Scene Load Failed!', err.response.data, 'warning');
+        console.log(err);
+    });
 
     if (!auth.authenticated) {
         window.dispatchEvent(new Event('hashchange')); // Manually trigger initial hash routing
