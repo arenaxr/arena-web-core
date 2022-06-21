@@ -33,6 +33,17 @@ if (!storageAvailable('localStorage')) {
     authError(title, text);
 }
 
+window.onload = function() {
+    // load sweetalert if not already loaded
+    if (typeof Swal === 'undefined') {
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@10';
+        head.appendChild(script);
+    }
+}
+
 /**
  * Display user-friendly error message.
  * @param {string} title Title of error
