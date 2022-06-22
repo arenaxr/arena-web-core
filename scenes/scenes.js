@@ -83,6 +83,12 @@ window.addEventListener('onauth', async function(e) {
         })
     }
 
+    const togglePublicSceneButtons = (toggle) => {
+        publicButtons.forEach((btn) => {
+            toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled')
+        })
+    }
+
     $(userSceneSelect).on('select2:select', checkUserSceneSelect);
     $(publicSceneSelect).on('select2:select', checkPublicSceneSelect);
 
@@ -169,6 +175,7 @@ window.addEventListener('onauth', async function(e) {
         //tabMyScenes.parentElement.style.display = 'inline-block';
     } else {
         tabMyScenes.parentElement.style.display = 'none'; // anon users may not edit scenes
+        window.publicButtons.push(enterPublicSceneBtn); // just one, for anon case
         userNoteSpan.textContent = 'To create or clone scenes, please login with an authenticated account.';
     }
 
