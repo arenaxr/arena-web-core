@@ -77,6 +77,15 @@ window.addEventListener('onauth', async function(e) {
     const userNoteSpan = document.getElementById('userNoteSpan');
     const tabMyScenes = document.getElementById('myscenes-tab');
 
+    window.publicButtons.push(enterPublicSceneBtn);
+    if (auth.authenticated) {
+        window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
+        tabMyScenes.parentElement.style.display = 'block';
+    } else {
+        tabMyScenes.parentElement.style.display = 'none'; // anon users may not edit scenes
+        userNoteSpan.textContent = 'To create or clone scenes, please login with an authenticated account.';
+    }
+
     const toggleUserSceneButtons = (toggle) => {
         [enterUserSceneBtn, cloneUserSceneBtn, deleteUserSceneBtn, copyUserSceneUrlBtn].forEach((btn) => {
             toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled')
@@ -133,7 +142,7 @@ window.addEventListener('onauth', async function(e) {
     deleteUserSceneBtn.addEventListener('click', () => {
         if (confirm(`Are you sure you want to delete ${deleteUserSceneBtn.value}?`)) {
             const deletes = [
-                axios.delete(`scenes/${deleteUserSceneBtn.value}`, {
+                axios.delete(`/user/scenes/${deleteUserSceneBtn.value}`, {
                     withCredentials: true
                 }),
                 axios.delete(`/persist/${deleteUserSceneBtn.value}`)
@@ -169,15 +178,6 @@ window.addEventListener('onauth', async function(e) {
     window.userSceneId = '';
     window.publicSceneId = '';
     window.cloneSceneId = '';
-
-    if (auth.authenticated) {
-        window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
-        //tabMyScenes.parentElement.style.display = 'inline-block';
-    } else {
-        tabMyScenes.parentElement.style.display = 'none'; // anon users may not edit scenes
-        window.publicButtons.push(enterPublicSceneBtn); // just one, for anon case
-        userNoteSpan.textContent = 'To create or clone scenes, please login with an authenticated account.';
-    }
 
     /*  *********************** */
 
@@ -256,7 +256,5 @@ window.addEventListener('onauth', async function(e) {
         console.log(err);
     });
 
-    if (!auth.authenticated) {
-        window.dispatchEvent(new Event('hashchange')); // Manually trigger initial hash routing
-    }
+    window.dispatchEvent(new Event('hashchange')); // Manually trigger initial hash routing
 });
