@@ -14,7 +14,7 @@ import Swal from 'sweetalert2';
  * Load new URL when object is clicked
  * @module goto-url
  * @property {string} on - A case-sensitive string representing the [event type]{@link https://developer.mozilla.org/en-US/docs/Web/Events} to listen for, e.g. 'mousedown', 'mouseup'
- * @property {string} url - The destination url e.g. https://some-site.com
+ * @property {string} url - The destination url e.g. https://example.com
  * @property {string} [dest=sametab] - Where to open the URL; one of 'popup', 'newtab', 'sametab'
  */
 AFRAME.registerComponent('goto-url', {

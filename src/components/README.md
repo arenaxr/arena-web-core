@@ -214,7 +214,7 @@ Load new URL when object is clicked
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | on | <code>string</code> |  | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
-| url | <code>string</code> |  | The destination url e.g. https://some-site.com |
+| url | <code>string</code> |  | The destination url e.g. https://example.com |
 | [dest] | <code>string</code> | <code>&quot;sametab&quot;</code> | Where to open the URL; one of 'popup', 'newtab', 'sametab' |
 
 <a name="module_impulse"></a>
