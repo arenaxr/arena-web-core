@@ -1,6 +1,6 @@
 {
     "title": "GLTF Model",
-    "description": "Load a GLTF model",
+    "description":"Load a GLTF model. \n\nFormat: <a href='https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/README.md'>https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/README.md</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
