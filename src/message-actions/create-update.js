@@ -9,8 +9,8 @@ const ACTIONS = {
 
 // path to controler models
 const handControllerPath = {
-    handLeft: 'media/models/hands/valve_index_left.gltf',
-    handRight: 'media/models/hands/valve_index_right.gltf',
+    handLeft: 'static/models/hands/valve_index_left.gltf',
+    handRight: 'static/models/hands/valve_index_right.gltf',
 };
 
 // default render order of objects; reserve 0 for occlusion

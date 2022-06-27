@@ -53,11 +53,11 @@
                         </div>
                         <div class="form-floating mb-3">
                             <select aria-label="HeadModel" class="form-select mb-3" id="headModelPathSelect">
-                                <option value="/media/models/avatars/robobit.glb">Robot</option>
-                                <option value="/media/models/avatars/DamagedHelmet.glb">Damaged Helmet</option>
-                                <option value="/media/models/avatars/Avocado.glb">Avocado</option>
-                                <option value="/media/models/avatars/Duck.glb">Duck</option>
-                                <option value="/media/models/avatars/suzanne.glb">Suzanne</option>
+                                <option value="/static/models/avatars/robobit.glb">Robot</option>
+                                <option value="/static/models/avatars/DamagedHelmet.glb">Damaged Helmet</option>
+                                <option value="/static/models/avatars/Avocado.glb">Avocado</option>
+                                <option value="/static/models/avatars/Duck.glb">Duck</option>
+                                <option value="/static/models/avatars/suzanne.glb">Suzanne</option>
                             </select>
                             <label for="presenceSelect">Select Head Model</label>
                         </div>
@@ -76,7 +76,7 @@
                         <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
                             Play Test Sound <i class="fas fa-volume-off" id="playTestAudioOutIcon"></i>
                         </button>
-                        <audio id="testAudioOut" src="media/step.ogg"></audio>
+                        <audio id="testAudioOut" src="/static/media/step.ogg"></audio>
                         <div class="form-floating mb-3">
                             <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
                             </select>
@@ -148,11 +148,11 @@
 </div>
 <a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
          stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
-         ar-hit-test="enabled:true;src:media/images/reticle.png;type:map">
+         ar-hit-test="enabled:true;src:static/images/reticle.png;type:map">
     <a-assets>
         <!-- Vive controller 3d model -->
-        <a-asset-item id="viveControl-obj" src="media/models/hands/vr_controller_vive.obj"></a-asset-item>
-        <a-asset-item id="viveControl-mtl" src="media/models/hands/vr_controller_vive.mtl"></a-asset-item>
+        <a-asset-item id="viveControl-obj" src="static/models/hands/vr_controller_vive.obj"></a-asset-item>
+        <a-asset-item id="viveControl-mtl" src="static/models/hands/vr_controller_vive.mtl"></a-asset-item>
     </a-assets>
 
     <a-entity id="sceneRoot">
