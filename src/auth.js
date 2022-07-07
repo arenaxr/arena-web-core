@@ -309,7 +309,7 @@ function formatPerms(perms) {
         }
     }
     lines.push('');
-    lines.push(`Publish topics:`);
+    lines.push(`MQTT Publish topics:`);
     if (perms.publ && perms.publ.length > 0) {
         perms.publ.forEach((pub) => {
             lines.push(`- ${pub}`);
@@ -318,7 +318,7 @@ function formatPerms(perms) {
         lines.push(`- `);
     }
     lines.push('');
-    lines.push(`Subscribe topics:`);
+    lines.push(`MQTT Subscribe topics:`);
     if (perms.subs && perms.subs.length > 0) {
         perms.subs.forEach((sub) => {
             lines.push(`- ${sub}`);
@@ -341,7 +341,7 @@ function showProfile() {
  */
 function showPerms() {
     Swal.fire({
-        title: 'MQTT Permissions',
+        title: 'Permissions',
         html: `<pre style="text-align: left;">${formatPerms(AUTH.token_payload)}</pre>`,
     });
 }

@@ -231,6 +231,7 @@ export class ARENAUtils {
      * @return {boolean} True if the topic matches the list of topic wildcards.
      */
     static matchJWT(topic, rights) {
+        console.log('matchJWT', topic, rights);
         const len = rights.length;
         let valid = false;
         for (let i = 0; i < len; i++) {
