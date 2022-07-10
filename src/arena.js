@@ -200,7 +200,7 @@ export class Arena {
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted(mqttToken) {
+    isJitsiPermitted(mqttToken = ARENA.mqttToken) {
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -213,7 +213,7 @@ export class Arena {
      * Checks loaded MQTT/Jitsi token for user chat permission.
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
-     isChatPermitted(nameSpace, mqttToken, realm) {
+    isUsersPermitted(nameSpace = ARENA.nameSpace, mqttToken = ARENA.mqttToken, realm = ARENA.defaults.realm) {
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -238,7 +238,7 @@ export class Arena {
      * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      * @return {boolean} True if the user has permission to write in this scene.
      */
-    isUserSceneWriter(mqttToken=ARENA.mqttToken) {
+    isUserSceneWriter(mqttToken = ARENA.mqttToken) {
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -305,7 +305,7 @@ export class Arena {
         color = '#' + color;
 
         const camera = document.getElementById('my-camera');
-        camera.setAttribute('arena-camera', 'enabled', true);
+        camera.setAttribute('arena-camera', 'enabled', ARENA.isUsersPermitted());
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
@@ -698,7 +698,7 @@ export class Arena {
             }
 
             // init chat
-            if (this.isChatPermitted(this.nameSpace, this.mqttToken, this.defaults.realm)) {
+            if (this.isUsersPermitted()) {
                 this.chat = new ARENAChat({
                     userid: this.idTag,
                     cameraid: this.camName,
@@ -723,7 +723,7 @@ export class Arena {
                  }
             }
 
-            if (this.noav || !this.isJitsiPermitted(this.mqttToken)) {
+            if (this.noav || !this.isJitsiPermitted()) {
                 this.showEchoDisplayName();
             } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
                 /*
