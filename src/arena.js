@@ -210,25 +210,15 @@ export class Arena {
     }
 
     /**
-     * Checks loaded MQTT/Jitsi token for user chat permission.
+     * Checks loaded MQTT/Jitsi token for user interaction permission.
+     * TODO: This should perhaps use another flag, more general, not just chat.
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
     isUsersPermitted(nameSpace = ARENA.nameSpace, mqttToken = ARENA.mqttToken, realm = ARENA.defaults.realm) {
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
-
-            // MQTT Publish topics:
-            // - realm/c/mwfarb/o/4157144653_mwfarbnookNDE1NzE0NDY1M19td2ZhcmJub29r
-            // - realm/c/mwfarb/p/+/4157144653_mwfarbnookNDE1NzE0NDY1M19td2ZhcmJub29r
-            // MQTT Subscribe topics:
-            // - realm/c/mwfarb/o/#
-            // - realm/c/mwfarb/p/4157144653_mwfarbnook/#
-
-            // if (ARENAUtils.matchJWT(`${realm}/c/${nameSpace}/o/#`, perms.publ)) {
-            //     return true;
-            // }
-            if (perms.room) return true;
+            return ARENAUtils.matchJWT(`${realm}/c/${nameSpace}/o/#`, perms.subs);
         }
         return false;
     }
@@ -242,9 +232,7 @@ export class Arena {
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
-            if (ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ)) {
-                return true;
-            }
+            return ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ);
         }
         return false;
     }
@@ -715,12 +703,6 @@ export class Arena {
                     isSceneWriter: this.isUserSceneWriter(),
                 });
                 await this.chat.start();
-            } else {
-                if (!this.noav) {
-                    let newUrl = new URL(window.location.href);
-                    newUrl.searchParams.set('noav', `true`);
-                    window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
-                 }
             }
 
             if (this.noav || !this.isJitsiPermitted()) {
