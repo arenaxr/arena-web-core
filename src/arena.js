@@ -703,15 +703,15 @@ export class Arena {
                     isSceneWriter: this.isUserSceneWriter(),
                 });
                 await this.chat.start();
+                // if user interaction, display names
+                this.showEchoDisplayName();
             }
 
-            if (this.noav || !this.isJitsiPermitted()) {
-                this.showEchoDisplayName();
-            } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
+            if (this.armode && AFRAME.utils.device.checkARSupport()) {
                 /*
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
-                 */
+                */
                 Swal.fire({
                     title: 'Enter AR Mode',
                     html: `This is an immersive AR scene that requires access to your camera and device sensors.`,
@@ -724,13 +724,11 @@ export class Arena {
             } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-                this.showEchoDisplayName();
-            } else {
+            } else if (!this.noav && this.isJitsiPermitted()) {
                 window.setupAV(() => {
                     const pano = document.getElementById('presenceSelect').value == 'Panoramic';
                     // Initialize Jitsi videoconferencing after A/V setup window
                     this.Jitsi = ARENAJitsi.init(this.jitsiHost, pano);
-                    this.showEchoDisplayName();
                 });
             }
 
