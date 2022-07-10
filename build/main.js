@@ -840,13 +840,13 @@ function matchJWT(topic, rights) {
 
 /**
  * Checks loaded MQTT token for full scene object write permissions.
- * @param {string} mqtt_token The JWT token for the user to connect to MQTT.
+ * @param {string} mqttToken The JWT token for the user to connect to MQTT.
  * @param {string} objectsTopic
  * @return {boolean} True if the user has permission to write in this scene.
  */
-function isUserSceneEditor(mqtt_token, objectsTopic) {
-    if (mqtt_token) {
-        const tokenObj = KJUR.jws.JWS.parse(mqtt_token);
+function isUserSceneEditor(mqttToken, objectsTopic) {
+    if (mqttToken) {
+        const tokenObj = KJUR.jws.JWS.parse(mqttToken);
         const perms = tokenObj.payloadObj;
         if (matchJWT(objectsTopic, perms.publ)) {
             return true;

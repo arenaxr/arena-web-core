@@ -341,7 +341,7 @@ export class SideMenu {
         }
         iconsDiv.appendChild(speedBtn);
         iconsDiv.appendChild(flyingBtn);
-        if (!AFRAME.utils.device.isMobile()) {
+        if (!url.searchParams.get('noav') || !AFRAME.utils.device.isMobile()) {
             iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
         }
         iconsDiv.appendChild(logoutBtn);

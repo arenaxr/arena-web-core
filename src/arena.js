@@ -224,9 +224,11 @@ export class Arena {
             // MQTT Subscribe topics:
             // - realm/c/mwfarb/o/#
             // - realm/c/mwfarb/p/4157144653_mwfarbnook/#
-            if (ARENAUtils.matchJWT(`${realm}/c/${nameSpace}/o/+`, perms.publ)) {
-                return true;
-            }
+
+            // if (ARENAUtils.matchJWT(`${realm}/c/${nameSpace}/o/#`, perms.publ)) {
+            //     return true;
+            // }
+            if (perms.room) return true;
         }
         return false;
     }
@@ -713,6 +715,12 @@ export class Arena {
                     isSceneWriter: this.isUserSceneWriter(),
                 });
                 await this.chat.start();
+            } else {
+                if (!this.noav) {
+                    let newUrl = new URL(window.location.href);
+                    newUrl.searchParams.set('noav', `true`);
+                    window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
+                 }
             }
 
             if (this.noav || !this.isJitsiPermitted(this.mqttToken)) {
