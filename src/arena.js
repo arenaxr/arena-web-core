@@ -60,6 +60,7 @@ export class Arena {
         this.armode = url.searchParams.get('armode');
         this.vr = url.searchParams.get('vr');
         this.noav = url.searchParams.get('noav');
+        this.noname = url.searchParams.get('noname');
         this.confstats = url.searchParams.get('confstats');
 
         ARENAUtils.getLocation((coords, err) => {
@@ -243,10 +244,9 @@ export class Arena {
      */
     showEchoDisplayName = (speaker = false) => {
         const url = new URL(window.location.href);
-        const noname = url.searchParams.get('noname');
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
-        if (!noname) {
+        if (!ARENA.noname) {
             if (speaker) {
                 echo.style.backgroundColor = '#0F08'; // green alpha
             } else {
@@ -685,8 +685,12 @@ export class Arena {
                 );
             }
 
+            // check token for communications allowed
+            const allowJitsi = this.isJitsiPermitted();
+            const allowUsers = this.isUsersPermitted();
+
             // init chat
-            if (this.isUsersPermitted()) {
+            if (allowUsers) {
                 this.chat = new ARENAChat({
                     userid: this.idTag,
                     cameraid: this.camName,
@@ -703,8 +707,10 @@ export class Arena {
                     isSceneWriter: this.isUserSceneWriter(),
                 });
                 await this.chat.start();
-                // if user interaction, display names
                 this.showEchoDisplayName();
+            } else {
+                // prevent local name when non-interactive
+                this.noname = true;
             }
 
             if (this.armode && AFRAME.utils.device.checkARSupport()) {
@@ -724,7 +730,7 @@ export class Arena {
             } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-            } else if (!this.noav && this.isJitsiPermitted()) {
+            } else if (!this.noav && allowJitsi) {
                 window.setupAV(() => {
                     const pano = document.getElementById('presenceSelect').value == 'Panoramic';
                     // Initialize Jitsi videoconferencing after A/V setup window
