@@ -144,7 +144,7 @@ window.addEventListener('onauth', async function(e) {
         advancedLinksDiv.hidden = !advancedLinksDiv.hidden;
     })
     // set listeners for advanced links URI-builder
-    var checkboxes = document.querySelectorAll('input[type=checkbox][name=uri-builder]');
+    const checkboxes = document.querySelectorAll('input[type=checkbox][name=uri-builder]');
     checkboxes.forEach(function(checkbox) {
         checkbox.addEventListener('change', () => {
             let uriSettings = [];
@@ -178,6 +178,10 @@ window.addEventListener('onauth', async function(e) {
                 }
             });
             userSceneUrl.value = sceneUrl.href;
+            // update scene url box height as it expands
+            userSceneUrl.style.overflow = 'hidden';
+            userSceneUrl.style.height = 0;
+            userSceneUrl.style.height = userSceneUrl.scrollHeight + 'px';
         })
     });
 
