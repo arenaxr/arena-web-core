@@ -60,6 +60,7 @@ export class Arena {
         this.armode = url.searchParams.get('armode');
         this.vr = url.searchParams.get('vr');
         this.noav = url.searchParams.get('noav');
+        this.noname = url.searchParams.get('noname');
         this.confstats = url.searchParams.get('confstats');
 
         ARENAUtils.getLocation((coords, err) => {
@@ -200,11 +201,25 @@ export class Arena {
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted() {
-        if (this.mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
+    isJitsiPermitted(mqttToken = ARENA.mqttToken) {
+        if (mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
             if (perms.room) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks loaded MQTT/Jitsi token for user interaction permission.
+     * TODO: This should perhaps use another flag, more general, not just chat.
+     * @return {boolean} True if the user has permission to send/receive chats in this scene.
+     */
+    isUsersPermitted(nameSpace = ARENA.nameSpace, mqttToken = ARENA.mqttToken, realm = ARENA.defaults.realm) {
+        if (mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
+            const perms = tokenObj.payloadObj;
+            return ARENAUtils.matchJWT(`${realm}/c/${nameSpace}/o/#`, perms.subs);
         }
         return false;
     }
@@ -214,13 +229,11 @@ export class Arena {
      * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      * @return {boolean} True if the user has permission to write in this scene.
      */
-    isUserSceneWriter(mqttToken=ARENA.mqttToken) {
+    isUserSceneWriter(mqttToken = ARENA.mqttToken) {
         if (mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
-            if (ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ)) {
-                return true;
-            }
+            return ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ);
         }
         return false;
     }
@@ -231,10 +244,9 @@ export class Arena {
      */
     showEchoDisplayName = (speaker = false) => {
         const url = new URL(window.location.href);
-        const noname = url.searchParams.get('noname');
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
-        if (!noname) {
+        if (!ARENA.noname) {
             if (speaker) {
                 echo.style.backgroundColor = '#0F08'; // green alpha
             } else {
@@ -281,7 +293,7 @@ export class Arena {
         color = '#' + color;
 
         const camera = document.getElementById('my-camera');
-        camera.setAttribute('arena-camera', 'enabled', true);
+        camera.setAttribute('arena-camera', 'enabled', ARENA.isUsersPermitted());
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
@@ -673,31 +685,39 @@ export class Arena {
                 );
             }
 
-            // init chat
-            this.chat = new ARENAChat({
-                userid: this.idTag,
-                cameraid: this.camName,
-                username: this.getDisplayName(),
-                realm: this.defaults.realm,
-                namespace: this.nameSpace,
-                scene: this.namespacedScene,
-                persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
-                keepalive_interval_ms: 30000,
-                mqtt_host: this.mqttHostURI,
-                mqtt_username: this.username,
-                mqtt_token: this.mqttToken,
-                devInstance: this.defaults.devInstance,
-                isSceneWriter: this.isUserSceneWriter(),
-            });
-            await this.chat.start();
+            // check token for communications allowed
+            const allowJitsi = this.isJitsiPermitted();
+            const allowUsers = this.isUsersPermitted();
 
-            if (this.noav || !this.isJitsiPermitted()) {
+            // init chat
+            if (allowUsers) {
+                this.chat = new ARENAChat({
+                    userid: this.idTag,
+                    cameraid: this.camName,
+                    username: this.getDisplayName(),
+                    realm: this.defaults.realm,
+                    namespace: this.nameSpace,
+                    scene: this.namespacedScene,
+                    persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
+                    keepalive_interval_ms: 30000,
+                    mqtt_host: this.mqttHostURI,
+                    mqtt_username: this.username,
+                    mqtt_token: this.mqttToken,
+                    devInstance: this.defaults.devInstance,
+                    isSceneWriter: this.isUserSceneWriter(),
+                });
+                await this.chat.start();
                 this.showEchoDisplayName();
-            } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
+            } else {
+                // prevent local name when non-interactive
+                this.noname = true;
+            }
+
+            if (this.armode && AFRAME.utils.device.checkARSupport()) {
                 /*
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
-                 */
+                */
                 Swal.fire({
                     title: 'Enter AR Mode',
                     html: `This is an immersive AR scene that requires access to your camera and device sensors.`,
@@ -710,13 +730,11 @@ export class Arena {
             } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-                this.showEchoDisplayName();
-            } else {
+            } else if (!this.noav && allowJitsi) {
                 window.setupAV(() => {
                     const pano = document.getElementById('presenceSelect').value == 'Panoramic';
                     // Initialize Jitsi videoconferencing after A/V setup window
                     this.Jitsi = ARENAJitsi.init(this.jitsiHost, pano);
-                    this.showEchoDisplayName();
                 });
             }
 

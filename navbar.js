@@ -16,7 +16,7 @@ $(document).ready(function() {
                 if (data.authenticated) {
                     authDrop.html(data.username);
                     $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
-                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" id="show_perms" href="#">MQTT Permissions</a></li>');
+                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" id="show_perms" href="#">Permissions</a></li>');
                     $('#show_perms').on('click', function() {
                         const frame = document.getElementsByTagName('iframe');
                         const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;

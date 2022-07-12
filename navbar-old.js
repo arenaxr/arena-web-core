@@ -13,7 +13,7 @@ $(document).ready(function() {
                 if (data.authenticated) {
                     $('#auth-dropdown').html(`${data.username} <b class="caret"></b>`);
                     $('ul .dropdown-menu').append('<li><a href="/user/profile">Profile</a></li>');
-                    $('ul .dropdown-menu').append('<li><a id="show_perms" href="#">MQTT Permissions</a></li>');
+                    $('ul .dropdown-menu').append('<li><a id="show_perms" href="#">Permissions</a></li>');
                     $('#show_perms').on('click', function() {
                         const frame = document.getElementsByTagName('iframe');
                         const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
