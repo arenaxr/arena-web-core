@@ -463,6 +463,46 @@
                 "description":"If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
                 "title":"Physics System",
                 "type":"boolean"
+             },
+             "ar-hit-test": {
+                "properties": {
+                   "enabled": {
+                      "default": true,
+                      "description": "Whether to do hit-testing or not",
+                      "type": "boolean"
+                   },
+                   "src": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Image to use for the reticle"
+                   },
+                   "type": {
+                      "default": "footprint",
+                      "description": "'footprint' or 'map' footprint is the shape of the model",
+                      "enum": [
+                         "footprint",
+                         "map"
+                      ],
+                      "type": "string"
+                   },
+                   "footprintDepth": {
+                      "default": 0.1,
+                      "description": "Amount of the model used for the footprint, 1 is full height",
+                      "type": "number"
+                   },
+                   "mapSize": {
+                      "default": "0.5 0.5",
+                      "description": "If no target is set then this is the size of the map",
+                      "type": "string"
+                   }
+                },
+                "required": [
+                   "enabled",
+                   "src"
+                ],
+                "title": "AR Hit Test Settings",
+                "type": "object",
+                "description": "A-Frame AR Hit Test Settings. \n\nMore properties at <a href='https://aframe.io/docs/1.3.0/components/ar-hit-test.html'>https://aframe.io/docs/1.3.0/components/ar-hit-test.html</a>"
              }
           },
           "required":[
