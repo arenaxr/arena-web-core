@@ -107,6 +107,63 @@
                                             </button>
                                         </div>
                                     </div>
+                                    <div class="row text-left mb-3" id="uri-builder" hidden>
+                                        <div class="col-md-9 offset-md-3">
+                                            <medium id="uri-builder-label">Optional User Entry Links</medium>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder" id="armodeCheck">
+                                                <label class="form-check-label" for="armodeCheck">
+                                                    AR: Enter AR automatically; Remove hide-in-ar objects.
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                    id="noreticleCheck">
+                                                <label class="form-check-label" for="noreticleCheck">
+                                                    AR: Remove recticle (gray circle)
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder" id="vrCheck">
+                                                <label class="form-check-label" for="vrCheck">
+                                                    VR: Remove hide-in-vr objects.
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder" id="nonameCheck">
+                                                <label class="form-check-label" for="nonameCheck">
+                                                    Avatar: Remove user name display.
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder" id="skipavCheck">
+                                                <label class="form-check-label" for="skipavCheck">
+                                                    Avatar: Select audio/video options automatically.
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder" id="noavCheck">
+                                                <label class="form-check-label" for="noavCheck">
+                                                    Avatar: Remove video conferencing.
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                    id="startLastPosCheck">
+                                                <label class="form-check-label" for="startLastPosCheck">
+                                                    Nav: Restore user's last scene location.
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input small" type="checkbox" name="uri-builder"
+                                                    id="anonymousCheck">
+                                                <label class="form-check-label" for="anonymousCheck">
+                                                    Auth: Use anonymous login.
+                                                </label>
+                                            </div>
+                                            <small style="color: grey">Change <a id="scenePermsLink">scene permissions</a>.</small>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="tab-pane fade show active" id="publicscenes" role="tabpanel"
                                     aria-labelledby="publicscenes-tab">
@@ -145,62 +202,6 @@
                             </div>
                         </div>
 
-                        <div class="row text-left mb-3" id="uri-builder" hidden>
-                            <div class="col-md-9 offset-md-3">
-                                <medium id="uri-builder-label">Advanced Links</medium>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="armodeCheck">
-                                    <label class="form-check-label" for="armodeCheck">
-                                        AR: Enter AR automatically; Remove hide-in-ar objects.
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder"
-                                        id="noreticleCheck">
-                                    <label class="form-check-label" for="noreticleCheck">
-                                        AR: Remove recticle (gray circle)
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="vrCheck">
-                                    <label class="form-check-label" for="vrCheck">
-                                        VR: Remove hide-in-vr objects.
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="nonameCheck">
-                                    <label class="form-check-label" for="nonameCheck">
-                                        Avatar: Remove user name display.
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="skipavCheck">
-                                    <label class="form-check-label" for="skipavCheck">
-                                        Avatar: Select audio/video options automatically.
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="noavCheck">
-                                    <label class="form-check-label" for="noavCheck">
-                                        Avatar: Remove video conferencing.
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder"
-                                        id="startLastPosCheck">
-                                    <label class="form-check-label" for="startLastPosCheck">
-                                        Nav: Restore user's last scene location.
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input small" type="checkbox" name="uri-builder"
-                                        id="anonymousCheck">
-                                    <label class="form-check-label" for="anonymousCheck">
-                                        Auth: Use anonymous login.
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
 
                         <div class="row">
                             <div class="col-md-9 offset-md-3">
@@ -259,9 +260,8 @@
                                     <div class="row">
                                         <div class="col-9">
                                             <div class="form-floating">
-                                                <input rows="3" aria-label="Scene URL"
-                                                    class="form-control form-control-sm" id="cloneSceneUrl" readonly
-                                                    type="text" value="" />
+                                                <input aria-label="Scene URL" class="form-control form-control-sm"
+                                                    id="cloneSceneUrl" readonly type="text" value="" />
                                                 <label class="form-label" for="cloneSceneUrl">New Scene URL</label>
                                             </div>
                                         </div>

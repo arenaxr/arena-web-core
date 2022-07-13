@@ -78,6 +78,8 @@ window.addEventListener('onauth', async function(e) {
     const advancedLinksDiv = document.getElementById('uri-builder')
     const userNoteSpan = document.getElementById('userNoteSpan');
     const tabMyScenes = document.getElementById('myscenes-tab');
+    const uriBuilderCheckboxes = document.querySelectorAll('input[type=checkbox][name=uri-builder]');
+    const scenePermsLink = document.getElementById('scenePermsLink');
 
     window.publicButtons.push(enterPublicSceneBtn);
     if (auth.authenticated) {
@@ -106,7 +108,9 @@ window.addEventListener('onauth', async function(e) {
     function checkUserSceneSelect(e) {
         if (e.target.value) {
             window.userSceneId = e.target.value;
+            updateUriBuilderCheckboxes(true);
             updateUserSceneUrlBox(`${window.location.origin}/${e.target.value}`);
+            scenePermsLink.href = `${window.location.origin}/user/profile/scenes/${e.target.value}`;
             deleteUserSceneBtn.value = e.target.value;
             toggleUserSceneButtons(true);
         } else {
@@ -140,15 +144,16 @@ window.addEventListener('onauth', async function(e) {
     enterUserSceneBtn.addEventListener('click', () =>
         window.location = userSceneUrl.value
     )
+
+    // set listeners for advanced links URI-builder
     advancedLinksUserBtn.addEventListener('click', () => {
         advancedLinksDiv.hidden = !advancedLinksDiv.hidden;
+        updateUriBuilderCheckboxes(advancedLinksDiv.hidden);
     })
-    // set listeners for advanced links URI-builder
-    const checkboxes = document.querySelectorAll('input[type=checkbox][name=uri-builder]');
-    checkboxes.forEach(function(checkbox) {
+    uriBuilderCheckboxes.forEach(function(checkbox) {
         checkbox.addEventListener('change', () => {
             let uriSettings = [];
-            checkboxes.forEach(function(checkbox) {
+            uriBuilderCheckboxes.forEach(function(checkbox) {
                 if (checkbox.checked) {
                     uriSettings.push(checkbox.id);
                 }
@@ -186,9 +191,17 @@ window.addEventListener('onauth', async function(e) {
         })
     });
 
+    function updateUriBuilderCheckboxes(clear) {
+        if (clear) {
+            uriBuilderCheckboxes.forEach(function(checkbox) {
+                checkbox.checked = false;
+            });
+        }
+    }
+
     function updateUserSceneUrlBox(sceneUrl) {
         userSceneUrl.value = sceneUrl;
-        // update scene url box height as it expands
+        // update scene url box height as it expands/shrinks
         userSceneUrl.style.overflow = 'hidden';
         userSceneUrl.style.height = 0;
         userSceneUrl.style.height = userSceneUrl.scrollHeight + 'px';
