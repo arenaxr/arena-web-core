@@ -106,12 +106,12 @@ window.addEventListener('onauth', async function(e) {
     function checkUserSceneSelect(e) {
         if (e.target.value) {
             window.userSceneId = e.target.value;
-            userSceneUrl.value = `${window.location.origin}/${e.target.value}`
+            updateUserSceneUrlBox(`${window.location.origin}/${e.target.value}`);
             deleteUserSceneBtn.value = e.target.value;
             toggleUserSceneButtons(true);
         } else {
             window.userSceneId = '';
-            userSceneUrl.value = 'No valid scene selected';
+            updateUserSceneUrlBox('No valid scene selected');
             toggleUserSceneButtons(false);
         }
     }
@@ -149,7 +149,6 @@ window.addEventListener('onauth', async function(e) {
         checkbox.addEventListener('change', () => {
             let uriSettings = [];
             checkboxes.forEach(function(checkbox) {
-                console.log(checkbox.checked, checkbox.id);
                 if (checkbox.checked) {
                     uriSettings.push(checkbox.id);
                 }
@@ -175,15 +174,25 @@ window.addEventListener('onauth', async function(e) {
                     case 'anonymousCheck':
                         sceneUrl.searchParams.append('auth', 'anonymous');
                         break;
+                    case 'skipavCheck':
+                        sceneUrl.searchParams.append('skipav', '1');
+                        break;
+                    case 'noavCheck':
+                        sceneUrl.searchParams.append('noav', '1');
+                        break;
                 }
             });
-            userSceneUrl.value = sceneUrl.href;
-            // update scene url box height as it expands
-            userSceneUrl.style.overflow = 'hidden';
-            userSceneUrl.style.height = 0;
-            userSceneUrl.style.height = userSceneUrl.scrollHeight + 'px';
+            updateUserSceneUrlBox(sceneUrl.href);
         })
     });
+
+    function updateUserSceneUrlBox(sceneUrl) {
+        userSceneUrl.value = sceneUrl;
+        // update scene url box height as it expands
+        userSceneUrl.style.overflow = 'hidden';
+        userSceneUrl.style.height = 0;
+        userSceneUrl.style.height = userSceneUrl.scrollHeight + 'px';
+    }
 
     deleteUserSceneBtn.addEventListener('click', () => {
         if (confirm(`Are you sure you want to delete ${deleteUserSceneBtn.value}?`)) {

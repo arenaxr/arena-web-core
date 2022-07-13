@@ -79,7 +79,6 @@
                                             <button class="btn btn-light disabled" id="enterUserSceneBtn"
                                                 title="Enter Scene"><i class="fas fa-sign-in-alt"></i></button>
 
-
                                             <button class="btn btn-light disabled" id="cloneUserSceneBtn"
                                                 title="Duplicate Scene"><i class="far fa-clone"></i></button>
 
@@ -89,8 +88,8 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <div class="row">
-                                        <div class="col-8">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-sm-8">
                                             <div class="form-floating mb-3">
                                                 <textarea aria-label="Scene URL"
                                                     class="form-control form-control-sm" id="userSceneUrl" readonly
@@ -98,13 +97,13 @@
                                                 <label for="userSceneUrl">Scene URL</label>
                                             </div>
                                         </div>
-                                        <div class="col-4">
+                                        <div class="col-sm-4">
                                             <button class="btn btn-light disabled" id="copyUserSceneUrlBtn"
                                                 title="Copy Scene Url"><i class="far fa-clipboard"></i>
                                             </button>
                                             <button class="btn btn-light disabled" id="advancedLinksUserBtn"
                                                 title="Advanced Links Options">
-                                                <i class="far fa-link"></i>
+                                                <i class="fa fa-link"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -150,42 +149,54 @@
                             <div class="col-md-9 offset-md-3">
                                 <medium id="uri-builder-label">Advanced Links</medium>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="uri-builder" id="armodeCheck">
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="armodeCheck">
                                     <label class="form-check-label" for="armodeCheck">
-                                        armode
+                                        AR: Enter AR automatically; Remove hide-in-ar objects.
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="uri-builder" id="vrCheck">
-                                    <label class="form-check-label" for="vrCheck">
-                                        vr
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="uri-builder" id="nonameCheck">
-                                    <label class="form-check-label" for="nonameCheck">
-                                        noname
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="uri-builder"
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder"
                                         id="noreticleCheck">
                                     <label class="form-check-label" for="noreticleCheck">
-                                        noreticle
+                                        AR: Remove recticle (gray circle)
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="uri-builder"
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="vrCheck">
+                                    <label class="form-check-label" for="vrCheck">
+                                        VR: Remove hide-in-vr objects.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="nonameCheck">
+                                    <label class="form-check-label" for="nonameCheck">
+                                        Avatar: Remove user name display.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="skipavCheck">
+                                    <label class="form-check-label" for="skipavCheck">
+                                        Avatar: Select audio/video options automatically.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder" id="noavCheck">
+                                    <label class="form-check-label" for="noavCheck">
+                                        Avatar: Remove video conferencing.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder"
                                         id="startLastPosCheck">
                                     <label class="form-check-label" for="startLastPosCheck">
-                                        startLastPos
+                                        Nav: Restore user's last scene location.
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="uri-builder"
+                                    <input class="form-check-input small" type="checkbox" name="uri-builder"
                                         id="anonymousCheck">
                                     <label class="form-check-label" for="anonymousCheck">
-                                        anonymous
+                                        Auth: Use anonymous login.
                                     </label>
                                 </div>
                             </div>
