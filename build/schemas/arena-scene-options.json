@@ -472,6 +472,7 @@
                       "type": "boolean"
                    },
                    "src": {
+                      "default": "static/images/reticle-gray.png",
                       "type": "string",
                       "format": "uri",
                       "description": "Image to use for the reticle"
