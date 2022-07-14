@@ -22,7 +22,7 @@ The main ARENA documentation is here: [https://arena.conix.io/](https://arena.co
 
 ## Installation
 
-Most users will want to use an already deployed ARENA. If you want to setup you own ARENA stack, you can use our [docker compose setup](https://github.com/conix-center/arena-services-docker).
+Most users will want to use an already deployed ARENA. If you want to setup your own ARENA stack, you can use our [docker compose setup](https://github.com/conix-center/arena-services-docker).
 
 ## License
 
