@@ -41,6 +41,8 @@ AFRAME.registerComponent('material-extras', {
         this.update();
         this.el.addEventListener('model-loaded', () => this.update());
         this.el.addEventListener('load', () => this.update());
+
+        console.info("MATERIAL EXTRAS:", this.schema.renderOrder.default)
     },
     update: function(oldData) {
         this.retryIndex = 0;
