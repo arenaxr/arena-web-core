@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.9.0](https://github.com/conix-center/ARENA-core/compare/v1.8.1...v1.9.0) (2022-07-14)
+
+
+### Features
+
+* add scene landing logic; separate scene name loads; auth uses sweet alert ([#462](https://github.com/conix-center/ARENA-core/issues/462)) ([dd5c4fe](https://github.com/conix-center/ARENA-core/commit/dd5c4fef3bb6024ccf4f7c4e5b4bf14a89bc3030))
+* **auth:** Add support "no users", removes chat, jitsi, camera publish ([#465](https://github.com/conix-center/ARENA-core/issues/465)) ([03e6a0d](https://github.com/conix-center/ARENA-core/commit/03e6a0d97d3ff329468387e7a4e8a2020e157688))
+* **build:** add ar-hit-test attributes to schema ([e9acc3c](https://github.com/conix-center/ARENA-core/commit/e9acc3ca8588194eac61ed1136b75c8b959f8001))
+* material-extras traverses objects, so can be applied to GLTFs ([f5aed24](https://github.com/conix-center/ARENA-core/commit/f5aed2404be462be302a0e5a88edef150ae45cb2))
+* **scenes:** Allow panel to add optional URI params ([#466](https://github.com/conix-center/ARENA-core/issues/466)) ([f033956](https://github.com/conix-center/ARENA-core/commit/f0339565389cff9ccc80e04abfae76b1631756ae))
+
+
+### Bug Fixes
+
+* actually add vendor component files ([91c15f2](https://github.com/conix-center/ARENA-core/commit/91c15f23511a2a23e615641d687fe31d32956447))
+* missing public clone ([b8eee4a](https://github.com/conix-center/ARENA-core/commit/b8eee4a1c26a6fe6251a7cc95a2588bf37b20d06))
+* **scenes:** make Scene URL Options link-style button ([995ff2d](https://github.com/conix-center/ARENA-core/commit/995ff2d5003cbddf3b19ea6b6e003d03276684b0))
+* **scenes:** proper select order ([2e4f4b0](https://github.com/conix-center/ARENA-core/commit/2e4f4b08e3fa56865e280d88fdd963c0dcc1907c))
+
 ### [1.8.1](https://github.com/conix-center/ARENA-core/compare/v1.8.0...v1.8.1) (2022-05-25)
 
 
