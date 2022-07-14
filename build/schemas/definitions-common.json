@@ -383,7 +383,7 @@
              "overrideSrc":{
                 "type":"string",
                 "default":"",
-                "description":"Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+                "description":"Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
              },
              "encoding":{
                 "default":"sRGBEncoding",

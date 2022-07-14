@@ -92,7 +92,7 @@ AFRAME.registerComponent('material-extras', {
             // onProgress callback currently not supported
             undefined,
             // onError callback
-            (err) => console.error(`Error loading texture ${this.data.overrideSrc}: ${err}`));
+            (err) => console.error(`[material-extras] Error loading texture ${this.data.overrideSrc}: ${err}`));
     },
     updateMeshMaterial: function(mesh) {
         mesh.renderOrder = this.data.renderOrder;
@@ -108,7 +108,6 @@ AFRAME.registerComponent('material-extras', {
     updateMaterial: function() {
         const mesh = this.el.getObject3D('mesh');
         if (!mesh) {
-            console.warn('Could not find mesh!');
             this.retryUpdateMaterial();
             return;
         }
@@ -128,6 +127,8 @@ AFRAME.registerComponent('material-extras', {
                 this.retryIndex++;
                 this.updateMaterial();
             }, this.retryTimeouts[this.retryIndex]); // try again in a bit
+        } else {
+            console.warn('[material-extras] Could not update material!');
         }
     },
 });
