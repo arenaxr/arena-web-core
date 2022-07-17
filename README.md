@@ -4,9 +4,9 @@
 <p align="center"><b>An environment to view and interact in multiuser virtual and augmented reality</b></p>
 
 
-| <img alt="" src="static/images/a1.gif">         | <img alt="" src="static/images/a2.gif">         |
-|------------------------------------------|------------------------------------------|
-| <img alt="" src="static/images/a3.gif">         | <img alt="" src="static/images/a4.gif">         |
+| <img alt="" src="static/media/a1.mp4"> | <img alt="" src="static/media/a2.mp4">         |
+|----------------------------------------|------------------------------------------|
+| <img alt="" src="static/media/a3.mp4"> | <img alt="" src="static/media/a4.mp4">         |
 
 The [ARENA](https://arena.conix.io/) is a platform for supporting real-time mixed reality (XR) interaction between multiple users and the physical world.
 
