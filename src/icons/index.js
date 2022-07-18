@@ -421,7 +421,7 @@ export class SideMenu {
         pagesDiv.append(' | ');
 
         const docs = document.createElement('a');
-        docs.href = 'https://arena.conix.io';
+        docs.href = 'https://docs.arenaxr.org';
         docs.target = '_blank';
         docs.rel = 'noopener noreferrer';
         docs.innerHTML = 'Docs';

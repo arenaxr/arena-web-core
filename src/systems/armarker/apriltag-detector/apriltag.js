@@ -5,7 +5,7 @@
 /**
  * @fileoverview Process grayscale camera frames in WASM detector.
  *
- * See https://github.com/conix-center/apriltag-js-standalone
+ * See https://github.com/arenaxr/apriltag-js-standalone
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
