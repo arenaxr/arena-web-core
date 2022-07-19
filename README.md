@@ -1,6 +1,6 @@
 
 <p align="center"> <img alt="" src="static/images/xr-logo.png" width="150px"> </p>
-<h2 align="center">ARENA browser client (ARENA-core)</h2>
+<h2 align="center">ARENA browser client (ARENA-web-core)</h2>
 <p align="center"><b>An environment to view and interact in multiuser virtual and augmented reality</b></p>
 
 
