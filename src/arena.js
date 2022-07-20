@@ -270,9 +270,11 @@ export class Arena {
             ARENA.loadSceneObjects();
         });
 
-        // after scene is completely loaded, add user camera
-        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
-            ARENA.loadUser();
+        // after scene is completely loaded, add user camera if this is the initial scene load
+        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, (initialLoad) => {
+            if (initialLoad) {
+                ARENA.loadUser();
+            }
         });
     };
 
