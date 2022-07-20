@@ -434,7 +434,13 @@ export class Arena {
                     this.Mqtt.processMessage(msg);
                     arenaObjects.delete(obj.object_id);
                 };
+                let i = 0;
+                const xhrLen = xhr.response.length;
                 while (arenaObjects.size > 0) {
+                    if (++i > xhrLen) {
+                        console.err('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
+                        break;
+                    }
                     const iter = arenaObjects.entries();
                     const [objId, obj] = iter.next().value; // get first entry
                     if (obj.type === 'program') {
