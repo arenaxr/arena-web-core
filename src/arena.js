@@ -269,9 +269,11 @@ export class Arena {
             ARENA.loadSceneObjects();
         });
 
-        // after scene is completely loaded, add user camera
-        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
-            ARENA.loadUser();
+        // after scene is completely loaded, add user camera if this is the initial scene load
+        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, (initialLoad) => {
+            if (initialLoad) {
+                ARENA.loadUser();
+            }
         });
     };
 
@@ -356,7 +358,7 @@ export class Arena {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to load arena from
      * @param {string} [parentName] parentObject to attach sceneObjects to
-     * @parem {string} [prefixName] prefix to add to container
+     * @param {string} [prefixName] prefix to add to container
      */
     loadSceneObjects(urlToLoad, parentName, prefixName) {
         const xhr = new XMLHttpRequest();
@@ -466,7 +468,10 @@ export class Arena {
                         arenaObjects.delete(objId);
                     }
                 }
-                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true), 500);
+                window.setTimeout(
+                    () => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, !containerObjName),
+                    500,
+                );
             }
         };
     };
