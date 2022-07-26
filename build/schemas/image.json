@@ -28,6 +28,9 @@
                             }
                         },
                         {
+                            "$ref": "./schemas/definitions-transform.json#/properties"
+                        },
+                        {
                             "$ref": "./schemas/definitions-common.json#/properties"
                         },
                         {
