@@ -157,7 +157,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-transform.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         }
                     ],
                     "title": "Text Data",
