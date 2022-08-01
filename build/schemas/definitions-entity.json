@@ -81,5 +81,10 @@
           "type":"object",
           "title":"Scale"
        }
-    }
- }
+    },
+    "required": [
+        "object_type",
+        "position",
+        "rotation"
+    ]
+}
