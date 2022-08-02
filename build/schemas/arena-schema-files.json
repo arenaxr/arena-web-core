@@ -133,5 +133,10 @@
        "description":"Triangle Geometry",
        "file":"schemas/triangle.json",
        "title":"Triangle"
+    },
+    "videosphere":{
+       "description":"Videosphere Geometry",
+       "file":"schemas/videosphere.json",
+       "title":"Videosphere"
     }
 }
