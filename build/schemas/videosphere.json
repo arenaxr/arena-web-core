@@ -46,14 +46,16 @@
                                     "type": "number",
                                     "title": "segments width",
                                     "default": 64
+                                },
+                                "src": {
+                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+                                    "format": "uri",
+                                    "type": "string"
                                 }
                             }
                         },
                         {
                             "$ref": "./schemas/definitions-entity.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-common.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-geometry.json#/properties"
@@ -64,9 +66,6 @@
                     "default": {
                         "object_type": "videosphere",
                         "radius": 1,
-                        "material": {
-                            "color": "#7f7f7f"
-                        },
                         "position": {
                             "x": 0,
                             "y": 0,

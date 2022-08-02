@@ -67,7 +67,11 @@ AFRAME.registerComponent('jitsi-video', {
         }
     },
     setVideoSrc: function() {
-        this.el.setAttribute('material', 'src', `#${this.videoID}`); // video only! (no audio)
+        if (this.el.tagName.toLowerCase() === 'a-videosphere'){
+            this.el.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
+        } else {
+            this.el.setAttribute('material', 'src', `#${this.videoID}`); // video only! (no audio)
+        }
         this.el.setAttribute('material', 'shader', 'flat');
         this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
         this.el.setAttribute('material-extras', 'needsUpdate', 'true');
