@@ -74,6 +74,11 @@
        "file":"schemas/plane.json",
        "title":"Plane"
     },
+    "prism":{
+      "description":"Prism Geometry",
+      "file":"schemas/prism.json",
+      "title":"Prism"
+    },
     "program":{
        "description":"ARENA program data",
        "file":"schemas/arena-program.json",
