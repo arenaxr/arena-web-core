@@ -55,7 +55,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-geometry.json#/properties"
@@ -65,7 +65,7 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "videosphere",
-                        "radius": 1,
+                        "radius": 5000,
                         "position": {
                             "x": 0,
                             "y": 0,

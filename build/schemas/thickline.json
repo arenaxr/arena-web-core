@@ -19,6 +19,11 @@
                                         "thickline"
                                     ]
                                 },
+                                "color": {
+                                    "default": "#000000",
+                                    "format": "color",
+                                    "type": "string"
+                                  },
                                 "lineWidth": {
                                     "type": "number",
                                     "title": "Line width",
@@ -33,16 +38,13 @@
                                 "path": {
                                     "type": "string",
                                     "title": "Line path",
-                                    "description": "Comma-seperated list of x y z coordinates of the line vertices",
+                                    "description": "Comma-separated list of x y z coordinates of the line vertices",
                                     "default": "-2 -1 0, 0 20 0, 10 -1 10"
                                 }
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         }
                     ],
                     "title": "Thickline Data",
