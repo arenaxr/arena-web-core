@@ -45,6 +45,13 @@ AFRAME.registerComponent('jitsi-video', {
             return;
         }
         if (this.data.displayName === '') return;
+        // check local video first
+        if (ARENA.Jitsi && ARENA.getDisplayName() === this.data.displayName) {
+            this.data.jitsiId = ARENA.Jitsi.getJitsiId();
+            this.updateVideo();
+            return;
+        }
+        // check remote video
         args.pl.forEach((user) => {
             if (user.dn === this.data.displayName) {
                 this.data.jitsiId = user.jid;
@@ -69,6 +76,14 @@ AFRAME.registerComponent('jitsi-video', {
     setVideoSrc: function() {
         if (this.el.tagName.toLowerCase() === 'a-videosphere'){
             this.el.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
+            // ensure panoramic videospheres have max resolution
+            const users = document.querySelectorAll('[arena-user]');
+            users.forEach((user) => {
+                const data = user.components['arena-user'].data;
+                if (data.jitsiId === this.data.jitsiId) {
+                    data.pano = true;
+                }
+            });
         } else {
             this.el.setAttribute('material', 'src', `#${this.videoID}`); // video only! (no audio)
         }
@@ -85,11 +100,17 @@ AFRAME.registerComponent('jitsi-video', {
         if (!ARENA.Jitsi) {
             return;
         }
-        this.videoID = `video${data.jitsiId}`;
-        if (!ARENA.Jitsi.getVideoTrack(data.jitsiId)) {
-            this.retryWaitVideoLoad();
-            return;
+
+        if (ARENA.Jitsi.getJitsiId() === data.jitsiId) {
+            this.videoID = 'cornerVideo';
+        } else {
+            this.videoID = `video${data.jitsiId}`;
+            if (!ARENA.Jitsi.getVideoTrack(data.jitsiId)) {
+                this.retryWaitVideoLoad();
+                return;
+            }
         }
+
         const jitsiVideo = document.getElementById(this.videoID);
         if (!jitsiVideo) {
             // if object not created yet, try to wait
