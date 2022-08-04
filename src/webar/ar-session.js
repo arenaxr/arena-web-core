@@ -36,6 +36,20 @@ AFRAME.registerComponent('arena-webar-session', {
         // enable aframe's usage of gyro
         camera.setAttribute('look-controls', 'magicWindowTrackingEnabled', true);
 
+        // Disable handoff of orientation to THREE when `ar-mode` and VR-capability is detected
+        document.getElementById('my-camera').components['look-controls'].updateOrientation = function() {
+            const object3D = this.el.object3D;
+            const pitchObject = this.pitchObject;
+            const yawObject = this.yawObject;
+
+            this.updateMagicWindowOrientation();
+
+            // On mobile, do camera rotation with touch events and sensors.
+            object3D.rotation.x = this.magicWindowDeltaEuler.x + pitchObject.rotation.x;
+            object3D.rotation.y = this.magicWindowDeltaEuler.y + yawObject.rotation.y;
+            object3D.rotation.z = this.magicWindowDeltaEuler.z;
+        };
+
         el.addState('ar-mode');
         el.resize();
 
