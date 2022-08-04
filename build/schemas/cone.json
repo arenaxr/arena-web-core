@@ -62,6 +62,9 @@
                             }
                         },
                         {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
                             "$ref": "./schemas/definitions-common.json#/properties"
                         },
                         {

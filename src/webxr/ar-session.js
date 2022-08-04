@@ -25,7 +25,7 @@ AFRAME.registerComponent('arena-webar-session', {
         this.hideVRButtons();
 
         // hide icons
-        const icons = document.getElementById('icons-div');
+        const icons = document.getElementById('icons-div-container');
         icons.style.display = 'none';
 
         const camera = document.getElementById('my-camera');
@@ -34,7 +34,7 @@ AFRAME.registerComponent('arena-webar-session', {
         // remove dragging to rotate scene
         camera.setAttribute('look-controls', 'touchEnabled', false);
         // enable aframe's usage of gyro
-        // camera.setAttribute('look-controls', 'magicWindowTrackingEnabled', true);
+        camera.setAttribute('look-controls', 'magicWindowTrackingEnabled', true);
 
         el.addState('ar-mode');
         el.resize();

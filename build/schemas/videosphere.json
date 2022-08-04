@@ -1,58 +1,56 @@
 {
-    "title": "Cylinder",
-    "description": "cylinder Geometry",
-    "allOf": [
-        {
+    "title": "Videosphere",
+    "description": "Videosphere Geometry",
+    "allOf": [{
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {
             "properties": {
                 "data": {
-                    "allOf": [
-                        {
+                    "allOf": [{
                             "properties": {
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": [
-                                        "cylinder"
+                                        "videosphere"
                                     ]
                                 },
-                                "height": {
-                                    "type": "number",
-                                    "title": "height",
-                                    "default": 2
+                                "autoplay": {
+                                    "default": true,
+                                    "description": "autoplay",
+                                    "type": "boolean"
                                 },
-                                "openEnded": {
-                                    "type": "boolean",
-                                    "title": "open ended",
-                                    "default": false
+                                "crossOrigin": {
+                                    "default": "anonymous",
+                                    "type": "string",
+                                    "title": "crossOrigin"
+                                },
+                                "loop": {
+                                    "default": true,
+                                    "title": "loop",
+                                    "type": "boolean"
                                 },
                                 "radius": {
                                     "type": "number",
                                     "title": "radius",
-                                    "default": 1
+                                    "default": 5000
                                 },
                                 "segmentsHeight": {
                                     "type": "number",
                                     "title": "segments height",
-                                    "default": 18
+                                    "default": 64
                                 },
-                                "segmentsRadial": {
+                                "segmentsWidth": {
                                     "type": "number",
-                                    "title": "segments radial",
-                                    "default": 36
+                                    "title": "segments width",
+                                    "default": 64
                                 },
-                                "thetaLength": {
-                                    "type": "number",
-                                    "title": "theta length",
-                                    "default": 360
-                                },
-                                "thetaStart": {
-                                    "type": "number",
-                                    "title": "theta start",
-                                    "default": 0
+                                "src": {
+                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+                                    "format": "uri",
+                                    "type": "string"
                                 }
                             }
                         },
@@ -60,21 +58,14 @@
                             "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
                             "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
-                    "title": "Cylinder Data",
+                    "title": "Videosphere Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "cylinder",
-                        "height": 2,
-                        "radius": 1,
-                        "material": {
-                            "color": "#7f7f7f"
-                        },
+                        "object_type": "videosphere",
+                        "radius": 5000,
                         "position": {
                             "x": 0,
                             "y": 0,
@@ -87,9 +78,7 @@
                         }
                     },
                     "required": [
-                        "object_type",
-                        "radius",
-                        "height"
+                        "object_type"
                     ]
                 }
             }

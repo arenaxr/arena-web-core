@@ -22,7 +22,7 @@ const handleARButtonForNonWebXRMobile = function() {
         return;
     }
 
-    if (navigator.userAgent.includes('WebXRViewer')) {
+    if (this.isWebARViewer) {
         return;
     }
 

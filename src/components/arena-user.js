@@ -102,6 +102,7 @@ AFRAME.registerComponent('arena-user', {
         hasVideo: {type: 'boolean', default: false},
         jitsiQuality: {type: 'number', default: 100.0},
         resolutionStep: {type: 'number', default: 180},
+        pano: {type: 'boolean', default: false},
     },
 
     init: function() {
@@ -430,7 +431,7 @@ AFRAME.registerComponent('arena-user', {
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
                 const data = user.components['arena-user'].data;
-                if (data.presence === 'Panoramic') {
+                if (data.pano || data.presence === 'Panoramic') {
                     panoIds.push(data.jitsiId);
                 }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
@@ -549,7 +550,7 @@ AFRAME.registerComponent('arena-user', {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
-            if (this.data.presence === 'Panoramic') {
+            if (this.data.pano || this.data.presence === 'Panoramic') {
                 this.evaluateRemoteResolution(1920);
             } else if (inFieldOfView == false) {
                 this.muteVideo();

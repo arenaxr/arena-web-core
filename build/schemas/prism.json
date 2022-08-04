@@ -1,6 +1,6 @@
 {
-    "title": "Cylinder",
-    "description": "cylinder Geometry",
+    "title": "Prism",
+    "description": "Prism Geometry",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -16,43 +16,23 @@
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": [
-                                        "cylinder"
+                                        "prism"
                                     ]
+                                },
+                                "depth": {
+                                    "type": "number",
+                                    "title": "depth",
+                                    "default": 1
                                 },
                                 "height": {
                                     "type": "number",
                                     "title": "height",
-                                    "default": 2
-                                },
-                                "openEnded": {
-                                    "type": "boolean",
-                                    "title": "open ended",
-                                    "default": false
-                                },
-                                "radius": {
-                                    "type": "number",
-                                    "title": "radius",
                                     "default": 1
                                 },
-                                "segmentsHeight": {
+                                "width": {
                                     "type": "number",
-                                    "title": "segments height",
-                                    "default": 18
-                                },
-                                "segmentsRadial": {
-                                    "type": "number",
-                                    "title": "segments radial",
-                                    "default": 36
-                                },
-                                "thetaLength": {
-                                    "type": "number",
-                                    "title": "theta length",
-                                    "default": 360
-                                },
-                                "thetaStart": {
-                                    "type": "number",
-                                    "title": "theta start",
-                                    "default": 0
+                                    "title": "width",
+                                    "default": 1
                                 }
                             }
                         },
@@ -66,12 +46,13 @@
                             "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
-                    "title": "Cylinder Data",
+                    "title": "Prism Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "cylinder",
-                        "height": 2,
-                        "radius": 1,
+                        "object_type": "prism",
+                        "depth": 1,
+                        "height": 1,
+                        "width": 1,
                         "material": {
                             "color": "#7f7f7f"
                         },
@@ -88,8 +69,9 @@
                     },
                     "required": [
                         "object_type",
-                        "radius",
-                        "height"
+                        "width",
+                        "height",
+                        "depth"
                     ]
                 }
             }

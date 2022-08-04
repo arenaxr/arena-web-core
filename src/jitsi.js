@@ -556,6 +556,7 @@ export class ARENAJitsi {
                         delete(this.newUserTimers[id]);
                         // emit new user event
                         ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                            jid: id,
                             id: arenaId,
                             dn: arenaDisplayName,
                             cn: arenaCameraName,

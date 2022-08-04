@@ -171,7 +171,7 @@ AFRAME.registerSystem('armarker', {
                 console.error(`No valid CV camera capture found. ${err}`);
                 return; // no valid cv camera capture; we are done here
             }
-        } else {
+        } else if (!this.isWebARViewer) {
             try {
                 this.cameraCapture = new WebARCameraCapture();
                 await this.cameraCapture.initCamera();
