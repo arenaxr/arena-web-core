@@ -14,6 +14,7 @@ import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
+import {enterARNonWebXR} from './webar/';
 import Swal from 'sweetalert2';
 
 /* global ARENA, KJUR */
@@ -713,7 +714,7 @@ export class Arena {
                 this.noname = true;
             }
 
-            if (this.armode && AFRAME.utils.device.checkARSupport()) {
+            if (this.armode) {
                 /*
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
@@ -725,7 +726,11 @@ export class Arena {
                     showConfirmButton: true,
                     confirmButtonText: 'Enter',
                 }).then(() => {
-                    document.getElementsByTagName('a-scene')[0].enterAR();
+                    if (this.isWebARViewer || AFRAME.utils.device.checkARSupport()) {
+                        document.getElementsByTagName('a-scene')[0].enterAR();
+                    } else {
+                        enterARNonWebXR();
+                    }
                 });
             } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
