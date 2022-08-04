@@ -24,7 +24,7 @@ AFRAME.registerComponent('click-listener', {
         const self = this;
         this.el.addEventListener('mousedown', function(evt) {
             const camera = document.getElementById('my-camera');
-            const position = camera.getAttribute('position');
+            const position = camera.components['arena-camera'].data.position;
 
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setClickData(evt);
@@ -50,7 +50,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseup', function(evt) {
             const camera = document.getElementById('my-camera');
-            const position = camera.getAttribute('position');
+            const position = camera.components['arena-camera'].data.position;
 
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setClickData(evt);
@@ -76,7 +76,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseenter', function(evt) {
             const camera = document.getElementById('my-camera');
-            const position = camera.getAttribute('position');
+            const position = camera.components['arena-camera'].data.position;
 
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setCoordsData(evt);
@@ -102,7 +102,7 @@ AFRAME.registerComponent('click-listener', {
 
         this.el.addEventListener('mouseleave', function(evt) {
             const camera = document.getElementById('my-camera');
-            const position = camera.getAttribute('position');
+            const position = camera.components['arena-camera'].data.position;
 
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setCoordsData(evt);

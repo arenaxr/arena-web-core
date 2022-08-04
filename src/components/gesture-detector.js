@@ -153,7 +153,7 @@ AFRAME.registerComponent('gesture-detector', {
         }
         // send through MQTT
         const camera = document.getElementById('my-camera');
-        const position = camera.getAttribute('position');
+        const position = camera.components['arena-camera'].data.position;
         const clickPos = ARENAUtils.vec3ToObject(position);
 
         // generated finger move
