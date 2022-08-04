@@ -14,6 +14,7 @@
  */
 
 import {WebXRCameraCapture} from './camera-capture/ccwebxr.js';
+import {WebARCameraCapture} from './camera-capture/ccwebar.js';
 import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset.js';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer.js';
 import {ARMarkerRelocalization} from './armarker-reloc.js';
@@ -111,14 +112,16 @@ AFRAME.registerSystem('armarker', {
     * @param {object} xrSession - Handle to the WebXR session
     */
     async webXRSessionStarted(xrSession) {
-        this.webXRSession = xrSession;
-        this.gl = this.el.renderer.getContext();
+        if (xrSession != undefined) {
+            this.webXRSession = xrSession;
+            this.gl = this.el.renderer.getContext();
 
-        // make sure gl context is XR compatible
-        try {
-            await this.gl.makeXRCompatible();
-        } catch (err) {
-            console.error('Could not make make gl context XR compatible!', err);
+            // make sure gl context is XR compatible
+            try {
+                await this.gl.makeXRCompatible();
+            } catch (err) {
+                console.error('Could not make make gl context XR compatible!', err);
+            }
         }
 
         // init cv pipeline
@@ -164,6 +167,14 @@ AFRAME.registerSystem('armarker', {
             console.info('Setting up WebXR-based passthrough AR camera capture.');
             try {
                 this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl, this.data.debugCameraCapture);
+            } catch (err) {
+                console.error(`No valid CV camera capture found. ${err}`);
+                return; // no valid cv camera capture; we are done here
+            }
+        } else {
+            try {
+                this.cameraCapture = new WebARCameraCapture();
+                await this.cameraCapture.initCamera();
             } catch (err) {
                 console.error(`No valid CV camera capture found. ${err}`);
                 return; // no valid cv camera capture; we are done here
