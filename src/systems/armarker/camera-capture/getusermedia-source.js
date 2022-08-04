@@ -1,4 +1,4 @@
-export class ARSource {
+export class GetUserMediaARSource {
     constructor(options) {
         this.options = {
             width: 1280,

@@ -70,20 +70,13 @@ AFRAME.registerComponent('arena-webar-session', {
 
         // handle tap events
         document.addEventListener('mousedown', function(e) {
-            if (window.lastMouseTarget) {
-                const el = document.getElementById(window.lastMouseTarget);
-                const elPos = new THREE.Vector3();
-                el.object3D.getWorldPosition(elPos);
-
-                const intersection = {
-                    x: elPos.x,
-                    y: elPos.y,
-                    z: elPos.z,
-                };
-                el.emit('mousedown', {
+            const intersectedEl = cursor.components.cursor.intersectedEl;
+            if (intersectedEl) {
+                const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
+                intersectedEl.emit('mousedown', {
                     'clicker': window.ARENA.camName,
                     'intersection': {
-                        point: intersection,
+                        point: intersection.point,
                     },
                     'cursorEl': true,
                 }, false);
@@ -91,19 +84,13 @@ AFRAME.registerComponent('arena-webar-session', {
         });
 
         document.addEventListener('mouseup', function(e) {
-            if (window.lastMouseTarget) {
-                const el = document.getElementById(window.lastMouseTarget);
-                const elPos = new THREE.Vector3();
-                el.object3D.getWorldPosition(elPos);
-                const intersection = {
-                    x: elPos.x,
-                    y: elPos.y,
-                    z: elPos.z,
-                };
-                el.emit('mouseup', {
+            const intersectedEl = cursor.components.cursor.intersectedEl;
+            if (intersectedEl) {
+                const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
+                intersectedEl.emit('mouseup', {
                     'clicker': window.ARENA.camName,
                     'intersection': {
-                        point: intersection,
+                        point: intersection.point,
                     },
                     'cursorEl': true,
                 }, false);

@@ -8,7 +8,7 @@
  */
 
 import {CVWorkerMsgs} from '../worker-msgs.js';
-import {ARSource} from './ar-source.js';
+import {GetUserMediaARSource} from './getusermedia-source.js';
 
 /**
  * Grab front facing camera frames using getUserMedia()
@@ -60,7 +60,7 @@ export class WebARCameraCapture {
             width: this.frameWidth,
             height: this.frameHeight,
         };
-        this.arSource = new ARSource(options);
+        this.arSource = new GetUserMediaARSource(options);
     }
 
     /**
