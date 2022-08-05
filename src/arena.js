@@ -356,17 +356,17 @@ export class Arena {
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to load arena from
-     * @param {Object} position initial position
-     * @param {Object} rotation initial rotation
+     * @param {string} [parentName] parentObject to attach sceneObjects to
+     * @param {string} [prefixName] prefix to add to container
      */
-    loadSceneObjects(urlToLoad, position, rotation) {
+    loadSceneObjects(urlToLoad, parentName, prefixName) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
         xhr.send();
         xhr.responseType = 'json';
-        const deferredObjects = [];
+        const orphanObjects = new Map();
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -376,60 +376,53 @@ export class Arena {
                     showConfirmButton: true,
                     confirmButtonText: 'Ok',
                 });
-            } else {
-                if (xhr.response === undefined || xhr.response.length === 0) {
-                    console.error('No scene objects found in persistence.');
-                    ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true);
-                    return;
-                }
-                const arenaObjects = xhr.response;
-                for (let i = 0; i < arenaObjects.length; i++) {
-                    const obj = arenaObjects[i];
-                    if (obj.type === 'program') {
-                        // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                        const avars = {
-                            scene: ARENA.sceneName,
-                            namespace: ARENA.nameSpace,
-                            cameraid: ARENA.camName,
-                            username: ARENA.getDisplayName,
-                            mqtth: ARENA.mqttHost,
-                        };
-                        // ask runtime manager to start this program
-                        this.RuntimeManager.createModuleFromPersist(obj, avars);
-                        continue;
-                    }
-                    if (obj.object_id === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
-                    if (obj.attributes.parent) {
-                        deferredObjects.push(obj);
-                    } else {
-                        const msg = {
-                            object_id: obj.object_id,
-                            action: 'create',
-                            type: obj.type,
-                            data: obj.attributes,
-                        };
-                        if (position) {
-                            msg.data.position.x = msg.data.position.x + position.x;
-                            msg.data.position.y = msg.data.position.y + position.y;
-                            msg.data.position.z = msg.data.position.z + position.z;
-                        }
-                        if (rotation) {
-                            const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y,
-                                msg.data.rotation.z, msg.data.rotation.w);
-                            const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-                            r.multiply(q);
-                            msg.data.rotation = r;
-                        }
+                return;
+            }
 
-                        this.Mqtt.processMessage(msg);
+            if (xhr.response === undefined || xhr.response.length === 0) {
+                console.error('No scene objects found in persistence.');
+                ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, !(parentName || prefixName));
+                return;
+            }
+
+            let containerObjName;
+            if (parentName && prefixName && document.getElementById(parentName)) {
+                containerObjName = `${prefixName}_container`;
+                // Make container to hold all scene objects
+                const msg = {
+                    object_id: containerObjName,
+                    action: 'create',
+                    type: 'object',
+                    data: {parent: parentName},
+                };
+                this.Mqtt.processMessage(msg);
+            }
+
+            const arenaObjects = xhr.response;
+            for (let i = 0; i < arenaObjects.length; i++) {
+                const obj = arenaObjects[i];
+                if (obj.type === 'program') {
+                    // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+                    const avars = {
+                        scene: ARENA.sceneName,
+                        namespace: ARENA.nameSpace,
+                        cameraid: ARENA.camName,
+                        username: ARENA.getDisplayName,
+                        mqtth: ARENA.mqttHost,
+                    };
+                    // ask runtime manager to start this program
+                    this.RuntimeManager.createModuleFromPersist(obj, avars);
+                } else {
+                    const parentId = obj.attributes.parent;
+                    if (parentId) {
+                        // Stash parentID map
+                        orphanObjects.set(parentId, obj);
+                        // Temporarily place it at scene or container root
+                        delete obj.attributes.parent;
                     }
-                }
-                for (let i = 0; i < deferredObjects.length; i++) {
-                    const obj = deferredObjects[i];
-                    if (obj.attributes.parent === this.camName) {
-                        continue; // don't load our own camera/head assembly
+                    if (containerObjName) {
+                        // Add first-level objects as children to container if applicable
+                        obj.attributes.parent = containerObjName;
                     }
                     const msg = {
                         object_id: obj.object_id,
@@ -437,11 +430,25 @@ export class Arena {
                         type: obj.type,
                         data: obj.attributes,
                     };
-                    console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
                 }
-                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true), 500);
             }
+            // Go through orphans and attach them to their parents
+            for (const [parentId, obj] of orphanObjects) {
+                const parent = document.getElementById(parentId);
+                if (parent) {
+                    try { // Handles DOMExceptions for circular references
+                        parent.appendChild(obj);
+                    } catch (e) {
+                        console.log('Error attaching orphan object', obj.object_id, e);
+                    }
+                }
+                console.log('No parent for orphan object', obj.object_id);
+            }
+            window.setTimeout(
+                () => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, !(parentName || prefixName)),
+                500,
+            );
         };
     };
 
