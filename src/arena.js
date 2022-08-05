@@ -270,9 +270,11 @@ export class Arena {
             ARENA.loadSceneObjects();
         });
 
-        // after scene is completely loaded, add user camera
-        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
-            ARENA.loadUser();
+        // after scene is completely loaded, add user camera if this is the initial scene load
+        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, (initialLoad) => {
+            if (initialLoad) {
+                ARENA.loadUser();
+            }
         });
     };
 
@@ -356,17 +358,16 @@ export class Arena {
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to load arena from
-     * @param {Object} position initial position
-     * @param {Object} rotation initial rotation
+     * @param {string} [parentName] parentObject to attach sceneObjects to
+     * @param {string} [prefixName] prefix to add to container
      */
-    loadSceneObjects(urlToLoad, position, rotation) {
+    loadSceneObjects(urlToLoad, parentName, prefixName) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
         xhr.send();
         xhr.responseType = 'json';
-        const deferredObjects = [];
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -382,11 +383,71 @@ export class Arena {
                     ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true);
                     return;
                 }
-                const arenaObjects = xhr.response;
-                for (let i = 0; i < arenaObjects.length; i++) {
-                    const obj = arenaObjects[i];
+                let containerObjName;
+                if (parentName && prefixName && document.getElementById(parentName)) {
+                    containerObjName = `${prefixName}_container`;
+                    // Make container to hold all scene objects
+                    const msg = {
+                        object_id: containerObjName,
+                        action: 'create',
+                        type: 'object',
+                        data: {parent: parentName},
+                    };
+                    this.Mqtt.processMessage(msg);
+                }
+                const arenaObjects = new Map(
+                    xhr.response.map((object) => [object.object_id, object]),
+                );
+
+                /**
+                 * Recursively creates objects with parents, keep list of descendants to prevent circular references
+                 * @param {Object} obj - msg from persistence
+                 * @param {Array} [descendants] - running list of descendants
+                 */
+                const createObj = (obj, descendants = []) => {
+                    const parent = obj.attributes.parent;
+                    if (obj.object_id === this.camName) {
+                        arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
+                        return;
+                    }
+                    // if parent is specified, but doesn't yet exist
+                    if (parent && document.getElementById(parent) === null) {
+                        // Check for circular references
+                        if (obj.object_id === parent || descendants.includes(parent)) {
+                            console.log('Circular reference detected, skipping', obj.object_id);
+                            arenaObjects.delete(obj.object_id);
+                            return;
+                        }
+                        if (arenaObjects.has(parent)) { // Does exist in pending objects
+                            // Recursively create parent, include this as child
+                            createObj(arenaObjects.get(parent), [...descendants, obj.object_id]);
+                        } else { // Parent doesn't exist in DOM, doesn't exist in pending arenaObjects, skip orphan
+                            console.log('Orphaned object detected, skipping', obj.object_id);
+                            arenaObjects.delete(obj.object_id);
+                            return;
+                        }
+                    }
+                    // Parent null or has been recursively created, create this object
+                    const msg = {
+                        object_id: obj.object_id,
+                        action: 'create',
+                        type: obj.type,
+                        data: obj.attributes,
+                    };
+                    this.Mqtt.processMessage(msg);
+                    arenaObjects.delete(obj.object_id);
+                };
+                let i = 0;
+                const xhrLen = xhr.response.length;
+                while (arenaObjects.size > 0) {
+                    if (++i > xhrLen) {
+                        console.err('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
+                        break;
+                    }
+                    const iter = arenaObjects.entries();
+                    const [objId, obj] = iter.next().value; // get first entry
                     if (obj.type === 'program') {
-                        // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+                    // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
                         const avars = {
                             scene: ARENA.sceneName,
                             namespace: ARENA.nameSpace,
@@ -396,51 +457,22 @@ export class Arena {
                         };
                         // ask runtime manager to start this program
                         this.RuntimeManager.createModuleFromPersist(obj, avars);
-                        continue;
-                    }
-                    if (obj.object_id === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
-                    if (obj.attributes.parent) {
-                        deferredObjects.push(obj);
+                        arenaObjects.delete(objId);
+                    } else if (obj.type === 'object') {
+                        if (containerObjName && obj.attributes.parent === undefined) {
+                            // Add first-level objects as children to container if applicable
+                            obj.attributes.parent = containerObjName;
+                        }
+                        createObj(obj);
                     } else {
-                        const msg = {
-                            object_id: obj.object_id,
-                            action: 'create',
-                            type: obj.type,
-                            data: obj.attributes,
-                        };
-                        if (position) {
-                            msg.data.position.x = msg.data.position.x + position.x;
-                            msg.data.position.y = msg.data.position.y + position.y;
-                            msg.data.position.z = msg.data.position.z + position.z;
-                        }
-                        if (rotation) {
-                            const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y,
-                                msg.data.rotation.z, msg.data.rotation.w);
-                            const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-                            r.multiply(q);
-                            msg.data.rotation = r;
-                        }
-
-                        this.Mqtt.processMessage(msg);
+                        // Scene Options, what else? Skip
+                        arenaObjects.delete(objId);
                     }
                 }
-                for (let i = 0; i < deferredObjects.length; i++) {
-                    const obj = deferredObjects[i];
-                    if (obj.attributes.parent === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
-                    const msg = {
-                        object_id: obj.object_id,
-                        action: 'create',
-                        type: obj.type,
-                        data: obj.attributes,
-                    };
-                    console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
-                    this.Mqtt.processMessage(msg);
-                }
-                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true), 500);
+                window.setTimeout(
+                    () => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, !containerObjName),
+                    500,
+                );
             }
         };
     };
