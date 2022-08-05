@@ -418,7 +418,7 @@ export class Arena {
                     const parentId = obj.attributes.parent;
                     if (parentId) {
                         // Stash parentID map
-                        orphanObjects.set(parentId, obj);
+                        orphanObjects.set(obj.object_id, parentId);
                         // Temporarily place it at scene or container root
                         delete obj.attributes.parent;
                     }
@@ -436,16 +436,18 @@ export class Arena {
                 }
             }
             // Go through orphans and attach them to their parents
-            for (const [parentId, obj] of orphanObjects) {
+            for (const [objId, parentId] of orphanObjects) {
+                const obj = document.getElementById(objId);
                 const parent = document.getElementById(parentId);
-                if (parent) {
+                if (parent && obj) {
                     try { // Handles DOMExceptions for circular references
                         parent.appendChild(obj);
                     } catch (e) {
-                        console.log('Error attaching orphan object', obj.object_id, e);
+                        console.log('Error attaching orphan object', objId, e);
                     }
+                } else {
+                    console.log('Missing object in relationship for', objId, parentId);
                 }
-                console.log('No parent for orphan object', obj.object_id);
             }
             window.setTimeout(
                 () => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, !(parentName || prefixName)),
