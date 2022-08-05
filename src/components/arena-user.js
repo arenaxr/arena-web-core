@@ -545,7 +545,7 @@ AFRAME.registerComponent('arena-user', {
         // frustum culling for WebRTC video streams;
         if (this.videoID) {
             let inFieldOfView = true;
-            if (arenaCameraComponent.isVideoFrustumCullingEnabled()) {
+            if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled()) {
                 if (this.el.contains(this.videoCube)) {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
@@ -555,7 +555,7 @@ AFRAME.registerComponent('arena-user', {
             } else if (inFieldOfView == false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
-            } else if (arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
+            } else if (arenaCameraComponent && arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
                 // check if A/V cut off distance has been reached
                 if (distance > ARENA.maxAVDist) {
                     this.muteVideo();
