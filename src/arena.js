@@ -441,6 +441,7 @@ export class Arena {
                 const parent = document.getElementById(parentId);
                 if (parent && obj) {
                     try { // Handles DOMExceptions for circular references
+                        obj.parentElement.removeChild(obj);
                         parent.appendChild(obj);
                     } catch (e) {
                         console.log('Error attaching orphan object', objId, e);
