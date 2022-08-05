@@ -1,6 +1,15 @@
+/**
+ * @fileoverview Handles getUserMedia video source
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2022, The CONIX Research Center. All rights reserved.
+ * @date 2022
+ */
+
 export class GetUserMediaARSource {
     constructor(options) {
         this.options = {
+            cameraFacingMode: 'enviornment',
             width: 1280,
             height: 720,
         }
@@ -71,7 +80,7 @@ export class GetUserMediaARSource {
             navigator.mediaDevices.getUserMedia({
                 audio: false,
                 video: {
-                    facingMode: "environment",
+                    facingMode: this.options.cameraFacingMode,
                     width: { ideal: this.options.width },
                     height: { ideal: this.options.height },
                 }

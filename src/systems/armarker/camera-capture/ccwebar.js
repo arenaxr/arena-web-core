@@ -3,8 +3,8 @@
  * @fileoverview Capture camera facing forward using getUserMedia
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
- * @date 2021
+ * Copyright (c) 2022, The CONIX Research Center. All rights reserved.
+ * @date 2022
  */
 
 import {CVWorkerMsgs} from '../worker-msgs.js';
@@ -57,6 +57,7 @@ export class WebARCameraCapture {
         this.frameWidth = 1280;
         this.frameHeight = 720;
         const options = {
+            cameraFacingMode: cameraFacingMode,
             width: this.frameWidth,
             height: this.frameHeight,
         };
@@ -191,7 +192,7 @@ export class WebARCameraCapture {
      */
     getCameraIntrinsics() {
         return {
-        // Focal lengths in pixels (these are equal for square pixels)
+            // Focal lengths in pixels (these are equal for square pixels)
             cx: (this.frameWidth / 2),
             cy: (this.frameHeight / 2),
             // Principal point in pixels (typically at or near the center of the viewport)

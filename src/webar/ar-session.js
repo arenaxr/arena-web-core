@@ -1,16 +1,18 @@
+/**
+ * @fileoverview AR session component for standard, non-webxr devices
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2022, The CONIX Research Center. All rights reserved.
+ * @date 2022
+ */
+
 const HIDDEN_CLASS = 'a-hidden';
 
 AFRAME.registerComponent('arena-webar-session', {
     schema: {
         enabled: {type: 'boolean', default: true},
-        drawTagsEnabled: {type: 'boolean', default: true},
-        quadSigma: {type: 'number', default: 0.2},
         imgWidth: {type: 'number', default: 1280},
         imgHeight: {type: 'number', default: 720},
-        cx: {type: 'number', default: 640},
-        cy: {type: 'number', default: 360},
-        fx: {type: 'number', default: 1280},
-        fy: {type: 'number', default: 1280},
     },
 
     init: async function() {
@@ -53,63 +55,10 @@ AFRAME.registerComponent('arena-webar-session', {
         el.addState('ar-mode');
         el.resize();
 
-        this.setupCursor();
-
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
 
         document.querySelector('a-scene').systems['armarker'].webXRSessionStarted();
-    },
-
-    setupCursor: function() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        // create cursor
-        let cursor = document.getElementById('mouse-cursor');
-        const cursorParent = cursor.parentNode;
-        cursorParent.removeChild(cursor);
-        cursor = document.createElement('a-cursor');
-        cursor.setAttribute('fuse', false);
-        cursor.setAttribute('scale', '0.1 0.1 0.1');
-        cursor.setAttribute('position', '0 0 -0.1');
-        if (urlParams.get('noreticle')) {
-            cursor.setAttribute('material', 'transparent: "true"; opacity: 0');
-        } else {
-            cursor.setAttribute('color', '#555');
-        }
-        cursor.setAttribute('max-distance', '10000');
-        cursorParent.appendChild(cursor);
-
-        window.lastMouseTarget = undefined;
-
-        // handle tap events
-        document.addEventListener('mousedown', function(e) {
-            const intersectedEl = cursor.components.cursor.intersectedEl;
-            if (intersectedEl) {
-                const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
-                intersectedEl.emit('mousedown', {
-                    'clicker': window.ARENA.camName,
-                    'intersection': {
-                        point: intersection.point,
-                    },
-                    'cursorEl': true,
-                }, false);
-            }
-        });
-
-        document.addEventListener('mouseup', function(e) {
-            const intersectedEl = cursor.components.cursor.intersectedEl;
-            if (intersectedEl) {
-                const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
-                intersectedEl.emit('mouseup', {
-                    'clicker': window.ARENA.camName,
-                    'intersection': {
-                        point: intersection.point,
-                    },
-                    'cursorEl': true,
-                }, false);
-            }
-        });
     },
 
     hideVRButtons: function() {

@@ -14,7 +14,7 @@ import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
-import {enterARNonWebXR} from './webar/';
+import {ARENAWebARUtils} from './webar/';
 import Swal from 'sweetalert2';
 
 /* global ARENA, KJUR */
@@ -721,7 +721,7 @@ export class Arena {
                 */
                 Swal.fire({
                     title: 'Enter AR Mode',
-                    html: `This is an immersive AR scene that requires access to your camera and device sensors.`,
+                    html: 'This is an immersive AR scene that requires access to your camera and device sensors.',
                     icon: 'info',
                     showConfirmButton: true,
                     confirmButtonText: 'Enter',
@@ -729,7 +729,7 @@ export class Arena {
                     if (this.isWebARViewer || AFRAME.utils.device.checkARSupport()) {
                         document.getElementsByTagName('a-scene')[0].enterAR();
                     } else {
-                        enterARNonWebXR();
+                        ARENAWebARUtils.enterARNonWebXR();
                     }
                 });
             } else if (this.skipav) {
