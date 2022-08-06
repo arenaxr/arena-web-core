@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.10.0](https://github.com/arenaxr/arena-web-core/compare/v1.9.0...v1.10.0) (2022-08-06)
+
+
+### Features
+
+* **build:** Add prism geometry ([79e708a](https://github.com/arenaxr/arena-web-core/commit/79e708aa5abbce5cab0ff9ba32b7e58fd5bff80e))
+* **jitsi-video:** support rendering local video; detect panoramic resolution ([e853b15](https://github.com/arenaxr/arena-web-core/commit/e853b1586ad3b7d2a0ce17df4baf08bdcec253bc))
+* **videosphere:** Add videosphere 360 native object support ([04217ac](https://github.com/arenaxr/arena-web-core/commit/04217ac3def10bcd1b8cfaca4b3d49f12b65dfdc))
+
+
+### Bug Fixes
+
+* **arena-user:** fixed load crash detecting arena-camera on slow networks ([cec3585](https://github.com/arenaxr/arena-web-core/commit/cec35856210777a38e6d3653ed9316ebdee509d2))
+* **build:** Update schema, esp. removing unsupported items from: text, thickline ([#482](https://github.com/arenaxr/arena-web-core/issues/482)) ([c41e68d](https://github.com/arenaxr/arena-web-core/commit/c41e68d2465cd4feb1113b7b703a02653c64d495))
+* disable check for vr headset in custom AR ([124ddae](https://github.com/arenaxr/arena-web-core/commit/124ddae748681237faaa634ad8e16e958fb2cd23))
+* **jitsi:** fixed jitsi-video displayname autolink to jitsi id ([950db70](https://github.com/arenaxr/arena-web-core/commit/950db706efb0b69373e6a5d9f3e72aa03b3698d6))
+* only loadUser on initial loadSceneObjects ([6ff7068](https://github.com/arenaxr/arena-web-core/commit/6ff706849a6a16b0a20899abc6862910ad3283fa))
+* use video html tags in readme [no ci] ([6892299](https://github.com/arenaxr/arena-web-core/commit/6892299e56f7e3a07bc2cf9637d4bf3873c7eae6))
+* use world position for camera clientEvents ([1c92110](https://github.com/arenaxr/arena-web-core/commit/1c92110ccd5883b207a20980b46c52db6043cdca)), closes [#484](https://github.com/arenaxr/arena-web-core/issues/484)
+* video embeds [no ci] ([538d6a0](https://github.com/arenaxr/arena-web-core/commit/538d6a06b10e581896d39f1bca265954d3e79166))
+
 ## [1.9.0](https://github.com/arenaxr/arena-web-core/compare/v1.8.1...v1.9.0) (2022-07-14)
 
 
