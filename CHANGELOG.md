@@ -9,7 +9,7 @@
 * **jitsi-video:** support rendering local video; detect panoramic resolution ([e853b15](https://github.com/arenaxr/arena-web-core/commit/e853b1586ad3b7d2a0ce17df4baf08bdcec253bc))
 * **videosphere:** Add videosphere 360 native object support ([04217ac](https://github.com/arenaxr/arena-web-core/commit/04217ac3def10bcd1b8cfaca4b3d49f12b65dfdc))
 * **webar:** Add WebAR/SpotAR support for non-WebXR mobile devices ([2cb9f37](https://github.com/arenaxr/arena-web-core/commit/2cb9f3734b92bb8b13b3a5aa871f1d4aea83953e))
-* 
+
 ### Bug Fixes
 
 * **arena-user:** fixed load crash detecting arena-camera on slow networks ([cec3585](https://github.com/arenaxr/arena-web-core/commit/cec35856210777a38e6d3653ed9316ebdee509d2))
