@@ -1,27 +1,34 @@
 /* global AFRAME */
 
+/**
+ * @fileoverview Capsule geometry. Adds geometry to render a capsule primitive.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
+// TODO (mwfarb): use three r138, and we can use THREE.CapsuleGeometry() directly.
+
 AFRAME.registerGeometry('capsule', {
     schema: {
-        height : {default: 2, min: 0},
+        length : {default: 1, min: 0},
         radius : {default: 1, min: 0},
-        segmentsHeight : {default: 18, min: 1},
+        segmentsCap : {default: 18, min: 4},
         segmentsRadial : {default: 36, min: 8},
-        capsSegments : {default: 8, min: 2},
-        thetaStart : {default: 0, min: 0},
-        thetaLength : {default: 360, min: 0},
 },
 
 init: function(data) {
     this.geometry = new THREE.CapsuleBufferGeometry(
         data.radius,
         data.radius,
-        data.height,
+        data.length,
+        data.segmentsCap,
         data.segmentsRadial,
-        data.segmentsHeight,
-        data.capsSegments,
-        data.capsSegments,
-        data.thetaStart * (Math.PI / 180),
-        data.thetaLength * (Math.PI / 180)
+        data.segmentsCap,
+        data.segmentsCap,
+        0,
+        Math.PI * 2
     );
 },
 

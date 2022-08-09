@@ -19,35 +19,25 @@
                                         "capsule"
                                     ]
                                 },
-                                "height": {
+                                "length": {
                                     "type": "number",
-                                    "title": "height",
-                                    "default": 2
+                                    "title": "length",
+                                    "default": 1
                                 },
                                 "radius": {
                                     "type": "number",
                                     "title": "radius",
                                     "default": 1
                                 },
-                                "segmentsHeight": {
+                                "segmentsCap": {
                                     "type": "number",
-                                    "title": "segments height",
+                                    "title": "segments capsule",
                                     "default": 18
                                 },
                                 "segmentsRadial": {
                                     "type": "number",
                                     "title": "segments radial",
                                     "default": 36
-                                },
-                                "thetaLength": {
-                                    "type": "number",
-                                    "title": "theta length",
-                                    "default": 360
-                                },
-                                "thetaStart": {
-                                    "type": "number",
-                                    "title": "theta start",
-                                    "default": 0
                                 }
                             }
                         },
@@ -83,7 +73,7 @@
                     "required": [
                         "object_type",
                         "radius",
-                        "height"
+                        "length"
                     ]
                 }
             }
