@@ -9,6 +9,11 @@
        "file":"schemas/circle.json",
        "title":"Circle"
     },
+    "capsule":{
+       "description":"Capsule Geometry",
+       "file":"schemas/capsule.json",
+       "title":"Capsule"
+    },
     "cone":{
        "description":"Cone Geometry",
        "file":"schemas/cone.json",

@@ -1,0 +1,99 @@
+{
+    "title": "Capsule",
+    "description": "Capsule Geometry",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "capsule"
+                                    ]
+                                },
+                                "height": {
+                                    "type": "number",
+                                    "title": "height",
+                                    "default": 2
+                                },
+                                "radius": {
+                                    "type": "number",
+                                    "title": "radius",
+                                    "default": 1
+                                },
+                                "segmentsHeight": {
+                                    "type": "number",
+                                    "title": "segments height",
+                                    "default": 18
+                                },
+                                "segmentsRadial": {
+                                    "type": "number",
+                                    "title": "segments radial",
+                                    "default": 36
+                                },
+                                "thetaLength": {
+                                    "type": "number",
+                                    "title": "theta length",
+                                    "default": 360
+                                },
+                                "thetaStart": {
+                                    "type": "number",
+                                    "title": "theta start",
+                                    "default": 0
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                        }
+                    ],
+                    "title": "Capsule Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "capsule",
+                        "radius": 1,
+                        "material": {
+                            "color": "#7f7f7f"
+                        },
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        }
+                    },
+                    "required": [
+                        "object_type",
+                        "radius",
+                        "height"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}
