@@ -96,6 +96,8 @@ export class Arena {
             const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
             this.showEchoDisplayName(speaker);
         });
+        // setup webar session
+        this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, ARENAWebARUtils.handleARButtonForNonWebXRMobile);
     }
 
     /**

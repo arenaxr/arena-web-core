@@ -241,4 +241,12 @@ export class ARENAUtils {
         }
         return valid;
     };
+
+    /**
+     * Utility to check if device is in landscape mode.
+     * @return {boolean} True if device is in landscape mode.
+     */
+    static isLandscapeMode() {
+        return (window.orientation == 90 || window.orientation == -90);
+    }
 }

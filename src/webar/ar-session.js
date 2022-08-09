@@ -6,6 +6,8 @@
  * @date 2022
  */
 
+import {ARENAUtils} from '../utils.js';
+
 const HIDDEN_CLASS = 'a-hidden';
 
 AFRAME.registerComponent('arena-webar-session', {
@@ -29,6 +31,12 @@ AFRAME.registerComponent('arena-webar-session', {
         // hide icons
         const icons = document.getElementById('icons-div-container');
         icons.style.display = 'none';
+
+        // unexpand chat
+        const chatExpandBtn = document.getElementById('chat-button-group-expand-icon');
+        if (chatExpandBtn.classList.contains('fa-angle-left')) {
+            chatExpandBtn.click();
+        }
 
         const camera = document.getElementById('my-camera');
         // disable press and move controls
@@ -61,6 +69,10 @@ AFRAME.registerComponent('arena-webar-session', {
         document.querySelector('a-scene').systems['armarker'].webXRSessionStarted();
     },
 
+    update() {
+        this.onResize();
+    },
+
     hideVRButtons: function() {
         const data = this.data;
         const el = this.el;
@@ -76,7 +88,7 @@ AFRAME.registerComponent('arena-webar-session', {
         const el = this.el;
 
         // set new camera projection matrix parameters
-        if (window.orientation == 90 || window.orientation == -90) {
+        if (ARENAUtils.isLandscapeMode()) {
             if (window.innerWidth > data.frameWidth || window.innerHeight > data.frameHeight) {
                 el.camera.fov = 31; // found empirically
             } else {

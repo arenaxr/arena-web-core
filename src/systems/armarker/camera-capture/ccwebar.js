@@ -9,6 +9,7 @@
 
 import {CVWorkerMsgs} from '../worker-msgs.js';
 import {GetUserMediaARSource} from './getusermedia-source.js';
+import {ARENAUtils} from '../../../utils.js';
 
 /**
  * Grab front facing camera frames using getUserMedia()
@@ -74,28 +75,12 @@ export class WebARCameraCapture {
                     this.video = videoElem;
                     document.body.appendChild(videoElem);
 
-                    this.frameWidth = this.video.videoWidth;
-                    this.frameHeight = this.video.videoHeight;
-
                     this.canvas = document.createElement('canvas');
                     this.canvasCtx = this.canvas.getContext('2d');
-                    this.canvas.width = this.frameWidth;
-                    this.canvas.height = this.frameHeight;
-
-                    this.frameGsPixels = new Uint8ClampedArray(
-                        this.frameWidth * this.frameHeight,
-                    ); // grayscale (1 value per pixel)
-
-                    // update camera intrinsics
-                    this.frameCamera = this.getCameraIntrinsics();
-
-                    const sceneEl = document.querySelector('a-scene');
-                    sceneEl.setAttribute('arena-webar-session', 'frameWidth', this.frameWidth);
-                    sceneEl.setAttribute('arena-webar-session', 'frameHeight', this.frameHeight);
 
                     // init frame size to screen size
-                    this.handleOrientation();
-                    window.addEventListener('resize', this.handleOrientation.bind(this));
+                    this.onResize();
+                    window.addEventListener('resize', this.onResize.bind(this));
 
                     resolve(this);
                 })
@@ -107,12 +92,37 @@ export class WebARCameraCapture {
     }
 
     /**
-     * When device changes orientation, handle screen size changes
+     * When device's screen changes size/changes orientation, handle screen size changes
      * @private
      */
-    handleOrientation() {
+    onResize() {
         this.arSource.resize(window.innerWidth, window.innerHeight);
         this.arSource.copyDimensionsTo(this.canvas);
+
+        const videoWidth = this.video.videoWidth;
+        const videoHeight = this.video.videoHeight;
+
+        if (ARENAUtils.isLandscapeMode()) {
+            this.frameWidth = Math.max(videoWidth, videoHeight);
+            this.frameHeight = Math.min(videoWidth, videoHeight);
+        } else {
+            this.frameWidth = Math.min(videoWidth, videoHeight);
+            this.frameHeight = Math.max(videoWidth, videoHeight);
+        }
+
+        this.canvas.width = this.frameWidth;
+        this.canvas.height = this.frameHeight;
+
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.setAttribute('arena-webar-session', 'frameWidth', this.frameWidth);
+        sceneEl.setAttribute('arena-webar-session', 'frameHeight', this.frameHeight);
+
+        this.frameGsPixels = new Uint8ClampedArray(
+            this.frameWidth * this.frameHeight,
+        ); // grayscale (1 value per pixel)
+
+        // update camera intrinsics
+        this.frameCamera = this.getCameraIntrinsics();
     }
 
     /**

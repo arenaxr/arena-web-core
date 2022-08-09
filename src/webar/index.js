@@ -5,7 +5,7 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-import '../webar/ar-session.js';
+import './ar-session.js';
 
 const HIDDEN_CLASS = 'a-hidden';
 
@@ -28,28 +28,17 @@ export class ARENAWebARUtils {
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
-        const sceneEl = document.querySelector('a-scene');
-        if (!sceneEl) {
-            window.addEventListener('DOMContentLoaded', ARENAWebARUtils.handleARButtonForNonWebXRMobile);
-            return;
-        }
-
         if (this.isWebARViewer) {
             return;
         }
 
-        if (sceneEl.hasLoaded) {
-            const vrModeUI = sceneEl.components['vr-mode-ui'];
-            const enterAREl = vrModeUI.enterAREl;
-            enterAREl.classList.remove(HIDDEN_CLASS);
-            enterAREl.removeEventListener('click', vrModeUI.onEnterARButtonClick, true);
-            enterAREl.addEventListener('click', function() {
-                ARENAWebARUtils.enterARNonWebXR();
-            });
-        } else {
-            sceneEl.addEventListener('loaded', ARENAWebARUtils.handleARButtonForNonWebXRMobile);
-        }
+        const sceneEl = document.querySelector('a-scene');
+        const vrModeUI = sceneEl.components['vr-mode-ui'];
+        const enterAREl = vrModeUI.enterAREl;
+        enterAREl.classList.remove(HIDDEN_CLASS);
+        enterAREl.removeEventListener('click', vrModeUI.onEnterARButtonClick, true);
+        enterAREl.addEventListener('click', function() {
+            ARENAWebARUtils.enterARNonWebXR();
+        });
     };
 }
-
-ARENAWebARUtils.handleARButtonForNonWebXRMobile();
