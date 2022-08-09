@@ -4,8 +4,8 @@ AFRAME.registerGeometry('capsule', {
     schema: {
         height : {default: 2, min: 0},
         radius : {default: 1, min: 0},
-        segmentsHeight : {default: 18, min: 2},
-        segmentsRadial : {default: 36, min: 2},
+        segmentsHeight : {default: 18, min: 1},
+        segmentsRadial : {default: 36, min: 8},
         capsSegments : {default: 8, min: 2},
         thetaStart : {default: 0, min: 0},
         thetaLength : {default: 360, min: 0},

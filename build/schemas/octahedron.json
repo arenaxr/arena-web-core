@@ -19,6 +19,11 @@
                                         "octahedron"
                                     ]
                                 },
+                                "detail": {
+                                    "type": "number",
+                                    "title": "detail",
+                                    "default": 0
+                                },
                                 "radius": {
                                     "type": "number",
                                     "title": "radius",

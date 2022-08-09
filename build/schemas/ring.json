@@ -22,17 +22,17 @@
                                 "radiusInner": {
                                     "type": "number",
                                     "title": "radius inner",
-                                    "default": 1
+                                    "default": 0.8
                                 },
                                 "radiusOuter": {
                                     "type": "number",
                                     "title": "radius outer",
-                                    "default": 1
+                                    "default": 1.2
                                 },
                                 "segmentsPhi": {
                                     "type": "number",
                                     "title": "segments phi",
-                                    "default": 8
+                                    "default": 10
                                 },
                                 "segmentsTheta": {
                                     "type": "number",
