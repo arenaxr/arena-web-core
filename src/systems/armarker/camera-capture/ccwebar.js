@@ -74,14 +74,28 @@ export class WebARCameraCapture {
                     this.video = videoElem;
                     document.body.appendChild(videoElem);
 
+                    this.frameWidth = this.video.videoWidth;
+                    this.frameHeight = this.video.videoHeight;
+
                     this.canvas = document.createElement('canvas');
                     this.canvasCtx = this.canvas.getContext('2d');
                     this.canvas.width = this.frameWidth;
                     this.canvas.height = this.frameHeight;
 
+                    this.frameGsPixels = new Uint8ClampedArray(
+                        this.frameWidth * this.frameHeight,
+                    ); // grayscale (1 value per pixel)
+
+                    // update camera intrinsics
+                    this.frameCamera = this.getCameraIntrinsics();
+
+                    const sceneEl = document.querySelector('a-scene');
+                    sceneEl.setAttribute('arena-webar-session', 'frameWidth', this.frameWidth);
+                    sceneEl.setAttribute('arena-webar-session', 'frameHeight', this.frameHeight);
+
                     // init frame size to screen size
                     this.handleOrientation();
-                    window.addEventListener('deviceorientation', this.handleOrientation.bind(this));
+                    window.addEventListener('resize', this.handleOrientation.bind(this));
 
                     resolve(this);
                 })
@@ -99,13 +113,6 @@ export class WebARCameraCapture {
     handleOrientation() {
         this.arSource.resize(window.innerWidth, window.innerHeight);
         this.arSource.copyDimensionsTo(this.canvas);
-
-        this.frameGsPixels = new Uint8ClampedArray(
-            this.frameWidth * this.frameHeight,
-        ); // grayscale (1 value per pixel)
-
-        // update camera intrinsics
-        this.frameCamera = this.getCameraIntrinsics();
     }
 
     /**

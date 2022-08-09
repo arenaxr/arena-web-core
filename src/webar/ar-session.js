@@ -11,8 +11,8 @@ const HIDDEN_CLASS = 'a-hidden';
 AFRAME.registerComponent('arena-webar-session', {
     schema: {
         enabled: {type: 'boolean', default: true},
-        imgWidth: {type: 'number', default: 1280},
-        imgHeight: {type: 'number', default: 720},
+        frameWidth: {type: 'number', default: 1280},
+        frameHeight: {type: 'number', default: 720},
     },
 
     init: async function() {
@@ -76,32 +76,22 @@ AFRAME.registerComponent('arena-webar-session', {
         const el = this.el;
 
         // set new camera projection matrix parameters
-        if (window.innerWidth > data.imgWidth || window.innerHeight > data.imgHeight) {
-            el.camera.fov = 31; // found empirically
+        if (window.orientation == 90 || window.orientation == -90) {
+            if (window.innerWidth > data.frameWidth || window.innerHeight > data.frameHeight) {
+                el.camera.fov = 31; // found empirically
+            } else {
+                el.camera.fov = 26; // found empirically
+            }
         } else {
-            el.camera.fov = 26; // found empirically
+            if (window.innerWidth > data.frameWidth || window.innerHeight > data.frameHeight) {
+                el.camera.fov = 64; // found empirically
+            } else {
+                el.camera.fov = 77; // found empirically
+            }
         }
         el.camera.aspect = window.innerWidth / window.innerHeight;
         el.camera.near = 0.001; // webxr viewer parameters
         el.camera.far = 1000.0;
         el.camera.updateProjectionMatrix();
-
-        // webxr:
-        // el.camera.projectionMatrix.elements[0] = 1.7113397121429443; // 1.6807010173797607
-        // el.camera.projectionMatrix.elements[1] = 0;
-        // el.camera.projectionMatrix.elements[2] = 0;
-        // el.camera.projectionMatrix.elements[3] = 0;
-        // el.camera.projectionMatrix.elements[4] = 0;
-        // el.camera.projectionMatrix.elements[5] = 3.5782558917999268; // 2.9894068241119385
-        // el.camera.projectionMatrix.elements[6] = 0;
-        // el.camera.projectionMatrix.elements[7] = 0;
-        // el.camera.projectionMatrix.elements[8] = 0;
-        // el.camera.projectionMatrix.elements[9] = 0;
-        // el.camera.projectionMatrix.elements[10] = -1.0000009536743164;
-        // el.camera.projectionMatrix.elements[11] = -1;
-        // el.camera.projectionMatrix.elements[12] = 0;
-        // el.camera.projectionMatrix.elements[13] = 0;
-        // el.camera.projectionMatrix.elements[14] = -0.001000000978820026;
-        // el.camera.projectionMatrix.elements[15] = 0;
     },
 });

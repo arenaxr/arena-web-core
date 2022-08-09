@@ -34,10 +34,6 @@ export class GetUserMediaARSource {
         }
     }
 
-    getVideo() {
-        return this.video;
-    }
-
     resize(width, height) {
         var screenWidth = width;
         var screenHeight = height;

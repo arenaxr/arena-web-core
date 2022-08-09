@@ -47,7 +47,7 @@ export class ARMarkerRelocalization {
         0, 0, 0, 1);
 
     /* error and movement thresholds */
-    DTAG_ERROR_THRESH = 7e-6;
+    DTAG_ERROR_THRESH = 1e-3;
     MOVE_THRESH = 0.05;
     ROT_THRESH = 0.087;
 

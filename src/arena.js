@@ -751,13 +751,7 @@ export class Arena {
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
                 */
-                Swal.fire({
-                    title: 'Enter AR Mode',
-                    html: 'This is an immersive AR scene that requires access to your camera and device sensors.',
-                    icon: 'info',
-                    showConfirmButton: true,
-                    confirmButtonText: 'Enter',
-                }).then(() => {
+                this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
                     if (this.isWebARViewer || AFRAME.utils.device.checkARSupport()) {
                         document.getElementsByTagName('a-scene')[0].enterAR();
                     } else {

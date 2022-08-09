@@ -20,19 +20,8 @@ export class ARENAWebARUtils {
         // if (!AFRAME.utils.device.isMobile()) {
         //     return;
         // }
-
         const sceneEl = document.querySelector('a-scene');
-
-        // enforce landscape mode
-        if (window.orientation == 90 || window.orientation == -90) {
-            sceneEl.setAttribute('arena-webar-session', '');
-        } else {
-            Swal.fire(
-                'Incorrect Orientation',
-                'This AR experience only works in landscape mode! Please rotate your device.',
-                'warning',
-            );
-        }
+        sceneEl.setAttribute('arena-webar-session', '');
     }
 
     /**
