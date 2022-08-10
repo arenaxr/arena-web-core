@@ -35,6 +35,7 @@ import './text-input.js';
 import './thickline/index.js';
 import './threejs-scene.js';
 import './ttl.js';
+import './ui';
 import './video-control.js';
 
 /**

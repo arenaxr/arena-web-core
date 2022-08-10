@@ -16,7 +16,7 @@ import './arena.js'; // ARENA
 import './ui/'; // 2D UI
 import './aframe-mods/'; // AFRAME modifications
 import './systems/'; // custom AFRAME systems
-import './components/'; // custom AFRAME components
 import './geometries/'; // custom AFRAME geometries
+import './components/'; // custom AFRAME components
 import './webxr/'; // special handler for webxr devices
 import './webar/'; // special handler for non-webxr devices
