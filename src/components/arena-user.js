@@ -282,26 +282,6 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('visible', false);
     },
 
-    drawVideoPano() {
-        const el = this.el;
-
-        // attach video to head
-        const videoCube = document.createElement('a-videosphere');
-        videoCube.setAttribute('id', this.videoID + 'cube');
-        videoCube.setAttribute('material', 'shader', 'flat');
-        videoCube.setAttribute('material', 'side', 'back');
-        videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
-        videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-        videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
-        videoCube.setAttribute('position', '0 0 0');
-        videoCube.setAttribute('radius', '100');
-
-        el.appendChild(videoCube);
-        this.videoCube = videoCube;
-
-        this.headModel.setAttribute('visible', false);
-    },
-
     removeVideoCube() {
         const el = this.el;
         const data = this.data;
@@ -332,11 +312,7 @@ AFRAME.registerComponent('arena-user', {
             const jistiVideo = document.getElementById(this.videoID);
             if (jistiVideo) {
                 if (!this.videoCube) {
-                    if (data.presence === 'Panoramic') {
-                        this.drawVideoPano();
-                    } else {
-                        this.drawVideoCube();
-                    }
+                    this.drawVideoCube();
                 }
             }
         } else {
@@ -431,7 +407,7 @@ AFRAME.registerComponent('arena-user', {
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
                 const data = user.components['arena-user'].data;
-                if (data.pano || data.presence === 'Panoramic') {
+                if (data.pano) {
                     panoIds.push(data.jitsiId);
                 }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
@@ -550,7 +526,7 @@ AFRAME.registerComponent('arena-user', {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
-            if (this.data.pano || this.data.presence === 'Panoramic') {
+            if (this.data.pano) {
                 this.evaluateRemoteResolution(1920);
             } else if (inFieldOfView == false) {
                 this.muteVideo();

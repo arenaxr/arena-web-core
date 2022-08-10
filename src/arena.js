@@ -765,9 +765,8 @@ export class Arena {
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
             } else if (!this.noav && allowJitsi) {
                 window.setupAV(() => {
-                    const pano = document.getElementById('presenceSelect').value == 'Panoramic';
                     // Initialize Jitsi videoconferencing after A/V setup window
-                    this.Jitsi = ARENAJitsi.init(this.jitsiHost, pano);
+                    this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 });
             }
 

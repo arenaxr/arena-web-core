@@ -619,7 +619,7 @@ export class ARENAJitsi {
      * This function is called when we disconnect.
      */
     disconnect() {
-        console.warning('Conference server disconnected!');
+        console.warn('Conference server disconnected!');
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
