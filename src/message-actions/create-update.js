@@ -68,7 +68,7 @@ export class CreateUpdate {
             let addObj = false;
             if (!entityEl) {
                 // create object
-                if (message.data.object_type === 'videosphere'){
+                if (message.data.object_type === 'videosphere') {
                     entityEl = document.createElement('a-videosphere');
                 } else {
                     entityEl = document.createElement('a-entity');
@@ -88,9 +88,11 @@ export class CreateUpdate {
             if (addObj) {
                 // Parent/Child handling
                 if (message.data.parent) {
-                    const parentName = (ARENA.camName == message.data.parent) ? 'my-camera' : message.data.parent; // our camera is named 'my-camera'
+                    // our camera is named 'my-camera'
+                    const parentName = (ARENA.camName === message.data.parent) ? 'my-camera' : message.data.parent;
                     const parentEl = document.getElementById(parentName);
-                    if (parentEl) {
+                    if (parentEl && message.data.camera === undefined) {
+                        entityEl.removeAttribute('parent');
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
                     } else {
