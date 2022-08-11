@@ -90,7 +90,7 @@ export class CreateUpdate {
                 if (message.data.parent) {
                     let parentName = message.data.parent;
                     if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
-                        if (!!message.data.camera) { // Don't attach extra cameras, use own id to skip
+                        if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
                             parentName = 'my-camera';
                         } else {
                             return;
