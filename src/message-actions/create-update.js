@@ -88,10 +88,16 @@ export class CreateUpdate {
             if (addObj) {
                 // Parent/Child handling
                 if (message.data.parent) {
-                    // our camera is named 'my-camera'
-                    const parentName = (ARENA.camName === message.data.parent) ? 'my-camera' : message.data.parent;
+                    let parentName = message.data.parent;
+                    if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
+                        if (!!message.data.camera) { // Don't attach extra cameras, use own id to skip
+                            parentName = 'my-camera';
+                        } else {
+                            return;
+                        }
+                    }
                     const parentEl = document.getElementById(parentName);
-                    if (parentEl && message.data.camera === undefined) {
+                    if (parentEl) {
                         entityEl.removeAttribute('parent');
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
