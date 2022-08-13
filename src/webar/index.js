@@ -20,6 +20,12 @@ export class ARENAWebARUtils {
         // if (!AFRAME.utils.device.isMobile()) {
         //     return;
         // }
+
+        // hack: only allow smartphones and tablets?
+        if (!('ontouchstart' in window)) {
+            return;
+        }
+
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-webar-session', '');
     }
@@ -29,6 +35,11 @@ export class ARENAWebARUtils {
      */
     static handleARButtonForNonWebXRMobile() {
         if (this.isWebARViewer) {
+            return;
+        }
+
+        // hack: only allow smartphones and tablets?
+        if (!('ontouchstart' in window)) {
             return;
         }
 
