@@ -22,7 +22,8 @@ jobs:
       - name: Checkout code
         if: ${{ steps.release.outputs.release_created }}  
         uses: actions/checkout@v3
-        fetch-depth: 0
+        with:
+            fetch-depth: 0
       - name: Get release
         if: ${{ steps.release.outputs.release_created }}
         id: get_release
