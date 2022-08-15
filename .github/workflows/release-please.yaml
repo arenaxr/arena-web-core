@@ -25,7 +25,7 @@ jobs:
       - name: Get release
         if: ${{ steps.release.outputs.release_created }}
         id: get_release
-        uses: bruceadams/get-release@v1.2.3
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"        
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push Docker image
@@ -37,7 +37,7 @@ jobs:
             chash=${{ github.sha }}
             version=${{ steps.get_release.outputs.tag_name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_release.outputs.tag_name }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_release.outputs.tag }}
       - name: Image digest
         if: ${{ steps.release.outputs.release_created }}      
         run: echo ${{ steps.docker_build.outputs.digest }}
