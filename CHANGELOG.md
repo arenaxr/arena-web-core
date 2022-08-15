@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/arenaxr/arena-web-core/compare/v1.11.0...v1.11.1) (2022-08-15)
+
+
+### Bug Fixes
+
+* release version ([2c2c3d9](https://github.com/arenaxr/arena-web-core/commit/2c2c3d96f5520b259c7ca0b111d02196a526fe90))
+
 ## [1.11.0](https://github.com/arenaxr/arena-web-core/compare/v1.10.0...v1.11.0) (2022-08-15)
 
 
