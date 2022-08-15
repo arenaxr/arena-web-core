@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.11.2](https://github.com/arenaxr/arena-web-core/compare/v1.11.1...v1.11.2) (2022-08-15)
+
+
+### Bug Fixes
+
+* checkout version ([b522a5b](https://github.com/arenaxr/arena-web-core/commit/b522a5badc73a1453ff28dc586622aa4ada5d0ce))
+* fetch action params ([1f6495d](https://github.com/arenaxr/arena-web-core/commit/1f6495d02bb41ab3ae0909bc2089ee637e3af274))
+* fetch tags ([05ff5e7](https://github.com/arenaxr/arena-web-core/commit/05ff5e7f43a86765ae2109014826784618135a74))
+
 ## [1.11.1](https://github.com/arenaxr/arena-web-core/compare/v1.11.0...v1.11.1) (2022-08-15)
 
 
