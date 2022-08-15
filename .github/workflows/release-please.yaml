@@ -35,10 +35,10 @@ jobs:
         with:
           build-args: |
             chash=${{ github.sha }}
-            version=${{ steps.get_release.outputs.tag_name }}
+            version=${{ steps.get_release.outputs.tag }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_release.outputs.tag }}
       - name: Image digest
-        if: ${{ steps.release.outputs.release_created }}      
+        if: ${{ steps.release.outputs.release_created }}
         run: echo ${{ steps.docker_build.outputs.digest }}
       
