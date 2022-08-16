@@ -350,16 +350,6 @@ export class Arena {
         }
         SideMenu.setupIcons();
 
-        if (this.skipav) {
-            // Directly initialize Jitsi videoconferencing
-            this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-        } else if (!this.noav && this.isJitsiPermitted()) {
-            window.setupAV(() => {
-                // Initialize Jitsi videoconferencing after A/V setup window
-                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-            });
-        }
-
         // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
         if (this.health) {
             this.health.removeError('slow.network');
@@ -765,6 +755,14 @@ export class Arena {
                     } else {
                         ARENAWebARUtils.enterARNonWebXR();
                     }
+                });
+            } else if (this.skipav) {
+                // Directly initialize Jitsi videoconferencing
+                this.Jitsi = ARENAJitsi.init(this.jitsiHost);
+            } else if (!this.noav && this.isJitsiPermitted()) {
+                window.setupAV(() => {
+                    // Initialize Jitsi videoconferencing after A/V setup window
+                    this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 });
             }
 
