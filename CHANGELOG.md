@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.12.0](https://github.com/arenaxr/arena-web-core/compare/v1.11.2...v1.12.0) (2022-08-21)
+
+
+### Features
+
+* Add draco decoder ([dc99525](https://github.com/arenaxr/arena-web-core/commit/dc99525c42c75d1e802d762749e4d018ecc9128d)), closes [#479](https://github.com/arenaxr/arena-web-core/issues/479)
+
+
+### Bug Fixes
+
+* **jitsi:** fixed [#492](https://github.com/arenaxr/arena-web-core/issues/492), arcore permissions ([dc12cf0](https://github.com/arenaxr/arena-web-core/commit/dc12cf0534749e7a7cee50b74a63e9cd601ee163))
+* stop meterDraw, meterProcess on avsetup hide ([d220910](https://github.com/arenaxr/arena-web-core/commit/d220910c6f11c145a1858616848b9280e75e01c6))
+
 ## [1.11.2](https://github.com/arenaxr/arena-web-core/compare/v1.11.0...v1.11.2) (2022-08-15)
 
 ### Bug Fixes
