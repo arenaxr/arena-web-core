@@ -260,8 +260,8 @@ window.setupAV = (callback) => {
         const vol = meterProcess.volume * 100 * 3;
         micMeter.setAttribute('style', `width: ${vol}%`);
         micMeter.setAttribute('aria-valuenow', '' + vol);
-        // set up the next visual callback if setupAV is not hidden
-        if (!setupAV.classList.contains('d-none')) {
+        // set up the next visual callback if setupPanel is not hidden
+        if (!setupPanel.classList.contains('d-none')) {
             window.requestAnimationFrame(micDrawLoop);
         } else {
             meterProcess.shutdown();
