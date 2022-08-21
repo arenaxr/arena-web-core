@@ -42,12 +42,10 @@ AFRAME.registerComponent('press-and-move', {
 
         this.velocity = new THREE.Vector3();
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
-
         const self = this;
         window.addEventListener('touchstart', function(evt) {
             evt.preventDefault();
-            if (!self.timer && evt.touches.length == 1) { // let gesture-detector handle 2+ touches
+            if (!self.timer && evt.touches.length === 1) { // let gesture-detector handle 2+ touches
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;
                 }, LONG_PRESS_DURATION_THRESHOLD);
