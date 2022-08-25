@@ -8,7 +8,9 @@
  * @date 2020
  */
 
-// TODO (mwfarb): use three r138, and we can use THREE.CapsuleGeometry() directly.
+// TODO (mwfarb): use three ~r138, and we can use THREE.CapsuleGeometry() directly.
+
+// Currently using https://github.com/maximeq/three-js-capsule-geometry
 
 AFRAME.registerGeometry('capsule', {
     schema: {
