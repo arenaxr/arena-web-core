@@ -174,6 +174,10 @@ AFRAME.registerComponent('arena-camera', {
         const data = this.data;
         if (oldData.showStats !== data.showStats) {
             document.getElementById('pose-stats').style.display = (data.showStats) ? 'block' : 'none';
+            if (this.data.showStats) { // update initial position of stats when opened
+                document.getElementById('pose-stats').textContent =
+                    `Position: ${ARENAUtils.coordsToText(data.position)}\r\nRotation: ${ARENAUtils.rotToText(data.rotation)}`;
+            }
         }
     },
     /**
