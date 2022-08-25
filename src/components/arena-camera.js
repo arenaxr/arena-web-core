@@ -29,7 +29,7 @@ AFRAME.registerComponent('arena-camera', {
         enabled: {type: 'boolean', default: false},
         vioEnabled: {type: 'boolean', default: false},
         displayName: {type: 'string', default: 'No Name'},
-        color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
+        color: {type: 'string', default: '#' + ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
         position: {type: 'vec3', default: new THREE.Vector3()},
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},

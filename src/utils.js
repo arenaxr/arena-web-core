@@ -249,4 +249,9 @@ export class ARENAUtils {
     static isLandscapeMode() {
         return (window.orientation == 90 || window.orientation == -90);
     }
+
+    static numToPaddedHex(num, len) {
+        const str = num.toString(16);
+        return "0".repeat(len - str.length) + str;
+    }
 }
