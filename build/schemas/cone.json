@@ -22,7 +22,7 @@
                                 "height": {
                                     "type": "number",
                                     "title": "height",
-                                    "default": 2
+                                    "default": 1
                                 },
                                 "openEnded": {
                                     "type": "boolean",
