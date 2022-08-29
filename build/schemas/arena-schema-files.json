@@ -54,10 +54,10 @@
        "file":"schemas/image.json",
        "title":"Image"
     },
-    "isosahedron":{
-       "description":"Isosahedron Geometry",
-       "file":"schemas/isosahedron.json",
-       "title":"Isosahedron"
+    "icosahedron":{
+       "description":"Icosahedron Geometry",
+       "file":"schemas/icosahedron.json",
+       "title":"Icosahedron"
     },
     "light":{
        "description":"A light",
