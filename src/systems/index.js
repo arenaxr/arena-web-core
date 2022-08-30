@@ -16,4 +16,5 @@ import './model-progress/model-progress.js';
 import './face-tracking';
 import './screenshare.js';
 // Vendor override/imports
+import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 import './vendor/nav-system.js'; // Override nav system

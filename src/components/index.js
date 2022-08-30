@@ -44,7 +44,6 @@ import './video-control.js';
 // from npm, when available
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
-import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 import 'aframe-blink-controls'; // Controller teleport
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
