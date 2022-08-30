@@ -48,7 +48,6 @@ import 'aframe-extras'; // gltf animations, components for controls, model loade
 import 'aframe-blink-controls'; // Controller teleport
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
-import './vendor/nav-system.js'; // Override nav system
 
 // import 'aframe-particle-system-component';
 // import 'aframe-spe-particles-component';

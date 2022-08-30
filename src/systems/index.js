@@ -15,3 +15,5 @@ import './attribution.js';
 import './model-progress/model-progress.js';
 import './face-tracking';
 import './screenshare.js';
+// Vendor override/imports
+import './vendor/nav-system.js'; // Override nav system
