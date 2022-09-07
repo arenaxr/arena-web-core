@@ -22,7 +22,7 @@
                                 "height": {
                                     "type": "number",
                                     "title": "height",
-                                    "default": 2
+                                    "default": 1
                                 },
                                 "openEnded": {
                                     "type": "boolean",
@@ -37,7 +37,7 @@
                                 "radiusTop": {
                                     "type": "number",
                                     "title": "radius top",
-                                    "default": 1
+                                    "default": 0.01
                                 },
                                 "segmentsHeight": {
                                     "type": "number",

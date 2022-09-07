@@ -8,6 +8,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: google-github-actions/release-please-action@v3
+        id: release      
         with:
           release-type: node
           package-name: release-please-action
+      # The logic below handles the publication to docker hub
+      - name: Login to Docker Hub
+        if: ${{ steps.release.outputs.release_created }}
+        uses: docker/login-action@v1        
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+      - name: Checkout code
+        if: ${{ steps.release.outputs.release_created }}  
+        uses: actions/checkout@v3
+        with:
+            fetch-depth: 0
+      - name: Get release
+        if: ${{ steps.release.outputs.release_created }}
+        id: get_release
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"        
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push Docker image
+        if: ${{ steps.release.outputs.release_created }}      
+        id:   docker_build
+        uses: docker/build-push-action@v2
+        with:
+          build-args: |
+            chash=${{ github.sha }}
+            version=${{ steps.get_release.outputs.tag }}
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_release.outputs.tag }}
+      - name: Image digest
+        if: ${{ steps.release.outputs.release_created }}
+        run: echo ${{ steps.docker_build.outputs.digest }}
+      

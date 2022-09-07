@@ -42,12 +42,10 @@ AFRAME.registerComponent('press-and-move', {
 
         this.velocity = new THREE.Vector3();
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
-
         const self = this;
         window.addEventListener('touchstart', function(evt) {
             evt.preventDefault();
-            if (!self.timer && evt.touches.length == 1) { // let gesture-detector handle 2+ touches
+            if (!self.timer && evt.touches.length === 1) { // let gesture-detector handle 2+ touches
                 self.timer = window.setTimeout(() => {
                     self.longTouch = true;
                 }, LONG_PRESS_DURATION_THRESHOLD);
@@ -123,7 +121,7 @@ AFRAME.registerComponent('press-and-move', {
             const xRotation = this.data.fly ? rotation.x : 0;
 
             // Transform direction relative to heading.
-            rotationEuler.set(THREE.Math.degToRad(xRotation), THREE.Math.degToRad(rotation.y), 0);
+            rotationEuler.set(THREE.MathUtils.degToRad(xRotation), THREE.MathUtils.degToRad(rotation.y), 0);
             directionVector.applyEuler(rotationEuler);
             return directionVector;
         };

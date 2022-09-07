@@ -27,7 +27,7 @@ export class ARENAUtils {
     /**
      * Extracts URL params
      * @param {string} parameter URL parameter
-     * @param {string} defaultValue default value in case parameter doesnt exist
+     * @param {string} defaultValue default value in case parameter doesn't exist
      * @return {string} value associated with parameter
      */
     static getUrlParam(parameter, defaultValue) {
@@ -45,8 +45,8 @@ export class ARENAUtils {
     /**
      * Extracts URL params
      * @param {string} parameter URL parameter
-     * @param {string} defaultValue default value in case parameter doesnt exist
-     * @return {[]} list of indicies
+     * @param {string} defaultValue default value in case parameter doesn't exist
+     * @return {[]} list of indices
      */
     static getUrlParams(parameter, defaultValue) {
         const indexes = [];
@@ -70,7 +70,7 @@ export class ARENAUtils {
      *
      * The callback should take the following arguments
      * @callback onLocationCallback
-     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successfull; "default" location if error
+     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successful; "default" location if error
      * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error
      */
     static getLocation(callback) {
@@ -184,7 +184,7 @@ export class ARENAUtils {
      * @return {string} position as string
      */
     static coordsToText(c) {
-        return `${c.x.toFixed(3)},${c.y.toFixed(3)},${c.z.toFixed(3)}`;
+        return `${c.x.toFixed(3)}, ${c.y.toFixed(3)}, ${c.z.toFixed(3)}`;
     };
 
     /**
@@ -193,7 +193,20 @@ export class ARENAUtils {
      * @return {string} rotation as string
      */
     static rotToText(c) {
-        return `${c.x.toFixed(3)} ${c.y.toFixed(3)} ${c.z.toFixed(3)} ${c.w.toFixed(3)}`;
+        return `${c.x.toFixed(3)}, ${c.y.toFixed(3)}, ${c.z.toFixed(3)}, ${c.w.toFixed(3)}`;
+    };
+
+    /**
+     * Turns quaternions to euler string
+     * @param {Object} c rotation in quaternions
+     * @return {string} rotation as euler string
+     */
+    static rotToEulerText(c) {
+        function rad2deg(radians) {
+            return radians * (180 / Math.PI);
+        }
+        let e = new THREE.Euler().setFromQuaternion(c);
+        return `${rad2deg(e.x).toFixed(3)}, ${rad2deg(e.y).toFixed(3)}, ${rad2deg(e.z).toFixed(3)}`;
     };
 
     /**
@@ -248,5 +261,16 @@ export class ARENAUtils {
      */
     static isLandscapeMode() {
         return (window.orientation == 90 || window.orientation == -90);
+    }
+
+    /**
+     * Convert integer to hex string with leading '0's.
+     * @param {integer} num integer to convert
+     * @param {integer} len length of padded output hex string
+     * @returns {string} hex string of num to len characters with leading '0'
+     */
+    static numToPaddedHex(num, len) {
+        const str = num.toString(16);
+        return "0".repeat(len - str.length) + str;
     }
 }

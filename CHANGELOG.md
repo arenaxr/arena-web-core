@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.12.0](https://github.com/arenaxr/arena-web-core/compare/v1.11.2...v1.12.0) (2022-08-21)
+
+
+### Features
+
+* Add draco decoder ([dc99525](https://github.com/arenaxr/arena-web-core/commit/dc99525c42c75d1e802d762749e4d018ecc9128d)), closes [#479](https://github.com/arenaxr/arena-web-core/issues/479)
+
+
+### Bug Fixes
+
+* **jitsi:** fixed [#492](https://github.com/arenaxr/arena-web-core/issues/492), arcore permissions ([dc12cf0](https://github.com/arenaxr/arena-web-core/commit/dc12cf0534749e7a7cee50b74a63e9cd601ee163))
+* stop meterDraw, meterProcess on avsetup hide ([d220910](https://github.com/arenaxr/arena-web-core/commit/d220910c6f11c145a1858616848b9280e75e01c6))
+
+## [1.11.2](https://github.com/arenaxr/arena-web-core/compare/v1.11.0...v1.11.2) (2022-08-15)
+
+### Bug Fixes
+* fixing release pipeline (several test commits)
+
+## [1.11.0](https://github.com/arenaxr/arena-web-core/compare/v1.10.0...v1.11.0) (2022-08-15)
+
+
+### Features
+
+* **build:** Added capsule geometry ([259afda](https://github.com/arenaxr/arena-web-core/commit/259afdaa090240a1410b0d56738f5b237bd6fd93))
+
+
+### Bug Fixes
+
+* actually fix camera parent case ([222cb23](https://github.com/arenaxr/arena-web-core/commit/222cb234d749c761134976c431e5ecf15a8e97bc))
+* **build:** Restore missing isosahedron ([b7b1ede](https://github.com/arenaxr/arena-web-core/commit/b7b1edef0497f6b0d29769b19968782a1f35070b))
+* **build:** update primitives meshes to three.js default dimensions ([8e8775f](https://github.com/arenaxr/arena-web-core/commit/8e8775ff7a7bc7f49e7d65b88b57fc9b6a875570))
+* don't attach camera objects to my-camera ([860eac7](https://github.com/arenaxr/arena-web-core/commit/860eac7adfa61e4003fecf2a5f7fe3758b32ebe3))
+* **jitsi-video:** force jitsi setup to end of persist load ([048189a](https://github.com/arenaxr/arena-web-core/commit/048189ac236ff49a3e86010bd856fe2671ac4684))
+* **videosphere:** update tracks with 2:1 aspect; remove Panoramic presense selection ([d28c912](https://github.com/arenaxr/arena-web-core/commit/d28c912e4bfad20216c803dc3e3058d58e7132cf))
+
 ## [1.10.0](https://github.com/arenaxr/arena-web-core/compare/v1.9.0...v1.10.0) (2022-08-06)
 
 

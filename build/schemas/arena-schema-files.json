@@ -9,6 +9,11 @@
        "file":"schemas/circle.json",
        "title":"Circle"
     },
+    "capsule":{
+       "description":"Capsule Geometry",
+       "file":"schemas/capsule.json",
+       "title":"Capsule"
+    },
     "cone":{
        "description":"Cone Geometry",
        "file":"schemas/cone.json",
@@ -48,6 +53,11 @@
        "description":"Display an image on a plane",
        "file":"schemas/image.json",
        "title":"Image"
+    },
+    "icosahedron":{
+       "description":"Icosahedron Geometry",
+       "file":"schemas/icosahedron.json",
+       "title":"Icosahedron"
     },
     "light":{
        "description":"A light",

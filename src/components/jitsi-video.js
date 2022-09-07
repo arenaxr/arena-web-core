@@ -74,22 +74,23 @@ AFRAME.registerComponent('jitsi-video', {
         }
     },
     setVideoSrc: function() {
-        if (this.el.tagName.toLowerCase() === 'a-videosphere'){
+        const pano = this.el.tagName.toLowerCase() === 'a-videosphere';
+        if (pano) {
             this.el.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
-            // ensure panoramic videospheres have max resolution
+            // ensure panoramic videospheres have max download resolution
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
                 const data = user.components['arena-user'].data;
                 if (data.jitsiId === this.data.jitsiId) {
-                    data.pano = true;
+                    data.pano = pano;
                 }
             });
         } else {
             this.el.setAttribute('material', 'src', `#${this.videoID}`); // video only! (no audio)
+            this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+            this.el.setAttribute('material-extras', 'needsUpdate', 'true');
         }
         this.el.setAttribute('material', 'shader', 'flat');
-        this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-        this.el.setAttribute('material-extras', 'needsUpdate', 'true');
     },
     updateVideo: function() {
         const data = this.data;
@@ -102,6 +103,12 @@ AFRAME.registerComponent('jitsi-video', {
         }
 
         if (ARENA.Jitsi.getJitsiId() === data.jitsiId) {
+            const pano = this.el.tagName.toLowerCase() === 'a-videosphere';
+            if (pano) {
+                // ensure panoramic videosphere local has max upload resolution, update local tracks
+                ARENA.Jitsi.pano = pano;
+                ARENA.Jitsi.avConnect();
+            }
             this.videoID = 'cornerVideo';
         } else {
             this.videoID = `video${data.jitsiId}`;

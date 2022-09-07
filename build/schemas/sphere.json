@@ -37,17 +37,17 @@
                                 "segmentsHeight": {
                                     "type": "number",
                                     "title": "segments height",
-                                    "default": 36
+                                    "default": 18
                                 },
                                 "segmentsWidth": {
                                     "type": "number",
                                     "title": "segments width",
-                                    "default": 18
+                                    "default": 36
                                 },
                                 "thetaLength": {
                                     "type": "number",
                                     "title": "theta length",
-                                    "default": 360
+                                    "default": 180
                                 },
                                 "thetaStart": {
                                     "type": "number",

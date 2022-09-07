@@ -550,7 +550,7 @@ export class Arena {
 
                     if (sceneOptions['physics']) {
                         // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-                        import('./components/vendor/aframe-physics-system.min.js');
+                        import('./systems/vendor/aframe-physics-system.min.js');
                         document.getElementById('groundPlane').setAttribute('static-body', 'true');
                     }
 
@@ -720,12 +720,8 @@ export class Arena {
                 );
             }
 
-            // check token for communications allowed
-            const allowJitsi = this.isJitsiPermitted();
-            const allowUsers = this.isUsersPermitted();
-
             // init chat
-            if (allowUsers) {
+            if (this.isUsersPermitted()) {
                 this.chat = new ARENAChat({
                     userid: this.idTag,
                     cameraid: this.camName,
@@ -763,11 +759,10 @@ export class Arena {
             } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-            } else if (!this.noav && allowJitsi) {
+            } else if (!this.noav && this.isJitsiPermitted()) {
                 window.setupAV(() => {
-                    const pano = document.getElementById('presenceSelect').value == 'Panoramic';
                     // Initialize Jitsi videoconferencing after A/V setup window
-                    this.Jitsi = ARENAJitsi.init(this.jitsiHost, pano);
+                    this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 });
             }
 

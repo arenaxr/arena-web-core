@@ -17,5 +17,6 @@ import './ui/'; // 2D UI
 import './aframe-mods/'; // AFRAME modifications
 import './systems/'; // custom AFRAME systems
 import './components/'; // custom AFRAME components
-import './webxr/'; // spedial handler for webxr devices
-import './webar/'; // spedial handler for non-webxr devices
+import './geometries/'; // custom AFRAME geometries
+import './webxr/'; // special handler for webxr devices
+import './webar/'; // special handler for non-webxr devices

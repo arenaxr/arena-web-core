@@ -1,6 +1,6 @@
 {
-    "title": "Octahedron",
-    "description": "Octahedron Geometry",
+    "title": "Icosahedron",
+    "description": "icosahedron Geometry",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -16,7 +16,7 @@
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": [
-                                        "octahedron"
+                                        "icosahedron"
                                     ]
                                 },
                                 "detail": {
@@ -41,10 +41,10 @@
                             "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
-                    "title": "Octahedron Data",
+                    "title": "Icosahedron Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "octahedron",
+                        "object_type": "icosahedron",
                         "radius": 1,
                         "material": {
                             "color": "#7f7f7f"

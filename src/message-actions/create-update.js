@@ -68,7 +68,7 @@ export class CreateUpdate {
             let addObj = false;
             if (!entityEl) {
                 // create object
-                if (message.data.object_type === 'videosphere'){
+                if (message.data.object_type === 'videosphere') {
                     entityEl = document.createElement('a-videosphere');
                 } else {
                     entityEl = document.createElement('a-entity');
@@ -88,9 +88,17 @@ export class CreateUpdate {
             if (addObj) {
                 // Parent/Child handling
                 if (message.data.parent) {
-                    const parentName = (ARENA.camName == message.data.parent) ? 'my-camera' : message.data.parent; // our camera is named 'my-camera'
+                    let parentName = message.data.parent;
+                    if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
+                        if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
+                            parentName = 'my-camera';
+                        } else {
+                            return;
+                        }
+                    }
                     const parentEl = document.getElementById(parentName);
                     if (parentEl) {
+                        entityEl.removeAttribute('parent');
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
                     } else {
@@ -123,9 +131,9 @@ export class CreateUpdate {
                         cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
                     } else { // otherwise its a rotation given in degrees
                         cameraSpinnerObj3D.rotation.set(
-                            THREE.Math.degToRad(rotation.x),
-                            THREE.Math.degToRad(rotation.y),
-                            THREE.Math.degToRad(rotation.z),
+                            THREE.MathUtils.degToRad(rotation.x),
+                            THREE.MathUtils.degToRad(rotation.y),
+                            THREE.MathUtils.degToRad(rotation.z),
                         );
                     }
                 }
@@ -357,7 +365,7 @@ export class CreateUpdate {
             case 'rotation':
                 // rotation is set directly in the THREE.js object, for performance reasons
                 if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
-                else entityEl.object3D.rotation.set( THREE.Math.degToRad(value.x), THREE.Math.degToRad(value.y), THREE.Math.degToRad(value.z)); // otherwise its a rotation given in degrees
+                else entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
                 break;
             case 'position':
                 // position is set directly in the THREE.js object, for performance reasons

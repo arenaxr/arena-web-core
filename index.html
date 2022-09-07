@@ -86,7 +86,6 @@
                             <select aria-label="Presence" class="form-select mb-3" id="presenceSelect">
                                 <option value="Standard">Standard</option>
                                 <option value="Portal">Portal</option>
-                                <option value="Panoramic">Panoramic</option>
                             </select>
                             <label for="presenceSelect">Select Presence Type</label>
                         </div>
@@ -148,7 +147,8 @@
 </div>
 <a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
          stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
-         ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005">
+         ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005"
+         gltf-model="dracoDecoderPath:/static/vendor/draco-1.5.3/">
     <a-assets>
         <!-- Vive controller 3d model -->
         <a-asset-item id="viveControl-obj" src="static/models/hands/vr_controller_vive.obj"></a-asset-item>

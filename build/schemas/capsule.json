@@ -1,6 +1,6 @@
 {
-    "title": "Octahedron",
-    "description": "Octahedron Geometry",
+    "title": "Capsule",
+    "description": "Capsule Geometry",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -16,18 +16,28 @@
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": [
-                                        "octahedron"
+                                        "capsule"
                                     ]
                                 },
-                                "detail": {
+                                "length": {
                                     "type": "number",
-                                    "title": "detail",
-                                    "default": 0
+                                    "title": "length",
+                                    "default": 1
                                 },
                                 "radius": {
                                     "type": "number",
                                     "title": "radius",
                                     "default": 1
+                                },
+                                "segmentsCap": {
+                                    "type": "number",
+                                    "title": "segments capsule",
+                                    "default": 18
+                                },
+                                "segmentsRadial": {
+                                    "type": "number",
+                                    "title": "segments radial",
+                                    "default": 36
                                 }
                             }
                         },
@@ -41,10 +51,10 @@
                             "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
-                    "title": "Octahedron Data",
+                    "title": "Capsule Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "octahedron",
+                        "object_type": "capsule",
                         "radius": 1,
                         "material": {
                             "color": "#7f7f7f"
@@ -62,7 +72,8 @@
                     },
                     "required": [
                         "object_type",
-                        "radius"
+                        "radius",
+                        "length"
                     ]
                 }
             }
