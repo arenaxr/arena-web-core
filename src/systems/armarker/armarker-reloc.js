@@ -48,8 +48,11 @@ export class ARMarkerRelocalization {
 
     /* error and movement thresholds */
     DTAG_ERROR_THRESH = 1e-3;
-    MOVE_THRESH = 0.05;
-    ROT_THRESH = 0.087;
+    // MOVE_THRESH = 0.05;
+    // ROT_THRESH = 0.087;
+
+    MOVE_THRESH = 0.0125;
+    ROT_THRESH = 0.02175;
 
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
@@ -218,7 +221,7 @@ export class ARMarkerRelocalization {
                 JSON.stringify(jsonMsg),
             );
         }
-
+        // this the one
         if (!this.networkedLocationSolver) {
             let localizerTag = false;
             const pubDetList = [];
