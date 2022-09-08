@@ -144,6 +144,17 @@ export class CreateUpdate {
             return;
 
         case 'scene-options':
+            // update env-presets section in real-time
+            const environmentOld = document.getElementById('env');
+            const environment = document.createElement('a-entity');
+            environment.id = 'env';
+            const envPresets = message.data['env-presets'];
+            for (const [attribute, value] of Object.entries(envPresets)) {
+                environment.setAttribute('environment', attribute, value);
+            }
+            environmentOld.parentNode.replaceChild(environment, environmentOld);
+            return;
+
         case 'face-features':
         case 'landmarks':
             // TODO : Remove once all existing persist landmark entities have converted
