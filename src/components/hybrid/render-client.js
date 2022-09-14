@@ -1,4 +1,5 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
+import {ARENAUtils} from '../../utils';
 
 const peerConnectionConfig = {
     'iceServers': [
@@ -6,24 +7,15 @@ const peerConnectionConfig = {
     ],
 };
 
-/**
- * Generate a UUID.
- * @return {string} The generated UUID string.
- */
-function uuidv4() {
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
-    );
-}
-
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
-  'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
+    'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
 
 AFRAME.registerComponent('render-client', {
     schema: {
         enabled: {type: 'boolean', default: false},
-        rotation: {type: 'vec4', default: new THREE.Quaternion()},
         position: {type: 'vec3', default: new THREE.Vector3()},
+        rotation: {type: 'vec4', default: new THREE.Quaternion()},
+        sendConnectRetryInterval: {type: 'number', default: 5000},
     },
 
     init: function() {
@@ -33,7 +25,7 @@ AFRAME.registerComponent('render-client', {
         this.connected = false;
         // this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
 
-        this.id = uuidv4();
+        this.id = ARENAUtils.uuidv4();
 
         this.signaler = new MQTTSignaling(this.id);
         this.signaler.onOffer = this.gotOffer.bind(this);
@@ -50,12 +42,14 @@ AFRAME.registerComponent('render-client', {
     },
 
     async connectToCloud() {
+        const data = this.data;
+
         await this.signaler.openConnection();
 
         while (!this.connected) {
             console.log('[render-client] connecting...');
             this.signaler.sendConnect();
-            await this.sleep(5000);
+            await this.sleep(data.sendConnectRetryInterval);
         }
     },
 
@@ -98,6 +92,9 @@ AFRAME.registerComponent('render-client', {
         this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
             .then(() => {
                 this.createAnswer();
+            })
+            .catch((err) => {
+                console.error(err);
             });
     },
 
