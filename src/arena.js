@@ -782,9 +782,6 @@ export class Arena {
                 this.noname = true;
             }
 
-            const camera = document.getElementById('my-camera');
-            camera.setAttribute('render-client', 'enabled', true);
-
             if (this.armode) {
                 /*
                 Instantly enter AR mode for now.

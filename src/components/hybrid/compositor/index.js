@@ -1,6 +1,6 @@
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
-import {CompositorPass} from './CompositorPass';
+import {CompositorPass} from './compositor-pass';
 
 AFRAME.registerSystem('compositor', {
     init: function() {
@@ -109,5 +109,5 @@ AFRAME.registerSystem('compositor', {
                 isDigest = false;
             }
         };
-    }
+    },
 });

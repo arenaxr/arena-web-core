@@ -11,8 +11,8 @@ const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer
 const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate';
 
 export class MQTTSignaling {
-	constructor(id) {
-		this.id = id;
+    constructor(id) {
+        this.id = id;
         this.connectionId = null;
         this.mqttHost = ARENA.mqttHostURI;
         this.mqttUsername = ARENA.username;
@@ -21,7 +21,7 @@ export class MQTTSignaling {
         this.onOffer = null;
         this.onAnswer = null;
         this.onIceCandidate = null;
-	}
+    }
 
     publish(topic, msg) {
         const message = new Paho.Message(msg);
@@ -29,7 +29,7 @@ export class MQTTSignaling {
         this.client.send(message);
     }
 
-	openConnection() {
+    openConnection() {
         this.client = new Paho.Client(this.mqttHost, `hybrid-client-${this.id}`);
 
         var _this = this;
@@ -46,7 +46,7 @@ export class MQTTSignaling {
                 // reconnect : true,
             });
         });
-	}
+    }
 
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
@@ -56,14 +56,14 @@ export class MQTTSignaling {
         this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/#`);
     }
 
-	closeConnection() {
+    closeConnection() {
         this.publish(
             `${CLIENT_DISCONNECT_TOPIC_PREFIX}/${this.id}`,
             JSON.stringify({'type': 'disconnect', 'source': 'client', 'id': this.id})
         );
 
         this.client.disconnect();
-	}
+    }
 
     mqttOnConnectionLost(responseObject) {
         if (responseObject.errorCode !== 0) {
@@ -71,7 +71,7 @@ export class MQTTSignaling {
         }
     }
 
-	mqttOnMessageArrived(message) {
+    mqttOnMessageArrived(message) {
         var signal = JSON.parse(message.payloadString);
 
         // ignore other clients
@@ -94,7 +94,7 @@ export class MQTTSignaling {
         else if (signal.type == 'ice') {
             if (this.onIceCandidate) this.onIceCandidate(signal.data);
         }
-	}
+    }
 
     sendConnect() {
         this.publish(
@@ -103,28 +103,28 @@ export class MQTTSignaling {
         );
     }
 
-	sendOffer(offer) {
+    sendOffer(offer) {
         this.publish(
             `${CLIENT_OFFER_TOPIC_PREFIX}/${this.id}`,
             JSON.stringify({'type': 'offer', 'source': 'client', 'id': this.id, 'data': offer})
         );
-	}
+    }
 
-	sendAnswer(answer) {
+    sendAnswer(answer) {
         this.publish(
             `${CLIENT_ANSWER_TOPIC_PREFIX}/${this.id}`,
             JSON.stringify({'type': 'answer', 'source': 'client', 'id': this.id, 'data': answer})
         );
-	}
+    }
 
-	sendCandidate(candidate) {
+    sendCandidate(candidate) {
         this.publish(
             `${CLIENT_CANDIDATE_TOPIC_PREFIX}/${this.id}`,
             JSON.stringify({'type': 'ice', 'source': 'client', 'id': this.id, 'data': candidate})
         );
-	}
+    }
 
-	sleep(ms) {
-		return new Promise(resolve => setTimeout(resolve, ms));
-	}
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 }
