@@ -1,6 +1,6 @@
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { CompositorPass } from './CompositorPass';
+import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+import {CompositorPass} from './CompositorPass';
 
 AFRAME.registerSystem('compositor', {
     init: function() {
@@ -78,22 +78,22 @@ AFRAME.registerSystem('compositor', {
 
         // const dpr = renderer.getPixelRatio();
         renderer.setSize(window.innerWidth, window.innerHeight);
-		this.target.setSize(window.innerWidth, window.innerHeight);
+        this.target.setSize(window.innerWidth, window.innerHeight);
         this.pass2.setSize(window.innerWidth, window.innerHeight);
     },
 
-    tick: function (t, dt) {
+    tick: function(t, dt) {
         this.t = t;
         this.dt = dt;
     },
 
-    bind: function () {
+    bind: function() {
         const renderer = this.sceneEl.renderer;
         const render = renderer.render;
         const system = this;
         let isDigest = false;
 
-        renderer.render = function () {
+        renderer.render = function() {
             if (isDigest) {
                 // render normally
                 render.apply(this, arguments);

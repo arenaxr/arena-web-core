@@ -1,5 +1,5 @@
-import { Pass, FullScreenQuad } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { CompositorShader } from './CompositorShader';
+import {Pass, FullScreenQuad} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {CompositorShader} from './CompositorShader';
 
 export class CompositorPass extends Pass {
     constructor( videoSource, depthTarget, cameraNear, cameraFar ) {

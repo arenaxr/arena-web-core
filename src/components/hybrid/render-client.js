@@ -1,9 +1,9 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
 
-var peerConnectionConfig = {
-	'iceServers': [
-    	{'urls': 'stun:stun.l.google.com:19302'},
-  	]
+const peerConnectionConfig = {
+    'iceServers': [
+        {'urls': 'stun:stun.l.google.com:19302'},
+    ],
 };
 
 /**
@@ -120,7 +120,7 @@ AFRAME.registerComponent('render-client', {
 						console.log('sending offer.');
 						this.signaler.sendOffer(this.peerConnection.localDescription);
 					})
-					.catch((err) =>{
+					.catch((err) => {
 						console.error(err);
 					});
 			})
@@ -135,7 +135,7 @@ AFRAME.registerComponent('render-client', {
 			.then(() => {
 				this.connected = true;
 				// const env = document.getElementById('env');
-        		// env.setAttribute('visible', false);
+				// env.setAttribute('visible', false);
 			})
 			.catch((err) =>{
 				console.error(err);
@@ -154,16 +154,14 @@ AFRAME.registerComponent('render-client', {
 
 		this.peerConnection.createAnswer()
 			.then((description) => {
-
 				this.peerConnection.setLocalDescription(description).then(() => {
 					console.log('sending answer');
 					this.signaler.sendAnswer(this.peerConnection.localDescription);
 					this.startNegotiation();
-				})
-
+				});
 			})
 			.catch((err) =>{
-				console.error(err)
+				console.error(err);
 			});
 	},
 
