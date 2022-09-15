@@ -22,16 +22,16 @@ uniform ivec2 streamSize;
 //     return abs(q.z + (q.w - q.y) / (6.0 * d + e));
 // }
 
-float readDepth(sampler2D depthSampler, vec2 coord) {
-    float depth = texture2D( depthSampler, coord ).x;
-    return depth;
-}
-
 // float readDepth( sampler2D depthSampler, vec2 coord ) {
 //     float fragCoordZ = texture2D( depthSampler, coord ).x;
 //     float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
 //     return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
 // }
+
+float readDepth(sampler2D depthSampler, vec2 coord) {
+    float depth = texture2D( depthSampler, coord ).x;
+    return depth;
+}
 
 void main() {
     ivec2 frameSize = ivec2(streamSize.x / 2, streamSize.y);

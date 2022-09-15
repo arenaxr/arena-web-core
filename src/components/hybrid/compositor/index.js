@@ -16,6 +16,8 @@ AFRAME.registerSystem('compositor', {
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
 
+        this.renderFunc = null;
+
         this.target = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
         this.target.texture.minFilter = THREE.NearestFilter;
         this.target.texture.magFilter = THREE.NearestFilter;
@@ -93,6 +95,8 @@ AFRAME.registerSystem('compositor', {
         const system = this;
         let isDigest = false;
 
+        this.renderFunc = render;
+
         renderer.render = function() {
             if (isDigest) {
                 // render normally
@@ -109,5 +113,10 @@ AFRAME.registerSystem('compositor', {
                 isDigest = false;
             }
         };
+    },
+
+    unbind: function() {
+        const renderer = this.sceneEl.renderer;
+        renderer.render = this.renderFunc;
     },
 });
