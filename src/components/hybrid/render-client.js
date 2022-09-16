@@ -140,8 +140,14 @@ AFRAME.registerComponent('render-client', {
         this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
             .then(() => {
                 this.connected = true;
-                // const env = document.getElementById('env');
-                // env.setAttribute('visible', false);
+
+                const env = document.getElementById('env');
+                env.setAttribute('visible', false);
+                // document.getElementById('sceneRoot');
+                // sceneRoot.removeChild(env);
+
+                const groundPlane = document.getElementById('groundPlane');
+                groundPlane.setAttribute('visible', false);
             })
             .catch((err) =>{
                 console.error(err);

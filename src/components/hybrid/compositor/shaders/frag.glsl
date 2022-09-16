@@ -82,7 +82,7 @@ void main() {
 
     float depth = readDepth( tDepth, coordDiffuseDepth );
     float streamDepth = readDepth( tStream, coordStreamDepth );
-    bool ignore = readMask( tStream, coordStreamDepth );
+    bool ignore = false; // readMask( tStream, coordStreamDepth );
 
     vec4 color;
     if (!targetWidthGreater ||
@@ -90,9 +90,9 @@ void main() {
         if (!ignore) {
             // color = streamColor;
 
-            if (depth == 1.0)
+            if (depth >= 0.995)
                 color = streamColor;
-            else if (depth == 0.0)
+            else if (depth <= 0.005)
                 color = diffuseColor;
             else if (streamDepth <= depth)
                 color = streamColor;
