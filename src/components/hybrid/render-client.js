@@ -39,6 +39,8 @@ AFRAME.registerComponent('render-client', {
         this.connectToCloud();
 
         console.log('[render-client]', this.id);
+
+        window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
     },
 
     async connectToCloud() {
@@ -57,12 +59,18 @@ AFRAME.registerComponent('render-client', {
         console.log('got remote stream');
 
         // send remote track to compositor
-        const remoteTrack = new CustomEvent('onremotetrack', {
+        const remoteTrack = new CustomEvent('hybrid-onremotetrack', {
             detail: {
                 track: event.streams[0],
             },
         });
         window.dispatchEvent(remoteTrack);
+    },
+
+    onRemoteRender(event) {
+        console.log('[render-client]', event.detail.object_id, event.detail.remoteRendered);
+        const update = event.detail;
+        this.signaler.sendRemoteStatusUpdate(update);
     },
 
     onIceCandidate(event) {

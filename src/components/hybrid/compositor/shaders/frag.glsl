@@ -29,8 +29,13 @@ uniform ivec2 streamSize;
 // }
 
 float readDepth(sampler2D depthSampler, vec2 coord) {
-    float depth = texture2D( depthSampler, coord ).x;
+    float depth = texture2D( depthSampler, coord ).r;
     return depth;
+}
+
+bool readMask(sampler2D depthSampler, vec2 coord) {
+    bool mask = texture2D( depthSampler, coord ).g > 0.5;
+    return mask;
 }
 
 void main() {
@@ -77,18 +82,26 @@ void main() {
 
     float depth = readDepth( tDepth, coordDiffuseDepth );
     float streamDepth = readDepth( tStream, coordStreamDepth );
+    bool ignore = readMask( tStream, coordStreamDepth );
 
     vec4 color;
     if (!targetWidthGreater ||
         (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {
-        if (depth == 1.0)
-            color = streamColor;
-        else if (depth == 0.0)
+        if (!ignore) {
+            // color = streamColor;
+
+            if (depth == 1.0)
+                color = streamColor;
+            else if (depth == 0.0)
+                color = diffuseColor;
+            else if (streamDepth <= depth)
+                color = streamColor;
+            else
+                color = diffuseColor;
+        }
+        else {
             color = diffuseColor;
-        else if (streamDepth <= depth)
-            color = streamColor;
-        else
-            color = diffuseColor;
+        }
     }
     else {
         color = diffuseColor;

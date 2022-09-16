@@ -1,11 +1,22 @@
 AFRAME.registerComponent('remote-render', {
     schema: {
+        enabled: {type: 'boolean', default: false},
     },
 
     init: function() {
     },
 
-    update: function() {
-        this.el.object3D.visible = !this.data;
+    update: function(oldData) {
+        if (oldData.enabled !== this.data.enabled) {
+            this.el.object3D.visible = !this.data.enabled;
+
+            const remoteRender = new CustomEvent('hybrid-onremoterender', {
+                detail: {
+                    object_id: this.el.id,
+                    remoteRendered: this.data.enabled,
+                },
+            });
+            window.dispatchEvent(remoteRender);
+        }
     },
 });

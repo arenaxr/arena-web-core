@@ -26,7 +26,7 @@ AFRAME.registerSystem('compositor', {
         this.target.depthTexture.format = THREE.DepthFormat;
         this.target.depthTexture.type = THREE.UnsignedShortType;
 
-        window.addEventListener('onremotetrack', this.onRemoteTrack.bind(this));
+        window.addEventListener('hybrid-onremotetrack', this.onRemoteTrack.bind(this));
     },
 
     onRemoteTrack(e) {

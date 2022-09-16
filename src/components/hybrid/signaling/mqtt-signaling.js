@@ -10,6 +10,8 @@ const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/offer';
 const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer';
 const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate';
 
+const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/remote';
+
 export class MQTTSignaling {
     constructor(id) {
         this.id = id;
@@ -77,7 +79,7 @@ export class MQTTSignaling {
         // ignore other clients
         if (signal.source == 'client') return;
 
-        // Ignore own messages
+        // ignore own messages
         if (signal.id == this.id) return;
 
         if ((this.connectionId != null) && (signal.id != this.connectionId)) return;
@@ -121,6 +123,13 @@ export class MQTTSignaling {
         this.publish(
             `${CLIENT_CANDIDATE_TOPIC_PREFIX}/${this.id}`,
             JSON.stringify({'type': 'ice', 'source': 'client', 'id': this.id, 'data': candidate})
+        );
+    }
+
+    sendRemoteStatusUpdate(update) {
+        this.publish(
+            `${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${this.id}`,
+            JSON.stringify({'type': 'remote-update', 'source': 'client', 'id': this.id, 'data': update})
         );
     }
 
