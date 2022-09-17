@@ -45,7 +45,9 @@ AFRAME.registerSystem('compositor', {
             this.remoteVideo.style.left = '15px';
             this.remoteVideo.style.width = '640px';
             this.remoteVideo.style.height = '180px';
-            document.body.appendChild(this.remoteVideo);
+            if (!AFRAME.utils.device.isMobile()) {
+                document.body.appendChild(this.remoteVideo);
+            }
         }
         this.remoteVideo.srcObject = e.detail.track;
     },
@@ -83,10 +85,8 @@ AFRAME.registerSystem('compositor', {
 
         // const dpr = renderer.getPixelRatio();
         // renderer.setSize(window.innerWidth, window.innerHeight);
-        const newWidth = renderer.domElement.width;
-        const newHeight = renderer.domElement.height;
-        this.target.setSize(newWidth, newHeight);
-        this.pass2.setSize(newWidth, newHeight);
+        this.target.setSize(window.innerWidth, window.innerHeight);
+        this.pass2.setSize(window.innerWidth, window.innerHeight);
     },
 
     tick: function(t, dt) {
