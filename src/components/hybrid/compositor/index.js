@@ -13,8 +13,8 @@ AFRAME.registerSystem('compositor', {
 
         const renderer = sceneEl.renderer;
 
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        // renderer.setPixelRatio(window.devicePixelRatio);
+        // renderer.setSize(window.innerWidth, window.innerHeight);
 
         this.renderFunc = null;
 
@@ -30,24 +30,27 @@ AFRAME.registerSystem('compositor', {
     },
 
     onRemoteTrack(e) {
-        this.remoteVideo = document.createElement('video');
-        this.remoteVideo.id = 'remoteVideo';
-        this.remoteVideo.setAttribute('muted', 'false');
-        this.remoteVideo.setAttribute('autoplay', 'true');
-        this.remoteVideo.setAttribute('playsinline', 'true');
-        this.remoteVideo.srcObject = e.detail.track;
-        this.remoteVideo.addEventListener('loadedmetadata', this.onVideoLoaded.bind(this), true);
+        this.remoteVideo = document.getElementById('remoteVideo');
+        if (!this.remoteVideo) {
+            this.remoteVideo = document.createElement('video');
+            this.remoteVideo.id = 'remoteVideo';
+            this.remoteVideo.setAttribute('muted', 'false');
+            this.remoteVideo.setAttribute('autoplay', 'true');
+            this.remoteVideo.setAttribute('playsinline', 'true');
+            this.remoteVideo.addEventListener('loadedmetadata', this.onRemoteVideoLoaded.bind(this), true);
 
-        this.remoteVideo.style.position = 'absolute';
-        this.remoteVideo.style.zIndex = '9999';
-        this.remoteVideo.style.top = '15px';
-        this.remoteVideo.style.left = '15px';
-        this.remoteVideo.style.width = '640px';
-        this.remoteVideo.style.height = '180px';
-        document.body.appendChild(this.remoteVideo);
+            this.remoteVideo.style.position = 'absolute';
+            this.remoteVideo.style.zIndex = '9999';
+            this.remoteVideo.style.top = '15px';
+            this.remoteVideo.style.left = '15px';
+            this.remoteVideo.style.width = '640px';
+            this.remoteVideo.style.height = '180px';
+            document.body.appendChild(this.remoteVideo);
+        }
+        this.remoteVideo.srcObject = e.detail.track;
     },
 
-    onVideoLoaded() {
+    onRemoteVideoLoaded() {
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
@@ -79,9 +82,11 @@ AFRAME.registerSystem('compositor', {
         const renderer = sceneEl.renderer;
 
         // const dpr = renderer.getPixelRatio();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        this.target.setSize(window.innerWidth, window.innerHeight);
-        this.pass2.setSize(window.innerWidth, window.innerHeight);
+        // renderer.setSize(window.innerWidth, window.innerHeight);
+        const newWidth = renderer.domElement.width;
+        const newHeight = renderer.domElement.height;
+        this.target.setSize(newWidth, newHeight);
+        this.pass2.setSize(newWidth, newHeight);
     },
 
     tick: function(t, dt) {

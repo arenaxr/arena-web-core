@@ -87,6 +87,23 @@ AFRAME.registerComponent('render-client', {
         this.peerConnection.onicecandidate = this.onIceCandidate.bind(this);
         this.peerConnection.ontrack = this.onRemoteTrack.bind(this);
 
+        // window.setInterval(() => {
+        //     this.peerConnection.getStats(function(res) {
+        //         var items = [];
+        //         res.result().forEach(function(res) {
+        //             var item = {};
+        //             res.names().forEach(function(name) {
+        //                 item[name] = res.stat(name);
+        //             });
+        //             item.id = res.id;
+        //             item.type = res.type;
+        //             item.timestamp = res.timestamp;
+        //             items.push(item);
+        //         });
+        //         console.log(items);
+        //     });
+        // }, 5000);
+
         this.dataChannel = this.peerConnection.createDataChannel('client-input');
 
         this.dataChannel.onopen = () => {
