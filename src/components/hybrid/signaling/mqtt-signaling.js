@@ -1,15 +1,15 @@
 const Paho = require('paho-mqtt');
 
-const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/offer/mathias';
-const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/answer/mathias';
-const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/candidate/mathias';
-const SERVER_HEALTH_CHECK = 'realm/g/a/cloud_rendering_test/server/health/mathias';
+const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/offer';
+const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/answer';
+const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/candidate';
+const SERVER_HEALTH_CHECK = 'realm/g/a/cloud_rendering_test/server/health';
 
-const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/connect/mathias';
-const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/disconnect/mathias';
-const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/offer/mathias';
-const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer/mathias';
-const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate/mathias';
+const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/connect';
+const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/disconnect';
+const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/offer';
+const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer';
+const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate';
 
 const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/remote';
 
