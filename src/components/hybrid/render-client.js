@@ -19,8 +19,9 @@ AFRAME.registerComponent('render-client', {
     },
 
     init: function() {
-        console.log('[render-client] Starting...');
-
+        console.log('[render-client] stopping...');
+        this.oldtime = 0;
+        this.timer = 0;
         this.counter = 0;
         this.connected = false;
         // this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
@@ -29,6 +30,7 @@ AFRAME.registerComponent('render-client', {
 
         this.signaler = new MQTTSignaling(this.id);
         this.signaler.onOffer = this.gotOffer.bind(this);
+        this.signaler.Health = this.Health.bind(this);
         this.signaler.onAnswer = this.gotAnswer.bind(this);
         this.signaler.onIceCandidate = this.gotIceCandidate.bind(this);
 
@@ -38,14 +40,17 @@ AFRAME.registerComponent('render-client', {
 
         this.connectToCloud();
 
+
         console.log('[render-client]', this.id);
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
+        const isServeralive = this.isServeralive.bind(this);
+        console.log('[render-client]', this.id);
+        setInterval(isServeralive, 5000);
     },
 
     async connectToCloud() {
         const data = this.data;
-
         await this.signaler.openConnection();
 
         while (!this.connected) {
@@ -127,7 +132,7 @@ AFRAME.registerComponent('render-client', {
         console.log('creating offer.');
 
         if (supportsSetCodecPreferences) {
-            const transceiver = this.peerConnection.addTransceiver('video', { direction: 'recvonly' });
+            const transceiver = this.peerConnection.addTransceiver('video', {direction: 'recvonly'});
             const codecs = RTCRtpSender.getCapabilities('video').codecs;
             const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
             const validCodecs = codecs.filter(function(value, index, arr) {
@@ -216,5 +221,30 @@ AFRAME.registerComponent('render-client', {
                 w_: data.rotation._w.toFixed(3),
             }));
         }
+    },
+    Health() {
+        this.timer++;
+    },
+    isServeralive() {
+        console.log(this.connected);
+        if (this.timer == this.oldtime && this.connected) {
+            console.log('server is dead');
+            const env = document.getElementById('env');
+                env.setAttribute('visible', true);
+                // document.getElementById('sceneRoot');
+                // sceneRoot.removeChild(env);
+
+                const groundPlane = document.getElementById('groundPlane');
+                groundPlane.setAttribute('visible', true);
+            document.querySelector('a-scene').systems['compositor'].unbind();
+           // this.dataChannel.close();
+            //this.peerConnection.close();
+            this.dataChannel = null;
+            this.peerConnection = null;
+            this.connected = false;
+            this.signaler.connectionId = null;
+            this.connectToCloud();
+        }
+        this.oldtime = this.timer;
     },
 });

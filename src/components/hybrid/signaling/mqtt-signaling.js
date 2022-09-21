@@ -1,14 +1,15 @@
 const Paho = require('paho-mqtt');
 
-const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/offer';
-const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/answer';
-const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/candidate';
+const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/offer/mathias';
+const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/answer/mathias';
+const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/candidate/mathias';
+const SERVER_HEALTH_CHECK = 'realm/g/a/cloud_rendering_test/server/health/mathias';
 
-const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/connect';
-const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/disconnect';
-const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/offer';
-const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer';
-const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate';
+const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/connect/mathias';
+const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/disconnect/mathias';
+const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/offer/mathias';
+const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer/mathias';
+const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate/mathias';
 
 const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/remote';
 
@@ -19,7 +20,7 @@ export class MQTTSignaling {
         this.mqttHost = ARENA.mqttHostURI;
         this.mqttUsername = ARENA.username;
         this.mqttToken = ARENA.mqttToken;
-
+        this.Health = null;
         this.onOffer = null;
         this.onAnswer = null;
         this.onIceCandidate = null;
@@ -53,6 +54,7 @@ export class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
+        this.client.subscribe(`${SERVER_HEALTH_CHECK}/#`);
         this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/#`);
         this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/#`);
         this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/#`);
@@ -75,7 +77,6 @@ export class MQTTSignaling {
 
     mqttOnMessageArrived(message) {
         var signal = JSON.parse(message.payloadString);
-
         // ignore other clients
         if (signal.source == 'client') return;
 
@@ -96,7 +97,10 @@ export class MQTTSignaling {
         else if (signal.type == 'ice') {
             if (this.onIceCandidate) this.onIceCandidate(signal.data);
         }
-    }
+        else if (signal.type == 'health') {
+            if (this.Health) this.Health(signal.data)
+        }
+	}
 
     sendConnect() {
         this.publish(
@@ -125,7 +129,6 @@ export class MQTTSignaling {
             JSON.stringify({'type': 'ice', 'source': 'client', 'id': this.id, 'data': candidate})
         );
     }
-
     sendRemoteStatusUpdate(update) {
         this.publish(
             `${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${this.id}`,
