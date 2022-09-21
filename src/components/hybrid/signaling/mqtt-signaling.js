@@ -20,10 +20,11 @@ export class MQTTSignaling {
         this.mqttHost = ARENA.mqttHostURI;
         this.mqttUsername = ARENA.username;
         this.mqttToken = ARENA.mqttToken;
-        this.Health = null;
+
         this.onOffer = null;
         this.onAnswer = null;
         this.onIceCandidate = null;
+        this.onHealthCheck = null;
     }
 
     publish(topic, msg) {
@@ -98,7 +99,7 @@ export class MQTTSignaling {
             if (this.onIceCandidate) this.onIceCandidate(signal.data);
         }
         else if (signal.type == 'health') {
-            if (this.Health) this.Health(signal.data)
+            if (this.onHealthCheck) this.onHealthCheck(signal.data)
         }
 	}
 
