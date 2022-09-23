@@ -4,12 +4,20 @@ export class WebRTCStatsLogger {
         this.updateInterval = updateInterval;
 
         this.lastReport = null;
+        this.interval = null;
 
         this.startLogging();
     }
 
     startLogging() {
-        window.setInterval(this.getStats.bind(this), this.updateInterval);
+        this.interval = window.setInterval(this.getStats.bind(this), this.updateInterval);
+    }
+
+    stopLogging() {
+        if (this.interval) {
+            window.clearInterval(this.interval);
+        }
+        this.interval = null;
     }
 
     async getStats() {

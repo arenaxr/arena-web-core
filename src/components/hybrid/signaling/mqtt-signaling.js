@@ -86,7 +86,7 @@ export class MQTTSignaling {
 
         if ((this.connectionId != null) && (signal.id != this.connectionId)) return;
 
-        console.log('[render-client]', signal);
+        // console.log('[render-client]', signal);
 
         if (signal.type == 'offer') {
             this.connectionId = signal.id;

@@ -20,7 +20,6 @@ AFRAME.registerComponent('render-client', {
 
     init: function() {
         console.log('[render-client] stopping...');
-        this.oldtime = 0;
         this.timer = 0;
         this.counter = 0;
         this.connected = false;
@@ -40,13 +39,10 @@ AFRAME.registerComponent('render-client', {
 
         this.connectToCloud();
 
-
         console.log('[render-client]', this.id);
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
-        const isServeralive = this.isServeralive.bind(this);
         console.log('[render-client]', this.id);
-        setInterval(isServeralive, 5000);
     },
 
     async connectToCloud() {
@@ -158,6 +154,8 @@ AFRAME.registerComponent('render-client', {
 
                 const groundPlane = document.getElementById('groundPlane');
                 groundPlane.setAttribute('visible', false);
+
+                this.listenForHealthCheck();
             })
             .catch((err) =>{
                 console.error(err);
@@ -212,27 +210,31 @@ AFRAME.registerComponent('render-client', {
     },
 
     gotHealthCheck() {
-        this.timer++;
+        this.timer = 0;
     },
 
-    isServeralive() {
-        console.log(this.connected);
-        if (this.timer == this.oldtime && this.connected) {
-            const env = document.getElementById('env');
-            env.setAttribute('visible', true);
-            const groundPlane = document.getElementById('groundPlane');
-            groundPlane.setAttribute('visible', true);
-
-            document.querySelector('a-scene').systems['compositor'].unbind();
-
-            // this.dataChannel.close();
-            // this.peerConnection.close();
-            this.dataChannel = null;
-            this.peerConnection = null;
-            this.connected = false;
-            this.signaler.connectionId = null;
-            this.connectToCloud();
+    async listenForHealthCheck() {
+        while (this.connected && this.timer < 2) {
+            this.timer++;
+            await this.sleep(1000);
         }
-        this.oldtime = this.timer;
+
+        const env = document.getElementById('env');
+        env.setAttribute('visible', true);
+        const groundPlane = document.getElementById('groundPlane');
+        groundPlane.setAttribute('visible', true);
+
+        document.querySelector('a-scene').systems['compositor'].unbind();
+
+        this.stats.stopLogging();
+
+        // this.dataChannel.close();
+        // this.peerConnection.close();
+        this.dataChannel = null;
+        this.peerConnection = null;
+        this.connected = false;
+        this.signaler.connectionId = null;
+        this.timer = 0;
+        this.connectToCloud();
     },
 });
