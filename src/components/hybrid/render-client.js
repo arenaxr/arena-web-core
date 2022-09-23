@@ -16,12 +16,13 @@ AFRAME.registerComponent('render-client', {
         position: {type: 'vec3', default: new THREE.Vector3()},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
         sendConnectRetryInterval: {type: 'number', default: 5000},
+        checkHealthInterval: {type: 'number', default: 1000},
+        getStatsInterval: {type: 'number', default: 2000},
     },
 
     init: function() {
-        console.log('[render-client] stopping...');
-        this.timer = 0;
-        this.counter = 0;
+        console.log('[render-client] Starting...');
+        this.healthCounter = 0;
         this.connected = false;
         // this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
 
@@ -103,6 +104,8 @@ AFRAME.registerComponent('render-client', {
             console.log('Data Channel is Closed');
         };
 
+        this.stats = new WebRTCStatsLogger(this.peerConnection, this.signaler);
+
         this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
             .then(() => {
                 this.createAnswer();
@@ -156,6 +159,7 @@ AFRAME.registerComponent('render-client', {
                 groundPlane.setAttribute('visible', false);
 
                 this.listenForHealthCheck();
+                this.checkStats();
             })
             .catch((err) =>{
                 console.error(err);
@@ -185,6 +189,43 @@ AFRAME.registerComponent('render-client', {
             });
     },
 
+    gotHealthCheck() {
+        this.healthCounter = 0;
+    },
+
+    async listenForHealthCheck() {
+        const data = this.data;
+
+        while (this.connected && this.healthCounter < 2) {
+            this.healthCounter++;
+            await this.sleep(data.checkHealthInterval);
+        }
+
+        const env = document.getElementById('env');
+        env.setAttribute('visible', true);
+        const groundPlane = document.getElementById('groundPlane');
+        groundPlane.setAttribute('visible', true);
+
+        document.querySelector('a-scene').systems['compositor'].unbind();
+
+        // this.dataChannel.close();
+        // this.peerConnection.close();
+        this.dataChannel = null;
+        this.peerConnection = null;
+        this.connected = false;
+        this.signaler.connectionId = null;
+        this.healthCounter = 0;
+        this.connectToCloud();
+    },
+
+    async checkStats() {
+        const data = this.data;
+        while (this.connected) {
+            this.stats.getStats();
+            await this.sleep(data.getStatsInterval);
+        }
+    },
+
     sleep: function(ms) {
         return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -207,34 +248,5 @@ AFRAME.registerComponent('render-client', {
                 w_: data.rotation._w.toFixed(3),
             }));
         }
-    },
-
-    gotHealthCheck() {
-        this.timer = 0;
-    },
-
-    async listenForHealthCheck() {
-        while (this.connected && this.timer < 2) {
-            this.timer++;
-            await this.sleep(1000);
-        }
-
-        const env = document.getElementById('env');
-        env.setAttribute('visible', true);
-        const groundPlane = document.getElementById('groundPlane');
-        groundPlane.setAttribute('visible', true);
-
-        document.querySelector('a-scene').systems['compositor'].unbind();
-
-        this.stats.stopLogging();
-
-        // this.dataChannel.close();
-        // this.peerConnection.close();
-        this.dataChannel = null;
-        this.peerConnection = null;
-        this.connected = false;
-        this.signaler.connectionId = null;
-        this.timer = 0;
-        this.connectToCloud();
     },
 });

@@ -241,6 +241,10 @@ export class CreateUpdate {
                 console.warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
+            if (data.hasOwnProperty('remote-render') && data['remote-render'].enabled) {
+                console.warn(`Skipping remote-rendered GLTF: ${entityEl.getAttribute('id')}`);
+                return false; // do not add this object
+            }
             // support both url and src property
             if (data.hasOwnProperty('url')) {
                 data.src = data.url; // make src=url

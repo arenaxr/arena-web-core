@@ -661,6 +661,18 @@
           "title":"Screenshare-able",
           "type":"boolean"
        },
+       "remote-render":{
+          "description":"Whether or not an object should be remote rendered [Experimental]",
+          "properties":{
+            "enabled":{
+               "description":"Remote Render this object",
+               "type":"boolean",
+               "default":true
+            }
+          },
+          "title":"Remote Render",
+          "type":"object"
+       },
        "video-control":{
           "description":"Video Control",
           "properties":{

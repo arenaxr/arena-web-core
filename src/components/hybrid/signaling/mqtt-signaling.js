@@ -1,17 +1,18 @@
 const Paho = require('paho-mqtt');
 
-const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/offer';
-const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/answer';
-const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/server/candidate';
-const SERVER_HEALTH_CHECK = 'realm/g/a/cloud_rendering_test/server/health';
+const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/server/offer';
+const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/server/answer';
+const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/server/candidate';
+const SERVER_HEALTH_CHECK = 'realm/g/a/cloud_rendering/server/health';
 
-const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/connect';
-const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/disconnect';
-const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/offer';
-const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/answer';
-const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/candidate';
+const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/connect';
+const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/disconnect';
+const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/offer';
+const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/answer';
+const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/candidate';
+const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/stats';
 
-const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering_test/client/remote';
+const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/remote';
 
 export class MQTTSignaling {
     constructor(id) {
@@ -130,11 +131,19 @@ export class MQTTSignaling {
             JSON.stringify({'type': 'ice', 'source': 'client', 'id': this.id, 'data': candidate})
         );
     }
+
     sendRemoteStatusUpdate(update) {
         this.publish(
             `${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${this.id}`,
             JSON.stringify({'type': 'remote-update', 'source': 'client', 'id': this.id, 'data': update})
         );
+    }
+
+    sendStats(stats) {
+        this.publish(
+            `${CLIENT_STATS_TOPIC_PREFIX}/${this.id}`,
+            JSON.stringify({'type': 'stats', 'source': 'client', 'id': this.id, 'data': stats})
+        )
     }
 
     sleep(ms) {
