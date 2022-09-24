@@ -2,6 +2,7 @@ import {MQTTSignaling} from './signaling/mqtt-signaling';
 import {ARENAUtils} from '../../utils';
 
 const peerConnectionConfig = {
+    'sdpSemantics': 'unified-plan',
     'iceServers': [
         {'urls': 'stun:stun.l.google.com:19302'},
     ],
@@ -116,15 +117,14 @@ AFRAME.registerComponent('render-client', {
     },
 
     startNegotiation() {
-        console.log('creating offer.');
+        console.log('creating offer.', supportsSetCodecPreferences);
 
         if (supportsSetCodecPreferences) {
             const transceiver = this.peerConnection.addTransceiver('video', {direction: 'recvonly'});
             const codecs = RTCRtpSender.getCapabilities('video').codecs;
             const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
-            const validCodecs = codecs.filter(function(value, index, arr) {
-                return !(invalidCodecs.includes(value));
-            });
+            const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
+            console.log('validCodecs', validCodecs);
             transceiver.setCodecPreferences(validCodecs);
         }
 

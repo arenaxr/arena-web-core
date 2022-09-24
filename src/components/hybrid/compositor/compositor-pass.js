@@ -15,7 +15,12 @@ export class CompositorPass extends Pass {
             fragmentShader: CompositorShader.fragmentShader
         } );
 
-        this.material.uniforms.tStream.value = new THREE.VideoTexture( this.videoSource );
+        const videoTexture = new THREE.VideoTexture(this.videoSource);
+        // NearestFilter looks better
+        videoTexture.minFilter = THREE.NearestFilter;
+        videoTexture.magFilter = THREE.NearestFilter;
+
+        this.material.uniforms.tStream.value = videoTexture;
         this.material.uniforms.tDepth.value = depthTarget.depthTexture;
         this.material.uniforms.streamSize.value = [this.videoSource.videoWidth, this.videoSource.videoHeight];
         this.material.uniforms.cameraNear.value = cameraNear;
