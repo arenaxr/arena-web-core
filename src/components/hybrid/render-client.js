@@ -8,6 +8,8 @@ const peerConnectionConfig = {
     ],
 };
 
+const invalidCodecs = ['video/VP8', 'video/red', 'video/ulpfec', 'video/rtx'];
+
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
 
@@ -122,7 +124,6 @@ AFRAME.registerComponent('render-client', {
         if (supportsSetCodecPreferences) {
             const transceiver = this.peerConnection.addTransceiver('video', {direction: 'recvonly'});
             const codecs = RTCRtpSender.getCapabilities('video').codecs;
-            const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
             console.log('validCodecs', validCodecs);
             transceiver.setCodecPreferences(validCodecs);
