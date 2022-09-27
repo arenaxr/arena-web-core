@@ -47,13 +47,20 @@ export class WebRTCStatsLogger {
                 clientStats['frameHeight'] = stat.frameHeight;
                 clientStats['framerate'] = stat.framesPerSecond;
 
-                console.log(`Decode Time: ${stat.totalDecodeTime.toFixed(3)}`);
-                console.log(`InterFrame Delay: ${stat.totalInterFrameDelay.toFixed(3)}`);
-                console.log(`Jitter Buffer Delay: ${stat.jitterBufferDelay.toFixed(3)}`);
+                if (stat.totalDecodeTime) {
+                    console.log(`Decode Time: ${stat.totalDecodeTime.toFixed(3)}`);
+                    clientStats['totalDecodeTime'] = stat.totalDecodeTime.toFixed(3);
+                }
 
-                clientStats['totalDecodeTime'] = stat.totalDecodeTime.toFixed(3);
-                clientStats['totalInterFrameDelay'] = stat.totalInterFrameDelay.toFixed(3);
-                clientStats['jitterBufferDelay'] = stat.jitterBufferDelay.toFixed(3);
+                if (stat.totalInterFrameDelay) {
+                    console.log(`InterFrame Delay: ${stat.totalInterFrameDelay.toFixed(3)}`);
+                    clientStats['totalInterFrameDelay'] = stat.totalInterFrameDelay.toFixed(3);
+                }
+
+                if (stat.jitterBufferDelay) {
+                    console.log(`Jitter Buffer Delay: ${stat.jitterBufferDelay.toFixed(3)}`);
+                    clientStats['jitterBufferDelay'] = stat.jitterBufferDelay.toFixed(3);
+                }
             }
 
             if (this.lastReport && this.lastReport.has(stat.id)) {

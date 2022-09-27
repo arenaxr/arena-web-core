@@ -8,7 +8,8 @@ const peerConnectionConfig = {
     ],
 };
 
-const invalidCodecs = ['video/VP8', 'video/red', 'video/ulpfec', 'video/rtx'];
+const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
+const preferredCodec = 'video/VP9';
 
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
@@ -119,14 +120,19 @@ AFRAME.registerComponent('render-client', {
     },
 
     startNegotiation() {
-        console.log('creating offer.', supportsSetCodecPreferences);
+        console.log('creating offer.');
 
         if (supportsSetCodecPreferences) {
-            const transceiver = this.peerConnection.addTransceiver('video', {direction: 'recvonly'});
-            const codecs = RTCRtpSender.getCapabilities('video').codecs;
+            const transceiver = this.peerConnection.getTransceivers()[0];
+            const {codecs} = RTCRtpSender.getCapabilities('video');
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
-            console.log('validCodecs', validCodecs);
+            const selectedCodecIndex = validCodecs.findIndex((c) => c.mimeType === preferredCodec);
+            const selectedCodec = validCodecs[selectedCodecIndex];
+            validCodecs.splice(selectedCodecIndex, 1);
+            validCodecs.unshift(selectedCodec);
+            console.log('codecs', validCodecs);
             transceiver.setCodecPreferences(validCodecs);
+            console.log('Preferred video codec', selectedCodec);
         }
 
         this.peerConnection.createOffer()

@@ -19,6 +19,7 @@ export class CompositorPass extends Pass {
         // NearestFilter looks better
         videoTexture.minFilter = THREE.NearestFilter;
         videoTexture.magFilter = THREE.NearestFilter;
+        videoTexture.encoding = THREE.sRGBEncoding;
 
         this.material.uniforms.tStream.value = videoTexture;
         this.material.uniforms.tDepth.value = depthTarget.depthTexture;
