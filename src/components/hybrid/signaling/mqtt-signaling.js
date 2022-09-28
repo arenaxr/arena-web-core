@@ -25,6 +25,7 @@ export class MQTTSignaling {
         this.onOffer = null;
         this.onAnswer = null;
         this.onIceCandidate = null;
+        //this.onAckknowledge = null;
     }
 
     publish(topic, msg) {
@@ -87,7 +88,7 @@ export class MQTTSignaling {
         if ((this.connectionId != null) && (signal.id != this.connectionId)) return;
 
         console.log('[render-client]', signal);
-
+       //if(signal.type == "Ackknowledge") this.OnAckknowledge()
         if (signal.type == 'offer') {
             this.connectionId = signal.id;
             if (this.onOffer) this.onOffer(signal.data);
@@ -106,6 +107,14 @@ export class MQTTSignaling {
             JSON.stringify({'type': 'connect', 'source': 'client', 'id': this.id, 'data': 'data'}),
         );
     }
+    /*
+    DispatcherConnect(){
+        this.publish(
+            `${CLIENT_CONNECT_TOPIC_PREFIX}/${this.id}`,
+            JSON.stringify({'type': 'connect', 'source': 'client', 'id': this.id, 'data': 'data'}),
+        );
+    }
+    */
 
     sendOffer(offer) {
         this.publish(
