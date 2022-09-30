@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.13.0](https://github.com/arenaxr/arena-web-core/compare/v1.12.0...v1.13.0) (2022-09-30)
+
+
+### Features
+
+* **env-presets:** add ability to change env-presets in real-time ([10dbd27](https://github.com/arenaxr/arena-web-core/commit/10dbd27c4f6b2551cc1cd40d2499f32c2268147c))
+
+
+### Bug Fixes
+
+* **avatar:** add missing leading 0 to avatar text color ([2eec88e](https://github.com/arenaxr/arena-web-core/commit/2eec88e84d1da11b36ed29a8c0a0d7105b08146a))
+* **build:** fix isosahedron mispelling ([683499f](https://github.com/arenaxr/arena-web-core/commit/683499ff801bc987ec7d4ca9a3d7cc2d9aa7f578))
+* **build:** fix isosahedron mispelling ([e438125](https://github.com/arenaxr/arena-web-core/commit/e4381252e4c94f4b893f12689a2176ee1705d2fc))
+* **build:** increse color property hieght to be visible ([a3882c0](https://github.com/arenaxr/arena-web-core/commit/a3882c059010a5dcb348a7f73f513290f493243d))
+* **build:** match more primitives to a-frame defaults ([d8e0bc9](https://github.com/arenaxr/arena-web-core/commit/d8e0bc9155b66a9ccded673a8d14326b1a99e1dd))
+* move aframe-extras to systems ([ee51bdc](https://github.com/arenaxr/arena-web-core/commit/ee51bdcf3b5707d4a9fa6200534d312fa1d2c959))
+* pass module parent along in module create ([6ba1117](https://github.com/arenaxr/arena-web-core/commit/6ba1117cfc346790c0134a1341b0a79c0f40d039))
+* **stats:** add euler angles to camera stats ([8eeb62c](https://github.com/arenaxr/arena-web-core/commit/8eeb62c35ff394f993b486065e306ba44b38e78c))
+* **stats:** update initial position of stats when opened ([6dbebe2](https://github.com/arenaxr/arena-web-core/commit/6dbebe2b94a733308ab03e0d9a230c9790f0e577))
+* use THREE.MathUtils over deprec THREE.Math ([14365c9](https://github.com/arenaxr/arena-web-core/commit/14365c9766037611721673cbcdc97ba3ea1a14b1))
+
 ## [1.12.0](https://github.com/arenaxr/arena-web-core/compare/v1.11.2...v1.12.0) (2022-08-21)
 
 
