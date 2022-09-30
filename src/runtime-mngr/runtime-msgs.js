@@ -249,9 +249,9 @@ export default class RuntimeMsgs {
             {
                 name: pdata.name,
                 uuid: muuid,
-                // parent is this runtime if affinity is client; otherwise, undefined to let orchestrator decide
+                // parent is this runtime if affinity is client; otherwise, from request parent which can be undefined to let orchestrator decide
                 parent:
-          pdata.affinity == 'client' ? {uuid: this.rt.getUuid()} : undefined,
+          pdata.affinity == 'client' ? {uuid: this.rt.getUuid()} : pdata.parent,
                 filename: fn,
                 filetype: pdata.filetype,
                 channels: pdata.channels,
