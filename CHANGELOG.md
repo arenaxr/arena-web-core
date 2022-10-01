@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.2](https://github.com/arenaxr/arena-web-core/compare/v1.13.1...v1.13.2) (2022-10-01)
+
+
+### Bug Fixes
+
+* create delete module error ([9e7a893](https://github.com/arenaxr/arena-web-core/commit/9e7a893a475b0e024c8b7fa4f1d5c5feba06b3ba))
+
 ## [1.13.1](https://github.com/arenaxr/arena-web-core/compare/v1.13.0...v1.13.1) (2022-10-01)
 
 
