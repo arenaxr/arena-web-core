@@ -52,6 +52,9 @@ export default class RuntimeMsgs {
         wasm: ['wasm:unstable'],
         python: ['python:python3'],
     };
+ 
+    /* our runtime type */
+    static RuntimeType='browser'
 
     /**
    * Create the factory
@@ -95,6 +98,7 @@ export default class RuntimeMsgs {
             name: this.rt.getName(),
             max_nmodules: this.rt.getMaxNmodules(),
             apis: this.rt.getApis(),
+            runtime_type: RuntimeMsgs.RuntimeType,
         };
         return msg;
     }
@@ -133,6 +137,7 @@ export default class RuntimeMsgs {
             apis = [],
             wait_state = undefined,
             memory = undefined,
+            type = 
         },
         msgAction = RuntimeMsgs.Action.create,
     ) {
