@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.1](https://github.com/arenaxr/arena-web-core/compare/v1.13.0...v1.13.1) (2022-10-01)
+
+
+### Bug Fixes
+
+* send runtime type ([678fd1c](https://github.com/arenaxr/arena-web-core/commit/678fd1c4dd46275a35c02bbb174057bda7cd0a2c))
+
 ## [1.13.0](https://github.com/arenaxr/arena-web-core/compare/v1.12.0...v1.13.0) (2022-09-30)
 
 
