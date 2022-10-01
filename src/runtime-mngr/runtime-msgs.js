@@ -137,7 +137,6 @@ export default class RuntimeMsgs {
             apis = [],
             wait_state = undefined,
             memory = undefined,
-            type = 
         },
         msgAction = RuntimeMsgs.Action.create,
     ) {
