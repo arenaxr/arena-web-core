@@ -36,7 +36,7 @@ AFRAME.registerComponent('video-control', {
     init: function() {
         const data = this.data;
         const theID = data.video_object;
-        const videoPath = data.video_path;
+        const videoPath = ARENAUtils.crossOriginDropboxSrc(data.video_path);
         const anyoneClicks = data.anyone_clicks;
         const videoLoop = data.video_loop;
         const autoplay = data.autoplay;
@@ -44,7 +44,7 @@ AFRAME.registerComponent('video-control', {
 
         let frameSrc = 'static/images/conix-face.white.jpg'; // default
         if (data.frame_object) {
-            frameSrc = data.frame_object;
+            frameSrc = ARENAUtils.crossOriginDropboxSrc(data.frame_object);
         }
 
         this.player = document.getElementById(theID);
