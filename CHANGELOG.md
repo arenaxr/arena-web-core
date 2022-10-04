@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.13.3](https://github.com/arenaxr/arena-web-core/compare/v1.13.2...v1.13.3) (2022-10-04)
+
+
+### Bug Fixes
+
+* **avatar:** fix dropbox ([44aa24e](https://github.com/arenaxr/arena-web-core/commit/44aa24e5fe9751d360453872bbd48bf698fbad71))
+* **gltf-model-lod:** fixed dropbox links on detailedUrl ([3603c1a](https://github.com/arenaxr/arena-web-core/commit/3603c1a496c6d12c3c50c22d337a2e2abb085aeb))
+* **video-control:** convert dropbox links properly ([305f383](https://github.com/arenaxr/arena-web-core/commit/305f3836ef90b41314e944e4947157ebc783623a))
+
 ## [1.13.2](https://github.com/arenaxr/arena-web-core/compare/v1.13.1...v1.13.2) (2022-10-01)
 
 
