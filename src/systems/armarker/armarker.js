@@ -318,7 +318,7 @@ AFRAME.registerSystem('armarker', {
     */
     detectARHeadset() {
         if (window.mlWorld) return 'ml';
-        if (navigator.xr && navigator.userAgent.includes('Edge')) return 'hl';
+        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
         return 'unknown';
     },
     /**
