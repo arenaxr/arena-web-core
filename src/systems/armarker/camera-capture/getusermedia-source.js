@@ -9,7 +9,7 @@
 export class GetUserMediaARSource {
     constructor(options) {
         this.options = {
-            cameraFacingMode: 'enviornment',
+            cameraFacingMode: 'environment',
             width: 1280,
             height: 720,
         }
