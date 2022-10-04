@@ -1,5 +1,7 @@
 /* global AFRAME, ARENA */
 
+import {ARENAUtils} from '../utils.js';
+
 /**
  * @fileoverview Adds a video to an entity and controls its playback.
  *
