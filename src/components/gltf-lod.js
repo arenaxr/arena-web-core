@@ -1,5 +1,7 @@
 /* global AFRAME */
 
+import {ARENAUtils} from '../utils.js';
+
 /**
  * @fileoverview Component loads/unloads gltfs by simple user distance-based LOD
  * Inspired by aframe-lod <https://github.com/mflux/aframe-lod>
@@ -127,7 +129,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         this.camDistance = new THREE.Vector3();
         this.tempDistance = new THREE.Vector3();
         this.showDetailed = false;
-        this.defaultUrl = this.el.getAttribute('gltf-model');
+        this.defaultUrl = ARENAUtils.crossOriginDropboxSrc(this.el.getAttribute('gltf-model'));
         this.cameraPos = document.getElementById('my-camera').object3D.position;
         this.cacheFreeTimer = null;
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
