@@ -648,7 +648,7 @@ export class Arena {
             const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
             sceneHeads.forEach((head) => {
                 const opt = document.createElement('option');
-                opt.value = head.url;
+                opt.value = ARENAUtils.crossOriginDropboxSrc(head.url);
                 opt.text = `${head.name} (scene-options)`;
                 headModelPathSelect.add(opt, null);
             });
