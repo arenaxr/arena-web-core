@@ -331,7 +331,7 @@ Opens an HTML prompt when clicked. Sends text input as an event on MQTT
 | [on] | <code>string</code> | <code>&quot;mousedown&quot;</code> | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
 | [title] | <code>string</code> | <code>&quot;Text Input&quot;</code> | The prompt title |
 | [label] | <code>string</code> | <code>&quot;Input text below (max is 140 characters)&quot;</code> | Text prompt label |
-| [placeholder] | <code>string</code> | <code>&quot;Type here&quot;</code> | Text input place hoText |
+| [placeholder] | <code>string</code> | <code>&quot;Type here&quot;</code> | Text input place holder |
 
 <a name="module_threejs-scene"></a>
 
