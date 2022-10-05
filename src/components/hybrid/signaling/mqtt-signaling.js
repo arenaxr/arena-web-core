@@ -1,18 +1,18 @@
 const Paho = require('paho-mqtt');
 
-const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/server/offer';
-const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/server/answer';
-const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/server/candidate';
-const SERVER_HEALTH_CHECK = 'realm/g/a/cloud_rendering/server/health';
+const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/offer';
+const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/answer';
+const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/candidate';
+const SERVER_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/server/health';
 
-const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/connect';
-const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/disconnect';
-const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/offer';
-const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/answer';
-const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/candidate';
-const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/stats';
+const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/connect';
+const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/disconnect';
+const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/offer';
+const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/answer';
+const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/candidate';
+const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/stats';
 
-const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/cloud_rendering/client/remote';
+const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/remote';
 
 export class MQTTSignaling {
     constructor(id) {

@@ -17,12 +17,9 @@ export class WebRTCStatsLogger {
                 return;
             }
 
-            const clientStats = {};
-
             if (stat.codecId != undefined) {
                 const codec = report.get(stat.codecId);
                 console.log(`Codec: ${codec.mimeType}`);
-                clientStats['codec'] = codec.mimeType;
 
                 if (codec.payloadType) {
                     console.log(`payloadType=${codec.payloadType}`);
@@ -42,24 +39,19 @@ export class WebRTCStatsLogger {
                 console.log(`Resolution: ${stat.frameWidth}x${stat.frameHeight}`);
                 console.log(`Framerate: ${stat.framesPerSecond}`);
 
-                clientStats['decoder'] = stat.decoderImplementation;
-                clientStats['frameWidth'] = stat.frameWidth;
-                clientStats['frameHeight'] = stat.frameHeight;
-                clientStats['framerate'] = stat.framesPerSecond;
+                if (this.lastReport && this.lastReport.has(stat.id)) {
+                    const lastStats = this.lastReport.get(stat.id);
+                    if (stat.totalDecodeTime) {
+                        console.log(`Decode Time: ${(stat.totalDecodeTime - lastStats.totalDecodeTime).toFixed(3)}`);
+                    }
 
-                if (stat.totalDecodeTime) {
-                    console.log(`Decode Time: ${stat.totalDecodeTime.toFixed(3)}`);
-                    clientStats['totalDecodeTime'] = stat.totalDecodeTime.toFixed(3);
-                }
+                    if (stat.totalInterFrameDelay) {
+                        console.log(`InterFrame Delay: ${(stat.totalInterFrameDelay - lastStats.totalInterFrameDelay).toFixed(3)}`);
+                    }
 
-                if (stat.totalInterFrameDelay) {
-                    console.log(`InterFrame Delay: ${stat.totalInterFrameDelay.toFixed(3)}`);
-                    clientStats['totalInterFrameDelay'] = stat.totalInterFrameDelay.toFixed(3);
-                }
-
-                if (stat.jitterBufferDelay) {
-                    console.log(`Jitter Buffer Delay: ${stat.jitterBufferDelay.toFixed(3)}`);
-                    clientStats['jitterBufferDelay'] = stat.jitterBufferDelay.toFixed(3);
+                    if (stat.jitterBufferDelay) {
+                        console.log(`Jitter Buffer Delay: ${(stat.jitterBufferDelay - lastStats.jitterBufferDelay).toFixed(3)}`);
+                    }
                 }
             }
 
@@ -70,10 +62,10 @@ export class WebRTCStatsLogger {
                 const bitrate = (8 * (stat.bytesReceived - lastStats.bytesReceived) / duration) / 1000;
                 console.log(`Bitrate: ${bitrate.toFixed(3)} kbit/sec`);
 
-                clientStats['bitrate'] = bitrate.toFixed(3);
+                // clientStats['bitrate'] = bitrate.toFixed(3);
             }
 
-            this.signaler.sendStats(clientStats);
+            this.signaler.sendStats(stat);
         });
 
         this.lastReport = report;
