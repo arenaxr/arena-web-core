@@ -11,6 +11,11 @@ const peerConnectionConfig = {
 const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
 const preferredCodec = 'video/VP9';
 
+const dataChannelOptions = {
+    // ordered: false, // do not guarantee order
+    // maxPacketLifeTime: 1000, // in milliseconds
+};
+
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
 
@@ -110,7 +115,7 @@ AFRAME.registerComponent('render-client', {
             }
         };
 
-        this.dataChannel = this.peerConnection.createDataChannel('client-input');
+        this.dataChannel = this.peerConnection.createDataChannel('client-input', dataChannelOptions);
 
         this.dataChannel.onopen = () => {
             console.log('Data Channel is Open');
@@ -267,11 +272,12 @@ AFRAME.registerComponent('render-client', {
             this.dataChannel.send(JSON.stringify({
                 x: data.position.x.toFixed(3),
                 y: data.position.y.toFixed(3),
-                z: -data.position.z.toFixed(3),
+                z: data.position.z.toFixed(3),
                 x_: data.rotation._x.toFixed(3),
                 y_: data.rotation._y.toFixed(3),
                 z_: data.rotation._z.toFixed(3),
                 w_: data.rotation._w.toFixed(3),
+                ts: new Date().getTime(),
             }));
         }
     },

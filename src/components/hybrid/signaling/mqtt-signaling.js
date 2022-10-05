@@ -48,7 +48,7 @@ export class MQTTSignaling {
                     resolve();
                 },
                 onFailure : this.mqttOnConnectionLost,
-                // reconnect : true,
+                reconnect : true,
             });
         });
     }
@@ -60,15 +60,6 @@ export class MQTTSignaling {
         this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/#`);
         this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/#`);
         this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/#`);
-    }
-
-    closeConnection() {
-        this.publish(
-            `${CLIENT_DISCONNECT_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'disconnect', 'source': 'client', 'id': this.id})
-        );
-
-        this.client.disconnect();
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -92,58 +83,54 @@ export class MQTTSignaling {
         if (signal.type == 'offer') {
             this.connectionId = signal.id;
             if (this.onOffer) this.onOffer(signal.data);
-        }
-        else if (signal.type == 'answer') {
+        } else if (signal.type == 'answer') {
             if (this.onAnswer) this.onAnswer(signal.data);
-        }
-        else if (signal.type == 'ice') {
+        } else if (signal.type == 'ice') {
             if (this.onIceCandidate) this.onIceCandidate(signal.data);
-        }
-        else if (signal.type == 'health') {
+        } else if (signal.type == 'health') {
             if (this.onHealthCheck) this.onHealthCheck(signal.data)
         }
 	}
 
-    sendConnect() {
-        this.publish(
-            `${CLIENT_CONNECT_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'connect', 'source': 'client', 'id': this.id})
+    sendMessage(topic, type, data) {
+        const msg = {'type': type, 'source': 'client', 'id': this.id, 'ts': new Date().getTime()};
+        if (data !== undefined) {
+            msg['data'] = data;
+        }
+
+        this.publish(topic,
+            JSON.stringify(msg)
         );
+    }
+
+    sendConnect() {
+        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${this.id}`, 'connect');
+    }
+
+    closeConnection() {
+        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${this.id}`, 'disconnect');
+
+        this.client.disconnect();
     }
 
     sendOffer(offer) {
-        this.publish(
-            `${CLIENT_OFFER_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'offer', 'source': 'client', 'id': this.id, 'data': offer})
-        );
+        this.sendMessage(`${CLIENT_OFFER_TOPIC_PREFIX}/${this.id}`, 'offer', offer);
     }
 
     sendAnswer(answer) {
-        this.publish(
-            `${CLIENT_ANSWER_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'answer', 'source': 'client', 'id': this.id, 'data': answer})
-        );
+        this.sendMessage(`${CLIENT_ANSWER_TOPIC_PREFIX}/${this.id}`, 'answer', answer);
     }
 
     sendCandidate(candidate) {
-        this.publish(
-            `${CLIENT_CANDIDATE_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'ice', 'source': 'client', 'id': this.id, 'data': candidate})
-        );
+        this.sendMessage(`${CLIENT_CANDIDATE_TOPIC_PREFIX}/${this.id}`, 'ice', candidate);
     }
 
     sendRemoteStatusUpdate(update) {
-        this.publish(
-            `${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'remote-update', 'source': 'client', 'id': this.id, 'data': update})
-        );
+        this.sendMessage(`${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${this.id}`, 'remote-update', update);
     }
 
     sendStats(stats) {
-        this.publish(
-            `${CLIENT_STATS_TOPIC_PREFIX}/${this.id}`,
-            JSON.stringify({'type': 'stats', 'source': 'client', 'id': this.id, 'data': stats})
-        )
+        this.sendMessage(`${CLIENT_STATS_TOPIC_PREFIX}/${this.id}`, 'stats', stats);
     }
 
     sleep(ms) {

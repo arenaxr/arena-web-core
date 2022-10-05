@@ -234,11 +234,11 @@ export class CreateUpdate {
             break;
         case 'gltf-model':
             if (ARENA.armode && data.hasOwnProperty('hide-on-enter-ar')) {
-                console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
+                Logger.warning('gltf-model', `Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
             if (ARENA.vr && data.hasOwnProperty('hide-on-enter-vr')) {
-                console.warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
+                Logger.warning('gltf-model', `Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
             // support both url and src property
