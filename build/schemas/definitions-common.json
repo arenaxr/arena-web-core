@@ -538,7 +538,7 @@
          "properties":{
             "on":{
                "default":"mousedown",
-               "description":"A case-sensitive string representing the [event type]{@link https://developer.mozilla.org/en-US/docs/Web/Events} to listen for, e.g. 'mousedown', 'mouseup'",
+               "description":"A case-sensitive string representing the event type to listen for, e.g. 'mousedown', 'mouseup'. See https://developer.mozilla.org/en-US/docs/Web/Events",
                "enum":[
                   "mousedown",
                   "mouseup",
