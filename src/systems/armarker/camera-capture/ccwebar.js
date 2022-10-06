@@ -15,7 +15,7 @@ import {ARENAUtils} from '../../../utils.js';
  * Grab front facing camera frames using getUserMedia()
  */
 export class WebARCameraCapture {
-    static instance=null;
+    static instance = null;
     /* worker to send images captured */
     cvWorker;
 
@@ -44,7 +44,7 @@ export class WebARCameraCapture {
      * @param {object} [cameraFacingMode='environment'] - as defined by MediaTrackConstraints.facingMode
      * @param {object} [debug=false] - debug messages on/off
      */
-    constructor(cameraFacingMode='environment', debug=false) {
+    constructor(cameraFacingMode = 'environment', debug = false) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw 'No getUserMedia support found for camera capture.';
         }
@@ -70,24 +70,22 @@ export class WebARCameraCapture {
      */
     initCamera() {
         return new Promise((resolve, reject) => {
-            this.arSource.init()
-                .then((videoElem) => {
-                    this.video = videoElem;
-                    document.body.appendChild(videoElem);
+            this.arSource.init().then((videoElem) => {
+                this.video = videoElem;
+                document.body.appendChild(videoElem);
 
-                    this.canvas = document.createElement('canvas');
-                    this.canvasCtx = this.canvas.getContext('2d');
+                this.canvas = document.createElement('canvas');
+                this.canvasCtx = this.canvas.getContext('2d');
 
-                    // init frame size to screen size
-                    this.onResize();
-                    window.addEventListener('resize', this.onResize.bind(this));
+                // init frame size to screen size
+                this.onResize();
+                window.addEventListener('resize', this.onResize.bind(this));
 
-                    resolve(this);
-                })
-                .catch((err) => {
-                    console.warn(err);
-                    reject(err);
-                });
+                resolve(this);
+            }).catch((err) => {
+                console.warn(err);
+                reject(err);
+            });
         });
     }
 
@@ -133,7 +131,7 @@ export class WebARCameraCapture {
     setCVWorker(worker, frameRequested = true) {
         this.cvWorker = worker;
 
-        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        if (frameRequested) requestAnimationFrame( this.getCameraImagePixels.bind(this));
     }
 
     /**
@@ -168,18 +166,18 @@ export class WebARCameraCapture {
         const imageDataPixels = imageData.data;
 
         for (let i = 0, j = 0; i < imageDataPixels.length; i += 4, j++) {
-            const grayscale = Math.round((imageDataPixels[i] + imageDataPixels[i + 1] + imageDataPixels[i + 2]) / 3);
+            const grayscale = Math.round( (imageDataPixels[i] + imageDataPixels[i + 1] + imageDataPixels[i + 2]) / 3);
             this.frameGsPixels[j] = grayscale; // single grayscale value
         }
         /*
-    if (this.debug) {
-        let dbgCanvas = document.getElementById('debug_canvas');
-        dbgCanvas.width = this.frameWidth;
-        dbgCanvas.height = this.frameHeight;
-        let ctx = dbgCanvas.getContext("2d");
-        ctx.putImageData(imageData, 0, 0);
-    }
-    */
+        if (this.debug) {
+          let dbgCanvas = document.getElementById('debug_canvas');
+          dbgCanvas.width = this.frameWidth;
+          dbgCanvas.height = this.frameHeight;
+          let ctx = dbgCanvas.getContext("2d");
+          ctx.putImageData(imageData, 0, 0);
+        }
+        */
         // construct cam frame data to send to worker
         const camFrameMsg = {
             type: CVWorkerMsgs.type.PROCESS_GSFRAME,

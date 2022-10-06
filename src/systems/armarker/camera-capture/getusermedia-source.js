@@ -74,14 +74,15 @@ export class GetUserMediaARSource {
                 return reject();
             }
 
-            navigator.mediaDevices.getUserMedia({
-                audio: false,
-                video: {
-                    facingMode: this.options.cameraFacingMode,
-                    width: {ideal: this.options.width},
-                    height: {ideal: this.options.height},
-                },
-            })
+            navigator.mediaDevices
+                .getUserMedia({
+                    audio: false,
+                    video: {
+                        facingMode: this.options.cameraFacingMode,
+                        width: {ideal: this.options.width},
+                        height: {ideal: this.options.height},
+                    },
+                })
                 .then((stream) => {
                     this.video.srcObject = stream;
                     this.video.onloadedmetadata = (e) => {

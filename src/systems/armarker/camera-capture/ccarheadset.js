@@ -3,8 +3,8 @@
  * @fileoverview Capture camera facing forward using getUserMedia
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
- * @date 2021
+ * Copyright (c) 2022, The CONIX Research Center. All rights reserved.
+ * @date 2022
  */
 
 import {CVWorkerMsgs} from '../worker-msgs.js';
@@ -13,7 +13,7 @@ import {CVWorkerMsgs} from '../worker-msgs.js';
  * Grab front facing camera frames using getUserMedia()
  */
 export class ARHeadsetCameraCapture {
-    static instance=null;
+    static instance = null;
     /* worker to send images captured */
     cvWorker;
 
@@ -38,14 +38,17 @@ export class ARHeadsetCameraCapture {
     cvWorker;
 
     /* projection matrices for supported headsets [TODO: get more values/check these] */
-    headsetPM = {ml: [2.842104, 0, 0, 0,
-        0, 3.897521, 0, 0,
-        -0.000893, -0.004491, -1.171066, -1,
-        0, 0, -0.839120, 0],
-    hl: [2.842104, 0, 0, 0,
-        0, 3.897521, 0, 0,
-        -0.000893, -0.004491, -1.171066, -1,
-        0, 0, -0.839120, 0],
+    headsetPM = {
+        ml: [
+            2.842104, 0, 0, 0,
+            0, 3.897521, 0, 0,
+            -0.000893, -0.004491, -1.171066, -1,
+            0, 0, -0.839120, 0],
+        hl: [
+            2.842104, 0, 0, 0,
+            0, 3.897521, 0, 0,
+            -0.000893, -0.004491, -1.171066, -1,
+            0, 0, -0.839120, 0],
     };
     /* selected projection matrix for device */
     projectionMatrix;
@@ -56,7 +59,7 @@ export class ARHeadsetCameraCapture {
      * @param {object} [cameraFacingMode='environment'] - as defined by MediaTrackConstraints.facingMode
      * @param {object} [debug=false] - debug messages on/off
      */
-    constructor(arHeadset, cameraFacingMode='environment', debug=false) {
+    constructor(arHeadset, cameraFacingMode = 'environment', debug = false) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw 'No getUserMedia support found for camera capture.';
         }
@@ -96,7 +99,7 @@ export class ARHeadsetCameraCapture {
             })
             .catch((err) => {
                 throw `ARHeadsetCC: getUserMedia camera access not found failed! ${err}`;
-            } );
+            });
     }
 
     /**
@@ -111,9 +114,7 @@ export class ARHeadsetCameraCapture {
         this.canvas.width = this.frameWidth;
         this.canvas.height = this.frameHeight;
 
-        this.frameGsPixels = new Uint8ClampedArray(
-            this.frameWidth * this.frameHeight,
-        ); // grayscale (1 value per pixel)
+        this.frameGsPixels = new Uint8ClampedArray(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
 
         // update camera intrinsics
         this.frameCamera = this.getCameraIntrinsics();
@@ -166,14 +167,14 @@ export class ARHeadsetCameraCapture {
             this.frameGsPixels[j] = grayscale; // single grayscale value
         }
         /*
-      if (this.debug) {
-        let dbgCanvas = document.getElementById('debug_canvas');
-        dbgCanvas.width = this.frameWidth;
-        dbgCanvas.height = this.frameHeight;
-        let ctx = dbgCanvas.getContext("2d");
-        ctx.putImageData(imageData, 0, 0);
-      }
-      */
+        if (this.debug) {
+          let dbgCanvas = document.getElementById('debug_canvas');
+          dbgCanvas.width = this.frameWidth;
+          dbgCanvas.height = this.frameHeight;
+          let ctx = dbgCanvas.getContext("2d");
+          ctx.putImageData(imageData, 0, 0);
+        }
+        */
         // construct cam frame data to send to worker
         const camFrameMsg = {
             type: CVWorkerMsgs.type.PROCESS_GSFRAME,
@@ -190,9 +191,7 @@ export class ARHeadsetCameraCapture {
         };
 
         // post frame data, marking the pixel buffer as transferable
-        this.cvWorker.postMessage(camFrameMsg, [
-            camFrameMsg.grayscalePixels.buffer,
-        ]);
+        this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
     }
 
     /**
@@ -203,7 +202,7 @@ export class ARHeadsetCameraCapture {
      */
     getCameraIntrinsics() {
         return {
-        // Focal lengths in pixels (these are equal for square pixels)
+            // Focal lengths in pixels (these are equal for square pixels)
             fx: (this.frameWidth / 2) * this.projectionMatrix[0],
             fy: (this.frameHeight / 2) * this.projectionMatrix[5],
             // Principal point in pixels (typically at or near the center of the viewport)
@@ -214,4 +213,3 @@ export class ARHeadsetCameraCapture {
         };
     }
 }
-
