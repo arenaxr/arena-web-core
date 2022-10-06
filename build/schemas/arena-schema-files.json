@@ -25,12 +25,12 @@
        "title":"Cube (deprecated; don't use)"
     },
     "cylinder":{
-       "description":"cylinder Geometry",
+       "description":"Cylinder Geometry",
        "file":"schemas/cylinder.json",
        "title":"Cylinder"
     },
     "dodecahedron":{
-       "description":"dodecahedron Geometry",
+       "description":"Dodecahedron Geometry",
        "file":"schemas/dodecahedron.json",
        "title":"Dodecahedron"
     },
@@ -99,6 +99,11 @@
        "file":"schemas/ring.json",
        "title":"Ring"
     },
+    "roundedbox":{
+      "description":"Rounded Box Geometry",
+      "file":"schemas/roundedbox.json",
+      "title":"Rounded Box"
+    },
     "scene-options":{
        "description":"ARENA scene options",
        "file":"schemas/arena-scene-options.json",
@@ -145,7 +150,7 @@
        "title":"Triangle"
     },
     "videosphere":{
-       "description":"Videosphere Geometry",
+       "description":"Videosphere 360 Video",
        "file":"schemas/videosphere.json",
        "title":"Videosphere"
     }
