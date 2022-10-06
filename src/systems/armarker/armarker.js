@@ -293,6 +293,10 @@ AFRAME.registerSystem('armarker', {
                 window.this.lastATLASUpdate = new Date();
                 return response.json();
             })
+            .catch((e) => {
+                console.log('Error retrieving ATLAS markers');
+                return false;
+            })
             .then((data) => {
                 data.forEach((tag) => {
                     const tagid = tag.name.substring(9);
