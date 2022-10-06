@@ -80,17 +80,26 @@ export class ARHeadsetCameraCapture {
         this.canvas = document.createElement('canvas');
         this.canvasCtx = this.canvas.getContext('2d');
 
-        // init frame size to screen size
-        this.handleOrientation();
-        window.addEventListener('deviceorientation', this.handleOrientation.bind(this));
+        this.frameWidth = screen.width;
+        this.frameHeight = screen.height;
+        this.video.style.width = this.frameWidth + 'px';
+        this.video.style.height = this.frameHeight + 'px';
+        this.canvas.width = this.frameWidth;
+        this.canvas.height = this.frameHeight;
+
+        this.frameGsPixels = new Uint8ClampedArray(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
+
+        // update camera intrinsics
+        this.frameCamera = this.getCameraIntrinsics2();
+
+        const options = {
+            cameraFacingMode: cameraFacingMode,
+            width: this.frameWidth,
+            height: this.frameHeight,
+        };
 
         navigator.mediaDevices
-            .getUserMedia({
-                audio: false,
-                video: {facingMode: cameraFacingMode},
-                width: this.frameWidth,
-                height: this.frameHeight,
-            })
+            .getUserMedia(options)
             .then((ms) => {
                 this.video.srcObject = ms;
                 this.video.onloadedmetadata = (e) => {
@@ -106,19 +115,6 @@ export class ARHeadsetCameraCapture {
      * When device changes orientation, handle screen size changes
      * @private
      */
-    handleOrientation() {
-        this.frameWidth = screen.width;
-        this.frameHeight = screen.height;
-        this.video.style.width = this.frameWidth + 'px';
-        this.video.style.height = this.frameHeight + 'px';
-        this.canvas.width = this.frameWidth;
-        this.canvas.height = this.frameHeight;
-
-        this.frameGsPixels = new Uint8ClampedArray(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
-
-        // update camera intrinsics
-        this.frameCamera = this.getCameraIntrinsics();
-    }
 
     /**
      * Indicate CV worker to send frames to (ar marker system expects this call to be implemented)
@@ -210,6 +206,19 @@ export class ARHeadsetCameraCapture {
             cy: ((1 - this.projectionMatrix[9]) * this.frameHeight) / 2,
             // Skew factor in pixels (nonzero for rhomboid pixels)
             gamma: (this.frameWidth / 2) * this.projectionMatrix[4],
+        };
+    }
+
+    getCameraIntrinsics2() {
+        return {
+            // Focal lengths in pixels (these are equal for square pixels)
+            cx: (this.frameWidth / 2),
+            cy: (this.frameHeight / 2),
+            // Principal point in pixels (typically at or near the center of the viewport)
+            fx: this.frameWidth,
+            fy: this.frameWidth,
+            // Skew factor in pixels (nonzero for rhomboid pixels)
+            gamma: 0,
         };
     }
 }
