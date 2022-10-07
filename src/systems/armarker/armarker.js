@@ -357,13 +357,15 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     unregisterComponent: function(marker) {
-        // indicate marker was removed to cv worker
-        const delMarker = {
-            type: CVWorkerMsgs.type.KNOWN_MARKER_DEL,
-            // marker id
-            markerid: marker.data.markerid,
-        };
-        this.cvWorker.postMessage(delMarker);
+        if (this.cvPipelineInitialized) {
+            // indicate marker was removed to cv worker
+            const delMarker = {
+                type: CVWorkerMsgs.type.KNOWN_MARKER_DEL,
+                // marker id
+                markerid: marker.data.markerid,
+            };
+            this.cvWorker.postMessage(delMarker);
+        }
         delete this.markers[marker.data.markerid];
     },
     /**
