@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.14.0](https://github.com/arenaxr/arena-web-core/compare/v1.13.3...v1.14.0) (2022-10-07)
+
+
+### Features
+
+* **add:** add roundedbox preimitive to schema ([6d0c2de](https://github.com/arenaxr/arena-web-core/commit/6d0c2de95934620accdc8234195d5e7fc35f8b0d))
+
+
+### Bug Fixes
+
+* **build:** add text-input property to objects in build page ([88e6718](https://github.com/arenaxr/arena-web-core/commit/88e67181e5c233b6a56dbcc6bb9f2702df87dbf2))
+* **build:** add ui panel primitive to build schema ([7535f5a](https://github.com/arenaxr/arena-web-core/commit/7535f5a224e69e499165d3c4ab7af7e26326d556))
+* check for cvpipeline before worker msg ([50e3d64](https://github.com/arenaxr/arena-web-core/commit/50e3d641b4b73db62d0a5568fe940d28cd23602f))
+* Prevent double-loading CV worker ([2567ed6](https://github.com/arenaxr/arena-web-core/commit/2567ed6d2bdd032803a4745741f083fd24ef03a0))
+* sync initial armarker wireframe w/ dynamic ([3cb1e2c](https://github.com/arenaxr/arena-web-core/commit/3cb1e2c6ed175f9002da23fdd27bd61ad75045b0))
+* typo in GUM options ([7a87efd](https://github.com/arenaxr/arena-web-core/commit/7a87efd246937402500df302e2dc14f05955ae18))
+
 ## [1.13.3](https://github.com/arenaxr/arena-web-core/compare/v1.13.2...v1.13.3) (2022-10-04)
 
 
