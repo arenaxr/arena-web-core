@@ -189,7 +189,11 @@ export class ARHeadsetCameraCapture {
         };
 
         // post frame data, marking the pixel buffer as transferable
-        this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
+        try {
+            this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
+        } catch (err) {
+            console.warn('Failed to post message to CV Worker', err);
+        }
     }
 
     /**
