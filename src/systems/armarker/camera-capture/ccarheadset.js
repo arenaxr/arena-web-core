@@ -216,13 +216,15 @@ export class ARHeadsetCameraCapture {
     }
 
     getCameraIntrinsics2() {
+        // Assuming  64.69° FOV per https://stackoverflow.com/questions/65575712/
+        const hl2Ratio = 0.905886;
         return {
             // Focal lengths in pixels (these are equal for square pixels)
             cx: (this.frameWidth / 2),
             cy: (this.frameHeight / 2),
             // Principal point in pixels (typically at or near the center of the viewport)
-            fx: this.frameWidth,
-            fy: this.frameWidth,
+            fx: this.frameWidth * hl2Ratio,
+            fy: this.frameWidth * hl2Ratio,
             // Skew factor in pixels (nonzero for rhomboid pixels)
             gamma: 0,
         };
