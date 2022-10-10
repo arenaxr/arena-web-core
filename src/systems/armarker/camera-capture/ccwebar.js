@@ -75,7 +75,7 @@ export class WebARCameraCapture {
                 document.body.appendChild(videoElem);
 
                 this.canvas = document.createElement('canvas');
-                this.canvasCtx = this.canvas.getContext('2d');
+                this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
 
                 // init frame size to screen size
                 this.onResize();

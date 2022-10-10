@@ -78,7 +78,7 @@ export class ARHeadsetCameraCapture {
         this.projectionMatrix = this.headsetPM[arHeadset];
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
-        this.canvasCtx = this.canvas.getContext('2d');
+        this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
 
         this.frameWidth = screen.width;
         this.frameHeight = screen.height;
