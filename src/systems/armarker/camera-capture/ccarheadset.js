@@ -93,9 +93,11 @@ export class ARHeadsetCameraCapture {
         this.frameCamera = this.getCameraIntrinsics2();
 
         const options = {
-            cameraFacingMode: cameraFacingMode,
-            width: this.frameWidth,
-            height: this.frameHeight,
+            video: {
+                cameraFacingMode: cameraFacingMode,
+                width: this.frameWidth,
+                height: this.frameHeight,
+            },
         };
 
         navigator.mediaDevices
@@ -153,7 +155,7 @@ export class ARHeadsetCameraCapture {
             imageData = this.canvasCtx.getImageData(0, 0, this.frameWidth, this.frameHeight);
         } catch (err) {
             console.warn('Failed to get video frame. Video not started ?', err);
-            setTimeout(getCameraImagePixels.bind(this), 1000); // try again..
+            setTimeout(this.getCameraImagePixels.bind(this), 1000); // try again..
             return;
         }
         const imageDataPixels = imageData.data;
