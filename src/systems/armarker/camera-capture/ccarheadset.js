@@ -78,10 +78,10 @@ export class ARHeadsetCameraCapture {
         this.projectionMatrix = this.headsetPM[arHeadset];
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
-        this.canvasCtx = this.canvas.getContext('2d');
+        this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
 
-        this.frameWidth = screen.width;
-        this.frameHeight = screen.height;
+        this.frameWidth = 1280;
+        this.frameHeight = 720;
         this.video.style.width = this.frameWidth + 'px';
         this.video.style.height = this.frameHeight + 'px';
         this.canvas.width = this.frameWidth;
@@ -93,9 +93,11 @@ export class ARHeadsetCameraCapture {
         this.frameCamera = this.getCameraIntrinsics2();
 
         const options = {
-            cameraFacingMode: cameraFacingMode,
-            width: this.frameWidth,
-            height: this.frameHeight,
+            video: {
+                cameraFacingMode: cameraFacingMode,
+                width: this.frameWidth,
+                height: this.frameHeight,
+            },
         };
 
         navigator.mediaDevices
@@ -153,7 +155,7 @@ export class ARHeadsetCameraCapture {
             imageData = this.canvasCtx.getImageData(0, 0, this.frameWidth, this.frameHeight);
         } catch (err) {
             console.warn('Failed to get video frame. Video not started ?', err);
-            setTimeout(getCameraImagePixels.bind(this), 1000); // try again..
+            setTimeout(this.getCameraImagePixels.bind(this), 1000); // try again..
             return;
         }
         const imageDataPixels = imageData.data;
@@ -187,7 +189,11 @@ export class ARHeadsetCameraCapture {
         };
 
         // post frame data, marking the pixel buffer as transferable
-        this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
+        try {
+            this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
+        } catch (err) {
+            console.warn('Failed to post message to CV Worker', err);
+        }
     }
 
     /**
