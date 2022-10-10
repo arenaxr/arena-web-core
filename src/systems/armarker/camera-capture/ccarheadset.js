@@ -37,6 +37,9 @@ export class ARHeadsetCameraCapture {
     /* worker to send images captured */
     cvWorker;
 
+    localizeOnce;
+    arMarkerSystem;
+
     /* projection matrices for supported headsets [TODO: get more values/check these] */
     headsetPM = {
         ml: [
@@ -56,10 +59,10 @@ export class ARHeadsetCameraCapture {
     /**
      * Setup camera frame capture
      * @param {object} arHeadset - heaset name to lookup in headsetPM list
-     * @param {object} [cameraFacingMode='environment'] - as defined by MediaTrackConstraints.facingMode
+     * @param {object} [arMarkerSystem=undefined] - the AFRAME ARMarker system
      * @param {object} [debug=false] - debug messages on/off
      */
-    constructor(arHeadset, cameraFacingMode = 'environment', debug = false) {
+    constructor(arHeadset, arMarkerSystem, debug = false) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw 'No getUserMedia support found for camera capture.';
         }
@@ -76,6 +79,10 @@ export class ARHeadsetCameraCapture {
             throw `ARHeadsetCC: The headset key "${arHeadset}" is not supported (could not find in headset projection matrix list).`;
         }
         this.projectionMatrix = this.headsetPM[arHeadset];
+        this.arMarkerSystem = arMarkerSystem;
+        const url = new URL(window.location.href);
+        this.localizeOnce = !!url.searchParams.get('locOnce');
+        this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
         this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
@@ -94,7 +101,7 @@ export class ARHeadsetCameraCapture {
 
         const options = {
             video: {
-                cameraFacingMode: cameraFacingMode,
+                cameraFacingMode: 'environment',
                 width: this.frameWidth,
                 height: this.frameHeight,
             },
@@ -114,9 +121,21 @@ export class ARHeadsetCameraCapture {
     }
 
     /**
-     * When device changes orientation, handle screen size changes
-     * @private
+     * Tear down camera capture and webworker
      */
+    terminate() {
+        if (this.cvWorker) {
+            this.cvWorker.terminate();
+        }
+        if (this.video) {
+            this.video.srcObject.getTracks().forEach((track) => {
+                track.stop();
+            });
+            this.video.pause();
+            this.video.remove();
+        }
+        this.canvas.remove();
+    }
 
     /**
      * Indicate CV worker to send frames to (ar marker system expects this call to be implemented)
@@ -136,6 +155,11 @@ export class ARHeadsetCameraCapture {
      * @param {boolean} [worker=undefined] - the worker instance to send frames to
      */
     requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
+        if (this.localizeOnce && this.arMarkerSystem.initialLocalized) {
+            console.log('ARHeadsetCC: localizeOnce set and initial localization complete; tearing down pipeline');
+            this.terminate();
+            return;
+        }
         if (grayscalePixels) {
             this.frameGsPixels = grayscalePixels;
         }

@@ -261,6 +261,7 @@ export class ARMarkerRelocalization {
                           // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
                           this.rigMatrixT.transpose();
                         */
+                        this.arMakerSystem.initialLocalized = true;
                     }
                 } else if (refTag.dynamic && refTag.publish==false) { // tag is dynamic? push update if publish=false
                     if (ARENA && ARENA.isUserSceneWriter()) {

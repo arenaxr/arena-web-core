@@ -63,6 +63,7 @@ AFRAME.registerSystem('armarker', {
     ),
     // if we detected WebXRViewer/WebARViewer
     isWebARViewer: false,
+    initialLocalized: false,
     /*
     * Init system
     * @param {object} marker - The marker component object to register.
@@ -158,7 +159,7 @@ AFRAME.registerSystem('armarker', {
             // try to set up a camera facing forward capture (using getUserMedia)
             console.info('Setting up AR Headset camera capture.');
             try {
-                this.cameraCapture = new ARHeadsetCameraCapture(arHeadset, this.data.debugCameraCapture);
+                this.cameraCapture = new ARHeadsetCameraCapture(arHeadset, this, this.data.debugCameraCapture);
             } catch (err) {
                 console.warn(`Could not create AR Headset camera capture. ${err}`);
             }
