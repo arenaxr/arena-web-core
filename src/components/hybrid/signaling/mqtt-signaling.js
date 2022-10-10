@@ -56,10 +56,10 @@ export class MQTTSignaling {
     mqttOnConnect() {
         this.client.onMessageArrived = this.mqttOnMessageArrived.bind(this);
 
-        this.client.subscribe(`${SERVER_HEALTH_CHECK}/#`);
-        this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/#`);
-        this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/#`);
-        this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/#`);
+        this.client.subscribe(`${SERVER_HEALTH_CHECK}/${ARENA.namespacedScene}/#`);
+        this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
+        this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
+        this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -104,33 +104,33 @@ export class MQTTSignaling {
     }
 
     sendConnect() {
-        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${this.id}`, 'connect');
+        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect');
     }
 
     closeConnection() {
-        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${this.id}`, 'disconnect');
+        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'disconnect');
 
         this.client.disconnect();
     }
 
     sendOffer(offer) {
-        this.sendMessage(`${CLIENT_OFFER_TOPIC_PREFIX}/${this.id}`, 'offer', offer);
+        this.sendMessage(`${CLIENT_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'offer', offer);
     }
 
     sendAnswer(answer) {
-        this.sendMessage(`${CLIENT_ANSWER_TOPIC_PREFIX}/${this.id}`, 'answer', answer);
+        this.sendMessage(`${CLIENT_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'answer', answer);
     }
 
     sendCandidate(candidate) {
-        this.sendMessage(`${CLIENT_CANDIDATE_TOPIC_PREFIX}/${this.id}`, 'ice', candidate);
+        this.sendMessage(`${CLIENT_CANDIDATE_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'ice', candidate);
     }
 
     sendRemoteStatusUpdate(update) {
-        this.sendMessage(`${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${this.id}`, 'remote-update', update);
+        this.sendMessage(`${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'remote-update', update);
     }
 
     sendStats(stats) {
-        this.sendMessage(`${CLIENT_STATS_TOPIC_PREFIX}/${this.id}`, 'stats', stats);
+        this.sendMessage(`${CLIENT_STATS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'stats', stats);
     }
 
     sleep(ms) {

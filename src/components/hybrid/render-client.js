@@ -13,7 +13,8 @@ const preferredCodec = 'video/VP9';
 
 const dataChannelOptions = {
     // ordered: false, // do not guarantee order
-    // maxPacketLifeTime: 1000, // in milliseconds
+    // maxPacketLifeTime: 17, // in milliseconds
+    // maxRetransmits: null,
 };
 
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
