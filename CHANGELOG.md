@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.14.1](https://github.com/arenaxr/arena-web-core/compare/v1.14.0...v1.14.1) (2022-10-11)
+
+
+### Bug Fixes
+
+* catch early err postMessage to cvworker ([31cea9d](https://github.com/arenaxr/arena-web-core/commit/31cea9dd56e39156265e0b9caeb75044ca030f54))
+* GUM settings missing video ([2e1ee53](https://github.com/arenaxr/arena-web-core/commit/2e1ee537a745575b42ec1b030656a852b944f1c7))
+* Move hands to children of spinner ([45c2cb0](https://github.com/arenaxr/arena-web-core/commit/45c2cb01dc8c9496fd132d0425cb45b531747f34))
+* Use (probably) correct FOV for HL2 ([c865fd6](https://github.com/arenaxr/arena-web-core/commit/c865fd6fc2ea71cdebb4e942f298cd2e10e18afc))
+* use worldpos for gltf-lod and arena-hand ([4503c5e](https://github.com/arenaxr/arena-web-core/commit/4503c5ee5b4dbcc3c52a8e652cd02733588858c8))
+
+
+### Reverts
+
+* 3a7f313e - loosen motion thresholds ([f73aa08](https://github.com/arenaxr/arena-web-core/commit/f73aa08269d7d13684af820d2ce5ccf9c510aba4))
+
 ## [1.14.0](https://github.com/arenaxr/arena-web-core/compare/v1.13.3...v1.14.0) (2022-10-07)
 
 
