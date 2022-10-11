@@ -87,8 +87,8 @@ export class ARHeadsetCameraCapture {
         this.canvas = document.createElement('canvas');
         this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
 
-        this.frameWidth = 640;
-        this.frameHeight = 360;
+        this.frameWidth = 1280;
+        this.frameHeight = 720;
         this.video.style.width = this.frameWidth + 'px';
         this.video.style.height = this.frameHeight + 'px';
         this.canvas.width = this.frameWidth;
