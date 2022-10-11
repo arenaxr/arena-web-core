@@ -23,7 +23,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         this.tempDistance = new THREE.Vector3();
         this.currentLevel = undefined;
         this.previousLevel = undefined;
-        this.cameraPos = document.getElementById('my-camera').object3D.position;
+        this.cameraPos = document.getElementById('my-camera').object3D.getWorldPosition();
         this.cacheFreeTimers = {};
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
         this.updateLevels();
@@ -42,7 +42,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         if (!this.data.enabled) {
             return;
         }
-        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);
+        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.object3D.getWorldPosition());
         if (this.tempDistance !== this.camDistance) {
             this.camDistance = this.tempDistance;
             let nextLevel;
@@ -130,7 +130,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         this.tempDistance = new THREE.Vector3();
         this.showDetailed = false;
         this.defaultUrl = this.el.getAttribute('gltf-model');
-        this.cameraPos = document.getElementById('my-camera').object3D.position;
+        this.cameraPos = document.getElementById('my-camera').object3D.getWorldPosition();
         this.cacheFreeTimer = null;
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
     },
@@ -138,7 +138,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         if (!this.data.enabled || !this.defaultUrl) {
             return;
         }
-        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);
+        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.getWorldPosition());
         if (this.tempDistance !== this.camDistance) {
             this.camDistance = this.tempDistance;
             const distDiff = this.camDistance - this.data.detailedDistance;

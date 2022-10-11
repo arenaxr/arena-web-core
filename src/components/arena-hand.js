@@ -16,7 +16,7 @@
  * @private
  */
 function eventAction(evt, eventName, myThis) {
-    const newPosition = myThis.object3D.position;
+    const newPosition = myThis.object3D.getWorldPosition();
 
     const coordsData = {
         x: newPosition.x.toFixed(3),
