@@ -51,6 +51,12 @@ export class WebRTCStatsLogger {
 
                     if (stat.jitterBufferDelay) {
                         console.log(`Jitter Buffer Delay: ${(stat.jitterBufferDelay - lastStats.jitterBufferDelay).toFixed(3)}`);
+                        console.log(`Avg Jitter Buffer Delay: ${(stat.jitterBufferDelay / stat.jitterBufferEmittedCount).toFixed(3)}`);
+                    }
+
+                    if (stat.totalProcessingDelay) {
+                        console.log(`Total Delay: ${(stat.totalProcessingDelay - lastStats.totalProcessingDelay).toFixed(3)}`);
+                        console.log(`Avg Delay: ${(stat.totalProcessingDelay / stat.framesDecoded).toFixed(3)}`);
                     }
                 }
             }
