@@ -43,7 +43,7 @@ AFRAME.registerComponent('render-client', {
         this.signaler.onHealthCheck = this.gotHealthCheck.bind(this);
         this.signaler.onAnswer = this.gotAnswer.bind(this);
         this.signaler.onIceCandidate = this.gotIceCandidate.bind(this);
-        //this.recivedAckknowledge = False;
+        // this.recivedAckknowledge = False;
         window.onbeforeunload = () => {
             this.signaler.closeConnection();
         };
@@ -54,6 +54,8 @@ AFRAME.registerComponent('render-client', {
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
         console.log('[render-client]', this.id);
+
+        // window.addEventListener('keyup', this.tick1.bind(this));
     },
 
     async connectToCloud() {
@@ -79,13 +81,16 @@ AFRAME.registerComponent('render-client', {
     },
     */
 
-    onRemoteTrack(event) {
+    onRemoteTrack(e) {
         console.log('got remote stream');
+
+        const stream = new MediaStream();
+        stream.addTrack(e.track);
 
         // send remote track to compositor
         const remoteTrack = new CustomEvent('hybrid-onremotetrack', {
             detail: {
-                track: event.streams[0],
+                stream: stream,
             },
         });
         window.dispatchEvent(remoteTrack);
@@ -142,6 +147,7 @@ AFRAME.registerComponent('render-client', {
 
         if (supportsSetCodecPreferences) {
             const transceiver = this.peerConnection.getTransceivers()[0];
+            // const transceiver = this.peerConnection.addTransceiver('video', {direction: 'recvonly'});
             const {codecs} = RTCRtpSender.getCapabilities('video');
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
             const selectedCodecIndex = validCodecs.findIndex((c) => c.mimeType === preferredCodec);

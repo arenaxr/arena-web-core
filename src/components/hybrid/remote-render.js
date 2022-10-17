@@ -7,7 +7,7 @@ AFRAME.registerComponent('remote-render', {
     },
 
     update: function(oldData) {
-        console.log('render-client', this.el.id, this.data.enabled);
+        // console.log('render-client', this.el.id, this.data.enabled);
 
         if (oldData.enabled !== this.data.enabled) {
             this.el.object3D.visible = !this.data.enabled;

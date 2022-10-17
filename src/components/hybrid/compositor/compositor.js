@@ -11,7 +11,7 @@ AFRAME.registerSystem('compositor', {
             return;
         }
 
-        const renderer = sceneEl.renderer;
+        // const renderer = sceneEl.renderer;
 
         // renderer.setPixelRatio(window.devicePixelRatio);
         // renderer.setSize(window.innerWidth, window.innerHeight);
@@ -49,10 +49,11 @@ AFRAME.registerSystem('compositor', {
                 document.body.appendChild(this.remoteVideo);
             }
         }
-        this.remoteVideo.srcObject = e.detail.track;
+        this.remoteVideo.srcObject = e.detail.stream;
     },
 
     onRemoteVideoLoaded() {
+        console.log('[render-client], remote video loaded!');
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
