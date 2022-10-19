@@ -56,10 +56,31 @@ AFRAME.registerComponent('stats-monitor', {
         }
         this.fps = parseFloat(this.fpsDiv.innerHTML, 10);
 
+
+        const camRoot = document.getElementById('my-camera');
+        if (camRoot && !this.hudStatsText){
+            console.warn(camRoot)
+            this.hudStatsText = document.createElement('a-text');
+            this.hudStatsText.setAttribute('id', 'myStats');
+            this.hudStatsText.setAttribute('position', '0 0 -1');
+            this.hudStatsText.setAttribute('scale', '0.25 0.25 0.25');
+            this.hudStatsText.setAttribute('side', 'double');
+            this.hudStatsText.setAttribute('align', 'left');
+            this.hudStatsText.setAttribute('anchor', 'center');
+            this.hudStatsText.setAttribute('color', '#cccccc');
+            //this.hudStatsText.setAttribute('width', 5);
+            camRoot.appendChild(this.hudStatsText);
+        }
+
         if (window.performance && window.performance.memory) {
             const memory = window.performance.memory;
             this.usedJSHeapSize = memory.usedJSHeapSize;
             this.jsHeapSizeLimit = memory.jsHeapSizeLimit;
+        }
+
+        if (this.hudStatsText){
+            const pctHeap =  Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit / 100).toFixed(1);
+            this.hudStatsText.setAttribute('value', `fps: ${this.fps}\nraf: ${this.raf}\nused heap: ${this.usedJSHeapSize} (${pctHeap}%)\nmax heap: ${this.jsHeapSizeLimit}`);
         }
 
         if (ARENA.confstats) {
