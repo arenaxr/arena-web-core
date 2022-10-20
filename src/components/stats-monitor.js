@@ -69,7 +69,7 @@ AFRAME.registerComponent('stats-monitor', {
             this.hudStatsText.setAttribute('align', 'left');
             this.hudStatsText.setAttribute('anchor', 'center');
             this.hudStatsText.setAttribute('color', '#cccccc');
-            this.hudStatsText.setAttribute('width', 1);
+            this.hudStatsText.setAttribute('width', 3);
             camRoot.appendChild(this.hudStatsText);
         }
 
