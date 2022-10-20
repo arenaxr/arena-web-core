@@ -68,7 +68,7 @@ AFRAME.registerComponent('stats-monitor', {
                 console.warn(camRoot)
                 this.hudStatsText = document.createElement('a-text');
                 this.hudStatsText.setAttribute('id', 'myStats');
-                this.hudStatsText.setAttribute('position', '0 0 -1');
+                this.hudStatsText.setAttribute('position', '0 0 -2');
                 this.hudStatsText.setAttribute('side', 'double');
                 this.hudStatsText.setAttribute('align', 'left');
                 this.hudStatsText.setAttribute('anchor', 'center');
@@ -99,7 +99,7 @@ AFRAME.registerComponent('stats-monitor', {
 
         if (ARENA && ARENA.hudstats && this.hudStatsText) {
             const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit / 100).toFixed(1);
-            let str = `[Browser]\n${navigator.appName}\n${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
+            let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
             if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
                 str += `\n\n[Jitsi]\n${ARENA.chat.getConnectionText(ARENA.getDisplayName(), ARENA.chat.settings.stats)}`;
             }
