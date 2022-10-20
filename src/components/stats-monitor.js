@@ -63,7 +63,7 @@ AFRAME.registerComponent('stats-monitor', {
             this.jsHeapSizeLimit = memory.jsHeapSizeLimit;
         }
 
-        if (ARENA.hudstats) {
+        if (ARENA && ARENA.hudstats) {
             const camRoot = document.getElementById('my-camera');
             if (camRoot && !this.hudStatsText) {
                 console.warn(camRoot)
@@ -80,7 +80,7 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
-        if (ARENA.confstats) {
+        if (ARENA && ARENA.confstats) {
             if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
                 const perfStats = {
                     jitsiStats: {
@@ -99,7 +99,7 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
-        if (ARENA.hudstats && this.hudStatsText) {
+        if (ARENA && ARENA.hudstats && this.hudStatsText) {
             const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit / 100).toFixed(1);
             let str = `fps: ${this.fps}\nraf: ${this.raf}\nused heap: ${this.usedJSHeapSize} (${pctHeap}%)\nmax heap: ${this.jsHeapSizeLimit}`;
             if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
