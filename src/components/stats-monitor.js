@@ -64,7 +64,7 @@ AFRAME.registerComponent('stats-monitor', {
             this.hudStatsText = document.createElement('a-text');
             this.hudStatsText.setAttribute('id', 'myStats');
             this.hudStatsText.setAttribute('position', '0 0 -1');
-            this.hudStatsText.setAttribute('scale', '0.25 0.25 0.25');
+            this.hudStatsText.setAttribute('scale', '0.5 0.5 0.5');
             this.hudStatsText.setAttribute('side', 'double');
             this.hudStatsText.setAttribute('align', 'left');
             this.hudStatsText.setAttribute('anchor', 'center');
