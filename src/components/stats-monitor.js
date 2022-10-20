@@ -99,7 +99,7 @@ AFRAME.registerComponent('stats-monitor', {
         }
 
         if (ARENA && ARENA.hudstats && this.hudStatsText) {
-            const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit / 100).toFixed(1);
+            const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit * 100).toFixed(0);
             let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
             if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
                 str += `\n\n[Jitsi]\n${ARENA.chat.getConnectionText(ARENA.getDisplayName(), ARENA.chat.settings.stats)}`;
