@@ -68,12 +68,12 @@ AFRAME.registerComponent('stats-monitor', {
                 console.warn(camRoot)
                 this.hudStatsText = document.createElement('a-text');
                 this.hudStatsText.setAttribute('id', 'myStats');
-                this.hudStatsText.setAttribute('position', '0 0 -2');
+                this.hudStatsText.setAttribute('position', '0 0 -1');
                 this.hudStatsText.setAttribute('side', 'double');
                 this.hudStatsText.setAttribute('align', 'left');
                 this.hudStatsText.setAttribute('anchor', 'center');
                 this.hudStatsText.setAttribute('color', '#cccccc');
-                this.hudStatsText.setAttribute('width', 1);
+                this.hudStatsText.setAttribute('width', 2);
                 camRoot.appendChild(this.hudStatsText);
             }
         }
