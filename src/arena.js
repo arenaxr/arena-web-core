@@ -63,6 +63,7 @@ export class Arena {
         this.noav = url.searchParams.get('noav');
         this.noname = url.searchParams.get('noname');
         this.confstats = url.searchParams.get('confstats');
+        this.hudstats = url.searchParams.get('hudstats');
 
         ARENAUtils.getLocation((coords, err) => {
             if (!err) ARENA.clientCoords = coords;
