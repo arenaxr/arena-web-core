@@ -32,7 +32,8 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     init: function() {
-        this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
+        //this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
 
         if (!this.data.enabled) {
             this.el.sceneEl.removeBehavior(this);
