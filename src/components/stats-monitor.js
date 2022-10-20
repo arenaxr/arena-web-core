@@ -100,12 +100,11 @@ AFRAME.registerComponent('stats-monitor', {
         }
 
         if (ARENA.hudstats && this.hudStatsText) {
-            let jitsiStats;
-            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
-                jitsiStats= ARENA.chat.settings.stats
-                        }
             const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit / 100).toFixed(1);
-            let str  = `fps: ${this.fps}\nraf: ${this.raf}\nused heap: ${this.usedJSHeapSize} (${pctHeap}%)\nmax heap: ${this.jsHeapSizeLimit}`;
+            let str = `fps: ${this.fps}\nraf: ${this.raf}\nused heap: ${this.usedJSHeapSize} (${pctHeap}%)\nmax heap: ${this.jsHeapSizeLimit}`;
+            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
+                str += JSON.stringify(ARENA.chat.settings.stats);
+            }
             this.hudStatsText.setAttribute('value', str);
         }
 
