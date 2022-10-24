@@ -107,7 +107,16 @@ export class CreateUpdate {
             if (message.ttl !== undefined) { // Allow falsy value of 0
                 entityEl.setAttribute('ttl', {seconds: message.ttl});
             }
-
+            if (id === ARENA.camFollow) {
+                this.handleCameraOverride(ACTIONS.UPDATE, {
+                    id: ARENA.camName,
+                    data: {
+                        object_type: 'camera',
+                        position: message.data.position,
+                        rotation: message.data.rotation,
+                    },
+                });
+            }
             return;
 
         case 'camera-override':
