@@ -152,6 +152,15 @@ AFRAME.registerComponent('arena-hand', {
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
     },
 
+    remove: function() {
+        // when disconnected, try to cleanup hands
+        const msg = {
+            object_id: this.name,
+            action: 'delete',
+        };
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
+    },
+
     tick: (function(t, dt) {
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
