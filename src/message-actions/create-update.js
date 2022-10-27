@@ -10,6 +10,11 @@ const ACTIONS = {
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
 
+const overrideMatrix = new THREE.Matrix4();
+const overrideMatrixInverse = new THREE.Matrix4();
+const overrideQuat = new THREE.Quaternion();
+const overrideEuler = new THREE.Euler();
+
 /**
  * Create/Update object handler
  */
@@ -434,12 +439,43 @@ export class CreateUpdate {
                 return;
             }
             const p = message.data.position;
-            if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
             const r = message.data.rotation;
-            if (r) {
-                myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
-                    new THREE.Quaternion(r.x, r.y, r.z, r.w));
-                Logger.warning('camera override', message);
+            if (AFRAME.scenes[0].xrSession) { // Apply transform to rig based off xrSession camera pose
+                overrideMatrix.identity();
+                const rig = document.getElementById('cameraRig');
+                const spinner = document.getElementById('cameraSpinner');
+                if (p) {
+                    overrideMatrix.setPosition(p.x, p.y, p.z);
+                }
+                if (r) {
+                    if (r.hasOwnProperty('w')) {
+                        overrideMatrix.makeRotationFromQuaternion(overrideQuat.set(r.x, r.y, r.z, r.w));
+                    } else {
+                        overrideMatrix.makeRotationFromEuler(overrideEuler.set(
+                            THREE.MathUtils.degToRad(r.x),
+                            THREE.MathUtils.degToRad(r.y),
+                            THREE.MathUtils.degToRad(r.z),
+                        ));
+                    }
+                }
+                overrideMatrixInverse.copy(myCamera.object3D.matrix).invert().multiply(overrideMatrix);
+                rig.object3D.position.setFromMatrixPosition(overrideMatrixInverse);
+                spinner.object3D.rotation.setFromRotationMatrix(overrideMatrixInverse);
+            } else { // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
+                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
+                if (r) {
+                    if (r.hasOwnProperty('w')) {
+                        myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
+                            overrideQuat.set(r.x, r.y, r.z, r.w));
+                    } else {
+                        myCamera.components['look-controls'].yawObject.rotation.set(
+                            THREE.MathUtils.degToRad(r.x),
+                            THREE.MathUtils.degToRad(r.y),
+                            THREE.MathUtils.degToRad(r.z),
+                        );
+                    }
+                    Logger.warning('camera override', message);
+                }
             }
         } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
