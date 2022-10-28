@@ -65,7 +65,7 @@ AFRAME.registerComponent('stats-monitor', {
         if (ARENA && ARENA.hudstats) {
             const camRoot = document.getElementById('my-camera');
             if (camRoot && !this.hudStatsText) {
-                console.warn(camRoot)
+                console.warn(camRoot);
                 this.hudStatsText = document.createElement('a-text');
                 this.hudStatsText.setAttribute('id', 'myStats');
                 this.hudStatsText.setAttribute('position', '0 0 -1');
@@ -106,6 +106,5 @@ AFRAME.registerComponent('stats-monitor', {
             }
             this.hudStatsText.setAttribute('value', str);
         }
-
     },
 });

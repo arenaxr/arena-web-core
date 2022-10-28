@@ -42,7 +42,7 @@ AFRAME.registerComponent('material-extras', {
         this.el.addEventListener('model-loaded', () => this.update());
         this.el.addEventListener('load', () => this.update());
 
-        console.info("MATERIAL EXTRAS:", this.schema.renderOrder.default)
+        console.info('MATERIAL EXTRAS:', this.schema.renderOrder.default);
     },
     update: function(oldData) {
         this.retryIndex = 0;
@@ -73,7 +73,7 @@ AFRAME.registerComponent('material-extras', {
             this.doUpdate = true;
         }
 
-        //this.el.object3D.renderOrder=this.data.renderOrder;
+        // this.el.object3D.renderOrder=this.data.renderOrder;
 
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
         if (this.doUpdate) this.updateMaterial();
@@ -98,13 +98,13 @@ AFRAME.registerComponent('material-extras', {
         mesh.renderOrder = this.data.renderOrder;
         if (mesh.material) {
             mesh.material.colorWrite = this.data.colorWrite;
-            if (mesh.material.map && this.texture) { 
+            if (mesh.material.map && this.texture) {
                 mesh.material.map = this.texture;
                 mesh.material.map.encoding = THREE[this.data.encoding];
             }
             mesh.material.needsUpdate = true;
         }
-    },    
+    },
     updateMaterial: function() {
         const mesh = this.el.getObject3D('mesh');
         if (!mesh) {

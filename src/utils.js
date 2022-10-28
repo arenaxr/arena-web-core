@@ -205,7 +205,7 @@ export class ARENAUtils {
         function rad2deg(radians) {
             return radians * (180 / Math.PI);
         }
-        let e = new THREE.Euler().setFromQuaternion(c);
+        const e = new THREE.Euler().setFromQuaternion(c);
         return `${rad2deg(e.x).toFixed(3)}, ${rad2deg(e.y).toFixed(3)}, ${rad2deg(e.z).toFixed(3)}`;
     };
 
@@ -267,10 +267,10 @@ export class ARENAUtils {
      * Convert integer to hex string with leading '0's.
      * @param {integer} num integer to convert
      * @param {integer} len length of padded output hex string
-     * @returns {string} hex string of num to len characters with leading '0'
+     * @return {string} hex string of num to len characters with leading '0'
      */
     static numToPaddedHex(num, len) {
         const str = num.toString(16);
-        return "0".repeat(len - str.length) + str;
+        return '0'.repeat(len - str.length) + str;
     }
 }

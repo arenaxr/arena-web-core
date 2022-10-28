@@ -36,13 +36,13 @@ if (!storageAvailable('localStorage')) {
 window.onload = function() {
     // load sweetalert if not already loaded
     if (typeof Swal === 'undefined') {
-        var head = document.getElementsByTagName('head')[0];
-        var script = document.createElement('script');
+        const head = document.getElementsByTagName('head')[0];
+        const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@10';
         head.appendChild(script);
     }
-}
+};
 
 /**
  * Display user-friendly error message.
@@ -362,8 +362,8 @@ function storageAvailable(type) {
         return true;
     } catch (e) {
         return e instanceof DOMException && (
-                // everything except Firefox
-                e.code === 22 ||
+        // everything except Firefox
+            e.code === 22 ||
                 // Firefox
                 e.code === 1014 ||
                 // test name field too, because code might not be present
