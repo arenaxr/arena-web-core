@@ -85,6 +85,11 @@ AFRAME.registerComponent('arena-hand', {
 
         el.addEventListener('controllerdisconnected', () => {
             el.setAttribute('visible', false);
+            // when disconnected, try to cleanup hands
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
+                object_id: this.name,
+                action: 'delete',
+            });
         });
 
         /*
@@ -148,15 +153,6 @@ AFRAME.registerComponent('arena-hand', {
                 color: data.color,
                 dep: ARENA.camName,
             },
-        };
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
-    },
-
-    remove: function() {
-        // when disconnected, try to cleanup hands
-        const msg = {
-            object_id: this.name,
-            action: 'delete',
         };
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
     },
