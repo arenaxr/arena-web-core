@@ -631,6 +631,50 @@
           ],
           "title":"Video",
           "type":"object"
+       },
+       "attribution": {
+          "description": "Attribution Component. Saves attribution data in any entity.",
+          "properties": {
+             "author": {
+                "type": "string",
+                "default": "Unknown",
+                "description": "Author name; e.g. “Vaptor-Studio”"
+             },
+             "authorURL": {
+                "type": "string",
+                "description": "Author homepage/profile; e.g. https://sketchfab.com/VapTor"
+             },
+             "license": {
+                "type": "string",
+                "default": "Unknown",
+                "description": "License summary/short name; e.g. “CC-BY-4.0”."
+             },
+             "licenseURL": {
+                "type": "string",
+                "description": "License URL; e.g. http://creativecommons.org/licenses/by/4.0/"
+             },
+             "source": {
+                "type": "string",
+                "default": "Unknown",
+                "description": "Model source e.g. “Sketchfab”."
+             },
+             "sourceURL": {
+                "type": "string",
+                "description": "Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7"
+             },
+             "title": {
+                "type": "string",
+                "default": "No Title",
+                "description": "Model title; e.g. “Spinosaurus”."
+             },
+             "extractAssetExtras": {
+               "type": "boolean",
+               "default": true,
+               "description": "Extract attribution info from asset extras; will override attribution info given (default: true)"
+            }
+         },
+          "title": "Attribution",
+          "type": "object"
        }
     }
  }
