@@ -9,7 +9,8 @@ const peerConnectionConfig = {
 };
 
 const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
-const preferredCodec = 'video/VP9';
+const preferredCodec = 'video/H264';
+const preferredSdpFmtpLine = 'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f';
 
 const dataChannelOptions = {
     // ordered: false, // do not guarantee order
@@ -150,7 +151,7 @@ AFRAME.registerComponent('render-client', {
             // const transceiver = this.peerConnection.addTransceiver('video', {direction: 'recvonly'});
             const {codecs} = RTCRtpSender.getCapabilities('video');
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
-            const selectedCodecIndex = validCodecs.findIndex((c) => c.mimeType === preferredCodec);
+            const selectedCodecIndex = validCodecs.findIndex((c) => c.mimeType === preferredCodec && c.sdpFmtpLine === preferredSdpFmtpLine);
             const selectedCodec = validCodecs[selectedCodecIndex];
             validCodecs.splice(selectedCodecIndex, 1);
             validCodecs.unshift(selectedCodec);
