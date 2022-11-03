@@ -22,6 +22,11 @@ uniform ivec2 streamSize;
 //     return abs(q.z + (q.w - q.y) / (6.0 * d + e));
 // }
 
+// bool readMask(sampler2D depthSampler, vec2 coord) {
+//     bool mask = texture2D( depthSampler, coord ).g > 0.5;
+//     return mask;
+// }
+
 // float readDepth( sampler2D depthSampler, vec2 coord ) {
 //     float fragCoordZ = texture2D( depthSampler, coord ).x;
 //     float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
@@ -31,11 +36,6 @@ uniform ivec2 streamSize;
 float readDepth(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
     return depth;
-}
-
-bool readMask(sampler2D depthSampler, vec2 coord) {
-    bool mask = texture2D( depthSampler, coord ).g > 0.5;
-    return mask;
 }
 
 void main() {

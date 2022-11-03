@@ -10,7 +10,7 @@ const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/discon
 const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/offer';
 const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/answer';
 const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/candidate';
-const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/stats';
+const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/stats_browser';
 
 const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/remote';
 
@@ -130,7 +130,7 @@ export class MQTTSignaling {
     }
 
     sendStats(stats) {
-        this.sendMessage(`${CLIENT_STATS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'stats', stats);
+        this.publish(`${CLIENT_STATS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, JSON.stringify(stats));
     }
 
     sleep(ms) {

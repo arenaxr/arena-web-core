@@ -16,7 +16,7 @@ export class CompositorPass extends Pass {
         } );
 
         const videoTexture = new THREE.VideoTexture(this.videoSource);
-        // NearestFilter looks better
+        // NearestFilter looks better?
         videoTexture.minFilter = THREE.NearestFilter;
         videoTexture.magFilter = THREE.NearestFilter;
         videoTexture.encoding = THREE.sRGBEncoding;
