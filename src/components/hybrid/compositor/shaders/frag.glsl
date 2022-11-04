@@ -1,4 +1,4 @@
-// #include <packing>
+#include <packing>
 
 varying vec2 vUv;
 
@@ -27,16 +27,16 @@ uniform ivec2 streamSize;
 //     return mask;
 // }
 
-// float readDepth( sampler2D depthSampler, vec2 coord ) {
-//     float fragCoordZ = texture2D( depthSampler, coord ).x;
-//     float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-//     return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-// }
-
-float readDepth(sampler2D depthSampler, vec2 coord) {
-    float depth = texture2D( depthSampler, coord ).x;
-    return depth;
+float readDepth( sampler2D depthSampler, vec2 coord ) {
+    float fragCoordZ = texture2D( depthSampler, coord ).x;
+    float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+    return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
 }
+
+// float readDepth(sampler2D depthSampler, vec2 coord) {
+//     float depth = texture2D( depthSampler, coord ).x;
+//     return depth;
+// }
 
 void main() {
     ivec2 frameSize = ivec2(streamSize.x, streamSize.y);
@@ -84,7 +84,7 @@ void main() {
     vec4 color;
     if (!targetWidthGreater ||
         (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {
-        if (depth < 0.99) {
+        if (depth < 0.01) {
             color = diffuseColor;
         }
         else {
@@ -92,9 +92,11 @@ void main() {
         }
     }
     else {
-        color = diffuseColor;
+        // color = diffuseColor;
+        color = vec4(0.0);
     }
 
+    // color = vec4(depth);
     gl_FragColor = vec4( color.rgb, 1.0 );
 
     // if (depth >= 0.5) color = streamColor;
