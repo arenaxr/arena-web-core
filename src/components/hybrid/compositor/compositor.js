@@ -43,7 +43,7 @@ AFRAME.registerSystem('compositor', {
             this.remoteVideo.style.zIndex = '9999';
             this.remoteVideo.style.top = '15px';
             this.remoteVideo.style.left = '15px';
-            this.remoteVideo.style.width = '320px';
+            this.remoteVideo.style.width = '640px';
             this.remoteVideo.style.height = '180px';
             if (!AFRAME.utils.device.isMobile()) {
                 document.body.appendChild(this.remoteVideo);

@@ -39,7 +39,7 @@ float readDepth( sampler2D depthSampler, vec2 coord ) {
 // }
 
 void main() {
-    ivec2 frameSize = ivec2(streamSize.x, streamSize.y);
+    ivec2 frameSize = ivec2(streamSize.x / 2, streamSize.y);
     vec2 frameSizeF = vec2(frameSize);
     vec2 diffuseSizeF = vec2(diffuseSize);
 
@@ -59,13 +59,13 @@ void main() {
     vec2 coordStreamNormalized;
     if (targetWidthGreater) {
         coordStreamNormalized = vec2(
-            ( (vUv.x * diffuseSizeF.x - padding) / float(diffuseSize.x - totalPad) ),
+            ( (vUv.x * diffuseSizeF.x - padding) / float(diffuseSize.x - totalPad) ) / 2.0,
             vUv.y
         );
     }
     else {
         coordStreamNormalized = vec2(
-            ( (vUv.x * diffuseSizeF.x + padding) / float(newWidth) ),
+            ( (vUv.x * diffuseSizeF.x + padding) / float(newWidth) ) / 2.0,
             vUv.y
         );
     }
@@ -73,30 +73,40 @@ void main() {
     vec2 coordDestNormalized = vUv;
 
     vec2 coordDiffuseColor = coordDestNormalized;
-    vec2 coordStreamColor = coordStreamNormalized;
     vec2 coordDiffuseDepth = coordDestNormalized;
+    vec2 coordStreamColor = coordStreamNormalized;
+    vec2 coordStreamDepth = vec2(coordStreamNormalized.x + 0.5, coordStreamNormalized.y);
 
     vec4 diffuseColor = texture2D( tDiffuse, coordDiffuseColor );
     vec4 streamColor = texture2D( tStream, coordStreamColor );
 
     float depth = readDepth( tDepth, coordDiffuseDepth );
+    float streamDepth = readDepth( tStream, coordStreamDepth );
+    bool ignore = false; // readMask( tStream, coordStreamDepth );
 
     vec4 color;
     if (!targetWidthGreater ||
         (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {
-        if (depth < 0.01) {
-            color = diffuseColor;
+        if (!ignore) {
+            // color = streamColor;
+
+            if (depth >= 0.995)
+                color = streamColor;
+            else if (depth <= 0.005)
+                color = diffuseColor;
+            else if (streamDepth <= depth)
+                color = streamColor;
+            else
+                color = diffuseColor;
         }
         else {
-            color = streamColor;
+            color = diffuseColor;
         }
     }
     else {
-        // color = diffuseColor;
-        color = vec4(0.0);
+        color = diffuseColor;
     }
 
-    // color = vec4(depth);
     gl_FragColor = vec4( color.rgb, 1.0 );
 
     // if (depth >= 0.5) color = streamColor;

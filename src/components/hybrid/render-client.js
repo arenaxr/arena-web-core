@@ -57,7 +57,7 @@ AFRAME.registerComponent('render-client', {
         window.onbeforeunload = () => {
             this.signaler.closeConnection();
         };
-        // this.connecttoDispatcher()
+
         this.connectToCloud();
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
@@ -76,18 +76,6 @@ AFRAME.registerComponent('render-client', {
             await this.sleep(data.sendConnectRetryInterval);
         }
     },
-    /*
-    async connecttoDispatcher() {
-        const data = this.data;
-        await this.signaler.recivedAcknoeldge();
-
-        while (!this.RecievedAckknowldge) {
-            console.log('[render-client] connecting...');
-            this.signaler.DispatcherConnect();
-            await this.sleep(data.sendConnectRetryInterval);
-        }
-    },
-    */
 
     onRemoteTrack(e) {
         console.log('got remote stream');
@@ -274,7 +262,6 @@ AFRAME.registerComponent('render-client', {
         this.connected = false;
         this.signaler.connectionId = null;
         this.healthCounter = 0;
-        //this.connecttoDispatcher
         this.connectToCloud();
     },
 
