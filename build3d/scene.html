@@ -37,8 +37,10 @@
 
 <body>
 
-  <a-scene background="color: black" name="ARENABuild3DScene" build-watch-scene debug
-    gltf-model="dracoDecoderPath:../static/vendor/draco-1.5.4/" inspector="url: ../static/vendor/aframe-inspector.min.js">
+  <a-scene background="color: black" name="ARENABuild3DScene" build-watch-scene debug vr-mode-ui="enabled: true"
+    webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
+    gltf-model="dracoDecoderPath:../static/vendor/draco-1.5.4/"
+    inspector="url: ../static/vendor/aframe-inspector.min.js">
 
     <a-entity id="sceneRoot">
       <!-- ground plane so falling objects don't fall through floor -->
