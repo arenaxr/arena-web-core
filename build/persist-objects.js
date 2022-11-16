@@ -309,9 +309,13 @@ export async function populateObjectList(
 export async function populateNamespaceList(nsInput, nsList) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
 
-    let scenes;
+    let scenes = [];
+    // get editable scenes...
     try {
-        scenes = await ARENAUserAccount.userScenes();
+        const u_scenes = await ARENAUserAccount.userScenes();
+        u_scenes.forEach((u_scene) => {
+            scenes.push(u_scene.name);
+        });
     } catch (err) {
         Alert.fire({
             icon: 'error',
@@ -321,6 +325,32 @@ export async function populateNamespaceList(nsInput, nsList) {
         console.error(err);
         return undefined;
     }
+
+    // get public scenes...
+    if (persist.persistUri == undefined) {
+        throw 'Persist DB URL not defined.'; // should be called after persist_url is set
+    }
+    let sceneObjs;
+    try {
+        let persistOpt = ARENADefaults.disallowJWT ? {} : {
+            credentials: 'include'
+        };
+        let data = await fetch(`${persist.persistUri}public/!allscenes`, persistOpt);
+        if (!data) {
+            throw 'Could not fetch data';
+        }
+        if (!data.ok) {
+            throw 'Fetch request result not ok';
+        }
+        const p_scenes = await data.json();
+        scenes.push(...p_scenes);
+    } catch (err) {
+        console.error(err);
+        return undefined;
+    }
+
+    // make distinct
+    scenes = [...new Set(scenes)];
 
     // clear list
     while (nsList.firstChild) {
@@ -334,7 +364,7 @@ export async function populateNamespaceList(nsInput, nsList) {
         nsList.disabled = false;
         // split scenes into scene name and namespace
         for (let i = 0; i < scenes.length; i++) {
-            let sn = scenes[i].name.split('/');
+            let sn = scenes[i].split('/');
             if (sn.length < 2) continue;
             if (persist.namespaces.indexOf(sn[0]) < 0) persist.namespaces.push(sn[0]);
             persist.scenes.push({ ns: sn[0], name: sn[1] });

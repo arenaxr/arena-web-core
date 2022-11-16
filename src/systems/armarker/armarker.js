@@ -14,11 +14,13 @@
  */
 
 import {WebXRCameraCapture} from './camera-capture/ccwebxr.js';
+import {WebARCameraCapture} from './camera-capture/ccwebar.js';
 import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset.js';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer.js';
 import {ARMarkerRelocalization} from './armarker-reloc.js';
 import {CVWorkerMsgs} from './worker-msgs.js';
 import {ARENAEventEmitter} from '../../event-emitter.js';
+
 /**
   * ARMarker System. Supports ARMarkers in a scene.
   * @module armarker-system
@@ -30,7 +32,7 @@ AFRAME.registerSystem('armarker', {
         /* relocalization debug messages output */
         debugRelocalization: {default: false},
         /* networked marker solver flag; let relocalization up to a networked solver;
-           NOTE: at armarker init time, we lookup scene options to set this flag */
+           NOTE: at armarker init time, we look up scene options to set this flag */
         networkedLocationSolver: {default: false},
         /* how often we update markers from ATLAS; 0=never */
         ATLASUpdateIntervalSecs: {default: 30},
@@ -42,6 +44,7 @@ AFRAME.registerSystem('armarker', {
     // ar markers retrieved from ATLAS
     ATLASMarkers: {},
     // indicate if we started the cv pipeline
+    cvPipelineInitializing: false,
     cvPipelineInitialized: false,
     // initialized once the xr session starts
     webXRSession: null,
@@ -60,6 +63,7 @@ AFRAME.registerSystem('armarker', {
     ),
     // if we detected WebXRViewer/WebARViewer
     isWebARViewer: false,
+    initialLocalized: false,
     /*
     * Init system
     * @param {object} marker - The marker component object to register.
@@ -111,14 +115,16 @@ AFRAME.registerSystem('armarker', {
     * @param {object} xrSession - Handle to the WebXR session
     */
     async webXRSessionStarted(xrSession) {
-        this.webXRSession = xrSession;
-        this.gl = this.el.renderer.getContext();
+        if (xrSession !== undefined) {
+            this.webXRSession = xrSession;
+            this.gl = this.el.renderer.getContext();
 
-        // make sure gl context is XR compatible
-        try {
-            await this.gl.makeXRCompatible();
-        } catch (err) {
-            console.error('Could not make make gl context XR compatible!', err);
+            // make sure gl context is XR compatible
+            try {
+                await this.gl.makeXRCompatible();
+            } catch (err) {
+                console.error('Could not make make gl context XR compatible!', err);
+            }
         }
 
         // init cv pipeline
@@ -134,44 +140,57 @@ AFRAME.registerSystem('armarker', {
     *
     */
     async initCVPipeline() {
-        if (this.cvPipelineInitialized) return;
-        // try to setup a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
+        if (this.cvPipelineInitializing || this.cvPipelineInitialized) return;
+        this.cvPipelineInitializing = true;
+        // try to set up a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
         if (this.isWebARViewer) {
             try {
                 this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
             } catch (err) {
+                this.cvPipelineInitializing = false;
                 console.warn(`Could not create WebXRViewer/WebARViewer camera capture. ${err}`);
                 return; // we are done here
             }
         }
 
-        // if we are on a AR headset, use camera facing forward
+        // if we are on an AR headset, use camera facing forward
         const arHeadset = this.detectARHeadset();
         if (arHeadset !== 'unknown') {
-            // try to setup a camera facing forward capture (using getUserMedia)
+            // try to set up a camera facing forward capture (using getUserMedia)
             console.info('Setting up AR Headset camera capture.');
             try {
-                this.cameraCapture = new ARHeadsetCameraCapture(arHeadset,
-                    this.data.debugCameraCapture,
-                );
+                this.cameraCapture = new ARHeadsetCameraCapture(arHeadset, this, this.data.debugCameraCapture);
             } catch (err) {
                 console.warn(`Could not create AR Headset camera capture. ${err}`);
             }
         }
 
-        // fallback to setup a webxr camera capture (e.g. passthrough AR on a phone)
-        if (!this.cameraCapture && window.XRWebGLBinding) {
-            console.info('Setting up WebXR-based passthrough AR camera capture.');
-            try {
-                this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl, this.data.debugCameraCapture);
-            } catch (err) {
-                console.error(`No valid CV camera capture found. ${err}`);
-                return; // no valid cv camera capture; we are done here
+
+        if (!this.cameraCapture) { // Not WebXRViewer/WebARViewer, not AR headset
+            if (window.XRWebGLBinding) { // Set up a webxr camera capture (e.g. passthrough AR on a phone)
+                console.info('Setting up WebXR-based passthrough AR camera capture.');
+                try {
+                    this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl,
+                        this.data.debugCameraCapture);
+                } catch (err) {
+                    this.cvPipelineInitializing = false;
+                    console.error(`No valid CV camera capture found. ${err}`);
+                    return; // no valid cv camera capture; we are done here
+                }
+            } else { // Final fallthrough to Spot AR, no real WebXR support
+                try {
+                    this.cameraCapture = new WebARCameraCapture();
+                    await this.cameraCapture.initCamera();
+                } catch (err) {
+                    this.cvPipelineInitializing = false;
+                    console.error(`No valid CV camera capture found. ${err}`);
+                    return; // no valid cv camera capture; we are done here
+                }
             }
         }
 
         // create cv worker for apriltag detection
-        this.cvWorker = new Worker(new URL('/dist/apriltag.js', import.meta.url), {type: 'module'});
+        this.cvWorker = new Worker(new URL('dist/apriltag.js', import.meta.url), {type: 'module'});
         this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
 
         // listen for worker messages
@@ -185,6 +204,7 @@ AFRAME.registerSystem('armarker', {
             debug: this.data.debugRelocalization,
         });
 
+        this.cvPipelineInitializing = false;
         this.cvPipelineInitialized = true;
 
         // send size of known markers to cvWorker (so it can compute pose)
@@ -260,7 +280,7 @@ AFRAME.registerSystem('armarker', {
         const position = ARENA.clientCoords;
 
         // ATLASUpdateIntervalSecs=0: only update tags at init
-        if (this.data.ATLASUpdateIntervalSecs == 0 && !init) return;
+        if (this.data.ATLASUpdateIntervalSecs === 0 && !init) return;
 
         // limit to ATLASUpdateIntervalSecs update interval
         if (new Date() - this.lastATLASUpdate < this.data.ATLASUpdateIntervalSecs * 1000) {
@@ -276,6 +296,10 @@ AFRAME.registerSystem('armarker', {
             .then((response) => {
                 window.this.lastATLASUpdate = new Date();
                 return response.json();
+            })
+            .catch(() => {
+                console.log('Error retrieving ATLAS markers');
+                return false;
             })
             .then((data) => {
                 data.forEach((tag) => {
@@ -307,7 +331,7 @@ AFRAME.registerSystem('armarker', {
     */
     detectARHeadset() {
         if (window.mlWorld) return 'ml';
-        if (navigator.xr && navigator.userAgent.includes('Edge')) return 'hl';
+        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
         return 'unknown';
     },
     /**
@@ -337,13 +361,15 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     unregisterComponent: function(marker) {
-        // indicate marker was removed to cv worker
-        const delMarker = {
-            type: CVWorkerMsgs.type.KNOWN_MARKER_DEL,
-            // marker id
-            markerid: marker.data.markerid,
-        };
-        this.cvWorker.postMessage(delMarker);
+        if (this.cvPipelineInitialized) {
+            // indicate marker was removed to cv worker
+            const delMarker = {
+                type: CVWorkerMsgs.type.KNOWN_MARKER_DEL,
+                // marker id
+                markerid: marker.data.markerid,
+            };
+            this.cvWorker.postMessage(delMarker);
+        }
         delete this.markers[marker.data.markerid];
     },
     /**
@@ -362,14 +388,13 @@ AFRAME.registerSystem('armarker', {
     *
     */
     getAll: function(mtype = undefined) {
-        if (mtype == undefined) return this.markers;
-        const filtered = Object.assign(
+        if (mtype === undefined) return this.markers;
+        return Object.assign(
             {},
             ...Object.entries(this.markers)
-                .filter(([k, v]) => v.data.markertype == mtype)
+                .filter(([, v]) => v.data.markertype === mtype)
                 .map(([k, v]) => ({[k]: v})),
         );
-        return filtered;
     },
     /**
     * Get a marker given its markerid; first lookup local scene objects, then ATLAS
@@ -392,11 +417,10 @@ AFRAME.registerSystem('armarker', {
             const markerPoseNoScale = new THREE.Matrix4(); // create a world matrix with only position and rotation
             markerPoseNoScale.makeRotationFromQuaternion( quat );
             markerPoseNoScale.setPosition( pos );
-            const marker = Object.assign({}, sceneTag.data, {
+            return Object.assign({}, sceneTag.data, {
                 obj_id: sceneTag.el.id,
                 pose: markerPoseNoScale,
             });
-            return marker;
         }
         // default pose for tag 0
         if (markerid === '0') {

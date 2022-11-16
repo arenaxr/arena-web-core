@@ -1,0 +1,78 @@
+{
+    "title": "Icosahedron",
+    "description": "icosahedron Geometry",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "icosahedron"
+                                    ]
+                                },
+                                "detail": {
+                                    "type": "number",
+                                    "title": "detail",
+                                    "default": 0
+                                },
+                                "radius": {
+                                    "type": "number",
+                                    "title": "radius",
+                                    "default": 1
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                        }
+                    ],
+                    "title": "Icosahedron Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "icosahedron",
+                        "radius": 1,
+                        "material": {
+                            "color": "#7f7f7f"
+                        },
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        }
+                    },
+                    "required": [
+                        "object_type",
+                        "radius"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}

@@ -14,6 +14,7 @@ import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
+import {ARENAWebARUtils} from './webar/';
 import Swal from 'sweetalert2';
 
 /* global ARENA, KJUR */
@@ -60,7 +61,9 @@ export class Arena {
         this.armode = url.searchParams.get('armode');
         this.vr = url.searchParams.get('vr');
         this.noav = url.searchParams.get('noav');
+        this.noname = url.searchParams.get('noname');
         this.confstats = url.searchParams.get('confstats');
+        this.hudstats = url.searchParams.get('hudstats');
 
         ARENAUtils.getLocation((coords, err) => {
             if (!err) ARENA.clientCoords = coords;
@@ -94,6 +97,8 @@ export class Arena {
             const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
             this.showEchoDisplayName(speaker);
         });
+        // setup webar session
+        this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, ARENAWebARUtils.handleARButtonForNonWebXRMobile);
     }
 
     /**
@@ -200,11 +205,25 @@ export class Arena {
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted() {
-        if (this.mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
+    isJitsiPermitted(mqttToken = ARENA.mqttToken) {
+        if (mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
             if (perms.room) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks loaded MQTT/Jitsi token for user interaction permission.
+     * TODO: This should perhaps use another flag, more general, not just chat.
+     * @return {boolean} True if the user has permission to send/receive chats in this scene.
+     */
+    isUsersPermitted(nameSpace = ARENA.nameSpace, mqttToken = ARENA.mqttToken, realm = ARENA.defaults.realm) {
+        if (mqttToken) {
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
+            const perms = tokenObj.payloadObj;
+            return ARENAUtils.matchJWT(`${realm}/c/${nameSpace}/o/#`, perms.subs);
         }
         return false;
     }
@@ -214,13 +233,11 @@ export class Arena {
      * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      * @return {boolean} True if the user has permission to write in this scene.
      */
-    isUserSceneWriter(mqttToken=ARENA.mqttToken) {
+    isUserSceneWriter(mqttToken = ARENA.mqttToken) {
         if (mqttToken) {
-            const tokenObj = KJUR.jws.JWS.parse(this.mqttToken);
+            const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
-            if (ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ)) {
-                return true;
-            }
+            return ARENAUtils.matchJWT(ARENA.renderTopic, perms.publ);
         }
         return false;
     }
@@ -231,10 +248,9 @@ export class Arena {
      */
     showEchoDisplayName = (speaker = false) => {
         const url = new URL(window.location.href);
-        const noname = url.searchParams.get('noname');
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
-        if (!noname) {
+        if (!ARENA.noname) {
             if (speaker) {
                 echo.style.backgroundColor = '#0F08'; // green alpha
             } else {
@@ -257,9 +273,11 @@ export class Arena {
             ARENA.loadSceneObjects();
         });
 
-        // after scene is completely loaded, add user camera
-        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
-            ARENA.loadUser();
+        // after scene is completely loaded, add user camera if this is the initial scene load
+        ARENA.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, (initialLoad) => {
+            if (initialLoad) {
+                ARENA.loadUser();
+            }
         });
     };
 
@@ -281,7 +299,7 @@ export class Arena {
         color = '#' + color;
 
         const camera = document.getElementById('my-camera');
-        camera.setAttribute('arena-camera', 'enabled', true);
+        camera.setAttribute('arena-camera', 'enabled', ARENA.isUsersPermitted());
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
@@ -343,17 +361,16 @@ export class Arena {
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to load arena from
-     * @param {Object} position initial position
-     * @param {Object} rotation initial rotation
+     * @param {string} [parentName] parentObject to attach sceneObjects to
+     * @param {string} [prefixName] prefix to add to container
      */
-    loadSceneObjects(urlToLoad, position, rotation) {
+    loadSceneObjects(urlToLoad, parentName, prefixName) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !this.defaults.disallowJWT; // Include JWT cookie
         if (urlToLoad) xhr.open('GET', urlToLoad);
         else xhr.open('GET', this.persistenceUrl);
         xhr.send();
         xhr.responseType = 'json';
-        const deferredObjects = [];
         xhr.onload = () => {
             if (xhr.status !== 200) {
                 Swal.fire({
@@ -395,7 +412,6 @@ export class Arena {
                             object_id: obj.object_id,
                             action: 'create',
                             type: obj.type,
-                            persist: true,
                             data: obj.attributes,
                         };
                         if (position) {
@@ -411,14 +427,35 @@ export class Arena {
                             msg.data.rotation = r;
                         }
 
-                        this.Mqtt.processMessage(msg);
+                /**
+                 * Recursively creates objects with parents, keep list of descendants to prevent circular references
+                 * @param {Object} obj - msg from persistence
+                 * @param {Array} [descendants] - running list of descendants
+                 */
+                const createObj = (obj, descendants = []) => {
+                    const parent = obj.attributes.parent;
+                    if (obj.object_id === this.camName) {
+                        arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
+                        return;
                     }
-                }
-                for (let i = 0; i < deferredObjects.length; i++) {
-                    const obj = deferredObjects[i];
-                    if (obj.attributes.parent === this.camName) {
-                        continue; // don't load our own camera/head assembly
+                    // if parent is specified, but doesn't yet exist
+                    if (parent && document.getElementById(parent) === null) {
+                        // Check for circular references
+                        if (obj.object_id === parent || descendants.includes(parent)) {
+                            console.log('Circular reference detected, skipping', obj.object_id);
+                            arenaObjects.delete(obj.object_id);
+                            return;
+                        }
+                        if (arenaObjects.has(parent)) { // Does exist in pending objects
+                            // Recursively create parent, include this as child
+                            createObj(arenaObjects.get(parent), [...descendants, obj.object_id]);
+                        } else { // Parent doesn't exist in DOM, doesn't exist in pending arenaObjects, skip orphan
+                            console.log('Orphaned object detected, skipping', obj.object_id);
+                            arenaObjects.delete(obj.object_id);
+                            return;
+                        }
                     }
+                    // Parent null or has been recursively created, create this object
                     const msg = {
                         object_id: obj.object_id,
                         action: 'create',
@@ -426,10 +463,45 @@ export class Arena {
                         persist: true,
                         data: obj.attributes,
                     };
-                    console.info('adding deferred object ' + obj.object_id + ' to parent ' + obj.attributes.parent);
                     this.Mqtt.processMessage(msg);
+                    arenaObjects.delete(obj.object_id);
+                };
+                let i = 0;
+                const xhrLen = xhr.response.length;
+                while (arenaObjects.size > 0) {
+                    if (++i > xhrLen) {
+                        console.err('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
+                        break;
+                    }
+                    const iter = arenaObjects.entries();
+                    const [objId, obj] = iter.next().value; // get first entry
+                    if (obj.type === 'program') {
+                    // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+                        const avars = {
+                            scene: ARENA.sceneName,
+                            namespace: ARENA.nameSpace,
+                            cameraid: ARENA.camName,
+                            username: ARENA.getDisplayName,
+                            mqtth: ARENA.mqttHost,
+                        };
+                        // ask runtime manager to start this program
+                        this.RuntimeManager.createModuleFromPersist(obj, avars);
+                        arenaObjects.delete(objId);
+                    } else if (obj.type === 'object') {
+                        if (containerObjName && obj.attributes.parent === undefined) {
+                            // Add first-level objects as children to container if applicable
+                            obj.attributes.parent = containerObjName;
+                        }
+                        createObj(obj);
+                    } else {
+                        // Scene Options, what else? Skip
+                        arenaObjects.delete(objId);
+                    }
                 }
-                window.setTimeout(() => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true), 500);
+                window.setTimeout(
+                    () => ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, !containerObjName),
+                    500,
+                );
             }
         };
     };
@@ -505,7 +577,7 @@ export class Arena {
 
                     if (sceneOptions['physics']) {
                         // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-                        import('./components/vendor/aframe-physics-system.min.js');
+                        import('./systems/vendor/aframe-physics-system.min.js');
                         document.getElementById('groundPlane').setAttribute('static-body', 'true');
                     }
 
@@ -603,7 +675,7 @@ export class Arena {
             const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
             sceneHeads.forEach((head) => {
                 const opt = document.createElement('option');
-                opt.value = head.url;
+                opt.value = ARENAUtils.crossOriginDropboxSrc(head.url);
                 opt.text = `${head.name} (scene-options)`;
                 headModelPathSelect.add(opt, null);
             });
@@ -676,49 +748,48 @@ export class Arena {
             }
 
             // init chat
-            this.chat = new ARENAChat({
-                userid: this.idTag,
-                cameraid: this.camName,
-                username: this.getDisplayName(),
-                realm: this.defaults.realm,
-                namespace: this.nameSpace,
-                scene: this.namespacedScene,
-                persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
-                keepalive_interval_ms: 30000,
-                mqtt_host: this.mqttHostURI,
-                mqtt_username: this.username,
-                mqtt_token: this.mqttToken,
-                devInstance: this.defaults.devInstance,
-                isSceneWriter: this.isUserSceneWriter(),
-            });
-            await this.chat.start();
-
-            if (this.noav || !this.isJitsiPermitted()) {
+            if (this.isUsersPermitted()) {
+                this.chat = new ARENAChat({
+                    userid: this.idTag,
+                    cameraid: this.camName,
+                    username: this.getDisplayName(),
+                    realm: this.defaults.realm,
+                    namespace: this.nameSpace,
+                    scene: this.namespacedScene,
+                    persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
+                    keepalive_interval_ms: 30000,
+                    mqtt_host: this.mqttHostURI,
+                    mqtt_username: this.username,
+                    mqtt_token: this.mqttToken,
+                    devInstance: this.defaults.devInstance,
+                    isSceneWriter: this.isUserSceneWriter(),
+                });
+                await this.chat.start();
                 this.showEchoDisplayName();
-            } else if (this.armode && AFRAME.utils.device.checkARSupport()) {
+            } else {
+                // prevent local name when non-interactive
+                this.noname = true;
+            }
+
+            if (this.armode) {
                 /*
                 Instantly enter AR mode for now.
                 TODO: incorporate AV selection for possible Jitsi and multicamera
-                 */
-                Swal.fire({
-                    title: 'Enter AR Mode',
-                    html: `This is an immersive AR scene that requires access to your camera and device sensors.`,
-                    icon: 'info',
-                    showConfirmButton: true,
-                    confirmButtonText: 'Enter',
-                }).then(() => {
-                    document.getElementsByTagName('a-scene')[0].enterAR();
+                */
+                this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
+                    if (this.isWebARViewer || AFRAME.utils.device.checkARSupport()) {
+                        document.getElementsByTagName('a-scene')[0].enterAR();
+                    } else {
+                        ARENAWebARUtils.enterARNonWebXR();
+                    }
                 });
             } else if (this.skipav) {
                 // Directly initialize Jitsi videoconferencing
                 this.Jitsi = ARENAJitsi.init(this.jitsiHost);
-                this.showEchoDisplayName();
-            } else {
+            } else if (!this.noav && this.isJitsiPermitted()) {
                 window.setupAV(() => {
-                    const pano = document.getElementById('presenceSelect').value == 'Panoramic';
                     // Initialize Jitsi videoconferencing after A/V setup window
-                    this.Jitsi = ARENAJitsi.init(this.jitsiHost, pano);
-                    this.showEchoDisplayName();
+                    this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 });
             }
 

@@ -35,6 +35,7 @@ import './text-input.js';
 import './thickline/index.js';
 import './threejs-scene.js';
 import './ttl.js';
+import './ui';
 import './video-control.js';
 
 /**
@@ -44,16 +45,16 @@ import './video-control.js';
 // from npm, when available
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
-import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 import 'aframe-blink-controls'; // Controller teleport
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
-import './vendor/nav-system.js'; // Override nav system
 
 // import 'aframe-particle-system-component';
 // import 'aframe-spe-particles-component';
 
 // direct file imports
+import './vendor/aframe-aabb-collider-component.min.js'; // AABB collider https://github.com/supermedium/superframe#readme
+import './vendor/aframe-look-at-component.min.js'; // Look at component https://github.com/supermedium/superframe#readme
 import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
 import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
 import './vendor/morphTarget.js'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component

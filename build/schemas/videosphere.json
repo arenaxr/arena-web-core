@@ -1,0 +1,94 @@
+{
+    "title": "Videosphere",
+    "description": "Videosphere Geometry",
+    "allOf": [{
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [{
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "videosphere"
+                                    ]
+                                },
+                                "autoplay": {
+                                    "default": true,
+                                    "description": "autoplay",
+                                    "type": "boolean"
+                                },
+                                "crossOrigin": {
+                                    "default": "anonymous",
+                                    "type": "string",
+                                    "title": "crossOrigin"
+                                },
+                                "loop": {
+                                    "default": true,
+                                    "title": "loop",
+                                    "type": "boolean"
+                                },
+                                "radius": {
+                                    "type": "number",
+                                    "title": "radius",
+                                    "default": 5000
+                                },
+                                "segmentsHeight": {
+                                    "type": "number",
+                                    "title": "segments height",
+                                    "default": 64
+                                },
+                                "segmentsWidth": {
+                                    "type": "number",
+                                    "title": "segments width",
+                                    "default": 64
+                                },
+                                "src": {
+                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+                                    "format": "uri",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                        }
+                    ],
+                    "title": "Videosphere Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "videosphere",
+                        "radius": 5000,
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        }
+                    },
+                    "required": [
+                        "object_type"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}

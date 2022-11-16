@@ -19,7 +19,7 @@ const config = require('./health-config.json');
  *   // title for display purposes
  *   "title": "Conference server connection failed"
  *   // link to troubleshooting help page/section
- *   "helpLink": "https://arena.conix.io/content/troubleshooting.html#error-conference-server-connection-failed"
+ *   "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-conference-server-connection-failed"
  * }
  */
 export class ARENAHealth {
@@ -96,7 +96,7 @@ export class ARENAHealth {
                 errorCode: errorCode,
                 class: 'health-warning-label',
                 title: errorCode,
-                helpLink: 'https://arena.conix.io/content/troubleshooting.html',
+                helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html',
             };
         }
     }

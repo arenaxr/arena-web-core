@@ -1,0 +1,135 @@
+/*
+    style.css
+
+    Styling for the ARENA sign in page.
+*/
+
+body,
+html {
+    height: 100%;
+    font-family: 'Roboto', sans-serif;
+}
+
+.top-logo {
+    max-height: 100px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.g-signin2 {
+    width: 100%;
+    font-size: 15px;
+    margin: 0 0 10px;
+}
+
+:-moz-placeholder {
+    color: #c9c9c9 !important;
+    font-size: 13px;
+}
+
+::-webkit-input-placeholder {
+    color: #ccc;
+    font-size: 13px;
+}
+
+.lt-ie9 input[type="email"],
+.lt-ie9 input[type="text"],
+.lt-ie9 input[type="password"] {
+    line-height: 34px;
+}
+
+span.icon {
+    display: inline-block;
+    vertical-align: middle;
+    width: 42px;
+    height: 42px;
+}
+
+#customBtnGoogle span.icon {
+    background: url('../img/g-normal.png') transparent 5px 50% no-repeat;
+}
+
+.min-vh-75 {
+    min-height: 75vh
+}
+
+/* allow/deny permissions icons for profile dashboard */
+.fa-check {
+    color: green;
+}
+
+.fa-times {
+    color: red;
+}
+
+/* table size/scroll management */
+.sticky-header {
+    position: sticky;
+    top: 60px;
+    background: white;
+    z-index: 999;
+}
+
+.border-grey {
+    border-color: #BBB;
+}
+
+@media only screen and (min-width: 850px) {
+    .navbar-brand {
+        margin-right: 10%;
+    }
+}
+
+.navbar-brand img {
+    max-height: 16px;
+}
+
+#sceneSelect .nav-item {
+    width: 50%;
+    border: 0;
+    margin-bottom: 10px;
+
+}
+
+#sceneSelect .nav-link {
+    border: none;
+    width: 100%;
+    text-align: left;
+    color: #495057;
+}
+
+#sceneSelect .nav-tabs{
+    border:none;
+}
+
+#sceneSelect .nav-link.active {
+    border-bottom: 3px solid #a42629;
+    color: #a42629;
+}
+
+#sceneSelect .form-floating label {
+    background: none;
+    opacity: 1;
+}
+
+#sceneSelect button.disabled i.fas, #sceneSelect button.disabled i.far {
+    color: #666;
+}
+
+#sceneSelect button i.fas, #sceneSelect button i.far {
+    color: #a42629;
+}
+
+#sceneSelect button.btn-light, #cloneScene button.btn-light {
+    background: none;
+    border:none;
+    box-shadow: none;
+    padding-left: 0.8em;
+    padding-right: 0.8em;
+}
+
+.routePage .rounded {
+    min-height: 350px;
+}

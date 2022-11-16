@@ -47,9 +47,12 @@ export class ARMarkerRelocalization {
         0, 0, 0, 1);
 
     /* error and movement thresholds */
-    DTAG_ERROR_THRESH = 7e-6;
+    DTAG_ERROR_THRESH = 1e-3;
     MOVE_THRESH = 0.05;
     ROT_THRESH = 0.087;
+
+    // MOVE_THRESH = 0.0125;
+    // ROT_THRESH = 0.02175;
 
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
@@ -218,7 +221,7 @@ export class ARMarkerRelocalization {
                 JSON.stringify(jsonMsg),
             );
         }
-
+        // this the one
         if (!this.networkedLocationSolver) {
             let localizerTag = false;
             const pubDetList = [];
@@ -258,6 +261,7 @@ export class ARMarkerRelocalization {
                           // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
                           this.rigMatrixT.transpose();
                         */
+                        this.arMakerSystem.initialLocalized = true;
                     }
                 } else if (refTag.dynamic && refTag.publish==false) { // tag is dynamic? push update if publish=false
                     if (ARENA && ARENA.isUserSceneWriter()) {

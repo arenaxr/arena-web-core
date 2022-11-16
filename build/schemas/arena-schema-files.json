@@ -9,6 +9,11 @@
        "file":"schemas/circle.json",
        "title":"Circle"
     },
+    "capsule":{
+       "description":"Capsule Geometry",
+       "file":"schemas/capsule.json",
+       "title":"Capsule"
+    },
     "cone":{
        "description":"Cone Geometry",
        "file":"schemas/cone.json",
@@ -20,12 +25,12 @@
        "title":"Cube (deprecated; don't use)"
     },
     "cylinder":{
-       "description":"cylinder Geometry",
+       "description":"Cylinder Geometry",
        "file":"schemas/cylinder.json",
        "title":"Cylinder"
     },
     "dodecahedron":{
-       "description":"dodecahedron Geometry",
+       "description":"Dodecahedron Geometry",
        "file":"schemas/dodecahedron.json",
        "title":"Dodecahedron"
     },
@@ -48,6 +53,11 @@
        "description":"Display an image on a plane",
        "file":"schemas/image.json",
        "title":"Image"
+    },
+    "icosahedron":{
+       "description":"Icosahedron Geometry",
+       "file":"schemas/icosahedron.json",
+       "title":"Icosahedron"
     },
     "light":{
        "description":"A light",
@@ -74,6 +84,11 @@
        "file":"schemas/plane.json",
        "title":"Plane"
     },
+    "prism":{
+      "description":"Prism Geometry",
+      "file":"schemas/prism.json",
+      "title":"Prism"
+    },
     "program":{
        "description":"ARENA program data",
        "file":"schemas/arena-program.json",
@@ -83,6 +98,11 @@
        "description":"Ring Geometry",
        "file":"schemas/ring.json",
        "title":"Ring"
+    },
+    "roundedbox":{
+      "description":"Rounded Box Geometry",
+      "file":"schemas/roundedbox.json",
+      "title":"Rounded Box"
     },
     "scene-options":{
        "description":"ARENA scene options",
@@ -128,5 +148,10 @@
        "description":"Triangle Geometry",
        "file":"schemas/triangle.json",
        "title":"Triangle"
+    },
+    "videosphere":{
+       "description":"Videosphere 360 Video",
+       "file":"schemas/videosphere.json",
+       "title":"Videosphere"
     }
 }

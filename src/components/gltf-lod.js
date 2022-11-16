@@ -1,5 +1,7 @@
 /* global AFRAME */
 
+import {ARENAUtils} from '../utils.js';
+
 /**
  * @fileoverview Component loads/unloads gltfs by simple user distance-based LOD
  * Inspired by aframe-lod <https://github.com/mflux/aframe-lod>
@@ -21,7 +23,10 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         this.tempDistance = new THREE.Vector3();
         this.currentLevel = undefined;
         this.previousLevel = undefined;
-        this.cameraPos = document.getElementById('my-camera').object3D.position;
+        this.cameraObj = document.getElementById('my-camera').object3D;
+        this.cameraPos = new THREE.Vector3();
+        this.cameraObj.getWorldPosition(this.cameraPos);
+        this.objWorldPos = new THREE.Vector3();
         this.cacheFreeTimers = {};
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
         this.updateLevels();
@@ -40,7 +45,9 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         if (!this.data.enabled) {
             return;
         }
-        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);
+        this.cameraObj.getWorldPosition(this.cameraPos);
+        this.el.object3D.getWorldPosition(this.objWorldPos);
+        this.tempDistance = this.cameraPos.distanceTo(this.objWorldPos);
         if (this.tempDistance !== this.camDistance) {
             this.camDistance = this.tempDistance;
             let nextLevel;
@@ -128,7 +135,10 @@ AFRAME.registerComponent('gltf-model-lod', {
         this.tempDistance = new THREE.Vector3();
         this.showDetailed = false;
         this.defaultUrl = this.el.getAttribute('gltf-model');
-        this.cameraPos = document.getElementById('my-camera').object3D.position;
+        this.cameraObj = document.getElementById('my-camera').object3D;
+        this.cameraPos = new THREE.Vector3();
+        this.cameraObj.getWorldPosition(this.cameraPos);
+        this.objWorldPos = new THREE.Vector3();
         this.cacheFreeTimer = null;
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
     },
@@ -136,14 +146,16 @@ AFRAME.registerComponent('gltf-model-lod', {
         if (!this.data.enabled || !this.defaultUrl) {
             return;
         }
-        this.tempDistance = this.cameraPos.distanceTo(this.el.object3D.position);
+        this.cameraObj.getWorldPosition(this.cameraPos);
+        this.el.object3D.getWorldPosition(this.objWorldPos);
+        this.tempDistance = this.cameraPos.distanceTo(this.objWorldPos);
         if (this.tempDistance !== this.camDistance) {
             this.camDistance = this.tempDistance;
             const distDiff = this.camDistance - this.data.detailedDistance;
             // Switch from default to detailed when inside (dist - threshold)
             if (!this.showDetailed && distDiff <= -LOD_THRESHOLD ) {
                 window.clearTimeout(this.cacheFreeTimer); // Stop cache freeing timer, if active
-                this.el.setAttribute('gltf-model', this.data.detailedUrl);
+                this.el.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(this.data.detailedUrl));
                 this.showDetailed = true;
             // Switch from detailed to default when outside (dist + threshold)
             } else if (this.showDetailed && distDiff >= LOD_THRESHOLD) {
@@ -152,7 +164,7 @@ AFRAME.registerComponent('gltf-model-lod', {
                 if (!this.data.retainCache) {
                     window.clearTimeout(this.cacheFreeTimer);
                     this.cacheFreeTimer = window.setTimeout(() => {
-                        THREE.Cache.remove(this.data.detailedUrl);
+                        THREE.Cache.remove(ARENAUtils.crossOriginDropboxSrc(this.data.detailedUrl));
                         this.cacheFreeTimer = null;
                     }, CACHE_FREE_DELAY);
                 }

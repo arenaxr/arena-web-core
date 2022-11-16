@@ -14,14 +14,13 @@ import {ARENAUtils} from '../utils.js';
 /**
  * Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
  * The properties set here access directly [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
- * Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.
+ * Implements a timeout scheme in lack of better management of the timing/events causing properties to not be available.
  * @module material-extras
  * @property {string} [overrideSrc=''] - Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF).
  * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
- * @property {number} [defaultRenderOrder=1] - Used as the renderOrder when transparentOccluder is reset to `false`.
 */
 AFRAME.registerComponent('material-extras', {
     dependencies: ['material'],
@@ -33,7 +32,6 @@ AFRAME.registerComponent('material-extras', {
         colorWrite: {default: true},
         renderOrder: {default: 1},
         transparentOccluder: {default: false},
-        defaultRenderOrder: {default: 1},
     },
     retryTimeouts: [1000, 2000, 5000, 10000],
     init: function() {
@@ -43,6 +41,8 @@ AFRAME.registerComponent('material-extras', {
         this.update();
         this.el.addEventListener('model-loaded', () => this.update());
         this.el.addEventListener('load', () => this.update());
+
+        console.info('MATERIAL EXTRAS:', this.schema.renderOrder.default);
     },
     update: function(oldData) {
         this.retryIndex = 0;
@@ -67,12 +67,13 @@ AFRAME.registerComponent('material-extras', {
                 this.data.renderOrder = 0;
                 this.data.colorWrite = false;
             } else {
-                this.data.renderOrder = this.data.defaultRenderOrder; // default renderOrder used in the arena
-                this.data.colorWrite = true; // default colorWrite
+                this.data.renderOrder = this.schema.renderOrder.default; // default renderOrder used in the arena
+                this.data.colorWrite = this.schema.colorWrite.default; // default colorWrite
             }
             this.doUpdate = true;
         }
-        this.el.object3D.renderOrder=this.data.renderOrder;
+
+        // this.el.object3D.renderOrder=this.data.renderOrder;
 
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
         if (this.doUpdate) this.updateMaterial();
@@ -91,38 +92,34 @@ AFRAME.registerComponent('material-extras', {
             // onProgress callback currently not supported
             undefined,
             // onError callback
-            (err) => console.error(`Error loading texture ${this.data.overrideSrc}: ${err}`));
+            (err) => console.error(`[material-extras] Error loading texture ${this.data.overrideSrc}: ${err}`));
+    },
+    updateMeshMaterial: function(mesh) {
+        mesh.renderOrder = this.data.renderOrder;
+        if (mesh.material) {
+            mesh.material.colorWrite = this.data.colorWrite;
+            if (mesh.material.map && this.texture) {
+                mesh.material.map = this.texture;
+                mesh.material.map.encoding = THREE[this.data.encoding];
+            }
+            mesh.material.needsUpdate = true;
+        }
     },
     updateMaterial: function() {
         const mesh = this.el.getObject3D('mesh');
         if (!mesh) {
-            console.warn('Could not find mesh!');
             this.retryUpdateMaterial();
             return;
         }
-        if (this.texture) {
-            mesh.traverse((node) => {
-                if (node.isMesh) {
-                    if (node.material.map) {
-                        node.material.map = this.texture;
-                        mesh.material.needsUpdate = true;
-                    }
-                }
-            });
-        }
-        if (mesh.material) {
-            mesh.material.colorWrite = this.data.colorWrite;
-            if (mesh.material.map) {
-                mesh.material.map.encoding = THREE[this.data.encoding];
-            } else {
-                this.retryUpdateMaterial();
-                return;
+
+        this.updateMeshMaterial(mesh);
+
+        // traverse children
+        mesh.traverse((node) => {
+            if (node.isMesh) {
+                this.updateMeshMaterial(node);
             }
-            mesh.material.needsUpdate = true;
-        } else {
-            this.retryUpdateMaterial();
-            return;
-        }
+        });
     },
     retryUpdateMaterial() {
         if (this.retryIndex < this.retryTimeouts.length) {
@@ -130,6 +127,8 @@ AFRAME.registerComponent('material-extras', {
                 this.retryIndex++;
                 this.updateMaterial();
             }, this.retryTimeouts[this.retryIndex]); // try again in a bit
+        } else {
+            console.warn('[material-extras] Could not update material!');
         }
     },
 });

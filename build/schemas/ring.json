@@ -22,17 +22,17 @@
                                 "radiusInner": {
                                     "type": "number",
                                     "title": "radius inner",
-                                    "default": 1
+                                    "default": 0.8
                                 },
                                 "radiusOuter": {
                                     "type": "number",
                                     "title": "radius outer",
-                                    "default": 1
+                                    "default": 1.2
                                 },
                                 "segmentsPhi": {
                                     "type": "number",
                                     "title": "segments phi",
-                                    "default": 8
+                                    "default": 10
                                 },
                                 "segmentsTheta": {
                                     "type": "number",
@@ -52,6 +52,9 @@
                             }
                         },
                         {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
                             "$ref": "./schemas/definitions-common.json#/properties"
                         },
                         {
@@ -62,7 +65,7 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "ring",
-                        "radiusInner": 1,
+                        "radiusInner": 0.5,
                         "radiusOuter": 1,
                         "material": {
                             "color": "#7f7f7f"

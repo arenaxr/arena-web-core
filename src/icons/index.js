@@ -148,7 +148,7 @@ export class SideMenu {
         const url = new URL(window.location.href);
         const avSettingsBtn = createIconButton('options', 'Change A/V options',
             () => window.setupAV(ARENA.Jitsi.avConnect.bind(ARENA.Jitsi)));
-        if (!url.searchParams.get('noav')) {
+        if (ARENA.isJitsiPermitted()) {
             this._buttonList[this.buttons.AVSETTINGS] = avSettingsBtn;
         }
 
@@ -331,17 +331,19 @@ export class SideMenu {
 
 
         const iconsDiv = document.getElementById('icons-div');
-        if (!url.searchParams.get('noav')) {
+        const isJitsi = ARENA.isJitsiPermitted();
+        const isUsers = ARENA.isUsersPermitted();
+        if (isJitsi) {
             iconsDiv.appendChild(audioBtn);
             iconsDiv.appendChild(videoBtn);
             iconsDiv.appendChild(avSettingsBtn);
         }
-        if (!AFRAME.utils.device.isMobile()) {
+        if (isUsers && !AFRAME.utils.device.isMobile()) {
             iconsDiv.appendChild(avatarBtn); // no avatar on mobile - face model is too large
         }
         iconsDiv.appendChild(speedBtn);
         iconsDiv.appendChild(flyingBtn);
-        if (!AFRAME.utils.device.isMobile()) {
+        if (isJitsi && !AFRAME.utils.device.isMobile()) {
             iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
         }
         iconsDiv.appendChild(logoutBtn);
@@ -430,7 +432,7 @@ export class SideMenu {
         pagesDiv.append(' | ');
 
         const docs = document.createElement('a');
-        docs.href = 'https://arena.conix.io';
+        docs.href = 'https://docs.arenaxr.org';
         docs.target = '_blank';
         docs.rel = 'noopener noreferrer';
         docs.innerHTML = 'Docs';

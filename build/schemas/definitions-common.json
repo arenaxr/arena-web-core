@@ -305,7 +305,7 @@
        "landmark":{
           "title":"Landmark",
           "type":"object",
-          "description":"Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is contrained by a navmesh (when it exists)",
+          "description":"Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is constrained by a navmesh (when it exists)",
           "properties":{
              "randomRadiusMin":{
                 "default":0,
@@ -383,7 +383,7 @@
              "overrideSrc":{
                 "type":"string",
                 "default":"",
-                "description":"Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+                "description":"Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
              },
              "encoding":{
                 "default":"sRGBEncoding",
@@ -419,87 +419,6 @@
           },
           "title":"Material extras",
           "type":"object"
-       },
-       "parent":{
-          "description":"Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
-          "title":"Parent",
-          "type":"string"
-       },
-       "position":{
-          "description":"3D object position",
-          "properties":{
-             "x":{
-                "type":"number"
-             },
-             "y":{
-                "type":"number"
-             },
-             "z":{
-                "type":"number"
-             }
-          },
-          "required":[
-             "x",
-             "y",
-             "z"
-          ],
-          "type":"object",
-          "title":"Position"
-       },
-       "rotation":{
-          "description":"3D object rotation in degrees by default; Right-handed coordinate system. Switches to quaternion representation if 'w' is given",
-          "properties":{
-             "w":{
-                "default":1,
-                "type":"number"
-             },
-             "x":{
-                "default":0,
-                "type":"number"
-             },
-             "y":{
-                "default":0,
-                "type":"number"
-             },
-             "z":{
-                "default":0,
-                "type":"number"
-             }
-          },
-          "required":[
-             "x",
-             "y",
-             "z"
-          ],
-          "type":"object",
-          "title":"Rotation"
-       },
-       "scale":{
-          "default":{
-             "x":1,
-             "y":1,
-             "z":1
-          },
-          "description":"3D object scale",
-          "id":"scale",
-          "properties":{
-             "x":{
-                "type":"number"
-             },
-             "y":{
-                "type":"number"
-             },
-             "z":{
-                "type":"number"
-             }
-          },
-          "required":[
-             "x",
-             "y",
-             "z"
-          ],
-          "type":"object",
-          "title":"Scale"
        },
        "shadow":{
           "title":"Shadow",
@@ -606,6 +525,55 @@
           "title":"Positional Sound",
           "type":"object"
        },
+       "textinput":{
+         "title":"Text Input",
+         "description":"Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
+         "type":"object",
+         "default":{
+            "on":"mousedown",
+            "title":"Text Input",
+            "label":"Input text below (max is 140 characters)",
+            "placeholder":"Type here"
+         },
+         "properties":{
+            "on":{
+               "default":"mousedown",
+               "description":"A case-sensitive string representing the event type to listen for, e.g. 'mousedown', 'mouseup'. See https://developer.mozilla.org/en-US/docs/Web/Events",
+               "enum":[
+                  "mousedown",
+                  "mouseup",
+                  "mouseenter",
+                  "mouseleave",
+                  "triggerdown",
+                  "triggerup",
+                  "gripdown",
+                  "gripup",
+                  "menudown",
+                  "menuup",
+                  "systemdown",
+                  "systemup",
+                  "trackpaddown",
+                  "trackpadup"
+               ],
+               "type":"string"
+            },
+            "title":{
+               "default":"Text Input",
+               "description":"The prompt title",
+               "type":"string"
+            },
+            "label":{
+               "default":"Input text below (max is 140 characters)",
+               "description":"Text prompt label",
+               "type":"string"
+            },
+            "placeholder":{
+               "default":"Type here",
+               "description":"Text input place holder",
+               "type":"string"
+            }
+         }
+       },
        "url":{
           "description":"Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
           "format":"uri",
@@ -663,6 +631,50 @@
           ],
           "title":"Video",
           "type":"object"
+       },
+       "attribution": {
+          "description": "Attribution Component. Saves attribution data in any entity.",
+          "properties": {
+             "author": {
+                "type": "string",
+                "default": "Unknown",
+                "description": "Author name; e.g. “Vaptor-Studio”"
+             },
+             "authorURL": {
+                "type": "string",
+                "description": "Author homepage/profile; e.g. https://sketchfab.com/VapTor"
+             },
+             "license": {
+                "type": "string",
+                "default": "Unknown",
+                "description": "License summary/short name; e.g. “CC-BY-4.0”."
+             },
+             "licenseURL": {
+                "type": "string",
+                "description": "License URL; e.g. http://creativecommons.org/licenses/by/4.0/"
+             },
+             "source": {
+                "type": "string",
+                "default": "Unknown",
+                "description": "Model source e.g. “Sketchfab”."
+             },
+             "sourceURL": {
+                "type": "string",
+                "description": "Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7"
+             },
+             "title": {
+                "type": "string",
+                "default": "No Title",
+                "description": "Model title; e.g. “Spinosaurus”."
+             },
+             "extractAssetExtras": {
+               "type": "boolean",
+               "default": true,
+               "description": "Extract attribution info from asset extras; will override attribution info given (default: true)"
+            }
+         },
+          "title": "Attribution",
+          "type": "object"
        }
     }
  }

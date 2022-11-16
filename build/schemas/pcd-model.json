@@ -1,6 +1,6 @@
 {
     "title": "PCD Model",
-    "description": "Load a PCD model",
+    "description": "Load a PCD model. \n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>https://pointclouds.org/documentation/tutorials/index.html</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -39,6 +39,9 @@
                                     "default": "#7f7f7f"
                                 }
                             }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"

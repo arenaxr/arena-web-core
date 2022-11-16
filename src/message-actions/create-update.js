@@ -9,8 +9,8 @@ const ACTIONS = {
 
 // path to controller models
 const handControllerPath = {
-    handLeft: 'media/models/hands/valve_index_left.gltf',
-    handRight: 'media/models/hands/valve_index_right.gltf',
+    handLeft: 'static/models/hands/valve_index_left.gltf',
+    handRight: 'static/models/hands/valve_index_right.gltf',
 };
 
 // default render order of objects; reserve 0 for occlusion
@@ -70,7 +70,11 @@ export class CreateUpdate {
             let addObj = false;
             if (!entityEl) {
                 // create object
-                entityEl = document.createElement('a-entity');
+                if (message.data.object_type === 'videosphere') {
+                    entityEl = document.createElement('a-videosphere');
+                } else {
+                    entityEl = document.createElement('a-entity');
+                }
                 entityEl.setAttribute('id', id);
                 // after setting object attributes, we will add it to the scene
                 addObj = true;
@@ -89,9 +93,17 @@ export class CreateUpdate {
             if (addObj) {
                 // Parent/Child handling
                 if (message.data.parent) {
-                    const parentName = (ARENA.camName == message.data.parent) ? 'my-camera' : message.data.parent; // our camera is named 'my-camera'
+                    let parentName = message.data.parent;
+                    if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
+                        if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
+                            parentName = 'my-camera';
+                        } else {
+                            return;
+                        }
+                    }
                     const parentEl = document.getElementById(parentName);
                     if (parentEl) {
+                        entityEl.removeAttribute('parent');
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
                     } else {
@@ -127,9 +139,9 @@ export class CreateUpdate {
                         cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
                     } else { // otherwise its a rotation given in degrees
                         cameraSpinnerObj3D.rotation.set(
-                            THREE.Math.degToRad(rotation.x),
-                            THREE.Math.degToRad(rotation.y),
-                            THREE.Math.degToRad(rotation.z),
+                            THREE.MathUtils.degToRad(rotation.x),
+                            THREE.MathUtils.degToRad(rotation.y),
+                            THREE.MathUtils.degToRad(rotation.z),
                         );
                     }
                 }
@@ -140,6 +152,17 @@ export class CreateUpdate {
             return;
 
         case 'scene-options':
+            // update env-presets section in real-time
+            const environmentOld = document.getElementById('env');
+            const environment = document.createElement('a-entity');
+            environment.id = 'env';
+            const envPresets = message.data['env-presets'];
+            for (const [attribute, value] of Object.entries(envPresets)) {
+                environment.setAttribute('environment', attribute, value);
+            }
+            environmentOld.parentNode.replaceChild(environment, environmentOld);
+            return;
+
         case 'face-features':
         case 'landmarks':
             // TODO : Remove once all existing persist landmark entities have converted
@@ -373,7 +396,7 @@ export class CreateUpdate {
             case 'rotation':
                 // rotation is set directly in the THREE.js object, for performance reasons
                 if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
-                else entityEl.object3D.rotation.set( THREE.Math.degToRad(value.x), THREE.Math.degToRad(value.y), THREE.Math.degToRad(value.z)); // otherwise its a rotation given in degrees
+                else entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
                 break;
             case 'position':
                 // position is set directly in the THREE.js object, for performance reasons

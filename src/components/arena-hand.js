@@ -16,7 +16,8 @@
  * @private
  */
 function eventAction(evt, eventName, myThis) {
-    const newPosition = myThis.object3D.position;
+    const newPosition = new THREE.Vector3();
+    myThis.object3D.getWorldPosition(newPosition);
 
     const coordsData = {
         x: newPosition.x.toFixed(3),
@@ -84,6 +85,11 @@ AFRAME.registerComponent('arena-hand', {
 
         el.addEventListener('controllerdisconnected', () => {
             el.setAttribute('visible', false);
+            // when disconnected, try to cleanup hands
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
+                object_id: this.name,
+                action: 'delete',
+            });
         });
 
         /*

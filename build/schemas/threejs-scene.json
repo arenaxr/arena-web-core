@@ -1,6 +1,6 @@
 {
     "title": "Three.js Scene",
-    "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred)",
+    "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred) \n\nFormat: <a href='https://threejs.org/docs/#api/en/scenes/Scene'>https://threejs.org/docs/#api/en/scenes/Scene</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -26,6 +26,9 @@
                                     "type": "string"
                                 }
                             }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"

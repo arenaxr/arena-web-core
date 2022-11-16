@@ -8,7 +8,6 @@
 
 /* global AFRAME, ARENA, JitsiMeetJS */
 import $ from 'jquery';
-import Swal from 'sweetalert2';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {SideMenu} from './icons/index.js';
 
@@ -557,6 +556,7 @@ export class ARENAJitsi {
                         delete(this.newUserTimers[id]);
                         // emit new user event
                         ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                            jid: id,
                             id: arenaId,
                             dn: arenaDisplayName,
                             cn: arenaCameraName,
@@ -619,7 +619,7 @@ export class ARENAJitsi {
      * This function is called when we disconnect.
      */
     disconnect() {
-        console.warning('Conference server disconnected!');
+        console.warn('Conference server disconnected!');
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
@@ -910,7 +910,7 @@ export class ARENAJitsi {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         videoConstraints.defaultConstraints = {
-            "maxHeight": resolution
+            'maxHeight': resolution,
         };
         this.conference.setReceiverConstraints(videoConstraints);
     }

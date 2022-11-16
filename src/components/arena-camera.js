@@ -29,7 +29,7 @@ AFRAME.registerComponent('arena-camera', {
         enabled: {type: 'boolean', default: false},
         vioEnabled: {type: 'boolean', default: false},
         displayName: {type: 'string', default: 'No Name'},
-        color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
+        color: {type: 'string', default: '#' + ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
         position: {type: 'vec3', default: new THREE.Vector3()},
         vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
@@ -174,6 +174,10 @@ AFRAME.registerComponent('arena-camera', {
         const data = this.data;
         if (oldData.showStats !== data.showStats) {
             document.getElementById('pose-stats').style.display = (data.showStats) ? 'block' : 'none';
+            if (this.data.showStats) { // update initial position of stats when opened
+                document.getElementById('pose-stats').textContent =
+                    `Position: ${ARENAUtils.coordsToText(data.position)}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(data.rotation)}`;
+            }
         }
     },
     /**
@@ -228,7 +232,7 @@ AFRAME.registerComponent('arena-camera', {
             this.publishPose();
             if (this.data.showStats) {
                 document.getElementById('pose-stats').textContent =
-                    `Position: ${positionCoords}\r\nRotation: ${rotationCoords}`;
+                    `Position: ${ARENAUtils.coordsToText(data.position)}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(data.rotation)}`;
             }
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)

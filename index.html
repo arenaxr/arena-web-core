@@ -53,11 +53,11 @@
                         </div>
                         <div class="form-floating mb-3">
                             <select aria-label="HeadModel" class="form-select mb-3" id="headModelPathSelect">
-                                <option value="/media/models/avatars/robobit.glb">Robot</option>
-                                <option value="/media/models/avatars/DamagedHelmet.glb">Damaged Helmet</option>
-                                <option value="/media/models/avatars/Avocado.glb">Avocado</option>
-                                <option value="/media/models/avatars/Duck.glb">Duck</option>
-                                <option value="/media/models/avatars/suzanne.glb">Suzanne</option>
+                                <option value="/static/models/avatars/robobit.glb">Robot</option>
+                                <option value="/static/models/avatars/DamagedHelmet.glb">Damaged Helmet</option>
+                                <option value="/static/models/avatars/Avocado.glb">Avocado</option>
+                                <option value="/static/models/avatars/Duck.glb">Duck</option>
+                                <option value="/static/models/avatars/suzanne.glb">Suzanne</option>
                             </select>
                             <label for="presenceSelect">Select Head Model</label>
                         </div>
@@ -76,7 +76,7 @@
                         <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
                             Play Test Sound <i class="fas fa-volume-off" id="playTestAudioOutIcon"></i>
                         </button>
-                        <audio id="testAudioOut" src="media/step.ogg"></audio>
+                        <audio id="testAudioOut" src="/static/media/step.ogg"></audio>
                         <div class="form-floating mb-3">
                             <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
                             </select>
@@ -86,7 +86,6 @@
                             <select aria-label="Presence" class="form-select mb-3" id="presenceSelect">
                                 <option value="Standard">Standard</option>
                                 <option value="Portal">Portal</option>
-                                <option value="Panoramic">Panoramic</option>
                             </select>
                             <label for="presenceSelect">Select Presence Type</label>
                         </div>
@@ -111,7 +110,7 @@
                            href="https://test.8x8.vc"
                            target="_blank">Test Browser</a>
                         <a class="float-end btn btn-link btn-sm btn-outline-primary mb-3" data-mdb-ripple-color="dark"
-                           href="https://arena.conix.io/content/overview" target="_blank">Having
+                           href="https://docs.arenaxr.org/content/overview" target="_blank">Having
                             Issues?</a>
                     </div>
                 </div>
@@ -148,11 +147,13 @@
 </div>
 <a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
          stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
-         ar-hit-test="enabled:true;src:media/images/reticle.png;type:map">
+         ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005"
+         gltf-model="dracoDecoderPath:/static/vendor/draco-1.5.4/"
+         inspector="url: static/vendor/aframe-inspector.min.js">
     <a-assets>
         <!-- Vive controller 3d model -->
-        <a-asset-item id="viveControl-obj" src="media/models/hands/vr_controller_vive.obj"></a-asset-item>
-        <a-asset-item id="viveControl-mtl" src="media/models/hands/vr_controller_vive.mtl"></a-asset-item>
+        <a-asset-item id="viveControl-obj" src="static/models/hands/vr_controller_vive.obj"></a-asset-item>
+        <a-asset-item id="viveControl-mtl" src="static/models/hands/vr_controller_vive.mtl"></a-asset-item>
     </a-assets>
 
     <a-entity id="sceneRoot">
@@ -171,9 +172,9 @@
                     <a-entity cursor="rayOrigin: mouse" id="mouse-cursor"
                               raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
                 </a-camera>
+                <a-entity arena-hand="hand:Left" blink-controls="cameraRig: #cameraRig; collisionEntities:[nav-mesh]" visible=false id="leftHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
+                <a-entity arena-hand="hand:Right" visible=false id="rightHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
             </a-entity>
-            <a-entity arena-hand="hand:Left" blink-controls="cameraRig: #cameraRig; collisionEntities:[nav-mesh]" visible=false id="leftHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-            <a-entity arena-hand="hand:Right" visible=false id="rightHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
         </a-entity>
     </a-entity>
 </a-scene>

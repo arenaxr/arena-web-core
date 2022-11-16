@@ -37,19 +37,22 @@
                                 "radiusTubular": {
                                     "type": "number",
                                     "title": "radius tubular",
-                                    "default": 0.2
+                                    "default": 0.4
                                 },
                                 "segmentsRadial": {
                                     "type": "number",
                                     "title": "segments radial",
-                                    "default": 36
+                                    "default": 8
                                 },
                                 "segmentsTubular": {
                                     "type": "number",
                                     "title": "segments tubular",
-                                    "default": 32
+                                    "default": 100
                                 }
                             }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"

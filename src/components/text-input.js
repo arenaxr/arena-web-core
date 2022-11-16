@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
  * @property {string} [on=mousedown] - A case-sensitive string representing the [event type]{@link https://developer.mozilla.org/en-US/docs/Web/Events} to listen for, e.g. 'mousedown', 'mouseup'
  * @property {string} [title=Text Input] - The prompt title
  * @property {string} [label=Input text below (max is 140 characters)] - Text prompt label
- * @property {string} [placeholder=Type here] - Text input place hoText
+ * @property {string} [placeholder=Type here] - Text input place holder
  */
 AFRAME.registerComponent('textinput', {
     schema: {

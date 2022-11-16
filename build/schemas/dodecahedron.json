@@ -19,12 +19,20 @@
                                         "dodecahedron"
                                     ]
                                 },
+                                "detail": {
+                                    "type": "number",
+                                    "title": "detail",
+                                    "default": 0
+                                },
                                 "radius": {
                                     "type": "number",
                                     "title": "radius",
                                     "default": 1
                                 }
                             }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"

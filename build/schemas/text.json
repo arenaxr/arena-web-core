@@ -19,8 +19,17 @@
                                         "text"
                                     ]
                                 },
+                                "align": {
+                                    "default": "left",
+                                    "enum": [
+                                        "left",
+                                        "center",
+                                        "right"
+                                    ]
+                                },
                                 "alphaTest": {
-                                    "default": 0.5
+                                    "default": 0.5,
+                                    "type": "number"
                                 },
                                 "anchor": {
                                     "default": "center",
@@ -39,6 +48,11 @@
                                         "bottom"
                                     ]
                                 },
+                                "color": {
+                                    "default": "#000000",
+                                    "format": "color",
+                                    "type": "string"
+                                  },
                                 "font": {
                                     "type": "string",
                                     "default": "roboto",
@@ -97,6 +111,7 @@
                                     ]
                                 },
                                 "tabSize": {
+                                    "type": "number",
                                     "default": 4
                                 },
                                 "text": {
@@ -135,10 +150,6 @@
                                     "type": "number",
                                     "default": 0
                                 },
-                                "yOffset": {
-                                    "type": "number",
-                                    "default": 0
-                                },
                                 "zOffset": {
                                     "type": "number",
                                     "default": 0.001
@@ -146,10 +157,7 @@
                             }
                         },
                         {
-                            "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         }
                     ],
                     "title": "Text Data",

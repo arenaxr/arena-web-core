@@ -27,24 +27,56 @@
                                             "description": "The geometry primitive.",
                                             "enum": [
                                                 "box",
-                                                "sphere",
+                                                "capsule",
                                                 "circle",
                                                 "cone",
                                                 "cylinder",
                                                 "dodecahedron",
                                                 "icosahedron",
-                                                "tetrahedron",
                                                 "octahedron",
                                                 "plane",
+                                                "prism",
                                                 "ring",
+                                                "roundedbox",
+                                                "sphere",
+                                                "tetrahedron",
                                                 "torus",
                                                 "torusKnot",
                                                 "triangle"
                                             ]
                                         }
                                     }
+                                },
+                                "panel": {
+                                    "title": "UI Panel",
+                                    "description": "The rounded UI panel primitive.",
+                                    "default":{
+                                        "depth":0.05,
+                                        "height":1,
+                                        "width":1
+                                    },
+                                    "properties": {
+                                        "depth": {
+                                            "type": "number",
+                                            "title": "depth",
+                                            "default": 0.05
+                                        },
+                                        "height": {
+                                            "type": "number",
+                                            "title": "height",
+                                            "default": 1
+                                        },
+                                        "width": {
+                                            "type": "number",
+                                            "title": "width",
+                                            "default": 1
+                                        }
+                                    }
                                 }
                             }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"

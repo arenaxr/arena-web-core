@@ -102,6 +102,7 @@ AFRAME.registerComponent('arena-user', {
         hasVideo: {type: 'boolean', default: false},
         jitsiQuality: {type: 'number', default: 100.0},
         resolutionStep: {type: 'number', default: 180},
+        pano: {type: 'boolean', default: false},
     },
 
     init: function() {
@@ -281,26 +282,6 @@ AFRAME.registerComponent('arena-user', {
         this.headModel.setAttribute('visible', false);
     },
 
-    drawVideoPano() {
-        const el = this.el;
-
-        // attach video to head
-        const videoCube = document.createElement('a-videosphere');
-        videoCube.setAttribute('id', this.videoID + 'cube');
-        videoCube.setAttribute('material', 'shader', 'flat');
-        videoCube.setAttribute('material', 'side', 'back');
-        videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
-        videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-        videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
-        videoCube.setAttribute('position', '0 0 0');
-        videoCube.setAttribute('radius', '1.5');
-
-        el.appendChild(videoCube);
-        this.videoCube = videoCube;
-
-        this.headModel.setAttribute('visible', false);
-    },
-
     removeVideoCube() {
         const el = this.el;
         const data = this.data;
@@ -331,11 +312,7 @@ AFRAME.registerComponent('arena-user', {
             const jistiVideo = document.getElementById(this.videoID);
             if (jistiVideo) {
                 if (!this.videoCube) {
-                    if (data.presence === 'Panoramic') {
-                        this.drawVideoPano();
-                    } else {
-                        this.drawVideoCube();
-                    }
+                    this.drawVideoCube();
                 }
             }
         } else {
@@ -425,12 +402,12 @@ AFRAME.registerComponent('arena-user', {
     evaluateRemoteResolution(resolutionStep) {
         if (resolutionStep != this.data.resolutionStep) {
             this.data.resolutionStep = resolutionStep;
-            let panoIds = [];
-            let constraints = {};
-            const users = document.querySelectorAll('[arena-user]')
-            users.forEach(user => {
+            const panoIds = [];
+            const constraints = {};
+            const users = document.querySelectorAll('[arena-user]');
+            users.forEach((user) => {
                 const data = user.components['arena-user'].data;
-                if (data.presence === 'Panoramic') {
+                if (data.pano) {
                     panoIds.push(data.jitsiId);
                 }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
@@ -544,17 +521,17 @@ AFRAME.registerComponent('arena-user', {
         // frustum culling for WebRTC video streams;
         if (this.videoID) {
             let inFieldOfView = true;
-            if (arenaCameraComponent.isVideoFrustumCullingEnabled()) {
+            if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled()) {
                 if (this.el.contains(this.videoCube)) {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
-            if (this.data.presence === 'Panoramic') {
+            if (this.data.pano) {
                 this.evaluateRemoteResolution(1920);
             } else if (inFieldOfView == false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
-            } else if (arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
+            } else if (arenaCameraComponent && arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
                 // check if A/V cut off distance has been reached
                 if (distance > ARENA.maxAVDist) {
                     this.muteVideo();

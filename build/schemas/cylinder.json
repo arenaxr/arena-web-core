@@ -22,7 +22,7 @@
                                 "height": {
                                     "type": "number",
                                     "title": "height",
-                                    "default": 2
+                                    "default": 1
                                 },
                                 "openEnded": {
                                     "type": "boolean",
@@ -55,6 +55,9 @@
                                     "default": 0
                                 }
                             }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"
