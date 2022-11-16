@@ -93,22 +93,24 @@ export class MQTTSignaling {
 	}
 
     sendMessage(topic, type, data) {
-        const msg = {'type': type, 'source': 'client', 'id': this.id, 'ts': new Date().getTime()};
-        if (data !== undefined) {
-            msg['data'] = data;
-        }
+        const msg = {
+            'type': type,
+            'source': 'client',
+            'id': this.id,
+            'data': data,
+            'ts': new Date().getTime()
+        };
 
         this.publish(topic,
             JSON.stringify(msg)
         );
     }
-
     sendConnect() {
-        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect');
+        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect', ARENA.namespacedScene);
     }
 
     closeConnection() {
-        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'disconnect');
+        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'disconnect', ARENA.namespacedScene);
 
         this.client.disconnect();
     }
