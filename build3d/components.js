@@ -33,7 +33,7 @@ import 'aframe-environment-component'; // pretty environments
 import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 // NPM import overrides
 import '../src/components/vendor/animation-mixer.js'; // Override animation mixer
-import '../src/components/vendor/nav-system.js'; // Override nav system
+// import '../src/components/vendor/nav-system.js'; // Override nav system
 
 // import 'aframe-particle-system-component';
 // import 'aframe-spe-particles-component';
