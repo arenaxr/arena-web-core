@@ -386,46 +386,21 @@ export class Arena {
                     ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true);
                     return;
                 }
-                const arenaObjects = xhr.response;
-                for (let i = 0; i < arenaObjects.length; i++) {
-                    const obj = arenaObjects[i];
-                    if (obj.type === 'program') {
-                        // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                        const avars = {
-                            scene: ARENA.sceneName,
-                            namespace: ARENA.nameSpace,
-                            cameraid: ARENA.camName,
-                            username: ARENA.getDisplayName,
-                            mqtth: ARENA.mqttHost,
-                        };
-                        // ask runtime manager to start this program
-                        this.RuntimeManager.createModuleFromPersist(obj, avars);
-                        continue;
-                    }
-                    if (obj.object_id === this.camName) {
-                        continue; // don't load our own camera/head assembly
-                    }
-                    if (obj.attributes.parent) {
-                        deferredObjects.push(obj);
-                    } else {
-                        const msg = {
-                            object_id: obj.object_id,
-                            action: 'create',
-                            type: obj.type,
-                            data: obj.attributes,
-                        };
-                        if (position) {
-                            msg.data.position.x = msg.data.position.x + position.x;
-                            msg.data.position.y = msg.data.position.y + position.y;
-                            msg.data.position.z = msg.data.position.z + position.z;
-                        }
-                        if (rotation) {
-                            const r = new THREE.Quaternion(msg.data.rotation.x, msg.data.rotation.y,
-                                msg.data.rotation.z, msg.data.rotation.w);
-                            const q = new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w);
-                            r.multiply(q);
-                            msg.data.rotation = r;
-                        }
+                let containerObjName;
+                if (parentName && prefixName && document.getElementById(parentName)) {
+                    containerObjName = `${prefixName}_container`;
+                    // Make container to hold all scene objects
+                    const msg = {
+                        object_id: containerObjName,
+                        action: 'create',
+                        type: 'object',
+                        data: {parent: parentName},
+                    };
+                    this.Mqtt.processMessage(msg);
+                }
+                const arenaObjects = new Map(
+                    xhr.response.map((object) => [object.object_id, object]),
+                );
 
                 /**
                  * Recursively creates objects with parents, keep list of descendants to prevent circular references
