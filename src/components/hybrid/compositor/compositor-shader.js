@@ -21,6 +21,9 @@ export const CompositorShader = {
         cameraFar: {
             type: 'f', value: 10000.0,
         },
+        arMode: {
+            type: 'bool', value: false,
+        },
     },
 
     vertexShader: require('./shaders/vert.glsl'),
