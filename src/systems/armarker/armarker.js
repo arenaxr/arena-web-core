@@ -154,12 +154,12 @@ AFRAME.registerSystem('armarker', {
         }
 
         // if we are on an AR headset, use camera facing forward
-        const arHeadset = this.detectARHeadset();
-        if (arHeadset !== 'unknown') {
+        ARENA.arHeadset = this.detectARHeadset();
+        if (ARENA.arHeadset !== undefined) {
             // try to set up a camera facing forward capture (using getUserMedia)
             console.info('Setting up AR Headset camera capture.');
             try {
-                this.cameraCapture = new ARHeadsetCameraCapture(arHeadset, this, this.data.debugCameraCapture);
+                this.cameraCapture = new ARHeadsetCameraCapture(ARENA.arHeadset, this, this.data.debugCameraCapture);
             } catch (err) {
                 console.warn(`Could not create AR Headset camera capture. ${err}`);
             }
@@ -332,7 +332,7 @@ AFRAME.registerSystem('armarker', {
     detectARHeadset() {
         if (window.mlWorld) return 'ml';
         if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
-        return 'unknown';
+        return undefined;
     },
     /**
     * Register an ARMarker component with the system
