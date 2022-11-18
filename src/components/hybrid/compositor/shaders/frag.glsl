@@ -14,6 +14,9 @@ uniform bool arMode;
 uniform ivec2 diffuseSize;
 uniform ivec2 streamSize;
 
+// h264 video streams have a white color offset of 17 when frames are decoded (experimentally found)
+#define H264_OFFSET     (17.0 / 255.0)
+
 // float rgb2hue(vec3 c) {
 //     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 //     vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -83,7 +86,7 @@ void main() {
     vec4 streamColor = texture2D( tStream, coordStreamColor );
 
     float depth = readDepth( tDepth, coordDiffuseDepth );
-    float streamDepth = readDepth( tStream, coordStreamDepth );
+    float streamDepth = readDepth( tStream, coordStreamDepth ) + H264_OFFSET;
     bool ignore = false; // readMask( tStream, coordStreamDepth );
 
     vec4 color;
@@ -91,10 +94,11 @@ void main() {
         (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {
         if (!ignore) {
             // color = streamColor;
+            // color = depth * streamColor + streamDepth * diffuseColor;
 
-            if (depth >= 0.995)
+            if (depth >= 0.9999)
                 color = vec4(streamColor.rgb, 1.0);
-            else if (depth <= 0.005)
+            else if (depth <= 0.0001)
                 color = diffuseColor;
             else if (streamDepth <= depth)
                 color = vec4(streamColor.rgb, 1.0);
@@ -111,9 +115,6 @@ void main() {
 
     gl_FragColor = color;
 
-    // if (depth >= 0.5) color = streamColor;
-    // else color = diffuseColor;
-
-    // gl_FragColor.rgb = vec3(depth);
+    // gl_FragColor.rgb = vec3(streamDepth);
     // gl_FragColor.a = 1.0;
 }
