@@ -1,4 +1,4 @@
-#include <packing>
+// #include <packing>
 
 varying vec2 vUv;
 
@@ -14,8 +14,8 @@ uniform bool arMode;
 uniform ivec2 diffuseSize;
 uniform ivec2 streamSize;
 
-// h264 video streams have a white color offset of 17 when frames are decoded (experimentally found)
-#define H264_OFFSET     (17.0 / 255.0)
+// h264 video streams have a white color offset of 18 when frames are decoded (experimentally found)
+#define H264_OFFSET     (18.0 / 255.0)
 
 // float rgb2hue(vec3 c) {
 //     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -96,11 +96,10 @@ void main() {
             // color = streamColor;
             // color = depth * streamColor + streamDepth * diffuseColor;
 
-            if (depth >= 0.9999)
-                color = vec4(streamColor.rgb, 1.0);
-            else if (depth <= 0.0001)
-                color = diffuseColor;
-            else if (streamDepth <= depth)
+            if (arMode && streamDepth >= 0.975)
+                color = vec4(0.0);
+            else
+            if (streamDepth <= depth)
                 color = vec4(streamColor.rgb, 1.0);
             else
                 color = diffuseColor;
@@ -115,6 +114,6 @@ void main() {
 
     gl_FragColor = color;
 
-    // gl_FragColor.rgb = vec3(streamDepth);
+    // gl_FragColor.rgb = vec3(depth);
     // gl_FragColor.a = 1.0;
 }
