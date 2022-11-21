@@ -1,4 +1,4 @@
-// #include <packing>
+#include <packing>
 
 varying vec2 vUv;
 
@@ -15,7 +15,7 @@ uniform ivec2 diffuseSize;
 uniform ivec2 streamSize;
 
 // h264 video streams have a white color offset of 18 when frames are decoded (experimentally found)
-#define H264_OFFSET     (18.0 / 255.0)
+#define H264_BIAS     (18.0 / 255.0)
 
 // float rgb2hue(vec3 c) {
 //     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -32,11 +32,21 @@ uniform ivec2 streamSize;
 //     return mask;
 // }
 
-// float readDepth( sampler2D depthSampler, vec2 coord ) {
-//     float fragCoordZ = texture2D( depthSampler, coord ).x;
-//     float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-//     return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-// }
+float readDepthDiffuse( sampler2D depthSampler, vec2 coord ) {
+    float fragCoordZ = texture2D( depthSampler, coord ).x;
+
+    // float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
+    // return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
+
+    // https://sites.google.com/site/cgwith3js/home/depth-buffer-visualization
+    float ndcZ = 2.0 * fragCoordZ - 1.0;
+    float linearDepth = (2.0 * cameraNear * cameraFar) / (cameraFar + cameraNear - ndcZ * (cameraFar - cameraNear));
+    return (linearDepth - cameraNear) / (cameraFar - cameraNear);
+
+    // float _ZBufferParamsX = 1.0 - cameraFar / cameraNear;
+    // float _ZBufferParamsY = cameraFar / cameraNear;
+    // return 1.0 / (_ZBufferParamsX * fragCoordZ + _ZBufferParamsY);
+}
 
 float readDepth(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).x;
@@ -85,8 +95,8 @@ void main() {
     vec4 diffuseColor = texture2D( tDiffuse, coordDiffuseColor );
     vec4 streamColor = texture2D( tStream, coordStreamColor );
 
-    float depth = readDepth( tDepth, coordDiffuseDepth );
-    float streamDepth = readDepth( tStream, coordStreamDepth ) + H264_OFFSET;
+    float diffuseDepth = readDepthDiffuse( tDepth, coordDiffuseDepth );
+    float streamDepth = readDepth( tStream, coordStreamDepth ) + H264_BIAS;
     bool ignore = false; // readMask( tStream, coordStreamDepth );
 
     vec4 color;
@@ -94,12 +104,12 @@ void main() {
         (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {
         if (!ignore) {
             // color = streamColor;
-            // color = depth * streamColor + streamDepth * diffuseColor;
+            // color = diffuseDepth * streamColor + streamDepth * diffuseColor;
 
-            if (arMode && streamDepth >= 0.975)
+            if (arMode && streamDepth >= 0.98)
                 color = vec4(0.0);
             else
-            if (streamDepth <= depth)
+            if (streamDepth <= diffuseDepth)
                 color = vec4(streamColor.rgb, 1.0);
             else
                 color = diffuseColor;
@@ -114,6 +124,6 @@ void main() {
 
     gl_FragColor = color;
 
-    // gl_FragColor.rgb = vec3(depth);
+    // gl_FragColor.rgb = vec3(readDepthDiffuse( tDepth, coordDiffuseDepth ));
     // gl_FragColor.a = 1.0;
 }
