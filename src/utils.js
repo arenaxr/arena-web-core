@@ -323,7 +323,7 @@ export class ARENAUtils {
     static getDeviceType() {
         let deviceType = 'desktop';
         if (AFRAME.utils.device.isMobile()) deviceType = 'mobile';
-        else if (ARENAUtils.detectARHeadset() !== 'unknown') deviceType = 'headset';
+        else if (ARENAUtils.detectARHeadset() !== undefined) deviceType = 'headset';
         return deviceType;
     }
 

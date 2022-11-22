@@ -14,9 +14,6 @@ uniform bool arMode;
 uniform ivec2 diffuseSize;
 uniform ivec2 streamSize;
 
-// h264 video streams have a white color offset of 18 ON MAC when frames are decoded (experimentally found)
-#define H264_BIAS     (18.0 / 255.0)
-
 // float rgb2hue(vec3 c) {
 //     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
 //     vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
@@ -106,9 +103,9 @@ void main() {
             // color = streamColor;
             // color = diffuseDepth * streamColor + streamDepth * diffuseColor;
 
-            if (arMode && streamDepth >= 0.98)
-                color = vec4(0.0);
-            else
+            // if (arMode && streamDepth >= 0.9)
+            //     color = vec4(0.0);
+            // else
             if (streamDepth <= diffuseDepth)
                 color = vec4(streamColor.rgb, 1.0);
             else

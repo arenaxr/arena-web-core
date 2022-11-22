@@ -2,9 +2,11 @@ import {Pass, FullScreenQuad} from 'three/examples/jsm/postprocessing/EffectComp
 import {CompositorShader} from './compositor-shader';
 
 export class CompositorPass extends Pass {
-    constructor( videoSource, depthTarget, cameraNear, cameraFar ) {
+    constructor(scene, camera, videoSource) {
         super();
 
+        this.scene = scene;
+		this.camera = camera;
         this.videoSource = videoSource;
 
         this.uniforms = THREE.UniformsUtils.clone( CompositorShader.uniforms );
@@ -22,10 +24,9 @@ export class CompositorPass extends Pass {
         videoTexture.encoding = THREE.sRGBEncoding;
 
         this.material.uniforms.tStream.value = videoTexture;
-        this.material.uniforms.tDepth.value = depthTarget.depthTexture;
         this.material.uniforms.streamSize.value = [this.videoSource.videoWidth, this.videoSource.videoHeight];
-        this.material.uniforms.cameraNear.value = cameraNear;
-        this.material.uniforms.cameraFar.value = cameraFar;
+        this.material.uniforms.cameraNear.value = camera.near;
+        this.material.uniforms.cameraFar.value = camera.far;
 
 		this.needsSwap = false;
 
@@ -50,23 +51,14 @@ export class CompositorPass extends Pass {
         this.material.uniforms.arMode.value = false;
     }
 
-    render(renderer, writeBuffer, readBuffer
-        /*, deltaTime, maskActive */
-    ) {
+    render(renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */) {
         this.material.uniforms.tDiffuse.value = readBuffer.texture;
+        this.material.uniforms.tDepth.value = readBuffer.depthTexture;
 
-        if ( this.renderToScreen ) {
+        renderer.setRenderTarget(readBuffer);
+        renderer.render(this.scene, this.camera);
 
-            renderer.setRenderTarget( null );
-            this.fsQuad.render( renderer );
-
-        } else {
-
-            renderer.setRenderTarget( writeBuffer ); // TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
-
-            if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-            this.fsQuad.render( renderer );
-
-        }
+        renderer.setRenderTarget(null);
+        this.fsQuad.render(renderer);
     }
 }

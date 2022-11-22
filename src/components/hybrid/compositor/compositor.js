@@ -1,5 +1,4 @@
-import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
-import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
+import {EffectComposer} from './effect-composer';
 import {CompositorPass} from './compositor-pass';
 
 AFRAME.registerSystem('compositor', {
@@ -11,14 +10,10 @@ AFRAME.registerSystem('compositor', {
             return;
         }
 
-        // const renderer = sceneEl.renderer;
-
-        // renderer.setPixelRatio(window.devicePixelRatio);
-        // renderer.setSize(window.innerWidth, window.innerHeight);
-
         this.renderFunc = null;
 
         this.target = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+        this.target.texture.name = 'EffectComposer.rt1';
         this.target.texture.minFilter = THREE.NearestFilter;
         this.target.texture.magFilter = THREE.NearestFilter;
         this.target.stencilBuffer = false;
@@ -53,21 +48,16 @@ AFRAME.registerSystem('compositor', {
     },
 
     onRemoteVideoLoaded() {
-        console.log('[render-client], remote video loaded!');
+        // console.log('[render-client], remote video loaded!');
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
         const scene = sceneEl.object3D;
         const camera = sceneEl.camera;
 
-        this.composer = new EffectComposer(renderer);
-        this.pass1 = new RenderPass(scene, camera);
-        this.pass2 = new CompositorPass(this.remoteVideo, this.target, camera.near, camera.far);
-
-        this.pass2.renderToScreen = true;
-
-        this.composer.addPass(this.pass1);
-        this.composer.addPass(this.pass2);
+        this.composer = new EffectComposer(renderer, this.target);
+        this.pass = new CompositorPass(scene, camera, this.remoteVideo);
+        this.composer.addPass(this.pass);
 
         this.t = 0;
         this.dt = 0;
@@ -86,8 +76,9 @@ AFRAME.registerSystem('compositor', {
 
         // const dpr = renderer.getPixelRatio();
         // renderer.setSize(window.innerWidth, window.innerHeight);
+        this.composer.setSize(window.innerWidth, window.innerHeight);
+        this.pass.setSize(window.innerWidth, window.innerHeight);
         this.target.setSize(window.innerWidth, window.innerHeight);
-        this.pass2.setSize(window.innerWidth, window.innerHeight);
     },
 
     tick: function(t, dt) {
@@ -108,7 +99,7 @@ AFRAME.registerSystem('compositor', {
                 // render normally
                 render.apply(this, arguments);
             } else {
-                // render to target to get depth
+                // render to target (writeBuffer)
                 renderer.setRenderTarget(system.target);
                 render.apply(this, arguments);
                 renderer.setRenderTarget(null);
