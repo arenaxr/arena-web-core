@@ -1,3 +1,5 @@
+import {ARENAUtils} from '../../../utils.js';
+
 const Paho = require('paho-mqtt');
 
 const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/offer';
@@ -101,16 +103,23 @@ export class MQTTSignaling {
             'ts': new Date().getTime()
         };
 
-        this.publish(topic,
-            JSON.stringify(msg)
-        );
+        this.publish(topic, JSON.stringify(msg));
     }
+
     sendConnect() {
-        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect', ARENA.namespacedScene);
+        const connectData = {
+            'id': this.id,
+            'deviceType': ARENAUtils.getDeviceType(),
+            'sceneNamespace': ARENA.namespace,
+            'sceneName': ARENA.scene,
+            'screenWidth': window.innerWidth,
+            'screenHeight': window.innerHeight,
+        };
+        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect', connectData);
     }
 
     closeConnection() {
-        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'disconnect', ARENA.namespacedScene);
+        this.sendMessage(`${CLIENT_DISCONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'disconnect');
 
         this.client.disconnect();
     }

@@ -300,6 +300,31 @@ export class ARENAUtils {
         if (position) {
             targetObject3D.position.set(position.x, position.y, position.z);
         }
+
+   /**
+    * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
+    * Hololens reliable detection is tbd
+    *
+    * ARHeadeset camera capture uses returned value as a key to projection matrix array
+    *
+    * @return {string} "ml", "hl", "unknown".
+    * @alias module:armarker-system
+    */
+    static detectARHeadset() {
+        if (window.mlWorld) return 'ml';
+        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
+        return 'unknown';
+    }
+
+    /**
+     * Returns device type.
+     * @return {string} device type (desktop, mobile, headset)
+     */
+    static getDeviceType() {
+        let deviceType = 'desktop';
+        if (AFRAME.utils.device.isMobile()) deviceType = 'mobile';
+        else if (ARENAUtils.detectARHeadset() !== 'unknown') deviceType = 'headset';
+        return deviceType;
     }
 
    /**

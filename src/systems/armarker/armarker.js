@@ -13,14 +13,14 @@
  * @date 2020
  */
 
-import {WebXRCameraCapture} from './camera-capture/ccwebxr';
-import {WebARCameraCapture} from './camera-capture/ccwebar';
-import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset';
-import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer';
-import {ARMarkerRelocalization} from './armarker-reloc';
-import {CVWorkerMsgs} from './worker-msgs';
-import {ARENAEventEmitter} from '../../event-emitter';
-import {ARENAUtils} from '../../utils';
+import {WebXRCameraCapture} from './camera-capture/ccwebxr.js';
+import {WebARCameraCapture} from './camera-capture/ccwebar.js';
+import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset.js';
+import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer.js';
+import {ARMarkerRelocalization} from './armarker-reloc.js';
+import {CVWorkerMsgs} from './worker-msgs.js';
+import {ARENAEventEmitter} from '../../event-emitter.js';
+import {ARENAUtils} from '../../utils.js';
 
 /**
   * ARMarker System. Supports ARMarkers in a scene.
@@ -332,7 +332,6 @@ AFRAME.registerSystem('armarker', {
             });
         return true;
     },
-
     /**
     * Register an ARMarker component with the system
     * @param {object} marker - The marker component object to register.
