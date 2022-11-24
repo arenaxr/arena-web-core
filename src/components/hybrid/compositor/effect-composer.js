@@ -55,7 +55,7 @@ class EffectComposer {
 		var scope = this;
 
 		function onSessionStateChange() {
-			renderer.getBufferSize( rendererSize );
+			renderer.getSize( rendererSize );
 			scope.setPixelRatio( renderer.getPixelRatio() );
 			scope.setSize( rendererSize.x, rendererSize.y );
 		}

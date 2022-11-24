@@ -18,7 +18,7 @@ const sdpConstraints = {
 
 const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
 const preferredCodec = 'video/H264';
-const preferredSdpFmtpLine = 'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f';
+const preferredSdpFmtpPrefix = 'level-asymmetry-allowed=1;packetization-mode=1;';
 
 const dataChannelOptions = {
     ordered: true,
@@ -112,14 +112,15 @@ AFRAME.registerComponent('render-client', {
             console.log(this.pc.getTransceivers());
             const {codecs} = RTCRtpSender.getCapabilities('video');
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
-            const selectedCodecIndex = validCodecs.findIndex((c) => c.mimeType === preferredCodec &&
-                                                                    c.sdpFmtpLine === preferredSdpFmtpLine);
-            const selectedCodec = validCodecs[selectedCodecIndex];
-            validCodecs.splice(selectedCodecIndex, 1);
-            validCodecs.unshift(selectedCodec);
-            console.log('codecs', validCodecs);
-            transceiver.setCodecPreferences(validCodecs);
-            console.log('Preferred video codec', selectedCodec);
+            const preferredCodecs = validCodecs.sort(function(c1, c2) {
+                if (c1.mimeType === preferredCodec && c1.sdpFmtpLine.includes(preferredSdpFmtpPrefix)) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+            console.log('codecs', preferredCodecs);
+            transceiver.setCodecPreferences(preferredCodecs);
         }
     },
 
