@@ -1,9 +1,11 @@
 body {
     background-color: #32364d;
 }
+
 .title-logo {
     max-height: 32px;
 }
+
 #avSetup {
     z-index: 999;
     position: relative;
@@ -13,5 +15,3 @@ body {
 .max-vh-100 {
     max-height: 100vh !important;
 }
-
-

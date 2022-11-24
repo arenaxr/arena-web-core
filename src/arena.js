@@ -65,10 +65,6 @@ export class Arena {
         this.confstats = url.searchParams.get('confstats');
         this.hudstats = url.searchParams.get('hudstats');
 
-        ARENAUtils.getLocation((coords, err) => {
-            if (!err) ARENA.clientCoords = coords;
-        });
-
         // setup required scene-options defaults
         // TODO: pull these from a schema
         this.clickableOnlyEvents = true;

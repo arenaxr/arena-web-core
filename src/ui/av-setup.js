@@ -26,6 +26,10 @@ window.setupAV = (callback) => {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     const audioContext = new AudioContext();
 
+    // style video element
+    videoElement.classList.add('flipVideo');
+    videoElement.style.borderRadius = '10px';
+
     /**
      * Initialize listeners
      */

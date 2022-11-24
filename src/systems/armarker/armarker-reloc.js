@@ -307,6 +307,11 @@ export class ARMarkerRelocalization {
 
                 // do we have detected markers to publish ?
                 if (pubDetList.length > 0 && ARENA) {
+                    if (ARENA.clientCoords === undefined) {
+                        ARENAUtils.getLocation((coords, err) => {
+                            if (!err) ARENA.clientCoords = coords;
+                        });
+                    }
                     const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
                         timestamp: timestamp,
                         vio: vio,
