@@ -6,6 +6,8 @@
  *
  */
 
+import {FaceTracker, FaceTrackerSource} from './face-tracker.min.js';
+
 AFRAME.registerSystem('face-tracking', {
     schema: {
         overlayColor: {default: '#ef2d5e'},
@@ -16,8 +18,6 @@ AFRAME.registerSystem('face-tracking', {
     init: async function() {
         this.enabled = !AFRAME.utils.device.isMobile();
         if (!this.enabled) return;
-
-        const {FaceTracker, FaceTrackerSource} = await import('./face-tracker.min.js');
 
         this.width = ARENA.localVideoWidth;
         this.height = Math.ceil((window.screen.height / window.screen.width) * this.width);

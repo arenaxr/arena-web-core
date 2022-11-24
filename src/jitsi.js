@@ -9,7 +9,7 @@
 /* global AFRAME, ARENA, JitsiMeetJS */
 import $ from 'jquery';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {SideMenu} from './icons/index.js';
+import {SideMenu} from './icons/';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {
