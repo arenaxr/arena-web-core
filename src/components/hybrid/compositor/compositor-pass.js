@@ -1,4 +1,4 @@
-import {Pass, FullScreenQuad} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {Pass, FullScreenQuad} from './effect-composer';
 import {CompositorShader} from './compositor-shader';
 
 export class CompositorPass extends Pass {
@@ -6,7 +6,7 @@ export class CompositorPass extends Pass {
         super();
 
         this.scene = scene;
-		this.camera = camera;
+        this.camera = camera;
         this.videoSource = videoSource;
 
         this.uniforms = THREE.UniformsUtils.clone( CompositorShader.uniforms );
@@ -14,8 +14,8 @@ export class CompositorPass extends Pass {
             defines: Object.assign( {}, CompositorShader.defines ),
             uniforms: this.uniforms,
             vertexShader: CompositorShader.vertexShader,
-            fragmentShader: CompositorShader.fragmentShader
-        } );
+            fragmentShader: CompositorShader.fragmentShader,
+        });
 
         const videoTexture = new THREE.VideoTexture(this.videoSource);
         // LinearFilter looks better?
@@ -28,9 +28,13 @@ export class CompositorPass extends Pass {
         this.material.uniforms.cameraNear.value = camera.near;
         this.material.uniforms.cameraFar.value = camera.far;
 
-		this.needsSwap = false;
+        this.needsSwap = false;
 
         this.fsQuad = new FullScreenQuad(this.material);
+
+        this.quadScene = new THREE.Scene();
+        this.quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        this.quadScene.add(this.fsQuad._mesh);
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
@@ -44,21 +48,22 @@ export class CompositorPass extends Pass {
         const sceneEl = document.querySelector('a-scene');
         if (sceneEl.is('ar-mode')) {
             this.material.uniforms.arMode.value = true;
+        } else {
+            this.material.uniforms.vrMode.value = true;
         }
     }
 
     onExitVR() {
         this.material.uniforms.arMode.value = false;
+        this.material.uniforms.vrMode.value = false;
     }
 
-    render(renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */) {
+    render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
         this.material.uniforms.tDiffuse.value = readBuffer.texture;
         this.material.uniforms.tDepth.value = readBuffer.depthTexture;
 
         renderer.setRenderTarget(readBuffer);
         renderer.render(this.scene, this.camera);
-
         renderer.setRenderTarget(null);
-        this.fsQuad.render(renderer);
     }
 }

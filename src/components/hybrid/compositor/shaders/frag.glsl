@@ -10,6 +10,7 @@ uniform float cameraNear;
 uniform float cameraFar;
 
 uniform bool arMode;
+uniform bool vrMode;
 
 uniform ivec2 windowSize;
 uniform ivec2 streamSize;
@@ -106,6 +107,10 @@ void main() {
             // if (arMode && streamDepth >= 0.9)
             //     color = vec4(0.0);
             // else
+            if (arMode) {
+                color = vec4(streamColor.rgb, 1.0);
+            }
+            else
             if (streamDepth <= diffuseDepth)
                 color = vec4(streamColor.rgb, 1.0);
             else
@@ -119,6 +124,7 @@ void main() {
         color = diffuseColor;
     }
 
+    // color = vec4(streamColor.rgb, 1.0);
     gl_FragColor = color;
 
     // gl_FragColor.rgb = vec3(readDepthDiffuse( tDepth, coordDiffuseDepth ));

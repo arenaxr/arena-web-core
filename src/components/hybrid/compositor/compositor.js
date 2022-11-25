@@ -69,8 +69,9 @@ AFRAME.registerSystem('compositor', {
 
         const sizeVector = new THREE.Vector2();
         const size = renderer.getSize(sizeVector);
-        this.composer.setSize(2*size.width, 2*size.height);
-        this.target.setSize(2*size.width, 2*size.height);
+        const pixelRatio = renderer.getPixelRatio();
+        this.composer.setSize(pixelRatio * size.width, pixelRatio * size.height);
+        this.target.setSize(pixelRatio * size.width, pixelRatio * size.height);
 
         this.bind();
     },
@@ -95,19 +96,26 @@ AFRAME.registerSystem('compositor', {
 
         this.renderFunc = render;
 
+        let currentXREnabled = renderer.xr.enabled;
+
         renderer.render = function() {
             if (isDigest) {
                 // render normally
+                this.xr.enabled = currentXREnabled;
                 render.apply(this, arguments);
             } else {
-                // render to target (writeBuffer)
-                renderer.setRenderTarget(system.target);
-                render.apply(this, arguments);
-                renderer.setRenderTarget(null);
-
                 // render with composer
                 isDigest = true;
+
                 system.composer.render(system.dt);
+
+                currentXREnabled = this.xr.enabled;
+                if (this.xr.enabled === true) {
+                    this.xr.enabled = false;
+                }
+                render.call(this, system.pass.quadScene, system.pass.quadCamera);
+                this.xr.enabled = currentXREnabled;
+
                 isDigest = false;
             }
         };

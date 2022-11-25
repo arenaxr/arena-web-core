@@ -107,13 +107,15 @@ export class MQTTSignaling {
     }
 
     sendConnect() {
+        const width = Math.max(screen.width, screen.height);
+        const height = Math.min(screen.width, screen.height);
         const connectData = {
             'id': this.id,
             'deviceType': ARENAUtils.getDeviceType(),
             'sceneNamespace': ARENA.namespace,
             'sceneName': ARENA.scene,
-            'screenWidth': 1.25*screen.width,
-            'screenHeight': screen.height,
+            'screenWidth': 1.25*width,
+            'screenHeight': height,
         };
         this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect', connectData);
     }

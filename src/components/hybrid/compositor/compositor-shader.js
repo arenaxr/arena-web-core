@@ -24,6 +24,9 @@ export const CompositorShader = {
         arMode: {
             type: 'bool', value: false,
         },
+        vrMode: {
+            type: 'bool', value: false,
+        },
     },
 
     vertexShader: require('./shaders/vert.glsl'),
