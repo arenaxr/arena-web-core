@@ -11,7 +11,7 @@ uniform float cameraFar;
 
 uniform bool arMode;
 
-uniform ivec2 diffuseSize;
+uniform ivec2 windowSize;
 uniform ivec2 streamSize;
 
 // float rgb2hue(vec3 c) {
@@ -53,31 +53,31 @@ float readDepth(sampler2D depthSampler, vec2 coord) {
 void main() {
     ivec2 frameSize = ivec2(streamSize.x / 2, streamSize.y);
     vec2 frameSizeF = vec2(frameSize);
-    vec2 diffuseSizeF = vec2(diffuseSize);
+    vec2 windowSizeF = vec2(windowSize);
 
     // calculate new dimensions, maintaining aspect ratio
     float aspect = frameSizeF.x / frameSizeF.y;
-    int newHeight = diffuseSize.y;
+    int newHeight = windowSize.y;
     int newWidth = int(float(newHeight) * aspect);
 
     // calculate left and right padding offset
-    int totalPad = abs(diffuseSize.x - newWidth);
+    int totalPad = abs(windowSize.x - newWidth);
     float padding = float(totalPad / 2);
-    float paddingLeft = padding / diffuseSizeF.x;
+    float paddingLeft = padding / windowSizeF.x;
     float paddingRight = 1.0 - paddingLeft;
 
-    bool targetWidthGreater = diffuseSize.x > newWidth;
+    bool targetWidthGreater = windowSize.x > newWidth;
 
     vec2 coordStreamNormalized;
     if (targetWidthGreater) {
         coordStreamNormalized = vec2(
-            ( (vUv.x * diffuseSizeF.x - padding) / float(diffuseSize.x - totalPad) ) / 2.0,
+            ( (vUv.x * windowSizeF.x - padding) / float(windowSize.x - totalPad) ) / 2.0,
             vUv.y
         );
     }
     else {
         coordStreamNormalized = vec2(
-            ( (vUv.x * diffuseSizeF.x + padding) / float(newWidth) ) / 2.0,
+            ( (vUv.x * windowSizeF.x + padding) / float(newWidth) ) / 2.0,
             vUv.y
         );
     }

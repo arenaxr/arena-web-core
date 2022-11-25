@@ -67,18 +67,19 @@ AFRAME.registerSystem('compositor', {
 
         this.remoteVideo.play();
 
+        const sizeVector = new THREE.Vector2();
+        const size = renderer.getSize(sizeVector);
+        this.composer.setSize(2*size.width, 2*size.height);
+        this.target.setSize(2*size.width, 2*size.height);
+
         this.bind();
     },
 
     onWindowResize() {
-        const sceneEl = this.sceneEl;
-        const renderer = sceneEl.renderer;
+        // const sceneEl = this.sceneEl;
+        // const renderer = sceneEl.renderer;
 
-        // const dpr = renderer.getPixelRatio();
-        // renderer.setSize(window.innerWidth, window.innerHeight);
-        this.composer.setSize(window.innerWidth, window.innerHeight);
         this.pass.setSize(window.innerWidth, window.innerHeight);
-        this.target.setSize(window.innerWidth, window.innerHeight);
     },
 
     tick: function(t, dt) {

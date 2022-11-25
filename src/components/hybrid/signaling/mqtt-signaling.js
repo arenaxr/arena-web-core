@@ -112,8 +112,8 @@ export class MQTTSignaling {
             'deviceType': ARENAUtils.getDeviceType(),
             'sceneNamespace': ARENA.namespace,
             'sceneName': ARENA.scene,
-            'screenWidth': window.innerWidth,
-            'screenHeight': window.innerHeight,
+            'screenWidth': 1.25*screen.width,
+            'screenHeight': screen.height,
         };
         this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect', connectData);
     }

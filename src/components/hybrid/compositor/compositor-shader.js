@@ -9,7 +9,7 @@ export const CompositorShader = {
         tDepth: {
             type: 't', value: new THREE.Texture(),
         },
-        diffuseSize: {
+        windowSize: {
             type: 'i2', value: [0, 0],
         },
         streamSize: {

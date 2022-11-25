@@ -36,8 +36,8 @@ export class CompositorPass extends Pass {
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
     }
 
-    setSize( width, height ) {
-        this.material.uniforms.diffuseSize.value = [width, height];
+    setSize(width, height) {
+        this.material.uniforms.windowSize.value = [width, height];
     }
 
     onEnterVR() {
