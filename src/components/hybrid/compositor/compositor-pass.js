@@ -1,4 +1,4 @@
-import {Pass, FullScreenQuad} from './effect-composer';
+import {Pass} from './effect-composer';
 import {CompositorShader} from './compositor-shader';
 
 export class CompositorPass extends Pass {
@@ -25,16 +25,26 @@ export class CompositorPass extends Pass {
 
         this.material.uniforms.tStream.value = videoTexture;
         this.material.uniforms.streamSize.value = [this.videoSource.videoWidth, this.videoSource.videoHeight];
-        this.material.uniforms.cameraNear.value = camera.near;
-        this.material.uniforms.cameraFar.value = camera.far;
+        this.material.uniforms.cameraNear.value = this.camera.near;
+        this.material.uniforms.cameraFar.value = this.camera.far;
 
         this.needsSwap = false;
 
-        this.fsQuad = new FullScreenQuad(this.material);
-
-        this.quadScene = new THREE.Scene();
         this.quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-        this.quadScene.add(this.fsQuad._mesh);
+
+        this.fsQuad = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
+        this.quadScene = new THREE.Scene();
+        this.quadScene.add(this.fsQuad);
+
+        this.fsQuadL = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
+        this.fsQuadL.geometry.attributes.uv.array.set([0, 1, 0.5, 1, 0, 0, 0.5, 0]);
+        this.quadSceneL = new THREE.Scene();
+        this.quadSceneL.add(this.fsQuadL);
+
+        this.fsQuadR = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
+        this.fsQuadR.geometry.attributes.uv.array.set([0.5, 1, 1, 1, 0.5, 0, 1, 0]);
+        this.quadSceneR = new THREE.Scene();
+        this.quadSceneR.add(this.fsQuadR);
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));

@@ -10,6 +10,8 @@ AFRAME.registerSystem('compositor', {
             return;
         }
 
+        this.cameras = [];
+
         this.renderFunc = null;
 
         this.target = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
@@ -98,7 +100,22 @@ AFRAME.registerSystem('compositor', {
 
         let currentXREnabled = renderer.xr.enabled;
 
+        function setView(x, y, w, h) {
+            renderer.setViewport(x, y, w, h);
+            renderer.setScissor(x, y, w, h);
+        }
+
+        this.sceneEl.object3D.onBeforeRender = function(renderer, scene, camera) {
+            if (camera instanceof THREE.ArrayCamera) {
+                system.cameras = camera.cameras;
+            } else {
+                system.cameras.push(camera);
+            }
+        };
+
+        const sizeVector = new THREE.Vector2();
         renderer.render = function() {
+            const size = renderer.getSize(sizeVector);
             if (isDigest) {
                 // render normally
                 this.xr.enabled = currentXREnabled;
@@ -113,10 +130,24 @@ AFRAME.registerSystem('compositor', {
                 if (this.xr.enabled === true) {
                     this.xr.enabled = false;
                 }
-                render.call(this, system.pass.quadScene, system.pass.quadCamera);
+
+                if (system.cameras.length > 1) {
+                    render.call(this, system.pass.quadScene, system.pass.quadCamera);
+                    // setView(0, 0, Math.round(size.width * 0.5), size.height);
+                    // render.call(this, system.pass.quadSceneL, system.pass.quadCamera);
+                    // setView(Math.round(size.width * 0.5), 0, Math.round(size.width * 0.5), size.height);
+                    // render.call(this, system.pass.quadSceneR, system.pass.quadCamera);
+                    setView(0, 0, size.width, size.height);
+                } else {
+                    setView(0, 0, size.width, size.height);
+                    render.call(this, system.pass.quadScene, system.pass.quadCamera);
+                }
+
                 this.xr.enabled = currentXREnabled;
 
                 isDigest = false;
+
+                system.cameras = [];
             }
         };
     },

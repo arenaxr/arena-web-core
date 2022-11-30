@@ -125,6 +125,7 @@ void main() {
     }
 
     // color = vec4(streamColor.rgb, 1.0);
+    // color = vec4(diffuseColor.rgb, 1.0);
     gl_FragColor = color;
 
     // gl_FragColor.rgb = vec3(readDepthDiffuse( tDepth, coordDiffuseDepth ));
