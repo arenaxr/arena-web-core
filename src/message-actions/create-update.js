@@ -465,14 +465,13 @@ export class CreateUpdate {
                 if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
                 if (r) {
                     if (r.hasOwnProperty('w')) {
-                        myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
-                            overrideQuat.set(r.x, r.y, r.z, r.w));
+                        overrideQuat.set(r.x, r.y, r.z, r.w);
+                        overrideEuler.setFromQuaternion(overrideQuat);
+                        myCamera.components['look-controls'].yawObject.rotation.y = overrideEuler.y;
+                        myCamera.components['look-controls'].pitchObject.rotation.x = overrideEuler.x;
                     } else {
-                        myCamera.components['look-controls'].yawObject.rotation.set(
-                            THREE.MathUtils.degToRad(r.x),
-                            THREE.MathUtils.degToRad(r.y),
-                            THREE.MathUtils.degToRad(r.z),
-                        );
+                        myCamera.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(r.y);
+                        myCamera.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(r.x);
                     }
                     Logger.warning('camera override', message);
                 }
