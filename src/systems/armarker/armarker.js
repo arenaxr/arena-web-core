@@ -128,8 +128,10 @@ AFRAME.registerSystem('armarker', {
             }
         }
 
-        // init cv pipeline
-        this.initCVPipeline();
+        // init cv pipeline, if we are not using an external localizer
+        if (!ARENA.camFollow) {
+            this.initCVPipeline();
+        }
     },
     /**
     * Setup cv pipeline (camera capture and cv worker)
