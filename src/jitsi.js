@@ -902,7 +902,7 @@ export class ARENAJitsi {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         // The endpoint ids of the participants that are prioritized up to a higher resolution.
-        videoConstraints.onStageEndpoints = panoIds;
+        videoConstraints.onStageSources = panoIds;
         videoConstraints.constraints = constraints;
         this.conference.setReceiverConstraints(videoConstraints);
     }

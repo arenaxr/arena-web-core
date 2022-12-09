@@ -407,16 +407,17 @@ AFRAME.registerComponent('arena-user', {
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
                 const data = user.components['arena-user'].data;
+                const jitsiSourceName = `${data.jitsiId}-v0`;
                 if (data.pano) {
-                    panoIds.push(data.jitsiId);
+                    panoIds.push(jitsiSourceName);
                 }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
-                    constraints[data.jitsiId] = {
+                    constraints[jitsiSourceName] = {
                         'maxHeight': 180,
                         'maxFrameRate': data.resolutionStep,
                     }; // start dropping FPS, not res
                 } else {
-                    constraints[data.jitsiId] = {
+                    constraints[jitsiSourceName] = {
                         'maxHeight': data.resolutionStep,
                     }; // use distance based res for 0 and 180+
                 }
