@@ -11,7 +11,8 @@ const ACTIONS = {
 const RENDER_ORDER = 1;
 
 const overrideMatrix = new THREE.Matrix4();
-const overrideMatrixInverse = new THREE.Matrix4();
+const camMatrixInverse = new THREE.Matrix4();
+const rigMatrix = new THREE.Matrix4();
 const overrideQuat = new THREE.Quaternion();
 const overrideEuler = new THREE.Euler();
 
@@ -458,9 +459,10 @@ export class CreateUpdate {
                         ));
                     }
                 }
-                overrideMatrixInverse.copy(myCamera.object3D.matrix).invert().multiply(overrideMatrix);
-                rig.object3D.position.setFromMatrixPosition(overrideMatrixInverse);
-                spinner.object3D.rotation.setFromRotationMatrix(overrideMatrixInverse);
+                camMatrixInverse.copy(myCamera.object3D.matrix).invert(); // camera matrix inverse
+                rigMatrix.multiplyMatrices(overrideMatrix, camMatrixInverse); // rig matrix = override * camera inverse
+                rig.object3D.position.setFromMatrixPosition(rigMatrix);
+                spinner.object3D.rotation.setFromRotationMatrix(rigMatrix);
             } else { // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
                 if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
                 if (r) {
