@@ -22,7 +22,7 @@ export class ARENAWebARUtils {
         // }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window)) {
+        if (!('ontouchstart' in window) && !ARENA.camFollow ) {
             return;
         }
 
@@ -34,12 +34,16 @@ export class ARENAWebARUtils {
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
+        if (ARENA.camFollow) {
+            document.getElementById('my-camera').removeAttribute('look-controls');
+        }
+
         if (this.isWebARViewer) {
             return;
         }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window)) {
+        if (!('ontouchstart' in window) && !ARENA.camFollow) {
             return;
         }
 
