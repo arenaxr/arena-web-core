@@ -65,9 +65,6 @@ export class Arena {
         this.confstats = url.searchParams.get('confstats');
         this.hudstats = url.searchParams.get('hudstats');
         this.camFollow = url.searchParams.get('camFollow');
-        if (this.camFollow) {
-            document.getElementById('my-camera').removeAttribute('look-controls');
-        }
 
         // setup required scene-options defaults
         // TODO: pull these from a schema
