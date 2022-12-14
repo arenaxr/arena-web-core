@@ -441,7 +441,7 @@ export class CreateUpdate {
             }
             const p = message.data.position;
             const r = message.data.rotation;
-            if (AFRAME.scenes[0].xrSession) { // Apply transform to rig based off xrSession camera pose
+            if (AFRAME.scenes[0]?.xrSession) { // Apply transform to rig based off xrSession camera pose
                 overrideMatrix.identity();
                 const rig = document.getElementById('cameraRig');
                 const spinner = document.getElementById('cameraSpinner');
