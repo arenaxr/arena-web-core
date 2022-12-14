@@ -467,7 +467,8 @@ export class CreateUpdate {
                 if (ARENA.camFollow) {
                     const target = document.getElementById(ARENA.camFollow).object3D;
                     if (target) {
-                        myCamera.object3D.matrix.copy(target.matrix);
+                        myCamera.object3D.position.copy(target.position);
+                        myCamera.object3D.rotation.copy(target.rotation);
                     }
                 } else {
                     if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
