@@ -6,6 +6,7 @@
  * @date 2020
  */
 import './ar-session.js';
+import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
 
 const HIDDEN_CLASS = 'a-hidden';
 
@@ -28,6 +29,15 @@ export class ARENAWebARUtils {
 
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-webar-session', '');
+
+        if (ARENA.camFollow) {
+            try {
+                this.cameraCapture = new WebARCameraCapture();
+                this.cameraCapture.initCamera();
+            } catch (err) {
+                console.error(`No valid CV camera capture found. ${err}`);
+            }
+        }
     }
 
     /**
