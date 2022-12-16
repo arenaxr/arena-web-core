@@ -19,9 +19,10 @@ AFRAME.registerSystem('compositor', {
         this.target.texture.minFilter = THREE.NearestFilter;
         this.target.texture.magFilter = THREE.NearestFilter;
         this.target.stencilBuffer = false;
+        this.target.format = THREE.RGBAFormat;
         this.target.depthTexture = new THREE.DepthTexture();
-        this.target.depthTexture.format = THREE.DepthFormat;
-        this.target.depthTexture.type = THREE.UnsignedShortType;
+        // this.target.depthTexture.format = THREE.RGBAFormat;
+        this.target.depthTexture.type = THREE.FloatType;
 
         window.addEventListener('hybrid-onremotetrack', this.onRemoteTrack.bind(this));
     },
