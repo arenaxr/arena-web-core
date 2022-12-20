@@ -8,6 +8,12 @@
  * @date 2020
  */
 
+// path to controler models
+const handControllerPath = {
+    Left: 'static/models/hands/valve_index_left.gltf',
+    Right: 'static/models/hands/valve_index_right.gltf',
+};
+
 /**
  * Generates a hand event
  * @param {Object} evt event
@@ -46,26 +52,28 @@ function eventAction(evt, eventName, myThis) {
  * @module arena-hand
  * @property {boolean} enabled - Controller enabled.
  * @property {string} hand - Controller hand.
- * @property {string} color - Controller color.
  *
  */
 AFRAME.registerComponent('arena-hand', {
     dependencies: ['laser-controls'],
     schema: {
         enabled: {type: 'boolean', default: false},
-        hand: {type: 'string', default: 'Left'},
-        color: {type: 'string', default: '#' + Math.floor(Math.random() * 16777215).toString(16)},
+        hand: {type: 'string', default: 'left'},
     },
 
     init: function() {
         const el = this.el;
+        const data = this.data;
 
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
 
         this.lastPose = '';
 
-        this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+        // capitalize hand type
+        data.hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
+
+        this.name = data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
 
         el.addEventListener('controllerconnected', () => {
             el.setAttribute('visible', true);
@@ -74,13 +82,13 @@ AFRAME.registerComponent('arena-hand', {
                 action: 'create',
                 type: 'object',
                 data: {
-                    object_type: `hand${this.data.hand}`,
+                    object_type: `hand${data.hand}`,
                     position: {x: 0, y: -1, z: 0},
-                    color: this.data.color,
+                    url: this.getControllerURL(),
                     dep: ARENA.camName,
                 },
             });
-            this.data.enabled = true;
+            data.enabled = true;
         });
 
         el.addEventListener('controllerdisconnected', () => {
@@ -128,6 +136,16 @@ AFRAME.registerComponent('arena-hand', {
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },
 
+    getControllerURL() {
+        const el = this.el;
+        const data = this.data;
+
+        let url = el.getAttribute('gltf-model');
+        if (!url) url = handControllerPath[data.hand];
+
+        return url;
+    },
+
     publishPose() {
         const data = this.data;
         if (!data.enabled || !data.hand) return;
@@ -150,7 +168,7 @@ AFRAME.registerComponent('arena-hand', {
                     z: parseFloat(this.rotation._z.toFixed(3)),
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
-                color: data.color,
+                url: this.getControllerURL(),
                 dep: ARENA.camName,
             },
         };

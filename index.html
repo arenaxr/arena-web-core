@@ -164,16 +164,26 @@
         <a-entity id="cameraRig" position="0 0 0">
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
                 <!-- this camera can 'fly': z axis follows pitch of head direction -->
-                <a-camera far="10000" gesture-detector id="my-camera"
-                          look-controls="reverseMouseDrag: true"
-                          look-controls-arrow
-                          mouse-cursor near="0.1" network-latency press-and-move="constrainToNavMesh:true"
+                <a-camera id="my-camera"
+                          near="0.1" far="10000"
+                          gesture-detector network-latency
+                          look-controls="reverseMouseDrag: true" look-controls-arrow
+                          mouse-cursor press-and-move="constrainToNavMesh:true"
                           wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true">
                     <a-entity cursor="rayOrigin: mouse" id="mouse-cursor"
                               raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
                 </a-camera>
-                <a-entity arena-hand="hand:Left" blink-controls="cameraRig: #cameraRig; collisionEntities:[nav-mesh]" visible=false id="leftHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-                <a-entity arena-hand="hand:Right" visible=false id="rightHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
+                <a-entity id="leftHand"
+                          visible=false
+                          arena-hand="hand:left"
+                          laser-controls="hand:left"
+                          blink-controls="cameraRig: #cameraRig; collisionEntities:[nav-mesh]"
+                          raycaster="objects: [click-listener]"></a-entity>
+                <a-entity id="rightHand"
+                          visible=false
+                          arena-hand="hand:right"
+                          laser-controls="hand:right"
+                          raycaster="objects: [click-listener]"></a-entity>
             </a-entity>
         </a-entity>
     </a-entity>

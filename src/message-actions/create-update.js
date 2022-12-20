@@ -7,12 +7,6 @@ const ACTIONS = {
     UPDATE: 'update',
 };
 
-// path to controler models
-const handControllerPath = {
-    handLeft: 'static/models/hands/valve_index_left.gltf',
-    handRight: 'static/models/hands/valve_index_right.gltf',
-};
-
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
 
@@ -266,7 +260,7 @@ export class CreateUpdate {
             break;
         case 'handLeft':
         case 'handRight':
-            entityEl.setAttribute('gltf-model', handControllerPath[type]);
+            entityEl.setAttribute('gltf-model', data.url);
             delete data[type];
             break;
         case 'cube':
