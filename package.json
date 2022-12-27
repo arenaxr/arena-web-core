@@ -13,7 +13,7 @@
   },
   "overrides": {
     "aframe": "git+https://github.com/arenaxr/aframe.git#db9222b",
-    "super-three": "0.144.0",
+    "super-three": "0.147.0",
     "three-pathfinding": "^1.1.0"
   },
   "dependencies": {
