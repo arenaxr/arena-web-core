@@ -21,6 +21,9 @@ export const CompositorShader = {
         cameraFar: {
             type: 'f', value: 10000.0,
         },
+        hasDualCameras: {
+            type: 'bool', value: false,
+        },
         arMode: {
             type: 'bool', value: false,
         },

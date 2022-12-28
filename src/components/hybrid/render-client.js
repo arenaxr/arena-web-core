@@ -146,11 +146,11 @@ AFRAME.registerComponent('render-client', {
         this.dataChannel = this.pc.createDataChannel('client-input', dataChannelOptions);
 
         this.dataChannel.onopen = () => {
-            console.log('Data Channel is Open');
+            console.log('[render-client] data channel opened');
         };
 
         this.dataChannel.onclose = () => {
-            console.log('Data Channel is Closed');
+            console.log('[render-client] data channel closed');
         };
 
         this.stats = new WebRTCStatsLogger(this.pc, this.signaler);

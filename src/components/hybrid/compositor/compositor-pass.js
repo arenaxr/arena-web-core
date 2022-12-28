@@ -32,11 +32,21 @@ export class CompositorPass extends Pass {
 
         this.quadCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
+        /* this.quadCameraL = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        this.quadCameraL.layers.enable( 1 );
+        this.quadCameraR = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+        this.quadCameraR.layers.enable( 2 );
+
+        this.quadCameraVR = new THREE.ArrayCamera();
+        this.quadCameraVR.layers.enable( 1 );
+        this.quadCameraVR.layers.enable( 2 );
+        this.quadCameraVR.cameras = [ this.quadCameraL, this.quadCameraR ]; */
+
         this.fsQuad = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
         this.quadScene = new THREE.Scene();
         this.quadScene.add(this.fsQuad);
 
-        this.fsQuadL = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
+        /* this.fsQuadL = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
         this.fsQuadL.geometry.attributes.uv.array.set([0, 1, 0.5, 1, 0, 0, 0.5, 0]);
         this.quadSceneL = new THREE.Scene();
         this.quadSceneL.add(this.fsQuadL);
@@ -44,7 +54,7 @@ export class CompositorPass extends Pass {
         this.fsQuadR = new THREE.Mesh(new THREE.PlaneGeometry( 2, 2 ), this.material);
         this.fsQuadR.geometry.attributes.uv.array.set([0.5, 1, 1, 1, 0.5, 0, 1, 0]);
         this.quadSceneR = new THREE.Scene();
-        this.quadSceneR.add(this.fsQuadR);
+        this.quadSceneR.add(this.fsQuadR); */
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
@@ -52,6 +62,10 @@ export class CompositorPass extends Pass {
 
     setSize(width, height) {
         this.material.uniforms.windowSize.value = [width, height];
+    }
+
+    setHasDualCameras(hasDualCameras) {
+        this.material.uniforms.hasDualCameras.value = hasDualCameras;
     }
 
     onEnterVR() {

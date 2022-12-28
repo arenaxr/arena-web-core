@@ -95,15 +95,15 @@ void main() {
     vec2 coordDestNormalized = vUv;
 
     /* if (hasDualCameras) {
-        if (vUv.x < 0.5) {
-            coordDestNormalized.x = coordDestNormalized.x * 2.0;
-            coordStreamNormalized.x = coordStreamNormalized.x * 2.0;
-        }
-        else {
-            coordDestNormalized.x = coordDestNormalized.x * 2.0 - 0.5;
-            coordStreamNormalized.x = coordStreamNormalized.x * 2.0 - 0.5;
-        }
-    } */
+     *     if (vUv.x < 0.5) {
+     *         coordDestNormalized.x = coordDestNormalized.x * 2.0;
+     *         coordStreamNormalized.x = coordStreamNormalized.x * 2.0;
+     *     }
+     *     else {
+     *         coordDestNormalized.x = coordDestNormalized.x * 2.0 - 0.5;
+     *         coordStreamNormalized.x = coordStreamNormalized.x * 2.0 - 0.5;
+     *     }
+     * } */
 
     vec2 coordDiffuseColor = coordDestNormalized;
     vec2 coordDiffuseDepth = coordDestNormalized;
