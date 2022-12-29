@@ -440,7 +440,7 @@ export class Arena {
                 const xhrLen = xhr.response.length;
                 while (arenaObjects.size > 0) {
                     if (++i > xhrLen) {
-                        console.err('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
+                        console.error('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
                         break;
                     }
                     const iter = arenaObjects.entries();
