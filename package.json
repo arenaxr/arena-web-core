@@ -14,13 +14,13 @@
   "overrides": {
     "aframe": "git+https://github.com/arenaxr/aframe.git#db9222b",
     "super-three": "0.147.0",
-    "three-pathfinding": "^1.1.0"
+    "three-pathfinding": "git+https://github.com/donmccurdy/three-pathfinding.git#9231ca2"
   },
   "dependencies": {
     "aframe": "git+https://github.com/arenaxr/aframe.git#db9222b",
     "aframe-blink-controls": "^0.4.3",
     "aframe-environment-component": "^1.3.1",
-    "aframe-extras": "git+https://github.com/n5ro/aframe-extras#ebae62f",
+    "aframe-extras": "git+https://github.com/n5ro/aframe-extras#c5c5dcf",
     "aframe-particle-system-component": "^1.1.3",
     "aframe-spe-particles-component": "^1.0.4",
     "aframe-thickline-component": "^0.0.3",
@@ -34,7 +34,7 @@
     "mqtt-pattern": "^1.2.0",
     "paho-mqtt": "^1.1.0",
     "sweetalert2": "^10.16.6",
-    "three-pathfinding": "^1.1.0",
+    "three-pathfinding": "git+https://github.com/donmccurdy/three-pathfinding.git#9231ca2",
     "uuidjs": "^4.2.11",
     "webxr-polyfill": "^2.0.3"
   },
