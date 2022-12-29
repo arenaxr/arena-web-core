@@ -9,9 +9,9 @@ export class CompositorPass extends Pass {
         this.camera = camera;
         this.videoSource = videoSource;
 
-        this.uniforms = THREE.UniformsUtils.clone( CompositorShader.uniforms );
-        this.material = new THREE.ShaderMaterial( {
-            defines: Object.assign( {}, CompositorShader.defines ),
+        this.uniforms = THREE.UniformsUtils.clone(CompositorShader.uniforms);
+        this.material = new THREE.ShaderMaterial({
+            defines: Object.assign({}, CompositorShader.defines),
             uniforms: this.uniforms,
             vertexShader: CompositorShader.vertexShader,
             fragmentShader: CompositorShader.fragmentShader,

@@ -192,6 +192,6 @@ AFRAME.registerSystem('compositor', {
     unbind: function() {
         const renderer = this.sceneEl.renderer;
         renderer.render = this.originalRenderFunc;
-        this.sceneEl.object3D.onBeforeRender = null;
+        this.sceneEl.object3D.onBeforeRender = () => {};
     },
 });
