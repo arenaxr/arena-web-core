@@ -6,7 +6,7 @@ on:
       - master
 
   workflow_dispatch:
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -28,6 +28,6 @@ jobs:
              git reset --hard HEAD
              git pull
              npm ci
-             npm run build
+             npm run build-ci
              cd ..
              ./update-custom-website.sh
