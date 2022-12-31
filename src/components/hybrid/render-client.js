@@ -42,13 +42,16 @@ AFRAME.registerComponent('render-client', {
         getStatsInterval: {type: 'number', default: 2000},
     },
 
-    init: function() {
+    init: async function() {
+        const el = this.el;
+
         console.log('[render-client] Starting...');
-        this.healthCounter = 0;
         this.connected = false;
+
+        this.compositor = el.sceneEl.systems['compositor'];
         // this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
 
-        this.id = ARENAUtils.uuidv4();
+        this.id = ARENA.idTag; // ARENAUtils.uuidv4();
 
         this.signaler = new MQTTSignaling(this.id);
         this.signaler.onOffer = this.gotOffer.bind(this);
@@ -60,6 +63,7 @@ AFRAME.registerComponent('render-client', {
             this.signaler.closeConnection();
         };
 
+        await this.signaler.openConnection();
         this.connectToCloud();
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
@@ -70,7 +74,7 @@ AFRAME.registerComponent('render-client', {
 
     async connectToCloud() {
         const data = this.data;
-        await this.signaler.openConnection();
+        this.signaler.connectionId = null;
 
         while (!this.connected) {
             console.log('[render-client] connecting...');
@@ -86,12 +90,7 @@ AFRAME.registerComponent('render-client', {
         stream.addTrack(e.track);
 
         // send remote track to compositor
-        const remoteTrack = new CustomEvent('hybrid-onremotetrack', {
-            detail: {
-                stream: stream,
-            },
-        });
-        window.dispatchEvent(remoteTrack);
+        this.compositor.handleRemoteTrack(stream);
     },
 
     onRemoteRender(event) {
@@ -135,12 +134,16 @@ AFRAME.registerComponent('render-client', {
     gotOffer(offer) {
         // console.log('got offer.');
 
+        const _this = this;
         this.pc = new RTCPeerConnection(pcConfig);
         this.pc.onicecandidate = this.onIceCandidate.bind(this);
         this.pc.ontrack = this.onRemoteTrack.bind(this);
         this.pc.oniceconnectionstatechange = () => {
-            if (this.pc) {
+            if (_this.pc) {
                 console.log('[render-client] iceConnectionState changed:', this.pc.iceConnectionState);
+                if (_this.pc.iceConnectionState === 'disconnected') {
+                    _this.handleCloudDisconnect();
+                }
             }
         };
 
@@ -152,6 +155,7 @@ AFRAME.registerComponent('render-client', {
 
         this.dataChannel.onclose = () => {
             console.log('[render-client] data channel closed');
+            _this.handleCloudDisconnect();
         };
 
         this.stats = new WebRTCStatsLogger(this.pc, this.signaler);
@@ -193,13 +197,10 @@ AFRAME.registerComponent('render-client', {
 
                 const env = document.getElementById('env');
                 env.setAttribute('visible', false);
-                // document.getElementById('sceneRoot');
-                // sceneRoot.removeChild(env);
-
                 const groundPlane = document.getElementById('groundPlane');
                 groundPlane.setAttribute('visible', false);
 
-                this.listenForHealthCheck();
+                // this.listenForHealthCheck();
                 this.checkStats();
             })
             .catch((err) =>{
@@ -240,44 +241,43 @@ AFRAME.registerComponent('render-client', {
     },
 
     gotHealthCheck() {
-        this.healthCounter = 0;
+        this.signaler.sendHealthCheck();
     },
-    /*
-    gotAckknowldge()
-    {
-        this.recivedAckknowledge = True;
-    }
-    */
 
-    async listenForHealthCheck() {
-        const data = this.data;
-
-        while (this.connected && this.healthCounter < 2) {
-            this.healthCounter++;
-            await this.sleep(data.checkHealthInterval);
-        }
+    handleCloudDisconnect() {
+        if (!this.connected) return;
 
         const env = document.getElementById('env');
         env.setAttribute('visible', true);
         const groundPlane = document.getElementById('groundPlane');
         groundPlane.setAttribute('visible', true);
 
-        document.querySelector('a-scene').systems['compositor'].unbind();
+        this.compositor.unbind();
 
         // this.dataChannel.close();
         // this.pc.close();
+        this.connected = false;
         this.dataChannel = null;
         this.pc = null;
-        this.connected = false;
-        this.signaler.connectionId = null;
         this.healthCounter = 0;
         this.connectToCloud();
     },
 
+/*     async listenForHealthCheck() {
+ *         const data = this.data;
+ *
+ *         while (this.connected && this.healthCounter < 2) {
+ *             this.healthCounter++;
+ *             await this.sleep(data.checkHealthInterval);
+ *         }
+ *
+ *         this.handleCloudDisconnect();
+ *     }, */
+
     async checkStats() {
         const data = this.data;
         while (this.connected) {
-            this.stats.getStats();
+            // this.stats.getStats();
             await this.sleep(data.getStatsInterval);
         }
     },

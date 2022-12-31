@@ -22,11 +22,9 @@ AFRAME.registerSystem('compositor', {
         this.renderTarget.depthTexture = new THREE.DepthTexture();
         this.renderTarget.depthTexture.format = THREE.DepthFormat;
         this.renderTarget.depthTexture.type = THREE.UnsignedShortType;
-
-        window.addEventListener('hybrid-onremotetrack', this.onRemoteTrack.bind(this));
     },
 
-    onRemoteTrack(e) {
+    handleRemoteTrack(stream) {
         this.remoteVideo = document.getElementById('remoteVideo');
         if (!this.remoteVideo) {
             this.remoteVideo = document.createElement('video');
@@ -46,7 +44,8 @@ AFRAME.registerSystem('compositor', {
                 document.body.appendChild(this.remoteVideo);
             }
         }
-        this.remoteVideo.srcObject = e.detail.stream;
+        this.remoteVideo.style.display = 'block';
+        this.remoteVideo.srcObject = stream;
     },
 
     onRemoteVideoLoaded() {
@@ -193,5 +192,6 @@ AFRAME.registerSystem('compositor', {
         const renderer = this.sceneEl.renderer;
         renderer.render = this.originalRenderFunc;
         this.sceneEl.object3D.onBeforeRender = () => {};
+        this.remoteVideo.style.display = 'none';
     },
 });

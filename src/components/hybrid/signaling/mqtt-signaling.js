@@ -12,6 +12,7 @@ const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/discon
 const CLIENT_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/offer';
 const CLIENT_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/answer';
 const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/candidate';
+const CLIENT_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/client/health';
 const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/stats_browser';
 
 const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/remote';
@@ -92,7 +93,7 @@ export class MQTTSignaling {
         } else if (signal.type == 'health') {
             if (this.onHealthCheck) this.onHealthCheck(signal.data)
         }
-	}
+    }
 
     sendMessage(topic, type, data) {
         const msg = {
@@ -140,6 +141,10 @@ export class MQTTSignaling {
 
     sendRemoteStatusUpdate(update) {
         this.sendMessage(`${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'remote-update', update);
+    }
+
+    sendHealthCheck() {
+        this.sendMessage(`${CLIENT_HEALTH_CHECK}/${ARENA.namespacedScene}/${this.id}`, 'health', '');
     }
 
     sendStats(stats) {
