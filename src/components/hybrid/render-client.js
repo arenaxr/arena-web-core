@@ -18,9 +18,9 @@ const sdpConstraints = {
 };
 
 const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
-const preferredCodec = 'video/H264';
-const preferredSdpFmtpPrefix = 'level-asymmetry-allowed=1;packetization-mode=1;';
-const preferredSdpFmtpLine = 'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f';
+let preferredCodec = 'video/H264';
+let preferredSdpFmtpPrefix = 'level-asymmetry-allowed=1;packetization-mode=1;';
+let preferredSdpFmtpLine = 'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f';
 
 const dataChannelOptions = {
     ordered: true,
@@ -67,7 +67,6 @@ AFRAME.registerComponent('render-client', {
         this.connectToCloud();
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
-        console.log('[render-client]', this.id);
 
         // window.addEventListener('keyup', this.tick1.bind(this));
     },
@@ -106,8 +105,15 @@ AFRAME.registerComponent('render-client', {
         }
     },
 
-    setupTransceivers() {
+    setupTransceivers(isMac) {
         if (supportsSetCodecPreferences) {
+            // Mac's H264 encoder produced colors that are a bit off, so prefer VP9
+            if (isMac) {
+                preferredCodec = 'video/VP9';
+                preferredSdpFmtpPrefix = '';
+                preferredSdpFmtpLine = 'profile-id=0';
+            }
+
             const transceiver = this.pc.getTransceivers()[0];
             // const transceiver = this.pc.addTransceiver('video', {direction: 'recvonly'});
             const {codecs} = RTCRtpSender.getCapabilities('video');
@@ -162,7 +168,7 @@ AFRAME.registerComponent('render-client', {
 
         this.pc.setRemoteDescription(new RTCSessionDescription(offer))
             .then(() => {
-                this.createAnswer();
+                this.createAnswer(offer.isMac);
             })
             .catch((err) => {
                 console.error(err);
@@ -208,17 +214,10 @@ AFRAME.registerComponent('render-client', {
             });
     },
 
-    gotIceCandidate(candidate) {
-        // console.log('got ice.');
-        if (this.connected) {
-            this.pc.addIceCandidate(new RTCIceCandidate(candidate));
-        }
-    },
-
-    createAnswer() {
+    createAnswer(isMac) {
         // console.log('creating answer.');
 
-        this.setupTransceivers();
+        this.setupTransceivers(isMac);
 
         this.pc.createAnswer()
             .then((description) => {
@@ -238,6 +237,13 @@ AFRAME.registerComponent('render-client', {
             .catch((err) =>{
                 console.error(err);
             });
+    },
+
+    gotIceCandidate(candidate) {
+        // console.log('got ice.');
+        if (this.connected) {
+            this.pc.addIceCandidate(new RTCIceCandidate(candidate));
+        }
     },
 
     gotHealthCheck() {
@@ -277,7 +283,7 @@ AFRAME.registerComponent('render-client', {
     async checkStats() {
         const data = this.data;
         while (this.connected) {
-            // this.stats.getStats();
+            this.stats.getStats();
             await this.sleep(data.getStatsInterval);
         }
     },

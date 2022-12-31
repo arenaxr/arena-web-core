@@ -1,5 +1,5 @@
 export class WebRTCStatsLogger {
-    constructor(peerConnection, signaler, logToConsole=false) {
+    constructor(peerConnection, signaler, logToConsole=true) {
         this.peerConnection = peerConnection;
         this.signaler = signaler;
         this.logToConsole = logToConsole;
