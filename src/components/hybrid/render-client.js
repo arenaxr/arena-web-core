@@ -38,8 +38,9 @@ AFRAME.registerComponent('render-client', {
         position: {type: 'vec3', default: new THREE.Vector3()},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
         sendConnectRetryInterval: {type: 'number', default: 5000},
-        checkHealthInterval: {type: 'number', default: 1000},
         getStatsInterval: {type: 'number', default: 2000},
+        ipd: {type: 'number', default: 0.064},
+        hasDualCameras: {type: 'boolean', default: false},
     },
 
     init: async function() {
@@ -58,7 +59,6 @@ AFRAME.registerComponent('render-client', {
         this.signaler.onHealthCheck = this.gotHealthCheck.bind(this);
         this.signaler.onAnswer = this.gotAnswer.bind(this);
         this.signaler.onIceCandidate = this.gotIceCandidate.bind(this);
-        // this.recivedAckknowledge = False;
         window.onbeforeunload = () => {
             this.signaler.closeConnection();
         };
@@ -67,6 +67,9 @@ AFRAME.registerComponent('render-client', {
         this.connectToCloud();
 
         window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
+
+        window.addEventListener('enter-vr', this.onEnterVR.bind(this));
+        window.addEventListener('exit-vr', this.onExitVR.bind(this));
 
         // window.addEventListener('keyup', this.tick1.bind(this));
     },
@@ -153,14 +156,21 @@ AFRAME.registerComponent('render-client', {
             }
         };
 
-        this.dataChannel = this.pc.createDataChannel('client-input', dataChannelOptions);
-
-        this.dataChannel.onopen = () => {
-            console.log('[render-client] data channel opened');
+        this.inputDataChannel = this.pc.createDataChannel('client-input', dataChannelOptions);
+        this.inputDataChannel.onopen = () => {
+            console.log('[render-client] input data channel opened');
+        };
+        this.inputDataChannel.onclose = () => {
+            console.log('[render-client] input data channel closed');
+            _this.handleCloudDisconnect();
         };
 
-        this.dataChannel.onclose = () => {
-            console.log('[render-client] data channel closed');
+        this.statusDataChannel = this.pc.createDataChannel('client-status', dataChannelOptions);
+        this.statusDataChannel.onopen = () => {
+            console.log('[render-client] status data channel opened');
+        };
+        this.statusDataChannel.onclose = () => {
+            console.log('[render-client] status data channel closed');
             _this.handleCloudDisconnect();
         };
 
@@ -209,7 +219,7 @@ AFRAME.registerComponent('render-client', {
                 // this.listenForHealthCheck();
                 this.checkStats();
             })
-            .catch((err) =>{
+            .catch((err) => {
                 console.error(err);
             });
     },
@@ -234,7 +244,7 @@ AFRAME.registerComponent('render-client', {
                     receiver.playoutDelayHint = 0;
                 }
             })
-            .catch((err) =>{
+            .catch((err) => {
                 console.error(err);
             });
     },
@@ -247,7 +257,7 @@ AFRAME.registerComponent('render-client', {
     },
 
     gotHealthCheck() {
-        this.signaler.sendHealthCheck();
+        this.signaler.sendHealthCheckAck();
     },
 
     handleCloudDisconnect() {
@@ -260,25 +270,13 @@ AFRAME.registerComponent('render-client', {
 
         this.compositor.unbind();
 
-        // this.dataChannel.close();
-        // this.pc.close();
         this.connected = false;
-        this.dataChannel = null;
+        this.inputDataChannel = null;
+        this.statusDataChannel = null;
         this.pc = null;
         this.healthCounter = 0;
         this.connectToCloud();
     },
-
-/*     async listenForHealthCheck() {
- *         const data = this.data;
- *
- *         while (this.connected && this.healthCounter < 2) {
- *             this.healthCounter++;
- *             await this.sleep(data.checkHealthInterval);
- *         }
- *
- *         this.handleCloudDisconnect();
- *     }, */
 
     async checkStats() {
         const data = this.data;
@@ -292,11 +290,51 @@ AFRAME.registerComponent('render-client', {
         return new Promise((resolve) => setTimeout(resolve, ms));
     },
 
+    sendStatus() {
+        const el = this.el;
+        const data = this.data;
+
+        const isVRMode = el.sceneEl.is('vr-mode');
+        const isARMode = el.sceneEl.is('ar-mode');
+        const hasDualCameras = (isVRMode && !isARMode) || (data.hasDualCameras);
+        this.statusDataChannel.send(JSON.stringify({
+            isVRMode: true,
+            isARMode: isARMode,
+            hasDualCameras: hasDualCameras,
+            ipd: data.ipd,
+            ts: new Date().getTime(),
+        }));
+    },
+
+    onEnterVR() {
+        this.sendStatus();
+    },
+
+    onExitVR() {
+        this.statusDataChannel.send(JSON.stringify({
+            isVRMode: false,
+            ts: new Date().getTime(),
+        }));
+    },
+
+    update: function(oldData) {
+        const el = this.el;
+        const data = this.data;
+
+        if (oldData.ipd !== undefined && data.ipd != oldData.ipd) {
+            this.sendStatus();
+        }
+
+        if (oldData.hasDualCameras !== undefined && data.hasDualCameras != oldData.hasDualCameras) {
+            this.sendStatus();
+        }
+    },
+
     tick: function(time, timeDelta) {
         const data = this.data;
         const el = this.el;
 
-        if (this.connected && this.dataChannel.readyState == 'open') {
+        if (this.connected && this.inputDataChannel.readyState == 'open') {
             const prevPos = new THREE.Vector3();
             const prevRot = new THREE.Vector3();
             data.position.copy(prevPos);
@@ -308,7 +346,7 @@ AFRAME.registerComponent('render-client', {
             if (prevPos.distanceTo(data.position) <= Number.EPSILON &&
                 prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
 
-            this.dataChannel.send(JSON.stringify({
+            this.inputDataChannel.send(JSON.stringify({
                 x: data.position.x.toFixed(3),
                 y: data.position.y.toFixed(3),
                 z: data.position.z.toFixed(3),

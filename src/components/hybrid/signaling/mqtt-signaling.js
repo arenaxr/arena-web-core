@@ -143,7 +143,7 @@ export class MQTTSignaling {
         this.sendMessage(`${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'remote-update', update);
     }
 
-    sendHealthCheck() {
+    sendHealthCheckAck() {
         this.sendMessage(`${CLIENT_HEALTH_CHECK}/${ARENA.namespacedScene}/${this.id}`, 'health', '');
     }
 

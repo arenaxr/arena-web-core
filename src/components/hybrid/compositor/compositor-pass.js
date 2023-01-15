@@ -68,6 +68,10 @@ export class CompositorPass extends Pass {
         this.material.uniforms.hasDualCameras.value = hasDualCameras;
     }
 
+    getHasDualCameras() {
+        return this.material.uniforms.hasDualCameras.value;
+    }
+
     onEnterVR() {
         const sceneEl = document.querySelector('a-scene');
         if (sceneEl.is('ar-mode')) {

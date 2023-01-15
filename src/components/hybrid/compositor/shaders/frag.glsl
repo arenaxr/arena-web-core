@@ -78,6 +78,7 @@ void main() {
 
     bool targetWidthGreater = windowSize.x > newWidth;
 
+    vec2 coordDestNormalized = vUv;
     vec2 coordStreamNormalized;
     if (targetWidthGreater) {
         coordStreamNormalized = vec2(
@@ -92,29 +93,42 @@ void main() {
         );
     }
 
-    vec2 coordDestNormalized = vUv;
-
-    /* if (hasDualCameras) {
-        if (vUv.x < 0.5) {
-            coordDestNormalized.x = coordDestNormalized.x * 2.0;
-            coordStreamNormalized.x = coordStreamNormalized.x * 2.0;
-        }
-        else {
-            coordDestNormalized.x = coordDestNormalized.x * 2.0 - 0.5;
-            coordStreamNormalized.x = coordStreamNormalized.x * 2.0 - 0.5;
-        }
-    } */
-
     vec2 coordDiffuseColor = coordDestNormalized;
     vec2 coordDiffuseDepth = coordDestNormalized;
-    vec2 coordStreamColor = coordStreamNormalized;
-    vec2 coordStreamDepth = vec2(coordStreamNormalized.x + 0.5, coordStreamNormalized.y);
 
     vec4 diffuseColor = texture2D( tDiffuse, coordDiffuseColor );
-    vec4 streamColor = texture2D( tStream, coordStreamColor );
-
     float diffuseDepth = readDepthDiffuse( tDepth, coordDiffuseDepth );
-    float streamDepth = readDepth( tStream, coordStreamDepth );
+
+    vec4 streamColor;
+    float streamDepth;
+
+    if (hasDualCameras) {
+        vec2 coordStreamColor = coordStreamNormalized;
+        vec2 coordStreamDepth = coordStreamNormalized;
+        // left eye
+        if (vUv.x < 0.5) {
+            float xcoord = vUv.x * 2.0;
+            coordStreamColor.x = xcoord / 4.0;
+            coordStreamDepth.x = xcoord / 4.0 + 0.25;
+        }
+        // right eye
+        else {
+            float xcoord = (vUv.x - 0.5) * 2.0;
+            coordStreamColor.x = xcoord / 4.0 + 0.5;
+            coordStreamDepth.x = xcoord / 4.0 + 0.75;
+        }
+
+        streamColor = texture2D( tStream, coordStreamColor );
+        streamDepth = readDepth( tStream, coordStreamDepth );
+    }
+    else {
+        vec2 coordStreamColor = coordStreamNormalized;
+        vec2 coordStreamDepth = vec2(coordStreamNormalized.x + 0.5, coordStreamNormalized.y);
+
+        streamColor = texture2D( tStream, coordStreamColor );
+        streamDepth = readDepth( tStream, coordStreamDepth );
+    }
+
     bool ignore = false; // readMask( tStream, coordStreamDepth );
 
     vec4 color;
@@ -124,11 +138,11 @@ void main() {
             // color = streamColor;
             // color = diffuseDepth * streamColor + streamDepth * diffuseColor;
 
-            // if (arMode && streamDepth >= 0.9)
-            //     color = vec4(0.0);
-            // else
             if (arMode) {
                 color = vec4(streamColor.rgb, 1.0);
+                // if (streamDepth >= 0.99) {
+                    // color = vec4(0.0);
+                // }
             }
             else
             if (streamDepth <= diffuseDepth)

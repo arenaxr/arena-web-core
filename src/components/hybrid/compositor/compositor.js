@@ -14,7 +14,7 @@ AFRAME.registerSystem('compositor', {
 
         this.originalRenderFunc = null;
 
-        this.renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight);
+        this.renderTarget = new THREE.WebGLRenderTarget(1, 1);
         this.renderTarget.texture.name = 'EffectComposer.rt1';
         this.renderTarget.texture.minFilter = THREE.NearestFilter;
         this.renderTarget.texture.magFilter = THREE.NearestFilter;
@@ -68,20 +68,18 @@ AFRAME.registerSystem('compositor', {
 
         this.remoteVideo.play();
 
+        this.bind();
+    },
+
+    onWindowResize() {
+        const sceneEl = this.sceneEl;
+        const renderer = sceneEl.renderer;
+
         const sizeVector = new THREE.Vector2();
         const size = renderer.getSize(sizeVector);
         const pixelRatio = renderer.getPixelRatio();
         this.composer.setSize(pixelRatio * size.width, pixelRatio * size.height);
         this.renderTarget.setSize(pixelRatio * size.width, pixelRatio * size.height);
-
-        this.bind();
-    },
-
-    onWindowResize() {
-        // const sceneEl = this.sceneEl;
-        // const renderer = sceneEl.renderer;
-
-        this.pass.setSize(window.innerWidth, window.innerHeight);
     },
 
     tick: function(t, dt) {
@@ -92,17 +90,13 @@ AFRAME.registerSystem('compositor', {
     bind: function() {
         const renderer = this.sceneEl.renderer;
         const render = renderer.render;
+        const mainCamera = document.getElementById('my-camera');
         const system = this;
         let isDigest = false;
 
         this.originalRenderFunc = render;
 
         let currentXREnabled = renderer.xr.enabled;
-
-        function setView(x, y, w, h) {
-            renderer.setViewport(x, y, w, h);
-            renderer.setScissor(x, y, w, h);
-        }
 
         this.sceneEl.object3D.onBeforeRender = function(renderer, scene, camera) {
             if (camera instanceof THREE.ArrayCamera) {
@@ -111,6 +105,10 @@ AFRAME.registerSystem('compositor', {
                 system.cameras.push(camera);
             }
         }
+
+        let hasDualCameras = false;
+
+        const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
 
         const cameraLPos = new THREE.Vector3();
         const cameraRPos = new THREE.Vector3();
@@ -136,49 +134,42 @@ AFRAME.registerSystem('compositor', {
 
                 if (system.cameras.length > 1) {
                     // we have two cameras here (vr mode or headset ar mode)
-                    system.pass.setHasDualCameras(true);
+                    hasDualCameras = !isWebXRViewer; // webarviewer seens to have 2 cameras, but uses one...
 
                     const cameraL = system.cameras[0];
                     const cameraR = system.cameras[1];
                     cameraLPos.setFromMatrixPosition( cameraL.matrixWorld );
                     cameraRPos.setFromMatrixPosition( cameraR.matrixWorld );
                     const ipd = cameraLPos.distanceTo( cameraRPos );
-                    // console.log(ipd);
 
-                    /* const myCameraVR = system.pass.quadCameraVR;
-                    const myCameraL = system.cameras[0];
-                    const myCameraR = system.cameras[1];
-                    myCameraL.copy( cameraL );
-                    myCameraR.copy( cameraR );
-                    myCameraL.viewport = cameraL.viewport;
-                    myCameraR.viewport = cameraR.viewport; */
-                    // render.call(this, system.pass.quadScene, myCameraVR);
+                    AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client.ipd', ipd);
 
-                    currentXREnabled = this.xr.enabled;
-                    if (this.xr.enabled === true) {
-                        this.xr.enabled = false;
-                    }
-                    render.call(this, system.pass.quadScene, system.pass.quadCamera);
-                    this.xr.enabled = currentXREnabled;
+                    /* const projL = cameraL.projectionMatrix.elements;
+                    const projR = cameraR.projectionMatrix.elements;
 
-                    // render.apply(this, arguments);
-                    // setView(0, 0, Math.round(size.width * 0.5), size.height);
-                    // render.call(this, system.pass.quadSceneL, system.pass.quadCamera);
-                    // setView(Math.round(size.width * 0.5), 0, Math.round(size.width * 0.5), size.height);
-                    // render.call(this, system.pass.quadSceneR, system.pass.quadCamera);
-                    // setView(0, 0, size.width, size.height);
+                    const near = projL[ 14 ] / ( projL[ 10 ] - 1 );
+                    const far = projL[ 14 ] / ( projL[ 10 ] + 1 );
+                    const topFov = ( projL[ 9 ] + 1 ) / projL[ 5 ];
+                    const bottomFov = ( projL[ 9 ] - 1 ) / projL[ 5 ];
+
+                    const leftFov = ( projL[ 8 ] - 1 ) / projL[ 0 ];
+                    const rightFov = ( projR[ 8 ] + 1 ) / projR[ 0 ];
+                    const left = near * leftFov;
+                    const right = near * rightFov; */
                 } else {
                     // we just have a single camera here
-                    system.pass.setHasDualCameras(false);
-
-                    // setView(0, 0, size.width, size.height);
-                    currentXREnabled = this.xr.enabled;
-                    if (this.xr.enabled === true) {
-                        this.xr.enabled = false;
-                    }
-                    render.call(this, system.pass.quadScene, system.pass.quadCamera);
-                    this.xr.enabled = currentXREnabled;
+                    hasDualCameras = false;
                 }
+
+                currentXREnabled = this.xr.enabled;
+                if (this.xr.enabled === true) {
+                    this.xr.enabled = false;
+                }
+                render.call(this, system.pass.quadScene, system.pass.quadCamera);
+                this.xr.enabled = currentXREnabled;
+
+                system.pass.setHasDualCameras(hasDualCameras);
+                AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client.hasDualCameras', hasDualCameras);
 
                 // call this part of the conditional again on the next call to render()
                 isDigest = false;
