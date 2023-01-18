@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.15.0](https://github.com/arenaxr/arena-web-core/compare/v1.14.1...v1.15.0) (2023-01-18)
+
+
+### Features
+
+* **debug:** added hudstats boolean url param to display ([294c0ce](https://github.com/arenaxr/arena-web-core/commit/294c0ce6e3fe963ce89bb7dbd1429ea7dd4a966c))
+* use arenaxr forked aframe-inspector ([a3fb870](https://github.com/arenaxr/arena-web-core/commit/a3fb8702c9b384a44a87bcb39fe2b74d17e438ca))
+
+
+### Bug Fixes
+
+* **avatar:** move hand delete to disconnection event ([d09db8f](https://github.com/arenaxr/arena-web-core/commit/d09db8fcf9fd060bbefa05f08050cf1c802115f3))
+* **avatar:** send hand delete message when arena-hand component is removed ([#512](https://github.com/arenaxr/arena-web-core/issues/512)) ([fa4b273](https://github.com/arenaxr/arena-web-core/commit/fa4b273020dcf0462ff62b64e9c0183cbe23b223))
+* **build:** add missing attribution component to schema ([986d900](https://github.com/arenaxr/arena-web-core/commit/986d9001321d076a062ea479d32f03bc045bc791))
+* **build:** add ttl component to message schema ([733225f](https://github.com/arenaxr/arena-web-core/commit/733225f8cfad61e4d3a6b6a72f94cc7d80105585))
+* draco decoder path ([5751b3c](https://github.com/arenaxr/arena-web-core/commit/5751b3c599fbd821f662c5868b842f6218a8b497))
+* **jitsi:** accommodate new jitsi source name signaling ([59030a5](https://github.com/arenaxr/arena-web-core/commit/59030a580b7e57b572c93ed4621ee54156d1327e))
+* **jitsi:** added backward-compatibile for old jitsi onStageEndpoints ([ca8e1c9](https://github.com/arenaxr/arena-web-core/commit/ca8e1c91d627d928291fca8504fc61226807d3ed))
+* typo console error ([d2633a9](https://github.com/arenaxr/arena-web-core/commit/d2633a902cbf6b83d2a15daeddf54e97ab8b457c))
+
 ## [1.14.1](https://github.com/arenaxr/arena-web-core/compare/v1.14.0...v1.14.1) (2022-10-11)
 
 
