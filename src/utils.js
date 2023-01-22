@@ -13,56 +13,17 @@ import MQTTPattern from 'mqtt-pattern';
  */
 export class ARENAUtils {
     /**
-     * Gets URL parameters as dictionary
-     * @return {Object} dictionary of URL parameters
-     */
-    static getUrlVars() {
-        const vars = {};
-        window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m, key, value) {
-            vars[key] = value;
-        });
-        return vars;
-    };
-
-    /**
      * Extracts URL params
      * @param {string} parameter URL parameter
      * @param {string} defaultValue default value in case parameter doesn't exist
      * @return {string} value associated with parameter
      */
     static getUrlParam(parameter, defaultValue) {
-        let urlParameter = defaultValue;
-        if (window.location.href.indexOf(parameter) > -1) {
-            urlParameter = this.getUrlVars()[parameter];
-        }
-        if (urlParameter === '') {
-            urlParameter = defaultValue;
-        }
+        const urlParameter = AFRAME.utils.getUrlParameter(parameter)
         // console.info(`ARENA (URL) config param ${parameter}: ${urlParameter}`);
+        if (urlParameter === '')
+            return defaultValue;
         return urlParameter;
-    };
-
-    /**
-     * Extracts URL params
-     * @param {string} parameter URL parameter
-     * @param {string} defaultValue default value in case parameter doesn't exist
-     * @return {[]} list of indices
-     */
-    static getUrlParams(parameter, defaultValue) {
-        const indexes = [];
-        parameter = parameter + '=';
-        if (window.location.href.indexOf(parameter) > -1) {
-            const vars = getUrlVars();
-            for (let i = 0; i < vars.length; i++) {
-                if (vars[parameter] == parameter) {
-                    indexes.push(vars[i]);
-                }
-            }
-        } else {
-            indexes.push(defaultValue);
-        }
-
-        return indexes;
     };
 
     /**
