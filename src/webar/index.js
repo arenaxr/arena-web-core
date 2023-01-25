@@ -45,7 +45,10 @@ export class ARENAWebARUtils {
      */
     static handleARButtonForNonWebXRMobile() {
         if (ARENA.camFollow) {
-            document.getElementById('my-camera').removeAttribute('look-controls');
+            const camera = document.getElementById('my-camera');
+            camera.setAttribute('look-controls', 'touchEnabled', false);
+            camera.setAttribute('look-controls', 'mouseEnabled', false);
+            camera.setAttribute('wasd-controls', 'enabled', false);
         }
 
         if (this.isWebARViewer) {

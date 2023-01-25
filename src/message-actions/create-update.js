@@ -452,26 +452,18 @@ export class CreateUpdate {
                     spinner.object3D.rotation.setFromRotationMatrix(rigMatrix);
                 }
             } else { // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
-                if (ARENA.camFollow) {
-                    const target = document.getElementById(ARENA.camFollow);
-                    if (target) {
-                        myCamera.object3D.position.copy(target.object3D.position);
-                        myCamera.object3D.rotation.copy(target.object3D.rotation);
-                    }
-                } else {
-                    if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
-                    if (r) {
-                        if (r.hasOwnProperty('w')) {
-                            overrideQuat.set(r.x, r.y, r.z, r.w);
-                            overrideEuler.setFromQuaternion(overrideQuat);
-                            myCamera.components['look-controls'].yawObject.rotation.y = overrideEuler.y;
-                            myCamera.components['look-controls'].pitchObject.rotation.x = overrideEuler.x;
-                        } else {
-                            myCamera.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(
-                                r.y);
-                            myCamera.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(
-                                r.x);
-                        }
+                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
+                if (r) {
+                    if (r.hasOwnProperty('w')) {
+                        overrideQuat.set(r.x, r.y, r.z, r.w);
+                        overrideEuler.setFromQuaternion(overrideQuat);
+                        myCamera.components['look-controls'].yawObject.rotation.y = overrideEuler.y;
+                        myCamera.components['look-controls'].pitchObject.rotation.x = overrideEuler.x;
+                    } else {
+                        myCamera.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(
+                            r.y);
+                        myCamera.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(
+                            r.x);
                     }
                 }
             }
