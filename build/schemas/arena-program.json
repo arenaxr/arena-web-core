@@ -121,6 +121,11 @@
                       }
                    }
                 },
+                "parent":{
+                    "type":"string",
+                    "description":"Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); can be left blank.",
+                    "minLength":5
+                 },    
                 "required":[
                    "path",
                    "type",
@@ -133,7 +138,8 @@
                       "mode":"rw",
                       "params":{
                          "topic":"realm/s/${scene}"
-                      }
+                      },
+                      "parent": "pytest"
                    }
                 ]
              }
