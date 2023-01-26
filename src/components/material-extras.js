@@ -21,6 +21,7 @@ import {ARENAUtils} from '../utils.js';
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
+ * @property {boolean} [wireframe=false] - If `true`, will render the material without textures, wireframe only.
 */
 AFRAME.registerComponent('material-extras', {
     dependencies: ['material'],

@@ -415,6 +415,11 @@
                 "type":"boolean",
                 "default":false,
                 "description":"If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder."
+             },
+             "wireframe":{
+                "type":"boolean",
+                "default":false,
+                "description":"Render the material without textures, wireframe only."
              }
           },
           "title":"Material extras",

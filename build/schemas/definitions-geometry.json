@@ -9,7 +9,7 @@
       "jitsi-video": {
         "description": "Apply a jitsi video source to the geometry",
         "title": "Jitsi Video",
-        "type":"object",
+        "type": "object",
         "properties": {
             "jitsiId": {
                 "description": "JitsiId of the video source; If defined will override displayName",
@@ -153,6 +153,11 @@
             "default": true,
             "description": "Whether material is visible. Raycasters will ignore invisible materials.",
             "type": "boolean"
+          },
+          "wireframe": {
+             "type": "boolean",
+             "default":false,
+             "description": "Render the material without textures, wireframe only."
           }
         },
         "title": "Material",
@@ -160,47 +165,50 @@
       },
       "material-extras": {
         "default": {
-          "encoding": "sRGBEncoding",
-          "needsUpdate": false
+          "encoding": "sRGBEncoding"
         },
         "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>https://threejs.org/docs/#api/en/materials/Material</a>",
         "properties": {
+          "overrideSrc": {
+              "type": "string",
+              "default": "",
+              "description": "Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+          },
           "encoding": {
-            "default": "sRGBEncoding",
-            "enum": [
-              "LinearEncoding",
-              "sRGBEncoding",
-              "GammaEncoding",
-              "RGBEEncoding",
-              "LogLuvEncoding",
-              "RGBM7Encoding",
-              "RGBM16Encoding",
-              "RGBDEncoding",
-              "BasicDepthPacking",
-              "RGBADepthPacking"
-            ],
-            "type": "string"
-          },
-          "needsUpdate": {
-            "default": false,
-            "type": "boolean"
-          },
-          "render-order": {
-            "default": "1",
-            "description": "This value allows the default rendering order of scene graph objects to be overridden.",
-            "type": "number"
+              "default": "sRGBEncoding",
+              "enum": [
+                "LinearEncoding",
+                "sRGBEncoding",
+                "GammaEncoding",
+                "RGBEEncoding",
+                "LogLuvEncoding",
+                "RGBM7Encoding",
+                "RGBM16Encoding",
+                "RGBDEncoding",
+                "BasicDepthPacking",
+                "RGBADepthPacking"
+              ],
+              "type": "string"
           },
           "colorWrite": {
-            "description": "Whether to render the material’s color",
-            "type": "boolean"
+              "type": "boolean",
+              "default":true,
+              "description": "Whether to render the material's color."
+          },
+          "renderOrder": {
+              "type": "number",
+              "default":1,
+              "description": "Allows the default rendering order of scene graph objects to be overridden."
           },
           "transparentOccluder": {
-            "description": "If true, will set colorWrite=false and renderOrder=0 to make the material a transparent occluder.",
-            "type": "boolean"
+              "type": "boolean",
+              "default":false,
+              "description": "If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder."
           },
-          "defaultRenderOrder": {
-            "description": "Used as the renderOrder when transparentOccluder is reset to false.",
-            "type": "number"
+          "wireframe": {
+              "type": "boolean",
+              "default":false,
+              "description": "If `true`, will render the material without textures, wireframe only."
           }
         },
         "title": "Material extras",
