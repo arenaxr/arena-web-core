@@ -33,7 +33,7 @@ AFRAME.registerComponent('material-extras', {
         colorWrite: {default: true},
         renderOrder: {default: 1},
         transparentOccluder: {default: false},
-        wireframe: {default: true},
+        wireframe: {default: false},
     },
     retryTimeouts: [1000, 2000, 5000, 10000],
     init: function() {
