@@ -32,6 +32,7 @@ AFRAME.registerComponent('material-extras', {
         colorWrite: {default: true},
         renderOrder: {default: 1},
         transparentOccluder: {default: false},
+        wireframe: {default: true},
     },
     retryTimeouts: [1000, 2000, 5000, 10000],
     init: function() {
@@ -53,6 +54,7 @@ AFRAME.registerComponent('material-extras', {
             if (oldData.renderOrder !== this.data.renderOrder ||
                 oldData.colorWrite !== this.data.colorWrite ||
                 oldData.encoding !== this.data.encoding ||
+                oldData.wireframe !== this.data.wireframe ||
                 oldData.overrideSrc !== this.data.overrideSrc) {
                 this.doUpdate = true;
             }
@@ -103,6 +105,7 @@ AFRAME.registerComponent('material-extras', {
                 mesh.material.map.encoding = THREE[this.data.encoding];
             }
             mesh.material.needsUpdate = true;
+            mesh.material.wireframe = this.data.wireframe;
         }
     },
     updateMaterial: function() {
