@@ -81,6 +81,7 @@ export class CreateUpdate {
 
             // experiment setting all to wireframe
             entityEl.setAttribute('material', 'wireframe', 'true');
+            entityEl.setAttribute('material', 'color', '#777777');
             entityEl.setAttribute('material-extras', 'wireframe', 'true');
 
 
