@@ -71,6 +71,8 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     init: function() {
+        const sceneEl = this.el;
+
         // init this.ATLASMarkers with list of markers within range
         this.getARMArkersFromATLAS(true);
 
@@ -84,17 +86,17 @@ AFRAME.registerSystem('armarker', {
             });
         }
 
-        // request camera acess features
-        const sceneEl = this.el;
-        const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
-        if (this.isWebARViewer) {
-            // eslint-disable-next-line max-len
-            optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in WebXRViewer/WebARViewer
-        } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
-        sceneEl.systems.webxr.sceneEl.setAttribute(
-            'optionalFeatures',
-            optionalFeatures,
-        );
+        // request camera access features
+        if (!ARENA.camFollow) {
+            const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
+            if (this.isWebARViewer) {
+                optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in XRBrowser
+            } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
+            sceneEl.systems.webxr.sceneEl.setAttribute(
+                'optionalFeatures',
+                optionalFeatures,
+            );
+        }
 
         // listner for xr session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
@@ -128,8 +130,10 @@ AFRAME.registerSystem('armarker', {
             }
         }
 
-        // init cv pipeline
-        this.initCVPipeline();
+        // init cv pipeline, if we are not using an external localizer
+        if (!ARENA.camFollow) {
+            this.initCVPipeline();
+        }
     },
     /**
     * Setup cv pipeline (camera capture and cv worker)

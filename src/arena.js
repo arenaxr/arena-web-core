@@ -64,6 +64,7 @@ export class Arena {
         this.noname = url.searchParams.get('noname');
         this.confstats = url.searchParams.get('confstats');
         this.hudstats = url.searchParams.get('hudstats');
+        this.camFollow = url.searchParams.get('camFollow');
 
         // setup required scene-options defaults
         // TODO: pull these from a schema

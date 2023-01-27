@@ -10,6 +10,11 @@ const ACTIONS = {
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
 
+const camMatrixInverse = new THREE.Matrix4();
+const rigMatrix = new THREE.Matrix4();
+const overrideQuat = new THREE.Quaternion();
+const overrideEuler = new THREE.Euler();
+
 /**
  * Create/Update object handler
  */
@@ -107,7 +112,16 @@ export class CreateUpdate {
             if (message.ttl !== undefined) { // Allow falsy value of 0
                 entityEl.setAttribute('ttl', {seconds: message.ttl});
             }
-
+            if (id === ARENA.camFollow) {
+                this.handleCameraOverride(ACTIONS.UPDATE, {
+                    id: ARENA.camName,
+                    data: {
+                        object_type: 'camera',
+                        position: message.data.position,
+                        rotation: message.data.rotation,
+                    },
+                });
+            }
             return;
 
         case 'camera-override':
@@ -425,12 +439,33 @@ export class CreateUpdate {
                 return;
             }
             const p = message.data.position;
-            if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
             const r = message.data.rotation;
-            if (r) {
-                myCamera.components['look-controls'].yawObject.rotation.setFromQuaternion(
-                    new THREE.Quaternion(r.x, r.y, r.z, r.w));
-                Logger.warning('camera override', message);
+            if (AFRAME.scenes[0]?.xrSession) { // Apply transform to rig based off xrSession camera pose
+                const rig = document.getElementById('cameraRig');
+                const spinner = document.getElementById('cameraSpinner');
+                const target = document.getElementById(ARENA.camFollow);
+                if (target) {
+                    camMatrixInverse.copy(myCamera.object3D.matrix).invert();
+                    // rig matrix = target * camera inverse
+                    rigMatrix.multiplyMatrices(target.object3D.matrixWorld, camMatrixInverse);
+                    rig.object3D.position.setFromMatrixPosition(rigMatrix);
+                    spinner.object3D.rotation.setFromRotationMatrix(rigMatrix);
+                }
+            } else { // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
+                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
+                if (r) {
+                    if (r.hasOwnProperty('w')) {
+                        overrideQuat.set(r.x, r.y, r.z, r.w);
+                        overrideEuler.setFromQuaternion(overrideQuat);
+                        myCamera.components['look-controls'].yawObject.rotation.y = overrideEuler.y;
+                        myCamera.components['look-controls'].pitchObject.rotation.x = overrideEuler.x;
+                    } else {
+                        myCamera.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(
+                            r.y);
+                        myCamera.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(
+                            r.x);
+                    }
+                }
             }
         } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
