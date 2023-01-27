@@ -45,6 +45,12 @@
                    "WA"
                 ]
              },
+             "parent":{
+                "type":"string",
+                "description":"Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); usually left blank.",
+                "minLength":5,
+                "default": "pytest"
+             },
              "args":{
                 "type":"array",
                 "description":"Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
@@ -120,12 +126,7 @@
                          }
                       }
                    }
-                },
-                "parent":{
-                    "type":"string",
-                    "description":"Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); can be left blank.",
-                    "minLength":5
-                 },    
+                }, 
                 "required":[
                    "path",
                    "type",
@@ -138,8 +139,7 @@
                       "mode":"rw",
                       "params":{
                          "topic":"realm/s/${scene}"
-                      },
-                      "parent": "pytest"
+                      }
                    }
                 ]
              }
@@ -149,6 +149,7 @@
              "filename",
              "filetype",
              "instantiate",
+             "parent",
              "env"
           ]
        }
