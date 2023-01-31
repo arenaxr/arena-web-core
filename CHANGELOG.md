@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.16.0](https://github.com/arenaxr/arena-web-core/compare/v1.15.0...v1.16.0) (2023-01-31)
+
+
+### Features
+
+* add camFollow target ([d30e02e](https://github.com/arenaxr/arena-web-core/commit/d30e02e8faa8df17567090707db14afec875f3ad))
+* add parent to program schema; temporarily make 'pytest' the default ([8f03835](https://github.com/arenaxr/arena-web-core/commit/8f0383563b8b497c4601edfd15b2afff69a3f5a9))
+
+
+### Bug Fixes
+
+* add `playsinline` on all media tags for iOS ([96f90f6](https://github.com/arenaxr/arena-web-core/commit/96f90f6308ab9b3457af837867df946e0889e35e))
+* alter rig in xrSession for camera-override ([4f03855](https://github.com/arenaxr/arena-web-core/commit/4f038550675f52a3def69d2fdd5aa7b8307a605d))
+* copy pos and rot instead of matrix ([b74578f](https://github.com/arenaxr/arena-web-core/commit/b74578f1e167c431f86654b6fe98a7c88660d4ca))
+* don't req cam-access or CV when camFollow ([0b11522](https://github.com/arenaxr/arena-web-core/commit/0b11522caa27b977b217d30b040c5a792d371b2e))
+* handle uninited scene in camfollow override ([4012097](https://github.com/arenaxr/arena-web-core/commit/4012097b7441988f64c4de5812c2d2e5657d9610))
+* program schema ([62f4873](https://github.com/arenaxr/arena-web-core/commit/62f4873ea403fbf7077117f0240cd1ecaebac51b))
+* rig matrix calc for cam override ([c4d81b0](https://github.com/arenaxr/arena-web-core/commit/c4d81b0cd79aeeb6b65cd517267f354993d219b6))
+
 ## [1.15.0](https://github.com/arenaxr/arena-web-core/compare/v1.14.1...v1.15.0) (2023-01-18)
 
 
