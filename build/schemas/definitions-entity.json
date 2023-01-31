@@ -27,7 +27,7 @@
           "title":"Position"
        },
        "rotation":{
-          "description":"3D object rotation in degrees by default; Right-handed coordinate system. Switches to quaternion representation if 'w' is given",
+          "description":"3D object rotation in quaternion representation; Right-handed coordinate system. Euler degrees are deprecated in wire message format.",
           "properties":{
              "w":{
                 "default":1,
@@ -47,6 +47,7 @@
              }
           },
           "required":[
+             "w",
              "x",
              "y",
              "z"
