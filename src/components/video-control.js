@@ -56,7 +56,7 @@ AFRAME.registerComponent('video-control', {
         const videoId = this.videoNum + '_videoId';
 
         theAssets.append(
-            `<video id='${videoId}' src='${videoPath}' ${(autoplay) ? 'autoplay':''} loop='${videoLoop}'/>`,
+            `<video id='${videoId}' src='${videoPath}' ${(autoplay) ? 'autoplay':''} loop='${videoLoop}' playsinline/>`,
         );
 
         const frameId = this.videoNum + '_frameId';
