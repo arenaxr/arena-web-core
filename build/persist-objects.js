@@ -261,16 +261,16 @@ export async function populateObjectList(
         if (r) {
             // convert deprecated euler-style rotation to quaternions if needed
             if (!r.hasOwnProperty('w')) {
-                const rq = new THREE.Quaternion().setFromEuler(new THREE.Euler(
-                    r.x * Math.PI / 180.0,
-                    r.y * Math.PI / 180.0,
-                    r.z * Math.PI / 180.0,
+                const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+                    r.x * Math.PI / 180,
+                    r.y * Math.PI / 180,
+                    r.z * Math.PI / 180,
                 ));
                 sceneObjs[i].attributes.rotation = {
-                    x: rq.x,
-                    y: rq.y,
-                    z: rq.z,
-                    w: rq.w
+                    x: parseFloat(q.x.toFixed(3)),
+                    y: parseFloat(q.y.toFixed(3)),
+                    z: parseFloat(q.z.toFixed(3)),
+                    w: parseFloat(q.w.toFixed(3)),
                 }
             }
         }
