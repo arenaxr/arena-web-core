@@ -77,7 +77,7 @@ AFRAME.registerComponent('arena-hand', {
 
         el.addEventListener('controllerconnected', () => {
             el.setAttribute('visible', true);
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
+            const msg = {
                 object_id: this.name,
                 action: 'create',
                 type: 'object',
@@ -87,7 +87,11 @@ AFRAME.registerComponent('arena-hand', {
                     url: this.getControllerURL(),
                     dep: ARENA.camName,
                 },
-            });
+            };
+            if (msg.data.url.includes("magicleap")) {
+                msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
+            }
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
             data.enabled = true;
         });
 

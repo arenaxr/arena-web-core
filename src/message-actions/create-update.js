@@ -276,7 +276,6 @@ export class CreateUpdate {
         case 'handRight':
             entityEl.setAttribute('gltf-model', data.url);
             delete data[type];
-            break;
         case 'cube':
             type='box'; // arena legacy! new libraries/persist objects should use box!
         case 'box':
