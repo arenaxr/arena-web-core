@@ -146,6 +146,7 @@ window.addEventListener('onauth', async function (e) {
             } else {
                 validate.value = "valid";
             }
+            insertEulerRotationEditor(json);
         });
 
         let typeSel = document.getElementsByName("root[type]")[0];
@@ -200,6 +201,60 @@ window.addEventListener('onauth', async function (e) {
             });
         });
 
+    }
+
+    /**
+     * Seeks the Rotation block (if any) and inserts a user-friendly Euler degree editor.
+     * @param {*} json The object returned from editor.getValue().
+     */
+    var insertEulerRotationEditor = function(json) {
+        editor.querySelectorAll('[data-schemapath="root.data.rotation"]').forEach((rowRotation) => {
+            // divide rotation attribute into 2 GUI columns
+            let rowQuat = rowRotation.childNodes[3];
+            rowQuat.classList.remove('span12');
+            rowQuat.classList.add('span6');
+            // add second column of euler values
+            let fragment = document.createDocumentFragment();
+            let rowEuler = fragment.appendChild(document.createElement('div'));
+            rowEuler.setAttribute('id', 'rotation-euler');
+            rowRotation.appendChild(fragment);
+            let elQx = document.getElementsByName("root[data][rotation][x]")[0];
+            let elQy = document.getElementsByName("root[data][rotation][y]")[0];
+            let elQz = document.getElementsByName("root[data][rotation][z]")[0];
+            let elQw = document.getElementsByName("root[data][rotation][w]")[0];
+            let elEx, elEy, elEz;
+            $('#rotation-euler').load('rotation-euler.html', function() {
+                // update euler degrees on form from quaternions
+                elEx = document.getElementsByName("root[data][rotation][euler-x]")[0];
+                elEy = document.getElementsByName("root[data][rotation][euler-y]")[0];
+                elEz = document.getElementsByName("root[data][rotation][euler-z]")[0];
+                const e = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(
+                    parseFloat(elQx.value),
+                    parseFloat(elQy.value),
+                    parseFloat(elQz.value),
+                    parseFloat(elQw.value)
+                ));
+                elEx.value = parseFloat(THREE.MathUtils.radToDeg(e.x).toFixed(3));
+                elEy.value = parseFloat(THREE.MathUtils.radToDeg(e.y).toFixed(3));
+                elEz.value = parseFloat(THREE.MathUtils.radToDeg(e.z).toFixed(3));
+            });
+            rowEuler.addEventListener('change', () => {
+                // update quaternions on form from euler degree changes
+                const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+                    THREE.MathUtils.degToRad(elEx.value),
+                    THREE.MathUtils.degToRad(elEy.value),
+                    THREE.MathUtils.degToRad(elEz.value)
+                ));
+                if (json){
+                    json.data.rotation.x = parseFloat(q.x.toFixed(5));
+                    json.data.rotation.y= parseFloat(q.y.toFixed(5));
+                    json.data.rotation.z= parseFloat(q.z.toFixed(5));
+                    json.data.rotation.w = parseFloat(q.w.toFixed(5));
+                    jsoneditor.setValue(json);
+                    output.value = JSON.stringify(json, null, 2);
+                }
+            });
+        });
     }
 
     // Start the output textarea empty
