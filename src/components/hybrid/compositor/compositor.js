@@ -100,8 +100,6 @@ AFRAME.registerSystem('compositor', {
 
         this.originalRenderFunc = render;
 
-        let currentXREnabled = renderer.xr.enabled;
-
         this.sceneEl.object3D.onBeforeRender = function(renderer, scene, camera) {
             if (camera instanceof THREE.ArrayCamera) {
                 system.cameras = camera.cameras;
@@ -111,6 +109,9 @@ AFRAME.registerSystem('compositor', {
         }
 
         let hasDualCameras = false;
+
+        let currentXREnabled = renderer.xr.enabled;
+        let currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
         const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
 
@@ -125,20 +126,40 @@ AFRAME.registerSystem('compositor', {
             } else {
                 isDigest = true;
 
+<<<<<<< HEAD
                 var currentRenderTarget = this.getRenderTarget();
+=======
+                // save render state (1)
+                const currentRenderTarget = this.getRenderTarget();
+>>>>>>> finally got local rendering to look right
                 if (currentRenderTarget != null) {
                     // resize if an existing rendertarget exists (usually in webxr mode)
                     system.pass.setSize(currentRenderTarget.width, currentRenderTarget.height);
                     system.renderTarget.setSize(currentRenderTarget.width, currentRenderTarget.height);
                 }
+<<<<<<< HEAD
+=======
+
+                // store "normal" rendering output to this.renderTarget
+>>>>>>> finally got local rendering to look right
                 this.setRenderTarget(system.renderTarget);
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
+<<<<<<< HEAD
                 currentXREnabled = this.xr.enabled;
                 if (this.xr.enabled === true) {
                     this.xr.enabled = false;
                 }
+=======
+                // save render state (2)
+                currentXREnabled = this.xr.enabled;
+                currentShadowAutoUpdate = this.shadowMap.autoUpdate;
+
+                // disable xr
+                this.xr.enabled = false;
+                this.shadowMap.autoUpdate = false;
+>>>>>>> finally got local rendering to look right
 
                 if (system.cameras.length > 1) {
                     // we have two cameras here (vr mode or headset ar mode)
@@ -169,18 +190,19 @@ AFRAME.registerSystem('compositor', {
                     hasDualCameras = false;
                 }
 
+                // render with custom shader (local-remote compositing):
                 // this will internally call renderer.render(), which will execute the code within
                 // the isDigest conditional above (render normally). this will copy the result of
-                // the rendering to the readbuffer in the composer (aka this.renderTarget), which we
+                // the rendering to the readbuffer in the compositor (aka this.renderTarget), which we
                 // will use for the "local" frame.
                 // the composer will take the "local" frame and merge it with the "remote" frame from
                 // the video by calling the compositor pass and executing the shaders.
-                // we will call render() (but not renderer.render()) AGAIN below, which will not execute
-                // the code above.
                 system.pass.render(this, currentRenderTarget, system.renderTarget);
 
+                // restore render state
                 this.setRenderTarget(currentRenderTarget);
                 this.xr.enabled = currentXREnabled;
+                this.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
                 system.pass.setHasDualCameras(hasDualCameras);
                 AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client.hasDualCameras', hasDualCameras);
