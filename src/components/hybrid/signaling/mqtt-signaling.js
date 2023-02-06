@@ -87,8 +87,7 @@ export class MQTTSignaling {
         // console.log('[render-client]', signal);
         if (signal.type == 'connect') {
             if (this.onConnect) this.onConnect();
-        }
-        if (signal.type == 'offer') {
+        } else if (signal.type == 'offer') {
             this.connectionId = signal.id;
             if (this.onOffer) this.onOffer(signal.data);
         } else if (signal.type == 'answer') {

@@ -81,9 +81,7 @@ AFRAME.registerComponent('render-client', {
         this.signaler.connectionId = null;
 
         console.log('[render-client] connecting...');
-        if (!this.connected) {
-            this.signaler.sendConnectACK();
-        }
+        this.signaler.sendConnectACK();
     },
 
     onRemoteTrack(e) {
