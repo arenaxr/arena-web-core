@@ -108,7 +108,19 @@ AFRAME.registerSystem('compositor', {
             }
         }
 
-        let hasDualCameras = false;
+        function decomposeProj(projMat) {
+            const elements = projMat.elements;
+            const x = elements[0] / 2;
+            const a = elements[2] / 2;
+            const y = elements[5];
+            const b = elements[6];
+            const c = elements[10];
+            const d = elements[11];
+            const e = elements[14];
+            return [x,a,y,b,c,d,e];
+        }
+
+        let hasDualCameras, ipd, leftProj, rightProj;
 
         let currentXREnabled = renderer.xr.enabled;
         let currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
@@ -126,32 +138,24 @@ AFRAME.registerSystem('compositor', {
             } else {
                 isDigest = true;
 
-<<<<<<< HEAD
-                var currentRenderTarget = this.getRenderTarget();
-=======
                 // save render state (1)
                 const currentRenderTarget = this.getRenderTarget();
->>>>>>> finally got local rendering to look right
                 if (currentRenderTarget != null) {
                     // resize if an existing rendertarget exists (usually in webxr mode)
                     system.pass.setSize(currentRenderTarget.width, currentRenderTarget.height);
                     system.renderTarget.setSize(currentRenderTarget.width, currentRenderTarget.height);
                 }
-<<<<<<< HEAD
-=======
 
                 // store "normal" rendering output to this.renderTarget
->>>>>>> finally got local rendering to look right
                 this.setRenderTarget(system.renderTarget);
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
-<<<<<<< HEAD
                 currentXREnabled = this.xr.enabled;
                 if (this.xr.enabled === true) {
                     this.xr.enabled = false;
                 }
-=======
+
                 // save render state (2)
                 currentXREnabled = this.xr.enabled;
                 currentShadowAutoUpdate = this.shadowMap.autoUpdate;
@@ -159,7 +163,6 @@ AFRAME.registerSystem('compositor', {
                 // disable xr
                 this.xr.enabled = false;
                 this.shadowMap.autoUpdate = false;
->>>>>>> finally got local rendering to look right
 
                 if (system.cameras.length > 1) {
                     // we have two cameras here (vr mode or headset ar mode)
@@ -169,9 +172,10 @@ AFRAME.registerSystem('compositor', {
                     const cameraR = system.cameras[1];
                     cameraLPos.setFromMatrixPosition( cameraL.matrixWorld );
                     cameraRPos.setFromMatrixPosition( cameraR.matrixWorld );
-                    const ipd = cameraLPos.distanceTo( cameraRPos );
+                    ipd = cameraLPos.distanceTo( cameraRPos );
 
-                    AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client.ipd', ipd);
+                    leftProj = decomposeProj(cameraL.projectionMatrix.transpose());
+                    rightProj = decomposeProj(cameraR.projectionMatrix.transpose());
 
                     /* const projL = cameraL.projectionMatrix.elements;
                     const projR = cameraR.projectionMatrix.elements;
@@ -205,7 +209,13 @@ AFRAME.registerSystem('compositor', {
                 this.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
                 system.pass.setHasDualCameras(hasDualCameras);
-                AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client.hasDualCameras', hasDualCameras);
+
+                AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client', {
+                    hasDualCameras: hasDualCameras,
+                    ipd: ipd,
+                    leftProj: leftProj,
+                    rightProj, rightProj
+                });
 
                 // call this part of the conditional again on the next call to render()
                 isDigest = false;

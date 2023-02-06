@@ -41,6 +41,8 @@ AFRAME.registerComponent('render-client', {
         getStatsInterval: {type: 'number', default: 2000},
         ipd: {type: 'number', default: 0.064},
         hasDualCameras: {type: 'boolean', default: false},
+        leftProj: {type: 'array'},
+        rightProj: {type: 'array'},
     },
 
     init: async function() {
@@ -302,6 +304,8 @@ AFRAME.registerComponent('render-client', {
             isARMode: isARMode,
             hasDualCameras: hasDualCameras,
             ipd: data.ipd,
+            leftProj: data.leftProj,
+            rightProj: data.rightProj,
             ts: new Date().getTime(),
         }));
     },
@@ -321,13 +325,25 @@ AFRAME.registerComponent('render-client', {
         const el = this.el;
         const data = this.data;
 
+        let updateStatus = false;
+
         if (oldData.ipd !== undefined && data.ipd != oldData.ipd) {
-            this.sendStatus();
+            updateStatus = true;
         }
 
         if (oldData.hasDualCameras !== undefined && data.hasDualCameras != oldData.hasDualCameras) {
-            this.sendStatus();
+            updateStatus = true;
         }
+
+        if (oldData.leftProj !== undefined && !AFRAME.utils.deepEqual(data.leftProj, oldData.leftProj)) {
+            updateStatus = true;
+        }
+
+        if (oldData.rightProj !== undefined && !AFRAME.utils.deepEqual(data.rightProj, oldData.rightProj)) {
+            updateStatus = true;
+        }
+
+        if (updateStatus) this.sendStatus();
     },
 
     tick: function(time, timeDelta) {
