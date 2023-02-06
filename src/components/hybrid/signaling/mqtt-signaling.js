@@ -6,6 +6,7 @@ const SERVER_OFFER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/offer';
 const SERVER_ANSWER_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/answer';
 const SERVER_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/candidate';
 const SERVER_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/server/health';
+const SERVER_CONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/server/connect';
 
 const CLIENT_CONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/connect';
 const CLIENT_DISCONNECT_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/disconnect';
@@ -25,6 +26,7 @@ export class MQTTSignaling {
         this.mqttUsername = ARENA.username;
         this.mqttToken = ARENA.mqttToken;
 
+        this.onConnect = null;
         this.onOffer = null;
         this.onAnswer = null;
         this.onIceCandidate = null;
@@ -63,6 +65,7 @@ export class MQTTSignaling {
         this.client.subscribe(`${SERVER_OFFER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
         this.client.subscribe(`${SERVER_ANSWER_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
         this.client.subscribe(`${SERVER_CANDIDATE_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
+        this.client.subscribe(`${SERVER_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/#`);
     }
 
     mqttOnConnectionLost(responseObject) {
@@ -82,7 +85,9 @@ export class MQTTSignaling {
         if ((this.connectionId != null) && (signal.id != this.connectionId)) return;
 
         // console.log('[render-client]', signal);
-
+        if (signal.type == 'connect') {
+            if (this.onConnect) this.onConnect();
+        }
         if (signal.type == 'offer') {
             this.connectionId = signal.id;
             if (this.onOffer) this.onOffer(signal.data);
@@ -107,7 +112,7 @@ export class MQTTSignaling {
         this.publish(topic, JSON.stringify(msg));
     }
 
-    sendConnect() {
+    sendConnectACK() {
         const width = Math.max(screen.width, screen.height);
         const height = Math.min(screen.width, screen.height);
         const connectData = {
@@ -118,7 +123,7 @@ export class MQTTSignaling {
             'screenWidth': 1.25*width,
             'screenHeight': height,
         };
-        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect', connectData);
+        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect-ack', connectData);
     }
 
     closeConnection() {
