@@ -357,7 +357,7 @@ export class SideMenu {
          * Add settings panel
          */
         const settingsPopup = document.createElement('div');
-        settingsPopup.className = 'settings-popup px-3 py-1 bg-white';
+        settingsPopup.className = 'settings-popup px-3 py-1'; // remove bg-white to inherit transparency
         document.body.appendChild(settingsPopup);
 
         const closeSettingsBtn = document.createElement('span');
