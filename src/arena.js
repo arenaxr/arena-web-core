@@ -120,7 +120,7 @@ export class Arena {
         this.idTag = idTag;
 
         // set camName
-        this.camName = 'camera_' + this.idTag; // e.g. camera_1234_eric
+        this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
         // if fixedCamera is given, then camName must be set accordingly
         this.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', '');
         if (this.fixedCamera !== '') {
@@ -128,9 +128,9 @@ export class Arena {
         }
 
         // set faceName, avatarName, handLName, handRName which depend on user name
-        this.faceName = 'face_' + this.idTag; // e.g. face_9240_X
-        this.handLName = 'handLeft_' + this.idTag; // e.g. handLeft_9240_X
-        this.handRName = 'handRight_' + this.idTag; // e.g. handRight_9240_X
+        this.faceName = `face_${this.idTag}`; // e.g. face_9240_X
+        this.handLName = `handLeft_${this.idTag}`; // e.g. handLeft_9240_X
+        this.handRName = `handRight_${this.idTag}`; // e.g. handRight_9240_X
     }
 
     /**
