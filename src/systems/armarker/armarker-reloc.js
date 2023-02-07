@@ -287,7 +287,7 @@ export class ARMarkerRelocalization {
                                         y: tagPose.elements[13],
                                         z: tagPose.elements[14],
                                     },
-                                    rotation: {
+                                    rotation: { // always send quaternions over the wire
                                         x: this.tagPoseRot.x,
                                         y: this.tagPoseRot.y,
                                         z: this.tagPoseRot.z,
@@ -390,4 +390,3 @@ export class ARMarkerRelocalization {
         return this.tagPoseMatrix;
     }
 }
-

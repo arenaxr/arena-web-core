@@ -166,7 +166,7 @@ AFRAME.registerComponent('arena-hand', {
                     y: parseFloat(this.position.y.toFixed(3)),
                     z: parseFloat(this.position.z.toFixed(3)),
                 },
-                rotation: {
+                rotation: { // always send quaternions over the wire
                     x: parseFloat(this.rotation._x.toFixed(3)),
                     y: parseFloat(this.rotation._y.toFixed(3)),
                     z: parseFloat(this.rotation._z.toFixed(3)),
