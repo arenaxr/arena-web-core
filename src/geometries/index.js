@@ -10,6 +10,5 @@
  * ARENA A-Frame geometries
  */
 
-import './three-js-capsule-geometry/three-js-capsule-geometry.js';
 import './capsule.js';
 import './roundedbox.js';
