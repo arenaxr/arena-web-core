@@ -19,10 +19,11 @@ export class ARENAUtils {
      * @return {string} value associated with parameter
      */
     static getUrlParam(parameter, defaultValue) {
-        const urlParameter = AFRAME.utils.getUrlParameter(parameter)
+        const urlParameter = AFRAME.utils.getUrlParameter(parameter);
         // console.info(`ARENA (URL) config param ${parameter}: ${urlParameter}`);
-        if (urlParameter === '')
+        if (urlParameter === '') {
             return defaultValue;
+        }
         return urlParameter;
     };
 
@@ -233,5 +234,30 @@ export class ARENAUtils {
     static numToPaddedHex(num, len) {
         const str = num.toString(16);
         return '0'.repeat(len - str.length) + str;
+    }
+
+    /**
+     * General purpose function to update the pose of an object3D from a data object which can contain pos and/or rot
+     * @param {THREE.Object3D} targetObject3D object3D to update
+     * @param {object} data  object containing position and/or rotation keys
+     * @param {THREE.Vector3} data.position position to set
+     * @param {THREE.Quaternion|THREE.Euler} data.rotation rotation to set
+     */
+    static updatePose(targetObject3D, data) {
+        const {position, rotation} = data;
+        if (rotation) { // has 'w' coordinate: a quaternion
+            if (rotation.hasOwnProperty('w')) {
+                targetObject3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+            } else {
+                targetObject3D.rotation.set(
+                    THREE.MathUtils.degToRad(rotation.x),
+                    THREE.MathUtils.degToRad(rotation.y),
+                    THREE.MathUtils.degToRad(rotation.z),
+                ); // otherwise its a rotation given in degrees
+            }
+        }
+        if (position) {
+            targetObject3D.position.set(position.x, position.y, position.z);
+        }
     }
 }

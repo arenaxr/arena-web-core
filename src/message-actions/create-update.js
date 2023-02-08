@@ -235,6 +235,16 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
+            if (data.hasOwnProperty('model-update')) {
+                const o3d = entityEl.object3D;
+                const modelUpdates = data['model-update']; // Obj with key:value as name:{position, rotation}
+                o3d.traverse((child) => {
+                    if (modelUpdates.hasOwnProperty(child.name)) {
+                        ARENAUtils.updatePose(child, modelUpdates[child.name]);
+                    }
+                });
+                delete data['model-update']; // remove attribute so we don't set it later
+            }
             break;
         case 'headtext':
             // handle changes to other users head text
