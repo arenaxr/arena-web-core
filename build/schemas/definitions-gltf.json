@@ -34,9 +34,9 @@
           "type": "string"
         },
         "repetitions": {
-          "default": 0,
-          "description": "Number of times to play the clip, in addition to the first play. Repetitions are ignored for loop: once.",
-          "type": "number"
+          "default": null,
+          "description": "Number of times to play the clip, in addition to the first play (null = Infinity). Repetitions are ignored for loop: once.",
+          "type": ["number", "null"]
         },
         "startAt": {
           "default": 0,
