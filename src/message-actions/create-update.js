@@ -235,15 +235,16 @@ export class CreateUpdate {
             if (!data.hasOwnProperty('attribution')) {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
-            if (data.hasOwnProperty('model-update')) {
+            if (data.hasOwnProperty('modelUpdate')) {
                 const o3d = entityEl.object3D;
-                const modelUpdates = data['model-update']; // Obj with key:value as name:{position, rotation}
+                const modelUpdates = data['modelUpdate']; // Obj with key:value as name:{position, rotation}
+                // Traverse once, instead of doing a lookup for each modelUpdate key
                 o3d.traverse((child) => {
                     if (modelUpdates.hasOwnProperty(child.name)) {
                         ARENAUtils.updatePose(child, modelUpdates[child.name]);
                     }
                 });
-                delete data['model-update']; // remove attribute so we don't set it later
+                delete data['modelUpdate']; // remove attribute so we don't set it later
             }
             break;
         case 'headtext':
