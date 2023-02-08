@@ -14,23 +14,33 @@
           "type": "string"
         },
         "crossFadeDuration": {
-          "default": "0",
+          "default": 0,
           "description": "Duration of cross-fades between clips, in seconds.",
           "type": "number"
         },
         "duration": {
-          "default": "0",
+          "default": 0,
           "description": "Duration of the animation, in seconds (0 = auto).",
           "type": "number"
+        },
+        "loop": {
+          "default": "repeat",
+          "description": "once, repeat, or pingpong. In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
+          "enum": [
+            "once",
+            "repeat",
+            "pingpong"
+          ],
+          "type": "string"
         },
         "repetitions": {
           "default": 0,
           "description": "Number of times to play the clip, in addition to the first play. Repetitions are ignored for loop: once.",
-          "enum": [
-            "once",
-            "repeate",
-            "pingpong"
-          ],
+          "type": "number"
+        },
+        "startAt": {
+          "default": 0,
+          "description": "Sets the start of an animation to a specific time (in milliseconds). This is useful when you need to jump to an exact time in an animation. The input parameter will be scaled by the mixer's timeScale.",
           "type": "number"
         },
         "timeScale": {
