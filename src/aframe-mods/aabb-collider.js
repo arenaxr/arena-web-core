@@ -319,3 +319,23 @@ AFRAME.registerComponent('box-collision-listener', {
         // Possible cleanup on box-collider?
     },
 });
+
+AFRAME.registerComponent('box-collision-publisher', {
+    schema: {
+        enabled: {default: true},
+    },
+    init: function() {
+        this.el.addEventListener('hitstart', function(e) {
+            console.log('hitstart', e.detail);
+        });
+        this.el.addEventListener('hitend', function(e) {
+            console.log('hitend', e.detail);
+        });
+        this.el.addEventListener('hitclosest', function(e) {
+            console.log('hitclosest', e.detail);
+        });
+        this.el.addEventListener('hitclosestclear', function(e) {
+            console.log('hitclosestclear', e.detail);
+        });
+    },
+});

@@ -77,6 +77,7 @@ AFRAME.registerComponent('arena-hand', {
 
         el.addEventListener('controllerconnected', () => {
             el.setAttribute('visible', true);
+            el.setAttribute('collision-publisher', 'enabled', true);
             const msg = {
                 object_id: this.name,
                 action: 'create',
@@ -88,7 +89,7 @@ AFRAME.registerComponent('arena-hand', {
                     dep: ARENA.camName,
                 },
             };
-            if (msg.data.url.includes("magicleap")) {
+            if (msg.data.url.includes('magicleap')) {
                 msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
             }
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
@@ -97,6 +98,7 @@ AFRAME.registerComponent('arena-hand', {
 
         el.addEventListener('controllerdisconnected', () => {
             el.setAttribute('visible', false);
+            el.setAttribute('collision-publisher', 'enabled', false);
             // when disconnected, try to cleanup hands
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
                 object_id: this.name,
