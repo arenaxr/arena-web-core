@@ -6,6 +6,7 @@
  * @date 2020
  */
 
+import './aabb-collider.js';
 import './arrow-controls.js';
 import './gltf-model-loading.js';
 import './wasd-speed-controls.js';
