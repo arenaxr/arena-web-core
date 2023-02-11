@@ -48,16 +48,16 @@ float readDepthDiffuseOld( sampler2D depthSampler, vec2 coord ) {
     // return 1.0 / (_ZBufferParamsX * fragCoordZ + _ZBufferParamsY);
 }
 
-float readDepth(sampler2D depthSampler, vec2 coord) {
+float readDepthStream(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).x;
-    return depth;
+    return depth / 50.0;
 }
 
 float readDepthDiffuse(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).x;
     float viewZ = perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
     viewZ = viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-    return 50.0 * viewZ;
+    return viewZ;
 }
 
 void main() {
@@ -119,14 +119,14 @@ void main() {
         }
 
         streamColor = texture2D( tStream, coordStreamColor );
-        streamDepth = readDepth( tStream, coordStreamDepth );
+        streamDepth = readDepthStream( tStream, coordStreamDepth );
     }
     else {
         vec2 coordStreamColor = coordStreamNormalized;
         vec2 coordStreamDepth = vec2(coordStreamNormalized.x + 0.5, coordStreamNormalized.y);
 
         streamColor = texture2D( tStream, coordStreamColor );
-        streamDepth = readDepth( tStream, coordStreamDepth );
+        streamDepth = readDepthStream( tStream, coordStreamDepth );
     }
 
     bool ignore = false; // readMask( tStream, coordStreamDepth );

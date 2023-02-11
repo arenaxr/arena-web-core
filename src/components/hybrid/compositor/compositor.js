@@ -151,17 +151,14 @@ AFRAME.registerSystem('compositor', {
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
-                currentXREnabled = this.xr.enabled;
-                if (this.xr.enabled === true) {
-                    this.xr.enabled = false;
-                }
-
                 // save render state (2)
                 currentXREnabled = this.xr.enabled;
                 currentShadowAutoUpdate = this.shadowMap.autoUpdate;
 
                 // disable xr
-                this.xr.enabled = false;
+                if (this.xr.enabled === true) {
+                    this.xr.enabled = false;
+                }
                 this.shadowMap.autoUpdate = false;
 
                 if (system.cameras.length > 1) {
@@ -176,19 +173,6 @@ AFRAME.registerSystem('compositor', {
 
                     leftProj = decomposeProj(cameraL.projectionMatrix.transpose());
                     rightProj = decomposeProj(cameraR.projectionMatrix.transpose());
-
-                    /* const projL = cameraL.projectionMatrix.elements;
-                    const projR = cameraR.projectionMatrix.elements;
-
-                    const near = projL[ 14 ] / ( projL[ 10 ] - 1 );
-                    const far = projL[ 14 ] / ( projL[ 10 ] + 1 );
-                    const topFov = ( projL[ 9 ] + 1 ) / projL[ 5 ];
-                    const bottomFov = ( projL[ 9 ] - 1 ) / projL[ 5 ];
-
-                    const leftFov = ( projL[ 8 ] - 1 ) / projL[ 0 ];
-                    const rightFov = ( projR[ 8 ] + 1 ) / projR[ 0 ];
-                    const left = near * leftFov;
-                    const right = near * rightFov; */
                 } else {
                     // we just have a single camera here
                     hasDualCameras = false;

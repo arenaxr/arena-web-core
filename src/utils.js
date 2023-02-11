@@ -300,6 +300,7 @@ export class ARENAUtils {
         if (position) {
             targetObject3D.position.set(position.x, position.y, position.z);
         }
+    }
 
    /**
     * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
