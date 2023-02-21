@@ -221,6 +221,8 @@
           "description": "Teleports user to the landmark with the given name; Requires click-listener",
           "properties": {
              "on":{
+                "default": "mousedown",
+                "description":"Event to listen 'on'.",
                 "enum":[
                    "mousedown",
                    "mouseup"
@@ -229,6 +231,7 @@
              },
              "landmark": {
                 "default": "",
+                "description":"Id of landmark to teleport to.",
                 "type":"string"
              }
           },
@@ -243,6 +246,7 @@
           "description":"Goto given URL; Requires click-listener",
           "properties":{
              "dest":{
+                "default": "sametab",
                 "enum":[
                    "popup",
                    "newtab",
@@ -251,6 +255,7 @@
                 "type":"string"
              },
              "on":{
+                "default": "mousedown",
                 "enum":[
                    "mousedown",
                    "mouseup"
@@ -258,6 +263,7 @@
                 "type":"string"
              },
              "url":{
+                "default": "",
                 "format":"uri",
                 "type":"string"
              }

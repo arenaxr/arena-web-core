@@ -547,7 +547,7 @@
           "type":"string"
        },
        "persist":{
-          "default":"true",
+          "default":true,
           "description":"Persist this object in the database",
           "type":"boolean"
        },
