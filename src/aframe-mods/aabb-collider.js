@@ -336,6 +336,7 @@ AFRAME.registerComponent('box-collision-publisher', {
                 action: 'clientEvent',
                 type: 'collision-start',
                 data: {
+                    source: objName,
                     position: ARENAUtils.getWorldPos(thisEl),
                     targets: e.detail.intersectedEls.map((inEl) => (
                         {id: inEl.id, position: ARENAUtils.getWorldPos(inEl)}
@@ -352,6 +353,7 @@ AFRAME.registerComponent('box-collision-publisher', {
                 action: 'clientEvent',
                 type: 'collision-end',
                 data: {
+                    source: objName,
                     position: ARENAUtils.getWorldPos(thisEl),
                     targets: e.detail.endIntersectedEls.map((inEl) => (
                         {id: inEl.id, position: ARENAUtils.getWorldPos(inEl)}
