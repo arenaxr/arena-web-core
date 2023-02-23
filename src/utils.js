@@ -260,4 +260,18 @@ export class ARENAUtils {
             targetObject3D.position.set(position.x, position.y, position.z);
         }
     }
+
+    /**
+     * Get the world position of an element, saves having to instantiate a new vec3
+     * @param {Element} el element to get world position of
+     * @return {THREE.Vector3} world position of element
+     */
+    static getWorldPos(el) {
+        if (!el?.object3D) {
+            return null;
+        }
+        const worldVec3 = new THREE.Vector3();
+        el.object3D.getWorldPosition(worldVec3);
+        return worldVec3;
+    }
 }

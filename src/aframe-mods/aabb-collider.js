@@ -1,5 +1,7 @@
 /* global AFRAME, THREE */
 
+import {ARENAUtils} from 'utils';
+
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
 }
@@ -51,6 +53,7 @@ AFRAME.registerComponent('box-collider', {
         this.dirty = true;
 
         this.hitStartEventDetail = {intersectedEls: this.newIntersectedEls};
+        this.hitEndEventDetail = {endIntersectedEls: this.clearedIntersectedEls};
     },
 
     play: function() {
@@ -225,7 +228,7 @@ AFRAME.registerComponent('box-collider', {
         }
 
         if (clearedIntersectedEls.length) {
-            el.emit('hitend');
+            el.emit('hitend', this.hitEndEventDetail);
         }
 
         if (newIntersectedEls.length) {
@@ -325,17 +328,38 @@ AFRAME.registerComponent('box-collision-publisher', {
         enabled: {default: true},
     },
     init: function() {
-        this.el.addEventListener('hitstart', function(e) {
-            console.log('hitstart', e.detail);
+        const thisEl = this.el;
+        thisEl.addEventListener('hitstart', function(e) {
+            const thisMsg = {
+                object_id: thisEl.id,
+                action: 'clientEvent',
+                type: 'collision-start',
+                data: {
+                    position: ARENAUtils.getWorldPos(thisEl),
+                    targets: e.detail.intersectedEls.map((inEl) => (
+                        {id: inEl.id, position: ARENAUtils.getWorldPos(inEl)}
+                    )),
+                },
+            };
+            // This is either the camera or a hand
+            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
         });
-        this.el.addEventListener('hitend', function(e) {
-            console.log('hitend', e.detail);
-        });
-        this.el.addEventListener('hitclosest', function(e) {
-            console.log('hitclosest', e.detail);
-        });
-        this.el.addEventListener('hitclosestclear', function(e) {
-            console.log('hitclosestclear', e.detail);
+        thisEl.addEventListener('hitend', function(e) {
+            const thisMsg = {
+                object_id: thisEl.id,
+                action: 'clientEvent',
+                type: 'collision-end',
+                data: {
+                    position: ARENAUtils.getWorldPos(thisEl),
+                    targets: e.detail.endIntersectedEls.map((inEl) => (
+                        {id: inEl.id, position: ARENAUtils.getWorldPos(inEl)}
+                    )),
+                },
+            };
+            // This is either the camera or a hand
+            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
         });
     },
 });
