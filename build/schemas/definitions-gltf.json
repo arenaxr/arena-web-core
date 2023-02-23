@@ -49,6 +49,9 @@
           "type": "number"
         }
       },
+      "required": [
+        "clip"
+      ],
       "title": "Animation Mixer",
       "type": "object"
     },
