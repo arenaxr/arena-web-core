@@ -26,7 +26,7 @@ AFRAME.registerComponent('box-collider', {
         debug: {default: false},
         enabled: {default: true},
         interval: {default: 100}, // Change to match default camera tick rate
-        objects: {default: '[collision-listener]'}, // Default only intersects with collision-listeners
+        objects: {default: '[box-collision-listener]'}, // Default only intersects with collision-listeners
     },
 
     init: function() {
