@@ -330,8 +330,9 @@ AFRAME.registerComponent('box-collision-publisher', {
     init: function() {
         const thisEl = this.el;
         thisEl.addEventListener('hitstart', function(e) {
+            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
             const thisMsg = {
-                object_id: thisEl.id,
+                object_id: objName,
                 action: 'clientEvent',
                 type: 'collision-start',
                 data: {
@@ -342,12 +343,12 @@ AFRAME.registerComponent('box-collision-publisher', {
                 },
             };
             // This is either the camera or a hand
-            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
         });
         thisEl.addEventListener('hitend', function(e) {
+            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
             const thisMsg = {
-                object_id: thisEl.id,
+                object_id: objName,
                 action: 'clientEvent',
                 type: 'collision-end',
                 data: {
@@ -358,7 +359,6 @@ AFRAME.registerComponent('box-collision-publisher', {
                 },
             };
             // This is either the camera or a hand
-            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
         });
     },
