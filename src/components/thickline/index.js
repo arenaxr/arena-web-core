@@ -18,7 +18,7 @@ const lineWidthStylers = {
         return 1 - Math.abs(2 * p - 1);
     },
     'center-smooth': function(p) {
-        Math.sin( p * 3.1415 );
+        return Math.sin( p * 3.1415 );
     },
     'sine-wave': function(p) {
         return 0.5 + 0.5 * Math.sin( (p - 0.5) * 2 * 3.1415 * 10 );
