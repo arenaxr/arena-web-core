@@ -33,8 +33,9 @@
                                     "type": "string",
                                     "title": "Line width styler",
                                     "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. You may also choose one of the preset functions",
-                                    "default": "",
+                                    "default": "default",
                                     "enum": [
+                                        "default",
                                         "grow",
                                         "shrink",
                                         "center-sharp",
@@ -59,7 +60,7 @@
                     "default": {
                         "object_type": "thickline",
                         "lineWidth": 5,
-                        "lineWidthStyler": 1,
+                        "lineWidthStyler": "default",
                         "path": "-2 -1 0, 0 20 0, 10 -1 10",
                         "color": "#7f7f7f"
                     },
