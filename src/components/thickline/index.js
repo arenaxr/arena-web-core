@@ -71,13 +71,9 @@ AFRAME.registerComponent('thickline', {
 
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
 
-        const widthFn = (
-            typeof this.data.lineWidthStyler === 'string' &&
-      this.data.lineWidthStyler.length > 0
-        ) ? new Function('p', 'return ' + this.data.lineWidthStyler) :
-            function() {
-                return 1;
-            };
+        const widthFn = function() {
+            return 1;
+        };
         // ? try {var w = widthFn(0);} catch(e) {warn(e);}
         const line = new THREE.MeshLine();
         line.setGeometry( geometry, widthFn );
