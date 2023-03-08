@@ -236,14 +236,16 @@ export class CreateUpdate {
                 entityEl.setAttribute('attribution', 'extractAssetExtras', true);
             }
             if (data.hasOwnProperty('modelUpdate')) {
-                const o3d = entityEl.object3D;
-                const modelUpdates = data['modelUpdate']; // Obj with key:value as name:{position, rotation}
-                // Traverse once, instead of doing a lookup for each modelUpdate key
-                o3d.traverse((child) => {
-                    if (modelUpdates.hasOwnProperty(child.name)) {
-                        ARENAUtils.updatePose(child, modelUpdates[child.name]);
-                    }
-                });
+                /*
+                 Only apply update directly on update. If this is a CREATE msg (from persist most likely), let a
+                 element prop be set and actual updates deferred, to be picked up by gltf-model after model load.
+                 */
+                const modelUpdateData = {...data['modelUpdate']};
+                if (message.action === ACTIONS.UPDATE) {
+                    ARENAUtils.updateModelComponents(entityEl.object3D, modelUpdateData);
+                } else {
+                    entityEl.deferredModelUpdate = modelUpdateData;
+                }
                 delete data['modelUpdate']; // remove attribute so we don't set it later
             }
             break;

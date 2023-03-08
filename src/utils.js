@@ -274,4 +274,19 @@ export class ARENAUtils {
         el.object3D.getWorldPosition(worldVec3);
         return worldVec3;
     }
+
+    /**
+     * Applies GLTF model sub component pose updates
+     * @param {THREE.Object3D} o3d - target object3D
+     * @param {object} data  - data object containing keys of named sub components, with values of
+     *                        position and/or rotation keys
+     */
+    static updateModelComponents(o3d, data) {
+        // Traverse once, instead of doing a lookup for each modelUpdate key
+        o3d.traverse((child) => {
+            if (data.hasOwnProperty(child.name)) {
+                ARENAUtils.updatePose(child, data[child.name]);
+            }
+        });
+    }
 }
