@@ -91,6 +91,72 @@
       },
       "title": "GLTF Model Level of Detail",
       "type": "object"
+    },
+    "modelUpdate": {
+      "description": "The GLTF-specific `modelUpdate` attribute is an object with child component names as keys. The top-level keys are the names of the child components to be updated. The values of each are nested `position` and `rotation` attributes to set as new values, respectively. Either `position` or `rotation` can be omitted if unchanged.",
+      "minProperties": 1,
+      "patternProperties": {
+          "^[a-zA-Z]*": {
+            "type": "object",
+            "description": "One of this model's named child components.",
+            "properties": {
+              "position":{
+                "properties":{
+                   "x":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "y":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "z":{
+                      "default":0,
+                      "type":"number"
+                   }
+                },
+                "required":[
+                   "x",
+                   "y",
+                   "z"
+                ],
+                "type":"object",
+                "title":"Position"
+             },
+             "rotation":{
+                "properties":{
+                   "w":{
+                      "default":1,
+                      "type":"number"
+                   },
+                   "x":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "y":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "z":{
+                      "default":0,
+                      "type":"number"
+                   }
+                },
+                "required":[
+                   "w",
+                   "x",
+                   "y",
+                   "z"
+                ],
+                "type":"object",
+                "title":"Rotation"
+             }
+            }
+          }
+      },
+      "additionalProperties": true,
+      "title": "GLTF Model Update",
+      "type": "object"
     }
   }
 }

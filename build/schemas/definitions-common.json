@@ -226,7 +226,8 @@
           "properties":{
              "enabled": {
                 "default": true,
-                "type":"boolean"
+                "type":"boolean",
+                "description": "Publish detections, set `false` to disable"
              },
              "dynamic":{
                 "default": false,
