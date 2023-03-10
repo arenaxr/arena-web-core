@@ -93,10 +93,12 @@
       "type": "object"
     },
     "modelUpdate": {
+      "title": "GLTF Model Update",
+      "type": "object",
       "description": "The GLTF-specific `modelUpdate` attribute is an object with child component names as keys. The top-level keys are the names of the child components to be updated. The values of each are nested `position` and `rotation` attributes to set as new values, respectively. Either `position` or `rotation` can be omitted if unchanged.",
-      "minProperties": 1,
+      "additionalProperties": true,
       "patternProperties": {
-          "^[a-zA-Z]*": {
+          "^[A-Za-z][A-Za-z0-9_-]*$": {
             "type": "object",
             "description": "One of this model's named child components.",
             "properties": {
@@ -154,9 +156,31 @@
             }
           }
       },
-      "additionalProperties": true,
-      "title": "GLTF Model Update",
-      "type": "object"
+      "example": {
+        "left-elbow": {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "w": 1,
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "right-elbow": {
+          "rotation": {
+            "w": 1,
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "left-knee": {
+        }
+      }
     }
   }
 }
