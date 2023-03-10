@@ -503,7 +503,7 @@
                 ],
                 "title": "AR Hit Test Settings",
                 "type": "object",
-                "description": "A-Frame AR Hit Test Settings. More properties at <a href='https://aframe.io/docs/1.3.0/components/ar-hit-test.html'>https://aframe.io/docs/1.3.0/components/ar-hit-test.html</a>"
+                "description": "A-Frame AR Hit Test Settings. More properties at <a href='https://aframe.io/docs/1.4.0/components/ar-hit-test.html'>https://aframe.io/docs/1.4.0/components/ar-hit-test.html</a>"
              }
           },
           "required":[
