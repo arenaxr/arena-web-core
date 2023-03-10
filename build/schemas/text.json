@@ -130,6 +130,7 @@
                                 },
                                 "text": {
                                     "type": "string",
+                                    "deprecated": true,
                                     "title": "Text Value (deprecated; don't use)",
                                     "description": "(deprecated) Please use attribute 'value' in new Text objects;"
                                 },
@@ -140,7 +141,7 @@
                                 },
                                 "value": {
                                     "description": "The actual content of the text. Line breaks and tabs are supported with \\n and \\t.",
-                                    "title": "Text Value",
+                                    "title": "Value (Text)",
                                     "type": "string"
                                 },
                                 "whiteSpace": {

@@ -245,9 +245,11 @@
           "type":"string"
        },
        "color":{
+          "deprecated": true,
           "default":"#ffa500",
           "format":"color",
-          "title":"Color",
+          "description":"(deprecated) Color of the material. Please use material.color instead.",
+          "title":"Color (legacy)",
           "type":"string"
        },
        "dynamic-body":{

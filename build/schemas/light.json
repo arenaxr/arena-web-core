@@ -64,6 +64,7 @@
                                 },
                                 "light": {
                                     "title": "light (deprecated; don't use)",
+                                    "deprecated": true,
                                     "description": "These attributes (light, intensity, color, ...) can be set directly on the light object (instead of this light attribute inside the light object); dont use in new light objects",
                                     "properties": {
                                         "type": {
