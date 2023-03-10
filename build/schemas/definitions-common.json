@@ -220,7 +220,7 @@
           "type":"boolean"
        },
        "box-collision-listener":{
-          "description":"Users HEAD and HAND objects will fire collision events for this object. Collisions are determined by course bounding-box overlaps",
+          "description":"Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps",
           "title":"Box Collision Listener",
           "type":"object",
           "properties":{

@@ -52,6 +52,7 @@
                                 "y",
                                 "z"
                             ],
+                            "type": "object",
                             "title": "Click Position"
                         }
                     },
