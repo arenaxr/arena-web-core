@@ -20,6 +20,7 @@
                                     ]
                                 },
                                 "align": {
+                                    "description": "Multi-line text alignment (left, center, right).",
                                     "default": "left",
                                     "enum": [
                                         "left",
@@ -28,10 +29,12 @@
                                     ]
                                 },
                                 "alphaTest": {
+                                    "description": "Discard text pixels if alpha is less than this value.",
                                     "default": 0.5,
                                     "type": "number"
                                 },
                                 "anchor": {
+                                    "description": "Horizontal positioning (left, center, right, align).",
                                     "default": "center",
                                     "enum": [
                                         "left",
@@ -41,6 +44,7 @@
                                     ]
                                 },
                                 "baseline": {
+                                    "description": "Vertical positioning (top, center, bottom).",
                                     "default": "center",
                                     "enum": [
                                         "top",
@@ -49,11 +53,13 @@
                                     ]
                                 },
                                 "color": {
+                                    "description": "Text color.",
                                     "default": "#000000",
                                     "format": "color",
                                     "type": "string"
                                   },
                                 "font": {
+                                    "description": "Font to render text, either the name of one of A-Frame's stock fonts or a URL to a font file",
                                     "type": "string",
                                     "default": "roboto",
                                     "enum": [
@@ -69,16 +75,20 @@
                                     ]
                                 },
                                 "fontImage": {
+                                    "description": "Font image texture path to render text. Defaults to the font's name with extension replaced to .png. Don't need to specify if using a stock font. (derived from font name)",
                                     "type": "string"
                                 },
                                 "height": {
+                                    "description": "Height of text block. (derived from text size)",
                                     "type": "number"
                                 },
                                 "letterSpacing": {
+                                    "description": "Letter spacing in pixels.",
                                     "type": "number",
                                     "default": 0
                                 },
                                 "lineHeight": {
+                                    "description": "Line height in pixels. (derived from font file)",
                                     "type": "number"
                                 },
                                 "negate": {
@@ -86,10 +96,12 @@
                                     "default": true
                                 },
                                 "opacity": {
+                                    "description": "Opacity, on a scale from 0 to 1, where 0 means fully transparent and 1 means fully opaque.",
                                     "type": "number",
-                                    "default": 1
+                                    "default": 1.0
                                 },
                                 "shader": {
+                                    "description": "Shader used to render text.",
                                     "default": "sdf",
                                     "enum": [
                                         "portal",
@@ -103,6 +115,7 @@
                                     ]
                                 },
                                 "side": {
+                                    "description": "Side to render. (front, back, double)",
                                     "default": "double",
                                     "enum": [
                                         "front",
@@ -111,6 +124,7 @@
                                     ]
                                 },
                                 "tabSize": {
+                                    "description": "Tab size in spaces.",
                                     "type": "number",
                                     "default": 4
                                 },
@@ -120,14 +134,17 @@
                                     "description": "Please use attribute 'value' in new Text objects;"
                                 },
                                 "transparent": {
+                                    "description": "Whether text is transparent.",
+                                    "type": "boolean",
                                     "default": true
                                 },
                                 "value": {
-                                    "type": "string",
+                                    "description": "The actual content of the text. Line breaks and tabs are supported with \\n and \\t.",
                                     "title": "Text Value",
-                                    "description": "Any string of ASCII characters. e.g. 'Hello world!'"
+                                    "type": "string"
                                 },
                                 "whiteSpace": {
+                                    "description": "How whitespace should be handled (i.e., normal, pre, nowrap).</a>",
                                     "default": "normal",
                                     "enum": [
                                         "normal",
@@ -136,21 +153,26 @@
                                     ]
                                 },
                                 "width": {
+                                    "description": "Width in meters. (derived from geometry if exists)",
                                     "type": "number",
                                     "default": 5
                                 },
                                 "wrapCount": {
+                                    "description": "Number of characters before wrapping text (more or less).",
                                     "type": "number",
                                     "default": 40
                                 },
                                 "wrapPixels": {
+                                    "description": "Number of pixels before wrapping text. (derived from wrapCount)",
                                     "type": "number"
                                 },
                                 "xOffset": {
+                                    "description": "X-offset to apply to add padding.",
                                     "type": "number",
                                     "default": 0
                                 },
                                 "zOffset": {
+                                    "description": "Z-offset to apply to avoid Z-fighting if using with a geometry as a background.",
                                     "type": "number",
                                     "default": 0.001
                                 }

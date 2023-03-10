@@ -21,6 +21,7 @@
                                 },
                                 "end": {
                                     "title": "vertex B (end)",
+                                    "type": "object",
                                     "properties": {
                                         "x": {
                                             "type": "number"
@@ -50,6 +51,7 @@
                                 },
                                 "start": {
                                     "title": "vertex A (start)",
+                                    "type": "object",
                                     "properties": {
                                         "x": {
                                             "type": "number"
