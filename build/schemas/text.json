@@ -131,7 +131,7 @@
                                 "text": {
                                     "type": "string",
                                     "title": "Text Value (deprecated; don't use)",
-                                    "description": "Please use attribute 'value' in new Text objects;"
+                                    "description": "(deprecated) Please use attribute 'value' in new Text objects;"
                                 },
                                 "transparent": {
                                     "description": "Whether text is transparent.",

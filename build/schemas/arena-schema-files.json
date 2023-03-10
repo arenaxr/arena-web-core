@@ -20,7 +20,7 @@
        "title":"Cone"
     },
     "cube":{
-       "description":"Cube (=Box) Geometry; Supported for Legacy reasons; Please use Box in new scenes",
+       "description":"Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
        "file":"schemas/cube.json",
        "title":"Cube (deprecated; don't use)"
     },

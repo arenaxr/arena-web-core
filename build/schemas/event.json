@@ -52,12 +52,23 @@
                                 "y",
                                 "z"
                             ],
-                            "type": "object",
                             "title": "Click Position"
                         }
                     },
                     "title": "Event Data",
                     "additionalProperties": true,
+                    "default": {
+                        "clickPos": {
+                            "x": 0,
+                            "y": 1.6,
+                            "z": 0
+                        },
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        }
+                    },
                     "required": [
                         "position",
                         "source"
