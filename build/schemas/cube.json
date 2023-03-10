@@ -1,6 +1,5 @@
 {
     "title": "Cube (deprecated; don't use)",
-    "deprecated": true,
     "description": "Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
     "allOf": [
         {
@@ -8,13 +7,12 @@
         },
         {
             "properties": {
-                "deprecated": true,
                 "data": {
                     "allOf": [
                         {
                             "properties": {
-                                "deprecated": true,
                                 "object_type": {
+                                    "deprecated": true,
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
@@ -23,37 +21,31 @@
                                     ]
                                 },
                                 "depth": {
-                                    "deprecated": true,
                                     "type": "number",
                                     "title": "depth",
                                     "default": 1
                                 },
                                 "height": {
-                                    "deprecated": true,
                                     "type": "number",
                                     "title": "height",
                                     "default": 1
                                 },
                                 "segmentsDepth": {
-                                    "deprecated": true,
                                     "type": "number",
                                     "title": "segments depth",
                                     "default": 1
                                 },
                                 "segmentsHeight": {
-                                    "deprecated": true,
                                     "type": "number",
                                     "title": "segments height",
                                     "default": 1
                                 },
                                 "segmentsWidth": {
-                                    "deprecated": true,
                                     "type": "number",
                                     "title": "segments width",
                                     "default": 1
                                 },
                                 "width": {
-                                    "deprecated": true,
                                     "type": "number",
                                     "title": "width",
                                     "default": 1
