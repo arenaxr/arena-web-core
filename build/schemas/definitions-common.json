@@ -1,7 +1,7 @@
 {
     "properties":{
        "animation":{
-          "description":"Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.3.0/components/animation.html'>https://aframe.io/docs/1.3.0/components/animation.html</a>",
+          "description":"Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/animation.html'>https://aframe.io/docs/1.4.0/components/animation.html</a>",
           "properties":{
              "autoplay":{
                 "default":true,
@@ -29,7 +29,37 @@
                 "type":"number"
              },
              "easing":{
-                "default":"easeInQuad",
+                "enum":[
+                  "easeInQuad",
+                  "easeInCubic",
+                  "easeInQuart",
+                  "easeInQuint",
+                  "easeInSine",
+                  "easeInExpo",
+                  "easeInCirc",
+                  "easeInBack",
+                  "easeInElastic",
+                  "easeOutQuad",
+                  "easeOutCubic",
+                  "easeOutQuart",
+                  "easeOutQuint",
+                  "easeOutSine",
+                  "easeOutExpo",
+                  "easeOutCirc",
+                  "easeOutBack",
+                  "easeOutElastic",
+                  "easeInOutQuad",
+                  "easeInOutCubic",
+                  "easeInOutQuart",
+                  "easeInOutQuint",
+                  "easeInOutSine",
+                  "easeInOutExpo",
+                  "easeInOutCirc",
+                  "easeInOutBack",
+                  "easeInOutElastic",
+                  "linear"
+               ],
+               "default":"easeInQuad",
                 "description":"Easing function of animation. To ease in, ease out, ease in and out.",
                 "type":"string"
              },
@@ -189,21 +219,44 @@
           "title":"Click Listener",
           "type":"boolean"
        },
+       "box-collision-listener":{
+          "description":"Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps",
+          "title":"Box Collision Listener",
+          "type":"object",
+          "properties":{
+             "enabled": {
+                "default": true,
+                "type":"boolean",
+                "description": "Publish detections, set `false` to disable"
+             },
+             "dynamic":{
+                "default": false,
+                "type":"boolean",
+                "description": "Set true for a moving object, which should have its bounding box recalculated regularly to determine proper collision"
+             }
+          },
+          "required":[
+             "dynamic"
+          ]
+       },
        "collision-listener":{
-          "description":"Name of the collision-listener, default can be empty string",
-          "title":"Collision Listener",
+          "description":"Name of the collision-listener, default can be empty string. Collisions trigger click events",
+          "title":"Collision Listener (legacy)",
           "type":"string"
        },
        "color":{
+          "deprecated": true,
           "default":"#ffa500",
           "format":"color",
-          "title":"Color",
+          "description":"(deprecated) Color of the material. Please use material.color instead.",
+          "title":"Color (legacy)",
           "type":"string"
        },
        "dynamic-body":{
           "description":"Physics type attached to the object. \n\nMore properties at <a href='https://github.com/n5ro/aframe-physics-system#dynamic-body-and-static-body'>https://github.com/n5ro/aframe-physics-system#dynamic-body-and-static-body</a>",
           "properties":{
              "type":{
+                "default": "static",
                 "enum":[
                    "static",
                    "dynamic"
@@ -221,6 +274,8 @@
           "description": "Teleports user to the landmark with the given name; Requires click-listener",
           "properties": {
              "on":{
+                "default": "mousedown",
+                "description":"Event to listen 'on'.",
                 "enum":[
                    "mousedown",
                    "mouseup"
@@ -229,6 +284,7 @@
              },
              "landmark": {
                 "default": "",
+                "description":"Id of landmark to teleport to.",
                 "type":"string"
              }
           },
@@ -243,6 +299,7 @@
           "description":"Goto given URL; Requires click-listener",
           "properties":{
              "dest":{
+                "default": "sametab",
                 "enum":[
                    "popup",
                    "newtab",
@@ -251,6 +308,7 @@
                 "type":"string"
              },
              "on":{
+                "default": "mousedown",
                 "enum":[
                    "mousedown",
                    "mouseup"
@@ -258,6 +316,7 @@
                 "type":"string"
              },
              "url":{
+                "default": "",
                 "format":"uri",
                 "type":"string"
              }
@@ -318,26 +377,29 @@
                 "type":"number"
              },
              "offsetPosition":{
+                "default":{
+                  "x":0,
+                  "y":1.6,
+                  "z":0
+                },
                 "description":"Use as a static teleport x,y,z offset",
                 "properties":{
                    "x":{
-                      "type":"number",
-                      "default":0
+                      "type":"number"
                    },
                    "y":{
-                      "type":"number",
-                      "default":1.6
+                      "type":"number"
                    },
                    "z":{
-                      "type":"number",
-                      "default":0
+                      "type":"number"
                    }
                 },
                 "required":[
                    "x",
                    "y",
                    "z"
-                ]
+                ],
+                "type":"object"
              },
              "constrainToNavMesh":{
                 "description":"Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
@@ -448,7 +510,7 @@
           }
        },
        "sound":{
-          "description":"The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.3.0/components/sound.html'>https://aframe.io/docs/1.3.0/components/sound.html</a>",
+          "description":"The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/sound.html'>https://aframe.io/docs/1.4.0/components/sound.html</a>",
           "properties":{
              "autoplay":{
                 "default":false,

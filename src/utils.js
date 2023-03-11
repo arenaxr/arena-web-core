@@ -19,10 +19,11 @@ export class ARENAUtils {
      * @return {string} value associated with parameter
      */
     static getUrlParam(parameter, defaultValue) {
-        const urlParameter = AFRAME.utils.getUrlParameter(parameter)
+        const urlParameter = AFRAME.utils.getUrlParameter(parameter);
         // console.info(`ARENA (URL) config param ${parameter}: ${urlParameter}`);
-        if (urlParameter === '')
+        if (urlParameter === '') {
             return defaultValue;
+        }
         return urlParameter;
     };
 
@@ -233,5 +234,59 @@ export class ARENAUtils {
     static numToPaddedHex(num, len) {
         const str = num.toString(16);
         return '0'.repeat(len - str.length) + str;
+    }
+
+    /**
+     * General purpose function to update the pose of an object3D from a data object which can contain pos and/or rot
+     * @param {THREE.Object3D} targetObject3D object3D to update
+     * @param {object} data  object containing position and/or rotation keys
+     * @param {THREE.Vector3} data.position position to set
+     * @param {THREE.Quaternion|THREE.Euler} data.rotation rotation to set
+     */
+    static updatePose(targetObject3D, data) {
+        const {position, rotation} = data;
+        if (rotation) { // has 'w' coordinate: a quaternion
+            if (rotation.hasOwnProperty('w')) {
+                targetObject3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+            } else {
+                targetObject3D.rotation.set(
+                    THREE.MathUtils.degToRad(rotation.x),
+                    THREE.MathUtils.degToRad(rotation.y),
+                    THREE.MathUtils.degToRad(rotation.z),
+                ); // otherwise its a rotation given in degrees
+            }
+        }
+        if (position) {
+            targetObject3D.position.set(position.x, position.y, position.z);
+        }
+    }
+
+    /**
+     * Get the world position of an element, saves having to instantiate a new vec3
+     * @param {Element} el element to get world position of
+     * @return {THREE.Vector3} world position of element
+     */
+    static getWorldPos(el) {
+        if (!el?.object3D) {
+            return null;
+        }
+        const worldVec3 = new THREE.Vector3();
+        el.object3D.getWorldPosition(worldVec3);
+        return worldVec3;
+    }
+
+    /**
+     * Applies GLTF model sub component pose updates
+     * @param {THREE.Object3D} o3d - target object3D
+     * @param {object} data  - data object containing keys of named sub components, with values of
+     *                        position and/or rotation keys
+     */
+    static updateModelComponents(o3d, data) {
+        // Traverse once, instead of doing a lookup for each modelUpdate key
+        o3d.traverse((child) => {
+            if (data.hasOwnProperty(child.name)) {
+                ARENAUtils.updatePose(child, data[child.name]);
+            }
+        });
     }
 }

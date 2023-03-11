@@ -78,7 +78,7 @@
                         <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
                             Play Test Sound <i class="fas fa-volume-off" id="playTestAudioOutIcon"></i>
                         </button>
-                        <audio id="testAudioOut" src="/static/media/step.ogg"></audio>
+                        <audio id="testAudioOut" src="/static/media/step.ogg" playsinline></audio>
                         <div class="form-floating mb-3">
                             <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
                             </select>
@@ -167,6 +167,8 @@
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
                 <!-- this camera can 'fly': z axis follows pitch of head direction -->
                 <a-camera id="my-camera"
+                          geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25"
+                          box-collider="collideNonVisible:true" box-collision-publisher
                           near="0.1" far="10000"
                           gesture-detector network-latency
                           look-controls="reverseMouseDrag: true" look-controls-arrow
@@ -176,12 +178,14 @@
                               raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
                 </a-camera>
                 <a-entity id="leftHand"
+                          box-collider="collideNonVisible:true;enabled:false" box-collision-publisher
                           visible=false
                           arena-hand="hand:left"
                           laser-controls="hand:left"
-                          blink-controls="cameraRig: #cameraRig; collisionEntities:[nav-mesh]"
+                          blink-controls="cameraRig:#cameraRig; collisionEntities:[nav-mesh]; teleportOrigin:#my-camera"
                           raycaster="objects: [click-listener]"></a-entity>
                 <a-entity id="rightHand"
+                          box-collider="collideNonVisible:true;enabled:false" box-collision-publisher
                           visible=false
                           arena-hand="hand:right"
                           laser-controls="hand:right"

@@ -50,11 +50,11 @@ function onLocalTracks(tracks) {
                     `track audio output device was changed to ${deviceId}`));
         if (localTracks[i].getType() === 'audio') {
             $('body').append(
-                `<audio autoplay='1' muted='true' id='localAudio${i}' />`);
+                `<audio autoplay='1' muted='true' id='localAudio${i}' playsinline/>`);
             localTracks[i].attach($(`#localAudio${i}`)[0]);
         } else { // desktop
             $('body').append(
-                `<video autoplay='1' id='localScreenShare${i}' class='screen-share' />`);
+                `<video autoplay='1' id='localScreenShare${i}' class='screen-share' playsinline/>`);
             $(`#localScreenShare${i}`).css('width', '100%');
             $(`#localScreenShare${i}`).css('height', 'auto');
             localTracks[i].attach($(`#localScreenShare${i}`)[0]);

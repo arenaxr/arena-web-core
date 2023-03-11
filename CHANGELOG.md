@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.17.0](https://github.com/arenaxr/arena-web-core/compare/v1.16.0...v1.17.0) (2023-03-03)
+
+
+### Features
+
+* Add model-update attr handle for gltf-model ([7a3c37b](https://github.com/arenaxr/arena-web-core/commit/7a3c37ba34d8946e9d33c54bd26acf44c9c9e5d2))
+* **build:** Add a GUI-only Rotation Euler degree editor ([36508d4](https://github.com/arenaxr/arena-web-core/commit/36508d41fc0355a8bf0a6f02f33d2cd55c6d3e7d))
+* **build:** migrate wire rotation format to quaternion-only ([7ea52d3](https://github.com/arenaxr/arena-web-core/commit/7ea52d39930e9f743f96d728ddb83fa41abf8f7f))
+
+
+### Bug Fixes
+
+* add source (head/hands name) to collision msg ([929aef6](https://github.com/arenaxr/arena-web-core/commit/929aef6c5a99b073ebf711c577bbecf0d1874fd4))
+* blink-controls teleportOrigin camera selector ([3ddf296](https://github.com/arenaxr/arena-web-core/commit/3ddf29608b643464fc2b77e29be7fe7b21db3984))
+* **build:** 'animation-mixer: {}' will not persist ([ebf95d6](https://github.com/arenaxr/arena-web-core/commit/ebf95d6929466c4ccdfdf16d4ed89edf6b3e1a7d))
+* **build:** account for animation-mixer infinity repitions ([2baacec](https://github.com/arenaxr/arena-web-core/commit/2baacec00786dc484dfcb3aac8b360405d195ae5))
+* **build:** add several missing defaults ([060099a](https://github.com/arenaxr/arena-web-core/commit/060099a2bbf0eb20657819007c63f1f038afd171))
+* **build:** fix missing/incorrect animation-mixer schema ([98a1b5f](https://github.com/arenaxr/arena-web-core/commit/98a1b5fcc417415153821c07e0fae81e13312971))
+* **build:** updated default definitions ([8a91d53](https://github.com/arenaxr/arena-web-core/commit/8a91d53aa3eb8cdef6db88d8e4fc60ca89d3902e))
+* **build:** use string for animation mixer repetitions ([47c9d1d](https://github.com/arenaxr/arena-web-core/commit/47c9d1dec1149a2fb233f7a0499bd2a2b5ce79b3))
+* **capsule:** corrected capsule mesh with standard three mesh ([9830b47](https://github.com/arenaxr/arena-web-core/commit/9830b47a4cba91eeb8c993a78c37fdf8b555a67f))
+* collision obj_id ([0e37344](https://github.com/arenaxr/arena-web-core/commit/0e373443f97acbc6da1fa77f2e0bdda312c158e9))
+* default collision listener object name ([73e414f](https://github.com/arenaxr/arena-web-core/commit/73e414f82ea38808e0fe3faf992f4340c05a2f38))
+* **hand:** controller sizing for magicleap1 ([e56259c](https://github.com/arenaxr/arena-web-core/commit/e56259c69c0bf19d33f2ef5bb6167c6ed457750d))
+* **hand:** remove orphaned hands when remote avatar leaves ([aec970e](https://github.com/arenaxr/arena-web-core/commit/aec970e9931fe375852a50735eca90a5707c5866))
+* **settings:** allow settings dialog to be transparent a little ([88d050a](https://github.com/arenaxr/arena-web-core/commit/88d050aa847c9c9a32a5678d49d3c3bf551439aa))
+* **thickline:** add default enum lineWidthStyler ([b2c46e5](https://github.com/arenaxr/arena-web-core/commit/b2c46e52c4397ca0e7badced94e7641ceff3c63f))
+* **thickline:** styler center-smooth should return a value ([f8268b7](https://github.com/arenaxr/arena-web-core/commit/f8268b7a8402cb4be0c8398487ba9035b088affa))
+* utils import ([ae8274e](https://github.com/arenaxr/arena-web-core/commit/ae8274e7a799fb05a167fdb9d8c206594d184551))
+
+## [1.16.0](https://github.com/arenaxr/arena-web-core/compare/v1.15.0...v1.16.0) (2023-01-31)
+
+
+### Features
+
+* add camFollow target ([d30e02e](https://github.com/arenaxr/arena-web-core/commit/d30e02e8faa8df17567090707db14afec875f3ad))
+* add parent to program schema; temporarily make 'pytest' the default ([8f03835](https://github.com/arenaxr/arena-web-core/commit/8f0383563b8b497c4601edfd15b2afff69a3f5a9))
+
+
+### Bug Fixes
+
+* add `playsinline` on all media tags for iOS ([96f90f6](https://github.com/arenaxr/arena-web-core/commit/96f90f6308ab9b3457af837867df946e0889e35e))
+* alter rig in xrSession for camera-override ([4f03855](https://github.com/arenaxr/arena-web-core/commit/4f038550675f52a3def69d2fdd5aa7b8307a605d))
+* copy pos and rot instead of matrix ([b74578f](https://github.com/arenaxr/arena-web-core/commit/b74578f1e167c431f86654b6fe98a7c88660d4ca))
+* don't req cam-access or CV when camFollow ([0b11522](https://github.com/arenaxr/arena-web-core/commit/0b11522caa27b977b217d30b040c5a792d371b2e))
+* handle uninited scene in camfollow override ([4012097](https://github.com/arenaxr/arena-web-core/commit/4012097b7441988f64c4de5812c2d2e5657d9610))
+* program schema ([62f4873](https://github.com/arenaxr/arena-web-core/commit/62f4873ea403fbf7077117f0240cd1ecaebac51b))
+* rig matrix calc for cam override ([c4d81b0](https://github.com/arenaxr/arena-web-core/commit/c4d81b0cd79aeeb6b65cd517267f354993d219b6))
+
 ## [1.15.0](https://github.com/arenaxr/arena-web-core/compare/v1.14.1...v1.15.0) (2023-01-18)
 
 

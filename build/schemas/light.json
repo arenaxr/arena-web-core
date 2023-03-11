@@ -1,6 +1,6 @@
 {
     "title": "Light",
-    "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.3.0/components/light.html'>https://aframe.io/docs/1.3.0/components/light.html</a>",
+    "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/light.html'>https://aframe.io/docs/1.4.0/components/light.html</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -64,6 +64,7 @@
                                 },
                                 "light": {
                                     "title": "light (deprecated; don't use)",
+                                    "deprecated": true,
                                     "description": "These attributes (light, intensity, color, ...) can be set directly on the light object (instead of this light attribute inside the light object); dont use in new light objects",
                                     "properties": {
                                         "type": {
@@ -237,6 +238,7 @@
                             "z": 0
                         },
                         "rotation": {
+                            "w": 1,
                             "x": 0,
                             "y": 0,
                             "z": 0

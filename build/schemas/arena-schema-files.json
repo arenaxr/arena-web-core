@@ -20,7 +20,7 @@
        "title":"Cone"
     },
     "cube":{
-       "description":"Cube (=Box) Geometry; Supported for Legacy reasons; Please use Box in new scenes",
+       "description":"Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
        "file":"schemas/cube.json",
        "title":"Cube (deprecated; don't use)"
     },
@@ -38,11 +38,6 @@
        "description":"Entities are the base of all objects in the scene. Entities are containers into which components can be attached.",
        "file":"schemas/entity.json",
        "title":"Entity (generic object)"
-    },
-    "event":{
-       "description":"Events are ephemeral messages used to send user events like mouse movements or controller actions.",
-       "file":"schemas/event.json",
-       "title":"Event (non-persist)"
     },
     "gltf-model":{
        "description":"Load a GLTF model",

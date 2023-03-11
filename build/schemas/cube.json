@@ -1,6 +1,6 @@
 {
     "title": "Cube (deprecated; don't use)",
-    "description": "Cube (=Box) Geometry; Supported for Legacy reasons; Please use Box in new scenes",
+    "description": "Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -12,6 +12,7 @@
                         {
                             "properties": {
                                 "object_type": {
+                                    "deprecated": true,
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",

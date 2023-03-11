@@ -265,7 +265,7 @@ export class ARENAJitsi {
             const audioId = `audio${participantId}`;
             // create HTML audio elem to store audio
             if (!document.getElementById(audioId)) {
-                $('a-assets').append(`<audio id='${audioId}'/>`);
+                $('a-assets').append(`<audio id='${audioId}' playsinline/>`);
             }
             track.attach($(`#${audioId}`)[0]);
         } else if (track.getType() == 'video') {
@@ -277,7 +277,7 @@ export class ARENAJitsi {
             const videoId = `video${participantId}`;
             // create HTML video elem to store video
             if (!document.getElementById(videoId)) {
-                $('a-assets').append(`<video autoplay='1' id='${videoId}'/>`);
+                $('a-assets').append(`<video autoplay='1' id='${videoId}' playsinline/>`);
             }
             track.attach($(`#${videoId}`)[0]);
 

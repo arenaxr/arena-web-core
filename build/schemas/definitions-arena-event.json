@@ -6,7 +6,7 @@
          "type": "string"
       },
       "persist": {
-         "default": "false",
+         "default": false,
          "description": "Persist this object in the database (default false = do not persist on server)",
          "type": "boolean"
       },

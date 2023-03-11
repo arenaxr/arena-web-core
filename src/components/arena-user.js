@@ -506,6 +506,14 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
+    remove: function () {
+        // camera special case, look for hands to delete
+        const elHandL = document.getElementById(`handLeft_${ARENA.idTag}`);
+        if (elHandL) elHandL.remove();
+        const elHandR = document.getElementById(`handRight_${ARENA.idTag}`);
+        if (elHandR) elHandR.remove();
+    },
+
     tick: function() {
         // do periodic a/v updates
         if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {

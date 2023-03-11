@@ -8,10 +8,6 @@
  * @date 2020
  */
 
-// TODO (mwfarb): use three ~r138, and we can use THREE.CapsuleGeometry() directly.
-
-// Currently using https://github.com/maximeq/three-js-capsule-geometry
-
 AFRAME.registerGeometry('capsule', {
     schema: {
         length: {default: 1, min: 0},
@@ -21,16 +17,11 @@ AFRAME.registerGeometry('capsule', {
     },
 
     init: function(data) {
-        this.geometry = new THREE.CapsuleBufferGeometry(
-            data.radius,
+        this.geometry = new THREE.CapsuleGeometry(
             data.radius,
             data.length,
             data.segmentsCap,
             data.segmentsRadial,
-            data.segmentsCap,
-            data.segmentsCap,
-            0,
-            Math.PI * 2,
         );
     },
 
