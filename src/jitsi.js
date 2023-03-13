@@ -347,6 +347,8 @@ export class ARENAJitsi {
     onConferenceJoined() {
         this.ready = true;
         console.log('Joined conf! localTracks.length: ', this.localTracks.length);
+        console.log(`jitsi.getRole()=${this.conference.getRole()}`);
+        console.log(`jitsi.isModerator()=${this.conference.isModerator()}`);
 
         if (this.localTracks.length == 0) {
             console.log('NO LOCAL TRACKS but UserId is: ', this.conference.myUserId());
