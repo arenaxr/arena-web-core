@@ -83,12 +83,10 @@ export class CreateUpdate {
             // handle attributes of object
             if (!this.setObjectAttributes(entityEl, message)) return;
 
-
             // experiment setting all to wireframe
             entityEl.setAttribute('material', 'wireframe', 'true');
-            entityEl.setAttribute('material', 'color', '#777777');
+            //entityEl.setAttribute('material', 'color', '#777777');
             entityEl.setAttribute('material-extras', 'wireframe', 'true');
-
 
             // add object to the scene after setting all attributes
             if (addObj) {

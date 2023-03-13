@@ -633,6 +633,12 @@ export class Arena {
                 sceneRoot.appendChild(light1);
             }).
             finally(() => {
+                // experiment setting all to wireframe
+                const environmentGround = document.getElementsByClassName('environment environmentGround')[0];
+                environmentGround.setAttribute('material', 'wireframe', 'true');
+                const environmentDressing = document.getElementsByClassName('environment environmentDressing')[0];
+                environmentDressing.setAttribute('material', 'wireframe', 'true');
+
                 this.sceneOptions = sceneOptions;
                 ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
             });
