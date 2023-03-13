@@ -634,11 +634,11 @@ export class Arena {
             }).
             finally(() => {
                 // experiment setting all to wireframe
-                grounds = document.getElementsByClassName('environment environmentGround');
+                const grounds = document.getElementsByClassName('environment environmentGround');
                 for (let i = 0; i < grounds.length; i++) {
                     grounds[i].setAttribute('material', 'wireframe', 'true');
                 }
-                dressings = document.getElementsByClassName('environment environmentDressing');
+                const dressings = document.getElementsByClassName('environment environmentDressing');
                 for (let i = 0; i < dressings.length; i++) {
                     dressings[i].setAttribute('material', 'wireframe', 'true');
                 }
