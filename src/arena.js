@@ -634,10 +634,14 @@ export class Arena {
             }).
             finally(() => {
                 // experiment setting all to wireframe
-                const environmentGround = document.getElementsByClassName('environment environmentGround')[0];
-                environmentGround.setAttribute('material', 'wireframe', 'true');
-                const environmentDressing = document.getElementsByClassName('environment environmentDressing')[0];
-                environmentDressing.setAttribute('material', 'wireframe', 'true');
+                grounds = document.getElementsByClassName('environment environmentGround');
+                for (let i = 0; i < grounds.length; i++) {
+                    grounds[i].setAttribute('material', 'wireframe', 'true');
+                }
+                dressings = document.getElementsByClassName('environment environmentDressing');
+                for (let i = 0; i < dressings.length; i++) {
+                    dressings[i].setAttribute('material', 'wireframe', 'true');
+                }
 
                 this.sceneOptions = sceneOptions;
                 ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
