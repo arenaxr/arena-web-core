@@ -347,8 +347,6 @@ export class ARENAJitsi {
     onConferenceJoined() {
         this.ready = true;
         console.log('Joined conf! localTracks.length: ', this.localTracks.length);
-        console.log(`jitsi.getRole()=${this.conference.getRole()}`);
-        console.log(`jitsi.isModerator()=${this.conference.isModerator()}`);
 
         if (this.localTracks.length == 0) {
             console.log('NO LOCAL TRACKS but UserId is: ', this.conference.myUserId());
@@ -515,6 +513,14 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+            this.conference.sendEndpointMessage('', ARENA.idTag); // update status to remotes
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, {// update status to local
+                jid: this.jitsiId,
+                id: ARENA.idTag,
+                status: {
+                    role:  this.conference.getRole(),
+                }
+            });
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
                 jid: this.jitsiId,
@@ -528,6 +534,16 @@ export class ARENAJitsi {
                 jid: id,
                 id: arenaId,
                 stats: stats,
+            });
+        });
+        this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, arenaId) => {
+            console.warn('ENDPOINT_MESSAGE_RECEIVED', id._displayName, arenaId, id._id, id._role);
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, {
+                jid: id._id,
+                id: arenaId,
+                status: {
+                    role: id._role,
+                }
             });
         });
 

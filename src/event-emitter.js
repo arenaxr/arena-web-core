@@ -166,6 +166,14 @@ export class ARENAEventEmitter {
          * @param stats {object} the statsObject obj of stats for the user
          */
         JITSI_STATS_REMOTE: 'jitsi_stats_remote',
+
+        /**
+         * @callback jitsiStatusCallback
+         * @param jid {string} the Jitsi conference id of the user, undefined for self
+         * @param id {string} the ARENA id of the user, undefined for self
+         * @param role {object} the statsObject obj of stats for the user
+         */
+        JITSI_STATUS: 'jitsi_status',
     };
 
     /**
