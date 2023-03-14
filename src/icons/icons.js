@@ -348,7 +348,7 @@ export class SideMenu {
         iconsDiv.appendChild(speedBtn);
         iconsDiv.appendChild(flyingBtn);
         if (isJitsi && !AFRAME.utils.device.isMobile()) {
-            iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesnt work
+            iconsDiv.appendChild(screenShareButton); // no screenshare on mobile - doesn't work
         }
         iconsDiv.appendChild(logoutBtn);
         iconsDiv.parentElement.classList.remove('d-none');
@@ -444,6 +444,16 @@ export class SideMenu {
         appendBold(formDiv, 'Scene: ');
         const sceneName = document.createElement('span');
         formDiv.appendChild(sceneName);
+        if (ARENA.isUserSceneWriter()) { // add permissions link
+            formDiv.append(" (");
+            const aSec = document.createElement("a");
+            aSec.href = `/user/profile/scenes/${ARENA.namespacedScene}`;
+            aSec.target = "_blank";
+            aSec.rel = "noopener noreferrer";
+            aSec.innerHTML = "Security";
+            formDiv.appendChild(aSec);
+            formDiv.append(")");
+        }
         formDiv.appendChild(document.createElement('br'));
 
         appendBold(formDiv, 'Authenticator: ');
