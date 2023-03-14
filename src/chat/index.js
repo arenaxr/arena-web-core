@@ -1052,7 +1052,7 @@ export class ARENAChat {
             iconModerator.className = 'fa fa-crown';
             iconModerator.style.color = 'black';
             iconModerator.style.paddingLeft = '5px';
-            iconModerator.title = status.role;
+            iconModerator.title = 'Moderator';
             uli.appendChild(iconModerator);
         }
     }
@@ -1085,7 +1085,7 @@ export class ARENAChat {
         let sendmax = '';
         lines.push(`Name: ${name}`);
         if (status && status.role) {
-            lines.push(`Role: ${status.role}`);
+            lines.push(`Jitsi Role: ${status.role}`);
         }
         if (stats.conn) {
             lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
