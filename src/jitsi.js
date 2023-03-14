@@ -220,7 +220,7 @@ export class ARENAJitsi {
         let screenShareEl = document.getElementById(screenShareId);
         if (!screenShareEl) {
             const sceneEl = document.querySelector('a-scene');
-            // create if doesnt exist
+            // create if doesn't exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
             screenShareEl.setAttribute('rotation.order', 'YXZ');
