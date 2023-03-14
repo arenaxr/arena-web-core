@@ -220,7 +220,7 @@ export class ARENAJitsi {
         let screenShareEl = document.getElementById(screenShareId);
         if (!screenShareEl) {
             const sceneEl = document.querySelector('a-scene');
-            // create if doesnt exist
+            // create if doesn't exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
             screenShareEl.setAttribute('rotation.order', 'YXZ');
@@ -513,6 +513,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+            this.updateUserStatus();
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
                 jid: this.jitsiId,
@@ -527,6 +528,9 @@ export class ARENAJitsi {
                 id: arenaId,
                 stats: stats,
             });
+        });
+        this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, statusPayload) => {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
@@ -581,6 +585,18 @@ export class ARENAJitsi {
             }.bind(this));
         }
         ARENA.health.removeError('connection.connectionFailed');
+    }
+
+    updateUserStatus() {
+        const statusPayload = {
+            jid: this.jitsiId,
+            id: ARENA.idTag,
+            status: {
+                role: this.conference.getRole(),
+            }
+        };
+        this.conference.sendEndpointMessage('', statusPayload);
+        ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
     }
 
     /**

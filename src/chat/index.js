@@ -65,6 +65,7 @@ export class ARENAChat {
             isSceneWriter: st.isSceneWriter !== undefined ? st.isSceneWriter : false,
             isSpeaker: false,
             stats: {},
+            status: {},
         };
 
         // users list
@@ -385,6 +386,7 @@ export class ARENAChat {
         ARENA.events.on(ARENAEventEmitter.events.CONFERENCE_ERROR, this.conferenceErrorCallback);
         ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback);
         ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_REMOTE, this.jitsiStatsRemoteCallback);
+        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATUS, this.jitsiStatusCallback);
     }
 
     /**
@@ -573,6 +575,24 @@ export class ARENAChat {
             }
         }
     };
+
+
+    jitsiStatusCallback = (e) => {
+        console.log('jitsiStatusCallback', e.detail)
+        const jid = e.detail.jid;
+        const arenaId = e.detail.id;
+        const status = e.detail.status;
+        // local
+        if (this.settings.userid == arenaId){
+            this.settings.status = status;
+        }
+        // remote
+        if (this.liveUsers[arenaId]) {
+            this.liveUsers[arenaId].status = status;
+        }
+        this.populateUserList();
+    };
+
 
     /**
      * Perform some async startup tasks.
@@ -860,6 +880,7 @@ export class ARENAChat {
                 type: _this.liveUsers[key].type,
                 speaker: _this.liveUsers[key].speaker,
                 stats: _this.liveUsers[key].stats,
+                status: _this.liveUsers[key].status,
             });
         });
 
@@ -889,7 +910,7 @@ export class ARENAChat {
             uli.style.color = 'green';
         }
         _this.usersList.appendChild(uli);
-        this.addJitsiStats(uli, this.settings.stats, uli.textContent);
+        this.addJitsiStats(uli, this.settings.stats, this.settings.status, uli.textContent);
         const uBtnCtnr = document.createElement('div');
         uBtnCtnr.className = 'users-list-btn-ctnr';
         uli.appendChild(uBtnCtnr);
@@ -987,7 +1008,7 @@ export class ARENAChat {
                 }
             }
             _this.usersList.appendChild(uli);
-            this.addJitsiStats(uli, user.stats, uli.textContent);
+            this.addJitsiStats(uli, user.stats, user.status, uli.textContent);
         });
         this.toSel.value = selVal; // preserve selected value
     }
@@ -998,7 +1019,7 @@ export class ARENAChat {
      * @param {Object} stats The jisti video stata object if any
      * @param {string} name The display name of the user
      */
-    addJitsiStats(uli, stats, name) {
+    addJitsiStats(uli, stats, status, name) {
         if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
@@ -1007,11 +1028,10 @@ export class ARENAChat {
         uli.appendChild(iconStats);
         const spanStats = document.createElement('span');
         uli.appendChild(spanStats);
-
         // show current stats on hover/mouseover
         const _this = this;
         iconStats.onmouseover = function() {
-            spanStats.textContent = (stats ? _this.getConnectionText(name, stats) : 'None');
+            spanStats.textContent = (stats ? _this.getConnectionText(name, stats, status) : 'None');
             const offset_ul = $('.user-list').offset();
             const midpoint_w = offset_ul.left + ($('.user-list').width() / 2);
             const midpoint_h = offset_ul.top + ($('.user-list').height() / 2);
@@ -1025,6 +1045,16 @@ export class ARENAChat {
         iconStats.onmouseleave = function() {
             $(this).next('span').fadeOut(200);
         };
+
+        // show moderator info
+        if (status && status.role == 'moderator'){
+            const iconModerator = document.createElement('i');
+            iconModerator.className = 'fa fa-crown';
+            iconModerator.style.color = 'black';
+            iconModerator.style.paddingLeft = '5px';
+            iconModerator.title = 'Moderator';
+            uli.appendChild(iconModerator);
+        }
     }
 
     /**
@@ -1050,10 +1080,13 @@ export class ARENAChat {
      * @param {Object} stats The jisti video stata object if any
      * @return {string} Readable stats
      */
-    getConnectionText(name, stats) {
+    getConnectionText(name, stats, status) {
         const lines = [];
         let sendmax = '';
         lines.push(`Name: ${name}`);
+        if (status && status.role) {
+            lines.push(`Jitsi Role: ${status.role}`);
+        }
         if (stats.conn) {
             lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
             if (stats.conn.bitrate) {
