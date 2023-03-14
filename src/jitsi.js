@@ -513,14 +513,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
-            this.conference.sendEndpointMessage('', ARENA.idTag); // update status to remotes
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, {// update status to local
-                jid: this.jitsiId,
-                id: ARENA.idTag,
-                status: {
-                    role:  this.conference.getRole(),
-                }
-            });
+            this.updateUserStatus();
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
                 jid: this.jitsiId,
@@ -536,15 +529,8 @@ export class ARENAJitsi {
                 stats: stats,
             });
         });
-        this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, arenaId) => {
-            console.warn('ENDPOINT_MESSAGE_RECEIVED', id._displayName, arenaId, id._id, id._role);
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, {
-                jid: id._id,
-                id: arenaId,
-                status: {
-                    role: id._role,
-                }
-            });
+        this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, statusPayload) => {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
@@ -599,6 +585,18 @@ export class ARENAJitsi {
             }.bind(this));
         }
         ARENA.health.removeError('connection.connectionFailed');
+    }
+
+    updateUserStatus() {
+        const statusPayload = {
+            jid: this.jitsiId,
+            id: ARENA.idTag,
+            status: {
+                role: this.conference.getRole(),
+            }
+        };
+        this.conference.sendEndpointMessage('', statusPayload);
+        ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
     }
 
     /**
