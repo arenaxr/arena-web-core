@@ -43,7 +43,8 @@ AFRAME.registerComponent('goto-url', {
 
         let fired = false;
         if (data.on && data.url) { // we have an event?
-            el.addEventListener(data.on, function(evt) {
+            el.removeEventListener(data.event, this.eventHandlerFn);
+            this.eventHandlerFn = function() {
                 if (!fired) {
                     fired = true;
                     Swal.fire({
@@ -73,7 +74,8 @@ AFRAME.registerComponent('goto-url', {
                         fired = false;
                     }, 100);
                 }
-            });
+            };
+            el.addEventListener(data.on, this.eventHandlerfn);
         } else {
             // `event` not specified, just log the message.
             console.log(data);
