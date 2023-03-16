@@ -34,6 +34,7 @@ AFRAME.registerSystem('attribution', {
                     _this.extractAttributionFromGtlfAsset(el, gltfComponent);
                 });
             }
+            // TODO: check FBX/OBJ
         });
     },
     /**

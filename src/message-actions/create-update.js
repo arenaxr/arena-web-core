@@ -212,6 +212,15 @@ export class CreateUpdate {
                 entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
             }
             break;
+        case 'fbx-model':
+            // support both url and src property
+            if (data.hasOwnProperty('url')) {
+                data.src = data.url; // make src=url
+                delete data.url; // remove attribute so we don't set it later
+            }
+            break;
+        case 'obj-model':
+            break;
         case 'gltf-model':
             if (ARENA.armode && data.hasOwnProperty('hide-on-enter-ar')) {
                 console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
@@ -370,7 +379,7 @@ export class CreateUpdate {
         for (let [attribute, value] of Object.entries(data)) {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
                 // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute == 'src' || attribute == 'url') value = ARENAUtils.crossOriginDropboxSrc(value);
+                if (attribute == 'src' || attribute == 'url'|| attribute == 'obj'|| attribute == 'mtl') value = ARENAUtils.crossOriginDropboxSrc(value);
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(cName);
                 } else {
@@ -417,6 +426,8 @@ export class CreateUpdate {
                 // ttl is applied to property 'seconds' of ttl component
                 entityEl.setAttribute('ttl', {seconds: value});
                 break;
+            case 'obj':
+            case 'mtl':
             case 'src':
             case 'url':
                 // replace dropbox links in any 'src'/'url' attributes that get here
@@ -427,6 +438,8 @@ export class CreateUpdate {
                     entityEl.removeAttribute(attribute);
                 } else {
                     // replace dropbox links in any url or src attribute inside value
+                    if (value.hasOwnProperty('mtl')) value.src = ARENAUtils.crossOriginDropboxSrc(value.mtl);
+                    if (value.hasOwnProperty('obj')) value.src = ARENAUtils.crossOriginDropboxSrc(value.obj);
                     if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                     if (value.hasOwnProperty('url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                     entityEl.setAttribute(attribute, value);

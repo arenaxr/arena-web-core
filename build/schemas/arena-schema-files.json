@@ -39,6 +39,11 @@
        "file":"schemas/entity.json",
        "title":"Entity (generic object)"
     },
+    "fbx-model":{
+      "description":"Load a FBX model",
+      "file":"schemas/fbx-model.json",
+      "title":"FBX Model"
+    },
     "gltf-model":{
        "description":"Load a GLTF model",
        "file":"schemas/gltf-model.json",
@@ -63,6 +68,11 @@
        "description":"Draw a line",
        "file":"schemas/line.json",
        "title":"Line"
+    },
+    "obj-model":{
+      "description":"Load an OBJ model",
+      "file":"schemas/obj-model.json",
+      "title":"OBJ Model"
     },
     "octahedron":{
        "description":"Octahedron Geometry",

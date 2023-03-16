@@ -1,0 +1,82 @@
+{
+    "title": "OBJ Model",
+    "description":"Loads a 3D model and material using a Wavefront (.OBJ) file and a .MTL file.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "obj-model"
+                                    ]
+                                },
+                                "obj": {
+                                    "description": "Url pointing to a .OBJ file",
+                                    "format": "uri",
+                                    "title": "OBJ Wavefront Url",
+                                    "type": "string"
+                                },
+                                "mtl": {
+                                    "description": "Url pointing to a .MTL file. Optional if you wish to use the material component instead.",
+                                    "format": "uri",
+                                    "title": "MTL Url",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "OBJ Model Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "obj-model",
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "w": 1,
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 1,
+                            "y": 1,
+                            "z": 1
+                        }
+                    },
+                    "required": [
+                        "object_type",
+                        "obj",
+                        "position",
+                        "rotation",
+                        "scale"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}

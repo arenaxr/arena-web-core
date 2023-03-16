@@ -1,0 +1,80 @@
+{
+    "title": "FBX Model",
+    "description":"Loader for FBX format. Supports ASCII, but *not* binary, models.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "fbx-model"
+                                    ]
+                                },
+                                "url": {
+                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under '/store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.fbx); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.fbx)",
+                                    "format": "uri",
+                                    "title": "Url",
+                                    "type": "string"
+                                },
+                                "crossorigin": {
+                                    "type": "string",
+                                    "default": ""
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "FBX Model Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "fbx-model",
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "w": 1,
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 1,
+                            "y": 1,
+                            "z": 1
+                        }
+                    },
+                    "required": [
+                        "object_type",
+                        "url",
+                        "position",
+                        "rotation",
+                        "scale"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}
