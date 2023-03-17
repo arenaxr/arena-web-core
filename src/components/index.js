@@ -46,11 +46,11 @@ import './video-control.js';
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
+import '@c-frame/aframe-particle-system-component'; // particle system
+//import 'aframe-spe-particles-component';
+
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
-
-// import 'aframe-particle-system-component';
-// import 'aframe-spe-particles-component';
 
 // direct file imports
 import './vendor/aframe-look-at-component.min.js'; // Look at component https://github.com/supermedium/superframe#readme
