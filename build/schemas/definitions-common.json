@@ -829,8 +829,8 @@
             },
             "size": {
                "description": "Describes a particle's size.",
-               "type": "number",
-               "default": 1
+               "type": "string",
+               "default": "[1]"
             },
             "direction": {
                "description": "The direction of the emitter. If value is 1, emitter will start at beginning of particle's lifecycle. If value is -1, emitter will start at end of particle's lifecycle and work it's way backwards.",
@@ -855,7 +855,7 @@
             "texture": {
                "description": "The texture used by this emitter.",
                "type": "string",
-               "default": "./images/star2.png"
+               "default": "static/images/textures/star2.png"
             },
             "randomise": {
                "description": "When a particle is re-spawned, whether it's position should be re-randomised or not. Can incur a performance hit.",
@@ -869,8 +869,15 @@
             },
             "blending": {
                "description": "The blending mode of the particles. Possible values are 0 (no blending), 1 (normal), 2 (additive), 3 (subtractive), 4 (multiply)",
-               "type": "number",
-               "default": 2
+               "enum": [
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+               ],
+               "type": "string",
+               "default": "2"
             },
             "maxParticleCount": {
                "description": "",
@@ -879,9 +886,10 @@
             }
          },
          "required": [
-            "texture"
+            "texture",
+            "size"
          ],
-         "title": "Particle system",
+         "title": "Particle System",
          "type": "object"
       }
     }
