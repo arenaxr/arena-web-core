@@ -853,7 +853,7 @@
                "default": 1000
             },
             "texture": {
-               "description": "The texture used by this emitter.",
+               "description": "The texture used by this emitter. Also available: 'static/images/textures/star2.png', static/images/textures/smokeparticle.png, static/images/textures/raindrop.png",
                "type": "string",
                "default": "static/images/textures/star2.png"
             },
