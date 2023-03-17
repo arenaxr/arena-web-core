@@ -737,6 +737,160 @@
          },
           "title": "Attribution",
           "type": "object"
-       }
+      },
+      "particle-system": {
+         "description": "Particle system component for A-Frame.",
+         "properties": {
+            "preset": {
+               "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
+               "enum": [
+                  "default",
+                  "dust",
+                  "snow",
+                  "rain"
+               ],
+               "type": "string",
+               "default": "default"
+            },
+            "maxAge": {
+               "description": "The particle's maximum age in seconds.",
+               "type": "number",
+               "default": 6
+            },
+            "positionSpread": {
+               "description": "Describes this emitter's position variance on a per-particle basis.",
+               "type": "string",
+               "default": "0 0 0"
+            },
+            "type": {
+               "description": "The default distribution this emitter should use to control its particle's spawn position and force behaviour. Possible values are 1 (box), 2 (sphere), 3 (disc)",
+               "type": "number",
+               "default": 1
+            },
+            "rotationAxis": {
+               "description": "Describes this emitter's axis of rotation. Possible values are x, y and z.",
+               "enum": [
+                  "x",
+                  "y",
+                  "x"
+               ],
+               "type": "string",
+               "default": "x"
+            },
+            "rotationAngle": {
+               "description": "The angle of rotation, given in radians. Dust preset is 3.14.",
+               "type": "number",
+               "default": 0
+            },
+            "rotationAngleSpread": {
+               "description": "The amount of variance in the angle of rotation per-particle, given in radians.",
+               "type": "number",
+               "default": 0
+            },
+            "accelerationValue": {
+               "description": "Describes this emitter's base acceleration.",
+               "type": "string",
+               "default": "0, -10, 0"
+            },
+            "accelerationSpread": {
+               "description": "Describes this emitter's acceleration variance on a per-particle basis.",
+               "type": "boolean",
+               "default": "10 0 10"
+            },
+            "velocityValue": {
+               "description": "Describes this emitter's base velocity.",
+               "type": "string",
+               "default": "0 25 0"
+            },
+            "velocitySpread": {
+               "description": "Describes this emitter's acceleration variance on a per-particle basis.",
+               "type": "string",
+               "default": "10 7.5 10"
+            },
+            "dragValue": {
+               "description": "Number between 0 and 1 describing drag applied to all particles.",
+               "type": "number",
+               "default": 0
+            },
+            "dragSpread": {
+               "description": "Number describing drag variance on a per-particle basis.",
+               "type": "number",
+               "default": 0
+            },
+            "dragRandomise": {
+               "description": "WHen a particle is re-spawned, whether it's drag should be re-randomised or not. Can incur a performance hit.",
+               "type": "boolean",
+               "default": false
+            },
+            "color": {
+               "description": "Describes a particle's color. This property is a 'value-over-lifetime' property, meaning an array of values can be given to describe specific value changes over a particle's lifetime.",
+               "type": "string",
+               "default": "#0000FF,#FF0000"
+            },
+            "size": {
+               "description": "Describes a particle's size.",
+               "type": "string",
+               "default": "[1]"
+            },
+            "direction": {
+               "description": "The direction of the emitter. If value is 1, emitter will start at beginning of particle's lifecycle. If value is -1, emitter will start at end of particle's lifecycle and work it's way backwards.",
+               "type": "number",
+               "default": 1
+            },
+            "duration": {
+               "description": "The duration in seconds that this emitter should live for. If not specified, the emitter will emit particles indefinitely.",
+               "type": "number",
+               "default": null
+            },
+            "enabled": {
+               "description": "When true the emitter will emit particles, when false it will not. This value can be changed dynamically during a scene. While particles are emitting, they will disappear immediately when set to false.",
+               "type": "boolean",
+               "default": true
+            },
+            "particleCount": {
+               "description": "The total number of particles this emitter will hold. NOTE: this is not the number of particles emitted in a second, or anything like that. The number of particles emitted per-second is calculated by particleCount ",
+               "type": "number",
+               "default": 1000
+            },
+            "texture": {
+               "description": "The texture used by this emitter. Also available: 'static/images/textures/star2.png', static/images/textures/smokeparticle.png, static/images/textures/raindrop.png",
+               "type": "string",
+               "default": "static/images/textures/star2.png"
+            },
+            "randomise": {
+               "description": "When a particle is re-spawned, whether it's position should be re-randomised or not. Can incur a performance hit.",
+               "type": "boolean",
+               "default": false
+            },
+            "opacity": {
+               "description": "Either a single number to describe the opacity of a particle.",
+               "type": "number",
+               "default": 1
+            },
+            "blending": {
+               "description": "The blending mode of the particles. Possible values are 0 (no blending), 1 (normal), 2 (additive), 3 (subtractive), 4 (multiply)",
+               "enum": [
+                  "0",
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+               ],
+               "type": "string",
+               "default": "2"
+            },
+            "maxParticleCount": {
+               "description": "",
+               "type": "number",
+               "default": 250000
+            }
+         },
+         "required": [
+            "texture",
+            "size"
+         ],
+         "title": "Particle System",
+         "type": "object"
+      }
     }
  }
