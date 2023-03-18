@@ -46,8 +46,8 @@ import './video-control.js';
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
-import '@c-frame/aframe-particle-system-component'; // particle system
-import 'aframe-spe-particles-component/dist/aframe-spe-particles-component';
+import '@c-frame/aframe-particle-system-component'; // particle system environment
+import 'aframe-spe-particles-component/dist/aframe-spe-particles-component'; // particles localized
 
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
