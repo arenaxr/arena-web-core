@@ -1140,7 +1140,7 @@
                "default": false,
                "type": "boolean"
             },
-            "randomizePpacity": {
+            "randomizeOpacity": {
                "description": "if true, re-randomize opacity when re-spawning a particle, can incur a performance hit",
                "default": false,
                "type": "boolean"
