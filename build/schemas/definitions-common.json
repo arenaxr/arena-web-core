@@ -739,7 +739,7 @@
           "type": "object"
       },
       "particle-system": {
-         "description": "Particle system component for A-Frame.",
+         "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>https://github.com/c-frame/aframe-particle-system-component</a>",
          "properties": {
             "preset": {
                "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
