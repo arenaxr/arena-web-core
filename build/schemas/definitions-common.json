@@ -86,7 +86,7 @@
              "loop":{
                 "default":0,
                 "description":"How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
-                "type":"number"
+                "type":"string"
              },
              "pauseEvents":{
                 "default":[
@@ -739,7 +739,7 @@
           "type": "object"
       },
       "particle-system": {
-         "description": "Particle system component for A-Frame.",
+         "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>https://github.com/c-frame/aframe-particle-system-component</a>",
          "properties": {
             "preset": {
                "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
@@ -891,6 +891,432 @@
          ],
          "title": "Particle System",
          "type": "object"
+      },
+      "spe-particles": {
+         "description": "GPU based particle systems in A-Frame. \n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>https://github.com/harlyq/aframe-spe-particles-component</a>",
+         "properties": {
+            "acceleration": {
+               "description": "for sphere and disc distributions, only the x axis is used",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "accelerationDistribution": {
+               "description": "distribution of particle acceleration, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for accelerationDistribution",
+               "default": "none",
+               "enum": [
+                  "none",
+                  "box",
+                  "sphere",
+                  "disc"
+               ],
+               "type": "string"
+            },
+            "accelerationSpread": {
+               "description": "spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "activeMultiplier": {
+               "description": "multiply the rate of particles emission, if larger than 1 then the particles will be emitted in bursts. note, very large numbers will emit all particles at once",
+               "default": "1",
+               "type": "number"
+            },
+            "affectedByFog": {
+               "description": "if true, the particles are affected by THREE js fog",
+               "default": true,
+               "type": "boolean"
+            },
+            "alphaTest": {
+               "description": "alpha values below the alphaTest threshold are considered invisible",
+               "default": "0",
+               "type": "number"
+            },
+            "angle": {
+               "description": "2D rotation of the particle over the particle's lifetime, max 4 elements",
+               "default": [
+                  0
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
+            },
+            "angleSpread": {
+               "description": "spread in angle over the particle's lifetime, max 4 elements",
+               "default": [
+                  0
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
+            },
+            "blending": {
+               "description": "blending mode, when drawing particles",
+               "default": "normal",
+               "enum": [
+                  "no",
+                  "normal",
+                  "additive",
+                  "subtractive",
+                  "multiply",
+                  "custom"
+               ],
+               "type": "string"
+            },
+            "color": {
+               "description": "array of colors over the particle's lifetime, max 4 elements",
+               "default": [
+                  "#fff"
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "string"
+               }
+            },
+            "colorSpread": {
+               "description": "spread to apply to colors, spread an array of vec3 (r g b) with 0 for no spread. note the spread will be re-applied through-out the lifetime of the particle",
+               "default": [],
+               "type": "array",
+               "items": {
+                  "$ref": "#/definitions/Vector3"
+               }
+            },
+            "depthTest": {
+               "description": "if true, don't render a particle's pixels if something is closer in the depth buffer",
+               "default": true,
+               "type": "boolean"
+            },
+            "depthWrite": {
+               "description": "if true, particles write their depth into the depth buffer. this should be false if we use transparent particles",
+               "default": false,
+               "type": "boolean"
+            },
+            "direction": {
+               "description": "make the emitter operate forward or backward in time",
+               "default": "forward",
+               "enum": [
+                  "forward",
+                  "backward"
+               ],
+               "type": "string"
+            },
+            "distribution": {
+               "description": "distribution for particle positions, velocities and acceleration. will be overriden by specific '...Distribution' attributes",
+               "default": "box",
+               "enum": [
+                  "box",
+                  "sphere",
+                  "disc"
+               ],
+               "type": "string"
+            },
+            "drag": {
+               "description": "apply resistance to moving the particle, 0 is no resistance, 1 is full resistance, particle will stop moving at half of it's maxAge",
+               "default": "0",
+               "type": "number"
+            },
+            "dragSpread": {
+               "description": "spread to apply to the drag attribute",
+               "default": "0",
+               "type": "number"
+            },
+            "duration": {
+               "description": "duration of the emitter (seconds), if less than 0 then continuously emit particles",
+               "default": "-1",
+               "type": "number"
+            },
+            "emitterScale": {
+               "description": "global scaling factor for all particles from the emitter",
+               "default": "100",
+               "type": "number"
+            },
+            "enableInSditor": {
+               "description": "enable the emitter while the editor is active (i.e. while scene is paused)",
+               "default": false,
+               "type": "boolean"
+            },
+            "enabled": {
+               "description": "enable/disable the emitter",
+               "default": true,
+               "type": "boolean"
+            },
+            "frustumCulled": {
+               "description": "enable/disable frustum culling",
+               "default": false,
+               "type": "boolean"
+            },
+            "hasPerspective": {
+               "description": "if true, particles will be larger the closer they are to the camera",
+               "default": true,
+               "type": "boolean"
+            },
+            "maxAge": {
+               "description": "maximum age of a particle before reusing",
+               "default": "1",
+               "type": "number"
+            },
+            "maxAgeSpread": {
+               "description": "variance for the 'maxAge' attribute",
+               "default": "0",
+               "type": "number"
+            },
+            "opacity": {
+               "description": "opacity over the particle's lifetime, max 4 elements",
+               "default": [
+                  1
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
+            },
+            "opacitySpread": {
+               "description": "spread in opacity over the particle's lifetime, max 4 elements",
+               "default": [0],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
+            },
+            "particleCount": {
+               "description": "maximum number of particles for this emitter",
+               "default": "100",
+               "type": "integer"
+            },
+            "positionDistribution": {
+               "description": "distribution of particle positions, disc and sphere will use the radius attributes. For box particles emit at 0,0,0, for sphere they emit on the surface of the sphere and for disc on the edge of a 2D disc on the XY plane",
+               "default": "none",
+               "enum": [
+                  "none",
+                  "box",
+                  "sphere",
+                  "disc"
+               ],
+               "type": "string"
+            },
+            "positionOffset": {
+               "description": "fixed offset to the apply to the emitter relative to its parent entity",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "positionSpread": {
+               "description": "particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "radius": {
+               "description": "radius of the disc or sphere emitter (ignored for box). note radius of 0 will prevent velocity and acceleration if they use a sphere or disc distribution",
+               "default": "1",
+               "type": "number"
+            },
+            "radiusScale": {
+               "description": "scales the emitter for sphere and disc shapes to form oblongs and ellipses",
+               "default": "{x: 1, y: 1, z: 1}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "randomizeAcceleration": {
+               "description": "if true, re-randomize acceleration when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeAngle": {
+               "description": "if true, re-randomize angle when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeColor": {
+               "description": "if true, re-randomize colour when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeDrag": {
+               "description": "if true, re-randomize drag when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeOpacity": {
+               "description": "if true, re-randomize opacity when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizePosition": {
+               "description": "if true, re-randomize position when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeRotation": {
+               "description": "if true, re-randomize rotation when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeSize": {
+               "description": "if true, re-randomize size when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "randomizeVelocity": {
+               "description": "if true, re-randomize velocity when re-spawning a particle, can incur a performance hit",
+               "default": false,
+               "type": "boolean"
+            },
+            "relative": {
+               "description": "world relative particles move relative to the world, while local particles move relative to the emitter (i.e. if the emitter moves, all particles move with it)",
+               "default": "local",
+               "enum": [
+                  "local",
+                  "world"
+               ],
+               "type": "string"
+            },
+            "rotation": {
+               "description": "rotation in degrees",
+               "default": "0",
+               "type": "number"
+            },
+            "rotationAxis": {
+               "description": "local axis when using rotation",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "rotationAxisSpread": {
+               "description": "variance in the axis of rotation",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "rotationSpread": {
+               "description": "rotation variance in degrees",
+               "default": "0",
+               "type": "number"
+            },
+            "rotationStatic": {
+               "description": "if true, the particles are fixed at their initial rotation value. if false, the particle will rotate from 0 to the 'rotation' value",
+               "default": false,
+               "type": "boolean"
+            },
+            "size": {
+               "description": "array of sizes over the particle's lifetime, max 4 elements",
+               "default": [
+                  1
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
+            },
+            "sizeSpread": {
+               "description": "spread in size over the particle's lifetime, max 4 elements",
+               "default": [
+                  0
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
+            },
+            "texture": {
+               "description": "texture to be used for each particle, may be a spritesheet",
+               "default": "",
+               "type": "string"
+            },
+            "textureFrameCount": {
+               "description": "number of frames in the spritesheet, negative numbers default to textureFrames.x * textureFrames.y",
+               "default": "-1",
+               "type": "integer"
+            },
+            "textureFrameLoop": {
+               "description": "number of times the spritesheet should be looped over the lifetime of a particle",
+               "default": "1",
+               "type": "integer"
+            },
+            "textureFrames": {
+               "description": "x and y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop)",
+               "default": "{x: 1, y: 1}",
+               "$ref": "#/definitions/Vector2"
+            },
+            "useTransparency": {
+               "description": "should the particles be rendered with transparency?",
+               "default": true,
+               "type": "boolean"
+            },
+            "velocity": {
+               "description": "for sphere and disc distributions, only the x axis is used",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "velocityDistribution": {
+               "description": "distribution of particle velocities, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for velocityDistribution",
+               "default": "none",
+               "enum": [
+                  "none",
+                  "box",
+                  "sphere",
+                  "disc"
+               ],
+               "type": "string"
+            },
+            "velocitySpread": {
+               "description": "variance for the velocity",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "wiggle": {
+               "description": "extra distance the particle moves over its lifetime",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            },
+            "wiggleSpread": {
+               "description": "+- spread for the wiggle attribute",
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
+            }
+         },
+         "required": [],
+         "title": "SPE Particles",
+         "type": "object"
       }
-    }
+   },
+   "definitions": {
+      "Vector2": {
+         "properties": {
+            "x": {
+               "type": "number"
+            },
+            "y": {
+               "type": "number"
+            }
+         },
+         "required": [
+            "x",
+            "y"
+         ],
+         "type": "object"
+      },
+      "Vector3": {
+         "properties": {
+            "x": {
+               "type": "number"
+            },
+            "y": {
+               "type": "number"
+            },
+            "z": {
+               "type": "number"
+            }
+         },
+         "required": [
+            "x",
+            "y",
+            "z"
+         ],
+         "type": "object"
+      }
+   }
  }
