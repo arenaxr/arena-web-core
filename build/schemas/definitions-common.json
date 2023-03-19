@@ -86,7 +86,7 @@
              "loop":{
                 "default":0,
                 "description":"How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
-                "type":"number"
+                "type":"string"
              },
              "pauseEvents":{
                 "default":[
@@ -902,12 +902,12 @@
             },
             "accelerationDistribution": {
                "description": "distribution of particle acceleration, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for accelerationDistribution",
-               "default": "NONE",
+               "default": "none",
                "enum": [
-                  "NONE",
-                  "BOX",
-                  "SPHERE",
-                  "DISC"
+                  "none",
+                  "box",
+                  "sphere",
+                  "disc"
                ],
                "type": "string"
             },
@@ -936,14 +936,22 @@
                "default": [
                   0
                ],
-               "type": "array"
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
             },
             "angleSpread": {
                "description": "spread in angle over the particle's lifetime, max 4 elements",
                "default": [
                   0
                ],
-               "type": "array"
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
             },
             "blending": {
                "description": "blending mode, when drawing particles",
@@ -963,12 +971,19 @@
                "default": [
                   "#fff"
                ],
-               "type": "array"
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "string"
+               }
             },
             "colorSpread": {
                "description": "spread to apply to colors, spread an array of vec3 (r g b) with 0 for no spread. note the spread will be re-applied through-out the lifetime of the particle",
                "default": [],
-               "type": "array"
+               "type": "array",
+               "items": {
+                  "$ref": "#/definitions/Vector3"
+               }
             },
             "depthTest": {
                "description": "if true, don't render a particle's pixels if something is closer in the depth buffer",
@@ -991,11 +1006,11 @@
             },
             "distribution": {
                "description": "distribution for particle positions, velocities and acceleration. will be overriden by specific '...Distribution' attributes",
-               "default": "BOX",
+               "default": "box",
                "enum": [
-                  "BOX",
-                  "SPHERE",
-                  "DISC"
+                  "box",
+                  "sphere",
+                  "disc"
                ],
                "type": "string"
             },
@@ -1051,13 +1066,23 @@
             },
             "opacity": {
                "description": "opacity over the particle's lifetime, max 4 elements",
-               "default": [1],
-               "type": "array"
+               "default": [
+                  1
+               ],
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
             },
             "opacitySpread": {
                "description": "spread in opacity over the particle's lifetime, max 4 elements",
                "default": [0],
-               "type": "array"
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
             },
             "particleCount": {
                "description": "maximum number of particles for this emitter",
@@ -1066,12 +1091,12 @@
             },
             "positionDistribution": {
                "description": "distribution of particle positions, disc and sphere will use the radius attributes. For box particles emit at 0,0,0, for sphere they emit on the surface of the sphere and for disc on the edge of a 2D disc on the XY plane",
-               "default": "NONE",
+               "default": "none",
                "enum": [
-                  "NONE",
-                  "BOX",
-                  "SPHERE",
-                  "DISC"
+                  "none",
+                  "box",
+                  "sphere",
+                  "disc"
                ],
                "type": "string"
             },
@@ -1179,14 +1204,22 @@
                "default": [
                   1
                ],
-               "type": "array"
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
             },
             "sizeSpread": {
                "description": "spread in size over the particle's lifetime, max 4 elements",
                "default": [
                   0
                ],
-               "type": "array"
+               "type": "array",
+               "maxItems": 4,
+               "items": {
+                  "type": "number"
+               }
             },
             "texture": {
                "description": "texture to be used for each particle, may be a spritesheet",
@@ -1220,12 +1253,12 @@
             },
             "velocityDistribution": {
                "description": "distribution of particle velocities, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for velocityDistribution",
-               "default": "NONE",
+               "default": "none",
                "enum": [
-                  "NONE",
-                  "BOX",
-                  "SPHERE",
-                  "DISC"
+                  "none",
+                  "box",
+                  "sphere",
+                  "disc"
                ],
                "type": "string"
             },
@@ -1236,13 +1269,13 @@
             },
             "wiggle": {
                "description": "extra distance the particle moves over its lifetime",
-               "default": "0",
-               "type": "number"
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
             },
             "wiggleSpread": {
                "description": "+- spread for the wiggle attribute",
-               "default": "0",
-               "type": "number"
+               "default": "{x: 0, y: 0, z: 0}",
+               "$ref": "#/definitions/Vector3"
             }
          },
          "required": [],
