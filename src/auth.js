@@ -30,7 +30,7 @@ if (!storageAvailable('localStorage')) {
     const title = 'LocalStorage has been disabled';
     const text = 'The ARENA needs LocalStorage. ' +
         'Bugs are coming! Perhaps you have disabled cookies?';
-    authError(title, text);
+    authError(title, text, 'localStorageDisabled');
 }
 
 window.onload = function() {
@@ -49,10 +49,10 @@ window.onload = function() {
  * @param {string} title Title of error
  * @param {string} text Error message
  */
-function authError(title, text) {
+function authError(title, text, status) {
     console.error(`${title}: ${text}`);
     if (typeof ARENA !== 'undefined' && ARENA.health) {
-        ARENA.health.addError(title);
+        ARENA.health.addError(`user.${status}`);
     } else {
         Swal.fire({
             icon: 'error',
@@ -144,7 +144,7 @@ function requestAuthState() {
         if (xhr.status !== 200) {
             const title = 'Error loading user state';
             const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
-            authError(title, text);
+            authError(title, text, xhr.status);
         } else {
             AUTH.authenticated = xhr.response.authenticated;
             AUTH.user_type = xhr.response.type; // user database auth state
@@ -233,7 +233,7 @@ function requestMqttToken(authType, mqttUsername) {
         if (xhr.status !== 200) {
             const title = 'Error loading MQTT token';
             const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
-            authError(title, text);
+            authError(title, text, xhr.status);
         } else {
             AUTH.user_type = authType;
             AUTH.user_username = xhr.response.username;

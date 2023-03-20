@@ -377,6 +377,7 @@ export class Arena {
                     showConfirmButton: true,
                     confirmButtonText: 'Ok',
                 });
+                ARENA.health.addError(`persist.${xhr.status}`);
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
                     console.error('No scene objects found in persistence.');
@@ -498,6 +499,7 @@ export class Arena {
                     showConfirmButton: true,
                     confirmButtonText: 'Ok',
                 });
+                ARENA.health.addError(`persist.${xhr.status}`);
             } else {
                 const arenaObjects = xhr.response;
                 const l = arenaObjects.length;

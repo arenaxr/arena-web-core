@@ -111,11 +111,14 @@ function drawErrorBlock(errors) {
     $('#error-block').append('<table id="error-list"><tbody></tbody></table><hr>');
     // add list of errors
     for (const [k, v] of Object.entries(errors)) {
-        $('#error-list').find('tbody')
-            .append($('<tr>')
-                .append($(`<td class="w-75"><span class="${v.class}">${v.title}</span></td>`))
-                .append(`<td class="w-25"><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
-    };
+        const err = $("<tr>").append($(`<td class="w-75"><span class="${v.class}">${v.title}</span></td>`));
+        if (v.helpLink) {
+            err.append(
+                `<td class="w-25"><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`
+            );
+        }
+        $("#error-list").find("tbody").append(err);
+    }
     // add reload option
     const reload = $('<table>')
         .append($('<tbody>')
