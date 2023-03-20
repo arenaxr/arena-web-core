@@ -55,6 +55,8 @@ export class Arena {
         this.ATLASurl = ARENAUtils.getUrlParam('ATLASurl', this.defaults.ATLASurl);
         this.localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.latencyTopic = this.defaults.latencyTopic;
+        this.fullRender = false; // deny some rendering until auth/moderator completes if needed
+
         // get url params
         const url = new URL(window.location.href);
         this.skipav = url.searchParams.get('skipav');
@@ -96,6 +98,32 @@ export class Arena {
         });
         // setup webar session
         this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, ARENAWebARUtils.handleARButtonForNonWebXRMobile);
+    }
+
+    enableFullRender(enable) {
+        // set render state
+        this.fullRender = enable;
+
+        // experiment setting all to wireframe
+        const grounds = document.getElementsByClassName('environment environmentGround');
+        for (let i = 0; i < grounds.length; i++) {
+            grounds[i].setAttribute('material', 'wireframe', `${!enable}`);
+        }
+        const dressings = document.getElementsByClassName('environment environmentDressing');
+        for (let i = 0; i < dressings.length; i++) {
+            dressings[i].setAttribute('material', 'wireframe', `${!enable}`);
+        }
+        const sceneRoot  = document.getElementById("sceneRoot");
+        const entities = sceneRoot.getElementsByTagName("a-*"); // search all scene objects
+        for (let i = 0; i < entities.length; i++) {
+            // sloppy, prob need to test
+            if (entities[i].hasAttribute('material')){
+                entities[i].setAttribute('material', 'wireframe', `${!enable}`);
+            }
+            if (entities[i].hasAttribute('material-extras')){
+                entities[i].setAttribute('material-extras', 'wireframe', `${!enable}`);
+            }
+        }
     }
 
     /**
@@ -635,16 +663,7 @@ export class Arena {
                 sceneRoot.appendChild(light1);
             }).
             finally(() => {
-                // experiment setting all to wireframe
-                const grounds = document.getElementsByClassName('environment environmentGround');
-                for (let i = 0; i < grounds.length; i++) {
-                    grounds[i].setAttribute('material', 'wireframe', 'true');
-                }
-                const dressings = document.getElementsByClassName('environment environmentDressing');
-                for (let i = 0; i < dressings.length; i++) {
-                    dressings[i].setAttribute('material', 'wireframe', 'true');
-                }
-
+                this.enableFullRender(this.fullRender);
                 this.sceneOptions = sceneOptions;
                 ARENA.events.emit(ARENAEventEmitter.events.SCENE_OPT_LOADED, true);
             });

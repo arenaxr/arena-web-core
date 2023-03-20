@@ -546,6 +546,9 @@ export class SideMenu {
             cam.setAttribute('arena-camera', {
                 showStats: !showStats,
             });
+
+            //TODO remove hack
+            ARENA.enableFullRender(true);
         }
 
         /**
