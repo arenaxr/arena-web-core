@@ -407,6 +407,15 @@ export class SideMenu {
         appendBold(pagesDiv, 'Pages: ');
         formDiv.appendChild(pagesDiv);
 
+        const scenes = document.createElement('a');
+        scenes.href = `/scenes`;
+        scenes.target = '_blank';
+        scenes.rel = 'noopener noreferrer';
+        scenes.innerHTML = 'Scenes';
+        pagesDiv.appendChild(scenes);
+
+        pagesDiv.append(' | ');
+
         const edit = document.createElement('a');
         edit.href = `/build/?scene=${ARENA.namespacedScene}`;
         edit.target = '_blank';
