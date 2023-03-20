@@ -1034,7 +1034,7 @@
                "default": "100",
                "type": "number"
             },
-            "enableInSditor": {
+            "enableInEditor": {
                "description": "enable the emitter while the editor is active (i.e. while scene is paused)",
                "default": false,
                "type": "boolean"
@@ -1269,13 +1269,13 @@
             },
             "wiggle": {
                "description": "extra distance the particle moves over its lifetime",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
+               "default": "0",
+               "type": "number"
             },
             "wiggleSpread": {
                "description": "+- spread for the wiggle attribute",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
+               "default": "0",
+               "type": "number"
             }
          },
          "required": [],
