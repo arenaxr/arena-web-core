@@ -830,8 +830,9 @@
                   "#FF0000"
                ],
                "items": {
+                  "format": "color",
                   "type": "string"
-               }
+                  }
             },
             "size": {
                "description": "Describes a particle's size.",
@@ -1007,8 +1008,9 @@
                "type": "array",
                "maxItems": 4,
                "items": {
+                  "format": "color",
                   "type": "string"
-               }
+                  }
             },
             "colorSpread": {
                "description": "spread to apply to colors, spread an array of vec3 (r g b) with 0 for no spread. note the spread will be re-applied through-out the lifetime of the particle",
@@ -1315,6 +1317,95 @@
          },
          "required": [],
          "title": "SPE Particles",
+         "type": "object"
+      },
+      "ocean": {
+         "description": "Flat-shaded ocean primitive.",
+         "properties": {
+            "width": {
+               "description": "Width of the ocean area.",
+               "default": 10,
+               "minValue": 0,
+               "type": "number"
+            },
+            "depth": {
+               "description": "Depth of the ocean area.",
+               "default": 10,
+               "minValue": 0,
+               "type": "number"
+            },
+            "density": {
+               "description": "Density of waves.",
+               "default": 10,
+               "type": "number"
+            },
+            "amplitude": {
+               "description": "Wave amplitude.",
+               "default": 0.1,
+               "type": "number"
+            },
+            "amplitudeVariance": {
+               "description": "Wave amplitude variance.",
+               "default": 0.3,
+               "type": "number"
+            },
+            "speed": {
+               "description": "Wave speed.",
+               "default": 1,
+               "type": "number"
+            },
+            "speedVariance": {
+               "description": "Wave speed variance.",
+               "default": 2,
+               "type": "number"
+            },
+            "color": {
+               "description": "Wave color.",
+               "default": "#7AD2F7",
+               "format": "color",
+               "type": "string"
+               },
+            "opacity": {
+               "description": "Wave opacity.",
+               "default": 0.8,
+               "type": "number"
+            }
+         },
+         "required": [],
+         "title": "Ocean",
+         "type": "object"
+      },
+      "tube": {
+         "description": "Tube following a custom path.",
+         "properties": {
+            "path": {
+               "default": [],
+               "type": "array",
+               "items": {
+                  "$ref": "#/definitions/Vector3"
+               }
+            },
+            "segments": {
+               "default": 64,
+               "type": "number"
+            },
+            "radius": {
+               "default": 1,
+               "type": "number"
+            },
+            "radialSegments": {
+               "default": 8,
+               "type": "number"
+            },
+            "closed": {
+               "default": false,
+               "type": "boolean"
+            }
+         },
+         "required": [
+            "path"
+         ],
+         "title": "Tube",
          "type": "object"
       }
    },
