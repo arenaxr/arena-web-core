@@ -64,6 +64,11 @@
        "file":"schemas/line.json",
        "title":"Line"
     },
+    "ocean":{
+       "description":"Ocean",
+       "file":"schemas/ocean.json",
+       "title":"Ocean"
+    },
     "octahedron":{
        "description":"Octahedron Geometry",
        "file":"schemas/octahedron.json",

@@ -830,8 +830,9 @@
                   "#FF0000"
                ],
                "items": {
+                  "format": "color",
                   "type": "string"
-               }
+                  }
             },
             "size": {
                "description": "Describes a particle's size.",
@@ -1007,8 +1008,9 @@
                "type": "array",
                "maxItems": 4,
                "items": {
+                  "format": "color",
                   "type": "string"
-               }
+                  }
             },
             "colorSpread": {
                "description": "spread to apply to colors, spread an array of vec3 (r g b) with 0 for no spread. note the spread will be re-applied through-out the lifetime of the particle",

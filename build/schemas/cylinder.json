@@ -70,7 +70,7 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "cylinder",
-                        "height": 2,
+                        "height": 1,
                         "radius": 1,
                         "material": {
                             "color": "#7f7f7f"

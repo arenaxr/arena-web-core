@@ -56,6 +56,7 @@
                     "default": {
                         "object_type": "capsule",
                         "radius": 1,
+                        "length": 1,
                         "material": {
                             "color": "#7f7f7f"
                         },
