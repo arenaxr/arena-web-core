@@ -60,7 +60,7 @@
                   "linear"
                ],
                "default":"easeInQuad",
-                "description":"Easing function of animation. To ease in, ease out, ease in and out.",
+                "description":"Easing function of animation. To ease in, ease out, ease in and out. Lists at <a href='https://easings.net'>https://easings.net</a>",
                 "type":"string"
              },
              "elasticity":{
