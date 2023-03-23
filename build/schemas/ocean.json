@@ -1,0 +1,107 @@
+{
+    "title": "Ocean",
+    "description": "Flat-shaded ocean primitive.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": [
+                                        "ocean"
+                                    ]
+                                },
+                                "width": {
+                                    "description": "Width of the ocean area.",
+                                    "default": 10,
+                                    "minValue": 0,
+                                    "type": "number"
+                                },
+                                "depth": {
+                                    "description": "Depth of the ocean area.",
+                                    "default": 10,
+                                    "minValue": 0,
+                                    "type": "number"
+                                },
+                                "density": {
+                                    "description": "Density of waves.",
+                                    "default": 10,
+                                    "type": "number"
+                                },
+                                "amplitude": {
+                                    "description": "Wave amplitude.",
+                                    "default": 0.1,
+                                    "type": "number"
+                                },
+                                "amplitudeVariance": {
+                                    "description": "Wave amplitude variance.",
+                                    "default": 0.3,
+                                    "type": "number"
+                                },
+                                "speed": {
+                                    "description": "Wave speed.",
+                                    "default": 1,
+                                    "type": "number"
+                                },
+                                "speedVariance": {
+                                    "description": "Wave speed variance.",
+                                    "default": 2,
+                                    "type": "number"
+                                },
+                                "color": {
+                                    "description": "Wave color.",
+                                    "default": "#7AD2F7",
+                                    "format": "color",
+                                    "type": "string"
+                                },
+                                "opacity": {
+                                    "description": "Wave opacity.",
+                                    "default": 0.8,
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        }
+                    ],
+                    "title": "Ocean Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "ocean",
+                        "width": 10,
+                        "depth": 10,
+                        "color": "#7AD2F7",
+                        "rotation": {
+                            "w": -0.70711,
+                            "x": 0.70711,
+                            "y": 0,
+                            "z": 0
+                        }
+                    },
+                    "required": [
+                        "object_type",
+                        "width",
+                        "depth",
+                        "color"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}

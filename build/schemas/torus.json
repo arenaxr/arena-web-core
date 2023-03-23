@@ -61,6 +61,7 @@
                     "default": {
                         "object_type": "torus",
                         "radius": 1,
+                        "radiusTubular": 0.4,
                         "material": {
                             "color": "#7f7f7f"
                         },
