@@ -383,6 +383,7 @@ export class SideMenu {
         const credits = document.createElement('a');
         credits.href = '#';
         credits.innerHTML = 'Credits';
+        credits.title = 'Show the credits for models in the scene';
         credits.onclick = showCredits;
         statusDiv.appendChild(credits);
 
@@ -391,6 +392,7 @@ export class SideMenu {
         const stats = document.createElement('a');
         stats.href = '#';
         stats.innerHTML = 'Stats';
+        stats.title = 'Show the A-Frame performance stats and user pose data for you';
         stats.onclick = showStats;
         statusDiv.append(stats);
 
@@ -399,6 +401,7 @@ export class SideMenu {
         const perms = document.createElement('a');
         perms.href = '#';
         perms.innerHTML = 'Permissions';
+        perms.title = 'Show the security permissions for you in the scene';
         perms.onclick = showPerms;
         statusDiv.appendChild(perms);
 
@@ -412,6 +415,7 @@ export class SideMenu {
         edit.target = '_blank';
         edit.rel = 'noopener noreferrer';
         edit.innerHTML = 'Editor';
+        edit.title = 'Open the Scene Editor for this scene in a new page';
         pagesDiv.appendChild(edit);
 
         pagesDiv.append(' | ');
@@ -429,6 +433,7 @@ export class SideMenu {
         docs.target = '_blank';
         docs.rel = 'noopener noreferrer';
         docs.innerHTML = 'Docs';
+        docs.title = 'Open the ARENA documentation in another page';
         pagesDiv.appendChild(docs);
 
         pagesDiv.append(' | ');
@@ -438,6 +443,7 @@ export class SideMenu {
         version.target = '_blank';
         version.rel = 'noopener noreferrer';
         version.innerHTML = 'Version';
+        version.title = 'Show the ARENA versions listed on a new page';
         pagesDiv.appendChild(version);
 
         // Auth status
@@ -451,6 +457,7 @@ export class SideMenu {
             aSec.target = "_blank";
             aSec.rel = "noopener noreferrer";
             aSec.innerHTML = "Security";
+            aSec.title = 'Open the security controls for the scene (editors only)';
             formDiv.appendChild(aSec);
             formDiv.append(")");
         }
