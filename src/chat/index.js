@@ -577,8 +577,12 @@ export class ARENAChat {
     };
 
 
+    /**
+     * Called when Jitsi remote and local status object is updated.
+     * Defined as a closure to capture 'this'
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
     jitsiStatusCallback = (e) => {
-        console.log('jitsiStatusCallback', e.detail)
         const jid = e.detail.jid;
         const arenaId = e.detail.id;
         const status = e.detail.status;

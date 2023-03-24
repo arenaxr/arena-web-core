@@ -168,10 +168,13 @@ export class ARENAEventEmitter {
         JITSI_STATS_REMOTE: 'jitsi_stats_remote',
 
         /**
+         * Indicates an update of remote Jitsi user status state. The event provides
+         * the following parameters to its listeners (event.detail object):
+         *
          * @callback jitsiStatusCallback
          * @param jid {string} the Jitsi conference id of the user, undefined for self
          * @param id {string} the ARENA id of the user, undefined for self
-         * @param role {object} the statsObject obj of stats for the user
+         * @param status {object} the Status object with role and other state data
          */
         JITSI_STATUS: 'jitsi_status',
     };
