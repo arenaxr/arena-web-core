@@ -423,6 +423,7 @@ export class SideMenu {
         const profile = document.createElement('a');
         profile.href = '#';
         profile.innerHTML = 'Profile';
+        profile.title = 'Open your user account Profile in a new page';
         profile.onclick = showProfile;
         pagesDiv.append(profile);
 
