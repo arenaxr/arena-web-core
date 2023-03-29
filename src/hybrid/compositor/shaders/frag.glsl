@@ -2,9 +2,9 @@
 
 varying vec2 vUv;
 
-uniform sampler2D tDiffuse;
-uniform sampler2D tStream;
-uniform sampler2D tDepth;
+uniform sampler2D tLocalColor;
+uniform sampler2D tLocalDepth;
+uniform sampler2D tRemoteColor;
 
 uniform float cameraNear;
 uniform float cameraFar;
@@ -15,6 +15,8 @@ uniform bool vrMode;
 
 uniform ivec2 windowSize;
 uniform ivec2 streamSize;
+
+#define DEPTH_SCALAR    50.0
 
 // float rgb2hue(vec3 c) {
 //     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -31,26 +33,9 @@ uniform ivec2 streamSize;
 //     return mask;
 // }
 
-float readDepthDiffuseOld( sampler2D depthSampler, vec2 coord ) {
-    float fragCoordZ = texture2D( depthSampler, coord ).x;
-    return fragCoordZ;
-
-    // float viewZ = perspectiveDepthToViewZ( fragCoordZ, cameraNear, cameraFar );
-    // return viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-
-    // https://sites.google.com/site/cgwith3js/home/depth-buffer-visualization
-    float ndcZ = 2.0 * fragCoordZ - 1.0;
-    float linearDepth = (2.0 * cameraNear * cameraFar) / (cameraFar + cameraNear - ndcZ * (cameraFar - cameraNear));
-    return (linearDepth - cameraNear) / (cameraFar - cameraNear);
-
-    // float _ZBufferParamsX = 1.0 - cameraFar / cameraNear;
-    // float _ZBufferParamsY = cameraFar / cameraNear;
-    // return 1.0 / (_ZBufferParamsX * fragCoordZ + _ZBufferParamsY);
-}
-
 float readDepthStream(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).x;
-    return depth / 50.0;
+    return depth / DEPTH_SCALAR;
 }
 
 float readDepthDiffuse(sampler2D depthSampler, vec2 coord) {
@@ -96,8 +81,8 @@ void main() {
     vec2 coordDiffuseColor = coordDestNormalized;
     vec2 coordDiffuseDepth = coordDestNormalized;
 
-    vec4 diffuseColor = texture2D( tDiffuse, coordDiffuseColor );
-    float diffuseDepth = readDepthDiffuse( tDepth, coordDiffuseDepth );
+    vec4 diffuseColor = texture2D( tLocalColor, coordDiffuseColor );
+    float diffuseDepth = readDepthDiffuse( tLocalDepth, coordDiffuseDepth );
 
     vec4 streamColor;
     float streamDepth;
@@ -118,18 +103,18 @@ void main() {
             coordStreamDepth.x = xcoord / 4.0 + 0.75;
         }
 
-        streamColor = texture2D( tStream, coordStreamColor );
-        streamDepth = readDepthStream( tStream, coordStreamDepth );
+        streamColor = texture2D( tRemoteColor, coordStreamColor );
+        streamDepth = readDepthStream( tRemoteColor, coordStreamDepth );
     }
     else {
         vec2 coordStreamColor = coordStreamNormalized;
         vec2 coordStreamDepth = vec2(coordStreamNormalized.x + 0.5, coordStreamNormalized.y);
 
-        streamColor = texture2D( tStream, coordStreamColor );
-        streamDepth = readDepthStream( tStream, coordStreamDepth );
+        streamColor = texture2D( tRemoteColor, coordStreamColor );
+        streamDepth = readDepthStream( tRemoteColor, coordStreamDepth );
     }
 
-    bool ignore = false; // readMask( tStream, coordStreamDepth );
+    bool ignore = false; // readMask( tRemoteColor, coordStreamDepth );
 
     vec4 color;
     if (!targetWidthGreater ||
@@ -138,15 +123,13 @@ void main() {
             // color = streamColor;
             // color = diffuseDepth * streamColor + streamDepth * diffuseColor;
 
-            if (arMode) {
+            if (streamDepth <= diffuseDepth) {
                 color = vec4(streamColor.rgb, 1.0);
-                // if (streamDepth >= 0.99) {
-                    // color = vec4(0.0);
-                // }
+                // handles passthrough
+                if (arMode && streamDepth >= 0.9 / DEPTH_SCALAR) {
+                    color = diffuseColor;
+                }
             }
-            else
-            if (streamDepth <= diffuseDepth)
-                color = vec4(streamColor.rgb, 1.0);
             else
                 color = diffuseColor;
         }

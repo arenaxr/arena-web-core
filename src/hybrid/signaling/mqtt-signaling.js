@@ -1,4 +1,4 @@
-import {ARENAUtils} from '../../../utils';
+import {ARENAUtils} from '../../utils';
 
 const Paho = require('paho-mqtt');
 
@@ -153,9 +153,5 @@ export class MQTTSignaling {
 
     sendStats(stats) {
         this.publish(`${CLIENT_STATS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, JSON.stringify(stats));
-    }
-
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }

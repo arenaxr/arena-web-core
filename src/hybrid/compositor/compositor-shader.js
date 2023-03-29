@@ -1,12 +1,12 @@
 export const CompositorShader = {
     uniforms: {
-        tDiffuse: {
+        tLocalColor: {
             type: 't', value: new THREE.Texture(),
         },
-        tStream: {
+        tRemoteColor: {
             type: 't', value: new THREE.Texture(),
         },
-        tDepth: {
+        tLocalDepth: {
             type: 't', value: new THREE.Texture(),
         },
         windowSize: {

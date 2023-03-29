@@ -23,7 +23,7 @@ export class CompositorPass extends Pass {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.encoding = THREE.sRGBEncoding;
 
-        this.material.uniforms.tStream.value = videoTexture;
+        this.material.uniforms.tRemoteColor.value = videoTexture;
         this.material.uniforms.streamSize.value = [this.videoSource.videoWidth, this.videoSource.videoHeight];
         this.material.uniforms.cameraNear.value = this.camera.near;
         this.material.uniforms.cameraFar.value = this.camera.far;
@@ -63,8 +63,8 @@ export class CompositorPass extends Pass {
     }
 
     render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
-        this.material.uniforms.tDiffuse.value = readBuffer.texture;
-        this.material.uniforms.tDepth.value = readBuffer.depthTexture;
+        this.material.uniforms.tLocalColor.value = readBuffer.texture;
+        this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
 
         renderer.setRenderTarget( writeBuffer );
         this.fsQuad.render( renderer );

@@ -146,12 +146,12 @@ AFRAME.registerSystem('compositor', {
                     system.renderTarget.setSize(currentRenderTarget.width, currentRenderTarget.height);
                 }
 
-                // store "normal" rendering output to this.renderTarget
+                // store "normal" rendering output to this.renderTarget (2)
                 this.setRenderTarget(system.renderTarget);
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
-                // save render state (2)
+                // save render state (3)
                 currentXREnabled = this.xr.enabled;
                 currentShadowAutoUpdate = this.shadowMap.autoUpdate;
 
@@ -178,7 +178,7 @@ AFRAME.registerSystem('compositor', {
                     hasDualCameras = false;
                 }
 
-                // render with custom shader (local-remote compositing):
+                // render with custom shader (local-remote compositing) (4):
                 // this will internally call renderer.render(), which will execute the code within
                 // the isDigest conditional above (render normally). this will copy the result of
                 // the rendering to the readbuffer in the compositor (aka this.renderTarget), which we
@@ -198,7 +198,7 @@ AFRAME.registerSystem('compositor', {
                     hasDualCameras: hasDualCameras,
                     ipd: ipd,
                     leftProj: leftProj,
-                    rightProj, rightProj
+                    rightProj: rightProj,
                 });
 
                 // call this part of the conditional again on the next call to render()

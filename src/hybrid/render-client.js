@@ -1,6 +1,5 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
 import {WebRTCStatsLogger} from './webrtc-stats';
-import {ARENAUtils} from '../../utils';
 
 const pcConfig = {
     'sdpSemantics': 'unified-plan',
@@ -47,14 +46,16 @@ AFRAME.registerComponent('render-client', {
 
     init: async function() {
         const el = this.el;
+        const sceneEl = el.sceneEl;
 
         console.log('[render-client] Starting...');
         this.connected = false;
 
-        this.compositor = el.sceneEl.systems['compositor'];
-        // this.tick = AFRAME.utils.throttleTick(this.tick, 100, this);
+        this.compositor = sceneEl.systems['compositor'];
 
-        this.id = ARENA.idTag; // ARENAUtils.uuidv4();
+        this.id = ARENA.idTag;
+
+        this.idCounter = 0;
 
         this.signaler = new MQTTSignaling(this.id);
         this.signaler.onOffer = this.gotOffer.bind(this);
@@ -72,8 +73,6 @@ AFRAME.registerComponent('render-client', {
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
-
-        // window.addEventListener('keyup', this.tick1.bind(this));
     },
 
     connectToCloud() {
@@ -215,7 +214,6 @@ AFRAME.registerComponent('render-client', {
                 const groundPlane = document.getElementById('groundPlane');
                 groundPlane.setAttribute('visible', false);
 
-                // this.listenForHealthCheck();
                 this.checkStats();
             })
             .catch((err) => {
@@ -237,7 +235,7 @@ AFRAME.registerComponent('render-client', {
                         this.createOffer();
                     });
             })
-            .then(()=> {
+            .then(() => {
                 const receivers = this.pc.getReceivers();
                 for (const receiver of receivers) {
                     receiver.playoutDelayHint = 0;
@@ -292,9 +290,10 @@ AFRAME.registerComponent('render-client', {
     sendStatus() {
         const el = this.el;
         const data = this.data;
+        const sceneEl = el.sceneEl;
 
-        const isVRMode = el.sceneEl.is('vr-mode');
-        const isARMode = el.sceneEl.is('ar-mode');
+        const isVRMode = sceneEl.is('vr-mode');
+        const isARMode = sceneEl.is('ar-mode');
         const hasDualCameras = (isVRMode && !isARMode) || (data.hasDualCameras);
         this.statusDataChannel.send(JSON.stringify({
             isVRMode: true,
@@ -324,11 +323,11 @@ AFRAME.registerComponent('render-client', {
 
         let updateStatus = false;
 
-        if (oldData.ipd !== undefined && data.ipd != oldData.ipd) {
+        if (oldData.ipd !== undefined && data.ipd !== oldData.ipd) {
             updateStatus = true;
         }
 
-        if (oldData.hasDualCameras !== undefined && data.hasDualCameras != oldData.hasDualCameras) {
+        if (oldData.hasDualCameras !== undefined && data.hasDualCameras !== oldData.hasDualCameras) {
             updateStatus = true;
         }
 
@@ -347,7 +346,7 @@ AFRAME.registerComponent('render-client', {
         const data = this.data;
         const el = this.el;
 
-        if (this.connected && this.inputDataChannel.readyState == 'open') {
+        if (this.connected && this.inputDataChannel.readyState === 'open') {
             const prevPos = new THREE.Vector3();
             const prevRot = new THREE.Vector3();
             data.position.copy(prevPos);
@@ -360,15 +359,17 @@ AFRAME.registerComponent('render-client', {
                 prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
 
             this.inputDataChannel.send(JSON.stringify({
-                x: data.position.x.toFixed(3),
-                y: data.position.y.toFixed(3),
-                z: data.position.z.toFixed(3),
+                id: this.idCounter,
+                x:  data.position.x.toFixed(3),
+                y:  data.position.y.toFixed(3),
+                z:  data.position.z.toFixed(3),
                 x_: data.rotation._x.toFixed(3),
                 y_: data.rotation._y.toFixed(3),
                 z_: data.rotation._z.toFixed(3),
                 w_: data.rotation._w.toFixed(3),
                 ts: new Date().getTime(),
             }));
+            this.idCounter++;
         }
     },
 });
