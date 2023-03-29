@@ -83,19 +83,56 @@ AFRAME.registerComponent('render-client', {
         this.signaler.sendConnectACK();
     },
 
-    onRemoteTrack(e) {
+    onRemoteTrack(evt) {
         console.log('got remote stream');
 
         const stream = new MediaStream();
-        stream.addTrack(e.track);
+        stream.addTrack(evt.track);
 
         // send remote track to compositor
-        this.compositor.handleRemoteTrack(stream);
+        this.remoteVideo = document.getElementById('remoteVideo');
+        if (!this.remoteVideo) {
+            this.remoteVideo = document.createElement('video');
+            this.remoteVideo.id = 'remoteVideo';
+            this.remoteVideo.setAttribute('muted', 'false');
+            this.remoteVideo.setAttribute('autoplay', 'true');
+            this.remoteVideo.setAttribute('playsinline', 'true');
+            this.remoteVideo.addEventListener('loadedmetadata', this.onRemoteVideoLoaded.bind(this), true);
+
+            this.remoteVideo.style.position = 'absolute';
+            this.remoteVideo.style.zIndex = '9999';
+            this.remoteVideo.style.top = '15px';
+            this.remoteVideo.style.left = '15px';
+            this.remoteVideo.style.width = '640px';
+            this.remoteVideo.style.height = '180px';
+            if (!AFRAME.utils.device.isMobile()) {
+                document.body.appendChild(this.remoteVideo);
+            }
+        }
+        this.remoteVideo.style.display = 'block';
+        this.remoteVideo.srcObject = stream;
     },
 
-    onRemoteRender(event) {
-        console.log('[render-client]', event.detail.object_id, event.detail.remoteRendered);
-        const update = event.detail;
+    onRemoteVideoLoaded(evt) {
+        // console.log('[render-client], remote video loaded!');
+        const videoTexture = new THREE.VideoTexture(this.remoteVideo);
+        // LinearFilter looks better?
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.encoding = THREE.sRGBEncoding;
+
+        const remoteRenderTarget = new THREE.WebGLRenderTarget(this.remoteVideo.videoWidth, this.remoteVideo.videoHeight);
+        remoteRenderTarget.texture = videoTexture;
+
+        this.compositor.addRemoteRenderTarget(remoteRenderTarget);
+        this.compositor.bind();
+
+        this.remoteVideo.play();
+    },
+
+    onRemoteRender(evt) {
+        console.log('[render-client]', evt.detail.object_id, evt.detail.remoteRendered);
+        const update = evt.detail;
         this.signaler.sendRemoteStatusUpdate(update);
     },
 
@@ -266,6 +303,7 @@ AFRAME.registerComponent('render-client', {
         groundPlane.setAttribute('visible', true);
 
         this.compositor.unbind();
+        this.remoteVideo.style.display = 'none';
 
         this.connected = false;
         this.inputDataChannel = null;

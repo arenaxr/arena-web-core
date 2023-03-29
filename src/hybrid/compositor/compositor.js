@@ -24,53 +24,25 @@ AFRAME.registerSystem('compositor', {
         this.renderTarget.depthTexture.format = THREE.DepthFormat;
         this.renderTarget.depthTexture.type = THREE.UnsignedShortType;
 
+        this.t = 0;
+        this.dt = 0;
+
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
         renderer.xr.addEventListener('sessionstart', this.onResize.bind(this));
         renderer.xr.addEventListener('sessionend', this.onResize.bind(this));
     },
 
-    handleRemoteTrack(stream) {
-        this.remoteVideo = document.getElementById('remoteVideo');
-        if (!this.remoteVideo) {
-            this.remoteVideo = document.createElement('video');
-            this.remoteVideo.id = 'remoteVideo';
-            this.remoteVideo.setAttribute('muted', 'false');
-            this.remoteVideo.setAttribute('autoplay', 'true');
-            this.remoteVideo.setAttribute('playsinline', 'true');
-            this.remoteVideo.addEventListener('loadedmetadata', this.onRemoteVideoLoaded.bind(this), true);
-
-            this.remoteVideo.style.position = 'absolute';
-            this.remoteVideo.style.zIndex = '9999';
-            this.remoteVideo.style.top = '15px';
-            this.remoteVideo.style.left = '15px';
-            this.remoteVideo.style.width = '640px';
-            this.remoteVideo.style.height = '180px';
-            if (!AFRAME.utils.device.isMobile()) {
-                document.body.appendChild(this.remoteVideo);
-            }
-        }
-        this.remoteVideo.style.display = 'block';
-        this.remoteVideo.srcObject = stream;
-    },
-
-    onRemoteVideoLoaded() {
-        // console.log('[render-client], remote video loaded!');
+    addRemoteRenderTarget(remoteRenderTarget) {
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
         const scene = sceneEl.object3D;
         const camera = sceneEl.camera;
 
-        this.pass = new CompositorPass(scene, camera, this.remoteVideo);
-
-        this.t = 0;
-        this.dt = 0;
+        this.pass = new CompositorPass(camera, remoteRenderTarget);
 
         this.onResize();
-        this.remoteVideo.play();
-
-        this.bind();
     },
 
     onResize() {
@@ -213,6 +185,5 @@ AFRAME.registerSystem('compositor', {
         const renderer = this.sceneEl.renderer;
         renderer.render = this.originalRenderFunc;
         this.sceneEl.object3D.onBeforeRender = () => {};
-        this.remoteVideo.style.display = 'none';
     },
 });
