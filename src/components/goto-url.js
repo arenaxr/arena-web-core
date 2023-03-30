@@ -75,7 +75,7 @@ AFRAME.registerComponent('goto-url', {
                     }, 100);
                 }
             };
-            el.addEventListener(data.on, this.eventHandlerfn);
+            el.addEventListener(data.on, this.eventHandlerFn);
         } else {
             // `event` not specified, just log the message.
             console.log(data);
