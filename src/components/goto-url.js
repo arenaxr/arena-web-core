@@ -43,7 +43,7 @@ AFRAME.registerComponent('goto-url', {
 
         let fired = false;
         if (data.on && data.url) { // we have an event?
-            el.removeEventListener(data.event, this.eventHandlerFn);
+            el.removeEventListener(data.on, this.eventHandlerFn);
             this.eventHandlerFn = function() {
                 if (!fired) {
                     fired = true;
@@ -88,8 +88,8 @@ AFRAME.registerComponent('goto-url', {
         const el = this.el;
 
         // remove event listener
-        if (data.event) {
-            el.removeEventListener(data.event, this.eventHandlerFn);
+        if (data.on) {
+            el.removeEventListener(data.on, this.eventHandlerFn);
         }
     },
 });
