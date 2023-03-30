@@ -37,13 +37,13 @@ AFRAME.registerComponent('goto-url', {
 
     },
 
-    update: function() {
+    update: function(oldData) {
         const data = this.data;
         const el = this.el;
 
         let fired = false;
+        el.removeEventListener(oldData.on, this.eventHandlerFn);
         if (data.on && data.url) { // we have an event?
-            el.removeEventListener(data.on, this.eventHandlerFn);
             this.eventHandlerFn = function() {
                 if (!fired) {
                     fired = true;
