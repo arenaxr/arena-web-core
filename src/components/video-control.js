@@ -83,7 +83,7 @@ AFRAME.registerComponent('video-control', {
             this.video.pause();
         }
 
-        this.el.addEventListener('mousedown', function(evt) {
+        this.eventHandlerFn = function(evt) {
             if (evt.detail.clicker == ARENA.camName ||
                 anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName)) {
                 const theSource = this.player.getAttribute('arenaVideo');
@@ -103,7 +103,9 @@ AFRAME.registerComponent('video-control', {
                     this.video.play(); // play the html video elem ==> play aframe video elem
                 }
             }
-        });
+        };
+
+        this.el.addEventListener('mousedown', this.eventHandlerFn);
     },
 
     update: function(oldData) {
