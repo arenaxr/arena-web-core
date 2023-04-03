@@ -31,6 +31,7 @@ AFRAME.registerComponent('video-control', {
         video_loop: {type: 'boolean', default: true},
         autoplay: {type: 'boolean', default: false},
         volume: {type: 'number', default: 1},
+        cleanup: {type: 'boolean', default: true},
     },
 
     multiple: true,
@@ -129,6 +130,13 @@ AFRAME.registerComponent('video-control', {
         // remove event listener
         if (data.event) {
             el.removeEventListener(data.event, this.eventHandlerFn);
+        }
+
+        if (data.cleanup) {
+            const videoId = this.player.getAttribute('videoId');
+            document.getElementById(videoId).remove();
+            const imageId = this.player.getAttribute('frameId');
+            document.getElementById(imageId).remove();
         }
     },
 });

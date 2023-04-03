@@ -684,6 +684,11 @@
                 "description":"Video sound volume",
                 "type":"number",
                 "default":1
+             },
+             "cleanup": {
+                "description": "Automatically remove HTML5 video and img assets from DOM on object removal",
+                "type": "boolean",
+                "default":true
              }
           },
           "required":[
