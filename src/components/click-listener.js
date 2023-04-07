@@ -16,7 +16,10 @@ import {ARENAUtils} from '../utils.js';
  * @todo Consolidate event listeners (they are very similar)
  */
 AFRAME.registerComponent('click-listener', {
-    schema: {default: true},
+    schema: {
+        bubble: {type: 'boolean', default: true},
+        default: true,
+    },
 
     init: function() {
         this.mouseleaveHandler = this.mouseleaveHandler.bind(this);
@@ -73,6 +76,9 @@ AFRAME.registerComponent('click-listener', {
                     thisMsg);
             }
         }
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
     },
 
     mouseupHandler: function(evt) {
@@ -100,6 +106,9 @@ AFRAME.registerComponent('click-listener', {
                 ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
                     thisMsg);
             }
+        }
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
         }
     },
 
@@ -129,6 +138,9 @@ AFRAME.registerComponent('click-listener', {
                     thisMsg);
             }
         }
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
     },
     mouseleaveHandler: function(evt) {
         const camera = document.getElementById('my-camera');
@@ -155,6 +167,9 @@ AFRAME.registerComponent('click-listener', {
                 ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
                     thisMsg);
             }
+        }
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
         }
     },
 });
