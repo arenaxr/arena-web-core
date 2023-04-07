@@ -52,6 +52,9 @@ AFRAME.registerComponent('click-listener', {
         this.el.removeEventListener('mouseleave', this.mouseleaveHandler);
     },
     mousedownHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
@@ -78,12 +81,12 @@ AFRAME.registerComponent('click-listener', {
                     thisMsg);
             }
         }
-        if (this.data.bubble === false) {
-            evt.stopPropagation();
-        }
     },
 
     mouseupHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
@@ -110,12 +113,12 @@ AFRAME.registerComponent('click-listener', {
                     thisMsg);
             }
         }
-        if (this.data.bubble === false) {
-            evt.stopPropagation();
-        }
     },
 
     mouseenterHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
@@ -142,11 +145,11 @@ AFRAME.registerComponent('click-listener', {
                     thisMsg);
             }
         }
+    },
+    mouseleaveHandler: function(evt) {
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
-    },
-    mouseleaveHandler: function(evt) {
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
@@ -172,9 +175,6 @@ AFRAME.registerComponent('click-listener', {
                 ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
                     thisMsg);
             }
-        }
-        if (this.data.bubble === false) {
-            evt.stopPropagation();
         }
     },
 });
