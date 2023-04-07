@@ -18,6 +18,7 @@ import {ARENAUtils} from '../utils.js';
 AFRAME.registerComponent('click-listener', {
     schema: {
         bubble: {type: 'boolean', default: true},
+        enabled: {type: 'boolean', default: true},
         default: true,
     },
 
@@ -51,6 +52,7 @@ AFRAME.registerComponent('click-listener', {
         this.el.removeEventListener('mouseleave', this.mouseleaveHandler);
     },
     mousedownHandler: function(evt) {
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
@@ -82,6 +84,7 @@ AFRAME.registerComponent('click-listener', {
     },
 
     mouseupHandler: function(evt) {
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
@@ -113,6 +116,7 @@ AFRAME.registerComponent('click-listener', {
     },
 
     mouseenterHandler: function(evt) {
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
@@ -143,6 +147,7 @@ AFRAME.registerComponent('click-listener', {
         }
     },
     mouseleaveHandler: function(evt) {
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
