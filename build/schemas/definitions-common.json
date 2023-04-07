@@ -217,7 +217,20 @@
        "click-listener":{
           "description":"Object will listen for clicks",
           "title":"Click Listener",
-          "type":"boolean"
+          "type":"object",
+          "properties":{
+             "enabled": {
+                "default": true,
+                "type":"boolean",
+                "description": "Publish events, set false to disable"
+             },
+             "bubble":{
+                "default":true,
+                "type":"boolean",
+                "description": "Set false to prevent click events from bubbling up to parent objects. See https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#event_bubbling"
+             }
+          },
+          "required": ["bubble", "enabled"]
        },
        "box-collision-listener":{
           "description":"Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps",
