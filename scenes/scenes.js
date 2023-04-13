@@ -74,6 +74,7 @@ window.addEventListener('onauth', async function(e) {
     const publicSceneUrl = document.getElementById('publicSceneUrl');
 
     const enterPublicSceneBtn = document.getElementById('enterPublicSceneBtn');
+    const enterArPublicSceneBtn = document.getElementById('enterArPublicSceneBtn');
 
     const advancedLinksDiv = document.getElementById('uri-builder')
     const userNoteSpan = document.getElementById('userNoteSpan');
@@ -82,6 +83,7 @@ window.addEventListener('onauth', async function(e) {
     const scenePermsLink = document.getElementById('scenePermsLink');
 
     window.publicButtons.push(enterPublicSceneBtn);
+    window.publicButtons.push(enterArPublicSceneBtn);
     if (auth.authenticated) {
         window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
         tabMyScenes.parentElement.style.display = 'block';
@@ -135,6 +137,9 @@ window.addEventListener('onauth', async function(e) {
     }
     enterPublicSceneBtn.addEventListener('click', () =>
         window.location = publicSceneUrl.value
+    )
+    enterArPublicSceneBtn.addEventListener('click', () =>
+        window.location = `${publicSceneUrl.value}?armode=1`
     )
     copyUserSceneUrlBtn.addEventListener('click', () => {
         userSceneUrl.select();
