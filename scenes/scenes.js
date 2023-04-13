@@ -64,6 +64,7 @@ window.addEventListener('onauth', async function(e) {
     const userSceneUrl = document.getElementById('userSceneUrl');
 
     const enterUserSceneBtn = document.getElementById('enterUserSceneBtn');
+    const enterArUserSceneBtn = document.getElementById('enterArUserSceneBtn');
     const cloneUserSceneBtn = document.getElementById('cloneUserSceneBtn');
     const deleteUserSceneBtn = document.getElementById('deleteUserSceneBtn');
     const copyUserSceneUrlBtn = document.getElementById('copyUserSceneUrlBtn')
@@ -93,7 +94,7 @@ window.addEventListener('onauth', async function(e) {
     }
 
     const toggleUserSceneButtons = (toggle) => {
-        [enterUserSceneBtn, cloneUserSceneBtn, deleteUserSceneBtn, copyUserSceneUrlBtn, advancedLinksUserBtn].forEach((btn) => {
+        [enterUserSceneBtn, enterArUserSceneBtn, cloneUserSceneBtn, deleteUserSceneBtn, copyUserSceneUrlBtn, advancedLinksUserBtn].forEach((btn) => {
             toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled')
         })
     }
@@ -148,6 +149,9 @@ window.addEventListener('onauth', async function(e) {
     })
     enterUserSceneBtn.addEventListener('click', () =>
         window.location = userSceneUrl.value
+    )
+    enterArUserSceneBtn.addEventListener('click', () =>
+        window.location = `${userSceneUrl.value}?armode=1`
     )
 
     // set listeners for advanced links URI-builder
