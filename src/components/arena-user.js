@@ -178,6 +178,7 @@ AFRAME.registerComponent('arena-user', {
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
+            micIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
             micIconEl.setAttribute('material', 'shader', 'flat');
             micIconEl.setAttribute('scale', '0.2 0.2 0.2');
             if (data.presence !== 'Portal') {
@@ -210,6 +211,7 @@ AFRAME.registerComponent('arena-user', {
             qualIconEl = document.createElement('a-image');
             qualIconEl.setAttribute('id', name);
             qualIconEl.setAttribute('material', 'shader', 'flat');
+            qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
             qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
             if (data.presence !== 'Portal') {
                 qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
