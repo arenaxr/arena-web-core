@@ -320,7 +320,7 @@ export class RuntimeMngr {
         });
 
         // sent in case last will fails (this will be a duplicate of last will)
-        this.mc.publish(this.regTopic, lastWillStringMsg);
+        this.mc.publish(this.regTopic, this.lastWillStringMsg);
     }
 
     /* public getters */
