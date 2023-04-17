@@ -31,6 +31,7 @@ AFRAME.registerComponent('material-extras', {
             'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking']},
         colorWrite: {default: true},
         renderOrder: {default: 1},
+        depthTest: {default: true},
         occluderRenderOrder: {default: -1},
         transparentOccluder: {default: false},
     },
@@ -67,9 +68,11 @@ AFRAME.registerComponent('material-extras', {
             if (this.data.transparentOccluder == true) {
                 this.data.renderOrder = 0;
                 this.data.colorWrite = false;
+                this.data.depthTest = false;                
             } else {
                 this.data.renderOrder = this.schema.renderOrder.default; // default renderOrder used in the arena
                 this.data.colorWrite = this.schema.colorWrite.default; // default colorWrite
+                this.data.depthTest = this.schema.depthTest.default; // default depthTest
             }
             this.doUpdate = true;
         }
@@ -100,6 +103,7 @@ AFRAME.registerComponent('material-extras', {
         mesh.renderOrder = this.data.renderOrder;
         if (mesh.material) {
             mesh.material.colorWrite = this.data.colorWrite;
+            mesh.material.depthTest = this.data.depthTest;
             if (mesh.material.map && this.texture) {
                 mesh.material.map = this.texture;
                 mesh.material.map.encoding = THREE[this.data.encoding];
