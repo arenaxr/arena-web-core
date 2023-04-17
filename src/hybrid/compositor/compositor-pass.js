@@ -62,10 +62,10 @@ export class CompositorPass extends Pass {
         renderer.setRenderTarget(this.decoderRenderTarget);
         this.decoderFsQuad.render(renderer);
 
-        const start = performance.now();
+        // const start = performance.now();
         renderer.readRenderTargetPixels(this.decoderRenderTarget, 0, 0, FRAME_ID_LENGTH, 1, this.pixelBuffer);
-        const stop = performance.now();
-        console.log(stop - start);
+        // const stop = performance.now();
+        // console.log(stop - start);
 
         var value = 0;
         for (var i = 0; i < FRAME_ID_LENGTH; i++) {

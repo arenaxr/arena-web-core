@@ -55,7 +55,7 @@ AFRAME.registerComponent('render-client', {
 
         this.id = ARENA.idTag;
 
-        this.idCounter = 0;
+        this.frameID = 0;
 
         this.signaler = new MQTTSignaling(this.id);
         this.signaler.onOffer = this.gotOffer.bind(this);
@@ -393,11 +393,11 @@ AFRAME.registerComponent('render-client', {
             data.position.setFromMatrixPosition(el.object3D.matrixWorld);
             data.rotation.setFromRotationMatrix(el.object3D.matrixWorld);
 
-            if (prevPos.distanceTo(data.position) <= Number.EPSILON &&
-                prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
+            // if (prevPos.distanceTo(data.position) <= Number.EPSILON &&
+            //     prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
 
-            this.inputDataChannel.send(JSON.stringify({
-                id: this.idCounter,
+            const msg = {
+                id: this.frameID,
                 x:  data.position.x.toFixed(3),
                 y:  data.position.y.toFixed(3),
                 z:  data.position.z.toFixed(3),
@@ -405,9 +405,11 @@ AFRAME.registerComponent('render-client', {
                 y_: data.rotation._y.toFixed(3),
                 z_: data.rotation._z.toFixed(3),
                 w_: data.rotation._w.toFixed(3),
-                ts: new Date().getTime(),
-            }));
-            this.idCounter++;
+                ts: performance.now(),
+            };
+            this.compositor.prevFrames[this.frameID] = msg.ts;
+            this.inputDataChannel.send(JSON.stringify(msg));
+            this.frameID++;
         }
     },
 });

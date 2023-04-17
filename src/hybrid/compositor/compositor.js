@@ -12,6 +12,7 @@ AFRAME.registerSystem('compositor', {
         const renderer = sceneEl.renderer;
 
         this.cameras = [];
+        this.prevFrames = [];
 
         this.originalRenderFunc = null;
 
@@ -159,7 +160,12 @@ AFRAME.registerSystem('compositor', {
                 // the video by calling the compositor pass and executing the shaders.
                 system.pass.render(this, currentRenderTarget, system.renderTarget);
 
-                // console.log(system.pass.getFrameID(this, currentRenderTarget, system.renderTarget));
+                // const frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
+                // if (system.prevFrames[frameID]) {
+                //     const currTime = performance.now();
+                //     console.log(currTime - system.prevFrames[frameID]);
+                //     system.prevFrames.splice(frameID, 1);
+                // }
 
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
