@@ -10,6 +10,7 @@
  * ARENA A-Frame components
  */
 
+import './ar-hit-test-listener.js';
 import './arena-camera.js';
 import './arena-hand.js';
 import './arena-user.js';

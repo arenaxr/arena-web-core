@@ -103,6 +103,20 @@ export class ARENAUtils {
                 y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
                 z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
             };
+        } else if (evt.position && evt.orientation) {
+            return {
+                position: {
+                    x: parseFloat(evt.position.x.toFixed(3)),
+                    y: parseFloat(evt.position.y.toFixed(3)),
+                    z: parseFloat(evt.position.z.toFixed(3)),
+                },
+                rotation: {
+                    x: parseFloat(evt.orientation.x.toFixed(3)),
+                    y: parseFloat(evt.orientation.y.toFixed(3)),
+                    z: parseFloat(evt.orientation.z.toFixed(3)),
+                    w: parseFloat(evt.orientation.w.toFixed(3)),
+                },
+            };
         } else {
             console.info('WARN: empty coords data');
             return {
