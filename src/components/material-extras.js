@@ -19,6 +19,7 @@ import {ARENAUtils} from '../utils.js';
  * @property {string} [overrideSrc=''] - Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF).
  * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
+ * @property {boolean} [depthTest=true] - Whether to have depth test enabled when rendering this material. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
 */
@@ -30,8 +31,8 @@ AFRAME.registerComponent('material-extras', {
             'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding',
             'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking']},
         colorWrite: {default: true},
-        renderOrder: {default: 1},
         depthTest: {default: true},
+        renderOrder: {default: 1},
         occluderRenderOrder: {default: -1},
         transparentOccluder: {default: false},
     },
@@ -64,7 +65,7 @@ AFRAME.registerComponent('material-extras', {
         }
 
         if (transparentOccluder !== this.data.transparentOccluder) {
-            // a transparent occluder has renderOrder=0 and colorWrite=false
+            // a transparent occluder has renderOrder=0 and colorWrite=false and depthTest=false
             if (this.data.transparentOccluder == true) {
                 this.data.renderOrder = 0;
                 this.data.colorWrite = false;
