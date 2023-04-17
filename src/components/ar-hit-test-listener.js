@@ -36,7 +36,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         const clickPos = ARENAUtils.vec3ToObject(camPosition);
         const {position, rotation} = ARENAUtils.setClickData(evt);
 
-        if ('inputSource' in evt) {
+        if ('inputSource' in evt.detail) {
             // original hit-test event; simply publish to MQTT
             const thisMsg = {
                 object_id: this.el.id,
@@ -61,7 +61,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         const clickPos = ARENAUtils.vec3ToObject(camPosition);
         const {position, rotation} = ARENAUtils.setClickData(evt);
 
-        if ('inputSource' in evt) {
+        if ('inputSource' in evt.detail) {
             // original hit-test event; simply publish to MQTT
             const thisMsg = {
                 object_id: this.el.id,

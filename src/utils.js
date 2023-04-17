@@ -25,7 +25,7 @@ export class ARENAUtils {
             return defaultValue;
         }
         return urlParameter;
-    };
+    }
 
     /**
      * Register a callback for the geolocation of user's device
@@ -39,10 +39,13 @@ export class ARENAUtils {
         const urlLat = ARENAUtils.getUrlParam('lat', undefined);
         const urlLong = ARENAUtils.getUrlParam('long', undefined);
         if (urlLat && urlLong && callback) {
-            callback({
-                latitude: urlLat,
-                longitude: urlLong,
-            }, undefined);
+            callback(
+                {
+                    latitude: urlLat,
+                    longitude: urlLong,
+                },
+                undefined,
+            );
         } else {
             if (navigator.geolocation) {
                 const options = {
@@ -57,9 +60,10 @@ export class ARENAUtils {
                     (err) => {
                         console.warn(`Error getting device location: ${err.message}`);
                         console.warn('Defaulting to campus location');
-                        if (callback) callback({latitude: 40.4427, longitude: 79.9430}, err);
+                        if (callback) callback({latitude: 40.4427, longitude: 79.943}, err);
                     },
-                    options);
+                    options,
+                );
             }
         }
     }
@@ -76,7 +80,7 @@ export class ARENAUtils {
             data: msg,
         };
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}/debug`, message);
-    };
+    }
 
     /**
      * Returns the position of an event's target
@@ -89,7 +93,7 @@ export class ARENAUtils {
             y: parseFloat(evt.currentTarget.object3D.position.y.toFixed(3)),
             z: parseFloat(evt.currentTarget.object3D.position.z.toFixed(3)),
         };
-    };
+    }
 
     /**
      * Returns where an evt's intersection happened
@@ -103,18 +107,18 @@ export class ARENAUtils {
                 y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
                 z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
             };
-        } else if (evt.position && evt.orientation) {
+        } else if (evt.detail.position && evt.detail.orientation) {
             return {
                 position: {
-                    x: parseFloat(evt.position.x.toFixed(3)),
-                    y: parseFloat(evt.position.y.toFixed(3)),
-                    z: parseFloat(evt.position.z.toFixed(3)),
+                    x: parseFloat(evt.detail.position.x.toFixed(3)),
+                    y: parseFloat(evt.detail.position.y.toFixed(3)),
+                    z: parseFloat(evt.detail.position.z.toFixed(3)),
                 },
                 rotation: {
-                    x: parseFloat(evt.orientation.x.toFixed(3)),
-                    y: parseFloat(evt.orientation.y.toFixed(3)),
-                    z: parseFloat(evt.orientation.z.toFixed(3)),
-                    w: parseFloat(evt.orientation.w.toFixed(3)),
+                    x: parseFloat(evt.detail.orientation.x.toFixed(3)),
+                    y: parseFloat(evt.detail.orientation.y.toFixed(3)),
+                    z: parseFloat(evt.detail.orientation.z.toFixed(3)),
+                    w: parseFloat(evt.detail.orientation.w.toFixed(3)),
                 },
             };
         } else {
@@ -125,7 +129,7 @@ export class ARENAUtils {
                 z: 0,
             };
         }
-    };
+    }
 
     /**
      * Turns 3 elem vector to object
@@ -138,7 +142,7 @@ export class ARENAUtils {
             y: parseFloat(vec.y.toFixed(3)),
             z: parseFloat(vec.z.toFixed(3)),
         };
-    };
+    }
 
     /**
      * Turns quaternion to object
@@ -152,7 +156,7 @@ export class ARENAUtils {
             z: parseFloat(q.z.toFixed(3)),
             w: parseFloat(q.w.toFixed(3)),
         };
-    };
+    }
 
     /**
      * Turns position to string
@@ -161,7 +165,7 @@ export class ARENAUtils {
      */
     static coordsToText(c) {
         return `${c.x.toFixed(3)}, ${c.y.toFixed(3)}, ${c.z.toFixed(3)}`;
-    };
+    }
 
     /**
      * Turns quaternions to string
@@ -170,7 +174,7 @@ export class ARENAUtils {
      */
     static rotToText(c) {
         return `${c.x.toFixed(3)}, ${c.y.toFixed(3)}, ${c.z.toFixed(3)}, ${c.w.toFixed(3)}`;
-    };
+    }
 
     /**
      * Turns quaternions to euler string
@@ -181,9 +185,10 @@ export class ARENAUtils {
         function rad2deg(radians) {
             return radians * (180 / Math.PI);
         }
+
         const e = new THREE.Euler().setFromQuaternion(c);
         return `${rad2deg(e.x).toFixed(3)}, ${rad2deg(e.y).toFixed(3)}, ${rad2deg(e.z).toFixed(3)}`;
-    };
+    }
 
     /**
      * Utility static to check incoming messages
@@ -199,7 +204,7 @@ export class ARENAUtils {
             return false;
         }
         return true;
-    };
+    }
 
     /**
      * Replace dropbox link to dl.dropboxusercontent, which
@@ -211,7 +216,7 @@ export class ARENAUtils {
         if (!dropboxShareUrl) return undefined;
         // eslint-disable-next-line max-len
         return dropboxShareUrl.replace('www.dropbox.com', 'dl.dropboxusercontent.com'); // replace dropbox links to direct links
-    };
+    }
 
     /**
      * Utility to match MQTT topic within permissions.
@@ -229,14 +234,14 @@ export class ARENAUtils {
             }
         }
         return valid;
-    };
+    }
 
     /**
      * Utility to check if device is in landscape mode.
      * @return {boolean} True if device is in landscape mode.
      */
     static isLandscapeMode() {
-        return (window.orientation == 90 || window.orientation == -90);
+        return window.orientation == 90 || window.orientation == -90;
     }
 
     /**
@@ -259,7 +264,8 @@ export class ARENAUtils {
      */
     static updatePose(targetObject3D, data) {
         const {position, rotation} = data;
-        if (rotation) { // has 'w' coordinate: a quaternion
+        if (rotation) {
+            // has 'w' coordinate: a quaternion
             if (rotation.hasOwnProperty('w')) {
                 targetObject3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
             } else {
