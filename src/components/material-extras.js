@@ -31,18 +31,19 @@ AFRAME.registerComponent('material-extras', {
             'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking']},
         colorWrite: {default: true},
         renderOrder: {default: 1},
+        occluderRenderOrder: {default: -1},
         transparentOccluder: {default: false},
     },
-    retryTimeouts: [1000, 2000, 5000, 10000],
+    retryTimeouts: [1000, 5000],
     init: function() {
         this.loader = new THREE.TextureLoader();
         this.doUpdate = true;
-        if (this.data.overrideSrc.length > 0) this.loadTexture(this.data.overrideSrc);
+        this.loadTexture(this.data.overrideSrc);
         this.update();
         this.el.addEventListener('model-loaded', () => this.update());
         this.el.addEventListener('load', () => this.update());
-
-        console.info('MATERIAL EXTRAS:', this.schema.renderOrder.default);
+        // going to retry updating material; TODO: check if we still need this
+        this.retryUpdateMaterial();
     },
     update: function(oldData) {
         this.retryIndex = 0;
@@ -73,12 +74,11 @@ AFRAME.registerComponent('material-extras', {
             this.doUpdate = true;
         }
 
-        // this.el.object3D.renderOrder=this.data.renderOrder;
-
         // do a retry scheme to apply material properties (waiting on events did not seem to work for all cases)
         if (this.doUpdate) this.updateMaterial();
     },
     loadTexture(src) {
+        if (src.length == 0) return;
         this.loader.load(
             ARENAUtils.crossOriginDropboxSrc(src),
             // onLoad callback
@@ -95,6 +95,8 @@ AFRAME.registerComponent('material-extras', {
             (err) => console.error(`[material-extras] Error loading texture ${this.data.overrideSrc}: ${err}`));
     },
     updateMeshMaterial: function(mesh) {
+        if (!mesh) return;
+        if (!mesh.isMesh) return;
         mesh.renderOrder = this.data.renderOrder;
         if (mesh.material) {
             mesh.material.colorWrite = this.data.colorWrite;
@@ -106,19 +108,11 @@ AFRAME.registerComponent('material-extras', {
         }
     },
     updateMaterial: function() {
-        const mesh = this.el.getObject3D('mesh');
-        if (!mesh) {
-            this.retryUpdateMaterial();
-            return;
-        }
-
-        this.updateMeshMaterial(mesh);
+        if (this.el.object3D.isMesh) this.updateMeshMaterial(this.el.object3D);
 
         // traverse children
-        mesh.traverse((node) => {
-            if (node.isMesh) {
-                this.updateMeshMaterial(node);
-            }
+        this.el.object3D.traverse((node) => {
+            this.updateMeshMaterial(node);
         });
     },
     retryUpdateMaterial() {
@@ -127,8 +121,6 @@ AFRAME.registerComponent('material-extras', {
                 this.retryIndex++;
                 this.updateMaterial();
             }, this.retryTimeouts[this.retryIndex]); // try again in a bit
-        } else {
-            console.warn('[material-extras] Could not update material!');
         }
     },
 });
