@@ -8,16 +8,25 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     },
 
     init: function() {
-        this.session = this.renderer.xr.getSession();
+        this.enterARHandler = this.enterARHandler.bind(this);
+        this.exitARHandler = this.exitARHandler.bind(this);
         this.hitStartHandler = this.hitStartHandler.bind(this);
         this.hitEndHandler = this.hitEndHandler.bind(this);
-        this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
-        this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
+        this.el.addEventListener('enter-vr', this.enterARHandler);
+        this.el.addEventListener('exit-vr', this.exitARHandler);
     },
 
-    remove: function() {
-        this.session.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
-        this.session.removeEventListener('ar-hit-test-select', this.hitEndHandler);
+    enterARHandler: function() {
+        if (this.el.is('ar-mode')) {
+            this.session = this.el.renderer.xr.getSession();
+            this.session.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
+            this.session.addEventListener('ar-hit-test-select', this.hitEndHandler);
+        }
+    },
+
+    exitARHandler: function() {
+        this.session?.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
+        this.session?.removeEventListener('ar-hit-test-select', this.hitEndHandler);
     },
 
     hitStartHandler: function(evt) {
