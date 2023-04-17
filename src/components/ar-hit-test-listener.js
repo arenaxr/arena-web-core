@@ -18,15 +18,14 @@ AFRAME.registerComponent('ar-hit-test-listener', {
 
     enterARHandler: function() {
         if (this.el.is('ar-mode')) {
-            this.session = this.el.renderer.xr.getSession();
-            this.session.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
-            this.session.addEventListener('ar-hit-test-select', this.hitEndHandler);
+            this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
+            this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
         }
     },
 
     exitARHandler: function() {
-        this.session?.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
-        this.session?.removeEventListener('ar-hit-test-select', this.hitEndHandler);
+        this.el.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
+        this.el.removeEventListener('ar-hit-test-select', this.hitEndHandler);
     },
 
     hitStartHandler: function(evt) {
