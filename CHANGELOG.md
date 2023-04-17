@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.18.0](https://github.com/arenaxr/arena-web-core/compare/v1.17.0...v1.18.0) (2023-04-17)
+
+
+### Features
+
+* **ocean:** add ocean primitive to schema ([#525](https://github.com/arenaxr/arena-web-core/issues/525)) ([ec41bbc](https://github.com/arenaxr/arena-web-core/commit/ec41bbcf6577eb523dae29f5ee5c9522efa52c1c))
+* **particle-system:** add environment features for dust, snow, rain ([#523](https://github.com/arenaxr/arena-web-core/issues/523)) ([e2105ae](https://github.com/arenaxr/arena-web-core/commit/e2105ae96c328e3daa3500be375a9adcd316d641))
+* **scenes:** add quick enter-in-ar button ([8ba2777](https://github.com/arenaxr/arena-web-core/commit/8ba27776aa47fa28814456fa7c026275ef0c1a77))
+* **spe-particles:** added spe-particles system (with arenaxr fork fixing THREE 0.147) ([#524](https://github.com/arenaxr/arena-web-core/issues/524)) ([d22bacc](https://github.com/arenaxr/arena-web-core/commit/d22baccdb46c3a09b3d323c60b670b2e972ee5fe))
+
+
+### Bug Fixes
+
+* **attribution:** fixed crash from GLTFs missing model data ([34daed0](https://github.com/arenaxr/arena-web-core/commit/34daed0d99f57e02b40204c7d701670f0a60bf51))
+* **auth:** add security link in settingd dialog ([51619af](https://github.com/arenaxr/arena-web-core/commit/51619af870c2eeae18c83590ad270a1637b073c6))
+* **avatar:** allow mic/network icons alpha channel to render against transparent ([31be8ce](https://github.com/arenaxr/arena-web-core/commit/31be8ceac458166e51de9ba8c6f7ff053ed81f4b))
+* **build:** add build desc for a-text, minor fixes ([8f39aea](https://github.com/arenaxr/arena-web-core/commit/8f39aeaab04a3559954236bd6a55de7d16d35c84))
+* **build:** add schema modelUpdate, other minor fixes ([3ac11b1](https://github.com/arenaxr/arena-web-core/commit/3ac11b1339b699fa7146ed0bf45dfcca983a0f13))
+* **build:** added missing types and a-text descriptions ([ff83816](https://github.com/arenaxr/arena-web-core/commit/ff838162242f0a4cd60f2a1115c36a1a478807c3))
+* clean up event listener for got-url ([8833e9f](https://github.com/arenaxr/arena-web-core/commit/8833e9fa8784f8aeb6d3ebe7b45a26e113db0676))
+* cleanup listener for video-control ([3850021](https://github.com/arenaxr/arena-web-core/commit/3850021981b74d2b9d18d22b5c3cfa69d9d74fab))
+* ensure old gotourl eventlistener is removed ([89820fe](https://github.com/arenaxr/arena-web-core/commit/89820fee1ab23b6b6d912d7f91cd0afd79b9c7c5))
+* handle load modelUpdates from persist/create ([6ecbf03](https://github.com/arenaxr/arena-web-core/commit/6ecbf03f13c80bb4cca3b2421973bf850122d999))
+* incorrect gotourl data attr from 8833e9f ([e7ddea1](https://github.com/arenaxr/arena-web-core/commit/e7ddea1c5b8d1265612ba85ff0bfc23c984a4192))
+* **jitsi:** show moderator status in user list ([34df699](https://github.com/arenaxr/arena-web-core/commit/34df6996b92493cc9ee22d4f464d3be6b1670472))
+* **material-extras:** no texture loads on empty source; transverse all objects checking if they are a mesh ([6846082](https://github.com/arenaxr/arena-web-core/commit/68460824c66ccbd360c56e5188ebccb2c0fd3973))
+* **material-extras:** set mesh.material.depthTest=false when transparentOccluder=true ([a26697b](https://github.com/arenaxr/arena-web-core/commit/a26697b68fc8dd24f1f27859588cbbe4a14c4293))
+* more typos ([4864ceb](https://github.com/arenaxr/arena-web-core/commit/4864ceb4f5dda93d6643ec308678135140b23743))
+* **runtime-mngr:** fixed missing runtime LWT on cleanup ([18e9eb5](https://github.com/arenaxr/arena-web-core/commit/18e9eb5995660570a9ac068fcfa3a637707ba57b))
+* **schema:** add example to modelUpdate ([3223ef2](https://github.com/arenaxr/arena-web-core/commit/3223ef23beb70fd1d5ae794fbaf20a461fbf8817))
+* **schema:** future-proof schema support with 'deprecated' attribute ([fd306f6](https://github.com/arenaxr/arena-web-core/commit/fd306f6de6cc038476f74232831167655c52810e))
+* **settings:** add hover titles for links in settings ([7a08249](https://github.com/arenaxr/arena-web-core/commit/7a0824906fa981c34d433a1a8ca4312f27db64cc))
+* **spe-particles:** fixed wiggle schema formatting ([53aeae6](https://github.com/arenaxr/arena-web-core/commit/53aeae6448a4eaf5b1a25839c86e1cab5cda7f73))
+
 ## [1.17.0](https://github.com/arenaxr/arena-web-core/compare/v1.16.0...v1.17.0) (2023-03-03)
 
 
