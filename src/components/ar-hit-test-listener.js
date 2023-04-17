@@ -20,12 +20,16 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         if (this.el.is('ar-mode')) {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
             this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
+            this.el.setAttribute('raycaster', 'enabled', 'true');
+            document.getElementById('mouse-cursor').setAttribute('raycaster', 'enabled', 'false');
         }
     },
 
     exitARHandler: function() {
         this.el.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
         this.el.removeEventListener('ar-hit-test-select', this.hitEndHandler);
+        this.el.setAttribute('raycaster', 'enabled', 'false');
+        document.getElementById('mouse-cursor').setAttribute('raycaster', 'enabled', 'true');
     },
 
     hitStartHandler: function(evt) {

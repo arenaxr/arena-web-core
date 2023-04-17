@@ -151,7 +151,9 @@
          stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
          ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005" ar-hit-test-listener
          gltf-model="dracoDecoderPath:/static/vendor/draco-1.5.4/"
-         inspector="url: static/vendor/aframe-inspector.min.js">
+         inspector="url: static/vendor/aframe-inspector.min.js"
+         cursor="rayOrigin:xrselect; fuse:false"
+         raycaster="enabled:false;objects:[click-listener],[click-listener-local]">
     <a-assets>
         <!-- Vive controller 3d model -->
         <a-asset-item id="viveControl-obj" src="static/models/hands/vr_controller_vive.obj"></a-asset-item>
