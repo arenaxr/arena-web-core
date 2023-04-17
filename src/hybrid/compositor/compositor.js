@@ -159,6 +159,8 @@ AFRAME.registerSystem('compositor', {
                 // the video by calling the compositor pass and executing the shaders.
                 system.pass.render(this, currentRenderTarget, system.renderTarget);
 
+                // console.log(system.pass.getFrameID(this, currentRenderTarget, system.renderTarget));
+
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
                 this.xr.enabled = currentXREnabled;

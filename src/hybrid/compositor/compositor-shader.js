@@ -3,7 +3,7 @@ export const CompositorShader = {
         tLocalColor: {
             type: 't', value: new THREE.Texture(),
         },
-        tRemoteColor: {
+        tRemoteFrame: {
             type: 't', value: new THREE.Texture(),
         },
         tLocalDepth: {
@@ -32,7 +32,7 @@ export const CompositorShader = {
         },
     },
 
-    vertexShader: require('./shaders/vert.glsl'),
+    vertexShader: require('./shaders/compositor/vert.glsl'),
 
-    fragmentShader: require('./shaders/frag.glsl'),
+    fragmentShader: require('./shaders/compositor/frag.glsl'),
 };

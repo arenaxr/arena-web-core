@@ -4,7 +4,7 @@ varying vec2 vUv;
 
 uniform sampler2D tLocalColor;
 uniform sampler2D tLocalDepth;
-uniform sampler2D tRemoteColor;
+uniform sampler2D tRemoteFrame;
 
 uniform float cameraNear;
 uniform float cameraFar;
@@ -16,7 +16,7 @@ uniform bool vrMode;
 uniform ivec2 windowSize;
 uniform ivec2 streamSize;
 
-#define DEPTH_SCALAR    50.0
+#define DEPTH_SCALAR    (50.0)
 
 // float rgb2hue(vec3 c) {
 //     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
@@ -103,18 +103,18 @@ void main() {
             coordStreamDepth.x = xcoord / 4.0 + 0.75;
         }
 
-        streamColor = texture2D( tRemoteColor, coordStreamColor );
-        streamDepth = readDepthStream( tRemoteColor, coordStreamDepth );
+        streamColor = texture2D( tRemoteFrame, coordStreamColor );
+        streamDepth = readDepthStream( tRemoteFrame, coordStreamDepth );
     }
     else {
         vec2 coordStreamColor = coordStreamNormalized;
         vec2 coordStreamDepth = vec2(coordStreamNormalized.x + 0.5, coordStreamNormalized.y);
 
-        streamColor = texture2D( tRemoteColor, coordStreamColor );
-        streamDepth = readDepthStream( tRemoteColor, coordStreamDepth );
+        streamColor = texture2D( tRemoteFrame, coordStreamColor );
+        streamDepth = readDepthStream( tRemoteFrame, coordStreamDepth );
     }
 
-    bool ignore = false; // readMask( tRemoteColor, coordStreamDepth );
+    bool ignore = false; // readMask( tRemoteFrame, coordStreamDepth );
 
     vec4 color;
     if (!targetWidthGreater ||
