@@ -178,6 +178,9 @@ AFRAME.registerComponent('arena-hand', {
                 dep: ARENA.camName,
             },
         };
+        if (msg.data.url.includes('magicleap')) {
+            msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
+        }
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
     },
 
