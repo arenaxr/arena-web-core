@@ -19,7 +19,6 @@ import {ARENAUtils} from '../utils.js';
  * @property {string} [overrideSrc=''] - Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF).
  * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
- * @property {boolean} [depthTest=true] - Whether to have depth test enabled when rendering this material. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
 */
@@ -31,7 +30,6 @@ AFRAME.registerComponent('material-extras', {
             'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding',
             'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking']},
         colorWrite: {default: true},
-        depthTest: {default: true},
         renderOrder: {default: 1},
         occluderRenderOrder: {default: -1},
         transparentOccluder: {default: false},
@@ -40,6 +38,7 @@ AFRAME.registerComponent('material-extras', {
     init: function() {
         this.loader = new THREE.TextureLoader();
         this.doUpdate = true;
+        this.previousData = {renderOrder: 1, colorWrite: true};
         this.loadTexture(this.data.overrideSrc);
         this.update();
         this.el.addEventListener('model-loaded', () => this.update());
@@ -65,15 +64,16 @@ AFRAME.registerComponent('material-extras', {
         }
 
         if (transparentOccluder !== this.data.transparentOccluder) {
-            // a transparent occluder has renderOrder=0 and colorWrite=false and depthTest=false
+            // a transparent occluder has renderOrder=0 and colorWrite=false 
             if (this.data.transparentOccluder == true) {
-                this.data.renderOrder = 0;
-                this.data.colorWrite = false;
-                this.data.depthTest = false;                
+                this.previousData = {renderOrder: this.data.renderOrder,
+                    colorWrite: this.data.colorWrite};
+                this.el.setAttribute('material-extras', 'renderOrder', 0);
+                this.el.setAttribute('material-extras', 'colorWrite', false);
             } else {
-                this.data.renderOrder = this.schema.renderOrder.default; // default renderOrder used in the arena
-                this.data.colorWrite = this.schema.colorWrite.default; // default colorWrite
-                this.data.depthTest = this.schema.depthTest.default; // default depthTest
+                // set to previous values
+                this.el.setAttribute('material-extras', 'renderOrder', this.previousData.renderOrder);
+                this.el.setAttribute('material-extras', 'colorWrite', this.previousData.colorWrite);
             }
             this.doUpdate = true;
         }
@@ -100,20 +100,18 @@ AFRAME.registerComponent('material-extras', {
     },
     updateMeshMaterial: function(mesh) {
         if (!mesh) return;
-        if (!mesh.isMesh) return;
         mesh.renderOrder = this.data.renderOrder;
-        if (mesh.material) {
-            mesh.material.colorWrite = this.data.colorWrite;
-            mesh.material.depthTest = this.data.depthTest;
-            if (mesh.material.map && this.texture) {
-                mesh.material.map = this.texture;
-                mesh.material.map.encoding = THREE[this.data.encoding];
-            }
-            mesh.material.needsUpdate = true;
+        if (!mesh.material) return;
+
+        mesh.material.colorWrite = this.data.colorWrite;
+        if (mesh.material.map && this.texture) {
+            mesh.material.map = this.texture;
+            mesh.material.map.encoding = THREE[this.data.encoding];
         }
+        mesh.material.needsUpdate = true;
     },
     updateMaterial: function() {
-        if (this.el.object3D.isMesh) this.updateMeshMaterial(this.el.object3D);
+        this.updateMeshMaterial(this.el.object3D);
 
         // traverse children
         this.el.object3D.traverse((node) => {
