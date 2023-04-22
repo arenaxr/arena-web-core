@@ -1,7 +1,7 @@
 /* global AFRAME */
 import he from 'he';
 import Swal from 'sweetalert2';
-import './model-load-progress-style.css';
+import './style.css';
 
 /**
  * @fileoverview Model loading progress system. Manage model load messages.
