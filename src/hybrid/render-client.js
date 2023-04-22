@@ -380,7 +380,7 @@ AFRAME.registerComponent('render-client', {
         if (updateStatus) this.sendStatus();
     },
 
-    tick: function(time, timeDelta) {
+    tick: function(t, dt) {
         const data = this.data;
         const el = this.el;
 
@@ -390,11 +390,14 @@ AFRAME.registerComponent('render-client', {
             data.position.copy(prevPos);
             data.rotation.copy(prevPos);
 
-            data.position.setFromMatrixPosition(el.object3D.matrixWorld);
-            data.rotation.setFromRotationMatrix(el.object3D.matrixWorld);
+            const camPose = new THREE.Matrix4();
+            camPose.copy(el.object3D.matrixWorld);
 
-            // if (prevPos.distanceTo(data.position) <= Number.EPSILON &&
-            //     prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
+            data.position.setFromMatrixPosition(camPose);
+            data.rotation.setFromRotationMatrix(camPose);
+
+            if (prevPos.distanceTo(data.position) <= Number.EPSILON &&
+                prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
 
             const msg = {
                 id: this.frameID,
@@ -407,8 +410,13 @@ AFRAME.registerComponent('render-client', {
                 w_: data.rotation._w.toFixed(3),
                 ts: performance.now(),
             };
-            this.compositor.prevFrames[this.frameID] = msg.ts;
             this.inputDataChannel.send(JSON.stringify(msg));
+
+            this.compositor.prevFrames[this.frameID] = {
+                pose: camPose,
+                ts: msg.ts,
+            };
+
             this.frameID++;
         }
     },

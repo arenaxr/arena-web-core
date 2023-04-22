@@ -76,6 +76,16 @@ export class CompositorPass extends Pass {
         return value;
     }
 
+    setCameraMats(cameraPose, cameraProj) {
+        this.material.uniforms.cameraLMatrixWorld.value.copy(cameraPose);
+        this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraProj);
+    }
+
+    setCameraMatsRemote(remotePose, remoteProj) {
+        this.material.uniforms.remoteLMatrixWorld.value.copy(remotePose);
+        this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteProj);
+    }
+
     onEnterVR() {
         const sceneEl = document.querySelector('a-scene');
         if (sceneEl.is('ar-mode')) {

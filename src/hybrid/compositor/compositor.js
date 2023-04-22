@@ -12,7 +12,8 @@ AFRAME.registerSystem('compositor', {
         const renderer = sceneEl.renderer;
 
         this.cameras = [];
-        this.prevFrames = [];
+        this.prevFrames = {};
+        this.prevFrameID = -1;
 
         this.originalRenderFunc = null;
 
@@ -67,8 +68,14 @@ AFRAME.registerSystem('compositor', {
     bind: function() {
         const renderer = this.sceneEl.renderer;
         const render = renderer.render;
+        const sceneEl = this.sceneEl;
+
+        const scene = sceneEl.object3D;
+        const camera = sceneEl.camera;
+
         const mainCamera = document.getElementById('my-camera');
         const system = this;
+
         let isDigest = false;
 
         this.originalRenderFunc = render;
@@ -160,12 +167,22 @@ AFRAME.registerSystem('compositor', {
                 // the video by calling the compositor pass and executing the shaders.
                 system.pass.render(this, currentRenderTarget, system.renderTarget);
 
-                // const frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                // if (system.prevFrames[frameID]) {
-                //     const currTime = performance.now();
-                //     console.log(currTime - system.prevFrames[frameID]);
-                //     system.prevFrames.splice(frameID, 1);
-                // }
+                const frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
+                if (system.prevFrames[frameID]) {
+                    const currTime = performance.now();
+                    const frameTimestamp = system.prevFrames[frameID].ts;
+                    // console.log("[frame id]", currTime - frameTimestamp);
+
+                    console.log(frameID, system.prevFrameID);
+                    if (frameID > system.prevFrameID) {
+                        const pose = system.prevFrames[frameID].pose;
+                        system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
+                        system.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
+                    }
+
+                    delete system.prevFrames[frameID]; // remove entry with frameID
+                    system.prevFrameID = frameID;
+                }
 
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
