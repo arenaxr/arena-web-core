@@ -1,7 +1,6 @@
 /* global ARENA */
 
 import Swal from 'sweetalert2';
-import {SideMenu} from '../icons/';
 
 // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
 window.setupAV = (callback) => {
@@ -280,11 +279,13 @@ window.setupAV = (callback) => {
     if (ARENA.Jitsi) {
         ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi.hasVideo;
         ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi.hasAudio;
-        if (ARENA.Jitsi.hasVideo) {
-            SideMenu.clickButton(SideMenu.buttons.VIDEO);
+        const sceneEl = document.querySelector('a-scene');
+        const sideMenu = sceneEl.components['arena-side-menu'];
+        if (ARENA.Jitsi?.hasVideo) {
+            sideMenu.clickButton(sideMenu.buttons.VIDEO);
         }
         if (ARENA.Jitsi?.hasAudio) {
-            SideMenu.clickButton(SideMenu.buttons.AUDIO);
+            sideMenu.clickButton(sideMenu.buttons.AUDIO);
         }
     }
     setupPanel.classList.remove('d-none');

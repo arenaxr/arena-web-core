@@ -121,7 +121,8 @@ AFRAME.registerSystem('model-progress', {
             this.loadProgress[src] = {
                 done: false,
                 failed: false,
-                progress: 0,
+                loaded: 0,
+                total: 0,
             };
             const _this = this;
             // add load event listeners, only if not already cached
@@ -149,10 +150,10 @@ AFRAME.registerSystem('model-progress', {
      */
     updateProgress: function(failed, evt) {
         this.loadProgress[evt.detail.src].failed = failed;
-        this.loadProgress[evt.detail.src].progress = evt.detail.progress;
+        this.loadProgress[evt.detail.src].loaded = evt.detail.loaded;
+        this.loadProgress[evt.detail.src].total = evt.detail.total;
 
-        // console.log(failed, evt.detail.progress == Infinity, evt.detail.progress == 100);
-        if (failed || evt.detail.progress == Infinity || evt.detail.progress == 100) {
+        if (failed || evt.detail.total === 0) {
             if (this.loadProgress[evt.detail.src].done == false) {
                 this.loadProgress[evt.detail.src].done = true;
             }
@@ -172,9 +173,10 @@ AFRAME.registerSystem('model-progress', {
 
             let progessStr = '';
             if (lp.failed == false) {
-                if (lp.progress !== Infinity && lp.progress !== undefined) {
-                    progessStr = `${parseFloat(lp.progress.toFixed(1))}%`;
-                    pSum += lp.progress;
+                if (lp.total > 0) {
+                    const progess = (lp.loaded / lp.total) * 100;
+                    progessStr = `${parseFloat( progess.toFixed(1) )}%`;
+                    pSum += progess;
                 } else {
                     pSum += 100;
                     progessStr = `n.a.`;

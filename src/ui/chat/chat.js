@@ -9,11 +9,10 @@
 /* global ARENA */
 
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
-import {ARENAEventEmitter} from '../event-emitter.js';
-import linkify from 'linkifyjs';
-import linkifyStr from 'linkifyjs/string';
+import {ARENAEventEmitter} from '../../event-emitter.js';
+import 'linkifyjs';
+import 'linkifyjs/string';
 import Swal from 'sweetalert2';
-import {SideMenu} from '../icons';
 import './style.css';
 
 /**
@@ -129,7 +128,7 @@ export class ARENAChat {
         this.chatBtn = document.createElement('div');
         this.chatBtn.className = 'chat-button';
         this.chatBtn.setAttribute('title', 'Chat');
-        this.chatBtn.style.backgroundImage = 'url(\'src/icons/images/message.png\')';
+        this.chatBtn.style.backgroundImage = 'url(\'src/ui/icons/images/message.png\')';
         btnGroup.appendChild(this.chatBtn);
 
         this.chatDot = document.createElement('span');
@@ -140,7 +139,7 @@ export class ARENAChat {
         this.usersBtn = document.createElement('div');
         this.usersBtn.className = 'users-button';
         this.usersBtn.setAttribute('title', 'User List');
-        this.usersBtn.style.backgroundImage = 'url(\'src/icons/images/users.png\')';
+        this.usersBtn.style.backgroundImage = 'url(\'src/ui/icons/images/users.png\')';
         btnGroup.appendChild(this.usersBtn);
 
         this.usersDot = document.createElement('span');
@@ -151,7 +150,7 @@ export class ARENAChat {
         this.lmBtn = document.createElement('div');
         this.lmBtn.className = 'landmarks-button';
         this.lmBtn.setAttribute('title', 'Landmarks');
-        this.lmBtn.style.backgroundImage = 'url(\'src/icons/images/landmarks.png\')';
+        this.lmBtn.style.backgroundImage = 'url(\'src/ui/icons/images/landmarks.png\')';
         btnGroup.appendChild(this.lmBtn);
         this.lmBtn.style.display = 'none';
 
@@ -787,7 +786,9 @@ export class ARENAChat {
                 // console.log('muteAudio', ARENA.Jitsi.hasAudio);
                 // only mute
                 if (ARENA.Jitsi.hasAudio) {
-                    SideMenu.clickButton(SideMenu.buttons.AUDIO);
+                    const sceneEl = document.querySelector('a-scene');
+                    const sideMenu = sceneEl.components['arena-side-menu'];
+                    sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
                 const warn = `You have been asked to leave in 5 seconds by ${msg.from_un}.`;

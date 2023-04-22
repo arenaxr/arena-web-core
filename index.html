@@ -147,10 +147,11 @@
         </div>
     </div>
 </div>
-<a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
-         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
-         ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005" ar-hit-test-listener
-         gltf-model="dracoDecoderPath:/static/vendor/draco-1.5.4/"
+<a-scene name="ARENAScene" id="ARENAScene"
+         background="color: black" stats="false" stats-monitor="true"
+         webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
+         ar-hit-test="enabled:true; src: static/images/blank-pixel.png; mapSize:0.005 0.005" ar-hit-test-listener
+         gltf-model="dracoDecoderPath: /static/vendor/draco-1.5.4/"
          inspector="url: static/vendor/aframe-inspector.min.js"
          cursor="rayOrigin:xrselect; fuse:false"
          raycaster="enabled:false;objects:[click-listener],[click-listener-local]">

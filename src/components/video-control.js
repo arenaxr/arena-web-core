@@ -72,9 +72,9 @@ AFRAME.registerComponent('video-control', {
         this.player.setAttribute('videoId', videoId);
         this.player.setAttribute('frameId', frameId);
 
+        this.video = document.getElementById(videoId);
         if (autoplay) {
             // start video
-            this.video = document.getElementById(videoId);
             const theVideoId = this.player.getAttribute('videoId');
             this.player.setAttribute('material', 'src', `#${theVideoId}`);
             this.player.setAttribute('arenaVideo', videoPath);
