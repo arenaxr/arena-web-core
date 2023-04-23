@@ -2,15 +2,31 @@
  * WebXR viewer handler and pseudo-click generator
  *
  */
+AFRAME.registerComponent('webxr-viewer-manager', {
+    schema: {
+        enabled: {default: true},
+    },
 
-window.addEventListener('enter-vr', async function(e) {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sceneEl = document.querySelector('a-scene');
-    if (sceneEl.is('ar-mode')) {
-        window.lastMouseTarget = undefined;
+    init: function() {
         const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
+        if (!isWebXRViewer) return;
 
-        if (isWebXRViewer) {
+        this.onEnterVR = this.onEnterVR.bind(this);
+
+        window.addEventListener('enter-vr', this.onEnterVR);
+    },
+
+    onEnterVR: function() {
+        const el = this.el;
+        const data = this.data;
+
+        const sceneEl = el;
+
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (sceneEl.is('ar-mode')) {
+            window.lastMouseTarget = undefined;
+
             // create psuedo-cursor
             let cursor = document.getElementById('mouse-cursor');
             const cursorParent = cursor.parentNode;
@@ -33,11 +49,11 @@ window.addEventListener('enter-vr', async function(e) {
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
                     intersectedEl.emit('mousedown', {
-                        'clicker': window.ARENA.camName,
-                        'intersection': {
+                        clicker: window.ARENA.camName,
+                        intersection: {
                             point: intersection.point,
                         },
-                        'cursorEl': true,
+                        cursorEl: true,
                     }, false);
                 }
             });
@@ -47,15 +63,16 @@ window.addEventListener('enter-vr', async function(e) {
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
                     intersectedEl.emit('mouseup', {
-                        'clicker': window.ARENA.camName,
-                        'intersection': {
+                        clicker: window.ARENA.camName,
+                        intersection: {
                             point: intersection.point,
                         },
-                        'cursorEl': true,
+                        cursorEl: true,
                     }, false);
                 }
             });
+
+            document.getElementById('env').setAttribute('visible', false);
         }
-        document.getElementById('env').setAttribute('visible', false);
-    }
+    },
 });

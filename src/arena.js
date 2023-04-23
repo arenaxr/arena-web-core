@@ -9,9 +9,8 @@ import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
-import {ARENAChat} from './chat/';
+import {ARENAChat} from './ui/chat/index.js';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
 import {ARENAWebARUtils} from './webar/';
@@ -346,7 +345,9 @@ export class Arena {
         if (ARENA.fixedCamera !== '') {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
-        SideMenu.setupIcons();
+
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.setAttribute('arena-side-menu', 'enabled', true);
 
         // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
         if (this.health) {
@@ -379,7 +380,7 @@ export class Arena {
                 });
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
-                    console.error('No scene objects found in persistence.');
+                    console.warn('No scene objects found in persistence.');
                     ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true);
                     return;
                 }

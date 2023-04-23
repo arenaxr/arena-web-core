@@ -9,7 +9,6 @@
 /* global AFRAME, ARENA, JitsiMeetJS */
 import $ from 'jquery';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {SideMenu} from './icons/';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {
@@ -203,8 +202,10 @@ export class ARENAJitsi {
                 this.connectArena(this.conference.myUserId(), track.getType());
             }
         }
-        if (this.prevVideoUnmuted) SideMenu.clickButton(SideMenu.buttons.VIDEO);
-        if (this.prevAudioUnmuted) SideMenu.clickButton(SideMenu.buttons.AUDIO);
+        const sceneEl = document.querySelector('a-scene');
+        const sideMenu = sceneEl.components['arena-side-menu'];
+        if (this.prevVideoUnmuted) sideMenu.clickButton(sideMenu.buttons.VIDEO);
+        if (this.prevAudioUnmuted) sideMenu.clickButton(sideMenu.buttons.AUDIO);
     }
 
     /**

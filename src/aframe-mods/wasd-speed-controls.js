@@ -84,7 +84,6 @@ AFRAME.components['wasd-controls'].Component.prototype.resetNav = function(check
     }
 };
 
-
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
     let adSign;
     const data = this.data;
