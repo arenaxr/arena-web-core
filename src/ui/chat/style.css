@@ -1,5 +1,4 @@
 /* Alerts */
-
 .chat-alert-box {
 	position: fixed;
 	top: 21px;
@@ -24,7 +23,6 @@
 }
 
 /* Button used to open the chat form - fixed at the bottom of the page */
-
 .chat-button-group-container {
 	position: fixed;
 	z-index: 9999;
@@ -48,10 +46,8 @@
 	background-color: #111111;
 	font-size: 24px;
 	padding: 10px;
-	cursor:pointer;
+	cursor: pointer;
 }
-
-
 
 /* Button used to open the chat form - fixed at the bottom of the page */
 
@@ -67,10 +63,10 @@
 	min-height: 45px;
 	/* 1.74418604651 */
 	/*
-    In order to keep the aspect ratio when resizing
-    padding-top percentages are relative to the containing block's width.
-    http://stackoverflow.com/questions/12121090/responsively-change-div-size-keeping-aspect-ratio
-  */
+		In order to keep the aspect ratio when resizing
+		padding-top percentages are relative to the containing block's width.
+		http://stackoverflow.com/questions/12121090/responsively-change-div-size-keeping-aspect-ratio
+	*/
 	padding-right: 0;
 	padding-top: 0;
 	transition: background-color .05s ease;
@@ -418,12 +414,12 @@
 }
 
 .users-button .dot {
-  position: absolute;
-  top: 5px;
-  padding: 3px 7px;
-  border-radius: 50%;
-  background:#c4c4c4;
-  color: black;
-  font-size: 10px;
-  justify-content: center;
+	position: absolute;
+	top: 5px;
+	padding: 3px 7px;
+	border-radius: 50%;
+	background:#c4c4c4;
+	color: black;
+	font-size: 10px;
+	justify-content: center;
 }

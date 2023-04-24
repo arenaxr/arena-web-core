@@ -200,13 +200,13 @@
         </a-entity>
     </a-scene>
 
-    <div class="d-none" id="icons-div-container">
-        <div id="icons-div"></div>
+    <div id="icons-div-container" class="d-none d-flex flex-column">
+        <div id="icons-div" class="d-flex flex-column align-items-center"></div>
         <div id="icons-div-expand" class="text-white text-center">
             <i id="icons-div-expand-button" class="fas fa-angle-down"></i>
         </div>
     </div>
-    <div class="d-none chat-button-group-container d-flex">
+    <div class="chat-button-group-container d-none d-flex">
         <div class="text-white chat-button-group-expand d-flex align-items-center">
             <i id="chat-button-group-expand-icon" class="fas fa-angle-left"></i>
         </div>
@@ -219,7 +219,7 @@
     </div>
     <span class="echo-name" id="echo-name"></span>
     <span class="pose-stats" id="pose-stats"></span>
-    <video autoplay="1" crossorigin="anonymous" id="cornerVideo" muted="true" playsinline="1" volume="0"></video>
+    <video id="cornerVideo" autoplay="1" crossorigin="anonymous" muted="true" playsinline="1" volume="0"></video>
 
     <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
     <script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>

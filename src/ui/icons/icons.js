@@ -1,29 +1,11 @@
 /* global AFRAME, ARENA */
 import Swal from 'sweetalert2';
-import {ARENAJitsi} from '../../jitsi.js';
-import {ARENAEventEmitter} from '../../event-emitter.js';
+import {ARENAJitsi} from '../../jitsi';
+import {ARENAEventEmitter} from '../../event-emitter';
+import './remove-stats-exit-fullscreen';
 import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
-
-// fullscreen exit handlers
-if (document.addEventListener) {
-    document.addEventListener('fullscreenchange', fullScreenExitHandler, false);
-    document.addEventListener('mozfullscreenchange', fullScreenExitHandler, false);
-    document.addEventListener('MSFullscreenChange', fullScreenExitHandler, false);
-    document.addEventListener('webkitfullscreenchange', fullScreenExitHandler, false);
-}
-
-/**
- * Handle exit from full screen scenarios
- */
-function fullScreenExitHandler() {
-    if (document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement !== null) {
-        // manually disable a-frame stats
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.removeAttribute('stats');
-    }
-}
 
 /**
  * SideMenu component
@@ -31,20 +13,25 @@ function fullScreenExitHandler() {
 AFRAME.registerComponent('arena-side-menu', {
     schema: {
         enabled: {default: true},
-        audioButton: {default: true},
-        videoButton: {default: true},
-        faceTrackingButton: {default: true},
-        speedButton: {default: true},
-        flyButton: {default: true},
-        screenshareButton: {default: true},
-        avSettingsButton: {default: true},
-        logoutButton: {default: true},
-        additionalSettingsButton: {default: true},
+        audioButtonEnabled: {default: true},
+        videoButtonEnabled: {default: true},
+        faceTrackingButtonEnabled: {default: true},
+        speedButtonEnabled: {default: true},
+        flyingButtonEnabled: {default: true},
+        screenshareButtonEnabled: {default: true},
+        avSettingsButtonEnabled: {default: true},
+        logoutButtonEnabled: {default: true},
+        additionalSettingsButtonEnabled: {default: true},
     },
+
+    dependencies: ['remove-stats-exit-fullscreen'],
 
     init: function() {
         const data = this.data;
         const el = this.el;
+
+        const sceneEl = el;
+        const cameraEl = sceneEl.camera.el;
 
         if (this.data.enabled === false) return;
 
@@ -63,17 +50,15 @@ AFRAME.registerComponent('arena-side-menu', {
         // we will save a list of the buttons other modules can request to be clicked
         this._buttonList = [];
 
-        const camera = document.getElementById('my-camera');
-
         /**
          * Create audio button
          */
-        if (data.audioButton) {
-            this.audioBtn = createIconButton('audio-off', 'Microphone on/off.', () => {
+        if (data.audioButtonEnabled) {
+            this.audioButton = createIconButton('audio-off', 'Microphone on/off.', () => {
                 if (!ARENA.Jitsi.hasAudio) { // toggled
                     ARENA.Jitsi.unmuteAudio()
                         .then(() => {
-                            this.audioBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/audio-on.png\')';
+                            this.audioButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/audio-on.png\')';
                         })
                         .catch((err) => {
                             console.log(err);
@@ -81,26 +66,28 @@ AFRAME.registerComponent('arena-side-menu', {
                 } else {
                     ARENA.Jitsi.muteAudio()
                         .then(() => {
-                            this.audioBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/audio-off.png\')';
+                            this.audioButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/audio-off.png\')';
                         })
                         .catch((err) => {
                             console.log(err);
                         });
                 }
             });
-            this._buttonList[this.buttons.AUDIO] = this.audioBtn;
+            this._buttonList[this.buttons.AUDIO] = this.audioButton;
         }
 
         /**
          * Create video button
          */
-        if (data.videoButton) {
-            this.videoBtn = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
+        if (data.videoButtonEnabled) {
+            this.videoButton = createIconButton('video-off', 'Camera on/off. You appear as a video box.', () => {
                 if (!ARENA.Jitsi.hasVideo) { // toggled
+                    if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
+
                     ARENA.Jitsi.startVideo()
                         .then(() => {
-                            this.videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/video-on.png\')';
-                            this.avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-off.png\')';
+                            this.videoButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/video-on.png\')';
+                            this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-off.png\')';
                             ARENA.Jitsi.showVideo();
                             const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
                             if (faceTracker !== undefined && faceTracker.isRunning()) {
@@ -111,7 +98,7 @@ AFRAME.registerComponent('arena-side-menu', {
                             console.log(err);
                         });
                 } else {
-                    this.videoBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/video-off.png\')';
+                    this.videoButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/video-off.png\')';
                     ARENA.Jitsi.stopVideo()
                         .then(() => {
                             ARENA.Jitsi.hideVideo();
@@ -121,18 +108,22 @@ AFRAME.registerComponent('arena-side-menu', {
                         });
                 }
             });
-            this._buttonList[this.buttons.VIDEO] = this.videoBtn;
+            this._buttonList[this.buttons.VIDEO] = this.videoButton;
         }
 
         /**
          * Create AV Settings button
          */
-        if (data.avSettingsButton) {
+        if (data.avSettingsButtonEnabled) {
             const url = new URL(window.location.href);
-            this.avSettingsBtn = createIconButton('options', 'Change A/V options',
-                () => window.setupAV(ARENA.Jitsi.avConnect.bind(ARENA.Jitsi)));
+            this.avSettingsButton = createIconButton('options', 'Change A/V options', () => {
+                if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
+
+                window.setupAV(ARENA.Jitsi.avConnect.bind(ARENA.Jitsi))
+            });
+
             if (ARENA.isJitsiPermitted()) {
-                this._buttonList[this.buttons.AVSETTINGS] = this.avSettingsBtn;
+                this._buttonList[this.buttons.AVSETTINGS] = this.avSettingsButton;
             }
         }
 
@@ -141,9 +132,11 @@ AFRAME.registerComponent('arena-side-menu', {
         /**
          * Create face tracking button
          */
-        if (data.faceTrackingButton) {
-            this.avatarBtn = createIconButton('avatar-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
+        if (data.faceTrackingButtonEnabled) {
+            this.avatarButton = createIconButton('avatar-off', 'Face-recognition on/off. You appear as a 3d-animated face.',
                 async () => {
+                    if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
+
                     let faceTracker = document.querySelector('a-scene').systems['face-tracking'];
                     if (faceTracker === undefined) {
                         await import('../../systems/face-tracking/index.js');
@@ -152,10 +145,10 @@ AFRAME.registerComponent('arena-side-menu', {
                     }
                     if (!faceTracker.isRunning()) { // toggled
                         faceTracker.run().then(() => {
-                            this.avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-on.png\')';
+                            this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-on.png\')';
                             if (ARENA.Jitsi && ARENA.Jitsi.ready) {
                                 ARENA.Jitsi.stopVideo().then(() => {
-                                    this.videoBtn.childNodes[0].style.backgroundImage =
+                                    this.videoButton.childNodes[0].style.backgroundImage =
                                                                             'url(\'src/ui/icons/images/video-off.png\')';
                                     ARENA.Jitsi.hideVideo();
                                 });
@@ -163,74 +156,80 @@ AFRAME.registerComponent('arena-side-menu', {
                         });
                     } else {
                         faceTracker.stop().then(() => {
-                            this.avatarBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-off.png\')';
+                            this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-off.png\')';
                         });
                     }
                 });
-            this.avatarBtn.style.display = 'none';
-            this.settingsButtons.push(this.avatarBtn);
-            this._buttonList[this.buttons.AVATAR] = this.avatarBtn;
+            this.avatarButton.style.display = 'none';
+            this.settingsButtons.push(this.avatarButton);
+            this._buttonList[this.buttons.AVATAR] = this.avatarButton;
         }
 
         /**
          * Create speed button
          */
-        if (data.speedButton) {
+        if (data.speedButtonEnabled) {
             let speedState = 0;
             const speedMod = Number(ARENA.sceneOptions?.speedModifier) || 1;
             if (speedMod) { // Set new initial speed if applicable
-                camera.setAttribute('wasd-controls', {'acceleration': 30 * speedMod});
-                camera.setAttribute('press-and-move', {'acceleration': 30 * speedMod});
+                cameraEl.setAttribute('wasd-controls', {'acceleration': 30 * speedMod});
+                cameraEl.setAttribute('press-and-move', {'acceleration': 30 * speedMod});
             }
-            this.speedBtn = createIconButton('speed-medium', 'Change your movement speed.', () => {
+            this.speedButton = createIconButton('speed-medium', 'Change your movement speed.', () => {
+                if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
+
                 speedState = (speedState + 1) % 3;
                 if (speedState === 0) { // medium
-                    this.speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-medium.png\')';
-                    camera.setAttribute('wasd-controls', {'acceleration': 30 * speedMod});
-                    camera.setAttribute('press-and-move', {'acceleration': 30 * speedMod});
+                    this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-medium.png\')';
+                    cameraEl.setAttribute('wasd-controls', {'acceleration': 30 * speedMod});
+                    cameraEl.setAttribute('press-and-move', {'acceleration': 30 * speedMod});
                 } else if (speedState === 1) { // fast
-                    this.speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-fast.png\')';
-                    camera.setAttribute('wasd-controls', {'acceleration': 60 * speedMod});
-                    camera.setAttribute('press-and-move', {'acceleration': 60 * speedMod});
+                    this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-fast.png\')';
+                    cameraEl.setAttribute('wasd-controls', {'acceleration': 60 * speedMod});
+                    cameraEl.setAttribute('press-and-move', {'acceleration': 60 * speedMod});
                 } else if (speedState === 2) { // slow
-                    this.speedBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-slow.png\')';
-                    camera.setAttribute('wasd-controls', {'acceleration': 15 * speedMod});
-                    camera.setAttribute('press-and-move', {'acceleration': 15 * speedMod});
+                    this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-slow.png\')';
+                    cameraEl.setAttribute('wasd-controls', {'acceleration': 15 * speedMod});
+                    cameraEl.setAttribute('press-and-move', {'acceleration': 15 * speedMod});
                 }
             });
-            this.speedBtn.style.display = 'none';
-            this.settingsButtons.push(this.speedBtn);
-            this._buttonList[this.buttons.SPEED] = this.speedBtn;
+            this.speedButton.style.display = 'none';
+            this.settingsButtons.push(this.speedButton);
+            this._buttonList[this.buttons.SPEED] = this.speedButton;
         }
 
         /**
          * Create flying on/off button
          */
-        if (data.flyButton) {
+        if (data.flyingButtonEnabled) {
             let flying = false;
-            this.flyingBtn = createIconButton('flying-off', 'Flying on/off.', () => {
+            this.flyingButton = createIconButton('flying-off', 'Flying on/off.', () => {
+                if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
+
                 flying = !flying;
                 if (flying) { // toggled on
-                    this.flyingBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-on.png\')';
+                    this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-on.png\')';
                 } else { // toggled off
-                    camera.components['wasd-controls'].resetNav();
-                    camera.components['press-and-move'].resetNav();
-                    camera.object3D.position.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
-                    this.flyingBtn.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-off.png\')';
+                    cameraEl.components['wasd-controls'].resetNav();
+                    cameraEl.components['press-and-move'].resetNav();
+                    cameraEl.object3D.position.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
+                    this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-off.png\')';
                 }
-                camera.setAttribute('wasd-controls', {'fly': flying});
-                camera.setAttribute('press-and-move', {'fly': flying});
+                cameraEl.setAttribute('wasd-controls', {'fly': flying});
+                cameraEl.setAttribute('press-and-move', {'fly': flying});
             });
-            this.flyingBtn.style.display = 'none';
-            this.settingsButtons.push(this.flyingBtn);
-            this._buttonList[this.buttons.FLYING] = this.flyingBtn;
+            this.flyingButton.style.display = 'none';
+            this.settingsButtons.push(this.flyingButton);
+            this._buttonList[this.buttons.FLYING] = this.flyingButton;
         }
 
         /**
          * Create screen share button
          */
-        if (data.screenshareButton) {
-            this.screenshareBtn = createIconButton('screen-on', 'Share your screen in a new window.', () => {
+        if (data.screenshareButtonEnabled) {
+            this.screenshareButton = createIconButton('screen-on', 'Share your screen in a new window.', () => {
+                if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
+
                 Swal.fire({
                     title: 'You clicked on screen share! Are you sure you want to share your screen?',
                     html: `In order to share your screen, ARENA will open a new tab.<br>
@@ -264,23 +263,23 @@ AFRAME.registerComponent('arena-side-menu', {
                                     token: ARENA.mqttToken,
                                     screenSharePrefix: ARENAJitsi.SCREENSHARE_PREFIX,
                                     conferenceName: ARENA.Jitsi.arenaConferenceName,
-                                    displayName: camera ? camera.getAttribute('arena-camera').displayName : 'No Name',
+                                    displayName: camera ? cameraEl.getAttribute('arena-camera').displayName : 'No Name',
                                     camName: ARENA.camName,
                                     objectIds: objectIds.join(),
                                 };
                             });
                     });
             });
-            this.screenshareBtn.style.display = 'none';
-            this.settingsButtons.push(this.screenshareBtn);
-            this._buttonList[this.buttons.SCREENSHARE] = this.screenshareBtn;
+            this.screenshareButton.style.display = 'none';
+            this.settingsButtons.push(this.screenshareButton);
+            this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
         }
 
         /**
          * Create logout button
          */
-        if (data.logoutButton) {
-            this.logoutBtn = createIconButton('logout', 'Sign out of the ARENA.', () => {
+        if (data.logoutButtonEnabled) {
+            this.logoutButton = createIconButton('logout', 'Sign out of the ARENA.', () => {
                 Swal.fire({
                     title: 'You are about to sign out of the ARENA!',
                     text: 'Are you sure you want to sign out?',
@@ -295,28 +294,28 @@ AFRAME.registerComponent('arena-side-menu', {
                         }
                     });
             });
-            this.logoutBtn.style.display = 'none';
-            this.settingsButtons.push(this.logoutBtn);
-            this._buttonList[this.buttons.LOGOUT] = this.logoutBtn;
+            this.logoutButton.style.display = 'none';
+            this.settingsButtons.push(this.logoutButton);
+            this._buttonList[this.buttons.LOGOUT] = this.logoutButton;
         }
 
         /**
          * Create additional setting button
          */
-        if (data.additionalSettingsButton) {
+        if (data.additionalSettingsButtonEnabled) {
             let expanded = false;
-            this.settingsBtn = document.getElementById('icons-div-expand-button');
+            this.settingsButton = document.getElementById('icons-div-expand-button');
             document.getElementById('icons-div-expand').addEventListener('click', () => {
                 expanded = !expanded;
                 if (expanded) { // toggled
-                    this.settingsBtn.classList.replace('fa-angle-down', 'fa-angle-up');
+                    this.settingsButton.classList.replace('fa-angle-down', 'fa-angle-up');
                     for (let i = 0; i < this.settingsButtons.length; i++) {
                         this.settingsButtons[i].style.display = 'block';
                     }
                     settingsPopup.style.display = 'block'; // open settings panel
                     loadSettings();
                 } else {
-                    this.settingsBtn.classList.replace('fa-angle-up', 'fa-angle-down');
+                    this.settingsButton.classList.replace('fa-angle-up', 'fa-angle-down');
                     for (let i = 0; i < this.settingsButtons.length; i++) {
                         this.settingsButtons[i].style.display = 'none';
                     }
@@ -329,19 +328,19 @@ AFRAME.registerComponent('arena-side-menu', {
             const isJitsi = ARENA.isJitsiPermitted();
             const isUsers = ARENA.isUsersPermitted();
             if (isJitsi) {
-                iconsDiv.appendChild(this.audioBtn);
-                iconsDiv.appendChild(this.videoBtn);
-                iconsDiv.appendChild(this.avSettingsBtn);
+                iconsDiv.appendChild(this.audioButton);
+                iconsDiv.appendChild(this.videoButton);
+                iconsDiv.appendChild(this.avSettingsButton);
             }
             if (isUsers && !AFRAME.utils.device.isMobile()) {
-                iconsDiv.appendChild(this.avatarBtn); // no avatar on mobile - face model is too large
+                iconsDiv.appendChild(this.avatarButton); // no avatar on mobile - face model is too large
             }
-            iconsDiv.appendChild(this.speedBtn);
-            iconsDiv.appendChild(this.flyingBtn);
+            iconsDiv.appendChild(this.speedButton);
+            iconsDiv.appendChild(this.flyingButton);
             if (isJitsi && !AFRAME.utils.device.isMobile()) {
-                iconsDiv.appendChild(this.screenshareBtn); // no screenshare on mobile - doesn't work
+                iconsDiv.appendChild(this.screenshareButton); // no screenshare on mobile - doesn't work
             }
-            iconsDiv.appendChild(this.logoutBtn);
+            iconsDiv.appendChild(this.logoutButton);
             iconsDiv.parentElement.classList.remove('d-none');
 
             /**
@@ -351,10 +350,10 @@ AFRAME.registerComponent('arena-side-menu', {
             settingsPopup.className = 'settings-popup px-3 py-1'; // remove bg-white to inherit transparency
             document.body.appendChild(settingsPopup);
 
-            const closeSettingsBtn = document.createElement('span');
-            closeSettingsBtn.className = 'close pe-2';
-            closeSettingsBtn.innerHTML = '&times';
-            settingsPopup.appendChild(closeSettingsBtn);
+            const closeSettingsButton = document.createElement('span');
+            closeSettingsButton.className = 'close pe-2';
+            closeSettingsButton.innerHTML = '&times';
+            settingsPopup.appendChild(closeSettingsButton);
 
             const formDiv = document.createElement('div');
             formDiv.className = 'pb-3';
@@ -494,21 +493,21 @@ AFRAME.registerComponent('arena-side-menu', {
 
             formDiv.appendChild(usernameInputDiv);
 
-            const saveSettingsBtn = document.createElement('button');
-            saveSettingsBtn.innerHTML = 'Save';
-            saveSettingsBtn.className = 'btn btn-info btn-sm';
-            formDiv.appendChild(saveSettingsBtn);
+            const saveSettingsButton = document.createElement('button');
+            saveSettingsButton.innerHTML = 'Save';
+            saveSettingsButton.className = 'btn btn-info btn-sm';
+            formDiv.appendChild(saveSettingsButton);
 
             const iconCredits = document.createElement('p');
             iconCredits.innerHTML = 'Icons made by <a href="https://www.flaticon.com/authors/smashicons" title="Smashicons">Smashicons</a>, <a href="https://www.freepik.com" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>';
             formDiv.appendChild(iconCredits);
 
-            closeSettingsBtn.onclick = function() {
+            closeSettingsButton.onclick = function() {
                 settingsPopup.style.display = 'none'; // close settings panel
                 saveSettings();
             };
 
-            saveSettingsBtn.onclick = function() {
+            saveSettingsButton.onclick = function() {
                 saveSettings();
             };
 
@@ -594,14 +593,14 @@ AFRAME.registerComponent('arena-side-menu', {
                     // remove extra spaces
                     const displayName = usernameInput.value.replace(/\s+/g, ' ').trim();
                     localStorage.setItem('display_name', displayName); // save for next use
-                    camera.setAttribute('arena-camera', 'displayName', displayName); // push to other users' views
+                    cameraEl.setAttribute('arena-camera', 'displayName', displayName); // push to other users' views
                     ARENA.events.emit(ARENAEventEmitter.events.NEW_SETTINGS, {userName: displayName});
                 }
             }
         }
     },
 
-    clickButton(button) {
+    clickButton: function(button) {
         this._buttonList[button].onClick();
     },
 

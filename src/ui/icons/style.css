@@ -16,7 +16,7 @@
     width: 100%;
     background-color: #111111;
     font-size: 24px;
-    cursor:pointer;
+    cursor: pointer;
 }
 
 #icons-div {
@@ -24,21 +24,6 @@
     flex-direction: column;
     flex-wrap: nowrap;
     padding: 5px 5px 0;
-}
-
-.cornerVideoStyle {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    border-radius: 10px;
-    z-index: 9999;
-}
-
-.flipVideo {
-    transform: scale(-1, 1);
-    -moz-transform: scale(-1, 1); /* Firefox */
-    -webkit-transform: scale(-1, 1); /* Safari and Chrome */
-    -o-transform: scale(-1, 1); /* Opera */
 }
 
 .arena-icon-button {
