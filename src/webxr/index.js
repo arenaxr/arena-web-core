@@ -6,4 +6,5 @@
  * @date 2020
  */
 
-import './webxr-viewer-manager';
+import './webxr-device-manager.js';
+import './webxr-viewer.js';
