@@ -237,6 +237,16 @@ export class ARENAUtils {
     }
 
     /**
+     * Generate a UUID.
+     * @return {string} The generated UUID string.
+     */
+    static uuidv4() {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+        );
+    }
+
+    /**
      * Utility to check if device is in landscape mode.
      * @return {boolean} True if device is in landscape mode.
      */
@@ -279,6 +289,32 @@ export class ARENAUtils {
         if (position) {
             targetObject3D.position.set(position.x, position.y, position.z);
         }
+    }
+
+   /**
+    * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
+    * Hololens reliable detection is tbd
+    *
+    * ARHeadeset camera capture uses returned value as a key to projection matrix array
+    *
+    * @return {string} "ml", "hl", "unknown".
+    * @alias module:armarker-system
+    */
+    static detectARHeadset() {
+        if (window.mlWorld) return 'ml';
+        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
+        return 'unknown';
+    }
+
+    /**
+     * Returns device type.
+     * @return {string} device type (desktop, mobile, headset)
+     */
+    static getDeviceType() {
+        let deviceType = 'desktop';
+        if (AFRAME.utils.device.isMobile()) deviceType = 'mobile';
+        else if (ARENAUtils.detectARHeadset() !== undefined) deviceType = 'headset';
+        return deviceType;
     }
 
     /**
