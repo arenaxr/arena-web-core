@@ -14,22 +14,27 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         this.hitEndHandler = this.hitEndHandler.bind(this);
         this.el.addEventListener('enter-vr', this.enterARHandler);
         this.el.addEventListener('exit-vr', this.exitARHandler);
+        this.mouseCursor = document.getElementById('mouse-cursor');
     },
 
     enterARHandler: function() {
         if (this.el.is('ar-mode')) {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
             this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
-            this.el.setAttribute('raycaster', 'enabled', 'true');
-            document.getElementById('mouse-cursor').setAttribute('raycaster', 'enabled', 'false');
+            this.el.setAttribute('cursor', {rayOrigin: 'xrselect', fuse: false});
+            this.el.setAttribute('raycaster', {objects: ['[click-listener],[click-listener-local]']});
+            this.mouseCursor.removeAttribute('cursor');
+            this.mouseCursor.removeAttribute('raycaster');
         }
     },
 
     exitARHandler: function() {
         this.el.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
         this.el.removeEventListener('ar-hit-test-select', this.hitEndHandler);
-        this.el.setAttribute('raycaster', 'enabled', 'false');
-        document.getElementById('mouse-cursor').setAttribute('raycaster', 'enabled', 'true');
+        this.el.removeAttribute('cursor');
+        this.el.removeAttribute('raycaster');
+        this.mouseCursor.setAttribute('cursor', {rayOrigin: 'mouse'});
+        this.mouseCursor.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
     },
 
     hitStartHandler: function(evt) {
