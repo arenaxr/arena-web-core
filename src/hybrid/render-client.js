@@ -1,5 +1,6 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
 import {WebRTCStatsLogger} from './webrtc-stats';
+import {ARENAEventEmitter} from '../event-emitter';
 
 const pcConfig = {
     'sdpSemantics': 'unified-plan',
@@ -31,12 +32,11 @@ const dataChannelOptions = {
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
 
-AFRAME.registerComponent('render-client', {
+AFRAME.registerComponent('arena-hybrid-render-client', {
     schema: {
         enabled: {type: 'boolean', default: false},
         position: {type: 'vec3', default: new THREE.Vector3()},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
-        sendConnectRetryInterval: {type: 'number', default: 5000},
         getStatsInterval: {type: 'number', default: 2000},
         ipd: {type: 'number', default: 0.064},
         hasDualCameras: {type: 'boolean', default: false},
@@ -45,8 +45,14 @@ AFRAME.registerComponent('render-client', {
     },
 
     init: async function() {
+        const data = this.data;
         const el = this.el;
-        const sceneEl = el.sceneEl;
+
+        const sceneEl = el;
+        if (ARENA.idTag === undefined) {
+            ARENA.events.on(ARENAEventEmitter.events.ARENA_STARTED, this.init.bind(this));
+            return;
+        }
 
         console.log('[render-client] Starting...');
         this.connected = false;
@@ -384,6 +390,10 @@ AFRAME.registerComponent('render-client', {
         const data = this.data;
         const el = this.el;
 
+        const sceneEl = el;
+        const scene = sceneEl.object3D;
+        const camera = sceneEl.camera;
+
         if (this.connected && this.inputDataChannel.readyState === 'open') {
             const prevPos = new THREE.Vector3();
             const prevRot = new THREE.Vector3();
@@ -391,7 +401,7 @@ AFRAME.registerComponent('render-client', {
             data.rotation.copy(prevPos);
 
             const camPose = new THREE.Matrix4();
-            camPose.copy(el.object3D.matrixWorld);
+            camPose.copy(camera.matrixWorld);
 
             data.position.setFromMatrixPosition(camPose);
             data.rotation.setFromRotationMatrix(camPose);

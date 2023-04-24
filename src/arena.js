@@ -300,7 +300,6 @@ export class Arena {
         camera.setAttribute('arena-camera', 'enabled', ARENA.isUsersPermitted());
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
-        camera.setAttribute('render-client', 'enabled', true);
 
         const startPos = new THREE.Vector3;
         if (ARENA.startCoords) {
