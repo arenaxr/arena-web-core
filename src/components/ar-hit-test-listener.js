@@ -22,7 +22,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
             this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
             this.el.setAttribute('cursor', {rayOrigin: 'xrselect', fuse: false});
-            this.el.setAttribute('raycaster', {objects: ['[click-listener],[click-listener-local]']});
+            this.el.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
             this.mouseCursor.removeAttribute('cursor');
             this.mouseCursor.removeAttribute('raycaster');
         }
