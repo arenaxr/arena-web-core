@@ -4,7 +4,6 @@
 */
 export class ARENAEventEmitter {
     static events = {
-
         /**
          * Indicate user settings changed (currently, username changes). The event provides
          * the following parameters to its listeners (event.detail object):
@@ -177,6 +176,14 @@ export class ARENAEventEmitter {
          * @param status {object} the Status object with role and other state data
          */
         JITSI_STATUS: 'jitsi_status',
+
+        /**
+         * Indicates ARENA has started (MQTT ready, Jitsi started, etc.)
+         *
+         * @callback onARENAStartedCallback
+         * @param result {boolean} Should always be true
+         */
+        ARENA_STARTED: 'arena_started',
     };
 
     /**

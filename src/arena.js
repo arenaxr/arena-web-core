@@ -765,8 +765,9 @@ export class Arena {
                 });
             }
 
-            console.info(
-                `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
+            ARENA.events.emit(ARENAEventEmitter.events.ARENA_STARTED, true);
+
+            console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag}`);
         }); // mqtt API (after this.* above, are defined)
     }
 }
