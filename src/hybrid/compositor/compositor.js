@@ -158,6 +158,24 @@ AFRAME.registerSystem('compositor', {
                     hasDualCameras = false;
                 }
 
+                // set camera parameters for ATW
+                const frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
+                if (system.prevFrames[frameID]) {
+                    const currTime = performance.now();
+                    const frameTimestamp = system.prevFrames[frameID].ts;
+                    // console.log("[frame id]", currTime - frameTimestamp);
+
+                    // console.log(frameID, system.prevFrameID);
+                    if (frameID >= system.prevFrameID) {
+                        const pose = system.prevFrames[frameID].pose;
+                        system.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
+                    }
+
+                    delete system.prevFrames[frameID]; // remove entry with frameID
+                    system.prevFrameID = frameID;
+                }
+                system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
+
                 // render with custom shader (local-remote compositing) (4):
                 // this will internally call renderer.render(), which will execute the code within
                 // the isDigest conditional above (render normally). this will copy the result of
@@ -166,23 +184,6 @@ AFRAME.registerSystem('compositor', {
                 // the composer will take the "local" frame and merge it with the "remote" frame from
                 // the video by calling the compositor pass and executing the shaders.
                 system.pass.render(this, currentRenderTarget, system.renderTarget);
-
-                const frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                if (system.prevFrames[frameID]) {
-                    const currTime = performance.now();
-                    const frameTimestamp = system.prevFrames[frameID].ts;
-                    // console.log("[frame id]", currTime - frameTimestamp);
-
-                    console.log(frameID, system.prevFrameID);
-                    if (frameID > system.prevFrameID) {
-                        const pose = system.prevFrames[frameID].pose;
-                        system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
-                        system.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
-                    }
-
-                    delete system.prevFrames[frameID]; // remove entry with frameID
-                    system.prevFrameID = frameID;
-                }
 
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);

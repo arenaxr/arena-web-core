@@ -150,7 +150,7 @@ void main() {
     vec3 remoteTopLeft, remoteTopRight, remoteBotLeft, remoteBotRight;
 
     if (!hasDualCameras) {
-        float x = vUv.x;
+        float x = 2.0 * coordRemoteNormalized.x;
 
         cameraTopLeft  = unprojectCamera(vec2(0.0, 1.0), cameraLProjectionMatrix, cameraLMatrixWorld);
         cameraTopRight = unprojectCamera(vec2(1.0, 1.0), cameraLProjectionMatrix, cameraLMatrixWorld);
