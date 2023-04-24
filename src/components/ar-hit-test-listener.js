@@ -17,6 +17,11 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         this.mouseCursor = document.getElementById('mouse-cursor');
     },
 
+    remove: function() {
+        this.el.removeEventListener('enter-vr', this.enterARHandler);
+        this.el.removeEventListener('exit-vr', this.exitARHandler);
+    },
+
     enterARHandler: function() {
         if (this.el.is('ar-mode')) {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
@@ -25,6 +30,8 @@ AFRAME.registerComponent('ar-hit-test-listener', {
             this.el.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
             this.mouseCursor.removeAttribute('cursor');
             this.mouseCursor.removeAttribute('raycaster');
+
+            this.el.components['cursor'].onEnterVR(); // Manually trigger cursor
         }
     },
 
