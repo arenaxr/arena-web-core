@@ -64,6 +64,7 @@ export class Arena {
         this.confstats = url.searchParams.get('confstats');
         this.hudstats = url.searchParams.get('hudstats');
         this.camFollow = url.searchParams.get('camFollow');
+        this.build3d = url.searchParams.get('build3d');
 
         // setup required scene-options defaults
         // TODO: pull these from a schema
@@ -202,6 +203,7 @@ export class Arena {
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
     isJitsiPermitted(mqttToken = ARENA.mqttToken) {
+        if (this.build3d) return false; // build3d is used on a new page
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -216,6 +218,7 @@ export class Arena {
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
     isUsersPermitted(nameSpace = ARENA.nameSpace, mqttToken = ARENA.mqttToken, realm = ARENA.defaults.realm) {
+        if (this.build3d) return false; // build3d is used on a new page
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -367,12 +370,13 @@ export class Arena {
     loadArenaInspector() {
         const sceneEl = document.querySelector('a-scene');
         const object_id = ARENAUtils.getUrlParam('object_id', '');
+        let el;
         if (object_id) {
-            const el = document.getElementById(object_id);
-            sceneEl.components.inspector.openInspector(el);
+            el = document.getElementById(object_id); // requested id
         } else {
-            sceneEl.components.inspector.openInspector();
+            el = document.querySelector('[build-watch-object]'); // first id
         }
+        sceneEl.components.inspector.openInspector(el ? el : null);
         console.log('build3d', 'A-Frame Inspector loaded');
 
         setTimeout(() => {
@@ -383,8 +387,7 @@ export class Arena {
 
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(function() {
-                // remove the a-frame inspector
-                //sceneEl.components.inspector.closeInspector();
+                // remove the build3d a-frame inspector
                 let url = new URL(window.location.href);
                 url.searchParams.delete('build3d');
                 url.searchParams.delete('object_id');
@@ -820,8 +823,7 @@ export class Arena {
                 });
             }
 
-            let url = new URL(window.location.href);
-            if (url.searchParams.get('build3d')){
+            if (this.build3d) {
                 const sceneEl = document.querySelector('a-scene');
                 sceneEl.setAttribute('build-watch-scene', 'enabled', true);
             }

@@ -312,9 +312,9 @@ export async function populateObjectList(
 
             editspan3d.onclick = function() {
                 if (sceneObjs[i].type == 'scene-options'){
-                    window.location.href = `/${scene}?skipav=1&build3d=1&object_id=env`;
+                    window.location.href = `/${scene}?build3d=1&object_id=env`;
                 }else{
-                    window.location.href = `/${scene}?skipav=1&build3d=1&object_id=${sceneObjs[i].object_id}`;
+                    window.location.href = `/${scene}?build3d=1&object_id=${sceneObjs[i].object_id}`;
                 }
             };
         }

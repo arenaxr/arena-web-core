@@ -413,7 +413,7 @@ AFRAME.registerComponent('arena-side-menu', {
             pagesDiv.append(', ');
 
             const edit3d = document.createElement('a');
-            edit3d.href = `/${ARENA.namespacedScene}?skipav=1&build3d=1`;
+            edit3d.href = `/${ARENA.namespacedScene}?build3d=1`;
             edit3d.target = '_blank';
             edit3d.rel = 'noopener noreferrer';
             edit3d.innerHTML = '3D';
