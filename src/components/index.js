@@ -10,6 +10,7 @@
  * ARENA A-Frame components
  */
 
+import './ar-hit-test-listener.js';
 import './arena-camera.js';
 import './arena-hand.js';
 import './arena-user.js';
@@ -46,14 +47,13 @@ import './video-control.js';
 import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
+import '@c-frame/aframe-particle-system-component'; // particle system environment
+import 'aframe-spe-particles-component/dist/aframe-spe-particles-component'; // particles localized
+
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
 
-// import 'aframe-particle-system-component';
-// import 'aframe-spe-particles-component';
-
 // direct file imports
-import './vendor/aframe-aabb-collider-component.min.js'; // AABB collider https://github.com/supermedium/superframe#readme
 import './vendor/aframe-look-at-component.min.js'; // Look at component https://github.com/supermedium/superframe#readme
 import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
 import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme

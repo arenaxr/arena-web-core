@@ -7,11 +7,30 @@ THREE.MeshLine = ml.MeshLine;
 THREE.MeshLineMaterial = ml.MeshLineMaterial;
 
 
+const lineWidthStylers = {
+    'grow': function(p) {
+        return p;
+    },
+    'shrink': function(p) {
+        return 1 - p;
+    },
+    'center-sharp': function(p) {
+        return 1 - Math.abs(2 * p - 1);
+    },
+    'center-smooth': function(p) {
+        return Math.sin( p * 3.1415 );
+    },
+    'sine-wave': function(p) {
+        return 0.5 + 0.5 * Math.sin( (p - 0.5) * 2 * 3.1415 * 10 );
+    },
+};
+
+
 AFRAME.registerComponent('thickline', {
     schema: {
         color: {default: '#000'},
         lineWidth: {default: 10},
-        lineWidthStyler: {default: ''},
+        lineWidthStyler: {default: ''}, // One of lineWidthStyles above
         sizeAttenuation: {default: 0},
         near: {default: 0.1},
         far: {default: 1000},
@@ -71,13 +90,9 @@ AFRAME.registerComponent('thickline', {
 
         geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( positions, 3 ) );
 
-        const widthFn = (
-            typeof this.data.lineWidthStyler === 'string' &&
-      this.data.lineWidthStyler.length > 0
-        ) ? new Function('p', 'return ' + this.data.lineWidthStyler) :
-            function() {
-                return 1;
-            };
+        const widthFn = lineWidthStylers[this.data.lineWidthStyler] ?? function() {
+            return 1;
+        };
         // ? try {var w = widthFn(0);} catch(e) {warn(e);}
         const line = new THREE.MeshLine();
         line.setGeometry( geometry, widthFn );

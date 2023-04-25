@@ -1,7 +1,7 @@
 {
     "properties": {
       "buffer": {
-        "default": "true",
+        "default": true,
         "description": "Transform geometry into a BufferGeometry to reduce memory usage at the cost of being harder to manipulate (geometries only: box, circle, cone, ...).",
         "title": "Buffer",
         "type": "boolean"
@@ -23,7 +23,7 @@
         "required": ["displayName"]
       },
       "material": {
-        "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.3.0/components/material.html'>https://aframe.io/docs/1.3.0/components/material.html</a>",
+        "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/material.html'>https://aframe.io/docs/1.4.0/components/material.html</a>",
         "properties": {
           "alphaTest": {
             "default": 0,
@@ -158,54 +158,6 @@
         "title": "Material",
         "type": "object"
       },
-      "material-extras": {
-        "default": {
-          "encoding": "sRGBEncoding",
-          "needsUpdate": false
-        },
-        "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>https://threejs.org/docs/#api/en/materials/Material</a>",
-        "properties": {
-          "encoding": {
-            "default": "sRGBEncoding",
-            "enum": [
-              "LinearEncoding",
-              "sRGBEncoding",
-              "GammaEncoding",
-              "RGBEEncoding",
-              "LogLuvEncoding",
-              "RGBM7Encoding",
-              "RGBM16Encoding",
-              "RGBDEncoding",
-              "BasicDepthPacking",
-              "RGBADepthPacking"
-            ],
-            "type": "string"
-          },
-          "needsUpdate": {
-            "default": false,
-            "type": "boolean"
-          },
-          "render-order": {
-            "default": "1",
-            "description": "This value allows the default rendering order of scene graph objects to be overridden.",
-            "type": "number"
-          },
-          "colorWrite": {
-            "description": "Whether to render the material’s color",
-            "type": "boolean"
-          },
-          "transparentOccluder": {
-            "description": "If true, will set colorWrite=false and renderOrder=0 to make the material a transparent occluder.",
-            "type": "boolean"
-          },
-          "defaultRenderOrder": {
-            "description": "Used as the renderOrder when transparentOccluder is reset to false.",
-            "type": "number"
-          }
-        },
-        "title": "Material extras",
-        "type": "object"
-      },
       "multisrc": {
         "description": "Define multiple visual sources applied to an object.",
         "properties": {
@@ -227,7 +179,7 @@
         "type": "object"
       },
       "skipCache": {
-        "default": "true",
+        "default": true,
         "description": "Disable retrieving the shared geometry object from the cache. (geometries only: box, circle, cone, ...).",
         "title": "Skip Cache",
         "type": "boolean"

@@ -6,4 +6,4 @@
  * @date 2020
  */
 
-import './web-xr-viewer.js';
+import './webxr-viewer-manager';

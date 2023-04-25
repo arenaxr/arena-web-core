@@ -9,7 +9,6 @@
 /* global AFRAME, ARENA, JitsiMeetJS */
 import $ from 'jquery';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {SideMenu} from './icons/index.js';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {
@@ -203,8 +202,10 @@ export class ARENAJitsi {
                 this.connectArena(this.conference.myUserId(), track.getType());
             }
         }
-        if (this.prevVideoUnmuted) SideMenu.clickButton(SideMenu.buttons.VIDEO);
-        if (this.prevAudioUnmuted) SideMenu.clickButton(SideMenu.buttons.AUDIO);
+        const sceneEl = document.querySelector('a-scene');
+        const sideMenu = sceneEl.components['arena-side-menu'];
+        if (this.prevVideoUnmuted) sideMenu.clickButton(sideMenu.buttons.VIDEO);
+        if (this.prevAudioUnmuted) sideMenu.clickButton(sideMenu.buttons.AUDIO);
     }
 
     /**
@@ -220,7 +221,7 @@ export class ARENAJitsi {
         let screenShareEl = document.getElementById(screenShareId);
         if (!screenShareEl) {
             const sceneEl = document.querySelector('a-scene');
-            // create if doesnt exist
+            // create if doesn't exist
             screenShareEl = document.createElement('a-entity');
             screenShareEl.setAttribute('geometry', 'primitive', 'plane');
             screenShareEl.setAttribute('rotation.order', 'YXZ');
@@ -265,7 +266,7 @@ export class ARENAJitsi {
             const audioId = `audio${participantId}`;
             // create HTML audio elem to store audio
             if (!document.getElementById(audioId)) {
-                $('a-assets').append(`<audio id='${audioId}'/>`);
+                $('a-assets').append(`<audio id='${audioId}' playsinline/>`);
             }
             track.attach($(`#${audioId}`)[0]);
         } else if (track.getType() == 'video') {
@@ -277,7 +278,7 @@ export class ARENAJitsi {
             const videoId = `video${participantId}`;
             // create HTML video elem to store video
             if (!document.getElementById(videoId)) {
-                $('a-assets').append(`<video autoplay='1' id='${videoId}'/>`);
+                $('a-assets').append(`<video autoplay='1' id='${videoId}' playsinline/>`);
             }
             track.attach($(`#${videoId}`)[0]);
 
@@ -513,6 +514,7 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
+            this.updateUserStatus();
             this.conference.sendEndpointStatsMessage(stats); // send to remote
             ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
                 jid: this.jitsiId,
@@ -527,6 +529,9 @@ export class ARENAJitsi {
                 id: arenaId,
                 stats: stats,
             });
+        });
+        this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, statusPayload) => {
+            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
@@ -581,6 +586,18 @@ export class ARENAJitsi {
             }.bind(this));
         }
         ARENA.health.removeError('connection.connectionFailed');
+    }
+
+    updateUserStatus() {
+        const statusPayload = {
+            jid: this.jitsiId,
+            id: ARENA.idTag,
+            status: {
+                role: this.conference.getRole(),
+            }
+        };
+        this.conference.sendEndpointMessage('', statusPayload);
+        ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
     }
 
     /**
@@ -718,14 +735,15 @@ export class ARENAJitsi {
         /**
          * show user video in the corner
          */
+        const _this = this;
         function setupCornerVideo() {
             // video window for jitsi
-            this.jitsiVideoElem = document.getElementById('cornerVideo');
-            this.jitsiVideoElem.className = 'flipVideo';
-            this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
-            this.jitsiVideoElem.style.display = 'none';
+            _this.jitsiVideoElem = document.getElementById('cornerVideo');
+            _this.jitsiVideoElem.classList.add('flipVideo');
+            _this.jitsiVideoElem.classList.add('cornerVideoStyle');
+            _this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
+            _this.jitsiVideoElem.style.display = 'none';
 
-            const _this = this;
             /**
              * set video element size
              */
@@ -737,7 +755,7 @@ export class ARENAJitsi {
                 _this.jitsiVideoElem.style.height = videoHeight + 'px';
             }
 
-            this.jitsiVideoElem.onloadedmetadata = () => {
+            _this.jitsiVideoElem.onloadedmetadata = () => {
                 setCornerVideoHeight();
             };
 
@@ -901,7 +919,12 @@ export class ARENAJitsi {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         // The endpoint ids of the participants that are prioritized up to a higher resolution.
-        videoConstraints.onStageEndpoints = panoIds;
+        try {
+            videoConstraints.onStageSources = panoIds;
+        } catch (error) {
+            console.error(`Upgrade to latest Jitsi, older API is causing: ${error}`);
+            videoConstraints.onStageEndpoints = panoIds;
+        }
         videoConstraints.constraints = constraints;
         this.conference.setReceiverConstraints(videoConstraints);
     }

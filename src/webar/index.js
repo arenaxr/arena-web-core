@@ -6,6 +6,7 @@
  * @date 2020
  */
 import './ar-session.js';
+import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
 
 const HIDDEN_CLASS = 'a-hidden';
 
@@ -22,24 +23,40 @@ export class ARENAWebARUtils {
         // }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window)) {
+        if (!('ontouchstart' in window) && !ARENA.camFollow ) {
             return;
         }
 
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-webar-session', '');
+
+        if (ARENA.camFollow) {
+            try {
+                this.cameraCapture = new WebARCameraCapture();
+                this.cameraCapture.initCamera();
+            } catch (err) {
+                console.error(`No valid CV camera capture found. ${err}`);
+            }
+        }
     }
 
     /**
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
+        if (ARENA.camFollow) {
+            const camera = document.getElementById('my-camera');
+            camera.setAttribute('look-controls', 'touchEnabled', false);
+            camera.setAttribute('look-controls', 'mouseEnabled', false);
+            camera.setAttribute('wasd-controls', 'enabled', false);
+        }
+
         if (this.isWebARViewer) {
             return;
         }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window)) {
+        if (!('ontouchstart' in window) && !ARENA.camFollow) {
             return;
         }
 

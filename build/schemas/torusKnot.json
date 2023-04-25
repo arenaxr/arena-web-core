@@ -66,6 +66,7 @@
                     "default": {
                         "object_type": "torusKnot",
                         "radius": 1,
+                        "radiusTubular": 0.4,
                         "material": {
                             "color": "#7f7f7f"
                         },
@@ -75,6 +76,7 @@
                             "z": 0
                         },
                         "rotation": {
+                            "w": 1,
                             "x": 0,
                             "y": 0,
                             "z": 0

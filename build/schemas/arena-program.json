@@ -45,6 +45,12 @@
                    "WA"
                 ]
              },
+             "parent":{
+                "type":"string",
+                "description":"Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); usually left blank.",
+                "minLength":5,
+                "default": "pytest"
+             },
              "args":{
                 "type":"array",
                 "description":"Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
@@ -143,6 +149,7 @@
              "filename",
              "filetype",
              "instantiate",
+             "parent",
              "env"
           ]
        }
@@ -170,7 +177,7 @@
        "persist":{
           "type":"boolean",
           "description":"Persist this object in the database",
-          "default":"true"
+          "default":true
        },
        "type":{
           "type":"string",

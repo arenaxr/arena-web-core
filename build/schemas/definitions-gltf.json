@@ -14,23 +14,33 @@
           "type": "string"
         },
         "crossFadeDuration": {
-          "default": "0",
+          "default": 0,
           "description": "Duration of cross-fades between clips, in seconds.",
           "type": "number"
         },
         "duration": {
-          "default": "0",
+          "default": 0,
           "description": "Duration of the animation, in seconds (0 = auto).",
           "type": "number"
         },
-        "repetitions": {
-          "default": 0,
-          "description": "Number of times to play the clip, in addition to the first play. Repetitions are ignored for loop: once.",
+        "loop": {
+          "default": "repeat",
+          "description": "once, repeat, or pingpong. In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
           "enum": [
             "once",
-            "repeate",
+            "repeat",
             "pingpong"
           ],
+          "type": "string"
+        },
+        "repetitions": {
+          "default": "",
+          "description": "Number of times to play the clip, in addition to the first play (empty string = Infinity). Repetitions are ignored for loop: once.",
+          "type": "string"
+        },
+        "startAt": {
+          "default": 0,
+          "description": "Sets the start of an animation to a specific time (in milliseconds). This is useful when you need to jump to an exact time in an animation. The input parameter will be scaled by the mixer's timeScale.",
           "type": "number"
         },
         "timeScale": {
@@ -39,6 +49,9 @@
           "type": "number"
         }
       },
+      "required": [
+        "clip"
+      ],
       "title": "Animation Mixer",
       "type": "object"
     },
@@ -78,6 +91,96 @@
       },
       "title": "GLTF Model Level of Detail",
       "type": "object"
+    },
+    "modelUpdate": {
+      "title": "GLTF Model Update",
+      "type": "object",
+      "description": "The GLTF-specific `modelUpdate` attribute is an object with child component names as keys. The top-level keys are the names of the child components to be updated. The values of each are nested `position` and `rotation` attributes to set as new values, respectively. Either `position` or `rotation` can be omitted if unchanged.",
+      "additionalProperties": true,
+      "patternProperties": {
+          "^[A-Za-z][A-Za-z0-9_-]*$": {
+            "type": "object",
+            "description": "One of this model's named child components.",
+            "properties": {
+              "position":{
+                "properties":{
+                   "x":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "y":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "z":{
+                      "default":0,
+                      "type":"number"
+                   }
+                },
+                "required":[
+                   "x",
+                   "y",
+                   "z"
+                ],
+                "type":"object",
+                "title":"Position"
+             },
+             "rotation":{
+                "properties":{
+                   "w":{
+                      "default":1,
+                      "type":"number"
+                   },
+                   "x":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "y":{
+                      "default":0,
+                      "type":"number"
+                   },
+                   "z":{
+                      "default":0,
+                      "type":"number"
+                   }
+                },
+                "required":[
+                   "w",
+                   "x",
+                   "y",
+                   "z"
+                ],
+                "type":"object",
+                "title":"Rotation"
+             }
+            }
+          }
+      },
+      "example": {
+        "left-elbow": {
+          "position": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "rotation": {
+            "w": 1,
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "right-elbow": {
+          "rotation": {
+            "w": 1,
+            "x": 0,
+            "y": 0,
+            "z": 0
+          }
+        },
+        "left-knee": {
+        }
+      }
     }
   }
 }

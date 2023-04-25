@@ -233,7 +233,7 @@ export async function populateObjectList(
         let span = document.createElement('span');
         let img = document.createElement('img');
 
-        // save obj json so we can use later in slected object actions (delete/copy)
+        // save obj json so we can use later in selected object actions (delete/copy)
         li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
         let inputValue = '';
 
@@ -255,6 +255,24 @@ export async function populateObjectList(
         } else if (sceneObjs[i].type == 'landmarks') {
             inputValue = sceneObjs[i].object_id + ' ( landmarks )';
             img.src = 'assets/map-icon.png';
+        }
+
+        const r = sceneObjs[i].attributes.rotation;
+        if (r) {
+            // convert deprecated euler-style rotation to quaternions if needed
+            if (!r.hasOwnProperty('w')) {
+                const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(
+                    THREE.MathUtils.degToRad(r.x),
+                    THREE.MathUtils.degToRad(r.y),
+                    THREE.MathUtils.degToRad(r.z)
+                ));
+                sceneObjs[i].attributes.rotation = {
+                    x: parseFloat(q.x.toFixed(5)),
+                    y: parseFloat(q.y.toFixed(5)),
+                    z: parseFloat(q.z.toFixed(5)),
+                    w: parseFloat(q.w.toFixed(5)),
+                }
+            }
         }
 
         let t = document.createTextNode(inputValue);

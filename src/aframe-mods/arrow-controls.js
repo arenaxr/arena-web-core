@@ -2,7 +2,7 @@
 
 const MAX_DELTA = 0.2;
 
-AFRAME.registerComponent('look-controls-arrow', {
+AFRAME.registerComponent('arrow-controls', {
     schema: {
         acceleration: {default: 1.1},
     },

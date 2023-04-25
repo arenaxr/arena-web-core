@@ -82,12 +82,12 @@ AFRAME.registerSystem('attribution', {
     extractAttributionFromGtlfAsset: function(el, gltfComponent) {
         // check gltf's asset.extras (sketchfab) and scene.userData (blender)
         let attr1 = {}; let attr2 = {};
-        if (gltfComponent.model.hasOwnProperty('asset')) {
+        if (gltfComponent.model && gltfComponent.model.hasOwnProperty('asset')) {
             if (gltfComponent.model.asset.hasOwnProperty('extras')) {
                 attr1 = this.parseExtrasAttributes(gltfComponent.model.asset.extras);
             }
         }
-        if (gltfComponent.model.hasOwnProperty('userData')) {
+        if (gltfComponent.model && gltfComponent.model.hasOwnProperty('userData')) {
             attr2 = this.parseExtrasAttributes(gltfComponent.model.userData);
         }
         Object.assign(attr2, attr1); // merge data from asset.extras and scene.userData;  asset.extras is preferred
@@ -126,4 +126,3 @@ AFRAME.registerSystem('attribution', {
         return true;
     },
 });
-

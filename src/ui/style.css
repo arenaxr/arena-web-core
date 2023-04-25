@@ -1,9 +1,11 @@
 body {
     background-color: #32364d;
 }
+
 .title-logo {
     max-height: 32px;
 }
+
 #avSetup {
     z-index: 999;
     position: relative;
@@ -14,4 +16,17 @@ body {
     max-height: 100vh !important;
 }
 
+.cornerVideoStyle {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    border-radius: 10px;
+    z-index: 9999;
+}
 
+.flipVideo {
+    transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1); /* Firefox */
+    -webkit-transform: scale(-1, 1); /* Safari and Chrome */
+    -o-transform: scale(-1, 1); /* Opera */
+}

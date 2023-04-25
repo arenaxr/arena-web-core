@@ -13,13 +13,14 @@
  * @date 2020
  */
 
-import {WebXRCameraCapture} from './camera-capture/ccwebxr.js';
-import {WebARCameraCapture} from './camera-capture/ccwebar.js';
-import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset.js';
-import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer.js';
-import {ARMarkerRelocalization} from './armarker-reloc.js';
-import {CVWorkerMsgs} from './worker-msgs.js';
-import {ARENAEventEmitter} from '../../event-emitter.js';
+import {WebXRCameraCapture} from './camera-capture/ccwebxr';
+import {WebARCameraCapture} from './camera-capture/ccwebar';
+import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset';
+import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer';
+import {ARMarkerRelocalization} from './armarker-reloc';
+import {CVWorkerMsgs} from './worker-msgs';
+import {ARENAEventEmitter} from '../../event-emitter';
+import {ARENAUtils} from '../../utils';
 
 /**
   * ARMarker System. Supports ARMarkers in a scene.
@@ -70,6 +71,8 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     init: function() {
+        const sceneEl = this.el;
+
         // init this.ATLASMarkers with list of markers within range
         this.getARMArkersFromATLAS(true);
 
@@ -83,17 +86,17 @@ AFRAME.registerSystem('armarker', {
             });
         }
 
-        // request camera acess features
-        const sceneEl = this.el;
-        const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
-        if (this.isWebARViewer) {
-            // eslint-disable-next-line max-len
-            optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in WebXRViewer/WebARViewer
-        } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
-        sceneEl.systems.webxr.sceneEl.setAttribute(
-            'optionalFeatures',
-            optionalFeatures,
-        );
+        // request camera access features
+        if (!ARENA.camFollow) {
+            const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
+            if (this.isWebARViewer) {
+                optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in XRBrowser
+            } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
+            sceneEl.systems.webxr.sceneEl.setAttribute(
+                'optionalFeatures',
+                optionalFeatures,
+            );
+        }
 
         // listner for xr session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
@@ -127,8 +130,10 @@ AFRAME.registerSystem('armarker', {
             }
         }
 
-        // init cv pipeline
-        this.initCVPipeline();
+        // init cv pipeline, if we are not using an external localizer
+        if (!ARENA.camFollow) {
+            this.initCVPipeline();
+        }
     },
     /**
     * Setup cv pipeline (camera capture and cv worker)
@@ -154,12 +159,12 @@ AFRAME.registerSystem('armarker', {
         }
 
         // if we are on an AR headset, use camera facing forward
-        const arHeadset = this.detectARHeadset();
+        const arHeadset = ARENAUtils.detectARHeadset();
         if (arHeadset !== 'unknown') {
             // try to set up a camera facing forward capture (using getUserMedia)
             console.info('Setting up AR Headset camera capture.');
             try {
-                this.cameraCapture = new ARHeadsetCameraCapture(arHeadset, this, this.data.debugCameraCapture);
+                this.cameraCapture = new ARHeadsetCameraCapture(ARENA.arHeadset, this, this.data.debugCameraCapture);
             } catch (err) {
                 console.warn(`Could not create AR Headset camera capture. ${err}`);
             }
@@ -167,6 +172,13 @@ AFRAME.registerSystem('armarker', {
 
 
         if (!this.cameraCapture) { // Not WebXRViewer/WebARViewer, not AR headset
+            // ignore camera capture when in VR Mode
+            const sceneEl = document.querySelector('a-scene');
+            if (!sceneEl.is('ar-mode')) {
+                console.info('Attempted to initialize camera capture, but found VR Mode.');
+                return;
+            }
+
             if (window.XRWebGLBinding) { // Set up a webxr camera capture (e.g. passthrough AR on a phone)
                 console.info('Setting up WebXR-based passthrough AR camera capture.');
                 try {
@@ -265,7 +277,7 @@ AFRAME.registerSystem('armarker', {
         }
 
         // check if we should trigger a device location update
-        if (this.data.devLocUpdateIntervalSecs > 0 && ARENAUtils) {
+        if (this.data.devLocUpdateIntervalSecs > 0) {
             if (new Date() - this.lastdevLocUpdate < this.data.devLocUpdateIntervalSecs * 1000) {
                 ARENAUtils.getLocation((coords, err) => {
                     if (!err) ARENA.clientCoords = coords;
@@ -274,7 +286,7 @@ AFRAME.registerSystem('armarker', {
             }
         }
         if (ARENA.clientCoords === undefined) {
-            console.error('No device location! Cannot query ATLAS.');
+            console.warn('No device location! Cannot query ATLAS.');
             return false;
         }
         const position = ARENA.clientCoords;
@@ -320,20 +332,7 @@ AFRAME.registerSystem('armarker', {
             });
         return true;
     },
-    /**
-    * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
-    * Hololens reliable detection is tbd
-    *
-    * ARHeadeset camera capture uses returned value as a key to projection matrix array
-    *
-    * @return {string} "ml", "hl", "unknown".
-    * @alias module:armarker-system
-    */
-    detectARHeadset() {
-        if (window.mlWorld) return 'ml';
-        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
-        return 'unknown';
-    },
+
     /**
     * Register an ARMarker component with the system
     * @param {object} marker - The marker component object to register.
@@ -433,6 +432,11 @@ AFRAME.registerSystem('armarker', {
             };
         }
         if (!this.ATLASMarkers[markerid]) {
+            if (ARENA.clientCoords === undefined) {
+                ARENAUtils.getLocation((coords, err) => {
+                    if (!err) ARENA.clientCoords = coords;
+                });
+            }
             // force update from ATLAS if not found
             this.getARMArkersFromATLAS();
         }

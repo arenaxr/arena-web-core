@@ -23,6 +23,8 @@
     <!-- our default configs -->
     <script src="conf/defaults.js"></script>
 
+    <!-- AFRAME base -->
+    <script src="static/vendor/aframe/aframe-master.min.js"></script>
     <!-- main arena bundle -->
     <script src="dist/index.js"></script>
     <!-- main arena stylesheet -->
@@ -76,7 +78,7 @@
                         <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
                             Play Test Sound <i class="fas fa-volume-off" id="playTestAudioOutIcon"></i>
                         </button>
-                        <audio id="testAudioOut" src="/static/media/step.ogg"></audio>
+                        <audio id="testAudioOut" src="/static/media/step.ogg" playsinline></audio>
                         <div class="form-floating mb-3">
                             <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
                             </select>
@@ -145,11 +147,14 @@
         </div>
     </div>
 </div>
-<a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
-         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
-         ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005"
-         gltf-model="dracoDecoderPath:/static/vendor/draco-1.5.4/"
-         inspector="url: static/vendor/aframe-inspector.min.js">
+<a-scene name="ARENAScene" id="ARENAScene"
+         background="color: black"
+         stats="false" stats-monitor="true"
+         webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
+         webxr-viewer-manager
+         ar-hit-test="enabled:true; src: static/images/blank-pixel.png; mapSize: 0.005 0.005;" ar-hit-test-listener
+         gltf-model="dracoDecoderPath: /static/vendor/draco-1.5.4/;"
+         inspector="url: static/vendor/aframe-inspector.min.js;">
     <a-assets>
         <!-- Vive controller 3d model -->
         <a-asset-item id="viveControl-obj" src="static/models/hands/vr_controller_vive.obj"></a-asset-item>
@@ -164,28 +169,42 @@
         <a-entity id="cameraRig" position="0 0 0">
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
                 <!-- this camera can 'fly': z axis follows pitch of head direction -->
-                <a-camera far="10000" gesture-detector id="my-camera"
-                          look-controls="reverseMouseDrag: true"
-                          look-controls-arrow
-                          mouse-cursor near="0.1" network-latency press-and-move="constrainToNavMesh:true"
-                          wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true">
+                <a-camera id="my-camera"
+                          near="0.1" far="10000"
+                          gesture-detector network-latency
+                          look-controls="reverseMouseDrag: true" arrow-controls
+                          mouse-cursor press-and-move="constrainToNavMesh:true"
+                          wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true"
+                          geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25"
+                          box-collider="collideNonVisible:true" box-collision-publisher>
                     <a-entity cursor="rayOrigin: mouse" id="mouse-cursor"
                               raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
                 </a-camera>
-                <a-entity arena-hand="hand:Left" blink-controls="cameraRig: #cameraRig; collisionEntities:[nav-mesh]" visible=false id="leftHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:left" raycaster="objects: [click-listener]"></a-entity>
-                <a-entity arena-hand="hand:Right" visible=false id="rightHand" obj-model="obj: #viveControl-obj; mtl: #viveControl-mtl" laser-controls="hand:right" raycaster="objects: [click-listener]"></a-entity>
+                <a-entity id="leftHand"
+                          box-collider="collideNonVisible: true; enabled: false" box-collision-publisher
+                          visible=false
+                          arena-hand="hand:left"
+                          laser-controls="hand:left"
+                          blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
+                          raycaster="objects: [click-listener]"></a-entity>
+                <a-entity id="rightHand"
+                          box-collider="collideNonVisible: true; enabled: false" box-collision-publisher
+                          visible=false
+                          arena-hand="hand:right"
+                          laser-controls="hand:right"
+                          raycaster="objects: [click-listener]"></a-entity>
             </a-entity>
         </a-entity>
     </a-entity>
 </a-scene>
 
-<div class="d-none" id="icons-div-container">
-    <div id="icons-div"></div>
+<div id="icons-div-container" class="d-none d-flex flex-column">
+    <div id="icons-div" class="d-flex flex-column align-items-center"></div>
     <div id="icons-div-expand" class="text-white text-center">
         <i id="icons-div-expand-button" class="fas fa-angle-down"></i>
     </div>
 </div>
-<div class="d-none chat-button-group-container d-flex">
+<div class="chat-button-group-container d-none d-flex">
     <div class="text-white chat-button-group-expand d-flex align-items-center">
         <i id="chat-button-group-expand-icon" class="fas fa-angle-left"></i>
     </div>
@@ -198,7 +217,7 @@
 </div>
 <span class="echo-name" id="echo-name"></span>
 <span class="pose-stats" id="pose-stats"></span>
-<video autoplay="1" crossorigin="anonymous" id="cornerVideo" muted="true" playsinline="1" volume="0"></video>
+<video id="cornerVideo" autoplay="1" crossorigin="anonymous" muted="true" playsinline="1" volume="0"></video>
 
 <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
 <script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>

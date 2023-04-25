@@ -10,8 +10,7 @@
 import {ARENA_VERSION_MSG} from './arena-version.js';
 console.info(ARENA_VERSION_MSG);
 
-// load order: AFRAME, ARENA, components that depend on AFRAME and ARENA
-import 'aframe'; // AFRAME
+// load order: ARENA, components that depend on AFRAME and ARENA
 import './arena.js'; // ARENA
 import './ui/'; // 2D UI
 import './aframe-mods/'; // AFRAME modifications

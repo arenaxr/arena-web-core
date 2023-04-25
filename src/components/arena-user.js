@@ -178,6 +178,7 @@ AFRAME.registerComponent('arena-user', {
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
+            micIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
             micIconEl.setAttribute('material', 'shader', 'flat');
             micIconEl.setAttribute('scale', '0.2 0.2 0.2');
             if (data.presence !== 'Portal') {
@@ -210,6 +211,7 @@ AFRAME.registerComponent('arena-user', {
             qualIconEl = document.createElement('a-image');
             qualIconEl.setAttribute('id', name);
             qualIconEl.setAttribute('material', 'shader', 'flat');
+            qualIconEl.setAttribute('material', 'alphaTest', '0.001'); // fix alpha against transparent
             qualIconEl.setAttribute('scale', '0.15 0.15 0.15');
             if (data.presence !== 'Portal') {
                 qualIconEl.setAttribute('position', `${0 - 0.2} 0.3 0.045`);
@@ -407,16 +409,17 @@ AFRAME.registerComponent('arena-user', {
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
                 const data = user.components['arena-user'].data;
+                const jitsiSourceName = `${data.jitsiId}-v0`;
                 if (data.pano) {
-                    panoIds.push(data.jitsiId);
+                    panoIds.push(jitsiSourceName);
                 }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
-                    constraints[data.jitsiId] = {
+                    constraints[jitsiSourceName] = {
                         'maxHeight': 180,
                         'maxFrameRate': data.resolutionStep,
                     }; // start dropping FPS, not res
                 } else {
-                    constraints[data.jitsiId] = {
+                    constraints[jitsiSourceName] = {
                         'maxHeight': data.resolutionStep,
                     }; // use distance based res for 0 and 180+
                 }
@@ -503,6 +506,14 @@ AFRAME.registerComponent('arena-user', {
                 this.removeQuality();
             }
         }
+    },
+
+    remove: function () {
+        // camera special case, look for hands to delete
+        const elHandL = document.getElementById(`handLeft_${ARENA.idTag}`);
+        if (elHandL) elHandL.remove();
+        const elHandR = document.getElementById(`handRight_${ARENA.idTag}`);
+        if (elHandR) elHandR.remove();
     },
 
     tick: function() {

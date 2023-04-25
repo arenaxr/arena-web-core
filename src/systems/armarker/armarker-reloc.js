@@ -48,11 +48,8 @@ export class ARMarkerRelocalization {
 
     /* error and movement thresholds */
     DTAG_ERROR_THRESH = 1e-3;
-    MOVE_THRESH = 0.05;
-    ROT_THRESH = 0.087;
-
-    // MOVE_THRESH = 0.0125;
-    // ROT_THRESH = 0.02175;
+    MOVE_THRESH = 0.0125;
+    ROT_THRESH = 0.02175;
 
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
@@ -109,6 +106,11 @@ export class ARMarkerRelocalization {
             'armarker-detection',
             this.markerDetection.bind(this),
         );
+
+        if (ARENA.arHeadset !== undefined) {
+            this.MOVE_THRESH = 0.05;
+            this.ROT_THRESH = 0.087;
+        }
     }
 
     /**
@@ -285,7 +287,7 @@ export class ARMarkerRelocalization {
                                         y: tagPose.elements[13],
                                         z: tagPose.elements[14],
                                     },
-                                    rotation: {
+                                    rotation: { // always send quaternions over the wire
                                         x: this.tagPoseRot.x,
                                         y: this.tagPoseRot.y,
                                         z: this.tagPoseRot.z,
@@ -305,6 +307,11 @@ export class ARMarkerRelocalization {
 
                 // do we have detected markers to publish ?
                 if (pubDetList.length > 0 && ARENA) {
+                    if (ARENA.clientCoords === undefined) {
+                        ARENAUtils.getLocation((coords, err) => {
+                            if (!err) ARENA.clientCoords = coords;
+                        });
+                    }
                     const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
                         timestamp: timestamp,
                         vio: vio,
@@ -383,4 +390,3 @@ export class ARMarkerRelocalization {
         return this.tagPoseMatrix;
     }
 }
-

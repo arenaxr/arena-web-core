@@ -1,6 +1,6 @@
 {
     "title": "GLTF Model",
-    "description":"Load a GLTF model. \n\nFormat: <a href='https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/README.md'>https://github.com/KhronosGroup/glTF-Tutorials/blob/master/gltfTutorial/README.md</a>",
+    "description":"Load a GLTF model. \n\nBesides applying standard rotation and position attributes to the center-point of the GLTF model, the individual child components can also be manually manipulated. See format details in the `modelUpdate` data attribute.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -47,6 +47,7 @@
                             "z": 0
                         },
                         "rotation": {
+                            "w": 1,
                             "x": 0,
                             "y": 0,
                             "z": 0

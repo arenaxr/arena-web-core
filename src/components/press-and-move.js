@@ -8,7 +8,6 @@
 
 const MAX_DELTA = 0.2;
 const CLAMP_VELOCITY = 0.00001;
-const LONG_PRESS_DURATION_THRESHOLD = 1000; // pressing for 1 second counts as long press
 const EPS = 10e-6;
 /**
  * Press and move camera; User camera movement with the mouse.
@@ -24,9 +23,12 @@ AFRAME.registerComponent('press-and-move', {
         constrainToNavMesh: {default: false},
         enabled: {default: true},
         fly: {default: false},
+        longPressDurationThreshold: {default: 500},
     },
 
     init: function() {
+        const data = this.data;
+
         // Navigation
         this.navGroup = null;
         this.navNode = null;
@@ -34,31 +36,31 @@ AFRAME.registerComponent('press-and-move', {
         this.navEnd = new THREE.Vector3();
         this.clampedEnd = new THREE.Vector3();
 
-        this.timer = null;
-        this.drag = false;
+        this.startTouchTime = null;
         this.longTouch = false;
 
         this.easing = 1.1;
 
         this.velocity = new THREE.Vector3();
+        this.direction = 1;
 
         const self = this;
         window.addEventListener('touchstart', function(evt) {
-            evt.preventDefault();
-            if (!self.timer && evt.touches.length === 1) { // let gesture-detector handle 2+ touches
-                self.timer = window.setTimeout(() => {
-                    self.longTouch = true;
-                }, LONG_PRESS_DURATION_THRESHOLD);
+            // evt.preventDefault();
+            if (evt.touches.length === 1 || evt.touches.length == 2) {
+                if (evt.touches.length === 1) {
+                    self.direction = 1;
+                }
+                else if (evt.touches.length === 2) {
+                    self.direction = -1;
+                }
+
+                self.startTouchTime = performance.now();
             }
-        });
+        }, {passive: false});
 
         window.addEventListener('touchend', function(evt) {
-            if (self.timer) {
-                clearTimeout(self.timer);
-                self.timer = null;
-            }
-            self.longTouch = false;
-            self.drag = false;
+            self.startTouchTime = null;
         });
     },
 
@@ -123,6 +125,8 @@ AFRAME.registerComponent('press-and-move', {
             // Transform direction relative to heading.
             rotationEuler.set(THREE.MathUtils.degToRad(xRotation), THREE.MathUtils.degToRad(rotation.y), 0);
             directionVector.applyEuler(rotationEuler);
+            // Apply direction
+            directionVector.multiplyScalar(this.direction);
             return directionVector;
         };
     })(),
@@ -147,15 +151,16 @@ AFRAME.registerComponent('press-and-move', {
         const el = this.el;
         const velocity = this.velocity;
 
-        if (this.longTouch) {
-            this.timer = null;
+        const currTime = performance.now();
+        if (this.startTouchTime !== null) {
+            if (currTime - this.startTouchTime < data.longPressDurationThreshold)
+                return;
 
             delta = delta / 1000;
             this.updateVelocity(delta);
 
-            if (!velocity.x && !velocity.z) {
+            if (!velocity.x && !velocity.z)
                 return;
-            }
 
             const nav = el.sceneEl.systems.nav;
             if (nav.navMesh && data.constrainToNavMesh && !data.fly) {

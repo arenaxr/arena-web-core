@@ -9,9 +9,8 @@ import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
-import {ARENAChat} from './chat/';
+import {ARENAChat} from './ui/chat/index.js';
 import {ARENAEventEmitter} from './event-emitter.js';
-import {SideMenu} from './icons/';
 import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
 import {ARENAWebARUtils} from './webar/';
@@ -64,10 +63,7 @@ export class Arena {
         this.noname = url.searchParams.get('noname');
         this.confstats = url.searchParams.get('confstats');
         this.hudstats = url.searchParams.get('hudstats');
-
-        ARENAUtils.getLocation((coords, err) => {
-            if (!err) ARENA.clientCoords = coords;
-        });
+        this.camFollow = url.searchParams.get('camFollow');
 
         // setup required scene-options defaults
         // TODO: pull these from a schema
@@ -123,7 +119,7 @@ export class Arena {
         this.idTag = idTag;
 
         // set camName
-        this.camName = 'camera_' + this.idTag; // e.g. camera_1234_eric
+        this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
         // if fixedCamera is given, then camName must be set accordingly
         this.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', '');
         if (this.fixedCamera !== '') {
@@ -131,9 +127,9 @@ export class Arena {
         }
 
         // set faceName, avatarName, handLName, handRName which depend on user name
-        this.faceName = 'face_' + this.idTag; // e.g. face_9240_X
-        this.handLName = 'handLeft_' + this.idTag; // e.g. handLeft_9240_X
-        this.handRName = 'handRight_' + this.idTag; // e.g. handRight_9240_X
+        this.faceName = `face_${this.idTag}`; // e.g. face_9240_X
+        this.handLName = `handLeft_${this.idTag}`; // e.g. handLeft_9240_X
+        this.handRName = `handRight_${this.idTag}`; // e.g. handRight_9240_X
     }
 
     /**
@@ -349,7 +345,9 @@ export class Arena {
         if (ARENA.fixedCamera !== '') {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
-        SideMenu.setupIcons();
+
+        const sceneEl = document.querySelector('a-scene');
+        sceneEl.setAttribute('arena-side-menu', 'enabled', true);
 
         // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
         if (this.health) {
@@ -382,7 +380,7 @@ export class Arena {
                 });
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
-                    console.error('No scene objects found in persistence.');
+                    console.warn('No scene objects found in persistence.');
                     ARENA.events.emit(ARENAEventEmitter.events.SCENE_OBJ_LOADED, true);
                     return;
                 }
@@ -445,7 +443,7 @@ export class Arena {
                 const xhrLen = xhr.response.length;
                 while (arenaObjects.size > 0) {
                     if (++i > xhrLen) {
-                        console.err('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
+                        console.error('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
                         break;
                     }
                     const iter = arenaObjects.entries();
@@ -768,8 +766,9 @@ export class Arena {
                 });
             }
 
-            console.info(
-                `* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag} `);
+            ARENA.events.emit(ARENAEventEmitter.events.ARENA_STARTED, true);
+
+            console.info(`* ARENA Started * Scene:${ARENA.namespacedScene}; User:${ARENA.userName}; idTag:${ARENA.idTag}`);
         }); // mqtt API (after this.* above, are defined)
     }
 }

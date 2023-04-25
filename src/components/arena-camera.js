@@ -105,7 +105,7 @@ AFRAME.registerComponent('arena-camera', {
                     y: parseFloat(data.position.y.toFixed(3)),
                     z: parseFloat(data.position.z.toFixed(3)),
                 },
-                rotation: {
+                rotation: { // always send quaternions over the wire
                     x: parseFloat(data.rotation._x.toFixed(3)),
                     y: parseFloat(data.rotation._y.toFixed(3)),
                     z: parseFloat(data.rotation._z.toFixed(3)),
@@ -155,7 +155,7 @@ AFRAME.registerComponent('arena-camera', {
                     y: parseFloat(data.vioPosition.y.toFixed(3)),
                     z: parseFloat(data.vioPosition.z.toFixed(3)),
                 },
-                rotation: {
+                rotation: { // always send quaternions over the wire
                     x: parseFloat(data.vioRotation._x.toFixed(3)),
                     y: parseFloat(data.vioRotation._y.toFixed(3)),
                     z: parseFloat(data.vioRotation._z.toFixed(3)),
