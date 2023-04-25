@@ -349,9 +349,63 @@ export class Arena {
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-side-menu', 'enabled', true);
 
+        let url = new URL(window.location.href);
+        if (url.searchParams.get('build3d')){
+            this.loadArenaInspector();
+        }
+
         // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
         if (this.health) {
             this.health.removeError('slow.network');
+        }
+    }
+
+    /**
+     * Loads the a-frame inspector, with MutationObserver connected to MQTT.
+     * Expects all known objects to be loaded first.
+     */
+    loadArenaInspector() {
+        const sceneEl = document.querySelector('a-scene');
+        const object_id = ARENAUtils.getUrlParam('object_id', '');
+        if (object_id) {
+            const el = document.getElementById(object_id);
+            sceneEl.components.inspector.openInspector(el);
+        } else {
+            sceneEl.components.inspector.openInspector();
+        }
+        console.log('build3d', 'A-Frame Inspector loaded');
+
+        setTimeout(() => {
+            const perm = this.isUserSceneWriter();
+            updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
+            updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
+            updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
+
+            // use "Back to Scene" to send to real ARENA scene
+            $('a.toggle-edit').click(function() {
+                // remove the a-frame inspector
+                //sceneEl.components.inspector.closeInspector();
+                let url = new URL(window.location.href);
+                url.searchParams.delete('build3d');
+                url.searchParams.delete('object_id');
+                window.parent.window.history.pushState({
+                    path: url.href
+                }, '', decodeURIComponent(url.href));
+                window.location.reload();
+            });
+        }, 2000);
+
+        function updateInspectorPanel(perm, jqSelect) {
+            // otherwise, disable controls
+            if (perm) {
+                // permission to edit
+                $(jqSelect).css('background-color', 'green');
+            } else {
+                // no permission to edit
+                $(jqSelect).css('pointer-events', 'orange');
+                $(jqSelect).css('opacity', '.5');
+                $(`${jqSelect} :input`).attr('disabled', true);
+            }
         }
     }
 
@@ -764,6 +818,12 @@ export class Arena {
                     // Initialize Jitsi videoconferencing after A/V setup window
                     this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 });
+            }
+
+            let url = new URL(window.location.href);
+            if (url.searchParams.get('build3d')){
+                const sceneEl = document.querySelector('a-scene');
+                sceneEl.setAttribute('build-watch-scene', 'enabled', true);
             }
 
             ARENA.events.emit(ARENAEventEmitter.events.ARENA_STARTED, true);

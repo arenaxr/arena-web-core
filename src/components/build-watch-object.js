@@ -103,9 +103,6 @@ AFRAME.registerComponent('build-watch-object', {
             this.observer.disconnect();
         }
     },
-    remove: function() {
-        this.system.unregisterComponent(this.el);
-    },
     tick: function() {
         // this.el.flushToDOM(true);
     },

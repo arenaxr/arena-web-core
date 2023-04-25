@@ -51,9 +51,6 @@ AFRAME.registerComponent('build-watch-scene', {
             }
         });
     },
-    remove: function() {
-        this.system.unregisterComponent(this.el);
-    },
     tick: function() {
         // this.el.flushToDOM(true);
     },
