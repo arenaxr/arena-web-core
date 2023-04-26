@@ -5,7 +5,7 @@ import {
 } from '../utils.js';
 
 /**
- * @fileoverview Component to monitor client-performance: fps, memory, etc.
+ * @fileoverview Component to monitor client-performance: fps, memory, etc, and relay to MQTT debug channel if enabled.
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
@@ -17,19 +17,9 @@ AFRAME.registerComponent('stats-monitor', {
         enabled: {
             type: 'boolean', default: true,
         },
-        fps: { // A-Frame stats, Frames rendered in the last second.
-            type: 'number', default: 0,
-        },
-        raf: { // A-Frame stats, Milliseconds needed to render a frame. (latency)
-            type: 'number', default: 0,
-        },
-        totalJSHeapSize: { // The total allocated heap size, in bytes. (Chrome/Edge only)
-            type: 'number', default: 0,
-        },
-        usedJSHeapSize: { // The currently active segment of JS heap, in bytes. (Chrome/Edge only)
-            type: 'number', default: 0,
-        },
     },
+
+    multiple: false,
 
     init: function() {
         const data = this.data;
@@ -45,13 +35,32 @@ AFRAME.registerComponent('stats-monitor', {
         sceneEl.setAttribute('stats', '');
     },
 
+    update: function(oldData) {
+        if (this.data && !oldData) {
+            this.registerListeners();
+        } else if (!this.data && oldData) {
+            this.unregisterListeners();
+        }
+    },
+    remove: function() {
+        this.unregisterListeners();
+    },
+    registerListeners: function() {
+        this.el.addEventListener(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback);
+    },
+    unregisterListeners: function() {
+        this.el.removeEventListener(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback);
+    },
+
+    /**
+     * Called when Jitsi local stats are updated, used to save local status for stats-monitor.
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    jitsiStatsLocalCallback: function(e) {
+        this.callStats = e.detail.stats;
+    },
+
     tick: function(time, timeDelta) {
-        const data = this.data;
-        const el = this.el;
-        const sceneEl = el.sceneEl;
-
-        const chat = sceneEl.components['arena-chat-ui'];
-
         if (!this.rafDiv) {
             this.rafDiv = document.querySelector('.rs-counter-base:nth-child(1) .rs-counter-value');
             return;
@@ -70,10 +79,10 @@ AFRAME.registerComponent('stats-monitor', {
             this.jsHeapSizeLimit = memory.jsHeapSizeLimit;
         }
 
+        // format HUD
         if (ARENA && ARENA.hudstats) {
             const camRoot = document.getElementById('my-camera');
             if (camRoot && !this.hudStatsText) {
-                console.warn(camRoot);
                 this.hudStatsText = document.createElement('a-text');
                 this.hudStatsText.setAttribute('id', 'myStats');
                 this.hudStatsText.setAttribute('position', '0 0 -1');
@@ -87,7 +96,8 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
-        if (ARENA && ARENA.confstats && chat) {
+        // publish to mqtt debug channel the stats
+        if (ARENA && ARENA.confstats) {
             if (ARENA && ARENA.Jitsi) {
                 const perfStats = {
                     jitsiStats: {
@@ -95,7 +105,7 @@ AFRAME.registerComponent('stats-monitor', {
                         jitsiId: ARENA.Jitsi.jitsiId,
                         renderFps: this.fps,
                         requestAnimationFrame: this.raf,
-                        stats: chat.settings.stats,
+                        stats: this.callStats,
                     },
                 };
                 if (window.performance && window.performance.memory) {
@@ -106,11 +116,12 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
+        // display the stats on the HUD
         if (ARENA && ARENA.hudstats && this.hudStatsText) {
             const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit * 100).toFixed(0);
             let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
-            if (ARENA && ARENA.Jitsi && chat) {
-                str += `\n\n[Jitsi]\n${chat.getConnectionText(ARENA.getDisplayName(), chat.settings.stats)}`;
+            if (ARENA && ARENA.Jitsi) {
+                str += `\n\n[Jitsi]\n${JSON.stringify(this.callStats, null, "\t")}`;
             }
             this.hudStatsText.setAttribute('value', str);
         }
