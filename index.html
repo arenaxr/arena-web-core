@@ -12,6 +12,13 @@
     <title>ARENA</title>
     <meta content="Augmented Reality Edge Networking Architecture" name="description">
 
+    <!-- our default configs -->
+    <script src="conf/defaults.js"></script>
+
+    <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
+    <script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+    <script src="src/auth.js"></script>
+
     <!-- jquery, needed by lib jitsi -->
     <script src="static/vendor/jquery-2.1.1.min.js"></script>
 
@@ -19,9 +26,6 @@
     <script src="static/vendor/strophe/strophe.js"></script>
     <script src="static/vendor/strophe/strophe.disco.min.js?v=1"></script>
     <script src="static/vendor/lib-jitsi-meet.min.js"></script>
-
-    <!-- our default configs -->
-    <script src="conf/defaults.js"></script>
 
     <!-- AFRAME base -->
     <script src="static/vendor/aframe/aframe-master.min.js"></script>
@@ -219,10 +223,6 @@
 <span class="echo-name" id="echo-name"></span>
 <span class="pose-stats" id="pose-stats"></span>
 <video id="cornerVideo" autoplay="1" crossorigin="anonymous" muted="true" playsinline="1" volume="0"></video>
-
-<!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-<script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
-<script src="src/auth.js"></script>
 
 <!-- 2D UI -->
 <script src="static/vendor/mdb/mdb.min.js"></script>
