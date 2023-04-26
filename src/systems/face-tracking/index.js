@@ -39,8 +39,8 @@ AFRAME.registerSystem('face-tracking', {
         const _this = this;
         window.addEventListener('onFaceTrackerInit', (e) => {
             const video = e.detail.source;
-            video.classList.add('flipVideo');
-            video.classList.add('cornerVideoStyle');
+            video.classList.add('flip-video');
+            video.classList.add('arena-corner-video');
             video.style.top = '15px';
             video.style.left = '15px';
             video.style.opacity = '0.3';

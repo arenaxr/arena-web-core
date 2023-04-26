@@ -9,12 +9,11 @@
 /* global AFRAME, ARENA */
 
 import Swal from 'sweetalert2';
-import {ARENAJitsi} from '../../jitsi';
-import {ARENAEventEmitter} from '../../event-emitter';
+import {ARENAJitsi} from '../jitsi';
+import {ARENAEventEmitter} from '../event-emitter';
 import './remove-stats-exit-fullscreen';
-import './style.css';
 
-const ICON_BTN_CLASS = 'arena-icon-button';
+const ICON_BTN_CLASS = 'arena-button arena-side-menu-button';
 
 const SpeedState = Object.freeze({
     MEDIUM: 0,
@@ -64,7 +63,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
 
         if (!data.enabled) return;
 
-        if (ARENA === undefined) {
+        if (ARENA.idTag === undefined) {
             ARENA.events.on(ARENAEventEmitter.events.ARENA_STARTED, this.init.bind(this));
             return;
         }
@@ -86,7 +85,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
 
         this.settingsButtons = [];
 
-        this.iconsDiv = document.getElementById('icons-div');
+        this.iconsDiv = document.getElementById('side-menu');
 
         const isJitsi = ARENA.isJitsiPermitted();
         const isUsers = ARENA.isUsersPermitted();
@@ -190,10 +189,10 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         // Create additional setting button
         if (data.additionalSettingsButtonEnabled) {
             this.expanded = false;
-            this.settingsButton = document.getElementById('icons-div-expand-button');
+            this.settingsButton = document.getElementById('side-menu-expand-button');
 
             this.createAdditionalSettings();
-            document.getElementById('icons-div-expand').addEventListener('click', this.onAdditionalSettingsButtonClick);
+            document.getElementById('side-menu-expand').addEventListener('click', this.onAdditionalSettingsButtonClick);
         }
     },
 
@@ -395,7 +394,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         if (!ARENA.Jitsi.hasAudio) { // toggled
             ARENA.Jitsi.unmuteAudio()
                 .then(() => {
-                    this.audioButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/audio-on.png\')';
+                    this.audioButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/audio-on.png\')';
                 })
                 .catch((err) => {
                     console.log(err);
@@ -403,7 +402,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         } else {
             ARENA.Jitsi.muteAudio()
                 .then(() => {
-                    this.audioButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/audio-off.png\')';
+                    this.audioButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/audio-off.png\')';
                 })
                 .catch((err) => {
                     console.log(err);
@@ -422,8 +421,8 @@ AFRAME.registerComponent('arena-side-menu-ui', {
 
             ARENA.Jitsi.startVideo()
                 .then(() => {
-                    this.videoButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/video-on.png\')';
-                    this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-off.png\')';
+                    this.videoButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/video-on.png\')';
+                    this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/avatar-off.png\')';
                     ARENA.Jitsi.showVideo();
                     const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
                     if (faceTracker !== undefined && faceTracker.isRunning()) {
@@ -434,7 +433,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
                     console.log(err);
                 });
         } else {
-            this.videoButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/video-off.png\')';
+            this.videoButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/video-off.png\')';
             ARENA.Jitsi.stopVideo()
                 .then(() => {
                     ARENA.Jitsi.hideVideo();
@@ -456,25 +455,25 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         // dynamically import face tracking module
         let faceTracker = document.querySelector('a-scene').systems['face-tracking'];
         if (faceTracker === undefined) {
-            await import('../../systems/face-tracking/index.js');
+            await import('../systems/face-tracking/index.js');
             faceTracker = document.querySelector('a-scene').systems['face-tracking'];
             if (!faceTracker) return;
         }
 
         if (!faceTracker.isRunning()) { // toggled
             faceTracker.run().then(() => {
-                this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-on.png\')';
+                this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/avatar-on.png\')';
                 if (ARENA.Jitsi && ARENA.Jitsi.ready) {
                     ARENA.Jitsi.stopVideo().then(() => {
                         this.videoButton.childNodes[0].style.backgroundImage =
-                                                                'url(\'src/ui/icons/images/video-off.png\')';
+                                                                'url(\'src/ui/images/video-off.png\')';
                         ARENA.Jitsi.hideVideo();
                     });
                 }
             });
         } else {
             faceTracker.stop().then(() => {
-                this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/avatar-off.png\')';
+                this.avatarButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/avatar-off.png\')';
             });
         }
     },
@@ -507,15 +506,15 @@ AFRAME.registerComponent('arena-side-menu-ui', {
 
         this.speedState = (this.speedState + 1) % 3;
         if (this.speedState === SpeedState.MEDIUM) { // medium
-            this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-medium.png\')';
+            this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/speed-medium.png\')';
             cameraEl.setAttribute('wasd-controls', {'acceleration': 30 * speedMod});
             cameraEl.setAttribute('press-and-move', {'acceleration': 30 * speedMod});
         } else if (this.speedState === SpeedState.FAST) { // fast
-            this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-fast.png\')';
+            this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/speed-fast.png\')';
             cameraEl.setAttribute('wasd-controls', {'acceleration': 60 * speedMod});
             cameraEl.setAttribute('press-and-move', {'acceleration': 60 * speedMod});
         } else if (this.speedState === SpeedState.SLOW) { // slow
-            this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/speed-slow.png\')';
+            this.speedButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/speed-slow.png\')';
             cameraEl.setAttribute('wasd-controls', {'acceleration': 15 * speedMod});
             cameraEl.setAttribute('press-and-move', {'acceleration': 15 * speedMod});
         }
@@ -532,12 +531,12 @@ AFRAME.registerComponent('arena-side-menu-ui', {
 
         this.flying = !this.flying;
         if (this.flying) { // toggled on
-            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-on.png\')';
+            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/flying-on.png\')';
         } else { // toggled off
             cameraEl.components['wasd-controls'].resetNav();
             cameraEl.components['press-and-move'].resetNav();
             cameraEl.object3D.position.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
-            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-off.png\')';
+            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/flying-off.png\')';
         }
         cameraEl.setAttribute('wasd-controls', {'fly': this.flying});
         cameraEl.setAttribute('press-and-move', {'fly': this.flying});
@@ -554,12 +553,12 @@ AFRAME.registerComponent('arena-side-menu-ui', {
 
         this.flying = !this.flying;
         if (this.flying) { // toggled on
-            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-on.png\')';
+            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/flying-on.png\')';
         } else { // toggled off
             cameraEl.components['wasd-controls'].resetNav();
             cameraEl.components['press-and-move'].resetNav();
             cameraEl.object3D.position.y = ARENA.startCoords.y + ARENA.defaults.camHeight;
-            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/icons/images/flying-off.png\')';
+            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/flying-off.png\')';
         }
         cameraEl.setAttribute('wasd-controls', {'fly': flying});
         cameraEl.setAttribute('press-and-move', {'fly': flying});
@@ -740,7 +739,7 @@ function createIconButton(initialImage, tooltip, onClick) {
     // Create elements.
     const wrapper = document.createElement('div');
     const iconButton = document.createElement('button');
-    iconButton.style.backgroundImage = `url('src/ui/icons/images/${initialImage}.png')`;
+    iconButton.style.backgroundImage = `url('src/ui/images/${initialImage}.png')`;
     iconButton.className = ICON_BTN_CLASS;
     iconButton.setAttribute('id', 'btn-' + initialImage);
     iconButton.setAttribute('title', tooltip);

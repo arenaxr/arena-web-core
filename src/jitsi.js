@@ -739,8 +739,8 @@ export class ARENAJitsi {
         function setupCornerVideo() {
             // video window for jitsi
             _this.jitsiVideoElem = document.getElementById('cornerVideo');
-            _this.jitsiVideoElem.classList.add('flipVideo');
-            _this.jitsiVideoElem.classList.add('cornerVideoStyle');
+            _this.jitsiVideoElem.classList.add('flip-video');
+            _this.jitsiVideoElem.classList.add('arena-corner-video');
             _this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
             _this.jitsiVideoElem.style.display = 'none';
 

@@ -34,7 +34,7 @@ window.setupAV = (callback) => {
     const audioContext = new AudioContext();
 
     // style video element
-    videoElement.classList.add('flipVideo');
+    videoElement.classList.add('flip-video');
     videoElement.style.borderRadius = '10px';
 
     /**

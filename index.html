@@ -36,7 +36,7 @@
 </head>
 <body>
 <!-- A/V Setup -->
-<div class="d-none d-flex align-items-center min-vh-100" id="avSetup">
+<div class="arena-av-setup d-none d-flex align-items-center min-vh-100" id="avSetup">
     <div class="container">
         <div class="row d-flex justify-content-center align-items-center">
             <div class="col-lg-10 col-xl-8 p-5 shadow rounded bg-white max-vh-100 overflow-auto">
@@ -199,13 +199,13 @@
     </a-entity>
 </a-scene>
 
-<div id="icons-div-container" class="d-flex flex-column">
-    <div id="icons-div" class="d-flex flex-column align-items-center"></div>
-    <div id="icons-div-expand" class="text-white text-center">
-        <i id="icons-div-expand-button" class="fas fa-angle-down"></i>
+<div id="side-menu-container" class="side-menu-container d-flex flex-column">
+    <div id="side-menu" class="side-menu d-flex flex-column align-items-center"></div>
+    <div id="side-menu-expand" class="side-menu-expand text-white text-center">
+        <i id="side-menu-expand-button" class="side-menu-expand-button fas fa-angle-down"></i>
     </div>
 </div>
-<div class="chat-button-group-container d-none d-flex">
+<div class="chat-button-group-container d-flex">
     <div class="text-white chat-button-group-expand d-flex align-items-center">
         <i id="chat-button-group-expand-icon" class="fas fa-angle-left"></i>
     </div>

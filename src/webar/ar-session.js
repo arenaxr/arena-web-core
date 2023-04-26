@@ -29,7 +29,7 @@ AFRAME.registerComponent('arena-webar-session', {
         this.hideVRButtons();
 
         // hide icons
-        const icons = document.getElementById('icons-div-container');
+        const icons = document.getElementById('side-menu-container');
         icons.style.display = 'none';
 
         // unexpand chat

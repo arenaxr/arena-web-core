@@ -9,12 +9,11 @@
 /* global AFRAME, ARENA */
 
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
-import {ARENAEventEmitter} from '../../event-emitter';
-import {ARENAUtils} from '../../utils';
+import {ARENAEventEmitter} from '../event-emitter';
+import {ARENAUtils} from '../utils';
 import 'linkifyjs';
 import 'linkifyjs/string';
 import Swal from 'sweetalert2';
-import './style.css';
 
 const UserType = Object.freeze({
     EXTERNAL:       'external',
@@ -119,9 +118,9 @@ AFRAME.registerComponent('arena-chat-ui', {
         btnGroup.parentElement.classList.remove('d-none');
 
         this.chatBtn = document.createElement('div');
-        this.chatBtn.className = 'chat-button';
+        this.chatBtn.className = 'arena-button chat-button';
         this.chatBtn.setAttribute('title', 'Chat');
-        this.chatBtn.style.backgroundImage = 'url(\'src/ui/icons/images/message.png\')';
+        this.chatBtn.style.backgroundImage = 'url(\'src/ui/images/message.png\')';
         btnGroup.appendChild(this.chatBtn);
 
         this.chatDot = document.createElement('span');
@@ -130,9 +129,9 @@ AFRAME.registerComponent('arena-chat-ui', {
         this.chatBtn.appendChild(this.chatDot);
 
         this.usersBtn = document.createElement('div');
-        this.usersBtn.className = 'users-button';
+        this.usersBtn.className = 'arena-button users-button';
         this.usersBtn.setAttribute('title', 'User List');
-        this.usersBtn.style.backgroundImage = 'url(\'src/ui/icons/images/users.png\')';
+        this.usersBtn.style.backgroundImage = 'url(\'src/ui/images/users.png\')';
         btnGroup.appendChild(this.usersBtn);
 
         this.usersDot = document.createElement('span');
@@ -141,9 +140,9 @@ AFRAME.registerComponent('arena-chat-ui', {
         this.usersBtn.appendChild(this.usersDot);
 
         this.lmBtn = document.createElement('div');
-        this.lmBtn.className = 'landmarks-button';
+        this.lmBtn.className = 'arena-button landmarks-button';
         this.lmBtn.setAttribute('title', 'Landmarks');
-        this.lmBtn.style.backgroundImage = 'url(\'src/ui/icons/images/landmarks.png\')';
+        this.lmBtn.style.backgroundImage = 'url(\'src/ui/images/landmarks.png\')';
         btnGroup.appendChild(this.lmBtn);
         this.lmBtn.style.display = 'none';
 
