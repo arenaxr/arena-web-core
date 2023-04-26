@@ -19,6 +19,10 @@ AFRAME.registerComponent('build-watch-object', {
             type: 'boolean',
             default: true
         },
+        openJsonEditor: {
+            type: 'boolean',
+            default: false
+        },
     },
     init: function() {
         this.observer = new MutationObserver(this.callback);
@@ -101,6 +105,11 @@ AFRAME.registerComponent('build-watch-object', {
             });
         } else {
             this.observer.disconnect();
+        }
+        // quick setting for user to edit in the build page
+        if (this.data.openJsonEditor) {
+            window.open(`/build/?scene=${ARENA.namespacedScene}&object_id=${this.el.id}`, '_blank');
+            this.data.openJsonEditor = false; // restore
         }
     },
     tick: function() {
