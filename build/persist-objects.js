@@ -309,7 +309,7 @@ export async function populateObjectList(
         if (sceneObjs[i].type != 'program') {
             let editspan3d = document.createElement('span');
             let ielem3d = document.createElement('i');
-            ielem3d.className = 'icon-picture';
+            ielem3d.className = 'icon-fullscreen';
             editspan3d.className = 'edit3d';
             editspan3d.title = 'Edit 3D';
             editspan3d.appendChild(ielem3d);
