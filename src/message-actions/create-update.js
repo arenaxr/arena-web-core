@@ -43,6 +43,8 @@ export class CreateUpdate {
                 return;
             }
 
+            const buildWatchScene = document.querySelector('a-scene').getAttribute('build-watch-scene');
+
             let entityEl = document.getElementById(id);
 
             if (action === ACTIONS.CREATE) {
@@ -76,6 +78,9 @@ export class CreateUpdate {
                 // after setting object attributes, we will add it to the scene
                 addObj = true;
             }
+
+            // disable build-watch when applying remote updates to this object
+            if (buildWatchScene) enableBuildWatchObject(entityEl, message, false);
 
             // set to default render order
             entityEl.object3D.renderOrder = RENDER_ORDER;
@@ -112,6 +117,10 @@ export class CreateUpdate {
             if (message.ttl !== undefined) { // Allow falsy value of 0
                 entityEl.setAttribute('ttl', {seconds: message.ttl});
             }
+
+            // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
+            if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
+
             if (id === ARENA.camFollow) {
                 this.handleCameraOverride(ACTIONS.UPDATE, {
                     id: ARENA.camName,
@@ -170,6 +179,18 @@ export class CreateUpdate {
 
         default:
             Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknown type:', JSON.stringify(message));
+        }
+
+        /**
+         * Enable/Disable object MutationObserver for build-3d watcher.
+         * @param {*} entityEl The scene object to observe mutations
+         * @param {*} msg Incoming ARENA message payload.
+         * @param {*} enable true=start mutation observer, false=pause mutation observer
+         */
+        function enableBuildWatchObject(entityEl, msg, enable) {
+            if (msg.persist) {
+                entityEl.setAttribute('build-watch-object', 'enabled', enable);
+            }
         }
     }
 

@@ -16,6 +16,8 @@ import './arena-hand.js';
 import './arena-user.js';
 import './armarker.js';
 import './attribution.js';
+import './build-watch-object.js';
+import './build-watch-scene.js';
 import './click-listener.js';
 import './collision-listener.js';
 import './gesture-detector.js';

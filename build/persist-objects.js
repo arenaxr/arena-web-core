@@ -169,7 +169,8 @@ export async function fetchSceneObjects(scene) {
 export async function populateObjectList(
     scene,
     filter,
-    objTypeFilter
+    objTypeFilter,
+    focusObjectId = undefined
 ) {
     clearObjectList();
 
@@ -299,6 +300,29 @@ export async function populateObjectList(
                 persist.editObjHandler(obj);
             };
         })();
+
+        if (sceneObjs[i].object_id == focusObjectId){
+            persist.editObjHandler(sceneObjs[i]);
+        }
+
+        // add 3d edit "button"
+        if (sceneObjs[i].type != 'program') {
+            let editspan3d = document.createElement('span');
+            let ielem3d = document.createElement('i');
+            ielem3d.className = 'icon-picture';
+            editspan3d.className = 'edit3d';
+            editspan3d.title = 'Edit 3D';
+            editspan3d.appendChild(ielem3d);
+            li.appendChild(editspan3d);
+
+            editspan3d.onclick = function() {
+                if (sceneObjs[i].type == 'scene-options'){
+                    window.location.href = `/${scene}?build3d=1&object_id=env`;
+                }else{
+                    window.location.href = `/${scene}?build3d=1&object_id=${sceneObjs[i].object_id}`;
+                }
+            };
+        }
 
         persist.objList.appendChild(li);
     }

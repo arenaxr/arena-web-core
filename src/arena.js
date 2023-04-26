@@ -64,6 +64,7 @@ export class Arena {
         this.confstats = url.searchParams.get('confstats');
         this.hudstats = url.searchParams.get('hudstats');
         this.camFollow = url.searchParams.get('camFollow');
+        this.build3d = url.searchParams.get('build3d');
 
         // setup required scene-options defaults
         // TODO: pull these from a schema
@@ -202,6 +203,7 @@ export class Arena {
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
     isJitsiPermitted(mqttToken = ARENA.mqttToken) {
+        if (this.build3d) return false; // build3d is used on a new page
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -216,6 +218,7 @@ export class Arena {
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
     isUsersPermitted(nameSpace = ARENA.nameSpace, mqttToken = ARENA.mqttToken, realm = ARENA.defaults.realm) {
+        if (this.build3d) return false; // build3d is used on a new page
         if (mqttToken) {
             const tokenObj = KJUR.jws.JWS.parse(mqttToken);
             const perms = tokenObj.payloadObj;
@@ -349,9 +352,60 @@ export class Arena {
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-side-menu', 'enabled', true);
 
+        let url = new URL(window.location.href);
+        if (url.searchParams.get('build3d')){
+            this.loadArenaInspector();
+        }
+
         // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
         if (this.health) {
             this.health.removeError('slow.network');
+        }
+    }
+
+    /**
+     * Loads the a-frame inspector, with MutationObserver connected to MQTT.
+     * Expects all known objects to be loaded first.
+     */
+    loadArenaInspector() {
+        const sceneEl = document.querySelector('a-scene');
+        const object_id = ARENAUtils.getUrlParam('object_id', '');
+        let el;
+        if (object_id) {
+            el = document.getElementById(object_id); // requested id
+        } else {
+            el = document.querySelector('[build-watch-object]'); // first id
+        }
+        sceneEl.components.inspector.openInspector(el ? el : null);
+        console.log('build3d', 'A-Frame Inspector loaded');
+
+        setTimeout(() => {
+            const perm = this.isUserSceneWriter();
+            updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
+            updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
+            updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
+
+            // use "Back to Scene" to send to real ARENA scene
+            $('a.toggle-edit').click(function() {
+                // remove the build3d a-frame inspector
+                let url = new URL(window.location.href);
+                url.searchParams.delete('build3d');
+                url.searchParams.delete('object_id');
+                window.parent.window.history.pushState({
+                    path: url.href
+                }, '', decodeURIComponent(url.href));
+                window.location.reload();
+            });
+        }, 2000);
+
+        function updateInspectorPanel(perm, jqSelect) {
+            $(jqSelect).css('opacity', '.75');
+            if (!perm) {
+                // no permission to edit
+                $(jqSelect).css('background-color', 'orange');
+                $(jqSelect).css('pointer-events', 'none');
+                $(`${jqSelect} :input`).attr('disabled', true);
+            }
         }
     }
 
@@ -433,6 +487,7 @@ export class Arena {
                         object_id: obj.object_id,
                         action: 'create',
                         type: obj.type,
+                        persist: true,
                         data: obj.attributes,
                     };
                     this.Mqtt.processMessage(msg);
@@ -763,6 +818,12 @@ export class Arena {
                     // Initialize Jitsi videoconferencing after A/V setup window
                     this.Jitsi = ARENAJitsi.init(this.jitsiHost);
                 });
+            }
+
+            if (this.build3d) {
+                const sceneEl = document.querySelector('a-scene');
+                sceneEl.setAttribute('build-watch-scene', 'enabled', true);
+                sceneEl.setAttribute('debug');
             }
 
             ARENA.events.emit(ARENAEventEmitter.events.ARENA_STARTED, true);
