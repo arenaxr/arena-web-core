@@ -2,17 +2,9 @@
  * WebXR viewer handler and pseudo-click generator
  *
  */
-AFRAME.registerComponent('webxr-viewer-manager', {
-    schema: {
-        enabled: {default: true},
-    },
-
+AFRAME.registerComponent('webxr-viewer', {
     init: function() {
-        const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
-        if (!isWebXRViewer) return;
-
         this.onEnterVR = this.onEnterVR.bind(this);
-
         window.addEventListener('enter-vr', this.onEnterVR);
     },
 
@@ -48,13 +40,17 @@ AFRAME.registerComponent('webxr-viewer-manager', {
                 const intersectedEl = cursor.components.cursor.intersectedEl;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
-                    intersectedEl.emit('mousedown', {
-                        clicker: window.ARENA.camName,
-                        intersection: {
-                            point: intersection.point,
+                    intersectedEl.emit(
+                        'mousedown',
+                        {
+                            clicker: window.ARENA.camName,
+                            intersection: {
+                                point: intersection.point,
+                            },
+                            cursorEl: true,
                         },
-                        cursorEl: true,
-                    }, false);
+                        false,
+                    );
                 }
             });
 
@@ -62,17 +58,19 @@ AFRAME.registerComponent('webxr-viewer-manager', {
                 const intersectedEl = cursor.components.cursor.intersectedEl;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
-                    intersectedEl.emit('mouseup', {
-                        clicker: window.ARENA.camName,
-                        intersection: {
-                            point: intersection.point,
+                    intersectedEl.emit(
+                        'mouseup',
+                        {
+                            clicker: window.ARENA.camName,
+                            intersection: {
+                                point: intersection.point,
+                            },
+                            cursorEl: true,
                         },
-                        cursorEl: true,
-                    }, false);
+                        false,
+                    );
                 }
             });
-
-            document.getElementById('env').setAttribute('visible', false);
         }
     },
 });
