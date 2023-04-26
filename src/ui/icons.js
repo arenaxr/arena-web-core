@@ -257,7 +257,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         edit.target = '_blank';
         edit.rel = 'noopener noreferrer';
         edit.innerHTML = 'Json Editor';
-        edit.title = 'Open the Scene Editor for this scene in a new page';
+        edit.title = 'Open the JSON Scene Editor for this scene in a new page';
         pagesDiv.appendChild(edit);
 
         pagesDiv.append(' | ');
@@ -268,6 +268,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
             edit3d.target = '_blank';
             edit3d.rel = 'noopener noreferrer';
             edit3d.innerHTML = '3D Editor';
+            edit3d.title = 'Open the 3D Scene Editor for this scene in a new page (editors only)';
             pagesDiv.appendChild(edit3d);
 
             pagesDiv.append(' | ');
