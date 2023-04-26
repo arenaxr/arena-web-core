@@ -16,7 +16,7 @@ import './style.css';
 
 const ICON_BTN_CLASS = 'arena-icon-button';
 
-export const SpeedState = Object.freeze({
+const SpeedState = Object.freeze({
     MEDIUM: 0,
     FAST:   1,
     SLOW:   2,
@@ -25,7 +25,7 @@ export const SpeedState = Object.freeze({
 /**
  * SideMenu component
  */
-AFRAME.registerComponent('arena-side-menu', {
+AFRAME.registerComponent('arena-side-menu-ui', {
     schema: {
         enabled: {type: 'boolean', default: true},
 
@@ -62,9 +62,12 @@ AFRAME.registerComponent('arena-side-menu', {
         const data = this.data;
         const el = this.el;
 
-        const sceneEl = el;
+        if (!data.enabled) return;
 
-        if (this.data.enabled === false) return;
+        if (ARENA === undefined) {
+            ARENA.events.on(ARENAEventEmitter.events.ARENA_STARTED, this.init.bind(this));
+            return;
+        }
 
         // button names, to be used by other modules
         this.buttons = {

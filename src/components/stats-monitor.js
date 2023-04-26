@@ -15,35 +15,43 @@ import {
 AFRAME.registerComponent('stats-monitor', {
     schema: {
         enabled: {
-            default: true,
+            type: 'boolean', default: true,
         },
         fps: { // A-Frame stats, Frames rendered in the last second.
-            default: 0,
+            type: 'number', default: 0,
         },
         raf: { // A-Frame stats, Milliseconds needed to render a frame. (latency)
-            default: 0,
+            type: 'number', default: 0,
         },
         totalJSHeapSize: { // The total allocated heap size, in bytes. (Chrome/Edge only)
-            default: 0,
+            type: 'number', default: 0,
         },
         usedJSHeapSize: { // The currently active segment of JS heap, in bytes. (Chrome/Edge only)
-            default: 0,
+            type: 'number', default: 0,
         },
     },
 
     init: function() {
+        const data = this.data;
+        const el = this.el;
+        const sceneEl = el.sceneEl;
+
         this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
 
-        if (!this.data.enabled) {
-            this.el.sceneEl.removeBehavior(this);
+        if (!data.enabled) {
+            sceneEl.removeBehavior(this);
             return;
         }
-        this.el.sceneEl.setAttribute('stats', '');
+        sceneEl.setAttribute('stats', '');
     },
 
-    update: function() {},
-
     tick: function(time, timeDelta) {
+        const data = this.data;
+        const el = this.el;
+        const sceneEl = el.sceneEl;
+
+        const chat = sceneEl.components['arena-chat-ui'];
+
         if (!this.rafDiv) {
             this.rafDiv = document.querySelector('.rs-counter-base:nth-child(1) .rs-counter-value');
             return;
@@ -79,15 +87,15 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
-        if (ARENA && ARENA.confstats) {
-            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
+        if (ARENA && ARENA.confstats && chat) {
+            if (ARENA && ARENA.Jitsi) {
                 const perfStats = {
                     jitsiStats: {
                         arenaId: ARENA.idTag,
                         jitsiId: ARENA.Jitsi.jitsiId,
                         renderFps: this.fps,
                         requestAnimationFrame: this.raf,
-                        stats: ARENA.chat.settings.stats,
+                        stats: chat.settings.stats,
                     },
                 };
                 if (window.performance && window.performance.memory) {
@@ -101,8 +109,8 @@ AFRAME.registerComponent('stats-monitor', {
         if (ARENA && ARENA.hudstats && this.hudStatsText) {
             const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit * 100).toFixed(0);
             let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
-            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
-                str += `\n\n[Jitsi]\n${ARENA.chat.getConnectionText(ARENA.getDisplayName(), ARENA.chat.settings.stats)}`;
+            if (ARENA && ARENA.Jitsi && chat) {
+                str += `\n\n[Jitsi]\n${chat.getConnectionText(ARENA.getDisplayName(), chat.settings.stats)}`;
             }
             this.hudStatsText.setAttribute('value', str);
         }

@@ -7,6 +7,7 @@
  */
 
 /* global AFRAME, ARENA, THREE */
+import {ARENAEventEmitter} from '../event-emitter';
 
 /**
  * Component-System of teleport destination Landmarks
@@ -50,12 +51,15 @@ AFRAME.registerComponent('landmark', {
             default: true,
         },
     },
+
     init: function() {
         this.system.registerComponent(this);
     },
+
     remove: function() {
         this.system.unregisterComponent(this);
     },
+
     teleportTo: function(moveEl = undefined) {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
@@ -102,18 +106,31 @@ AFRAME.registerSystem('landmark', {
     init: function() {
         this.landmarks = {};
     },
+
     registerComponent: function(landmark) {
+        const data = this.data;
+        const el = this.el;
+        const sceneEl = el.sceneEl;
+
+        const chat = sceneEl.components['arena-chat-ui'];
         this.landmarks[landmark.el.id] = landmark;
         if (landmark.data.startingPosition === false) {
-            ARENA.chat.addLandmark(landmark);
+            chat.addLandmark(landmark);
         }
     },
+
     unregisterComponent: function(landmark) {
+        const data = this.data;
+        const el = this.el;
+        const sceneEl = el.sceneEl;
+
+        const chat = sceneEl.components['arena-chat-ui'];
         delete this.landmarks[landmark.el.id];
         if (landmark.data.startingPosition === false) {
-            ARENA.chat.removeLandmark(landmark);
+            chat.removeLandmark(landmark);
         }
     },
+
     getAll: function(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);
         if (startingPosition !== undefined) {
@@ -121,6 +138,7 @@ AFRAME.registerSystem('landmark', {
         }
         return landmarks;
     },
+
     getRandom: function(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);
         if (startingPosition !== undefined) {
@@ -132,6 +150,7 @@ AFRAME.registerSystem('landmark', {
             return undefined;
         }
     },
+
     get: function(id) {
         return this.landmarks[id];
     },
@@ -143,6 +162,7 @@ AFRAME.registerComponent('goto-landmark', {
         on: {type: 'string', default: ''}, // event to listen 'on'
         landmark: {type: 'string', default: ''}, // id of landmark to teleport to
     },
+
     eventHandlerFn: function(evt) {
         if (evt.detail.clicker) { // this is synthetic click event from network, not from our own user
             return;
@@ -152,9 +172,11 @@ AFRAME.registerComponent('goto-landmark', {
             targetEl.components.landmark.teleportTo();
         }
     },
+
     init: function() {
         this.eventHandlerFn = this.eventHandlerFn.bind(this);
     },
+
     update: function(oldData) {
         if (oldData.on) {
             this.el.removeEventListener(oldData.on, this.eventHandlerFn);
@@ -163,9 +185,11 @@ AFRAME.registerComponent('goto-landmark', {
             this.el.addEventListener(this.data.on, this.eventHandlerFn);
         }
     },
+
     remove: function() { // handle component removal
         if (this.data.on) {
             this.el.removeEventListener(this.data.on, this.eventHandlerFn);
         }
     },
+
 });

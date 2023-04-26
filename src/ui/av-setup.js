@@ -288,7 +288,7 @@ window.setupAV = (callback) => {
         ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi.hasVideo;
         ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi.hasAudio;
         const sceneEl = document.querySelector('a-scene');
-        const sideMenu = sceneEl.components['arena-side-menu'];
+        const sideMenu = sceneEl.components['arena-side-menu-ui'];
         if (ARENA.Jitsi?.hasVideo) {
             sideMenu.clickButton(sideMenu.buttons.VIDEO);
         }

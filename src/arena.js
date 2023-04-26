@@ -9,7 +9,6 @@ import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
 import {ARENAMqtt} from './mqtt.js';
 import {ARENAJitsi} from './jitsi.js';
-import {ARENAChat} from './ui/chat/index.js';
 import {ARENAEventEmitter} from './event-emitter.js';
 import {RuntimeMngr} from './runtime-mngr';
 import {ARENAHealth} from './health/';
@@ -348,9 +347,6 @@ export class Arena {
         if (ARENA.fixedCamera !== '') {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
-
-        const sceneEl = document.querySelector('a-scene');
-        sceneEl.setAttribute('arena-side-menu', 'enabled', true);
 
         let url = new URL(window.location.href);
         if (url.searchParams.get('build3d')){
@@ -729,6 +725,8 @@ export class Arena {
     async onAuth(e) {
         const args = e.detail;
 
+        const sceneEl = document.querySelector('a-scene');
+
         this.username = args.mqtt_username;
         this.mqttToken = args.mqtt_token;
 
@@ -742,14 +740,14 @@ export class Arena {
             this.Mqtt = Mqtt;
             // Do not pass functions in mqttClientOptions
             await Mqtt.connect({
-                reconnect: true,
-                userName: this.username,
-                password: this.mqttToken,
-            },
-            // last will message
-            JSON.stringify({object_id: this.camName, action: 'delete'}),
-            // last will topic
-            this.outputTopic + this.camName,
+                    reconnect: true,
+                    userName: this.username,
+                    password: this.mqttToken,
+                },
+                // last will message
+                JSON.stringify({object_id: this.camName, action: 'delete'}),
+                // last will topic
+                this.outputTopic + this.camName,
             );
 
             // init runtime manager
@@ -770,28 +768,12 @@ export class Arena {
             if (!ARENADefaults.devInstance) {
                 console.setOptions({
                     dbgTopic: this.RuntimeManager.getRtDbgTopic(),
-                    publish: this.Mqtt.publish.bind(this.Mqtt)},
-                );
+                    publish: this.Mqtt.publish.bind(this.Mqtt)
+                });
             }
 
             // init chat
             if (this.isUsersPermitted()) {
-                this.chat = new ARENAChat({
-                    userid: this.idTag,
-                    cameraid: this.camName,
-                    username: this.getDisplayName(),
-                    realm: this.defaults.realm,
-                    namespace: this.nameSpace,
-                    scene: this.namespacedScene,
-                    persist_uri: 'https://' + this.defaults.persistHost + this.defaults.persistPath,
-                    keepalive_interval_ms: 30000,
-                    mqtt_host: this.mqttHostURI,
-                    mqtt_username: this.username,
-                    mqtt_token: this.mqttToken,
-                    devInstance: this.defaults.devInstance,
-                    isSceneWriter: this.isUserSceneWriter(),
-                });
-                await this.chat.start();
                 this.showEchoDisplayName();
             } else {
                 // prevent local name when non-interactive
@@ -821,7 +803,6 @@ export class Arena {
             }
 
             if (this.build3d) {
-                const sceneEl = document.querySelector('a-scene');
                 sceneEl.setAttribute('build-watch-scene', 'enabled', true);
                 sceneEl.setAttribute('debug');
             }

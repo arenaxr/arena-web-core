@@ -1,5 +1,1 @@
-import {ARENAChat} from './chat';
-
-export {
-    ARENAChat
-}
+import './chat';
