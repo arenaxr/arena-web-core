@@ -13,7 +13,6 @@ const RENDER_ORDER = 1;
 const camMatrixInverse = new THREE.Matrix4();
 const rigMatrix = new THREE.Matrix4();
 const overrideQuat = new THREE.Quaternion();
-const overrideEuler = new THREE.Euler();
 
 /**
  * Create/Update object handler
@@ -311,7 +310,7 @@ export class CreateUpdate {
             entityEl.setAttribute('gltf-model', data.url);
             delete data[type];
         case 'cube':
-            type='box'; // arena legacy! new libraries/persist objects should use box!
+            type = 'box'; // arena legacy! new libraries/persist objects should use box!
         case 'box':
         case 'circle':
         case 'cone':
@@ -489,14 +488,13 @@ export class CreateUpdate {
                 if (r) {
                     if (r.hasOwnProperty('w')) {
                         overrideQuat.set(r.x, r.y, r.z, r.w);
-                        overrideEuler.setFromQuaternion(overrideQuat);
-                        myCamera.components['look-controls'].yawObject.rotation.y = overrideEuler.y;
-                        myCamera.components['look-controls'].pitchObject.rotation.x = overrideEuler.x;
+                        myCamera.object3D.rotation.setFromQuaternion(overrideQuat);
                     } else {
-                        myCamera.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(
-                            r.y);
-                        myCamera.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(
-                            r.x);
+                        myCamera.object3D.rotation.set(
+                            THREE.MathUtils.degToRad(r.x),
+                            THREE.MathUtils.degToRad(r.y),
+                            THREE.MathUtils.degToRad(r.z),
+                        );
                     }
                 }
             }

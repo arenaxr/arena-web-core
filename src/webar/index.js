@@ -23,7 +23,7 @@ export class ARENAWebARUtils {
         // }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window) && !ARENA.camFollow ) {
+        if (!('ontouchstart' in window) && !ARENA.camFollow) {
             return;
         }
 
@@ -45,9 +45,9 @@ export class ARENAWebARUtils {
      */
     static handleARButtonForNonWebXRMobile() {
         if (ARENA.camFollow) {
+            // Assume that all controls should be relinquished
             const camera = document.getElementById('my-camera');
-            camera.setAttribute('look-controls', 'touchEnabled', false);
-            camera.setAttribute('look-controls', 'mouseEnabled', false);
+            camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('wasd-controls', 'enabled', false);
         }
 
@@ -68,5 +68,5 @@ export class ARENAWebARUtils {
         enterAREl.addEventListener('click', function() {
             ARENAWebARUtils.enterARNonWebXR();
         });
-    };
+    }
 }
