@@ -169,7 +169,8 @@ export async function fetchSceneObjects(scene) {
 export async function populateObjectList(
     scene,
     filter,
-    objTypeFilter
+    objTypeFilter,
+    focusObjectId = undefined
 ) {
     clearObjectList();
 
@@ -299,6 +300,10 @@ export async function populateObjectList(
                 persist.editObjHandler(obj);
             };
         })();
+
+        if (sceneObjs[i].object_id == focusObjectId){
+            persist.editObjHandler(sceneObjs[i]);
+        }
 
         // add 3d edit "button"
         if (sceneObjs[i].type != 'program') {

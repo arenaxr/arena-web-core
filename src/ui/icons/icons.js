@@ -401,26 +401,24 @@ AFRAME.registerComponent('arena-side-menu', {
             formDiv.appendChild(pagesDiv);
 
             if (ARENA.isUserSceneWriter()) { // add permissions link
-                pagesDiv.append('Edit (');
-
                 const edit = document.createElement('a');
                 edit.href = `/build/?scene=${ARENA.namespacedScene}`;
                 edit.target = '_blank';
                 edit.rel = 'noopener noreferrer';
-                edit.innerHTML = 'JSON';
+                edit.innerHTML = 'Json Editor';
                 edit.title = 'Open the Scene Editor for this scene in a new page';
                 pagesDiv.appendChild(edit);
 
-                pagesDiv.append(', ');
+                pagesDiv.append(' | ');
 
                 const edit3d = document.createElement('a');
                 edit3d.href = `/${ARENA.namespacedScene}?build3d=1`;
                 edit3d.target = '_blank';
                 edit3d.rel = 'noopener noreferrer';
-                edit3d.innerHTML = '3D';
+                edit3d.innerHTML = '3D Editor';
                 pagesDiv.appendChild(edit3d);
 
-                pagesDiv.append(') | ');
+                pagesDiv.append(' | ');
             }
             const profile = document.createElement('a');
             profile.href = '#';
