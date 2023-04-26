@@ -1,3 +1,11 @@
+/**
+ * @fileoverview HTML audio/video setup modal
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
+ * @date 2020
+ */
+
 /* global ARENA */
 
 import Swal from 'sweetalert2';
