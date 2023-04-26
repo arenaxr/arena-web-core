@@ -399,14 +399,11 @@ export class Arena {
         }, 2000);
 
         function updateInspectorPanel(perm, jqSelect) {
-            // otherwise, disable controls
-            if (perm) {
-                // permission to edit
-                $(jqSelect).css('background-color', 'green');
-            } else {
+            $(jqSelect).css('opacity', '.75');
+            if (!perm) {
                 // no permission to edit
-                $(jqSelect).css('pointer-events', 'orange');
-                $(jqSelect).css('opacity', '.5');
+                $(jqSelect).css('background-color', 'orange');
+                $(jqSelect).css('pointer-events', 'none');
                 $(`${jqSelect} :input`).attr('disabled', true);
             }
         }
@@ -826,6 +823,7 @@ export class Arena {
             if (this.build3d) {
                 const sceneEl = document.querySelector('a-scene');
                 sceneEl.setAttribute('build-watch-scene', 'enabled', true);
+                sceneEl.setAttribute('debug');
             }
 
             ARENA.events.emit(ARENAEventEmitter.events.ARENA_STARTED, true);
