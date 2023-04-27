@@ -57,6 +57,7 @@ AFRAME.registerComponent('stats-monitor', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiStatsLocalCallback: function(e) {
+        console.error('jitsiStatsLocalCallback', e)
         this.callStats = e.detail.stats;
     },
 
