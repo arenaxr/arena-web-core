@@ -803,8 +803,8 @@ export class Arena {
             }
 
             if (this.build3d) {
-                sceneEl.setAttribute('build-watch-scene');
-                sceneEl.setAttribute('debug');
+                sceneEl.setAttribute('build-watch-scene', true);
+                sceneEl.setAttribute('debug', true);
             }
 
             ARENA.events.emit(ARENAEventEmitter.events.ARENA_STARTED, true);
