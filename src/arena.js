@@ -365,7 +365,7 @@ export class Arena {
      */
     loadArenaInspector() {
         const sceneEl = document.querySelector('a-scene');
-        const object_id = ARENAUtils.getUrlParam('object_id', '');
+        const object_id = ARENAUtils.getUrlParam('objectId', '');
         let el;
         if (object_id) {
             el = document.getElementById(object_id); // requested id
@@ -386,7 +386,7 @@ export class Arena {
                 // remove the build3d a-frame inspector
                 let url = new URL(window.location.href);
                 url.searchParams.delete('build3d');
-                url.searchParams.delete('object_id');
+                url.searchParams.delete('objectId');
                 window.parent.window.history.pushState({
                     path: url.href
                 }, '', decodeURIComponent(url.href));

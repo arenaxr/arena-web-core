@@ -108,7 +108,7 @@ AFRAME.registerComponent('build-watch-object', {
         }
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {
-            window.open(`/build/?scene=${ARENA.namespacedScene}&object_id=${this.el.id}`, '_blank');
+            window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
             this.data.openJsonEditor = false; // restore
         }
     },

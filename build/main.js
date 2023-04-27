@@ -804,7 +804,7 @@ window.addEventListener('onauth', async function (e) {
     // load namespace from defaults or local storage, if they exist; prefer url parameter, if given
     let url = new URL(window.location.href);
     let sceneParam = url.searchParams.get('scene');
-    let focusObjectId = url.searchParams.get('object_id');
+    let focusObjectId = url.searchParams.get('objectId');
     let ns, s;
     if (sceneParam) {
         let sn = sceneParam.split('/');

@@ -254,8 +254,9 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         formDiv.appendChild(pagesDiv);
 
         const edit = document.createElement('a');
+
         edit.href = `/build/?scene=${ARENA.namespacedScene}`;
-        edit.target = '_blank';
+        edit.target = 'ArenaJsonEditor';
         edit.rel = 'noopener noreferrer';
         edit.innerHTML = 'Json Editor';
         edit.title = 'Open the JSON Scene Editor for this scene in a new page';
@@ -266,7 +267,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         if (ARENA.isUserSceneWriter()) { // add permissions link
             const edit3d = document.createElement('a');
             edit3d.href = `/${ARENA.namespacedScene}?build3d=1`;
-            edit3d.target = '_blank';
+            edit3d.target = 'Arena3dEditor';
             edit3d.rel = 'noopener noreferrer';
             edit3d.innerHTML = '3D Editor';
             edit3d.title = 'Open the 3D Scene Editor for this scene in a new page (editors only)';

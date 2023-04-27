@@ -316,10 +316,10 @@ export async function populateObjectList(
             li.appendChild(editspan3d);
 
             editspan3d.onclick = function() {
-                if (sceneObjs[i].type == 'scene-options'){
-                    window.location.href = `/${scene}?build3d=1&object_id=env`;
-                }else{
-                    window.location.href = `/${scene}?build3d=1&object_id=${sceneObjs[i].object_id}`;
+                if (sceneObjs[i].type == 'scene-options') {
+                    window.open(`/${scene}?build3d=1&objectId=env`, 'Arena3dEditor');
+                } else {
+                    window.open(`/${scene}?build3d=1&objectId=${sceneObjs[i].object_id}`, 'Arena3dEditor');
                 }
             };
         }
