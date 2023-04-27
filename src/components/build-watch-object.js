@@ -70,7 +70,13 @@ AFRAME.registerComponent('build-watch-object', {
                                 msg.data.position = mutation.target.getAttribute('position');
                                 break;
                             case 'rotation':
-                                msg.data.rotation = mutation.target.getAttribute('rotation');
+                                const quaternion = mutation.target.object3D.quaternion;
+                                msg.data.rotation = { // always send quaternions over the wire
+                                    x: quaternion._x,
+                                    y: quaternion._y,
+                                    z: quaternion._z,
+                                    w: quaternion._w,
+                                };
                                 break;
                             case 'scale':
                                 msg.data.scale = mutation.target.getAttribute('scale');
