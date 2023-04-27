@@ -73,7 +73,7 @@ AFRAME.registerSystem('compositor', {
         const scene = sceneEl.object3D;
         const camera = sceneEl.camera;
 
-        const mainCamera = document.getElementById('my-camera');
+        const cameraEl = camera.el;
         const system = this;
 
         let isDigest = false;
@@ -103,7 +103,6 @@ AFRAME.registerSystem('compositor', {
         let hasDualCameras, ipd, leftProj, rightProj;
 
         let currentXREnabled = renderer.xr.enabled;
-        let currentShadowAutoUpdate = renderer.shadowMap.autoUpdate;
 
         const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
 
@@ -133,7 +132,6 @@ AFRAME.registerSystem('compositor', {
 
                 // save render state (3)
                 currentXREnabled = this.xr.enabled;
-                currentShadowAutoUpdate = this.shadowMap.autoUpdate;
 
                 // disable xr
                 if (this.xr.enabled === true) {
@@ -176,7 +174,7 @@ AFRAME.registerSystem('compositor', {
                 }
                 system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
 
-                // render with custom shader (local-remote compositing) (4):
+                // (4) render with custom shader (local-remote compositing):
                 // this will internally call renderer.render(), which will execute the code within
                 // the isDigest conditional above (render normally). this will copy the result of
                 // the rendering to the readbuffer in the compositor (aka this.renderTarget), which we
@@ -188,11 +186,10 @@ AFRAME.registerSystem('compositor', {
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
                 this.xr.enabled = currentXREnabled;
-                this.shadowMap.autoUpdate = currentShadowAutoUpdate;
 
                 system.pass.setHasDualCameras(hasDualCameras);
 
-                AFRAME.utils.entity.setComponentProperty(mainCamera, 'render-client', {
+                AFRAME.utils.entity.setComponentProperty(cameraEl, 'render-client', {
                     hasDualCameras: hasDualCameras,
                     ipd: ipd,
                     leftProj: leftProj,
