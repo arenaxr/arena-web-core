@@ -176,7 +176,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 preferredCodecs.splice(selectedCodecIndex, 1);
                 preferredCodecs.unshift(selectedCodec);
             }
-            console.log('codecs', preferredCodecs);
+            console.log('[render-client] codecs', preferredCodecs);
             transceiver.setCodecPreferences(preferredCodecs);
         }
     },

@@ -24,6 +24,8 @@ uniform mat4 remoteLProjectionMatrix;
 
 #define DEPTH_SCALAR    (50.0)
 
+bool stretchBorders = false;
+
 vec3 homogenize(vec2 coord) {
     return vec3(coord, 1.0);
 }
@@ -120,37 +122,24 @@ void main() {
     bool targetWidthGreater = windowSize.x > newWidth;
 
     vec2 coordLocalNormalized = vUv;
-    vec2 coordRemoteNormalized;
-    if (targetWidthGreater) {
-        coordRemoteNormalized = vec2(
-            ( (vUv.x * windowSizeF.x - padding) / float(windowSize.x - totalPad) ) / 2.0,
-            vUv.y
-        );
-    }
-    else {
-        coordRemoteNormalized = vec2(
-            ( (vUv.x * windowSizeF.x + padding) / float(newWidth) ) / 2.0,
-            vUv.y
-        );
-    }
-
     vec2 coordDiffuseColor = coordLocalNormalized;
     vec2 coordDiffuseDepth = coordLocalNormalized;
 
     vec4 diffuseColor = texture2D( tLocalColor, coordDiffuseColor );
     float diffuseDepth = readDepthLocal( tLocalDepth, coordDiffuseDepth );
 
-    vec4 remoteColor;
-    float remoteDepth;
-
+    vec2 coordRemoteNormalized = vUv;
     vec2 coordRemoteColor = coordRemoteNormalized;
     vec2 coordRemoteDepth = coordRemoteNormalized;
+
+    vec4 remoteColor;
+    float remoteDepth;
 
     vec3 cameraTopLeft, cameraTopRight, cameraBotLeft, cameraBotRight;
     vec3 remoteTopLeft, remoteTopRight, remoteBotLeft, remoteBotRight;
 
     if (!hasDualCameras) {
-        float x = 2.0 * coordRemoteNormalized.x;
+        float x = vUv.x;
 
         cameraTopLeft  = unprojectCamera(vec2(0.0, 1.0), cameraLProjectionMatrix, cameraLMatrixWorld);
         cameraTopRight = unprojectCamera(vec2(1.0, 1.0), cameraLProjectionMatrix, cameraLMatrixWorld);
@@ -172,10 +161,19 @@ void main() {
         vec2 uv3 = projectCamera(hitPt, remoteLProjectionMatrix, remoteLMatrixWorld);
 
         coordRemoteNormalized = uv3;
-        coordRemoteNormalized.x = coordRemoteNormalized.x / 2.0;
 
-        coordRemoteColor = coordRemoteNormalized;
-        coordRemoteDepth = vec2(coordRemoteNormalized.x + 0.5, coordRemoteNormalized.y);
+        if (targetWidthGreater) {
+            coordRemoteColor = vec2(
+                ( (coordRemoteNormalized.x * windowSizeF.x - padding) / float(windowSize.x - totalPad) ) / 2.0,
+                coordRemoteNormalized.y
+            );
+        }
+        else {
+            coordRemoteColor = vec2(
+                ( (coordRemoteNormalized.x * windowSizeF.x + padding) / float(newWidth) ) / 2.0,
+                coordRemoteNormalized.y
+            );
+        }
     }
     else {
         // left eye
@@ -191,8 +189,6 @@ void main() {
             coordRemoteDepth.x = xcoord / 4.0 + 0.75;
         }
     }
-
-    bool stretchBorders = false;
 
     float xMin = 0.0;
     float xMax = 0.5;

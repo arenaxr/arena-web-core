@@ -23,8 +23,6 @@ export class CompositorPass extends Pass {
         this.material.uniforms.cameraNear.value = camera.near;
         this.material.uniforms.cameraFar.value = camera.far;
 
-        this.needsSwap = false;
-
         this.fsQuad = new FullScreenQuad(this.material);
 
         const decoderUniform = THREE.UniformsUtils.clone(DecoderShader.uniforms);
@@ -41,6 +39,8 @@ export class CompositorPass extends Pass {
         this.decoderFsQuad = new FullScreenQuad(decoderMaterial);
         this.decoderRenderTarget = new THREE.WebGLRenderTarget(FRAME_ID_LENGTH, 1);
         this.pixelBuffer = new Uint8Array( FRAME_ID_LENGTH * 4 );
+
+        this.needsSwap = false;
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
