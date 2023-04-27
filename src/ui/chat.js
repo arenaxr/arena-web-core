@@ -114,7 +114,7 @@ AFRAME.registerComponent('arena-chat-ui', {
         });
 
         // create chat html elements
-        const btnGroup = document.querySelector('.chat-button-group');
+        const btnGroup = document.getElementById('chat-button-group');
         btnGroup.parentElement.classList.remove('d-none');
 
         this.chatBtn = document.createElement('div');

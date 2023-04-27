@@ -86,6 +86,7 @@ AFRAME.registerComponent('arena-side-menu-ui', {
         this.settingsButtons = [];
 
         this.iconsDiv = document.getElementById('side-menu');
+        this.iconsDiv.parentElement.classList.remove('d-none');
 
         const isJitsi = ARENA.isJitsiPermitted();
         const isUsers = ARENA.isUsersPermitted();
