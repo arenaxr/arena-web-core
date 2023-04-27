@@ -37,8 +37,10 @@ AFRAME.registerComponent('stats-monitor', {
 
     update: function(oldData) {
         if (this.data && !oldData) {
+            console.error('registerListeners', e)
             this.registerListeners();
         } else if (!this.data && oldData) {
+            console.error('unregisterListeners', e)
             this.unregisterListeners();
         }
     },
@@ -46,10 +48,10 @@ AFRAME.registerComponent('stats-monitor', {
         this.unregisterListeners();
     },
     registerListeners: function() {
-        this.el.addEventListener(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback);
+        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
     },
     unregisterListeners: function() {
-        this.el.removeEventListener(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback);
+        ARENA.events.off(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
     },
 
     /**
