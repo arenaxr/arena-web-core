@@ -25,6 +25,75 @@
 // });
 
 window.AUTH = {}; // auth namespace
+// This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
+if (typeof ARENA === 'undefined') {
+    window.ARENA = {
+        defaults: ARENADefaults,
+    };
+    // These need to be refactored into some initial loading function, maybe just the util class (which
+    // is totally different from the new ARENA system btw...)
+    ARENA.setSceneName = function(sceneName) {
+        // private function to set scenename, namespacedScene and namespace
+        const _setNames = (ns, sn) => {
+            this.namespacedScene = `${ns}/${sn}`;
+            this.sceneName = sn;
+            this.nameSpace = ns;
+        };
+        let path = window.location.pathname.substring(1);
+        let {namespace: namespace, sceneName: scenename} = this.defaults;
+        if (this.defaults.devInstance && path.length > 0) {
+            const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
+            if (devPrefix) {
+                path = path.replace(devPrefix[0], '');
+            }
+        }
+        if (path === '' || path === 'index.html') {
+            if (!ARENA.queryParams) {
+                scenename = ARENAUtils?.getUrlParam('scene', scenename);
+            } else {
+                scenename = ARENA.queryParams.get('scene') || scenename;
+            }
+            _setNames(namespace, scenename);
+        } else {
+            try {
+                const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
+                const matches = r.exec(path).groups;
+                // Only first group is given, namespace is actually the scene name
+                if (matches.scenename === undefined) {
+                    _setNames(namespace, matches.namespace);
+                } else {
+                    // Both scene and namespace are defined, return regex as-is
+                    _setNames(matches.namespace, matches.scenename);
+                }
+            } catch (e) {
+                // TODO: consolidate this
+                if (!ARENA.queryParams) {
+                    scenename = ARENAUtils?.getUrlParam('scene', scenename);
+                } else {
+                    scenename = ARENA.queryParams.get('scene') || scenename;
+                }
+                _setNames(namespace, scenename);
+            }
+        }
+        // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
+        this.persistenceUrl = '//' + this.defaults.persistHost + this.defaults.persistPath + this.namespacedScene;
+        this.outputTopic = this.defaults.realm + '/s/' + this.namespacedScene + '/';
+        this.renderTopic = this.outputTopic + '#';
+        this.vioTopic = this.defaults.realm + '/vio/' + this.namespacedScene + '/';
+    }.bind(ARENA);
+    ARENA.setUserName = function(name = undefined) {
+        // set userName
+        if (name === undefined) {
+            if (!ARENA.queryParams) {
+                name = ARENAUtils?.getUrlParam('name', this.defaults.userName);
+            } else {
+                name = ARENA.queryParams.get('name') || this.defaults.userName;
+            }
+        } // check url params, defaults
+        this.userName = name;
+    }.bind(ARENA);
+}
+ARENA.queryParams = new URLSearchParams(window.location.search);
 
 if (!storageAvailable('localStorage')) {
     const title = 'LocalStorage has been disabled';
@@ -69,12 +138,8 @@ const authCheck = function(blocking = false) {
     AUTH.signInPath = `//${window.location.host}/user/login`;
     AUTH.signOutPath = `//${window.location.host}/user/logout`;
     if (blocking) {
-        // This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
-        window.ARENA = {
-            sceneName: '',
-            namespacedScene: '',
-            userName: '',
-        };
+        ARENA.setSceneName();
+        ARENA.setUserName();
         requestAuthState().then();
     } else {
         window.addEventListener('load', requestAuthState);
@@ -155,7 +220,7 @@ async function requestAuthState() {
 
         AUTH.authenticated = userState.authenticated;
         AUTH.user_type = userState.type; // user database auth state
-        const queryParams = new URLSearchParams(window.location.search);
+        const queryParams = ARENA.queryParams;
         const urlAuthType = queryParams.get('auth');
         if (urlAuthType !== null) {
             localStorage.setItem('auth_choice', urlAuthType);
@@ -164,12 +229,12 @@ async function requestAuthState() {
         const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
         if (userState.authenticated) {
             // auth user login
-            localStorage.setItem('auth_choice', userStateRes.type);
+            localStorage.setItem('auth_choice', userState.type);
             processUserNames(userState.fullname ? userState.fullname : userState.username);
             AUTH.user_username = userState.username;
             AUTH.user_fullname = userState.fullname;
             AUTH.user_email = userState.email;
-            await requestMqttToken(userStateRes.type, userStateRes.username);
+            await requestMqttToken(userState.type, userState.username);
         } else {
             if (savedAuthType === 'anonymous') {
                 const urlName = queryParams.get('name');
@@ -201,7 +266,7 @@ async function requestAuthState() {
  * @param {string} mqttUsername mqtt user name
  */
 async function requestMqttToken(authType, mqttUsername) {
-    const queryParams = new URLSearchParams(window.location.search);
+    const queryParams = ARENA.queryParams;
     const authParams = {
         username: mqttUsername,
         id_auth: authType,
@@ -245,7 +310,7 @@ async function requestMqttToken(authType, mqttUsername) {
         // keep payload for later viewing
         const tokenObj = KJUR.jws.JWS.parse(authData.token);
         AUTH.token_payload = tokenObj.payloadObj;
-        completeAuth(authData.response);
+        completeAuth(authData);
     } catch (e) {
         throw Error('Error requesting auth token: ' + e.message);
     }
