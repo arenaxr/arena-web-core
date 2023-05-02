@@ -304,9 +304,9 @@ async function requestMqttToken(authType, mqttUsername) {
     }
     try {
         const authRes = await fetch('/user/mqtt_auth', {
-            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/json'},
+            headers: {'X-CSRFToken': getCookie('csrftoken'), 'Content-Type': 'application/x-www-form-urlencoded'},
             method: 'POST',
-            body: JSON.stringify(authParams),
+            body: new URLSearchParams(authParams),
         });
         if (!authRes.ok) {
             const title = 'Error loading MQTT token';
