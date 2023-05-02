@@ -1032,14 +1032,14 @@ AFRAME.registerComponent('arena-chat-ui', {
     /**
      * Apply a jitsi signal icon after the user name in list item 'uli'.
      * @param {Element} uli List item with only name, not buttons yet.
-     * @param {Object} stats The jisti video stata object if any
+     * @param {Object} stats The jisti video stats object if any
      * @param {string} name The display name of the user
      */
     addJitsiStats: function(uli, stats, status, name) {
         if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
-        iconStats.style.color = (stats.conn ? this.getConnectionColor(stats.conn.connectionQuality) : 'gray');
+        iconStats.style.color = (stats.conn ? ARENA.Jitsi.getConnectionColor(stats.conn.connectionQuality) : 'gray');
         iconStats.style.paddingLeft = '5px';
         uli.appendChild(iconStats);
         const spanStats = document.createElement('span');
@@ -1047,7 +1047,7 @@ AFRAME.registerComponent('arena-chat-ui', {
         // show current stats on hover/mouseover
         const _this = this;
         iconStats.onmouseover = function() {
-            spanStats.textContent = (stats ? _this.getConnectionText(name, stats, status) : 'None');
+            spanStats.textContent = (stats ? ARENA.Jitsi.getConnectionText(name, stats, status) : 'None');
             const offset_ul = $('.user-list').offset();
             const midpoint_w = offset_ul.left + ($('.user-list').width() / 2);
             const midpoint_h = offset_ul.top + ($('.user-list').height() / 2);
@@ -1071,120 +1071,6 @@ AFRAME.registerComponent('arena-chat-ui', {
             iconModerator.title = 'Moderator';
             uli.appendChild(iconModerator);
         }
-    },
-
-    /**
-     * Get color based on 0-100% connection quality.
-     * @param {int} quality Connection Quality
-     * @return {string} Color string
-     */
-    getConnectionColor: function(quality) {
-        if (quality > 66.7) {
-            return 'green';
-        } else if (quality > 33.3) {
-            return 'orange';
-        } else if (quality > 0) {
-            return 'gold';
-        } else {
-            return 'red';
-        }
-    },
-
-    /**
-     * Get readable video stats.
-     * @param {string} name The display name of the user
-     * @param {Object} stats The jisti video stata object if any
-     * @return {string} Readable stats
-     */
-    getConnectionText: function(name, stats, status) {
-        const lines = [];
-        let sendmax = '';
-        lines.push(`Name: ${name}`);
-        if (status && status.role) {
-            lines.push(`Jitsi Role: ${status.role}`);
-        }
-        if (stats.conn) {
-            lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
-            if (stats.conn.bitrate) {
-                lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload} Kbps`);
-            }
-            if (stats.conn.packetLoss) {
-                lines.push(`Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
-            }
-            if (stats.conn.jvbRTT) {
-                lines.push(`RTT: ${stats.conn.jvbRTT} ms`);
-            }
-            if (stats.conn.maxEnabledResolution) {
-                sendmax = ` (max↑ ${stats.conn.maxEnabledResolution}p)`;
-            }
-        }
-        if (stats.resolution) {
-            lines.push(`Video: ${this._extractResolutionString(stats)}${sendmax}`);
-        }
-        if (stats.codec) {
-            lines.push(`Codecs (A/V): ${this._extractCodecs(stats)}`);
-        }
-        return lines.join('\r\n');
-    },
-
-    // From https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js
-    /**
-     * Extracts the resolution and framerate.
-     *
-     * @param {Object} stats - Connection stats from the library.
-     * @private
-     * @return {string}
-     */
-    _extractResolutionString: function(stats) {
-        const {
-            framerate,
-            resolution,
-        } = stats;
-
-        const resolutionString = Object.keys(resolution || {})
-            .map((ssrc) => {
-                const {
-                    width,
-                    height,
-                } = resolution[ssrc];
-
-                return `${width}x${height}`;
-            })
-            .join(', ') || null;
-
-        const frameRateString = Object.keys(framerate || {})
-            .map((ssrc) => framerate[ssrc])
-            .join(', ') || null;
-
-        return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
-    },
-
-    /**
-     * Extracts the audio and video codecs names.
-     *
-     * @param {Object} stats - Connection stats from the library.
-     * @private
-     * @return {string}
-     */
-    _extractCodecs: function(stats) {
-        const {
-            codec,
-        } = stats;
-
-        let codecString;
-
-        // Only report one codec, in case there are multiple for a user.
-        Object.keys(codec || {})
-            .forEach((ssrc) => {
-                const {
-                    audio,
-                    video,
-                } = codec[ssrc];
-
-                codecString = `${audio}, ${video}`;
-            });
-
-        return codecString;
     },
 
     /**

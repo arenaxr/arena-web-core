@@ -1,8 +1,7 @@
 /* global AFRAME, ARENA */
 
-import {
-    ARENAUtils,
-} from '../utils.js';
+import {ARENAUtils} from '../utils.js';
+import {ARENAEventEmitter} from '../event-emitter.js';
 
 /**
  * @fileoverview Component to monitor client-performance: fps, memory, etc, and relay to MQTT debug channel if enabled.
@@ -28,6 +27,7 @@ AFRAME.registerComponent('stats-monitor', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
 
+        this.registerListeners();
         if (!data.enabled) {
             sceneEl.removeBehavior(this);
             return;
@@ -37,10 +37,8 @@ AFRAME.registerComponent('stats-monitor', {
 
     update: function(oldData) {
         if (this.data && !oldData) {
-            console.error('registerListeners', e)
             this.registerListeners();
         } else if (!this.data && oldData) {
-            console.error('unregisterListeners', e)
             this.unregisterListeners();
         }
     },
@@ -59,7 +57,6 @@ AFRAME.registerComponent('stats-monitor', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     jitsiStatsLocalCallback: function(e) {
-        console.error('jitsiStatsLocalCallback', e)
         this.callStats = e.detail.stats;
     },
 
@@ -121,10 +118,14 @@ AFRAME.registerComponent('stats-monitor', {
 
         // display the stats on the HUD
         if (ARENA && ARENA.hudstats && this.hudStatsText) {
-            const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit * 100).toFixed(0);
+            const pctHeap = Math.trunc((this.usedJSHeapSize / this.jsHeapSizeLimit) * 100).toFixed(0);
             let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
-            if (ARENA && ARENA.Jitsi) {
-                str += `\n\n[Jitsi]\n${JSON.stringify(this.callStats, null, "\t")}`;
+            if (ARENA && ARENA.Jitsi && this.callStats) {
+                str += `\n\n[Jitsi]\n${ARENA.Jitsi.getConnectionText(
+                    ARENA.displayName,
+                    { conn: this.callStats },
+                    null
+                )}`;
             }
             this.hudStatsText.setAttribute('value', str);
         }

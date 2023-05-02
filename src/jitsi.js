@@ -977,4 +977,120 @@ export class ARENAJitsi {
     getProperty(participantJitsiId, property) {
         return this.conference.getParticipantById(participantJitsiId).getProperty(property);
     }
+
+    /**
+     * Get color based on 0-100% connection quality.
+     * @param {int} quality Connection Quality
+     * @return {string} Color string
+     */
+    getConnectionColor(quality) {
+        if (quality > 66.7) {
+            return 'green';
+        } else if (quality > 33.3) {
+            return 'orange';
+        } else if (quality > 0) {
+            return 'gold';
+        } else {
+            return 'red';
+        }
+    }
+
+    /**
+     * Get readable video stats.
+     * @param {string} name The display name of the user
+     * @param {Object} stats The jisti video stats object if any
+     * @param {Object} status The jisti video status object if any
+     * @return {string} Readable stats
+     */
+    getConnectionText(name, stats, status) {
+        const lines = [];
+        let sendmax = '';
+        lines.push(`Name: ${name}`);
+        if (status && status.role) {
+            lines.push(`Jitsi Role: ${status.role}`);
+        }
+        if (stats.conn) {
+            lines.push(`Quality: ${Math.round(stats.conn.connectionQuality)}%`);
+            if (stats.conn.bitrate) {
+                lines.push(`Bitrate: ↓${stats.conn.bitrate.download} ↑${stats.conn.bitrate.upload} Kbps`);
+            }
+            if (stats.conn.packetLoss) {
+                lines.push(`Loss: ↓${stats.conn.packetLoss.download}% ↑${stats.conn.packetLoss.upload}%`);
+            }
+            if (stats.conn.jvbRTT) {
+                lines.push(`RTT: ${stats.conn.jvbRTT} ms`);
+            }
+            if (stats.conn.maxEnabledResolution) {
+                sendmax = ` (max↑ ${stats.conn.maxEnabledResolution}p)`;
+            }
+        }
+        if (stats.resolution) {
+            lines.push(`Video: ${this._extractResolutionString(stats)}${sendmax}`);
+        }
+        if (stats.codec) {
+            lines.push(`Codecs (A/V): ${this._extractCodecs(stats)}`);
+        }
+        return lines.join('\r\n');
+    }
+
+    // From https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js
+    /**
+     * Extracts the resolution and framerate.
+     *
+     * @param {Object} stats - Connection stats from the library.
+     * @private
+     * @return {string}
+     */
+    _extractResolutionString(stats) {
+        const {
+            framerate,
+            resolution,
+        } = stats;
+
+        const resolutionString = Object.keys(resolution || {})
+            .map((ssrc) => {
+                const {
+                    width,
+                    height,
+                } = resolution[ssrc];
+
+                return `${width}x${height}`;
+            })
+            .join(', ') || null;
+
+        const frameRateString = Object.keys(framerate || {})
+            .map((ssrc) => framerate[ssrc])
+            .join(', ') || null;
+
+        return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
+    }
+
+    /**
+     * Extracts the audio and video codecs names.
+     *
+     * @param {Object} stats - Connection stats from the library.
+     * @private
+     * @return {string}
+     */
+    _extractCodecs(stats) {
+        const {
+            codec,
+        } = stats;
+
+        let codecString;
+
+        // Only report one codec, in case there are multiple for a user.
+        Object.keys(codec || {})
+            .forEach((ssrc) => {
+                const {
+                    audio,
+                    video,
+                } = codec[ssrc];
+
+                codecString = `${audio}, ${video}`;
+            });
+
+        return codecString;
+    }
+
 };
