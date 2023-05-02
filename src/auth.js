@@ -24,7 +24,18 @@
 //     });
 // });
 
-window.AUTH = {}; // auth namespace
+window.AUTH = {
+    getMQTTToken: function() {
+        if (this.mqtt_token) {
+            const token = this.mqtt_token;
+            delete this.mqtt_token;
+            return token;
+        } else {
+            console.error('MQTT Token Invalidated');
+            return null;
+        }
+    },
+}; // auth namespace
 // This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
 if (typeof ARENA === 'undefined') {
     window.ARENA = {
@@ -328,6 +339,7 @@ function completeAuth(response) {
     if (response.ids) {
         onAuthEvt.ids = response.ids;
     }
+    AUTH.mqtt_token = onAuthEvt;
     localStorage.removeItem('request_uri'); // 'forget' login redirect on success
     // mqtt-token must be set to authorize access to MQTT broker
     if (ARENA?.events) {
