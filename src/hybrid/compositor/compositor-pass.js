@@ -19,7 +19,7 @@ export class CompositorPass extends Pass {
         });
 
         this.material.uniforms.tRemoteFrame.value = this.remoteRenderTarget.texture;
-        this.material.uniforms.streamSize.value = [this.remoteRenderTarget.width, this.remoteRenderTarget.height];
+        this.material.uniforms.remoteSize.value = [this.remoteRenderTarget.width, this.remoteRenderTarget.height];
         this.material.uniforms.cameraNear.value = camera.near;
         this.material.uniforms.cameraFar.value = camera.far;
 
@@ -33,7 +33,7 @@ export class CompositorPass extends Pass {
             fragmentShader: DecoderShader.fragmentShader,
         });
         decoderMaterial.uniforms.tRemoteFrame.value = this.remoteRenderTarget.texture;
-        decoderMaterial.uniforms.streamSize.value = [this.remoteRenderTarget.width, this.remoteRenderTarget.height];
+        decoderMaterial.uniforms.remoteSize.value = [this.remoteRenderTarget.width, this.remoteRenderTarget.height];
         decoderMaterial.uniforms.frameIDLength.value = FRAME_ID_LENGTH;
 
         this.decoderFsQuad = new FullScreenQuad(decoderMaterial);
@@ -47,7 +47,7 @@ export class CompositorPass extends Pass {
     }
 
     setSize(width, height) {
-        this.material.uniforms.windowSize.value = [width, height];
+        this.material.uniforms.localSize.value = [width, height];
     }
 
     setHasDualCameras(hasDualCameras) {
@@ -70,7 +70,7 @@ export class CompositorPass extends Pass {
         var value = 0;
         for (var i = 0; i < FRAME_ID_LENGTH; i++) {
             if (this.pixelBuffer[4*i+1] / 255 > 0.5) {
-                value += 1 << i;
+                value += (1 << i);
             }
         }
         return value;

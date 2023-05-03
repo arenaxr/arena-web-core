@@ -3,7 +3,7 @@ export const DecoderShader = {
         tRemoteFrame: {
             type: 't', value: new THREE.Texture(),
         },
-        streamSize: {
+        remoteSize: {
             type: 'i2', value: [0, 0],
         },
         frameIDLength: {

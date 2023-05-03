@@ -4,12 +4,12 @@ varying vec2 vUv;
 
 uniform sampler2D tRemoteFrame;
 
-uniform ivec2 streamSize;
+uniform ivec2 remoteSize;
 
 uniform int frameIDLength;
 
 void main() {
-    vec2 frameSizeF = vec2(streamSize);
+    vec2 frameSizeF = vec2(remoteSize);
     float width = frameSizeF.x;
     float frameIDLengthF = float(frameIDLength);
 

@@ -9,10 +9,10 @@ export const CompositorShader = {
         tLocalDepth: {
             type: 't', value: new THREE.Texture(),
         },
-        windowSize: {
+        localSize: {
             type: 'i2', value: [0, 0],
         },
-        streamSize: {
+        remoteSize: {
             type: 'i2', value: [0, 0],
         },
         cameraNear: {
