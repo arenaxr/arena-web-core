@@ -331,12 +331,12 @@ async function requestMqttToken(authType, mqttUsername, completeOnload = false) 
         // keep payload for later viewing
         const tokenObj = KJUR.jws.JWS.parse(authData.token);
         AUTH.token_payload = tokenObj.payloadObj;
-        if (completeOnload) {
+        if (!completeOnload || document.readyState === 'complete') { // Also handle crazy case page already loaded
+            completeAuth(authData);
+        } else {
             window.addEventListener('load', () => {
                 completeAuth(authData);
             });
-        } else {
-            completeAuth(authData);
         }
     } catch (e) {
         throw Error('Error requesting auth token: ' + e.message);
