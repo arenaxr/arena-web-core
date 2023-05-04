@@ -145,13 +145,13 @@ function authError(title, text) {
  * Initialize and launch start of authentication flow.
  * @param {boolean} [blocking]- whether this should block before anything else loads
  */
-const authCheck = function(blocking = false) {
+const authCheck = function(loadBlocking = false) {
     AUTH.signInPath = `//${window.location.host}/user/login`;
     AUTH.signOutPath = `//${window.location.host}/user/logout`;
-    if (blocking) {
+    if (loadBlocking) {
         ARENA.setSceneName();
         ARENA.setUserName();
-        requestAuthState();
+        requestAuthState(true);
     } else {
         window.addEventListener('load', requestAuthState);
     }
@@ -217,8 +217,10 @@ function getCookie(name) {
 
 /**
  * Request user state data for client-side state management.
+ * This is a blocking request
+ * @param {boolean} [completeOnload=false] Defer final auth callback to onload
  */
-function requestAuthState() {
+function requestAuthState(completeOnload = false) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', `/user/user_state`, false); // Blocking call
     xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
@@ -253,7 +255,7 @@ function requestAuthState() {
             AUTH.user_username = userStateRes.username;
             AUTH.user_fullname = userStateRes.fullname;
             AUTH.user_email = userStateRes.email;
-            requestMqttToken(userStateRes.type, userStateRes.username);
+            requestMqttToken(userStateRes.type, userStateRes.username, completeOnload).then();
         } else {
             if (savedAuthType === 'anonymous') {
                 const urlName = queryParams.get('name');
@@ -267,7 +269,7 @@ function requestAuthState() {
                 AUTH.user_username = anonName;
                 AUTH.user_fullname = localStorage.getItem('display_name');
                 AUTH.user_email = 'N/A';
-                requestMqttToken('anonymous', anonName);
+                requestMqttToken('anonymous', anonName, completeOnload).then();
             } else {
                 // user is logged out or new and not logged in
                 // 'remember' uri for post-login, just before login redirect
@@ -282,8 +284,9 @@ function requestAuthState() {
  * Request token to auth service
  * @param {string} authType authentication type
  * @param {string} mqttUsername mqtt user name
+ * @param {boolean} completeOnload wait for page load before firing callback
  */
-async function requestMqttToken(authType, mqttUsername) {
+async function requestMqttToken(authType, mqttUsername, completeOnload = false) {
     const queryParams = ARENA.queryParams;
     const authParams = {
         username: mqttUsername,
@@ -328,7 +331,13 @@ async function requestMqttToken(authType, mqttUsername) {
         // keep payload for later viewing
         const tokenObj = KJUR.jws.JWS.parse(authData.token);
         AUTH.token_payload = tokenObj.payloadObj;
-        completeAuth(authData);
+        if (completeOnload) {
+            window.addEventListener('load', () => {
+                completeAuth(authData);
+            });
+        } else {
+            completeAuth(authData);
+        }
     } catch (e) {
         throw Error('Error requesting auth token: ' + e.message);
     }
