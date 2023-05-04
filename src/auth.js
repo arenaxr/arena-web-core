@@ -151,7 +151,7 @@ const authCheck = function(blocking = false) {
     if (blocking) {
         ARENA.setSceneName();
         ARENA.setUserName();
-        requestAuthState().then();
+        requestAuthState();
     } else {
         window.addEventListener('load', requestAuthState);
     }
@@ -218,19 +218,27 @@ function getCookie(name) {
 /**
  * Request user state data for client-side state management.
  */
-async function requestAuthState() {
-    try {
-        const userStateRes = await fetch('/user/user_state', {headers: {'X-CSRFToken': getCookie('csrftoken')}});
-        if (!userStateRes.ok) {
-            const title = 'Error loading user state';
-            const text = `${userStateRes.status}: ${userStateRes.statusText} ${JSON.stringify(userStateRes.response)}`;
+function requestAuthState() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', `/user/user_state`, false); // Blocking call
+    xhr.setRequestHeader('X-CSRFToken', getCookie('csrftoken'));
+    xhr.send();
+    // Block on this request
+    if (xhr.status !== 200) {
+        const title = 'Error loading user state';
+        const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
+        authError(title, text);
+    } else {
+        let userStateRes;
+        try {
+            userStateRes = JSON.parse(xhr.response);
+        } catch (e) {
+            const title = 'Error parsing user state';
+            const text = `${e}: ${xhr.response}`;
             authError(title, text);
-            return;
         }
-        const userState = await userStateRes.json();
-
-        AUTH.authenticated = userState.authenticated;
-        AUTH.user_type = userState.type; // user database auth state
+        AUTH.authenticated = userStateRes.authenticated;
+        AUTH.user_type = userStateRes.type; // user database auth state
         const queryParams = ARENA.queryParams;
         const urlAuthType = queryParams.get('auth');
         if (urlAuthType !== null) {
@@ -238,14 +246,14 @@ async function requestAuthState() {
         }
 
         const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
-        if (userState.authenticated) {
+        if (AUTH.authenticated) {
             // auth user login
-            localStorage.setItem('auth_choice', userState.type);
-            processUserNames(userState.fullname ? userState.fullname : userState.username);
-            AUTH.user_username = userState.username;
-            AUTH.user_fullname = userState.fullname;
-            AUTH.user_email = userState.email;
-            await requestMqttToken(userState.type, userState.username);
+            localStorage.setItem('auth_choice', userStateRes.type);
+            processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
+            AUTH.user_username = userStateRes.username;
+            AUTH.user_fullname = userStateRes.fullname;
+            AUTH.user_email = userStateRes.email;
+            requestMqttToken(userStateRes.type, userStateRes.username);
         } else {
             if (savedAuthType === 'anonymous') {
                 const urlName = queryParams.get('name');
@@ -254,11 +262,12 @@ async function requestAuthState() {
                 } else if (localStorage.getItem('display_name') === null) {
                     localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                 }
-                const anonName = processUserNames(localStorage.getItem('display_name'), 'anonymous-');
+                const anonName = processUserNames(
+                    localStorage.getItem('display_name'), 'anonymous-');
                 AUTH.user_username = anonName;
                 AUTH.user_fullname = localStorage.getItem('display_name');
                 AUTH.user_email = 'N/A';
-                await requestMqttToken('anonymous', anonName);
+                requestMqttToken('anonymous', anonName);
             } else {
                 // user is logged out or new and not logged in
                 // 'remember' uri for post-login, just before login redirect
@@ -266,8 +275,6 @@ async function requestAuthState() {
                 location.href = AUTH.signInPath;
             }
         }
-    } catch (e) {
-        throw Error('Error communicating with auth server: ' + e.message);
     }
 }
 
