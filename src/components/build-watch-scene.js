@@ -31,10 +31,12 @@ AFRAME.registerComponent('build-watch-scene', {
                 case 'childList':
                     // mutation.addedNodes
                     // mutation.removedNodes
-                    if (mutation.addedNodes.length > 0)
+                    if (mutation.addedNodes.length > 0){
                         console.log(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
-                    if (mutation.removedNodes.length > 0)
+                    }
+                    if (mutation.removedNodes.length > 0){
                         console.log(`${mutation.removedNodes.length} child nodes have been removed.`, mutation.removedNodes);
+                    }
                     break;
                 case 'attributes':
                     // mutation.target

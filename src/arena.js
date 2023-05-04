@@ -376,6 +376,15 @@ export class Arena {
         console.log('build3d', 'A-Frame Inspector loaded');
 
         setTimeout(() => {
+            const scenegraphDiv = document.getElementById('scenegraph');
+            const inspectorMqttLog = document.createElement('div');
+            inspectorMqttLog.id = 'inspectorMqttLog';
+            inspectorMqttLog.className = 'outliner';
+            inspectorMqttLog.tabIndex = 1;
+            inspectorMqttLog.style.height = '25%';
+            inspectorMqttLog.style.overflow = 'overflow';
+            scenegraphDiv.appendChild(inspectorMqttLog);
+
             const perm = this.isUserSceneWriter();
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
             updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');

@@ -29,7 +29,8 @@ AFRAME.registerComponent('build-watch-object', {
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     callback: function(mutationList, observer) {
-        mutationList.forEach((mutation) => {
+        const inspectorMqttLog = document.getElementById('inspectorMqttLog');
+            mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
                     // mutation.addedNodes
@@ -96,6 +97,11 @@ AFRAME.registerComponent('build-watch-object', {
                                 break;
                         }
                         console.log('pub:', msg);
+                        if (inspectorMqttLog) {
+                            const line = document.createElement('pre');
+                            line.innerHTML += `${msg.object_id} ${msg.action} ${mutation.attributeName}`;
+                            inspectorMqttLog.appendChild(line);
+                            line.scrollIntoView();                      }
                         if (pub) ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                     }
                     break;
