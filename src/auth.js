@@ -31,7 +31,7 @@ window.ARENAAUTH = {
      */
     setArenaParams() {
         const queryParams = new URLSearchParams(window.location.search);
-        ARENA.params = { ...window.ARENADefaults, ...Object.fromEntries(queryParams) };
+        ARENA.params = { ...ARENA.defaults, ...Object.fromEntries(queryParams) };
     },
     /**
      * Get auth status
@@ -361,10 +361,10 @@ window.ARENAAUTH = {
             }
         }
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
-        ARENA.persistenceUrl = "//" + ARENA.params.persistHost + ARENA.params.persistPath + this.namespacedScene;
-        ARENA.outputTopic = ARENA.params.realm + "/s/" + this.namespacedScene + "/";
-        ARENA.renderTopic = this.outputTopic + "#";
-        ARENA.vioTopic = ARENA.params.realm + "/vio/" + this.namespacedScene + "/";
+        ARENA.persistenceUrl = "//" + ARENA.params.persistHost + ARENA.params.persistPath + ARENA.namespacedScene;
+        ARENA.outputTopic = ARENA.params.realm + "/s/" + ARENA.namespacedScene + "/";
+        ARENA.renderTopic = ARENA.outputTopic + "#";
+        ARENA.vioTopic = ARENA.params.realm + "/vio/" + ARENA.namespacedScene + "/";
     },
 };
 
