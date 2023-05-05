@@ -61,7 +61,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.persist_uri = this.arena.persistenceUrl;
         this.mqtt_host = this.arena.mqttHostURI;
         this.mqtt_username = this.arena.username;
-        this.mqtt_token = this.arena.mqttToken;
+        this.mqtt_token = this.arena.mqttToken.mqtt_token;
         this.devInstance = ARENADefaults.devInstance;
         this.isSceneWriter = this.arena.isUserSceneWriter();
 

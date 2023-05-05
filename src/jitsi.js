@@ -137,7 +137,7 @@ export class ARENAJitsi {
 
         JitsiMeetJS.init(this.initOptions);
         console.info('Jitsi, connecting:', this.connectOptions);
-        this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken, this.connectOptions);
+        this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken.mqtt_token, this.connectOptions);
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed.bind(this));
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect.bind(this));

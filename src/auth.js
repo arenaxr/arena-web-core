@@ -235,6 +235,7 @@ window.ARENAAUTH = {
             // keep payload for later viewing
             const tokenObj = KJUR.jws.JWS.parse(authData.token);
             this.token_payload = tokenObj.payloadObj;
+            authData.token_payload = tokenObj.payloadObj;
             if (!completeOnload || document.readyState === "complete") {
                 // Also handle crazy case page already loaded
                 this.completeAuth(authData);
@@ -255,6 +256,7 @@ window.ARENAAUTH = {
         const onAuthEvt = {
             mqtt_username: response.username,
             mqtt_token: response.token,
+            token_payload: response.token_payload,
         };
         if (response.ids) {
             onAuthEvt.ids = response.ids;

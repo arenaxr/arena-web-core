@@ -77,7 +77,7 @@ AFRAME.registerSystem('arena-scene', {
         this.videoFrustumCulling = true;
         this.videoDistanceConstraints = true;
 
-        this.mqttToken = evt.detail.mqtt_token;
+        this.mqttToken = evt.detail;
 
         // id tag including name is set from authentication service
         this.setIdTag(this.mqttToken.ids.userid);
@@ -193,13 +193,9 @@ AFRAME.registerSystem('arena-scene', {
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted: function() {
+    isJitsiPermitted: function () {
         if (this.build3d) return false; // build3d is used on a new page
-
-        const tokenObj = KJUR.jws.JWS.parse(this.mqttToken.mqtt_token);
-        const perms = tokenObj.payloadObj;
-        if (perms.room) return true;
-        return false;
+        return !!this.mqttToken.token_payload.room;
     },
 
     /**
@@ -207,15 +203,10 @@ AFRAME.registerSystem('arena-scene', {
      * TODO: This should perhaps use another flag, more general, not just chat.
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
-    isUsersPermitted: function() {
+    isUsersPermitted: function () {
         const data = this.data;
-        const el = this.el;
-
         if (this.build3d) return false; // build3d is used on a new page
-
-        const tokenObj = KJUR.jws.JWS.parse(this.mqttToken.mqtt_token);
-        const perms = tokenObj.payloadObj;
-        return ARENAUtils.matchJWT(`${data.realm}/c/${data.namespace}/o/#`, perms.subs);
+        return ARENAUtils.matchJWT(`${data.realm}/c/${data.namespace}/o/#`, this.mqttToken.token_payload.subs);
     },
 
     /**
@@ -223,10 +214,8 @@ AFRAME.registerSystem('arena-scene', {
      * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      * @return {boolean} True if the user has permission to write in this scene.
      */
-    isUserSceneWriter: function() {
-        const tokenObj = KJUR.jws.JWS.parse(this.mqttToken.mqtt_token);
-        const perms = tokenObj.payloadObj;
-        return ARENAUtils.matchJWT(this.renderTopic, perms.publ);
+    isUserSceneWriter: function () {
+        return ARENAUtils.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
     },
 
     /**
