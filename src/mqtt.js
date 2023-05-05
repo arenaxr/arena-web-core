@@ -55,6 +55,8 @@ AFRAME.registerSystem('arena-mqtt', {
 
         sceneEl.ARENAMqttLoaded = true;
         sceneEl.emit(EVENTS.MQTT_LOADED, true);
+
+        ARENA.Mqtt = this; // Restore old alias
     },
 
     setMqttHost: function() {
