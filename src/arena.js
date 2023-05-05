@@ -78,7 +78,7 @@ AFRAME.registerSystem('arena-scene', {
         this.videoFrustumCulling = true;
         this.videoDistanceConstraints = true;
 
-        this.mqttToken = AUTH.getMQTTToken();
+        this.mqttToken = ARENAAUTH.getMQTTToken();
 
         // set scene name from url
         this.setSceneName();

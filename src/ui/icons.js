@@ -248,7 +248,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         perms.href = '#';
         perms.innerHTML = 'Permissions';
         perms.title = 'Show the security permissions for you in the scene';
-        perms.onclick = showPerms;
+        perms.onclick = ARENAAUTH.showPerms;
         statusDiv.appendChild(perms);
 
         // Page links
@@ -283,7 +283,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         profile.href = '#';
         profile.innerHTML = 'Profile';
         profile.title = 'Open your user account Profile in a new page';
-        profile.onclick = showProfile;
+        profile.onclick = ARENAAUTH.showProfile;
         pagesDiv.append(profile);
 
         pagesDiv.append(' | ');
@@ -557,28 +557,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
 
-        this.flying = !this.flying;
-        if (this.flying) { // toggled on
-            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/flying-on.png\')';
-        } else { // toggled off
-            cameraEl.components['wasd-controls'].resetNav();
-            cameraEl.components['press-and-move'].resetNav();
-            cameraEl.object3D.position.y = this.arena.startCoords.y + this.arena.defaults.camHeight;
-            this.flyingButton.childNodes[0].style.backgroundImage = 'url(\'src/ui/images/flying-off.png\')';
-        }
-        cameraEl.setAttribute('wasd-controls', {'fly': flying});
-        cameraEl.setAttribute('press-and-move', {'fly': flying});
-    },
-
-    onScreenshareButtonClick: function() {
-        const data = this.data;
-        const el = this.el;
-
-        const sceneEl = el.sceneEl;
-        const cameraEl = sceneEl.camera.el;
-
-        if (sceneEl.is('vr-mode') || sceneEl.is('ar-mode')) return;
-
         Swal.fire({
             title: 'You clicked on screen share! Are you sure you want to share your screen?',
             html: `In order to share your screen, ARENA will open a new tab.<br>
@@ -632,7 +610,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         })
         .then((result) => {
             if (result.isConfirmed) {
-                signOut();
+                ARENAAUTH.signOut();
             }
         });
     },
@@ -659,7 +637,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     loadSettings: function() {
         this.usernameInput.value = localStorage.getItem('display_name');
 
-        const auth = getAuthStatus();
+        const auth = ARENAAUTH.getAuthStatus();
         this.sceneNameDiv.textContent = this.arena.namespacedScene;
         this.authType.textContent = auth.type;
         this.authUsername.textContent = auth.username;

@@ -804,7 +804,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 const warn = `You have been asked to leave in 5 seconds by ${msg.from_un}.`;
                 this.displayAlert(warn, 5000, 'warning');
                 setTimeout(() => {
-                    signOut();
+                    ARENAAUTH.signOut();
                 }, 5000);
             }
             return;

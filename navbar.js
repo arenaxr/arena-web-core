@@ -20,8 +20,8 @@ $(document).ready(function() {
                     $('#show_perms').on('click', function() {
                         const frame = document.getElementsByTagName('iframe');
                         const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
-                        if (typeof win.showPerms !== 'undefined') {
-                            win.showPerms();
+                        if (typeof win.ARENAAUTH.showPerms !== 'undefined') {
+                            win.ARENAAUTH.showPerms();
                         } else {
                             alert('No MQTT permissions');
                         }

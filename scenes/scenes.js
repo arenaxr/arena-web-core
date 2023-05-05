@@ -26,7 +26,7 @@ function changePage(page = 'sceneSelect') {
 window.addEventListener('onauth', async function(e) {
     const username = e.detail.mqtt_username;
     const mqttToken = e.detail.mqtt_token;
-    const auth = getAuthStatus();
+    const auth = ARENAAUTH.getAuthStatus();
     window.username = auth.username;
 
     // Rudimentary routing based on location hash
