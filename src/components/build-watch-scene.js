@@ -38,6 +38,30 @@ AFRAME.registerComponent('build-watch-scene', {
                         console.log(`${mutation.removedNodes.length} child nodes have been removed.`, mutation.removedNodes);
                         // if node has build-watch-object enabled, then we can send a delete message with id
                     }
+
+                    // const attribute = mutation.target.getAttribute(mutation.attributeName);
+                    // // use aframe-watcher updates to send only changes updated
+                    // const changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
+                    // switch (mutation.attributeName) {
+                    //     case 'geometry':
+                    //         obj_type = attribute.primitive;
+                    //         break;
+                    //     case 'gltf-model':
+                    //     case 'image':
+                    //     case 'light':
+                    //     case 'line':
+                    //     case 'obj-model':
+                    //     case 'ocean':
+                    //     case 'pcd-model':
+                    //     case 'text':
+                    //     case 'thickline':
+                    //     case 'threejs-scene':
+                    //         obj_type = mutation.attributeName;
+                    //         break;
+                    //     default:
+                    //         obj_type = 'entity';
+                    //         break;
+                    // }
                     break;
                 case 'attributes':
                     // mutation.target

@@ -68,7 +68,7 @@ export class CreateUpdate {
             let addObj = false;
             if (!entityEl) {
                 // create object
-                if (message.data.object_type === 'videosphere') {
+                if (message.data && message.data.object_type === 'videosphere') {
                     entityEl = document.createElement('a-videosphere');
                 } else {
                     entityEl = document.createElement('a-entity');
@@ -90,7 +90,7 @@ export class CreateUpdate {
             // add object to the scene after setting all attributes
             if (addObj) {
                 // Parent/Child handling
-                if (message.data.parent) {
+                if (message.data && message.data.parent) {
                     let parentName = message.data.parent;
                     if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
                         if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
@@ -200,6 +200,8 @@ export class CreateUpdate {
      */
     static setObjectAttributes(entityEl, message) {
         const data = message.data;
+        if (!data) return true;
+
         let type = data.object_type;
         delete data.object_type; // remove attribute so we don't set it later
 

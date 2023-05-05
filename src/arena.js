@@ -381,9 +381,14 @@ export class Arena {
             inspectorMqttLog.id = 'inspectorMqttLog';
             inspectorMqttLog.className = 'outliner';
             inspectorMqttLog.tabIndex = 1;
-            inspectorMqttLog.style.height = '25%';
+            inspectorMqttLog.style.height = '40%';
             inspectorMqttLog.style.overflow = 'overflow';
             scenegraphDiv.appendChild(inspectorMqttLog);
+
+            const line = document.createElement('span');
+            line.innerHTML += `Pub MQTT: watching local changes...`;
+            inspectorMqttLog.appendChild(document.createElement('br'));
+            inspectorMqttLog.appendChild(line);
 
             const perm = this.isUserSceneWriter();
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
@@ -465,7 +470,7 @@ export class Arena {
                  * @param {Array} [descendants] - running list of descendants
                  */
                 const createObj = (obj, descendants = []) => {
-                    const parent = obj.attributes.parent;
+                    const parent = obj.attributes ? obj.attributes.parent : undefined;
                     if (obj.object_id === this.camName) {
                         arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                         return;
