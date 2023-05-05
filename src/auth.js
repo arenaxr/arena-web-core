@@ -260,12 +260,6 @@ window.ARENAAUTH = {
             onAuthEvt.ids = response.ids;
         }
         localStorage.removeItem("request_uri"); // 'forget' login redirect on success
-        // mqtt-token must be set to authorize access to MQTT broker
-        if (ARENA?.events) {
-            // emit event to ARENA.event
-            ARENA.events.emit("onauth", onAuthEvt);
-            return;
-        }
 
         // emit custom event to window
         const authCompleteEvent = new CustomEvent("onauth", {
