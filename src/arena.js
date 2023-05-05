@@ -79,10 +79,6 @@ AFRAME.registerSystem('arena-scene', {
 
         this.mqttToken = evt.detail.mqtt_token;
 
-        // set scene name from url
-        this.setSceneName();
-        // match name on the end of the id tag
-        this.setUserName();
         // id tag including name is set from authentication service
         this.setIdTag(this.mqttToken.ids.userid);
 
@@ -158,76 +154,6 @@ AFRAME.registerSystem('arena-scene', {
 
         sceneEl.ARENALoaded = true;
         sceneEl.emit(EVENTS.ARENA_LOADED, true);
-    },
-
-    /**
-     * Sets this.sceneName and this.namespacedScene from url. this.namespacedScene
-     * includes namespace prefix (e.g. `namespace/foo`)
-     * Handles hostname.com/?scene=foo, hostname.com/foo, and hostname.com/namespace/foo
-     * Also sets persistenceUrl, outputTopic, renderTopic, vioTopic which depend on scene name
-     */
-    setSceneName: function() {
-        const data = this.data;
-        const el = this.el;
-
-        let scenename = data.sceneName;
-        let namespace = data.nameSpace;
-
-        // private function to set scenename, namespacedScene and namespace
-        const _setNames = (ns, sn) => {
-            this.sceneName = sn;
-            this.nameSpace = ns;
-            this.namespacedScene = `${this.nameSpace}/${this.sceneName}`;
-        };
-
-        let path = window.location.pathname.substring(1);
-        if (data.devInstance && path.length > 0) {
-            const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
-            if (devPrefix) {
-                path = path.replace(devPrefix[0], '');
-            }
-        }
-
-        if (path === '' || path === 'index.html') {
-            scenename = ARENAUtils.getUrlParam('scene', data.sceneName);
-            _setNames(namespace, scenename);
-        } else {
-            try {
-                const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
-                const matches = r.exec(path).groups;
-                // Only first group is given, namespace is actually the scene name
-                if (matches.scenename === undefined) {
-                    _setNames(namespace, matches.namespace);
-                } else {
-                    // Both scene and namespace are defined, return regex as-is
-                    _setNames(matches.namespace, matches.scenename);
-                }
-            } catch(e) {
-                scenename = ARENAUtils.getUrlParam('scene', data.sceneName);
-                _setNames(namespace, scenename);
-            }
-        }
-
-        // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
-        this.persistenceUrl = '//' + data.persistHost + data.persistPath + this.namespacedScene;
-        this.outputTopic = data.realm + '/s/' + this.namespacedScene + '/';
-        this.renderTopic = this.outputTopic + '#';
-        this.vioTopic = data.realm + '/vio/' + this.namespacedScene + '/';
-    },
-
-    /**
-     * Sets this.userName using name given as argument, url parameter value, or default
-     * @param {string} name user name to set; will use url parameter value or default is no name is given
-     */
-    setUserName(name) {
-        const data = this.data;
-        const el = this.el;
-
-        // set userName
-        if (name === undefined) {
-            name = ARENAUtils.getUrlParam('name', data.userName);
-        } // check url params, defaults
-        this.userName = name;
     },
 
     /**
@@ -348,7 +274,7 @@ AFRAME.registerSystem('arena-scene', {
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', this.getDisplayName());
 
-        const startPos = new THREE.Vector3;
+        const startPos = new THREE.Vector3();
         if (this.startCoords) {
             startPos.set(...this.startCoords);
             camera.object3D.position.copy(startPos);

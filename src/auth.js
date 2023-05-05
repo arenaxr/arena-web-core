@@ -27,6 +27,13 @@
 // auth namespace
 window.ARENAAUTH = {
     /**
+     * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
+     */
+    setArenaParams() {
+        const queryParams = new URLSearchParams(window.location.search);
+        ARENA.params = { ...window.ARENADefaults, ...Object.fromEntries(queryParams) };
+    },
+    /**
      * Get auth status
      * @return {object} auth status object
      */
@@ -39,16 +46,14 @@ window.ARENAAUTH = {
             email: this.user_email,
         };
     },
-    authCheck(loadBlocking = false) {
+    authCheck() {
         this.signInPath = `//${window.location.host}/user/login`;
         this.signOutPath = `//${window.location.host}/user/logout`;
-        if (loadBlocking) {
-            ARENA.setSceneName();
-            ARENA.setUserName();
-            this.requestAuthState(true);
-        } else {
-            window.addEventListener("load", this.requestAuthState);
-        }
+        this.setArenaParams();
+        ARENA.userName = ARENA.params.name; // For now, just an alias for legacy code.
+        // TODO: consolidate userName, params.name, and arena-system.data.name
+        this.setSceneName();
+        this.requestAuthState();
     },
     /**
      * Display user-friendly error message.
@@ -76,19 +81,17 @@ window.ARENAAUTH = {
     processUserNames(authName, prefix = null) {
         // var processedName = encodeURI(authName);
         let processedName = authName.replace(/[^a-zA-Z0-9]/g, "");
-        if (ARENA) {
-            if (ARENADefaults && ARENA.userName !== ARENADefaults.userName) {
-                // userName set? persist to storage
-                localStorage.setItem("display_name", decodeURI(ARENA.userName));
-                processedName = ARENA.userName;
-            }
-            const savedName = localStorage.getItem("display_name");
-            if (savedName === null || !savedName || savedName == "undefined") {
-                // Use auth name to create human-readable name
-                localStorage.setItem("display_name", authName);
-            }
-            ARENA.displayName = localStorage.getItem("display_name");
+        if (ARENA.userName !== ARENADefaults?.userName) {
+            // userName set? persist to storage
+            localStorage.setItem("display_name", decodeURI(ARENA.userName));
+            processedName = ARENA.userName;
         }
+        const savedName = localStorage.getItem("display_name");
+        if (savedName === null || !savedName || savedName === "undefined") {
+            // Use auth name to create human-readable name
+            localStorage.setItem("display_name", authName);
+        }
+        ARENA.displayName = localStorage.getItem("display_name");
         if (prefix !== null) {
             processedName = `${prefix}${processedName}`;
         }
@@ -97,9 +100,8 @@ window.ARENAAUTH = {
     /**
      * Request user state data for client-side state management.
      * This is a blocking request
-     * @param {boolean} [completeOnload=false] Defer final auth callback to onload
      */
-    requestAuthState(completeOnload = false) {
+    requestAuthState() {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", `/user/user_state`, false); // Blocking call
         xhr.setRequestHeader("X-CSRFToken", this.getCookie("csrftoken"));
@@ -120,9 +122,8 @@ window.ARENAAUTH = {
             }
             this.authenticated = userStateRes.authenticated;
             this.user_type = userStateRes.type; // user database auth state
-            const queryParams = ARENA.queryParams;
-            const urlAuthType = queryParams.get("auth");
-            if (urlAuthType !== null) {
+            const urlAuthType = ARENA.params.auth;
+            if (urlAuthType !== undefined) {
                 localStorage.setItem("auth_choice", urlAuthType);
             }
 
@@ -134,20 +135,20 @@ window.ARENAAUTH = {
                 this.user_username = userStateRes.username;
                 this.user_fullname = userStateRes.fullname;
                 this.user_email = userStateRes.email;
-                this.requestMqttToken(userStateRes.type, userStateRes.username, completeOnload).then();
+                this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
             } else {
                 if (savedAuthType === "anonymous") {
-                    const urlName = queryParams.get("name");
+                    const urlName = ARENA.params.name;
                     if (urlName !== null) {
                         localStorage.setItem("display_name", urlName);
                     } else if (localStorage.getItem("display_name") === null) {
                         localStorage.setItem("display_name", `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                     }
-                    const anonName = processUserNames(localStorage.getItem("display_name"), "anonymous-");
+                    const anonName = this.processUserNames(localStorage.getItem("display_name"), "anonymous-");
                     this.user_username = anonName;
                     this.user_fullname = localStorage.getItem("display_name");
                     this.user_email = "N/A";
-                    this.requestMqttToken("anonymous", anonName, completeOnload).then();
+                    this.requestMqttToken("anonymous", anonName, true).then();
                 } else {
                     // user is logged out or new and not logged in
                     // 'remember' uri for post-login, just before login redirect
@@ -192,22 +193,17 @@ window.ARENAAUTH = {
      * @param {boolean} completeOnload wait for page load before firing callback
      */
     async requestMqttToken(authType, mqttUsername, completeOnload = false) {
-        const queryParams = ARENA.queryParams;
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
         };
-        if (typeof defaults !== "undefined") {
-            // Where does "defaults" come from?
-            if (ARENADefaults.realm) {
-                authParams.realm = ARENADefaults.realm;
-            }
+        if (ARENA.params.realm) {
+            authParams.realm = ARENA.params.realm;
         }
 
-        const urlNamespacedScene = queryParams.get("scene");
-        if (urlNamespacedScene) {
-            authParams.scene = decodeURIComponent(urlNamespacedScene);
-        } else if (ARENA) {
+        if (ARENA.params.scene) {
+            authParams.scene = decodeURIComponent(ARENA.params.scene);
+        } else {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
@@ -336,36 +332,23 @@ window.ARENAAUTH = {
             html: `<pre style="text-align: left;">${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
         });
     },
-};
-
-// This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
-if (typeof ARENA === "undefined") {
-    window.ARENA = {
-        defaults: ARENADefaults,
-    };
-    // These need to be refactored into some initial loading function, maybe just the util class (which
-    // is totally different from the new ARENA system btw...)
-    ARENA.setSceneName = function (sceneName) {
+    setSceneName(sceneName) {
         // private function to set scenename, namespacedScene and namespace
         const _setNames = (ns, sn) => {
-            this.namespacedScene = `${ns}/${sn}`;
-            this.sceneName = sn;
-            this.nameSpace = ns;
+            ARENA.namespacedScene = `${ns}/${sn}`;
+            ARENA.sceneName = sn;
+            ARENA.nameSpace = ns;
         };
         let path = window.location.pathname.substring(1);
-        let { namespace: namespace, sceneName: scenename } = this.defaults;
-        if (this.defaults.devInstance && path.length > 0) {
+        let { namespace: namespace, sceneName: scenename } = ARENA.params;
+        if (ARENADefaults.devInstance && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
             if (devPrefix) {
                 path = path.replace(devPrefix[0], "");
             }
         }
         if (path === "" || path === "index.html") {
-            if (!ARENA.queryParams) {
-                scenename = ARENAUtils?.getUrlParam("scene", scenename);
-            } else {
-                scenename = ARENA.queryParams.get("scene") || scenename;
-            }
+            scenename = ARENA.params.scene ?? scenename;
             _setNames(namespace, scenename);
         } else {
             try {
@@ -379,34 +362,22 @@ if (typeof ARENA === "undefined") {
                     _setNames(matches.namespace, matches.scenename);
                 }
             } catch (e) {
-                // TODO: consolidate this
-                if (!ARENA.queryParams) {
-                    scenename = ARENAUtils?.getUrlParam("scene", scenename);
-                } else {
-                    scenename = ARENA.queryParams.get("scene") || scenename;
-                }
+                scenename = ARENA.params.scene ?? scenename;
                 _setNames(namespace, scenename);
             }
         }
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
-        this.persistenceUrl = "//" + this.defaults.persistHost + this.defaults.persistPath + this.namespacedScene;
-        this.outputTopic = this.defaults.realm + "/s/" + this.namespacedScene + "/";
-        this.renderTopic = this.outputTopic + "#";
-        this.vioTopic = this.defaults.realm + "/vio/" + this.namespacedScene + "/";
-    }.bind(ARENA);
-    ARENA.setUserName = function (name = undefined) {
-        // set userName
-        if (name === undefined) {
-            if (!ARENA.queryParams) {
-                name = ARENAUtils?.getUrlParam("name", this.defaults.userName);
-            } else {
-                name = ARENA.queryParams.get("name") || this.defaults.userName;
-            }
-        } // check url params, defaults
-        this.userName = name;
-    }.bind(ARENA);
+        ARENA.persistenceUrl = "//" + ARENA.params.persistHost + ARENA.params.persistPath + this.namespacedScene;
+        ARENA.outputTopic = ARENA.params.realm + "/s/" + this.namespacedScene + "/";
+        ARENA.renderTopic = this.outputTopic + "#";
+        ARENA.vioTopic = ARENA.params.realm + "/vio/" + this.namespacedScene + "/";
+    },
+};
+
+// This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
+if (typeof ARENA === "undefined") {
+    window.ARENA = {};
 }
-ARENA.queryParams = new URLSearchParams(window.location.search);
 
 window.onload = function () {
     // load sweetalert if not already loaded
@@ -459,4 +430,4 @@ if (!storageAvailable("localStorage")) {
 }
 
 // start authentication flow
-ARENAAUTH.authCheck(true);
+ARENAAUTH.authCheck();
