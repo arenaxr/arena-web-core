@@ -30,16 +30,15 @@ AFRAME.registerSystem('arena-scene', {
         disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
     },
 
-    init: async function() {
+    init: async function(evt) {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
 
-        // wait for auth to authorize user
-        if (!this.authorized) {
+        // wait for auth to authorize user, init called from onAuth with evt detail of token
+        if (!evt) {
             window.addEventListener(EVENTS.ON_AUTH, this.init.bind(this));
-            this.authorized = true;
             return;
         }
 
@@ -78,7 +77,7 @@ AFRAME.registerSystem('arena-scene', {
         this.videoFrustumCulling = true;
         this.videoDistanceConstraints = true;
 
-        this.mqttToken = ARENAAUTH.getMQTTToken();
+        this.mqttToken = evt.detail.mqtt_token;
 
         // set scene name from url
         this.setSceneName();
