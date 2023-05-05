@@ -42,14 +42,17 @@ AFRAME.registerComponent('stats-monitor', {
             this.unregisterListeners();
         }
     },
+
     remove: function() {
         this.unregisterListeners();
     },
+
     registerListeners: function() {
-        ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
+        // ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
     },
+
     unregisterListeners: function() {
-        ARENA.events.off(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
+        // ARENA.events.off(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
     },
 
     /**

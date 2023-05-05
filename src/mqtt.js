@@ -2,70 +2,123 @@
  * @fileoverview Handle messaging from MQTT
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
 /* global ARENA */
 
 // 'use strict';
 import {proxy, wrap} from 'comlink';
+import {ARENAUtils} from './utils.js';
 import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
+import {EVENTS} from './constants/events.js';
 
-/**
- * Interface for MQTT webworker
- */
-export class ARENAMqtt {
-    // eslint-disable-next-line require-jsdoc
-    static async init() {
-        const mqtt = new ARENAMqtt();
-        await mqtt._initWorker();
-        return mqtt;
-    }
+AFRAME.registerSystem('arena-mqtt', {
+    schema: {
+        mqttHost: {type: 'string', default: ARENADefaults.mqttHost},
+        mqttPath: {type: 'array', default: ARENADefaults.mqttPath},
+    },
 
-    /**
-     * Initializes webworker for ARENAMQtt factory
-     * @private
-     */
-    async _initWorker() {
-        const MQTTWorker = wrap(new Worker(new URL('../workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
-        const worker = await new MQTTWorker(
-            {
-                renderTopic: ARENA.renderTopic,
-                mqttHostURI: ARENA.mqttHostURI,
-                idTag: ARENA.idTag,
+    init: async function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        if (!sceneEl.ARENAUserParamsLoaded) {
+            sceneEl.addEventListener(EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
+            return;
+        }
+
+        this.setMqttHost();
+
+        await this.initWorker();
+
+        const userName = sceneEl.systems['arena-scene'].mqttToken.mqtt_username;
+        const mqttToken = sceneEl.systems['arena-scene'].mqttToken.mqtt_token;
+        const camName = sceneEl.systems['arena-scene'].camName;
+        const outputTopic = sceneEl.systems['arena-scene'].outputTopic;
+        // Do not pass functions in mqttClientOptions
+        await this.connect({
+                reconnect: true,
+                userName: userName,
+                password: mqttToken,
             },
-            proxy(ARENA.initScene),
-            proxy(this._onMessageArrived),
-            proxy(() => {
-                if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
-                    // eslint-disable-next-line new-cap
-                    ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
-                    console.warn(`ARENA Jitsi restarting...`);
-                }
-            }),
-            proxy(this._mqttHealthCheck),
+            // last will message
+            JSON.stringify({object_id: camName, action: 'delete'}),
+            // last will topic
+            outputTopic + camName,
         );
-        console.log('MQTT Worker initialized');
+
+        console.log('ARENA MQTT Worker initialized');
+
+        sceneEl.ARENAMqttLoaded = true;
+        sceneEl.emit(EVENTS.MQTT_LOADED, true);
+    },
+
+    setMqttHost: function() {
+        const data = this.data;
+        const el = this.el;
+
+        this.mqttHost = ARENAUtils.getUrlParam('mqttHost', data.mqttHost);
+        this.mqttHostURI = 'wss://' + this.mqttHost + data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)];
+    },
+
+    initWorker: async function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        const renderTopic = sceneEl.systems['arena-scene'].renderTopic;
+        const idTag = sceneEl.systems['arena-scene'].idTag;
+
+        const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
+        const worker = await new MQTTWorker({
+                renderTopic: renderTopic,
+                mqttHostURI: this.mqttHostURI,
+                idTag: idTag,
+            },
+            proxy(this.onMessageArrived.bind(this)),
+            proxy(this.mqttHealthCheck.bind(this)),
+            // proxy(ARENA.initScene),
+            // proxy(() => {
+            //     if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
+            //         // eslint-disable-next-line new-cap
+            //         ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
+            //         console.warn(`ARENA Jitsi restarting...`);
+            //     }
+            // }),
+        );
         this.MQTTWorker = worker;
         this.mqttClient = worker.mqttClient;
-    }
+    },
+
+    /**
+     * @param {object} mqttClientOptions
+     * @param {string} lwMsg
+     * @param {string} lwTopic
+     */
+    connect: async function(mqttClientOptions, lwMsg = undefined, lwTopic = undefined) {
+        await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
+    },
 
     /**
      * Internal callback to pass MQTT connection health to ARENAHealth.
      * @param {object} msg Message object like: {addError: 'mqttScene.connection'}
      */
-    _mqttHealthCheck(msg) {
-        if (msg.removeError) ARENA.health.removeError(msg.removeError);
-        else if (msg.addError) ARENA.health.addError(msg.addError);
-    }
+    mqttHealthCheck: function(msg) {
+        // if (msg.removeError) ARENA.health.removeError(msg.removeError);
+        // else if (msg.addError) ARENA.health.addError(msg.addError);
+    },
 
     /**
      * Internal MessageArrived handler; handles object create/delete/event/... messages
      * @param {string} message
      * @param {object} jsonMessage
      */
-    _onMessageArrived(message, jsonMessage) {
+    onMessageArrived: function(message, jsonMessage) {
         let theMessage = {};
 
         if (message) {
@@ -74,6 +127,9 @@ export class ARENAMqtt {
             } catch {}
         } else if (jsonMessage) {
             theMessage = jsonMessage;
+        }
+        else {
+            return;
         }
 
         if (!theMessage) {
@@ -147,16 +203,7 @@ export class ARENAMqtt {
             console.warn('Malformed message (invalid action field):', JSON.stringify(message));
             break;
         }
-    }
-
-    /**
-     * @param {object} mqttClientOptions
-     * @param {string} lwMsg
-     * @param {string} lwTopic
-     */
-    async connect(mqttClientOptions, lwMsg = undefined, lwTopic = undefined) {
-        await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
-    }
+    },
 
     /**
      * Publishes message to mqtt
@@ -165,23 +212,23 @@ export class ARENAMqtt {
      * @param {number} qos
      * @param {boolean} retained
      */
-    async publish(topic, payload, qos, retained) {
+    publish: async function(topic, payload, qos, retained) {
         await this.MQTTWorker.publish(topic, payload, qos, retained);
-    }
+    },
 
     /**
      * Send a message to internal receive handler
      * @param {object} jsonMessage
      */
-    processMessage(jsonMessage) {
-        this._onMessageArrived(undefined, jsonMessage);
-    }
+    processMessage: function(jsonMessage) {
+        this.onMessageArrived(undefined, jsonMessage);
+    },
 
     /**
      * Returns mqttClient connection state
      * @return {boolean}
      */
-    async isConnected() {
+    isConnected: async function() {
         return await this.mqttClient.isConnected();
-    }
-}
+    },
+});

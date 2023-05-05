@@ -2,12 +2,12 @@
  * @fileoverview Handle messaging from MQTT
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
 import {expose} from 'comlink';
-const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
+import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
 /**
  * Main ARENA MQTT webworker client
@@ -23,7 +23,7 @@ class MQTTWorker {
     constructor(ARENAConfig, initScene, mainOnMessageArrived, restartJitsi, healthCheck) {
         this.initScene = initScene;
         this.restartJitsi = restartJitsi;
-        this.healthCheck = healthCheck;
+        // this.healthCheck = healthCheck;
         this.ARENA = ARENAConfig;
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
@@ -44,9 +44,9 @@ class MQTTWorker {
                 console.info('MQTT scene connection success.');
             },
             onFailure: function(res) {
-                this.healthCheck({
-                    addError: 'mqttScene.connection',
-                });
+                // this.healthCheck({
+                //     addError: 'mqttScene.connection',
+                // });
                 console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
             },
         };
@@ -87,9 +87,9 @@ class MQTTWorker {
      * @param {Object} uri uri used
      */
     async onConnected(reconnect, uri) {
-        await this.healthCheck({
-            removeError: 'mqttScene.connection',
-        });
+        // await this.healthCheck({
+        //     removeError: 'mqttScene.connection',
+        // });
         if (reconnect) {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
@@ -115,9 +115,9 @@ class MQTTWorker {
      * @param {Object} responseObject paho response object
      */
     async onConnectionLost(responseObject) {
-        await this.healthCheck({
-            addError: 'mqttScene.connection',
-        });
+        // await this.healthCheck({
+        //     addError: 'mqttScene.connection',
+        // });
         if (responseObject.errorCode !== 0) {
             console.error(
                 `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,

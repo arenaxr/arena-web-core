@@ -737,6 +737,8 @@ export class ARENAJitsi {
          */
         const _this = this;
         function setupCornerVideo() {
+            const localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+
             // video window for jitsi
             _this.jitsiVideoElem = document.getElementById('cornerVideo');
             _this.jitsiVideoElem.classList.add('flip-video');
@@ -748,7 +750,7 @@ export class ARENAJitsi {
              * set video element size
              */
             function setCornerVideoHeight() {
-                const videoWidth = ARENA.localVideoWidth;
+                const videoWidth = localVideoWidth;
                 const videoHeight = _this.jitsiVideoElem.videoHeight /
                                         (_this.jitsiVideoElem.videoWidth / videoWidth);
                 _this.jitsiVideoElem.style.width = videoWidth + 'px';
@@ -761,7 +763,7 @@ export class ARENAJitsi {
 
             // mobile only
             window.addEventListener('orientationchange', () => {
-                ARENA.localVideoWidth = Number(window.innerWidth / 5);
+                localVideoWidth = Number(window.innerWidth / 5);
                 setCornerVideoHeight();
             });
         }

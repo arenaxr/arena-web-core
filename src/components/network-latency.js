@@ -8,6 +8,7 @@
  * @date 2020
  */
 
+import {EVENTS} from '../constants/events';
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 
 /**
@@ -17,23 +18,43 @@ const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
  *
  */
 AFRAME.registerComponent('network-latency', {
-    // publish empty message with qos of 2 for network graph to update latency
+    schema: {
+        enabled: {type: 'boolean', default: true},
+        updateIntervalMs: {type: 'number', default: 10000}, // updates every 10s
+        latencyTopic: {type: 'string', default: ARENADefaults.latencyTopic},
+    },
+
     init: function() {
-        this.UPDATE_INTERVAL_MS = 10000; // updates every 10s
-        this.tick = AFRAME.utils.throttleTick(this.tick, this.UPDATE_INTERVAL_MS, this);
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        if (!data.enabled) return;
+
+        if (!sceneEl.ARENAMqttLoaded) {
+            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.init.bind(this));
+            return;
+        }
+
         const pahoMsg = new Paho.Message('{ "type": "latency" }'); // send message type latency
-        pahoMsg.destinationName = ARENA.latencyTopic;
+        pahoMsg.destinationName = data.latencyTopic;
         pahoMsg.qos = 2;
+
         this.pahoMsg = pahoMsg;
         this.message = '{ "type": "latency" }'; // send message type latency
-        this.topic = ARENA.latencyTopic;
+        this.topic = data.latencyTopic;
         this.qos = 2;
+
+        this.tick = AFRAME.utils.throttleTick(this.tick, data.updateIntervalMs, this);
     },
-    tick: (function() {
+
+    tick: function() {
+        // publish empty message with qos of 2 for network graph to update latency
         if (ARENA.Mqtt) {
             if (ARENA.Mqtt.isConnected()) {
                 ARENA.Mqtt.publish(this.topic, this.message, this.qos);
             }
         }
-    }),
+    },
 });

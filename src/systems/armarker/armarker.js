@@ -81,9 +81,9 @@ AFRAME.registerSystem('armarker', {
 
         // init networkedLocationSolver flag from ARENA scene options, if available
         if (ARENA) {
-            ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
-                this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
-            });
+            // ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
+            //     this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
+            // });
         }
 
         // request camera access features

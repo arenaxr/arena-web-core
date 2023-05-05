@@ -1,5 +1,7 @@
 /* global AFRAME, ARENA */
 
+import { ARENADefaults } from "../../conf/defaults";
+
 const bind = AFRAME.utils.bind;
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
@@ -51,16 +53,16 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
         return;
     }
     const nav = el.sceneEl.systems.nav;
-    if (nav.navMesh && data.constrainToNavMesh && !data.fly) {
+    if (data.constrainToNavMesh && nav?.navMesh && !data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
-        this.navStart.copy(el.object3D.position).y -= ARENA.defaults.camHeight;
+        this.navStart.copy(el.object3D.position).y -= ARENADefaults.camHeight;
         this.navEnd.copy(this.navStart).add(this.getMovementVector(delta));
 
         this.navGroup = this.navGroup === null ? nav.getGroup(this.navStart) : this.navGroup;
         this.navNode = this.navNode || nav.getNode(this.navStart, this.navGroup);
         this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
-        this.clampedEnd.y += ARENA.defaults.camHeight;
+        this.clampedEnd.y += ARENADefaults.camHeight;
         el.object3D.position.copy(this.clampedEnd);
     } else {
         // Get movement vector and translate position.
@@ -72,13 +74,13 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
 AFRAME.components['wasd-controls'].Component.prototype.resetNav = function(checkPolygon = false, clampStep = false) {
     const nav = this.el.sceneEl.systems.nav;
     if (nav.navMesh) {
-        this.navStart.copy(this.el.object3D.position).y -= ARENA.defaults.camHeight;
+        this.navStart.copy(this.el.object3D.position).y -= ARENADefaults.camHeight;
         this.navEnd.copy(this.navStart);
         this.navGroup = nav.getGroup(this.navStart, checkPolygon);
         this.navNode = nav.getNode(this.navStart, this.navGroup, checkPolygon);
         this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
         if (clampStep) {
-            this.clampedEnd.y += ARENA.defaults.camHeight;
+            this.clampedEnd.y += ARENADefaults.camHeight;
             this.el.object3D.position.copy(this.clampedEnd);
         }
     }
