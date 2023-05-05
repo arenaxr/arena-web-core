@@ -30,7 +30,7 @@ AFRAME.registerComponent('build-watch-object', {
     },
     callback: function(mutationList, observer) {
         const inspectorMqttLog = document.getElementById('inspectorMqttLog');
-            mutationList.forEach((mutation) => {
+        mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
                     // mutation.addedNodes
@@ -49,12 +49,25 @@ AFRAME.registerComponent('build-watch-object', {
                         return; // no need to handle on/off mutations to our own component
                     }
                     if (mutation.target.id) {
-                        if (mutation.target.getAttribute('gltf-model')) {
-                            obj_type = 'gltf-model';
-                        } else if (mutation.target.getAttribute('geometry')) {
-                            obj_type = mutation.target.getAttribute('geometry').primitive;
-                        } else {
-                            return;
+                        const attribute = mutation.target.getAttribute(mutation.attributeName);
+                        // use aframe-watcher updates to send only changes updated
+                        const changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
+                        switch (mutation.attributeName) {
+                            case 'geometry':
+                                obj_type = attribute.primitive; break;
+                            case 'gltf-model':
+                            case 'image':
+                            case 'light':
+                            case 'line':
+                            case 'obj-model':
+                            case 'ocean':
+                            case 'pcd-model':
+                            case 'text':
+                            case 'thickline':
+                            case 'threejs-scene':
+                                obj_type = mutation.attributeName; break;
+                            default:
+                                obj_type = 'entity'; break;
                         }
                         const msg = {
                             object_id: mutation.target.id,
@@ -65,14 +78,14 @@ AFRAME.registerComponent('build-watch-object', {
                                 object_type: obj_type,
                             },
                         };
-                        let pub = true;
                         switch (mutation.attributeName) {
                             case 'position':
-                                msg.data.position = mutation.target.getAttribute('position');
+                                msg.data.position = attribute;
                                 break;
                             case 'rotation':
                                 const quaternion = mutation.target.object3D.quaternion;
-                                msg.data.rotation = { // always send quaternions over the wire
+                                msg.data.rotation = {
+                                    // always send quaternions over the wire
                                     x: quaternion._x,
                                     y: quaternion._y,
                                     z: quaternion._z,
@@ -80,29 +93,25 @@ AFRAME.registerComponent('build-watch-object', {
                                 };
                                 break;
                             case 'scale':
-                                msg.data.scale = mutation.target.getAttribute('scale');
+                                msg.data.scale = attribute;
                                 break;
                             case 'geometry':
-                                // TODO: create system of checking which geometry item was changed, all is too much
-                                msg.data = mutation.target.getAttribute('geometry')
-                                break;
-                            case 'material':
-                                // TODO: create system of checking which material item was changed, all is too much
-                                msg.data.material = {
-                                    color: mutation.target.getAttribute('material').color
-                                };
+                                // we apply primitive data directory to root data
+                                msg.data = {...msg.data, ...changes};
                                 break;
                             default:
-                                pub = false;
+                                msg.data[mutation.attributeName] = changes;
                                 break;
                         }
                         console.log('pub:', msg);
                         if (inspectorMqttLog) {
-                            const line = document.createElement('pre');
-                            line.innerHTML += `${msg.object_id} ${msg.action} ${mutation.attributeName}`;
+                            const line = document.createElement('span');
+                            line.innerHTML += `Pub: ${mutation.attributeName} ${msg.object_id} ${JSON.stringify(changes)}`;
+                            inspectorMqttLog.appendChild(document.createElement('br'));
                             inspectorMqttLog.appendChild(line);
-                            line.scrollIntoView();                      }
-                        if (pub) ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+                            line.scrollIntoView();
+                        }
+                        ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                     }
                     break;
             }

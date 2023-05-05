@@ -36,6 +36,7 @@ AFRAME.registerComponent('build-watch-scene', {
                     }
                     if (mutation.removedNodes.length > 0){
                         console.log(`${mutation.removedNodes.length} child nodes have been removed.`, mutation.removedNodes);
+                        // if node has build-watch-object enabled, then we can send a delete message with id
                     }
                     break;
                 case 'attributes':
