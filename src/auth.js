@@ -376,7 +376,9 @@ window.ARENAAUTH = {
 
 // This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
 if (typeof ARENA === "undefined") {
-    window.ARENA = {};
+    window.ARENA = {
+        defaults: ARENADefaults,
+    };
 }
 
 window.onload = function () {
