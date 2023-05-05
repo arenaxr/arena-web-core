@@ -59,9 +59,8 @@ AFRAME.registerSystem('arena-mqtt', {
 
     setMqttHost: function() {
         const data = this.data;
-        const el = this.el;
 
-        this.mqttHost = ARENAUtils.getUrlParam('mqttHost', data.mqttHost);
+        this.mqttHost = ARENA.params.mqttHost ?? data.mqttHost;
         this.mqttHostURI = 'wss://' + this.mqttHost + data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)];
     },
 

@@ -51,10 +51,9 @@ AFRAME.registerSystem('arena-scene', {
         // start client health monitor
         this.health = new ARENAHealth();
 
-        this.startCoords = ARENAUtils.getUrlParam('startCoords', undefined); // leave undefined if not specified
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
-        if (this.startCoords !== undefined) {
-            this.startCoords = this.startCoords.split(',').map((i) => Number(i));
+        if (this.startCoords) {
+            this.startCoords = this.startCoords.split(",").map((i) => Number(i));
         }
 
         // Sync params with bootstrap ARENA object from Auth
@@ -171,9 +170,8 @@ AFRAME.registerSystem('arena-scene', {
         // set camName
         this.camName = `camera_${this.idTag}`; // e.g. camera_1234_eric
         // if fixedCamera is given, then camName must be set accordingly
-        this.fixedCamera = ARENAUtils.getUrlParam('fixedCamera', '');
-        if (this.fixedCamera !== '') {
-            this.camName = this.fixedCamera;
+        if (this.params.fixedCamera) {
+            this.camName = this.params.fixedCamera;
         }
 
         // set faceName, avatarName, handLName, handRName which depend on user name
@@ -272,7 +270,7 @@ AFRAME.registerSystem('arena-scene', {
             camera.object3D.position.copy(startPos);
             camera.object3D.position.y += data.camHeight;
             this.startCoords = startPos;
-        } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
+        } else if (this.params.startLastPos) {
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
             const lastPos = sceneHist[this.namespacedScene]?.lastPos;
             if (lastPos) {
@@ -309,12 +307,11 @@ AFRAME.registerSystem('arena-scene', {
             camera.object3D.position.y += data.camHeight;
         }
         // enable vio if fixedCamera is given
-        if (this.fixedCamera !== '') {
+        if (this.params.fixedCamera) {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
 
-        const url = new URL(window.location.href);
-        if (url.searchParams.get('build3d')) {
+        if (this.params.build3d) {
             this.loadArenaInspector();
         }
 
@@ -330,12 +327,11 @@ AFRAME.registerSystem('arena-scene', {
      */
     loadArenaInspector: function () {
         const sceneEl = sceneEl;
-        const object_id = ARENAUtils.getUrlParam('objectId', '');
         let el;
-        if (object_id) {
-            el = document.getElementById(object_id); // requested id
+        if (this.params.objectId) {
+            el = document.getElementById(this.params.objectId); // requested id
         } else {
-            el = document.querySelector('[build-watch-object]'); // first id
+            el = document.querySelector("[build-watch-object]"); // first id
         }
         sceneEl.components.inspector.openInspector(el ? el : null);
         console.log('build3d', 'A-Frame Inspector loaded');
