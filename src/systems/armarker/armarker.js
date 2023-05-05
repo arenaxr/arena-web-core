@@ -87,7 +87,7 @@ AFRAME.registerSystem('armarker', {
         }
 
         // request camera access features
-        if (!ARENA.camFollow) {
+        if (!ARENA.params.camFollow) {
             const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
             if (this.isWebARViewer) {
                 optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in XRBrowser
@@ -131,7 +131,7 @@ AFRAME.registerSystem('armarker', {
         }
 
         // init cv pipeline, if we are not using an external localizer
-        if (!ARENA.camFollow) {
+        if (!ARENA.params.camFollow) {
             this.initCVPipeline();
         }
     },

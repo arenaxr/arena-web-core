@@ -83,7 +83,7 @@ AFRAME.registerComponent('stats-monitor', {
         }
 
         // format HUD
-        if (ARENA && ARENA.hudstats) {
+        if (ARENA && ARENA.params.hudstats) {
             const camRoot = document.getElementById('my-camera');
             if (camRoot && !this.hudStatsText) {
                 this.hudStatsText = document.createElement('a-text');
@@ -100,7 +100,7 @@ AFRAME.registerComponent('stats-monitor', {
         }
 
         // publish to mqtt debug channel the stats
-        if (ARENA && ARENA.confstats) {
+        if (ARENA && ARENA.params.confstats) {
             if (ARENA && ARENA.Jitsi) {
                 const perfStats = {
                     jitsiStats: {
@@ -120,7 +120,7 @@ AFRAME.registerComponent('stats-monitor', {
         }
 
         // display the stats on the HUD
-        if (ARENA && ARENA.hudstats && this.hudStatsText) {
+        if (ARENA && ARENA.params.hudstats && this.hudStatsText) {
             const pctHeap = Math.trunc((this.usedJSHeapSize / this.jsHeapSizeLimit) * 100).toFixed(0);
             let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
             if (ARENA && ARENA.Jitsi && this.callStats) {

@@ -120,7 +120,7 @@ export class CreateUpdate {
             // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
             if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
-            if (id === ARENA.camFollow) {
+            if (id === ARENA.params.camFollow) {
                 this.handleCameraOverride(ACTIONS.UPDATE, {
                     id: ARENA.camName,
                     data: {
@@ -233,11 +233,11 @@ export class CreateUpdate {
             }
             break;
         case 'gltf-model':
-            if (ARENA.armode && data.hasOwnProperty('hide-on-enter-ar')) {
+            if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
                 console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
-            if (ARENA.vr && data.hasOwnProperty('hide-on-enter-vr')) {
+            if (ARENA.params.vr && data.hasOwnProperty('hide-on-enter-vr')) {
                 console.warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
@@ -475,7 +475,7 @@ export class CreateUpdate {
             if (AFRAME.scenes[0]?.xrSession) { // Apply transform to rig based off xrSession camera pose
                 const rig = document.getElementById('cameraRig');
                 const spinner = document.getElementById('cameraSpinner');
-                const target = document.getElementById(ARENA.camFollow);
+                const target = document.getElementById(ARENA.params.camFollow);
                 if (target) {
                     camMatrixInverse.copy(myCamera.object3D.matrix).invert();
                     // rig matrix = target * camera inverse

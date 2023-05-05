@@ -362,11 +362,6 @@ window.ARENAAUTH = {
                 _setNames(namespace, scenename);
             }
         }
-        // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
-        ARENA.persistenceUrl = "//" + ARENA.params.persistHost + ARENA.params.persistPath + ARENA.namespacedScene;
-        ARENA.outputTopic = ARENA.params.realm + "/s/" + ARENA.namespacedScene + "/";
-        ARENA.renderTopic = ARENA.outputTopic + "#";
-        ARENA.vioTopic = ARENA.params.realm + "/vio/" + ARENA.namespacedScene + "/";
     },
 };
 

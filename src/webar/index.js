@@ -23,14 +23,14 @@ export class ARENAWebARUtils {
         // }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window) && !ARENA.camFollow) {
+        if (!('ontouchstart' in window) && !ARENA.params.camFollow) {
             return;
         }
 
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-webar-session', '');
 
-        if (ARENA.camFollow) {
+        if (ARENA.params.camFollow) {
             try {
                 this.cameraCapture = new WebARCameraCapture();
                 this.cameraCapture.initCamera();
@@ -44,7 +44,7 @@ export class ARENAWebARUtils {
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
-        if (ARENA.camFollow) {
+        if (ARENA.params.camFollow) {
             // Assume that all controls should be relinquished
             const camera = document.getElementById('my-camera');
             camera.setAttribute('look-controls', 'enabled', false);
@@ -56,7 +56,7 @@ export class ARENAWebARUtils {
         }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window) && !ARENA.camFollow) {
+        if (!('ontouchstart' in window) && !ARENA.params.camFollow) {
             return;
         }
 

@@ -30,7 +30,7 @@ AFRAME.registerSystem('arena-scene', {
         disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
     },
 
-    init: async function(evt) {
+    init: async function (evt) {
         const data = this.data;
         const el = this.el;
 
@@ -57,17 +57,20 @@ AFRAME.registerSystem('arena-scene', {
             this.startCoords = this.startCoords.split(',').map((i) => Number(i));
         }
 
-        // get url params
-        const url = new URL(window.location.href);
-        this.skipav = url.searchParams.get('skipav');
-        this.armode = url.searchParams.get('armode');
-        this.vr = url.searchParams.get('vr');
-        this.noav = url.searchParams.get('noav');
-        this.noname = url.searchParams.get('noname');
-        this.confstats = url.searchParams.get('confstats');
-        this.hudstats = url.searchParams.get('hudstats');
-        this.camFollow = url.searchParams.get('camFollow');
-        this.build3d = url.searchParams.get('build3d');
+        // Sync params with bootstrap ARENA object from Auth
+        this.params = { ...ARENA.params };
+        this.defaults = ARENA.defaults;
+        this.userName = ARENA.userName;
+        this.displayName = ARENA.displayName;
+        this.sceneName = ARENA.sceneName;
+        this.namespacedScene = ARENA.namespacedScene;
+        // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
+        this.persistenceUrl = "//" + this.params.persistHost + this.params.persistPath + this.namespacedScene;
+        this.outputTopic = this.params.realm + "/s/" + this.namespacedScene + "/";
+        this.renderTopic = this.outputTopic + "#";
+        this.vioTopic = this.params.realm + "/vio/" + this.namespacedScene + "/";
+
+        window.ARENA = this; // alias to window for easy access
 
         // setup required scene-options defaults
         // TODO: pull these from a schema
@@ -86,7 +89,7 @@ AFRAME.registerSystem('arena-scene', {
             this.showEchoDisplayName();
         } else {
             // prevent local name when non-interactive
-            this.noname = true;
+            this.params.noname = true;
         }
 
         sceneEl.ARENAUserParamsLoaded = true;
@@ -119,7 +122,7 @@ AFRAME.registerSystem('arena-scene', {
             return;
         }
 
-        if (this.armode) {
+        if (this.params.armode) {
             /*
             Instantly enter AR mode for now.
             TODO: incorporate AV selection for possible Jitsi and multicamera
@@ -131,17 +134,17 @@ AFRAME.registerSystem('arena-scene', {
             //         ARENAWebARUtils.enterARNonWebXR();
             //     }
             // });
-        } else if (this.skipav) {
+        } else if (this.params.skipav) {
             // Directly initialize Jitsi videoconferencing
             this.Jitsi = ARENAJitsi.init(data.jitsiHost);
-        } else if (!this.noav && this.isJitsiPermitted()) {
+        } else if (!this.params.noav && this.isJitsiPermitted()) {
             window.setupAV(() => {
                 // Initialize Jitsi videoconferencing after A/V setup window
                 this.Jitsi = ARENAJitsi.init(data.jitsiHost);
             });
         }
 
-        if (this.build3d) {
+        if (this.params.build3d) {
             sceneEl.setAttribute('build-watch-scene', true);
             sceneEl.setAttribute('debug', true);
         }
@@ -161,7 +164,7 @@ AFRAME.registerSystem('arena-scene', {
      * Important: Also sets amName, faceName, handLName, handRName which depend on idTag
      * @param {string} idTag user name to set; will use url parameter value or default is no name is given
      */
-    setIdTag: function(idTag) {
+    setIdTag: function (idTag) {
         if (idTag === undefined) throw 'setIdTag: idTag not defined.'; // idTag must be set
         this.idTag = idTag;
 
@@ -183,7 +186,7 @@ AFRAME.registerSystem('arena-scene', {
      * Gets display name either from local storage or from userName
      * @return {string} display name
      */
-    getDisplayName: function() {
+    getDisplayName: function () {
         let displayName = localStorage.getItem('display_name');
         if (!displayName) displayName = decodeURI(this.userName);
         return displayName;
@@ -194,7 +197,7 @@ AFRAME.registerSystem('arena-scene', {
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
     isJitsiPermitted: function () {
-        if (this.build3d) return false; // build3d is used on a new page
+        if (this.params.build3d) return false; // build3d is used on a new page
         return !!this.mqttToken.token_payload.room;
     },
 
@@ -205,7 +208,7 @@ AFRAME.registerSystem('arena-scene', {
      */
     isUsersPermitted: function () {
         const data = this.data;
-        if (this.build3d) return false; // build3d is used on a new page
+        if (this.params.build3d) return false; // build3d is used on a new page
         return ARENAUtils.matchJWT(`${data.realm}/c/${data.namespace}/o/#`, this.mqttToken.token_payload.subs);
     },
 
@@ -222,11 +225,11 @@ AFRAME.registerSystem('arena-scene', {
      * Renders/updates the display name in the top left corner of a scene.
      * @param {boolean} speaker If the user is the dominant speaker
      */
-    showEchoDisplayName: function(speaker = false) {
+    showEchoDisplayName: function (speaker = false) {
         const url = new URL(window.location.href);
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
-        if (!this.noname) {
+        if (!this.params.noname) {
             if (speaker) {
                 echo.style.backgroundColor = '#0F08'; // green alpha
             } else {
@@ -241,7 +244,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * loads this user's presence and camera
      */
-    loadUser: function() {
+    loadUser: function () {
         const data = this.data;
         const el = this.el;
 
@@ -299,7 +302,8 @@ AFRAME.registerSystem('arena-scene', {
                     const closestGroup = navSys.getGroup(startPos, false);
                     const closestNode = navSys.getNode(startPos, closestGroup, false);
                     navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
-                } catch {}
+                } catch {
+                }
             }
             camera.object3D.position.copy(startPos);
             camera.object3D.position.y += data.camHeight;
@@ -309,8 +313,8 @@ AFRAME.registerSystem('arena-scene', {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
         }
 
-        let url = new URL(window.location.href);
-        if (url.searchParams.get('build3d')){
+        const url = new URL(window.location.href);
+        if (url.searchParams.get('build3d')) {
             this.loadArenaInspector();
         }
 
@@ -324,7 +328,7 @@ AFRAME.registerSystem('arena-scene', {
      * Loads the a-frame inspector, with MutationObserver connected to MQTT.
      * Expects all known objects to be loaded first.
      */
-    loadArenaInspector: function() {
+    loadArenaInspector: function () {
         const sceneEl = sceneEl;
         const object_id = ARENAUtils.getUrlParam('objectId', '');
         let el;
@@ -343,9 +347,9 @@ AFRAME.registerSystem('arena-scene', {
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
             // use "Back to Scene" to send to real ARENA scene
-            $('a.toggle-edit').click(function() {
+            $('a.toggle-edit').click(function () {
                 // remove the build3d a-frame inspector
-                let url = new URL(window.location.href);
+                const url = new URL(window.location.href);
                 url.searchParams.delete('build3d');
                 url.searchParams.delete('objectId');
                 window.parent.window.history.pushState({
@@ -373,7 +377,7 @@ AFRAME.registerSystem('arena-scene', {
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
-    loadSceneObjects: function(urlToLoad, parentName, prefixName) {
+    loadSceneObjects: function (urlToLoad, parentName, prefixName) {
         const data = this.data;
         const el = this.el;
 
@@ -502,7 +506,7 @@ AFRAME.registerSystem('arena-scene', {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArenaScene: function(urlToLoad) {
+    unloadArenaScene: function (urlToLoad) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !data.disallowJWT;
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -540,7 +544,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * Loads and applies scene-options (if it exists), otherwise set to default environment
      */
-    loadSceneOptions: function() {
+    loadSceneOptions: function () {
         const data = this.data;
         const el = this.el;
 
@@ -666,7 +670,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * Update the list of scene-specific heads the user can select from
      */
-    setupSceneHeadModels: function() {
+    setupSceneHeadModels: function () {
         const sceneHeads = sceneOptions['sceneHeadModels'];
         const headModelPathSelect = document.getElementById('headModelPathSelect');
         const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
