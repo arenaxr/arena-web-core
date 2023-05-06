@@ -9,8 +9,8 @@
 import {ARENAMqttConsole} from './arena-console.js';
 import {ARENAUtils} from './utils.js';
 import {ARENAJitsi} from './jitsi.js';
-import {ARENAHealth} from './health/';
-import {ARENAWebARUtils} from './webar/';
+import {ARENAHealth} from './health';
+import {ARENAWebARUtils} from './webar';
 import {EVENTS} from './constants/events';
 import Swal from 'sweetalert2';
 
@@ -19,10 +19,6 @@ import Swal from 'sweetalert2';
 AFRAME.registerSystem('arena-scene', {
     schema: {
         devInstance: {type: 'boolean', default: ARENADefaults.devInstance},
-        userName: {type: 'string', default: ARENADefaults.userName},
-        realm: {type: 'string', default: ARENADefaults.realm},
-        sceneName: {type: 'string', default: ARENADefaults.sceneName},
-        namespace: {type: 'string', default: ARENADefaults.namespace},
         persistHost: {type: 'string', default: ARENADefaults.persistHost},
         persistPath: {type: 'string', default: ARENADefaults.persistPath},
         camHeight: {type: 'number', default: ARENADefaults.camHeight},
@@ -30,7 +26,7 @@ AFRAME.registerSystem('arena-scene', {
         disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
     },
 
-    init: async function (evt) {
+    init: function(evt) {
         const data = this.data;
         const el = this.el;
 
@@ -59,6 +55,7 @@ AFRAME.registerSystem('arena-scene', {
         this.sceneName = ARENA.sceneName;
         this.namespacedScene = ARENA.namespacedScene;
         // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
+        this.nameSpace = ARENA.nameSpace;
         this.persistenceUrl = "//" + this.params.persistHost + this.params.persistPath + this.namespacedScene;
         this.outputTopic = this.params.realm + "/s/" + this.namespacedScene + "/";
         this.renderTopic = this.outputTopic + "#";
@@ -82,7 +79,7 @@ AFRAME.registerSystem('arena-scene', {
         this.mqttToken = evt.detail;
 
         // id tag including name is set from authentication service
-        this.setIdTag(this.mqttToken.ids.userid);
+        this.setIdTag(this.mqttToken.ids.userid, ARENA);
 
         if (this.isUsersPermitted()) {
             this.showEchoDisplayName();
@@ -110,7 +107,7 @@ AFRAME.registerSystem('arena-scene', {
         // this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, ARENAWebARUtils.handleARButtonForNonWebXRMobile);
     },
 
-    onMqttReady() {
+    onMqttReady: function() {
         const data = this.data;
         const el = this.el;
 
@@ -156,6 +153,7 @@ AFRAME.registerSystem('arena-scene', {
 
         sceneEl.ARENALoaded = true;
         sceneEl.emit(EVENTS.ARENA_LOADED, true);
+        console.log(this.camName)
     },
 
     /**
@@ -207,7 +205,7 @@ AFRAME.registerSystem('arena-scene', {
     isUsersPermitted: function () {
         const data = this.data;
         if (this.params.build3d) return false; // build3d is used on a new page
-        return ARENAUtils.matchJWT(`${data.realm}/c/${data.namespace}/o/#`, this.mqttToken.token_payload.subs);
+        return ARENAUtils.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
     },
 
     /**
@@ -223,8 +221,7 @@ AFRAME.registerSystem('arena-scene', {
      * Renders/updates the display name in the top left corner of a scene.
      * @param {boolean} speaker If the user is the dominant speaker
      */
-    showEchoDisplayName: function (speaker = false) {
-        const url = new URL(window.location.href);
+    showEchoDisplayName: function (speaker) {
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!this.params.noname) {
@@ -246,15 +243,8 @@ AFRAME.registerSystem('arena-scene', {
         const data = this.data;
         const el = this.el;
 
-        // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
-        if (!AFRAME || !AFRAME.scenes[0] || !AFRAME.scenes[0].systems) {
-            if (this.health) {
-                this.health.addError('slow.network');
-                return;
-            }
-        }
+        const sceneEl = el.sceneEl;
 
-        const systems = AFRAME.scenes[0].systems;
         let color = Math.floor(Math.random() * 16777215).toString(16);
         if (color.length < 6) color = '0' + color;
         color = '#' + color;
@@ -280,10 +270,14 @@ AFRAME.registerSystem('arena-scene', {
                 this.startCoords = startPos;
             }
         }
+
+        const systems = sceneEl.systems;
+        const landmark = systems['landmark'];
+
         // Fallthrough failure if startLastPos fails
-        if (!this.startCoords && systems.landmark) {
+        if (!this.startCoords && landmark) {
             // Try to define starting position if the scene has startPosition objects
-            const startPosition = systems.landmark.getRandom(true);
+            const startPosition = landmark.getRandom(true);
             if (startPosition) {
                 console.log('Moving camera to start position', startPosition.el.id);
                 startPosition.teleportTo();
@@ -292,6 +286,7 @@ AFRAME.registerSystem('arena-scene', {
                 this.startCoords = startPos;
             }
         }
+
         if (!this.startCoords) { // Final fallthrough for failures, resort to default
             const navSys = systems.nav;
             startPos.copy(this.defaults.startCoords);
@@ -306,6 +301,7 @@ AFRAME.registerSystem('arena-scene', {
             camera.object3D.position.copy(startPos);
             camera.object3D.position.y += data.camHeight;
         }
+
         // enable vio if fixedCamera is given
         if (this.params.fixedCamera) {
             camera.setAttribute('arena-camera', 'vioEnabled', true);
@@ -326,7 +322,10 @@ AFRAME.registerSystem('arena-scene', {
      * Expects all known objects to be loaded first.
      */
     loadArenaInspector: function () {
-        const sceneEl = sceneEl;
+        const data = this.data;
+
+        const sceneEl = this.el.sceneEl;
+
         let el;
         if (this.params.objectId) {
             el = document.getElementById(this.params.objectId); // requested id

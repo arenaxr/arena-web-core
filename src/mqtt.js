@@ -30,19 +30,19 @@ AFRAME.registerSystem('arena-mqtt', {
             sceneEl.addEventListener(EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
             return;
         }
+        this.arena = sceneEl.systems['arena-scene'];
 
         this.setMqttHost();
 
         await this.initWorker();
 
-        const userName = sceneEl.systems['arena-scene'].mqttToken.mqtt_username;
-        const mqttToken = sceneEl.systems['arena-scene'].mqttToken.mqtt_token;
-        const camName = sceneEl.systems['arena-scene'].camName;
-        const outputTopic = sceneEl.systems['arena-scene'].outputTopic;
+        const mqttToken = this.arena.mqttToken.mqtt_token;
+        const camName = this.arena.camName;
+        const outputTopic = this.arena.outputTopic;
         // Do not pass functions in mqttClientOptions
         await this.connect({
                 reconnect: true,
-                userName: userName,
+                userName: this.userName,
                 password: mqttToken,
             },
             // last will message
@@ -62,6 +62,7 @@ AFRAME.registerSystem('arena-mqtt', {
     setMqttHost: function() {
         const data = this.data;
 
+        this.userName = this.arena.mqttToken.mqtt_username;
         this.mqttHost = ARENA.params.mqttHost ?? data.mqttHost;
         this.mqttHostURI = 'wss://' + this.mqttHost + data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)];
     },
@@ -72,8 +73,8 @@ AFRAME.registerSystem('arena-mqtt', {
 
         const sceneEl = el.sceneEl;
 
-        const renderTopic = sceneEl.systems['arena-scene'].renderTopic;
-        const idTag = sceneEl.systems['arena-scene'].idTag;
+        const renderTopic = this.arena.renderTopic;
+        const idTag = this.arena.idTag;
 
         const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
         const worker = await new MQTTWorker({
@@ -121,6 +122,8 @@ AFRAME.registerSystem('arena-mqtt', {
      */
     onMessageArrived: function(message, jsonMessage) {
         let theMessage = {};
+
+        // console.log(message, jsonMessage);
 
         if (message) {
             try {
@@ -213,7 +216,8 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {number} qos
      * @param {boolean} retained
      */
-    publish: async function(topic, payload, qos, retained) {
+    publish: async function(topic, payload, qos=0, retained=false) {
+        console.log(topic, payload);
         await this.MQTTWorker.publish(topic, payload, qos, retained);
     },
 

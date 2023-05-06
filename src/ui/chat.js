@@ -43,7 +43,13 @@ AFRAME.registerSystem('arena-chat-ui', {
             return;
         }
 
+        if (!sceneEl.ARENAMqttLoaded) {
+            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.init.bind(this));
+            return;
+        }
+
         this.arena = sceneEl.systems['arena-scene'];
+        this.mqtt = sceneEl.systems['arena-mqtt'];
 
         this.isSpeaker = false;
         this.stats = {};
@@ -56,11 +62,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.cameraid = this.arena.camName;
         this.username = this.arena.getDisplayName();
         this.realm = ARENADefaults.realm;
-        this.namespace = this.arena.nameSpace;
+        this.nameSpace = this.arena.nameSpace;
         this.scene = this.arena.namespacedScene;
         this.persist_uri = this.arena.persistenceUrl;
-        this.mqtt_host = this.arena.mqttHostURI;
-        this.mqtt_username = this.arena.username;
+        this.mqtt_host = this.mqtt.mqttHostURI;
+        this.mqtt_username = this.mqtt.userName;
         this.mqtt_token = this.arena.mqttToken.mqtt_token;
         this.devInstance = ARENADefaults.devInstance;
         this.isSceneWriter = this.arena.isUserSceneWriter();
@@ -93,16 +99,16 @@ AFRAME.registerSystem('arena-chat-ui', {
         */
 
         // receive private messages  (subscribe only)
-        this.subscribePrivateTopic = `${this.realm}/c/${this.namespace}/p/${this.userid}/#`;
+        this.subscribePrivateTopic = `${this.realm}/c/${this.nameSpace}/p/${this.userid}/#`;
 
         // receive open messages to everyone and/or scene (subscribe only)
-        this.subscribePublicTopic = `${this.realm}/c/${this.namespace}/o/#`;
+        this.subscribePublicTopic = `${this.realm}/c/${this.nameSpace}/o/#`;
 
         // send private messages to a user (publish only)
-        this.publishPrivateTopic = `${this.realm}/c/${this.namespace}/p/\{to_uid\}/${`${this.userid}${btoa(this.userid)}`}`;
+        this.publishPrivateTopic = `${this.realm}/c/${this.nameSpace}/p/\{to_uid\}/${`${this.userid}${btoa(this.userid)}`}`;
 
         // send open messages (chat keepalive, messages to all/scene) (publish only)
-        this.publishPublicTopic = `${this.realm}/c/${this.namespace}/o/${`${this.userid}${btoa(this.userid)}`}`;
+        this.publishPublicTopic = `${this.realm}/c/${this.nameSpace}/o/${`${this.userid}${btoa(this.userid)}`}`;
 
         // counter for unread msgs
         this.unreadMsgs = 0;

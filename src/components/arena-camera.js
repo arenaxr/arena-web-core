@@ -36,11 +36,19 @@ AFRAME.registerComponent('arena-camera', {
         vioPosition: {type: 'vec3', default: new THREE.Vector3()},
         showStats: {type: 'boolean', default: false},
     },
+
     /**
      * Send initial camera create message; Setup heartbeat timer
      * @ignore
      */
     init: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        this.arena = sceneEl.systems['arena-scene'];
+
         this.lastPos = new THREE.Vector3();
         this.vioMatrix = new THREE.Matrix4();
         this.camParent = new THREE.Matrix4();
@@ -56,7 +64,7 @@ AFRAME.registerComponent('arena-camera', {
         this.videoDefaultResolutionSet = false;
 
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.camUpdateIntervalMs, this);
 
         // send initial create
         this.publishPose('create');
@@ -84,6 +92,7 @@ AFRAME.registerComponent('arena-camera', {
             document.getElementById('pose-stats').style.display = 'block';
         }
     },
+
     /**
      * Publish user camera pose
      * @param {string} action One of 'update' or 'create' actions sent in the publish message
@@ -91,10 +100,11 @@ AFRAME.registerComponent('arena-camera', {
      */
     publishPose(action = 'update') {
         const data = this.data;
+
         if (!data.enabled) return;
 
         const msg = {
-            object_id: ARENA.camName,
+            object_id: this.arena.camName,
             displayName: data.displayName,
             action: action,
             type: 'object',
@@ -116,10 +126,10 @@ AFRAME.registerComponent('arena-camera', {
             },
         };
 
-        if (ARENA.Jitsi) {
-            msg.jitsiId = ARENA.Jitsi.getJitsiId();
-            msg.hasAudio = ARENA.Jitsi.hasAudio;
-            msg.hasVideo = ARENA.Jitsi.hasVideo;
+        if (this.arena.Jitsi) {
+            msg.jitsiId = this.arena.Jitsi.getJitsiId();
+            msg.hasAudio = this.arena.Jitsi.hasAudio;
+            msg.hasVideo = this.arena.Jitsi.hasVideo;
         }
 
         const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
@@ -131,11 +141,12 @@ AFRAME.registerComponent('arena-camera', {
         if (headModelPathSelect) {
             msg.data.headModelPath = headModelPathSelect.value;
         } else {
-            msg.data.headModelPath = ARENA.defaults.headModelPath;
+            msg.data.headModelPath = this.arena.defaults.headModelPath;
         }
 
-        ARENA.Mqtt?.publish(`${ARENA.outputTopic}${ARENA.camName}`, msg); // extra timestamp info at end for debugging
+        this.arena.Mqtt?.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
     },
+
     /**
      * Publish user VIO
      * @param {string} action One of 'update' or 'create' actions sent in the publish message
@@ -145,7 +156,7 @@ AFRAME.registerComponent('arena-camera', {
         const data = this.data;
 
         const msg = {
-            object_id: ARENA.camName,
+            object_id: this.arena.camName,
             action: action,
             type: 'object',
             data: {
@@ -164,8 +175,9 @@ AFRAME.registerComponent('arena-camera', {
                 color: data.color,
             },
         };
-        ARENA.Mqtt?.publish(`${ARENA.vioTopic}${ARENA.camName}`, msg); // extra timestamp info at end for debugging
+        this.arena.Mqtt?.publish(`${this.arena.vioTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
     },
+
     /**
      * Update component data
      * @ignore
@@ -180,6 +192,7 @@ AFRAME.registerComponent('arena-camera', {
             }
         }
     },
+
     /**
      * Every tick, update rotation and position of the camera
      * If a position or rotation change is detected, or time for a heartbeat, trigger message publish
@@ -210,14 +223,14 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position if pose changed, or every 1 sec heartbeat
-        if (this.heartBeatCounter % (1000 / ARENA.camUpdateIntervalMs) === 0) {
+        if (this.heartBeatCounter % (1000 / this.arena.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
             this.lastPos.copy(this.el.object3D.position);
-            this.lastPos.y -= ARENA.defaults.camHeight;
-            sceneHist[ARENA.namespacedScene] = {
-                ...sceneHist[ARENA.namespacedScene],
+            this.lastPos.y -= this.arena.defaults.camHeight;
+            sceneHist[this.arena.namespacedScene] = {
+                ...sceneHist[this.arena.namespacedScene],
                 lastPos: this.lastPos,
             };
             localStorage.setItem('sceneHistory', JSON.stringify(sceneHist));
@@ -238,18 +251,21 @@ AFRAME.registerComponent('arena-camera', {
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
 
-        if (!this.videoDefaultResolutionSet && ARENA && ARENA.Jitsi && ARENA.Jitsi.ready && ARENA.videoDefaultResolutionConstraint) {
+        if (!this.videoDefaultResolutionSet && ARENA && this.arena.Jitsi && this.arena.Jitsi.ready && this.arena.videoDefaultResolutionConstraint) {
             // set scene-options, videoDefaultResolutionConstraint, only once
-            ARENA.Jitsi.setDefaultResolutionRemotes(ARENA.videoDefaultResolutionConstraint);
+            this.arena.Jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;
         }
     },
+
     isVideoFrustumCullingEnabled() {
-        return ARENA && ARENA.videoFrustumCulling;
+        return ARENA && this.arena.videoFrustumCulling;
     },
+
     isVideoDistanceConstraintsEnabled() {
-        return ARENA && ARENA.videoDistanceConstraints;
+        return ARENA && this.arena.videoDistanceConstraints;
     },
+
     viewIntersectsObject3D(obj3D) {
         // note: bbox.setFromObject computes the world-axis-aligned bounding box of the video cube
         this.bbox.setFromObject(obj3D);

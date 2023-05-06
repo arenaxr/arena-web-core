@@ -24,7 +24,7 @@ class MQTTWorker {
         this.initScene = initScene;
         this.restartJitsi = restartJitsi;
         // this.healthCheck = healthCheck;
-        this.ARENA = ARENAConfig;
+        this.config = ARENAConfig;
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
         mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
@@ -95,7 +95,7 @@ class MQTTWorker {
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
             await this.restartJitsi();
-            this.mqttClient.subscribe(this.ARENA.renderTopic);
+            this.mqttClient.subscribe(this.config.renderTopic);
             console.warn(`MQTT scene reconnected to ${uri}`);
             return; // do not continue!
         }
@@ -107,7 +107,7 @@ class MQTTWorker {
         await this.initScene();
 
         // start listening for MQTT messages
-        this.mqttClient.subscribe(this.ARENA.renderTopic);
+        this.mqttClient.subscribe(this.config.renderTopic);
     }
 
     /**
