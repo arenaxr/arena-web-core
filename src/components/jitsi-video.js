@@ -1,5 +1,5 @@
 /* global AFRAME */
-import {ARENAEventEmitter} from '../event-emitter.js';
+// import {ARENAEventEmitter} from '../event-emitter.js';
 
 /**
  * @fileoverview Apply a jitsi video to a geometry
@@ -25,9 +25,9 @@ AFRAME.registerComponent('jitsi-video', {
     init: function() {
         const el = this.el;
 
-        ARENA.events.on(ARENAEventEmitter.events.JITSI_CONNECT, (e) => this.jitsiConnect(e.detail));
-        ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, (e) => this.jitsiNewUser(e.detail));
-        ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, (e) => this.jitsiUserLeft(e.detail));
+        // ARENA.events.on(ARENAEventEmitter.events.JITSI_CONNECT, (e) => this.jitsiConnect(e.detail));
+        // ARENA.events.on(ARENAEventEmitter.events.USER_JOINED, (e) => this.jitsiNewUser(e.detail));
+        // ARENA.events.on(ARENAEventEmitter.events.USER_LEFT, (e) => this.jitsiUserLeft(e.detail));
     },
     update: function(oldData) {
         const data = this.data;

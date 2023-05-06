@@ -7,7 +7,7 @@
  */
 import './ar-session.js';
 import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 

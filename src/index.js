@@ -6,14 +6,14 @@
  * @date 2023
  */
 
-import { ARENADefaults } from '../conf/defaults.js';
+import { ARENADefaults } from '../conf/defaults';
 
 // ARENA version from automated scripts
-import { ARENA_VERSION_MSG } from './arena-version.js';
+import { ARENA_VERSION_MSG } from './arena-version';
 console.info(ARENA_VERSION_MSG);
 
 // replace console with our logging (only when not in dev)
-import { ARENAMqttConsole } from './arena-console.js';
+import { ARENAMqttConsole } from './utils';
 
 if (!ARENADefaults.devInstance) {
     // will queue messages until MQTT connection is available (indicated by console.setOptions())

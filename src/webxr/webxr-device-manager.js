@@ -7,7 +7,7 @@
  */
 
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 AFRAME.registerComponent('webxr-device-manager', {
     init: function() {

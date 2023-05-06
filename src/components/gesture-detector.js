@@ -8,7 +8,7 @@
 
 import {
     ARENAUtils,
-} from '../utils.js';
+} from '../utils';
 
 /**
  * Detect multi-finger touch gestures. Publish events accordingly.

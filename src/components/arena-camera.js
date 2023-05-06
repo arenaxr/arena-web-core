@@ -9,7 +9,7 @@
 /* global AFRAME */
 
 import { EVENTS } from '../constants';
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and VIO change events.

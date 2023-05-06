@@ -7,7 +7,7 @@
  */
 
 import { ARENADefaults } from '../../conf/defaults.js';
-import { ARENAUtils } from '../utils.js';
+import { ARENAUtils } from '../utils';
 import { ARENAJitsi } from './jitsi.js';
 import { ARENAHealth } from '../health/index.js';
 import { ARENAWebARUtils } from '../webar/index.js';

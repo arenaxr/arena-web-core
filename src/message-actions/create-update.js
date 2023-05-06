@@ -1,5 +1,5 @@
 import {Logger} from './logger.js';
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 // handle actions
 const ACTIONS = {
