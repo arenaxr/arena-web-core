@@ -157,7 +157,7 @@ AFRAME.registerSystem('compositor', {
                 }
 
                 // set camera parameters for ATW
-                const frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
+                let frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
                 if (system.prevFrames[frameID]) {
                     const currTime = performance.now();
                     const frameTimestamp = system.prevFrames[frameID].ts;
