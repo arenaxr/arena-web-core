@@ -32,17 +32,6 @@ AFRAME.registerComponent('build-watch-object', {
         const inspectorMqttLog = document.getElementById('inspectorMqttLog');
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
-                case 'childList':
-                    // mutation.addedNodes
-                    // mutation.removedNodes
-                    if (mutation.addedNodes.length > 0)
-                        console.log(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
-                    if (mutation.removedNodes.length > 0)
-                        console.log(
-                            `${mutation.removedNodes.length} child nodes have been removed.`,
-                            mutation.removedNodes
-                        );
-                    break;
                 case 'attributes':
                     // mutation.target
                     // mutation.attributeName
@@ -53,9 +42,10 @@ AFRAME.registerComponent('build-watch-object', {
                     }
                     if (mutation.target.id) {
                         const attribute = mutation.target.getAttribute(mutation.attributeName);
-                        const msg = {
+                        // when 'id' changes, we have a new object, maybe a name change
+                        let msg = {
                             object_id: mutation.target.id,
-                            action: 'update',
+                            action: mutation.attributeName === 'id' ? 'create' : 'update',
                             type: 'object',
                             persist: true,
                             data: {},
@@ -79,7 +69,7 @@ AFRAME.registerComponent('build-watch-object', {
                         }
                         // use aframe-watcher updates to send only changes updated
                         let changes = undefined;
-                        if (AFRAME.INSPECTOR.history.updates[mutation.target.id]){
+                        if (AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
                             changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
                         }
                         switch (mutation.attributeName) {
@@ -101,7 +91,7 @@ AFRAME.registerComponent('build-watch-object', {
                                 break;
                             case 'geometry':
                                 // we apply primitive data directory to root data
-                                if (changes){
+                                if (changes) {
                                     msg.data = changes;
                                     delete msg.data.primitive;
                                 }
@@ -111,17 +101,28 @@ AFRAME.registerComponent('build-watch-object', {
                                 msg.data[mutation.attributeName] = changes ? changes : {};
                                 break;
                         }
-                        console.log('pub:', msg);
                         if (inspectorMqttLog) {
-                            const line = document.createElement('span');
+                            inspectorMqttLog.appendChild(document.createElement('br'));
+                            let line = document.createElement('span');
                             line.innerHTML += `Pub: ${mutation.attributeName} ${msg.object_id} ${JSON.stringify(
                                 changes ? changes : msg.data
                             )}`;
-                            inspectorMqttLog.appendChild(document.createElement('br'));
                             inspectorMqttLog.appendChild(line);
                             line.scrollIntoView();
                         }
+                        console.log('pub:', msg);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+
+                        // check rename case
+                        if (mutation.attributeName === 'id' && mutation.target.id != mutation.oldValue) {
+                            let msg = {
+                                object_id: mutation.oldValue,
+                                action: 'delete',
+                                persist: true,
+                            };
+                            console.log('pub:', msg);
+                            ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+                        }
                     }
                     break;
             }
@@ -130,9 +131,8 @@ AFRAME.registerComponent('build-watch-object', {
     update: function () {
         if (this.data.enabled) {
             this.observer.observe(this.el, {
-                childList: true,
                 attributes: true,
-                subtree: true,
+                attributeOldValue: true,
             });
         } else {
             this.observer.disconnect();
@@ -140,6 +140,7 @@ AFRAME.registerComponent('build-watch-object', {
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {
             this.data.openJsonEditor = false; // restore
+            this.update();
             window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
     },
