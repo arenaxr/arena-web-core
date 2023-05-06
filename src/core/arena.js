@@ -9,7 +9,6 @@
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
 import { ARENAJitsi } from './jitsi.js';
-import { ARENAHealth } from '../ui/health.js';
 import { ARENAWebARUtils } from '../webar/index.js';
 import { EVENTS } from '../constants/index.js';
 import Swal from 'sweetalert2';
@@ -36,9 +35,6 @@ AFRAME.registerSystem('arena-scene', {
             return;
         }
 
-        // start client health monitor
-        this.health = new ARENAHealth();
-
         // Sync params with bootstrap ARENA object from Auth
         this.params = { ...ARENA.params };
         this.defaults = ARENA.defaults;
@@ -56,6 +52,8 @@ AFRAME.registerSystem('arena-scene', {
         this.vioTopic = this.params.realm + "/vio/" + this.namespacedScene + "/";
 
         window.ARENA = this; // alias to window for easy access
+
+        this.health = sceneEl.systems['arena-health-ui'];
 
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
         if (typeof this.params.startCoords === 'string') {
@@ -598,7 +596,7 @@ AFRAME.registerSystem('arena-scene', {
                     }
 
                     if (!sceneOptions['clickableOnlyEvents']) {
-                    // unusual case: clickableOnlyEvents = true by default, add warning...
+                        // unusual case: clickableOnlyEvents = true by default, add warning...
                         this.health.addError('scene-options.allObjectsClickable');
                     }
 

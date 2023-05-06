@@ -5,12 +5,11 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2021
  */
-const config = require('./health-config.json');
 
 /**
- * A class to manage an instance of ARENA's health/error reporting and troubleshooting.
+ * A system to manage an instance of ARENA's health/error reporting and troubleshooting.
  * @example
- * // Add your errors and help links to ./health-config.json
+ * // Add your errors and help links to this.config
  * {
  *   // unique error code for indexing
  *   "errorCode": "connection.connectionFailed"
@@ -22,39 +21,46 @@ const config = require('./health-config.json');
  *   "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-conference-server-connection-failed"
  * }
  */
-export class ARENAHealth {
-    /**
-     * Construct a health object and begin monitoring for user events.
-     */
-    constructor() {
-        const instance = this;
+AFRAME.registerSystem('arena-health-ui', {
+    schema: {
+        enabled: {type: 'boolean', default: true},
+    },
+
+    init: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        if (!data.enabled) return;
+
         this.activeErrors = {};
 
+        const _this = this;
         $(document).ready(function() {
             // hover, draw draw the errors box
             $('#error-icon').hover(
                 function() { // mouseenter
-                    drawErrorBlock(instance.activeErrors);
+                    drawErrorBlock(_this.activeErrors);
                 },
                 function() { // mouseleave
                     $('#error-block').empty();
                 });
             // update icon display once doc is ready
             const icon = document.getElementById('error-icon');
-            if (Object.keys(instance.activeErrors).length) {
+            if (Object.keys(_this.activeErrors).length) {
                 icon.style.display = 'block';
             } else {
                 icon.style.display = 'none';
             }
         });
-        console.log('ARENA Health checker ready.');
-    }
+    },
 
     /**
      * Add an error to health monitor and show the icon.
-     * @param {string} errorCode The error string matching errorCode in health-config.json
+     * @param {string} errorCode The error string matching errorCode in config
      */
-    addError(errorCode) {
+    addError: function(errorCode) {
         this.activeErrors[errorCode] = this.getErrorDetails(errorCode);
         // make error-icon visible
         const icon = document.getElementById('error-icon');
@@ -67,28 +73,28 @@ export class ARENAHealth {
             }
         };
         $('#error-img').attr('src', imgSrc);
-    }
+    },
 
     /**
      * Remove an error to health monitor and hide the icon when errors = 0.
-     * @param {string} errorCode The error string matching errorCode in health-config.json
+     * @param {string} errorCode The error string matching errorCode in config
      */
-    removeError(errorCode) {
+    removeError: function(errorCode) {
         delete this.activeErrors[errorCode];
         // make error-icon invisible, when activeErrors = 0
         if (!Object.keys(this.activeErrors).length) {
             const icon = document.getElementById('error-icon');
             if (icon) icon.style.display = 'none';
         }
-    }
+    },
 
     /**
-     * Lookup details of error code if any from health-config.json.
-     * @param {string} errorCode The error string matching errorCode in health-config.json
+     * Lookup details of error code if any from config.
+     * @param {string} errorCode The error string matching errorCode in config
      * @return {object} Details object for found/default error
      */
-    getErrorDetails(errorCode) {
-        const err = config.find((el) => el.errorCode === errorCode);
+    getErrorDetails: function(errorCode) {
+        const err = this.config.find((el) => el.errorCode === errorCode);
         if (err) {
             return err;
         } else {
@@ -99,8 +105,35 @@ export class ARENAHealth {
                 helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html',
             };
         }
-    }
-}
+    },
+
+    config: [{
+        "errorCode": "connection.connectionFailed",
+        "class": "health-error-label",
+        "title": "Conference server connection failed",
+        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-conference-server-connection-failed"
+    }, {
+        "errorCode": "conference.iceFailed",
+        "class": "health-error-label",
+        "title": "Conference stream failed",
+        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-conference-stream-failed"
+    }, {
+        "errorCode": "mqttChat.connection",
+        "class": "health-error-label",
+        "title": "Chat MQTT connection failed",
+        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html"
+    }, {
+        "errorCode": "slow.network",
+        "class": "health-error-label",
+        "title": "Network speed is too slow",
+        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-network-speed-is-too-slow"
+    }, {
+        "errorCode": "scene-options.allObjectsClickable",
+        "class": "health-warning-label",
+        "title": "Events Publish Behavior is too high",
+        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#warning-events-publish-behavior-is-too-high"
+    }],
+});
 
 /**
  * Render the display of errors in #error-block for troubleshooting.

@@ -8,9 +8,9 @@
 
 export const EVENTS = Object.freeze({
     ON_AUTH:            'onauth',
-    USER_PARAMS_LOADED: 'user-params-loaded',
-    MQTT_LOADED:        'mqtt-loaded',
-    SCENE_OPT_LOADED:   'scene-options-loaded',
-    ARENA_LOADED:       'arena-loaded',
-    NEW_SETTINGS:       'new-settings',
+    USER_PARAMS_LOADED: 'onuserparamsloaded',
+    MQTT_LOADED:        'onmqttloaded',
+    SCENE_OPT_LOADED:   'onsceneoptionsloaded',
+    ARENA_LOADED:       'onarenaloaded',
+    NEW_SETTINGS:       'onnewsettings',
 });

@@ -585,7 +585,7 @@ export class ARENAJitsi {
                 this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
-        ARENA.health.removeError('connection.connectionFailed');
+        // ARENA.health.removeError('connection.connectionFailed');
     }
 
     updateUserStatus() {
@@ -609,7 +609,7 @@ export class ARENAJitsi {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
             errorCode: err,
         });
-        ARENA.health.addError(err);
+        // ARENA.health.addError(err);
     }
 
     /**
@@ -621,7 +621,7 @@ export class ARENAJitsi {
         ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
             errorCode: err,
         });
-        ARENA.health.addError(err);
+        // ARENA.health.addError(err);
     }
 
     /**

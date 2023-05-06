@@ -50,6 +50,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
+        this.health = sceneEl.systems['arena-health-ui'];
 
         this.isSpeaker = false;
         this.stats = {};
@@ -528,7 +529,7 @@ AFRAME.registerSystem('arena-chat-ui', {
     onConferenceError: function(e) {
         // display error to user
         const errorCode = e.detail.errorCode;
-        const err = this.arena.health.getErrorDetails(errorCode);
+        const err = this.health.getErrorDetails(errorCode);
         this.displayAlert(err.title, 5000, 'error');
     },
 
@@ -644,7 +645,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         willMessage.destinationName = this.publishPublicTopic;
         this.mqttc.connect({
             onSuccess: () => {
-                this.arena.health.removeError('mqttChat.connection');
+                this.health.removeError('mqttChat.connection');
                 console.info(
                     'Chat connected. Subscribing to:',
                     this.subscribePublicTopic,
@@ -670,7 +671,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 this.connected = true;
             },
             onFailure: () => {
-                this.arena.health.addError('mqttChat.connection');
+                this.health.addError('mqttChat.connection');
                 console.error('Chat failed to connect.');
                 this.connected = false;
             },
@@ -686,7 +687,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      */
     onConnectionLost: function(message) {
         console.log(message)
-        this.arena.health.addError('mqttChat.connection');
+        this.health.addError('mqttChat.connection');
         console.error('Chat disconnect.');
         this.connected = false;
     },

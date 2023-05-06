@@ -37,6 +37,7 @@ AFRAME.registerSystem('arena-mqtt', {
         }
 
         this.arena = sceneEl.systems['arena-scene'];
+        this.health = sceneEl.systems['arena-health-ui'];
 
         // set up MQTT params for worker
         this.userName = this.arena.mqttToken.mqtt_username;
@@ -106,8 +107,8 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {object} msg Message object like: {addError: 'mqttScene.connection'}
      */
     mqttHealthCheck: function(msg) {
-        if (msg.removeError) this.arena.health.removeError(msg.removeError);
-        else if (msg.addError) this.arena.health.addError(msg.addError);
+        if (msg.removeError) this.health.removeError(msg.removeError);
+        else if (msg.addError) this.health.addError(msg.addError);
     },
 
     /**
