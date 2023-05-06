@@ -9,7 +9,7 @@
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
 import { ARENAJitsi } from './jitsi.js';
-import { ARENAHealth } from '../health/index.js';
+import { ARENAHealth } from '../ui/health.js';
 import { ARENAWebARUtils } from '../webar/index.js';
 import { EVENTS } from '../constants/index.js';
 import Swal from 'sweetalert2';
@@ -42,12 +42,14 @@ AFRAME.registerSystem('arena-scene', {
         // Sync params with bootstrap ARENA object from Auth
         this.params = { ...ARENA.params };
         this.defaults = ARENA.defaults;
+
         this.userName = ARENA.userName;
         this.displayName = ARENA.displayName;
         this.sceneName = ARENA.sceneName;
-        this.namespacedScene = ARENA.namespacedScene;
-        // Sets namespace, persistenceUrl, outputTopic, renderTopic, vioTopic
         this.nameSpace = ARENA.nameSpace;
+        this.namespacedScene = ARENA.namespacedScene;
+
+        // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
         this.persistenceUrl = "//" + this.params.persistHost + this.params.persistPath + this.namespacedScene;
         this.outputTopic = this.params.realm + "/s/" + this.namespacedScene + "/";
         this.renderTopic = this.outputTopic + "#";

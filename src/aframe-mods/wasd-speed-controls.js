@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Allows for changing speed in wasd controls.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
+ */
+
 /* global AFRAME, ARENA */
 
 import { ARENADefaults } from "../../conf/defaults";

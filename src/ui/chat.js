@@ -8,12 +8,12 @@
 
 /* global AFRAME, ARENA */
 
+import 'linkifyjs';
+import 'linkifyjs/string';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 import { ARENAEventEmitter } from '../event-emitter';
 import { ARENAUtils } from '../utils';
 import { EVENTS } from '../constants';
-import 'linkifyjs';
-import 'linkifyjs/string';
 import Swal from 'sweetalert2';
 
 const UserType = Object.freeze({

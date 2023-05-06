@@ -9,7 +9,7 @@
 /* global ARENA */
 
 // 'use strict';
-import { proxy , wrap} from 'comlink';
+import { proxy, wrap} from 'comlink';
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ClientEvent, CreateUpdate, Delete} from '../message-actions/index.js';
 import { EVENTS } from '../constants';
@@ -30,6 +30,7 @@ AFRAME.registerSystem('arena-mqtt', {
 
         const sceneEl = el.sceneEl;
 
+        // wait for ARENA user params (token, id, etc.) to be ready
         if (!sceneEl.ARENAUserParamsLoaded) {
             sceneEl.addEventListener(EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
             return;
@@ -37,9 +38,12 @@ AFRAME.registerSystem('arena-mqtt', {
 
         this.arena = sceneEl.systems['arena-scene'];
 
-        this.setMqttHost();
+        // set up MQTT params for worker
+        this.userName = this.arena.mqttToken.mqtt_username;
+        this.mqttHost = ARENA.params.mqttHost ?? data.mqttHost;
+        this.mqttHostURI = 'wss://' + this.mqttHost + data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)];
 
-        await this.initWorker();
+        this.MQTTWorker = await this.initWorker();
 
         const mqttToken = this.arena.mqttToken.mqtt_token;
         const camName = this.arena.camName;
@@ -62,19 +66,9 @@ AFRAME.registerSystem('arena-mqtt', {
         sceneEl.emit(EVENTS.MQTT_LOADED, true);
     },
 
-    setMqttHost: function() {
-        const data = this.data;
-
-        this.userName = this.arena.mqttToken.mqtt_username;
-        this.mqttHost = ARENA.params.mqttHost ?? data.mqttHost;
-        this.mqttHostURI = 'wss://' + this.mqttHost + data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)];
-    },
-
     initWorker: async function() {
         const data = this.data;
         const el = this.el;
-
-        const sceneEl = el.sceneEl;
 
         const renderTopic = this.arena.renderTopic;
         const idTag = this.arena.idTag;
@@ -95,8 +89,7 @@ AFRAME.registerSystem('arena-mqtt', {
             //     }
             // }),
         );
-        this.MQTTWorker = worker;
-        this.mqttClient = worker.mqttClient;
+        return worker;
     },
 
     /**
@@ -113,8 +106,8 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {object} msg Message object like: {addError: 'mqttScene.connection'}
      */
     mqttHealthCheck: function(msg) {
-        // if (msg.removeError) ARENA.health.removeError(msg.removeError);
-        // else if (msg.addError) ARENA.health.addError(msg.addError);
+        if (msg.removeError) this.arena.health.removeError(msg.removeError);
+        else if (msg.addError) this.arena.health.addError(msg.addError);
     },
 
     /**
@@ -233,6 +226,8 @@ AFRAME.registerSystem('arena-mqtt', {
      * @return {boolean}
      */
     isConnected: async function() {
-        return await this.mqttClient.isConnected();
+        const client = this.MQTTWorker.mqttClient;
+        const isConnected = await client.isConnected();
+        return isConnected;
     },
 });

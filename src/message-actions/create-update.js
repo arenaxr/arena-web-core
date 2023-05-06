@@ -397,7 +397,10 @@ export class CreateUpdate {
         for (let [attribute, value] of Object.entries(data)) {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
                 // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute == 'src' || attribute == 'url') value = ARENAUtils.crossOriginDropboxSrc(value);
+                if (attribute == 'src' || attribute == 'url') {
+                    value = ARENAUtils.crossOriginDropboxSrc(value);
+                }
+
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(cName);
                 } else {
@@ -423,8 +426,11 @@ export class CreateUpdate {
             switch (attribute) {
             case 'rotation':
                 // rotation is set directly in the THREE.js object, for performance reasons
-                if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
-                else entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
+                if (value.hasOwnProperty('w')) {
+                    entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
+                } else {
+                    entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
+                }
                 break;
             case 'position':
                 // position is set directly in the THREE.js object, for performance reasons
@@ -478,6 +484,7 @@ export class CreateUpdate {
                 error('camera override', 'local camera object does not exist! (create camera before)');
                 return;
             }
+
             const p = message.data.position;
             const r = message.data.rotation;
             if (AFRAME.scenes[0]?.xrSession) { // Apply transform to rig based off xrSession camera pose
@@ -511,6 +518,7 @@ export class CreateUpdate {
                 cameraLookAtError('local camera object does not exist! (create camera before)');
                 return;
             }
+
             let target = message.data.target;
             if (!target.hasOwnProperty('x')) { // check if an object id was given
                 const targetObj = document.getElementById(target);
@@ -520,6 +528,7 @@ export class CreateUpdate {
                     return;
                 }
             }
+
             // x, y, z given
             if (target.hasOwnProperty('x') &&
                 target.hasOwnProperty('y') &&

@@ -6,7 +6,6 @@
  * @date 2023
  */
 
-
 import {ARENAUtils} from '../utils';
 
 AFRAME.registerComponent('webxr-device-manager', {
@@ -21,6 +20,7 @@ AFRAME.registerComponent('webxr-device-manager', {
         window.addEventListener('enter-vr', this.onEnterVR);
         window.addEventListener('exit-vr', this.onExitVR);
     },
+
     onEnterVR: function() {
         if (this.el.sceneEl.is('ar-mode')) {
             document.getElementById('env').setAttribute('visible', false);
