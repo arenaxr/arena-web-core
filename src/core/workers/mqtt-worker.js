@@ -92,6 +92,7 @@ class MQTTWorker {
         await this.healthCheck({
             removeError: 'mqttScene.connection',
         });
+
         if (reconnect) {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.

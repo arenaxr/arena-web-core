@@ -12,7 +12,11 @@
 import { proxy , wrap} from 'comlink';
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ClientEvent, CreateUpdate, Delete} from '../message-actions/index.js';
-import { EVENTS } from '../constants/events.js';
+import { EVENTS } from '../constants';
+import { ACTIONS } from '../constants';
+
+const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
+const error = AFRAME.utils.debug('ARENA:MQTT:error');
 
 AFRAME.registerSystem('arena-mqtt', {
     schema: {
@@ -87,7 +91,7 @@ AFRAME.registerSystem('arena-mqtt', {
             //     if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
             //         // eslint-disable-next-line new-cap
             //         ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
-            //         console.warn(`ARENA Jitsi restarting...`);
+            //         warn(`ARENA Jitsi restarting...`);
             //     }
             // }),
         );
@@ -133,17 +137,17 @@ AFRAME.registerSystem('arena-mqtt', {
         }
 
         if (!theMessage) {
-            console.warn('Received empty message');
+            warn('Received empty message');
             return;
         }
 
         if (theMessage.object_id === undefined) {
-            console.warn('Malformed message (no object_id):', JSON.stringify(message));
+            warn('Malformed message (no object_id):', JSON.stringify(message));
             return;
         }
 
         if (theMessage.action === undefined) {
-            console.warn('Malformed message (no action field):', JSON.stringify(message));
+            warn('Malformed message (no action field):', JSON.stringify(message));
             return;
         }
 
@@ -157,50 +161,50 @@ AFRAME.registerSystem('arena-mqtt', {
         }
 
         switch (theMessage.action) { // clientEvent, create, delete, update
-        case 'clientEvent':
+        case ACTIONS.CLIENT_EVENT:
             if (theMessage.data === undefined) {
-                console.warn('Malformed message (no data field):', JSON.stringify(message));
+                warn('Malformed message (no data field):', JSON.stringify(message));
                 return;
             }
             // check topic
             if (message) {
                 if (topicUser !== theMessage.data.source) {
-                    console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                    warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
                 }
             }
             ClientEvent.handle(theMessage);
             break;
-        case 'create':
-        case 'update':
+        case ACTIONS.CREATE:
+        case ACTIONS.UPDATE:
             if (theMessage.data === undefined) {
-                console.warn('Malformed message (no data field):', JSON.stringify(message));
+                warn('Malformed message (no data field):', JSON.stringify(message));
                 return;
             }
             // check topic
             if (message) {
                 if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
-                    console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                    warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
                 }
             }
             CreateUpdate.handle(theMessage.action, theMessage);
             break;
-        case 'delete':
+        case ACTIONS.DELETE:
             // check topic
             if (message) {
                 if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
-                    console.warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                    warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
                 }
             }
             Delete.handle(theMessage);
             break;
-        case 'getPersist':
-        case 'returnPersist':
+        case ACTIONS.GET_PERSIST:
+        case ACTIONS.RETURN_PERSIST:
             break;
         default:
-            console.warn('Malformed message (invalid action field):', JSON.stringify(message));
+            warn('Malformed message (invalid action field):', JSON.stringify(message));
             break;
         }
     },

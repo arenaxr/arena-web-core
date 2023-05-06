@@ -1,11 +1,5 @@
-import {Logger} from './logger.js';
 import {ARENAUtils} from '../utils';
-
-// handle actions
-const ACTIONS = {
-    CREATE: 'create',
-    UPDATE: 'update',
-};
+import {ACTIONS} from '../constants';
 
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
@@ -13,6 +7,15 @@ const RENDER_ORDER = 1;
 const camMatrixInverse = new THREE.Matrix4();
 const rigMatrix = new THREE.Matrix4();
 const overrideQuat = new THREE.Quaternion();
+
+const warn = AFRAME.utils.debug('ARENA:warn');
+const error = AFRAME.utils.debug('ARENA:error');
+const createWarn = AFRAME.utils.debug('ARENA:create:warn');
+const updateWarn = AFRAME.utils.debug('ARENA:update:warn');
+const createError = AFRAME.utils.debug('ARENA:create:error');
+const updateError = AFRAME.utils.debug('ARENA:update:error');
+const cameraLookAtWarn = AFRAME.utils.debug('ARENA:camera look-at:warn');
+const cameraLookAtError = AFRAME.utils.debug('ARENA:camera look-at:error');
 
 /**
  * Create/Update object handler
@@ -53,14 +56,14 @@ export class CreateUpdate {
                     if (parentEl) {
                         parentEl.removeChild(entityEl);
                     } else {
-                        Logger.error('create', `Could not find parent of object_id "${id}" to clear object properties.`);
+                        createError(`Could not find parent of object_id "${id}" to clear object properties.`);
                     }
                     entityEl = undefined;
                 }
             } else if (action === ACTIONS.UPDATE) {
                 // warn that update to non-existing object will create it
                 if (!entityEl) {
-                    Logger.warning('update', `Object with object_id "${id}" does not exist; Creating...`);
+                    updateWarn(`Object with object_id "${id}" does not exist; Creating...`);
                 }
             }
 
@@ -105,7 +108,7 @@ export class CreateUpdate {
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
                     } else {
-                        Logger.warning('create', 'Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
+                        createWarn('Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
                     }
                 } else {
                     const sceneRoot = document.getElementById('sceneRoot');
@@ -177,7 +180,11 @@ export class CreateUpdate {
             return;
 
         default:
-            Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknown type:', JSON.stringify(message));
+            if (action === ACTIONS.CREATE) {
+                createWarn('Unknown type:', JSON.stringify(message));
+            } else {
+                updateWarn('Unknown type:', JSON.stringify(message));
+            }
         }
 
         /**
@@ -204,7 +211,7 @@ export class CreateUpdate {
         delete data.object_type; // remove attribute so we don't set it later
 
         if (!type) {
-            Logger.warning('Update/Create:', 'Malformed message; type is undefined; attributes might not be set correctly.');
+            warn('Malformed message; type is undefined; attributes might not be set correctly.');
         }
 
         // handle geometries and some type special cases
@@ -234,11 +241,11 @@ export class CreateUpdate {
             break;
         case 'gltf-model':
             if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
-                console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
+                warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
             if (ARENA.params.vr && data.hasOwnProperty('hide-on-enter-vr')) {
-                console.warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
+                warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
             // support both url and src property
@@ -410,6 +417,7 @@ export class CreateUpdate {
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
             // console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
+
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
             switch (attribute) {
@@ -467,7 +475,7 @@ export class CreateUpdate {
 
         if (message.data.object_type === 'camera') { // camera override
             if (!myCamera) {
-                Logger.error('camera override', 'local camera object does not exist! (create camera before)');
+                error('camera override', 'local camera object does not exist! (create camera before)');
                 return;
             }
             const p = message.data.position;
@@ -500,7 +508,7 @@ export class CreateUpdate {
             }
         } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
-                Logger.error('camera look-at', 'local camera object does not exist! (create camera before)');
+                cameraLookAtError('local camera object does not exist! (create camera before)');
                 return;
             }
             let target = message.data.target;
@@ -508,7 +516,7 @@ export class CreateUpdate {
                 const targetObj = document.getElementById(target);
                 if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
                 else {
-                    Logger.error('camera look-at', 'target not found.');
+                    cameraLookAtError('target not found.');
                     return;
                 }
             }
@@ -518,7 +526,7 @@ export class CreateUpdate {
                 target.hasOwnProperty('z')) {
                 myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z );
                 myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z );
-                Logger.warning('camera look-at', message);
+                cameraLookAtWarn(message);
             }
         }
     }

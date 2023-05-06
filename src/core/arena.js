@@ -152,7 +152,6 @@ AFRAME.registerSystem('arena-scene', {
 
         sceneEl.ARENALoaded = true;
         sceneEl.emit(EVENTS.ARENA_LOADED, true);
-        console.log(this.camName)
     },
 
     /**

@@ -1,4 +1,6 @@
-import {Logger} from './logger.js';
+const info = AFRAME.utils.debug('ARENA:delete:info');
+const warn = AFRAME.utils.debug('ARENA:delete:warn');
+const error = AFRAME.utils.debug('ARENA:delete:error');
 
 /**
  * Delete object handler
@@ -11,12 +13,12 @@ export class Delete {
     static handle(message) {
         const id = message.id;
         if (id === undefined) {
-            console.error('delete', 'Malformed message (no object_id):', JSON.stringify(message));
+            error('Malformed message (no object_id):', JSON.stringify(message));
         }
 
         const entityEl = document.getElementById(id);
         if (!entityEl) {
-            console.error('delete', `Object with object_id "${id}" does not exist!`);
+            error(`Object with object_id "${id}" does not exist!`);
             return;
         }
 
