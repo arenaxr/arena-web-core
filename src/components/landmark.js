@@ -7,7 +7,6 @@
  */
 
 /* global AFRAME, ARENA, THREE */
-import {ARENAEventEmitter} from '../event-emitter';
 
 /**
  * Component-System of teleport destination Landmarks

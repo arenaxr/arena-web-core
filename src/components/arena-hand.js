@@ -4,9 +4,13 @@
  * @fileoverview Tracking Hand controller movement in real time.
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME */
+
+import { EVENTS } from '../constants';
 
 // path to controler models
 const handControllerPath = {
@@ -68,10 +72,15 @@ AFRAME.registerComponent('arena-hand', {
 
         const sceneEl = el.sceneEl;
 
-        this.arena = sceneEl.systems['arena-scene'];
-
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
+
+        if (!sceneEl.ARENALoaded) {
+            sceneEl.addEventListener(EVENTS.ARENA_LOADED, this.init.bind(this));
+            return;
+        }
+
+        this.arena = sceneEl.systems['arena-scene'];
 
         this.lastPose = '';
 
@@ -189,7 +198,7 @@ AFRAME.registerComponent('arena-hand', {
         this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
     },
 
-    tick: (function(t, dt) {
+    tick: function(t, dt) {
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
         }
@@ -205,5 +214,5 @@ AFRAME.registerComponent('arena-hand', {
             this.publishPose();
             this.lastPose = newPose;
         }
-    }),
+    },
 });

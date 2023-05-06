@@ -6,15 +6,13 @@
  * @date 2023
  */
 
-import {ARENAMqttConsole} from './arena-console.js';
-import {ARENAUtils} from './utils.js';
-import {ARENAJitsi} from './jitsi.js';
-import {ARENAHealth} from './health';
-import {ARENAWebARUtils} from './webar';
-import {EVENTS} from './constants';
+import { ARENADefaults } from '../../conf/defaults.js';
+import { ARENAUtils } from '../utils.js';
+import { ARENAJitsi } from './jitsi.js';
+import { ARENAHealth } from '../health/index.js';
+import { ARENAWebARUtils } from '../webar/index.js';
+import { EVENTS } from '../constants/index.js';
 import Swal from 'sweetalert2';
-
-/* global ARENA, KJUR */
 
 AFRAME.registerSystem('arena-scene', {
     schema: {
@@ -36,12 +34,6 @@ AFRAME.registerSystem('arena-scene', {
         if (!evt) {
             window.addEventListener(EVENTS.ON_AUTH, this.init.bind(this));
             return;
-        }
-
-        // replace console with our logging (only when not in dev)
-        if (!data.devInstance) {
-            // will queue messages until MQTT connection is available (indicated by console.setOptions())
-            ARENAMqttConsole.init();
         }
 
         // start client health monitor
@@ -91,7 +83,7 @@ AFRAME.registerSystem('arena-scene', {
         sceneEl.ARENAUserParamsLoaded = true;
         sceneEl.emit(EVENTS.USER_PARAMS_LOADED, true);
 
-        this.onMqttReady();
+        this.loadScene();
 
         // setup webar session
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
@@ -109,14 +101,21 @@ AFRAME.registerSystem('arena-scene', {
         // });
     },
 
-    onMqttReady: function() {
+    loadScene: function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
 
+        // wait for mqtt client to be loaded
         if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.onMqttReady.bind(this));
+            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.loadScene.bind(this));
+            return;
+        }
+
+        // wait for aframe scene to be ready to render
+        if (!sceneEl.hasLoaded) {
+            sceneEl.addEventListener('loaded', this.loadScene.bind(this));
             return;
         }
 
@@ -125,13 +124,11 @@ AFRAME.registerSystem('arena-scene', {
             Instantly enter AR mode for now.
             TODO: incorporate AV selection for possible Jitsi and multicamera
             */
-            // this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, () => {
-            //     if (this.isWebARViewer || AFRAME.utils.device.checkARSupport()) {
-            //         sceneEl.enterAR();
-            //     } else {
-            //         ARENAWebARUtils.enterARNonWebXR();
-            //     }
-            // });
+            if (ARENAUtils.isWebXRViewer() || AFRAME.utils.device.checkARSupport()) {
+                sceneEl.enterAR();
+            } else {
+                ARENAWebARUtils.enterARNonWebXR();
+            }
         } else if (this.params.skipav) {
             // Directly initialize Jitsi videoconferencing
             this.Jitsi = ARENAJitsi.init(data.jitsiHost);
@@ -247,28 +244,23 @@ AFRAME.registerSystem('arena-scene', {
 
         const sceneEl = el.sceneEl;
 
-        let color = Math.floor(Math.random() * 16777215).toString(16);
-        if (color.length < 6) color = '0' + color;
-        color = '#' + color;
-
-        const camera = document.getElementById('my-camera');
-        camera.setAttribute('arena-camera', 'enabled', this.isUsersPermitted());
-        camera.setAttribute('arena-camera', 'color', color);
-        camera.setAttribute('arena-camera', 'displayName', this.getDisplayName());
+        const cameraEl = sceneEl.camera.el;
+        cameraEl.setAttribute('arena-camera', 'enabled', this.isUsersPermitted());
+        cameraEl.setAttribute('arena-camera', 'displayName', this.getDisplayName());
 
         const startPos = new THREE.Vector3();
         if (this.startCoords instanceof Array) { // This is a split string to array
             startPos.set(...this.startCoords);
-            camera.object3D.position.copy(startPos);
-            camera.object3D.position.y += data.camHeight;
+            cameraEl.object3D.position.copy(startPos);
+            cameraEl.object3D.position.y += data.camHeight;
             this.startCoords = startPos;
         } else if (this.params.startLastPos) {
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
             const lastPos = sceneHist[this.namespacedScene]?.lastPos;
             if (lastPos) {
                 startPos.copy(lastPos);
-                camera.object3D.position.copy(startPos);
-                camera.object3D.position.y += data.camHeight;
+                cameraEl.object3D.position.copy(startPos);
+                cameraEl.object3D.position.y += data.camHeight;
                 this.startCoords = startPos;
             }
         }
@@ -283,7 +275,7 @@ AFRAME.registerSystem('arena-scene', {
             if (startPosition) {
                 console.log('Moving camera to start position', startPosition.el.id);
                 startPosition.teleportTo();
-                startPos.copy(camera.object3D.position);
+                startPos.copy(cameraEl.object3D.position);
                 startPos.y -= data.camHeight;
                 this.startCoords = startPos;
             }
@@ -300,13 +292,13 @@ AFRAME.registerSystem('arena-scene', {
                 } catch {
                 }
             }
-            camera.object3D.position.copy(startPos);
-            camera.object3D.position.y += data.camHeight;
+            cameraEl.object3D.position.copy(startPos);
+            cameraEl.object3D.position.y += data.camHeight;
         }
 
         // enable vio if fixedCamera is given
         if (this.params.fixedCamera) {
-            camera.setAttribute('arena-camera', 'vioEnabled', true);
+            cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
         }
 
         if (this.params.build3d) {
@@ -503,7 +495,7 @@ AFRAME.registerSystem('arena-scene', {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArenaScene: function (urlToLoad) {
+    unloadsceneEl: function (urlToLoad) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !data.disallowJWT;
         if (urlToLoad) xhr.open('GET', urlToLoad);
@@ -570,16 +562,15 @@ AFRAME.registerSystem('arena-scene', {
                 if (payload) {
                     const options = payload['attributes'];
                     Object.assign(sceneOptions, options['scene-options']);
-                    const arenaScene = document.getElementById('ARENAScene');
 
                     if (sceneOptions['physics']) {
                         // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-                        import('./systems/vendor/aframe-physics-system.min.js');
+                        import('../systems/vendor/aframe-physics-system.min.js');
                         document.getElementById('groundPlane').setAttribute('static-body', 'true');
                     }
 
                     if (sceneOptions['ar-hit-test']) {
-                        arenaScene.setAttribute('ar-hit-test', sceneOptions['ar-hit-test']);
+                        sceneEl.setAttribute('ar-hit-test', sceneOptions['ar-hit-test']);
                     }
 
                     // deal with scene attribution

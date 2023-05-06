@@ -19,7 +19,7 @@ import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer';
 import {ARMarkerRelocalization} from './armarker-reloc';
 import {CVWorkerMsgs} from './worker-msgs';
-import {ARENAEventEmitter} from '../../event-emitter';
+import {EVENTS} from '../../constants';
 import {ARENAUtils} from '../../utils';
 
 /**
@@ -63,7 +63,7 @@ AFRAME.registerSystem('armarker', {
         0, 0, 0, 1,
     ),
     // if we detected WebXRViewer/WebARViewer
-    isWebARViewer: false,
+    isWebXRViewer: ARENAUtils.isWebXRViewer(),
     initialLocalized: false,
     /*
     * Init system
@@ -71,25 +71,33 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     init: function() {
-        const sceneEl = this.el;
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        if (!sceneEl.ARENALoaded) {
+            sceneEl.addEventListener(EVENTS.ARENA_LOADED, this.init.bind(this));
+            return;
+        }
+
+        this.arena = sceneEl.systems['arena-scene'];
+
+        if (this.arena.sceneOptions === undefined) {
+            sceneEl.addEventListener(EVENTS.SCENE_OPT_LOADED, this.init.bind(this));
+            return;
+        }
 
         // init this.ATLASMarkers with list of markers within range
         this.getARMArkersFromATLAS(true);
 
-        // check if this is WebXRViewer/WebARViewer
-        this.isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
-
-        // init networkedLocationSolver flag from ARENA scene options, if available
-        if (ARENA) {
-            // ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
-            //     this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
-            // });
-        }
+        // init networkedLocationSolver flag from ARENA scene options
+        this.data.networkedLocationSolver = !!this.arena.sceneOptions['networkedLocationSolver'];
 
         // request camera access features
         if (!ARENA.params.camFollow) {
             const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
-            if (this.isWebARViewer) {
+            if (this.isWebXRViewer) {
                 optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in XRBrowser
             } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
             sceneEl.systems.webxr.sceneEl.setAttribute(
@@ -148,7 +156,7 @@ AFRAME.registerSystem('armarker', {
         if (this.cvPipelineInitializing || this.cvPipelineInitialized) return;
         this.cvPipelineInitializing = true;
         // try to set up a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
-        if (this.isWebARViewer) {
+        if (this.isWebXRViewer) {
             try {
                 this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
             } catch (err) {

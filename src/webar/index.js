@@ -7,6 +7,7 @@
  */
 import './ar-session.js';
 import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
+import {ARENAUtils} from '../utils.js';
 
 const HIDDEN_CLASS = 'a-hidden';
 
@@ -51,7 +52,7 @@ export class ARENAWebARUtils {
             camera.setAttribute('wasd-controls', 'enabled', false);
         }
 
-        if (this.isWebARViewer) {
+        if (ARENAUtils.isWebXRViewer()) {
             return;
         }
 

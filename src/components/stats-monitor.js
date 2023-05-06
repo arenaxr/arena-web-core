@@ -1,7 +1,6 @@
 /* global AFRAME, ARENA */
 
 import {ARENAUtils} from '../utils.js';
-import {ARENAEventEmitter} from '../event-emitter.js';
 
 /**
  * @fileoverview Component to monitor client-performance: fps, memory, etc, and relay to MQTT debug channel if enabled.

@@ -9,10 +9,10 @@
 /* global ARENA */
 
 // 'use strict';
-import {proxy, wrap} from 'comlink';
-import {ARENAUtils} from './utils.js';
-import {ClientEvent, CreateUpdate, Delete} from './message-actions/';
-import {EVENTS} from './constants/events.js';
+import { proxy , wrap} from 'comlink';
+import { ARENADefaults } from '../../conf/defaults.js';
+import { ClientEvent, CreateUpdate, Delete} from '../message-actions/index.js';
+import { EVENTS } from '../constants/events.js';
 
 AFRAME.registerSystem('arena-mqtt', {
     schema: {
@@ -52,12 +52,10 @@ AFRAME.registerSystem('arena-mqtt', {
             outputTopic + camName,
         );
 
-        console.log('ARENA MQTT Worker initialized');
+        ARENA.Mqtt = this; // Restore old alias
 
         sceneEl.ARENAMqttLoaded = true;
         sceneEl.emit(EVENTS.MQTT_LOADED, true);
-
-        ARENA.Mqtt = this; // Restore old alias
     },
 
     setMqttHost: function() {

@@ -1,12 +1,17 @@
 /**
- * General component for WebXR, assigning device-specific components
+ * @fileoverview General component for WebXR, assigning device-specific components
  *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+
+import {ARENAUtils} from '../utils.js';
 
 AFRAME.registerComponent('webxr-device-manager', {
     init: function() {
-        const isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
-        if (isWebXRViewer) {
+        if (ARENAUtils.isWebXRViewer()) {
             this.el.sceneEl.setAttribute('webxr-viewer', true);
             this.el.sceneEl.removeAttribute('ar-hit-test-listener');
         }

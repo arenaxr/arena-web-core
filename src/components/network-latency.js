@@ -1,14 +1,15 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Perform periodic pings on MQTT to monitor network latency
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
-import {EVENTS} from '../constants/events';
+/* global AFRAME */
+
+import { ARENADefaults } from '../../conf/defaults.js';
+import { EVENTS } from '../constants/events';
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 
 /**
@@ -37,6 +38,8 @@ AFRAME.registerComponent('network-latency', {
             return;
         }
 
+        this.mqtt = sceneEl.systems['arena-mqtt'];
+
         const pahoMsg = new Paho.Message('{ "type": "latency" }'); // send message type latency
         pahoMsg.destinationName = data.latencyTopic;
         pahoMsg.qos = 2;
@@ -50,11 +53,14 @@ AFRAME.registerComponent('network-latency', {
     },
 
     tick: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         // publish empty message with qos of 2 for network graph to update latency
-        if (ARENA.Mqtt) {
-            if (ARENA.Mqtt.isConnected()) {
-                ARENA.Mqtt.publish(this.topic, this.message, this.qos);
-            }
+        if (sceneEl.ARENAMqttLoaded && this.mqtt.isConnected()) {
+            this.mqtt.publish(this.topic, this.message, this.qos);
         }
     },
 });

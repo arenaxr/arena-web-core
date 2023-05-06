@@ -291,15 +291,23 @@ export class ARENAUtils {
         }
     }
 
-   /**
-    * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
-    * Hololens reliable detection is tbd
-    *
-    * ARHeadeset camera capture uses returned value as a key to projection matrix array
-    *
-    * @return {string} "ml", "hl", "unknown".
-    * @alias module:armarker-system
-    */
+    /**
+     * Checks if current arena session is running on WebXRViewer on iOS.
+     *
+     * @return {boolean} true if device is WebXRViewer, false if not
+     */
+    static isWebXRViewer() {
+        return navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
+    }
+
+    /**
+     * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
+     * Hololens reliable detection is tbd
+     *
+     * ARHeadeset camera capture uses returned value as a key to projection matrix array
+     *
+     * @return {string} "ml", "hl", "unknown".
+     */
     static detectARHeadset() {
         if (window.mlWorld) return 'ml';
         if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';

@@ -9,8 +9,8 @@
 /* global AFRAME, ARENA */
 
 import Swal from 'sweetalert2';
-import {ARENAJitsi} from '../jitsi';
-import {EVENTS} from '../constants';
+import { ARENAJitsi } from '../core/jitsi';
+import { EVENTS } from '../constants';
 import './remove-stats-exit-fullscreen';
 
 const ICON_BTN_CLASS = 'arena-button arena-side-menu-button';

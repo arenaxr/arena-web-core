@@ -47,7 +47,7 @@ export class ARENAHealth {
                 icon.style.display = 'none';
             }
         });
-        console.log('ARENAHealth checker ready.');
+        console.log('ARENA Health checker ready.');
     }
 
     /**

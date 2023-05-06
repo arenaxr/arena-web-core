@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA, JitsiMeetJS */
 import $ from 'jquery';
-import {ARENAEventEmitter} from './event-emitter.js';
+import {ARENAEventEmitter} from '../event-emitter.js';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {

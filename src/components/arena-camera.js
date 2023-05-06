@@ -2,12 +2,13 @@
  * @fileoverview ARENA camera component; track camera movement
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
-/* global AFRAME, ARENA */
+/* global AFRAME */
 
+import { EVENTS } from '../constants';
 import {ARENAUtils} from '../utils.js';
 
 /**
@@ -46,6 +47,11 @@ AFRAME.registerComponent('arena-camera', {
         const el = this.el;
 
         const sceneEl = el.sceneEl;
+
+        if (!sceneEl.ARENALoaded) {
+            sceneEl.addEventListener(EVENTS.ARENA_LOADED, this.init.bind(this));
+            return;
+        }
 
         this.arena = sceneEl.systems['arena-scene'];
 

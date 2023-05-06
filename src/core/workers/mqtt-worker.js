@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-import {expose} from 'comlink';
+import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
 /**
@@ -41,15 +41,16 @@ class MQTTWorker {
         const opts = {
             ...mqttClientOptions,
             onSuccess: function() {
-                console.info('MQTT scene connection success.');
+                console.info('ARENA MQTT scene connection success!');
             },
             onFailure: function(res) {
                 this.healthCheck({
                     addError: 'mqttScene.connection',
                 });
-                console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
+                console.error(`ARENA MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
             },
         };
+
         if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
             // Last Will and Testament message sent to subscribers if this client loses connection
             const lwt = new Paho.Message(lwMsg);
@@ -59,6 +60,7 @@ class MQTTWorker {
 
             opts.willMessage = lwt;
         }
+
         this.mqttClient.connect(opts);
     }
 
@@ -96,12 +98,12 @@ class MQTTWorker {
             // need to resubscribe however, to keep receiving messages
             // await this.restartJitsi();
             this.mqttClient.subscribe(this.config.renderTopic);
-            console.warn(`MQTT scene reconnected to ${uri}`);
+            console.warn(`ARENA MQTT scene reconnected to ${uri}`);
             return; // do not continue!
         }
 
         // first connection for this client
-        console.log(`MQTT scene init user state, connected to ${uri}`);
+        console.log(`ARENA MQTT scene init user state, connected to ${uri}`);
 
         // start listening for MQTT messages
         this.mqttClient.subscribe(this.config.renderTopic);
@@ -117,10 +119,10 @@ class MQTTWorker {
         });
         if (responseObject.errorCode !== 0) {
             console.error(
-                `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
+                `ARENA MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
             );
         }
-        console.warn('MQTT scene automatically reconnecting...');
+        console.warn('ARENA MQTT scene automatically reconnecting...');
         // no need to connect manually here, "reconnect: true" already set
     }
 }
