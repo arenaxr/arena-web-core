@@ -10,8 +10,7 @@
 
 import Swal from 'sweetalert2';
 import {ARENAJitsi} from '../jitsi';
-import {ARENAEventEmitter} from '../event-emitter';
-import {EVENTS} from '../constants/events';
+import {EVENTS} from '../constants';
 import './remove-stats-exit-fullscreen';
 
 const ICON_BTN_CLASS = 'arena-button arena-side-menu-button';
@@ -659,7 +658,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             const displayName = this.usernameInput.value.replace(/\s+/g, ' ').trim();
             localStorage.setItem('display_name', displayName); // save for next use
             cameraEl.setAttribute('arena-camera', 'displayName', displayName); // push to other users' views
-            this.arena.events.emit(ARENAEventEmitter.events.NEW_SETTINGS, {userName: displayName});
+            sceneEl.emit(EVENTS.NEW_SETTINGS, {userName: displayName});
         }
     },
 

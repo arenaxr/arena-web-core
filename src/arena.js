@@ -11,7 +11,7 @@ import {ARENAUtils} from './utils.js';
 import {ARENAJitsi} from './jitsi.js';
 import {ARENAHealth} from './health';
 import {ARENAWebARUtils} from './webar';
-import {EVENTS} from './constants/events';
+import {EVENTS} from './constants';
 import Swal from 'sweetalert2';
 
 /* global ARENA, KJUR */
@@ -93,18 +93,20 @@ AFRAME.registerSystem('arena-scene', {
 
         this.onMqttReady();
 
+        // setup webar session
+        ARENAWebARUtils.handleARButtonForNonWebXRMobile();
+
         // setup event listeners
-        // this.events.on(ARENAEventEmitter.events.NEW_SETTINGS, (e) => {
-        //     const args = e.detail;
-        //     if (!args.userName) return; // only handle a user name change
-        //     this.showEchoDisplayName();
-        // });
+        sceneEl.addEventListener(EVENTS.NEW_SETTINGS, (e) => {
+            const args = e.detail;
+            if (!args.userName) return; // only handle a user name change
+            this.showEchoDisplayName();
+        });
+
         // this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, (e) => {
         //     const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
         //     this.showEchoDisplayName(speaker);
         // });
-        // // setup webar session
-        // this.events.on(ARENAEventEmitter.events.SCENE_OBJ_LOADED, ARENAWebARUtils.handleARButtonForNonWebXRMobile);
     },
 
     onMqttReady: function() {

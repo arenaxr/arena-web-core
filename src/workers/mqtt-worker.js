@@ -15,22 +15,22 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 class MQTTWorker {
     /**
      * @param {object} ARENAConfig
-     * @param {function} initScene
      * @param {function} mainOnMessageArrived
      * @param {function} restartJitsi
      * @param {function} healthCheck
      */
-    constructor(ARENAConfig, initScene, mainOnMessageArrived, restartJitsi, healthCheck) {
-        this.initScene = initScene;
-        this.restartJitsi = restartJitsi;
-        // this.healthCheck = healthCheck;
+    constructor(ARENAConfig, mainOnMessageArrived, /*restartJitsi,*/ healthCheck) {
+        // this.restartJitsi = restartJitsi;
         this.config = ARENAConfig;
+        this.healthCheck = healthCheck;
+
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
         mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
         mqttClient.onMessageArrived = async (msg) => await mainOnMessageArrived(msg);
         this.mqttClient = mqttClient;
     }
+
     /**
      * Connect mqtt client; If given, setup a last will message given as argument
      * @param {object} mqttClientOptions paho mqtt options
@@ -44,9 +44,9 @@ class MQTTWorker {
                 console.info('MQTT scene connection success.');
             },
             onFailure: function(res) {
-                // this.healthCheck({
-                //     addError: 'mqttScene.connection',
-                // });
+                this.healthCheck({
+                    addError: 'mqttScene.connection',
+                });
                 console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
             },
         };
@@ -87,14 +87,14 @@ class MQTTWorker {
      * @param {Object} uri uri used
      */
     async onConnected(reconnect, uri) {
-        // await this.healthCheck({
-        //     removeError: 'mqttScene.connection',
-        // });
+        await this.healthCheck({
+            removeError: 'mqttScene.connection',
+        });
         if (reconnect) {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
-            await this.restartJitsi();
+            // await this.restartJitsi();
             this.mqttClient.subscribe(this.config.renderTopic);
             console.warn(`MQTT scene reconnected to ${uri}`);
             return; // do not continue!
@@ -102,9 +102,6 @@ class MQTTWorker {
 
         // first connection for this client
         console.log(`MQTT scene init user state, connected to ${uri}`);
-
-        // do scene init before starting to receive messages
-        await this.initScene();
 
         // start listening for MQTT messages
         this.mqttClient.subscribe(this.config.renderTopic);
@@ -115,9 +112,9 @@ class MQTTWorker {
      * @param {Object} responseObject paho response object
      */
     async onConnectionLost(responseObject) {
-        // await this.healthCheck({
-        //     addError: 'mqttScene.connection',
-        // });
+        await this.healthCheck({
+            addError: 'mqttScene.connection',
+        });
         if (responseObject.errorCode !== 0) {
             console.error(
                 `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,

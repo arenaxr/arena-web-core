@@ -64,7 +64,7 @@ AFRAME.registerComponent('arena-camera', {
         this.videoDefaultResolutionSet = false;
 
         this.heartBeatCounter = 0;
-        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.camUpdateIntervalMs, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
 
         // send initial create
         this.publishPose('create');
@@ -223,7 +223,7 @@ AFRAME.registerComponent('arena-camera', {
         const newPose = rotationCoords + ' ' + positionCoords;
 
         // update position if pose changed, or every 1 sec heartbeat
-        if (this.heartBeatCounter % (1000 / this.arena.camUpdateIntervalMs) === 0) {
+        if (this.heartBeatCounter % (1000 / this.arena.params.camUpdateIntervalMs) === 0) {
             // heartbeats are sent as create; TMP: sending as updates
             this.publishPose();
             const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};

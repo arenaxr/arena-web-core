@@ -12,4 +12,6 @@ export const EVENTS = Object.freeze({
     MQTT_LOADED:        'mqtt-loaded',
     SCENE_OPT_LOADED:   'scene-options-loaded',
     ARENA_LOADED:       'arena-loaded',
+
+    NEW_SETTINGS:       'new-settings',
 });

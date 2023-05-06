@@ -30,6 +30,7 @@ AFRAME.registerSystem('arena-mqtt', {
             sceneEl.addEventListener(EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
             return;
         }
+
         this.arena = sceneEl.systems['arena-scene'];
 
         this.setMqttHost();
@@ -84,7 +85,6 @@ AFRAME.registerSystem('arena-mqtt', {
             },
             proxy(this.onMessageArrived.bind(this)),
             proxy(this.mqttHealthCheck.bind(this)),
-            // proxy(ARENA.initScene),
             // proxy(() => {
             //     if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
             //         // eslint-disable-next-line new-cap
@@ -122,8 +122,6 @@ AFRAME.registerSystem('arena-mqtt', {
      */
     onMessageArrived: function(message, jsonMessage) {
         let theMessage = {};
-
-        // console.log(message, jsonMessage);
 
         if (message) {
             try {
@@ -217,7 +215,6 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {boolean} retained
      */
     publish: async function(topic, payload, qos=0, retained=false) {
-        console.log(topic, payload);
         await this.MQTTWorker.publish(topic, payload, qos, retained);
     },
 
