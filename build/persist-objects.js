@@ -238,7 +238,7 @@ export async function populateObjectList(
         li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
         let inputValue = '';
 
-        if (sceneObjs[i].attributes == undefined) continue;
+        if (sceneObjs[i].attributes == undefined) sceneObjs[i].attributes = {object_type: 'entity'};
         if (objTypeFilter[sceneObjs[i].type] == false) continue;
         if (re.test(sceneObjs[i].object_id) == false) continue;
 

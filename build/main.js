@@ -234,9 +234,9 @@ window.addEventListener('onauth', async function (e) {
                     parseFloat(elQz.value),
                     parseFloat(elQw.value)
                 ));
-                elEx.value = parseFloat(THREE.MathUtils.radToDeg(e.x).toFixed(3));
-                elEy.value = parseFloat(THREE.MathUtils.radToDeg(e.y).toFixed(3));
-                elEz.value = parseFloat(THREE.MathUtils.radToDeg(e.z).toFixed(3));
+                if (elEx) elEx.value = parseFloat(THREE.MathUtils.radToDeg(e.x).toFixed(3));
+                if (elEy) elEy.value = parseFloat(THREE.MathUtils.radToDeg(e.y).toFixed(3));
+                if (elEz) elEz.value = parseFloat(THREE.MathUtils.radToDeg(e.z).toFixed(3));
             });
             rowEuler.addEventListener('change', () => {
                 // update quaternions on form from euler degree changes
