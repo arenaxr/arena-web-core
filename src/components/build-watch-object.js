@@ -53,12 +53,16 @@ AFRAME.registerComponent('build-watch-object', {
                     }
                     if (mutation.target.id) {
                         const attribute = mutation.target.getAttribute(mutation.attributeName);
-                        // use aframe-watcher updates to send only changes updated
-
-                        const changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
+                        const msg = {
+                            object_id: mutation.target.id,
+                            action: 'update',
+                            type: 'object',
+                            persist: true,
+                            data: {},
+                        };
                         switch (mutation.attributeName) {
                             case 'geometry':
-                                obj_type = attribute.primitive;
+                                msg.data.object_type = attribute.primitive;
                                 break;
                             case 'gltf-model':
                             case 'image':
@@ -70,20 +74,14 @@ AFRAME.registerComponent('build-watch-object', {
                             case 'text':
                             case 'thickline':
                             case 'threejs-scene':
-                                obj_type = mutation.attributeName;
-                                break;
-                            default:
-                                obj_type = 'entity';
+                                msg.data.object_type = mutation.attributeName;
                                 break;
                         }
-                        const msg = {
-                            object_id: mutation.target.id,
-                            action: 'update',
-                            type: 'object',
-                            persist: true,
-                            data: {},
-                        };
-                        if (obj_type) msg.data.object_type = obj_type;
+                        // use aframe-watcher updates to send only changes updated
+                        let changes = undefined;
+                        if (AFRAME.INSPECTOR.history.updates[mutation.target.id]){
+                            changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
+                        }
                         switch (mutation.attributeName) {
                             case 'position':
                                 msg.data.position = attribute;
@@ -106,24 +104,18 @@ AFRAME.registerComponent('build-watch-object', {
                                 if (changes){
                                     msg.data = changes;
                                     delete msg.data.primitive;
-                                    msg.data.object_type = changes.primitive;
-                                } else {
-                                    msg.data.object_type = attribute.primitive;
                                 }
+                                msg.data.object_type = attribute.primitive;
                                 break;
                             default:
-                                if (changes){
-                                    msg.data[mutation.attributeName] = changes;
-                                } else {
-                                    msg.data[mutation.attributeName] = {};
-                                }
+                                msg.data[mutation.attributeName] = changes ? changes : {};
                                 break;
                         }
                         console.log('pub:', msg);
                         if (inspectorMqttLog) {
                             const line = document.createElement('span');
                             line.innerHTML += `Pub: ${mutation.attributeName} ${msg.object_id} ${JSON.stringify(
-                                changes
+                                changes ? changes : msg.data
                             )}`;
                             inspectorMqttLog.appendChild(document.createElement('br'));
                             inspectorMqttLog.appendChild(line);
@@ -147,8 +139,8 @@ AFRAME.registerComponent('build-watch-object', {
         }
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {
-            window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
             this.data.openJsonEditor = false; // restore
+            window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
     },
     tick: function () {
