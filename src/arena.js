@@ -51,11 +51,6 @@ AFRAME.registerSystem('arena-scene', {
         // start client health monitor
         this.health = new ARENAHealth();
 
-        // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
-        if (this.startCoords) {
-            this.startCoords = this.startCoords.split(",").map((i) => Number(i));
-        }
-
         // Sync params with bootstrap ARENA object from Auth
         this.params = { ...ARENA.params };
         this.defaults = ARENA.defaults;
@@ -70,6 +65,11 @@ AFRAME.registerSystem('arena-scene', {
         this.vioTopic = this.params.realm + "/vio/" + this.namespacedScene + "/";
 
         window.ARENA = this; // alias to window for easy access
+
+        // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
+        if (typeof this.params.startCoords === 'string') {
+            this.startCoords = this.params.startCoords.split(",").map((i) => Number(i));
+        }
 
         // setup required scene-options defaults
         // TODO: pull these from a schema
@@ -265,7 +265,7 @@ AFRAME.registerSystem('arena-scene', {
         camera.setAttribute('arena-camera', 'displayName', this.getDisplayName());
 
         const startPos = new THREE.Vector3();
-        if (this.startCoords) {
+        if (this.startCoords instanceof Array) { // This is a split string to array
             startPos.set(...this.startCoords);
             camera.object3D.position.copy(startPos);
             camera.object3D.position.y += data.camHeight;
@@ -292,9 +292,9 @@ AFRAME.registerSystem('arena-scene', {
                 this.startCoords = startPos;
             }
         }
-        if (!this.startCoords) { // Final fallthrough for failures
+        if (!this.startCoords) { // Final fallthrough for failures, resort to default
             const navSys = systems.nav;
-            startPos.copy(this.startCoords);
+            startPos.copy(this.defaults.startCoords);
             if (navSys.navMesh) {
                 try {
                     const closestGroup = navSys.getGroup(startPos, false);
