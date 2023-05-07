@@ -112,6 +112,35 @@ AFRAME.registerSystem('arena-mqtt', {
     },
 
     /**
+     * Publishes message to mqtt
+     * @param {string} topic
+     * @param {string|object} payload
+     * @param {number} qos
+     * @param {boolean} retained
+     */
+    publish: async function(topic, payload, qos=0, retained=false) {
+        await this.MQTTWorker.publish(topic, payload, qos, retained);
+    },
+
+    /**
+     * Send a message to internal receive handler
+     * @param {object} jsonMessage
+     */
+    processMessage: function(jsonMessage) {
+        this.onMessageArrived(undefined, jsonMessage);
+    },
+
+    /**
+     * Returns mqttClient connection state
+     * @return {boolean}
+     */
+    isConnected: async function() {
+        const client = this.MQTTWorker.mqttClient;
+        const isConnected = await client.isConnected();
+        return isConnected;
+    },
+
+    /**
      * Internal MessageArrived handler; handles object create/delete/event/... messages
      * @param {string} message
      * @param {object} jsonMessage
@@ -201,34 +230,5 @@ AFRAME.registerSystem('arena-mqtt', {
             warn('Malformed message (invalid action field):', JSON.stringify(message));
             break;
         }
-    },
-
-    /**
-     * Publishes message to mqtt
-     * @param {string} topic
-     * @param {string|object} payload
-     * @param {number} qos
-     * @param {boolean} retained
-     */
-    publish: async function(topic, payload, qos=0, retained=false) {
-        await this.MQTTWorker.publish(topic, payload, qos, retained);
-    },
-
-    /**
-     * Send a message to internal receive handler
-     * @param {object} jsonMessage
-     */
-    processMessage: function(jsonMessage) {
-        this.onMessageArrived(undefined, jsonMessage);
-    },
-
-    /**
-     * Returns mqttClient connection state
-     * @return {boolean}
-     */
-    isConnected: async function() {
-        const client = this.MQTTWorker.mqttClient;
-        const isConnected = await client.isConnected();
-        return isConnected;
     },
 });

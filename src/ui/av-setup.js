@@ -100,7 +100,7 @@ window.setupAV = (callback) => {
             enterSceneBtn.textContent = 'Return to Scene';
             if (window.setupAVCallback) window.setupAVCallback();
 
-            document.querySelector('a-scene').emit(ARENA_EVENTS.NEW_SETTINGS, {userName: displayName});
+            document.querySelector('a-scene').emit(ARENA_EVENTS.NEW_SETTINGS, {userName: displayName.value});
         });
         document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
         document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];

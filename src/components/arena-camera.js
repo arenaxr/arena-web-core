@@ -54,6 +54,7 @@ AFRAME.registerComponent('arena-camera', {
         }
 
         this.arena = sceneEl.systems['arena-scene'];
+        this.mqtt = sceneEl.systems['arena-mqtt'];
 
         this.lastPos = new THREE.Vector3();
         this.vioMatrix = new THREE.Matrix4();
@@ -150,7 +151,7 @@ AFRAME.registerComponent('arena-camera', {
             msg.data.headModelPath = this.arena.defaults.headModelPath;
         }
 
-        this.arena.Mqtt?.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
+        this.mqtt.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
     },
 
     /**
@@ -181,7 +182,7 @@ AFRAME.registerComponent('arena-camera', {
                 color: data.color,
             },
         };
-        this.arena.Mqtt?.publish(`${this.arena.vioTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
+        this.mqtt.publish(`${this.arena.vioTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
     },
 
     /**

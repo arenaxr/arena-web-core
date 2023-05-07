@@ -46,7 +46,7 @@ AFRAME.registerSystem('arena-scene', {
         // Sets persistenceUrl, outputTopic, renderTopic, vioTopic
         this.persistenceUrl = `//${this.params.persistHost}${this.params.persistPath}${this.namespacedScene}`;
         this.outputTopic = `${this.params.realm}/s/${this.namespacedScene}/`;
-        this.renderTopic = `${this.outputTopic}/#`;
+        this.renderTopic = `${this.outputTopic}#`;
         this.vioTopic = `${this.params.realm}/vio/${this.namespacedScene}/`;
 
         window.ARENA = this; // alias to window for easy access
