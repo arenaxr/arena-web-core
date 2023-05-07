@@ -9,7 +9,7 @@
 /* global AFRAME */
 
 import { ARENADefaults } from '../../conf/defaults.js';
-import { EVENTS } from '../constants/events';
+import { ARENA_EVENTS } from '../constants/events';
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 
 /**
@@ -34,7 +34,7 @@ AFRAME.registerComponent('network-latency', {
         if (!data.enabled) return;
 
         if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.init.bind(this));
             return;
         }
 

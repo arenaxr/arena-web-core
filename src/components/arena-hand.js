@@ -10,7 +10,7 @@
 
 /* global AFRAME */
 
-import { EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../constants';
 
 // path to controler models
 const handControllerPath = {
@@ -76,7 +76,7 @@ AFRAME.registerComponent('arena-hand', {
         this.position = new THREE.Vector3();
 
         if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(EVENTS.ARENA_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
             return;
         }
 

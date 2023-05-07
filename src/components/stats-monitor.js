@@ -1,14 +1,14 @@
-/* global AFRAME, ARENA */
-
-import {ARENAUtils} from '../utils';
-
 /**
  * @fileoverview Component to monitor client-performance: fps, memory, etc, and relay to MQTT debug channel if enabled.
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME, ARENA */
+import { ARENAUtils } from '../utils';
+import { JITSI_EVENTS } from '../constants';
 
 AFRAME.registerComponent('stats-monitor', {
     schema: {
@@ -22,9 +22,12 @@ AFRAME.registerComponent('stats-monitor', {
     init: function() {
         const data = this.data;
         const el = this.el;
+
         const sceneEl = el.sceneEl;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
+
+        this.jitsiStatsLocalCallback = this.jitsiStatsLocalCallback.bind(this);
 
         this.registerListeners();
         if (!data.enabled) {
@@ -47,11 +50,21 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     registerListeners: function() {
-        // ARENA.events.on(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.jitsiStatsLocalCallback);
     },
 
     unregisterListeners: function() {
-        // ARENA.events.off(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.jitsiStatsLocalCallback.bind(this));
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        sceneEl.removeEventListener(JITSI_EVENTS.STATS_LOCAL, this.jitsiStatsLocalCallback);
     },
 
     /**

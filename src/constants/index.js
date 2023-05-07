@@ -6,10 +6,12 @@
  * @date 2023
  */
 
-import { EVENTS } from './events';
+import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from './events';
 import { ACTIONS } from './actions';
 
 export {
-    EVENTS,
+    ARENA_EVENTS,
+    JITSI_EVENTS,
+    EVENT_SOURCES,
     ACTIONS,
 }

@@ -11,9 +11,8 @@
 import 'linkifyjs';
 import 'linkifyjs/string';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
-import { ARENAEventEmitter } from '../event-emitter';
 import { ARENAUtils } from '../utils';
-import { EVENTS } from '../constants';
+import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
 import Swal from 'sweetalert2';
 
 const UserType = Object.freeze({
@@ -39,17 +38,23 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (!data.enabled) return;
 
         if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(EVENTS.ARENA_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
             return;
         }
 
         if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.init.bind(this));
+            return;
+        }
+
+        if (!sceneEl.jitsiLoaded) {
+            sceneEl.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.init.bind(this));
             return;
         }
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
+        this.jitsi = sceneEl.systems['arena-jitsi'];
         this.health = sceneEl.systems['arena-health-ui'];
 
         this.isSpeaker = false;
@@ -366,18 +371,31 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.moveToFrontOfCamera(moveToCamera, this.scene);
         }
 
-        sceneEl.addEventListener(EVENTS.NEW_SETTINGS, this.onNewSettings.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.JITSI_CONNECT, this.onJitsiConnect.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.USER_JOINED, this.onUserJoin.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.SCREENSHARE, this.onScreenshare.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.USER_LEFT, this.onUserLeft.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.DOMINANT_SPEAKER, this.onDominantSpeakerChanged.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.TALK_WHILE_MUTED, this.onTalkWhileMuted.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.NOISY_MIC, this.onNoisyMic.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.CONFERENCE_ERROR, this.onConferenceError.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.JITSI_STATS_LOCAL, this.onJitsiStatsLocal.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.JITSI_STATS_REMOTE, this.onJitsiStatsRemote.bind(this));
-        // sceneEl.addEventListener(ARENAEventEmitter.events.JITSI_STATUS, this.onJitsiStatus.bind(this));
+        this.onNewSettings = this.onNewSettings.bind(this);
+        this.onJitsiConnect = this.onJitsiConnect.bind(this);
+        this.onUserJoin = this.onUserJoin.bind(this);
+        this.onScreenshare = this.onScreenshare.bind(this);
+        this.onUserLeft = this.onUserLeft.bind(this);
+        this.onDominantSpeakerChanged = this.onDominantSpeakerChanged.bind(this);
+        this.onTalkWhileMuted = this.onTalkWhileMuted.bind(this);
+        this.onNoisyMic = this.onNoisyMic.bind(this);
+        this.onConferenceError = this.onConferenceError.bind(this);
+        this.onJitsiStatsLocal = this.onJitsiStatsLocal.bind(this);
+        this.onJitsiStatsRemote = this.onJitsiStatsRemote.bind(this);
+        this.onJitsiStatus = this.onJitsiStatus.bind(this);
+
+        sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
+        sceneEl.addEventListener(JITSI_EVENTS.JITSI_CONNECT, this.onJitsiConnect);
+        sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJoin);
+        sceneEl.addEventListener(JITSI_EVENTS.SCREENSHARE, this.onScreenshare);
+        sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onUserLeft);
+        sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER, this.onDominantSpeakerChanged);
+        sceneEl.addEventListener(JITSI_EVENTS.TALK_WHILE_MUTED, this.onTalkWhileMuted);
+        sceneEl.addEventListener(JITSI_EVENTS.NOISY_MIC, this.onNoisyMic);
+        sceneEl.addEventListener(JITSI_EVENTS.CONFERENCE_ERROR, this.onConferenceError);
+        sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.onJitsiStatsLocal);
+        sceneEl.addEventListener(JITSI_EVENTS.STATS_REMOTE, this.onJitsiStatsRemote);
+        sceneEl.addEventListener(JITSI_EVENTS.STATUS, this.onJitsiStatus);
 
         await this.connect();
     },
@@ -425,7 +443,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const data = this.data;
         const el = this.el;
 
-        if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
+        if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
         if (!this.liveUsers[user.id]) {
@@ -451,7 +469,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const data = this.data;
         const el = this.el;
 
-        if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
+        if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
         if (!this.liveUsers[user.id]) {
@@ -477,7 +495,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const data = this.data;
         const el = this.el;
 
-        if (e.detail.src === ARENAEventEmitter.sources.CHAT) return; // ignore our events
+        if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         if (!this.liveUsers[user.id]) return;
         if (this.liveUsers[user.id].type === UserType.ARENA) return; // will be handled through mqtt messaging
@@ -788,9 +806,9 @@ AFRAME.registerSystem('arena-chat-ui', {
         // process commands
         if (msg.type == 'chat-ctrl') {
             if (msg.text == 'sound:off') {
-                // console.log('muteAudio', this.arena.Jitsi.hasAudio);
+                // console.log('muteAudio', this.jitsi.hasAudio);
                 // only mute
-                if (this.arena.Jitsi.hasAudio) {
+                if (this.jitsi.hasAudio) {
                     const sideMenu = sceneEl.components['arena-side-menu-ui'];
                     sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
@@ -936,7 +954,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // span click event (sound off)
         usspan.onclick = function() {
             // only mute
-            if (this.arena.Jitsi.hasAudio) {
+            if (this.jitsi.hasAudio) {
                 const sideMenu = sceneEl.components['arena-side-menu-ui'];
                 sideMenu.clickButton(sideMenu.buttons.AUDIO);
             }
@@ -1004,7 +1022,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                                         _this.ctrlMsg(user.uid, 'logout');
                                         // kick jitsi channel directly as well
                                         const warn = `You have been asked to leave by ${_this.userName}.`;
-                                        this.arena.Jitsi.kickout(user.uid, warn);
+                                        this.jitsi.kickout(user.uid, warn);
                                     }
                                 });
                         };
@@ -1038,7 +1056,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (!stats) return;
         const iconStats = document.createElement('i');
         iconStats.className = 'videoStats fa fa-signal';
-        iconStats.style.color = (stats.conn ? this.arena.Jitsi.getConnectionColor(stats.conn.connectionQuality) : 'gray');
+        iconStats.style.color = (stats.conn ? this.jitsi.getConnectionColor(stats.conn.connectionQuality) : 'gray');
         iconStats.style.paddingLeft = '5px';
         uli.appendChild(iconStats);
         const spanStats = document.createElement('span');
@@ -1046,7 +1064,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         // show current stats on hover/mouseover
         const _this = this;
         iconStats.onmouseover = function() {
-            spanStats.textContent = (stats ? this.arena.Jitsi.getConnectionText(name, stats, status) : 'None');
+            spanStats.textContent = (stats ? this.jitsi.getConnectionText(name, stats, status) : 'None');
             const offset_ul = $('.user-list').offset();
             const midpoint_w = offset_ul.left + ($('.user-list').width() / 2);
             const midpoint_h = offset_ul.top + ($('.user-list').height() / 2);

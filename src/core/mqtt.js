@@ -12,7 +12,7 @@
 import { proxy, wrap} from 'comlink';
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ClientEvent, CreateUpdate, Delete} from '../message-actions/index.js';
-import { EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../constants';
 import { ACTIONS } from '../constants';
 
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
@@ -32,7 +32,7 @@ AFRAME.registerSystem('arena-mqtt', {
 
         // wait for ARENA user params (token, id, etc.) to be ready
         if (!sceneEl.ARENAUserParamsLoaded) {
-            sceneEl.addEventListener(EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
             return;
         }
 
@@ -64,7 +64,7 @@ AFRAME.registerSystem('arena-mqtt', {
         ARENA.Mqtt = this; // Restore old alias
 
         sceneEl.ARENAMqttLoaded = true;
-        sceneEl.emit(EVENTS.MQTT_LOADED, true);
+        sceneEl.emit(ARENA_EVENTS.MQTT_LOADED, true);
     },
 
     initWorker: async function() {

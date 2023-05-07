@@ -8,9 +8,8 @@
 
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
-import { ARENAJitsi } from './jitsi.js';
 import { ARENAWebARUtils } from '../webar/index.js';
-import { EVENTS } from '../constants/index.js';
+import { ARENA_EVENTS } from '../constants/index.js';
 import Swal from 'sweetalert2';
 
 AFRAME.registerSystem('arena-scene', {
@@ -19,7 +18,6 @@ AFRAME.registerSystem('arena-scene', {
         persistHost: {type: 'string', default: ARENADefaults.persistHost},
         persistPath: {type: 'string', default: ARENADefaults.persistPath},
         camHeight: {type: 'number', default: ARENADefaults.camHeight},
-        jitsiHost: {type: 'string', default: ARENADefaults.jitsiHost},
         disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
     },
 
@@ -31,7 +29,7 @@ AFRAME.registerSystem('arena-scene', {
 
         // wait for auth to authorize user, init called from onAuth with evt detail of token
         if (!evt) {
-            window.addEventListener(EVENTS.ON_AUTH, this.init.bind(this));
+            window.addEventListener(ARENA_EVENTS.ON_AUTH, this.init.bind(this));
             return;
         }
 
@@ -54,6 +52,7 @@ AFRAME.registerSystem('arena-scene', {
         window.ARENA = this; // alias to window for easy access
 
         this.health = sceneEl.systems['arena-health-ui'];
+        this.jitsi = sceneEl.systems['arena-jitsi'];
 
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
         if (typeof this.params.startCoords === 'string') {
@@ -81,7 +80,7 @@ AFRAME.registerSystem('arena-scene', {
         }
 
         sceneEl.ARENAUserParamsLoaded = true;
-        sceneEl.emit(EVENTS.USER_PARAMS_LOADED, true);
+        sceneEl.emit(ARENA_EVENTS.USER_PARAMS_LOADED, true);
 
         this.loadScene();
 
@@ -89,7 +88,7 @@ AFRAME.registerSystem('arena-scene', {
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
         // setup event listeners
-        sceneEl.addEventListener(EVENTS.NEW_SETTINGS, (e) => {
+        sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, (e) => {
             const args = e.detail;
             if (!args.userName) return; // only handle a user name change
             this.showEchoDisplayName();
@@ -109,7 +108,7 @@ AFRAME.registerSystem('arena-scene', {
 
         // wait for mqtt client to be loaded
         if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(EVENTS.MQTT_LOADED, this.loadScene.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.loadScene.bind(this));
             return;
         }
 
@@ -131,11 +130,11 @@ AFRAME.registerSystem('arena-scene', {
             }
         } else if (this.params.skipav) {
             // Directly initialize Jitsi videoconferencing
-            this.Jitsi = ARENAJitsi.init(data.jitsiHost);
+            this.jitsi.connect();
         } else if (!this.params.noav && this.isJitsiPermitted()) {
             window.setupAV(() => {
                 // Initialize Jitsi videoconferencing after A/V setup window
-                this.Jitsi = ARENAJitsi.init(data.jitsiHost);
+                this.jitsi.connect();
             });
         }
 
@@ -151,7 +150,7 @@ AFRAME.registerSystem('arena-scene', {
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
 
         sceneEl.ARENALoaded = true;
-        sceneEl.emit(EVENTS.ARENA_LOADED, true);
+        sceneEl.emit(ARENA_EVENTS.ARENA_LOADED, true);
     },
 
     /**
@@ -395,7 +394,7 @@ AFRAME.registerSystem('arena-scene', {
             } else {
                 if (xhr.response === undefined || xhr.response.length === 0) {
                     console.warn('No scene objects found in persistence.');
-                    sceneEl.emit(EVENTS.SCENE_OBJ_LOADED, true);
+                    sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, true);
                     return;
                 }
 
@@ -490,7 +489,7 @@ AFRAME.registerSystem('arena-scene', {
                     }
                 }
 
-                sceneEl.emit(EVENTS.SCENE_OBJ_LOADED, !containerObjName);
+                sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, !containerObjName);
             }
         };
     },
@@ -660,7 +659,7 @@ AFRAME.registerSystem('arena-scene', {
             }).
             finally(() => {
                 this.sceneOptions = sceneOptions;
-                sceneEl.emit(EVENTS.SCENE_OPT_LOADED, true);
+                sceneEl.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
             });
     },
 

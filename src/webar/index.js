@@ -5,7 +5,7 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-import './ar-session.js';
+import './webar-session.js';
 import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
 import {ARENAUtils} from '../utils';
 

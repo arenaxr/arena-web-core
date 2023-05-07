@@ -2,13 +2,13 @@
  * @fileoverview Jitsi API for the ARENA
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
 /* global AFRAME, ARENA, JitsiMeetJS */
-import $ from 'jquery';
-import {ARENAEventEmitter} from '../event-emitter.js';
+// import $ from 'jquery';
+import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {
@@ -16,76 +16,57 @@ if (JitsiMeetJS) {
 }
 
 /**
- * The ARENA Jitsi client connection class.
+ * The ARENA Jitsi client connection system.
  */
-export class ARENAJitsi {
-    static ARENA_APP_ID = 'arena';
-    static SCREENSHARE_PREFIX = '#5cr33n5h4r3'; // unique prefix for screenshare clients
-    static ARENA_USER = '#4r3n4'; // unique arena client "tag"
-    static NEW_USER_TIMEOUT_MS = 2000;
-    static jitsi = undefined;
+AFRAME.registerSystem('arena-jitsi', {
+    schema: {
+        jitsiHost: {type: 'string', default: ARENADefaults.jitsiHost},
+        arenaAppId: {type: 'string', default: 'arena'},
+        screensharePrefix: {type: 'string', default: '#5cr33n5h4r3'}, // unique prefix for screenshare clients
+        arenaUserPrefix: {type: 'string', default: '#4r3n4'}, // unique arena client "tag"
+        newUserTimeoutMs: {type: 'number', default: 2000},
+        pano: {type: 'boolean', default: false},
+    },
 
-    /**
-     * Initialize the Jitsi connection.
-     * @param {*} jitsiServer The jitsi server url.
-     * @return {*} Instantiated ARENAJitsi object.
-     */
-    static init(jitsiServer, pano = false) {
-        if (!this.jitsi) {
-            this.jitsi = new ARENAJitsi(jitsiServer, pano);
-            this.jitsi.connect();
-            this.jitsi.avConnect();
-        }
-        return this.jitsi;
-    }
+    init: function() {
+        const data = this.data;
+        const el = this.el;
 
-    /**
-     * Configure the ARENA Jitsi client before connecting.
-     * @param {*} jitsiServer The jitsi server url.
-     */
-    constructor(jitsiServer, pano = false) {
-        this.pano = pano;
+        const sceneEl = el.sceneEl;
+
         if (!window.JitsiMeetJS) {
             console.warn('Jitsi is not found!');
             return;
         }
-        this.serverName = jitsiServer;
+
+        // wait for ARENA user params (token, id, etc.) to be ready
+        if (!sceneEl.ARENAUserParamsLoaded) {
+            sceneEl.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
+            return;
+        }
+
+        this.arena = sceneEl.systems['arena-scene'];
+        this.health = sceneEl.systems['arena-health-ui'];
+
+        // don't start Jitsi if noav is set or if it is not allowed
+        if (this.arena.params.noav || !this.arena.isJitsiPermitted()) {
+            sceneEl.jitsiLoaded = true;
+            sceneEl.emit(ARENA_EVENTS.JITSI_LOADED, false);
+            return;
+        }
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.arenaConferenceName = ARENA.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         this.connectOptions = {
             hosts: {
-                domain: this.serverName.split(':')[0], // remove port, if exists.
-                muc: 'conference.' + this.serverName.split(':')[0], // remove port, if exists. FIXME: use XEP-0030
+                domain: data.jitsiHost.split(':')[0], // remove port, if exists.
+                muc: 'conference.' + data.jitsiHost.split(':')[0], // remove port, if exists. FIXME: use XEP-0030
             },
-            bosh: '//' + this.serverName + '/http-bind', // FIXME: use xep-0156 for that
+            bosh: '//' + data.jitsiHost + '/http-bind', // FIXME: use xep-0156 for that
 
             // The name of client node advertised in XEP-0115 'c' stanza
             clientNode: 'http://jitsi.org/jitsimeet',
-        };
-
-        // Connection recommendations and specs:
-        // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/
-        // https://github.com/jitsi/jitsi-meet/blob/master/config.js
-        this.confOptions = {
-            openBridgeChannel: true,
-            enableTalkWhileMuted: true,
-            enableNoisyMicDetection: true,
-            p2p: {
-                enabled: false,
-            },
-
-            // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
-            // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
-            enableLayerSuspension: true,
-
-            // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
-            useNewBandwidthAllocationStrategy: true,
-        };
-
-        this.initOptions = {
-            disableAudioLevels: true,
         };
 
         this.connection = null;
@@ -110,24 +91,44 @@ export class ARENAJitsi {
         this.hasVideo = false;
 
         this.screenShareDict = {};
+
         /**
          * list of timers to send new user notifications; when a user enters jitsi, there is some delay until other
          * participants receive data about its properties (e.g. arenaDisplayName and arenaUserName).
-         * we wait NEW_USER_TIMEOUT_MS to hear about these in case it is an arena user and notify anyway after this timeout
+         * we wait newUserTimeoutMs to hear about these in case it is an arena user and notify anyway after this timeout
          */
         this.newUserTimers = [];
-    }
+
+        this.unload = this.unload.bind(this);
+        this.onConferenceJoined = this.onConferenceJoined.bind(this);
+        this.onUserJoined = this.onUserJoined.bind(this);
+        this.onUserLeft = this.onUserLeft.bind(this);
+        this.onDeviceListChanged = this.onDeviceListChanged.bind(this);
+        this.onConnectionFailed = this.onConnectionFailed.bind(this);
+        this.onRemoteTrack = this.onRemoteTrack.bind(this);
+        this.onDominantSpeakerChanged = this.onDominantSpeakerChanged.bind(this);
+        this.onConferenceError = this.onConferenceError.bind(this);
+        this.disconnect = this.disconnect.bind(this);
+
+        $(window).bind('beforeunload', this.unload);
+        $(window).bind('unload', this.unload);
+
+        JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+
+        sceneEl.jitsiLoaded = true;
+        sceneEl.emit(ARENA_EVENTS.JITSI_LOADED, true);
+    },
 
     /**
      * Connect to the Jitsi server.
      */
     connect() {
-        $(window).bind('beforeunload', this.unload.bind(this));
-        $(window).bind('unload', this.unload.bind(this));
+        const data = this.data;
+        const el = this.el;
 
-        JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
+        const sceneEl = el.sceneEl;
 
-        JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, this.onDeviceListChanged.bind(this));
+        JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, this.onDeviceListChanged);
 
         // Firefox does not allow audio output device change
         try {
@@ -137,28 +138,31 @@ export class ARENAJitsi {
 
         JitsiMeetJS.init(this.initOptions);
         console.info('Jitsi, connecting:', this.connectOptions);
-        this.connection = new JitsiMeetJS.JitsiConnection(ARENAJitsi.ARENA_APP_ID, ARENA.mqttToken.mqtt_token, this.connectOptions);
-        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess.bind(this));
-        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed.bind(this));
-        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect.bind(this));
+
+        this.connection = new JitsiMeetJS.JitsiConnection(data.arenaAppId, this.arena.mqttToken.mqtt_token, this.connectOptions);
+        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
+        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
+        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
         this.connection.connect();
-    }
+
+        this.avConnect();
+    },
 
     /**
      * Called when user joins
      * @param {string} participantId Participant id
      * @param {string} trackType track type ('audio'/'video')
      */
-    connectArena(participantId, trackType) {
+    connectArena: function(participantId, trackType) {
         this.jitsiId = participantId;
         console.log('connectArena: ' + participantId, trackType);
-    }
+    },
 
     /**
      * Handles local tracks.
      * @param {[]} tracks Array with JitsiTrack objects
       */
-    async onLocalTracks(tracks) {
+    onLocalTracks: async function(tracks) {
         this.localTracks = tracks;
 
         for (let i = 0; i < this.localTracks.length; i++) {
@@ -175,6 +179,7 @@ export class ARENAJitsi {
             track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
                 console.log(`track audio output device was changed to ${deviceId}`),
             );
+
             // append our own video/audio elements to <body>
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
@@ -195,6 +200,7 @@ export class ARENAJitsi {
                 }
                 this.jitsiAudioTrack = track;
             }
+
             if (this.ready) {
                 // mobile only?
                 track.mute();
@@ -206,7 +212,7 @@ export class ARENAJitsi {
         const sideMenu = sceneEl.components['arena-side-menu-ui'];
         if (this.prevVideoUnmuted) sideMenu.clickButton(sideMenu.buttons.VIDEO);
         if (this.prevAudioUnmuted) sideMenu.clickButton(sideMenu.buttons.AUDIO);
-    }
+    },
 
     /**
      * Update screen share object
@@ -215,7 +221,7 @@ export class ARENAJitsi {
      * @param {string} participantId Jitsi participant Id
      * @return {object} screenShare scene object
      */
-    updateScreenShareObject(screenShareId, videoId, participantId) {
+    updateScreenShareObject: function(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
 
         let screenShareEl = document.getElementById(screenShareId);
@@ -240,16 +246,22 @@ export class ARENAJitsi {
         screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
         this.screenShareDict[participantId] = screenShareEl;
         return screenShareEl;
-    }
+    },
 
     /**
      * Handles remote tracks
      * @param {object} track JitsiTrack object
      */
-    async onRemoteTrack(track) {
+    onRemoteTrack: async function(track) {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         if (track.isLocal()) {
             return;
         }
+
         const participantId = track.getParticipantId();
 
         if (!this.remoteTracks[participantId]) {
@@ -287,7 +299,7 @@ export class ARENAJitsi {
             if (!camNames) camNames = user.getDisplayName();
             if (!camNames) return; // handle jitsi-only users that have not set the display name
 
-            if (camNames.includes(ARENAJitsi.SCREENSHARE_PREFIX)) {
+            if (camNames.includes(data.screensharePrefix)) {
                 let dn = user.getProperty('screenshareDispName');
                 if (!dn) dn = user.getDisplayName();
                 if (!dn) dn = `No Name #${id}`;
@@ -295,13 +307,13 @@ export class ARENAJitsi {
                 let objectIds = user.getProperty('screenshareObjIds');
 
                 if (camName && objectIds) {
-                    ARENA.events.emit(ARENAEventEmitter.events.SCREENSHARE, {
+                    sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
                         jid: participantId,
                         id: participantId,
                         dn: dn,
                         cn: camName,
-                        scene: ARENA.namespacedScene,
-                        src: ARENAEventEmitter.sources.JITSI,
+                        scene: thiss.arena.namespacedScene,
+                        src: EVENT_SOURCES.JITSI,
                     });
                     objectIds = objectIds.split(',');
 
@@ -315,13 +327,13 @@ export class ARENAJitsi {
                         }
                     }
                 } else { // display as external user; possible spoofer
-                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                         jid: participantId,
                         id: participantId,
                         dn: dn,
                         cn: undefined,
-                        scene: ARENA.namespacedScene,
-                        src: ARENAEventEmitter.sources.JITSI,
+                        scene: this.arena.namespacedScene,
+                        src: EVENT_SOURCES.JITSI,
                     });
                     return;
                 }
@@ -340,12 +352,17 @@ export class ARENAJitsi {
         //     () => {
         //         console.log('remote track muted')
         //     });
-    }
+    },
 
     /**
      * This function is executed when the this.conference is joined
      */
-    onConferenceJoined() {
+    onConferenceJoined: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         this.ready = true;
         console.log('Joined conf! localTracks.length: ', this.localTracks.length);
 
@@ -376,17 +393,23 @@ export class ARENAJitsi {
                 });
             }
         });
-        ARENA.events.emit(ARENAEventEmitter.events.JITSI_CONNECT, {
-            scene: ARENA.namespacedScene,
+
+        sceneEl.emit(JITSI_EVENTS.CONNECT, {
+            scene: this.arena.namespacedScene,
             pl: pl,
         });
-    }
+    },
 
     /**
      * Called when user joins
      * @param {string} id
      */
-    async onUserJoined(id) {
+    onUserJoined: async function(id) {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         console.log('New user joined:', id, this.conference.getParticipantById(id).getDisplayName());
         this.remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
 
@@ -395,47 +418,50 @@ export class ARENAJitsi {
         const arenaCameraName = this.conference.getParticipantById(id).getProperty('arenaCameraName');
         if (arenaId && arenaDisplayName && arenaCameraName) {
             // emit user joined event in the off chance we know all properties of this arena user
-            ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+            sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                 jid: id,
                 id: arenaId,
                 dn: arenaDisplayName,
                 cn: arenaCameraName,
-                scene: ARENA.namespacedScene,
-                src: ARENAEventEmitter.sources.JITSI,
+                scene: this.arena.namespacedScene,
+                src: EVENT_SOURCES.JITSI,
             });
         } else {
             let dn = this.conference.getParticipantById(id).getDisplayName(); // get display name
             if (!dn) dn = `No Name #${id}`; // jitsi user that did not set his display name
+
             // user join event args, to be emited below
             const userJoinedArgs = {
                 jid: id,
                 id: id,
                 dn: dn,
                 cn: undefined,
-                scene: ARENA.namespacedScene,
-                src: ARENAEventEmitter.sources.JITSI,
+                scene: this.arena.namespacedScene,
+                src: EVENT_SOURCES.JITSI,
             };
+
             // this might be a jitsi-only user; emit event if name does not have the arena tag
-            if (!dn.includes(ARENAJitsi.ARENA_USER)) {
-                if (!dn.includes(ARENAJitsi.SCREENSHARE_PREFIX)) {
-                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, userJoinedArgs);
+            if (!dn.includes(data.arenaUserPrefix)) {
+                if (!dn.includes(data.screensharePrefix)) {
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
                 }
             } else {
                 this.newUserTimers[id] = setTimeout(() => {
-                    // emit event anyway in NEW_USER_TIMEOUT_MS if we dont hear from this user
-                    ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, userJoinedArgs);
-                }, ARENAJitsi.NEW_USER_TIMEOUT_MS);
+                    // emit event anyway in newUserTimeoutMs if we dont hear from this user
+                    sceneEl.emit(JITSI_EVENTS.USER_JOINED, userJoinedArgs);
+                }, data.newUserTimeoutMs);
             }
         }
-    }
+    },
 
     /**
      * Called when user leaves
      * @param {string} id user Id
      * @param {object} user user object (JitsiParticipant)
      */
-    onUserLeft(id, user) {
+    onUserLeft: function(id, user) {
         console.log('user left:', id);
+
         let arenaId = user.getProperty('arenaId');
         if (!arenaId) arenaId = id; // this was a jitsi-only user
 
@@ -450,57 +476,65 @@ export class ARENAJitsi {
         delete this.remoteTracks[id];
 
         // emit user left event
-        ARENA.events.emit(ARENAEventEmitter.events.USER_LEFT, {
+        sceneEl.emit(JITSI_EVENTS.USER_LEFT, {
             jid: id,
             id: arenaId,
-            src: ARENAEventEmitter.sources.JITSI,
+            src: EVENT_SOURCES.JITSI,
         });
-    }
+    },
 
     /**
      * Called when dominant speaker changes.
      * @param {string} id user Id
      */
-    onDominantSpeakerChanged(id) {
+    onDominantSpeakerChanged: function(id) {
         // console.log(`(conference) Dominant Speaker ID: ${id}`);
         this.prevActiveSpeaker = this.activeSpeaker;
         this.activeSpeaker = id;
-        let actArenaId;
-        let prevArenaId;
+
+        let actArenaId, prevArenaId;
+
         const actJitsiId = this.conference.getParticipantById(this.activeSpeaker);
         if (actJitsiId) actArenaId = actJitsiId.getProperty('arenaId');
+
         const prevJitsiId = this.conference.getParticipantById(this.prevActiveSpeaker);
         if (prevJitsiId) prevArenaId = prevJitsiId.getProperty('arenaId');
-        ARENA.events.emit(ARENAEventEmitter.events.DOMINANT_SPEAKER, {
+
+        sceneEl.emit(JITSI_EVENTS.DOMINANT_SPEAKER, {
             id: actArenaId,
             pid: prevArenaId,
-            scene: this.arenaConferenceName,
-            src: ARENAEventEmitter.sources.JITSI,
+            scene: this.conferenceName,
+            src: EVENT_SOURCES.JITSI,
         });
-    }
+    },
 
     /**
      * This function is called when connection is established successfully
      */
-    onConnectionSuccess() {
-        console.log('Conference server connected!');
-        this.conference = this.connection.initJitsiConference(this.arenaConferenceName, this.confOptions);
+    onConnectionSuccess: function() {
+        const data = this.data;
+        const el = this.el;
 
-        this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack.bind(this));
+        const sceneEl = el.sceneEl;
+
+        console.log('Conference server connected!');
+        this.conference = this.connection.initJitsiConference(this.conferenceName, this.confOptions);
+
+        this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack);
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.log(`track removed!!!${track}`);
         });
-        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined.bind(this));
-        this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined.bind(this));
-        this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft.bind(this));
-        this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged.bind(this));
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoinedonRemoteTrack);
+        this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoinedonRemoteTrack);
+        this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeftonRemoteTrack);
+        this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChangedonRemoteTrack);
         this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
             console.log(`Talking on mute detected!`);
-            ARENA.events.emit(ARENAEventEmitter.events.TALK_WHILE_MUTED, true);
+            sceneEl.emit(JITSI_EVENTS.TALK_WHILE_MUTED, true);
         });
         this.conference.on(JitsiMeetJS.events.conference.NOISY_MIC, () => {
             console.log(`Non-speech noise detected on microphone.`);
-            ARENA.events.emit(ARENAEventEmitter.events.NOISY_MIC, true);
+            sceneEl.emit(JITSI_EVENTS.NOISY_MIC, true);
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
             console.log(`${userID} - ${displayName}`),
@@ -511,36 +545,36 @@ export class ARENAJitsi {
         this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
             console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
         );
-        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError.bind(this));
-        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError.bind(this));
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError);
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
             this.updateUserStatus();
             this.conference.sendEndpointStatsMessage(stats); // send to remote
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_LOCAL, {
+            sceneEl.emit(JITSI_EVENTS.STATS_LOCAL, {
                 jid: this.jitsiId,
-                id: ARENA.idTag,
+                id: this.arena.idTag,
                 stats: stats,
             });
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
             const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATS_REMOTE, {
+            sceneEl.emit(JITSI_EVENTS.STATS_REMOTE, {
                 jid: id,
                 id: arenaId,
                 stats: stats,
             });
         });
         this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, statusPayload) => {
-            ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
+            sceneEl.emit(JITSI_EVENTS.STATUS, statusPayload);
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
-        this.conference.setDisplayName(ARENA.displayName + ` (${ARENAJitsi.ARENA_USER}_${ARENA.idTag})`);
+        this.conference.setDisplayName(this.arena.displayName + ` (${data.arenaUserPrefix}_${this.arena.idTag})`);
 
         // set local properties
-        this.conference.setLocalParticipantProperty('arenaId', ARENA.idTag);
-        this.conference.setLocalParticipantProperty('arenaDisplayName', ARENA.displayName);
-        this.conference.setLocalParticipantProperty('arenaCameraName', ARENA.camName);
+        this.conference.setLocalParticipantProperty('arenaId', this.arena.idTag);
+        this.conference.setLocalParticipantProperty('arenaDisplayName', this.arena.displayName);
+        this.conference.setLocalParticipantProperty('arenaCameraName', this.arena.camName);
 
         this.conference.on(
             JitsiMeetJS.events.conference.PARTICIPANT_PROPERTY_CHANGED,
@@ -560,13 +594,13 @@ export class ARENAJitsi {
                         clearInterval(this.newUserTimers[id]);
                         delete(this.newUserTimers[id]);
                         // emit new user event
-                        ARENA.events.emit(ARENAEventEmitter.events.USER_JOINED, {
+                        sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                             jid: id,
                             id: arenaId,
                             dn: arenaDisplayName,
                             cn: arenaCameraName,
-                            scene: this.arenaConferenceName,
-                            src: ARENAEventEmitter.sources.JITSI,
+                            scene: this.conferenceName,
+                            src: EVENT_SOURCES.JITSI,
                         });
                     }
                 }
@@ -585,79 +619,94 @@ export class ARENAJitsi {
                 this.spatialAudioOn = !!headphonesConnected;
             }.bind(this));
         }
-        // ARENA.health.removeError('connection.connectionFailed');
-    }
+        this.health.removeError('connection.connectionFailed');
+    },
 
-    updateUserStatus() {
+    updateUserStatus: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         const statusPayload = {
             jid: this.jitsiId,
-            id: ARENA.idTag,
+            id: this.arena.idTag,
             status: {
                 role: this.conference.getRole(),
             }
         };
         this.conference.sendEndpointMessage('', statusPayload);
-        ARENA.events.emit(ARENAEventEmitter.events.JITSI_STATUS, statusPayload);
-    }
+        sceneEl.emit(JITSI_EVENTS.STATUS, statusPayload);
+    },
 
     /**
      * Called for conference errors/failures
      * @param {*} err
      */
-    onConferenceError(err) {
+    onConferenceError: function(err) {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         console.error(`Conference error ${err}!`);
-        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+        sceneEl.emit(JITSI_EVENTS.CONFERENCE_ERROR, {
             errorCode: err,
         });
-        // ARENA.health.addError(err);
-    }
+        this.health.addError(err);
+    },
 
     /**
      * This function is called when the this.connection fails.
      */
-    onConnectionFailed() {
+    onConnectionFailed: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         const err ='connection.connectionFailed';
         console.error('Conference server connection failed!');
-        ARENA.events.emit(ARENAEventEmitter.events.CONFERENCE_ERROR, {
+        sceneEl.emit(JITSI_EVENTS.CONFERENCE_ERROR, {
             errorCode: err,
         });
-        // ARENA.health.addError(err);
-    }
+        this.health.addError(err);
+    },
 
     /**
      * This function is called when device list changes
      * @param {object} devices List of devices
      */
-    onDeviceListChanged(devices) {
+    onDeviceListChanged: function(devices) {
         console.info('current devices', devices);
-    }
+    },
 
     /**
      * This function is called when we disconnect.
      */
-    disconnect() {
+    disconnect: function() {
         console.warn('Conference server disconnected!');
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
-    }
+    },
 
     /**
      * called on unload; release tracks, leave this.conference
      */
-    unload() {
+    unload: function() {
         for (let i = 0; i < this.localTracks.length; i++) {
             this.localTracks[i].dispose();
         }
         if (this.conference) this.conference.leave();
         if (this.connection) this.connection.disconnect();
-    }
+    },
 
     /**
      * Connect audio and video and start sending local tracks
      * @return {promise}
      */
-    async avConnect() {
+    avConnect: async function() {
         const prefAudioInput = localStorage.getItem('prefAudioInput');
         const prefVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
@@ -726,8 +775,8 @@ export class ARENAJitsi {
             then(async (tracks) => {
                 await this.onLocalTracks(tracks);
                 if (this.withVideo) setupCornerVideo.bind(this)();
-            }).
-            catch((err) => {
+            })
+            .catch((err) => {
                 this.ready = false;
                 console.warn(err);
             });
@@ -767,43 +816,43 @@ export class ARENAJitsi {
                 setCornerVideoHeight();
             });
         }
-    }
+    },
 
     /**
      * Show the client user's video
      */
-    showVideo() {
+    showVideo: function() {
         if (this.jitsiVideoElem) this.jitsiVideoElem.style.display = 'block';
-    }
+    },
 
     /**
      * Hide the client user's video
      */
-    hideVideo() {
+    hideVideo: function() {
         if (this.jitsiVideoElem) this.jitsiVideoElem.style.display = 'none';
-    }
+    },
 
     /**
      * Getter for the client users Jitsi Id
      * @return {string} The Jitsi Id
      */
-    getJitsiId() {
+    getJitsiId: function() {
         return this.jitsiId;
-    }
+    },
 
     /**
      * Has the active speaker changed
      * @return {boolean} if the active speaker has changed
      */
-    activeSpeakerChanged() {
+    activeSpeakerChanged: function() {
         return this.prevActiveSpeaker !== this.activeSpeaker;
-    }
+    },
 
     /**
      * Begin the audio feed
      * @return {*} Promise for the track unmute
      */
-    unmuteAudio() {
+    unmuteAudio: function() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiAudioTrack) {
                 this.jitsiAudioTrack.unmute()
@@ -818,13 +867,13 @@ export class ARENAJitsi {
                 reject(new Error('Jitsi is not ready yet'));
             }
         }.bind(this));
-    }
+    },
 
     /**
      * End the audio feed
      * @return {*} Promise for the track mute
      */
-    muteAudio() {
+    muteAudio: function() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiAudioTrack) {
                 this.jitsiAudioTrack.mute()
@@ -839,13 +888,13 @@ export class ARENAJitsi {
                 reject(new Error('Jitsi is not ready yet'));
             }
         }.bind(this));
-    }
+    },
 
     /**
      * Begin the video feed
      * @return {*} Promise for the track unmute
      */
-    startVideo() {
+    startVideo: function() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiVideoTrack) {
                 this.jitsiVideoTrack.unmute()
@@ -860,13 +909,13 @@ export class ARENAJitsi {
                 reject(new Error('Jitsi is not ready yet'));
             }
         }.bind(this));
-    }
+    },
 
     /**
      * End the video feed
      * @return {*} Promise for the track mute
      */
-    stopVideo() {
+    stopVideo: function() {
         return new Promise(function(resolve, reject) {
             if (this.jitsiVideoTrack) {
                 this.jitsiVideoTrack.mute()
@@ -881,33 +930,33 @@ export class ARENAJitsi {
                 reject(new Error('Jitsi is not ready yet'));
             }
         }.bind(this));
-    }
+    },
 
     /**
      * Getter for the audio feed by jisti id
      * @param {*} jitsiId The jitsi user id
      * @return {*} remote track object
      */
-    getAudioTrack(jitsiId) {
+    getAudioTrack: function(jitsiId) {
         if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][0];
         } else {
             return null;
         }
-    }
+    },
 
     /**
      * Getter for the video feed by jisti id
      * @param {*} jitsiId The jitsi user id
      * @return {*} remote track object
      */
-    getVideoTrack(jitsiId) {
+    getVideoTrack: function(jitsiId) {
         if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][1];
         } else {
             return null;
         }
-    }
+    },
 
     /**
      * Set received resolution of remote video. Used to prioritize high, medium, low, drop
@@ -917,7 +966,7 @@ export class ARENAJitsi {
      * @param {*} panoIds Array of jitsi ids panoramic, first is 'on-stage', others get lower res.
      * @param {*} constraints ID and resolution value object to update.
     */
-    setResolutionRemotes(panoIds = [], constraints = {}) {
+    setResolutionRemotes: function(panoIds = [], constraints = {}) {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         // The endpoint ids of the participants that are prioritized up to a higher resolution.
@@ -929,46 +978,46 @@ export class ARENAJitsi {
         }
         videoConstraints.constraints = constraints;
         this.conference.setReceiverConstraints(videoConstraints);
-    }
+    },
 
-    setDefaultResolutionRemotes(resolution) {
+    setDefaultResolutionRemotes: function(resolution) {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         videoConstraints.defaultConstraints = {
             'maxHeight': resolution,
         };
         this.conference.setReceiverConstraints(videoConstraints);
-    }
+    },
 
     /**
      * Remove a user from the conference
      * @param {*} participantJitsiId The user to kick out
      * @param {*} msg The message for the user
      */
-    kickout(participantJitsiId, msg) {
+    kickout: function(participantJitsiId, msg) {
         if (this.conference) {
             this.conference.kickParticipant(participantJitsiId, msg);
         }
-    }
+    },
 
     /**
      * Disconnect from the conference
      */
-    leave() {
+    leave: function() {
         this.unload();
         this.disconnect();
-    }
+    },
 
     /**
      *
      * @param {*} participantJitsiId
      * @returns
      */
-    getUserId(participantJitsiId) {
-        if (this.jitsiId == participantJitsiId) return ARENA.camName;
+    getUserId: function(participantJitsiId) {
+        if (this.jitsiId == participantJitsiId) return this.arena.camName;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
-    }
+    },
 
     /**
      *
@@ -976,16 +1025,16 @@ export class ARENAJitsi {
      * @param {*} property
      * @returns
      */
-    getProperty(participantJitsiId, property) {
+    getProperty: function(participantJitsiId, property) {
         return this.conference.getParticipantById(participantJitsiId).getProperty(property);
-    }
+    },
 
     /**
      * Get color based on 0-100% connection quality.
      * @param {int} quality Connection Quality
      * @return {string} Color string
      */
-    getConnectionColor(quality) {
+    getConnectionColor: function(quality) {
         if (quality > 66.7) {
             return 'green';
         } else if (quality > 33.3) {
@@ -995,7 +1044,7 @@ export class ARENAJitsi {
         } else {
             return 'red';
         }
-    }
+    },
 
     /**
      * Get readable video stats.
@@ -1004,7 +1053,7 @@ export class ARENAJitsi {
      * @param {Object} status The jisti video status object if any
      * @return {string} Readable stats
      */
-    getConnectionText(name, stats, status) {
+    getConnectionText: function(name, stats, status) {
         const lines = [];
         let sendmax = '';
         lines.push(`Name: ${name}`);
@@ -1033,7 +1082,7 @@ export class ARENAJitsi {
             lines.push(`Codecs (A/V): ${this._extractCodecs(stats)}`);
         }
         return lines.join('\r\n');
-    }
+    },
 
     // From https://github.com/jitsi/jitsi-meet/blob/master/react/features/video-menu/components/native/ConnectionStatusComponent.js
     /**
@@ -1043,7 +1092,7 @@ export class ARENAJitsi {
      * @private
      * @return {string}
      */
-    _extractResolutionString(stats) {
+    _extractResolutionString: function(stats) {
         const {
             framerate,
             resolution,
@@ -1065,7 +1114,7 @@ export class ARENAJitsi {
             .join(', ') || null;
 
         return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
-    }
+    },
 
     /**
      * Extracts the audio and video codecs names.
@@ -1074,7 +1123,7 @@ export class ARENAJitsi {
      * @private
      * @return {string}
      */
-    _extractCodecs(stats) {
+    _extractCodecs: function(stats) {
         const {
             codec,
         } = stats;
@@ -1093,6 +1142,28 @@ export class ARENAJitsi {
             });
 
         return codecString;
-    }
+    },
 
-};
+    initOptions: {
+        disableAudioLevels: true,
+    },
+
+    // Connection recommendations and specs:
+    // https://jitsi-club.gitlab.io/jitsi-self-hosting/en/01-deployment-howto/03-tuning/
+    // https://github.com/jitsi/jitsi-meet/blob/master/config.js
+    confOptions: {
+        openBridgeChannel: true,
+        enableTalkWhileMuted: true,
+        enableNoisyMicDetection: true,
+        p2p: {
+            enabled: false,
+        },
+
+        // https://jitsi.org/blog/new-off-stage-layer-suppression-feature/
+        // Enable layer suspension, so that frustum culled video, and distanced audio will actually drop bandwidth
+        enableLayerSuspension: true,
+
+        // https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md.
+        useNewBandwidthAllocationStrategy: true,
+    },
+});

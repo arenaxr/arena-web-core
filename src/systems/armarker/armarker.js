@@ -19,7 +19,7 @@ import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer';
 import {ARMarkerRelocalization} from './armarker-reloc';
 import {CVWorkerMsgs} from './worker-msgs';
-import {EVENTS} from '../../constants';
+import {ARENA_EVENTS} from '../../constants';
 import {ARENAUtils} from '../../utils';
 
 /**
@@ -77,14 +77,14 @@ AFRAME.registerSystem('armarker', {
         const sceneEl = el.sceneEl;
 
         if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(EVENTS.ARENA_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
             return;
         }
 
         this.arena = sceneEl.systems['arena-scene'];
 
         if (this.arena.sceneOptions === undefined) {
-            sceneEl.addEventListener(EVENTS.SCENE_OPT_LOADED, this.init.bind(this));
+            sceneEl.addEventListener(ARENA_EVENTS.SCENE_OPT_LOADED, this.init.bind(this));
             return;
         }
 
