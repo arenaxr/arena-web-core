@@ -138,9 +138,14 @@ window.ARENAAUTH = {
                 this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
             } else {
                 if (savedAuthType === "anonymous") {
-                    const urlName = ARENA.params.name;
+                    const urlName = ARENA.params.userName;
                     if (urlName !== null) {
-                        localStorage.setItem("display_name", urlName);
+                        const savedName = localStorage.getItem('display_name');
+                        if (savedName !== undefined) {
+                            localStorage.setItem("display_name", savedName);
+                        } else {
+                            localStorage.setItem("display_name", urlName);
+                        }
                     } else if (localStorage.getItem("display_name") === null) {
                         localStorage.setItem("display_name", `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                     }

@@ -471,7 +471,7 @@ AFRAME.registerSystem('arena-scene', {
                             scene: this.sceneName,
                             namespace: this.nameSpace,
                             cameraid: this.camName,
-                            username: this.getDisplayName,
+                            username: this.getDisplayName(),
                             mqtth: this.mqttHost,
                         };
                         // ask runtime manager to start this program

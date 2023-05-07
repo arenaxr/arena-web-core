@@ -2,13 +2,14 @@
  * @fileoverview HTML audio/video setup modal
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
 /* global ARENA */
 
 import Swal from 'sweetalert2';
+import { ARENA_EVENTS } from '../constants';
 
 // Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
 window.setupAV = (callback) => {
@@ -98,6 +99,8 @@ window.setupAV = (callback) => {
             // Change button name
             enterSceneBtn.textContent = 'Return to Scene';
             if (window.setupAVCallback) window.setupAVCallback();
+
+            document.querySelector('a-scene').emit(ARENA_EVENTS.NEW_SETTINGS, {userName: displayName});
         });
         document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
         document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
