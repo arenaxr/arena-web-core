@@ -25,10 +25,10 @@ AFRAME.registerComponent('build-watch-object', {
         },
     },
     init: function () {
-        this.observer = new MutationObserver(this.callback);
+        this.observer = new MutationObserver(this.objectAttributesUpdate);
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
-    callback: function (mutationList, observer) {
+    objectAttributesUpdate: function (mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -123,14 +123,11 @@ AFRAME.registerComponent('build-watch-object', {
     },
 });
 
-const symbols = { create: '+', update: '~', delete: '-' };
+const symbols = { create: 'CRE', update: 'UPD', delete: 'DEL' };
 
 function extractDataUpdates(mutation, attribute, changes) {
     data = {}
     switch (mutation.attributeName) {
-        case 'geometry':
-            data.object_type = attribute.primitive;
-            break;
         case 'gltf-model':
         case 'image':
         case 'light':
@@ -146,12 +143,11 @@ function extractDataUpdates(mutation, attribute, changes) {
     }
     switch (mutation.attributeName) {
         case 'id':
-            // pull all attributes, this is a create
-            data = AFRAME.INSPECTOR.history.updates[mutation.oldValue ? mutation.oldValue : ''];
-            data.object_type = 'entity'; // TODO: remove debug
+        case 'build-watch-object':
+            // skip
             break;
         case 'position':
-            msg.data.position = attribute;
+            data.position = attribute;
             break;
         case 'rotation':
             const quaternion = mutation.target.object3D.quaternion;
@@ -183,9 +179,9 @@ function extractDataUpdates(mutation, attribute, changes) {
 
 function extractDataFullDOM(mutation) {
     data = {object_type: 'entity'};
-    mutation.target.attributes.forEach((attributeName) => {
-        const attribute = mutation.target.getAttribute(mutation.attributeName);
-        switch (attributeName) {
+    mutation.target.attributes.forEach((attr) => {
+        const attribute = mutation.target.getAttribute(attr.name);
+        switch (attr.name) {
             case 'gltf-model':
             case 'image':
             case 'light':
@@ -196,15 +192,16 @@ function extractDataFullDOM(mutation) {
             case 'text':
             case 'thickline':
             case 'threejs-scene':
-                data.object_type = attributeName;
+                data.object_type = attr.name;
                 break;
         }
-        switch (attributeName) {
+        switch (attr.name) {
             case 'id':
+            case 'build-watch-object':
                 // skip
                 break;
             case 'position':
-                msg.data.position = attribute;
+                data.position = attribute;
                 break;
             case 'rotation':
                 const quaternion = mutation.target.object3D.quaternion;
@@ -226,7 +223,7 @@ function extractDataFullDOM(mutation) {
                 data.object_type = attribute.primitive;
                 break;
             default:
-                data[attributeName] = attribute;
+                data[attr.name] = attribute;
                 break;
         }
     });
@@ -238,7 +235,7 @@ function LogToUser(msg, attributeName, changes) {
     if (inspectorMqttLog) {
         inspectorMqttLog.appendChild(document.createElement('br'));
         let line = document.createElement('span');
-        line.innerHTML += `Pub${symbols[msg.action]} ${msg.object_id} ${
+        line.innerHTML += `${symbols[msg.action]}: ${msg.object_id} ${
             attributeName ? attributeName : ''
         } ${JSON.stringify(changes ? changes : msg.data ? msg.data : '')}`;
         inspectorMqttLog.appendChild(line);

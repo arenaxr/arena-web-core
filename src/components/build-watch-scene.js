@@ -16,7 +16,7 @@ AFRAME.registerComponent('build-watch-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     multiple: false,
     init: function () {
-        const observer = new MutationObserver(this.callback);
+        const observer = new MutationObserver(this.sceneNodesUpdate);
         observer.observe(this.el, {
             childList: true,
             attributes: false,
@@ -25,7 +25,7 @@ AFRAME.registerComponent('build-watch-scene', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
-    callback: function (mutationList, observer) {
+    sceneNodesUpdate: function (mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
