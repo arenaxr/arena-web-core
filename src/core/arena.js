@@ -84,6 +84,10 @@ AFRAME.registerSystem('arena-scene', {
 
         this.loadScene();
 
+        if (!this.params.noav) {
+            this.el.sceneEl.setAttribute('av-setup', {});
+        }
+
         // setup webar session
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
