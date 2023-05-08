@@ -32,9 +32,9 @@
     <!-- main arena bundle -->
     <script src="dist/index.js"></script>
 
-    <!-- 2D UI -->
-    <link href="static/vendor/mdb/mdb.min.css" rel="stylesheet"/>
-    <link href="static/vendor/fontawesome-5/css/all.min.css" rel="stylesheet"/>
+    <!-- 2D UI, load async since  -->
+    <link rel="stylesheet" href="static/vendor/mdb/mdb.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="static/vendor/fontawesome-5/css/all.min.css" media="print" onload="this.media='all'">
 </head>
 <body>
 <!-- A/V Setup -->
@@ -225,6 +225,6 @@
 <script src="static/vendor/mdb/mdb.min.js"></script>
 
 <!-- Mic setup audio processing -->
-<script src="static/vendor/volume-meter.js"></script>
+<script src="static/vendor/volume-meter.js" ></script>
 </body>
 </html>
