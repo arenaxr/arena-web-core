@@ -29,14 +29,17 @@ AFRAME.registerComponent('build-watch-object', {
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     callback: function (mutationList, observer) {
-        const inspectorMqttLog = document.getElementById('inspectorMqttLog');
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
                     // mutation.target
                     // mutation.attributeName
                     // mutation.oldValue
-                    console.log(`The ${mutation.attributeName} attribute was modified.`, mutation.target.id);
+                    console.log(
+                        `The ${mutation.attributeName} attribute was modified.`,
+                        mutation.target.id,
+                        mutation.oldValue
+                    );
                     if (mutation.attributeName === 'build-watch-object') {
                         return; // no need to handle on/off mutations to our own component
                     }
@@ -50,76 +53,32 @@ AFRAME.registerComponent('build-watch-object', {
                             persist: true,
                             data: {},
                         };
-                        switch (mutation.attributeName) {
-                            case 'geometry':
-                                msg.data.object_type = attribute.primitive;
-                                break;
-                            case 'gltf-model':
-                            case 'image':
-                            case 'light':
-                            case 'line':
-                            case 'obj-model':
-                            case 'ocean':
-                            case 'pcd-model':
-                            case 'text':
-                            case 'thickline':
-                            case 'threejs-scene':
-                                msg.data.object_type = mutation.attributeName;
-                                break;
-                        }
                         // use aframe-watcher updates to send only changes updated
                         let changes = undefined;
                         if (AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
                             changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
                         }
-                        switch (mutation.attributeName) {
-                            case 'position':
-                                msg.data.position = attribute;
-                                break;
-                            case 'rotation':
-                                const quaternion = mutation.target.object3D.quaternion;
-                                msg.data.rotation = {
-                                    // always send quaternions over the wire
-                                    x: quaternion._x,
-                                    y: quaternion._y,
-                                    z: quaternion._z,
-                                    w: quaternion._w,
-                                };
-                                break;
-                            case 'scale':
-                                msg.data.scale = attribute;
-                                break;
-                            case 'geometry':
-                                // we apply primitive data directory to root data
-                                if (changes) {
-                                    msg.data = changes;
-                                    delete msg.data.primitive;
-                                }
-                                msg.data.object_type = attribute.primitive;
-                                break;
-                            default:
-                                msg.data[mutation.attributeName] = changes ? changes : {};
-                                break;
+                        if (msg.action == 'update'){
+                            msg.data = extractDataUpdates(mutation, attribute, changes);
+                        } else if (msg.action == 'create') {
+                            msg.data = extractDataFullDOM(mutation);
                         }
-                        if (inspectorMqttLog) {
-                            inspectorMqttLog.appendChild(document.createElement('br'));
-                            let line = document.createElement('span');
-                            line.innerHTML += `Pub: ${mutation.attributeName} ${msg.object_id} ${JSON.stringify(
-                                changes ? changes : msg.data
-                            )}`;
-                            inspectorMqttLog.appendChild(line);
-                            line.scrollIntoView();
-                        }
+                        LogToUser(msg, mutation.attributeName, changes);
                         console.log('pub:', msg);
                         ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
 
                         // check rename case
-                        if (mutation.attributeName === 'id' && mutation.target.id != mutation.oldValue) {
+                        if (
+                            mutation.attributeName === 'id' &&
+                            mutation.oldValue &&
+                            mutation.target.id != mutation.oldValue
+                        ) {
                             let msg = {
                                 object_id: mutation.oldValue,
                                 action: 'delete',
                                 persist: true,
                             };
+                            LogToUser(msg);
                             console.log('pub:', msg);
                             ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
                         }
@@ -131,6 +90,7 @@ AFRAME.registerComponent('build-watch-object', {
     update: function () {
         if (this.data.enabled) {
             this.observer.observe(this.el, {
+                childList: false,
                 attributes: true,
                 attributeOldValue: true,
             });
@@ -144,7 +104,144 @@ AFRAME.registerComponent('build-watch-object', {
             window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
     },
+    remove: function () {
+        const el = document.getElementById(this.el.id);
+        // don't delete if only the component is removed, the node must be removed
+        if (!el) {
+            let msg = {
+                object_id: this.el.id,
+                action: 'delete',
+                persist: true,
+            };
+            LogToUser(msg);
+            console.log('pub:', msg);
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
+        }
+    },
     tick: function () {
         // this.el.flushToDOM(true);
     },
 });
+
+const symbols = { create: '+', update: '~', delete: '-' };
+
+function extractDataUpdates(mutation, attribute, changes) {
+    data = {}
+    switch (mutation.attributeName) {
+        case 'geometry':
+            data.object_type = attribute.primitive;
+            break;
+        case 'gltf-model':
+        case 'image':
+        case 'light':
+        case 'line':
+        case 'obj-model':
+        case 'ocean':
+        case 'pcd-model':
+        case 'text':
+        case 'thickline':
+        case 'threejs-scene':
+            data.object_type = mutation.attributeName;
+            break;
+    }
+    switch (mutation.attributeName) {
+        case 'id':
+            // pull all attributes, this is a create
+            data = AFRAME.INSPECTOR.history.updates[mutation.oldValue ? mutation.oldValue : ''];
+            data.object_type = 'entity'; // TODO: remove debug
+            break;
+        case 'position':
+            msg.data.position = attribute;
+            break;
+        case 'rotation':
+            const quaternion = mutation.target.object3D.quaternion;
+            data.rotation = {
+                // always send quaternions over the wire
+                x: quaternion._x,
+                y: quaternion._y,
+                z: quaternion._z,
+                w: quaternion._w,
+            };
+            break;
+        case 'scale':
+            data.scale = attribute;
+            break;
+        case 'geometry':
+            // we apply primitive data directory to root data
+            if (changes) {
+                data = changes;
+                delete data.primitive;
+            }
+            data.object_type = attribute.primitive;
+            break;
+        default:
+            data[mutation.attributeName] = changes ? changes : {};
+            break;
+    }
+    return data;
+}
+
+function extractDataFullDOM(mutation) {
+    data = {object_type: 'entity'};
+    mutation.target.attributes.forEach((attributeName) => {
+        const attribute = mutation.target.getAttribute(mutation.attributeName);
+        switch (attributeName) {
+            case 'gltf-model':
+            case 'image':
+            case 'light':
+            case 'line':
+            case 'obj-model':
+            case 'ocean':
+            case 'pcd-model':
+            case 'text':
+            case 'thickline':
+            case 'threejs-scene':
+                data.object_type = attributeName;
+                break;
+        }
+        switch (attributeName) {
+            case 'id':
+                // skip
+                break;
+            case 'position':
+                msg.data.position = attribute;
+                break;
+            case 'rotation':
+                const quaternion = mutation.target.object3D.quaternion;
+                data.rotation = {
+                    // always send quaternions over the wire
+                    x: quaternion._x,
+                    y: quaternion._y,
+                    z: quaternion._z,
+                    w: quaternion._w,
+                };
+                break;
+            case 'scale':
+                data.scale = attribute;
+                break;
+            case 'geometry':
+                // we apply primitive data directory to root data
+                data = { ...data, ...attribute };
+                delete data.primitive;
+                data.object_type = attribute.primitive;
+                break;
+            default:
+                data[attributeName] = attribute;
+                break;
+        }
+    });
+    return data;
+}
+
+function LogToUser(msg, attributeName, changes) {
+    inspectorMqttLog = document.getElementById('inspectorMqttLog');
+    if (inspectorMqttLog) {
+        inspectorMqttLog.appendChild(document.createElement('br'));
+        let line = document.createElement('span');
+        line.innerHTML += `Pub${symbols[msg.action]} ${msg.object_id} ${
+            attributeName ? attributeName : ''
+        } ${JSON.stringify(changes ? changes : msg.data ? msg.data : '')}`;
+        inspectorMqttLog.appendChild(line);
+        line.scrollIntoView();
+    }
+}
