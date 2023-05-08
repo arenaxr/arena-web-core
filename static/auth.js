@@ -9,7 +9,7 @@
 // Required:
 //  <script src="../vendor/jsrsasign-all-min.js" type="text/javascript"></script>
 //  <script src="../conf/defaults.js"></script>  <!-- for window.ARENADefaults -->
-//  <script src="../src/auth.js"></script>  <!-- browser authorization flow -->
+//  <script src="../static/auth.js"></script>  <!-- browser authorization flow -->
 //
 // Implement the following 'onauth' event handler and use it to start code that would
 // automatically connects to the MQTT broker so that authentication and access tokens
