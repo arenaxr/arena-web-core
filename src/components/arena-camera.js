@@ -129,9 +129,12 @@ AFRAME.registerComponent('arena-camera', {
                     w: parseFloat(data.rotation._w.toFixed(3)),
                 },
                 color: data.color,
-                presence: document.getElementById('presenceSelect').value,
             },
         };
+        const presence = document.getElementById('presence');
+        if (presence) {
+            msg.presence = presence.value;
+        }
 
         if (this.arena.Jitsi) {
             msg.jitsiId = this.arena.Jitsi.getJitsiId();
