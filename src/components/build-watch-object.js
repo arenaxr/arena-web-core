@@ -89,12 +89,14 @@ AFRAME.registerComponent('build-watch-object', {
     },
     update: function () {
         if (this.data.enabled) {
+            console.log('build3d watching scene attributes...');
             this.observer.observe(this.el, {
                 attributes: true,
                 attributeOldValue: true,
             });
         } else {
             this.observer.disconnect();
+            console.log('build3d watching scene attributes ended');
         }
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {

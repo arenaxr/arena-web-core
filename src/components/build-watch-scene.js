@@ -18,6 +18,7 @@ AFRAME.registerComponent('build-watch-scene', {
     multiple: false,
     init: function () {
         const observer = new MutationObserver(this.sceneNodesUpdate);
+        console.log('build3d watching scene children...');
         observer.observe(this.el, {
             childList: true,
             subtree: true,
@@ -68,7 +69,7 @@ AFRAME.registerComponent('build-watch-scene', {
                         mutation.oldValue
                     );
                     if (mutation.attributeName === 'class') {
-                        if (mutation.oldValue && mutation.oldValue.includes('a-mouse-cursor-hover')) {
+                        if (mutation.target.className.includes('a-mouse-cursor-hover')) {
                             // flush selected attr to dom from grab cursor update
                             el = AFRAME.INSPECTOR.selectedEntity;
                             if (el) {
@@ -111,7 +112,7 @@ AFRAME.registerComponent('build-watch-scene', {
                     );
                     if (mutation.attributeName === 'class') {
                         if (mutation.target.classList.contains('active')) {
-                            toolbarName=mutation.target.title;
+                            toolbarName = mutation.target.title;
                             console.log('toolbarName', toolbarName);
                         }
                     }
@@ -126,6 +127,7 @@ AFRAME.registerComponent('build-watch-scene', {
                 if (this.cursor) {
                     // watch for mouse down use of grab tools
                     const observer = new MutationObserver(this.cursorAttributesUpdate);
+                    console.log('build3d watching cursor class attributes...');
                     observer.observe(this.cursor, {
                         attributeFilter: ['class'],
                         attributes: true,
@@ -135,15 +137,18 @@ AFRAME.registerComponent('build-watch-scene', {
             }
         }
         if (!this.transformToolbar) {
-            this.transformToolbar = document.getElementById('transformToolbar');
-            if (this.transformToolbar) {
-                // watch for active toolbar grab tool change
-                const observer = new MutationObserver(this.transformToolbarUpdate);
-                observer.observe(this.transformToolbar, {
-                    attributeFilter: ['class'],
-                    attributes: true,
-                    subtree: true,
-                });
+            if (document.getElementsByClassName('toolbarButtons').length > 0) {
+                this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
+                if (this.transformToolbar) {
+                    // watch for active toolbar grab tool change
+                    const observer = new MutationObserver(this.transformToolbarUpdate);
+                    console.log('build3d watching toolbar class attributes...');
+                    observer.observe(this.transformToolbar, {
+                        attributeFilter: ['class'],
+                        attributes: true,
+                        subtree: true,
+                    });
+                }
             }
         }
     },

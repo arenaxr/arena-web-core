@@ -40,7 +40,7 @@ export class Arena {
             // will queue messages until MQTT connection is available (indicated by console.setOptions())
             ARENAMqttConsole.init();
         }
-        this.defaults = ARENADefaults; // "get" arena defaults
+        this.defaults = ARENADefaults; // 'get' arena defaults
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
@@ -395,8 +395,8 @@ export class Arena {
             updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
-            // use "Back to Scene" to send to real ARENA scene
-            $('a.toggle-edit').click(function() {
+            // use 'Back to Scene' to send to real ARENA scene
+            $('a.toggle-edit').on('click', function() {
                 // remove the build3d a-frame inspector
                 let url = new URL(window.location.href);
                 url.searchParams.delete('build3d');
@@ -406,7 +406,9 @@ export class Arena {
                 }, '', decodeURIComponent(url.href));
                 window.location.reload();
             });
-        }, 2000);
+            // allow all animations and components to run
+            $('#playPauseScene').trigger('click');
+        }, 500);
 
         function updateInspectorPanel(perm, jqSelect) {
             $(jqSelect).css('opacity', '.75');
