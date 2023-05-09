@@ -15,6 +15,16 @@
 let toolbarName = 'translate';
 AFRAME.registerComponent('build-watch-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
+    //schema: {
+        // sceneOptionsObject: {
+        //     type: 'object',
+        //     default: {'scene-options':{
+        //         'env-presets':{
+
+        //         }
+        //     }},
+        // },
+    //},
     multiple: false,
     init: function () {
         const observer = new MutationObserver(this.sceneNodesUpdate);
@@ -136,6 +146,7 @@ AFRAME.registerComponent('build-watch-scene', {
                 }
             }
         }
+        // TODO: this detection is delayed atm from the pause() event.
         if (!this.transformToolbar) {
             if (document.getElementsByClassName('toolbarButtons').length > 0) {
                 this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
@@ -149,6 +160,13 @@ AFRAME.registerComponent('build-watch-scene', {
                         subtree: true,
                     });
                 }
+            }
+        }
+
+        if (!this.env) {
+            this.env = document.getElementById('env');
+            if (this.env) {
+                this.env.setAttribute('build-watch-object', 'enabled', true);
             }
         }
     },

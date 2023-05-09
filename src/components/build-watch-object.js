@@ -47,9 +47,9 @@ AFRAME.registerComponent('build-watch-object', {
                         const attribute = mutation.target.getAttribute(mutation.attributeName);
                         // when 'id' changes, we have a new object, maybe a name change
                         let msg = {
-                            object_id: mutation.target.id,
+                            object_id: mutation.target.id === 'env' ? 'scene-options' : mutation.target.id,
                             action: mutation.attributeName === 'id' ? 'create' : 'update',
-                            type: 'object',
+                            type:  mutation.target.id === 'env' ? 'scene-options' : 'object',
                             persist: true,
                             data: {},
                         };
@@ -120,7 +120,7 @@ AFRAME.registerComponent('build-watch-object', {
         }
     },
     tick: function () {
-        // this.el.flushToDOM(true);
+
     },
 });
 
@@ -128,6 +128,7 @@ const symbols = { create: 'CRE', update: 'UPD', delete: 'DEL' };
 
 function extractDataUpdates(mutation, attribute, changes) {
     data = {}
+    // TODO always try and get the object_type, complicated
     switch (mutation.attributeName) {
         case 'gltf-model':
         case 'image':
@@ -170,6 +171,9 @@ function extractDataUpdates(mutation, attribute, changes) {
                 delete data.primitive;
             }
             data.object_type = attribute.primitive;
+            break;
+        case 'environment':
+            data['env-presets'] = changes ? changes : {};
             break;
         default:
             data[mutation.attributeName] = changes ? changes : {};
@@ -222,6 +226,9 @@ function extractDataFullDOM(mutation) {
                 data = { ...data, ...attribute };
                 delete data.primitive;
                 data.object_type = attribute.primitive;
+                break;
+            case 'environment':
+                data['env-presets'] = attribute;
                 break;
             default:
                 data[attr.name] = attribute;
