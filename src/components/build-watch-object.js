@@ -90,7 +90,6 @@ AFRAME.registerComponent('build-watch-object', {
     update: function () {
         if (this.data.enabled) {
             this.observer.observe(this.el, {
-                childList: false,
                 attributes: true,
                 attributeOldValue: true,
             });

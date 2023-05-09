@@ -381,7 +381,7 @@ export class Arena {
             inspectorMqttLog.id = 'inspectorMqttLog';
             inspectorMqttLog.className = 'outliner';
             inspectorMqttLog.tabIndex = 1;
-            inspectorMqttLog.style.height = '40%';
+            inspectorMqttLog.style.height = '50%';
             inspectorMqttLog.style.overflow = 'overflow';
             scenegraphDiv.appendChild(inspectorMqttLog);
 
