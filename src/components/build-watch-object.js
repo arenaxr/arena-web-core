@@ -26,7 +26,6 @@ AFRAME.registerComponent('build-watch-object', {
     },
     init: function () {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
-        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     objectAttributesUpdate: function (mutationList, observer) {
         mutationList.forEach((mutation) => {
@@ -49,7 +48,7 @@ AFRAME.registerComponent('build-watch-object', {
                         let msg = {
                             object_id: mutation.target.id === 'env' ? 'scene-options' : mutation.target.id,
                             action: mutation.attributeName === 'id' ? 'create' : 'update',
-                            type:  mutation.target.id === 'env' ? 'scene-options' : 'object',
+                            type: mutation.target.id === 'env' ? 'scene-options' : 'object',
                             persist: true,
                             data: {},
                         };
@@ -58,7 +57,7 @@ AFRAME.registerComponent('build-watch-object', {
                         if (AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
                             changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
                         }
-                        if (msg.action == 'update'){
+                        if (msg.action == 'update') {
                             msg.data = extractDataUpdates(mutation, attribute, changes);
                         } else if (msg.action == 'create') {
                             msg.data = extractDataFullDOM(mutation);
@@ -119,16 +118,12 @@ AFRAME.registerComponent('build-watch-object', {
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
         }
     },
-    tick: function () {
-
-    },
 });
 
 const symbols = { create: 'CRE', update: 'UPD', delete: 'DEL' };
 
 function extractDataUpdates(mutation, attribute, changes) {
-    data = {}
-    // TODO always try and get the object_type, complicated
+    let data = {};
     switch (mutation.attributeName) {
         case 'gltf-model':
         case 'image':
@@ -179,11 +174,17 @@ function extractDataUpdates(mutation, attribute, changes) {
             data[mutation.attributeName] = changes ? changes : {};
             break;
     }
+    // if (!data.object_type) {
+    //     // always try and get the object_type, complicated
+    //     let dataFull = extractDataFullDOM(mutation);
+    //     if (dataFull.object_type) data.object_type = dataFull.object_type;
+    // }
+
     return data;
 }
 
 function extractDataFullDOM(mutation) {
-    data = {object_type: 'entity'};
+    let data = { object_type: 'entity' };
     mutation.target.attributes.forEach((attr) => {
         const attribute = mutation.target.getAttribute(attr.name);
         switch (attr.name) {
@@ -229,6 +230,7 @@ function extractDataFullDOM(mutation) {
                 break;
             case 'environment':
                 data['env-presets'] = attribute;
+                delete data.object_type;
                 break;
             default:
                 data[attr.name] = attribute;
@@ -239,7 +241,7 @@ function extractDataFullDOM(mutation) {
 }
 
 function LogToUser(msg, attributeName, changes) {
-    inspectorMqttLog = document.getElementById('inspectorMqttLog');
+    let inspectorMqttLog = document.getElementById('inspectorMqttLog');
     if (inspectorMqttLog) {
         inspectorMqttLog.appendChild(document.createElement('br'));
         let line = document.createElement('span');
