@@ -215,9 +215,17 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
     }
 
     // Update scene obj list to download as json
+    const exportJSON = sceneObjs.map((obj) => {
+        const filteredObj = { ...obj };
+        filteredObj.data = filteredObj.attributes;
+        delete filteredObj.createdAt;
+        delete filteredObj.updatedAt;
+        delete filteredObj.attributes;
+        return filteredObj;
+    });
     persist.exportSceneButton.setAttribute(
         "href",
-        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sceneObjs, null, 2))
+        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportJSON, null, 2))
     );
     persist.exportSceneButton.setAttribute("download", `${scene.replace("/", "__")}.json`);
 
