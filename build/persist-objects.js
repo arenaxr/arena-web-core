@@ -210,6 +210,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         persist.objList.appendChild(li);
         persist.addEditSection.style = "display:block";
         persist.exportSceneButton.setAttribute("href", "#"); // No download
+        persist.exportSceneButton.removeAttribute("download"); // No download
         return;
     }
 
@@ -218,6 +219,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         "href",
         "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sceneObjs, null, 2))
     );
+    persist.exportSceneButton.setAttribute("download", `${scene.replace("/", "__")}.json`);
 
     // create regex
     let re;
