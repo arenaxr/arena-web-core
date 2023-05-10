@@ -44,6 +44,7 @@ window.addEventListener("onauth", async function (e) {
     var openAddSceneButton = document.getElementById("openaddscene");
     var deleteSceneButton = document.getElementById("deletescene");
     var importSceneButton = document.getElementById("importscene");
+    const exportSceneButton = document.getElementById("exportscene");
     var setValueButton = document.getElementById("setvalue");
     var selectSchema = document.getElementById("objtype");
     var genidButton = document.getElementById("genid");
@@ -842,6 +843,7 @@ window.addEventListener("onauth", async function (e) {
         authState: authState,
         mqttUsername: username,
         mqttToken: mqttToken,
+        exportSceneButton,
     });
 
     // load default objects, convert to mqtt wire format

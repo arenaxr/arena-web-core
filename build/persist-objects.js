@@ -45,6 +45,7 @@ export async function init(settings) {
         authState: settings.authState,
         mqttUsername: settings.mqttUsername,
         mqttToken: settings.mqttToken,
+        exportSceneButton: settings.exportSceneButton,
     };
 
     persist.currentSceneObjs = [];
@@ -208,8 +209,15 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         li.appendChild(t);
         persist.objList.appendChild(li);
         persist.addEditSection.style = "display:block";
+        persist.exportSceneButton.setAttribute("href", "#"); // No download
         return;
     }
+
+    // Update scene obj list to download as json
+    persist.exportSceneButton.setAttribute(
+        "href",
+        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sceneObjs))
+    );
 
     // create regex
     let re;
