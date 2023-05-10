@@ -12,6 +12,7 @@
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build-watch-object
  */
+// TODO: reduce logging to a reasonable level, similar to build page
 AFRAME.registerComponent('build-watch-object', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     schema: {
@@ -19,6 +20,7 @@ AFRAME.registerComponent('build-watch-object', {
             type: 'boolean',
             default: true,
         },
+        // TODO: fix the openJsonEditor staying checked state, messes up some refresh
         openJsonEditor: {
             type: 'boolean',
             default: false,
@@ -88,14 +90,14 @@ AFRAME.registerComponent('build-watch-object', {
     },
     update: function () {
         if (this.data.enabled) {
-            console.log('build3d watching scene attributes...');
+            console.log(`build3d watching ${this.el.id} attributes...`);
             this.observer.observe(this.el, {
                 attributes: true,
                 attributeOldValue: true,
             });
         } else {
             this.observer.disconnect();
-            console.log('build3d watching scene attributes ended');
+            console.log(`build3d watching ${this.el.id} attributes stopped`);
         }
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {

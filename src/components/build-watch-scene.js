@@ -15,16 +15,13 @@
 let toolbarName = 'translate';
 AFRAME.registerComponent('build-watch-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
-    //schema: {
-        // sceneOptionsObject: {
-        //     type: 'object',
-        //     default: {'scene-options':{
-        //         'env-presets':{
-
-        //         }
-        //     }},
-        // },
-    //},
+    schema: {
+        sceneOptionsObject: {
+            type: 'string',
+            default: 'scene-options',
+        },
+    },
+    // TODO: reduce logging to a reasonable level, similar to build page
     multiple: false,
     init: function () {
         const observer = new MutationObserver(this.sceneNodesUpdate);
@@ -40,7 +37,6 @@ AFRAME.registerComponent('build-watch-scene', {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
-                    // mutation.addedNodes
                     if (mutation.addedNodes.length > 0) {
                         console.log(`${mutation.addedNodes.length} child nodes have been added.`, mutation.addedNodes);
                         mutation.addedNodes.forEach((node) => {
@@ -52,7 +48,6 @@ AFRAME.registerComponent('build-watch-scene', {
                             }
                         });
                     }
-                    // mutation.removedNodes
                     if (mutation.removedNodes.length > 0) {
                         console.log(
                             `${mutation.removedNodes.length} child nodes have been removed.`,
@@ -70,14 +65,12 @@ AFRAME.registerComponent('build-watch-scene', {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
-                    // mutation.target
-                    // mutation.attributeName
-                    // mutation.oldValue
                     console.log(
                         `The ${mutation.attributeName} attribute was modified.`,
                         mutation.target.id,
                         mutation.oldValue
                     );
+                    // TODO: we are writing to DOM to frequently, try diffing a change graph...
                     if (mutation.attributeName === 'class') {
                         if (mutation.target.className.includes('a-mouse-cursor-hover')) {
                             // flush selected attr to dom from grab cursor update
@@ -112,9 +105,6 @@ AFRAME.registerComponent('build-watch-scene', {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
-                    // mutation.target
-                    // mutation.attributeName
-                    // mutation.oldValue
                     console.log(
                         `The ${mutation.attributeName} attribute was modified.`,
                         mutation.target.id,
@@ -133,6 +123,7 @@ AFRAME.registerComponent('build-watch-scene', {
     tick: function () {
         if (!this.cursor) {
             if (document.getElementsByClassName('a-grab-cursor').length > 0) {
+                console.log('cursorTest ok');
                 this.cursor = document.getElementsByClassName('a-grab-cursor')[0];
                 if (this.cursor) {
                     // watch for mouse down use of grab tools
@@ -146,9 +137,10 @@ AFRAME.registerComponent('build-watch-scene', {
                 }
             }
         }
-        // TODO: this detection is delayed atm from the pause() event.
+        // TODO: fix transformToolbar, is usually late and gets clipped from the global pause()
         if (!this.transformToolbar) {
             if (document.getElementsByClassName('toolbarButtons').length > 0) {
+                console.log('transformTest ok');
                 this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
                 if (this.transformToolbar) {
                     // watch for active toolbar grab tool change
@@ -162,9 +154,9 @@ AFRAME.registerComponent('build-watch-scene', {
                 }
             }
         }
-
         if (!this.env) {
             this.env = document.getElementById('env');
+            console.log('envTest ok');
             if (this.env) {
                 this.env.setAttribute('build-watch-object', 'enabled', true);
             }
