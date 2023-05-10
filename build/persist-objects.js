@@ -216,7 +216,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
     // Update scene obj list to download as json
     persist.exportSceneButton.setAttribute(
         "href",
-        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sceneObjs))
+        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sceneObjs, null, 2))
     );
 
     // create regex
