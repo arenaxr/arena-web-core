@@ -391,11 +391,10 @@ window.addEventListener("onauth", async function (e) {
     importSceneButton.addEventListener("click", async function () {
         Swal.fire({
             title: "Import from JSON",
-            html: `<div class="input-prepend">
-                  <span class="add-on" style="width:120px">JSON Path</span>
-                  <input type="text" style="width:320px" id="jsonpath" placeholder="/store/users/user/blender-exports/scene/scene.json">
-                </div>
-                <p style="font-size:10px"><strong>You can enter the blender export scene name and use the default export path.<strong></p>`,
+            html: `<div>
+                   <p style="text-align:center">Select JSON File</p>
+                   <input type="file" accept=".json,.txt" id="jsonfile">
+                   </div>`,
             width: 700,
             confirmButtonText: "Import",
             focusConfirm: false,
@@ -404,87 +403,69 @@ window.addEventListener("onauth", async function (e) {
             input: "checkbox",
             inputValue: 0,
             inputPlaceholder: "Create new scene from JSON data (add to current scene otherwise)",
-            willOpen: () => {
-                const path = Swal.getPopup().querySelector("#jsonpath");
-                path.value = `/store/users/${username}/blender-exports/scene/scene.json`;
-            },
             preConfirm: () => {
-                const path = Swal.getPopup().querySelector("#jsonpath").value;
+                const jsonFile = Swal.getPopup().querySelector("#jsonfile").files[0];
                 const newScene = !!Swal.getPopup().querySelector("#swal2-checkbox").checked;
 
-                if (!path) {
-                    Swal.showValidationMessage(`Please enter a valid filestore path`);
+                if (!jsonFile) {
+                    Swal.showValidationMessage(`Please select a valid json file`);
                 }
-                return { jsonpath: path, newscene: newScene };
+                return { jsonFile, newscene: newScene };
             },
         }).then((result) => {
             if (result.isDismissed) {
                 console.log("canceled");
                 return;
             }
-            let path = `${document.location.protocol}//${document.location.hostname}${document.location.port}${
-                result.value.jsonpath.startsWith("/") ? result.value.jsonpath : "/" + result.value.jsonpath
-            }`; // full path given
-            if (result.value.jsonpath.indexOf("/") == -1) {
-                // blender folder name given
-                path = `${document.location.protocol}//${document.location.hostname}${document.location.port}/store/users/${username}/blender-exports/${result.value.jsonpath}/scene.json`;
-            }
-            fetch(path)
-                .then((response) => {
-                    if (!response.ok) {
-                        Alert.fire({
-                            icon: "error",
-                            title: "Error loading JSON.",
-                            html: `Error: ${response.statusText}`,
-                            timer: 8000,
-                        });
-                        return;
-                    }
-                    return response.json();
-                })
-                .then((importObjs) => {
-                    if (!importObjs) return;
-                    if (sceneinput.disabled == true && !result.value.newscene) {
-                        Alert.fire({
-                            icon: "error",
-                            title: "New scene not requested.",
-                            html: `Must import into an existing scene.`,
-                            timer: 8000,
-                        });
-                        return;
-                    }
-                    let scene = `${namespaceinput.value}/${sceneinput.value}`;
-                    if (result.value.newscene) {
-                        scene = undefined; // will get scene from importObjs data
-                    }
-                    let theNewScene;
-                    try {
-                        theNewScene = PersistObjects.performActionArgObjList("create", scene, importObjs, false);
-                    } catch (err) {
-                        Alert.fire({
-                            icon: "error",
-                            title: "Error loading JSON.",
-                            html: `Error: ${err}`,
-                            timer: 8000,
-                        });
-                        return;
-                    }
-                    setTimeout(async () => {
-                        await PersistObjects.populateSceneList(
-                            namespaceinput.value,
-                            sceneinput,
-                            scenelist,
-                            theNewScene
-                        );
-                        await PersistObjects.populateObjectList(
-                            `${namespaceinput.value}/${theNewScene}`,
-                            objFilter.value,
-                            objTypeFilter
-                        );
-                        reload();
-                        updateLink();
-                    }, 500);
-                });
+            result.value.jsonFile.text().then((jsonText) => {
+                let importObjs;
+                try {
+                    importObjs = JSON.parse(jsonText);
+                } catch {
+                    Alert.fire({
+                        icon: "error",
+                        title: "Could not parse JSON.",
+                        timer: 8000,
+                    });
+                    return;
+                }
+                if (!importObjs) return;
+                if (sceneinput.disabled == true && !result.value.newscene) {
+                    Alert.fire({
+                        icon: "error",
+                        title: "New scene not requested.",
+                        html: `Must import into an existing scene.`,
+                        timer: 8000,
+                    });
+                    return;
+                }
+                let scene = `${namespaceinput.value}/${sceneinput.value}`;
+                if (result.value.newscene) {
+                    scene = undefined; // will get scene from importObjs data
+                }
+                let theNewScene;
+                try {
+                    theNewScene = PersistObjects.performActionArgObjList("create", scene, importObjs, false);
+                } catch (err) {
+                    Alert.fire({
+                        icon: "error",
+                        title: "Error loading JSON.",
+                        html: `Error: ${err}`,
+                        timer: 8000,
+                    });
+                    return;
+                }
+                setTimeout(async () => {
+                    await PersistObjects.populateSceneList(namespaceinput.value, sceneinput, scenelist, theNewScene);
+                    await PersistObjects.populateObjectList(
+                        `${namespaceinput.value}/${theNewScene}`,
+                        objFilter.value,
+                        objTypeFilter
+                    );
+                    reload();
+                    updateLink();
+                }, 500);
+            });
         });
     });
 
