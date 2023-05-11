@@ -56,7 +56,7 @@ AFRAME.registerComponent('build-watch-object', {
                         };
                         // use aframe-watcher updates to send only changes updated
                         let changes = undefined;
-                        if (AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
+                        if (AFRAME.INSPECTOR.history && AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
                             changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
                         }
                         if (msg.action == 'update') {
@@ -90,14 +90,14 @@ AFRAME.registerComponent('build-watch-object', {
     },
     update: function () {
         if (this.data.enabled) {
-            console.log(`build3d watching ${this.el.id} attributes...`);
+            console.log(`build3d watching entity ${this.el.id} attributes...`);
             this.observer.observe(this.el, {
                 attributes: true,
                 attributeOldValue: true,
             });
         } else {
             this.observer.disconnect();
-            console.log(`build3d watching ${this.el.id} attributes stopped`);
+            console.log(`build3d watching entity ${this.el.id} attributes stopped`);
         }
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {

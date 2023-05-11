@@ -40,7 +40,7 @@ export class Arena {
             // will queue messages until MQTT connection is available (indicated by console.setOptions())
             ARENAMqttConsole.init();
         }
-        this.defaults = ARENADefaults; // 'get' arena defaults
+        this.defaults = ARENADefaults; // "get" arena defaults
         this.events = new ARENAEventEmitter(); // arena events target
         this.timeID = new Date().getTime() % 10000;
         this.camUpdateIntervalMs = ARENAUtils.getUrlParam('camUpdateIntervalMs', this.defaults.camUpdateIntervalMs);
@@ -376,27 +376,13 @@ export class Arena {
         console.log('build3d', 'A-Frame Inspector loaded');
 
         setTimeout(() => {
-            const scenegraphDiv = document.getElementById('scenegraph');
-            const inspectorMqttLog = document.createElement('div');
-            inspectorMqttLog.id = 'inspectorMqttLog';
-            inspectorMqttLog.className = 'outliner';
-            inspectorMqttLog.tabIndex = 1;
-            inspectorMqttLog.style.height = '50%';
-            inspectorMqttLog.style.overflow = 'overflow';
-            scenegraphDiv.appendChild(inspectorMqttLog);
-
-            const line = document.createElement('span');
-            line.innerHTML += `Pub MQTT: watching local changes...`;
-            inspectorMqttLog.appendChild(document.createElement('br'));
-            inspectorMqttLog.appendChild(line);
-
             const perm = this.isUserSceneWriter();
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
             updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
-            // use 'Back to Scene' to send to real ARENA scene
-            $('a.toggle-edit').on('click', function() {
+            // use "Back to Scene" to send to real ARENA scene
+            $('a.toggle-edit').click(function() {
                 // remove the build3d a-frame inspector
                 let url = new URL(window.location.href);
                 url.searchParams.delete('build3d');
@@ -406,9 +392,7 @@ export class Arena {
                 }, '', decodeURIComponent(url.href));
                 window.location.reload();
             });
-            // allow all animations and components to run
-            $('#playPauseScene').trigger('click');
-        }, 500);
+        }, 2000);
 
         function updateInspectorPanel(perm, jqSelect) {
             $(jqSelect).css('opacity', '.75');

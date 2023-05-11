@@ -121,6 +121,25 @@ AFRAME.registerComponent('build-watch-scene', {
         });
     },
     tick: function () {
+        // TODO: move these detectors out to a more reliable timing condition
+        if (!this.scenegraphDiv) {
+            this.scenegraphDiv = document.getElementById('scenegraph');
+            if (this.scenegraphDiv) {
+                console.log('scenegraphTest ok');
+                const inspectorMqttLog = document.createElement('div');
+                inspectorMqttLog.id = 'inspectorMqttLog';
+                inspectorMqttLog.className = 'outliner';
+                inspectorMqttLog.tabIndex = 1;
+                inspectorMqttLog.style.height = '50%';
+                inspectorMqttLog.style.overflow = 'overflow';
+                this.scenegraphDiv.appendChild(inspectorMqttLog);
+
+                const line = document.createElement('span');
+                line.innerHTML += `Pub MQTT: watching local changes...`;
+                inspectorMqttLog.appendChild(document.createElement('br'));
+                inspectorMqttLog.appendChild(line);
+                    }
+        }
         if (!this.cursor) {
             if (document.getElementsByClassName('a-grab-cursor').length > 0) {
                 console.log('cursorTest ok');
@@ -156,8 +175,8 @@ AFRAME.registerComponent('build-watch-scene', {
         }
         if (!this.env) {
             this.env = document.getElementById('env');
-            console.log('envTest ok');
             if (this.env) {
+                console.log('envTest ok');
                 this.env.setAttribute('build-watch-object', 'enabled', true);
             }
         }
