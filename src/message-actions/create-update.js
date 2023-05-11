@@ -200,7 +200,6 @@ export class CreateUpdate {
      */
     static setObjectAttributes(entityEl, message) {
         const data = message.data;
-
         let type = data.object_type;
         delete data.object_type; // remove attribute so we don't set it later
 
