@@ -456,7 +456,7 @@ export class Arena {
                  * @param {Array} [descendants] - running list of descendants
                  */
                 const createObj = (obj, descendants = []) => {
-                    const parent = obj.attributes ? obj.attributes.parent : undefined;
+                    const parent = obj.attributes.parent;
                     if (obj.object_id === this.camName) {
                         arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                         return;

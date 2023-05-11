@@ -228,15 +228,17 @@ window.addEventListener("onauth", async function (e) {
                 elEx = document.getElementsByName("root[data][rotation][euler-x]")[0];
                 elEy = document.getElementsByName("root[data][rotation][euler-y]")[0];
                 elEz = document.getElementsByName("root[data][rotation][euler-z]")[0];
-                const e = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(
-                    parseFloat(elQx.value),
-                    parseFloat(elQy.value),
-                    parseFloat(elQz.value),
-                    parseFloat(elQw.value)
-                ));
-                if (elEx) elEx.value = parseFloat(THREE.MathUtils.radToDeg(e.x).toFixed(3));
-                if (elEy) elEy.value = parseFloat(THREE.MathUtils.radToDeg(e.y).toFixed(3));
-                if (elEz) elEz.value = parseFloat(THREE.MathUtils.radToDeg(e.z).toFixed(3));
+                const e = new THREE.Euler().setFromQuaternion(
+                    new THREE.Quaternion(
+                        parseFloat(elQx.value),
+                        parseFloat(elQy.value),
+                        parseFloat(elQz.value),
+                        parseFloat(elQw.value)
+                    )
+                );
+                elEx.value = parseFloat(THREE.MathUtils.radToDeg(e.x).toFixed(3));
+                elEy.value = parseFloat(THREE.MathUtils.radToDeg(e.y).toFixed(3));
+                elEz.value = parseFloat(THREE.MathUtils.radToDeg(e.z).toFixed(3));
             });
             rowEuler.addEventListener("change", () => {
                 // update quaternions on form from euler degree changes
