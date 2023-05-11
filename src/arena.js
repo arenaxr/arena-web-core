@@ -790,6 +790,7 @@ export class Arena {
 
             // init chat
             if (this.isUsersPermitted()) {
+                sceneEl.setAttribute('arena-chat-ui', 'enabled', true);
                 this.showEchoDisplayName();
             } else {
                 // prevent local name when non-interactive
