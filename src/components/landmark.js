@@ -113,7 +113,7 @@ AFRAME.registerSystem('landmark', {
 
         const chat = sceneEl.components['arena-chat-ui'];
         this.landmarks[landmark.el.id] = landmark;
-        if (landmark.data.startingPosition === false) {
+        if (chat && landmark.data.startingPosition === false) {
             chat.addLandmark(landmark);
         }
     },
@@ -125,7 +125,8 @@ AFRAME.registerSystem('landmark', {
 
         const chat = sceneEl.components['arena-chat-ui'];
         delete this.landmarks[landmark.el.id];
-        if (landmark.data.startingPosition === false) {
+        // TODO: fix loading order of chat and landmarks
+        if (chat && landmark.data.startingPosition === false) {
             chat.removeLandmark(landmark);
         }
     },

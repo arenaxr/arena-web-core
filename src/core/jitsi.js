@@ -48,13 +48,6 @@ AFRAME.registerSystem('arena-jitsi', {
         this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
 
-        // don't start Jitsi if noav is set or if it is not allowed
-        if (this.arena.params.noav || !this.arena.isJitsiPermitted()) {
-            sceneEl.jitsiLoaded = true;
-            sceneEl.emit(ARENA_EVENTS.JITSI_LOADED, false);
-            return;
-        }
-
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
         this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
@@ -108,6 +101,7 @@ AFRAME.registerSystem('arena-jitsi', {
         this.onConnectionFailed = this.onConnectionFailed.bind(this);
         this.onRemoteTrack = this.onRemoteTrack.bind(this);
         this.onDominantSpeakerChanged = this.onDominantSpeakerChanged.bind(this);
+        this.setResolutionRemotes = this.setResolutionRemotes.bind(this);
         this.onConferenceError = this.onConferenceError.bind(this);
         this.disconnect = this.disconnect.bind(this);
 
@@ -116,8 +110,19 @@ AFRAME.registerSystem('arena-jitsi', {
 
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
+        // signal that jitsi is loaded. note: jitsi is not necessarily CONNECTED when this event is fired,
+        // it is just LOADED
         sceneEl.jitsiLoaded = true;
         sceneEl.emit(ARENA_EVENTS.JITSI_LOADED, true);
+
+        if (this.arena.params.skipav) {
+            this.connect();
+        } else if (!this.arena.params.noav && this.arena.isJitsiPermitted()) {
+            window.setupAV(() => {
+                // Initialize Jitsi videoconferencing after A/V setup window
+                this.connect();
+            });
+        }
     },
 
     /**

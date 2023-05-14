@@ -34,13 +34,13 @@ AFRAME.registerComponent('jitsi-video', {
             return;
         }
 
-        this.jitsiConnect = this.jitsiConnect.bind(this);
-        this.jitsiNewUserjitsiConnect = this.jitsiNewUserjitsiConnect.bind(this);
-        this.jitsiUserLeftjitsiConnect = this.jitsiUserLeftjitsiConnect.bind(this);
+        this.onJitsiConnect = this.onJitsiConnect.bind(this);
+        this.onJitsiNewUser = this.onJitsiNewUser.bind(this);
+        this.onJitsiUserLeft = this.onJitsiUserLeft.bind(this);
 
-        sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.jitsiConnect);
-        sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.jitsiNewUserjitsiConnect);
-        sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.jitsiUserLeftjitsiConnect);
+        sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect);
+        sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onJitsiNewUser);
+        sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onJitsiUserLeft);
     },
 
     update: function(oldData) {
@@ -56,7 +56,8 @@ AFRAME.registerComponent('jitsi-video', {
         }
     },
 
-    jitsiConnect: function(args) {
+    onJitsiConnect: function(e) {
+        const args = e.detail;
         if (this.data.jitsiId !== '') {
             this.updateVideo();
             return;
@@ -83,7 +84,8 @@ AFRAME.registerComponent('jitsi-video', {
         this.updateVideo();
     },
 
-    jitsiNewUser: function(user) {
+    onJitsiNewUser: function(e) {
+        const user = e.detail;
         if (this.data.displayName === '') return;
 
         if (user.dn === this.data.displayName) {
@@ -92,8 +94,8 @@ AFRAME.registerComponent('jitsi-video', {
         }
     },
 
-    jitsiUserLeft: function(details) {
-        if (details.jid === this.data.jitsiId) {
+    onJitsiUserLeft: function(e) {
+        if (e.detail.jid === this.data.jitsiId) {
             this.el.removeAttribute('material', 'src');
         }
     },

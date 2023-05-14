@@ -128,14 +128,6 @@ AFRAME.registerSystem('arena-scene', {
             } else {
                 ARENAWebARUtils.enterARNonWebXR();
             }
-        } else if (this.params.skipav) {
-            // Directly initialize Jitsi videoconferencing
-            this.jitsi.connect();
-        } else if (!this.params.noav && this.isJitsiPermitted()) {
-            window.setupAV(() => {
-                // Initialize Jitsi videoconferencing after A/V setup window
-                this.jitsi.connect();
-            });
         }
 
         if (this.params.build3d) {
@@ -555,7 +547,7 @@ AFRAME.registerSystem('arena-scene', {
         // set renderer defaults that are different from THREE/aframe defaults
         const renderer = sceneEl.renderer;
         renderer.gammaFactor = 2.2;
-        renderer.outputEncoding = THREE['sRGBEncoding'];
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         const environment = document.createElement('a-entity');
         environment.id = 'env';
@@ -601,7 +593,7 @@ AFRAME.registerSystem('arena-scene', {
 
                     if (sceneOptions['sceneHeadModels']) {
                         // add scene custom scene heads to selection list
-                        this.setupSceneHeadModels();
+                        this.setupSceneHeadModels(sceneOptions['sceneHeadModels']);
                     }
 
                     if (!sceneOptions['clickableOnlyEvents']) {
@@ -614,6 +606,7 @@ AFRAME.registerSystem('arena-scene', {
                         ARENA[attribute] = value;
                     }
 
+                    console.log(options);
                     const envPresets = options['env-presets'];
                     for (const [attribute, value] of Object.entries(envPresets)) {
                         environment.setAttribute('environment', attribute, value);
@@ -666,8 +659,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * Update the list of scene-specific heads the user can select from
      */
-    setupSceneHeadModels: function() {
-        const sceneHeads = sceneOptions['sceneHeadModels'];
+    setupSceneHeadModels: function(sceneHeads) {
         const headModelPathSelect = document.getElementById('headModelPathSelect');
         const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
         sceneHeads.forEach((head) => {
