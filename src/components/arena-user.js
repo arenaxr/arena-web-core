@@ -9,6 +9,7 @@
  */
 
 import { ARENADefaults } from '../../conf/defaults.js';
+import { ARENA_EVENTS } from '../constants';
 
 /**
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
@@ -39,16 +40,27 @@ AFRAME.registerComponent('arena-user', {
     init: function() {
         const data = this.data;
         const el = this.el;
-        const name = el.id;
+
+        const sceneEl = el.sceneEl;
+
+        if (!sceneEl.jitsiLoaded) {
+            sceneEl.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.init.bind(this));
+            return;
+        }
+
+        this.arena = sceneEl.systems['arena-scene'];
+        this.jitsi = sceneEl.systems['arena-jitsi'];
 
         el.setAttribute('rotation.order', 'YXZ');
-        el.object3D.position.set(0, ARENA.defaults.camHeight, 0);
+        el.object3D.position.set(0, ARENADefaults.camHeight, 0);
         el.object3D.rotation.set(0, 0, 0);
+
+        const name = el.id;
 
         const decodeName = decodeURI(name.split('_')[2]);
         const personName = decodeName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         this.headText = document.createElement('a-text');
-        this.headText.setAttribute('id', 'headtext_' + name);
+        this.headText.setAttribute('id', `head-text-${name}`);
         this.headText.setAttribute('value', personName);
         this.headText.setAttribute('position', '0 0.45 0.05');
         this.headText.setAttribute('side', 'double');
@@ -60,7 +72,7 @@ AFRAME.registerComponent('arena-user', {
         this.headText.setAttribute('width', 5); // try setting last
 
         this.headModel = document.createElement('a-entity');
-        this.headModel.setAttribute('id', 'head-model_' + name);
+        this.headModel.setAttribute('id', `head-model-${name}`);
         this.headModel.setAttribute('rotation', '0 180 0');
         this.headModel.setAttribute('scale', '1 1 1');
         this.headModel.setAttribute('gltf-model', data.headModelPath);
@@ -89,7 +101,7 @@ AFRAME.registerComponent('arena-user', {
             setTimeout(function() {
                 if (audioCtx.state === 'running') {
                     if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-                        enableChromeAEC(listener.gain);
+                        enableChromeAEC(listener.gain, this.jisti.spatialAudioOn);
                     }
                     document.body.removeEventListener('touchmove', resume, false);
                     document.body.removeEventListener('mousemove', resume, false);
@@ -183,19 +195,19 @@ AFRAME.registerComponent('arena-user', {
 
         // attach video to head
         const videoCube = document.createElement('a-box');
-        videoCube.setAttribute('id', this.videoID + 'cube');
+        videoCube.setAttribute('id', `video-cube-${this.videoID}`);
         videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
         videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
-        videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
+        // videoCube.setAttribute('material-extras', 'needsUpdate', 'true');
 
         if (data.presence !== 'Portal') {
             videoCube.setAttribute('position', '0 0 0');
             videoCube.setAttribute('scale', '0.6 0.4 0.6');
 
             const videoCubeDark = document.createElement('a-box');
-            videoCubeDark.setAttribute('id', this.videoID + 'cubeDark');
+            videoCubeDark.setAttribute('id', `video-cube-dark-${this.videoID}`);
             videoCubeDark.setAttribute('position', '0 0 0.01');
             videoCubeDark.setAttribute('scale', '0.61 0.41 0.6');
             videoCubeDark.setAttribute('material', 'shader', 'flat');
@@ -238,7 +250,7 @@ AFRAME.registerComponent('arena-user', {
         /* Handle Jitsi Video */
         this.videoID = `video${data.jitsiId}`;
         if (data.hasVideo) {
-            if (!ARENA.Jitsi.getVideoTrack(data.jitsiId)) {
+            if (!this.jitsi.getVideoTrack(data.jitsiId)) {
                 return;
             }
 
@@ -259,18 +271,19 @@ AFRAME.registerComponent('arena-user', {
 
         this.aec(el.sceneEl.audioListener);
 
-        el.setAttribute('sound', 'positional: true');
+        // TODO: handle audio scene options
+        el.setAttribute('sound', 'positional', true);
         if (ARENA.refDistance) {
-            el.setAttribute('sound', `refDistance: ${ARENA.refDistance}`);
+            el.setAttribute('sound', 'refDistance', ARENA.refDistance);
         }
         if (ARENA.rolloffFactor) {
-            el.setAttribute('sound', `rolloffFactor: ${ARENA.rolloffFactor}`);
+            el.setAttribute('sound', 'rolloffFactor', ARENA.rolloffFactor);
         }
         if (ARENA.distanceModel) {
-            el.setAttribute('sound', `distanceModel: ${ARENA.distanceModel}`);
+            el.setAttribute('sound', 'distanceModel', ARENA.distanceModel);
         }
         if (ARENA.volume) {
-            el.setAttribute('sound', `volume: ${ARENA.volume}`);
+            el.setAttribute('sound', 'volume', ARENA.volume);
         }
     },
 
@@ -283,7 +296,7 @@ AFRAME.registerComponent('arena-user', {
         this.audioID = `audio${data.jitsiId}`;
         if (data.hasAudio) {
             // set up positional audio, but only once per camera
-            if (!ARENA.Jitsi.getAudioTrack(data.jitsiId)) {
+            if (!this.jitsi.getAudioTrack(data.jitsiId)) {
                 return;
             }
 
@@ -355,7 +368,7 @@ AFRAME.registerComponent('arena-user', {
                     }; // use distance based res for 0 and 180+
                 }
             });
-            ARENA.Jitsi.setResolutionRemotes(panoIds, constraints);
+            this.jitsi.setResolutionRemotes(panoIds, constraints);
         }
     },
 
@@ -430,7 +443,7 @@ AFRAME.registerComponent('arena-user', {
             }
         }
 
-        if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
+        if (this.data.jitsiId) {
             if (data.jitsiQuality < 66.7) {
                 this.drawQuality();
             } else {
@@ -448,8 +461,10 @@ AFRAME.registerComponent('arena-user', {
     },
 
     tick: function() {
+        const data = this.data;
+
         // do periodic a/v updates
-        if (ARENA.Jitsi && ARENA.Jitsi.ready && this.data.jitsiId) {
+        if (data.jitsiId) {
             this.updateVideo();
             this.updateAudio();
         }
@@ -468,7 +483,7 @@ AFRAME.registerComponent('arena-user', {
                     inFieldOfView = arenaCameraComponent.viewIntersectsObject3D(this.videoCube.object3D);
                 }
             }
-            if (this.data.pano) {
+            if (data.pano) {
                 this.evaluateRemoteResolution(1920);
             } else if (inFieldOfView == false) {
                 this.muteVideo();
@@ -508,7 +523,7 @@ AFRAME.registerComponent('arena-user', {
  * @param {Object} gainNode
  * @private
  */
-async function enableChromeAEC(gainNode) {
+async function enableChromeAEC(gainNode, spatialAudioOn) {
     /**
      *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
      *  1. grab the GainNode from the scene's THREE.AudioListener
@@ -563,7 +578,7 @@ async function enableChromeAEC(gainNode) {
         outboundPeerConnection.setRemoteDescription(answer);
 
         gainNode.disconnect();
-        if (ARENA.Jitsi.spatialAudioOn) {
+        if (spatialAudioOn) {
             gainNode.connect(context.destination);
         } else {
             gainNode.connect(loopbackDestination);

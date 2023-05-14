@@ -13,11 +13,35 @@
 import Swal from 'sweetalert2';
 import { ARENA_EVENTS } from '../constants';
 
-AFRAME.registerComponent('av-setup', {
+AFRAME.registerSystem('arena-av-setup', {
     schema: {
         htmlSrc: {type: 'string', default: 'static/html/avsetup.html'},
     },
-    init() {
+
+    init: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        // wait for ARENA user params (token, id, etc.) to be ready
+        if (!sceneEl.ARENAUserParamsLoaded) {
+            sceneEl.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
+            return;
+        }
+
+        this.arena = sceneEl.systems['arena-scene'];
+        this.jitsi = sceneEl.systems['arena-jitsi'];
+
+        this.show = this.show.bind(this);
+        this.getDevices = this.getDevices.bind(this);
+        this.gotDevices = this.gotDevices.bind(this);
+        this.getStream = this.getStream.bind(this);
+        this.gotStream = this.gotStream.bind(this);
+        this.micDrawLoop = this.micDrawLoop.bind(this);
+
+        if (this.arena.params.noav) return;
+
         try {
             this.loadHTML().then(() => {
                 this.addListeners();
@@ -29,18 +53,19 @@ AFRAME.registerComponent('av-setup', {
                 this.audioContext = new AudioContext();
                 this.meterProcess = createAudioMeter(this.audioContext);
 
-                // Only show if no previous preferences were set / first time AV setup
-                if (localStorage.getItem('prefAudioInput') === null) {
-                    this.show();
-                }
-
                 window.setupAV = this.show; // legacy alias
             });
         } catch (err) {
             console.error("Error loading AV setup HTML: ", err);
         }
+
+        // Only show if no previous preferences were set / first time AV setup
+        if (localStorage.getItem('prefAudioInput') === null) {
+            this.show();
+        }
     },
-    async loadHTML() {
+
+    loadHTML: async function() {
         const htmlRes = await fetch(this.data.htmlSrc);
         const html = await htmlRes.text();
         document.body.insertAdjacentHTML('beforeend', html);
@@ -65,22 +90,23 @@ AFRAME.registerComponent('av-setup', {
         this.videoElement.classList.add('flip-video');
         this.videoElement.style.borderRadius = '10px';
     },
-    show(callback) {
+
+    show: function(callback) {
+        console.log("showing av setup")
         if (callback) {
             this.setupAVCallback = callback;
         }
 
-        if (ARENA.Jitsi) {
-            ARENA.Jitsi.prevVideoUnmuted = ARENA.Jitsi.hasVideo;
-            ARENA.Jitsi.prevAudioUnmuted = ARENA.Jitsi.hasAudio;
-            const sideMenu = this.el.sceneEl.components['arena-side-menu-ui'];
-            if (ARENA.Jitsi?.hasVideo) {
-                sideMenu.clickButton(sideMenu.buttons.VIDEO);
-            }
-            if (ARENA.Jitsi?.hasAudio) {
-                sideMenu.clickButton(sideMenu.buttons.AUDIO);
-            }
+        this.jitsi.prevVideoUnmuted = this.jitsi.hasVideo;
+        this.jitsi.prevAudioUnmuted = this.jitsi.hasAudio;
+        const sideMenu = this.el.sceneEl.components['arena-side-menu-ui'];
+        if (this.jitsi.hasVideo) {
+            sideMenu.clickButton(sideMenu.buttons.VIDEO);
         }
+        if (this.jitsi.hasAudio) {
+            sideMenu.clickButton(sideMenu.buttons.AUDIO);
+        }
+
         this.setupPanel.classList.remove('d-none');
         let headModelPathIdx = 0;
         if (ARENA.sceneHeadModels) {
@@ -99,14 +125,15 @@ AFRAME.registerComponent('av-setup', {
             this.headModelPathSelect.length) ? headModelPathIdx : 0;
         if (localStorage.getItem('display_name')) {
             this.displayName.value = localStorage.getItem('display_name');
-            this.displayName.focus();
+            // this.displayName.focus();
         }
         this.detectDevices(undefined, true);
     },
+
     /**
      * Initialize listeners
      */
-    addListeners() {
+    addListeners: function() {
         this.audioInSelect.onchange = this.getStream;
         this.videoSelect.onchange = this.getStream;
         // This will fail on a lot of browsers :(
@@ -170,7 +197,8 @@ AFRAME.registerComponent('av-setup', {
         document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
         document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
     },
-    getStream(_evt= undefined, {prefAudioInput, prefVideoInput} = {}, silent) {
+
+    getStream: function(_evt=undefined, {prefAudioInput, prefVideoInput} = {}, silent) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
                 track.stop();
@@ -182,20 +210,22 @@ AFRAME.registerComponent('av-setup', {
             audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
             video: {deviceId: videoSource ? {exact: videoSource} : undefined},
         };
-        return navigator.mediaDevices.getUserMedia(constraints).
-            then(this.gotStream).catch((e) => {
-            // Prefer failed, don't popup alert, just fallback to detect-all
+        return navigator.mediaDevices.getUserMedia(constraints)
+            .then(this.gotStream)
+            .catch((e) => {
+                // Prefer failed, don't popup alert, just fallback to detect-all
                 if (prefAudioInput || prefAudioInput) {
                     return this.getStream(e, {}, silent);
                 }
                 return this.handleMediaError(e, silent);
             });
     },
+
     /**
      * Alias
      * @return {Promise<MediaDeviceInfo[]>}
      */
-    getDevices() {
+    getDevices: function() {
         // AFAICT in Safari this only gets default devices until gUM is called :/
         return navigator.mediaDevices.enumerateDevices();
     },
@@ -204,7 +234,7 @@ AFRAME.registerComponent('av-setup', {
      * Populates select dropdowns with detected devices
      * @param {MediaDeviceInfo[]} deviceInfos - List of enumerated devices
      */
-    gotDevices(deviceInfos) {
+    gotDevices: function(deviceInfos) {
         // Faster than innerHTML. No options have listeners so this is ok
         this.audioInSelect.textContent = '';
         this.audioOutSelect.textContent = '';
@@ -283,11 +313,11 @@ AFRAME.registerComponent('av-setup', {
      * Also initializes sound processing to display microphone volume meter
      * @param {MediaStream} stream - Stream created by gUM
      */
-    gotStream(stream) {
+    gotStream: function(stream) {
         window.stream = stream; // make stream available to console
-        this.audioInSelect.selectedIndex = [...audioInSelect.options].
+        this.audioInSelect.selectedIndex = [...this.audioInSelect.options].
             findIndex((option) => option.text === stream.getAudioTracks()[0].label);
-        this.videoSelect.selectedIndex = [...videoSelect.options].
+        this.videoSelect.selectedIndex = [...this.videoSelect.options].
             findIndex((option) => option.text === stream.getVideoTracks()[0].label);
         this.videoElement.srcObject = stream;
 
@@ -320,21 +350,21 @@ AFRAME.registerComponent('av-setup', {
         }
     },
 
-    detectDevices(_evt, silent = false)  {
+    detectDevices: function(_evt, silent = false)  {
         const preferredDevices = {
             prefAudioInput: localStorage.getItem('prefAudioInput'),
             prefVideoInput: localStorage.getItem('prefVideoInput'),
         };
-        this.getStream(undefined, preferredDevices, silent).
-            then(this.getDevices).
-            then(this.gotDevices).
-            catch((e) => this.handleMediaError(e, silent));
+        this.getStream(undefined, preferredDevices, silent)
+            .then(this.getDevices)
+            .then(this.gotDevices)
+            .catch((e) => this.handleMediaError(e, silent));
     },
 
     /**
      * Animation loop to draw detected microphone audio level
      */
-    micDrawLoop() {
+    micDrawLoop: function() {
         // set bar based on the current volume
         const vol = this.meterProcess.volume * 100 * 3;
         this.micMeter.setAttribute('style', `width: ${vol}%`);

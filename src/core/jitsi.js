@@ -100,6 +100,7 @@ AFRAME.registerSystem('arena-jitsi', {
         this.newUserTimers = [];
 
         this.unload = this.unload.bind(this);
+        this.onConnectionSuccess = this.onConnectionSuccess.bind(this);
         this.onConferenceJoined = this.onConferenceJoined.bind(this);
         this.onUserJoined = this.onUserJoined.bind(this);
         this.onUserLeft = this.onUserLeft.bind(this);
@@ -394,7 +395,7 @@ AFRAME.registerSystem('arena-jitsi', {
             }
         });
 
-        sceneEl.emit(JITSI_EVENTS.CONNECT, {
+        sceneEl.emit(JITSI_EVENTS.CONNECTED, {
             scene: this.arena.namespacedScene,
             pl: pl,
         });
@@ -460,6 +461,11 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {object} user user object (JitsiParticipant)
      */
     onUserLeft: function(id, user) {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         console.log('user left:', id);
 
         let arenaId = user.getProperty('arenaId');
@@ -488,6 +494,11 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {string} id user Id
      */
     onDominantSpeakerChanged: function(id) {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         // console.log(`(conference) Dominant Speaker ID: ${id}`);
         this.prevActiveSpeaker = this.activeSpeaker;
         this.activeSpeaker = id;
@@ -524,10 +535,10 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
             console.log(`track removed!!!${track}`);
         });
-        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoinedonRemoteTrack);
-        this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoinedonRemoteTrack);
-        this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeftonRemoteTrack);
-        this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChangedonRemoteTrack);
+        this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined);
+        this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined);
+        this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft);
+        this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged);
         this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
             console.log(`Talking on mute detected!`);
             sceneEl.emit(JITSI_EVENTS.TALK_WHILE_MUTED, true);

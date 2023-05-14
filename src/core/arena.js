@@ -9,7 +9,7 @@
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
 import { ARENAWebARUtils } from '../webar/index.js';
-import { ARENA_EVENTS } from '../constants/index.js';
+import { ARENA_EVENTS, JITSI_EVENTS } from '../constants/index.js';
 import Swal from 'sweetalert2';
 
 AFRAME.registerSystem('arena-scene', {
@@ -84,10 +84,6 @@ AFRAME.registerSystem('arena-scene', {
 
         this.loadScene();
 
-        if (!this.params.noav) {
-            this.el.sceneEl.setAttribute('av-setup', {});
-        }
-
         // setup webar session
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
@@ -98,10 +94,10 @@ AFRAME.registerSystem('arena-scene', {
             this.showEchoDisplayName();
         });
 
-        // this.events.on(ARENAEventEmitter.events.DOMINANT_SPEAKER, (e) => {
-        //     const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
-        //     this.showEchoDisplayName(speaker);
-        // });
+        sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER_CHANGED, (e) => {
+            const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
+            this.showEchoDisplayName(speaker);
+        });
     },
 
     loadScene: function() {

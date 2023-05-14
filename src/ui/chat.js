@@ -385,7 +385,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
 
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
-        sceneEl.addEventListener(JITSI_EVENTS.JITSI_CONNECT, this.onJitsiConnect);
+        sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect);
         sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJoin);
         sceneEl.addEventListener(JITSI_EVENTS.SCREENSHARE, this.onScreenshare);
         sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onUserLeft);

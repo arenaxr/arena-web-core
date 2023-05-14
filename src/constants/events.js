@@ -19,17 +19,17 @@ export const ARENA_EVENTS = Object.freeze({
 });
 
 export const JITSI_EVENTS = Object.freeze({
-    CONNECT:                    'onjitsiconnected',
-    USER_JOINED:                'onjitsiuserjoined',
-    USER_LEFT:                  'onjitsiuserleft',
-    SCREENSHARE:                'onjitsiscreenshare',
-    DOMINANT_SPEAKER_CHANGED:   'onjitsidominantspeakerchanged',
-    TALK_WHILE_MUTED:           'onjitsitalkwhilemuted',
-    NOISY_MIC:                  'onjitsinosymic',
-    STATS_LOCAL:                'onjitsistatslocal',
-    STATS_REMOTE:               'onjitsistatsremote',
-    STATUS:                     'onjitsistatus',
-    CONFERENCE_ERROR:           'onjitsierror',
+    CONNECTED:                  'onarenajitsiconnected',
+    USER_JOINED:                'onarenajitsiuserjoined',
+    USER_LEFT:                  'onarenajitsiuserleft',
+    SCREENSHARE:                'onarenajitsiscreenshare',
+    DOMINANT_SPEAKER_CHANGED:   'onarenajitsidominantspeakerchanged',
+    TALK_WHILE_MUTED:           'onarenajitsitalkwhilemuted',
+    NOISY_MIC:                  'onarenajitsinosymic',
+    STATS_LOCAL:                'onarenajitsistatslocal',
+    STATS_REMOTE:               'onarenajitsistatsremote',
+    STATUS:                     'onarenajitsistatus',
+    CONFERENCE_ERROR:           'onarenajitsierror',
 });
 
 export const EVENT_SOURCES = Object.freeze({

@@ -38,7 +38,7 @@ AFRAME.registerComponent('jitsi-video', {
         this.jitsiNewUserjitsiConnect = this.jitsiNewUserjitsiConnect.bind(this);
         this.jitsiUserLeftjitsiConnect = this.jitsiUserLeftjitsiConnect.bind(this);
 
-        sceneEl.addEventListener(JITSI_EVENTS.JITSI_CONNECT, this.jitsiConnect);
+        sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.jitsiConnect);
         sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.jitsiNewUserjitsiConnect);
         sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.jitsiUserLeftjitsiConnect);
     },

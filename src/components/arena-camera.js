@@ -55,6 +55,7 @@ AFRAME.registerComponent('arena-camera', {
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
+        this.jitsi = sceneEl.systems['arena-jitsi'];
 
         this.lastPos = new THREE.Vector3();
         this.vioMatrix = new THREE.Matrix4();
@@ -136,10 +137,10 @@ AFRAME.registerComponent('arena-camera', {
             msg.presence = presence.value;
         }
 
-        if (this.arena.Jitsi) {
-            msg.jitsiId = this.arena.Jitsi.getJitsiId();
-            msg.hasAudio = this.arena.Jitsi.hasAudio;
-            msg.hasVideo = this.arena.Jitsi.hasVideo;
+        if (this.jitsi.ready) {
+            msg.jitsiId = this.jitsi.getJitsiId();
+            msg.hasAudio = this.jitsi.hasAudio;
+            msg.hasVideo = this.jitsi.hasVideo;
         }
 
         const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
@@ -261,9 +262,9 @@ AFRAME.registerComponent('arena-camera', {
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
 
-        if (!this.videoDefaultResolutionSet && ARENA && this.arena.Jitsi && this.arena.Jitsi.ready && this.arena.videoDefaultResolutionConstraint) {
+        if (!this.videoDefaultResolutionSet && ARENA && this.jitsi.ready && this.arena.videoDefaultResolutionConstraint) {
             // set scene-options, videoDefaultResolutionConstraint, only once
-            this.arena.Jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
+            this.jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;
         }
     },
