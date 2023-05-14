@@ -24,8 +24,10 @@ uniform mat4 remoteRProjectionMatrix, remoteRMatrixWorld;
 
 #define DEPTH_SCALAR    (50.0)
 
+const float onePixel = (1.0 / 255.0);
+
 const bool doAsyncTimeWarp = true;
-const bool stretchBorders = false;
+const bool stretchBorders = true;
 
 float readDepthRemote(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).x;
@@ -101,23 +103,22 @@ void main() {
         float x;
         float xMin = 0.0;
         float xMax = 0.5;
-        vec3 cameraPos;
-        vec3 cameraTopLeft, cameraTopRight, cameraBotLeft, cameraBotRight;
-        vec3 remoteTopLeft, remotePlaneNormal;
-        mat4 remoteProjectionMatrix, remoteMatrixWorld;
 
-        if (oneCamera || leftEye) {
-            if (oneCamera) x = vUv.x;
-            else if (leftEye) x = 2.0 * vUv.x;
-            cameraPos = matrixWorldToPosition(cameraLMatrixWorld);
-            cameraTopLeft = cameraLTopLeft;
-            cameraTopRight = cameraLTopRight;
-            cameraBotLeft = cameraLBotLeft;
-            cameraBotRight = cameraLBotRight;
-            remoteTopLeft = remoteLTopLeft;
-            remotePlaneNormal = remoteLPlaneNormal;
-            remoteProjectionMatrix = remoteLProjectionMatrix;
-            remoteMatrixWorld = remoteLMatrixWorld;
+        vec3 cameraPos = matrixWorldToPosition(cameraLMatrixWorld);
+        vec3 cameraTopLeft = cameraLTopLeft;
+        vec3 cameraTopRight = cameraLTopRight;
+        vec3 cameraBotLeft = cameraLBotLeft;
+        vec3 cameraBotRight = cameraLBotRight;
+        vec3 remoteTopLeft = remoteLTopLeft;
+        vec3 remotePlaneNormal = remoteLPlaneNormal;
+        mat4 remoteProjectionMatrix = remoteLProjectionMatrix;
+        mat4 remoteMatrixWorld = remoteLMatrixWorld;
+
+        if (oneCamera) {
+            x = vUv.x;
+        }
+        else if (leftEye) {
+            x = 2.0 * vUv.x;
         }
         else if (rightEye) {
             x = 2.0 * (vUv.x - 0.5);
@@ -155,7 +156,6 @@ void main() {
                 );
             }
 
-            coordRemoteDepth = coordRemoteColor;
             coordRemoteDepth.x = coordRemoteColor.x + 0.5;
             coordRemoteDepth.y = coordRemoteColor.y;
         }
@@ -163,6 +163,7 @@ void main() {
             xMax = 0.25;
 
             coordRemoteColor.x = x / 4.0;
+            coordRemoteColor.y = vUv.y;
 
             coordRemoteDepth.x = x / 4.0 + 0.25;
             coordRemoteDepth.y = coordRemoteColor.y;
@@ -172,18 +173,29 @@ void main() {
             xMax = 0.75;
 
             coordRemoteColor.x = x / 4.0 + 0.5;
+            coordRemoteColor.y = vUv.y;
 
-            coordRemoteDepth.x = x / 4.0 + 0.25;
+            coordRemoteDepth.x = x / 4.0 + 0.75;
             coordRemoteDepth.y = coordRemoteColor.y;
         }
 
         remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
         remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
 
-        if (!stretchBorders) {
-            if (coordRemoteColor.x < xMin || coordRemoteColor.x > xMax ||
-                coordRemoteColor.y < 0.0  || coordRemoteColor.y > 1.0) {
-                remoteColor = vec4(0.0);
+        if (oneCamera) {
+            if (!stretchBorders) {
+                if (coordRemoteColor.x < xMin || coordRemoteColor.x > xMax ||
+                    coordRemoteColor.y < 0.0  || coordRemoteColor.y > 1.0) {
+                    remoteColor = vec4(0.0);
+                }
+            }
+            else {
+                coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax - onePixel);
+                coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
+                coordRemoteDepth.x = coordRemoteColor.x + 0.5;
+                coordRemoteDepth.y = coordRemoteColor.y;
+                remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
+                remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
             }
         }
     }

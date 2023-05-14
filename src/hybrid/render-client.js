@@ -351,10 +351,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     onEnterVR() {
+        if (!this.connected) return;
         this.sendStatus();
     },
 
     onExitVR() {
+        if (!this.connected) return;
         this.statusDataChannel.send(JSON.stringify({
             isVRMode: false,
             ts: new Date().getTime(),
