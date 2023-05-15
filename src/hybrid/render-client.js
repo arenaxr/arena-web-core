@@ -48,7 +48,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const data = this.data;
         const el = this.el;
 
-        const sceneEl = el;
+        const sceneEl = el.sceneEl;
         if (ARENA.idTag === undefined) {
             ARENA.events.on(ARENAEventEmitter.events.ARENA_STARTED, this.init.bind(this));
             return;
@@ -125,15 +125,13 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         // LinearFilter looks better?
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
-        videoTexture.encoding = THREE.sRGBEncoding;
+        // videoTexture.encoding = THREE.sRGBEncoding;
 
         const remoteRenderTarget = new THREE.WebGLRenderTarget(this.remoteVideo.videoWidth, this.remoteVideo.videoHeight);
         remoteRenderTarget.texture = videoTexture;
 
         this.compositor.addRemoteRenderTarget(remoteRenderTarget);
         this.compositor.bind();
-
-        this.remoteVideo.play();
     },
 
     onRemoteRender(evt) {
@@ -392,9 +390,13 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const data = this.data;
         const el = this.el;
 
-        const sceneEl = el;
+        const sceneEl = el.sceneEl;
         const scene = sceneEl.object3D;
         const camera = sceneEl.camera;
+
+        const renderer = sceneEl.renderer;
+
+        const cameraVR = renderer.xr.getCamera();
 
         if (this.connected && this.inputDataChannel.readyState === 'open') {
             const prevPos = new THREE.Vector3();
@@ -424,10 +426,22 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             };
             this.inputDataChannel.send(JSON.stringify(msg));
 
-            this.compositor.prevFrames[this.frameID] = {
-                pose: camPose,
-                ts: msg.ts,
-            };
+            if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
+                const camPoseL = new THREE.Matrix4();
+                const camPoseR = new THREE.Matrix4();
+                camPoseL.copy(cameraVR.cameras[0].matrixWorld);
+                camPoseR.copy(cameraVR.cameras[1].matrixWorld);
+
+                this.compositor.prevFrames[this.frameID] = {
+                    pose: [camPoseL, camPoseR],
+                    ts: msg.ts,
+                };
+            } else {
+                this.compositor.prevFrames[this.frameID] = {
+                    pose: camPose,
+                    ts: msg.ts,
+                };
+            }
 
             this.frameID++;
         }

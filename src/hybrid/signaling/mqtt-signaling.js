@@ -40,9 +40,9 @@ export class MQTTSignaling {
     }
 
     openConnection() {
-        this.client = new Paho.Client(this.mqttHost, `hybrid-client-${this.id}`);
+        this.client = new Paho.Client(this.mqttHost, `hybrid-mqtt-client-${this.id}`);
 
-        var _this = this;
+        const _this = this;
         return new Promise((resolve, reject) => {
             this.client.connect({
                 cleanSession : true,

@@ -117,6 +117,8 @@ AFRAME.registerSystem('compositor', {
             } else {
                 isDigest = true;
 
+                const cameraVR = this.xr.getCamera();
+
                 // save render state (1)
                 const currentRenderTarget = this.getRenderTarget();
                 if (currentRenderTarget != null) {
@@ -166,13 +168,27 @@ AFRAME.registerSystem('compositor', {
                     // console.log(frameID, system.prevFrameID);
                     if (frameID >= system.prevFrameID) {
                         const pose = system.prevFrames[frameID].pose;
-                        system.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
+                        if (pose.length === 2) {
+                            const cameraL = cameraVR.cameras[0];
+                            const cameraR = cameraVR.cameras[1];
+                            const poseL = pose[0];
+                            const poseR = pose[1];
+                            system.pass.setCameraMatsRemote(poseL, cameraL.projectionMatrix, poseR, cameraR.projectionMatrix);
+                        } else {
+                            system.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
+                        }
                     }
 
                     delete system.prevFrames[frameID]; // remove entry with frameID
                     system.prevFrameID = frameID;
                 }
-                system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
+                if (this.xr.enabled === true && this.xr.isPresenting === true) {
+                    const cameraL = cameraVR.cameras[0];
+                    const cameraR = cameraVR.cameras[1];
+                    system.pass.setCameraMats(cameraL.matrixWorld, cameraL.projectionMatrix, cameraR.matrixWorld, cameraR.projectionMatrix);
+                } else {
+                    system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
+                }
 
                 // (4) render with custom shader (local-remote compositing):
                 // this will internally call renderer.render(), which will execute the code within
@@ -189,7 +205,7 @@ AFRAME.registerSystem('compositor', {
 
                 system.pass.setHasDualCameras(hasDualCameras);
 
-                AFRAME.utils.entity.setComponentProperty(cameraEl, 'render-client', {
+                AFRAME.utils.entity.setComponentProperty(sceneEl, 'arena-hybrid-render-client', {
                     hasDualCameras: hasDualCameras,
                     ipd: ipd,
                     leftProj: leftProj,

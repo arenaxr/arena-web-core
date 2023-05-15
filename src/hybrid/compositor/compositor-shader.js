@@ -42,6 +42,18 @@ export const CompositorShader = {
         remoteLProjectionMatrix: {
             type: 'mat4', value: new THREE.Matrix4(),
         },
+        cameraRMatrixWorld: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
+        cameraRProjectionMatrix: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
+        remoteRMatrixWorld: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
+        remoteRProjectionMatrix: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
     },
 
     vertexShader: require('./shaders/compositor/vert.glsl'),

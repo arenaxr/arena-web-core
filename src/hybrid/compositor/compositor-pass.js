@@ -76,14 +76,18 @@ export class CompositorPass extends Pass {
         return value;
     }
 
-    setCameraMats(cameraPose, cameraProj) {
-        this.material.uniforms.cameraLMatrixWorld.value.copy(cameraPose);
-        this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraProj);
+    setCameraMats(cameraPoseL, cameraProjL, cameraPoseR, cameraProjR) {
+        this.material.uniforms.cameraLMatrixWorld.value.copy(cameraPoseL);
+        this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraProjL);
+        if (cameraPoseR) this.material.uniforms.cameraRMatrixWorld.value.copy(cameraPoseR);
+        if (cameraProjR) this.material.uniforms.cameraRProjectionMatrix.value.copy(cameraProjR);
     }
 
-    setCameraMatsRemote(remotePose, remoteProj) {
-        this.material.uniforms.remoteLMatrixWorld.value.copy(remotePose);
-        this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteProj);
+    setCameraMatsRemote(remotePoseL, remoteProjL, remotePoseR, remoteProjR) {
+        this.material.uniforms.remoteLMatrixWorld.value.copy(remotePoseL);
+        this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteProjL);
+        if (remotePoseR) this.material.uniforms.remoteRMatrixWorld.value.copy(remotePoseR);
+        if (remoteProjR) this.material.uniforms.remoteRProjectionMatrix.value.copy(remoteProjR);
     }
 
     onEnterVR() {
