@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.19.0](https://github.com/arenaxr/arena-web-core/compare/v1.18.0...v1.19.0) (2023-05-16)
+
+
+### Features
+
+* **build3d:** add 'build3d' param to publish mqtt over a-frame inspector ([#529](https://github.com/arenaxr/arena-web-core/issues/529)) ([636dbb8](https://github.com/arenaxr/arena-web-core/commit/636dbb89263b57a92f62d99b5e6ee88ef58ada48))
+* **build3d:** added logging window; entity add, delete, all attributes, grab updates ([#531](https://github.com/arenaxr/arena-web-core/issues/531)) ([334e678](https://github.com/arenaxr/arena-web-core/commit/334e678b7f9fb912e86d674b894838292e03763e))
+
+
+### Bug Fixes
+
+* **build/3d:** use canonical tab names to avoid cluttering the tab tray ([a7ab807](https://github.com/arenaxr/arena-web-core/commit/a7ab807b06c5eace3b072a64120e3b20e72f20da))
+* **build3d:** publish rotation in build3d as quaternions over the wire ([be27904](https://github.com/arenaxr/arena-web-core/commit/be27904bbcf87cd8e96dcfbd45a22a4a69af7981))
+* **chat:** ensure JWT permissions before chat launch ([d779781](https://github.com/arenaxr/arena-web-core/commit/d779781e757a0f7bdda9f5345b2648cc595b455f))
+* click-listener target for ar ([17670fd](https://github.com/arenaxr/arena-web-core/commit/17670fd8ce5f9fdf9bf12cc8c0ec444dff537769))
+* **hand:** fix magicleap controller scale ([09f10dd](https://github.com/arenaxr/arena-web-core/commit/09f10dd06c8850edf445b7b32657afee0d5d88a6))
+* **icons:** updated avatar icons location ([4b915fe](https://github.com/arenaxr/arena-web-core/commit/4b915fe4cee9370df13c467b00182a3a409467f0))
+* **material-extras:** add documentation of depthTest ([ae242a6](https://github.com/arenaxr/arena-web-core/commit/ae242a6163fdccb82c2aa61eb95e384f3b5b69cc))
+* **material-extras:** remove depthTest, needs testing; apply render order to all objects ([ed83c9c](https://github.com/arenaxr/arena-web-core/commit/ed83c9c05d95e143d6b1582f22261282f905e4be))
+* **programs:** change navbar to send programs to new endpoint ([d544bdf](https://github.com/arenaxr/arena-web-core/commit/d544bdf02acee8f235a5aadf296be4a1bd6ab0a2))
+* **settings:** only show 3dbuild in settings if scene writer ([6f5b89a](https://github.com/arenaxr/arena-web-core/commit/6f5b89a4a4da4a13b60def018240beec06262b15))
+* **silverline:** place /programs dashboard in old /arts container for now ([09ceb1b](https://github.com/arenaxr/arena-web-core/commit/09ceb1bad84e4683f15d30f9410e71a9335de606))
+* typo missing closing bracket ([c882a6e](https://github.com/arenaxr/arena-web-core/commit/c882a6e6172681fd725d1d14fc82d39fe4fab58e))
+* **vscode:** gitignore vscode settings ([74dccab](https://github.com/arenaxr/arena-web-core/commit/74dccabc45adb310abe823676a0ba88370c238cd))
+
 ## [1.18.0](https://github.com/arenaxr/arena-web-core/compare/v1.17.0...v1.18.0) (2023-04-17)
 
 
