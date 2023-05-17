@@ -37,7 +37,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         enabled: {type: 'boolean', default: false},
         position: {type: 'vec3', default: new THREE.Vector3()},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
-        getStatsInterval: {type: 'number', default: 1000},
+        getStatsInterval: {type: 'number', default: 5000},
         ipd: {type: 'number', default: 0.064},
         hasDualCameras: {type: 'boolean', default: false},
         leftProj: {type: 'array'},
@@ -443,7 +443,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 };
             }
 
-            this.frameID++;
+            this.frameID = (this.frameID + 100) & 0xFFFFFFFF;
         }
     },
 });

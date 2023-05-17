@@ -35,7 +35,7 @@ AFRAME.registerSystem('compositor', {
         renderer.xr.addEventListener('sessionend', this.onResize.bind(this));
     },
 
-    addRemoteRenderTarget(remoteRenderTarget) {
+    addRemoteRenderTarget: function(remoteRenderTarget) {
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
@@ -47,7 +47,7 @@ AFRAME.registerSystem('compositor', {
         this.onResize();
     },
 
-    onResize() {
+    onResize: function() {
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
@@ -58,6 +58,19 @@ AFRAME.registerSystem('compositor', {
         if (this.pass) {
             this.pass.setSize(pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
         }
+    },
+
+    closestKeyInDict: function(k, d, thres=10) {
+        var result, minDist = Infinity;
+        for (var key in d) {
+            var dist = Math.abs(key - k);
+            if (dist <= thres && dist <= minDist) {
+                result = key;
+                minDist = dist;
+            }
+        }
+
+        return result;
     },
 
     tick: function(t, dt) {
@@ -159,15 +172,18 @@ AFRAME.registerSystem('compositor', {
                 }
 
                 // set camera parameters for ATW
-                let frameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                if (system.prevFrames[frameID]) {
-                    const currTime = performance.now();
-                    const frameTimestamp = system.prevFrames[frameID].ts;
+                let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
+                // console.log(sceneEl.components['arena-hybrid-render-client'].frameID, frameID);
+                currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
+                if (currFrameID) {
+                    const currFrame = system.prevFrames[currFrameID];
+                    // const currTime = performance.now();
+                    // const frameTimestamp = currFrame.ts;
                     // console.log("[frame id]", currTime - frameTimestamp);
 
-                    // console.log(frameID, system.prevFrameID);
-                    if (frameID >= system.prevFrameID) {
-                        const pose = system.prevFrames[frameID].pose;
+                    // console.log(currFrameID, system.prevcurrFrameID);
+                    if (currFrameID >= system.prevFrameID) {
+                        const pose = currFrame.pose;
                         if (pose.length === 2) {
                             const cameraL = cameraVR.cameras[0];
                             const cameraR = cameraVR.cameras[1];
@@ -179,8 +195,10 @@ AFRAME.registerSystem('compositor', {
                         }
                     }
 
-                    delete system.prevFrames[frameID]; // remove entry with frameID
-                    system.prevFrameID = frameID;
+                    for (var i = currFrameID; i > 0; i--) {
+                        delete system.prevFrames[i]; // remove entry with frameID
+                    }
+                    system.prevFrameID = currFrameID;
                 }
                 if (this.xr.enabled === true && this.xr.isPresenting === true) {
                     const cameraL = cameraVR.cameras[0];
