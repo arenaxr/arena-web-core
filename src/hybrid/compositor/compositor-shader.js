@@ -30,28 +30,28 @@ export const CompositorShader = {
         vrMode: {
             type: 'bool', value: false,
         },
-        cameraLMatrixWorld: {
-            type: 'mat4', value: new THREE.Matrix4(),
-        },
         cameraLProjectionMatrix: {
             type: 'mat4', value: new THREE.Matrix4(),
         },
-        remoteLMatrixWorld: {
-            type: 'mat4', value: new THREE.Matrix4(),
-        },
-        remoteLProjectionMatrix: {
-            type: 'mat4', value: new THREE.Matrix4(),
-        },
-        cameraRMatrixWorld: {
+        cameraLMatrixWorld: {
             type: 'mat4', value: new THREE.Matrix4(),
         },
         cameraRProjectionMatrix: {
             type: 'mat4', value: new THREE.Matrix4(),
         },
-        remoteRMatrixWorld: {
+        cameraRMatrixWorld: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
+        remoteLProjectionMatrix: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
+        remoteLMatrixWorld: {
             type: 'mat4', value: new THREE.Matrix4(),
         },
         remoteRProjectionMatrix: {
+            type: 'mat4', value: new THREE.Matrix4(),
+        },
+        remoteRMatrixWorld: {
             type: 'mat4', value: new THREE.Matrix4(),
         },
     },

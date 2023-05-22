@@ -135,7 +135,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     onRemoteRender(evt) {
-        console.log('[render-client]', evt.detail.object_id, evt.detail.remoteRendered);
+        // console.log('[render-client]', evt.detail.object_id, evt.detail.remoteRendered);
         const update = evt.detail;
         this.signaler.sendRemoteStatusUpdate(update);
     },

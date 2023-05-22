@@ -122,6 +122,8 @@ AFRAME.registerSystem('compositor', {
         const cameraLPos = new THREE.Vector3();
         const cameraRPos = new THREE.Vector3();
         const sizeVector = new THREE.Vector2();
+        let cameraLProj = new THREE.Matrix4();
+        let cameraRProj = new THREE.Matrix4();
         renderer.render = function() {
             const size = renderer.getSize(sizeVector);
             if (isDigest) {
@@ -129,8 +131,6 @@ AFRAME.registerSystem('compositor', {
                 render.apply(this, arguments);
             } else {
                 isDigest = true;
-
-                const cameraVR = this.xr.getCamera();
 
                 // save render state (1)
                 const currentRenderTarget = this.getRenderTarget();
@@ -145,6 +145,8 @@ AFRAME.registerSystem('compositor', {
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
+                const cameraVR = this.xr.getCamera();
+
                 // save render state (3)
                 currentXREnabled = this.xr.enabled;
 
@@ -154,7 +156,8 @@ AFRAME.registerSystem('compositor', {
                 }
                 this.shadowMap.autoUpdate = false;
 
-                if (system.cameras.length > 1) {
+                // set camera parameters (transformation, projection) for ATW
+                if (system.cameras.length == 2) {
                     // we have two cameras here (vr mode or headset ar mode)
                     hasDualCameras = !isWebXRViewer; // webarviewer seens to have 2 cameras, but uses one...
 
@@ -164,16 +167,34 @@ AFRAME.registerSystem('compositor', {
                     cameraRPos.setFromMatrixPosition( cameraR.matrixWorld );
                     ipd = cameraLPos.distanceTo( cameraRPos );
 
-                    leftProj = decomposeProj(cameraL.projectionMatrix.transpose());
-                    rightProj = decomposeProj(cameraR.projectionMatrix.transpose());
-                } else {
-                    // we just have a single camera here
+                    cameraLProj.copy(cameraL.projectionMatrix);
+                    cameraRProj.copy(cameraR.projectionMatrix);
+
+                    leftProj = decomposeProj(cameraLProj.transpose());
+                    rightProj = decomposeProj(cameraRProj.transpose());
+
+                    system.pass.setCameraMats(cameraL, cameraR);
+
+                    AFRAME.utils.entity.setComponentProperty(sceneEl, 'arena-hybrid-render-client', {
+                        hasDualCameras: hasDualCameras,
+                        ipd: ipd,
+                        leftProj: leftProj,
+                        rightProj: rightProj,
+                    });
+                } else if (system.cameras.length == 1) {
+                    // we just have a single xr camera here
                     hasDualCameras = false;
+
+                    system.pass.setCameraMats(camera);
+                } else {
+                    // not in xr mode, just one camera
+                    hasDualCameras = false;
+
+                    system.pass.setCameraMats(camera);
                 }
 
-                // set camera parameters for ATW
                 let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                // console.log(sceneEl.components['arena-hybrid-render-client'].frameID, frameID);
+                // console.log(sceneEl.components['arena-hybrid-render-client'].frameID, currFrameID);
                 currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
                 if (currFrameID) {
                     const currFrame = system.prevFrames[currFrameID];
@@ -189,7 +210,8 @@ AFRAME.registerSystem('compositor', {
                             const cameraR = cameraVR.cameras[1];
                             const poseL = pose[0];
                             const poseR = pose[1];
-                            system.pass.setCameraMatsRemote(poseL, cameraL.projectionMatrix, poseR, cameraR.projectionMatrix);
+                            system.pass.setCameraMatsRemote(poseL, cameraL.projectionMatrix,
+                                                            poseR, cameraR.projectionMatrix);
                         } else {
                             system.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
                         }
@@ -199,13 +221,6 @@ AFRAME.registerSystem('compositor', {
                         delete system.prevFrames[i]; // remove entry with frameID
                     }
                     system.prevFrameID = currFrameID;
-                }
-                if (this.xr.enabled === true && this.xr.isPresenting === true) {
-                    const cameraL = cameraVR.cameras[0];
-                    const cameraR = cameraVR.cameras[1];
-                    system.pass.setCameraMats(cameraL.matrixWorld, cameraL.projectionMatrix, cameraR.matrixWorld, cameraR.projectionMatrix);
-                } else {
-                    system.pass.setCameraMats(camera.matrixWorld, camera.projectionMatrix);
                 }
 
                 // (4) render with custom shader (local-remote compositing):
@@ -223,12 +238,7 @@ AFRAME.registerSystem('compositor', {
 
                 system.pass.setHasDualCameras(hasDualCameras);
 
-                AFRAME.utils.entity.setComponentProperty(sceneEl, 'arena-hybrid-render-client', {
-                    hasDualCameras: hasDualCameras,
-                    ipd: ipd,
-                    leftProj: leftProj,
-                    rightProj: rightProj,
-                });
+                sceneEl.setAttribute('arena-hybrid-render-client', 'hasDualCameras', hasDualCameras);
 
                 // call this part of the conditional again on the next call to render()
                 isDigest = false;

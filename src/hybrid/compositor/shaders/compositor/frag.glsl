@@ -101,7 +101,8 @@ void main() {
 
     if (doAsyncTimeWarp) {
         float x;
-        float xMin = 0.0, xMax = 0.5;
+        float xMin, xMax;
+        float depthOffset;
 
         vec3 cameraPos = matrixWorldToPosition(cameraLMatrixWorld);
         vec3 cameraTopLeft = vCameraLTopLeft;
@@ -121,6 +122,7 @@ void main() {
         }
         else if (rightEye) {
             x = 2.0 * (vUv.x - 0.5);
+
             cameraPos = matrixWorldToPosition(cameraRMatrixWorld);
             cameraTopLeft = vCameraRTopLeft;
             cameraTopRight = vCameraRTopRight;
@@ -139,49 +141,46 @@ void main() {
         float t = intersectPlane(remoteTopLeft, remotePlaneNormal, cameraPos, cameraVector);
         vec3 hitPt = cameraPos + cameraVector * t;
         vec2 uv3 = worldToCamera(hitPt, remoteProjectionMatrix, remoteMatrixWorld);
-        coordRemoteColor = uv3;
+
+        if (targetWidthGreater) {
+            coordRemoteColor = vec2(
+                ( (uv3.x * localSizeF.x - padding) / float(localSize.x - totalPad) ),
+                uv3.y
+            );
+        }
+        else {
+            coordRemoteColor = vec2(
+                ( (uv3.x * localSizeF.x + padding) / float(newWidth) ),
+                uv3.y
+            );
+        }
 
         if (oneCamera) {
-            if (targetWidthGreater) {
-                coordRemoteColor = vec2(
-                    ( (uv3.x * localSizeF.x - padding) / float(localSize.x - totalPad) ) / 2.0,
-                    uv3.y
-                );
-            }
-            else {
-                coordRemoteColor = vec2(
-                    ( (uv3.x * localSizeF.x + padding) / float(newWidth) ) / 2.0,
-                    uv3.y
-                );
-            }
+            xMin = 0.0; xMax = 0.5;
+            depthOffset = 0.5;
 
-            coordRemoteDepth.x = coordRemoteColor.x + 0.5;
-            coordRemoteDepth.y = coordRemoteColor.y;
+            coordRemoteColor.x = coordRemoteColor.x / 2.0;
         }
         else if (leftEye) {
-            coordRemoteColor.x = x / 4.0;
-            coordRemoteColor.y = vUv.y;
-            // coordRemoteColor.x = (coordRemoteColor.x + 0.25) / 4.0;
+            xMin = 0.0; xMax = 0.25;
+            depthOffset = 0.25;
 
-            coordRemoteDepth.x = x / 4.0 + 0.25;
-            coordRemoteDepth.y = coordRemoteColor.y;
+            coordRemoteColor.x = coordRemoteColor.x / 4.0;
         }
         else if (rightEye) {
-            xMin = 0.5; xMax = 1.0;
+            xMin = 0.5; xMax = 0.75;
+            depthOffset = 0.25;
 
-            coordRemoteColor.x = x / 4.0 + 0.5;
-            coordRemoteColor.y = vUv.y;
-            // coordRemoteColor.x = coordRemoteColor.x / 2.0;
-
-            coordRemoteDepth.x = x / 4.0 + 0.75;
-            coordRemoteDepth.y = coordRemoteColor.y;
+            coordRemoteColor.x = coordRemoteColor.x / 4.0 + 0.5;
         }
 
-        remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
-        remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
-
-        if (oneCamera) {
         if (!stretchBorders) {
+            coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
+            coordRemoteDepth.y = coordRemoteColor.y;
+
+            remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
+            remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
+
             if (coordRemoteColor.x < xMin || coordRemoteColor.x > xMax ||
                 coordRemoteColor.y < 0.0  || coordRemoteColor.y > 1.0) {
                 remoteColor = vec4(0.0);
@@ -190,11 +189,10 @@ void main() {
         else {
             coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax - onePixel);
             coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
-            coordRemoteDepth.x = coordRemoteColor.x + 0.5;
+            coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
             coordRemoteDepth.y = coordRemoteColor.y;
             remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
             remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
-        }
         }
     }
     else {

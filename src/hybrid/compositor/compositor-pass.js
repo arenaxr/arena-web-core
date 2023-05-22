@@ -76,26 +76,33 @@ export class CompositorPass extends Pass {
         return value;
     }
 
-    setCameraMats(cameraLPose, cameraLProj, cameraRPose, cameraRProj) {
-        this.material.uniforms.cameraLMatrixWorld.value.copy(cameraLPose);
-        this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraLProj);
-        if (cameraRPose) this.material.uniforms.cameraRMatrixWorld.value.copy(cameraRPose);
-        if (cameraRProj) this.material.uniforms.cameraRProjectionMatrix.value.copy(cameraRProj);
+    setCameraMats(cameraL, cameraR) {
+        if (cameraL) {
+            this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraL.projectionMatrix);
+            this.material.uniforms.cameraLMatrixWorld.value.copy(cameraL.matrixWorld);
+        }
+
+        if (cameraR) {
+            this.material.uniforms.cameraRProjectionMatrix.value.copy(cameraR.projectionMatrix);
+            this.material.uniforms.cameraRMatrixWorld.value.copy(cameraR.matrixWorld);
+        }
     }
 
     setCameraMatsRemote(remoteLPose, remoteLProj, remoteRPose, remoteRProj) {
-        this.material.uniforms.remoteLMatrixWorld.value.copy(remoteLPose);
         this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteLProj);
-        if (remoteRPose) this.material.uniforms.remoteRMatrixWorld.value.copy(remoteRPose);
+        this.material.uniforms.remoteLMatrixWorld.value.copy(remoteLPose);
         if (remoteRProj) this.material.uniforms.remoteRProjectionMatrix.value.copy(remoteRProj);
+        if (remoteRPose) this.material.uniforms.remoteRMatrixWorld.value.copy(remoteRPose);
     }
 
     onEnterVR() {
         const sceneEl = document.querySelector('a-scene');
         if (sceneEl.is('ar-mode')) {
+            this.material.uniforms.vrMode.value = false;
             this.material.uniforms.arMode.value = true;
         } else {
             this.material.uniforms.vrMode.value = true;
+            this.material.uniforms.arMode.value = false;
         }
     }
 
