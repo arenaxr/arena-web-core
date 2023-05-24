@@ -32,38 +32,12 @@ const dataChannelOptions = {
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
 
-function DoubleToBits(f) {
-    return new Uint32Array(Float64Array.of(f).buffer);
-}
-
-function DoublesToMsg(...args) {
-    arrayLength = 0;
-    for (let arg of args) {
-        if (typeof arg == "number") {
-            arrayLength += 2;
-        }
-    }
-    const msg = new Uint32Array(arrayLength);
-
-    var index = 0;
-    for (let arg of args) {
-        if (typeof arg == "number") {
-            bits = DoubleToBits(arg);
-            msg[index] = bits[0];
-            msg[index + 1] = bits[1];
-            index += 2;
-        }
-    }
-
-    return msg;
-}
-
 AFRAME.registerComponent('arena-hybrid-render-client', {
     schema: {
         enabled: {type: 'boolean', default: false},
         position: {type: 'vec3', default: new THREE.Vector3()},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
-        getStatsInterval: {type: 'number', default: 5000},
+        getStatsInterval: {type: 'number', default: 2500},
         ipd: {type: 'number', default: 0.064},
         hasDualCameras: {type: 'boolean', default: false},
         leftProj: {type: 'array'},
@@ -135,8 +109,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.remoteVideo.style.zIndex = '9999';
             this.remoteVideo.style.top = '15px';
             this.remoteVideo.style.left = '15px';
-            this.remoteVideo.style.width = '640px';
-            this.remoteVideo.style.height = '180px';
+            this.remoteVideo.style.width = '768px';
+            this.remoteVideo.style.height = '216px';
             if (!AFRAME.utils.device.isMobile()) {
                 document.body.appendChild(this.remoteVideo);
             }
@@ -146,12 +120,19 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     onRemoteVideoLoaded(evt) {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+        const renderer = sceneEl.renderer;
+
         // console.log('[render-client], remote video loaded!');
         const videoTexture = new THREE.VideoTexture(this.remoteVideo);
-        // LinearFilter looks better?
-        videoTexture.minFilter = THREE.LinearFilter;
-        videoTexture.magFilter = THREE.LinearFilter;
-        // videoTexture.encoding = THREE.sRGBEncoding;
+        videoTexture.minFilter = THREE.NearestFilter;
+        videoTexture.magFilter = THREE.NearestFilter;
+        videoTexture.colorSpace = THREE.SRGBColorSpace;
+        const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+        videoTexture.anisotropy = maxAnisotropy;
 
         const remoteRenderTarget = new THREE.WebGLRenderTarget(this.remoteVideo.videoWidth, this.remoteVideo.videoHeight);
         remoteRenderTarget.texture = videoTexture;
@@ -425,26 +406,39 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const cameraVR = renderer.xr.getCamera();
 
         if (this.connected && this.inputDataChannel.readyState === 'open') {
-            const prevPos = new THREE.Vector3();
-            const prevRot = new THREE.Vector3();
-            data.position.copy(prevPos);
-            data.rotation.copy(prevPos);
-
             const camPose = new THREE.Matrix4();
             camPose.copy(camera.matrixWorld);
 
-            data.position.setFromMatrixPosition(camPose);
-            data.rotation.setFromRotationMatrix(camPose);
+            const currPos = new THREE.Vector3();
+            const currRot = new THREE.Quaternion();
+            currPos.setFromMatrixPosition(camPose);
+            currRot.setFromRotationMatrix(camPose);
 
-            if (prevPos.distanceTo(data.position) <= Number.EPSILON &&
-                prevRot.distanceTo(data.rotation) <= Number.EPSILON) return;
+            var changed = false;
+            if (data.position.distanceTo(currPos) > 0.01) {
+                data.position.copy(currPos);
+                changed = true;
+            }
 
-            const transformArray = camPose.toArray(); 
+            if (data.rotation.angleTo(currRot) > 0.01) {
+                data.rotation.copy(currRot);
+                changed = true;
+            }
 
-            var camMsg = DoublesToMsg(...transformArray,
-                                        parseFloat(this.frameID.toFixed(1)))
+            if (changed === false) return;
 
-            this.inputDataChannel.send(camMsg);
+            const msg = {
+                id: this.frameID,
+                x:  data.position.x,
+                y:  data.position.y,
+                z:  data.position.z,
+                x_: data.rotation._x,
+                y_: data.rotation._y,
+                z_: data.rotation._z,
+                w_: data.rotation._w,
+                ts: performance.now(),
+            };
+            this.inputDataChannel.send(JSON.stringify(msg));
 
             if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
                 const camPoseL = new THREE.Matrix4();
@@ -454,12 +448,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
                 this.compositor.prevFrames[this.frameID] = {
                     pose: [camPoseL, camPoseR],
-                    ts: performance.now(),
+                    ts: msg.ts,
                 };
             } else {
                 this.compositor.prevFrames[this.frameID] = {
                     pose: camPose,
-                    ts: performance.now(),
+                    ts: msg.ts,
                 };
             }
 

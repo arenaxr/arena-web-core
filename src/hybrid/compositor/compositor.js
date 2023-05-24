@@ -19,9 +19,6 @@ AFRAME.registerSystem('compositor', {
 
         this.renderTarget = new THREE.WebGLRenderTarget(1,1);
         this.renderTarget.texture.name = 'EffectComposer.rt1';
-        this.renderTarget.texture.minFilter = THREE.NearestFilter;
-        this.renderTarget.texture.magFilter = THREE.NearestFilter;
-        this.renderTarget.stencilBuffer = false;
         this.renderTarget.depthTexture = new THREE.DepthTexture();
         this.renderTarget.depthTexture.format = THREE.DepthFormat;
         this.renderTarget.depthTexture.type = THREE.UnsignedShortType;
@@ -43,6 +40,13 @@ AFRAME.registerSystem('compositor', {
         const camera = sceneEl.camera;
 
         this.pass = new CompositorPass(camera, remoteRenderTarget);
+
+        const geometry = new THREE.PlaneGeometry(12.8, 7.2);
+        const material = new THREE.MeshBasicMaterial({ map: remoteRenderTarget.texture });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.z = -12;
+        mesh.position.y = 7;
+        scene.add(mesh);
 
         this.onResize();
     },
@@ -122,8 +126,8 @@ AFRAME.registerSystem('compositor', {
         const cameraLPos = new THREE.Vector3();
         const cameraRPos = new THREE.Vector3();
         const sizeVector = new THREE.Vector2();
-        let cameraLProj = new THREE.Matrix4();
-        let cameraRProj = new THREE.Matrix4();
+        const cameraLProj = new THREE.Matrix4();
+        const cameraRProj = new THREE.Matrix4();
         renderer.render = function() {
             const size = renderer.getSize(sizeVector);
             if (isDigest) {
@@ -194,7 +198,6 @@ AFRAME.registerSystem('compositor', {
                 }
 
                 let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                // console.log(sceneEl.components['arena-hybrid-render-client'].frameID, currFrameID);
                 currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
                 if (currFrameID) {
                     const currFrame = system.prevFrames[currFrameID];
