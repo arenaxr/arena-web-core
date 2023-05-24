@@ -32,6 +32,32 @@ const dataChannelOptions = {
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
 
+function DoubleToBits(f) {
+    return new Uint32Array(Float64Array.of(f).buffer);
+}
+
+function DoublesToMsg(...args) {
+    arrayLength = 0;
+    for (let arg of args) {
+            if (typeof arg == "number") {
+                        arrayLength += 2;
+                    }
+        }
+    const msg = new Uint32Array(arrayLength);
+
+    var index = 0;
+    for (let arg of args) {
+            if (typeof arg == "number") {
+                        bits = DoubleToBits(arg);
+                        msg[index] = bits[0];
+                        msg[index + 1] = bits[1];
+                        index += 2;
+                    }
+        }
+
+    return msg;
+}
+
 AFRAME.registerComponent('arena-hybrid-render-client', {
     schema: {
         enabled: {type: 'boolean', default: false},
@@ -427,18 +453,10 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
             if (changed === false) return;
 
-            const msg = {
-                id: this.frameID,
-                x:  data.position.x,
-                y:  data.position.y,
-                z:  data.position.z,
-                x_: data.rotation._x,
-                y_: data.rotation._y,
-                z_: data.rotation._z,
-                w_: data.rotation._w,
-                ts: performance.now(),
-            };
-            this.inputDataChannel.send(JSON.stringify(msg));
+            const transformArray = camPose.toArray();
+
+            const camMsg = DoublesToMsg(...transformArray, parseFloat(this.frameID));
+            this.inputDataChannel.send(camMsg);
 
             if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
                 const camPoseL = new THREE.Matrix4();
@@ -448,12 +466,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
                 this.compositor.prevFrames[this.frameID] = {
                     pose: [camPoseL, camPoseR],
-                    ts: msg.ts,
+                    ts: performance.now(),
                 };
             } else {
                 this.compositor.prevFrames[this.frameID] = {
                     pose: camPose,
-                    ts: msg.ts,
+                    ts: performance.now(),
                 };
             }
 
