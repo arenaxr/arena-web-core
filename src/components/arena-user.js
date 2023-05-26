@@ -83,7 +83,7 @@ async function enableChromeAEC(gainNode) {
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
  * @module arena-user
  * @property {color} [color=white] - The color for the user's name text.
- * @property {string} [headModelPath=/store/models/robobit.glb] - Path to user head model
+ * @property {string} [headModelPath=/static/models/avatars/robobit.glb] - Path to user head model
  * @property {string} [presence] - type of presence for user
  * @property {string} [jitsiId] - User jitsi id.
  * @property {string} [displayName] - User display name.

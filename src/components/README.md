@@ -129,7 +129,7 @@ Another user's camera in the ARENA. Handles Jitsi and display name updates.
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [color] | <code>color</code> | <code>white</code> | The color for the user's name text. |
-| [headModelPath] | <code>string</code> | <code>&quot;/store/models/robobit.glb&quot;</code> | Path to user head model |
+| [headModelPath] | <code>string</code> | <code>&quot;/static/models/avatars/robobit.glb&quot;</code> | Path to user head model |
 | [presence] | <code>string</code> |  | type of presence for user |
 | [jitsiId] | <code>string</code> |  | User jitsi id. |
 | [displayName] | <code>string</code> |  | User display name. |
