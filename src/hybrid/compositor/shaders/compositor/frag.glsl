@@ -182,6 +182,9 @@ void main() {
             }
         }
         else {
+            xMin = xMin + onePixel;
+            xMax = xMax - onePixel;
+
             coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
             if (coordRemoteColor.y == 1.0) {
                 xMax = xMax - 33.0 * onePixel;

@@ -41,13 +41,6 @@ AFRAME.registerSystem('compositor', {
 
         this.pass = new CompositorPass(camera, remoteRenderTarget);
 
-        const geometry = new THREE.PlaneGeometry(12.8, 7.2);
-        const material = new THREE.MeshBasicMaterial({ map: remoteRenderTarget.texture });
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.z = -12;
-        mesh.position.y = 7;
-        scene.add(mesh);
-
         this.onResize();
     },
 
@@ -107,8 +100,8 @@ AFRAME.registerSystem('compositor', {
 
         function decomposeProj(projMat) {
             const elements = projMat.elements;
-            const x = elements[0] / 2;
-            const a = elements[2] / 2;
+            const x = elements[0];
+            const a = elements[2];
             const y = elements[5];
             const b = elements[6];
             const c = elements[10];
@@ -198,7 +191,9 @@ AFRAME.registerSystem('compositor', {
                 }
 
                 let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
+                if (currFrameID) {
+                    currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
+                }
                 if (currFrameID) {
                     const currFrame = system.prevFrames[currFrameID];
                     // const currTime = performance.now();
@@ -220,7 +215,7 @@ AFRAME.registerSystem('compositor', {
                         }
                     }
 
-                    for (var i = currFrameID; i > 0; i--) {
+                    for (var i = currFrameID; i > system.prevFrameID; i--) {
                         delete system.prevFrames[i]; // remove entry with frameID
                     }
                     system.prevFrameID = currFrameID;

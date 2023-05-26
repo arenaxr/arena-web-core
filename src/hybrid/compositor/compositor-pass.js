@@ -67,13 +67,23 @@ export class CompositorPass extends Pass {
         // const stop = performance.now();
         // console.log(stop - start);
 
-        var value = 0;
+        var value = 0, value1 = 0;
         for (var i = 0; i < FRAME_ID_LENGTH; i++) {
             if (this.pixelBuffer[4*i+1] / 255 > 0.5) {
                 value += (1 << i);
             }
+            if (this.pixelBuffer[4*i+2] / 255 > 0.5) {
+                value1 += (1 << i);
+            }
         }
-        return value;
+
+        if (value !== value1) {
+            if (value % 100 < 10) return value;
+            else if (value1 % 100 < 10) return value1;
+            else return undefined;
+        }
+        if (value % 100 < 10) return value;
+        else return undefined;
     }
 
     setCameraMats(cameraL, cameraR) {

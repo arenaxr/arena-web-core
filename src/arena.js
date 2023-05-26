@@ -301,10 +301,12 @@ export class Arena {
         camera.setAttribute('arena-camera', 'color', color);
         camera.setAttribute('arena-camera', 'displayName', ARENA.getDisplayName());
 
-        const startPos = new THREE.Vector3;
+        const cameraRigObj3D = document.getElementById('cameraRig').object3D;
+
+        const startPos = new THREE.Vector3();
         if (ARENA.startCoords) {
             startPos.set(...ARENA.startCoords);
-            camera.object3D.position.copy(startPos);
+            cameraRigObj3D.position.copy(startPos);
             camera.object3D.position.y += ARENA.defaults.camHeight;
             ARENA.startCoords = startPos;
         } else if (ARENAUtils.getUrlParam('startLastPos', false)) {
@@ -312,7 +314,7 @@ export class Arena {
             const lastPos = sceneHist[ARENA.namespacedScene]?.lastPos;
             if (lastPos) {
                 startPos.copy(lastPos);
-                camera.object3D.position.copy(startPos);
+                cameraRigObj3D.position.copy(startPos);
                 camera.object3D.position.y += ARENA.defaults.camHeight;
                 ARENA.startCoords = startPos;
             }

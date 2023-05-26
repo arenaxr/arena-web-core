@@ -1,5 +1,6 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
 import {WebRTCStatsLogger} from './webrtc-stats';
+import {HybridRenderingUtils} from './utils';
 import {ARENAEventEmitter} from '../event-emitter';
 
 const pcConfig = {
@@ -31,32 +32,6 @@ const dataChannelOptions = {
 
 const supportsSetCodecPreferences = window.RTCRtpTransceiver &&
     'setCodecPreferences' in window.RTCRtpTransceiver.prototype;
-
-function DoubleToBits(f) {
-    return new Uint32Array(Float64Array.of(f).buffer);
-}
-
-function DoublesToMsg(...args) {
-    arrayLength = 0;
-    for (let arg of args) {
-            if (typeof arg == "number") {
-                        arrayLength += 2;
-                    }
-        }
-    const msg = new Uint32Array(arrayLength);
-
-    var index = 0;
-    for (let arg of args) {
-            if (typeof arg == "number") {
-                        bits = DoubleToBits(arg);
-                        msg[index] = bits[0];
-                        msg[index + 1] = bits[1];
-                        index += 2;
-                    }
-        }
-
-    return msg;
-}
 
 AFRAME.registerComponent('arena-hybrid-render-client', {
     schema: {
@@ -135,11 +110,18 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.remoteVideo.style.zIndex = '9999';
             this.remoteVideo.style.top = '15px';
             this.remoteVideo.style.left = '15px';
-            this.remoteVideo.style.width = '768px';
+            this.remoteVideo.style.width = '384px';
             this.remoteVideo.style.height = '216px';
             if (!AFRAME.utils.device.isMobile()) {
                 document.body.appendChild(this.remoteVideo);
             }
+
+            /* const geometry = new THREE.PlaneGeometry(19.2, 10.8);
+             * const material = new THREE.MeshBasicMaterial({ map: remoteRenderTarget.texture });
+             * const mesh = new THREE.Mesh(geometry, material);
+             * mesh.position.z = -12;
+             * mesh.position.y = 7;
+             * scene.add(mesh); */
         }
         this.remoteVideo.style.display = 'block';
         this.remoteVideo.srcObject = stream;
@@ -453,9 +435,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
             if (changed === false) return;
 
-            const transformArray = camPose.toArray();
-
-            const camMsg = DoublesToMsg(...transformArray, parseFloat(this.frameID));
+            const camMsg = HybridRenderingUtils.doublesToCamMsg(...camPose.elements, parseFloat(this.frameID));
             this.inputDataChannel.send(camMsg);
 
             if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
