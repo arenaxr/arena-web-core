@@ -110,7 +110,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.remoteVideo.style.zIndex = '9999';
             this.remoteVideo.style.top = '15px';
             this.remoteVideo.style.left = '15px';
-            this.remoteVideo.style.width = '384px';
+            this.remoteVideo.style.width = '768px';
             this.remoteVideo.style.height = '216px';
             if (!AFRAME.utils.device.isMobile()) {
                 document.body.appendChild(this.remoteVideo);

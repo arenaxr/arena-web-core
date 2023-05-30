@@ -151,7 +151,6 @@ AFRAME.registerSystem('compositor', {
                 if (this.xr.enabled === true) {
                     this.xr.enabled = false;
                 }
-                this.shadowMap.autoUpdate = false;
 
                 // set camera parameters (transformation, projection) for ATW
                 if (system.cameras.length == 2) {
@@ -189,6 +188,10 @@ AFRAME.registerSystem('compositor', {
 
                     system.pass.setCameraMats(camera);
                 }
+
+                system.pass.setHasDualCameras(hasDualCameras);
+
+                sceneEl.setAttribute('arena-hybrid-render-client', 'hasDualCameras', hasDualCameras);
 
                 let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
                 if (currFrameID) {
@@ -233,10 +236,6 @@ AFRAME.registerSystem('compositor', {
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
                 this.xr.enabled = currentXREnabled;
-
-                system.pass.setHasDualCameras(hasDualCameras);
-
-                sceneEl.setAttribute('arena-hybrid-render-client', 'hasDualCameras', hasDualCameras);
 
                 // call this part of the conditional again on the next call to render()
                 isDigest = false;
