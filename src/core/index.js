@@ -1,3 +1,4 @@
-import './arena'
-import './mqtt'
-import './jitsi'
+import './eventManager';
+import './arena';
+import './mqtt';
+import './jitsi';
