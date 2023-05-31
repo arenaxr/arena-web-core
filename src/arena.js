@@ -583,7 +583,7 @@ export class Arena {
         // set renderer defaults that are different from THREE/aframe defaults
         const renderer = document.querySelector('a-scene').renderer;
         renderer.gammaFactor = 2.2;
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.outputEncoding = THREE['sRGBEncoding'];
 
         const environment = document.createElement('a-entity');
         environment.id = 'env';

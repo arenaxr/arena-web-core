@@ -153,7 +153,7 @@ AFRAME.registerSystem('compositor', {
                 }
 
                 // set camera parameters (transformation, projection) for ATW
-                if (system.cameras.length == 2) {
+                if (system.cameras.length === 2) {
                     // we have two cameras here (vr mode or headset ar mode)
                     hasDualCameras = !isWebXRViewer; // webarviewer seens to have 2 cameras, but uses one...
 
@@ -177,7 +177,7 @@ AFRAME.registerSystem('compositor', {
                         leftProj: leftProj,
                         rightProj: rightProj,
                     });
-                } else if (system.cameras.length == 1) {
+                } else if (system.cameras.length === 1) {
                     // we just have a single xr camera here
                     hasDualCameras = false;
 
@@ -194,6 +194,7 @@ AFRAME.registerSystem('compositor', {
                 sceneEl.setAttribute('arena-hybrid-render-client', 'hasDualCameras', hasDualCameras);
 
                 let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
+                console.log(currFrameID, system.prevFrames)
                 if (currFrameID) {
                     currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
                 }
@@ -218,9 +219,14 @@ AFRAME.registerSystem('compositor', {
                         }
                     }
 
-                    for (var i = currFrameID; i > system.prevFrameID; i--) {
-                        delete system.prevFrames[i]; // remove entry with frameID
+                    for (let key in system.prevFrames) {
+                        if (system.prevFrames.hasOwnProperty(key) && key < currFrameID) {
+                              delete system.prevFrames[key];
+                        }
                     }
+                    /* for (var i = currFrameID-1; i > system.prevFrameID; i--) {
+                     *     delete system.prevFrames[i]; // remove entry with frameID
+                     * } */
                     system.prevFrameID = currFrameID;
                 }
 

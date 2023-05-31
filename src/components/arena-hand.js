@@ -22,29 +22,35 @@ const handControllerPath = {
  * @private
  */
 function eventAction(evt, eventName, myThis) {
+
     const newPosition = new THREE.Vector3();
-    myThis.object3D.getWorldPosition(newPosition);
 
     const coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3),
+        x: myThis.position.x.toFixed(3),
+        y: myThis.position.y.toFixed(3),
+        z: myThis.position.z.toFixed(3),
     };
 
-    // publish to MQTT
-    const objName = myThis.name;
+     const objName = myThis.name;
     if (objName) {
-        // publishing events attached to user id objects allows sculpting security
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, {
+        const payload = {
             object_id: objName,
             action: 'clientEvent',
             type: eventName,
             data: {
                 position: coordsData,
-                source: ARENA.camName,
+                source: objName,
+                hand: myThis.attrValue.hand
             },
-        });
+        };
+        // console.log(payload)
+        // publishing events attached to user id objects allows sculpting security
+        ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, payload);
     }
+
+
+    //console.log(eventName);
+
 }
 
 /**
@@ -62,6 +68,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     init: function() {
+        const _this = this;
         const el = this.el;
         const data = this.data;
 
@@ -106,38 +113,38 @@ AFRAME.registerComponent('arena-hand', {
             });
         });
 
-        /*
+
         el.addEventListener('triggerup', function(evt) {
-            eventAction(evt, 'triggerup', this);
+            eventAction(evt, 'triggerup', _this);
         });
         el.addEventListener('triggerdown', function(evt) {
-            eventAction(evt, 'triggerdown', this);
+            eventAction(evt, 'triggerdown', _this);
         });
         el.addEventListener('gripup', function(evt) {
-            eventAction(evt, 'gripup', this);
+            eventAction(evt, 'gripup', _this);
         });
         el.addEventListener('gripdown', function(evt) {
-            eventAction(evt, 'gripdown', this);
+            eventAction(evt, 'gripdown', _this);
         });
         el.addEventListener('menuup', function(evt) {
-            eventAction(evt, 'menuup', this);
+            eventAction(evt, 'menuup', _this);
         });
         el.addEventListener('menudown', function(evt) {
-            eventAction(evt, 'menudown', this);
+            eventAction(evt, 'menudown', _this);
         });
         el.addEventListener('systemup', function(evt) {
-            eventAction(evt, 'systemup', this);
+            eventAction(evt, 'systemup', _this);
         });
         el.addEventListener('systemdown', function(evt) {
-            eventAction(evt, 'systemdown', this);
+            eventAction(evt, 'systemdown', _this);
         });
         el.addEventListener('trackpadup', function(evt) {
-            eventAction(evt, 'trackpadup', this);
+            eventAction(evt, 'trackpadup', _this);
         });
         el.addEventListener('trackpaddown', function(evt) {
-            eventAction(evt, 'trackpaddown', this);
+            eventAction(evt, 'trackpaddown', _this);
         });
-         */
+
 
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },

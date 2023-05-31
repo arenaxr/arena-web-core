@@ -174,7 +174,7 @@ void main() {
             coordRemoteColor.x = coordRemoteColor.x / 4.0 + 0.5;
         }
 
-        if (!stretchBorders) {
+        if (arMode || !stretchBorders) {
             coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
             coordRemoteDepth.y = coordRemoteColor.y;
 
