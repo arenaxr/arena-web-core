@@ -22,16 +22,13 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     init: function(evt) {
+        window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
+    },
+    ready: function(evt) {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-
-        // wait for auth to authorize user, init called from onAuth with evt detail of token
-        if (!evt) {
-            window.addEventListener(ARENA_EVENTS.ON_AUTH, this.init.bind(this));
-            return;
-        }
 
         // Sync params with bootstrap ARENA object from Auth
         this.params = { ...ARENA.params };
@@ -51,6 +48,7 @@ AFRAME.registerSystem('arena-scene', {
 
         window.ARENA = this; // alias to window for easy access
 
+        this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
@@ -79,8 +77,7 @@ AFRAME.registerSystem('arena-scene', {
             this.params.noname = true;
         }
 
-        sceneEl.ARENAUserParamsLoaded = true;
-        sceneEl.emit(ARENA_EVENTS.USER_PARAMS_LOADED, true);
+        this.events.emit(ARENA_EVENTS.USER_PARAMS_LOADED, true);
 
         this.loadScene();
 

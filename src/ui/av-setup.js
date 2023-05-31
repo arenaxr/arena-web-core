@@ -19,17 +19,13 @@ AFRAME.registerSystem('arena-av-setup', {
     },
 
     init: function() {
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+    },
+    ready: function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-
-        // wait for ARENA user params (token, id, etc.) to be ready
-        if (!sceneEl.ARENAUserParamsLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
-            return;
-        }
-
         this.arena = sceneEl.systems['arena-scene'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 

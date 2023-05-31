@@ -29,21 +29,17 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     init: function() {
-        const data = this.data;
-        const el = this.el;
-
-        const sceneEl = el.sceneEl;
-
         if (!window.JitsiMeetJS) {
             console.warn('Jitsi is not found!');
             return;
         }
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+    },
+    ready() {
+        const data = this.data;
+        const el = this.el;
 
-        // wait for ARENA user params (token, id, etc.) to be ready
-        if (!sceneEl.ARENAUserParamsLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
-            return;
-        }
+        const sceneEl = el.sceneEl;
 
         this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -508,7 +504,8 @@ AFRAME.registerSystem('arena-jitsi', {
         this.prevActiveSpeaker = this.activeSpeaker;
         this.activeSpeaker = id;
 
-        let actArenaId, prevArenaId;
+        let actArenaId;
+        let prevArenaId;
 
         const actJitsiId = this.conference.getParticipantById(this.activeSpeaker);
         if (actJitsiId) actArenaId = actJitsiId.getProperty('arenaId');

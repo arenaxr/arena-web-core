@@ -24,17 +24,14 @@ AFRAME.registerSystem('arena-mqtt', {
         mqttPath: {type: 'array', default: ARENADefaults.mqttPath},
     },
 
-    init: async function() {
+    init: function () {
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+    },
+    ready: async function () {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-
-        // wait for ARENA user params (token, id, etc.) to be ready
-        if (!sceneEl.ARENAUserParamsLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.init.bind(this));
-            return;
-        }
 
         this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -50,15 +47,16 @@ AFRAME.registerSystem('arena-mqtt', {
         const camName = this.arena.camName;
         const outputTopic = this.arena.outputTopic;
         // Do not pass functions in mqttClientOptions
-        await this.connect({
+        await this.connect(
+            {
                 reconnect: true,
                 userName: this.userName,
                 password: mqttToken,
             },
             // last will message
-            JSON.stringify({object_id: camName, action: 'delete'}),
+            JSON.stringify({ object_id: camName, action: "delete" }),
             // last will topic
-            outputTopic + camName,
+            outputTopic + camName
         );
 
         ARENA.Mqtt = this; // Restore old alias
@@ -75,13 +73,14 @@ AFRAME.registerSystem('arena-mqtt', {
         const idTag = this.arena.idTag;
 
         const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
-        const worker = await new MQTTWorker({
+        const worker = await new MQTTWorker(
+            {
                 renderTopic: renderTopic,
                 mqttHostURI: this.mqttHostURI,
                 idTag: idTag,
             },
             proxy(this.onMessageArrived.bind(this)),
-            proxy(this.mqttHealthCheck.bind(this)),
+            proxy(this.mqttHealthCheck.bind(this))
             // proxy(() => {
             //     if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
             //         // eslint-disable-next-line new-cap
