@@ -1,13 +1,19 @@
 /* global AFRAME */
 
 /**
- * @fileoverview Manager for ARENA events
+ * @fileoverview Manager for ARENA events, particularly those related to AFRAME
+ *               and ARENA loading sequence, in which scary async things happen
+ *               which results in unpredictable event ordering for various
+ *               systems and components.
  */
 
 AFRAME.registerSystem('arena-event-manager', {
     init() {
         this.eventData = {};
         ARENA.events = this; // Set ARENA reference, if this happens before ARENA ready
+        this.sceneEl.addEventListener('loaded', () => { // Handle AFRAME scene event
+            this.eventData['loaded'] = true;
+        });
     },
     /**
      * Register event listener AND dispatch it immediately if key is already set
