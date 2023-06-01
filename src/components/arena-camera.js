@@ -43,15 +43,14 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     init: function() {
+        ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
+    },
+
+    ready: function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-
-        if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
-            return;
-        }
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];

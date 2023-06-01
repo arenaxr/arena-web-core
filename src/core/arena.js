@@ -21,10 +21,11 @@ AFRAME.registerSystem('arena-scene', {
         disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
     },
 
-    init: function(evt) {
+    init: function (evt) {
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
+        ARENA.events.addMultiEventListener([ARENA_EVENTS.MQTT_LOADED, "loaded"], this.loadScene.bind(this));
     },
-    ready: function(evt) {
+    ready: function (evt) {
         const data = this.data;
         const el = this.el;
 
@@ -103,18 +104,6 @@ AFRAME.registerSystem('arena-scene', {
 
         const sceneEl = el.sceneEl;
 
-        // wait for mqtt client to be loaded
-        if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.loadScene.bind(this));
-            return;
-        }
-
-        // wait for aframe scene to be ready to render
-        if (!sceneEl.hasLoaded) {
-            sceneEl.addEventListener('loaded', this.loadScene.bind(this));
-            return;
-        }
-
         if (this.params.armode) {
             /*
             Instantly enter AR mode for now.
@@ -138,8 +127,7 @@ AFRAME.registerSystem('arena-scene', {
 
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
 
-        sceneEl.ARENALoaded = true;
-        sceneEl.emit(ARENA_EVENTS.ARENA_LOADED, true);
+        this.events.emit(ARENA_EVENTS.ARENA_LOADED, true);
     },
 
     /**
@@ -205,9 +193,9 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Renders/updates the display name in the top left corner of a scene.
-     * @param {boolean} speaker If the user is the dominant speaker
+     * @param {boolean} [speaker=false] If the user is the dominant speaker
      */
-    showEchoDisplayName: function(speaker) {
+    showEchoDisplayName: function (speaker = false) {
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!this.params.noname) {
@@ -649,7 +637,7 @@ AFRAME.registerSystem('arena-scene', {
             }).
             finally(() => {
                 this.sceneOptions = sceneOptions;
-                sceneEl.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
+                this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
             });
     },
 

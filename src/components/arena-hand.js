@@ -67,6 +67,10 @@ AFRAME.registerComponent('arena-hand', {
     dependencies: ['laser-controls'],
 
     init: function() {
+        ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
+    },
+
+    ready: function() {
         const data = this.data;
         const el = this.el;
 
@@ -74,11 +78,6 @@ AFRAME.registerComponent('arena-hand', {
 
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
-
-        if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
-            return;
-        }
 
         this.arena = sceneEl.systems['arena-scene'];
 

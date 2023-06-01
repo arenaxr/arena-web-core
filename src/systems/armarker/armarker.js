@@ -71,22 +71,18 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     init: function() {
+        ARENA.events.addMultiEventListener([
+            ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.SCENE_OPT_LOADED
+        ], this.ready.bind(this));
+    },
+
+    ready: function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
 
-        if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
-            return;
-        }
-
         this.arena = sceneEl.systems['arena-scene'];
-
-        if (this.arena.sceneOptions === undefined) {
-            sceneEl.addEventListener(ARENA_EVENTS.SCENE_OPT_LOADED, this.init.bind(this));
-            return;
-        }
 
         // init this.ATLASMarkers with list of markers within range
         this.getARMArkersFromATLAS(true);

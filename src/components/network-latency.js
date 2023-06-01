@@ -26,17 +26,14 @@ AFRAME.registerComponent('network-latency', {
     },
 
     init: function() {
+        if (!this.data.enabled) return;
+        ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.ready.bind(this));
+    },
+    ready: function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-
-        if (!data.enabled) return;
-
-        if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.init.bind(this));
-            return;
-        }
 
         this.mqtt = sceneEl.systems['arena-mqtt'];
 
@@ -59,7 +56,7 @@ AFRAME.registerComponent('network-latency', {
         const sceneEl = el.sceneEl;
 
         // publish empty message with qos of 2 for network graph to update latency
-        if (sceneEl.ARENAMqttLoaded && this.mqtt.isConnected()) {
+        if (ARENA.events.eventData[ARENA_EVENTS.MQTT_LOADED] && this.mqtt.isConnected()) {
             this.mqtt.publish(this.topic, this.message, this.qos);
         }
     },

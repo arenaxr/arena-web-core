@@ -31,26 +31,20 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     init: async function() {
         const data = this.data;
-        const el = this.el;
-
-        const sceneEl = el.sceneEl;
 
         if (!data.enabled) return;
 
-        if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
-            return;
-        }
+        ARENA.events.addMultiEventListener([
+            ARENA_EVENTS.ARENA_LOADED,
+            ARENA_EVENTS.MQTT_LOADED,
+            ARENA_EVENTS.JITSI_LOADED
+        ], this.ready.bind(this));
+    },
+    ready: async function() {
+        const data = this.data;
+        const el = this.el;
 
-        if (!sceneEl.ARENAMqttLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.init.bind(this));
-            return;
-        }
-
-        if (!sceneEl.jitsiLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.init.bind(this));
-            return;
-        }
+        const sceneEl = el.sceneEl;
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];

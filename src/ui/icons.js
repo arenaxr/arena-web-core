@@ -54,7 +54,14 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         additionalSettingsButtonEnabled: {type: 'boolean', default: true},
     },
 
-    init: function() {
+    init: function () {
+        ARENA.events.addMultiEventListener(
+            [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.JITSI_LOADED],
+            this.ready.bind(this)
+        );
+    },
+
+    ready: function () {
         const data = this.data;
         const el = this.el;
 

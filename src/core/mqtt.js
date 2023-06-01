@@ -61,8 +61,7 @@ AFRAME.registerSystem('arena-mqtt', {
 
         ARENA.Mqtt = this; // Restore old alias
 
-        sceneEl.ARENAMqttLoaded = true;
-        sceneEl.emit(ARENA_EVENTS.MQTT_LOADED, true);
+        ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
     },
 
     initWorker: async function() {

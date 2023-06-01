@@ -107,9 +107,7 @@ AFRAME.registerSystem('arena-jitsi', {
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
         // signal that jitsi is loaded. note: jitsi is not necessarily CONNECTED when this event is fired,
-        // it is just LOADED
-        sceneEl.jitsiLoaded = true;
-        sceneEl.emit(ARENA_EVENTS.JITSI_LOADED, true);
+        ARENA.events.emit(ARENA_EVENTS.JITSI_LOADED, true);
 
         if (this.arena.params.skipav) {
             this.connect();

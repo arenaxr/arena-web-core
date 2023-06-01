@@ -24,15 +24,14 @@ AFRAME.registerComponent('jitsi-video', {
     },
 
     init: function() {
+        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.ready.bind(this));
+    },
+
+    ready: function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-
-        if (!sceneEl.jitsiLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.init.bind(this));
-            return;
-        }
 
         this.onJitsiConnect = this.onJitsiConnect.bind(this);
         this.onJitsiNewUser = this.onJitsiNewUser.bind(this);
