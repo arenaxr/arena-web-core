@@ -23,7 +23,10 @@ AFRAME.registerSystem('arena-scene', {
 
     init: function (evt) {
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
-        ARENA.events.addMultiEventListener([ARENA_EVENTS.MQTT_LOADED, "loaded"], this.loadScene.bind(this));
+        ARENA.events.addMultiEventListener(
+            [ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.USER_PARAMS_LOADED, "loaded"],
+            this.loadScene.bind(this)
+        );
     },
     ready: function (evt) {
         const data = this.data;
@@ -47,11 +50,11 @@ AFRAME.registerSystem('arena-scene', {
         this.renderTopic = `${this.outputTopic}#`;
         this.vioTopic = `${this.params.realm}/vio/${this.namespacedScene}/`;
 
-        window.ARENA = this; // alias to window for easy access
-
         this.events = sceneEl.systems['arena-event-manager'];
         this.health = sceneEl.systems['arena-health-ui'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
+
+        window.ARENA = this; // alias to window for easy access
 
         // query string start coords given as a comma-separated string, e.g.: 'startCoords=0,1.6,0'
         if (typeof this.params.startCoords === 'string') {
@@ -79,8 +82,6 @@ AFRAME.registerSystem('arena-scene', {
         }
 
         this.events.emit(ARENA_EVENTS.USER_PARAMS_LOADED, true);
-
-        this.loadScene();
 
         // setup webar session
         ARENAWebARUtils.handleARButtonForNonWebXRMobile();
