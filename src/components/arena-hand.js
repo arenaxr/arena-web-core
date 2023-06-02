@@ -96,9 +96,6 @@ AFRAME.registerComponent('arena-hand', {
                     dep: ARENA.camName,
                 },
             };
-            if (msg.data.url.includes('magicleap')) {
-                msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
-            }
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
             data.enabled = true;
         });
@@ -156,6 +153,11 @@ AFRAME.registerComponent('arena-hand', {
         let url = el.getAttribute('gltf-model');
         if (!url) url = handControllerPath[data.hand];
 
+        if (url.includes('magicleap')) {
+            url = 'https://arena-dev1.conix.io/store/models/controllers/magicleap/magicleap-two-controller.glb';
+            el.setAttribute('gltf-model', url);
+        }
+
         return url;
     },
 
@@ -185,9 +187,6 @@ AFRAME.registerComponent('arena-hand', {
                 dep: ARENA.camName,
             },
         };
-        if (msg.data.url.includes('magicleap')) {
-            msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
-        }
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
     },
 

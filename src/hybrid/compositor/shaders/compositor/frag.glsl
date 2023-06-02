@@ -209,10 +209,10 @@ void main() {
         // color = remoteColor;
         // color = localDepth * remoteColor + remoteDepth * localColor;
 
-        if (remoteDepth <= localDepth) {
+        if (remoteDepth < localDepth) {
             color = vec4(remoteColor.rgb, 1.0);
             // handle passthrough
-            if (arMode && remoteDepth >= 0.9 / DEPTH_SCALAR) {
+            if (arMode && remoteDepth >= 0.95 / DEPTH_SCALAR) {
                 color = localColor;
             }
         }
