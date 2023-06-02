@@ -40,6 +40,11 @@ AFRAME.registerSystem('arena-av-setup', {
 
         try {
             this.loadHTML().then(() => {
+                // Manually init MDB form elements with Material design
+                document.querySelectorAll('.form-outline').forEach((formOutline) => {
+                    new mdb.Input(formOutline).init();
+                });
+
                 this.addListeners();
                 this.setupAVCallback = ()=>{}; // noop
 
