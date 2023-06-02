@@ -76,13 +76,11 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         await this.signaler.openConnection();
 
-        window.addEventListener('hybrid-onremoterender', this.onRemoteRender.bind(this));
-
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
     },
 
-    connectToCloud() {
+    connectToCloud: function() {
         const data = this.data;
         this.signaler.connectionId = null;
 
@@ -90,7 +88,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.signaler.sendConnectACK();
     },
 
-    onRemoteTrack(evt) {
+    onRemoteTrack: function(evt) {
         console.log('got remote stream');
 
         const stream = new MediaStream();
@@ -110,8 +108,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.remoteVideo.style.zIndex = '9999';
             this.remoteVideo.style.top = '15px';
             this.remoteVideo.style.left = '15px';
-            this.remoteVideo.style.width = '768px';
-            this.remoteVideo.style.height = '216px';
+            this.remoteVideo.style.width = '384px';
+            this.remoteVideo.style.height = '108px';
             if (!AFRAME.utils.device.isMobile()) {
                 document.body.appendChild(this.remoteVideo);
             }
@@ -127,7 +125,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.remoteVideo.srcObject = stream;
     },
 
-    onRemoteVideoLoaded(evt) {
+    onRemoteVideoLoaded: function(evt) {
         const data = this.data;
         const el = this.el;
 
@@ -149,20 +147,14 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.compositor.bind();
     },
 
-    onRemoteRender(evt) {
-        // console.log('[render-client]', evt.detail.object_id, evt.detail.remoteRendered);
-        const update = evt.detail;
-        this.signaler.sendRemoteStatusUpdate(update);
-    },
-
-    onIceCandidate(event) {
+    onIceCandidate: function(event) {
         // console.log('pc ICE candidate: \n ' + event.candidate);
         if (event.candidate != null) {
             this.signaler.sendCandidate(event.candidate);
         }
     },
 
-    setupTransceivers(isMac) {
+    setupTransceivers: function(isMac) {
         if (supportsSetCodecPreferences) {
             // Mac's H264 encoder produced colors that are a bit off, so prefer VP9
             if (isMac) {
@@ -194,7 +186,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         }
     },
 
-    gotOffer(offer) {
+    gotOffer: function(offer) {
         // console.log('got offer.');
 
         const _this = this;
@@ -239,7 +231,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             });
     },
 
-    createOffer() {
+    createOffer: function() {
         // console.log('creating offer.');
 
         this.pc.createOffer(sdpConstraints)
@@ -258,7 +250,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             });
     },
 
-    gotAnswer(answer) {
+    gotAnswer: function(answer) {
         // console.log('got answer.');
 
         this.pc.setRemoteDescription(new RTCSessionDescription(answer))
@@ -277,7 +269,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             });
     },
 
-    createAnswer(isMac) {
+    createAnswer: function(isMac) {
         // console.log('creating answer.');
 
         this.setupTransceivers(isMac);
@@ -302,18 +294,18 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             });
     },
 
-    gotIceCandidate(candidate) {
+    gotIceCandidate: function(candidate) {
         // console.log('got ice.');
         if (this.connected) {
             this.pc.addIceCandidate(new RTCIceCandidate(candidate));
         }
     },
 
-    gotHealthCheck() {
+    gotHealthCheck: function() {
         this.signaler.sendHealthCheckAck();
     },
 
-    handleCloudDisconnect() {
+    handleCloudDisconnect: function() {
         if (!this.connected) return;
 
         const env = document.getElementById('env');
@@ -332,7 +324,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.connectToCloud();
     },
 
-    async checkStats() {
+    checkStats: async function() {
         const data = this.data;
         while (this.connected) {
             this.stats.getStats();
@@ -344,7 +336,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         return new Promise((resolve) => setTimeout(resolve, ms));
     },
 
-    sendStatus() {
+    sendStatus: function() {
         const el = this.el;
         const data = this.data;
         const sceneEl = el.sceneEl;
@@ -363,12 +355,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         }));
     },
 
-    onEnterVR() {
+    onEnterVR: function() {
         if (!this.connected) return;
         this.sendStatus();
     },
 
-    onExitVR() {
+    onExitVR: function() {
         if (!this.connected) return;
         this.statusDataChannel.send(JSON.stringify({
             isVRMode: false,
@@ -433,7 +425,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 changed = true;
             }
 
-            if (changed === false) return;
+            if (t < 1000 && changed === false) return;
 
             const camMsg = HybridRenderingUtils.doublesToCamMsg(...camPose.elements, parseFloat(this.frameID));
             this.inputDataChannel.send(camMsg);

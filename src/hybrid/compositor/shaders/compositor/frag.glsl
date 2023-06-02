@@ -190,11 +190,8 @@ void main() {
             xMin = xMin + onePixel;
             xMax = xMax - onePixel;
 
-            coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
-            /* if (coordRemoteColor.y == 1.0) {
-             *     xMax = xMax - 33.0 * onePixel;
-             * } */
             coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax);
+            coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
             coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
             coordRemoteDepth.y = coordRemoteColor.y;
             remoteColor = texture2D( tRemoteFrame, coordRemoteColor );

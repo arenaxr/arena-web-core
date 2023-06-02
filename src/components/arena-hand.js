@@ -196,7 +196,25 @@ AFRAME.registerComponent('arena-hand', {
             this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
         }
 
-        this.rotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+        // remove orientationOffset per model to publish matching rendered pose
+        if (this.orientationOffset === undefined) {
+            const controls = this.el.components["tracked-controls"];
+            if (controls !== undefined) {
+                this.orientationOffset = controls.data.orientationOffset;
+                console.log(`Applying ${controls.data.id} ${controls.data.hand} orientationOffset=${JSON.stringify(this.orientationOffset)}`);
+            }
+        } else {
+            // TODO (mwfarb): this method is close, but orientation is a little off
+            this.rotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
+            const offset = new THREE.Quaternion().setFromEuler(
+                new THREE.Euler(
+                    THREE.MathUtils.degToRad(-this.orientationOffset.x),
+                    THREE.MathUtils.degToRad(-this.orientationOffset.y),
+                    THREE.MathUtils.degToRad(-this.orientationOffset.z)
+                )
+            );
+            this.rotation.multiply(offset);
+        }
         this.position.setFromMatrixPosition(this.el.object3D.matrixWorld);
 
         const rotationCoords = AFRAME.utils.coordinates.stringify(this.rotation);

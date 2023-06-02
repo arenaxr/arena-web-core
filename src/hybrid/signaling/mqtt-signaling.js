@@ -16,8 +16,6 @@ const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/candida
 const CLIENT_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/client/health';
 const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/stats_browser';
 
-const UPDATE_REMOTE_STATUS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/remote';
-
 export class MQTTSignaling {
     constructor(id) {
         this.id = id;
@@ -141,10 +139,6 @@ export class MQTTSignaling {
 
     sendCandidate(candidate) {
         this.sendMessage(`${CLIENT_CANDIDATE_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'ice', candidate);
-    }
-
-    sendRemoteStatusUpdate(update) {
-        this.sendMessage(`${UPDATE_REMOTE_STATUS_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'remote-update', update);
     }
 
     sendHealthCheckAck() {

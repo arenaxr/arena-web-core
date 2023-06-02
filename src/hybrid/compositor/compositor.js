@@ -194,7 +194,6 @@ AFRAME.registerSystem('compositor', {
                 sceneEl.setAttribute('arena-hybrid-render-client', 'hasDualCameras', hasDualCameras);
 
                 let currFrameID = system.pass.getFrameID(this, currentRenderTarget, system.renderTarget);
-                console.log(currFrameID, system.prevFrames)
                 if (currFrameID) {
                     currFrameID = system.closestKeyInDict(currFrameID, system.prevFrames);
                 }
@@ -224,9 +223,6 @@ AFRAME.registerSystem('compositor', {
                               delete system.prevFrames[key];
                         }
                     }
-                    /* for (var i = currFrameID-1; i > system.prevFrameID; i--) {
-                     *     delete system.prevFrames[i]; // remove entry with frameID
-                     * } */
                     system.prevFrameID = currFrameID;
                 }
 
