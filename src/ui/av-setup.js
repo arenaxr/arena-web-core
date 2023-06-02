@@ -65,7 +65,7 @@ AFRAME.registerSystem('arena-av-setup', {
     loadHTML: async function() {
         const htmlRes = await fetch(this.data.htmlSrc);
         const html = await htmlRes.text();
-        document.body.insertAdjacentHTML('beforeend', html);
+        document.body.insertAdjacentHTML('afterbegin', html);
 
         this.setupPanel = document.getElementById('avSetup');
         this.videoElement = document.getElementById('vidPreview');
@@ -89,7 +89,6 @@ AFRAME.registerSystem('arena-av-setup', {
     },
 
     show: function(callback) {
-        console.log("showing av setup")
         if (callback) {
             this.setupAVCallback = callback;
         }
