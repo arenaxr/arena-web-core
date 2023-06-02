@@ -69,16 +69,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         if (!data.enabled) return;
 
-        if (!sceneEl.ARENALoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.init.bind(this));
-            return;
-        }
-
-        if (!sceneEl.jitsiLoaded) {
-            sceneEl.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.init.bind(this));
-            return;
-        }
-
         this.arena = sceneEl.systems['arena-scene'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
