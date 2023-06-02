@@ -67,21 +67,22 @@ AFRAME.registerComponent('arena-hand', {
     dependencies: ['laser-controls'],
 
     init: function() {
+        this.rotation = new THREE.Quaternion();
+        this.position = new THREE.Vector3();
+        this.lastPose = '';
+        this.initialized = false;
+
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
     },
 
     ready: function() {
+        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
 
-        this.rotation = new THREE.Quaternion();
-        this.position = new THREE.Vector3();
-
         this.arena = sceneEl.systems['arena-scene'];
-
-        this.lastPose = '';
 
         // capitalize hand type
         data.hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
@@ -198,6 +199,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     tick: function(t, dt) {
+        if (!this.initialized) return;
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
         }

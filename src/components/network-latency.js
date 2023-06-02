@@ -26,10 +26,11 @@ AFRAME.registerComponent('network-latency', {
     },
 
     init: function() {
-        if (!this.data.enabled) return;
+        this.initialized = false;
         ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.ready.bind(this));
     },
     ready: function() {
+        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -50,6 +51,7 @@ AFRAME.registerComponent('network-latency', {
     },
 
     tick: function() {
+        if (!this.initialized || !this.enabled) return;
         const data = this.data;
         const el = this.el;
 

@@ -43,10 +43,12 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     init: function() {
+        this.initialized = false;
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
     },
 
     ready: function() {
+        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -209,6 +211,7 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     tick: function(t, dt) {
+        if (!this.initialized) return;
         const data = this.data;
         const el = this.el;
 

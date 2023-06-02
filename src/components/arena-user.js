@@ -38,9 +38,11 @@ AFRAME.registerComponent('arena-user', {
     },
 
     init: function() {
+        this.initialized = false;
         ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.ready.bind(this));
     },
     ready: function() {
+        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -458,6 +460,7 @@ AFRAME.registerComponent('arena-user', {
     },
 
     tick: function() {
+        if (!this.initialized) return;
         const data = this.data;
 
         // do periodic a/v updates
