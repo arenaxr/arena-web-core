@@ -50,6 +50,7 @@ AFRAME.registerSystem('arena-av-setup', {
                 this.meterProcess = createAudioMeter(this.audioContext);
 
                 window.setupAV = this.show; // legacy alias
+                ARENA.events.emit(ARENA_EVENTS.SETUPAV_LOADED);
             });
         } catch (err) {
             console.error("Error loading AV setup HTML: ", err);
