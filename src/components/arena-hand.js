@@ -65,6 +65,7 @@ AFRAME.registerComponent('arena-hand', {
     schema: {
         enabled: {type: 'boolean', default: false},
         hand: {type: 'string', default: 'left'},
+        remoteRender: {type: 'boolean', default: false},
     },
 
     init: function() {
@@ -96,6 +97,7 @@ AFRAME.registerComponent('arena-hand', {
                     dep: ARENA.camName,
                 },
             };
+            msg.data['remote-render'] = {'enabled': data.remoteRender};
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
             data.enabled = true;
         });
@@ -109,7 +111,6 @@ AFRAME.registerComponent('arena-hand', {
                 action: 'delete',
             });
         });
-
 
         el.addEventListener('triggerup', function(evt) {
             eventAction(evt, 'triggerup', _this);
@@ -142,7 +143,6 @@ AFRAME.registerComponent('arena-hand', {
             eventAction(evt, 'trackpaddown', _this);
         });
 
-
         this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
     },
 
@@ -154,7 +154,8 @@ AFRAME.registerComponent('arena-hand', {
         if (!url) url = handControllerPath[data.hand];
 
         if (url.includes('magicleap')) {
-            url = 'https://arena-dev1.conix.io/store/models/controllers/magicleap/magicleap-two-controller.glb';
+            url = `${window.location.origin}/store/models/controllers/magicleap/magicleap-two-controller.glb`;
+        console.log(url)
             el.setAttribute('gltf-model', url);
         }
 
@@ -187,7 +188,17 @@ AFRAME.registerComponent('arena-hand', {
                 dep: ARENA.camName,
             },
         };
+        msg.data['remote-render'] = {'enabled': data.remoteRender};
         ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
+    },
+
+    update: function(oldData) {
+        const el = this.el;
+        const data = this.data;
+
+        if (oldData.remoteRender !== data.remoteRender) {
+            this.publishPose();
+        }
     },
 
     tick: (function(t, dt) {

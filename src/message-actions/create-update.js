@@ -317,7 +317,9 @@ export class CreateUpdate {
         case 'handLeft':
         case 'handRight':
             entityEl.setAttribute('gltf-model', data.url);
-            delete data['remote-render'];
+            if (data.visible !== undefined) {
+                entityEl.setAttribute('arena-hand', 'remoteRender', !data.visible);
+            }
             delete data[type];
         case 'cube':
             type = 'box'; // arena legacy! new libraries/persist objects should use box!
