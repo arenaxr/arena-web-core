@@ -23,6 +23,7 @@ AFRAME.registerSystem('arena-scene', {
 
     init: function (evt) {
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.fetchSceneOptions.bind(this));
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.USER_PARAMS_LOADED, "loaded"],
             this.loadScene.bind(this)
@@ -99,7 +100,20 @@ AFRAME.registerSystem('arena-scene', {
         });
     },
 
-    loadScene: function() {
+    fetchSceneOptions: async function () {
+        fetch(`${this.persistenceUrl}?type=scene-options`, {
+            method: "GET",
+            credentials: this.data.disallowJWT ? "omit" : "same-origin",
+        })
+            .then((res) => res.json())
+            .then((sceneData) => {
+                this.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
+                    this.loadSceneOptions(sceneData[sceneData.length - 1]);
+                });
+            });
+    },
+
+    loadScene: function () {
         const data = this.data;
         const el = this.el;
 
@@ -122,7 +136,6 @@ AFRAME.registerSystem('arena-scene', {
             sceneEl.setAttribute('debug', true);
         }
 
-        this.loadSceneOptions();
         this.loadSceneObjects();
         this.loadUser();
 
@@ -338,7 +351,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
-     * @param {string} urlToLoad which url to load arena from
+     * @param {string} [urlToLoad] which url to load arena from
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
@@ -518,8 +531,9 @@ AFRAME.registerSystem('arena-scene', {
 
     /**
      * Loads and applies scene-options (if it exists), otherwise set to default environment
+     * @param {Object} sceneData - scene data from persistence, already JSON parsed
      */
-    loadSceneOptions: function() {
+    loadSceneOptions: function (sceneData) {
         const data = this.data;
         const el = this.el;
 
@@ -538,108 +552,71 @@ AFRAME.registerSystem('arena-scene', {
         const environment = document.createElement('a-entity');
         environment.id = 'env';
 
-        fetch(`${this.persistenceUrl}?type=scene-options`, {
-            method: 'GET',
-            credentials: data.disallowJWT ? 'omit' : 'same-origin',
-        }).
-            then((res) => res.json()).
-            then((data) => {
-                const payload = data[data.length - 1];
-                if (payload) {
-                    const options = payload['attributes'];
-                    Object.assign(sceneOptions, options['scene-options']);
+        if (sceneData) {
+            const options = sceneData['attributes'];
+            Object.assign(sceneOptions, options['scene-options']);
 
-                    if (sceneOptions['physics']) {
-                        // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-                        import('../systems/vendor/aframe-physics-system.min.js');
-                        document.getElementById('groundPlane').setAttribute('static-body', 'true');
-                    }
+            if (sceneOptions['physics']) {
+                // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
+                import('../systems/vendor/aframe-physics-system.min.js');
+                document.getElementById('groundPlane').setAttribute('static-body', 'true');
+            }
 
-                    if (sceneOptions['ar-hit-test']) {
-                        sceneEl.setAttribute('ar-hit-test', sceneOptions['ar-hit-test']);
-                    }
+            if (sceneOptions['ar-hit-test']) {
+                sceneEl.setAttribute('ar-hit-test', sceneOptions['ar-hit-test']);
+            }
 
-                    // deal with scene attribution
-                    if (sceneOptions['attribution']) {
-                        const sceneAttr = document.createElement('a-entity');
-                        sceneAttr.setAttribute('id', 'scene-options-attribution');
-                        sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
-                        sceneRoot.appendChild(sceneAttr);
-                        delete sceneOptions.attribution;
-                    }
+            // deal with scene attribution
+            if (sceneOptions['attribution']) {
+                const sceneAttr = document.createElement('a-entity');
+                sceneAttr.setAttribute('id', 'scene-options-attribution');
+                sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
+                sceneRoot.appendChild(sceneAttr);
+                delete sceneOptions.attribution;
+            }
 
-                    if (sceneOptions['navMesh']) {
-                        sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
-                        const navMesh = document.createElement('a-entity');
-                        navMesh.id = 'navMesh';
-                        navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
-                        navMesh.setAttribute('nav-mesh', '');
-                        sceneRoot.appendChild(navMesh);
-                    }
+            if (sceneOptions['navMesh']) {
+                sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
+                const navMesh = document.createElement('a-entity');
+                navMesh.id = 'navMesh';
+                navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
+                navMesh.setAttribute('nav-mesh', '');
+                sceneRoot.appendChild(navMesh);
+            }
 
-                    if (sceneOptions['sceneHeadModels']) {
-                        // add scene custom scene heads to selection list
-                        this.setupSceneHeadModels(sceneOptions['sceneHeadModels']);
-                    }
+            if (sceneOptions['sceneHeadModels']) {
+                // add scene custom scene heads to selection list
+                this.setupSceneHeadModels(sceneOptions['sceneHeadModels']);
+            }
 
-                    if (!sceneOptions['clickableOnlyEvents']) {
-                        // unusual case: clickableOnlyEvents = true by default, add warning...
-                        this.health.addError('scene-options.allObjectsClickable');
-                    }
+            if (!sceneOptions['clickableOnlyEvents']) {
+                // unusual case: clickableOnlyEvents = true by default, add warning...
+                this.health.addError('scene-options.allObjectsClickable');
+            }
 
-                    // save scene options
-                    for (const [attribute, value] of Object.entries(sceneOptions)) {
-                        ARENA[attribute] = value;
-                    }
+            // save scene options
+            for (const [attribute, value] of Object.entries(sceneOptions)) {
+                ARENA[attribute] = value;
+            }
 
-                    console.log(options);
-                    const envPresets = options['env-presets'];
-                    for (const [attribute, value] of Object.entries(envPresets)) {
-                        environment.setAttribute('environment', attribute, value);
-                    }
-                    sceneRoot.appendChild(environment);
+            const envPresets = options['env-presets'];
+            for (const [attribute, value] of Object.entries(envPresets)) {
+                environment.setAttribute('environment', attribute, value);
+            }
+            sceneRoot.appendChild(environment);
 
-                    const rendererSettings = options['renderer-settings'];
-                    if (rendererSettings) {
-                        for (const [attribute, value] of Object.entries(rendererSettings)) {
-                            renderer[attribute] = (attribute === 'outputEncoding') ?
-                                renderer[attribute] = THREE[value] :
-                                renderer[attribute] = value;
-                        }
-                    }
-                } else {
-                    throw new Error('No scene-options');
+            const rendererSettings = options['renderer-settings'];
+            if (rendererSettings) {
+                for (const [attribute, value] of Object.entries(rendererSettings)) {
+                    renderer[attribute] =
+                        attribute === 'outputEncoding'
+                            ? (renderer[attribute] = THREE[value])
+                            : (renderer[attribute] = value);
                 }
-            }).
-            catch(() => {
-                environment.setAttribute('environment', 'preset', 'starry');
-                environment.setAttribute('environment', 'seed', 3);
-                environment.setAttribute('environment', 'flatShading', true);
-                environment.setAttribute('environment', 'groundTexture', 'squares');
-                environment.setAttribute('environment', 'grid', 'none');
-                environment.setAttribute('environment', 'fog', 0);
-                environment.setAttribute('environment', 'fog', 0);
-                sceneRoot.appendChild(environment);
-
-                // make default env have lights
-                const light = document.createElement('a-light');
-                light.id = 'ambient-light';
-                light.setAttribute('type', 'ambient');
-                light.setAttribute('color', '#363942');
-
-                const light1 = document.createElement('a-light');
-                light1.id = 'point-light';
-                light1.setAttribute('type', 'point');
-                light1.setAttribute('position', '-0.272 0.39 1.25');
-                light1.setAttribute('color', '#C2E6C7');
-
-                sceneRoot.appendChild(light);
-                sceneRoot.appendChild(light1);
-            }).
-            finally(() => {
-                this.sceneOptions = sceneOptions;
-                this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
-            });
+            }
+        }
+        this.sceneOptions = sceneOptions;
+        this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
     },
 
     /**
