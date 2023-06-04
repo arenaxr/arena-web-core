@@ -7,12 +7,13 @@
  *               systems and components.
  */
 
-AFRAME.registerSystem('arena-event-manager', {
+AFRAME.registerSystem("arena-event-manager", {
     init() {
         this.eventData = {};
         ARENA.events = this; // Set ARENA reference, if this happens before ARENA ready
-        this.sceneEl.addEventListener('loaded', () => { // Handle AFRAME scene event
-            this.eventData['loaded'] = true;
+        this.sceneEl.addEventListener("loaded", () => {
+            // Handle AFRAME scene event
+            this.eventData["loaded"] = true;
         });
     },
     /**
@@ -37,25 +38,27 @@ AFRAME.registerSystem('arena-event-manager', {
     addMultiEventListener(keys, callback, opts = { once: true }) {
         const checkDepsAndEmit = (evtList) => {
             if (evtList.every(([_k, v]) => v !== undefined)) {
-                callback(evtList.reduce((obj, [key, value]) => {
-                    obj[key] = value;
-                    return obj;
-                }, {}));
+                callback(
+                    evtList.reduce((obj, [key, value]) => {
+                        obj[key] = value;
+                        return obj;
+                    }, {})
+                );
                 return true;
             }
             return false;
-        }
-        const eventList = keys.map(key => [key, this.eventData[key]]);
+        };
+        const eventList = keys.map((key) => [key, this.eventData[key]]);
         if (checkDepsAndEmit(eventList)) {
             return; // All events already set, fire callback immediately
         }
         // Not ready yet, register callback for each pending event. eventList in closure
         const checkCallbacks = (e) => {
-            let {type: key, detail: value } = e;
+            let { type: key, detail: value } = e;
             value = value ?? true; // Default to some defined value
             eventList.find(([k, _v]) => key === k)[1] = value; // Set value
             checkDepsAndEmit(eventList);
-        }
+        };
         eventList.forEach(([key, value]) => {
             if (value === undefined) {
                 this.sceneEl.addEventListener(key, checkCallbacks, opts);
@@ -68,7 +71,7 @@ AFRAME.registerSystem('arena-event-manager', {
      * @param {object} [detail={}] - Custom data to pass as `detail` to the event.
      * @param {boolean} [bubbles=true] - Whether the event should bubble.
      */
-    emit(name, detail= {}, bubbles) {
+    emit(name, detail = {}, bubbles) {
         this.eventData[name] = detail; // set event key with detail value
         this.sceneEl.emit(name, detail, bubbles);
     },
