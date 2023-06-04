@@ -19,9 +19,9 @@ AFRAME.registerSystem('arena-event-manager', {
      * Register event listener AND dispatch it immediately if key is already set
      * @param {string} key - event key
      * @param {function} callback - callback function to register or dispatch
-     * @param {object} [opts={}] - options to pass to addEventListener
+     * @param {object} [opts={ once: true }] - options to pass to addEventListener
      */
-    addEventListener(key, callback, opts) {
+    addEventListener(key, callback, opts = { once: true }) {
         this.sceneEl.addEventListener(key, callback, opts);
         if (this.eventData[key] !== undefined) {
             callback(this.eventData[key]); // Immediately fire callback
@@ -32,9 +32,9 @@ AFRAME.registerSystem('arena-event-manager', {
      * if all events are already set -- which may be immediate.
      * @param {array} keys - List of event keys to listen for
      * @param {function} callback - callback function to register or dispatch
-     * @param {object} [opts={}] - options to pass to addEventListener
+     * @param {object} [opts={ once: true }] - options to pass to addEventListener
      */
-    addMultiEventListener(keys, callback, opts) {
+    addMultiEventListener(keys, callback, opts = { once: true }) {
         const checkDepsAndEmit = (evtList) => {
             if (evtList.every(([_k, v]) => v !== undefined)) {
                 callback(evtList.reduce((obj, [key, value]) => {
