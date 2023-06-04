@@ -586,7 +586,9 @@ AFRAME.registerSystem('arena-scene', {
 
             if (sceneOptions['sceneHeadModels']) {
                 // add scene custom scene heads to selection list
-                this.setupSceneHeadModels(sceneOptions['sceneHeadModels']);
+                this.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
+                    this.setupSceneHeadModels(sceneOptions["sceneHeadModels"]);
+                });
             }
 
             if (!sceneOptions['clickableOnlyEvents']) {
