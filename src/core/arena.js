@@ -652,6 +652,30 @@ AFRAME.registerSystem('arena-scene', {
                             : (renderer[attribute] = value);
                 }
             }
+        } else {
+            environment.setAttribute('environment', 'preset', 'starry');
+            environment.setAttribute('environment', 'seed', 3);
+            environment.setAttribute('environment', 'flatShading', true);
+            environment.setAttribute('environment', 'groundTexture', 'squares');
+            environment.setAttribute('environment', 'grid', 'none');
+            environment.setAttribute('environment', 'fog', 0);
+            environment.setAttribute('environment', 'fog', 0);
+            sceneRoot.appendChild(environment);
+
+            // make default env have lights
+            const light = document.createElement('a-light');
+            light.id = 'ambient-light';
+            light.setAttribute('type', 'ambient');
+            light.setAttribute('color', '#363942');
+
+            const light1 = document.createElement('a-light');
+            light1.id = 'point-light';
+            light1.setAttribute('type', 'point');
+            light1.setAttribute('position', '-0.272 0.39 1.25');
+            light1.setAttribute('color', '#C2E6C7');
+
+            sceneRoot.appendChild(light);
+            sceneRoot.appendChild(light1);
         }
         this.sceneOptions = sceneOptions;
         this.events.emit(ARENA_EVENTS.SCENE_OPT_LOADED, true);
