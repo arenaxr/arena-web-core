@@ -64,8 +64,9 @@ AFRAME.registerComponent('landmark', {
     teleportTo: function(moveEl = undefined) {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
-        const dest = new THREE.Vector3;
-        const thisWorldPos = new THREE.Vector3;
+        const dest = new THREE.Vector3();
+        const thisWorldPos = new THREE.Vector3();
+        this.el.object3D.updateMatrixWorld(true); // Force update for initial loads
         thisWorldPos.setFromMatrixPosition(this.el.object3D.matrixWorld);
         dest.copy(thisWorldPos).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
