@@ -8,6 +8,8 @@
 
 /* global AFRAME, ARENA, THREE */
 
+import {ARENA_EVENTS} from "../constants";
+
 /**
  * Component-System of teleport destination Landmarks
  * @module landmark
@@ -104,6 +106,8 @@ AFRAME.registerComponent('landmark', {
 AFRAME.registerSystem('landmark', {
     init: function() {
         this.landmarks = {};
+        this.expectedStarts = 0;
+        this.registeredStarts = 0;
     },
 
     registerComponent: function(landmark) {
@@ -113,6 +117,12 @@ AFRAME.registerSystem('landmark', {
 
         const chat = sceneEl.components['arena-chat-ui'];
         this.landmarks[landmark.el.id] = landmark;
+        if (landmark.data.startingPosition === true) {
+            this.registeredStarts++;
+            if (this.registeredStarts === this.expectedStarts) {
+                ARENA.events.emit(ARENA_EVENTS.STARTPOS_LOADED);
+            }
+        }
         if (chat && landmark.data.startingPosition === false) {
             chat.addLandmark(landmark);
         }

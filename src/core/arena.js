@@ -157,13 +157,12 @@ AFRAME.registerSystem('arena-scene', {
                 throw new Error("Error loading initial scene data");
             })
             .then((sceneObjs) => {
+                const startCount = sceneObjs.filter((obj) => !!obj.attributes.landmark?.startingPosition).length;
                 // Initial scene load, fast scan for landmark starting positions, fire if none found
-                if (
-                    urlToLoad === undefined &&
-                    sceneObjs.find((obj) => obj.attributes.landmark?.startingPosition === true) === undefined
-                ) {
+                if (urlToLoad === undefined && startCount === 0) {
                     this.events.emit(ARENA_EVENTS.STARTPOS_LOADED, true);
                 }
+                this.sceneEl.systems["landmark"].expectedStarts = startCount;
                 this.events.addMultiEventListener([ARENA_EVENTS.MQTT_LOADED, "loaded"], () => {
                     this.loadSceneObjects(sceneObjs, parentName, prefixName);
                 });
@@ -517,7 +516,6 @@ AFRAME.registerSystem('arena-scene', {
                 arenaObjects.delete(objId);
             }
         }
-        this.events.emit(ARENA_EVENTS.STARTPOS_LOADED, true);
         sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, !containerObjName);
     },
 
