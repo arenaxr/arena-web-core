@@ -203,6 +203,9 @@ void main() {
         remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
     }
 
+    // for some reason post processing does not output in sRGB, so force sRGB here
+    localColor = LinearTosRGB(localColor);
+
     vec4 color = localColor;
     // if (!targetWidthGreater ||
     //     (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {

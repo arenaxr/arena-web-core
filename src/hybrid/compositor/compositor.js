@@ -147,11 +147,10 @@ AFRAME.registerSystem('compositor', {
 
                 // save render state (3)
                 currentXREnabled = this.xr.enabled;
+                currentShadowMapEnabled = this.shadowMap.enabled;
 
                 // disable xr
-                if (this.xr.enabled === true) {
-                    this.xr.enabled = false;
-                }
+                this.xr.enabled = false;
 
                 // set camera parameters (transformation, projection) for ATW
                 if (system.cameras.length === 2) {
@@ -205,7 +204,6 @@ AFRAME.registerSystem('compositor', {
                     system.latency = currTime - frameTimestamp;
                     // console.log("[frame id]", currTime - frameTimestamp);
 
-                    // console.log(currFrameID, system.prevcurrFrameID);
                     if (currFrameID >= system.prevFrameID) {
                         const pose = currFrame.pose;
                         if (pose.length === 2) {

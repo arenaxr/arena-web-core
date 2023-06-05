@@ -310,7 +310,7 @@ export class CreateUpdate {
         case 'handLeft':
         case 'handRight':
             entityEl.setAttribute('gltf-model', data.url);
-            if (data['remote-render'] !== undefined) {
+            if (data['remote-render']) {
                 const enabled = data['remote-render']['enabled'];
                 entityEl.setAttribute('arena-hand', 'remoteRender', enabled);
             }
