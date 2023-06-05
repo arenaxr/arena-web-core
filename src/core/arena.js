@@ -24,6 +24,9 @@ AFRAME.registerSystem('arena-scene', {
     init: function (evt) {
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.fetchSceneOptions.bind(this));
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
+            this.fetchSceneObjects().then(() => {});
+        });
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.USER_PARAMS_LOADED, "loaded"],
             this.loadScene.bind(this)
@@ -100,15 +103,69 @@ AFRAME.registerSystem('arena-scene', {
         });
     },
 
+    /**
+     * Fetches scene options from persistence server, deferring loading until user params are loaded.
+     * @return {Promise<void>}
+     */
     fetchSceneOptions: async function () {
         fetch(`${this.persistenceUrl}?type=scene-options`, {
             method: "GET",
             credentials: this.data.disallowJWT ? "omit" : "same-origin",
         })
-            .then((res) => res.json())
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.json();
+                }
+                Swal.fire({
+                    title: "Error loading initial scene options",
+                    text: `${res.status}: ${res.statusText} ${JSON.stringify(res.response)}`,
+                    icon: "error",
+                    showConfirmButton: true,
+                    confirmButtonText: "Ok",
+                });
+                throw new Error("Error loading initial scene options");
+            })
             .then((sceneData) => {
-                this.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
+                this.events.addEventListener("loaded", () => {
                     this.loadSceneOptions(sceneData[sceneData.length - 1]);
+                });
+            });
+    },
+
+    /**
+     * Fetches scene objects from persistence server, deferring loading until userparams and scene are loaded.
+     * @param {string} [urlToLoad] which url to load arena from
+     * @param {string} [parentName] parentObject to attach sceneObjects to
+     * @param {string} [prefixName] prefix to add to container
+     */
+    fetchSceneObjects: async function (urlToLoad, parentName, prefixName) {
+        fetch(urlToLoad ? urlToLoad : this.persistenceUrl, {
+            method: "GET",
+            credentials: this.data.disallowJWT ? "omit" : "same-origin",
+        })
+            .then((res) => {
+                if (res.status === 200) {
+                    return res.json();
+                }
+                Swal.fire({
+                    title: "Error loading initial scene data",
+                    text: `${res.status}: ${res.statusText} ${JSON.stringify(res.response)}`,
+                    icon: "error",
+                    showConfirmButton: true,
+                    confirmButtonText: "Ok",
+                });
+                throw new Error("Error loading initial scene data");
+            })
+            .then((sceneObjs) => {
+                // Initial scene load, fast scan for landmark starting positions, fire if none found
+                if (
+                    urlToLoad === undefined &&
+                    sceneObjs.find((obj) => obj.attributes.landmark?.startingPosition === true) === undefined
+                ) {
+                    this.events.emit(ARENA_EVENTS.STARTPOS_LOADED, true);
+                }
+                this.events.addMultiEventListener([ARENA_EVENTS.MQTT_LOADED, "loaded"], () => {
+                    this.loadSceneObjects(sceneObjs, parentName, prefixName);
                 });
             });
     },
@@ -136,7 +193,6 @@ AFRAME.registerSystem('arena-scene', {
             sceneEl.setAttribute('debug', true);
         }
 
-        this.loadSceneObjects();
         this.loadUser();
 
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
@@ -254,50 +310,53 @@ AFRAME.registerSystem('arena-scene', {
             }
         }
 
+        // We have no immediate start positions from URL or localStorage, wait for landmarks
         const systems = sceneEl.systems;
         const landmark = systems['landmark'];
 
-        // Fallthrough failure if startLastPos fails
-        if (!this.startCoords && landmark) {
-            // Try to define starting position if the scene has startPosition objects
-            const startPosition = landmark.getRandom(true);
-            if (startPosition) {
-                console.log('Moving camera to start position', startPosition.el.id);
-                startPosition.teleportTo();
-                startPos.copy(cameraEl.object3D.position);
-                startPos.y -= data.camHeight;
-                this.startCoords = startPos;
-            }
-        }
-
-        if (!this.startCoords) { // Final fallthrough for failures, resort to default
-            const navSys = systems.nav;
-            startPos.copy(this.defaults.startCoords);
-            if (navSys.navMesh) {
-                try {
-                    const closestGroup = navSys.getGroup(startPos, false);
-                    const closestNode = navSys.getNode(startPos, closestGroup, false);
-                    navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
-                } catch {
+        ARENA.events.addEventListener(ARENA_EVENTS.STARTPOS_LOADED, () => {
+            // Fallthrough failure if startLastPos fails
+            if (!this.startCoords && landmark) {
+                // Try to define starting position if the scene has startPosition objects
+                const startPosition = landmark.getRandom(true);
+                if (startPosition) {
+                    console.log("Moving camera to start position", startPosition.el.id);
+                    startPosition.teleportTo();
+                    startPos.copy(cameraEl.object3D.position);
+                    startPos.y -= data.camHeight;
+                    this.startCoords = startPos;
                 }
             }
-            cameraEl.object3D.position.copy(startPos);
-            cameraEl.object3D.position.y += data.camHeight;
-        }
 
-        // enable vio if fixedCamera is given
-        if (this.params.fixedCamera) {
-            cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
-        }
+            if (!this.startCoords) {
+                // Final fallthrough for failures, resort to default
+                const navSys = systems.nav;
+                startPos.copy(this.defaults.startCoords);
+                if (navSys.navMesh) {
+                    try {
+                        const closestGroup = navSys.getGroup(startPos, false);
+                        const closestNode = navSys.getNode(startPos, closestGroup, false);
+                        navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
+                    } catch {}
+                }
+                cameraEl.object3D.position.copy(startPos);
+                cameraEl.object3D.position.y += data.camHeight;
+            }
 
-        if (this.params.build3d) {
-            this.loadArenaInspector();
-        }
+            // enable vio if fixedCamera is given
+            if (this.params.fixedCamera) {
+                cameraEl.setAttribute("arena-camera", "vioEnabled", true);
+            }
 
-        // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
-        if (this.health) {
-            this.health.removeError('slow.network');
-        }
+            if (this.params.build3d) {
+                this.loadArenaInspector();
+            }
+
+            // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
+            if (this.health) {
+                this.health.removeError("slow.network");
+            }
+        })
     },
 
     /**
@@ -355,134 +414,111 @@ AFRAME.registerSystem('arena-scene', {
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
-    loadSceneObjects: function(urlToLoad, parentName, prefixName) {
+    loadSceneObjects: function (sceneObjs, parentName, prefixName) {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
 
-        const mqtt = sceneEl.systems['arena-mqtt'];
-
-        const xhr = new XMLHttpRequest();
-        xhr.withCredentials = !data.disallowJWT; // Include JWT cookie
-        if (urlToLoad) {
-            xhr.open('GET', urlToLoad);
-        } else {
-            xhr.open('GET', this.persistenceUrl);
+        if (sceneObjs.length === 0) {
+            console.warn("No scene objects found in persistence.");
+            sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, true);
+            return;
         }
 
-        xhr.send();
-        xhr.responseType = 'json';
-        xhr.onload = () => {
-            if (xhr.status !== 200) {
-                Swal.fire({
-                    title: 'Error loading initial scene data',
-                    text: `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
-                    icon: 'error',
-                    showConfirmButton: true,
-                    confirmButtonText: 'Ok',
-                });
-            } else {
-                if (xhr.response === undefined || xhr.response.length === 0) {
-                    console.warn('No scene objects found in persistence.');
-                    sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, true);
+        const mqtt = sceneEl.systems["arena-mqtt"];
+
+        let containerObjName;
+        if (parentName && prefixName && document.getElementById(parentName)) {
+            containerObjName = `${prefixName}_container`;
+            // Make container to hold all scene objects
+            const msg = {
+                object_id: containerObjName,
+                action: "create",
+                type: "object",
+                data: { parent: parentName },
+            };
+            mqtt.processMessage(msg);
+        }
+
+        const arenaObjects = new Map(sceneObjs.map((object) => [object.object_id, object]));
+
+        /**
+         * Recursively creates objects with parents, keep list of descendants to prevent circular references
+         * @param {Object} obj - msg from persistence
+         * @param {Array} [descendants] - running list of descendants
+         */
+        const createObj = (obj, descendants = []) => {
+            const parent = obj.attributes.parent;
+            if (obj.object_id === this.camName) {
+                arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
+                return;
+            }
+            // if parent is specified, but doesn't yet exist
+            if (parent && document.getElementById(parent) === null) {
+                // Check for circular references
+                if (obj.object_id === parent || descendants.includes(parent)) {
+                    console.log("Circular reference detected, skipping", obj.object_id);
+                    arenaObjects.delete(obj.object_id);
                     return;
                 }
-
-                let containerObjName;
-                if (parentName && prefixName && document.getElementById(parentName)) {
-                    containerObjName = `${prefixName}_container`;
-                    // Make container to hold all scene objects
-                    const msg = {
-                        object_id: containerObjName,
-                        action: 'create',
-                        type: 'object',
-                        data: {parent: parentName},
-                    };
-                    mqtt.processMessage(msg);
-                }
-
-                const arenaObjects = new Map(
-                    xhr.response.map((object) => [object.object_id, object]),
-                );
-
-                /**
-                 * Recursively creates objects with parents, keep list of descendants to prevent circular references
-                 * @param {Object} obj - msg from persistence
-                 * @param {Array} [descendants] - running list of descendants
-                 */
-                const createObj = (obj, descendants = []) => {
-                    const parent = obj.attributes.parent;
-                    if (obj.object_id === this.camName) {
-                        arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
-                        return;
-                    }
-                    // if parent is specified, but doesn't yet exist
-                    if (parent && document.getElementById(parent) === null) {
-                        // Check for circular references
-                        if (obj.object_id === parent || descendants.includes(parent)) {
-                            console.log('Circular reference detected, skipping', obj.object_id);
-                            arenaObjects.delete(obj.object_id);
-                            return;
-                        }
-                        if (arenaObjects.has(parent)) { // Does exist in pending objects
-                            // Recursively create parent, include this as child
-                            createObj(arenaObjects.get(parent), [...descendants, obj.object_id]);
-                        } else { // Parent doesn't exist in DOM, doesn't exist in pending arenaObjects, skip orphan
-                            console.log('Orphaned object detected, skipping', obj.object_id);
-                            arenaObjects.delete(obj.object_id);
-                            return;
-                        }
-                    }
-                    // Parent null or has been recursively created, create this object
-                    const msg = {
-                        object_id: obj.object_id,
-                        action: 'create',
-                        type: obj.type,
-                        persist: true,
-                        data: obj.attributes,
-                    };
-                    mqtt.processMessage(msg);
+                if (arenaObjects.has(parent)) {
+                    // Does exist in pending objects
+                    // Recursively create parent, include this as child
+                    createObj(arenaObjects.get(parent), [...descendants, obj.object_id]);
+                } else {
+                    // Parent doesn't exist in DOM, doesn't exist in pending arenaObjects, skip orphan
+                    console.log("Orphaned object detected, skipping", obj.object_id);
                     arenaObjects.delete(obj.object_id);
-                };
-
-                let i = 0;
-                const xhrLen = xhr.response.length;
-                while (arenaObjects.size > 0) {
-                    if (++i > xhrLen) {
-                        console.error('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
-                        break;
-                    }
-
-                    const iter = arenaObjects.entries();
-                    const [objId, obj] = iter.next().value; // get first entry
-                    if (obj.type === 'program') {
-                        // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                        const avars = {
-                            scene: this.sceneName,
-                            namespace: this.nameSpace,
-                            cameraid: this.camName,
-                            username: this.getDisplayName(),
-                            mqtth: this.mqttHost,
-                        };
-                        // ask runtime manager to start this program
-                        // this.RuntimeManager.createModuleFromPersist(obj, avars);
-                        arenaObjects.delete(objId);
-                    } else if (obj.type === 'object') {
-                        if (containerObjName && obj.attributes.parent === undefined) {
-                            // Add first-level objects as children to container if applicable
-                            obj.attributes.parent = containerObjName;
-                        }
-                        createObj(obj);
-                    } else {
-                        // Scene Options, what else? Skip
-                        arenaObjects.delete(objId);
-                    }
+                    return;
                 }
-
-                sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, !containerObjName);
             }
+            // Parent null or has been recursively created, create this object
+            const msg = {
+                object_id: obj.object_id,
+                action: "create",
+                type: obj.type,
+                persist: true,
+                data: obj.attributes,
+            };
+            mqtt.processMessage(msg);
+            arenaObjects.delete(obj.object_id);
         };
+
+        let i = 0;
+        while (arenaObjects.size > 0) {
+            if (++i > sceneObjs.length) {
+                console.error("Looped more than number of persist objects, aborting. Objects:", arenaObjects);
+                break;
+            }
+
+            const iter = arenaObjects.entries();
+            const [objId, obj] = iter.next().value; // get first entry
+            if (obj.type === "program") {
+                // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+                const avars = {
+                    scene: this.sceneName,
+                    namespace: this.nameSpace,
+                    cameraid: this.camName,
+                    username: this.getDisplayName(),
+                    mqtth: this.mqttHost,
+                };
+                // ask runtime manager to start this program
+                // this.RuntimeManager.createModuleFromPersist(obj, avars);
+                arenaObjects.delete(objId);
+            } else if (obj.type === "object") {
+                if (containerObjName && obj.attributes.parent === undefined) {
+                    // Add first-level objects as children to container if applicable
+                    obj.attributes.parent = containerObjName;
+                }
+                createObj(obj);
+            } else {
+                // Scene Options, what else? Skip
+                arenaObjects.delete(objId);
+            }
+        }
+        this.events.emit(ARENA_EVENTS.STARTPOS_LOADED, true);
+        sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, !containerObjName);
     },
 
     /**
