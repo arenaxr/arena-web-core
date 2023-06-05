@@ -14,6 +14,7 @@ AFRAME.registerSystem('compositor', {
         this.cameras = [];
         this.prevFrames = {};
         this.prevFrameID = -1;
+        this.latency = -1;
 
         this.originalRenderFunc = null;
 
@@ -199,8 +200,9 @@ AFRAME.registerSystem('compositor', {
                 }
                 if (currFrameID) {
                     const currFrame = system.prevFrames[currFrameID];
-                    // const currTime = performance.now();
-                    // const frameTimestamp = currFrame.ts;
+                    const currTime = performance.now();
+                    const frameTimestamp = currFrame.ts;
+                    system.latency = currTime - frameTimestamp;
                     // console.log("[frame id]", currTime - frameTimestamp);
 
                     // console.log(currFrameID, system.prevcurrFrameID);

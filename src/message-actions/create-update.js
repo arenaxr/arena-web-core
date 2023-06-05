@@ -132,13 +132,6 @@ export class CreateUpdate {
             }
             return;
 
-        /* case 'hand':
-         *     let data = message.data;
-         *     console.log(data['remote-render'].enabled);
-         *     entityEl.setAttribute('remoteRender', data['remote-render'].enabled);
-         *     entityEl.setAttribute('remote-render', 'enabled', data['remote-render'].enabled);
-         *     return; */
-
         case 'camera-override':
             if (id !== ARENA.camName) return; // bail if not for us
             this.handleCameraOverride(action, message);
@@ -317,8 +310,9 @@ export class CreateUpdate {
         case 'handLeft':
         case 'handRight':
             entityEl.setAttribute('gltf-model', data.url);
-            if (data.visible !== undefined) {
-                entityEl.setAttribute('arena-hand', 'remoteRender', !data.visible);
+            if (data['remote-render'] !== undefined) {
+                const enabled = data['remote-render']['enabled'];
+                entityEl.setAttribute('arena-hand', 'remoteRender', enabled);
             }
             delete data[type];
         case 'cube':

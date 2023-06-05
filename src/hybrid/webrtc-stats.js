@@ -7,12 +7,12 @@ export class WebRTCStatsLogger {
         this.lastReport = null;
     }
 
-    async getStats() {
+    async getStats(additionalStats) {
         const report = await this.peerConnection.getStats();
-        this.handleReport(report);
+        this.handleReport(report, additionalStats);
     }
 
-    handleReport(report) {
+    handleReport(report, additionalStats) {
         report.forEach((stat) => {
             if (stat.type !== 'inbound-rtp') {
                 return;
@@ -70,8 +70,16 @@ export class WebRTCStatsLogger {
                     const bitrate = (8 * (stat.bytesReceived - lastStats.bytesReceived) / duration) / 1000;
                     console.log(`Bitrate: ${bitrate.toFixed(3)} kbit/sec`);
 
-                    // clientStats['bitrate'] = bitrate.toFixed(3);
+                    stat['bitrate'] = bitrate;
                 }
+            }
+
+            for (let key in additionalStats) {
+                stat[key] = additionalStats[key];
+            }
+
+            if (stat['latency']) {
+                console.log(`Latency: ${stat['latency']} ms`);
             }
 
             this.signaler.sendStats(stat);

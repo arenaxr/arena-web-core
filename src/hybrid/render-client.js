@@ -327,7 +327,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     checkStats: async function() {
         const data = this.data;
         while (this.connected) {
-            this.stats.getStats();
+            this.stats.getStats({latency: this.compositor.latency});
             await this.sleep(data.getStatsInterval);
         }
     },
