@@ -1,0 +1,13 @@
+node_modules/
+build/
+network/
+screenshare/
+signin/
+dist/
+src/components/vendor/
+src/runtime-mngr/
+**/static/vendor/**
+*.min.js
+*_wasm.js
+webxrios.js
+
