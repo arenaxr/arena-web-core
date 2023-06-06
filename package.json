@@ -55,6 +55,7 @@
     "parcel": "^2.2.1",
     "parcel-resolver-ignore": "^2.0.0",
     "path-browserify": "^1.0.1",
+    "prettier": "^2.8.8",
     "stream-browserify": "^3.0.0"
   },
   "scripts": {
