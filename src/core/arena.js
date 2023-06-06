@@ -163,9 +163,12 @@ AFRAME.registerSystem('arena-scene', {
                     this.events.emit(ARENA_EVENTS.STARTPOS_LOADED, true);
                 }
                 this.sceneEl.systems["landmark"].expectedStarts = startCount;
-                this.events.addMultiEventListener([ARENA_EVENTS.MQTT_LOADED, "loaded"], () => {
-                    this.loadSceneObjects(sceneObjs, parentName, prefixName);
-                });
+                this.events.addMultiEventListener(
+                    [ARENA_EVENTS.SCENE_OPT_LOADED, ARENA_EVENTS.MQTT_LOADED, "loaded"],
+                    () => {
+                        this.loadSceneObjects(sceneObjs, parentName, prefixName);
+                    }
+                );
             });
     },
 
