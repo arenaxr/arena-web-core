@@ -476,7 +476,7 @@ AFRAME.registerComponent('arena-user', {
         const distance = myCamPos.distanceTo(this.entityPos);
 
         // frustum culling for WebRTC video streams;
-        if (this.videoID) {
+        if (this.videoID && ARENA.Jitsi?.conference) {
             let inFieldOfView = true;
             if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled()) {
                 if (this.el.contains(this.videoCube)) {
