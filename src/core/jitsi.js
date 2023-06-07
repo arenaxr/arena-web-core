@@ -29,23 +29,12 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     init: function() {
-        if (!window.JitsiMeetJS) {
-            console.warn('Jitsi is not found!');
-            return;
-        }
-        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
-    },
-    ready() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
 
-        this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
-
-        // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         this.connectOptions = {
             hosts: {
@@ -103,6 +92,17 @@ AFRAME.registerSystem('arena-jitsi', {
 
         $(window).bind('beforeunload', this.unload);
         $(window).bind('unload', this.unload);
+
+        if (!window.JitsiMeetJS) {
+            console.warn('Jitsi is not found!');
+            return;
+        }
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+    },
+    ready() {
+        this.arena = this.el.sceneEl.systems['arena-scene'];
+        // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
+        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
