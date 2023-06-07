@@ -81,7 +81,7 @@ AFRAME.registerSystem('arena-mqtt', {
             proxy(this.onMessageArrived.bind(this)),
             proxy(this.mqttHealthCheck.bind(this))
             // proxy(() => {
-            //     if (ARENA.Jitsi && !ARENA.Jitsi.ready) {
+            //     if (ARENA.Jitsi && !ARENA.Jitsi.initialized) {
             //         // eslint-disable-next-line new-cap
             //         ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
             //         warn(`ARENA Jitsi restarting...`);

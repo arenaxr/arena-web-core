@@ -49,7 +49,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         this.connection = null;
         this.conference = null;
-        this.ready = false;
+        this.initialized = false;
 
         this.avConnected = false;
         this.withVideo = false;
@@ -204,7 +204,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 this.jitsiAudioTrack = track;
             }
 
-            if (this.ready) {
+            if (this.initialized) {
                 // mobile only?
                 track.mute();
                 this.conference.addTrack(track);
@@ -366,7 +366,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const sceneEl = el.sceneEl;
 
-        this.ready = true;
+        this.initialized = true;
         console.log('Joined conf! localTracks.length: ', this.localTracks.length);
 
         if (this.localTracks.length == 0) {
@@ -791,7 +791,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 if (this.withVideo) setupCornerVideo.bind(this)();
             })
             .catch((err) => {
-                this.ready = false;
+                this.initialized = false;
                 console.warn(err);
             });
 

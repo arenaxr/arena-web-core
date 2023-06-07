@@ -138,7 +138,7 @@ AFRAME.registerComponent('arena-camera', {
             msg.presence = presence.value;
         }
 
-        if (this.jitsi.ready) {
+        if (this.jitsi.initialized) {
             msg.jitsiId = this.jitsi.getJitsiId();
             msg.hasAudio = this.jitsi.hasAudio;
             msg.hasVideo = this.jitsi.hasVideo;
@@ -264,7 +264,7 @@ AFRAME.registerComponent('arena-camera', {
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
 
-        if (!this.videoDefaultResolutionSet && ARENA && this.jitsi.ready && this.arena.videoDefaultResolutionConstraint) {
+        if (!this.videoDefaultResolutionSet && ARENA && this.jitsi.initialized && this.arena.videoDefaultResolutionConstraint) {
             // set scene-options, videoDefaultResolutionConstraint, only once
             this.jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;
