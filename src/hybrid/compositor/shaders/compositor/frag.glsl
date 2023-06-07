@@ -22,7 +22,7 @@ uniform mat4 remoteLProjectionMatrix, remoteLMatrixWorld;
 uniform mat4 cameraRProjectionMatrix, cameraRMatrixWorld;
 uniform mat4 remoteRProjectionMatrix, remoteRMatrixWorld;
 
-#define DEPTH_SCALAR    (50.0)
+#define DEPTH_SCALAR    (100.0)
 
 const float onePixel = (1.0 / 255.0);
 
@@ -30,12 +30,12 @@ const bool doAsyncTimeWarp = true;
 const bool stretchBorders = true;
 
 float readDepthRemote(sampler2D depthSampler, vec2 coord) {
-    float depth = texture2D( depthSampler, coord ).x;
+    float depth = texture2D( depthSampler, coord ).r;
     return depth / DEPTH_SCALAR;
 }
 
 float readDepthLocal(sampler2D depthSampler, vec2 coord) {
-    float depth = texture2D( depthSampler, coord ).x;
+    float depth = texture2D( depthSampler, coord ).r;
     float viewZ = perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
     viewZ = viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
     return viewZ;
@@ -212,12 +212,18 @@ void main() {
         // color = remoteColor;
         // color = localDepth * remoteColor + remoteDepth * localColor;
 
-        if (remoteDepth < localDepth) {
+        /* if (remoteDepth < localDepth) {
+         *     color = vec4(remoteColor.rgb, 1.0);
+         *     // handle passthrough
+         *     if (arMode && remoteDepth >= 0.9 / DEPTH_SCALAR) {
+         *         color = localColor;
+         *     }
+         * } */
+        if (remoteDepth < 0.9 / DEPTH_SCALAR) {
             color = vec4(remoteColor.rgb, 1.0);
-            // handle passthrough
-            if (arMode && remoteDepth >= 0.95 / DEPTH_SCALAR) {
-                color = localColor;
-            }
+        }
+        else {
+            color = localColor;
         }
     // }
 
@@ -225,6 +231,6 @@ void main() {
     // color = vec4(localColor.rgb, 1.0);
     gl_FragColor = color;
 
-    // gl_FragColor.rgb = vec3(remoteDepth * 50.0);
+    // gl_FragColor.rgb = vec3(remoteDepth * DEPTH_SCALAR);
     // gl_FragColor.a = 1.0;
 }

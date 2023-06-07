@@ -48,13 +48,14 @@ AFRAME.registerSystem('compositor', {
     onResize: function() {
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
+        const camera = sceneEl.camera;
 
         var rendererSize = new THREE.Vector2();
         renderer.getSize(rendererSize);
         const pixelRatio = renderer.getPixelRatio();
         this.renderTarget.setSize(pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
         if (this.pass) {
-            this.pass.setSize(pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
+            this.pass.setSize(camera, pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
         }
     },
 
@@ -134,7 +135,7 @@ AFRAME.registerSystem('compositor', {
                 const currentRenderTarget = this.getRenderTarget();
                 if (currentRenderTarget != null) {
                     // resize if an existing rendertarget exists (usually in webxr mode)
-                    system.pass.setSize(currentRenderTarget.width, currentRenderTarget.height);
+                    system.pass.setSize(camera, currentRenderTarget.width, currentRenderTarget.height);
                     system.renderTarget.setSize(currentRenderTarget.width, currentRenderTarget.height);
                 }
 

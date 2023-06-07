@@ -156,7 +156,7 @@ AFRAME.registerComponent('arena-hand', {
         if (url.includes('magicleap')) {
             el.setAttribute('laser-controls', 'model', false);
             url = `${window.location.origin}/store/models/controllers/magicleap/magicleap-two-controller.glb`;
-            el.setAttribute('gltf-model', url);
+            el.setAttribute('gltf-model', '');
         }
 
         return url;
@@ -209,6 +209,7 @@ AFRAME.registerComponent('arena-hand', {
             this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
         }
         el.setAttribute('raycaster', 'showLine', !data.remoteRender);
+        el.setAttribute('visibke', !data.remoteRender);
 
         // remove orientationOffset per model to publish matching rendered pose
         if (this.orientationOffset === undefined) {
