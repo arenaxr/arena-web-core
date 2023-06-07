@@ -15,6 +15,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         this.el.addEventListener('enter-vr', this.enterARHandler);
         this.el.addEventListener('exit-vr', this.exitARHandler);
         this.mouseCursor = document.getElementById('mouse-cursor');
+        this.isMobile = AFRAME.utils.device.isMobile();
     },
 
     remove: function() {
@@ -26,7 +27,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         if (this.el.is('ar-mode')) {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
             this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
-            if (AFRAME.utils.device.isMobile()) {
+            if (this.isMobile) {
                 this.el.setAttribute('cursor', {rayOrigin: 'xrselect', fuse: false});
                 this.el.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
                 this.mouseCursor.removeAttribute('cursor');
@@ -40,7 +41,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     exitARHandler: function() {
         this.el.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
         this.el.removeEventListener('ar-hit-test-select', this.hitEndHandler);
-        if (AFRAME.utils.device.isMobile()) {
+        if (this.isMobile) {
             this.el.removeAttribute('cursor');
             this.el.removeAttribute('raycaster');
             this.mouseCursor.setAttribute('cursor', {rayOrigin: 'mouse'});
