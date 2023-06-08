@@ -76,7 +76,6 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     ready: function() {
-        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -154,6 +153,8 @@ AFRAME.registerComponent('arena-hand', {
          */
 
         this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
+
+        this.initialized = true;
     },
 
     getControllerURL() {

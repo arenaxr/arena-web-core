@@ -30,7 +30,6 @@ AFRAME.registerComponent('network-latency', {
         ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.ready.bind(this));
     },
     ready: function() {
-        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -48,6 +47,7 @@ AFRAME.registerComponent('network-latency', {
         this.qos = 2;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, data.updateIntervalMs, this);
+        this.initialized = true;
     },
 
     tick: function() {

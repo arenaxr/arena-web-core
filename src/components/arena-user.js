@@ -42,7 +42,6 @@ AFRAME.registerComponent('arena-user', {
         ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.ready.bind(this));
     },
     ready: function() {
-        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -91,6 +90,8 @@ AFRAME.registerComponent('arena-user', {
         this.entityPos = this.el.object3D.position;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
+
+        this.initialized = true;
     },
 
     aec(listener) {

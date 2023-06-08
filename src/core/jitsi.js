@@ -366,7 +366,6 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const sceneEl = el.sceneEl;
 
-        this.initialized = true;
         console.log('Joined conf! localTracks.length: ', this.localTracks.length);
 
         if (this.localTracks.length == 0) {
@@ -396,6 +395,8 @@ AFRAME.registerSystem('arena-jitsi', {
                 });
             }
         });
+
+        this.initialized = true;
 
         sceneEl.emit(JITSI_EVENTS.CONNECTED, {
             scene: this.arena.namespacedScene,

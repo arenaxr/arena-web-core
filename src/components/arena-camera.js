@@ -48,7 +48,6 @@ AFRAME.registerComponent('arena-camera', {
     },
 
     ready: function() {
-        this.initialized = true;
         const data = this.data;
         const el = this.el;
 
@@ -100,6 +99,7 @@ AFRAME.registerComponent('arena-camera', {
         if (this.data.showStats) {
             document.getElementById('pose-stats').style.display = 'block';
         }
+        this.initialized = true;
     },
 
     /**
