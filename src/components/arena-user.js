@@ -234,6 +234,8 @@ AFRAME.registerComponent('arena-user', {
         if (el.contains(this.videoCubeDark)) {
             el.removeChild(this.videoCubeDark);
         }
+        this.videoCube = null;
+        this.videoCubeDark = null;
 
         this.headModel.setAttribute('visible', true);
     },
@@ -472,7 +474,7 @@ AFRAME.registerComponent('arena-user', {
         const distance = myCamPos.distanceTo(this.entityPos);
 
         // frustum culling for WebRTC video streams;
-        if (this.videoID && ARENA.Jitsi?.conference) {
+        if (this.videoID && this.videoCube && ARENA.Jitsi?.conference) {
             let inFieldOfView = true;
             if (arenaCameraComponent && arenaCameraComponent.isVideoFrustumCullingEnabled()) {
                 if (this.el.contains(this.videoCube)) {
@@ -481,7 +483,7 @@ AFRAME.registerComponent('arena-user', {
             }
             if (data.pano) {
                 this.evaluateRemoteResolution(1920);
-            } else if (inFieldOfView == false) {
+            } else if (inFieldOfView === false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
             } else if (arenaCameraComponent && arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
