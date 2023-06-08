@@ -38,10 +38,7 @@ AFRAME.registerComponent('arena-user', {
     },
 
     init: function() {
-        this.initialized = false;
-        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.ready.bind(this));
-    },
-    ready: function() {
+        this.jitsiReady = false;
         const data = this.data;
         const el = this.el;
 
@@ -91,7 +88,8 @@ AFRAME.registerComponent('arena-user', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
 
-        this.initialized = true;
+
+        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, () => this.jitsiReady = true );
     },
 
     aec(listener) {
@@ -459,7 +457,7 @@ AFRAME.registerComponent('arena-user', {
     },
 
     tick: function() {
-        if (!this.initialized) return;
+        if (!this.jitsiReady) return;
         const data = this.data;
 
         // do periodic a/v updates
