@@ -30,11 +30,6 @@ AFRAME.registerSystem('arena-jitsi', {
 
     init: function() {
         const data = this.data;
-        const el = this.el;
-
-        const sceneEl = el.sceneEl;
-
-        this.health = sceneEl.systems['arena-health-ui'];
 
         this.connectOptions = {
             hosts: {
@@ -100,7 +95,12 @@ AFRAME.registerSystem('arena-jitsi', {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
     },
     ready() {
-        this.arena = this.el.sceneEl.systems['arena-scene'];
+        const el = this.el;
+        const sceneEl = el.sceneEl;
+
+        this.arena = sceneEl.systems['arena-scene'];
+        this.health = sceneEl.systems['arena-health-ui'];
+
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
         this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
 
