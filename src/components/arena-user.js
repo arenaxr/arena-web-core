@@ -225,7 +225,6 @@ AFRAME.registerComponent('arena-user', {
 
     removeVideoCube() {
         const el = this.el;
-        const data = this.data;
 
         // remove video cubes
         if (el.contains(this.videoCube)) {
@@ -256,7 +255,7 @@ AFRAME.registerComponent('arena-user', {
                     this.drawVideoCube();
                 }
             }
-        } else {
+        } else if (this.videoCube) {
             this.removeVideoCube();
         }
     },
