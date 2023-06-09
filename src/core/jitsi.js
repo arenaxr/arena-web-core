@@ -110,7 +110,7 @@ AFRAME.registerSystem('arena-jitsi', {
         ARENA.events.emit(ARENA_EVENTS.JITSI_LOADED, true);
 
         if (this.arena.params.skipav) {
-            this.connect();
+            ARENA.events.addEventListener(ARENA.SCENE_OBJ_LOADED, this.connect.bind(this));
         } else if (!this.arena.params.noav && this.arena.isJitsiPermitted()) {
             const _this = this;
             ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
@@ -121,7 +121,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         _this.connect();
                     });
                 } else {
-                    _this.connect();
+                    ARENA.events.addEventListener(ARENA.SCENE_OBJ_LOADED, _this.connect.bind(_this));
                 }
             });
         }
