@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 AFRAME.registerComponent('ar-hit-test-listener', {
     schema: {

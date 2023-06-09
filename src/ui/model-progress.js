@@ -1,7 +1,6 @@
 /* global AFRAME */
 import he from 'he';
 import Swal from 'sweetalert2';
-import './style.css';
 
 /**
  * @fileoverview Model loading progress system. Manage model load messages.
@@ -16,10 +15,11 @@ import './style.css';
  * @private
  */
 class LoadAlertTable {
-    constructor(maxRows=10, errorsOnTop=true, timeoutMs=5000) {
+    constructor(maxRows = 10, errorsOnTop = true, timeoutMs = 4000, rowTimeout = 2000) {
         this.maxRows = maxRows;
         this.errorsOnTop = errorsOnTop;
         this.timeMs = timeoutMs;
+        this.rowTimeout = rowTimeout;
         this.alertBox = document.createElement('div');
         this.alertBox.className = 'alert-box';
         document.body.appendChild(this.alertBox);
@@ -28,7 +28,7 @@ class LoadAlertTable {
         this.titleSpan.className = 'alert-title';
         this.alertBox.appendChild(this.titleSpan);
 
-        this.bodySpan = document.createElement('div');
+        this.bodySpan = document.createElement("div");
         this.bodySpan.className = 'alert-body';
         this.alertBox.appendChild(this.bodySpan);
 
@@ -42,25 +42,27 @@ class LoadAlertTable {
     }
 
     parseTableRows(rows) {
-        const outHTML='';
-        let tableHTML='<table class="alert-table">';
-        if (this.errorsOnTop) { // bring errors to the top lines
+        let tableHTML = "<table class='alert-table'>";
+        if (this.errorsOnTop) {
+            // bring errors to the top lines
             rows.sort((a, b) => {
-                if (a.isError == true && b.isError == false) return -1;
-                if (a.isError == false && b.isError == true) return 1;
+                if (a.isError === true && b.isError === false) return -1;
+                if (a.isError === false && b.isError === true) return 1;
                 return 0;
             });
         }
-        let nCols=0;
-        if (rows.length > 0) nCols=rows[0].cols.length; // assume the smae number of columns in all lines
-        for (var i=0; i<Math.min(this.maxRows, rows.length); i++) {
-            let lineClass='normal';
-            if (rows[i].isError) lineClass = 'error';
-            tableHTML += `<tr><td class="alert-table ${lineClass}"><span>${rows[i].cols.join(`</span></td><td class="alert-table ${lineClass}"><span>`)}</span></td></tr>`;
-            nCols;
+        let nCols = 0;
+        if (rows.length > 0) nCols = rows[0].cols.length; // assume the smae number of columns in all lines
+        for (let i = 0; i < Math.min(this.maxRows, rows.length); i++) {
+            let lineClass = "normal";
+            if (rows[i].isError) lineClass = "error";
+            tableHTML += `
+                <tr><td class="alert-table ${lineClass}"><span>${rows[i].cols.join(`</span></td>
+                <td class="alert-table ${lineClass}"><span>`)}</span></td></tr>`;
+            nCols++;
         }
         if (i > this.maxRows) tableHTML += `<tr><td colspan=${nCols}>(more not shown...)</td></tr>`;
-        tableHTML+='</table>';
+        tableHTML += "</table>";
 
         return tableHTML;
     }
@@ -74,11 +76,10 @@ class LoadAlertTable {
         clearInterval(this.timeoutBarTimer);
         clearTimeout(this.timeout);
 
-        let count = 1;
+        let count = 0;
         this.timeoutBarTimer = setInterval(() => {
-            this.timeoutBar.style.width = `${100-count}%`;
-            count = count + 1;
-        }, this.timeMs/100);
+            this.timeoutBar.style.width = `${100 - count++}%`;
+        }, this.timeMs / 100);
 
         this.timeout = setTimeout(() => {
             clearInterval(this.timeoutBarTimer);
@@ -86,7 +87,7 @@ class LoadAlertTable {
         }, this.timeMs);
     }
 
-    display(title, rows, progress=0) {
+    display(title, rows, progress = 0) {
         this.title = title;
         this.progress = progress;
         if (rows) this.tableHTML = this.parseTableRows(rows);
@@ -99,7 +100,7 @@ class LoadAlertTable {
  * @module model-progress
  */
 AFRAME.registerSystem('model-progress', {
-    ALERT_TIMEOUT: 5000,
+    ALERT_TIMEOUT: 4000,
     ALERT_MAX_ROWS: 10,
     FN_MAX_LENGTH: 50,
     schema: {},
@@ -109,11 +110,17 @@ AFRAME.registerSystem('model-progress', {
      */
     init: function() {
         this.loadProgress = {};
-        this.loadAlert = new LoadAlertTable(this.ALERT_MAX_ROWS, true, this.ALERT_TIMEOUT);
+        this.loadAlert = new LoadAlertTable(
+            this.ALERT_MAX_ROWS,
+            true,
+            this.ALERT_TIMEOUT,
+            this.ALERT_TIMEOUT / 2
+        );
     },
     /**
      * Register model to deal with load events
      * @param {object} el - The a-frame element to register.
+     * @param {object} src - the model source
      * @alias module:model-progress
      */
     registerModel: function(el, src) {
@@ -136,7 +143,7 @@ AFRAME.registerSystem('model-progress', {
     },
     /**
      * Unregister a model
-     * @param {object} el - The a-frame element.
+     * @param {object} src - the model source
      * @alias module:model-progress
      */
     unregisterModelBySrc: function(src) {
@@ -149,18 +156,27 @@ AFRAME.registerSystem('model-progress', {
      * @alias module:model-progress
      */
     updateProgress: function(failed, evt) {
-        this.loadProgress[evt.detail.src].failed = failed;
-        this.loadProgress[evt.detail.src].loaded = evt.detail.loaded;
-        this.loadProgress[evt.detail.src].total = evt.detail.total;
+        const thisProgress = this.loadProgress[evt.detail.src];
+        if (thisProgress) {
+            thisProgress.failed = failed;
+            thisProgress.loaded = evt.detail.loaded;
+            thisProgress.total = evt.detail.total;
 
-        if (failed || evt.detail.total === 0) {
-            if (this.loadProgress[evt.detail.src].done == false) {
-                this.loadProgress[evt.detail.src].done = true;
+            if (failed || evt.detail.total === 0) {
+                if (thisProgress.done === false) {
+                    thisProgress.done = true;
+                }
+                // remove from list after a timeout
+                setTimeout(() => {
+                    this.unregisterModelBySrc(evt.detail.src);
+                }, this.rowTimeout);
+            } else if (evt.detail.loaded === evt.detail.total) {
+                thisProgress.done = true;
+                // Remove from done after a short timeout as well
+                setTimeout(() => {
+                    this.unregisterModelBySrc(evt.detail.src);
+                }, this.rowTimeout);
             }
-            // remove from list after a timeout
-            setTimeout(() => {
-                this.unregisterModelBySrc(evt.detail.src);
-            }, this.ALERT_TIMEOUT*2);
         }
 
         let pSum = 0;
@@ -168,29 +184,36 @@ AFRAME.registerSystem('model-progress', {
         const files = [];
         let errors = 0;
         for (const [src, lp] of Object.entries(this.loadProgress)) {
-            const filename = decodeURIComponent(src).replace(/^.*[\\\/]/, '').split('?')[0];
-            const shortName = filename.length < this.FN_MAX_LENGTH ? filename : `…${filename.substring(filename.length - this.FN_MAX_LENGTH)}`;
+            const filename = decodeURIComponent(src)
+                .replace(/^.*[\\\/]/, "")
+                .split("?")[0];
+            const shortName =
+                filename.length < this.FN_MAX_LENGTH
+                    ? filename
+                    : `…${filename.substring(filename.length - this.FN_MAX_LENGTH)}`;
 
-            let progessStr = '';
-            if (lp.failed == false) {
+            let progressStr = "";
+            if (lp.failed === false) {
                 if (lp.total > 0) {
-                    const progess = (lp.loaded / lp.total) * 100;
-                    progessStr = `${parseFloat( progess.toFixed(1) )}%`;
-                    pSum += progess;
+                    const progress = (lp.loaded / lp.total) * 100;
+                    progressStr = `${parseFloat(progress.toFixed(1))}%`;
+                    pSum += progress;
                 } else {
                     pSum += 100;
-                    progessStr = `n.a.`;
+                    progressStr = `n.a.`;
                 }
             } else {
-                progessStr = 'failed';
+                progressStr = 'failed';
                 pSum += 100;
                 errors++;
             }
             if (lp.done) doneCount++;
-            files.push({cols: [shortName, progessStr], isError: lp.failed});
+            files.push({ cols: [shortName, progressStr], isError: lp.failed });
         }
         const percent = (pSum / Object.keys(this.loadProgress).length).toFixed(1);
-        let title = `Loading : ${parseFloat((pSum / Object.keys(this.loadProgress).length).toFixed(1))}% (${doneCount}/${Object.keys(this.loadProgress).length}`;
+        let title = `Loading : ${parseFloat(
+            (pSum / Object.keys(this.loadProgress).length).toFixed(1)
+        )}% (${doneCount}/${Object.keys(this.loadProgress).length}`;
         if (errors > 0) {
             title += `; failed ${errors}`;
         }
@@ -198,6 +221,4 @@ AFRAME.registerSystem('model-progress', {
 
         this.loadAlert.display(title, files, percent);
     },
-
 });
-

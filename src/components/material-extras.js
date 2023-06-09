@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* global AFRAME */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 /**
  * @fileoverview Material extras component.
@@ -64,7 +64,7 @@ AFRAME.registerComponent('material-extras', {
         }
 
         if (transparentOccluder !== this.data.transparentOccluder) {
-            // a transparent occluder has renderOrder=0 and colorWrite=false 
+            // a transparent occluder has renderOrder=0 and colorWrite=false
             if (this.data.transparentOccluder == true) {
                 this.previousData = {renderOrder: this.data.renderOrder,
                     colorWrite: this.data.colorWrite};

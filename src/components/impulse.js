@@ -62,7 +62,7 @@ AFRAME.registerComponent('impulse', {
             });
         } else {
             // `event` not specified, just log the message.
-            console.log(data);
+            console.debug(data);
         }
     },
     // handle component removal

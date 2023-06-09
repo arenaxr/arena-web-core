@@ -12,7 +12,7 @@ AFRAME.registerComponent('webxr-viewer', {
         const el = this.el;
         const data = this.data;
 
-        const sceneEl = el;
+        const sceneEl = el.sceneEl;
 
         const urlParams = new URLSearchParams(window.location.search);
 

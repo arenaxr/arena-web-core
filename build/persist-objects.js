@@ -111,7 +111,7 @@ export async function populateSceneAndNsLists(nsInput, nsList, sceneInput, scene
             allowEscapeKey: false,
             allowOutsideClick: false,
         }).then((result) => {
-            signOut();
+            ARENAAUTH.signOut();
         });
 
         var option = document.createElement("option");

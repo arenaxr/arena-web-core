@@ -2,12 +2,12 @@
  * @fileoverview Handle messaging from MQTT
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
 
-import {expose} from 'comlink';
-const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
+import { expose } from 'comlink';
+import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
 /**
  * Main ARENA MQTT webworker client
@@ -15,22 +15,22 @@ const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 class MQTTWorker {
     /**
      * @param {object} ARENAConfig
-     * @param {function} initScene
      * @param {function} mainOnMessageArrived
      * @param {function} restartJitsi
      * @param {function} healthCheck
      */
-    constructor(ARENAConfig, initScene, mainOnMessageArrived, restartJitsi, healthCheck) {
-        this.initScene = initScene;
-        this.restartJitsi = restartJitsi;
+    constructor(ARENAConfig, mainOnMessageArrived, /*restartJitsi,*/ healthCheck) {
+        // this.restartJitsi = restartJitsi;
+        this.config = ARENAConfig;
         this.healthCheck = healthCheck;
-        this.ARENA = ARENAConfig;
+
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
         mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
         mqttClient.onMessageArrived = async (msg) => await mainOnMessageArrived(msg);
         this.mqttClient = mqttClient;
     }
+
     /**
      * Connect mqtt client; If given, setup a last will message given as argument
      * @param {object} mqttClientOptions paho mqtt options
@@ -41,15 +41,16 @@ class MQTTWorker {
         const opts = {
             ...mqttClientOptions,
             onSuccess: function() {
-                console.info('MQTT scene connection success.');
+                console.info('ARENA MQTT scene connection success!');
             },
             onFailure: function(res) {
                 this.healthCheck({
                     addError: 'mqttScene.connection',
                 });
-                console.error(`MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
+                console.error(`ARENA MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
             },
         };
+
         if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
             // Last Will and Testament message sent to subscribers if this client loses connection
             const lwt = new Paho.Message(lwMsg);
@@ -59,6 +60,7 @@ class MQTTWorker {
 
             opts.willMessage = lwt;
         }
+
         this.mqttClient.connect(opts);
     }
 
@@ -90,24 +92,22 @@ class MQTTWorker {
         await this.healthCheck({
             removeError: 'mqttScene.connection',
         });
+
         if (reconnect) {
             // For reconnect, do not reinitialize user state, that will warp user back and lose
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
-            await this.restartJitsi();
-            this.mqttClient.subscribe(this.ARENA.renderTopic);
-            console.warn(`MQTT scene reconnected to ${uri}`);
+            // await this.restartJitsi();
+            this.mqttClient.subscribe(this.config.renderTopic);
+            console.warn(`ARENA MQTT scene reconnected to ${uri}`);
             return; // do not continue!
         }
 
         // first connection for this client
-        console.log(`MQTT scene init user state, connected to ${uri}`);
-
-        // do scene init before starting to receive messages
-        await this.initScene();
+        console.debug(`ARENA MQTT scene init user state, connected to ${uri}`);
 
         // start listening for MQTT messages
-        this.mqttClient.subscribe(this.ARENA.renderTopic);
+        this.mqttClient.subscribe(this.config.renderTopic);
     }
 
     /**
@@ -120,10 +120,10 @@ class MQTTWorker {
         });
         if (responseObject.errorCode !== 0) {
             console.error(
-                `MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
+                `ARENA MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
             );
         }
-        console.warn('MQTT scene automatically reconnecting...');
+        console.warn('ARENA MQTT scene automatically reconnecting...');
         // no need to connect manually here, "reconnect: true" already set
     }
 }

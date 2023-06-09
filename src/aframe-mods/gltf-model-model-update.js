@@ -1,8 +1,12 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Apply any modelUpdate data attributes after a gltf model is loaded
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME */
 
 import {ARENAUtils} from '../utils';
 

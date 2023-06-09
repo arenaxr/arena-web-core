@@ -31,7 +31,7 @@ AFRAME.registerComponent('screenshareable', {
     },
 
     register: function() {
-        this.system.registerComponent(this);
+        // this.system.registerComponent(this);
     },
 
     remove: function() {

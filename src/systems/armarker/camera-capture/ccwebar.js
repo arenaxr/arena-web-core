@@ -9,7 +9,7 @@
 
 import {CVWorkerMsgs} from '../worker-msgs.js';
 import {GetUserMediaARSource} from './getusermedia-source.js';
-import {ARENAUtils} from '../../../utils.js';
+import {ARENAUtils} from '../../../utils';
 
 /**
  * Grab front facing camera frames using getUserMedia()
