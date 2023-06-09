@@ -60,11 +60,6 @@ AFRAME.registerSystem('arena-av-setup', {
         } catch (err) {
             console.error("Error loading AV setup HTML: ", err);
         }
-
-        // Only show if no previous preferences were set / first time AV setup
-        if (localStorage.getItem('prefAudioInput') === null) {
-            this.show();
-        }
     },
 
     loadHTML: async function() {
