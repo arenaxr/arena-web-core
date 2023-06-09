@@ -156,24 +156,27 @@ AFRAME.registerSystem('model-progress', {
      * @alias module:model-progress
      */
     updateProgress: function(failed, evt) {
-        this.loadProgress[evt.detail.src].failed = failed;
-        this.loadProgress[evt.detail.src].loaded = evt.detail.loaded;
-        this.loadProgress[evt.detail.src].total = evt.detail.total;
+        const thisProgress = this.loadProgress[evt.detail.src];
+        if (thisProgress) {
+            thisProgress.failed = failed;
+            thisProgress.loaded = evt.detail.loaded;
+            thisProgress.total = evt.detail.total;
 
-        if (failed || evt.detail.total === 0) {
-            if (this.loadProgress[evt.detail.src].done === false) {
-                this.loadProgress[evt.detail.src].done = true;
+            if (failed || evt.detail.total === 0) {
+                if (thisProgress.done === false) {
+                    thisProgress.done = true;
+                }
+                // remove from list after a timeout
+                setTimeout(() => {
+                    this.unregisterModelBySrc(evt.detail.src);
+                }, this.rowTimeout);
+            } else if (evt.detail.loaded === evt.detail.total) {
+                thisProgress.done = true;
+                // Remove from done after a short timeout as well
+                setTimeout(() => {
+                    this.unregisterModelBySrc(evt.detail.src);
+                }, this.rowTimeout);
             }
-            // remove from list after a timeout
-            setTimeout(() => {
-                this.unregisterModelBySrc(evt.detail.src);
-            }, this.rowTimeout);
-        } else if (evt.detail.loaded === evt.detail.total) {
-            this.loadProgress[evt.detail.src].done = true;
-            // Remove from done after a short timeout as well
-            setTimeout(() => {
-                this.unregisterModelBySrc(evt.detail.src);
-            }, this.rowTimeout);
         }
 
         let pSum = 0;
