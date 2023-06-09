@@ -337,7 +337,7 @@ AFRAME.registerSystem('arena-av-setup', {
      * @return {Promise<void>}
      */
     async handleMediaError(error, silent) {
-        console.log('Error: ', error);
+        console.error('Error: ', error);
         if (!silent) {
             await Swal.fire({
                 title: 'Oops...',

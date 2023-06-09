@@ -104,7 +104,7 @@ class MQTTWorker {
         }
 
         // first connection for this client
-        console.log(`ARENA MQTT scene init user state, connected to ${uri}`);
+        console.debug(`ARENA MQTT scene init user state, connected to ${uri}`);
 
         // start listening for MQTT messages
         this.mqttClient.subscribe(this.config.renderTopic);

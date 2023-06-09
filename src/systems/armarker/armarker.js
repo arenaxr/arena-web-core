@@ -314,7 +314,7 @@ AFRAME.registerSystem('armarker', {
                 return response.json();
             })
             .catch(() => {
-                console.log('Error retrieving ATLAS markers');
+                console.warn('Error retrieving ATLAS markers');
                 return false;
             })
             .then((data) => {

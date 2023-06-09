@@ -155,7 +155,7 @@ export class ARHeadsetCameraCapture {
      */
     requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
         if (this.localizeOnce && this.arMarkerSystem.initialLocalized) {
-            console.log('ARHeadsetCC: localizeOnce set and initial localization complete; tearing down pipeline');
+            console.debug('ARHeadsetCC: localizeOnce set and initial localization complete; tearing down pipeline');
             this.terminate();
             return;
         }

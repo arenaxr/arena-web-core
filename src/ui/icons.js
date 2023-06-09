@@ -448,7 +448,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     this.jitsi.hideVideo();
                 })
                 .catch((err) => {
-                    console.log(err);
+                    console.warn(err);
                 });
         }
     },

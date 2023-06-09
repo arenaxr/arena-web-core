@@ -66,7 +66,7 @@ class Apriltag {
 
         const _this = this;
         AprilTagWasm().then(function(Module) {
-            console.log('Apriltag WASM module loaded.');
+            console.debug('Apriltag WASM module loaded.');
             _this.onWasmInit(Module);
         });
     }
@@ -231,9 +231,10 @@ const pendingMarkerMsgs = [];
 const aprilTag = new Apriltag(() => {
     self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
     initDone = true;
-    console.log('CV Worker ready!');
+    console.debug('CV Worker ready!');
     pendingMarkerMsgs.forEach( (msg) => {
-        aprilTag.set_tag_size(msg.markerid, msg.size); console.log('Setting marker size', msg.markerid, msg.size);
+        aprilTag.set_tag_size(msg.markerid, msg.size);
+        console.debug('Setting marker size', msg.markerid, msg.size);
     }); // process pending marker data msgs
 });
 
@@ -264,7 +265,7 @@ onmessage = async function(e) {
                 pendingMarkerMsgs.push(cvWorkerMsg);
                 return;
             }
-            console.log('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
+            console.debug('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
             // let the detector know the size of markers, so it can compute their pose
             aprilTag.set_tag_size(cvWorkerMsg.markerid, cvWorkerMsg.size);
             break;

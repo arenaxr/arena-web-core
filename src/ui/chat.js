@@ -698,7 +698,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} message Broker message.
      */
     onConnectionLost: function(message) {
-        console.log(message)
+        console.warn(message);
         this.health.addError('mqttChat.connection');
         console.error('Chat disconnect.');
         this.connected = false;

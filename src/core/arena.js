@@ -322,7 +322,7 @@ AFRAME.registerSystem('arena-scene', {
                 // Try to define starting position if the scene has startPosition objects
                 const startPosition = landmark.getRandom(true);
                 if (startPosition) {
-                    console.log("Moving camera to start position", startPosition.el.id);
+                    console.debug("Moving camera to start position", startPosition.el.id);
                     startPosition.teleportTo();
                     startPos.copy(cameraEl.object3D.position);
                     startPos.y -= data.camHeight;

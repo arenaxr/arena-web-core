@@ -158,7 +158,7 @@ AFRAME.registerSystem('arena-jitsi', {
      */
     connectArena: function(participantId, trackType) {
         this.jitsiId = participantId;
-        console.log('connectArena: ' + participantId, trackType);
+        console.debug('connectArena: ' + participantId, trackType);
     },
 
     /**
@@ -171,16 +171,16 @@ AFRAME.registerSystem('arena-jitsi', {
         for (let i = 0; i < this.localTracks.length; i++) {
             const track = this.localTracks[i];
             track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
-                console.log(`Audio Level local: ${audioLevel}`),
+                console.debug(`Audio Level local: ${audioLevel}`)
             );
             track.addEventListener(JitsiMeetJS.events.track.TRACK_MUTE_CHANGED, () =>
-                console.log('local track state changed'),
+                console.debug('local track state changed')
             );
             track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () =>
-                console.log('local track stopped'),
+                console.debug('local track stopped')
             );
             track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
-                console.log(`track audio output device was changed to ${deviceId}`),
+                console.debug(`track audio output device was changed to ${deviceId}`)
             );
 
             // append our own video/audio elements to <body>
@@ -344,11 +344,13 @@ AFRAME.registerSystem('arena-jitsi', {
         }
 
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_LEVEL_CHANGED, (audioLevel) =>
-            console.log(`Audio Level remote: ${audioLevel}`),
+            console.debug(`Audio Level remote: ${audioLevel}`)
         );
-        track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () => console.log('remote track stopped'));
+        track.addEventListener(JitsiMeetJS.events.track.LOCAL_TRACK_STOPPED, () => {
+            console.debug('remote track stopped');
+        });
         track.addEventListener(JitsiMeetJS.events.track.TRACK_AUDIO_OUTPUT_CHANGED, (deviceId) =>
-            console.log(`track audio output device was changed to ${deviceId}`),
+            console.debug(`track audio output device was changed to ${deviceId}`)
         );
         // track.addEventListener(
         //     JitsiMeetJS.events.track.TRACK_MUTE_CHANGED,
@@ -366,10 +368,10 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const sceneEl = el.sceneEl;
 
-        console.log('Joined conf! localTracks.length: ', this.localTracks.length);
+        console.debug('Joined conf! localTracks.length: ', this.localTracks.length);
 
-        if (this.localTracks.length == 0) {
-            console.log('NO LOCAL TRACKS but UserId is: ', this.conference.myUserId());
+        if (this.localTracks.length === 0) {
+            console.debug('NO LOCAL TRACKS but UserId is: ', this.conference.myUserId());
             this.connectArena(this.conference.myUserId(), '');
         } else {
             for (let i = 0; i < this.localTracks.length; i++) {
@@ -414,7 +416,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const sceneEl = el.sceneEl;
 
-        console.log('New user joined:', id, this.conference.getParticipantById(id).getDisplayName());
+        console.debug('New user joined:', id, this.conference.getParticipantById(id).getDisplayName());
         this.remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
 
         const arenaId = this.conference.getParticipantById(id).getProperty('arenaId');
@@ -469,7 +471,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const sceneEl = el.sceneEl;
 
-        console.log('user left:', id);
+        console.debug('user left:', id);
 
         let arenaId = user.getProperty('arenaId');
         if (!arenaId) arenaId = id; // this was a jitsi-only user
@@ -532,33 +534,33 @@ AFRAME.registerSystem('arena-jitsi', {
 
         const sceneEl = el.sceneEl;
 
-        console.log('Conference server connected!');
+        console.info('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.conferenceName, this.confOptions);
 
         this.conference.on(JitsiMeetJS.events.conference.TRACK_ADDED, this.onRemoteTrack);
         this.conference.on(JitsiMeetJS.events.conference.TRACK_REMOVED, (track) => {
-            console.log(`track removed!!!${track}`);
+            console.debug(`track removed!!!${track}`);
         });
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_JOINED, this.onConferenceJoined);
         this.conference.on(JitsiMeetJS.events.conference.USER_JOINED, this.onUserJoined);
         this.conference.on(JitsiMeetJS.events.conference.USER_LEFT, this.onUserLeft);
         this.conference.on(JitsiMeetJS.events.conference.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged);
         this.conference.on(JitsiMeetJS.events.conference.TALK_WHILE_MUTED, () => {
-            console.log(`Talking on mute detected!`);
+            console.debug(`Talking on mute detected!`);
             sceneEl.emit(JITSI_EVENTS.TALK_WHILE_MUTED, true);
         });
         this.conference.on(JitsiMeetJS.events.conference.NOISY_MIC, () => {
-            console.log(`Non-speech noise detected on microphone.`);
+            console.debug(`Non-speech noise detected on microphone.`);
             sceneEl.emit(JITSI_EVENTS.NOISY_MIC, true);
         });
         this.conference.on(JitsiMeetJS.events.conference.DISPLAY_NAME_CHANGED, (userID, displayName) =>
-            console.log(`${userID} - ${displayName}`),
+            console.debug(`${userID} - ${displayName}`)
         );
         this.conference.on(JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED, (userID, audioLevel) =>
-            console.log(`${userID} - ${audioLevel}`),
+            console.debug(`${userID} - ${audioLevel}`)
         );
         this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
-            console.log(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`),
+            console.debug(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`)
         );
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError);
