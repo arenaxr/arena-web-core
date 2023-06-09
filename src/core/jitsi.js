@@ -808,7 +808,7 @@ AFRAME.registerSystem('arena-jitsi', {
          */
         const _this = this;
         function setupCornerVideo() {
-            const localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+            let localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
 
             // video window for jitsi
             _this.jitsiVideoElem = document.getElementById('cornerVideo');
