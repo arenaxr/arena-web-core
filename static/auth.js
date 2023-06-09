@@ -50,7 +50,8 @@ window.ARENAAUTH = {
         this.signInPath = `//${window.location.host}/user/login`;
         this.signOutPath = `//${window.location.host}/user/logout`;
         this.setArenaParams();
-        ARENA.userName = ARENA.params.name; // For now, just an alias for legacy code.
+        ARENA.userName = ARENA.params.name ?? ARENA.defaults.userName;
+        // For now, just an alias for legacy code.
         // TODO: consolidate userName, params.name, and arena-system.data.name
         this.setSceneName();
         this.requestAuthState();
@@ -139,7 +140,7 @@ window.ARENAAUTH = {
             } else {
                 if (savedAuthType === "anonymous") {
                     const urlName = ARENA.params.userName;
-                    const savedName = localStorage.getItem('display_name');
+                    const savedName = localStorage.getItem("display_name");
                     if (savedName === null) {
                         if (urlName !== null) {
                             localStorage.setItem("display_name", urlName);
