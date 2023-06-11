@@ -186,7 +186,7 @@ AFRAME.registerSystem('model-progress', {
         let title;
         let percent;
         const progressEntries = Object.entries(this.loadProgress);
-        if (progressEntries > 0) {
+        if (progressEntries.length > 0) {
             for (const [src, lp] of progressEntries) {
                 const filename = decodeURIComponent(src)
                     .replace(/^.*[\\\/]/, "")
