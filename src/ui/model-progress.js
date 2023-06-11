@@ -183,41 +183,47 @@ AFRAME.registerSystem('model-progress', {
         let doneCount = 0;
         const files = [];
         let errors = 0;
-        for (const [src, lp] of Object.entries(this.loadProgress)) {
-            const filename = decodeURIComponent(src)
-                .replace(/^.*[\\\/]/, "")
-                .split("?")[0];
-            const shortName =
-                filename.length < this.FN_MAX_LENGTH
-                    ? filename
-                    : `…${filename.substring(filename.length - this.FN_MAX_LENGTH)}`;
+        let title;
+        let percent;
+        const progressEntries = Object.entries(this.loadProgress);
+        if (progressEntries > 0) {
+            for (const [src, lp] of progressEntries) {
+                const filename = decodeURIComponent(src)
+                    .replace(/^.*[\\\/]/, "")
+                    .split("?")[0];
+                const shortName =
+                    filename.length < this.FN_MAX_LENGTH
+                        ? filename
+                        : `…${filename.substring(filename.length - this.FN_MAX_LENGTH)}`;
 
-            let progressStr = "";
-            if (lp.failed === false) {
-                if (lp.total > 0) {
-                    const progress = (lp.loaded / lp.total) * 100;
-                    progressStr = `${parseFloat(progress.toFixed(1))}%`;
-                    pSum += progress;
+                let progressStr = "";
+                if (lp.failed === false) {
+                    if (lp.total > 0) {
+                        const progress = (lp.loaded / lp.total) * 100;
+                        progressStr = `${parseFloat(progress.toFixed(1))}%`;
+                        pSum += progress;
+                    } else {
+                        pSum += 100;
+                        progressStr = `n.a.`;
+                    }
                 } else {
+                    progressStr = 'failed';
                     pSum += 100;
-                    progressStr = `n.a.`;
+                    errors++;
                 }
-            } else {
-                progressStr = 'failed';
-                pSum += 100;
-                errors++;
+                if (lp.done) doneCount++;
+                files.push({cols: [shortName, progressStr], isError: lp.failed});
             }
-            if (lp.done) doneCount++;
-            files.push({ cols: [shortName, progressStr], isError: lp.failed });
+            percent = (pSum / progressEntries.length).toFixed(1);
+            title = `Loading : ${percent}% (${doneCount}/${progressEntries.length}`;
+            if (errors > 0) {
+                title += `; failed ${errors}`;
+            }
+            title += `)`;
+        } else {
+            title = 'Loading...';
+            percent = 100;
         }
-        const percent = (pSum / Object.keys(this.loadProgress).length).toFixed(1);
-        let title = `Loading : ${parseFloat(
-            (pSum / Object.keys(this.loadProgress).length).toFixed(1)
-        )}% (${doneCount}/${Object.keys(this.loadProgress).length}`;
-        if (errors > 0) {
-            title += `; failed ${errors}`;
-        }
-        title += `)`;
 
         this.loadAlert.display(title, files, percent);
     },
