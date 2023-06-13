@@ -109,13 +109,11 @@ AFRAME.registerSystem('arena-jitsi', {
         // signal that jitsi is loaded. note: jitsi is not necessarily CONNECTED when this event is fired,
         ARENA.events.emit(ARENA_EVENTS.JITSI_LOADED, true);
 
-        if (this.arena.params.skipav) {
-            ARENA.events.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, this.connect.bind(this));
-        } else if (!this.arena.params.noav && this.arena.isJitsiPermitted()) {
+        if (!this.arena.params.noav && this.arena.isJitsiPermitted()) {
             const _this = this;
             ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
                 // Only show if no previous preferences were set / first time AV setup
-                if (localStorage.getItem('display_name') === null) {
+                if (localStorage.getItem('prefAudioInput') === null) {
                     window.setupAV(() => {
                         // Initialize Jitsi videoconferencing after A/V setup window
                         _this.connect();
