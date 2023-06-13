@@ -95,7 +95,7 @@ AFRAME.registerSystem('arena-av-setup', {
 
         this.jitsi.prevVideoUnmuted = this.jitsi.hasVideo;
         this.jitsi.prevAudioUnmuted = this.jitsi.hasAudio;
-        const sideMenu = this.el.sceneEl.components['arena-side-menu-ui'];
+        const sideMenu = this.el.sceneEl.systems['arena-side-menu-ui'];
         if (this.jitsi.hasVideo) {
             sideMenu.clickButton(sideMenu.buttons.VIDEO);
         }
