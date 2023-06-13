@@ -1056,8 +1056,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         const spanStats = document.createElement('span');
         uli.appendChild(spanStats);
         // show current stats on hover/mouseover
-        const _this = this;
-        iconStats.onmouseover = function() {
+        iconStats.onmouseover = () => {
             spanStats.textContent = (stats ? this.jitsi.getConnectionText(name, stats, status) : 'None');
             const offset_ul = $('.user-list').offset();
             const midpoint_w = offset_ul.left + ($('.user-list').width() / 2);
@@ -1069,7 +1068,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             $(this).next('span').css('left', off_left + 'px');
             $(this).next('span').css('top', off_top + 'px');
         };
-        iconStats.onmouseleave = function() {
+        iconStats.onmouseleave = () => {
             $(this).next('span').fadeOut(200);
         };
 
