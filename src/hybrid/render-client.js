@@ -1,7 +1,7 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
 import {WebRTCStatsLogger} from './webrtc-stats';
 import {HybridRenderingUtils} from './utils';
-import {ARENAEventEmitter} from '../event-emitter';
+import {ARENA_EVENTS} from '../../constants';
 
 const pcConfig = {
     'sdpSemantics': 'unified-plan',
@@ -46,16 +46,16 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     init: async function() {
+        this.initialized = false;
+        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+    },
+    ready: async function() {
         const data = this.data;
         const el = this.el;
 
         const sceneEl = el.sceneEl;
-        if (ARENA.idTag === undefined) {
-            ARENA.events.on(ARENAEventEmitter.events.ARENA_STARTED, this.init.bind(this));
-            return;
-        }
 
-        console.log('[render-client] Starting...');
+        console.info('[render-client] Starting...');
         this.connected = false;
 
         this.compositor = sceneEl.systems['compositor'];
@@ -78,18 +78,20 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
+
+        this.initialized = true;
     },
 
     connectToCloud: function() {
         const data = this.data;
         this.signaler.connectionId = null;
 
-        console.log('[render-client] connecting...');
+        console.debug('[render-client] connecting...');
         this.signaler.sendConnectACK();
     },
 
     onRemoteTrack: function(evt) {
-        console.log('got remote stream');
+        console.debug('got remote stream');
 
         const stream = new MediaStream();
         stream.addTrack(evt.track);
@@ -176,13 +178,13 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 }
             });
             const selectedCodecIndex = validCodecs.findIndex((c) => c.mimeType === preferredCodec &&
-                                                                    c.sdpFmtpLine === preferredSdpFmtpLine);
+                c.sdpFmtpLine === preferredSdpFmtpLine);
             if (selectedCodecIndex !== -1) {
                 const selectedCodec = validCodecs[selectedCodecIndex];
                 preferredCodecs.splice(selectedCodecIndex, 1);
                 preferredCodecs.unshift(selectedCodec);
             }
-            console.log('[render-client] codecs', preferredCodecs);
+            console.debug('[render-client] codecs', preferredCodecs);
             transceiver.setCodecPreferences(preferredCodecs);
         }
     },
@@ -196,7 +198,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.pc.ontrack = this.onRemoteTrack.bind(this);
         this.pc.oniceconnectionstatechange = () => {
             if (_this.pc) {
-                console.log('[render-client] iceConnectionState changed:', this.pc.iceConnectionState);
+                console.debug('[render-client] iceConnectionState changed:', this.pc.iceConnectionState);
                 if (_this.pc.iceConnectionState === 'disconnected') {
                     _this.handleCloudDisconnect();
                 }
@@ -205,69 +207,69 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         this.inputDataChannel = this.pc.createDataChannel('client-input', dataChannelOptions);
         this.inputDataChannel.onopen = () => {
-            console.log('[render-client] input data channel opened');
+            console.debug('[render-client] input data channel opened');
         };
         this.inputDataChannel.onclose = () => {
-            console.log('[render-client] input data channel closed');
+            console.debug('[render-client] input data channel closed');
             _this.handleCloudDisconnect();
         };
 
         this.statusDataChannel = this.pc.createDataChannel('client-status', dataChannelOptions);
         this.statusDataChannel.onopen = () => {
-            console.log('[render-client] status data channel opened');
+            console.debug('[render-client] status data channel opened');
         };
         this.statusDataChannel.onclose = () => {
-            console.log('[render-client] status data channel closed');
+            console.debug('[render-client] status data channel closed');
             _this.handleCloudDisconnect();
         };
 
         this.stats = new WebRTCStatsLogger(this.pc, this.signaler);
 
         this.pc.setRemoteDescription(new RTCSessionDescription(offer))
-            .then(() => {
-                this.createAnswer(offer.isMac);
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        .then(() => {
+            this.createAnswer(offer.isMac);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
     },
 
     createOffer: function() {
         // console.log('creating offer.');
 
         this.pc.createOffer(sdpConstraints)
-            .then((description) => {
-                this.pc.setLocalDescription(description)
-                    .then(() => {
-                        // console.log('sending offer.');
-                        this.signaler.sendOffer(this.pc.localDescription);
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                    });
+        .then((description) => {
+            this.pc.setLocalDescription(description)
+            .then(() => {
+                // console.log('sending offer.');
+                this.signaler.sendOffer(this.pc.localDescription);
             })
-            .catch((err) =>{
+            .catch((err) => {
                 console.error(err);
             });
+        })
+        .catch((err) =>{
+            console.error(err);
+        });
     },
 
     gotAnswer: function(answer) {
         // console.log('got answer.');
 
         this.pc.setRemoteDescription(new RTCSessionDescription(answer))
-            .then(() => {
-                this.connected = true;
+        .then(() => {
+            this.connected = true;
 
-                const env = document.getElementById('env');
-                env.setAttribute('visible', false);
-                const groundPlane = document.getElementById('groundPlane');
-                groundPlane.setAttribute('visible', false);
+            const env = document.getElementById('env');
+            env.setAttribute('visible', false);
+            const groundPlane = document.getElementById('groundPlane');
+            groundPlane.setAttribute('visible', false);
 
-                this.checkStats();
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+            this.checkStats();
+        })
+        .catch((err) => {
+            console.error(err);
+        });
     },
 
     createAnswer: function(isMac) {
@@ -276,23 +278,23 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.setupTransceivers(isMac);
 
         this.pc.createAnswer()
-            .then((description) => {
-                this.pc.setLocalDescription(description)
-                    .then(() => {
-                        console.log('sending answer');
-                        this.signaler.sendAnswer(this.pc.localDescription);
-                        this.createOffer();
-                    });
-            })
+        .then((description) => {
+            this.pc.setLocalDescription(description)
             .then(() => {
-                const receivers = this.pc.getReceivers();
-                for (const receiver of receivers) {
-                    receiver.playoutDelayHint = 0;
-                }
-            })
-            .catch((err) => {
-                console.error(err);
+                console.debug('sending answer');
+                this.signaler.sendAnswer(this.pc.localDescription);
+                this.createOffer();
             });
+        })
+        .then(() => {
+            const receivers = this.pc.getReceivers();
+            for (const receiver of receivers) {
+                receiver.playoutDelayHint = 0;
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+        });
     },
 
     gotIceCandidate: function(candidate) {
@@ -395,6 +397,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     tick: function(t, dt) {
+        if (!this.initialized) return;
         const data = this.data;
         const el = this.el;
 
