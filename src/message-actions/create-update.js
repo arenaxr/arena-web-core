@@ -315,6 +315,7 @@ export class CreateUpdate {
                 entityEl.setAttribute('arena-hand', 'remoteRender', enabled);
             }
             delete data[type];
+            break;
         case 'cube':
             type = 'box'; // arena legacy! new libraries/persist objects should use box!
         case 'box':

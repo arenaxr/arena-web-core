@@ -36,9 +36,12 @@ float readDepthRemote(sampler2D depthSampler, vec2 coord) {
 
 float readDepthLocal(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
-    float viewZ = perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
-    viewZ = viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-    return viewZ;
+    /* float viewZ = perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
+     * viewZ = viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
+     * return viewZ; */
+    depth = 2.0 * (cameraFar * cameraNear) / ((cameraFar + cameraNear) - depth * (cameraFar - cameraNear));
+    depth = (depth - cameraNear) / (cameraFar - cameraNear);
+    return depth;
 }
 
 vec3 matrixWorldToPosition(mat4 matrixWorld) {
@@ -212,25 +215,25 @@ void main() {
         // color = remoteColor;
         // color = localDepth * remoteColor + remoteDepth * localColor;
 
-        /* if (remoteDepth < localDepth) {
-         *     color = vec4(remoteColor.rgb, 1.0);
-         *     // handle passthrough
-         *     if (arMode && remoteDepth >= 0.9 / DEPTH_SCALAR) {
-         *         color = localColor;
-         *     }
-         * } */
-        if (remoteDepth < 0.9 / DEPTH_SCALAR) {
+        if (remoteDepth < localDepth) {
             color = vec4(remoteColor.rgb, 1.0);
+            // handle passthrough
+            if (arMode && remoteDepth >= (1.0-5.0*onePixel) / DEPTH_SCALAR) {
+                color = localColor;
+            }
         }
-        else {
-            color = localColor;
-        }
+        /* if (remoteDepth < (1.0-5.0*onePixel) / DEPTH_SCALAR) {
+         *     color = vec4(remoteColor.rgb, 1.0);
+         * }
+         * else {
+         *     color = localColor;
+         * } */
     // }
 
     // color = vec4(remoteColor.rgb, 1.0);
     // color = vec4(localColor.rgb, 1.0);
     gl_FragColor = color;
 
-    // gl_FragColor.rgb = vec3(remoteDepth * DEPTH_SCALAR);
-    // gl_FragColor.a = 1.0;
+    /* gl_FragColor.rgb = vec3(localDepth);
+     * gl_FragColor.a = 1.0; */
 }

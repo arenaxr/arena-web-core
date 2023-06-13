@@ -138,12 +138,16 @@ AFRAME.registerSystem('compositor', {
                     system.pass.setSize(camera, currentRenderTarget.width, currentRenderTarget.height);
                     system.renderTarget.setSize(currentRenderTarget.width, currentRenderTarget.height);
                 }
+                const startTime1 = performance.now();
+
 
                 // store "normal" rendering output to this.renderTarget (2)
                 this.setRenderTarget(system.renderTarget);
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
+                console.log("[normal rendering]", performance.now() - startTime1);
 
+                const startTime = performance.now();
                 const cameraVR = this.xr.getCamera();
 
                 // save render state (3)
@@ -203,7 +207,7 @@ AFRAME.registerSystem('compositor', {
                     const currTime = performance.now();
                     const frameTimestamp = currFrame.ts;
                     system.latency = currTime - frameTimestamp;
-                    // console.log("[frame id]", currTime - frameTimestamp);
+                    console.log("[frame id]", currTime - frameTimestamp);
 
                     if (currFrameID >= system.prevFrameID) {
                         const pose = currFrame.pose;
@@ -239,6 +243,8 @@ AFRAME.registerSystem('compositor', {
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
                 this.xr.enabled = currentXREnabled;
+                console.log("[compositing time]", performance.now() - startTime)
+
 
                 // call this part of the conditional again on the next call to render()
                 isDigest = false;

@@ -122,6 +122,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
              * scene.add(mesh); */
         }
         this.remoteVideo.style.display = 'block';
+        // this.remoteVideo.style.display = 'none';
         this.remoteVideo.srcObject = stream;
     },
 

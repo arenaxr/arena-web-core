@@ -209,7 +209,7 @@ AFRAME.registerComponent('arena-hand', {
             this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
         }
         el.setAttribute('raycaster', 'showLine', !data.remoteRender);
-        el.setAttribute('visibke', !data.remoteRender);
+        el.setAttribute('visible', !data.remoteRender);
 
         // remove orientationOffset per model to publish matching rendered pose
         if (this.orientationOffset === undefined) {

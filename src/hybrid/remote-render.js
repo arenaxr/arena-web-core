@@ -35,18 +35,16 @@ AFRAME.registerComponent('remote-render', {
             }
         });
 
-        // console.log('Triangle count:', el.id, triangleCount);
+        console.log('Triangle count:', el.id, triangleCount);
 
         const frustum = new THREE.Frustum();
         frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
 
         // Assuming you have references to your camera and object
-        // Step 1: Calculate the object's bounding box in world coordinates
         const box = new THREE.Box3().setFromObject(object);
         // const helper = new THREE.Box3Helper( box, 0xffff00 );
         // sceneEl.object3D.add(helper);
         if (frustum.intersectsBox(box)) {
-            // Step 2: Project the bounding box corners onto the camera viewport
             const corners = [
                 new THREE.Vector3(box.min.x, box.min.y, box.min.z),
                 new THREE.Vector3(box.min.x, box.min.y, box.max.z),
@@ -81,7 +79,6 @@ AFRAME.registerComponent('remote-render', {
 
             const clippedCorners = clipCornersToViewport(projectedCorners);
 
-            // Step 4: Calculate the dimensions of the bounding box on the viewport
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
             const minX = Math.min(...clippedCorners.map((corner) => corner.x));
