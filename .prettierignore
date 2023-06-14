@@ -10,4 +10,4 @@ src/runtime-mngr/
 *.min.js
 *_wasm.js
 webxrios.js
-
+CHANGELOG.md
