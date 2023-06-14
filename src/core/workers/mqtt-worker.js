@@ -13,21 +13,23 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
  * Main ARENA MQTT webworker client
  */
 class MQTTWorker {
+    messageHandlers = {};
+    subscriptions = [];
+
     /**
      * @param {object} ARENAConfig
-     * @param {function} mainOnMessageArrived
-     * @param {function} restartJitsi
      * @param {function} healthCheck
      */
-    constructor(ARENAConfig, mainOnMessageArrived, /*restartJitsi,*/ healthCheck) {
+    constructor(ARENAConfig, healthCheck) {
         // this.restartJitsi = restartJitsi;
         this.config = ARENAConfig;
         this.healthCheck = healthCheck;
 
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
+        this.subscriptions = [this.config.renderTopic]; // Add main scene renderTopic by default to subs
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
         mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
-        mqttClient.onMessageArrived = async (msg) => await mainOnMessageArrived(msg);
+        mqttClient.onMessageArrived = this.onMessageArrivedDispatcher.bind(this);
         this.mqttClient = mqttClient;
     }
 
@@ -65,6 +67,54 @@ class MQTTWorker {
     }
 
     /**
+   * Subscribe to a topic and add it to list of subscriptions
+   * @param {string} topic
+   */
+    subscribe(topic) {
+        if (!this.subscriptions.includes(topic)) {
+            this.subscriptions.push(topic);
+            this.mqttClient.subscribe(topic);
+        }
+    }
+
+    /**
+     * onMessageArrived callback. Dispatches message to registered handlers based on topic category.
+     * The category is the string between the first and second slash in the topic.
+     * If no handler exists for a given topic category, the message is ignored.
+     * @param {Paho.Message} message
+     */
+    onMessageArrivedDispatcher(message) {
+        const topic = message.destinationName;
+        const topicCategory = topic.split("/")[1];
+        const handler = this.messageHandlers[topicCategory];
+        if (handler) {
+            handler(message);
+        }
+    }
+
+    /**
+     * Register a message handler for a given topic category beneath realm (second level).
+     * @param {string} topicCategory - the topic category to register a handler for
+     * @param {function} mainHandler - main thread handler, pass in whatever expected format
+     * @param {boolean} isJson - whether the payload is expected to be well-formed json
+     */
+    registerMessageHandler(topicCategory, mainHandler, isJson) {
+        if (isJson) {
+            // Parse json in worker
+            this.messageHandlers[topicCategory] = (message) => {
+                try {
+                    const jsonPayload = JSON.parse(message.payloadString);
+                    mainHandler({ ...message, payloadObj: jsonPayload });
+                } catch (e) {
+                    // Ignore
+                }
+            };
+        } else {
+            this.messageHandlers[topicCategory] = mainHandler;
+        }
+    }
+
+    /**
      * Publish to given dest topic
      * @param {string} topic
      * @param {string|object} payload
@@ -98,7 +148,9 @@ class MQTTWorker {
             // current state. Instead, reconnection should naturally allow messages to continue.
             // need to resubscribe however, to keep receiving messages
             // await this.restartJitsi();
-            this.mqttClient.subscribe(this.config.renderTopic);
+            for (const topic of this.subscriptions) {
+                this.mqttClient.subscribe(topic);
+            }
             console.warn(`ARENA MQTT scene reconnected to ${uri}`);
             return; // do not continue!
         }
@@ -107,7 +159,9 @@ class MQTTWorker {
         console.debug(`ARENA MQTT scene init user state, connected to ${uri}`);
 
         // start listening for MQTT messages
-        this.mqttClient.subscribe(this.config.renderTopic);
+        for (const topic of this.subscriptions) {
+            this.mqttClient.subscribe(topic);
+        }
     }
 
     /**
