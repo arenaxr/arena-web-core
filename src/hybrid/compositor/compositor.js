@@ -1,5 +1,6 @@
 import {CompositorPass} from './compositor-pass';
-import {EffectComposer} from '../../postprocessing';
+import {CopyShader} from '../../postprocessing/shaders/CopyShader';
+import {EffectComposer, GlitchPass, BloomPass, UnrealBloomPass, ShaderPass} from '../../postprocessing';
 
 AFRAME.registerSystem('compositor', {
     init: function() {
@@ -34,11 +35,11 @@ AFRAME.registerSystem('compositor', {
         const sceneEl = this.sceneEl;
         const renderer = sceneEl.renderer;
 
-        const scene = sceneEl.object3D;
-        const camera = sceneEl.camera;
-
-        this.pass = new CompositorPass(scene, camera, remoteRenderTarget);
+        this.pass = new CompositorPass(remoteRenderTarget);
         this.composer.addPass(this.pass);
+        // this.composer.addPass(new BloomPass());
+        // this.composer.addPass(new UnrealBloomPass());
+        this.composer.addPass(new GlitchPass());
 
         this.onResize();
     },

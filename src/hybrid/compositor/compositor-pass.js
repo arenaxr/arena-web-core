@@ -1,11 +1,11 @@
-import {FullScreenQuad, Pass} from './pass';
+import {FullScreenQuad, Pass} from '../../postprocessing/passes/pass';
 import {CompositorShader} from './compositor-shader';
 import {DecoderShader} from './decoder-shader';
 
 const FRAME_ID_LENGTH = 32;
 
 export class CompositorPass extends Pass {
-    constructor(scene, camera, remoteRenderTarget) {
+    constructor(remoteRenderTarget) {
         super();
 
         this.remoteRenderTarget = remoteRenderTarget;
@@ -38,22 +38,18 @@ export class CompositorPass extends Pass {
         this.decoderRenderTarget = new THREE.WebGLRenderTarget(FRAME_ID_LENGTH, 1);
         this.pixelBuffer = new Uint8Array( FRAME_ID_LENGTH * 4 );
 
-        this.needsSwap = false;
-
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
     }
 
     setSize(width, height) {
         this.material.uniforms.localSize.value = [width, height];
-        console.log(width, height);
     }
 
     setCamera(camera) {
         this.material.uniforms.cameraNear.value = camera.near;
         this.material.uniforms.cameraFar.value = camera.far;
     }
-
 
     setHasDualCameras(hasDualCameras) {
         this.material.uniforms.hasDualCameras.value = hasDualCameras;
@@ -135,7 +131,14 @@ export class CompositorPass extends Pass {
 			this.fsQuad.render( renderer );
 		} else {
 			renderer.setRenderTarget( writeBuffer );
+			if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
 			this.fsQuad.render( renderer );
 		}
     }
+
+	dispose() {
+		this.material.dispose();
+        this.decoderMaterial.dispose();
+		this.fsQuad.dispose();
+	}
 }

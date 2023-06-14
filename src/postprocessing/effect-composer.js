@@ -27,6 +27,9 @@ export class EffectComposer {
 		this.renderTarget1 = renderTarget;
 		this.renderTarget2 = renderTarget.clone();
 		this.renderTarget2.texture.name = 'EffectComposer.rt2';
+        this.renderTarget2.depthTexture = new THREE.DepthTexture();
+        this.renderTarget2.depthTexture.format = THREE.DepthFormat;
+        this.renderTarget2.depthTexture.type = THREE.UnsignedShortType;
 
 		this.writeBuffer = this.renderTarget1;
 		this.readBuffer = this.renderTarget2;

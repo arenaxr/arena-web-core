@@ -93,7 +93,7 @@ AFRAME.registerComponent('remote-render', {
     },
 
     update: function(oldData) {
-        console.log('[render-client]', this.el.id, this.data.enabled);
+        // console.log('[render-client]', this.el.id, this.data.enabled);
 
         this.el.setAttribute('visible', !this.data.enabled);
     },
