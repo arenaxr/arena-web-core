@@ -126,15 +126,15 @@ AFRAME.registerComponent('gesture-detector', {
 
         // Calculate average spread of touches from the center point
         if (touchList.length >= 2) {
-            const spread = touchList.reduce((sum, touch) => {
-                return (
-                    sum +
-                    Math.sqrt(
-                        Math.pow(centerPositionRawX - touch.clientX, 2) +
-                        Math.pow(centerPositionRawY - touch.clientY, 2),
-                    )
-                );
-            }, 0) / touchList.length;
+            const spread =
+                touchList.reduce(
+                    (sum, touch) =>
+                        sum +
+                        Math.sqrt(
+                            (centerPositionRawX - touch.clientX) ** 2 + (centerPositionRawY - touch.clientY) ** 2
+                        ),
+                    0
+                ) / touchList.length;
 
             touchState.spread = spread * screenScale;
         }
