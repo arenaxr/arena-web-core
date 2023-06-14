@@ -17,12 +17,12 @@ const CLIENT_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/client/health';
 const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/stats_browser';
 
 export class MQTTSignaling {
-    constructor(id) {
+    constructor(id, mqttHost, username, mqttToken) {
         this.id = id;
         this.connectionId = null;
-        this.mqttHost = ARENA.mqttHostURI;
-        this.mqttUsername = ARENA.username;
-        this.mqttToken = ARENA.mqttToken;
+        this.mqttHost = mqttHost;
+        this.mqttUsername = username;
+        this.mqttToken = mqttToken;
 
         this.onConnect = null;
         this.onOffer = null;

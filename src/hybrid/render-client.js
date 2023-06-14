@@ -1,7 +1,7 @@
 import {MQTTSignaling} from './signaling/mqtt-signaling';
 import {WebRTCStatsLogger} from './webrtc-stats';
 import {HybridRenderingUtils} from './utils';
-import {ARENA_EVENTS} from '../../constants';
+import {ARENA_EVENTS} from '../constants';
 
 const pcConfig = {
     'sdpSemantics': 'unified-plan',
@@ -47,24 +47,32 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
     init: async function() {
         this.initialized = false;
-        ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
+        ARENA.events.addMultiEventListener([
+            ARENA_EVENTS.ARENA_LOADED,
+            ARENA_EVENTS.MQTT_LOADED
+        ], this.ready.bind(this));
     },
     ready: async function() {
         const data = this.data;
         const el = this.el;
-
         const sceneEl = el.sceneEl;
+
+        this.arena = sceneEl.systems['arena-scene'];
+        this.mqtt = sceneEl.systems['arena-mqtt'];
 
         console.info('[render-client] Starting...');
         this.connected = false;
+        this.frameID = 0;
 
         this.compositor = sceneEl.systems['compositor'];
 
-        this.id = ARENA.idTag;
+        this.id = this.arena.idTag;
 
-        this.frameID = 0;
+        const host = this.mqtt.mqttHostURI;
+        const username = this.mqtt.userName;
+        const token = this.arena.mqttToken.mqtt_token;
 
-        this.signaler = new MQTTSignaling(this.id);
+        this.signaler = new MQTTSignaling(this.id, host, username, token);
         this.signaler.onOffer = this.gotOffer.bind(this);
         this.signaler.onHealthCheck = this.gotHealthCheck.bind(this);
         this.signaler.onAnswer = this.gotAnswer.bind(this);

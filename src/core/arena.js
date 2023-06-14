@@ -8,8 +8,8 @@
 
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
-import { ARENAWebARUtils } from '../webar/index.js';
-import { ARENA_EVENTS, JITSI_EVENTS } from '../constants/index.js';
+import { ARENAWebARUtils } from '../webar';
+import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
 import Swal from 'sweetalert2';
 
 AFRAME.registerSystem('arena-scene', {
@@ -21,7 +21,7 @@ AFRAME.registerSystem('arena-scene', {
         disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
     },
 
-    init: function (evt) {
+    init: function () {
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.fetchSceneOptions.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
@@ -32,6 +32,7 @@ AFRAME.registerSystem('arena-scene', {
             this.loadScene.bind(this)
         );
     },
+
     ready: function (evt) {
         const data = this.data;
         const el = this.el;
