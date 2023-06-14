@@ -1,14 +1,15 @@
-import {FullScreenQuad, Pass} from '../../postprocessing/passes/pass';
-import {CompositorShader} from './compositor-shader';
-import {DecoderShader} from './decoder-shader';
+import {FullScreenQuad, Pass} from './pass';
+import {CompositorShader} from '../shaders/compositor-shader';
+import {DecoderShader} from '../shaders/decoder-shader';
 
 const FRAME_ID_LENGTH = 32;
 
 export class CompositorPass extends Pass {
-    constructor(remoteRenderTarget) {
+    constructor(camera, remoteRenderTarget) {
         super();
 
         this.remoteRenderTarget = remoteRenderTarget;
+        this.camera = camera;
 
         this.uniforms = THREE.UniformsUtils.clone(CompositorShader.uniforms);
         this.material = new THREE.ShaderMaterial({
@@ -44,11 +45,6 @@ export class CompositorPass extends Pass {
 
     setSize(width, height) {
         this.material.uniforms.localSize.value = [width, height];
-    }
-
-    setCamera(camera) {
-        this.material.uniforms.cameraNear.value = camera.near;
-        this.material.uniforms.cameraFar.value = camera.far;
     }
 
     setHasDualCameras(hasDualCameras) {
@@ -125,6 +121,9 @@ export class CompositorPass extends Pass {
     render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
         this.material.uniforms.tLocalColor.value = readBuffer.texture;
         this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
+
+        this.material.uniforms.cameraNear.value = this.camera.near;
+        this.material.uniforms.cameraFar.value = this.camera.far;
 
 		if (this.renderToScreen) {
 			renderer.setRenderTarget( null );

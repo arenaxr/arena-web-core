@@ -1,3 +1,6 @@
+import {CopyShader} from './shaders/CopyShader';
+import {ShaderPass} from './passes/shader-pass';
+
 // https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/EffectComposer.js
 export class EffectComposer {
 
@@ -37,6 +40,8 @@ export class EffectComposer {
 		this.renderToScreen = true;
 
 		this.passes = [];
+
+		// this.copyPass = new ShaderPass( CopyShader );
 
 		this.clock = new THREE.Clock();
 

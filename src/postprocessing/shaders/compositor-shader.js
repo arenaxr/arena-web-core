@@ -56,7 +56,7 @@ export const CompositorShader = {
         },
     },
 
-    vertexShader: require('./shaders/compositor/vert.glsl'),
+    vertexShader: require('./glsl/compositor/vert.glsl'),
 
-    fragmentShader: require('./shaders/compositor/frag.glsl'),
+    fragmentShader: require('./glsl/compositor/frag.glsl'),
 };

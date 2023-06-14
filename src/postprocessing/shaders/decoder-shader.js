@@ -11,7 +11,7 @@ export const DecoderShader = {
         },
     },
 
-    vertexShader: require('./shaders/decoder/vert.glsl'),
+    vertexShader: require('./glsl/decoder/vert.glsl'),
 
-    fragmentShader: require('./shaders/decoder/frag.glsl'),
+    fragmentShader: require('./glsl/decoder/frag.glsl'),
 };

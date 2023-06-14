@@ -38,7 +38,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         enabled: {type: 'boolean', default: false},
         position: {type: 'vec3', default: new THREE.Vector3()},
         rotation: {type: 'vec4', default: new THREE.Quaternion()},
-        getStatsInterval: {type: 'number', default: 2500},
+        getStatsInterval: {type: 'number', default: 5000},
         ipd: {type: 'number', default: 0.064},
         hasDualCameras: {type: 'boolean', default: false},
         leftProj: {type: 'array'},
@@ -131,8 +131,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
              * mesh.position.y = 7;
              * scene.add(mesh); */
         }
-        this.remoteVideo.style.display = 'block';
-        // this.remoteVideo.style.display = 'none';
+        // this.remoteVideo.style.display = 'block';
+        this.remoteVideo.style.display = 'none';
         this.remoteVideo.srcObject = stream;
     },
 
@@ -155,7 +155,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         remoteRenderTarget.texture = videoTexture;
 
         this.compositor.addRemoteRenderTarget(remoteRenderTarget);
-        this.compositor.bind();
+        // this.compositor.bind();
     },
 
     onIceCandidate: function(event) {
@@ -324,7 +324,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const groundPlane = document.getElementById('groundPlane');
         groundPlane.setAttribute('visible', true);
 
-        this.compositor.unbind();
+        // this.compositor.unbind();
+        this.compositor.disable();
         this.remoteVideo.style.display = 'none';
 
         this.connected = false;
