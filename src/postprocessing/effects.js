@@ -24,6 +24,8 @@ AFRAME.registerSystem('effects', {
 
         this.binded = false;
 
+        // this.addPass(new UnrealBloomPass());
+
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
         renderer.xr.addEventListener('sessionstart', this.onResize.bind(this));
@@ -85,7 +87,6 @@ AFRAME.registerSystem('effects', {
 
         let currentXREnabled = renderer.xr.enabled;
 
-        const sizeVector = new THREE.Vector2();
         renderer.render = function() {
             if (isDigest) {
                 // render "normally"

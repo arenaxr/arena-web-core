@@ -107,7 +107,7 @@ export class EffectComposer {
 
 		}
 
-		// const currentRenderTarget = this.renderer.getRenderTarget();
+		const currentRenderTarget = this.renderer.getRenderTarget();
 
 		let maskActive = false;
 
@@ -118,7 +118,7 @@ export class EffectComposer {
 			if ( pass.enabled === false ) continue;
 
 			pass.renderToScreen = ( this.renderToScreen && this.isLastEnabledPass( i ) );
-			pass.render( this.renderer, this.writeBuffer, this.readBuffer, deltaTime, maskActive );
+			pass.render( this.renderer, this.writeBuffer, this.readBuffer, currentRenderTarget, deltaTime, maskActive );
 
 			if ( pass.needsSwap ) {
 
@@ -142,7 +142,7 @@ export class EffectComposer {
 
 		}
 
-		// this.renderer.setRenderTarget( currentRenderTarget );
+		this.renderer.setRenderTarget( currentRenderTarget );
 
 	}
 

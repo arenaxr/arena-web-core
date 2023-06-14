@@ -191,7 +191,7 @@ class UnrealBloomPass extends Pass {
 
 	}
 
-	render( renderer, writeBuffer, readBuffer, deltaTime, maskActive ) {
+	render( renderer, writeBuffer, readBuffer, currentRenderTarget, deltaTime, maskActive ) {
 
 		renderer.getClearColor( this._oldClearColor );
 		this.oldClearAlpha = renderer.getClearAlpha();
@@ -209,7 +209,7 @@ class UnrealBloomPass extends Pass {
 			this.fsQuad.material = this.basic;
 			this.basic.map = readBuffer.texture;
 
-			renderer.setRenderTarget( null );
+			renderer.setRenderTarget( currentRenderTarget );
 			renderer.clear();
 			this.fsQuad.render( renderer );
 
@@ -269,7 +269,7 @@ class UnrealBloomPass extends Pass {
 
 		if ( this.renderToScreen ) {
 
-			renderer.setRenderTarget( null );
+			renderer.setRenderTarget( currentRenderTarget );
 			this.fsQuad.render( renderer );
 
 		} else {

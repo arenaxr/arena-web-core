@@ -118,7 +118,7 @@ export class CompositorPass extends Pass {
         this.material.uniforms.vrMode.value = false;
     }
 
-    render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
         this.material.uniforms.tLocalColor.value = readBuffer.texture;
         this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
 
@@ -126,7 +126,7 @@ export class CompositorPass extends Pass {
         this.material.uniforms.cameraFar.value = this.camera.far;
 
 		if (this.renderToScreen) {
-			renderer.setRenderTarget( null );
+			renderer.setRenderTarget( currentRenderTarget );
 			this.fsQuad.render( renderer );
 		} else {
 			renderer.setRenderTarget( writeBuffer );
