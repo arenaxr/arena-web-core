@@ -4,14 +4,14 @@ module.exports = {
         commonjs: true,
         es6: true,
     },
-    extends: ["google", "prettier"],
+    extends: ["airbnb-base", "prettier"],
+    plugins: ["prettier"],
     parser: "@babel/eslint-parser",
     parserOptions: {
         sourceType: "module",
         ecmaVersion: 12,
     },
     rules: {
-        indent: ["error", 4],
         "max-len": [
             "error",
             {
@@ -20,5 +20,11 @@ module.exports = {
                 ignoreUrls: true,
             },
         ],
+        "prettier/prettier": "error",
+        "no-unused-vars": "warn",
+        "no-console": "off",
+        "class-methods-use-this": "off",
+        "no-plusplus": "off",
+        "no-bitwise": "off",
     },
 };
