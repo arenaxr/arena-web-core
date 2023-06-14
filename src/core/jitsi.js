@@ -215,7 +215,7 @@ AFRAME.registerSystem('arena-jitsi', {
             }
         }
         const sceneEl = document.querySelector('a-scene');
-        const sideMenu = sceneEl.components['arena-side-menu-ui'];
+        const sideMenu = sceneEl.systems['arena-side-menu-ui'];
         if (this.prevVideoUnmuted) sideMenu.clickButton(sideMenu.buttons.VIDEO);
         if (this.prevAudioUnmuted) sideMenu.clickButton(sideMenu.buttons.AUDIO);
     },

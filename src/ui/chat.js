@@ -803,7 +803,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 // console.log('muteAudio', this.jitsi.hasAudio);
                 // only mute
                 if (this.jitsi.hasAudio) {
-                    const sideMenu = sceneEl.components['arena-side-menu-ui'];
+                    const sideMenu = sceneEl.systems['arena-side-menu-ui'];
                     sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
             } else if (msg.text == 'logout') {
@@ -949,7 +949,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         usspan.onclick = function() {
             // only mute
             if (this.jitsi.hasAudio) {
-                const sideMenu = sceneEl.components['arena-side-menu-ui'];
+                const sideMenu = sceneEl.systems['arena-side-menu-ui'];
                 sideMenu.clickButton(sideMenu.buttons.AUDIO);
             }
         };
