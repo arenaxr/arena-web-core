@@ -5,7 +5,7 @@ import {DecoderShader} from './decoder-shader';
 const FRAME_ID_LENGTH = 32;
 
 export class CompositorPass extends Pass {
-    constructor(camera, remoteRenderTarget) {
+    constructor(scene, camera, remoteRenderTarget) {
         super();
 
         this.remoteRenderTarget = remoteRenderTarget;
@@ -44,11 +44,16 @@ export class CompositorPass extends Pass {
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
     }
 
-    setSize(camera, width, height) {
+    setSize(width, height) {
         this.material.uniforms.localSize.value = [width, height];
+        console.log(width, height);
+    }
+
+    setCamera(camera) {
         this.material.uniforms.cameraNear.value = camera.near;
         this.material.uniforms.cameraFar.value = camera.far;
     }
+
 
     setHasDualCameras(hasDualCameras) {
         this.material.uniforms.hasDualCameras.value = hasDualCameras;
@@ -125,7 +130,12 @@ export class CompositorPass extends Pass {
         this.material.uniforms.tLocalColor.value = readBuffer.texture;
         this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
 
-        renderer.setRenderTarget(writeBuffer);
-        this.fsQuad.render(renderer);
+		if (this.renderToScreen) {
+			renderer.setRenderTarget( null );
+			this.fsQuad.render( renderer );
+		} else {
+			renderer.setRenderTarget( writeBuffer );
+			this.fsQuad.render( renderer );
+		}
     }
 }

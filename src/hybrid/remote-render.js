@@ -1,7 +1,7 @@
 AFRAME.registerComponent('remote-render', {
     schema: {
         enabled: {type: 'boolean', default: false},
-        printObjectStats: {type: 'boolean', default: true},
+        printObjectStats: {type: 'boolean', default: false},
     },
 
     init: function() {

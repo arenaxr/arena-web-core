@@ -31,6 +31,7 @@ import './ui'; // 2D UI systems
 import './systems'; // custom AFRAME systems
 import './geometries'; // custom AFRAME geometries
 import './components'; // custom AFRAME components
-import './hybrid/'; // hybrid rendering
+import './postprocessing'; // post-processing
+import './hybrid'; // hybrid rendering
 import './webxr'; // special handler for webxr devices
 import './webar'; // special handler for non-webxr devices

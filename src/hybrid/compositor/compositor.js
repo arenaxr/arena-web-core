@@ -1,4 +1,5 @@
 import {CompositorPass} from './compositor-pass';
+import {EffectComposer} from '../../postprocessing';
 
 AFRAME.registerSystem('compositor', {
     init: function() {
@@ -18,11 +19,7 @@ AFRAME.registerSystem('compositor', {
 
         this.originalRenderFunc = null;
 
-        this.renderTarget = new THREE.WebGLRenderTarget(1,1);
-        this.renderTarget.texture.name = 'EffectComposer.rt1';
-        this.renderTarget.depthTexture = new THREE.DepthTexture();
-        this.renderTarget.depthTexture.format = THREE.DepthFormat;
-        this.renderTarget.depthTexture.type = THREE.UnsignedShortType;
+        this.composer = new EffectComposer(renderer);
 
         this.t = 0;
         this.dt = 0;
@@ -40,7 +37,8 @@ AFRAME.registerSystem('compositor', {
         const scene = sceneEl.object3D;
         const camera = sceneEl.camera;
 
-        this.pass = new CompositorPass(camera, remoteRenderTarget);
+        this.pass = new CompositorPass(scene, camera, remoteRenderTarget);
+        this.composer.addPass(this.pass);
 
         this.onResize();
     },
@@ -53,9 +51,9 @@ AFRAME.registerSystem('compositor', {
         var rendererSize = new THREE.Vector2();
         renderer.getSize(rendererSize);
         const pixelRatio = renderer.getPixelRatio();
-        this.renderTarget.setSize(pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
+        this.composer.setSize(pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
         if (this.pass) {
-            this.pass.setSize(camera, pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
+            this.pass.setCamera(camera);
         }
     },
 
@@ -135,16 +133,16 @@ AFRAME.registerSystem('compositor', {
                 const currentRenderTarget = this.getRenderTarget();
                 if (currentRenderTarget != null) {
                     // resize if an existing rendertarget exists (usually in webxr mode)
-                    system.pass.setSize(camera, currentRenderTarget.width, currentRenderTarget.height);
-                    system.renderTarget.setSize(currentRenderTarget.width, currentRenderTarget.height);
+                    system.composer.setSize(currentRenderTarget.width, currentRenderTarget.height);
+                    system.pass.setCamera(camera);
                 }
 
                 // store "normal" rendering output to this.renderTarget (2)
-                this.setRenderTarget(system.renderTarget);
+                this.setRenderTarget(system.composer.readBuffer);
+                // this.setRenderTarget(system.renderTarget);
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
-                const startTime = performance.now();
                 const cameraVR = this.xr.getCamera();
 
                 // save render state (3)
@@ -231,11 +229,8 @@ AFRAME.registerSystem('compositor', {
                 // (4) render with custom shader (local-remote compositing):
                 // this will internally call renderer.render(), which will execute the code within
                 // the isDigest conditional above (render normally). this will copy the result of
-                // the rendering to the readbuffer in the compositor (aka this.renderTarget), which we
-                // will use for the "local" frame.
-                // the composer will take the "local" frame and merge it with the "remote" frame from
-                // the video by calling the compositor pass and executing the shaders.
-                system.pass.render(this, currentRenderTarget, system.renderTarget);
+                // the rendering to the readBuffer in the compositor
+                system.composer.render(system.dt);
 
                 // restore render state
                 this.setRenderTarget(currentRenderTarget);
