@@ -15,6 +15,7 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 class MQTTWorker {
     messageHandlers = {};
     subscriptions = [];
+    connectionLostHandlers = [];
 
     /**
      * @param {object} ARENAConfig
@@ -25,8 +26,20 @@ class MQTTWorker {
         this.config = ARENAConfig;
         this.healthCheck = healthCheck;
 
-        const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
         this.subscriptions = [this.config.renderTopic]; // Add main scene renderTopic by default to subs
+        this.connectionLostHandlers = [
+            (responseObject) => {
+                if (responseObject.errorCode !== 0) {
+                    console.error(
+                        `ARENA MQTT scene connection lost, code: ${responseObject.errorCode},
+                        reason: ${responseObject.errorMessage}`
+                    );
+                }
+                console.warn('ARENA MQTT scene automatically reconnecting...');
+            },
+        ];
+
+        const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
         mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
         mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
         mqttClient.onMessageArrived = this.onMessageArrivedDispatcher.bind(this);
@@ -74,6 +87,16 @@ class MQTTWorker {
         if (!this.subscriptions.includes(topic)) {
             this.subscriptions.push(topic);
             this.mqttClient.subscribe(topic);
+        }
+    }
+
+    /**
+     * Add a handler for when the connection is lost
+     * @param {function} handler
+     */
+    addConnectionLostHandler(handler) {
+        if (!this.connectionLostHandlers.includes(handler)) {
+            this.connectionLostHandlers.push(handler);
         }
     }
 
@@ -172,13 +195,7 @@ class MQTTWorker {
         await this.healthCheck({
             addError: 'mqttScene.connection',
         });
-        if (responseObject.errorCode !== 0) {
-            console.error(
-                `ARENA MQTT scene connection lost, code: ${responseObject.errorCode}, reason: ${responseObject.errorMessage}`,
-            );
-        }
-        console.warn('ARENA MQTT scene automatically reconnecting...');
-        // no need to connect manually here, "reconnect: true" already set
+        this.connectionLostHandlers.forEach((handler) => handler(responseObject));
     }
 }
 
