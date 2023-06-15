@@ -13,6 +13,12 @@
     <meta content="Augmented Reality Edge Networking Architecture" name="description">
 
     <script src="https://cdn.jsdelivr.net/npm/zlibjs@0.3.1/bin/zlib.min.js"></script>
+    <!-- our default configs -->
+    <script src="conf/defaults.js"></script>
+
+    <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
+    <script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+    <script src="static/auth.js"></script>
 
     <!-- jquery, needed by lib jitsi -->
     <script src="static/vendor/jquery-2.1.1.min.js"></script>
@@ -22,143 +28,28 @@
     <script src="static/vendor/strophe/strophe.disco.min.js?v=1"></script>
     <script src="static/vendor/lib-jitsi-meet.min.js"></script>
 
-    <!-- our default configs -->
-    <script src="conf/defaults.js"></script>
-
     <!-- AFRAME base -->
     <script src="static/vendor/aframe/aframe-master.min.js"></script>
     <!-- main arena bundle -->
     <script src="dist/index.js"></script>
-    <!-- main arena stylesheet -->
-    <link href="dist/index.css" rel="stylesheet">
 
-    <!-- 2D UI -->
-    <link href="static/vendor/mdb/mdb.min.css" rel="stylesheet"/>
-    <link href="static/vendor/fontawesome-5/css/all.min.css" rel="stylesheet"/>
+    <!-- 2D UI, load async since  -->
+    <link rel="stylesheet" href="static/vendor/mdb/mdb.min.css" media="print">
+    <link rel="stylesheet" href="static/vendor/fontawesome-5/css/all.min.css" media="print">
+    <script src="static/styleloader.js"></script>
 </head>
 <body>
-<!-- A/V Setup -->
-<div class="d-none d-flex align-items-center min-vh-100" id="avSetup">
-    <div class="container">
-        <div class="row d-flex justify-content-center align-items-center">
-            <div class="col-lg-10 col-xl-8 p-5 shadow rounded bg-white max-vh-100 overflow-auto">
-                <div class="row mb-3">
-                    <div class="col">
-                        <button class="float-end btn btn-sm btn-outline-primary" id="redetectAVBtn">
-                            Re-detect Devices <i class="fas fa-sync"></i>
-                        </button>
-                        <h3><img alt="CONIX Logo" class="title-logo" src="static/images/xr-logo-v7.png"/> Setup</h3>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col-md-7 mb-md-0 mb-3">
-                        <div class="mb-3">
-                            <video autoplay class="w-100 h-auto" id="vidPreview" muted playsinline></video>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select aria-label="HeadModel" class="form-select mb-3" id="headModelPathSelect">
-                                <option value="/static/models/avatars/robobit.glb">Robot</option>
-                                <option value="/static/models/avatars/DamagedHelmet.glb">Damaged Helmet</option>
-                                <option value="/static/models/avatars/Avocado.glb">Avocado</option>
-                                <option value="/static/models/avatars/Duck.glb">Duck</option>
-                                <option value="/static/models/avatars/suzanne.glb">Suzanne</option>
-                            </select>
-                            <label for="presenceSelect">Select Head Model</label>
-                        </div>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="form-floating mb-3">
-                            <select aria-label="Video Source" class="form-select mb-3" id="vidSourceSelect">
-                            </select>
-                            <label for="vidSourceSelect">Select Camera</label>
-                        </div>
-                        <div class="form-floating">
-                            <select aria-label="Speaker Device" class="form-select mb-3" id="audioOutSelect">
-                            </select>
-                            <label for="audioOutSelect">Select Speaker</label>
-                        </div>
-                        <button class="btn btn-sm btn-outline-primary mb-3" id="playTestAudioOutBtn">
-                            Play Test Sound <i class="fas fa-volume-off" id="playTestAudioOutIcon"></i>
-                        </button>
-                        <audio id="testAudioOut" src="/static/media/step.ogg" playsinline></audio>
-                        <div class="form-floating mb-3">
-                            <select aria-label="Microphone Device" class="form-select mb-3" id="audioSourceSelect">
-                            </select>
-                            <label for="audioSourceSelect">Select Microphone</label>
-                        </div>
-                        <div class="form-floating mb-3">
-                            <select aria-label="Presence" class="form-select mb-3" id="presenceSelect">
-                                <option value="Standard">Standard</option>
-                                <option value="Portal">Portal</option>
-                            </select>
-                            <label for="presenceSelect">Select Presence Type</label>
-                        </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input mb-3" type="checkbox" id="reverseMouseDragCheckbox"/>
-                            <label for="reverseMouseDragCheckbox">Reverse Mouse Drag</label>
-                        </div>
-                        <div class="progress mb-3" style="height: 20px;">
-                            <div
-                                    aria-valuemax="100"
-                                    aria-valuemin="0"
-                                    aria-valuenow="0"
-                                    class="progress-bar progress-bar-striped bg-success"
-                                    id="micMeter"
-                                    role="progressbar"
-                                    style="width: 0"
-                            ></div>
-                            <label for="micMeter" style="padding-left: 5px;">Speak to move green bar</label>
-                        </div>
-                        <!-- Ref https://github.com/cwilso/volume-meter/ !-->
-                        <a class="btn btn-link btn-sm btn-outline-primary mb-3" data-mdb-ripple-color="dark"
-                           href="https://test.8x8.vc"
-                           target="_blank">Test Browser</a>
-                        <a class="float-end btn btn-link btn-sm btn-outline-primary mb-3" data-mdb-ripple-color="dark"
-                           href="https://docs.arenaxr.org/content/overview" target="_blank">Having
-                            Issues?</a>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col mb-5 pb-5 mb-md-3 pb-md-3">
-                        <div class="input-group mb-3">
-                            <span class="col-6 col-md-3 input-group-text font-weight-bold">Namespace</span>
-                            <input
-                                    aria-label="Namespace"
-                                    class="col-6 col-md-3 form-control"
-                                    id="readonlyNamespace"
-                                    readonly
-                                    type="text"
-                            />
-                            <span class="col-6 col-md-3 input-group-text font-weight-bold">Scene Name</span>
-                            <input
-                                    aria-label="Scene Name"
-                                    class="col-6 col-md-3 form-control"
-                                    id="readonlySceneName"
-                                    readonly
-                                    type="text"
-                            />
-                        </div>
-                        <div class="form-outline input-group mb-3" id="displayName">
-                            <input class="form-control" id="displayName-input" type="text">
-                            <label class="form-label " for="displayName-input" style="z-index:999">Display Name</label>
-                            <button class="btn btn-primary" id="enterSceneAVBtn">Enter</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<a-scene background="color: black" name="ARENAScene" id="ARENAScene" stats-monitor="true"
-         stats="false" webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
-         ar-hit-test="enabled:true;src:static/images/blank-pixel.png;mapSize:0.005 0.005"
-         gltf-model="dracoDecoderPath:/static/vendor/draco-1.5.4/"
-         inspector="url: static/vendor/aframe-inspector.min.js">
-    <a-assets>
-        <!-- Vive controller 3d model -->
-        <a-asset-item id="viveControl-obj" src="static/models/hands/vr_controller_vive.obj"></a-asset-item>
-        <a-asset-item id="viveControl-mtl" src="static/models/hands/vr_controller_vive.mtl"></a-asset-item>
-    </a-assets>
+<a-scene name="ARENAScene" id="ARENAScene"
+         background="color: black"
+         stats="false" stats-monitor="enabled: false"
+         arena-hybrid-render-client renderer="antialias: true; maxCanvasWidth: 3840; maxCanvasHeight: 3840;"
+         webxr="optionalFeatures: hit-test, dom-overlay, computerVision; overlayElement: overlay;"
+         webxr-device-manager
+         ar-hit-test="enabled:true; src: static/images/blank-pixel.png; mapSize: 0.005 0.005;" ar-hit-test-listener
+         gltf-model="dracoDecoderPath: /static/vendor/draco-1.5.4/;"
+         inspector="url: static/vendor/aframe-inspector.min.js;">
+
+    <a-assets></a-assets>
 
     <a-entity id="sceneRoot">
         <!-- ground plane so falling objects don't fall through floor -->
@@ -169,25 +60,25 @@
             <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
                 <!-- this camera can 'fly': z axis follows pitch of head direction -->
                 <a-camera id="my-camera"
-                          geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25"
-                          box-collider="collideNonVisible:true" box-collision-publisher
                           near="0.1" far="10000"
                           gesture-detector network-latency
-                          look-controls="reverseMouseDrag: true" look-controls-arrow
+                          look-controls="reverseMouseDrag: true" arrow-controls
                           mouse-cursor press-and-move="constrainToNavMesh:true"
-                          wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true">
+                          wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true"
+                          geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25"
+                          box-collider="collideNonVisible:true" box-collision-publisher>
                     <a-entity cursor="rayOrigin: mouse" id="mouse-cursor"
                               raycaster="objects:[click-listener],[click-listener-local]"></a-entity>
                 </a-camera>
                 <a-entity id="leftHand"
-                          box-collider="collideNonVisible:true;enabled:false" box-collision-publisher
+                          box-collider="collideNonVisible: true; enabled: false" box-collision-publisher
                           visible=false
                           arena-hand="hand:left"
                           laser-controls="hand:left"
-                          blink-controls="cameraRig:#cameraRig; collisionEntities:[nav-mesh]; teleportOrigin:#my-camera"
+                          blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
                           raycaster="objects: [click-listener]"></a-entity>
                 <a-entity id="rightHand"
-                          box-collider="collideNonVisible:true;enabled:false" box-collision-publisher
+                          box-collider="collideNonVisible: true; enabled: false" box-collision-publisher
                           visible=false
                           arena-hand="hand:right"
                           laser-controls="hand:right"
@@ -197,17 +88,17 @@
     </a-entity>
 </a-scene>
 
-<div class="d-none" id="icons-div-container">
-    <div id="icons-div"></div>
-    <div id="icons-div-expand" class="text-white text-center">
-        <i id="icons-div-expand-button" class="fas fa-angle-down"></i>
+<div id="side-menu-container" class="side-menu-container d-none d-flex flex-column">
+    <div id="side-menu" class="side-menu d-flex flex-column align-items-center"></div>
+    <div id="side-menu-expand" class="side-menu-expand text-white text-center">
+        <i id="side-menu-expand-button" class="side-menu-expand-button fas fa-angle-down"></i>
     </div>
 </div>
-<div class="d-none chat-button-group-container d-flex">
+<div id="chat-button-group-container" class="chat-button-group-container d-none d-flex">
     <div class="text-white chat-button-group-expand d-flex align-items-center">
         <i id="chat-button-group-expand-icon" class="fas fa-angle-left"></i>
     </div>
-    <div class="chat-button-group"></div>
+    <div id="chat-button-group" class="chat-button-group"></div>
 </div>
 
 <div class="error-icon" id="error-icon">
@@ -216,16 +107,12 @@
 </div>
 <span class="echo-name" id="echo-name"></span>
 <span class="pose-stats" id="pose-stats"></span>
-<video autoplay="1" crossorigin="anonymous" id="cornerVideo" muted="true" playsinline="1" volume="0"></video>
-
-<!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-<script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
-<script src="src/auth.js"></script>
+<video id="cornerVideo" autoplay="1" crossorigin="anonymous" muted="true" playsinline="1" volume="0"></video>
 
 <!-- 2D UI -->
-<script src="static/vendor/mdb/mdb.min.js"></script>
+<script src="static/vendor/mdb/mdb.min.js" async></script>
 
 <!-- Mic setup audio processing -->
-<script src="static/vendor/volume-meter.js"></script>
+<script src="static/vendor/volume-meter.js" ></script>
 </body>
 </html>

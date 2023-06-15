@@ -1,8 +1,16 @@
+/**
+ * @fileoverview Allows using arrow keys for rotating the user's camera view
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
+ */
+
 /* global AFRAME */
 
 const MAX_DELTA = 0.2;
 
-AFRAME.registerComponent('look-controls-arrow', {
+AFRAME.registerComponent('arrow-controls', {
     schema: {
         acceleration: {default: 1.1},
     },

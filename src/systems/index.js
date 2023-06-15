@@ -10,10 +10,10 @@
  * ARENA A-Frame systems
  */
 
-import './armarker/armarker.js';
-import './attribution.js';
-import './model-progress/model-progress.js';
-import './screenshare.js';
 // Vendor override/imports
 import 'aframe-extras'; // gltf animations, components for controls, model loaders, pathfinding
 import './vendor/nav-system.js'; // Override nav system
+
+import './armarker';
+import './attribution';
+import './screenshare';

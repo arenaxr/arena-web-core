@@ -37,13 +37,13 @@ AFRAME.registerComponent('goto-url', {
 
     },
 
-    update: function() {
+    update: function(oldData) {
         const data = this.data;
         const el = this.el;
 
         let fired = false;
+        el.removeEventListener(oldData.on, this.eventHandlerFn);
         if (data.on && data.url) { // we have an event?
-            el.removeEventListener(data.event, this.eventHandlerFn);
             this.eventHandlerFn = function() {
                 if (!fired) {
                     fired = true;
@@ -75,10 +75,10 @@ AFRAME.registerComponent('goto-url', {
                     }, 100);
                 }
             };
-            el.addEventListener(data.on, this.eventHandlerfn);
+            el.addEventListener(data.on, this.eventHandlerFn);
         } else {
             // `event` not specified, just log the message.
-            console.log(data);
+            console.debug(data);
         }
     },
 
@@ -88,8 +88,8 @@ AFRAME.registerComponent('goto-url', {
         const el = this.el;
 
         // remove event listener
-        if (data.event) {
-            el.removeEventListener(data.event, this.eventHandlerFn);
+        if (data.on) {
+            el.removeEventListener(data.on, this.eventHandlerFn);
         }
     },
 });

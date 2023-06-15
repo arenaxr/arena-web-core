@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 /**
  * @fileoverview Component to listen for mouse events and publish corresponding events
@@ -16,7 +16,11 @@ import {ARENAUtils} from '../utils.js';
  * @todo Consolidate event listeners (they are very similar)
  */
 AFRAME.registerComponent('click-listener', {
-    schema: {default: true},
+    schema: {
+        bubble: {type: 'boolean', default: true},
+        enabled: {type: 'boolean', default: true},
+        default: true,
+    },
 
     init: function() {
         this.mouseleaveHandler = this.mouseleaveHandler.bind(this);
@@ -48,6 +52,10 @@ AFRAME.registerComponent('click-listener', {
         this.el.removeEventListener('mouseleave', this.mouseleaveHandler);
     },
     mousedownHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
@@ -76,6 +84,10 @@ AFRAME.registerComponent('click-listener', {
     },
 
     mouseupHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
@@ -104,6 +116,10 @@ AFRAME.registerComponent('click-listener', {
     },
 
     mouseenterHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 
@@ -131,6 +147,10 @@ AFRAME.registerComponent('click-listener', {
         }
     },
     mouseleaveHandler: function(evt) {
+        if (this.data.bubble === false) {
+            evt.stopPropagation();
+        }
+        if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const position = camera.components['arena-camera'].data.position;
 

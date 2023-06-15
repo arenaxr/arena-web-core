@@ -1,6 +1,6 @@
 /* global THREE */
-import {Logger} from './logger.js';
-import {Parser} from './parser.js';
+const warn = AFRAME.utils.debug('ARENA:client-event:warn');
+const error = AFRAME.utils.debug('ARENA:client-event:error');
 
 /**
  * Client Event handler
@@ -27,7 +27,7 @@ export class ClientEvent {
 
         const entityEl = document.getElementById(id);
         if (!entityEl) {
-            Logger.error('clientEvent', `Object with object_id "${id}" does not exist!`);
+            error('clientEvent', `Object with object_id "${id}" does not exist!`);
             return;
         }
 
@@ -39,7 +39,7 @@ export class ClientEvent {
                 parseFloat(data.position.z),
             );
         } else {
-            Logger.warn('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
+            warn('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
         }
 
         switch (message.type) {

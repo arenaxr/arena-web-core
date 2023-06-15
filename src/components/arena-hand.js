@@ -4,9 +4,13 @@
  * @fileoverview Tracking Hand controller movement in real time.
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME */
+
+import { ARENA_EVENTS } from '../constants';
 
 // path to controler models
 const handControllerPath = {
@@ -35,13 +39,13 @@ function eventAction(evt, eventName, myThis) {
     const objName = myThis.name;
     if (objName) {
         // publishing events attached to user id objects allows sculpting security
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, {
+        this.arena.Mqtt.publish(`${this.arena.outputTopic}${objName}`, {
             object_id: objName,
             action: 'clientEvent',
             type: eventName,
             data: {
                 position: coordsData,
-                source: ARENA.camName,
+                source: this.arena.camName,
             },
         });
     }
@@ -55,25 +59,34 @@ function eventAction(evt, eventName, myThis) {
  *
  */
 AFRAME.registerComponent('arena-hand', {
-    dependencies: ['laser-controls'],
     schema: {
         enabled: {type: 'boolean', default: false},
         hand: {type: 'string', default: 'left'},
     },
 
-    init: function() {
-        const el = this.el;
-        const data = this.data;
+    dependencies: ['laser-controls'],
 
+    init: function() {
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
-
         this.lastPose = '';
+        this.initialized = false;
+
+        ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
+    },
+
+    ready: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        this.arena = sceneEl.systems['arena-scene'];
 
         // capitalize hand type
         data.hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
-        this.name = data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+        this.name = data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
 
         el.addEventListener('controllerconnected', () => {
             el.setAttribute('visible', true);
@@ -86,13 +99,13 @@ AFRAME.registerComponent('arena-hand', {
                     object_type: `hand${data.hand}`,
                     position: {x: 0, y: -1, z: 0},
                     url: this.getControllerURL(),
-                    dep: ARENA.camName,
+                    dep: this.arena.camName,
                 },
             };
             if (msg.data.url.includes('magicleap')) {
                 msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
             }
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
+            this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
             data.enabled = true;
         });
 
@@ -100,7 +113,7 @@ AFRAME.registerComponent('arena-hand', {
             el.setAttribute('visible', false);
             el.setAttribute('collision-publisher', 'enabled', false);
             // when disconnected, try to cleanup hands
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, {
+            this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, {
                 object_id: this.name,
                 action: 'delete',
             });
@@ -139,12 +152,14 @@ AFRAME.registerComponent('arena-hand', {
         });
          */
 
-        this.tick = AFRAME.utils.throttleTick(this.tick, ARENA.camUpdateIntervalMs, this);
+        this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
+
+        this.initialized = true;
     },
 
     getControllerURL() {
-        const el = this.el;
         const data = this.data;
+        const el = this.el;
 
         let url = el.getAttribute('gltf-model');
         if (!url) url = handControllerPath[data.hand];
@@ -175,15 +190,19 @@ AFRAME.registerComponent('arena-hand', {
                     w: parseFloat(this.rotation._w.toFixed(3)),
                 },
                 url: this.getControllerURL(),
-                dep: ARENA.camName,
+                dep: this.arena.camName,
             },
         };
-        ARENA.Mqtt.publish(`${ARENA.outputTopic}${this.name}`, msg);
+        if (msg.data.url.includes('magicleap')) {
+            msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
+        }
+        this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
     },
 
-    tick: (function(t, dt) {
+    tick: function(t, dt) {
+        if (!this.initialized) return;
         if (!this.name) {
-            this.name = this.data.hand === 'Left' ? ARENA.handLName : ARENA.handRName;
+            this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
         }
 
         this.rotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
@@ -197,5 +216,5 @@ AFRAME.registerComponent('arena-hand', {
             this.publishPose();
             this.lastPose = newPose;
         }
-    }),
+    },
 });

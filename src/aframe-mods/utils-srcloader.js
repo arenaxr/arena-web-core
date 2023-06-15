@@ -1,9 +1,13 @@
-/* global AFRAME */
-
 /**
- * Monkeypatched AFRAME utils.srcLoader to skip HTTP content-type check
- * when extension matches known image types.
+ * @fileoverview Monkeypatched AFRAME utils.srcLoader to skip HTTP content-type check
+ *               when extension matches known image types.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME */
 
 const IMG_EXTENSIONS = ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff'];
 

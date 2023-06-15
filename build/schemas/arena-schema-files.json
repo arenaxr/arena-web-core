@@ -74,6 +74,11 @@
       "file":"schemas/obj-model.json",
       "title":"OBJ Model"
     },
+    "ocean":{
+       "description":"Ocean",
+       "file":"schemas/ocean.json",
+       "title":"Ocean"
+    },
     "octahedron":{
        "description":"Octahedron Geometry",
        "file":"schemas/octahedron.json",

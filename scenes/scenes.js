@@ -26,7 +26,7 @@ function changePage(page = 'sceneSelect') {
 window.addEventListener('onauth', async function(e) {
     const username = e.detail.mqtt_username;
     const mqttToken = e.detail.mqtt_token;
-    const auth = getAuthStatus();
+    const auth = ARENAAUTH.getAuthStatus();
     window.username = auth.username;
 
     // Rudimentary routing based on location hash
@@ -64,6 +64,7 @@ window.addEventListener('onauth', async function(e) {
     const userSceneUrl = document.getElementById('userSceneUrl');
 
     const enterUserSceneBtn = document.getElementById('enterUserSceneBtn');
+    const enterArUserSceneBtn = document.getElementById('enterArUserSceneBtn');
     const cloneUserSceneBtn = document.getElementById('cloneUserSceneBtn');
     const deleteUserSceneBtn = document.getElementById('deleteUserSceneBtn');
     const copyUserSceneUrlBtn = document.getElementById('copyUserSceneUrlBtn')
@@ -74,6 +75,7 @@ window.addEventListener('onauth', async function(e) {
     const publicSceneUrl = document.getElementById('publicSceneUrl');
 
     const enterPublicSceneBtn = document.getElementById('enterPublicSceneBtn');
+    const enterArPublicSceneBtn = document.getElementById('enterArPublicSceneBtn');
 
     const advancedLinksDiv = document.getElementById('uri-builder')
     const userNoteSpan = document.getElementById('userNoteSpan');
@@ -82,6 +84,7 @@ window.addEventListener('onauth', async function(e) {
     const scenePermsLink = document.getElementById('scenePermsLink');
 
     window.publicButtons.push(enterPublicSceneBtn);
+    window.publicButtons.push(enterArPublicSceneBtn);
     if (auth.authenticated) {
         window.publicButtons.push(clonePublicSceneBtn); // add clone option for full user
         tabMyScenes.parentElement.style.display = 'block';
@@ -91,7 +94,7 @@ window.addEventListener('onauth', async function(e) {
     }
 
     const toggleUserSceneButtons = (toggle) => {
-        [enterUserSceneBtn, cloneUserSceneBtn, deleteUserSceneBtn, copyUserSceneUrlBtn, advancedLinksUserBtn].forEach((btn) => {
+        [enterUserSceneBtn, enterArUserSceneBtn, cloneUserSceneBtn, deleteUserSceneBtn, copyUserSceneUrlBtn, advancedLinksUserBtn].forEach((btn) => {
             toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled')
         })
     }
@@ -136,6 +139,9 @@ window.addEventListener('onauth', async function(e) {
     enterPublicSceneBtn.addEventListener('click', () =>
         window.location = publicSceneUrl.value
     )
+    enterArPublicSceneBtn.addEventListener('click', () =>
+        window.location = `${publicSceneUrl.value}?armode=1`
+    )
     copyUserSceneUrlBtn.addEventListener('click', () => {
         userSceneUrl.select();
         userSceneUrl.setSelectionRange(0, 99999); /* For mobile devices */
@@ -143,6 +149,9 @@ window.addEventListener('onauth', async function(e) {
     })
     enterUserSceneBtn.addEventListener('click', () =>
         window.location = userSceneUrl.value
+    )
+    enterArUserSceneBtn.addEventListener('click', () =>
+        window.location = `${userSceneUrl.value}?armode=1`
     )
 
     // set listeners for advanced links URI-builder

@@ -7,6 +7,11 @@
 
     <link rel="icon" type="image/png" href="../static/images/conix-x.png">
 
+    <!-- login auth check, blocking to page load -->
+    <script src="../static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
+    <script src="../conf/defaults.js"></script>
+    <script src="../static/auth.js"></script>
+
     <link rel='stylesheet' href='../static/arenaxr-bootstrap/arenaxr-bootstrap.css'>
     <link rel="stylesheet" href='../static/vendor/fontawesome-5/css/all.min.css' type="text/css">
     <script src="../static/vendor/jquery-2.1.1.min.js"></script>
@@ -78,6 +83,9 @@
                                         <div class="col-sm-5">
                                             <button class="btn btn-light disabled" id="enterUserSceneBtn"
                                                 title="Enter Scene"><i class="fas fa-sign-in-alt"></i></button>
+
+                                            <button class="btn btn-light disabled" id="enterArUserSceneBtn"
+                                                title="Enter Scene in AR"><i class="fas fa-camera"></i></button>
 
                                             <button class="btn btn-light disabled" id="cloneUserSceneBtn"
                                                 title="Duplicate Scene"><i class="far fa-clone"></i></button>
@@ -189,6 +197,11 @@
                                                 <i class="fas fa-sign-in-alt"></i>
                                             </button>
 
+                                            <button class="btn btn-light disabled" id="enterArPublicSceneBtn"
+                                                title="Enter Scene in AR">
+                                                <i class="fas fa-camera"></i>
+                                            </button>
+
                                             <button class="btn btn-light disabled" id="clonePublicSceneBtn"
                                                 title="Duplicate Scene">
                                                 <i class="far fa-clone"></i>
@@ -284,11 +297,6 @@
             </div>
         </div>
     </div>
-
-    <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
-    <script src="../static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
-    <script src="../conf/defaults.js"></script>
-    <script src="../src/auth.js"></script>
 </body>
 
 </html>

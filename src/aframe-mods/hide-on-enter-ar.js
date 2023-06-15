@@ -1,9 +1,13 @@
-/* global AFRAME */
-
 /**
- * @fileoverview Override default behavior of hide-on-enter-ar to unload or
- * disable gltf models and related lod components when entering AR.
-*/
+ * @fileoverview Override default behavior of hide-on-enter-ar to unload or disable gltf models and related lod
+ *               components when entering AR.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
+ */
+
+/* global AFRAME */
 
 AFRAME.components['hide-on-enter-ar'].Component.prototype.init = function() {
     this.gltfAttributes = null;

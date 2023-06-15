@@ -1,47 +1,79 @@
-/* global AFRAME, ARENA */
-
-import {
-    ARENAUtils,
-} from '../utils.js';
-
 /**
- * @fileoverview Component to monitor client-performance: fps, memory, etc.
+ * @fileoverview Component to monitor client-performance: fps, memory, etc, and relay to MQTT debug channel if enabled.
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME, ARENA */
+import { ARENAUtils } from '../utils';
+import { JITSI_EVENTS } from '../constants';
 
 AFRAME.registerComponent('stats-monitor', {
     schema: {
         enabled: {
-            default: true,
-        },
-        fps: { // A-Frame stats, Frames rendered in the last second.
-            default: 0,
-        },
-        raf: { // A-Frame stats, Milliseconds needed to render a frame. (latency)
-            default: 0,
-        },
-        totalJSHeapSize: { // The total allocated heap size, in bytes. (Chrome/Edge only)
-            default: 0,
-        },
-        usedJSHeapSize: { // The currently active segment of JS heap, in bytes. (Chrome/Edge only)
-            default: 0,
+            type: 'boolean', default: true,
         },
     },
+
+    multiple: false,
 
     init: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
         this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
 
-        if (!this.data.enabled) {
-            this.el.sceneEl.removeBehavior(this);
+        this.jitsiStatsLocalCallback = this.jitsiStatsLocalCallback.bind(this);
+
+        this.registerListeners();
+        if (!data.enabled) {
+            sceneEl.removeBehavior(this);
             return;
         }
-        this.el.sceneEl.setAttribute('stats', '');
+        sceneEl.setAttribute('stats', '');
     },
 
-    update: function() {},
+    update: function(oldData) {
+        if (this.data && !oldData) {
+            this.registerListeners();
+        } else if (!this.data && oldData) {
+            this.unregisterListeners();
+        }
+    },
+
+    remove: function() {
+        this.unregisterListeners();
+    },
+
+    registerListeners: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.jitsiStatsLocalCallback);
+    },
+
+    unregisterListeners: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        sceneEl.removeEventListener(JITSI_EVENTS.STATS_LOCAL, this.jitsiStatsLocalCallback);
+    },
+
+    /**
+     * Called when Jitsi local stats are updated, used to save local status for stats-monitor.
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    jitsiStatsLocalCallback: function(e) {
+        this.callStats = e.detail.stats;
+    },
 
     tick: function(time, timeDelta) {
         if (!this.rafDiv) {
@@ -62,10 +94,10 @@ AFRAME.registerComponent('stats-monitor', {
             this.jsHeapSizeLimit = memory.jsHeapSizeLimit;
         }
 
-        if (ARENA && ARENA.hudstats) {
+        // format HUD
+        if (ARENA && ARENA.params.hudstats) {
             const camRoot = document.getElementById('my-camera');
             if (camRoot && !this.hudStatsText) {
-                console.warn(camRoot);
                 this.hudStatsText = document.createElement('a-text');
                 this.hudStatsText.setAttribute('id', 'myStats');
                 this.hudStatsText.setAttribute('position', '0 0 -1');
@@ -79,15 +111,16 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
-        if (ARENA && ARENA.confstats) {
-            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
+        // publish to mqtt debug channel the stats
+        if (ARENA && ARENA.params.confstats) {
+            if (ARENA && ARENA.Jitsi) {
                 const perfStats = {
                     jitsiStats: {
                         arenaId: ARENA.idTag,
                         jitsiId: ARENA.Jitsi.jitsiId,
                         renderFps: this.fps,
                         requestAnimationFrame: this.raf,
-                        stats: ARENA.chat.settings.stats,
+                        stats: this.callStats,
                     },
                 };
                 if (window.performance && window.performance.memory) {
@@ -98,11 +131,16 @@ AFRAME.registerComponent('stats-monitor', {
             }
         }
 
-        if (ARENA && ARENA.hudstats && this.hudStatsText) {
-            const pctHeap = Math.trunc(this.usedJSHeapSize / this.jsHeapSizeLimit * 100).toFixed(0);
+        // display the stats on the HUD
+        if (ARENA && ARENA.params.hudstats && this.hudStatsText) {
+            const pctHeap = Math.trunc((this.usedJSHeapSize / this.jsHeapSizeLimit) * 100).toFixed(0);
             let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
-            if (ARENA && ARENA.Jitsi && ARENA.chat && ARENA.chat.settings) {
-                str += `\n\n[Jitsi]\n${ARENA.chat.getConnectionText(ARENA.getDisplayName(), ARENA.chat.settings.stats)}`;
+            if (ARENA && ARENA.Jitsi && this.callStats) {
+                str += `\n\n[Jitsi]\n${ARENA.Jitsi.getConnectionText(
+                    ARENA.displayName,
+                    { conn: this.callStats },
+                    null
+                )}`;
             }
             this.hudStatsText.setAttribute('value', str);
         }

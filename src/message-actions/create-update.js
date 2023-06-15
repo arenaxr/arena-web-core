@@ -1,11 +1,5 @@
-import {Logger} from './logger.js';
-import {ARENAUtils} from '../utils.js';
-
-// handle actions
-const ACTIONS = {
-    CREATE: 'create',
-    UPDATE: 'update',
-};
+import {ARENAUtils} from '../utils';
+import {ACTIONS} from '../constants';
 
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
@@ -13,7 +7,15 @@ const RENDER_ORDER = 1;
 const camMatrixInverse = new THREE.Matrix4();
 const rigMatrix = new THREE.Matrix4();
 const overrideQuat = new THREE.Quaternion();
-const overrideEuler = new THREE.Euler();
+
+const warn = AFRAME.utils.debug('ARENA:warn');
+const error = AFRAME.utils.debug('ARENA:error');
+const createWarn = AFRAME.utils.debug('ARENA:create:warn');
+const updateWarn = AFRAME.utils.debug('ARENA:update:warn');
+const createError = AFRAME.utils.debug('ARENA:create:error');
+const updateError = AFRAME.utils.debug('ARENA:update:error');
+const cameraLookAtWarn = AFRAME.utils.debug('ARENA:camera look-at:warn');
+const cameraLookAtError = AFRAME.utils.debug('ARENA:camera look-at:error');
 
 /**
  * Create/Update object handler
@@ -43,6 +45,8 @@ export class CreateUpdate {
                 return;
             }
 
+            const buildWatchScene = document.querySelector('a-scene').getAttribute('build-watch-scene');
+
             let entityEl = document.getElementById(id);
 
             if (action === ACTIONS.CREATE) {
@@ -52,14 +56,14 @@ export class CreateUpdate {
                     if (parentEl) {
                         parentEl.removeChild(entityEl);
                     } else {
-                        Logger.error('create', `Could not find parent of object_id "${id}" to clear object properties.`);
+                        createError(`Could not find parent of object_id "${id}" to clear object properties.`);
                     }
                     entityEl = undefined;
                 }
             } else if (action === ACTIONS.UPDATE) {
                 // warn that update to non-existing object will create it
                 if (!entityEl) {
-                    Logger.warning('update', `Object with object_id "${id}" does not exist; Creating...`);
+                    updateWarn(`Object with object_id "${id}" does not exist; Creating...`);
                 }
             }
 
@@ -76,6 +80,9 @@ export class CreateUpdate {
                 // after setting object attributes, we will add it to the scene
                 addObj = true;
             }
+
+            // disable build-watch when applying remote updates to this object
+            if (buildWatchScene) enableBuildWatchObject(entityEl, message, false);
 
             // set to default render order
             entityEl.object3D.renderOrder = RENDER_ORDER;
@@ -101,7 +108,7 @@ export class CreateUpdate {
                         entityEl.flushToDOM();
                         parentEl.appendChild(entityEl);
                     } else {
-                        Logger.warning('create', 'Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
+                        createWarn('Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
                     }
                 } else {
                     const sceneRoot = document.getElementById('sceneRoot');
@@ -112,7 +119,11 @@ export class CreateUpdate {
             if (message.ttl !== undefined) { // Allow falsy value of 0
                 entityEl.setAttribute('ttl', {seconds: message.ttl});
             }
-            if (id === ARENA.camFollow) {
+
+            // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
+            if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
+
+            if (id === ARENA.params.camFollow) {
                 this.handleCameraOverride(ACTIONS.UPDATE, {
                     id: ARENA.camName,
                     data: {
@@ -169,7 +180,23 @@ export class CreateUpdate {
             return;
 
         default:
-            Logger.warning((action === ACTIONS.UPDATE) ? 'update':'create', 'Unknown type:', JSON.stringify(message));
+            if (action === ACTIONS.CREATE) {
+                createWarn('Unknown type:', JSON.stringify(message));
+            } else {
+                updateWarn('Unknown type:', JSON.stringify(message));
+            }
+        }
+
+        /**
+         * Enable/Disable object MutationObserver for build-3d watcher.
+         * @param {*} entityEl The scene object to observe mutations
+         * @param {*} msg Incoming ARENA message payload.
+         * @param {*} enable true=start mutation observer, false=pause mutation observer
+         */
+        function enableBuildWatchObject(entityEl, msg, enable) {
+            if (msg.persist) {
+                entityEl.setAttribute('build-watch-object', 'enabled', enable);
+            }
         }
     }
 
@@ -184,7 +211,7 @@ export class CreateUpdate {
         delete data.object_type; // remove attribute so we don't set it later
 
         if (!type) {
-            Logger.warning('Update/Create:', 'Malformed message; type is undefined; attributes might not be set correctly.');
+            warn('Malformed message; type is undefined; attributes might not be set correctly.');
         }
 
         // handle geometries and some type special cases
@@ -222,12 +249,12 @@ export class CreateUpdate {
         case 'obj-model':
             break;
         case 'gltf-model':
-            if (ARENA.armode && data.hasOwnProperty('hide-on-enter-ar')) {
-                console.warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
+            if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
+                warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
-            if (ARENA.vr && data.hasOwnProperty('hide-on-enter-vr')) {
-                console.warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
+            if (ARENA.params.vr && data.hasOwnProperty('hide-on-enter-vr')) {
+                warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                 return false; // do not add this object
             }
             // support both url and src property
@@ -237,7 +264,9 @@ export class CreateUpdate {
             }
             // gltf is a special case in that the src is applied to the component 'gltf-model'
             if (data.hasOwnProperty('src')) {
-                entityEl.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(data.src));
+                if (!(data.hasOwnProperty('remote-render') && data['remote-render'].enabled === true)) {
+                    entityEl.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(data.src));
+                }
                 delete data.src; // remove attribute so we don't set it later
             }
             // add attribution by default, if not given
@@ -299,7 +328,7 @@ export class CreateUpdate {
             entityEl.setAttribute('gltf-model', data.url);
             delete data[type];
         case 'cube':
-            type='box'; // arena legacy! new libraries/persist objects should use box!
+            type = 'box'; // arena legacy! new libraries/persist objects should use box!
         case 'box':
         case 'circle':
         case 'cone':
@@ -379,7 +408,10 @@ export class CreateUpdate {
         for (let [attribute, value] of Object.entries(data)) {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
                 // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute == 'src' || attribute == 'url'|| attribute == 'obj'|| attribute == 'mtl') value = ARENAUtils.crossOriginDropboxSrc(value);
+                if (attribute == 'src' || attribute == 'url'|| attribute == 'obj'|| attribute == 'mtl') {
+                    value = ARENAUtils.crossOriginDropboxSrc(value);
+                }
+
                 if (value === null) { // if null, remove attribute
                     entityEl.removeAttribute(cName);
                 } else {
@@ -399,13 +431,17 @@ export class CreateUpdate {
     static setEntityAttributes(entityEl, data) {
         for (const [attribute, value] of Object.entries(data)) {
             // console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
+
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
             switch (attribute) {
             case 'rotation':
                 // rotation is set directly in the THREE.js object, for performance reasons
-                if (value.hasOwnProperty('w')) entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
-                else entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
+                if (value.hasOwnProperty('w')) {
+                    entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
+                } else {
+                    entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
+                }
                 break;
             case 'position':
                 // position is set directly in the THREE.js object, for performance reasons
@@ -460,15 +496,16 @@ export class CreateUpdate {
 
         if (message.data.object_type === 'camera') { // camera override
             if (!myCamera) {
-                Logger.error('camera override', 'local camera object does not exist! (create camera before)');
+                error('camera override', 'local camera object does not exist! (create camera before)');
                 return;
             }
+
             const p = message.data.position;
             const r = message.data.rotation;
             if (AFRAME.scenes[0]?.xrSession) { // Apply transform to rig based off xrSession camera pose
                 const rig = document.getElementById('cameraRig');
                 const spinner = document.getElementById('cameraSpinner');
-                const target = document.getElementById(ARENA.camFollow);
+                const target = document.getElementById(ARENA.params.camFollow);
                 if (target) {
                     camMatrixInverse.copy(myCamera.object3D.matrix).invert();
                     // rig matrix = target * camera inverse
@@ -481,38 +518,39 @@ export class CreateUpdate {
                 if (r) {
                     if (r.hasOwnProperty('w')) {
                         overrideQuat.set(r.x, r.y, r.z, r.w);
-                        overrideEuler.setFromQuaternion(overrideQuat);
-                        myCamera.components['look-controls'].yawObject.rotation.y = overrideEuler.y;
-                        myCamera.components['look-controls'].pitchObject.rotation.x = overrideEuler.x;
+                        myCamera.object3D.rotation.setFromQuaternion(overrideQuat);
                     } else {
-                        myCamera.components['look-controls'].yawObject.rotation.y = THREE.MathUtils.degToRad(
-                            r.y);
-                        myCamera.components['look-controls'].pitchObject.rotation.x = THREE.MathUtils.degToRad(
-                            r.x);
+                        myCamera.object3D.rotation.set(
+                            THREE.MathUtils.degToRad(r.x),
+                            THREE.MathUtils.degToRad(r.y),
+                            THREE.MathUtils.degToRad(r.z),
+                        );
                     }
                 }
             }
         } else if (message.data.object_type === 'look-at') { // camera look-at
             if (!myCamera) {
-                Logger.error('camera look-at', 'local camera object does not exist! (create camera before)');
+                cameraLookAtError('local camera object does not exist! (create camera before)');
                 return;
             }
+
             let target = message.data.target;
             if (!target.hasOwnProperty('x')) { // check if an object id was given
                 const targetObj = document.getElementById(target);
                 if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
                 else {
-                    Logger.error('camera look-at', 'target not found.');
+                    cameraLookAtError('target not found.');
                     return;
                 }
             }
+
             // x, y, z given
             if (target.hasOwnProperty('x') &&
                 target.hasOwnProperty('y') &&
                 target.hasOwnProperty('z')) {
                 myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z );
                 myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z );
-                Logger.warning('camera look-at', message);
+                cameraLookAtWarn(message);
             }
         }
     }

@@ -1,3 +1,11 @@
+/**
+ * @fileoverview Allows for positional audio in AFRAME sound component.
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
+ */
+
 const warn = AFRAME.utils.debug('components:sound:warn');
 
 AFRAME.components.sound.schema.src.parse = function assetParse(value) {

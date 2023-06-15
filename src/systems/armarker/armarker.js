@@ -19,7 +19,7 @@ import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset';
 import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer';
 import {ARMarkerRelocalization} from './armarker-reloc';
 import {CVWorkerMsgs} from './worker-msgs';
-import {ARENAEventEmitter} from '../../event-emitter';
+import {ARENA_EVENTS} from '../../constants';
 import {ARENAUtils} from '../../utils';
 
 /**
@@ -63,7 +63,7 @@ AFRAME.registerSystem('armarker', {
         0, 0, 0, 1,
     ),
     // if we detected WebXRViewer/WebARViewer
-    isWebARViewer: false,
+    isWebXRViewer: ARENAUtils.isWebXRViewer(),
     initialLocalized: false,
     /*
     * Init system
@@ -71,25 +71,29 @@ AFRAME.registerSystem('armarker', {
     * @alias module:armarker-system
     */
     init: function() {
-        const sceneEl = this.el;
+        ARENA.events.addMultiEventListener([
+            ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.SCENE_OPT_LOADED
+        ], this.ready.bind(this));
+    },
+
+    ready: function() {
+        const data = this.data;
+        const el = this.el;
+
+        const sceneEl = el.sceneEl;
+
+        this.arena = sceneEl.systems['arena-scene'];
 
         // init this.ATLASMarkers with list of markers within range
         this.getARMArkersFromATLAS(true);
 
-        // check if this is WebXRViewer/WebARViewer
-        this.isWebARViewer = navigator.userAgent.includes('WebXRViewer') || navigator.userAgent.includes('WebARViewer');
-
-        // init networkedLocationSolver flag from ARENA scene options, if available
-        if (ARENA) {
-            ARENA.events.on(ARENAEventEmitter.events.SCENE_OPT_LOADED, () => {
-                this.data.networkedLocationSolver = ARENA['networkedLocationSolver'];
-            });
-        }
+        // init networkedLocationSolver flag from ARENA scene options
+        this.data.networkedLocationSolver = !!this.arena.sceneOptions['networkedLocationSolver'];
 
         // request camera access features
-        if (!ARENA.camFollow) {
+        if (!ARENA.params.camFollow) {
             const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
-            if (this.isWebARViewer) {
+            if (this.isWebXRViewer) {
                 optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in XRBrowser
             } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
             sceneEl.systems.webxr.sceneEl.setAttribute(
@@ -131,7 +135,7 @@ AFRAME.registerSystem('armarker', {
         }
 
         // init cv pipeline, if we are not using an external localizer
-        if (!ARENA.camFollow) {
+        if (!ARENA.params.camFollow) {
             this.initCVPipeline();
         }
     },
@@ -148,7 +152,7 @@ AFRAME.registerSystem('armarker', {
         if (this.cvPipelineInitializing || this.cvPipelineInitialized) return;
         this.cvPipelineInitializing = true;
         // try to set up a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
-        if (this.isWebARViewer) {
+        if (this.isWebXRViewer) {
             try {
                 this.cameraCapture = new WebARViewerCameraCapture(this.data.debugCameraCapture);
             } catch (err) {
@@ -159,8 +163,8 @@ AFRAME.registerSystem('armarker', {
         }
 
         // if we are on an AR headset, use camera facing forward
-        ARENA.arHeadset = this.detectARHeadset();
-        if (ARENA.arHeadset !== undefined) {
+        const arHeadset = ARENAUtils.detectARHeadset();
+        if (arHeadset !== 'unknown') {
             // try to set up a camera facing forward capture (using getUserMedia)
             console.info('Setting up AR Headset camera capture.');
             try {
@@ -172,6 +176,13 @@ AFRAME.registerSystem('armarker', {
 
 
         if (!this.cameraCapture) { // Not WebXRViewer/WebARViewer, not AR headset
+            // ignore camera capture when in VR Mode
+            const sceneEl = document.querySelector('a-scene');
+            if (!sceneEl.is('ar-mode')) {
+                console.info('Attempted to initialize camera capture, but found VR Mode.');
+                return;
+            }
+
             if (window.XRWebGLBinding) { // Set up a webxr camera capture (e.g. passthrough AR on a phone)
                 console.info('Setting up WebXR-based passthrough AR camera capture.');
                 try {
@@ -303,7 +314,7 @@ AFRAME.registerSystem('armarker', {
                 return response.json();
             })
             .catch(() => {
-                console.log('Error retrieving ATLAS markers');
+                console.warn('Error retrieving ATLAS markers');
                 return false;
             })
             .then((data) => {
@@ -325,20 +336,7 @@ AFRAME.registerSystem('armarker', {
             });
         return true;
     },
-    /**
-    * Try to detect AR headset (currently: magic leap and hololens only;  other devices to be added later)
-    * Hololens reliable detection is tbd
-    *
-    * ARHeadeset camera capture uses returned value as a key to projection matrix array
-    *
-    * @return {string} "ml", "hl", "unknown".
-    * @alias module:armarker-system
-    */
-    detectARHeadset() {
-        if (window.mlWorld) return 'ml';
-        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
-        return undefined;
-    },
+
     /**
     * Register an ARMarker component with the system
     * @param {object} marker - The marker component object to register.

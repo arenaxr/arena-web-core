@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 /**
  * @fileoverview Adds a video to an entity and controls its playback.
@@ -31,6 +31,7 @@ AFRAME.registerComponent('video-control', {
         video_loop: {type: 'boolean', default: true},
         autoplay: {type: 'boolean', default: false},
         volume: {type: 'number', default: 1},
+        cleanup: {type: 'boolean', default: true},
     },
 
     multiple: true,
@@ -71,9 +72,9 @@ AFRAME.registerComponent('video-control', {
         this.player.setAttribute('videoId', videoId);
         this.player.setAttribute('frameId', frameId);
 
+        this.video = document.getElementById(videoId);
         if (autoplay) {
             // start video
-            this.video = document.getElementById(videoId);
             const theVideoId = this.player.getAttribute('videoId');
             this.player.setAttribute('material', 'src', `#${theVideoId}`);
             this.player.setAttribute('arenaVideo', videoPath);
@@ -83,7 +84,7 @@ AFRAME.registerComponent('video-control', {
             this.video.pause();
         }
 
-        this.el.addEventListener('mousedown', function(evt) {
+        this.eventHandlerFn = function(evt) {
             if (evt.detail.clicker == ARENA.camName ||
                 anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName)) {
                 const theSource = this.player.getAttribute('arenaVideo');
@@ -103,7 +104,9 @@ AFRAME.registerComponent('video-control', {
                     this.video.play(); // play the html video elem ==> play aframe video elem
                 }
             }
-        });
+        };
+
+        this.el.addEventListener('mousedown', this.eventHandlerFn);
     },
 
     update: function(oldData) {
@@ -127,6 +130,13 @@ AFRAME.registerComponent('video-control', {
         // remove event listener
         if (data.event) {
             el.removeEventListener(data.event, this.eventHandlerFn);
+        }
+
+        if (data.cleanup) {
+            const videoId = this.player.getAttribute('videoId');
+            document.getElementById(videoId).remove();
+            const imageId = this.player.getAttribute('frameId');
+            document.getElementById(imageId).remove();
         }
     },
 });

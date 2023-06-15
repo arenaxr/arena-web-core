@@ -17,7 +17,7 @@ export class ARENAUserAccount {
         return new Promise(function(resolve, reject) {
             let xhr = new XMLHttpRequest();
             xhr.open(method, url);
-            const csrftoken = getCookie('csrftoken');
+            const csrftoken = ARENAAUTH.getCookie('csrftoken');
             xhr.setRequestHeader('X-CSRFToken', csrftoken);
             if (contentType) xhr.setRequestHeader('Content-Type', contentType);
             xhr.responseType = 'json';
@@ -99,11 +99,11 @@ export class ARENAUserAccount {
         params += `&realm=${ARENADefaults ? ARENADefaults.realm :'realm'}`;
         params += `&scene=${namespacedScene}`;
         let result = await ARENAUserAccount._makeRequest('POST', `/user/mqtt_auth`, params, 'application/x-www-form-urlencoded');
-        AUTH.user_type = authType;
-        AUTH.user_username = result.username;
+        ARENAAUTH.user_type = authType;
+        ARENAAUTH.user_username = result.username;
         // keep payload for later viewing
         const tokenObj = KJUR.jws.JWS.parse(result.token);
-        AUTH.token_payload = tokenObj.payloadObj;        
+        ARENAAUTH.token_payload = tokenObj.payloadObj;
         return { mqtt_username: result.username, mqtt_token: result.token };
-    }    
+    }
 }
