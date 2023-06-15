@@ -57,7 +57,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.status = {};
 
         // users list
-        this.liveUsers = [];
+        this.liveUsers = {};
 
         this.userId = this.arena.idTag;
         this.cameraId = this.arena.camName;
