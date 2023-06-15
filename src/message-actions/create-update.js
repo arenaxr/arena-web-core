@@ -239,8 +239,6 @@ export class CreateUpdate {
                 entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
             }
             break;
-        case 'obj-model':
-            break;
         case 'gltf-model':
             if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
                 warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
