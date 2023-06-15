@@ -26,5 +26,6 @@ module.exports = {
         "class-methods-use-this": "off",
         "no-plusplus": "off",
         "no-bitwise": "off",
+        "no-underscore-dangle": "off",
     },
 };
