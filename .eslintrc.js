@@ -18,6 +18,7 @@ module.exports = {
                 code: 120,
                 tabWidth: 4,
                 ignoreUrls: true,
+                ignoreComments: true,
             },
         ],
         'prettier/prettier': [
