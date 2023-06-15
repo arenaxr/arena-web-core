@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-/* global ARENA */
+/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal */
 
 // auth.js
 //
@@ -68,7 +67,7 @@ window.ARENAAUTH = {
         } else if (Swal) {
             Swal.fire({
                 icon: "error",
-                title: title,
+                title,
                 html: text,
             });
         }
@@ -137,28 +136,26 @@ window.ARENAAUTH = {
                 this.user_fullname = userStateRes.fullname;
                 this.user_email = userStateRes.email;
                 this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
-            } else {
-                if (savedAuthType === "anonymous") {
-                    const urlName = ARENA.params.userName;
-                    const savedName = localStorage.getItem("display_name");
-                    if (savedName === null) {
-                        if (urlName !== null) {
-                            localStorage.setItem("display_name", urlName);
-                        } else {
-                            localStorage.setItem("display_name", `UnnamedUser${Math.floor(Math.random() * 10000)}`);
-                        }
+            } else if (savedAuthType === "anonymous") {
+                const urlName = ARENA.params.userName;
+                const savedName = localStorage.getItem("display_name");
+                if (savedName === null) {
+                    if (urlName !== null) {
+                        localStorage.setItem("display_name", urlName);
+                    } else {
+                        localStorage.setItem("display_name", `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                     }
-                    const anonName = this.processUserNames(localStorage.getItem("display_name"), "anonymous-");
-                    this.user_username = anonName;
-                    this.user_fullname = localStorage.getItem("display_name");
-                    this.user_email = "N/A";
-                    this.requestMqttToken("anonymous", anonName, true).then();
-                } else {
-                    // user is logged out or new and not logged in
-                    // 'remember' uri for post-login, just before login redirect
-                    localStorage.setItem("request_uri", location.href);
-                    location.href = this.signInPath;
                 }
+                const anonName = this.processUserNames(localStorage.getItem("display_name"), "anonymous-");
+                this.user_username = anonName;
+                this.user_fullname = localStorage.getItem("display_name");
+                this.user_email = "N/A";
+                this.requestMqttToken("anonymous", anonName, true).then();
+            } else {
+                // user is logged out or new and not logged in
+                // 'remember' uri for post-login, just before login redirect
+                localStorage.setItem("request_uri", window.location.href);
+                window.location.href = this.signInPath;
             }
         }
     },
@@ -168,7 +165,7 @@ window.ARENAAUTH = {
     signOut() {
         localStorage.removeItem("auth_choice");
         // back to signin page
-        location.href = this.signOutPath;
+        window.location.href = this.signOutPath;
     },
     /**
      * Utility function to get cookie value
@@ -182,7 +179,7 @@ window.ARENAAUTH = {
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) === name + "=") {
+                if (cookie.substring(0, name.length + 1) === `${name}=`) {
                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                     break;
                 }
@@ -249,7 +246,7 @@ window.ARENAAUTH = {
                 });
             }
         } catch (e) {
-            throw Error("Error requesting auth token: " + e.message);
+            throw Error(`Error requesting auth token: ${e.message}`);
         }
     },
     /**
@@ -329,10 +326,10 @@ window.ARENAAUTH = {
     showPerms() {
         Swal.fire({
             title: "Permissions",
-            html: `<pre style="text-align: left;">${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
+            html: `<pre style='text-align: left;'>${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
         });
     },
-    setSceneName(sceneName) {
+    setSceneName() {
         // private function to set scenename, namespacedScene and namespace
         const _setNames = (ns, sn) => {
             ARENA.namespacedScene = `${ns}/${sn}`;
@@ -340,30 +337,31 @@ window.ARENAAUTH = {
             ARENA.nameSpace = ns;
         };
         let path = window.location.pathname.substring(1);
-        let { namespace: namespace, sceneName: scenename } = ARENA.params;
+        const { namespace } = ARENA.params;
+        let { sceneName } = ARENA.params;
         if (ARENADefaults.devInstance && path.length > 0) {
-            const devPrefix = path.match(/(?:x|dev)\/([^\/]+)\/?/g);
+            const devPrefix = path.match(/(?:x|dev)\/([^/]+)\/?/g);
             if (devPrefix) {
                 path = path.replace(devPrefix[0], "");
             }
         }
         if (path === "" || path === "index.html") {
-            scenename = ARENA.params.scene ?? scenename;
-            _setNames(namespace, scenename);
+            sceneName = ARENA.params.scene ?? sceneName;
+            _setNames(namespace, sceneName);
         } else {
             try {
-                const r = new RegExp(/^(?<namespace>[^\/]+)(\/(?<scenename>[^\/]+))?/g);
+                const r = /^(?<namespace>[^/]+)(\/(?<sceneName>[^/]+))?/g;
                 const matches = r.exec(path).groups;
                 // Only first group is given, namespace is actually the scene name
-                if (matches.scenename === undefined) {
+                if (matches.sceneName === undefined) {
                     _setNames(namespace, matches.namespace);
                 } else {
                     // Both scene and namespace are defined, return regex as-is
-                    _setNames(matches.namespace, matches.scenename);
+                    _setNames(matches.namespace, matches.sceneName);
                 }
             } catch (e) {
-                scenename = ARENA.params.scene ?? scenename;
-                _setNames(namespace, scenename);
+                sceneName = ARENA.params.scene ?? sceneName;
+                _setNames(namespace, sceneName);
             }
         }
     },
@@ -376,7 +374,7 @@ if (typeof ARENA === "undefined") {
     };
 }
 
-window.onload = function () {
+window.onload = function authOnLoad() {
     // load sweetalert if not already loaded
     if (typeof Swal === "undefined") {
         const head = document.getElementsByTagName("head")[0];
@@ -422,7 +420,7 @@ function storageAvailable(type) {
 
 if (!storageAvailable("localStorage")) {
     const title = "LocalStorage has been disabled";
-    const text = "The ARENA needs LocalStorage. " + "Bugs are coming! Perhaps you have disabled cookies?";
+    const text = "The ARENA needs LocalStorage. Bugs are coming! Perhaps you have disabled cookies?";
     ARENAAUTH.authError(title, text);
 }
 

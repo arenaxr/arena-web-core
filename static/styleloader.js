@@ -1,1 +1,5 @@
-[...document.querySelectorAll("[media=print]")].map((e) => e.addEventListener("load", (e) => e.target.media = "all"));
+[...document.querySelectorAll("[media=print]")].map((el) =>
+    el.addEventListener("load", (e) => {
+        e.target.media = "all";
+    })
+);
