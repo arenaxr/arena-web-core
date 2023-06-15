@@ -47,12 +47,16 @@ AFRAME.registerSystem('arena-mqtt', {
         const camName = this.arena.camName;
         const outputTopic = this.arena.outputTopic;
         // Do not pass functions in mqttClientOptions
-        await this.connect(
+        this.connect(
             {
                 reconnect: true,
                 userName: this.userName,
                 password: mqttToken,
             },
+            proxy(() => {
+                console.info("ARENA MQTT scene connection success!");
+                ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
+            }),
             // last will message
             JSON.stringify({ object_id: camName, action: "delete" }),
             // last will topic
@@ -60,8 +64,6 @@ AFRAME.registerSystem('arena-mqtt', {
         );
 
         ARENA.Mqtt = this; // Restore old alias
-
-        ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
     },
 
     initWorker: async function() {
@@ -78,7 +80,6 @@ AFRAME.registerSystem('arena-mqtt', {
                 mqttHostURI: this.mqttHostURI,
                 idTag: idTag,
             },
-            proxy(this.onMessageArrived.bind(this)),
             proxy(this.mqttHealthCheck.bind(this))
             // proxy(() => {
             //     if (ARENA.Jitsi && !ARENA.Jitsi.initialized) {
@@ -88,16 +89,18 @@ AFRAME.registerSystem('arena-mqtt', {
             //     }
             // }),
         );
+        worker.registerMessageHandler("s", proxy(this.onSceneMessageArrived.bind(this)), true);
         return worker;
     },
 
     /**
      * @param {object} mqttClientOptions
-     * @param {string} lwMsg
-     * @param {string} lwTopic
+     * @param {function} [onSuccessCallBack]
+     * @param {string} [lwMsg]
+     * @param {string} [lwTopic]
      */
-    connect: async function(mqttClientOptions, lwMsg = undefined, lwTopic = undefined) {
-        await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
+    connect(mqttClientOptions, onSuccessCallBack = undefined, lwMsg = undefined, lwTopic = undefined) {
+        this.MQTTWorker.connect(mqttClientOptions, onSuccessCallBack, lwMsg, lwTopic);
     },
 
     /**
@@ -125,7 +128,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {object} jsonMessage
      */
     processMessage: function(jsonMessage) {
-        this.onMessageArrived(undefined, jsonMessage);
+        this.onSceneMessageArrived({ payloadObj: jsonMessage });
     },
 
     /**
@@ -139,23 +142,12 @@ AFRAME.registerSystem('arena-mqtt', {
     },
 
     /**
-     * Internal MessageArrived handler; handles object create/delete/event/... messages
-     * @param {string} message
-     * @param {object} jsonMessage
+     * MessageArrived handler for scene messages; handles object create/delete/event... messages
+     * This message is expected to be JSON
+     * @param {object} message
      */
-    onMessageArrived: function(message, jsonMessage) {
-        let theMessage = {};
-
-        if (message) {
-            try {
-                theMessage = JSON.parse(message.payloadString);
-            } catch {}
-        } else if (jsonMessage) {
-            theMessage = jsonMessage;
-        }
-        else {
-            return;
-        }
+    onSceneMessageArrived: function(message) {
+        const theMessage = message.payloadObj; // This will be given as json
 
         if (!theMessage) {
             warn('Received empty message');
@@ -177,7 +169,8 @@ AFRAME.registerSystem('arena-mqtt', {
         delete theMessage.object_id;
 
         let topicUser;
-        if (message) {
+        if (message.destinationName) {
+            // This is a Paho.MQTT.Message
             topicUser = message.destinationName.split('/')[4];
         }
 
@@ -188,7 +181,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 return;
             }
             // check topic
-            if (message) {
+            if (message.destinationName) {
                 if (topicUser !== theMessage.data.source) {
                     warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
@@ -203,7 +196,7 @@ AFRAME.registerSystem('arena-mqtt', {
                 return;
             }
             // check topic
-            if (message) {
+            if (message.destinationName) {
                 if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
                     warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;
@@ -213,7 +206,7 @@ AFRAME.registerSystem('arena-mqtt', {
             break;
         case ACTIONS.DELETE:
             // check topic
-            if (message) {
+            if (message.destinationName) {
                 if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
                     warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
                     return;

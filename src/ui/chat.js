@@ -14,6 +14,7 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 import { ARENAUtils } from '../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
 import Swal from 'sweetalert2';
+import { proxy } from 'comlink';
 
 const UserType = Object.freeze({
     EXTERNAL:       'external',
@@ -33,6 +34,8 @@ AFRAME.registerSystem('arena-chat-ui', {
         const data = this.data;
 
         if (!data.enabled) return;
+
+        this.sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
 
         ARENA.events.addMultiEventListener([
             ARENA_EVENTS.ARENA_LOADED,
@@ -56,7 +59,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.status = {};
 
         // users list
-        this.liveUsers = [];
+        this.liveUsers = {};
 
         this.userId = this.arena.idTag;
         this.cameraId = this.arena.camName;
@@ -284,9 +287,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
                 // focus on textbox
                 _this.msgTxt.focus();
-
-                // re-establish connection, in case client disconnected
-                _this.connect();
             } else {
                 _this.chatPopup.style.display = 'none';
             }
@@ -366,7 +366,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         }
 
         this.onNewSettings = this.onNewSettings.bind(this);
-        this.onJitsiConnect = this.onJitsiConnect.bind(this);
         this.onUserJoin = this.onUserJoin.bind(this);
         this.onScreenshare = this.onScreenshare.bind(this);
         this.onUserLeft = this.onUserLeft.bind(this);
@@ -379,11 +378,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
 
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
-        sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect);
         sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJoin);
         sceneEl.addEventListener(JITSI_EVENTS.SCREENSHARE, this.onScreenshare);
         sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onUserLeft);
-        sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER, this.onDominantSpeakerChanged);
+        sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER_CHANGED, this.onDominantSpeakerChanged);
         sceneEl.addEventListener(JITSI_EVENTS.TALK_WHILE_MUTED, this.onTalkWhileMuted);
         sceneEl.addEventListener(JITSI_EVENTS.NOISY_MIC, this.onNoisyMic);
         sceneEl.addEventListener(JITSI_EVENTS.CONFERENCE_ERROR, this.onConferenceError);
@@ -407,9 +405,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onJitsiConnect: function(e) {
-        const data = this.data;
-        const el = this.el;
-
         const args = e.detail;
         args.pl.forEach((user) => {
             // console.log('Jitsi User: ', user);
@@ -423,8 +418,6 @@ AFRAME.registerSystem('arena-chat-ui', {
                     ts: new Date().getTime(),
                     type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
                 };
-                if (args.scene === this.scene) this.populateUserList(this.liveUsers[user.id]);
-                else this.populateUserList();
             }
         });
     },
@@ -633,64 +626,31 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
-     * Connect to the MQTT broker and subscribe.
-     * @param {boolean} force True to force the connection.
+     * Subscribe to mqtt channels.
      */
-    connect: async function(force = false) {
+    connect: async function () {
         const data = this.data;
         const el = this.el;
 
-        if (this.connected == true && force == false) return;
-        this.mqttc = new Paho.Client(this.mqtt.mqttHostURI, `chat-${this.userId}`);
+        if (this.connected === true) return;
+        this.mqttc = ARENA.Mqtt.MQTTWorker;
 
         const _this = this; /* save reference to class instance */
-        const msg = {
-            object_id: ARENAUtils.uuidv4(),
-            type: 'chat-ctrl',
-            to_uid: 'all',
-            from_uid: this.userId,
-            from_un: this.userName,
-            from_scene: this.scene,
-            text: 'left',
-        };
-        const willMessage = new Paho.Message(JSON.stringify(msg));
-        willMessage.destinationName = this.publishPublicTopic;
-        this.mqttc.connect({
-            onSuccess: () => {
-                this.health.removeError('mqttChat.connection');
-                console.info(
-                    'Chat connected. Subscribing to:',
-                    this.subscribePublicTopic,
-                    ';',
-                    this.subscribePrivateTopic,
-                );
-                this.mqttc.subscribe(this.subscribePublicTopic);
-                this.mqttc.subscribe(this.subscribePrivateTopic);
 
-                /* bind callback to _this, so it can access the class instance */
-                this.mqttc.onConnectionLost = this.onConnectionLost.bind(_this);
-                this.mqttc.onMessageArrived = this.onMessageArrived.bind(_this);
+        this.mqttc.registerMessageHandler("c", proxy(this.onMessageArrived.bind(_this)), true);
+        this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
 
-                // say hello to everyone
-                this.keepalive(false);
+        this.mqttc.subscribe(this.subscribePublicTopic);
+        this.mqttc.subscribe(this.subscribePrivateTopic);
 
-                // periodically send a keep alive
-                if (this.keepaliveInterval != undefined) clearInterval(this.keepaliveInterval);
-                this.keepaliveInterval = setInterval(function() {
-                    _this.keepalive(true);
-                }, this.keepalive_interval_ms);
+        this.keepalive();
+        // periodically send a keep alive
+        if (this.keepaliveInterval !== undefined) clearInterval(this.keepaliveInterval);
+        this.keepaliveInterval = setInterval(function () {
+            _this.keepalive();
+        }, this.keepalive_interval_ms);
 
-                this.connected = true;
-            },
-            onFailure: () => {
-                this.health.addError('mqttChat.connection');
-                console.error('Chat failed to connect.');
-                this.connected = false;
-            },
-            willMessage: willMessage,
-            userName: this.mqtt.userName,
-            password: this.arena.mqttToken.mqtt_token,
-        });
+        this.connected = true;
     },
 
     /**
@@ -698,9 +658,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} message Broker message.
      */
     onConnectionLost: function(message) {
-        console.warn(message);
-        this.health.addError('mqttChat.connection');
-        console.error('Chat disconnect.');
+        console.error('Chat disconnected.');
         this.connected = false;
     },
 
@@ -740,7 +698,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 this.publishPrivateTopic.replace('{to_uid}', this.toSel.value);
         // console.log('sending', msg, 'to', dstTopic);
         try {
-            this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
+            this.mqttc.publish(dstTopic, JSON.stringify(msg), 0, false);
         } catch (err) {
             console.error('chat msg send failed:', err.message);
         }
@@ -757,13 +715,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         const sceneEl = el.sceneEl;
 
-        let msg;
-        try {
-            msg = JSON.parse(mqttMsg.payloadString);
-        } catch (err) {
-            console.error('Error parsing chat msg.');
-            return;
-        }
+        const msg = mqttMsg.payloadObj;
         // console.log('Received:', msg);
 
         // ignore invalid and our own messages
@@ -784,17 +736,16 @@ AFRAME.registerSystem('arena-chat-ui', {
             else this.populateUserList();
             this.keepalive(); // let this user know about us
         } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
+            if (msg?.text === "left") {
+                delete this.liveUsers[msg.from_uid];
+                this.populateUserList();
+                return;
+            }
             this.liveUsers[msg.from_uid].un = msg.from_un;
             this.liveUsers[msg.from_uid].scene = msg.from_scene;
             this.liveUsers[msg.from_uid].cid = msg.cameraid;
             this.liveUsers[msg.from_uid].ts = new Date().getTime();
             this.liveUsers[msg.from_uid].type = UserType.ARENA;
-            if (msg.text) {
-                if (msg.text == 'left') {
-                    delete this.liveUsers[msg.from_uid];
-                    this.populateUserList();
-                }
-            }
         }
 
         // process commands
@@ -837,7 +788,7 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
-     * Adds a text message to the to the text message panel.
+     * Adds a text message to the text message panel.
      * @param {string} msg The message text.
      * @param {string} status The 'from' display user name.
      * @param {string} whoClass Sender scope: self, other.
@@ -1044,6 +995,7 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Apply a jitsi signal icon after the user name in list item 'uli'.
      * @param {Element} uli List item with only name, not buttons yet.
      * @param {Object} stats The jisti video stats object if any
+     * @param {Object} status The jitsi status object if any
      * @param {string} name The display name of the user
      */
     addJitsiStats: function(uli, stats, status, name) {
@@ -1146,8 +1098,8 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Send a chat system keepalive control message.
      * @param {boolean} tryconnect True, to first try connecting to MQTT.
      */
-    keepalive: function(tryconnect = false) {
-        this.ctrlMsg('all', 'keepalive', tryconnect);
+    keepalive: function () {
+        this.ctrlMsg('all', 'keepalive');
     },
 
     /**
@@ -1155,14 +1107,10 @@ AFRAME.registerSystem('arena-chat-ui', {
      * to send a private message.
      * @param {string} to Destination: all, scene, or the user id
      * @param {string} text Body of the message/command.
-     * @param {boolean} tryconnect True, to first try connecting to MQTT.
      */
-    ctrlMsg: function(to, text, tryconnect = false) {
+    ctrlMsg: function(to, text) {
         const data = this.data;
         const el = this.el;
-
-        // re-establish connection, in case client disconnected
-        if (tryconnect) this.connect();
 
         let dstTopic;
         if (to === 'all' || to === 'scene') {
@@ -1183,7 +1131,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         };
         // console.info('ctrl', msg, 'to', dstTopic);
         try {
-            this.mqttc.send(dstTopic, JSON.stringify(msg), 0, false);
+            this.mqttc.publish(dstTopic, JSON.stringify(msg), 0, false);
         } catch (err) {
             console.error('chat-ctrl send failed:', err.message);
         }

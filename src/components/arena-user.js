@@ -46,7 +46,9 @@ AFRAME.registerComponent('arena-user', {
 
         this.arena = sceneEl.systems['arena-scene'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
+        this.chat = sceneEl.systems["arena-chat-ui"];
 
+        this.idTag = el.id.replace("camera_", "");
         el.setAttribute('rotation.order', 'YXZ');
         el.object3D.position.set(0, ARENADefaults.camHeight, 0);
         el.object3D.rotation.set(0, 0, 0);
@@ -451,10 +453,13 @@ AFRAME.registerComponent('arena-user', {
 
     remove: function () {
         // camera special case, look for hands to delete
-        const elHandL = document.getElementById(`handLeft_${ARENA.idTag}`);
+        const elHandL = document.getElementById(`handLeft_${this.idTag}`);
         if (elHandL) elHandL.remove();
-        const elHandR = document.getElementById(`handRight_${ARENA.idTag}`);
+        const elHandR = document.getElementById(`handRight_${this.idTag}`);
         if (elHandR) elHandR.remove();
+        // try to remove chat user
+        delete this.chat?.liveUsers[this.idTag];
+        this.chat?.populateUserList();
     },
 
     tick: function() {
