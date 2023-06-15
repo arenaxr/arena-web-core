@@ -35,6 +35,8 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         if (!data.enabled) return;
 
+        this.sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect.bind(this));
+
         ARENA.events.addMultiEventListener([
             ARENA_EVENTS.ARENA_LOADED,
             ARENA_EVENTS.MQTT_LOADED,
@@ -364,7 +366,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         }
 
         this.onNewSettings = this.onNewSettings.bind(this);
-        this.onJitsiConnect = this.onJitsiConnect.bind(this);
         this.onUserJoin = this.onUserJoin.bind(this);
         this.onScreenshare = this.onScreenshare.bind(this);
         this.onUserLeft = this.onUserLeft.bind(this);
@@ -377,7 +378,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
 
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
-        sceneEl.addEventListener(JITSI_EVENTS.CONNECTED, this.onJitsiConnect);
         sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJoin);
         sceneEl.addEventListener(JITSI_EVENTS.SCREENSHARE, this.onScreenshare);
         sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onUserLeft);
@@ -405,9 +405,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onJitsiConnect: function(e) {
-        const data = this.data;
-        const el = this.el;
-
         const args = e.detail;
         args.pl.forEach((user) => {
             // console.log('Jitsi User: ', user);
@@ -421,8 +418,6 @@ AFRAME.registerSystem('arena-chat-ui', {
                     ts: new Date().getTime(),
                     type: UserType.EXTERNAL, // indicate we only know about the user from jitsi
                 };
-                if (args.scene === this.scene) this.populateUserList(this.liveUsers[user.id]);
-                else this.populateUserList();
             }
         });
     },
