@@ -642,19 +642,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         const _this = this; /* save reference to class instance */
 
-        // TODO: figure out how to handle only 1 will message
-        // const msg = {
-        //     object_id: ARENAUtils.uuidv4(),
-        //     type: "chat-ctrl",
-        //     to_uid: "all",
-        //     from_uid: this.userId,
-        //     from_un: this.userName,
-        //     from_scene: this.scene,
-        //     text: "left",
-        // };
-        // const willMessage = new Paho.Message(JSON.stringify(msg));
-        // willMessage.destinationName = this.publishPublicTopic;
-
         this.mqttc.registerMessageHandler("c", proxy(this.onMessageArrived.bind(_this)), true);
         this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
 
@@ -754,17 +741,16 @@ AFRAME.registerSystem('arena-chat-ui', {
             else this.populateUserList();
             this.keepalive(); // let this user know about us
         } else if (msg.from_un !== undefined && msg.from_scene !== undefined) {
+            if (msg?.text === "left") {
+                delete this.liveUsers[msg.from_uid];
+                this.populateUserList();
+                return;
+            }
             this.liveUsers[msg.from_uid].un = msg.from_un;
             this.liveUsers[msg.from_uid].scene = msg.from_scene;
             this.liveUsers[msg.from_uid].cid = msg.cameraid;
             this.liveUsers[msg.from_uid].ts = new Date().getTime();
             this.liveUsers[msg.from_uid].type = UserType.ARENA;
-            if (msg.text) {
-                if (msg.text == 'left') {
-                    delete this.liveUsers[msg.from_uid];
-                    this.populateUserList();
-                }
-            }
         }
 
         // process commands
