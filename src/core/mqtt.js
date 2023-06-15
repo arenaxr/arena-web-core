@@ -47,12 +47,16 @@ AFRAME.registerSystem('arena-mqtt', {
         const camName = this.arena.camName;
         const outputTopic = this.arena.outputTopic;
         // Do not pass functions in mqttClientOptions
-        await this.connect(
+        this.connect(
             {
                 reconnect: true,
                 userName: this.userName,
                 password: mqttToken,
             },
+            proxy(() => {
+                console.info("ARENA MQTT scene connection success!");
+                ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
+            }),
             // last will message
             JSON.stringify({ object_id: camName, action: "delete" }),
             // last will topic
@@ -60,8 +64,6 @@ AFRAME.registerSystem('arena-mqtt', {
         );
 
         ARENA.Mqtt = this; // Restore old alias
-
-        ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
     },
 
     initWorker: async function() {
@@ -93,11 +95,12 @@ AFRAME.registerSystem('arena-mqtt', {
 
     /**
      * @param {object} mqttClientOptions
-     * @param {string} lwMsg
-     * @param {string} lwTopic
+     * @param {function} [onSuccessCallBack]
+     * @param {string} [lwMsg]
+     * @param {string} [lwTopic]
      */
-    connect: async function(mqttClientOptions, lwMsg = undefined, lwTopic = undefined) {
-        await this.MQTTWorker.connect(mqttClientOptions, lwMsg, lwTopic);
+    connect(mqttClientOptions, onSuccessCallBack = undefined, lwMsg = undefined, lwTopic = undefined) {
+        this.MQTTWorker.connect(mqttClientOptions, onSuccessCallBack, lwMsg, lwTopic);
     },
 
     /**

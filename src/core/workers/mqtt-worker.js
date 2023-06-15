@@ -49,22 +49,27 @@ class MQTTWorker {
     /**
      * Connect mqtt client; If given, setup a last will message given as argument
      * @param {object} mqttClientOptions paho mqtt options
-     * @param {string} lwMsg last will message
-     * @param {string} lwTopic last will destination topic message
+     * @param {function} onSuccessCallBack callback function on successful connection
+     * @param {string} [lwMsg] last will message
+     * @param {string} [lwTopic] last will destination topic message
      */
-    async connect(mqttClientOptions, lwMsg=undefined, lwTopic=undefined) {
+    connect(mqttClientOptions, onSuccessCallBack, lwMsg = undefined, lwTopic = undefined) {
         const opts = {
-            ...mqttClientOptions,
-            onSuccess: function() {
-                console.info('ARENA MQTT scene connection success!');
-            },
             onFailure: function(res) {
                 this.healthCheck({
                     addError: 'mqttScene.connection',
                 });
                 console.error(`ARENA MQTT scene connection failed, ${res.errorCode}, ${res.errorMessage}`);
             },
+            ...mqttClientOptions,
         };
+        if (onSuccessCallBack) {
+            opts.onSuccess = onSuccessCallBack;
+        } else {
+            opts.onSuccess = () => {
+                console.info("ARENA MQTT scene connection success!");
+            };
+        }
 
         if (lwMsg && lwTopic && !mqttClientOptions.willMessage) {
             // Last Will and Testament message sent to subscribers if this client loses connection
