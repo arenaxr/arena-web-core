@@ -654,7 +654,7 @@ AFRAME.registerSystem('arena-scene', {
                 }
             }
         } else {
-            environment.setAttribute('environment', 'preset', 'starry');
+            environment.setAttribute('environment', 'preset', 'default');
             environment.setAttribute('environment', 'seed', 3);
             environment.setAttribute('environment', 'flatShading', true);
             environment.setAttribute('environment', 'groundTexture', 'squares');
