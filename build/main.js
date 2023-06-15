@@ -1,6 +1,8 @@
-import * as PersistObjects from "./persist-objects.js";
-import { ARENAUserAccount } from "./arena-account.js";
-import * as MQTTPattern from "./third-party/mqtt-pattern.js";
+/* global ARENAAUTH, Swal */
+
+import * as PersistObjects from './persist-objects.js';
+import { ARENAUserAccount } from './arena-account.js';
+import * as MQTTPattern from './third-party/mqtt-pattern.js';
 
 const Alert = Swal.mixin({
     toast: true,
@@ -812,6 +814,15 @@ window.addEventListener("onauth", async function (e) {
 
     let hostData = mqttAndPersistURI(location.hostname);
     let authState = await ARENAUserAccount.userAuthState();
+    if (!authState.authenticated) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Please do a non-anonymous login.',
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+        }).then(ARENAAUTH.signOut);
+    }
+
     arenaHostLbl.value = hostData.host;
 
     // start persist object mngr
