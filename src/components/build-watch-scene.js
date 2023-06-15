@@ -42,7 +42,7 @@ AFRAME.registerComponent('build-watch-scene', {
                         mutation.addedNodes.forEach((node) => {
                             console.log('add node:', node.nodeName, node.components);
                             // new blank entities are added by the user in the inspector
-                            if (node.nodeName == 'A-ENTITY' && Object.keys(node.components).length == 0) {
+                            if (node.nodeName.toLowerCase() == 'a-entity' && Object.keys(node.components).length == 0) {
                                 console.log('add build-watch-object:');
                                 node.setAttribute('build-watch-object', 'enabled', true);
                             }

@@ -167,7 +167,11 @@ function extractDataUpdates(mutation, attribute, changes) {
                 data = changes;
                 delete data.primitive;
             }
-            data.object_type = attribute.primitive;
+            if (mutation.target.nodeName.toLowerCase() == 'a-videosphere') {
+                data.object_type = 'videosphere';
+            } else{
+                data.object_type = attribute.primitive;
+            }
             break;
         case 'environment':
             data['env-presets'] = changes ? changes : {};
@@ -228,7 +232,11 @@ function extractDataFullDOM(mutation) {
                 // we apply primitive data directory to root data
                 data = { ...data, ...attribute };
                 delete data.primitive;
-                data.object_type = attribute.primitive;
+                if (mutation.target.nodeName.toLowerCase() == 'a-videosphere') {
+                    data.object_type = 'videosphere';
+                } else{
+                    data.object_type = attribute.primitive;
+                }
                 break;
             case 'environment':
                 data['env-presets'] = attribute;
