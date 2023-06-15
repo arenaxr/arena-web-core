@@ -11,3 +11,5 @@ src/runtime-mngr/
 *_wasm.js
 webxrios.js
 CHANGELOG.md
+*.gltf
+static/arenaxr-bootstrap/arenaxr-bootstrap.css
