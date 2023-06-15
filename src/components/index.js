@@ -50,7 +50,6 @@ import 'webxr-polyfill'; // fallback for non-webXR browsers
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
 import '@c-frame/aframe-particle-system-component'; // particle system environment
-import 'aframe-spe-particles-component/dist/aframe-spe-particles-component'; // particles localized
 
 // NPM import overrides
 import './vendor/animation-mixer.js'; // Override animation mixer
@@ -58,5 +57,6 @@ import './vendor/animation-mixer.js'; // Override animation mixer
 // direct file imports
 import './vendor/aframe-look-at-component.min.js'; // Look at component https://github.com/supermedium/superframe#readme
 import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
+import './vendor/aframe-spe-particles-component.min.js'; // particle system: https://github.com/arenaxr/aframe-spe-particles-component
 import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
 import './vendor/morphTarget.js'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component

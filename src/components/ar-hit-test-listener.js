@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 AFRAME.registerComponent('ar-hit-test-listener', {
     schema: {
@@ -15,6 +15,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         this.el.addEventListener('enter-vr', this.enterARHandler);
         this.el.addEventListener('exit-vr', this.exitARHandler);
         this.mouseCursor = document.getElementById('mouse-cursor');
+        this.isMobile = AFRAME.utils.device.isMobile();
     },
 
     remove: function() {
@@ -26,22 +27,26 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         if (this.el.is('ar-mode')) {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
             this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
-            this.el.setAttribute('cursor', {rayOrigin: 'xrselect', fuse: false});
-            this.el.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
-            this.mouseCursor.removeAttribute('cursor');
-            this.mouseCursor.removeAttribute('raycaster');
+            if (this.isMobile) {
+                this.el.setAttribute('cursor', {rayOrigin: 'xrselect', fuse: false});
+                this.el.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
+                this.mouseCursor.removeAttribute('cursor');
+                this.mouseCursor.removeAttribute('raycaster');
 
-            this.el.components['cursor'].onEnterVR(); // Manually trigger cursor
+                this.el.components['cursor'].onEnterVR(); // Manually trigger cursor
+            }
         }
     },
 
     exitARHandler: function() {
         this.el.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
         this.el.removeEventListener('ar-hit-test-select', this.hitEndHandler);
-        this.el.removeAttribute('cursor');
-        this.el.removeAttribute('raycaster');
-        this.mouseCursor.setAttribute('cursor', {rayOrigin: 'mouse'});
-        this.mouseCursor.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
+        if (this.isMobile) {
+            this.el.removeAttribute('cursor');
+            this.el.removeAttribute('raycaster');
+            this.mouseCursor.setAttribute('cursor', {rayOrigin: 'mouse'});
+            this.mouseCursor.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
+        }
     },
 
     hitStartHandler: function(evt) {

@@ -1,6 +1,14 @@
+/**
+ * @fileoverview AFRAME AABB collider component
+ *
+ * Open source software under the terms in /LICENSE
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
+ */
+
 /* global AFRAME, THREE */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');

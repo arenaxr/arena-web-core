@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 /**
  * @fileoverview Component to listen for mouse events and publish corresponding events

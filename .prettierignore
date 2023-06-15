@@ -1,0 +1,10 @@
+node_modules/
+dist/
+src/components/vendor/
+**/static/vendor/**
+*.min.js
+*_wasm.js
+webxrios.js
+CHANGELOG.md
+*.gltf
+static/arenaxr-bootstrap/arenaxr-bootstrap.css

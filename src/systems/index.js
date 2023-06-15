@@ -15,6 +15,5 @@ import 'aframe-extras'; // gltf animations, components for controls, model loade
 import './vendor/nav-system.js'; // Override nav system
 
 import './armarker';
-import './model-progress';
 import './attribution';
 import './screenshare';

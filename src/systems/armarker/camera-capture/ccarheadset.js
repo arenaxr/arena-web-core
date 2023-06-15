@@ -80,8 +80,7 @@ export class ARHeadsetCameraCapture {
         }
         this.projectionMatrix = this.headsetPM[arHeadset];
         this.arMarkerSystem = arMarkerSystem;
-        const url = new URL(window.location.href);
-        this.localizeOnce = !!url.searchParams.get('locOnce');
+        this.localizeOnce = !!ARENA.params.locOnce;
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
@@ -156,7 +155,7 @@ export class ARHeadsetCameraCapture {
      */
     requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
         if (this.localizeOnce && this.arMarkerSystem.initialLocalized) {
-            console.log('ARHeadsetCC: localizeOnce set and initial localization complete; tearing down pipeline');
+            console.debug('ARHeadsetCC: localizeOnce set and initial localization complete; tearing down pipeline');
             this.terminate();
             return;
         }

@@ -60,7 +60,7 @@ AFRAME.registerComponent('load-scene', {
                     // internal click event, our scene only
                 } else {
                     // MQTT click event that everyone gets
-                    console.log('load-scene url=' + data.url);
+                    console.debug('load-scene url=' + data.url);
                     if (!this.loaded) {
                         ARENA.loadArenaScene(data.url, data.position, data.rotation);
                         this.loaded = true;
@@ -72,7 +72,7 @@ AFRAME.registerComponent('load-scene', {
             });
         } else {
             // `event` not specified, just log the message.
-            console.log(data);
+            console.debug(data);
         }
     },
 

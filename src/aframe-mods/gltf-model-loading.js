@@ -1,12 +1,12 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Emit model onProgress (loading) event for gltf models; save model.asset
  *
  * Open source software under the terms in /LICENSE
- * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
- * @date 2020
+ * Copyright (c) 2023, The CONIX Research Center. All rights reserved.
+ * @date 2023
  */
+
+/* global AFRAME */
 
 AFRAME.components['gltf-model'].Component.prototype.update = function() {
     const self = this;

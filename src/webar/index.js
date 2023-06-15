@@ -5,8 +5,9 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-import './ar-session.js';
+import './webar-session.js';
 import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
+import {ARENAUtils} from '../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 
@@ -23,14 +24,14 @@ export class ARENAWebARUtils {
         // }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window) && !ARENA.camFollow) {
+        if (!('ontouchstart' in window) && !ARENA.params.camFollow) {
             return;
         }
 
         const sceneEl = document.querySelector('a-scene');
         sceneEl.setAttribute('arena-webar-session', '');
 
-        if (ARENA.camFollow) {
+        if (ARENA.params.camFollow) {
             try {
                 this.cameraCapture = new WebARCameraCapture();
                 this.cameraCapture.initCamera();
@@ -44,19 +45,19 @@ export class ARENAWebARUtils {
      * Adds the AR button for non-WebXR devices
      */
     static handleARButtonForNonWebXRMobile() {
-        if (ARENA.camFollow) {
+        if (ARENA.params.camFollow) {
             // Assume that all controls should be relinquished
             const camera = document.getElementById('my-camera');
             camera.setAttribute('look-controls', 'enabled', false);
             camera.setAttribute('wasd-controls', 'enabled', false);
         }
 
-        if (this.isWebARViewer) {
+        if (ARENAUtils.isWebXRViewer()) {
             return;
         }
 
         // hack: only allow smartphones and tablets?
-        if (!('ontouchstart' in window) && !ARENA.camFollow) {
+        if (!('ontouchstart' in window) && !ARENA.params.camFollow) {
             return;
         }
 

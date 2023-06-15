@@ -23,8 +23,7 @@
     "aframe": "1.4.2",
     "aframe-blink-controls": "^0.4.3",
     "aframe-environment-component": "^1.3.1",
-    "aframe-extras": "git+https://github.com/n5ro/aframe-extras#c5c5dcf",
-    "aframe-spe-particles-component": "github:arenaxr/aframe-spe-particles-component",
+    "aframe-extras": "^7.0.0",
     "aframe-thickline-component": "^0.0.3",
     "buffer": "^6.0.3",
     "comlink": "^4.3.0",
@@ -47,13 +46,18 @@
     "@parcel/babel-plugin-transform-runtime": "^2.2.1",
     "@parcel/babel-preset-env": "^2.2.1",
     "crypto-browserify": "^3.12.0",
-    "eslint": "^8.22.0",
+    "eslint": "^8.42.0",
+    "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-prettier": "^4.2.1",
     "jsdoc": "^3.6.6",
     "jsdoc-to-markdown": "^7.0.1",
     "parcel": "^2.2.1",
     "parcel-resolver-ignore": "^2.0.0",
     "path-browserify": "^1.0.1",
+    "prettier": "^2.8.8",
     "stream-browserify": "^3.0.0"
   },
   "scripts": {
@@ -65,7 +69,9 @@
     "build-ci": "parcel build src/index.js --public-url ./dist --no-cache",
     "build-nominify": "parcel build src/index.js --public-url ./dist --no-optimize",
     "predocs": "echo '# A-Frame components (modules) added to support ARENA core functionality\n' > src/components/README.md; echo '# A-Frame systems (modules) added to support ARENA core functionality\n' > src/systems/README.md",
-    "docs": "jsdoc2md src/components/*.js >> src/components/README.md; jsdoc2md src/systems/*.js >> src/systems/README.md"
+    "docs": "jsdoc2md src/components/*.js >> src/components/README.md; jsdoc2md src/systems/*.js >> src/systems/README.md",
+    "lint": "eslint --fix .",
+    "format": "prettier -w ."
   },
   "repository": {
     "type": "git",

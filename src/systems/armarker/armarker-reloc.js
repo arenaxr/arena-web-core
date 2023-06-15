@@ -179,7 +179,9 @@ export class ARMarkerRelocalization {
      */
     markerDetection(e) {
         const ARENA = window.ARENA;
-        if (this.debug) console.log('Tag detected:', e.detail);
+        if (this.debug) {
+            console.debug('Tag detected:', e.detail);
+        }
         const detections = e.detail.detections;
         const timestamp = e.detail.ts; // detection timestamp = when frame was captured
 
@@ -240,9 +242,14 @@ export class ARMarkerRelocalization {
                 const indexedTag = this.arMakerSystem.getMarker(detection.id);
                 if (indexedTag?.pose) refTag = indexedTag;
                 if (!refTag) {
-                    if (this.debug) console.log('ARMarker system has no data about tag id:', detection.id);
+                    if (this.debug) {
+                        console.debug('ARMarker system has no data about tag id:', detection.id);
+                    }
                     continue;
-                } else if (this.debug) console.log('ARMarker system found tag:', refTag);
+                }
+                if (this.debug) {
+                    console.debug('ARMarker system found tag:', refTag);
+                }
 
                 // publish this detection ?
                 if (refTag.publish == true) {
@@ -254,7 +261,9 @@ export class ARMarkerRelocalization {
                 if (!refTag.dynamic) {
                     if (vioStable && !localizerTag) {
                         const rigPose = this.getRigPoseFromAprilTag(detection.pose, refTag.pose);
-                        if (this.debug) console.log('Applying transform:', rigPose);
+                        if (this.debug) {
+                            console.debug('Applying transform:', rigPose);
+                        }
                         this.cameraSpinnerObj3D.quaternion.setFromRotationMatrix(rigPose);
                         this.cameraRigObj3D.position.setFromMatrixPosition(rigPose);
                         localizerTag = true;
@@ -270,9 +279,13 @@ export class ARMarkerRelocalization {
                         // Dynamic + writable, push marker update
                         if (this.rigMatrix.equals(this.identityMatrix)) {
                             // eslint-disable-next-line max-len
-                            if (this.debug) console.warn('Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first');
+                            if (this.debug) {
+                                console.debug('Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first');
+                            }
                         } else {
-                            if (this.debug) console.log(`Pushing update for tag ${detection.id}`);
+                            if (this.debug) {
+                                console.debug(`Pushing update for tag ${detection.id}`);
+                            }
                             const tagPose = this.getTagPoseFromRig(detection.pose);
                             this.tagPoseRot.setFromRotationMatrix(tagPose);
                             // Send update directly to scene (arguments order such that we overwrite 'type')

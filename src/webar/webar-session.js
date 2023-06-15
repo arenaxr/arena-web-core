@@ -6,7 +6,7 @@
  * @date 2022
  */
 
-import {ARENAUtils} from '../utils.js';
+import {ARENAUtils} from '../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 

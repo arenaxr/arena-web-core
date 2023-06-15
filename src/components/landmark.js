@@ -7,7 +7,8 @@
  */
 
 /* global AFRAME, ARENA, THREE */
-import {ARENAEventEmitter} from '../event-emitter';
+
+import {ARENA_EVENTS} from "../constants";
 
 /**
  * Component-System of teleport destination Landmarks
@@ -63,8 +64,9 @@ AFRAME.registerComponent('landmark', {
     teleportTo: function(moveEl = undefined) {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
-        const dest = new THREE.Vector3;
-        const thisWorldPos = new THREE.Vector3;
+        const dest = new THREE.Vector3();
+        const thisWorldPos = new THREE.Vector3();
+        this.el.object3D.updateMatrixWorld(true); // Force update for initial loads
         thisWorldPos.setFromMatrixPosition(this.el.object3D.matrixWorld);
         dest.copy(thisWorldPos).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
@@ -105,6 +107,8 @@ AFRAME.registerComponent('landmark', {
 AFRAME.registerSystem('landmark', {
     init: function() {
         this.landmarks = {};
+        this.expectedStarts = 0;
+        this.registeredStarts = 0;
     },
 
     registerComponent: function(landmark) {
@@ -114,7 +118,13 @@ AFRAME.registerSystem('landmark', {
 
         const chat = sceneEl.components['arena-chat-ui'];
         this.landmarks[landmark.el.id] = landmark;
-        if (landmark.data.startingPosition === false) {
+        if (landmark.data.startingPosition === true) {
+            this.registeredStarts++;
+            if (this.registeredStarts === this.expectedStarts) {
+                ARENA.events.emit(ARENA_EVENTS.STARTPOS_LOADED);
+            }
+        }
+        if (chat && landmark.data.startingPosition === false) {
             chat.addLandmark(landmark);
         }
     },
@@ -126,7 +136,8 @@ AFRAME.registerSystem('landmark', {
 
         const chat = sceneEl.components['arena-chat-ui'];
         delete this.landmarks[landmark.el.id];
-        if (landmark.data.startingPosition === false) {
+        // TODO: fix loading order of chat and landmarks
+        if (chat && landmark.data.startingPosition === false) {
             chat.removeLandmark(landmark);
         }
     },

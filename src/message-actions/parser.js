@@ -1,4 +1,5 @@
-import {Logger} from './logger.js';
+const warn = AFRAME.utils.debug('ARENA:message:warn');
+const error = AFRAME.utils.debug('ARENA:message:error');
 
 /**
  * Message parser and verifier
@@ -12,19 +13,19 @@ export class Parser {
      */
     static parse(source, message) {
         if (!message) {
-            console.warn(source, 'Received empty message');
+            warn(source, 'Received empty message');
             return undefined;
         }
 
         const object_id = message.object_id;
         if (object_id === undefined) {
-            console.error(source, 'Malformed message (no object_id):', JSON.stringify(message));
+            error(source, 'Malformed message (no object_id):', JSON.stringify(message));
             return undefined;
         }
 
         const data = message.data;
         if (data === undefined) {
-            console.error(source, 'Malformed message (no data field):', JSON.stringify(message));
+            error(source, 'Malformed message (no data field):', JSON.stringify(message));
             return undefined;
         }
 
