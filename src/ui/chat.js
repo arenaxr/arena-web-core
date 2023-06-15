@@ -655,11 +655,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         // const willMessage = new Paho.Message(JSON.stringify(msg));
         // willMessage.destinationName = this.publishPublicTopic;
 
-        await this.mqttc.registerMessageHandler("c", proxy(this.onMessageArrived.bind(_this)), true);
-        await this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
+        this.mqttc.registerMessageHandler("c", proxy(this.onMessageArrived.bind(_this)), true);
+        this.mqttc.addConnectionLostHandler(proxy(this.onConnectionLost.bind(_this)));
 
-        await this.mqttc.subscribe(this.subscribePublicTopic);
-        await this.mqttc.subscribe(this.subscribePrivateTopic);
+        this.mqttc.subscribe(this.subscribePublicTopic);
+        this.mqttc.subscribe(this.subscribePrivateTopic);
 
         this.keepalive();
         // periodically send a keep alive
