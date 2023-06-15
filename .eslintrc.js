@@ -4,28 +4,33 @@ module.exports = {
         commonjs: true,
         es6: true,
     },
-    extends: ["airbnb-base", "prettier"],
-    plugins: ["prettier"],
-    parser: "@babel/eslint-parser",
+    extends: ['airbnb-base', 'prettier'],
+    plugins: ['prettier'],
+    parser: '@babel/eslint-parser',
     parserOptions: {
-        sourceType: "module",
+        sourceType: 'module',
         ecmaVersion: 12,
     },
     rules: {
-        "max-len": [
-            "error",
+        'max-len': [
+            'error',
             {
                 code: 120,
                 tabWidth: 4,
                 ignoreUrls: true,
             },
         ],
-        "prettier/prettier": "error",
-        "no-unused-vars": "warn",
-        "no-console": "off",
-        "class-methods-use-this": "off",
-        "no-plusplus": "off",
-        "no-bitwise": "off",
-        "no-underscore-dangle": "off",
+        'prettier/prettier': [
+            'error',
+            {
+                singleQuote: true,
+            },
+        ],
+        'no-unused-vars': 'warn',
+        'no-console': 'off',
+        'class-methods-use-this': 'off',
+        'no-plusplus': 'off',
+        'no-bitwise': 'off',
+        'no-underscore-dangle': 'off',
     },
 };
