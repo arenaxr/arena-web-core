@@ -39,11 +39,6 @@
        "file":"schemas/entity.json",
        "title":"Entity (generic object)"
     },
-    "fbx-model":{
-      "description":"Load a FBX model",
-      "file":"schemas/fbx-model.json",
-      "title":"FBX Model"
-    },
     "gltf-model":{
        "description":"Load a GLTF model",
        "file":"schemas/gltf-model.json",

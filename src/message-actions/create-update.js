@@ -239,13 +239,6 @@ export class CreateUpdate {
                 entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
             }
             break;
-        case 'fbx-model':
-            // support both url and src property
-            if (data.hasOwnProperty('url')) {
-                data.src = data.url; // make src=url
-                delete data.url; // remove attribute so we don't set it later
-            }
-            break;
         case 'obj-model':
             break;
         case 'gltf-model':
