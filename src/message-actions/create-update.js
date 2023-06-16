@@ -87,43 +87,49 @@ export class CreateUpdate {
             // set to default render order
             entityEl.object3D.renderOrder = RENDER_ORDER;
 
-            // Parent/Child handling
-            if (message.data.parent) {
-                let parentName = message.data.parent;
-                if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
-                    if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
-                        parentName = 'my-camera';
-                    } else {
-                        return;
-                    }
-                }
-                const parentEl = document.getElementById(parentName);
-                if (parentEl) {
-                    if (parentEl !== entityEl.parentNode) {
-                        // remove old parent and clone entity (https://github.com/aframevr/aframe/issues/2425)
-                        if (entityEl.parentNode) {
-                            entityEl.flushToDOM();
-                            entityEl.parentNode.removeChild(entityEl);
-                            entityEl = entityEl.cloneNode();
-                        }
-                        parentEl.appendChild(entityEl);
-                    }
-                } else {
-                    createWarn('Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
-                }
-            } else {
-                const sceneRoot = document.getElementById('sceneRoot');
-                if (entityEl.parentNode) {
-                    // remove old parent and clone entity (https://github.com/aframevr/aframe/issues/2425)
-                    entityEl.flushToDOM();
-                    entityEl.parentNode.removeChild(entityEl);
-                    entityEl = entityEl.cloneNode();
-                }
-                sceneRoot.appendChild(entityEl);
-            }
-
             // handle attributes of object
             if (!this.setObjectAttributes(entityEl, message)) return;
+
+            const sceneRoot = document.getElementById('sceneRoot');
+            let parentName = message.data.parent;
+
+            // add object to the scene after setting all attributes
+            if (addObj) {
+                // Parent/Child handling
+                if (parentName) {
+                    if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
+                        if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
+                            parentName = 'my-camera';
+                        } else {
+                            return;
+                        }
+                    }
+
+                    const parentEl = document.getElementById(parentName);
+                    if (parentEl) {
+                        entityEl.removeAttribute('parent');
+                        entityEl.flushToDOM();
+                        parentEl.appendChild(entityEl);
+                    } else {
+                        createWarn('Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
+                    }
+                } else {
+                    sceneRoot.appendChild(entityEl);
+                }
+            } else {
+                // Parent/Child handling
+                const oldParent = entityEl.parentNode;
+                if (parentName === null) {
+                    if (oldParent) oldParent.object3D.remove(entityEl.object3D);
+                    sceneRoot.object3D.add(entityEl.object3D);
+                } else if (parentName !== undefined) {
+                    const parentEl = document.getElementById(parentName);
+                    if (parentEl !== oldParent) {
+                        if (oldParent) oldParent.object3D.remove(entityEl.object3D);
+                        parentEl.object3D.add(entityEl.object3D);
+                    }
+                }
+            }
 
             if (message.ttl !== undefined) { // Allow falsy value of 0
                 entityEl.setAttribute('ttl', {seconds: message.ttl});
