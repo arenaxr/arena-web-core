@@ -29,7 +29,7 @@ class GlitchPass extends Pass {
 
 	}
 
-	render( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
+	render( renderer, writeBuffer, readBuffer, currentRenderTarget /*, deltaTime, maskActive */ ) {
 
 		if ( renderer.capabilities.isWebGL2 === false ) this.uniforms[ 'tDisp' ].value.format = THREE.LuminanceFormat;
 
@@ -67,7 +67,7 @@ class GlitchPass extends Pass {
 
 		if ( this.renderToScreen ) {
 
-			renderer.setRenderTarget( null );
+			renderer.setRenderTarget( currentRenderTarget );
 			this.fsQuad.render( renderer );
 
 		} else {

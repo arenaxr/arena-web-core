@@ -56,13 +56,16 @@ export class CompositorPass extends Pass {
     }
 
     getFrameID(renderer) {
+        const currentRenderTarget = renderer.getRenderTarget();
         renderer.setRenderTarget(this.decoderRenderTarget);
         this.decoderFsQuad.render(renderer);
 
         // const start = performance.now();
         renderer.readRenderTargetPixels(this.decoderRenderTarget, 0, 0, FRAME_ID_LENGTH, 1, this.pixelBuffer);
-        // const stop = performance.now();
-        // console.log(stop - start);
+        // const end = performance.now();
+        // console.log(end - start);
+
+        renderer.setRenderTarget(currentRenderTarget);
 
         var value = 0, value1 = 0;
         for (var i = 0; i < FRAME_ID_LENGTH; i++) {
@@ -118,7 +121,7 @@ export class CompositorPass extends Pass {
         this.material.uniforms.vrMode.value = false;
     }
 
-    render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
         this.material.uniforms.tLocalColor.value = readBuffer.texture;
         this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
 
@@ -128,7 +131,7 @@ export class CompositorPass extends Pass {
         this.material.uniforms.cameraFar.value = this.camera.far;
 
 		if (this.renderToScreen) {
-			renderer.setRenderTarget( null );
+			renderer.setRenderTarget( currentRenderTarget );
 			this.fsQuad.render( renderer );
 		} else {
 			renderer.setRenderTarget( writeBuffer );

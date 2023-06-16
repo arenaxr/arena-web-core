@@ -102,7 +102,6 @@ AFRAME.registerSystem('effects', {
 
                 // store "normal" rendering output to this.renderTarget (1)
                 this.setRenderTarget(system.composer.readBuffer);
-                // this.setRenderTarget(system.renderTarget);
                 render.apply(this, arguments);
                 this.setRenderTarget(currentRenderTarget);
 
