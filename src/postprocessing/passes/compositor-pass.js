@@ -122,6 +122,8 @@ export class CompositorPass extends Pass {
         this.material.uniforms.tLocalColor.value = readBuffer.texture;
         this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
 
+        this.material.defines.IS_SRGB = (renderer.outputColorSpace === THREE.SRGBColorSpace);
+
         this.material.uniforms.cameraNear.value = this.camera.near;
         this.material.uniforms.cameraFar.value = this.camera.far;
 

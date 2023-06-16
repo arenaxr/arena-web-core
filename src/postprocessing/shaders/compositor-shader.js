@@ -1,5 +1,8 @@
 export const CompositorShader = {
     uniforms: {
+        defines: {
+            IS_SRGB: true
+        },
         tLocalColor: {
             type: 't', value: new THREE.Texture(),
         },
