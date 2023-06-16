@@ -85,8 +85,8 @@ AFRAME.registerComponent('video-control', {
         }
 
         this.eventHandlerFn = function(evt) {
-            if (evt.detail.clicker == ARENA.camName ||
-                anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName)) {
+            if (evt.detail.cursorEl ||
+                (anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName))) {
                 const theSource = this.player.getAttribute('arenaVideo');
                 const theVideoId = this.player.getAttribute('videoId');
                 const theFrameId = this.player.getAttribute('frameId');
@@ -106,7 +106,7 @@ AFRAME.registerComponent('video-control', {
             }
         };
 
-        this.el.addEventListener('mousedown', this.eventHandlerFn);
+        this.el.addEventListener('mousedown', this.eventHandlerFn.bind(this));
     },
 
     update: function(oldData) {
