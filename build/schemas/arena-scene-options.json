@@ -285,12 +285,6 @@
           },
        "renderer-settings":{
           "properties":{
-             "gammaFactor":{
-                "default":2.2,
-                "description":"Gamma factor (three.js default is 2.0; we use 2.2 as default)",
-                "title":"Gamma Factor",
-                "type":"number"
-             },
              "localClippingEnabled":{
                 "default":false,
                 "description":"Defines whether the renderer respects object-level clipping planes",

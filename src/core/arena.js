@@ -587,7 +587,6 @@ AFRAME.registerSystem('arena-scene', {
 
         // set renderer defaults that are different from THREE/aframe defaults
         const renderer = sceneEl.renderer;
-        renderer.gammaFactor = 2.2;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         const environment = document.createElement('a-entity');
