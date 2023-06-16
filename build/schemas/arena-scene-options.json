@@ -297,22 +297,16 @@
                 "title":"Local Clipping Enabled",
                 "type":"boolean"
              },
-             "outputEncoding":{
-                "default":"sRGBEncoding",
-                "description":"Defines the output encoding of the renderer (three.js default is LinearEncoding; we use sRGBEncoding as default)",
+             "outputColorSpace":{
+                "default":"SRGBColorSpace",
+                "description":"Defines the output color space of the renderer (three.js default is SRGBColorSpace)",
                 "enum":[
+                   "SRGBColorSpace",
+                   "LinearSRGBColorSpace",
                    "BasicDepthPacking",
-                   "GammaEncoding",
-                   "LinearEncoding",
-                   "LogLuvEncoding",
-                   "RGBADepthPacking",
-                   "RGBDEncoding",
-                   "RGBEEncoding",
-                   "RGBM16Encoding",
-                   "RGBM7Encoding",
-                   "sRGBEncoding"
+                   "RGBADepthPacking"
                 ],
-                "title":"Output Encoding",
+                "title":"Output Color Space",
                 "type":"string"
              },
              "physicallyCorrectLights":{

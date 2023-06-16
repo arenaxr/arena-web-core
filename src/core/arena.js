@@ -6,6 +6,9 @@
  * @date 2023
  */
 
+/* global AFRAME, THREE */
+
+import Swal from 'sweetalert2';
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
 import { ARENAWebARUtils } from '../webar';
@@ -649,12 +652,12 @@ AFRAME.registerSystem('arena-scene', {
 
             const rendererSettings = options['renderer-settings'];
             if (rendererSettings) {
-                for (const [attribute, value] of Object.entries(rendererSettings)) {
+                Object.entries(rendererSettings).forEach(([attribute, value]) => {
                     renderer[attribute] =
-                        attribute === 'outputEncoding'
+                        attribute === 'outputColorSpace'
                             ? (renderer[attribute] = THREE[value])
                             : (renderer[attribute] = value);
-                }
+                });
             }
         } else {
             environment.setAttribute('environment', 'preset', 'default');
