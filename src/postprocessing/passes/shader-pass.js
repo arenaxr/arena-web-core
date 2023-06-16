@@ -34,7 +34,7 @@ class ShaderPass extends Pass {
 
 	}
 
-	render( renderer, writeBuffer, readBuffer, currentRenderTarget /*, deltaTime, maskActive */ ) {
+	render( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
 
 		if ( this.uniforms[ this.textureID ] ) {
 
@@ -46,7 +46,7 @@ class ShaderPass extends Pass {
 
 		if ( this.renderToScreen ) {
 
-			renderer.setRenderTarget( currentRenderTarget );
+			renderer.setRenderTarget( null );
 			this.fsQuad.render( renderer );
 
 		} else {

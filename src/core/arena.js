@@ -12,7 +12,6 @@ import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
 import { ARENAWebARUtils } from '../webar';
 import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
-import Swal from 'sweetalert2';
 
 AFRAME.registerSystem('arena-scene', {
     schema: {

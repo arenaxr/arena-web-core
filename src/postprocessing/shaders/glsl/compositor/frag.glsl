@@ -207,7 +207,7 @@ void main() {
     }
 
     // for some reason post processing does not output in sRGB, so force sRGB here
-    localColor = LinearTosRGB(localColor);
+    // localColor = LinearTosRGB(localColor);
 
     vec4 color = localColor;
     // if (!targetWidthGreater ||
