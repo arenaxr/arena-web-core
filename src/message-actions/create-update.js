@@ -306,8 +306,8 @@ export class CreateUpdate {
                 delete data.src; // remove attribute so we don't set it later
             }
             if (!data.hasOwnProperty('material-extras')) {
-                // default images to sRGBEncoding, if not specified
-                entityEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+                // default images to SRGBColorSpace, if not specified
+                entityEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
                 entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
             }
             delete data.image; // no other properties applicable to image; delete it

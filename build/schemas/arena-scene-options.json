@@ -303,8 +303,8 @@
                 "enum":[
                    "SRGBColorSpace",
                    "LinearSRGBColorSpace",
-                   "BasicDepthPacking",
-                   "RGBADepthPacking"
+                   "DisplayP3ColorSpace",
+                   "NoColorSpace"
                 ],
                 "title":"Output Color Space",
                 "type":"string"

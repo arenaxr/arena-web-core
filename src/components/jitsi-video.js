@@ -113,7 +113,7 @@ AFRAME.registerComponent('jitsi-video', {
             });
         } else {
             this.el.setAttribute('material', 'src', `#${this.videoID}`); // video only! (no audio)
-            this.el.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+            this.el.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
             this.el.setAttribute('material-extras', 'needsUpdate', 'true');
         }
         this.el.setAttribute('material', 'shader', 'flat');

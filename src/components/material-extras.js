@@ -12,12 +12,12 @@ import {ARENAUtils} from '../utils';
  */
 
 /**
- * Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
+ * Allows to set extra material properties, namely texture colorspace, whether to render the material's color and render order.
  * The properties set here access directly [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * Implements a timeout scheme in lack of better management of the timing/events causing properties to not be available.
  * @module material-extras
  * @property {string} [overrideSrc=''] - Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF).
- * @property {string} [encoding=sRGBEncoding] - The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
+ * @property {string} [colorSpace=SRGBColorSpace] - The material colorspace; See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
@@ -26,9 +26,10 @@ AFRAME.registerComponent('material-extras', {
     dependencies: ['material'],
     schema: {
         overrideSrc: {default: ''},
-        encoding: {default: 'sRGBEncoding', oneOf: [
-            'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding',
-            'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking']},
+        colorSpace: {
+            default: 'SRGBColorSpace',
+            oneOf: ['SRGBColorSpace', 'LinearSRGBColorSpace', 'DisplayP3ColorSpace', 'NoColorSpace'],
+        },
         colorWrite: {default: true},
         renderOrder: {default: 1},
         occluderRenderOrder: {default: -1},
@@ -54,7 +55,7 @@ AFRAME.registerComponent('material-extras', {
             transparentOccluder = oldData.transparentOccluder;
             if (oldData.renderOrder !== this.data.renderOrder ||
                 oldData.colorWrite !== this.data.colorWrite ||
-                oldData.encoding !== this.data.encoding ||
+                oldData.colorSpace !== this.data.colorSpace ||
                 oldData.overrideSrc !== this.data.overrideSrc) {
                 this.doUpdate = true;
             }
@@ -89,7 +90,7 @@ AFRAME.registerComponent('material-extras', {
             (texture) => {
                 this.texture = texture;
                 this.doUpdate = true;
-                this.texture.encoding = THREE[this.data.encoding];
+                this.texture.colorSpace = THREE[this.data.colorSpace];
                 this.texture.flipY = false;
                 this.update();
             },
@@ -106,7 +107,7 @@ AFRAME.registerComponent('material-extras', {
         mesh.material.colorWrite = this.data.colorWrite;
         if (mesh.material.map && this.texture) {
             mesh.material.map = this.texture;
-            mesh.material.map.encoding = THREE[this.data.encoding];
+            mesh.material.map.colorSpace = THREE[this.data.colorSpace];
         }
         mesh.material.needsUpdate = true;
     },

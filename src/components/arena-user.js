@@ -198,7 +198,7 @@ AFRAME.registerComponent('arena-user', {
         videoCube.setAttribute('position', '0 0 0');
         videoCube.setAttribute('material', 'shader', 'flat');
         videoCube.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
-        videoCube.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+        videoCube.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
 
         if (data.presence !== 'Portal') {
             videoCube.setAttribute('position', '0 0 0');

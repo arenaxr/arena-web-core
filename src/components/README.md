@@ -50,7 +50,7 @@ Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name<
 <dd><p>Load scene from persistence.</p>
 </dd>
 <dt><a href="#module_material-extras">material-extras</a></dt>
-<dd><p>Allows to set extra material properties, namely texture encoding, whether to render the material&#39;s color and render order.
+<dd><p>Allows to set extra material properties, namely texture colorspace, whether to render the material&#39;s color and render order.
 The properties set here access directly <a href="https://threejs.org/docs/#api/en/materials/Material">Three.js material</a>.
 Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.</p>
 </dd>
@@ -267,7 +267,7 @@ Load scene from persistence.
 <a name="module_material-extras"></a>
 
 ## material-extras
-Allows to set extra material properties, namely texture encoding, whether to render the material's color and render order.
+Allows to set extra material properties, namely texture colorspace, whether to render the material's color and render order.
 The properties set here access directly [Three.js material](https://threejs.org/docs/#api/en/materials/Material).
 Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.
 
@@ -276,7 +276,7 @@ Implements a timeout scheme in lack of better understanding of the timing/events
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [overrideSrc] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF). |
-| [encoding] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'LinearEncoding', 'sRGBEncoding', 'GammaEncoding', 'RGBEEncoding', 'LogLuvEncoding', 'RGBM7Encoding', 'RGBM16Encoding', 'RGBDEncoding', 'BasicDepthPacking', 'RGBADepthPacking'. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [colorSpace] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'SRGBColorSpace', 'LinearSRGBColorSpace', 'DisplayP3ColorSpace', 'NoColorSpace'. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
 | [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
 | [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder](https://threejs.org/docs/#api/en/core/Object3D.renderOrder). |
 | [transparentOccluder] | <code>boolean</code> | <code>false</code> | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder. |

@@ -248,7 +248,7 @@ AFRAME.registerSystem('arena-jitsi', {
         screenShareEl.setAttribute('playsinline', 'true');
         screenShareEl.setAttribute('material', 'src', `#${videoId}`);
         screenShareEl.setAttribute('material', 'shader', 'flat');
-        screenShareEl.setAttribute('material-extras', 'encoding', 'sRGBEncoding');
+        screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
         screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
         this.screenShareDict[participantId] = screenShareEl;
         return screenShareEl;
