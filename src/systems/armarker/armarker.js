@@ -60,6 +60,9 @@ AFRAME.registerSystem('armarker', {
     // if we detected WebXRViewer/WebARViewer
     isWebXRViewer: ARENAUtils.isWebXRViewer(),
     initialLocalized: false,
+
+    originAnchor: undefined,
+    pendingOriginAnchor: undefined,
     /*
      * Init system
      * @param {object} marker - The marker component object to register.
@@ -94,10 +97,18 @@ AFRAME.registerSystem('armarker', {
             sceneEl.systems.webxr.sceneEl.setAttribute('optionalFeatures', optionalFeatures);
         }
 
-        // listner for xr session start
+        // listener for AR session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
             sceneEl.addEventListener('enter-vr', () => {
-                this.webXRSessionStarted(sceneEl.xrSession);
+                if (sceneEl.is('ar-mode')) {
+                    const { xrSession } = sceneEl;
+                    this.webXRSessionStarted(xrSession).then(() => {
+                        xrSession.requestReferenceSpace('local-floor').then((xrRefSpace) => {
+                            this.xrRefSpace = xrRefSpace;
+                            xrSession.requestAnimationFrame(this.onXRFrame.bind(this));
+                        });
+                    });
+                }
             });
         }
     },
@@ -124,6 +135,13 @@ AFRAME.registerSystem('armarker', {
             } catch (err) {
                 console.error('Could not make make gl context XR compatible!', err);
             }
+        }
+
+        const persistedOriginAnchor = window.localStorage.getItem('originAnchor');
+        if (xrSession.persistentAnchors && persistedOriginAnchor) {
+            xrSession.restorePersistentAnchor(persistedOriginAnchor).then((anchor) => {
+                this.originAnchor = anchor;
+            });
         }
 
         // init cv pipeline, if we are not using an external localizer
@@ -438,5 +456,49 @@ AFRAME.registerSystem('armarker', {
             this.getARMArkersFromATLAS();
         }
         return this.ATLASMarkers[String(markerid)];
+    },
+
+    /**
+     * Add an anchor to the origin of the XR reference space, persisting if possible. This is NOT pose synced
+     * to the originating frame, but since this is triggered off a marker detection requiring low motion
+     * and good visual acquisition of target area, this is close enough.
+     * @param {XRFrame} frame - The XRFrame to use for creating the anchor
+     * @param {XRSpace} xrSpace - The anchor object to create
+     */
+    setOriginAnchor(frame, xrSpace) {
+        const anchorPose = new XRRigidTransform(
+            this.pendingOriginAnchor.position,
+            this.pendingOriginAnchor.orientation
+        );
+        frame.createAnchor(anchorPose, xrSpace).then((anchor) => {
+            // Persist, currently Quest browser only
+            if (anchor.requestPersistentHandle) {
+                const oldPersistAnchor = window.localStorage.getItem('originAnchor');
+                if (oldPersistAnchor) {
+                    // Delete the old anchor
+                    this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
+                }
+                anchor.requestPersistentHandle().then((handle) => {
+                    // Save the new one
+                    window.localStorage.setItem('originAnchor', handle);
+                });
+            } else if (this.originAnchor) {
+                this.originAnchor.delete();
+            }
+            this.originAnchor = anchor;
+            this.pendingOriginAnchor = false;
+        });
+    },
+    /**
+     * RAF callback, check for any pending origin anchors to set from a marker detection
+     * @param _time
+     * @param frame
+     */
+    onXRFrame(_time, frame) {
+        // Address any pending origin anchors
+        if (this.pendingOriginAnchor) {
+            this.setOriginAnchor(frame, this.xrRefSpace);
+        }
+        this.sceneEl.xrSession?.requestAnimationFrame(this.onXRFrame.bind(this));
     },
 });

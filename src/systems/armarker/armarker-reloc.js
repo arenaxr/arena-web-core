@@ -279,6 +279,12 @@ export default class ARMarkerRelocalization {
                           // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
                           this.rigMatrixT.transpose();
                         */
+
+                        this.arMakerSystem.pendingOriginAnchor = {
+                            position: { ...this.cameraRigObj3D.position },
+                            rotation: { ...this.cameraSpinnerObj3D.quaternion },
+                        };
+
                         this.arMakerSystem.initialLocalized = true;
                     }
                 } else if (refTag.dynamic && refTag.publish === false) {
