@@ -180,6 +180,17 @@ export default class CreateUpdate {
                     if (position) {
                         cameraRigObj3D.position.set(position.x, position.y, position.z);
                     }
+                    if (AFRAME.scenes[0].xrSession?.persistentAnchors) {
+                        // Persist anchor support
+                        const { armarker: arMarkerSys } = AFRAME.scenes[0].systems;
+                        const { xrSession } = AFRAME.scenes[0];
+                        arMarkerSys.pendingOriginAnchor = { position, rotation };
+                        xrSession.requestReferenceSpace('local-floor').then((xrRefSpace) => {
+                            xrSession.requestAnimationFrame((time, frame) => {
+                                arMarkerSys.setOriginAnchor(frame, xrRefSpace);
+                            });
+                        });
+                    }
                 }
                 return;
 
