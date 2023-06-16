@@ -49,27 +49,11 @@ export class CreateUpdate {
 
             let entityEl = document.getElementById(id);
 
-            if (action === ACTIONS.CREATE) {
-                // delete object, if exists; ensures create clears all attributes
-                if (entityEl) {
-                    const parentEl = entityEl.parentNode;
-                    if (parentEl) {
-                        parentEl.removeChild(entityEl);
-                    } else {
-                        createError(`Could not find parent of object_id "${id}" to clear object properties.`);
-                    }
-                    entityEl = undefined;
-                }
-            } else if (action === ACTIONS.UPDATE) {
-                // warn that update to non-existing object will create it
-                if (!entityEl) {
-                    updateWarn(`Object with object_id "${id}" does not exist; Creating...`);
-                }
-            }
-
             // create entity, if does not exist
             let addObj = false;
             if (!entityEl) {
+                createWarn(`Object with object_id "${id}" does not exist; Creating...`);
+
                 // create object
                 if (message.data.object_type === 'videosphere') {
                     entityEl = document.createElement('a-videosphere');
