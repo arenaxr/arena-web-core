@@ -323,7 +323,7 @@
              }
           },
           "required":[
-             "outputEncoding"
+             "outputColorSpace"
           ],
           "title":"Renderer Settings",
           "type":"object",
