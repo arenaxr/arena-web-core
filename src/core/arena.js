@@ -296,10 +296,12 @@ AFRAME.registerSystem('arena-scene', {
         cameraEl.setAttribute('arena-camera', 'enabled', this.isUsersPermitted());
         cameraEl.setAttribute('arena-camera', 'displayName', this.getDisplayName());
 
+        const cameraRigObj3D = document.getElementById('cameraRig').object3D;
+
         const startPos = new THREE.Vector3();
         if (this.startCoords instanceof Array) { // This is a split string to array
             startPos.set(...this.startCoords);
-            cameraEl.object3D.position.copy(startPos);
+            cameraRigObj3D.position.copy(startPos);
             cameraEl.object3D.position.y += data.camHeight;
             this.startCoords = startPos;
         } else if (this.params.startLastPos) {
@@ -307,7 +309,7 @@ AFRAME.registerSystem('arena-scene', {
             const lastPos = sceneHist[this.namespacedScene]?.lastPos;
             if (lastPos) {
                 startPos.copy(lastPos);
-                cameraEl.object3D.position.copy(startPos);
+                cameraRigObj3D.position.copy(startPos);
                 cameraEl.object3D.position.y += data.camHeight;
                 this.startCoords = startPos;
             }
