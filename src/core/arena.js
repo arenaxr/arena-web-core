@@ -8,7 +8,6 @@
 
 /* global AFRAME, THREE */
 
-import Swal from 'sweetalert2';
 import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
 import { ARENAWebARUtils } from '../webar';
