@@ -206,6 +206,11 @@ void main() {
         remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
     }
 
+    // force srgb
+#ifndef IS_SRGB
+    localColor = LinearTosRGB(localColor);
+#endif
+
     vec4 color = localColor;
     // if (!targetWidthGreater ||
     //     (targetWidthGreater && paddingLeft <= vUv.x && vUv.x <= paddingRight)) {
@@ -230,10 +235,6 @@ void main() {
     // color = vec4(remoteColor.rgb, 1.0);
     // color = vec4(localColor.rgb, 1.0);
     gl_FragColor = color;
-
-#ifdef IS_SRGB
-    gl_FragColor = LinearTosRGB(gl_FragColor);
-#endif
 
     // gl_FragColor.rgb = vec3(localDepth);
     // gl_FragColor.a = 1.0;

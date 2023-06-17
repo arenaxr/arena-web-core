@@ -147,9 +147,9 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const videoTexture = new THREE.VideoTexture(this.remoteVideo);
         videoTexture.minFilter = THREE.NearestFilter;
         videoTexture.magFilter = THREE.NearestFilter;
-        videoTexture.colorSpace = THREE.SRGBColorSpace;
-        const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
-        videoTexture.anisotropy = maxAnisotropy;
+        // videoTexture.colorSpace = THREE.SRGBColorSpace;
+        // const maxAnisotropy = renderer.capabilities.getMaxAnisotropy();
+        // videoTexture.anisotropy = maxAnisotropy;
 
         const remoteRenderTarget = new THREE.WebGLRenderTarget(this.remoteVideo.videoWidth, this.remoteVideo.videoHeight);
         remoteRenderTarget.texture = videoTexture;
