@@ -112,7 +112,7 @@ AFRAME.registerSystem('effects', {
                 // disable xr
                 this.xr.enabled = false;
 
-                // update cameras for composition in RenderFusion, if needed
+                // update cameras for composition, if needed
                 system.compositor.updateRenderingState();
 
                 // (3) render with custom post-processing shaders:
