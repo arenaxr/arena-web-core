@@ -20,6 +20,12 @@
 <!-- markdown-link-check-disable-next-line -->
 <p>If <code>extractAssetExtras=true</code> (default), the <a href="https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
 </dd>
+<dt><a href="#module_build-watch-object">build-watch-object</a></dt>
+<dd><p>Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.</p>
+</dd>
+<dt><a href="#module_build-watch-scene">build-watch-scene</a></dt>
+<dd><p>Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.</p>
+</dd>
 <dt><a href="#module_click-listener">click-listener</a></dt>
 <dd><p>Keep track of mouse events and publish corresponding events</p>
 </dd>
@@ -52,7 +58,7 @@ Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name<
 <dt><a href="#module_material-extras">material-extras</a></dt>
 <dd><p>Allows to set extra material properties, namely texture colorspace, whether to render the material&#39;s color and render order.
 The properties set here access directly <a href="https://threejs.org/docs/#api/en/materials/Material">Three.js material</a>.
-Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.</p>
+Implements a timeout scheme in lack of better management of the timing/events causing properties to not be available.</p>
 </dd>
 <dt><a href="#module_network-latency">network-latency</a></dt>
 <dd><p>Publish with qos of 2 for network graph to update latency</p>
@@ -86,6 +92,14 @@ Update <em>is</em> allowed, which will reset the timer to start from that moment
 </dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#jitsiStatsLocalCallback">jitsiStatsLocalCallback(e)</a></dt>
+<dd><p>Called when Jitsi local stats are updated, used to save local status for stats-monitor.</p>
+</dd>
+</dl>
+
 <a name="module_arena-camera"></a>
 
 ## arena-camera
@@ -104,7 +118,6 @@ Tracking camera movement in real time. Emits camera pose change and VIO change e
 | vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value. |
 | vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value. |
 | showStats | <code>boolean</code> | Display camera position on the screen. |
-| videoCulling | <code>boolean</code> | Turn on frustum video culling. |
 
 <a name="module_arena-hand"></a>
 
@@ -117,7 +130,6 @@ Tracking Hand controller movement in real time.
 | --- | --- | --- |
 | enabled | <code>boolean</code> | Controller enabled. |
 | hand | <code>string</code> | Controller hand. |
-| color | <code>string</code> | Controller color. |
 
 <a name="module_arena-user"></a>
 
@@ -176,17 +188,21 @@ If `extractAssetExtras=true` (default), the [attribution system](https://help.sk
 | id | <code>string</code> |  | The entity id in the scene; automatically filled in on component init |
 | [extractAssetExtras] | <code>boolean</code> | <code>true</code> | Extract attribution info from asset extras; will override attribution info given (default: true) |
 
+<a name="module_build-watch-object"></a>
+
+## build-watch-object
+Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
+
+<a name="module_build-watch-scene"></a>
+
+## build-watch-scene
+Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
+
 <a name="module_click-listener"></a>
 
 ## click-listener
 Keep track of mouse events and publish corresponding events
 
-<a name="exp_module_click-listener--init"></a>
-
-### init() ⏏
-Setup event listeners for mouse events; listeners publish events to MQTT
-
-**Kind**: Exported function
 **Todo**
 
 - [ ] Consolidate event listeners (they are very similar)
@@ -197,7 +213,7 @@ Setup event listeners for mouse events; listeners publish events to MQTT
 Listen for collisions, callback on event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>
+**Requires**: <code>module:aframe-physics-system</code>  
 <a name="module_gesture-detector"></a>
 
 ## gesture-detector
@@ -224,7 +240,7 @@ One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>
+**Requires**: <code>module:aframe-physics-system</code>  
 <a name="module_jitsi-video"></a>
 
 ## jitsi-video
@@ -269,18 +285,17 @@ Load scene from persistence.
 ## material-extras
 Allows to set extra material properties, namely texture colorspace, whether to render the material's color and render order.
 The properties set here access directly [Three.js material](https://threejs.org/docs/#api/en/materials/Material).
-Implements a timeout scheme in lack of better understanding of the timing/events causing properties to not be available.
+Implements a timeout scheme in lack of better management of the timing/events causing properties to not be available.
 
 **Properties**
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
 | [overrideSrc] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF). |
-| [colorSpace] | <code>string</code> | <code>&quot;sRGBEncoding&quot;</code> | The material encoding; One of 'SRGBColorSpace', 'LinearSRGBColorSpace', 'DisplayP3ColorSpace', 'NoColorSpace'. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [colorSpace] | <code>string</code> | <code>&quot;SRGBColorSpace&quot;</code> | The material colorspace; See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
 | [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
 | [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder](https://threejs.org/docs/#api/en/core/Object3D.renderOrder). |
 | [transparentOccluder] | <code>boolean</code> | <code>false</code> | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder. |
-| [defaultRenderOrder] | <code>number</code> | <code>1</code> | Used as the renderOrder when transparentOccluder is reset to `false`. |
 
 <a name="module_network-latency"></a>
 
@@ -376,3 +391,15 @@ Adds a video to an entity and controls its playback.
 | [video_loop] | <code>boolean</code> | <code>true</code> | video loop |
 | [autoplay] | <code>boolean</code> | <code>false</code> | video autoplays on load |
 | [volume] | <code>number</code> | <code>1</code> | video sound volume |
+
+<a name="jitsiStatsLocalCallback"></a>
+
+## jitsiStatsLocalCallback(e)
+Called when Jitsi local stats are updated, used to save local status for stats-monitor.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>Object</code> | event object; e.detail contains the callback arguments |
+
