@@ -62,6 +62,9 @@ AFRAME.registerComponent('box-collider', {
 
         this.hitStartEventDetail = {intersectedEls: this.newIntersectedEls};
         this.hitEndEventDetail = {endIntersectedEls: this.clearedIntersectedEls};
+
+        this.tempMatrixWorld = new THREE.Matrix4();
+        this.isCamera = !!this.el.components.camera;
     },
 
     play: function() {
@@ -122,7 +125,14 @@ AFRAME.registerComponent('box-collider', {
         }
 
         // Update the bounding box to account for rotations and position changes.
+        // Workaround for matrixWorld update issue when in dual-view immersive mode after THREE r152
+        if (this.isCamera && this.el.sceneEl.xrSession) {
+            this.tempMatrixWorld.copy(this.el.object3D.matrixWorld);
+        }
         boundingBox.setFromObject(el.object3D);
+        if (this.isCamera && this.el.sceneEl.xrSession) {
+            this.el.object3D.matrixWorld.copy(this.tempMatrixWorld);
+        }
         this.boxMin.copy(boundingBox.min);
         this.boxMax.copy(boundingBox.max);
         boundingBox.getCenter(this.boxCenter);
