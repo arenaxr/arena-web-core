@@ -13,32 +13,32 @@
  * @date 2020
  */
 
-import {WebXRCameraCapture} from './camera-capture/ccwebxr';
-import {WebARCameraCapture} from './camera-capture/ccwebar';
-import {ARHeadsetCameraCapture} from './camera-capture/ccarheadset';
-import {WebARViewerCameraCapture} from './camera-capture/ccwebarviewer';
-import {ARMarkerRelocalization} from './armarker-reloc';
-import {CVWorkerMsgs} from './worker-msgs';
-import {ARENA_EVENTS} from '../../constants';
-import {ARENAUtils} from '../../utils';
+import { WebXRCameraCapture } from './camera-capture/ccwebxr';
+import { WebARCameraCapture } from './camera-capture/ccwebar';
+import { ARHeadsetCameraCapture } from './camera-capture/ccarheadset';
+import { WebARViewerCameraCapture } from './camera-capture/ccwebarviewer';
+import { ARMarkerRelocalization } from './armarker-reloc';
+import { CVWorkerMsgs } from './worker-msgs';
+import { ARENA_EVENTS } from '../../constants';
+import { ARENAUtils } from '../../utils';
 
 /**
-  * ARMarker System. Supports ARMarkers in a scene.
-  * @module armarker-system
-  */
+ * ARMarker System. Supports ARMarkers in a scene.
+ * @module armarker-system
+ */
 AFRAME.registerSystem('armarker', {
     schema: {
         /* camera capture debug: creates a plane texture-mapped with the camera frames */
-        debugCameraCapture: {default: false},
+        debugCameraCapture: { default: false },
         /* relocalization debug messages output */
-        debugRelocalization: {default: false},
+        debugRelocalization: { default: false },
         /* networked marker solver flag; let relocalization up to a networked solver;
            NOTE: at armarker init time, we look up scene options to set this flag */
-        networkedLocationSolver: {default: false},
+        networkedLocationSolver: { default: false },
         /* how often we update markers from ATLAS; 0=never */
-        ATLASUpdateIntervalSecs: {default: 30},
+        ATLASUpdateIntervalSecs: { default: 30 },
         /* how often we tigger a device location update; 0=never */
-        devLocUpdateIntervalSecs: {default: 0},
+        devLocUpdateIntervalSecs: { default: 0 },
     },
     // ar markers in the scene
     markers: {},
@@ -56,31 +56,27 @@ AFRAME.registerSystem('armarker', {
     // detection events are sent here
     detectionEvts: new EventTarget(),
     // init origin matrix for markerid=0 lookups (row-major)
-    originMatrix: new THREE.Matrix4().set(
-        1, 0, 0, 0,
-        0, 0, 1, 0,
-        0, -1, 0, 0,
-        0, 0, 0, 1,
-    ),
+    originMatrix: new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1),
     // if we detected WebXRViewer/WebARViewer
     isWebXRViewer: ARENAUtils.isWebXRViewer(),
     initialLocalized: false,
     /*
-    * Init system
-    * @param {object} marker - The marker component object to register.
-    * @alias module:armarker-system
-    */
-    init: function() {
-        ARENA.events.addMultiEventListener([
-            ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.SCENE_OPT_LOADED
-        ], this.ready.bind(this));
+     * Init system
+     * @param {object} marker - The marker component object to register.
+     * @alias module:armarker-system
+     */
+    init() {
+        ARENA.events.addMultiEventListener(
+            [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.SCENE_OPT_LOADED],
+            this.ready.bind(this)
+        );
     },
 
-    ready: function() {
-        const data = this.data;
-        const el = this.el;
+    ready() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.arena = sceneEl.systems['arena-scene'];
 
@@ -88,18 +84,15 @@ AFRAME.registerSystem('armarker', {
         this.getARMArkersFromATLAS(true);
 
         // init networkedLocationSolver flag from ARENA scene options
-        this.data.networkedLocationSolver = !!this.arena.sceneOptions['networkedLocationSolver'];
+        this.data.networkedLocationSolver = !!this.arena.sceneOptions.networkedLocationSolver;
 
         // request camera access features
         if (!ARENA.params.camFollow) {
-            const optionalFeatures = sceneEl.systems.webxr.data.optionalFeatures;
+            const { optionalFeatures } = sceneEl.systems.webxr.data;
             if (this.isWebXRViewer) {
                 optionalFeatures.push('computerVision'); // request custom 'computerVision' feature in XRBrowser
             } else optionalFeatures.push('camera-access'); // request WebXR 'camera-access' otherwise
-            sceneEl.systems.webxr.sceneEl.setAttribute(
-                'optionalFeatures',
-                optionalFeatures,
-            );
+            sceneEl.systems.webxr.sceneEl.setAttribute('optionalFeatures', optionalFeatures);
         }
 
         // listner for xr session start
@@ -110,17 +103,17 @@ AFRAME.registerSystem('armarker', {
         }
     },
     /*
-    * System attribute update
-    * @param {object} oldData - previous attribute values.
-    * @alias module:armarker-system
-    */
-    update: function(oldData) {
-    // TODO: Do stuff with `this.data`...
+     * System attribute update
+     * @param {object} oldData - previous attribute values.
+     * @alias module:armarker-system
+     */
+    update(oldData) {
+        // TODO: Do stuff with `this.data`...
     },
     /**
-    * WebXR session started callback
-    * @param {object} xrSession - Handle to the WebXR session
-    */
+     * WebXR session started callback
+     * @param {object} xrSession - Handle to the WebXR session
+     */
     async webXRSessionStarted(xrSession) {
         if (xrSession !== undefined) {
             this.webXRSession = xrSession;
@@ -140,14 +133,14 @@ AFRAME.registerSystem('armarker', {
         }
     },
     /**
-    * Setup cv pipeline (camera capture and cv worker)
-    * Attempts to detect device and setup camera capture accordingly:
-    *   ARHeadsetCameraCapture: capture camera facing forward using getUserMedia
-    *   WebXRCameraCapture: capture passthrough camera frames using the WebXR camera capture
-    *                       API (only in Android Chrome v93+)
-    *   WebARViewerCameraCapture: camera capture for custom iOS browser (WebXRViewer/WebARViewer)
-    *
-    */
+     * Setup cv pipeline (camera capture and cv worker)
+     * Attempts to detect device and setup camera capture accordingly:
+     *   ARHeadsetCameraCapture: capture camera facing forward using getUserMedia
+     *   WebXRCameraCapture: capture passthrough camera frames using the WebXR camera capture
+     *                       API (only in Android Chrome v93+)
+     *   WebARViewerCameraCapture: camera capture for custom iOS browser (WebXRViewer/WebARViewer)
+     *
+     */
     async initCVPipeline() {
         if (this.cvPipelineInitializing || this.cvPipelineInitialized) return;
         this.cvPipelineInitializing = true;
@@ -174,8 +167,8 @@ AFRAME.registerSystem('armarker', {
             }
         }
 
-
-        if (!this.cameraCapture) { // Not WebXRViewer/WebARViewer, not AR headset
+        if (!this.cameraCapture) {
+            // Not WebXRViewer/WebARViewer, not AR headset
             // ignore camera capture when in VR Mode
             const sceneEl = document.querySelector('a-scene');
             if (!sceneEl.is('ar-mode')) {
@@ -183,17 +176,22 @@ AFRAME.registerSystem('armarker', {
                 return;
             }
 
-            if (window.XRWebGLBinding) { // Set up a webxr camera capture (e.g. passthrough AR on a phone)
+            if (window.XRWebGLBinding) {
+                // Set up a webxr camera capture (e.g. passthrough AR on a phone)
                 console.info('Setting up WebXR-based passthrough AR camera capture.');
                 try {
-                    this.cameraCapture = new WebXRCameraCapture(this.webXRSession, this.gl,
-                        this.data.debugCameraCapture);
+                    this.cameraCapture = new WebXRCameraCapture(
+                        this.webXRSession,
+                        this.gl,
+                        this.data.debugCameraCapture
+                    );
                 } catch (err) {
                     this.cvPipelineInitializing = false;
                     console.error(`No valid CV camera capture found. ${err}`);
                     return; // no valid cv camera capture; we are done here
                 }
-            } else { // Final fallthrough to Spot AR, no real WebXR support
+            } else {
+                // Final fallthrough to Spot AR, no real WebXR support
                 try {
                     this.cameraCapture = new WebARCameraCapture();
                     await this.cameraCapture.initCamera();
@@ -206,7 +204,7 @@ AFRAME.registerSystem('armarker', {
         }
 
         // create cv worker for apriltag detection
-        this.cvWorker = new Worker(new URL('dist/apriltag.js', import.meta.url), {type: 'module'});
+        this.cvWorker = new Worker(new URL('dist/apriltag.js', import.meta.url), { type: 'module' });
         this.cameraCapture.setCVWorker(this.cvWorker); // let camera capture know about the cv worker
 
         // listen for worker messages
@@ -230,49 +228,51 @@ AFRAME.registerSystem('armarker', {
                 // marker id
                 markerid: mid,
                 // marker size in meters (marker component size is mm)
-                size: marker.data.size/1000,
+                size: marker.data.size / 1000,
             };
             this.cvWorker.postMessage(newMarker);
         }
     },
     /**
-    * Handle messages from cvWorker (detector)
-    * @param {object} msg - The worker message received.
-    * @alias module:armarker-system
-    */
+     * Handle messages from cvWorker (detector)
+     * @param {object} msg - The worker message received.
+     * @alias module:armarker-system
+     */
     cvWorkerMessage(msg) {
         const cvWorkerMsg = msg.data;
 
         switch (cvWorkerMsg.type) {
-        case CVWorkerMsgs.type.FRAME_RESULTS:
-            // pass detections and original frame timestamp to relocalization
-            if (cvWorkerMsg.detections.length) {
-                const detectionEvent = new CustomEvent('armarker-detection', {detail: {
-                    detections: cvWorkerMsg.detections,
-                    ts: cvWorkerMsg.ts,
-                }});
-                this.detectionEvts.dispatchEvent(detectionEvent);
-            }
-            // request next camera frame and return image buffer to camera capture
-            this.cameraCapture.requestCameraFrame(cvWorkerMsg.grayscalePixels);
-            break;
-        case CVWorkerMsgs.type.INIT_DONE:
-        case CVWorkerMsgs.type.NEXT_FRAME_REQ:
-            // request next camera frame
-            this.cameraCapture.requestCameraFrame();
-            break;
-        default:
-            console.warn('ARMarker System: unknow message from CV worker.');
+            case CVWorkerMsgs.type.FRAME_RESULTS:
+                // pass detections and original frame timestamp to relocalization
+                if (cvWorkerMsg.detections.length) {
+                    const detectionEvent = new CustomEvent('armarker-detection', {
+                        detail: {
+                            detections: cvWorkerMsg.detections,
+                            ts: cvWorkerMsg.ts,
+                        },
+                    });
+                    this.detectionEvts.dispatchEvent(detectionEvent);
+                }
+                // request next camera frame and return image buffer to camera capture
+                this.cameraCapture.requestCameraFrame(cvWorkerMsg.grayscalePixels);
+                break;
+            case CVWorkerMsgs.type.INIT_DONE:
+            case CVWorkerMsgs.type.NEXT_FRAME_REQ:
+                // request next camera frame
+                this.cameraCapture.requestCameraFrame();
+                break;
+            default:
+                console.warn('ARMarker System: unknow message from CV worker.');
         }
     },
     /**
-    * Queries ATLAS for ar makers within geolocation (requires ARENA)
-    * @param {boolean} init - weather it is init time (first time we get the markers) or not
-    * @return {Promise<boolean>}
-    */
-    async getARMArkersFromATLAS(init=false) {
+     * Queries ATLAS for ar makers within geolocation (requires ARENA)
+     * @param {boolean} init - weather it is init time (first time we get the markers) or not
+     * @return {Promise<boolean>}
+     */
+    async getARMArkersFromATLAS(init = false) {
         if (!window.ARENA) return false; // requires ARENA
-        const ARENA = window.ARENA;
+        const { ARENA } = window;
 
         // at init time, make sure we fetch ar markers from ATLAS
         if (init) {
@@ -303,11 +303,7 @@ AFRAME.registerSystem('armarker', {
             return false;
         }
         fetch(
-            ARENA.ATLASurl +
-         '/lookup/geo?objectType=apriltag&distance=20&units=km&lat=' +
-         position.latitude +
-         '&long=' +
-         position.longitude,
+            `${ARENA.ATLASurl}/lookup/geo?objectType=apriltag&distance=20&units=km&lat=${position.latitude}&long=${position.longitude}`
         )
             .then((response) => {
                 window.this.lastATLASUpdate = new Date();
@@ -338,32 +334,32 @@ AFRAME.registerSystem('armarker', {
     },
 
     /**
-    * Register an ARMarker component with the system
-    * @param {object} marker - The marker component object to register.
-    * @alias module:armarker-system
-    */
-    registerComponent: async function(marker) {
+     * Register an ARMarker component with the system
+     * @param {object} marker - The marker component object to register.
+     * @alias module:armarker-system
+     */
+    async registerComponent(marker) {
         this.markers[marker.data.markerid] = marker;
         if (this.cvPipelineInitialized) {
-        // indicate cv worker that a marker was added
+            // indicate cv worker that a marker was added
             const newMarker = {
                 type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
                 // marker id
                 markerid: marker.data.markerid,
                 // marker size in meters (marker component size is mm)
-                size: marker.data.size/1000,
+                size: marker.data.size / 1000,
             };
             this.cvWorker.postMessage(newMarker);
         } else {
-        // nothing to do; upon cv pipeline init the marker will be indicated to cv worker (see initCVPipeline())
+            // nothing to do; upon cv pipeline init the marker will be indicated to cv worker (see initCVPipeline())
         }
     },
     /**
-    * Unregister an ARMarker component
-    * @param {object} marker - The marker component object to unregister.
-    * @alias module:armarker-system
-    */
-    unregisterComponent: function(marker) {
+     * Unregister an ARMarker component
+     * @param {object} marker - The marker component object to unregister.
+     * @alias module:armarker-system
+     */
+    unregisterComponent(marker) {
         if (this.cvPipelineInitialized) {
             // indicate marker was removed to cv worker
             const delMarker = {
@@ -376,37 +372,37 @@ AFRAME.registerSystem('armarker', {
         delete this.markers[marker.data.markerid];
     },
     /**
-    * Get all markers registered with the system
-    * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for;
-    *                         No argument or undefined will return all
-    * @return {object} - a dictionary of markers
-    * @alias module:armarker-system
-    * @example <caption>Query the system a list of all markers in a scene</caption>
-    *     let markers = document.querySelector("a-scene").systems["armarker"].getAll();
-    *     Object.keys(markers).forEach(function(key) {
-    *       console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
-    *     });
-    * @example <caption>getAll() also accepts a marker type argument to filter by a given type</caption>
-    *     let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
-    *
-    */
-    getAll: function(mtype = undefined) {
+     * Get all markers registered with the system
+     * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for;
+     *                         No argument or undefined will return all
+     * @return {object} - a dictionary of markers
+     * @alias module:armarker-system
+     * @example <caption>Query the system a list of all markers in a scene</caption>
+     *     let markers = document.querySelector("a-scene").systems["armarker"].getAll();
+     *     Object.keys(markers).forEach(function(key) {
+     *       console.log(`tag id: ${markers[key].data.markerid}`, markers[key].el.object3D.matrixWorld); //matrixWorld: https://threejs.org/docs/#api/en/math/Matrix4
+     *     });
+     * @example <caption>getAll() also accepts a marker type argument to filter by a given type</caption>
+     *     let markers = document.querySelector("a-scene").systems["armarker"].getAll('apriltag_36h11');
+     *
+     */
+    getAll(mtype = undefined) {
         if (mtype === undefined) return this.markers;
         return Object.assign(
             {},
             ...Object.entries(this.markers)
                 .filter(([, v]) => v.data.markertype === mtype)
-                .map(([k, v]) => ({[k]: v})),
+                .map(([k, v]) => ({ [k]: v }))
         );
     },
     /**
-    * Get a marker given its markerid; first lookup local scene objects, then ATLAS
-    * Marker with ID 0 is assumed to be at (x, y, z) 0, 0, 0
-    * @param {string} markerid - The marker id to return (converts to string, if a string is not given)
-    * @return {object} - the marker with the markerid given or undefined
-    * @alias module:armarker-system
-    */
-    getMarker: function(markerid) {
+     * Get a marker given its markerid; first lookup local scene objects, then ATLAS
+     * Marker with ID 0 is assumed to be at (x, y, z) 0, 0, 0
+     * @param {string} markerid - The marker id to return (converts to string, if a string is not given)
+     * @return {object} - the marker with the markerid given or undefined
+     * @alias module:armarker-system
+     */
+    getMarker(markerid) {
         if (!(typeof markerid === 'string' || markerid instanceof String)) {
             markerid = String(markerid); // convert markerid to string
         }
@@ -416,14 +412,11 @@ AFRAME.registerSystem('armarker', {
             const pos = new THREE.Vector3();
             const quat = new THREE.Quaternion();
             const scale = new THREE.Vector3();
-            markerPose.decompose( pos, quat, scale );
+            markerPose.decompose(pos, quat, scale);
             const markerPoseNoScale = new THREE.Matrix4(); // create a world matrix with only position and rotation
-            markerPoseNoScale.makeRotationFromQuaternion( quat );
-            markerPoseNoScale.setPosition( pos );
-            return Object.assign({}, sceneTag.data, {
-                obj_id: sceneTag.el.id,
-                pose: markerPoseNoScale,
-            });
+            markerPoseNoScale.makeRotationFromQuaternion(quat);
+            markerPoseNoScale.setPosition(pos);
+            return { ...sceneTag.data, obj_id: sceneTag.el.id, pose: markerPoseNoScale };
         }
         // default pose for tag 0
         if (markerid === '0') {

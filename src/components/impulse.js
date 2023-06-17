@@ -41,18 +41,21 @@ AFRAME.registerComponent('impulse', {
 
     multiple: true,
 
-    init: function() {
+    init() {
         const self = this;
     },
 
-    update: function(oldData) {
-        const data = this.data; // Component property values.
-        const el = this.el; // Reference to the component's entity.
+    update(oldData) {
+        const { data } = this; // Component property values.
+        const { el } = this; // Reference to the component's entity.
 
-        if (data.on) { // we have an event?
-            el.addEventListener(data.on, function(args) {
-                if (args.detail.clicker) { // our synthetic event from MQTT
-                    if (el.body) { // has physics = dynamic-body Component
+        if (data.on) {
+            // we have an event?
+            el.addEventListener(data.on, (args) => {
+                if (args.detail.clicker) {
+                    // our synthetic event from MQTT
+                    if (el.body) {
+                        // has physics = dynamic-body Component
                         // e.g. <a-entity impulse="on: mouseup; force: 1 50 1; position: 1 1 1" ...>
                         const force = new THREE.Vector3(data.force.x, data.force.y, data.force.z);
                         const pos = new THREE.Vector3(data.position.x, data.position.y, data.position.z);
@@ -66,9 +69,9 @@ AFRAME.registerComponent('impulse', {
         }
     },
     // handle component removal
-    remove: function() {
-        const data = this.data;
-        const el = this.el;
+    remove() {
+        const { data } = this;
+        const { el } = this;
 
         // remove event listener
         if (data.event) {

@@ -9,29 +9,28 @@
 /* global ARENA */
 
 // 'use strict';
-import { proxy, wrap} from 'comlink';
+import { proxy, wrap } from 'comlink';
 import { ARENADefaults } from '../../conf/defaults.js';
-import { ClientEvent, CreateUpdate, Delete} from '../message-actions/index.js';
-import { ARENA_EVENTS } from '../constants';
-import { ACTIONS } from '../constants';
+import { ClientEvent, CreateUpdate, Delete } from '../message-actions/index.js';
+import { ARENA_EVENTS, ACTIONS } from '../constants';
 
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
 const error = AFRAME.utils.debug('ARENA:MQTT:error');
 
 AFRAME.registerSystem('arena-mqtt', {
     schema: {
-        mqttHost: {type: 'string', default: ARENADefaults.mqttHost},
-        mqttPath: {type: 'array', default: ARENADefaults.mqttPath},
+        mqttHost: { type: 'string', default: ARENADefaults.mqttHost },
+        mqttPath: { type: 'array', default: ARENADefaults.mqttPath },
     },
 
-    init: function () {
+    init() {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
     },
-    ready: async function () {
-        const data = this.data;
-        const el = this.el;
+    async ready() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
@@ -39,13 +38,13 @@ AFRAME.registerSystem('arena-mqtt', {
         // set up MQTT params for worker
         this.userName = this.arena.mqttToken.mqtt_username;
         this.mqttHost = ARENA.params.mqttHost ?? data.mqttHost;
-        this.mqttHostURI = 'wss://' + this.mqttHost + data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)];
+        this.mqttHostURI = `wss://${this.mqttHost}${data.mqttPath[Math.floor(Math.random() * data.mqttPath.length)]}`;
 
         this.MQTTWorker = await this.initWorker();
 
         const mqttToken = this.arena.mqttToken.mqtt_token;
-        const camName = this.arena.camName;
-        const outputTopic = this.arena.outputTopic;
+        const { camName } = this.arena;
+        const { outputTopic } = this.arena;
         // Do not pass functions in mqttClientOptions
         this.connect(
             {
@@ -54,11 +53,11 @@ AFRAME.registerSystem('arena-mqtt', {
                 password: mqttToken,
             },
             proxy(() => {
-                console.info("ARENA MQTT scene connection success!");
+                console.info('ARENA MQTT scene connection success!');
                 ARENA.events.emit(ARENA_EVENTS.MQTT_LOADED, true);
             }),
             // last will message
-            JSON.stringify({ object_id: camName, action: "delete" }),
+            JSON.stringify({ object_id: camName, action: 'delete' }),
             // last will topic
             outputTopic + camName
         );
@@ -66,19 +65,19 @@ AFRAME.registerSystem('arena-mqtt', {
         ARENA.Mqtt = this; // Restore old alias
     },
 
-    initWorker: async function() {
-        const data = this.data;
-        const el = this.el;
+    async initWorker() {
+        const { data } = this;
+        const { el } = this;
 
-        const renderTopic = this.arena.renderTopic;
-        const idTag = this.arena.idTag;
+        const { renderTopic } = this.arena;
+        const { idTag } = this.arena;
 
-        const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), {type: 'module'}));
+        const MQTTWorker = wrap(new Worker(new URL('./workers/mqtt-worker.js', import.meta.url), { type: 'module' }));
         const worker = await new MQTTWorker(
             {
-                renderTopic: renderTopic,
+                renderTopic,
                 mqttHostURI: this.mqttHostURI,
-                idTag: idTag,
+                idTag,
             },
             proxy(this.mqttHealthCheck.bind(this))
             // proxy(() => {
@@ -89,7 +88,7 @@ AFRAME.registerSystem('arena-mqtt', {
             //     }
             // }),
         );
-        worker.registerMessageHandler("s", proxy(this.onSceneMessageArrived.bind(this)), true);
+        worker.registerMessageHandler('s', proxy(this.onSceneMessageArrived.bind(this)), true);
         return worker;
     },
 
@@ -107,7 +106,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * Internal callback to pass MQTT connection health to ARENAHealth.
      * @param {object} msg Message object like: {addError: 'mqttScene.connection'}
      */
-    mqttHealthCheck: function(msg) {
+    mqttHealthCheck(msg) {
         if (msg.removeError) this.health.removeError(msg.removeError);
         else if (msg.addError) this.health.addError(msg.addError);
     },
@@ -119,7 +118,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {number} qos
      * @param {boolean} retained
      */
-    publish: async function(topic, payload, qos=0, retained=false) {
+    async publish(topic, payload, qos = 0, retained = false) {
         await this.MQTTWorker.publish(topic, payload, qos, retained);
     },
 
@@ -127,7 +126,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * Send a message to internal receive handler
      * @param {object} jsonMessage
      */
-    processMessage: function(jsonMessage) {
+    processMessage(jsonMessage) {
         this.onSceneMessageArrived({ payloadObj: jsonMessage });
     },
 
@@ -135,7 +134,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * Returns mqttClient connection state
      * @return {boolean}
      */
-    isConnected: async function() {
+    async isConnected() {
         const client = this.MQTTWorker.mqttClient;
         const isConnected = await client.isConnected();
         return isConnected;
@@ -146,7 +145,7 @@ AFRAME.registerSystem('arena-mqtt', {
      * This message is expected to be JSON
      * @param {object} message
      */
-    onSceneMessageArrived: function(message) {
+    onSceneMessageArrived(message) {
         const theMessage = message.payloadObj; // This will be given as json
 
         if (!theMessage) {
@@ -174,52 +173,66 @@ AFRAME.registerSystem('arena-mqtt', {
             topicUser = message.destinationName.split('/')[4];
         }
 
-        switch (theMessage.action) { // clientEvent, create, delete, update
-        case ACTIONS.CLIENT_EVENT:
-            if (theMessage.data === undefined) {
-                warn('Malformed message (no data field):', JSON.stringify(message));
-                return;
-            }
-            // check topic
-            if (message.destinationName) {
-                if (topicUser !== theMessage.data.source) {
-                    warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+        switch (
+            theMessage.action // clientEvent, create, delete, update
+        ) {
+            case ACTIONS.CLIENT_EVENT:
+                if (theMessage.data === undefined) {
+                    warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
-            }
-            ClientEvent.handle(theMessage);
-            break;
-        case ACTIONS.CREATE:
-        case ACTIONS.UPDATE:
-            if (theMessage.data === undefined) {
-                warn('Malformed message (no data field):', JSON.stringify(message));
-                return;
-            }
-            // check topic
-            if (message.destinationName) {
-                if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
-                    warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
+                // check topic
+                if (message.destinationName) {
+                    if (topicUser !== theMessage.data.source) {
+                        warn(
+                            'Malformed message (topic does not pass check):',
+                            JSON.stringify(message),
+                            message.destinationName
+                        );
+                        return;
+                    }
+                }
+                ClientEvent.handle(theMessage);
+                break;
+            case ACTIONS.CREATE:
+            case ACTIONS.UPDATE:
+                if (theMessage.data === undefined) {
+                    warn('Malformed message (no data field):', JSON.stringify(message));
                     return;
                 }
-            }
-            CreateUpdate.handle(theMessage.action, theMessage);
-            break;
-        case ACTIONS.DELETE:
-            // check topic
-            if (message.destinationName) {
-                if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
-                    warn('Malformed message (topic does not pass check):', JSON.stringify(message), message.destinationName);
-                    return;
+                // check topic
+                if (message.destinationName) {
+                    if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
+                        warn(
+                            'Malformed message (topic does not pass check):',
+                            JSON.stringify(message),
+                            message.destinationName
+                        );
+                        return;
+                    }
                 }
-            }
-            Delete.handle(theMessage);
-            break;
-        case ACTIONS.GET_PERSIST:
-        case ACTIONS.RETURN_PERSIST:
-            break;
-        default:
-            warn('Malformed message (invalid action field):', JSON.stringify(message));
-            break;
+                CreateUpdate.handle(theMessage.action, theMessage);
+                break;
+            case ACTIONS.DELETE:
+                // check topic
+                if (message.destinationName) {
+                    if (!message.destinationName.endsWith(`/${theMessage.id}`)) {
+                        warn(
+                            'Malformed message (topic does not pass check):',
+                            JSON.stringify(message),
+                            message.destinationName
+                        );
+                        return;
+                    }
+                }
+                Delete.handle(theMessage);
+                break;
+            case ACTIONS.GET_PERSIST:
+            case ACTIONS.RETURN_PERSIST:
+                break;
+            default:
+                warn('Malformed message (invalid action field):', JSON.stringify(message));
+                break;
         }
     },
 });

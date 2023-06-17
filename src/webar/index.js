@@ -6,8 +6,8 @@
  * @date 2020
  */
 import './webar-session.js';
-import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
-import {ARENAUtils} from '../utils';
+import { WebARCameraCapture } from '../systems/armarker/camera-capture/ccwebar';
+import { ARENAUtils } from '../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 
@@ -63,10 +63,10 @@ export class ARENAWebARUtils {
 
         const sceneEl = document.querySelector('a-scene');
         const vrModeUI = sceneEl.components['vr-mode-ui'];
-        const enterAREl = vrModeUI.enterAREl;
+        const { enterAREl } = vrModeUI;
         enterAREl.classList.remove(HIDDEN_CLASS);
         enterAREl.removeEventListener('click', vrModeUI.onEnterARButtonClick, true);
-        enterAREl.addEventListener('click', function() {
+        enterAREl.addEventListener('click', () => {
             ARENAWebARUtils.enterARNonWebXR();
         });
     }

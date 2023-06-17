@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA, THREE */
 
-import {ARENA_EVENTS} from "../constants";
+import { ARENA_EVENTS } from '../constants';
 
 /**
  * Component-System of teleport destination Landmarks
@@ -33,7 +33,7 @@ AFRAME.registerComponent('landmark', {
         }, // range in m. Ignored if randomRadiusMax is not set
         offsetPosition: {
             type: 'vec3',
-            default: {x: 0, y: 0, z: 0},
+            default: { x: 0, y: 0, z: 0 },
         },
         constrainToNavMesh: {
             oneOf: ['false', 'any', 'coplanar'],
@@ -53,15 +53,15 @@ AFRAME.registerComponent('landmark', {
         },
     },
 
-    init: function() {
+    init() {
         this.system.registerComponent(this);
     },
 
-    remove: function() {
+    remove() {
         this.system.unregisterComponent(this);
     },
 
-    teleportTo: function(moveEl = undefined) {
+    teleportTo(moveEl = undefined) {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
         const dest = new THREE.Vector3();
@@ -70,13 +70,14 @@ AFRAME.registerComponent('landmark', {
         thisWorldPos.setFromMatrixPosition(this.el.object3D.matrixWorld);
         dest.copy(thisWorldPos).add(this.data.offsetPosition);
         if (this.data.randomRadiusMax > 0) {
-            const randomNorm = this.data.randomRadiusMin + (Math.random() *
-                (this.data.randomRadiusMax - this.data.randomRadiusMin));
-            const randomAngle = (-2 * Math.PI) + (Math.random() * 4 * Math.PI);
+            const randomNorm =
+                this.data.randomRadiusMin + Math.random() * (this.data.randomRadiusMax - this.data.randomRadiusMin);
+            const randomAngle = -2 * Math.PI + Math.random() * 4 * Math.PI;
             dest.x += Math.cos(randomAngle) * randomNorm;
             dest.z += Math.sin(randomAngle) * randomNorm;
         }
-        const navSys = this.el.sceneEl.systems.nav; let closestNode;
+        const navSys = this.el.sceneEl.systems.nav;
+        let closestNode;
         if (this.data.constrainToNavMesh !== 'false' && navSys.navMesh) {
             const checkPolygon = this.data.constrainToNavMesh === 'coplanar';
             const closestGroup = navSys.getGroup(dest, checkPolygon);
@@ -90,11 +91,10 @@ AFRAME.registerComponent('landmark', {
             if (this.data.lookAtLandmark) {
                 moveEl.components['look-controls'].yawObject.rotation.y = Math.atan2(
                     moveEl.object3D.position.x - thisWorldPos.x,
-                    moveEl.object3D.position.z - thisWorldPos.z,
+                    moveEl.object3D.position.z - thisWorldPos.z
                 );
             } else {
-                moveEl.components['look-controls'].yawObject.rotation.copy(
-                    this.el.object3D.rotation);
+                moveEl.components['look-controls'].yawObject.rotation.copy(this.el.object3D.rotation);
             }
             if (closestNode) {
                 moveEl.components['wasd-controls'].resetNav();
@@ -105,16 +105,16 @@ AFRAME.registerComponent('landmark', {
 });
 
 AFRAME.registerSystem('landmark', {
-    init: function() {
+    init() {
         this.landmarks = {};
         this.expectedStarts = 0;
         this.registeredStarts = 0;
     },
 
-    registerComponent: function(landmark) {
-        const data = this.data;
-        const el = this.el;
-        const sceneEl = el.sceneEl;
+    registerComponent(landmark) {
+        const { data } = this;
+        const { el } = this;
+        const { sceneEl } = el;
 
         const chat = sceneEl.components['arena-chat-ui'];
         this.landmarks[landmark.el.id] = landmark;
@@ -129,10 +129,10 @@ AFRAME.registerSystem('landmark', {
         }
     },
 
-    unregisterComponent: function(landmark) {
-        const data = this.data;
-        const el = this.el;
-        const sceneEl = el.sceneEl;
+    unregisterComponent(landmark) {
+        const { data } = this;
+        const { el } = this;
+        const { sceneEl } = el;
 
         const chat = sceneEl.components['arena-chat-ui'];
         delete this.landmarks[landmark.el.id];
@@ -142,7 +142,7 @@ AFRAME.registerSystem('landmark', {
         }
     },
 
-    getAll: function(startingPosition = undefined) {
+    getAll(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);
         if (startingPosition !== undefined) {
             landmarks = landmarks.filter((landmark) => landmark.data.startingPosition === startingPosition);
@@ -150,19 +150,18 @@ AFRAME.registerSystem('landmark', {
         return landmarks;
     },
 
-    getRandom: function(startingPosition = undefined) {
+    getRandom(startingPosition = undefined) {
         let landmarks = Object.values(this.landmarks);
         if (startingPosition !== undefined) {
             landmarks = landmarks.filter((landmark) => landmark.data.startingPosition === startingPosition);
         }
         if (landmarks.length) {
-            return landmarks[Math.floor(Math.random()*landmarks.length)];
-        } else {
-            return undefined;
+            return landmarks[Math.floor(Math.random() * landmarks.length)];
         }
+        return undefined;
     },
 
-    get: function(id) {
+    get(id) {
         return this.landmarks[id];
     },
 });
@@ -170,12 +169,13 @@ AFRAME.registerSystem('landmark', {
 // Teleport to landmark on click/etc
 AFRAME.registerComponent('goto-landmark', {
     schema: {
-        on: {type: 'string', default: ''}, // event to listen 'on'
-        landmark: {type: 'string', default: ''}, // id of landmark to teleport to
+        on: { type: 'string', default: '' }, // event to listen 'on'
+        landmark: { type: 'string', default: '' }, // id of landmark to teleport to
     },
 
-    eventHandlerFn: function(evt) {
-        if (evt.detail.clicker) { // this is synthetic click event from network, not from our own user
+    eventHandlerFn(evt) {
+        if (evt.detail.clicker) {
+            // this is synthetic click event from network, not from our own user
             return;
         }
         const targetEl = document.getElementById(this.data.landmark);
@@ -184,11 +184,11 @@ AFRAME.registerComponent('goto-landmark', {
         }
     },
 
-    init: function() {
+    init() {
         this.eventHandlerFn = this.eventHandlerFn.bind(this);
     },
 
-    update: function(oldData) {
+    update(oldData) {
         if (oldData.on) {
             this.el.removeEventListener(oldData.on, this.eventHandlerFn);
         }
@@ -197,10 +197,10 @@ AFRAME.registerComponent('goto-landmark', {
         }
     },
 
-    remove: function() { // handle component removal
+    remove() {
+        // handle component removal
         if (this.data.on) {
             this.el.removeEventListener(this.data.on, this.eventHandlerFn);
         }
     },
-
 });

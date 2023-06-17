@@ -12,10 +12,10 @@ const MAX_DELTA = 0.2;
 
 AFRAME.registerComponent('arrow-controls', {
     schema: {
-        acceleration: {default: 1.1},
+        acceleration: { default: 1.1 },
     },
 
-    init: function() {
+    init() {
         this.keys = {};
 
         this.onBlur = this.onBlur.bind(this);
@@ -27,47 +27,47 @@ AFRAME.registerComponent('arrow-controls', {
         this.attachVisibilityEventListeners();
     },
 
-    play: function() {
+    play() {
         this.attachKeyEventListeners();
         this.removeVisibilityEventListeners();
     },
 
-    pause: function() {
+    pause() {
         this.keys = {};
         this.removeKeyEventListeners();
     },
 
-    attachVisibilityEventListeners: function() {
+    attachVisibilityEventListeners() {
         window.addEventListener('blur', this.onBlur);
         window.addEventListener('focus', this.onFocus);
         document.addEventListener('visibilitychange', this.onVisibilityChange);
     },
 
-    removeVisibilityEventListeners: function() {
+    removeVisibilityEventListeners() {
         window.removeEventListener('blur', this.onBlur);
         window.removeEventListener('focus', this.onFocus);
         document.removeEventListener('visibilitychange', this.onVisibilityChange);
     },
 
-    attachKeyEventListeners: function() {
+    attachKeyEventListeners() {
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
     },
 
-    removeKeyEventListeners: function() {
+    removeKeyEventListeners() {
         window.removeEventListener('keydown', this.onKeyDown);
         window.removeEventListener('keyup', this.onKeyUp);
     },
 
-    onBlur: function() {
+    onBlur() {
         this.pause();
     },
 
-    onFocus: function() {
+    onFocus() {
         this.play();
     },
 
-    onVisibilityChange: function() {
+    onVisibilityChange() {
         if (document.hidden) {
             this.onBlur();
         } else {
@@ -75,19 +75,19 @@ AFRAME.registerComponent('arrow-controls', {
         }
     },
 
-    onKeyDown: function(event) {
+    onKeyDown(event) {
         this.keys[event.key] = true;
     },
 
-    onKeyUp: function(event) {
+    onKeyUp(event) {
         delete this.keys[event.key];
     },
 
-    tick: function(time, delta) {
-        const data = this.data;
-        const el = this.el;
-        const keys = this.keys;
-        const acceleration = data.acceleration;
+    tick(time, delta) {
+        const { data } = this;
+        const { el } = this;
+        const { keys } = this;
+        const { acceleration } = data;
 
         if (isEmptyObject(keys)) {
             return;
@@ -100,7 +100,7 @@ AFRAME.registerComponent('arrow-controls', {
             return;
         }
 
-        delta = delta / 1000;
+        delta /= 1000;
 
         // If FPS too low, ignore.
         if (delta > MAX_DELTA) {

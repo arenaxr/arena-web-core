@@ -13,17 +13,18 @@ import { JITSI_EVENTS } from '../constants';
 AFRAME.registerComponent('stats-monitor', {
     schema: {
         enabled: {
-            type: 'boolean', default: true,
+            type: 'boolean',
+            default: true,
         },
     },
 
     multiple: false,
 
-    init: function() {
-        const data = this.data;
-        const el = this.el;
+    init() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
 
@@ -37,7 +38,7 @@ AFRAME.registerComponent('stats-monitor', {
         sceneEl.setAttribute('stats', '');
     },
 
-    update: function(oldData) {
+    update(oldData) {
         if (this.data && !oldData) {
             this.registerListeners();
         } else if (!this.data && oldData) {
@@ -45,24 +46,24 @@ AFRAME.registerComponent('stats-monitor', {
         }
     },
 
-    remove: function() {
+    remove() {
         this.unregisterListeners();
     },
 
-    registerListeners: function() {
-        const data = this.data;
-        const el = this.el;
+    registerListeners() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.jitsiStatsLocalCallback);
     },
 
-    unregisterListeners: function() {
-        const data = this.data;
-        const el = this.el;
+    unregisterListeners() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         sceneEl.removeEventListener(JITSI_EVENTS.STATS_LOCAL, this.jitsiStatsLocalCallback);
     },
@@ -71,11 +72,11 @@ AFRAME.registerComponent('stats-monitor', {
      * Called when Jitsi local stats are updated, used to save local status for stats-monitor.
      * @param {Object} e event object; e.detail contains the callback arguments
      */
-    jitsiStatsLocalCallback: function(e) {
+    jitsiStatsLocalCallback(e) {
         this.callStats = e.detail.stats;
     },
 
-    tick: function(time, timeDelta) {
+    tick(time, timeDelta) {
         if (!this.rafDiv) {
             this.rafDiv = document.querySelector('.rs-counter-base:nth-child(1) .rs-counter-value');
             return;
@@ -89,7 +90,7 @@ AFRAME.registerComponent('stats-monitor', {
         this.fps = parseFloat(this.fpsDiv.innerHTML, 10);
 
         if (window.performance && window.performance.memory) {
-            const memory = window.performance.memory;
+            const { memory } = window.performance;
             this.usedJSHeapSize = memory.usedJSHeapSize;
             this.jsHeapSizeLimit = memory.jsHeapSizeLimit;
         }

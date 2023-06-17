@@ -1,23 +1,23 @@
-import {EffectComposer} from './effect-composer';
-import {UnrealBloomPass} from './passes/unreal-bloom-pass';
+import { EffectComposer } from './effect-composer';
+import { UnrealBloomPass } from './passes/unreal-bloom-pass';
 
 AFRAME.registerSystem('effects', {
-    init: function() {
-        const sceneEl = this.sceneEl;
+    init() {
+        const { sceneEl } = this;
 
         if (!sceneEl.hasLoaded) {
             sceneEl.addEventListener('renderstart', this.init.bind(this));
             return;
         }
 
-        const renderer = sceneEl.renderer;
+        const { renderer } = sceneEl;
 
         this.cameras = [];
 
         this.originalRenderFunc = null;
 
         this.composer = new EffectComposer(renderer);
-        this.compositor = sceneEl.systems['compositor'];
+        this.compositor = sceneEl.systems.compositor;
 
         this.t = 0;
         this.dt = 0;
@@ -42,29 +42,29 @@ AFRAME.registerSystem('effects', {
         this.bind();
     },
 
-    onResize: function() {
-        const sceneEl = this.sceneEl;
-        const renderer = sceneEl.renderer;
-        const camera = sceneEl.camera;
+    onResize() {
+        const { sceneEl } = this;
+        const { renderer } = sceneEl;
+        const { camera } = sceneEl;
 
-        var rendererSize = new THREE.Vector2();
+        const rendererSize = new THREE.Vector2();
         renderer.getSize(rendererSize);
         const pixelRatio = renderer.getPixelRatio();
         this.composer.setSize(pixelRatio * rendererSize.width, pixelRatio * rendererSize.height);
     },
 
-    tick: function(t, dt) {
+    tick(t, dt) {
         this.t = t;
         this.dt = dt;
     },
 
-    bind: function() {
-        const renderer = this.sceneEl.renderer;
-        const render = renderer.render;
-        const sceneEl = this.sceneEl;
+    bind() {
+        const { renderer } = this.sceneEl;
+        const { render } = renderer;
+        const { sceneEl } = this;
 
         const scene = sceneEl.object3D;
-        const camera = sceneEl.camera;
+        const { camera } = sceneEl;
 
         const cameraEl = camera.el;
         const system = this;
@@ -77,17 +77,17 @@ AFRAME.registerSystem('effects', {
 
         this.originalRenderFunc = render;
 
-        scene.onBeforeRender = function(renderer, scene, camera) {
+        scene.onBeforeRender = function (renderer, scene, camera) {
             if (camera instanceof THREE.ArrayCamera) {
                 system.cameras = camera.cameras;
             } else {
                 system.cameras.push(camera);
             }
-        }
+        };
 
         let currentXREnabled = renderer.xr.enabled;
 
-        renderer.render = function() {
+        renderer.render = function () {
             if (isDigest) {
                 // render "normally"
                 render.apply(this, arguments);
@@ -133,12 +133,12 @@ AFRAME.registerSystem('effects', {
         };
     },
 
-    unbind: function() {
-        const sceneEl = this.sceneEl;
-        const renderer = sceneEl.renderer;
+    unbind() {
+        const { sceneEl } = this;
+        const { renderer } = sceneEl;
 
         const scene = sceneEl.object3D;
-        const camera = sceneEl.camera;
+        const { camera } = sceneEl;
 
         if (this.binded === false) return;
         this.binded = false;

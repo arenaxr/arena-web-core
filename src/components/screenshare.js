@@ -11,15 +11,13 @@
  *
  */
 AFRAME.registerComponent('screenshareable', {
-    schema: {
+    schema: {},
 
-    },
-
-    init: function() {
+    init() {
         this.update();
     },
 
-    update: function(oldData) {
+    update(oldData) {
         const register = this.data;
         const prevRegistered = oldData;
 
@@ -30,11 +28,11 @@ AFRAME.registerComponent('screenshareable', {
         }
     },
 
-    register: function() {
+    register() {
         // this.system.registerComponent(this);
     },
 
-    remove: function() {
+    remove() {
         this.system.unregisterComponent(this);
     },
 });

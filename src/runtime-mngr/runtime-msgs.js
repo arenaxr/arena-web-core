@@ -13,8 +13,10 @@ import UUID from 'uuidjs';
 export default class RuntimeMsgs {
     /* singleton instance */
     static instance = null;
+
     /* runtime instance */
     rt;
+
     /* debug flag */
     debug;
 
@@ -52,17 +54,17 @@ export default class RuntimeMsgs {
         wasm: ['wasm:unstable'],
         python: ['python:python3'],
     };
- 
+
     /* our runtime type */
-    static RuntimeType='browser'
+    static RuntimeType = 'browser';
 
     /**
-   * Create the factory
-   * @param {object} rt - runtime instance
-   * @param {boolean} debug - debug messages on/off
-   */
+     * Create the factory
+     * @param {object} rt - runtime instance
+     * @param {boolean} debug - debug messages on/off
+     */
     constructor(rt, debug = false) {
-    // singleton
+        // singleton
         if (RuntimeMsgs.instance) {
             return RuntimeMsgs.instance;
         }
@@ -73,9 +75,9 @@ export default class RuntimeMsgs {
     }
 
     /**
-   * Base message definition
-   * @param {string} msgAction - message action ("create"/"delete")
-   */
+     * Base message definition
+     * @param {string} msgAction - message action ("create"/"delete")
+     */
     req(msgAction) {
         return {
             object_id: UUID.generate(), // random uuid used as a transaction id
@@ -85,10 +87,10 @@ export default class RuntimeMsgs {
     }
 
     /**
-   * Register/delete (according to msgAction; create=register) runtime message
-   * For internal (class) use
-   * @param {string} [msgAction="create"] - message action ("create"/"delete")
-   */
+     * Register/delete (according to msgAction; create=register) runtime message
+     * For internal (class) use
+     * @param {string} [msgAction="create"] - message action ("create"/"delete")
+     */
     createDeleteRuntime(msgAction) {
         const msg = this.req(msgAction);
 
@@ -104,25 +106,25 @@ export default class RuntimeMsgs {
     }
 
     /**
-   * Register runtime message
-   */
+     * Register runtime message
+     */
     registerRuntime() {
         return this.createDeleteRuntime(RuntimeMsgs.Action.create);
     }
 
     /**
-   * Delete runtime message
-   */
+     * Delete runtime message
+     */
     deleteRuntime() {
         return this.createDeleteRuntime(RuntimeMsgs.Action.delete);
     }
 
     /**
-   * Create/delete module message (according to msgAction)
-   * For internal (class) use
-   * @param {object} modAttrs - module attributes to include (uuid, name, ...)
-   * @param {string} [msgAction="create"] - message action ("create"/"delete")
-   */
+     * Create/delete module message (according to msgAction)
+     * For internal (class) use
+     * @param {object} modAttrs - module attributes to include (uuid, name, ...)
+     * @param {string} [msgAction="create"] - message action ("create"/"delete")
+     */
     createDeleteModule(
         {
             uuid = UUID.generate(),
@@ -138,42 +140,42 @@ export default class RuntimeMsgs {
             wait_state = undefined,
             memory = undefined,
         },
-        msgAction = RuntimeMsgs.Action.create,
+        msgAction = RuntimeMsgs.Action.create
     ) {
         const msg = this.req(msgAction);
 
         msg.data = {
             type: RuntimeMsgs.ObjType.mod,
-            uuid: uuid,
-            name: name,
-            parent: parent,
-            filename: filename,
-            fileid: fileid,
-            filetype: filetype,
-            env: env,
-            args: args,
-            channels: channels,
-            apis: apis,
-            wait_state: wait_state,
-            memory: memory,
+            uuid,
+            name,
+            parent,
+            filename,
+            fileid,
+            filetype,
+            env,
+            args,
+            channels,
+            apis,
+            wait_state,
+            memory,
         };
 
         return msg;
     }
 
     /**
-   * Delete module message
-   * @param {object} delModuleAttrs - module attributes to include (uuid, name, ...)
-   */
+     * Delete module message
+     * @param {object} delModuleAttrs - module attributes to include (uuid, name, ...)
+     */
     deleteModule(delModuleAttrs) {
         return this.createDeleteModule(delModuleAttrs, RuntimeMsgs.Action.delete);
     }
 
     /**
-   * Create module message from persist object
-   * @param {object} persistObj - module persist data (See example)
-   * @param {object} replaceVars - dictionary of extra variables to replace (e.g. {scene: "ascene"})
-   */
+     * Create module message from persist object
+     * @param {object} persistObj - module persist data (See example)
+     * @param {object} replaceVars - dictionary of extra variables to replace (e.g. {scene: "ascene"})
+     */
     createModuleFromPersistObj(persistObj, extraVars = {}) {
         const pdata = persistObj.attributes;
 
@@ -182,7 +184,7 @@ export default class RuntimeMsgs {
             let result;
             for (const [key, value] of Object.entries(rvars)) {
                 if (value !== undefined) {
-                    const re = new RegExp('\\$\\{' + key + '\\}', 'g');
+                    const re = new RegExp(`\\$\\{${key}\\}`, 'g');
                     result = text.replace(re, value);
                     text = result;
                 }
@@ -194,18 +196,15 @@ export default class RuntimeMsgs {
         // check if instantiate is "single"
         if (pdata.instantiate == 'single') {
             // object_id in persist obj is used as the uuid, if it is a valid uuid
-            const uuid_regex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            const uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
             if (uuid_regex.test(persistObj.object_id)) muuid = persistObj.object_id;
             else {
-                console.error(
-                    'Error! Object id must be a valid uuid (for instantiate=single)!',
-                );
+                console.error('Error! Object id must be a valid uuid (for instantiate=single)!');
             }
         }
 
         // get query string dictionary
-        const searchParams = new URL(document.location).searchParams;
+        const { searchParams } = new URL(document.location);
         const qstring = Object.fromEntries(searchParams.entries());
 
         // variables we replace
@@ -217,7 +216,8 @@ export default class RuntimeMsgs {
         };
 
         // replace variables in args and env
-        let args; let env;
+        let args;
+        let env;
         if (pdata.args) args = pdata.args.map((arg) => replaceVars(arg, rvars));
         if (pdata.env) env = pdata.env.map((env) => replaceVars(env, rvars));
 
@@ -225,19 +225,14 @@ export default class RuntimeMsgs {
         if (pdata.channels) {
             for (let i = 0; i < pdata.channels.length; i++) {
                 pdata.channels[i].path = replaceVars(pdata.channels[i].path, rvars);
-                pdata.channels[i].params.topic = replaceVars(
-                    pdata.channels[i].params.topic,
-                    rvars,
-                );
+                pdata.channels[i].params.topic = replaceVars(pdata.channels[i].params.topic, rvars);
             }
         }
 
         let fn;
         if (pdata.filetype == RuntimeMsgs.FileType.wasm) {
             // full filename using file store location, name (in the form namespace/program-folder), entry filename
-            fn = [this.rt.getFSLocation(), pdata.name, pdata.filename]
-                .join('/')
-                .replace(/([^:])(\/\/+)/g, '$1/');
+            fn = [this.rt.getFSLocation(), pdata.name, pdata.filename].join('/').replace(/([^:])(\/\/+)/g, '$1/');
         } else fn = pdata.filename; // just the filename
 
         // check apis
@@ -254,23 +249,21 @@ export default class RuntimeMsgs {
                 name: pdata.name,
                 uuid: muuid,
                 // parent is this runtime if affinity is client; otherwise, from request parent which can be undefined to let orchestrator decide
-                parent:
-          pdata.affinity == 'client' ? {uuid: this.rt.getUuid()} : pdata.parent,
+                parent: pdata.affinity == 'client' ? { uuid: this.rt.getUuid() } : pdata.parent,
                 filename: fn,
                 filetype: pdata.filetype,
                 channels: pdata.channels,
-                env: env,
-                apis: apis,
-                args: args,
+                env,
+                apis,
+                args,
             },
-            RuntimeMsgs.Action.create,
+            RuntimeMsgs.Action.create
         );
 
         // check affinity
         if (pdata.affinity == 'single') {
             // object_id in persist obj is used as the uuid, if it is a valid uuid
-            const regex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
             if (regex.test(persistObj.object_id)) {
                 modCreateMsg.data.uuid = persistObj.object_id;
             } else console.error('Error! Object id must be a valid uuid!');

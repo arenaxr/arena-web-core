@@ -23,7 +23,7 @@ AFRAME.registerComponent('build-watch-scene', {
     },
     // TODO: reduce logging to a reasonable level, similar to build page
     multiple: false,
-    init: function () {
+    init() {
         const observer = new MutationObserver(this.sceneNodesUpdate);
         console.log('build3d watching scene children...');
         observer.observe(this.el, {
@@ -33,7 +33,7 @@ AFRAME.registerComponent('build-watch-scene', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
-    sceneNodesUpdate: function (mutationList, observer) {
+    sceneNodesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
@@ -61,7 +61,7 @@ AFRAME.registerComponent('build-watch-scene', {
             }
         });
     },
-    cursorAttributesUpdate: function (mutationList, observer) {
+    cursorAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -101,7 +101,7 @@ AFRAME.registerComponent('build-watch-scene', {
             }
         });
     },
-    transformToolbarUpdate: function (mutationList, observer) {
+    transformToolbarUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -120,7 +120,7 @@ AFRAME.registerComponent('build-watch-scene', {
             }
         });
     },
-    tick: function () {
+    tick() {
         // TODO: move these detectors out to a more reliable timing condition
         if (!this.scenegraphDiv) {
             this.scenegraphDiv = document.getElementById('scenegraph');
@@ -138,7 +138,7 @@ AFRAME.registerComponent('build-watch-scene', {
                 line.innerHTML += `Pub MQTT: watching local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
-                    }
+            }
         }
         if (!this.cursor) {
             if (document.getElementsByClassName('a-grab-cursor').length > 0) {

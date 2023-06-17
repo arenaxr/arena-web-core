@@ -23,29 +23,32 @@
  */
 AFRAME.registerSystem('arena-health-ui', {
     schema: {
-        enabled: {type: 'boolean', default: true},
+        enabled: { type: 'boolean', default: true },
     },
 
-    init: function() {
-        const data = this.data;
-        const el = this.el;
+    init() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         if (!data.enabled) return;
 
         this.activeErrors = {};
 
         const _this = this;
-        $(document).ready(function() {
+        $(document).ready(() => {
             // hover, draw draw the errors box
             $('#error-icon').hover(
-                function() { // mouseenter
+                () => {
+                    // mouseenter
                     drawErrorBlock(_this.activeErrors);
                 },
-                function() { // mouseleave
+                () => {
+                    // mouseleave
                     $('#error-block').empty();
-                });
+                }
+            );
             // update icon display once doc is ready
             const icon = document.getElementById('error-icon');
             if (Object.keys(_this.activeErrors).length) {
@@ -60,7 +63,7 @@ AFRAME.registerSystem('arena-health-ui', {
      * Add an error to health monitor and show the icon.
      * @param {string} errorCode The error string matching errorCode in config
      */
-    addError: function(errorCode) {
+    addError(errorCode) {
         this.activeErrors[errorCode] = this.getErrorDetails(errorCode);
         // make error-icon visible
         const icon = document.getElementById('error-icon');
@@ -71,7 +74,7 @@ AFRAME.registerSystem('arena-health-ui', {
             if (v.class == 'health-error-label') {
                 imgSrc = 'src/ui/images/exclamation-error.png';
             }
-        };
+        }
         $('#error-img').attr('src', imgSrc);
     },
 
@@ -79,7 +82,7 @@ AFRAME.registerSystem('arena-health-ui', {
      * Remove an error to health monitor and hide the icon when errors = 0.
      * @param {string} errorCode The error string matching errorCode in config
      */
-    removeError: function(errorCode) {
+    removeError(errorCode) {
         delete this.activeErrors[errorCode];
         // make error-icon invisible, when activeErrors = 0
         if (!Object.keys(this.activeErrors).length) {
@@ -93,46 +96,53 @@ AFRAME.registerSystem('arena-health-ui', {
      * @param {string} errorCode The error string matching errorCode in config
      * @return {object} Details object for found/default error
      */
-    getErrorDetails: function(errorCode) {
+    getErrorDetails(errorCode) {
         const err = this.config.find((el) => el.errorCode === errorCode);
         if (err) {
             return err;
-        } else {
-            return { // default for unknown problem, as warning
-                errorCode: errorCode,
-                class: 'health-warning-label',
-                title: errorCode,
-                helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html',
-            };
         }
+        return {
+            // default for unknown problem, as warning
+            errorCode,
+            class: 'health-warning-label',
+            title: errorCode,
+            helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html',
+        };
     },
 
-    config: [{
-        "errorCode": "connection.connectionFailed",
-        "class": "health-error-label",
-        "title": "Conference server connection failed",
-        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-conference-server-connection-failed"
-    }, {
-        "errorCode": "conference.iceFailed",
-        "class": "health-error-label",
-        "title": "Conference stream failed",
-        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-conference-stream-failed"
-    }, {
-        "errorCode": "mqttChat.connection",
-        "class": "health-error-label",
-        "title": "Chat MQTT connection failed",
-        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html"
-    }, {
-        "errorCode": "slow.network",
-        "class": "health-error-label",
-        "title": "Network speed is too slow",
-        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#error-network-speed-is-too-slow"
-    }, {
-        "errorCode": "scene-options.allObjectsClickable",
-        "class": "health-warning-label",
-        "title": "Events Publish Behavior is too high",
-        "helpLink": "https://docs.arenaxr.org/content/troubleshooting.html#warning-events-publish-behavior-is-too-high"
-    }],
+    config: [
+        {
+            errorCode: 'connection.connectionFailed',
+            class: 'health-error-label',
+            title: 'Conference server connection failed',
+            helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html#error-conference-server-connection-failed',
+        },
+        {
+            errorCode: 'conference.iceFailed',
+            class: 'health-error-label',
+            title: 'Conference stream failed',
+            helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html#error-conference-stream-failed',
+        },
+        {
+            errorCode: 'mqttChat.connection',
+            class: 'health-error-label',
+            title: 'Chat MQTT connection failed',
+            helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html',
+        },
+        {
+            errorCode: 'slow.network',
+            class: 'health-error-label',
+            title: 'Network speed is too slow',
+            helpLink: 'https://docs.arenaxr.org/content/troubleshooting.html#error-network-speed-is-too-slow',
+        },
+        {
+            errorCode: 'scene-options.allObjectsClickable',
+            class: 'health-warning-label',
+            title: 'Events Publish Behavior is too high',
+            helpLink:
+                'https://docs.arenaxr.org/content/troubleshooting.html#warning-events-publish-behavior-is-too-high',
+        },
+    ],
 });
 
 /**
@@ -144,19 +154,28 @@ function drawErrorBlock(errors) {
     $('#error-block').append('<table id="error-list"><tbody></tbody></table><hr>');
     // add list of errors
     for (const [k, v] of Object.entries(errors)) {
-        $('#error-list').find('tbody')
-            .append($('<tr>')
-                .append($(`<td class="w-75"><span class="${v.class}">${v.title}</span></td>`))
-                .append(`<td class="w-25"><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`));
-    };
+        $('#error-list')
+            .find('tbody')
+            .append(
+                $('<tr>')
+                    .append($(`<td class="w-75"><span class="${v.class}">${v.title}</span></td>`))
+                    .append(
+                        `<td class="w-25"><a href="${v.helpLink}" target="_blank" class="btn btn-link btn-sm">Help</a></td>`
+                    )
+            );
+    }
     // add reload option
-    const reload = $('<table>')
-        .append($('<tbody>')
-            .append($('<tr>')
+    const reload = $('<table>').append(
+        $('<tbody>').append(
+            $('<tr>')
                 .append($('<td class="w-75"><small>Click `Reload` once errors are resolved.</small></td>'))
-                .append('<td class="w-25"><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>')));
+                .append(
+                    '<td class="w-25"><button id="btn-error-reload" class="btn btn-link btn-sm">Reload</button></td>'
+                )
+        )
+    );
     $('#error-block').append(reload);
-    $('#btn-error-reload').click(function() {
+    $('#btn-error-reload').click(() => {
         window.location.reload();
     });
 }

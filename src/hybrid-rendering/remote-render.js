@@ -1,12 +1,12 @@
 AFRAME.registerComponent('remote-render', {
     schema: {
-        enabled: {type: 'boolean', default: false},
-        printObjectStats: {type: 'boolean', default: false},
+        enabled: { type: 'boolean', default: false },
+        printObjectStats: { type: 'boolean', default: false },
     },
 
-    init: function() {
-        const data = this.data;
-        const el = this.el;
+    init() {
+        const { data } = this;
+        const { el } = this;
 
         this.getObjectStats = this.getObjectStats.bind(this);
 
@@ -19,17 +19,17 @@ AFRAME.registerComponent('remote-render', {
         }
     },
 
-    getObjectStats: function() {
-        const el = this.el;
-        const sceneEl = el.sceneEl;
+    getObjectStats() {
+        const { el } = this;
+        const { sceneEl } = el;
 
-        const camera = sceneEl.camera;
+        const { camera } = sceneEl;
 
-        var object = el.getObject3D('mesh');
+        const object = el.getObject3D('mesh');
         if (object === undefined) return;
 
-        var triangleCount = 0;
-        object.traverse(function (node) {
+        let triangleCount = 0;
+        object.traverse((node) => {
             if (node.isMesh) {
                 triangleCount += node.geometry.attributes.position.count / 3;
             }
@@ -38,7 +38,9 @@ AFRAME.registerComponent('remote-render', {
         console.log('Triangle count:', el.id, triangleCount);
 
         const frustum = new THREE.Frustum();
-        frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
+        frustum.setFromProjectionMatrix(
+            new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse)
+        );
 
         // Assuming you have references to your camera and object
         const box = new THREE.Box3().setFromObject(object);
@@ -53,7 +55,7 @@ AFRAME.registerComponent('remote-render', {
                 new THREE.Vector3(box.max.x, box.min.y, box.min.z),
                 new THREE.Vector3(box.max.x, box.min.y, box.max.z),
                 new THREE.Vector3(box.max.x, box.max.y, box.min.z),
-                new THREE.Vector3(box.max.x, box.max.y, box.max.z)
+                new THREE.Vector3(box.max.x, box.max.y, box.max.z),
             ];
 
             const projectedCorners = [];
@@ -88,11 +90,15 @@ AFRAME.registerComponent('remote-render', {
             const boundingBoxWidth = Math.abs(maxX - minX) * viewportWidth;
             const boundingBoxHeight = Math.abs(maxY - minY) * viewportHeight;
 
-            console.log('Viewport %:', el.id, boundingBoxWidth * boundingBoxHeight / (viewportWidth * viewportHeight) * 100);
+            console.log(
+                'Viewport %:',
+                el.id,
+                ((boundingBoxWidth * boundingBoxHeight) / (viewportWidth * viewportHeight)) * 100
+            );
         }
     },
 
-    update: function(oldData) {
+    update(oldData) {
         // console.log('[render-client]', this.el.id, this.data.enabled);
 
         this.el.setAttribute('visible', !this.data.enabled);

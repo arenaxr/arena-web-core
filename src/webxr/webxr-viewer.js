@@ -3,16 +3,16 @@
  *
  */
 AFRAME.registerComponent('webxr-viewer', {
-    init: function() {
+    init() {
         this.onEnterVR = this.onEnterVR.bind(this);
         window.addEventListener('enter-vr', this.onEnterVR);
     },
 
-    onEnterVR: function() {
-        const el = this.el;
-        const data = this.data;
+    onEnterVR() {
+        const { el } = this;
+        const { data } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         const urlParams = new URLSearchParams(window.location.search);
 
@@ -36,8 +36,8 @@ AFRAME.registerComponent('webxr-viewer', {
             cursorParent.appendChild(cursor);
 
             // handle tap events
-            document.addEventListener('mousedown', function(e) {
-                const intersectedEl = cursor.components.cursor.intersectedEl;
+            document.addEventListener('mousedown', (e) => {
+                const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
                     intersectedEl.emit(
@@ -49,13 +49,13 @@ AFRAME.registerComponent('webxr-viewer', {
                             },
                             cursorEl: true,
                         },
-                        false,
+                        false
                     );
                 }
             });
 
-            document.addEventListener('mouseup', function(e) {
-                const intersectedEl = cursor.components.cursor.intersectedEl;
+            document.addEventListener('mouseup', (e) => {
+                const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
                     intersectedEl.emit(
@@ -67,7 +67,7 @@ AFRAME.registerComponent('webxr-viewer', {
                             },
                             cursorEl: true,
                         },
-                        false,
+                        false
                     );
                 }
             });

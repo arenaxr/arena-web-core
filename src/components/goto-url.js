@@ -27,24 +27,24 @@ AFRAME.registerComponent('goto-url', {
             default: '',
         }, // http:// style url
         dest: {
-            default: 'sametab', oneOf: ['popup', 'newtab', 'sametab'],
+            default: 'sametab',
+            oneOf: ['popup', 'newtab', 'sametab'],
         }, // newtab
     },
 
     multiple: true,
 
-    init: function() {
+    init() {},
 
-    },
-
-    update: function(oldData) {
-        const data = this.data;
-        const el = this.el;
+    update(oldData) {
+        const { data } = this;
+        const { el } = this;
 
         let fired = false;
         el.removeEventListener(oldData.on, this.eventHandlerFn);
-        if (data.on && data.url) { // we have an event?
-            this.eventHandlerFn = function() {
+        if (data.on && data.url) {
+            // we have an event?
+            this.eventHandlerFn = function () {
                 if (!fired) {
                     fired = true;
                     Swal.fire({
@@ -53,10 +53,9 @@ AFRAME.registerComponent('goto-url', {
                         showCancelButton: true,
                         confirmButtonText: 'Yes',
                         reverseButtons: true,
-                    })
-                        .then((result) => {
-                            if (result.isConfirmed) {
-                                switch (data.dest) {
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            switch (data.dest) {
                                 case 'popup':
                                     window.open(data.url, 'popup', 'width=500,height=500');
                                     break;
@@ -67,10 +66,11 @@ AFRAME.registerComponent('goto-url', {
                                 default:
                                     window.location.href = data.url;
                                     break;
-                                }
                             }
-                        });
-                    window.setTimeout(() => { // prevents event from firing twice after one event
+                        }
+                    });
+                    window.setTimeout(() => {
+                        // prevents event from firing twice after one event
                         fired = false;
                     }, 100);
                 }
@@ -83,9 +83,9 @@ AFRAME.registerComponent('goto-url', {
     },
 
     // handle component removal
-    remove: function() {
-        const data = this.data;
-        const el = this.el;
+    remove() {
+        const { data } = this;
+        const { el } = this;
 
         // remove event listener
         if (data.on) {

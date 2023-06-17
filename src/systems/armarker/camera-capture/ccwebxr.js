@@ -9,7 +9,7 @@
  * @date 2021
  */
 
-import {CVWorkerMsgs} from '../worker-msgs.js';
+import { CVWorkerMsgs } from '../worker-msgs.js';
 
 /**
  * Grab camera frames using WebXR Raw Camera Access API
@@ -17,35 +17,50 @@ import {CVWorkerMsgs} from '../worker-msgs.js';
 export class WebXRCameraCapture {
     /* singleton instance */
     static instance = null;
+
     /* debug flag */
     debug;
+
     /* element created for debugging */
     debugEl;
+
     /* pixel ratio for the debug object */
     dbgPixelRatio;
+
     /* cv worker requested another frame */
     frameRequested = true;
+
     /* gl context */
     gl;
+
     /* XRWebGLBinding used for camera access */
     glBinding;
+
     /* frame buffer used to write the camera texture */
     fb;
+
     /* reference space returned on xr session start */
     xrRefSpace;
+
     /* last captured frame width */
     frameWidth;
+
     /* last captured frame height */
     frameHeight;
+
     /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
        this is the grayscale image we will pass to the detector */
     frameGsPixels;
+
     /* last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4]) */
     framePixels;
+
     /* last captured frame camera properties */
     frameCamera;
+
     /* last received detections (debug only) */
     lastDetections;
+
     /* worker to send images captured */
     cvWorker;
 
@@ -70,10 +85,7 @@ export class WebXRCameraCapture {
             if (cameraEl) {
                 // create object for debug (plane where we texture map the camera pixels)
                 this.debugEl = document.createElement('a-entity');
-                this.debugEl.setAttribute(
-                    'geometry',
-                    'primitive: plane; width:.05; height: .05;',
-                );
+                this.debugEl.setAttribute('geometry', 'primitive: plane; width:.05; height: .05;');
                 this.debugEl.setAttribute('material', 'color: white; opacity: .8');
                 // this.debugEl.setAttribute("position", "0 0 -.057");
                 this.debugEl.setAttribute('position', '.05 .02 -.15');
@@ -115,7 +127,7 @@ export class WebXRCameraCapture {
         if (frameRequested) this.frameRequested = true;
 
         if (this.debug) {
-        // listen for detection messages too so we can draw the corners
+            // listen for detection messages too so we can draw the corners
             this.cvWorker.addEventListener('message', this.cvWorkerMessage.bind(this));
         }
     }
@@ -146,7 +158,7 @@ export class WebXRCameraCapture {
     getCameraIntrinsics(projectionMatrix, viewport) {
         const p = projectionMatrix;
         return {
-        // Focal lengths in pixels (these are equal for square pixels)
+            // Focal lengths in pixels (these are equal for square pixels)
             fx: (viewport.width / 2) * p[0],
             fy: (viewport.height / 2) * p[5],
             // Principal point in pixels (typically at or near the center of the viewport)
@@ -169,19 +181,15 @@ export class WebXRCameraCapture {
         // check if camera frame changed size
         if (
             this.frameCamera == undefined ||
-        this.frameWidth != view.camera.width ||
-        this.frameHeight != view.camera.height
+            this.frameWidth != view.camera.width ||
+            this.frameHeight != view.camera.height
         ) {
-        // const viewport = glLayer.getViewport(view);
+            // const viewport = glLayer.getViewport(view);
 
             this.frameWidth = view.camera.width;
             this.frameHeight = view.camera.height;
-            this.framePixels = new Uint8ClampedArray(
-                this.frameWidth * this.frameHeight * 4,
-            ); // RGBA image (4 values per pixel)
-            this.frameGsPixels = new Uint8ClampedArray(
-                this.frameWidth * this.frameHeight,
-            ); // grayscale (1 value per pixel)
+            this.framePixels = new Uint8ClampedArray(this.frameWidth * this.frameHeight * 4); // RGBA image (4 values per pixel)
+            this.frameGsPixels = new Uint8ClampedArray(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
 
             const cameraViewport = {
                 width: this.frameWidth,
@@ -190,10 +198,7 @@ export class WebXRCameraCapture {
                 y: 0,
             };
             // update camera intrinsics
-            this.frameCamera = this.getCameraIntrinsics(
-                view.projectionMatrix,
-                cameraViewport,
-            );
+            this.frameCamera = this.getCameraIntrinsics(view.projectionMatrix, cameraViewport);
         }
 
         // get camera image as texture
@@ -202,13 +207,7 @@ export class WebXRCameraCapture {
         // bind the framebuffer, attach texture and read pixels
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.fb);
         // this.gl.pixelStorei(this.gl.UNPACK_FLIP_Y_WEBGL, true);
-        this.gl.framebufferTexture2D(
-            this.gl.FRAMEBUFFER,
-            this.gl.COLOR_ATTACHMENT0,
-            this.gl.TEXTURE_2D,
-            texture,
-            0,
-        );
+        this.gl.framebufferTexture2D(this.gl.FRAMEBUFFER, this.gl.COLOR_ATTACHMENT0, this.gl.TEXTURE_2D, texture, 0);
         this.gl.readPixels(
             0,
             0,
@@ -216,17 +215,13 @@ export class WebXRCameraCapture {
             this.frameHeight,
             this.gl.RGBA,
             this.gl.UNSIGNED_BYTE,
-            this.framePixels,
+            this.framePixels
         );
         // bind back to xr session's framebuffer
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glLayer.framebuffer);
 
         // grayscale and mirror image
-        for (
-            let r = this.frameWidth * (this.frameHeight - 1), j = 0;
-            r >= 0;
-            r -= this.frameWidth
-        ) {
+        for (let r = this.frameWidth * (this.frameHeight - 1), j = 0; r >= 0; r -= this.frameWidth) {
             for (let i = r * 4; i < (r + this.frameWidth) * 4; i += 4) {
                 this.frameGsPixels[j++] = this.framePixels[i + 1];
             }
@@ -235,17 +230,17 @@ export class WebXRCameraCapture {
         if (this.debug) {
             // draw last detection corners
             if (this.lastDetections && this.lastDetections[0]) {
-                for (let j = 0; j< this.lastDetections.length; j++) {
-                    for (let c=0; c<4; c++) {
+                for (let j = 0; j < this.lastDetections.length; j++) {
+                    for (let c = 0; c < 4; c++) {
                         const x = Math.floor(this.lastDetections[j].corners[c].x);
                         const y = Math.floor(this.frameHeight - this.lastDetections[j].corners[c].y);
-                        for (let dx=x-20; dx <= x+20; dx++) {
-                            for (let dy=y-20; dy <= y+20; dy++) {
-                                const i = (dy*this.frameWidth + dx)*4;
+                        for (let dx = x - 20; dx <= x + 20; dx++) {
+                            for (let dy = y - 20; dy <= y + 20; dy++) {
+                                const i = (dy * this.frameWidth + dx) * 4;
                                 this.framePixels[i] = 255;
-                                this.framePixels[i+1] = 0;
-                                this.framePixels[i+2] = 0;
-                                this.framePixels[i+3] = 255;
+                                this.framePixels[i + 1] = 0;
+                                this.framePixels[i + 2] = 0;
+                                this.framePixels[i + 3] = 255;
                             }
                         }
                     }
@@ -256,18 +251,10 @@ export class WebXRCameraCapture {
                 this.framePixels,
                 this.frameWidth,
                 this.frameHeight,
-                THREE.RGBAFormat,
+                THREE.RGBAFormat
             );
-            this.debugEl.setAttribute(
-                'geometry',
-                'width',
-                this.frameWidth / this.dbgPixelRatio,
-            );
-            this.debugEl.setAttribute(
-                'geometry',
-                'height',
-                this.frameHeight / this.dbgPixelRatio,
-            );
+            this.debugEl.setAttribute('geometry', 'width', this.frameWidth / this.dbgPixelRatio);
+            this.debugEl.setAttribute('geometry', 'height', this.frameHeight / this.dbgPixelRatio);
             const mesh = this.debugEl.getObject3D('mesh');
             mesh.material.map = tTexture;
             mesh.material.needsUpdate = true;
@@ -290,9 +277,7 @@ export class WebXRCameraCapture {
 
         // if (this.debug) console.log(`Post frame to worker: ${this.frameWidth}x${this.frameHeight}`);
         // post frame data, marking the pixel buffer as transferable
-        this.cvWorker.postMessage(camFrameMsg, [
-            camFrameMsg.grayscalePixels.buffer,
-        ]);
+        this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
     }
 
     /**
@@ -302,7 +287,7 @@ export class WebXRCameraCapture {
      * @private
      */
     onXRFrame(time, frame) {
-        const session = frame.session;
+        const { session } = frame;
         session.requestAnimationFrame(this.onXRFrame.bind(this));
         if (!this.frameRequested) return;
 
@@ -328,4 +313,3 @@ export class WebXRCameraCapture {
         if (cvWorkerMsg.detections) this.lastDetections = cvWorkerMsg.detections;
     }
 }
-

@@ -2,15 +2,15 @@
 
 /**
  * @fileoverview Similar to overridden hide-on-enter-vr.js, but for VR
-*/
+ */
 
 AFRAME.registerComponent('hide-on-enter-vr', {
-    init: function() {
+    init() {
         this.gltfAttributes = null;
         this.gltfLodAttributes = null;
         this.gltfLodAdvancedAttributes = null;
         const self = this;
-        this.el.sceneEl.addEventListener('enter-vr', function() {
+        this.el.sceneEl.addEventListener('enter-vr', () => {
             if (self.el.sceneEl.is('vr-mode')) {
                 self.el.object3D.visible = false;
                 self.gltfAttributes = self.el.getAttribute('gltf-model');
@@ -27,7 +27,7 @@ AFRAME.registerComponent('hide-on-enter-vr', {
                 }
             }
         });
-        this.el.sceneEl.addEventListener('exit-vr', function() {
+        this.el.sceneEl.addEventListener('exit-vr', () => {
             if (self.gltfAttributes) {
                 self.setAttribute('gltf-model', self.gltfAttributes);
             }

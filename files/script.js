@@ -1,7 +1,7 @@
 /**
  * Script to connect to filestore auth endpoint and then load filestore proxy when fs auth completes.
  */
-$(document).ready(function() {
+$(document).ready(() => {
     updateStoreLogin();
 });
 
@@ -60,7 +60,7 @@ async function loadHtmlToFrame(html) {
     doc.close();
 
     // Since filebrowser load will overwrite some style, after fs load, force any style we require
-    var link = document.createElement('link');
+    const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.type = 'text/css';
     link.href = 'style.css';
@@ -102,7 +102,7 @@ function getCookie(name) {
         for (let i = 0; i < cookies.length; i++) {
             const cookie = cookies[i].trim();
             // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            if (cookie.substring(0, name.length + 1) === `${name}=`) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }

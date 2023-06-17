@@ -6,20 +6,20 @@
  * @date 2022
  */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 
 AFRAME.registerComponent('arena-webar-session', {
     schema: {
-        enabled: {type: 'boolean', default: true},
-        frameWidth: {type: 'number', default: 1280},
-        frameHeight: {type: 'number', default: 720},
+        enabled: { type: 'boolean', default: true },
+        frameWidth: { type: 'number', default: 1280 },
+        frameHeight: { type: 'number', default: 720 },
     },
 
-    init: async function() {
-        const data = this.data;
-        const el = this.el;
+    async init() {
+        const { data } = this;
+        const { el } = this;
 
         // hide environment and make scene transparent
         const env = document.getElementById('env');
@@ -47,10 +47,10 @@ AFRAME.registerComponent('arena-webar-session', {
         camera.setAttribute('look-controls', 'magicWindowTrackingEnabled', true);
 
         // Disable handoff of orientation to THREE when `ar-mode` and VR-capability is detected
-        document.getElementById('my-camera').components['look-controls'].updateOrientation = function() {
-            const object3D = this.el.object3D;
-            const pitchObject = this.pitchObject;
-            const yawObject = this.yawObject;
+        document.getElementById('my-camera').components['look-controls'].updateOrientation = function () {
+            const { object3D } = this.el;
+            const { pitchObject } = this;
+            const { yawObject } = this;
 
             this.updateMagicWindowOrientation();
 
@@ -66,26 +66,26 @@ AFRAME.registerComponent('arena-webar-session', {
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
 
-        document.querySelector('a-scene').systems['armarker'].webXRSessionStarted();
+        document.querySelector('a-scene').systems.armarker.webXRSessionStarted();
     },
 
     update() {
         this.onResize();
     },
 
-    hideVRButtons: function() {
-        const data = this.data;
-        const el = this.el;
+    hideVRButtons() {
+        const { data } = this;
+        const { el } = this;
 
-        const enterAREl = el.components['vr-mode-ui'].enterAREl;
+        const { enterAREl } = el.components['vr-mode-ui'];
         enterAREl.classList.add(HIDDEN_CLASS);
-        const enterVREl = el.components['vr-mode-ui'].enterVREl;
+        const { enterVREl } = el.components['vr-mode-ui'];
         enterVREl.classList.add(HIDDEN_CLASS);
     },
 
-    onResize: function() {
-        const data = this.data;
-        const el = this.el;
+    onResize() {
+        const { data } = this;
+        const { el } = this;
 
         // set new camera projection matrix parameters
         if (ARENAUtils.isLandscapeMode()) {
@@ -94,12 +94,10 @@ AFRAME.registerComponent('arena-webar-session', {
             } else {
                 el.camera.fov = 26; // found empirically
             }
+        } else if (window.innerWidth > data.frameWidth || window.innerHeight > data.frameHeight) {
+            el.camera.fov = 64; // found empirically
         } else {
-            if (window.innerWidth > data.frameWidth || window.innerHeight > data.frameHeight) {
-                el.camera.fov = 64; // found empirically
-            } else {
-                el.camera.fov = 77; // found empirically
-            }
+            el.camera.fov = 77; // found empirically
         }
         el.camera.aspect = window.innerWidth / window.innerHeight;
         el.camera.near = 0.001; // webxr viewer parameters

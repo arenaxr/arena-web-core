@@ -23,7 +23,7 @@ const IMG_EXTENSIONS = ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff'];
  * @params {function} isVideoCb - callback if texture is a video.
  */
 function validateSrc(src, isImageCb, isVideoCb) {
-    checkIsImage(src, function isAnImageUrl(isImage) {
+    checkIsImage(src, (isImage) => {
         if (isImage) {
             isImageCb(src);
             return;
@@ -59,18 +59,16 @@ function checkIsImage(src, onResult) {
 
     // Try to send HEAD request to check if image first.
     request.open('HEAD', src);
-    request.addEventListener('load', function(event) {
+    request.addEventListener('load', (event) => {
         let contentType;
         if (request.status >= 200 && request.status < 300) {
             contentType = request.getResponseHeader('Content-Type');
             if (contentType == null) {
                 checkIsImageFallback(src, onResult);
+            } else if (contentType.startsWith('image')) {
+                onResult(true);
             } else {
-                if (contentType.startsWith('image')) {
-                    onResult(true);
-                } else {
-                    onResult(false);
-                }
+                onResult(false);
             }
         } else {
             checkIsImageFallback(src, onResult);
@@ -92,6 +90,5 @@ function checkIsImageFallback(src, onResult) {
     }
     tester.src = src;
 }
-
 
 AFRAME.utils.srcLoader.validateSrc = validateSrc;

@@ -19,15 +19,15 @@ const EPS = 10e-6;
  */
 AFRAME.registerComponent('press-and-move', {
     schema: {
-        acceleration: {default: 30},
-        constrainToNavMesh: {default: false},
-        enabled: {default: true},
-        fly: {default: false},
-        longPressDurationThreshold: {default: 500},
+        acceleration: { default: 30 },
+        constrainToNavMesh: { default: false },
+        enabled: { default: true },
+        fly: { default: false },
+        longPressDurationThreshold: { default: 500 },
     },
 
-    init: function() {
-        const data = this.data;
+    init() {
+        const { data } = this;
 
         // Navigation
         this.navGroup = null;
@@ -45,28 +45,31 @@ AFRAME.registerComponent('press-and-move', {
         this.direction = 1;
 
         const self = this;
-        window.addEventListener('touchstart', function(evt) {
-            // evt.preventDefault();
-            if (evt.touches.length === 1 || evt.touches.length == 2) {
-                if (evt.touches.length === 1) {
-                    self.direction = 1;
-                }
-                else if (evt.touches.length === 2) {
-                    self.direction = -1;
-                }
+        window.addEventListener(
+            'touchstart',
+            (evt) => {
+                // evt.preventDefault();
+                if (evt.touches.length === 1 || evt.touches.length == 2) {
+                    if (evt.touches.length === 1) {
+                        self.direction = 1;
+                    } else if (evt.touches.length === 2) {
+                        self.direction = -1;
+                    }
 
-                self.startTouchTime = performance.now();
-            }
-        }, {passive: false});
+                    self.startTouchTime = performance.now();
+                }
+            },
+            { passive: false }
+        );
 
-        window.addEventListener('touchend', function(evt) {
+        window.addEventListener('touchend', (evt) => {
             self.startTouchTime = null;
         });
     },
 
-    updateVelocity: function(delta) {
-        const data = this.data;
-        const velocity = this.velocity;
+    updateVelocity(delta) {
+        const { data } = this;
+        const { velocity } = this;
 
         // If FPS too low, reset velocity.
         if (delta > MAX_DELTA) {
@@ -76,14 +79,14 @@ AFRAME.registerComponent('press-and-move', {
         }
 
         // https://gamedev.stackexchange.com/questions/151383/frame-rate-independant-movement-with-acceleration
-        const scaledEasing = Math.pow(1 / this.easing, delta * 60);
+        const scaledEasing = (1 / this.easing) ** (delta * 60);
         // Velocity Easing.
         if (velocity.x !== 0) {
-            velocity.x = velocity.x * scaledEasing;
+            velocity.x *= scaledEasing;
         }
 
         if (velocity.z !== 0) {
-            velocity.z = velocity.z * scaledEasing;
+            velocity.z *= scaledEasing;
         }
 
         // Clamp velocity easing.
@@ -100,17 +103,17 @@ AFRAME.registerComponent('press-and-move', {
         }
 
         // Update velocity using keys pressed.
-        const acceleration = data.acceleration;
+        const { acceleration } = data;
         velocity.z -= acceleration * delta;
     },
 
-    getMovementVector: (function() {
+    getMovementVector: (function () {
         const directionVector = new THREE.Vector3(0, 0, 0);
         const rotationEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
-        return function(delta) {
+        return function (delta) {
             const rotation = this.el.getAttribute('rotation');
-            const velocity = this.velocity;
+            const { velocity } = this;
 
             directionVector.copy(velocity);
             directionVector.multiplyScalar(delta);
@@ -131,8 +134,8 @@ AFRAME.registerComponent('press-and-move', {
         };
     })(),
 
-    resetNav: function(checkPolygon = false, clampStep = false) {
-        const nav = this.el.sceneEl.systems.nav;
+    resetNav(checkPolygon = false, clampStep = false) {
+        const { nav } = this.el.sceneEl.systems;
         if (nav.navMesh) {
             this.navStart.copy(this.el.object3D.position).y -= ARENA.defaults.camHeight;
             this.navEnd.copy(this.navStart);
@@ -146,23 +149,21 @@ AFRAME.registerComponent('press-and-move', {
         }
     },
 
-    tick: function(time, delta) {
-        const data = this.data;
-        const el = this.el;
-        const velocity = this.velocity;
+    tick(time, delta) {
+        const { data } = this;
+        const { el } = this;
+        const { velocity } = this;
 
         const currTime = performance.now();
         if (this.startTouchTime !== null) {
-            if (currTime - this.startTouchTime < data.longPressDurationThreshold)
-                return;
+            if (currTime - this.startTouchTime < data.longPressDurationThreshold) return;
 
-            delta = delta / 1000;
+            delta /= 1000;
             this.updateVelocity(delta);
 
-            if (!velocity.x && !velocity.z)
-                return;
+            if (!velocity.x && !velocity.z) return;
 
-            const nav = el.sceneEl.systems.nav;
+            const { nav } = el.sceneEl.systems;
             if (nav.navMesh && data.constrainToNavMesh && !data.fly) {
                 if (velocity.lengthSq() < EPS) return;
 
@@ -181,4 +182,3 @@ AFRAME.registerComponent('press-and-move', {
         }
     },
 });
-

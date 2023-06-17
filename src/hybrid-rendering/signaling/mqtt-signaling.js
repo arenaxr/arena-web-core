@@ -1,4 +1,4 @@
-import {ARENAUtils} from '../../utils';
+import { ARENAUtils } from '../../utils';
 
 const Paho = require('paho-mqtt');
 
@@ -43,15 +43,15 @@ export class MQTTSignaling {
         const _this = this;
         return new Promise((resolve, reject) => {
             this.client.connect({
-                cleanSession : true,
+                cleanSession: true,
                 userName: this.mqttUsername,
                 password: this.mqttToken,
-                onSuccess : () => {
+                onSuccess: () => {
                     _this.mqttOnConnect();
                     resolve();
                 },
-                onFailure : this.mqttOnConnectionLost,
-                reconnect : true,
+                onFailure: this.mqttOnConnectionLost,
+                reconnect: true,
             });
         });
     }
@@ -73,14 +73,14 @@ export class MQTTSignaling {
     }
 
     mqttOnMessageArrived(message) {
-        var signal = JSON.parse(message.payloadString);
+        const signal = JSON.parse(message.payloadString);
         // ignore other clients
         if (signal.source == 'client') return;
 
         // ignore own messages
         if (signal.id == this.id) return;
 
-        if ((this.connectionId != null) && (signal.id != this.connectionId)) return;
+        if (this.connectionId != null && signal.id != this.connectionId) return;
 
         // console.log('[render-client]', signal);
         if (signal.type == 'connect') {
@@ -93,17 +93,17 @@ export class MQTTSignaling {
         } else if (signal.type == 'ice') {
             if (this.onIceCandidate) this.onIceCandidate(signal.data);
         } else if (signal.type == 'health') {
-            if (this.onHealthCheck) this.onHealthCheck(signal.data)
+            if (this.onHealthCheck) this.onHealthCheck(signal.data);
         }
     }
 
     sendMessage(topic, type, data) {
         const msg = {
-            'type': type,
-            'source': 'client',
-            'id': this.id,
-            'data': data,
-            'ts': new Date().getTime()
+            type,
+            source: 'client',
+            id: this.id,
+            data,
+            ts: new Date().getTime(),
         };
 
         this.publish(topic, JSON.stringify(msg));
@@ -113,14 +113,18 @@ export class MQTTSignaling {
         const width = Math.max(screen.width, screen.height);
         const height = Math.min(screen.width, screen.height);
         const connectData = {
-            'id': this.id,
-            'deviceType': ARENAUtils.getDeviceType(),
-            'sceneNamespace': ARENA.namespace,
-            'sceneName': ARENA.scene,
-            'screenWidth': 1.25*width,
-            'screenHeight': height,
+            id: this.id,
+            deviceType: ARENAUtils.getDeviceType(),
+            sceneNamespace: ARENA.namespace,
+            sceneName: ARENA.scene,
+            screenWidth: 1.25 * width,
+            screenHeight: height,
         };
-        this.sendMessage(`${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`, 'connect-ack', connectData);
+        this.sendMessage(
+            `${CLIENT_CONNECT_TOPIC_PREFIX}/${ARENA.namespacedScene}/${this.id}`,
+            'connect-ack',
+            connectData
+        );
     }
 
     closeConnection() {

@@ -9,7 +9,7 @@
 /* global AFRAME */
 
 AFRAME.registerSystem('remove-stats-exit-fullscreen', {
-    init: function() {
+    init() {
         this.fullScreenExitHandler = this.fullScreenExitHandler.bind(this);
 
         if (document.addEventListener) {
@@ -23,11 +23,11 @@ AFRAME.registerSystem('remove-stats-exit-fullscreen', {
     /**
      * Handle exit from full screen scenarios
      */
-    fullScreenExitHandler: function() {
+    fullScreenExitHandler() {
         if (document.webkitIsFullScreen || document.mozFullScreen || document.msFullscreenElement !== null) {
             // manually disable a-frame stats
             const sceneEl = document.querySelector('a-scene');
             sceneEl.removeAttribute('stats');
         }
-    }
+    },
 });

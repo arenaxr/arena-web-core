@@ -26,10 +26,10 @@ AFRAME.registerComponent('build-watch-object', {
             default: false,
         },
     },
-    init: function () {
+    init() {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
     },
-    objectAttributesUpdate: function (mutationList, observer) {
+    objectAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -47,7 +47,7 @@ AFRAME.registerComponent('build-watch-object', {
                     if (mutation.target.id) {
                         const attribute = mutation.target.getAttribute(mutation.attributeName);
                         // when 'id' changes, we have a new object, maybe a name change
-                        let msg = {
+                        const msg = {
                             object_id: mutation.target.id === 'env' ? 'scene-options' : mutation.target.id,
                             action: mutation.attributeName === 'id' ? 'create' : 'update',
                             type: mutation.target.id === 'env' ? 'scene-options' : 'object',
@@ -55,7 +55,7 @@ AFRAME.registerComponent('build-watch-object', {
                             data: {},
                         };
                         // use aframe-watcher updates to send only changes updated
-                        let changes = undefined;
+                        let changes;
                         if (AFRAME.INSPECTOR.history && AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
                             changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
                         }
@@ -74,7 +74,7 @@ AFRAME.registerComponent('build-watch-object', {
                             mutation.oldValue &&
                             mutation.target.id != mutation.oldValue
                         ) {
-                            let msg = {
+                            const msg = {
                                 object_id: mutation.oldValue,
                                 action: 'delete',
                                 persist: true,
@@ -88,7 +88,7 @@ AFRAME.registerComponent('build-watch-object', {
             }
         });
     },
-    update: function () {
+    update() {
         if (this.data.enabled) {
             console.log(`build3d watching entity ${this.el.id} attributes...`);
             this.observer.observe(this.el, {
@@ -106,11 +106,11 @@ AFRAME.registerComponent('build-watch-object', {
             window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
     },
-    remove: function () {
+    remove() {
         const el = document.getElementById(this.el.id);
         // don't delete if only the component is removed, the node must be removed
         if (!el) {
-            let msg = {
+            const msg = {
                 object_id: this.el.id,
                 action: 'delete',
                 persist: true,
@@ -149,7 +149,7 @@ function extractDataUpdates(mutation, attribute, changes) {
             data.position = attribute;
             break;
         case 'rotation':
-            const quaternion = mutation.target.object3D.quaternion;
+            const { quaternion } = mutation.target.object3D;
             data.rotation = {
                 // always send quaternions over the wire
                 x: quaternion._x,
@@ -169,15 +169,15 @@ function extractDataUpdates(mutation, attribute, changes) {
             }
             if (mutation.target.nodeName.toLowerCase() == 'a-videosphere') {
                 data.object_type = 'videosphere';
-            } else{
+            } else {
                 data.object_type = attribute.primitive;
             }
             break;
         case 'environment':
-            data['env-presets'] = changes ? changes : {};
+            data['env-presets'] = changes || {};
             break;
         default:
-            data[mutation.attributeName] = changes ? changes : {};
+            data[mutation.attributeName] = changes || {};
             break;
     }
     // if (!data.object_type) {
@@ -216,7 +216,7 @@ function extractDataFullDOM(mutation) {
                 data.position = attribute;
                 break;
             case 'rotation':
-                const quaternion = mutation.target.object3D.quaternion;
+                const { quaternion } = mutation.target.object3D;
                 data.rotation = {
                     // always send quaternions over the wire
                     x: quaternion._x,
@@ -234,7 +234,7 @@ function extractDataFullDOM(mutation) {
                 delete data.primitive;
                 if (mutation.target.nodeName.toLowerCase() == 'a-videosphere') {
                     data.object_type = 'videosphere';
-                } else{
+                } else {
                     data.object_type = attribute.primitive;
                 }
                 break;
@@ -251,13 +251,13 @@ function extractDataFullDOM(mutation) {
 }
 
 function LogToUser(msg, attributeName, changes) {
-    let inspectorMqttLog = document.getElementById('inspectorMqttLog');
+    const inspectorMqttLog = document.getElementById('inspectorMqttLog');
     if (inspectorMqttLog) {
         inspectorMqttLog.appendChild(document.createElement('br'));
-        let line = document.createElement('span');
-        line.innerHTML += `${symbols[msg.action]}: ${msg.object_id} ${
-            attributeName ? attributeName : ''
-        } ${JSON.stringify(changes ? changes : msg.data ? msg.data : '')}`;
+        const line = document.createElement('span');
+        line.innerHTML += `${symbols[msg.action]}: ${msg.object_id} ${attributeName || ''} ${JSON.stringify(
+            changes || (msg.data ? msg.data : '')
+        )}`;
         inspectorMqttLog.appendChild(line);
         line.scrollIntoView();
     }

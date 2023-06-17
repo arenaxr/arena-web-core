@@ -8,9 +8,9 @@
 
 /* global AFRAME */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
-AFRAME.components['gltf-model'].Component.prototype.init = function() {
+AFRAME.components['gltf-model'].Component.prototype.init = function () {
     const self = this;
     const dracoLoader = this.system.getDRACOLoader();
     const meshoptDecoder = this.system.getMeshoptDecoder();
@@ -21,7 +21,7 @@ AFRAME.components['gltf-model'].Component.prototype.init = function() {
         this.loader.setDRACOLoader(dracoLoader);
     }
     if (meshoptDecoder) {
-        this.ready = meshoptDecoder.then(function(meshoptDecoder) {
+        this.ready = meshoptDecoder.then((meshoptDecoder) => {
             self.loader.setMeshoptDecoder(meshoptDecoder);
         });
     } else {
@@ -31,7 +31,7 @@ AFRAME.components['gltf-model'].Component.prototype.init = function() {
         this.loader.setKTX2Loader(ktxLoader);
     }
     // Add event listener for model-loaded event
-    this.el.addEventListener('model-loaded', function() {
+    this.el.addEventListener('model-loaded', () => {
         // Check for modelUpdate stashed prop
         const modelUpdate = self.el.deferredModelUpdate;
         if (modelUpdate) {

@@ -27,13 +27,16 @@
 AFRAME.registerComponent('armarker', {
     schema: {
         markertype: {
-            default: 'apriltag_36h11', oneOf: ['apriltag_36h11', 'lightanchor', 'uwb'],
+            default: 'apriltag_36h11',
+            oneOf: ['apriltag_36h11', 'lightanchor', 'uwb'],
         }, // markertype: apriltag_36h11, lightanchor, uwb
         dynamic: {
-            default: false, type: 'boolean',
+            default: false,
+            type: 'boolean',
         },
         publish: {
-            default: false, type: 'boolean',
+            default: false,
+            type: 'boolean',
         },
         markerid: {
             type: 'string',
@@ -60,21 +63,23 @@ AFRAME.registerComponent('armarker', {
             default: 0,
         }, // marker elevation
     },
-    init: function() {
+    init() {
         this.update();
         this.system.registerComponent(this);
-        if (this.data.buildable) { // Toggle clientside dynamic
+        if (this.data.buildable) {
+            // Toggle clientside dynamic
             this.el.setAttribute('material', 'wireframe', this.data.dynamic);
             this.el.setAttribute('click-listener', true);
             this.el.addEventListener('mousedown', (evt) => {
-                if (evt.detail.cursorEl) { // Only track native click event
+                if (evt.detail.cursorEl) {
+                    // Only track native click event
                     this.data.dynamic = !this.data.dynamic;
                     this.el.setAttribute('material', 'wireframe', this.data.dynamic);
                 }
             });
         }
     },
-    update: function() {
+    update() {
         // try to assign a marker id based on the object id: name_markerid
         if (this.data.markerid === '') {
             const regex = /(?<name>\w+)_(?<markerid>\w+)/g;
@@ -82,7 +87,7 @@ AFRAME.registerComponent('armarker', {
             this.data.markerid = match.groups.markerid;
         }
     },
-    remove: function() {
+    remove() {
         this.system.unregisterComponent(this);
     },
 });

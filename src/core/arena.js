@@ -15,30 +15,30 @@ import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
 
 AFRAME.registerSystem('arena-scene', {
     schema: {
-        devInstance: {type: 'boolean', default: ARENADefaults.devInstance},
-        persistHost: {type: 'string', default: ARENADefaults.persistHost},
-        persistPath: {type: 'string', default: ARENADefaults.persistPath},
-        camHeight: {type: 'number', default: ARENADefaults.camHeight},
-        disallowJWT: {type: 'boolean', default: !!ARENADefaults.disallowJWT},
+        devInstance: { type: 'boolean', default: ARENADefaults.devInstance },
+        persistHost: { type: 'string', default: ARENADefaults.persistHost },
+        persistPath: { type: 'string', default: ARENADefaults.persistPath },
+        camHeight: { type: 'number', default: ARENADefaults.camHeight },
+        disallowJWT: { type: 'boolean', default: !!ARENADefaults.disallowJWT },
     },
 
-    init: function () {
+    init() {
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.fetchSceneOptions.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
             this.fetchSceneObjects().then(() => {});
         });
         ARENA.events.addMultiEventListener(
-            [ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.USER_PARAMS_LOADED, "loaded"],
+            [ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.USER_PARAMS_LOADED, 'loaded'],
             this.loadScene.bind(this)
         );
     },
 
-    ready: function (evt) {
-        const data = this.data;
-        const el = this.el;
+    ready(evt) {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         // Sync params with bootstrap ARENA object from Auth
         this.params = { ...ARENA.params };
@@ -100,7 +100,7 @@ AFRAME.registerSystem('arena-scene', {
         });
 
         sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER_CHANGED, (e) => {
-            const speaker = (!e.detail.id || e.detail.id === this.idTag); // self is speaker
+            const speaker = !e.detail.id || e.detail.id === this.idTag; // self is speaker
             this.showEchoDisplayName(speaker);
         });
     },
@@ -109,26 +109,26 @@ AFRAME.registerSystem('arena-scene', {
      * Fetches scene options from persistence server, deferring loading until user params are loaded.
      * @return {Promise<void>}
      */
-    fetchSceneOptions: async function () {
+    async fetchSceneOptions() {
         fetch(`${this.persistenceUrl}?type=scene-options`, {
-            method: "GET",
-            credentials: this.data.disallowJWT ? "omit" : "same-origin",
+            method: 'GET',
+            credentials: this.data.disallowJWT ? 'omit' : 'same-origin',
         })
             .then((res) => {
                 if (res.status === 200) {
                     return res.json();
                 }
                 Swal.fire({
-                    title: "Error loading initial scene options",
+                    title: 'Error loading initial scene options',
                     text: `${res.status}: ${res.statusText} ${JSON.stringify(res.response)}`,
-                    icon: "error",
+                    icon: 'error',
                     showConfirmButton: true,
-                    confirmButtonText: "Ok",
+                    confirmButtonText: 'Ok',
                 });
-                throw new Error("Error loading initial scene options");
+                throw new Error('Error loading initial scene options');
             })
             .then((sceneData) => {
-                this.events.addEventListener("loaded", () => {
+                this.events.addEventListener('loaded', () => {
                     this.loadSceneOptions(sceneData[sceneData.length - 1]);
                 });
             });
@@ -140,23 +140,23 @@ AFRAME.registerSystem('arena-scene', {
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
-    fetchSceneObjects: async function (urlToLoad, parentName, prefixName) {
-        fetch(urlToLoad ? urlToLoad : this.persistenceUrl, {
-            method: "GET",
-            credentials: this.data.disallowJWT ? "omit" : "same-origin",
+    async fetchSceneObjects(urlToLoad, parentName, prefixName) {
+        fetch(urlToLoad || this.persistenceUrl, {
+            method: 'GET',
+            credentials: this.data.disallowJWT ? 'omit' : 'same-origin',
         })
             .then((res) => {
                 if (res.status === 200) {
                     return res.json();
                 }
                 Swal.fire({
-                    title: "Error loading initial scene data",
+                    title: 'Error loading initial scene data',
                     text: `${res.status}: ${res.statusText} ${JSON.stringify(res.response)}`,
-                    icon: "error",
+                    icon: 'error',
                     showConfirmButton: true,
-                    confirmButtonText: "Ok",
+                    confirmButtonText: 'Ok',
                 });
-                throw new Error("Error loading initial scene data");
+                throw new Error('Error loading initial scene data');
             })
             .then((sceneObjs) => {
                 const startCount = sceneObjs.filter((obj) => !!obj.attributes.landmark?.startingPosition).length;
@@ -164,9 +164,9 @@ AFRAME.registerSystem('arena-scene', {
                 if (urlToLoad === undefined && startCount === 0) {
                     this.events.emit(ARENA_EVENTS.STARTPOS_LOADED, true);
                 }
-                this.sceneEl.systems["landmark"].expectedStarts = startCount;
+                this.sceneEl.systems.landmark.expectedStarts = startCount;
                 this.events.addMultiEventListener(
-                    [ARENA_EVENTS.SCENE_OPT_LOADED, ARENA_EVENTS.MQTT_LOADED, "loaded"],
+                    [ARENA_EVENTS.SCENE_OPT_LOADED, ARENA_EVENTS.MQTT_LOADED, 'loaded'],
                     () => {
                         this.loadSceneObjects(sceneObjs, parentName, prefixName);
                     }
@@ -174,11 +174,11 @@ AFRAME.registerSystem('arena-scene', {
             });
     },
 
-    loadScene: function () {
-        const data = this.data;
-        const el = this.el;
+    loadScene() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         if (this.params.armode) {
             /*
@@ -209,7 +209,7 @@ AFRAME.registerSystem('arena-scene', {
      * Important: Also sets amName, faceName, handLName, handRName which depend on idTag
      * @param {string} idTag user name to set; will use url parameter value or default is no name is given
      */
-    setIdTag: function(idTag) {
+    setIdTag(idTag) {
         if (idTag === undefined) throw 'setIdTag: idTag not defined.'; // idTag must be set
         this.idTag = idTag;
 
@@ -230,7 +230,7 @@ AFRAME.registerSystem('arena-scene', {
      * Gets display name either from local storage or from userName
      * @return {string} display name
      */
-    getDisplayName: function() {
+    getDisplayName() {
         let displayName = localStorage.getItem('display_name');
         if (!displayName) displayName = decodeURI(this.userName);
         return displayName;
@@ -240,7 +240,7 @@ AFRAME.registerSystem('arena-scene', {
      * Checks loaded MQTT/Jitsi token for Jitsi video conference permission.
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
-    isJitsiPermitted: function() {
+    isJitsiPermitted() {
         if (this.params.build3d) return false; // build3d is used on a new page
         return !!this.mqttToken.token_payload.room;
     },
@@ -250,8 +250,8 @@ AFRAME.registerSystem('arena-scene', {
      * TODO: This should perhaps use another flag, more general, not just chat.
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
-    isUsersPermitted: function() {
-        const data = this.data;
+    isUsersPermitted() {
+        const { data } = this;
         if (this.params.build3d) return false; // build3d is used on a new page
         return ARENAUtils.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
     },
@@ -261,7 +261,7 @@ AFRAME.registerSystem('arena-scene', {
      * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
      * @return {boolean} True if the user has permission to write in this scene.
      */
-    isUserSceneWriter: function() {
+    isUserSceneWriter() {
         return ARENAUtils.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
     },
 
@@ -269,7 +269,7 @@ AFRAME.registerSystem('arena-scene', {
      * Renders/updates the display name in the top left corner of a scene.
      * @param {boolean} [speaker=false] If the user is the dominant speaker
      */
-    showEchoDisplayName: function (speaker = false) {
+    showEchoDisplayName(speaker = false) {
         const echo = document.getElementById('echo-name');
         echo.textContent = localStorage.getItem('display_name');
         if (!this.params.noname) {
@@ -287,11 +287,11 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * loads this user's presence and camera
      */
-    loadUser: function() {
-        const data = this.data;
-        const el = this.el;
+    loadUser() {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         const cameraEl = sceneEl.camera.el;
         cameraEl.setAttribute('arena-camera', 'enabled', this.isUsersPermitted());
@@ -300,7 +300,8 @@ AFRAME.registerSystem('arena-scene', {
         const cameraRigObj3D = document.getElementById('cameraRig').object3D;
 
         const startPos = new THREE.Vector3();
-        if (this.startCoords instanceof Array) { // This is a split string to array
+        if (this.startCoords instanceof Array) {
+            // This is a split string to array
             startPos.set(...this.startCoords);
             cameraRigObj3D.position.copy(startPos);
             cameraEl.object3D.position.y += data.camHeight;
@@ -317,8 +318,8 @@ AFRAME.registerSystem('arena-scene', {
         }
 
         // We have no immediate start positions from URL or localStorage, wait for landmarks
-        const systems = sceneEl.systems;
-        const landmark = systems['landmark'];
+        const { systems } = sceneEl;
+        const { landmark } = systems;
 
         ARENA.events.addEventListener(ARENA_EVENTS.STARTPOS_LOADED, () => {
             // Fallthrough failure if startLastPos fails
@@ -326,7 +327,7 @@ AFRAME.registerSystem('arena-scene', {
                 // Try to define starting position if the scene has startPosition objects
                 const startPosition = landmark.getRandom(true);
                 if (startPosition) {
-                    console.debug("Moving camera to start position", startPosition.el.id);
+                    console.debug('Moving camera to start position', startPosition.el.id);
                     startPosition.teleportTo();
                     startPos.copy(cameraEl.object3D.position);
                     startPos.y -= data.camHeight;
@@ -351,7 +352,7 @@ AFRAME.registerSystem('arena-scene', {
 
             // enable vio if fixedCamera is given
             if (this.params.fixedCamera) {
-                cameraEl.setAttribute("arena-camera", "vioEnabled", true);
+                cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
             }
 
             if (this.params.build3d) {
@@ -360,19 +361,19 @@ AFRAME.registerSystem('arena-scene', {
 
             // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
             if (this.health) {
-                this.health.removeError("slow.network");
+                this.health.removeError('slow.network');
             }
-        })
+        });
     },
 
     /**
      * Loads the a-frame inspector, with MutationObserver connected to MQTT.
      * Expects all known objects to be loaded first.
      */
-    loadArenaInspector: function() {
-        const data = this.data;
+    loadArenaInspector() {
+        const { data } = this;
 
-        const sceneEl = this.el.sceneEl;
+        const { sceneEl } = this.el;
 
         let el;
         if (this.params.objectId) {
@@ -380,7 +381,7 @@ AFRAME.registerSystem('arena-scene', {
         } else {
             el = document.querySelector('[build-watch-object]'); // first id
         }
-        sceneEl.components.inspector.openInspector(el ? el : null);
+        sceneEl.components.inspector.openInspector(el || null);
         console.log('build3d', 'A-Frame Inspector loaded');
 
         setTimeout(() => {
@@ -390,14 +391,18 @@ AFRAME.registerSystem('arena-scene', {
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
             // use "Back to Scene" to send to real ARENA scene
-            $('a.toggle-edit').click(function() {
+            $('a.toggle-edit').click(() => {
                 // remove the build3d a-frame inspector
                 const url = new URL(window.location.href);
                 url.searchParams.delete('build3d');
                 url.searchParams.delete('objectId');
-                window.parent.window.history.pushState({
-                    path: url.href
-                }, '', decodeURIComponent(url.href));
+                window.parent.window.history.pushState(
+                    {
+                        path: url.href,
+                    },
+                    '',
+                    decodeURIComponent(url.href)
+                );
                 window.location.reload();
             });
         }, 2000);
@@ -420,19 +425,19 @@ AFRAME.registerSystem('arena-scene', {
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
-    loadSceneObjects: function (sceneObjs, parentName, prefixName) {
-        const data = this.data;
-        const el = this.el;
+    loadSceneObjects(sceneObjs, parentName, prefixName) {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         if (sceneObjs.length === 0) {
-            console.warn("No scene objects found in persistence.");
+            console.warn('No scene objects found in persistence.');
             sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, true);
             return;
         }
 
-        const mqtt = sceneEl.systems["arena-mqtt"];
+        const mqtt = sceneEl.systems['arena-mqtt'];
 
         let containerObjName;
         if (parentName && prefixName && document.getElementById(parentName)) {
@@ -440,8 +445,8 @@ AFRAME.registerSystem('arena-scene', {
             // Make container to hold all scene objects
             const msg = {
                 object_id: containerObjName,
-                action: "create",
-                type: "object",
+                action: 'create',
+                type: 'object',
                 data: { parent: parentName },
             };
             mqtt.processMessage(msg);
@@ -455,7 +460,7 @@ AFRAME.registerSystem('arena-scene', {
          * @param {Array} [descendants] - running list of descendants
          */
         const createObj = (obj, descendants = []) => {
-            const parent = obj.attributes.parent;
+            const { parent } = obj.attributes;
             if (obj.object_id === this.camName) {
                 arenaObjects.delete(obj.object_id); // don't load our own camera/head assembly
                 return;
@@ -464,7 +469,7 @@ AFRAME.registerSystem('arena-scene', {
             if (parent && document.getElementById(parent) === null) {
                 // Check for circular references
                 if (obj.object_id === parent || descendants.includes(parent)) {
-                    console.log("Circular reference detected, skipping", obj.object_id);
+                    console.log('Circular reference detected, skipping', obj.object_id);
                     arenaObjects.delete(obj.object_id);
                     return;
                 }
@@ -474,7 +479,7 @@ AFRAME.registerSystem('arena-scene', {
                     createObj(arenaObjects.get(parent), [...descendants, obj.object_id]);
                 } else {
                     // Parent doesn't exist in DOM, doesn't exist in pending arenaObjects, skip orphan
-                    console.log("Orphaned object detected, skipping", obj.object_id);
+                    console.log('Orphaned object detected, skipping', obj.object_id);
                     arenaObjects.delete(obj.object_id);
                     return;
                 }
@@ -482,7 +487,7 @@ AFRAME.registerSystem('arena-scene', {
             // Parent null or has been recursively created, create this object
             const msg = {
                 object_id: obj.object_id,
-                action: "create",
+                action: 'create',
                 type: obj.type,
                 persist: true,
                 data: obj.attributes,
@@ -494,13 +499,13 @@ AFRAME.registerSystem('arena-scene', {
         let i = 0;
         while (arenaObjects.size > 0) {
             if (++i > sceneObjs.length) {
-                console.error("Looped more than number of persist objects, aborting. Objects:", arenaObjects);
+                console.error('Looped more than number of persist objects, aborting. Objects:', arenaObjects);
                 break;
             }
 
             const iter = arenaObjects.entries();
             const [objId, obj] = iter.next().value; // get first entry
-            if (obj.type === "program") {
+            if (obj.type === 'program') {
                 // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
                 const avars = {
                     scene: this.sceneName,
@@ -512,7 +517,7 @@ AFRAME.registerSystem('arena-scene', {
                 // ask runtime manager to start this program
                 // this.RuntimeManager.createModuleFromPersist(obj, avars);
                 arenaObjects.delete(objId);
-            } else if (obj.type === "object") {
+            } else if (obj.type === 'object') {
                 if (containerObjName && obj.attributes.parent === undefined) {
                     // Add first-level objects as children to container if applicable
                     obj.attributes.parent = containerObjName;
@@ -531,7 +536,7 @@ AFRAME.registerSystem('arena-scene', {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArenaScene: function(urlToLoad) {
+    unloadArenaScene(urlToLoad) {
         const xhr = new XMLHttpRequest();
         xhr.withCredentials = !data.disallowJWT;
         if (urlToLoad) {
@@ -574,11 +579,11 @@ AFRAME.registerSystem('arena-scene', {
      * Loads and applies scene-options (if it exists), otherwise set to default environment
      * @param {Object} sceneData - scene data from persistence, already JSON parsed
      */
-    loadSceneOptions: function (sceneData) {
-        const data = this.data;
-        const el = this.el;
+    loadSceneOptions(sceneData) {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         const sceneOptions = {};
 
@@ -586,17 +591,17 @@ AFRAME.registerSystem('arena-scene', {
         const sceneRoot = document.getElementById('sceneRoot');
 
         // set renderer defaults that are different from THREE/aframe defaults
-        const renderer = sceneEl.renderer;
+        const { renderer } = sceneEl;
         renderer.outputColorSpace = THREE.SRGBColorSpace;
 
         const environment = document.createElement('a-entity');
         environment.id = 'env';
 
         if (sceneData) {
-            const options = sceneData['attributes'];
+            const options = sceneData.attributes;
             Object.assign(sceneOptions, options['scene-options']);
 
-            if (sceneOptions['physics']) {
+            if (sceneOptions.physics) {
                 // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
                 import('../systems/vendor/aframe-physics-system.min.js');
                 document.getElementById('groundPlane').setAttribute('static-body', 'true');
@@ -607,31 +612,31 @@ AFRAME.registerSystem('arena-scene', {
             }
 
             // deal with scene attribution
-            if (sceneOptions['attribution']) {
+            if (sceneOptions.attribution) {
                 const sceneAttr = document.createElement('a-entity');
                 sceneAttr.setAttribute('id', 'scene-options-attribution');
-                sceneAttr.setAttribute('attribution', sceneOptions['attribution']);
+                sceneAttr.setAttribute('attribution', sceneOptions.attribution);
                 sceneRoot.appendChild(sceneAttr);
                 delete sceneOptions.attribution;
             }
 
-            if (sceneOptions['navMesh']) {
-                sceneOptions['navMesh'] = ARENAUtils.crossOriginDropboxSrc(sceneOptions['navMesh']);
+            if (sceneOptions.navMesh) {
+                sceneOptions.navMesh = ARENAUtils.crossOriginDropboxSrc(sceneOptions.navMesh);
                 const navMesh = document.createElement('a-entity');
                 navMesh.id = 'navMesh';
-                navMesh.setAttribute('gltf-model', sceneOptions['navMesh']);
+                navMesh.setAttribute('gltf-model', sceneOptions.navMesh);
                 navMesh.setAttribute('nav-mesh', '');
                 sceneRoot.appendChild(navMesh);
             }
 
-            if (sceneOptions['sceneHeadModels']) {
+            if (sceneOptions.sceneHeadModels) {
                 // add scene custom scene heads to selection list
                 this.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
-                    this.setupSceneHeadModels(sceneOptions["sceneHeadModels"]);
+                    this.setupSceneHeadModels(sceneOptions.sceneHeadModels);
                 });
             }
 
-            if (!sceneOptions['clickableOnlyEvents']) {
+            if (!sceneOptions.clickableOnlyEvents) {
                 // unusual case: clickableOnlyEvents = true by default, add warning...
                 this.health.addError('scene-options.allObjectsClickable');
             }
@@ -688,7 +693,7 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * Update the list of scene-specific heads the user can select from
      */
-    setupSceneHeadModels: function(sceneHeads) {
+    setupSceneHeadModels(sceneHeads) {
         const headModelPathSelect = document.getElementById('headModelPathSelect');
         const defaultHeadsLen = headModelPathSelect.length; // static default heads list length
         sceneHeads.forEach((head) => {

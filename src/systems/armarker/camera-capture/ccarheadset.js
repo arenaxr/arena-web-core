@@ -7,52 +7,55 @@
  * @date 2022
  */
 
-import {CVWorkerMsgs} from '../worker-msgs.js';
+import { CVWorkerMsgs } from '../worker-msgs.js';
 
 /**
  * Grab front facing camera frames using getUserMedia()
  */
 export class ARHeadsetCameraCapture {
     static instance = null;
+
     /* worker to send images captured */
     cvWorker;
 
     video;
+
     canvas;
+
     canvasCtx;
 
     // last captured frame timestamp (Date.now())
     frameTs;
+
     // last captured frame width
     frameWidth;
+
     // last captured frame height
     frameHeight;
+
     // last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
     // this is the grayscale image we will pass to the detector
     frameGsPixels;
+
     // last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4])
     framePixels;
+
     // last captured frame camera properties
     frameCamera;
+
     /* worker to send images captured */
     cvWorker;
 
     localizeOnce;
+
     arMarkerSystem;
 
     /* projection matrices for supported headsets [TODO: get more values/check these] */
     headsetPM = {
-        ml: [
-            2.842104, 0, 0, 0,
-            0, 3.897521, 0, 0,
-            -0.000893, -0.004491, -1.171066, -1,
-            0, 0, -0.839120, 0],
-        hl: [
-            2.842104, 0, 0, 0,
-            0, 3.897521, 0, 0,
-            -0.000893, -0.004491, -1.171066, -1,
-            0, 0, -0.839120, 0],
+        ml: [2.842104, 0, 0, 0, 0, 3.897521, 0, 0, -0.000893, -0.004491, -1.171066, -1, 0, 0, -0.83912, 0],
+        hl: [2.842104, 0, 0, 0, 0, 3.897521, 0, 0, -0.000893, -0.004491, -1.171066, -1, 0, 0, -0.83912, 0],
     };
+
     /* selected projection matrix for device */
     projectionMatrix;
 
@@ -84,12 +87,12 @@ export class ARHeadsetCameraCapture {
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
-        this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
+        this.canvasCtx = this.canvas.getContext('2d', { willReadFrequently: true });
 
         this.frameWidth = 1280;
         this.frameHeight = 720;
-        this.video.style.width = this.frameWidth + 'px';
-        this.video.style.height = this.frameHeight + 'px';
+        this.video.style.width = `${this.frameWidth}px`;
+        this.video.style.height = `${this.frameHeight}px`;
         this.canvas.width = this.frameWidth;
         this.canvas.height = this.frameHeight;
 
@@ -243,8 +246,8 @@ export class ARHeadsetCameraCapture {
         const hl2Ratio = 0.905886;
         return {
             // Focal lengths in pixels (these are equal for square pixels)
-            cx: (this.frameWidth / 2),
-            cy: (this.frameHeight / 2),
+            cx: this.frameWidth / 2,
+            cy: this.frameHeight / 2,
             // Principal point in pixels (typically at or near the center of the viewport)
             fx: this.frameWidth * hl2Ratio,
             fy: this.frameWidth * hl2Ratio,

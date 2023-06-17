@@ -10,20 +10,9 @@ import { ARENADefaults } from '../conf/defaults';
 
 // ARENA version from automated scripts
 import { ARENA_VERSION_MSG } from './arena-version';
-console.info(ARENA_VERSION_MSG);
 
 // replace console with our logging (only when not in dev)
 import { ARENAMqttConsole } from './utils';
-
-if (!ARENADefaults.devInstance) {
-    // will queue messages until MQTT connection is available (indicated by console.setOptions())
-    ARENAMqttConsole.init();
-}
-
-// load css
-if (AFRAME.utils.device.isBrowserEnvironment) {
-    import ('./style/arena.css');
-}
 
 import './aframe-mods'; // AFRAME modifications
 import './core'; // ARENA core systems
@@ -34,4 +23,16 @@ import './components'; // custom AFRAME components
 import './postprocessing'; // post-processing
 import './hybrid-rendering'; // hybrid rendering
 import './webxr'; // special handler for webxr devices
-import './webar'; // special handler for non-webxr devices
+import './webar';
+
+console.info(ARENA_VERSION_MSG);
+
+if (!ARENADefaults.devInstance) {
+    // will queue messages until MQTT connection is available (indicated by console.setOptions())
+    ARENAMqttConsole.init();
+}
+
+// load css
+if (AFRAME.utils.device.isBrowserEnvironment) {
+    import('./style/arena.css');
+} // special handler for non-webxr devices

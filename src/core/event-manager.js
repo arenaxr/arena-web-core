@@ -7,13 +7,13 @@
  *               systems and components.
  */
 
-AFRAME.registerSystem("arena-event-manager", {
+AFRAME.registerSystem('arena-event-manager', {
     init() {
         this.eventData = {};
         ARENA.events = this; // Set ARENA reference, if this happens before ARENA ready
-        this.sceneEl.addEventListener("loaded", () => {
+        this.sceneEl.addEventListener('loaded', () => {
             // Handle AFRAME scene event
-            this.eventData["loaded"] = true;
+            this.eventData.loaded = true;
         });
     },
     /**

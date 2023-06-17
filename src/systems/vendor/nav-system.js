@@ -4,7 +4,7 @@
  * - getNode allows optional param to allow non-coplanar closestNode
  */
 
-const {Pathfinding} = require('three-pathfinding');
+const { Pathfinding } = require('three-pathfinding');
 
 const ZONE = 'level';
 
@@ -14,7 +14,7 @@ const ZONE = 'level';
  * Pathfinding system, using PatrolJS.
  */
 
-AFRAME.systems['nav'].prototype.init = function() {
+AFRAME.systems.nav.prototype.init = function () {
     this.navMesh = null;
     this.agents = new Set();
     this.pathfinder = new Pathfinding();
@@ -23,7 +23,7 @@ AFRAME.systems['nav'].prototype.init = function() {
 /**
  * @param {THREE.Geometry} geometry
  */
-AFRAME.systems['nav'].prototype.setNavMeshGeometry = function(geometry) {
+AFRAME.systems.nav.prototype.setNavMeshGeometry = function (geometry) {
     this.navMesh = new THREE.Mesh(geometry);
     this.pathfinder.setZoneData(ZONE, Pathfinding.createZone(geometry));
     Array.from(this.agents).forEach((agent) => agent.updateNavLocation());
@@ -35,11 +35,8 @@ AFRAME.systems['nav'].prototype.setNavMeshGeometry = function(geometry) {
  * @param  {number} groupID
  * @return {Array<THREE.Vector3>}
  */
-AFRAME.systems['nav'].prototype.getPath = function(
-    start, end, groupID) {
-    return this.navMesh ?
-        this.pathfinder.findPath(start, end, ZONE, groupID) :
-        null;
+AFRAME.systems.nav.prototype.getPath = function (start, end, groupID) {
+    return this.navMesh ? this.pathfinder.findPath(start, end, ZONE, groupID) : null;
 };
 
 /**
@@ -47,10 +44,8 @@ AFRAME.systems['nav'].prototype.getPath = function(
  * @param {boolean} checkPolygon - Check coplanar groups only
  * @return {number}
  */
-AFRAME.systems['nav'].prototype.getGroup = function(position, checkPolygon = true) {
-    return this.navMesh ?
-        this.pathfinder.getGroup(ZONE, position, checkPolygon) :
-        null;
+AFRAME.systems.nav.prototype.getGroup = function (position, checkPolygon = true) {
+    return this.navMesh ? this.pathfinder.getGroup(ZONE, position, checkPolygon) : null;
 };
 
 /**
@@ -59,11 +54,8 @@ AFRAME.systems['nav'].prototype.getGroup = function(position, checkPolygon = tru
  * @param  {boolean} checkPolygon - Restrict getClosest node to coplanar
  * @return {Node}
  */
-AFRAME.systems['nav'].prototype.getNode = function(
-    position, groupID, checkPolygon = true) {
-    return this.navMesh ?
-        this.pathfinder.getClosestNode(position, ZONE, groupID, checkPolygon) :
-        null;
+AFRAME.systems.nav.prototype.getNode = function (position, groupID, checkPolygon = true) {
+    return this.navMesh ? this.pathfinder.getClosestNode(position, ZONE, groupID, checkPolygon) : null;
 };
 
 /**
@@ -74,15 +66,14 @@ AFRAME.systems['nav'].prototype.getNode = function(
  * @param  {THREE.Vector3} endTarget (Output) Adjusted step end position.
  * @return {Node} Current node, after step is taken.
  */
-AFRAME.systems['nav'].prototype.clampStep = function(
-    start, end, groupID, node, endTarget) {
+AFRAME.systems.nav.prototype.clampStep = function (start, end, groupID, node, endTarget) {
     if (!this.navMesh) {
         endTarget.copy(end);
         return null;
-    } else if (!node) {
+    }
+    if (!node) {
         endTarget.copy(end);
         return this.getNode(end, groupID);
     }
-    return this.pathfinder.clampStep(start, end, node, ZONE, groupID,
-        endTarget);
+    return this.pathfinder.clampStep(start, end, node, ZONE, groupID, endTarget);
 };

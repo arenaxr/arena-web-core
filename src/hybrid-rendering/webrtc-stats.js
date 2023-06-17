@@ -1,5 +1,5 @@
 export class WebRTCStatsLogger {
-    constructor(peerConnection, signaler, logToConsole=true) {
+    constructor(peerConnection, signaler, logToConsole = true) {
         this.peerConnection = peerConnection;
         this.signaler = signaler;
         this.logToConsole = logToConsole;
@@ -44,20 +44,38 @@ export class WebRTCStatsLogger {
                     if (this.lastReport && this.lastReport.has(stat.id)) {
                         const lastStats = this.lastReport.get(stat.id);
                         if (stat.totalDecodeTime) {
-                            console.log(`Decode Time: ${(stat.totalDecodeTime - lastStats.totalDecodeTime).toFixed(3)}`);
+                            console.log(
+                                `Decode Time: ${(stat.totalDecodeTime - lastStats.totalDecodeTime).toFixed(3)}`
+                            );
                         }
 
                         if (stat.totalInterFrameDelay) {
-                            console.log(`InterFrame Delay: ${(stat.totalInterFrameDelay - lastStats.totalInterFrameDelay).toFixed(3)}`);
+                            console.log(
+                                `InterFrame Delay: ${(
+                                    stat.totalInterFrameDelay - lastStats.totalInterFrameDelay
+                                ).toFixed(3)}`
+                            );
                         }
 
                         if (stat.jitterBufferDelay) {
-                            console.log(`Jitter Buffer Delay: ${(stat.jitterBufferDelay - lastStats.jitterBufferDelay).toFixed(3)}`);
-                            console.log(`Avg Jitter Buffer Delay: ${(stat.jitterBufferDelay / stat.jitterBufferEmittedCount).toFixed(3)}`);
+                            console.log(
+                                `Jitter Buffer Delay: ${(stat.jitterBufferDelay - lastStats.jitterBufferDelay).toFixed(
+                                    3
+                                )}`
+                            );
+                            console.log(
+                                `Avg Jitter Buffer Delay: ${(
+                                    stat.jitterBufferDelay / stat.jitterBufferEmittedCount
+                                ).toFixed(3)}`
+                            );
                         }
 
                         if (stat.totalProcessingDelay) {
-                            console.log(`Total Delay: ${(stat.totalProcessingDelay - lastStats.totalProcessingDelay).toFixed(3)}`);
+                            console.log(
+                                `Total Delay: ${(stat.totalProcessingDelay - lastStats.totalProcessingDelay).toFixed(
+                                    3
+                                )}`
+                            );
                             console.log(`Avg Delay: ${(stat.totalProcessingDelay / stat.framesDecoded).toFixed(3)}`);
                         }
                     }
@@ -67,19 +85,19 @@ export class WebRTCStatsLogger {
                     // calculate bitrate
                     const lastStats = this.lastReport.get(stat.id);
                     const duration = (stat.timestamp - lastStats.timestamp) / 1000;
-                    const bitrate = (8 * (stat.bytesReceived - lastStats.bytesReceived) / duration) / 1000;
+                    const bitrate = (8 * (stat.bytesReceived - lastStats.bytesReceived)) / duration / 1000;
                     console.log(`Bitrate: ${bitrate.toFixed(3)} kbit/sec`);
 
-                    stat['bitrate'] = bitrate;
+                    stat.bitrate = bitrate;
                 }
             }
 
-            for (let key in additionalStats) {
+            for (const key in additionalStats) {
                 stat[key] = additionalStats[key];
             }
 
-            if (stat['latency']) {
-                console.log(`Latency: ${stat['latency']} ms`);
+            if (stat.latency) {
+                console.log(`Latency: ${stat.latency} ms`);
             }
 
             this.signaler.sendStats(stat);

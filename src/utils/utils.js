@@ -44,27 +44,25 @@ export class ARENAUtils {
                     latitude: urlLat,
                     longitude: urlLong,
                 },
-                undefined,
+                undefined
             );
-        } else {
-            if (navigator.geolocation) {
-                const options = {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0,
-                };
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        if (callback) callback(position.coords, undefined);
-                    },
-                    (err) => {
-                        console.warn(`Error getting device location: ${err.message}`);
-                        console.warn('Defaulting to campus location');
-                        if (callback) callback({latitude: 40.4427, longitude: 79.943}, err);
-                    },
-                    options,
-                );
-            }
+        } else if (navigator.geolocation) {
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+            };
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    if (callback) callback(position.coords, undefined);
+                },
+                (err) => {
+                    console.warn(`Error getting device location: ${err.message}`);
+                    console.warn('Defaulting to campus location');
+                    if (callback) callback({ latitude: 40.4427, longitude: 79.943 }, err);
+                },
+                options
+            );
         }
     }
 
@@ -107,7 +105,8 @@ export class ARENAUtils {
                 y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
                 z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
             };
-        } else if (evt.detail.position && evt.detail.orientation) {
+        }
+        if (evt.detail.position && evt.detail.orientation) {
             return {
                 position: {
                     x: parseFloat(evt.detail.position.x.toFixed(3)),
@@ -121,14 +120,13 @@ export class ARENAUtils {
                     w: parseFloat(evt.detail.orientation.w.toFixed(3)),
                 },
             };
-        } else {
-            console.info('WARN: empty coords data');
-            return {
-                x: 0,
-                y: 0,
-                z: 0,
-            };
         }
+        console.info('WARN: empty coords data');
+        return {
+            x: 0,
+            y: 0,
+            z: 0,
+        };
     }
 
     /**
@@ -242,7 +240,7 @@ export class ARENAUtils {
      */
     static uuidv4() {
         return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
         );
     }
 
@@ -273,7 +271,7 @@ export class ARENAUtils {
      * @param {THREE.Quaternion|THREE.Euler} data.rotation rotation to set
      */
     static updatePose(targetObject3D, data) {
-        const {position, rotation} = data;
+        const { position, rotation } = data;
         if (rotation) {
             // has 'w' coordinate: a quaternion
             if (rotation.hasOwnProperty('w')) {
@@ -282,7 +280,7 @@ export class ARENAUtils {
                 targetObject3D.rotation.set(
                     THREE.MathUtils.degToRad(rotation.x),
                     THREE.MathUtils.degToRad(rotation.y),
-                    THREE.MathUtils.degToRad(rotation.z),
+                    THREE.MathUtils.degToRad(rotation.z)
                 ); // otherwise its a rotation given in degrees
             }
         }

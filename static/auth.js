@@ -66,7 +66,7 @@ window.ARENAAUTH = {
             ARENA.health.addError(title);
         } else if (Swal) {
             Swal.fire({
-                icon: "error",
+                icon: 'error',
                 title,
                 html: text,
             });
@@ -80,18 +80,18 @@ window.ARENAAUTH = {
      */
     processUserNames(authName, prefix = null) {
         // var processedName = encodeURI(authName);
-        let processedName = authName.replace(/[^a-zA-Z0-9]/g, "");
+        let processedName = authName.replace(/[^a-zA-Z0-9]/g, '');
         if (ARENA.userName !== ARENADefaults?.userName) {
             // userName set? persist to storage
-            localStorage.setItem("display_name", decodeURI(ARENA.userName));
+            localStorage.setItem('display_name', decodeURI(ARENA.userName));
             processedName = ARENA.userName;
         }
-        const savedName = localStorage.getItem("display_name");
-        if (savedName === null || !savedName || savedName === "undefined") {
+        const savedName = localStorage.getItem('display_name');
+        if (savedName === null || !savedName || savedName === 'undefined') {
             // Use auth name to create human-readable name
-            localStorage.setItem("display_name", authName);
+            localStorage.setItem('display_name', authName);
         }
-        ARENA.displayName = localStorage.getItem("display_name");
+        ARENA.displayName = localStorage.getItem('display_name');
         if (prefix !== null) {
             processedName = `${prefix}${processedName}`;
         }
@@ -103,12 +103,12 @@ window.ARENAAUTH = {
      */
     requestAuthState() {
         const xhr = new XMLHttpRequest();
-        xhr.open("GET", `/user/user_state`, false); // Blocking call
-        xhr.setRequestHeader("X-CSRFToken", this.getCookie("csrftoken"));
+        xhr.open('GET', `/user/user_state`, false); // Blocking call
+        xhr.setRequestHeader('X-CSRFToken', this.getCookie('csrftoken'));
         xhr.send();
         // Block on this request
         if (xhr.status !== 200) {
-            const title = "Error loading user state";
+            const title = 'Error loading user state';
             const text = `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`;
             this.authError(title, text);
         } else {
@@ -116,7 +116,7 @@ window.ARENAAUTH = {
             try {
                 userStateRes = JSON.parse(xhr.response);
             } catch (e) {
-                const title = "Error parsing user state";
+                const title = 'Error parsing user state';
                 const text = `${e}: ${xhr.response}`;
                 this.authError(title, text);
             }
@@ -124,37 +124,37 @@ window.ARENAAUTH = {
             this.user_type = userStateRes.type; // user database auth state
             const urlAuthType = ARENA.params.auth;
             if (urlAuthType !== undefined) {
-                localStorage.setItem("auth_choice", urlAuthType);
+                localStorage.setItem('auth_choice', urlAuthType);
             }
 
-            const savedAuthType = localStorage.getItem("auth_choice"); // user choice auth state
+            const savedAuthType = localStorage.getItem('auth_choice'); // user choice auth state
             if (this.authenticated) {
                 // auth user login
-                localStorage.setItem("auth_choice", userStateRes.type);
+                localStorage.setItem('auth_choice', userStateRes.type);
                 this.processUserNames(userStateRes.fullname ? userStateRes.fullname : userStateRes.username);
                 this.user_username = userStateRes.username;
                 this.user_fullname = userStateRes.fullname;
                 this.user_email = userStateRes.email;
                 this.requestMqttToken(userStateRes.type, userStateRes.username, true).then();
-            } else if (savedAuthType === "anonymous") {
+            } else if (savedAuthType === 'anonymous') {
                 const urlName = ARENA.params.userName;
-                const savedName = localStorage.getItem("display_name");
+                const savedName = localStorage.getItem('display_name');
                 if (savedName === null) {
                     if (urlName !== null) {
-                        localStorage.setItem("display_name", urlName);
+                        localStorage.setItem('display_name', urlName);
                     } else {
-                        localStorage.setItem("display_name", `UnnamedUser${Math.floor(Math.random() * 10000)}`);
+                        localStorage.setItem('display_name', `UnnamedUser${Math.floor(Math.random() * 10000)}`);
                     }
                 }
-                const anonName = this.processUserNames(localStorage.getItem("display_name"), "anonymous-");
+                const anonName = this.processUserNames(localStorage.getItem('display_name'), 'anonymous-');
                 this.user_username = anonName;
-                this.user_fullname = localStorage.getItem("display_name");
-                this.user_email = "N/A";
-                this.requestMqttToken("anonymous", anonName, true).then();
+                this.user_fullname = localStorage.getItem('display_name');
+                this.user_email = 'N/A';
+                this.requestMqttToken('anonymous', anonName, true).then();
             } else {
                 // user is logged out or new and not logged in
                 // 'remember' uri for post-login, just before login redirect
-                localStorage.setItem("request_uri", window.location.href);
+                localStorage.setItem('request_uri', window.location.href);
                 window.location.href = this.signInPath;
             }
         }
@@ -163,7 +163,7 @@ window.ARENAAUTH = {
      * Processes user sign out.
      */
     signOut() {
-        localStorage.removeItem("auth_choice");
+        localStorage.removeItem('auth_choice');
         // back to signin page
         window.location.href = this.signOutPath;
     },
@@ -174,8 +174,8 @@ window.ARENAAUTH = {
      */
     getCookie(name) {
         let cookieValue = null;
-        if (document.cookie && document.cookie !== "") {
-            const cookies = document.cookie.split(";");
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
             for (let i = 0; i < cookies.length; i++) {
                 const cookie = cookies[i].trim();
                 // Does this cookie string begin with the name we want?
@@ -215,16 +215,16 @@ window.ARENAAUTH = {
             authParams.handrightid = true;
         }
         try {
-            const authRes = await fetch("/user/mqtt_auth", {
+            const authRes = await fetch('/user/mqtt_auth', {
                 headers: {
-                    "X-CSRFToken": this.getCookie("csrftoken"),
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    'X-CSRFToken': this.getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                method: "POST",
+                method: 'POST',
                 body: new URLSearchParams(authParams),
             });
             if (!authRes.ok) {
-                const title = "Error loading MQTT token";
+                const title = 'Error loading MQTT token';
                 const text = `${authRes.status}: ${authRes.statusText} ${JSON.stringify(authRes.response)}`;
                 this.authError(title, text);
                 return;
@@ -237,11 +237,11 @@ window.ARENAAUTH = {
             const tokenObj = KJUR.jws.JWS.parse(authData.token);
             this.token_payload = tokenObj.payloadObj;
             authData.token_payload = tokenObj.payloadObj;
-            if (!completeOnload || document.readyState === "complete") {
+            if (!completeOnload || document.readyState === 'complete') {
                 // Also handle crazy case page already loaded
                 this.completeAuth(authData);
             } else {
-                window.addEventListener("load", () => {
+                window.addEventListener('load', () => {
                     ARENAAUTH.completeAuth(authData);
                 });
             }
@@ -262,10 +262,10 @@ window.ARENAAUTH = {
         if (response.ids) {
             onAuthEvt.ids = response.ids;
         }
-        localStorage.removeItem("request_uri"); // 'forget' login redirect on success
+        localStorage.removeItem('request_uri'); // 'forget' login redirect on success
 
         // emit custom event to window
-        const authCompleteEvent = new CustomEvent("onauth", {
+        const authCompleteEvent = new CustomEvent('onauth', {
             detail: onAuthEvt,
         });
         window.dispatchEvent(authCompleteEvent);
@@ -286,14 +286,14 @@ window.ARENAAUTH = {
         }
         if (ARENA) {
             // TODO: Check for some other indicator
-            lines.push("");
+            lines.push('');
             if (perms.room) {
                 lines.push(`Video Conference: allowed`);
             } else {
                 lines.push(`Video Conference: disallowed`);
             }
         }
-        lines.push("");
+        lines.push('');
         lines.push(`MQTT Publish topics:`);
         if (perms.publ && perms.publ.length > 0) {
             perms.publ.forEach((pub) => {
@@ -302,7 +302,7 @@ window.ARENAAUTH = {
         } else {
             lines.push(`- `);
         }
-        lines.push("");
+        lines.push('');
         lines.push(`MQTT Subscribe topics:`);
         if (perms.subs && perms.subs.length > 0) {
             perms.subs.forEach((sub) => {
@@ -311,7 +311,7 @@ window.ARENAAUTH = {
         } else {
             lines.push(`- `);
         }
-        return lines.join("\r\n");
+        return lines.join('\r\n');
     },
     /**
      * Open profile in new page to avoid mqtt disconnect.
@@ -325,7 +325,7 @@ window.ARENAAUTH = {
      */
     showPerms() {
         Swal.fire({
-            title: "Permissions",
+            title: 'Permissions',
             html: `<pre style='text-align: left;'>${ARENAAUTH.formatPerms(ARENAAUTH.token_payload)}</pre>`,
         });
     },
@@ -342,10 +342,10 @@ window.ARENAAUTH = {
         if (ARENADefaults.devInstance && path.length > 0) {
             const devPrefix = path.match(/(?:x|dev)\/([^/]+)\/?/g);
             if (devPrefix) {
-                path = path.replace(devPrefix[0], "");
+                path = path.replace(devPrefix[0], '');
             }
         }
-        if (path === "" || path === "index.html") {
+        if (path === '' || path === 'index.html') {
             sceneName = ARENA.params.scene ?? sceneName;
             _setNames(namespace, sceneName);
         } else {
@@ -368,7 +368,7 @@ window.ARENAAUTH = {
 };
 
 // This is meant to pre-empt any ARENA systems loading, so we bootstrap keys that are needed for auth
-if (typeof ARENA === "undefined") {
+if (typeof ARENA === 'undefined') {
     window.ARENA = {
         defaults: ARENADefaults,
     };
@@ -376,11 +376,11 @@ if (typeof ARENA === "undefined") {
 
 window.onload = function authOnLoad() {
     // load sweetalert if not already loaded
-    if (typeof Swal === "undefined") {
-        const head = document.getElementsByTagName("head")[0];
-        const script = document.createElement("script");
-        script.type = "text/javascript";
-        script.src = "https://cdn.jsdelivr.net/npm/sweetalert2@10";
+    if (typeof Swal === 'undefined') {
+        const head = document.getElementsByTagName('head')[0];
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@10';
         head.appendChild(script);
     }
 };
@@ -395,7 +395,7 @@ function storageAvailable(type) {
     let storage;
     try {
         storage = window[type];
-        const x = "__storage_test__";
+        const x = '__storage_test__';
         storage.setItem(x, x);
         storage.removeItem(x);
         return true;
@@ -408,9 +408,9 @@ function storageAvailable(type) {
                 e.code === 1014 ||
                 // test name field too, because code might not be present
                 // everything except Firefox
-                e.name === "QuotaExceededError" ||
+                e.name === 'QuotaExceededError' ||
                 // Firefox
-                e.name === "NS_ERROR_DOM_QUOTA_REACHED") &&
+                e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
             // acknowledge QuotaExceededError only if there's something already stored
             storage &&
             storage.length !== 0
@@ -418,9 +418,9 @@ function storageAvailable(type) {
     }
 }
 
-if (!storageAvailable("localStorage")) {
-    const title = "LocalStorage has been disabled";
-    const text = "The ARENA needs LocalStorage. Bugs are coming! Perhaps you have disabled cookies?";
+if (!storageAvailable('localStorage')) {
+    const title = 'LocalStorage has been disabled';
+    const text = 'The ARENA needs LocalStorage. Bugs are coming! Perhaps you have disabled cookies?';
     ARENAAUTH.authError(title, text);
 }
 

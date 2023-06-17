@@ -1,5 +1,5 @@
 /* global AFRAME */
-import {PCDLoader} from './vendor/pcd-loader.js';
+import { PCDLoader } from './vendor/pcd-loader.js';
 
 /**
  * @fileoverview Load PCD models
@@ -18,19 +18,19 @@ import {PCDLoader} from './vendor/pcd-loader.js';
  */
 AFRAME.registerComponent('pcd-model', {
     schema: {
-        src: {type: 'string'},
-        url: {type: 'string'},
-        pointSize: {type: 'number', default: 0.01},
-        pointColor: {type: 'color', default: '#7f7f7f'},
+        src: { type: 'string' },
+        url: { type: 'string' },
+        pointSize: { type: 'number', default: 0.01 },
+        pointColor: { type: 'color', default: '#7f7f7f' },
     },
-    init: function() {
+    init() {
         this.points = null;
         this.loader = new PCDLoader();
     },
-    update: function(oldData) {
+    update(oldData) {
         const self = this;
-        const el = this.el;
-        const src = (this.data.src) ? this.data.src: this.data.url;
+        const { el } = this;
+        const src = this.data.src ? this.data.src : this.data.url;
 
         if (!src) {
             return;
@@ -42,18 +42,23 @@ AFRAME.registerComponent('pcd-model', {
         document.querySelector('a-scene').systems['model-progress'].registerModel(el, src);
 
         const _this = this;
-        this.loader.load(src, function pcdLoaded(points) {
-            _this.points = points;
-            el.setObject3D('mesh', points);
-            el.emit('model-loaded', {format: 'pcd', model: self.model});
-            points.material.size=(_this.data.pointSize) ? _this.data.pointSize : 1;
-            if (_this.data.color) points.material.color.set((_this.data.color));
-        }, function pcdProgress(xhr) {
-            el.emit('model-progress', {src: src, progress: (xhr.loaded / xhr.total * 100)});
-        }, function pcdFailed(error) {
-            const message = (error && error.message) ? error.message : 'Failed to load PCD model';
-            console.error(message);
-            el.emit('model-error', {format: 'pcd', src: src});
-        });
+        this.loader.load(
+            src,
+            (points) => {
+                _this.points = points;
+                el.setObject3D('mesh', points);
+                el.emit('model-loaded', { format: 'pcd', model: self.model });
+                points.material.size = _this.data.pointSize ? _this.data.pointSize : 1;
+                if (_this.data.color) points.material.color.set(_this.data.color);
+            },
+            (xhr) => {
+                el.emit('model-progress', { src, progress: (xhr.loaded / xhr.total) * 100 });
+            },
+            (error) => {
+                const message = error && error.message ? error.message : 'Failed to load PCD model';
+                console.error(message);
+                el.emit('model-error', { format: 'pcd', src });
+            }
+        );
     },
 });

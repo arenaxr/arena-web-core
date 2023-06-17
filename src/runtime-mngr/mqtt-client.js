@@ -16,29 +16,23 @@ export default class MQTTClient {
         st = st || {};
         this.settings = {
             mqtt_host:
-                st.mqtt_host !== undefined ?
-                    st.mqtt_host :
-                    'wss://' +
-                    location.hostname +
-                    (location.port ? ':' + location.port : '') +
-                    '/mqtt/',
+                st.mqtt_host !== undefined
+                    ? st.mqtt_host
+                    : `wss://${location.hostname}${location.port ? `:${location.port}` : ''}/mqtt/`,
             useSSL: st.useSSL !== undefined ? st.useSSL : true,
-            mqtt_username:
-                st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
+            mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
             reconnect: st.reconnect !== undefined ? st.reconnect : true,
             onMessageCallback: st.onMessageCallback,
             willMessage: st.willMessage !== undefined ? st.willMessage : 'left',
-            willMessageTopic:
-                st.willMessageTopic !== undefined ? st.willMessageTopic : 'lastwill',
+            willMessageTopic: st.willMessageTopic !== undefined ? st.willMessageTopic : 'lastwill',
             dbg: st.dbg !== undefined ? st.dbg : false,
             userid: st.userid !== undefined ? st.userid : (Math.random() + 1).toString(36).substring(2),
         };
 
         if (this.settings.willMessage !== undefined) {
             const lw = new Paho.Message(this.settings.willMessage);
-            lw.destinationName =
-                st.willMessageTopic !== undefined ? st.willMessageTopic : 'lwtopic';
+            lw.destinationName = st.willMessageTopic !== undefined ? st.willMessageTopic : 'lwtopic';
             lw.qos = 2;
             lw.retained = false;
 
@@ -48,16 +42,13 @@ export default class MQTTClient {
 
     async connect(force = false) {
         if (this.connected == true && force == false) return;
-        this.mqttc = new Paho.Client(
-            this.settings.mqtt_host,
-            this.settings.userid,
-        );
+        this.mqttc = new Paho.Client(this.settings.mqtt_host, this.settings.userid);
 
         this.mqttc.onConnectionLost = this.onConnectionLost.bind(this);
         this.mqttc.onMessageArrived = this.onMessageArrived.bind(this);
 
         const _this = this;
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             _this.mqttc.connect({
                 onSuccess: () => {
                     console.info('MQTT Connected.');

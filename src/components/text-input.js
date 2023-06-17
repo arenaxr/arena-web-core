@@ -36,15 +36,13 @@ AFRAME.registerComponent('textinput', {
 
     multiple: true,
 
-    init: function() {
+    init() {},
 
-    },
+    update() {
+        const { data } = this;
+        const { el } = this;
 
-    update: function() {
-        const data = this.data;
-        const el = this.el;
-
-        el.addEventListener(data.on, function(evt) {
+        el.addEventListener(data.on, function (evt) {
             Swal.fire({
                 title: data.title.substring(0, 140),
                 input: 'textarea',
@@ -54,24 +52,23 @@ AFRAME.registerComponent('textinput', {
                 cancelButtonText: 'Cancel',
                 confirmButtonText: 'Send',
                 reverseButtons: true,
-            })
-                .then((result) => {
-                    if (!result.value) return;
-                    const text = result.value.substring(0, 140);
+            }).then((result) => {
+                if (!result.value) return;
+                const text = result.value.substring(0, 140);
 
-                    const thisMsg = {
-                        object_id: this.id,
-                        action: 'clientEvent',
-                        type: 'textinput',
-                        data: {
-                            writer: ARENA.camName,
-                            text: text,
-                        },
-                    };
+                const thisMsg = {
+                    object_id: this.id,
+                    action: 'clientEvent',
+                    type: 'textinput',
+                    data: {
+                        writer: ARENA.camName,
+                        text,
+                    },
+                };
 
-                    // publishing events attached to user id objects allows sculpting security
-                    ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
-                });
+                // publishing events attached to user id objects allows sculpting security
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
+            });
         });
     },
 });

@@ -1,5 +1,5 @@
-import {ARENAUtils} from '../utils';
-import {ACTIONS} from '../constants';
+import { ARENAUtils } from '../utils';
+import { ACTIONS } from '../constants';
 
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
@@ -27,163 +27,169 @@ export class CreateUpdate {
      * @param {object} message message to be parsed
      */
     static handle(action, message) {
-        const id = message.id;
+        const { id } = message;
 
         switch (message.type) {
-        case 'object':
-            // our own camera/controllers: bail, this message is meant for all other viewers
-            if (id === ARENA.camName) {
-                return;
-            }
-            if (id === ARENA.handLName) {
-                return;
-            }
-            if (id === ARENA.handRName) {
-                return;
-            }
-            if (id === ARENA.faceName) {
-                return;
-            }
-
-            const buildWatchScene = document.querySelector('a-scene').getAttribute('build-watch-scene');
-
-            let entityEl = document.getElementById(id);
-
-            // create entity, if does not exist
-            let addObj = false;
-            if (!entityEl) {
-                createWarn(`Object with object_id "${id}" does not exist; Creating...`);
-
-                // create object
-                if (message.data.object_type === 'videosphere') {
-                    entityEl = document.createElement('a-videosphere');
-                } else {
-                    entityEl = document.createElement('a-entity');
+            case 'object':
+                // our own camera/controllers: bail, this message is meant for all other viewers
+                if (id === ARENA.camName) {
+                    return;
                 }
-                entityEl.setAttribute('id', id);
-                // after setting object attributes, we will add it to the scene
-                addObj = true;
-            }
+                if (id === ARENA.handLName) {
+                    return;
+                }
+                if (id === ARENA.handRName) {
+                    return;
+                }
+                if (id === ARENA.faceName) {
+                    return;
+                }
 
-            // disable build-watch when applying remote updates to this object
-            if (buildWatchScene) enableBuildWatchObject(entityEl, message, false);
+                const buildWatchScene = document.querySelector('a-scene').getAttribute('build-watch-scene');
 
-            // set to default render order
-            entityEl.object3D.renderOrder = RENDER_ORDER;
+                let entityEl = document.getElementById(id);
 
-            // handle attributes of object
-            if (!this.setObjectAttributes(entityEl, message)) return;
+                // create entity, if does not exist
+                let addObj = false;
+                if (!entityEl) {
+                    createWarn(`Object with object_id "${id}" does not exist; Creating...`);
 
-            const sceneRoot = document.getElementById('sceneRoot');
-            let parentName = message.data.parent;
+                    // create object
+                    if (message.data.object_type === 'videosphere') {
+                        entityEl = document.createElement('a-videosphere');
+                    } else {
+                        entityEl = document.createElement('a-entity');
+                    }
+                    entityEl.setAttribute('id', id);
+                    // after setting object attributes, we will add it to the scene
+                    addObj = true;
+                }
 
-            // add object to the scene after setting all attributes
-            if (addObj) {
-                // Parent/Child handling
-                if (parentName) {
-                    if (ARENA.camName === message.data.parent) { // our camera is named 'my-camera'
-                        if (!message.data.camera) { // Don't attach extra cameras, use own id to skip
-                            parentName = 'my-camera';
+                // disable build-watch when applying remote updates to this object
+                if (buildWatchScene) enableBuildWatchObject(entityEl, message, false);
+
+                // set to default render order
+                entityEl.object3D.renderOrder = RENDER_ORDER;
+
+                // handle attributes of object
+                if (!this.setObjectAttributes(entityEl, message)) return;
+
+                const sceneRoot = document.getElementById('sceneRoot');
+                let parentName = message.data.parent;
+
+                // add object to the scene after setting all attributes
+                if (addObj) {
+                    // Parent/Child handling
+                    if (parentName) {
+                        if (ARENA.camName === message.data.parent) {
+                            // our camera is named 'my-camera'
+                            if (!message.data.camera) {
+                                // Don't attach extra cameras, use own id to skip
+                                parentName = 'my-camera';
+                            } else {
+                                return;
+                            }
+                        }
+
+                        const parentEl = document.getElementById(parentName);
+                        if (parentEl) {
+                            entityEl.removeAttribute('parent');
+                            entityEl.flushToDOM();
+                            parentEl.appendChild(entityEl);
                         } else {
-                            return;
+                            createWarn('Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
+                        }
+                    } else {
+                        sceneRoot.appendChild(entityEl);
+                    }
+                } else {
+                    // Parent/Child handling
+                    const oldParent = entityEl.parentNode;
+                    if (parentName === null) {
+                        if (oldParent) oldParent.object3D.remove(entityEl.object3D);
+                        sceneRoot.object3D.add(entityEl.object3D);
+                    } else if (parentName !== undefined) {
+                        const parentEl = document.getElementById(parentName);
+                        if (parentEl !== oldParent) {
+                            if (oldParent) oldParent.object3D.remove(entityEl.object3D);
+                            parentEl.object3D.add(entityEl.object3D);
                         }
                     }
+                }
 
-                    const parentEl = document.getElementById(parentName);
-                    if (parentEl) {
-                        entityEl.removeAttribute('parent');
-                        entityEl.flushToDOM();
-                        parentEl.appendChild(entityEl);
-                    } else {
-                        createWarn('Orphaned:', `${id} cannot find parent: ${message.data.parent}!`);
+                if (message.ttl !== undefined) {
+                    // Allow falsy value of 0
+                    entityEl.setAttribute('ttl', { seconds: message.ttl });
+                }
+
+                // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
+                if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
+
+                if (id === ARENA.params.camFollow) {
+                    this.handleCameraOverride(ACTIONS.UPDATE, {
+                        id: ARENA.camName,
+                        data: {
+                            object_type: 'camera',
+                            position: message.data.position,
+                            rotation: message.data.rotation,
+                        },
+                    });
+                }
+                return;
+
+            case 'camera-override':
+                if (id !== ARENA.camName) return; // bail if not for us
+                this.handleCameraOverride(action, message);
+                return;
+
+            case 'rig':
+                if (id === ARENA.camName) {
+                    // our camera Rig
+                    const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
+                    const cameraRigObj3D = document.getElementById('cameraRig').object3D;
+                    const { position, rotation } = message.data;
+                    if (rotation) {
+                        if (rotation.hasOwnProperty('w')) {
+                            // has 'w' coordinate: a quaternion
+                            cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
+                        } else {
+                            // otherwise its a rotation given in degrees
+                            cameraSpinnerObj3D.rotation.set(
+                                THREE.MathUtils.degToRad(rotation.x),
+                                THREE.MathUtils.degToRad(rotation.y),
+                                THREE.MathUtils.degToRad(rotation.z)
+                            );
+                        }
                     }
+                    if (position) {
+                        cameraRigObj3D.position.set(position.x, position.y, position.z);
+                    }
+                }
+                return;
+
+            case 'scene-options':
+                // update env-presets section in real-time
+                const environmentOld = document.getElementById('env');
+                const environment = document.createElement('a-entity');
+                environment.id = 'env';
+                const envPresets = message.data['env-presets'];
+                for (const [attribute, value] of Object.entries(envPresets)) {
+                    environment.setAttribute('environment', attribute, value);
+                }
+                environmentOld.parentNode.replaceChild(environment, environmentOld);
+                return;
+
+            case 'face-features':
+            case 'landmarks':
+                // TODO : Remove once all existing persist landmark entities have converted
+                return;
+
+            default:
+                if (action === ACTIONS.CREATE) {
+                    createWarn('Unknown type:', JSON.stringify(message));
                 } else {
-                    sceneRoot.appendChild(entityEl);
+                    updateWarn('Unknown type:', JSON.stringify(message));
                 }
-            } else {
-                // Parent/Child handling
-                const oldParent = entityEl.parentNode;
-                if (parentName === null) {
-                    if (oldParent) oldParent.object3D.remove(entityEl.object3D);
-                    sceneRoot.object3D.add(entityEl.object3D);
-                } else if (parentName !== undefined) {
-                    const parentEl = document.getElementById(parentName);
-                    if (parentEl !== oldParent) {
-                        if (oldParent) oldParent.object3D.remove(entityEl.object3D);
-                        parentEl.object3D.add(entityEl.object3D);
-                    }
-                }
-            }
-
-            if (message.ttl !== undefined) { // Allow falsy value of 0
-                entityEl.setAttribute('ttl', {seconds: message.ttl});
-            }
-
-            // re-enable build-watch done with applying remote updates to this object, to handle local mutation observer
-            if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
-
-            if (id === ARENA.params.camFollow) {
-                this.handleCameraOverride(ACTIONS.UPDATE, {
-                    id: ARENA.camName,
-                    data: {
-                        object_type: 'camera',
-                        position: message.data.position,
-                        rotation: message.data.rotation,
-                    },
-                });
-            }
-            return;
-
-        case 'camera-override':
-            if (id !== ARENA.camName) return; // bail if not for us
-            this.handleCameraOverride(action, message);
-            return;
-
-        case 'rig':
-            if (id === ARENA.camName) { // our camera Rig
-                const cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
-                const cameraRigObj3D = document.getElementById('cameraRig').object3D;
-                const {position, rotation} = message.data;
-                if (rotation) {
-                    if (rotation.hasOwnProperty('w')) { // has 'w' coordinate: a quaternion
-                        cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
-                    } else { // otherwise its a rotation given in degrees
-                        cameraSpinnerObj3D.rotation.set(
-                            THREE.MathUtils.degToRad(rotation.x),
-                            THREE.MathUtils.degToRad(rotation.y),
-                            THREE.MathUtils.degToRad(rotation.z),
-                        );
-                    }
-                }
-                if (position) {
-                    cameraRigObj3D.position.set(position.x, position.y, position.z);
-                }
-            }
-            return;
-
-        case 'scene-options':
-            // update env-presets section in real-time
-            const environmentOld = document.getElementById('env');
-            const environment = document.createElement('a-entity');
-            environment.id = 'env';
-            const envPresets = message.data['env-presets'];
-            for (const [attribute, value] of Object.entries(envPresets)) {
-                environment.setAttribute('environment', attribute, value);
-            }
-            environmentOld.parentNode.replaceChild(environment, environmentOld);
-            return;
-
-        case 'face-features':
-        case 'landmarks':
-            // TODO : Remove once all existing persist landmark entities have converted
-            return;
-
-        default:
-            if (action === ACTIONS.CREATE) {
-                createWarn('Unknown type:', JSON.stringify(message));
-            } else {
-                updateWarn('Unknown type:', JSON.stringify(message));
-            }
         }
 
         /**
@@ -205,7 +211,7 @@ export class CreateUpdate {
      * @param {object} message message to be parsed
      */
     static setObjectAttributes(entityEl, message) {
-        const data = message.data;
+        const { data } = message;
         let type = data.object_type;
         delete data.object_type; // remove attribute so we don't set it later
 
@@ -218,133 +224,133 @@ export class CreateUpdate {
         // special cases
         let isGeometry = false;
         switch (type) {
-        case 'camera':
-            if (data.hasOwnProperty('color')) {
-                entityEl.setAttribute('arena-user', 'color', data.color);
-            }
-            if (data.hasOwnProperty('headModelPath')) {
-                entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
-            }
-            if (data.hasOwnProperty('presence')) {
-                entityEl.setAttribute('arena-user', 'presence', data.presence); // update presence
-            }
-            // decide if we need draw or delete videoCube around head
-            if (message.hasOwnProperty('jitsiId')) {
-                entityEl.setAttribute('arena-user', 'jitsiId', message.jitsiId);
-                entityEl.setAttribute('arena-user', 'hasVideo', message.hasVideo);
-                entityEl.setAttribute('arena-user', 'hasAudio', message.hasAudio);
-            }
-            if (message.hasOwnProperty('displayName')) {
-                entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
-            }
-            break;
-        case 'gltf-model':
-            if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
-                warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
-                return false; // do not add this object
-            }
-            if (ARENA.params.vr && data.hasOwnProperty('hide-on-enter-vr')) {
-                warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
-                return false; // do not add this object
-            }
-            // support both url and src property
-            if (data.hasOwnProperty('url')) {
-                data.src = data.url; // make src=url
-                delete data.url; // remove attribute so we don't set it later
-            }
-            // gltf is a special case in that the src is applied to the component 'gltf-model'
-            if (data.hasOwnProperty('src')) {
-                if (!(data.hasOwnProperty('remote-render') && data['remote-render'].enabled === true)) {
-                    entityEl.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(data.src));
+            case 'camera':
+                if (data.hasOwnProperty('color')) {
+                    entityEl.setAttribute('arena-user', 'color', data.color);
                 }
-                delete data.src; // remove attribute so we don't set it later
-            }
-            // add attribution by default, if not given
-            if (!data.hasOwnProperty('attribution')) {
-                entityEl.setAttribute('attribution', 'extractAssetExtras', true);
-            }
-            if (data.hasOwnProperty('modelUpdate')) {
-                /*
+                if (data.hasOwnProperty('headModelPath')) {
+                    entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
+                }
+                if (data.hasOwnProperty('presence')) {
+                    entityEl.setAttribute('arena-user', 'presence', data.presence); // update presence
+                }
+                // decide if we need draw or delete videoCube around head
+                if (message.hasOwnProperty('jitsiId')) {
+                    entityEl.setAttribute('arena-user', 'jitsiId', message.jitsiId);
+                    entityEl.setAttribute('arena-user', 'hasVideo', message.hasVideo);
+                    entityEl.setAttribute('arena-user', 'hasAudio', message.hasAudio);
+                }
+                if (message.hasOwnProperty('displayName')) {
+                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
+                }
+                break;
+            case 'gltf-model':
+                if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
+                    warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
+                    return false; // do not add this object
+                }
+                if (ARENA.params.vr && data.hasOwnProperty('hide-on-enter-vr')) {
+                    warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
+                    return false; // do not add this object
+                }
+                // support both url and src property
+                if (data.hasOwnProperty('url')) {
+                    data.src = data.url; // make src=url
+                    delete data.url; // remove attribute so we don't set it later
+                }
+                // gltf is a special case in that the src is applied to the component 'gltf-model'
+                if (data.hasOwnProperty('src')) {
+                    if (!(data.hasOwnProperty('remote-render') && data['remote-render'].enabled === true)) {
+                        entityEl.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(data.src));
+                    }
+                    delete data.src; // remove attribute so we don't set it later
+                }
+                // add attribution by default, if not given
+                if (!data.hasOwnProperty('attribution')) {
+                    entityEl.setAttribute('attribution', 'extractAssetExtras', true);
+                }
+                if (data.hasOwnProperty('modelUpdate')) {
+                    /*
                  Only apply update directly on update. If this is a CREATE msg (from persist most likely), let a
                  element prop be set and actual updates deferred, to be picked up by gltf-model after model load.
                  */
-                const modelUpdateData = {...data['modelUpdate']};
-                if (message.action === ACTIONS.UPDATE) {
-                    ARENAUtils.updateModelComponents(entityEl.object3D, modelUpdateData);
-                } else {
-                    entityEl.deferredModelUpdate = modelUpdateData;
+                    const modelUpdateData = { ...data.modelUpdate };
+                    if (message.action === ACTIONS.UPDATE) {
+                        ARENAUtils.updateModelComponents(entityEl.object3D, modelUpdateData);
+                    } else {
+                        entityEl.deferredModelUpdate = modelUpdateData;
+                    }
+                    delete data.modelUpdate; // remove attribute so we don't set it later
                 }
-                delete data['modelUpdate']; // remove attribute so we don't set it later
-            }
-            break;
-        case 'headtext':
-            // handle changes to other users head text
-            if (message.hasOwnProperty('displayName')) {
-                entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
-            }
-            break;
-        case 'image':
-            // image is just a textured plane
-            // TODO: create an aframe component for this
-            entityEl.setAttribute('geometry', 'primitive', 'plane');
-            if (data.hasOwnProperty('url')) {
-                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url));
-                delete data.url; // remove attribute so we don't set it later
-            }
-            if (data.hasOwnProperty('src')) {
-                entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.src));
-                delete data.src; // remove attribute so we don't set it later
-            }
-            if (!data.hasOwnProperty('material-extras')) {
-                // default images to SRGBColorSpace, if not specified
-                entityEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
-                entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
-            }
-            delete data.image; // no other properties applicable to image; delete it
-            break;
-        case 'text':
-            // Support legacy `data: { text: 'STRING TEXT' }`
-            const theText = data.text;
-            if (typeof theText === 'string' || theText instanceof String) {
-                entityEl.setAttribute('text', 'value', data.text);
-                delete data.text;
-            }
-            if (!data.hasOwnProperty('side')) entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)
-            if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
-            if (!data.hasOwnProperty('align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
-            break;
-        case 'handLeft':
-        case 'handRight':
-            entityEl.setAttribute('gltf-model', data.url);
-            delete data[type];
-        case 'cube':
-            type = 'box'; // arena legacy! new libraries/persist objects should use box!
-        case 'box':
-        case 'circle':
-        case 'cone':
-        case 'cylinder':
-        case 'dodecahedron':
-        case 'icosahedron':
-        case 'octahedron':
-        case 'plane':
-        case 'ring':
-        case 'sphere':
-        case 'tetrahedron':
-        case 'torus':
-        case 'torusKnot':
-        case 'triangle':
-            // handle A-Frame geometry types here for performance (custom geometries are handled in the default case)
-            if (type) {
-                entityEl.setAttribute('geometry', 'primitive', type);
-                isGeometry = true;
-            }
-            break;
-        default:
-            // check if the type is a registered geometry (that we do not catch in the cases above)
-            if (AFRAME.geometries[type]) {
-                entityEl.setAttribute('geometry', 'primitive', type);
-                isGeometry = true;
-            }
+                break;
+            case 'headtext':
+                // handle changes to other users head text
+                if (message.hasOwnProperty('displayName')) {
+                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
+                }
+                break;
+            case 'image':
+                // image is just a textured plane
+                // TODO: create an aframe component for this
+                entityEl.setAttribute('geometry', 'primitive', 'plane');
+                if (data.hasOwnProperty('url')) {
+                    entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url));
+                    delete data.url; // remove attribute so we don't set it later
+                }
+                if (data.hasOwnProperty('src')) {
+                    entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.src));
+                    delete data.src; // remove attribute so we don't set it later
+                }
+                if (!data.hasOwnProperty('material-extras')) {
+                    // default images to SRGBColorSpace, if not specified
+                    entityEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
+                    entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
+                }
+                delete data.image; // no other properties applicable to image; delete it
+                break;
+            case 'text':
+                // Support legacy `data: { text: 'STRING TEXT' }`
+                const theText = data.text;
+                if (typeof theText === 'string' || theText instanceof String) {
+                    entityEl.setAttribute('text', 'value', data.text);
+                    delete data.text;
+                }
+                if (!data.hasOwnProperty('side')) entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)
+                if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
+                if (!data.hasOwnProperty('align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
+                break;
+            case 'handLeft':
+            case 'handRight':
+                entityEl.setAttribute('gltf-model', data.url);
+                delete data[type];
+            case 'cube':
+                type = 'box'; // arena legacy! new libraries/persist objects should use box!
+            case 'box':
+            case 'circle':
+            case 'cone':
+            case 'cylinder':
+            case 'dodecahedron':
+            case 'icosahedron':
+            case 'octahedron':
+            case 'plane':
+            case 'ring':
+            case 'sphere':
+            case 'tetrahedron':
+            case 'torus':
+            case 'torusKnot':
+            case 'triangle':
+                // handle A-Frame geometry types here for performance (custom geometries are handled in the default case)
+                if (type) {
+                    entityEl.setAttribute('geometry', 'primitive', type);
+                    isGeometry = true;
+                }
+                break;
+            default:
+                // check if the type is a registered geometry (that we do not catch in the cases above)
+                if (AFRAME.geometries[type]) {
+                    entityEl.setAttribute('geometry', 'primitive', type);
+                    isGeometry = true;
+                }
         } // switch(type)
 
         // handle geometry attributes
@@ -402,7 +408,8 @@ export class CreateUpdate {
                     value = ARENAUtils.crossOriginDropboxSrc(value);
                 }
 
-                if (value === null) { // if null, remove attribute
+                if (value === null) {
+                    // if null, remove attribute
                     entityEl.removeAttribute(cName);
                 } else {
                     entityEl.setAttribute(cName, attribute, value);
@@ -425,47 +432,52 @@ export class CreateUpdate {
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
             // default is to let aframe handle attributes directly
             switch (attribute) {
-            case 'rotation':
-                // rotation is set directly in the THREE.js object, for performance reasons
-                if (value.hasOwnProperty('w')) {
-                    entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
-                } else {
-                    entityEl.object3D.rotation.set( THREE.MathUtils.degToRad(value.x), THREE.MathUtils.degToRad(value.y), THREE.MathUtils.degToRad(value.z)); // otherwise its a rotation given in degrees
-                }
-                break;
-            case 'position':
-                // position is set directly in the THREE.js object, for performance reasons
-                entityEl.object3D.position.set(value.x, value.y, value.z);
-                break;
-            case 'color':
-                if (!entityEl.hasOwnProperty('text')) {
-                    entityEl.setAttribute('material', 'color', value);
-                } else {
-                    entityEl.setAttribute('text', 'color', value);
-                }
-                break;
-            case 'scale':
-                // scale is set directly in the THREE.js object, for performance reasons
-                entityEl.object3D.scale.set(value.x, value.y, value.z);
-                break;
-            case 'ttl':
-                // ttl is applied to property 'seconds' of ttl component
-                entityEl.setAttribute('ttl', {seconds: value});
-                break;
-            case 'src':
-            case 'url':
-                // replace dropbox links in any 'src'/'url' attributes that get here
-                entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
-            default:
-                // all other attributes are pushed directly to aframe
-                if (value === null) { // if null, remove attribute
-                    entityEl.removeAttribute(attribute);
-                } else {
-                    // replace dropbox links in any url or src attribute inside value
-                    if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
-                    if (value.hasOwnProperty('url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
-                    entityEl.setAttribute(attribute, value);
-                }
+                case 'rotation':
+                    // rotation is set directly in the THREE.js object, for performance reasons
+                    if (value.hasOwnProperty('w')) {
+                        entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
+                    } else {
+                        entityEl.object3D.rotation.set(
+                            THREE.MathUtils.degToRad(value.x),
+                            THREE.MathUtils.degToRad(value.y),
+                            THREE.MathUtils.degToRad(value.z)
+                        ); // otherwise its a rotation given in degrees
+                    }
+                    break;
+                case 'position':
+                    // position is set directly in the THREE.js object, for performance reasons
+                    entityEl.object3D.position.set(value.x, value.y, value.z);
+                    break;
+                case 'color':
+                    if (!entityEl.hasOwnProperty('text')) {
+                        entityEl.setAttribute('material', 'color', value);
+                    } else {
+                        entityEl.setAttribute('text', 'color', value);
+                    }
+                    break;
+                case 'scale':
+                    // scale is set directly in the THREE.js object, for performance reasons
+                    entityEl.object3D.scale.set(value.x, value.y, value.z);
+                    break;
+                case 'ttl':
+                    // ttl is applied to property 'seconds' of ttl component
+                    entityEl.setAttribute('ttl', { seconds: value });
+                    break;
+                case 'src':
+                case 'url':
+                    // replace dropbox links in any 'src'/'url' attributes that get here
+                    entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
+                default:
+                    // all other attributes are pushed directly to aframe
+                    if (value === null) {
+                        // if null, remove attribute
+                        entityEl.removeAttribute(attribute);
+                    } else {
+                        // replace dropbox links in any url or src attribute inside value
+                        if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
+                        if (value.hasOwnProperty('url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
+                        entityEl.setAttribute(attribute, value);
+                    }
             } // switch attribute
         }
     }
@@ -480,7 +492,8 @@ export class CreateUpdate {
 
         const myCamera = document.getElementById('my-camera');
 
-        if (message.data.object_type === 'camera') { // camera override
+        if (message.data.object_type === 'camera') {
+            // camera override
             if (!myCamera) {
                 error('camera override', 'local camera object does not exist! (create camera before)');
                 return;
@@ -488,7 +501,8 @@ export class CreateUpdate {
 
             const p = message.data.position;
             const r = message.data.rotation;
-            if (AFRAME.scenes[0]?.xrSession) { // Apply transform to rig based off xrSession camera pose
+            if (AFRAME.scenes[0]?.xrSession) {
+                // Apply transform to rig based off xrSession camera pose
                 const rig = document.getElementById('cameraRig');
                 const spinner = document.getElementById('cameraSpinner');
                 const target = document.getElementById(ARENA.params.camFollow);
@@ -499,7 +513,8 @@ export class CreateUpdate {
                     rig.object3D.position.setFromMatrixPosition(rigMatrix);
                     spinner.object3D.rotation.setFromRotationMatrix(rigMatrix);
                 }
-            } else { // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
+            } else {
+                // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
                 if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
                 if (r) {
                     if (r.hasOwnProperty('w')) {
@@ -509,19 +524,21 @@ export class CreateUpdate {
                         myCamera.object3D.rotation.set(
                             THREE.MathUtils.degToRad(r.x),
                             THREE.MathUtils.degToRad(r.y),
-                            THREE.MathUtils.degToRad(r.z),
+                            THREE.MathUtils.degToRad(r.z)
                         );
                     }
                 }
             }
-        } else if (message.data.object_type === 'look-at') { // camera look-at
+        } else if (message.data.object_type === 'look-at') {
+            // camera look-at
             if (!myCamera) {
                 cameraLookAtError('local camera object does not exist! (create camera before)');
                 return;
             }
 
-            let target = message.data.target;
-            if (!target.hasOwnProperty('x')) { // check if an object id was given
+            let { target } = message.data;
+            if (!target.hasOwnProperty('x')) {
+                // check if an object id was given
                 const targetObj = document.getElementById(target);
                 if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
                 else {
@@ -531,11 +548,9 @@ export class CreateUpdate {
             }
 
             // x, y, z given
-            if (target.hasOwnProperty('x') &&
-                target.hasOwnProperty('y') &&
-                target.hasOwnProperty('z')) {
-                myCamera.components['look-controls'].yawObject.lookAt( target.x, target.y, target.z );
-                myCamera.components['look-controls'].pitchObject.lookAt( target.x, target.y, target.z );
+            if (target.hasOwnProperty('x') && target.hasOwnProperty('y') && target.hasOwnProperty('z')) {
+                myCamera.components['look-controls'].yawObject.lookAt(target.x, target.y, target.z);
+                myCamera.components['look-controls'].pitchObject.lookAt(target.x, target.y, target.z);
                 cameraLookAtWarn(message);
             }
         }

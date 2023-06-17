@@ -14,24 +14,24 @@ export class ARENAUserAccount {
      * Internal call to perform xhr request
      */
     static _makeRequest(method, url, params = undefined, contentType = undefined) {
-        return new Promise(function(resolve, reject) {
-            let xhr = new XMLHttpRequest();
+        return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
             xhr.open(method, url);
             const csrftoken = ARENAAUTH.getCookie('csrftoken');
             xhr.setRequestHeader('X-CSRFToken', csrftoken);
             if (contentType) xhr.setRequestHeader('Content-Type', contentType);
             xhr.responseType = 'json';
-            xhr.onload = function() {
+            xhr.onload = function () {
                 if (this.status >= 200 && this.status < 300) {
                     resolve(xhr.response);
                 } else {
                     reject({
                         status: this.status,
-                        statusText: xhr.statusText
+                        statusText: xhr.statusText,
                     });
                 }
             };
-            xhr.onerror = function() {
+            xhr.onerror = function () {
                 reject({
                     status: this.status,
                     statusText: xhr.statusText,
@@ -55,7 +55,7 @@ export class ARENAUserAccount {
      * @return {UserAccountData} object with user account data
      */
     static async userAuthState() {
-        let result = await ARENAUserAccount._makeRequest('GET', `/user/user_state`);
+        const result = await ARENAUserAccount._makeRequest('GET', `/user/user_state`);
         return result;
     }
 
@@ -64,7 +64,7 @@ export class ARENAUserAccount {
      * @return {string[]]} list of scene names
      */
     static async userScenes() {
-        let result = await ARENAUserAccount._makeRequest('GET', '/user/my_scenes');
+        const result = await ARENAUserAccount._makeRequest('GET', '/user/my_scenes');
         return result;
     }
 
@@ -73,10 +73,10 @@ export class ARENAUserAccount {
      * @param {string} scene_namespace name of the scene without namespace
      * @param {boolean} isPublic true when 'public' namespace is used, false for user namespace
      */
-    static async requestUserNewScene(scene_namespace, is_public=false) {
-        var params = new FormData();
+    static async requestUserNewScene(scene_namespace, is_public = false) {
+        const params = new FormData();
         // TODO: add public parameter
-        let result = await ARENAUserAccount._makeRequest('POST', `/user/scenes/${scene_namespace}`);
+        const result = await ARENAUserAccount._makeRequest('POST', `/user/scenes/${scene_namespace}`);
         return result;
     }
 
@@ -85,7 +85,7 @@ export class ARENAUserAccount {
      * @param {string} scene_namespace name of the scene without namespace
      */
     static async requestDeleteUserScene(scene_namespace) {
-        let result = await ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${scene_namespace}`);
+        const result = await ARENAUserAccount._makeRequest('DELETE', `/user/scenes/${scene_namespace}`);
         return result;
     }
 
@@ -93,12 +93,17 @@ export class ARENAUserAccount {
      * Request to delete scene permissions from user db
      * @param {string} scene_namespace name of the scene without namespace
      */
-     static async refreshAuthToken(authType, mqttUsername, namespacedScene) {
-        let params = 'username=' + mqttUsername;
+    static async refreshAuthToken(authType, mqttUsername, namespacedScene) {
+        let params = `username=${mqttUsername}`;
         params += `&id_auth=${authType}`;
-        params += `&realm=${ARENADefaults ? ARENADefaults.realm :'realm'}`;
+        params += `&realm=${ARENADefaults ? ARENADefaults.realm : 'realm'}`;
         params += `&scene=${namespacedScene}`;
-        let result = await ARENAUserAccount._makeRequest('POST', `/user/mqtt_auth`, params, 'application/x-www-form-urlencoded');
+        const result = await ARENAUserAccount._makeRequest(
+            'POST',
+            `/user/mqtt_auth`,
+            params,
+            'application/x-www-form-urlencoded'
+        );
         ARENAAUTH.user_type = authType;
         ARENAAUTH.user_username = result.username;
         // keep payload for later viewing

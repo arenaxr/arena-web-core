@@ -8,14 +8,14 @@
 
 /* global AFRAME, ARENA */
 
-import { ARENADefaults } from "../../conf/defaults";
+import { ARENADefaults } from '../../conf/defaults';
 
-const bind = AFRAME.utils.bind;
+const { bind } = AFRAME.utils;
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 
-AFRAME.components['wasd-controls'].Component.prototype.init = function() {
+AFRAME.components['wasd-controls'].Component.prototype.init = function () {
     // Navigation
     this.navGroup = null;
     this.navNode = null;
@@ -40,27 +40,26 @@ AFRAME.components['wasd-controls'].Component.prototype.init = function() {
 };
 
 const wasdSchema = AFRAME.components['wasd-controls'].Component.prototype.schema;
-Object.assign(wasdSchema, {constrainToNavMesh: {default: false}});
+Object.assign(wasdSchema, { constrainToNavMesh: { default: false } });
 AFRAME.components['wasd-controls'].Component.prototype.schema = AFRAME.schema.process(wasdSchema);
 
-AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, delta) {
-    const data = this.data;
-    const el = this.el;
-    const velocity = this.velocity;
+AFRAME.components['wasd-controls'].Component.prototype.tick = function (time, delta) {
+    const { data } = this;
+    const { el } = this;
+    const { velocity } = this;
 
-    if (!velocity[data.adAxis] && !velocity[data.wsAxis] &&
-        isEmptyObject(this.keys)) {
+    if (!velocity[data.adAxis] && !velocity[data.wsAxis] && isEmptyObject(this.keys)) {
         return;
     }
 
     // Update velocity.
-    delta = delta / 1000;
+    delta /= 1000;
     this.updateVelocity(delta);
 
     if (!velocity[data.adAxis] && !velocity[data.wsAxis]) {
         return;
     }
-    const nav = el.sceneEl.systems.nav;
+    const { nav } = el.sceneEl.systems;
     if (data.constrainToNavMesh && nav?.navMesh && !data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
@@ -78,9 +77,8 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
     }
 };
 
-
-AFRAME.components['wasd-controls'].Component.prototype.resetNav = function(checkPolygon = false, clampStep = false) {
-    const nav = this.el.sceneEl.systems.nav;
+AFRAME.components['wasd-controls'].Component.prototype.resetNav = function (checkPolygon = false, clampStep = false) {
+    const { nav } = this.el.sceneEl.systems;
     if (nav.navMesh) {
         this.navStart.copy(this.el.object3D.position).y -= ARENADefaults.camHeight;
         this.navEnd.copy(this.navStart);
@@ -94,15 +92,15 @@ AFRAME.components['wasd-controls'].Component.prototype.resetNav = function(check
     }
 };
 
-AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
+AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function (delta) {
     let adSign;
-    const data = this.data;
-    const keys = this.keys;
-    const velocity = this.velocity;
+    const { data } = this;
+    const { keys } = this;
+    const { velocity } = this;
     let wsSign;
 
-    const adAxis = data.adAxis;
-    const wsAxis = data.wsAxis;
+    const { adAxis } = data;
+    const { wsAxis } = data;
 
     // If FPS too low, reset velocity.
     if (delta > MAX_DELTA) {
@@ -112,7 +110,7 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
     }
 
     // https://gamedev.stackexchange.com/questions/151383/frame-rate-independant-movement-with-acceleration
-    const scaledEasing = Math.pow(1 / this.easing, delta * 60);
+    const scaledEasing = (1 / this.easing) ** (delta * 60);
     // Velocity Easing.
     if (velocity[adAxis] !== 0) {
         velocity[adAxis] = velocity[adAxis] * scaledEasing;
@@ -134,7 +132,7 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
     }
 
     // Update velocity using keys pressed.
-    const acceleration = data.acceleration;
+    const { acceleration } = data;
     if (data.adEnabled) {
         adSign = data.adInverted ? -1 : 1;
         if (keys.KeyA) {

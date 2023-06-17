@@ -17,21 +17,21 @@ export class Parser {
             return undefined;
         }
 
-        const object_id = message.object_id;
+        const { object_id } = message;
         if (object_id === undefined) {
             error(source, 'Malformed message (no object_id):', JSON.stringify(message));
             return undefined;
         }
 
-        const data = message.data;
+        const { data } = message;
         if (data === undefined) {
             error(source, 'Malformed message (no data field):', JSON.stringify(message));
             return undefined;
         }
 
         return {
-            object_id: object_id,
-            data: data,
+            object_id,
+            data,
         };
     }
 }

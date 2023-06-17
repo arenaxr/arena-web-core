@@ -6,9 +6,7 @@
  *
  */
 
-import {
-    ARENAUtils,
-} from '../utils';
+import { ARENAUtils } from '../utils';
 
 /**
  * Detect multi-finger touch gestures. Publish events accordingly.
@@ -23,7 +21,7 @@ AFRAME.registerComponent('gesture-detector', {
         },
     },
 
-    init: function() {
+    init() {
         this.internalState = {
             previousState: null,
             timer: null,
@@ -34,7 +32,7 @@ AFRAME.registerComponent('gesture-detector', {
         window.addEventListener('touchmove', this.emitGestureEvent);
     },
 
-    remove: function() {
+    remove() {
         window.removeEventListener('touchstart', this.emitGestureEvent);
         window.removeEventListener('touchend', this.emitGestureEvent);
         window.removeEventListener('touchmove', this.emitGestureEvent);
@@ -42,13 +40,13 @@ AFRAME.registerComponent('gesture-detector', {
 
     emitGestureEvent(event) {
         const currentState = this.getTouchState(event);
-        const previousState = this.internalState.previousState;
+        const { previousState } = this.internalState;
         const gestureContinues = previousState && currentState && currentState.touchCount == previousState.touchCount;
         const gestureEnded = previousState && !gestureContinues;
         const gestureStarted = currentState && !gestureContinues;
 
         if (gestureEnded) {
-            const eventName = this.getEventPrefix(previousState.touchCount) + 'fingerend';
+            const eventName = `${this.getEventPrefix(previousState.touchCount)}fingerend`;
             this.sendGesture(eventName, previousState);
             if (this.internalState.timer) {
                 clearTimeout(this.internalState.timer);
@@ -61,7 +59,7 @@ AFRAME.registerComponent('gesture-detector', {
             currentState.startTime = performance.now();
             currentState.positionStart = currentState.position;
             currentState.spreadStart = currentState.spread;
-            const eventName = this.getEventPrefix(currentState.touchCount) + 'fingerstart';
+            const eventName = `${this.getEventPrefix(currentState.touchCount)}fingerstart`;
             if (!this.internalState.timer) {
                 this.internalState.timer = window.setTimeout(() => {
                     this.internalState.timer = null;
@@ -86,8 +84,9 @@ AFRAME.registerComponent('gesture-detector', {
             // Add state data to event detail
             Object.assign(eventDetail, previousState);
 
-            if (!this.internalState.timer) { // throttle publish to publishRateMs
-                const eventName = this.getEventPrefix(currentState.touchCount) + 'fingermove';
+            if (!this.internalState.timer) {
+                // throttle publish to publishRateMs
+                const eventName = `${this.getEventPrefix(currentState.touchCount)}fingermove`;
                 this.sendGesture(eventName, eventDetail);
 
                 this.internalState.timer = window.setTimeout(() => {
@@ -97,7 +96,7 @@ AFRAME.registerComponent('gesture-detector', {
         }
     },
 
-    getTouchState: function(event) {
+    getTouchState(event) {
         if (event.touches.length === 0) {
             return null;
         }
@@ -153,7 +152,7 @@ AFRAME.registerComponent('gesture-detector', {
         }
         // send through MQTT
         const camera = document.getElementById('my-camera');
-        const position = camera.components['arena-camera'].data.position;
+        const { position } = camera.components['arena-camera'].data;
         const clickPos = ARENAUtils.vec3ToObject(position);
 
         // generated finger move
@@ -162,7 +161,7 @@ AFRAME.registerComponent('gesture-detector', {
             action: 'clientEvent',
             type: eventName,
             data: {
-                clickPos: clickPos,
+                clickPos,
                 source: ARENA.camName,
                 position: {
                     x: parseFloat(eventDetail.position.x.toFixed(5)),

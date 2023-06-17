@@ -1,73 +1,53 @@
 import { Pass, FullScreenQuad } from './pass.js';
 
 class ShaderPass extends Pass {
+    constructor(shader, textureID) {
+        super();
 
-	constructor( shader, textureID ) {
+        this.textureID = textureID !== undefined ? textureID : 'tDiffuse';
 
-		super();
+        if (shader instanceof THREE.ShaderMaterial) {
+            this.uniforms = shader.uniforms;
 
-		this.textureID = ( textureID !== undefined ) ? textureID : 'tDiffuse';
+            this.material = shader;
+        } else if (shader) {
+            this.uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-		if ( shader instanceof THREE.ShaderMaterial ) {
+            this.material = new THREE.ShaderMaterial({
+                name: shader.name !== undefined ? shader.name : 'unspecified',
+                defines: { ...shader.defines },
+                uniforms: this.uniforms,
+                vertexShader: shader.vertexShader,
+                fragmentShader: shader.fragmentShader,
+            });
+        }
 
-			this.uniforms = shader.uniforms;
+        this.fsQuad = new FullScreenQuad(this.material);
+    }
 
-			this.material = shader;
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
+        if (this.uniforms[this.textureID]) {
+            this.uniforms[this.textureID].value = readBuffer.texture;
+        }
 
-		} else if ( shader ) {
+        this.fsQuad.material = this.material;
 
-			this.uniforms = THREE.UniformsUtils.clone( shader.uniforms );
+        if (this.renderToScreen) {
+            renderer.setRenderTarget(currentRenderTarget);
+            this.fsQuad.render(renderer);
+        } else {
+            renderer.setRenderTarget(writeBuffer);
+            // TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
+            if (this.clear) renderer.clear(renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil);
+            this.fsQuad.render(renderer);
+        }
+    }
 
-			this.material = new THREE.ShaderMaterial( {
+    dispose() {
+        this.material.dispose();
 
-				name: ( shader.name !== undefined ) ? shader.name : 'unspecified',
-				defines: Object.assign( {}, shader.defines ),
-				uniforms: this.uniforms,
-				vertexShader: shader.vertexShader,
-				fragmentShader: shader.fragmentShader
-
-			} );
-
-		}
-
-		this.fsQuad = new FullScreenQuad( this.material );
-
-	}
-
-	render( renderer, writeBuffer, readBuffer, currentRenderTarget /*, deltaTime, maskActive */ ) {
-
-		if ( this.uniforms[ this.textureID ] ) {
-
-			this.uniforms[ this.textureID ].value = readBuffer.texture;
-
-		}
-
-		this.fsQuad.material = this.material;
-
-		if ( this.renderToScreen ) {
-
-			renderer.setRenderTarget( currentRenderTarget );
-			this.fsQuad.render( renderer );
-
-		} else {
-
-			renderer.setRenderTarget( writeBuffer );
-			// TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
-			if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-			this.fsQuad.render( renderer );
-
-		}
-
-	}
-
-	dispose() {
-
-		this.material.dispose();
-
-		this.fsQuad.dispose();
-
-	}
-
+        this.fsQuad.dispose();
+    }
 }
 
 export { ShaderPass };

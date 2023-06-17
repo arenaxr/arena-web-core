@@ -34,7 +34,7 @@ AFRAME.components.sound.schema.src.parse = function assetParse(value) {
             }
             return el.getAttribute('src');
         }
-        warn('"' + value + '" asset not found.');
+        warn(`"${value}" asset not found.`);
         return;
     }
 
@@ -43,8 +43,8 @@ AFRAME.components.sound.schema.src.parse = function assetParse(value) {
 };
 
 const Sound = AFRAME.components.sound.Component;
-Sound.prototype.update = function(oldData) {
-    const data = this.data;
+Sound.prototype.update = function (oldData) {
+    const { data } = this;
     const srcChanged = data.src !== oldData.src;
     // Create new sound if not yet created or changing `src`.
     if (srcChanged) {
@@ -55,7 +55,7 @@ Sound.prototype.update = function(oldData) {
         this.setupSound();
     }
 
-    this.pool.children.forEach(function(sound) {
+    this.pool.children.forEach((sound) => {
         if (data.positional) {
             sound.setDistanceModel(data.distanceModel);
             sound.setMaxDistance(data.maxDistance);
@@ -75,11 +75,11 @@ Sound.prototype.update = function(oldData) {
         const self = this;
 
         if (window.MediaStream) {
-            const isStream = (data.src.srcObject instanceof window.MediaStream);
+            const isStream = data.src.srcObject instanceof window.MediaStream;
 
             if (isStream) {
                 const stream = data.src.srcObject;
-                self.pool.children.forEach(function(sound) {
+                self.pool.children.forEach((sound) => {
                     sound.setNodeSource(sound.context.createMediaStreamSource(stream));
                 });
                 self.loaded = true;
@@ -88,10 +88,10 @@ Sound.prototype.update = function(oldData) {
             }
         }
 
-        const src = data.src;
+        const { src } = data;
         this.loaded = false;
-        this.audioLoader.load(src, function(buffer) {
-            self.pool.children.forEach(function(sound) {
+        this.audioLoader.load(src, (buffer) => {
+            self.pool.children.forEach((sound) => {
                 sound.setBuffer(buffer);
             });
             self.loaded = true;

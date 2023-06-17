@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
 /**
  * @fileoverview Adds a video to an entity and controls its playback.
@@ -24,26 +24,26 @@ import {ARENAUtils} from '../utils';
  */
 AFRAME.registerComponent('video-control', {
     schema: {
-        video_object: {type: 'string', default: ''},
-        video_path: {type: 'string', default: ''},
-        frame_object: {type: 'string', default: ''},
-        anyone_clicks: {type: 'boolean', default: true},
-        video_loop: {type: 'boolean', default: true},
-        autoplay: {type: 'boolean', default: false},
-        volume: {type: 'number', default: 1},
-        cleanup: {type: 'boolean', default: true},
+        video_object: { type: 'string', default: '' },
+        video_path: { type: 'string', default: '' },
+        frame_object: { type: 'string', default: '' },
+        anyone_clicks: { type: 'boolean', default: true },
+        video_loop: { type: 'boolean', default: true },
+        autoplay: { type: 'boolean', default: false },
+        volume: { type: 'number', default: 1 },
+        cleanup: { type: 'boolean', default: true },
     },
 
     multiple: true,
 
-    init: function() {
-        const data = this.data;
+    init() {
+        const { data } = this;
         const theID = data.video_object;
         const videoPath = ARENAUtils.crossOriginDropboxSrc(data.video_path);
         const anyoneClicks = data.anyone_clicks;
         const videoLoop = data.video_loop;
-        const autoplay = data.autoplay;
-        const volume = data.volume;
+        const { autoplay } = data;
+        const { volume } = data;
 
         let frameSrc = 'static/images/conix-face.white.jpg'; // default
         if (data.frame_object) {
@@ -54,16 +54,14 @@ AFRAME.registerComponent('video-control', {
         const theAssets = $('a-assets');
 
         this.videoNum = this.el.id;
-        const videoId = this.videoNum + '_videoId';
+        const videoId = `${this.videoNum}_videoId`;
 
         theAssets.append(
-            `<video id='${videoId}' src='${videoPath}' ${(autoplay) ? 'autoplay':''} loop='${videoLoop}' playsinline/>`,
+            `<video id='${videoId}' src='${videoPath}' ${autoplay ? 'autoplay' : ''} loop='${videoLoop}' playsinline/>`
         );
 
-        const frameId = this.videoNum + '_frameId';
-        theAssets.append(
-            `<image id='${frameId}' src='${frameSrc}'/>`,
-        );
+        const frameId = `${this.videoNum}_frameId`;
+        theAssets.append(`<image id='${frameId}' src='${frameSrc}'/>`);
 
         this.player.setAttribute('material', 'src', `#${frameId}`);
 
@@ -84,9 +82,8 @@ AFRAME.registerComponent('video-control', {
             this.video.pause();
         }
 
-        this.eventHandlerFn = function(evt) {
-            if (evt.detail.cursorEl ||
-                (anyoneClicks && evt.detail.clicker && (evt.detail.clicker != ARENA.camName))) {
+        this.eventHandlerFn = function (evt) {
+            if (evt.detail.cursorEl || (anyoneClicks && evt.detail.clicker && evt.detail.clicker != ARENA.camName)) {
                 const theSource = this.player.getAttribute('arenaVideo');
                 const theVideoId = this.player.getAttribute('videoId');
                 const theFrameId = this.player.getAttribute('frameId');
@@ -109,23 +106,23 @@ AFRAME.registerComponent('video-control', {
         this.el.addEventListener('mousedown', this.eventHandlerFn.bind(this));
     },
 
-    update: function(oldData) {
-        const volume = this.data.volume;
+    update(oldData) {
+        const { volume } = this.data;
         this.video.volume = volume;
     },
 
-    pause: function() {
+    pause() {
         // this.removeEventListeners()
     },
 
-    play: function() {
+    play() {
         // this.addEventListeners()
     },
 
     // handle component removal
-    remove: function() {
-        const data = this.data;
-        const el = this.el;
+    remove() {
+        const { data } = this;
+        const { el } = this;
 
         // remove event listener
         if (data.event) {

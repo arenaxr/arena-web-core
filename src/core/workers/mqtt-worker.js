@@ -14,7 +14,9 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
  */
 class MQTTWorker {
     messageHandlers = {};
+
     subscriptions = [];
+
     connectionLostHandlers = [];
 
     /**
@@ -55,7 +57,7 @@ class MQTTWorker {
      */
     connect(mqttClientOptions, onSuccessCallBack, lwMsg = undefined, lwTopic = undefined) {
         const opts = {
-            onFailure: function(res) {
+            onFailure(res) {
                 this.healthCheck({
                     addError: 'mqttScene.connection',
                 });
@@ -67,7 +69,7 @@ class MQTTWorker {
             opts.onSuccess = onSuccessCallBack;
         } else {
             opts.onSuccess = () => {
-                console.info("ARENA MQTT scene connection success!");
+                console.info('ARENA MQTT scene connection success!');
             };
         }
 
@@ -85,9 +87,9 @@ class MQTTWorker {
     }
 
     /**
-   * Subscribe to a topic and add it to list of subscriptions
-   * @param {string} topic
-   */
+     * Subscribe to a topic and add it to list of subscriptions
+     * @param {string} topic
+     */
     subscribe(topic) {
         if (!this.subscriptions.includes(topic)) {
             this.subscriptions.push(topic);
@@ -113,7 +115,7 @@ class MQTTWorker {
      */
     onMessageArrivedDispatcher(message) {
         const topic = message.destinationName;
-        const topicCategory = topic.split("/")[1];
+        const topicCategory = topic.split('/')[1];
         const handler = this.messageHandlers[topicCategory];
         if (handler) {
             handler(message);
@@ -149,12 +151,12 @@ class MQTTWorker {
      * @param {number} qos
      * @param {boolean} retained
      */
-    async publish(topic, payload, qos=0, retained=false) {
+    async publish(topic, payload, qos = 0, retained = false) {
         if (!this.mqttClient.isConnected()) return;
 
         if (typeof payload === 'object') {
             // add timestamp to all published messages
-            payload['timestamp'] = new Date().toISOString();
+            payload.timestamp = new Date().toISOString();
 
             payload = JSON.stringify(payload);
         }

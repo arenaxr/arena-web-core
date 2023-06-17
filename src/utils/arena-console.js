@@ -7,7 +7,6 @@
  */
 
 /* global ARENA */
-'use strict';
 
 /**
  * Redirect console messages to MQTT
@@ -19,6 +18,7 @@
  */
 export class ARENAMqttConsole {
     static dftDbgTopic = 'realm/proc/debug/stdout/unknown-rtuuid';
+
     /**
      * Returns a console object that replaces the original console (original console saved to **window.jsConsole**)
      * Parameters are passed in an object: Uses ES6 object destructuring to set defaults.
@@ -31,9 +31,17 @@ export class ARENAMqttConsole {
      * @param {string} [dbgTopic=dftDbgTopic] - Topic where to publish messages
      * @param {function} [publish=ARENA.Mqtt.publish] - Publish function(topic, msg)
      */
-    static init({consoleDebug = true, mqttDebug = true, mqttLogUncaughtExceptions = true, mqttQueueLen = 500, mqttMsgsPerSec = 100, dbgTopic = ARENAMqttConsole.dftDbgTopic, publish = undefined} = {}) {
-        window.console = (function(jsConsole) {
-        // deal with browsers with no console
+    static init({
+        consoleDebug = true,
+        mqttDebug = true,
+        mqttLogUncaughtExceptions = true,
+        mqttQueueLen = 500,
+        mqttMsgsPerSec = 100,
+        dbgTopic = ARENAMqttConsole.dftDbgTopic,
+        publish = undefined,
+    } = {}) {
+        window.console = (function (jsConsole) {
+            // deal with browsers with no console
             if (!window.console || !jsConsole) {
                 jsConsole = {};
             }
@@ -50,11 +58,11 @@ export class ARENAMqttConsole {
             let _publish = publish;
             let _sendQueue = [];
             let _isSending = false;
-            const _mqttDelayMs = (mqttMsgsPerSec == 0) ? 0 : 1000/mqttMsgsPerSec;
+            const _mqttDelayMs = mqttMsgsPerSec == 0 ? 0 : 1000 / mqttMsgsPerSec;
 
             // send unhandled exceptions to mqtt
             if (_mqttLogUncaughtExceptions) {
-                window.onerror = function(message, file, line, col, error) {
+                window.onerror = function (message, file, line, col, error) {
                     const msg = `ERROR: ${message} (${file}, line ${line})`;
                     if (_publish) _publish(_dbgTopic, msg);
                     else {
@@ -68,8 +76,8 @@ export class ARENAMqttConsole {
               let msg = `ERROR: ${e.error} (${e.filename}, line ${e.lineno}`;
               _publish(_dbgTopic, msg);
               return false;
-          })*/
-                window.addEventListener('unhandledrejection', function(e) {
+          }) */
+                window.addEventListener('unhandledrejection', (e) => {
                     const msg = `ERROR: ${e.reason}`;
                     if (_publish) _publish(_dbgTopic, msg);
                     else {
@@ -107,7 +115,7 @@ export class ARENAMqttConsole {
 
             // publish messages from queue
             var sendNextMessage = async () => {
-                if (!_sendQueue.length || _isSending || _publish==undefined) return;
+                if (!_sendQueue.length || _isSending || _publish == undefined) return;
 
                 if (_mqttDelayMs > 0) {
                     _isSending = true;
@@ -126,24 +134,33 @@ export class ARENAMqttConsole {
             };
 
             return {
-                log: function() {
+                log() {
                     consoleLog(arguments, 'log');
                     mqttLog(arguments, 'log');
                 },
-                warn: function() {
+                warn() {
                     consoleLog(arguments, 'warn');
                     mqttLog(arguments, 'warn');
                 },
-                error: function() {
+                error() {
                     consoleLog(arguments, 'error');
                     mqttLog(arguments, 'error');
                 },
-                info: function(v) {
+                info(v) {
                     consoleLog(arguments, 'info');
                     mqttLog(arguments, 'info');
                 },
-                setOptions({consoleDebug = true, mqttDebug = true, mqttLogUncaughtExceptions = undefined, mqttQueueLen = 500, mqttMsgsPerSec = 100, dbgTopic = ARENAMqttConsole.dftDbgTopic, publish = undefined}) {
-                    if (mqttLogUncaughtExceptions != undefined) throw 'We do not support changing mqttLogUncaughtExceptions!';
+                setOptions({
+                    consoleDebug = true,
+                    mqttDebug = true,
+                    mqttLogUncaughtExceptions = undefined,
+                    mqttQueueLen = 500,
+                    mqttMsgsPerSec = 100,
+                    dbgTopic = ARENAMqttConsole.dftDbgTopic,
+                    publish = undefined,
+                }) {
+                    if (mqttLogUncaughtExceptions != undefined)
+                        throw 'We do not support changing mqttLogUncaughtExceptions!';
                     _consoleDebug = consoleDebug;
                     _mqttDebug = mqttDebug;
                     _mqttQueueLen = mqttQueueLen;

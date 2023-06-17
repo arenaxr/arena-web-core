@@ -65,12 +65,12 @@ AFRAME.registerComponent('attribution', {
             default: true,
         },
     },
-    init: function() {
+    init() {
         this.data.id = this.el.getAttribute('id');
         this.system.registerComponent(this.el);
     },
-    update: function() {},
-    remove: function() {
+    update() {},
+    remove() {
         this.system.unregisterComponent(this.el);
     },
 });

@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
 /**
  * @fileoverview Component to listen for mouse events and publish corresponding events
@@ -17,47 +17,47 @@ import {ARENAUtils} from '../utils';
  */
 AFRAME.registerComponent('click-listener', {
     schema: {
-        bubble: {type: 'boolean', default: true},
-        enabled: {type: 'boolean', default: true},
+        bubble: { type: 'boolean', default: true },
+        enabled: { type: 'boolean', default: true },
         default: true,
     },
 
-    init: function() {
+    init() {
         this.mouseleaveHandler = this.mouseleaveHandler.bind(this);
         this.mouseenterHandler = this.mouseenterHandler.bind(this);
         this.mousedownHandler = this.mousedownHandler.bind(this);
         this.mouseupHandler = this.mouseupHandler.bind(this);
     },
 
-    update: function(oldData) {
+    update(oldData) {
         if (this.data && !oldData) {
             this.registerListeners();
         } else if (!this.data && oldData) {
             this.unregisterListeners();
         }
     },
-    remove: function() {
+    remove() {
         this.unregisterListeners();
     },
-    registerListeners: function() {
+    registerListeners() {
         this.el.addEventListener('mousedown', this.mousedownHandler);
         this.el.addEventListener('mouseup', this.mouseupHandler);
         this.el.addEventListener('mouseenter', this.mouseenterHandler);
         this.el.addEventListener('mouseleave', this.mouseleaveHandler);
     },
-    unregisterListeners: function() {
+    unregisterListeners() {
         this.el.removeEventListener('mousedown', this.mousedownHandler);
         this.el.removeEventListener('mouseup', this.mouseupHandler);
         this.el.removeEventListener('mouseenter', this.mouseenterHandler);
         this.el.removeEventListener('mouseleave', this.mouseleaveHandler);
     },
-    mousedownHandler: function(evt) {
+    mousedownHandler(evt) {
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const position = camera.components['arena-camera'].data.position;
+        const { position } = camera.components['arena-camera'].data;
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setClickData(evt);
@@ -69,27 +69,25 @@ AFRAME.registerComponent('click-listener', {
                 action: 'clientEvent',
                 type: 'mousedown',
                 data: {
-                    clickPos: clickPos,
+                    clickPos,
                     position: coordsData,
                     source: ARENA.camName,
                 },
             };
-            if (!this.el.getAttribute('goto-url') &&
-                !this.el.getAttribute('textinput')) {
+            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
-                    thisMsg);
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
             }
         }
     },
 
-    mouseupHandler: function(evt) {
+    mouseupHandler(evt) {
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const position = camera.components['arena-camera'].data.position;
+        const { position } = camera.components['arena-camera'].data;
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setClickData(evt);
@@ -101,27 +99,25 @@ AFRAME.registerComponent('click-listener', {
                 action: 'clientEvent',
                 type: 'mouseup',
                 data: {
-                    clickPos: clickPos,
+                    clickPos,
                     position: coordsData,
                     source: ARENA.camName,
                 },
             };
-            if (!this.el.getAttribute('goto-url') &&
-                !this.el.getAttribute('textinput')) {
+            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
-                    thisMsg);
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
             }
         }
     },
 
-    mouseenterHandler: function(evt) {
+    mouseenterHandler(evt) {
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const position = camera.components['arena-camera'].data.position;
+        const { position } = camera.components['arena-camera'].data;
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setCoordsData(evt);
@@ -133,26 +129,24 @@ AFRAME.registerComponent('click-listener', {
                 action: 'clientEvent',
                 type: 'mouseenter',
                 data: {
-                    clickPos: clickPos,
+                    clickPos,
                     position: coordsData,
                     source: ARENA.camName,
                 },
             };
-            if (!this.el.getAttribute('goto-url') &&
-                !this.el.getAttribute('textinput')) {
+            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
-                    thisMsg);
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
             }
         }
     },
-    mouseleaveHandler: function(evt) {
+    mouseleaveHandler(evt) {
         if (this.data.bubble === false) {
             evt.stopPropagation();
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const position = camera.components['arena-camera'].data.position;
+        const { position } = camera.components['arena-camera'].data;
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setCoordsData(evt);
@@ -164,16 +158,14 @@ AFRAME.registerComponent('click-listener', {
                 action: 'clientEvent',
                 type: 'mouseleave',
                 data: {
-                    clickPos: clickPos,
+                    clickPos,
                     position: coordsData,
                     source: ARENA.camName,
                 },
             };
-            if (!this.el.getAttribute('goto-url') &&
-                !this.el.getAttribute('textinput')) {
+            if (!this.el.getAttribute('goto-url') && !this.el.getAttribute('textinput')) {
                 // publishing events attached to user id objects allows sculpting security
-                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`,
-                    thisMsg);
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
             }
         }
     },

@@ -1,5 +1,3 @@
-'use strict';
-
 window.publicButtons = []; // 1 or 2 buttons depending on auth
 
 function showEl(el, flex = false) {
@@ -10,7 +8,7 @@ function showEl(el, flex = false) {
 
 function hideEls(els, flex = false) {
     const showClass = flex ? 'd-flex' : 'd-block';
-    for (let el of els) {
+    for (const el of els) {
         el.classList.add('d-none');
         el.classList.remove(showClass);
     }
@@ -23,30 +21,31 @@ function changePage(page = 'sceneSelect') {
 }
 
 // document.addEventListener('DOMContentLoaded', function() { // document.ready() equiv
-window.addEventListener('onauth', async function(e) {
+window.addEventListener('onauth', async (e) => {
     const username = e.detail.mqtt_username;
     const mqttToken = e.detail.mqtt_token;
     const auth = ARENAAUTH.getAuthStatus();
     window.username = auth.username;
 
     // Rudimentary routing based on location hash
-    window.addEventListener('hashchange', function() {
-        const validRoutes = [
-            '#sceneSelect',
-            '#cloneScene',
-        ];
-        const routePage = validRoutes.includes(window.location.hash) ? window.location.hash : '#sceneSelect';
-        const pageEl = document.querySelector(routePage);
-        hideEls(document.querySelectorAll(`.routePage:not(${routePage})`));
-        showEl(pageEl, true);
-        pageEl.dispatchEvent(new Event('routePageLoaded'));
-    }, false);
+    window.addEventListener(
+        'hashchange',
+        () => {
+            const validRoutes = ['#sceneSelect', '#cloneScene'];
+            const routePage = validRoutes.includes(window.location.hash) ? window.location.hash : '#sceneSelect';
+            const pageEl = document.querySelector(routePage);
+            hideEls(document.querySelectorAll(`.routePage:not(${routePage})`));
+            showEl(pageEl, true);
+            pageEl.dispatchEvent(new Event('routePageLoaded'));
+        },
+        false
+    );
 
     document.getElementById('closeCloneScene').addEventListener('click', () => {
         changePage('#sceneSelect');
-    })
+    });
 
-    $('select').each(function() {
+    $('select').each(function () {
         $(this).select2({
             theme: 'bootstrap4',
             width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
@@ -67,8 +66,8 @@ window.addEventListener('onauth', async function(e) {
     const enterArUserSceneBtn = document.getElementById('enterArUserSceneBtn');
     const cloneUserSceneBtn = document.getElementById('cloneUserSceneBtn');
     const deleteUserSceneBtn = document.getElementById('deleteUserSceneBtn');
-    const copyUserSceneUrlBtn = document.getElementById('copyUserSceneUrlBtn')
-    const advancedLinksUserBtn = document.getElementById('advancedLinksUserBtn')
+    const copyUserSceneUrlBtn = document.getElementById('copyUserSceneUrlBtn');
+    const advancedLinksUserBtn = document.getElementById('advancedLinksUserBtn');
 
     const clonePublicSceneBtn = document.getElementById('clonePublicSceneBtn');
     const publicSceneSelect = document.getElementById('publicSceneSelect');
@@ -77,7 +76,7 @@ window.addEventListener('onauth', async function(e) {
     const enterPublicSceneBtn = document.getElementById('enterPublicSceneBtn');
     const enterArPublicSceneBtn = document.getElementById('enterArPublicSceneBtn');
 
-    const advancedLinksDiv = document.getElementById('uri-builder')
+    const advancedLinksDiv = document.getElementById('uri-builder');
     const userNoteSpan = document.getElementById('userNoteSpan');
     const tabMyScenes = document.getElementById('myscenes-tab');
     const uriBuilderCheckboxes = document.querySelectorAll('input[type=checkbox][name=uri-builder]');
@@ -94,16 +93,23 @@ window.addEventListener('onauth', async function(e) {
     }
 
     const toggleUserSceneButtons = (toggle) => {
-        [enterUserSceneBtn, enterArUserSceneBtn, cloneUserSceneBtn, deleteUserSceneBtn, copyUserSceneUrlBtn, advancedLinksUserBtn].forEach((btn) => {
-            toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled')
-        })
-    }
+        [
+            enterUserSceneBtn,
+            enterArUserSceneBtn,
+            cloneUserSceneBtn,
+            deleteUserSceneBtn,
+            copyUserSceneUrlBtn,
+            advancedLinksUserBtn,
+        ].forEach((btn) => {
+            toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled');
+        });
+    };
 
     const togglePublicSceneButtons = (toggle) => {
         publicButtons.forEach((btn) => {
-            toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled')
-        })
-    }
+            toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled');
+        });
+    };
 
     $(userSceneSelect).on('select2:select', checkUserSceneSelect);
     $(publicSceneSelect).on('select2:select', checkPublicSceneSelect);
@@ -126,49 +132,41 @@ window.addEventListener('onauth', async function(e) {
     function checkPublicSceneSelect(e) {
         if (e.target.value) {
             window.publicSceneId = e.target.value;
-            publicSceneUrl.value = `${window.location.origin}/${e.target.value}`
+            publicSceneUrl.value = `${window.location.origin}/${e.target.value}`;
             togglePublicSceneButtons(true);
-            console.log('valid public', e.target.value)
+            console.log('valid public', e.target.value);
         } else {
             window.publicSceneId = '';
             publicSceneUrl.value = '';
             togglePublicSceneButtons(false);
-            console.log('invalid public', e.target.value)
+            console.log('invalid public', e.target.value);
         }
     }
-    enterPublicSceneBtn.addEventListener('click', () =>
-        window.location = publicSceneUrl.value
-    )
-    enterArPublicSceneBtn.addEventListener('click', () =>
-        window.location = `${publicSceneUrl.value}?armode=1`
-    )
+    enterPublicSceneBtn.addEventListener('click', () => (window.location = publicSceneUrl.value));
+    enterArPublicSceneBtn.addEventListener('click', () => (window.location = `${publicSceneUrl.value}?armode=1`));
     copyUserSceneUrlBtn.addEventListener('click', () => {
         userSceneUrl.select();
         userSceneUrl.setSelectionRange(0, 99999); /* For mobile devices */
         document.execCommand('copy');
-    })
-    enterUserSceneBtn.addEventListener('click', () =>
-        window.location = userSceneUrl.value
-    )
-    enterArUserSceneBtn.addEventListener('click', () =>
-        window.location = `${userSceneUrl.value}?armode=1`
-    )
+    });
+    enterUserSceneBtn.addEventListener('click', () => (window.location = userSceneUrl.value));
+    enterArUserSceneBtn.addEventListener('click', () => (window.location = `${userSceneUrl.value}?armode=1`));
 
     // set listeners for advanced links URI-builder
     advancedLinksUserBtn.addEventListener('click', () => {
         advancedLinksDiv.hidden = !advancedLinksDiv.hidden;
         updateUriBuilderCheckboxes(advancedLinksDiv.hidden);
-    })
-    uriBuilderCheckboxes.forEach(function(checkbox) {
+    });
+    uriBuilderCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
-            let uriSettings = [];
-            uriBuilderCheckboxes.forEach(function(checkbox) {
+            const uriSettings = [];
+            uriBuilderCheckboxes.forEach((checkbox) => {
                 if (checkbox.checked) {
                     uriSettings.push(checkbox.id);
                 }
             });
             const sceneUrl = new URL(`${window.location.origin}/${window.userSceneId}`);
-            uriSettings.forEach(function(setting) {
+            uriSettings.forEach((setting) => {
                 switch (setting) {
                     case 'armodeCheck':
                         sceneUrl.searchParams.append('armode', '1');
@@ -197,12 +195,12 @@ window.addEventListener('onauth', async function(e) {
                 }
             });
             updateUserSceneUrlBox(sceneUrl.href);
-        })
+        });
     });
 
     function updateUriBuilderCheckboxes(clear) {
         if (clear) {
-            uriBuilderCheckboxes.forEach(function(checkbox) {
+            uriBuilderCheckboxes.forEach((checkbox) => {
                 checkbox.checked = false;
             });
         }
@@ -213,32 +211,35 @@ window.addEventListener('onauth', async function(e) {
         // update scene url box height as it expands/shrinks
         userSceneUrl.style.overflow = 'hidden';
         userSceneUrl.style.height = 0;
-        userSceneUrl.style.height = userSceneUrl.scrollHeight + 'px';
+        userSceneUrl.style.height = `${userSceneUrl.scrollHeight}px`;
     }
 
     deleteUserSceneBtn.addEventListener('click', () => {
         if (confirm(`Are you sure you want to delete ${deleteUserSceneBtn.value}?`)) {
             const deletes = [
                 axios.delete(`/user/scenes/${deleteUserSceneBtn.value}`, {
-                    withCredentials: true
+                    withCredentials: true,
                 }),
-                axios.delete(`/persist/${deleteUserSceneBtn.value}`)
-            ]
-            axios.all(deletes).then(() => {
-                Swal.fire({
-                    title: 'Delete success!',
-                    html: `${deleteUserSceneBtn.value} has been deleted.`,
-                    icon: 'info',
-                    willClose: () => {
-                        location.reload();
-                    }
+                axios.delete(`/persist/${deleteUserSceneBtn.value}`),
+            ];
+            axios
+                .all(deletes)
+                .then(() => {
+                    Swal.fire({
+                        title: 'Delete success!',
+                        html: `${deleteUserSceneBtn.value} has been deleted.`,
+                        icon: 'info',
+                        willClose: () => {
+                            location.reload();
+                        },
+                    });
+                })
+                .catch((err) => {
+                    Swal.fire('Scene Delete Failed!', err.response.data, 'warning');
+                    console.log(err);
                 });
-            }).catch((err) => {
-                Swal.fire('Scene Delete Failed!', err.response.data, 'warning');
-                console.log(err);
-            });
         }
-    })
+    });
 
     cloneUserSceneBtn.addEventListener('click', () => {
         window.cloneSceneId = window.userSceneId;
@@ -276,62 +277,71 @@ window.addEventListener('onauth', async function(e) {
         } else {
             doCloneSceneBtn.classList.add('disabled');
         }
-    })
+    });
 
     document.getElementById('doCloneSceneBtn').addEventListener('click', () => {
-        const [namespace, sceneId] = sourceScene.value.split('/')
-        axios.post(`/persist/${window.username}/${newSceneNameInput.value}`, {
-            action: 'clone',
-            namespace,
-            sceneId,
-        }).then((res) => {
-            Swal.fire('Clone success!', `${res.data.objectsCloned} objects cloned into new scene`, 'success');
-            cloneSceneUrl.value = `${window.location.origin}/${window.username}/${newSceneNameInput.value}`
-            document.getElementById('doCloneSceneContainer').classList.add('d-none');
-            document.getElementById('cloneSceneCreated').classList.remove('d-none');
-            newSceneNameInput.setAttribute('readonly', 'readonly')
-        }).catch((err) => {
-            Swal.fire('Scene Clone Failed!', err.response.data, 'warning');
-            console.log(err);
-        });
-    })
+        const [namespace, sceneId] = sourceScene.value.split('/');
+        axios
+            .post(`/persist/${window.username}/${newSceneNameInput.value}`, {
+                action: 'clone',
+                namespace,
+                sceneId,
+            })
+            .then((res) => {
+                Swal.fire('Clone success!', `${res.data.objectsCloned} objects cloned into new scene`, 'success');
+                cloneSceneUrl.value = `${window.location.origin}/${window.username}/${newSceneNameInput.value}`;
+                document.getElementById('doCloneSceneContainer').classList.add('d-none');
+                document.getElementById('cloneSceneCreated').classList.remove('d-none');
+                newSceneNameInput.setAttribute('readonly', 'readonly');
+            })
+            .catch((err) => {
+                Swal.fire('Scene Clone Failed!', err.response.data, 'warning');
+                console.log(err);
+            });
+    });
 
-    const copyCloneSceneUrlBtn = document.getElementById('copyCloneSceneUrlBtn')
+    const copyCloneSceneUrlBtn = document.getElementById('copyCloneSceneUrlBtn');
     copyCloneSceneUrlBtn.addEventListener('click', () => {
         cloneSceneUrl.select();
         cloneSceneUrl.setSelectionRange(0, 99999); /* For mobile devices */
         document.execCommand('copy');
-    })
+    });
 
     document.getElementById('enterCloneSceneBtn').addEventListener('click', () => {
         window.location = cloneSceneUrl.value;
-    })
+    });
 
     // Request editable scenes...
     // my_scenes may include 'public' namespaces for staff
     // my_scenes may include other editor namespaces that have been granted
-    axios.get('/user/my_scenes', {
-        withCredentials: true
-    }).then((res) => {
-        res.data.forEach(ns => {
-            userSceneSelect.options.add(new Option(ns.name, ns.name));
+    axios
+        .get('/user/my_scenes', {
+            withCredentials: true,
+        })
+        .then((res) => {
+            res.data.forEach((ns) => {
+                userSceneSelect.options.add(new Option(ns.name, ns.name));
+            });
+        })
+        .catch((err) => {
+            Swal.fire('My Scene Load Failed!', err.response.data, 'warning');
+            console.log(err);
         });
-    }).catch((err) => {
-        Swal.fire('My Scene Load Failed!', err.response.data, 'warning');
-        console.log(err);
-    });
 
     // Request public scenes...
-    axios.get('/persist/public/!allscenes', {
-        withCredentials: true
-    }).then((res) => {
-        res.data.forEach(ns => {
-            publicSceneSelect.options.add(new Option(ns, ns));
+    axios
+        .get('/persist/public/!allscenes', {
+            withCredentials: true,
+        })
+        .then((res) => {
+            res.data.forEach((ns) => {
+                publicSceneSelect.options.add(new Option(ns, ns));
+            });
+        })
+        .catch((err) => {
+            Swal.fire('Public Scene Load Failed!', err.response.data, 'warning');
+            console.log(err);
         });
-    }).catch((err) => {
-        Swal.fire('Public Scene Load Failed!', err.response.data, 'warning');
-        console.log(err);
-    });
 
     window.dispatchEvent(new Event('hashchange')); // Manually trigger initial hash routing
 });

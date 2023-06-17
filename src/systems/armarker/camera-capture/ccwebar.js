@@ -7,35 +7,44 @@
  * @date 2022
  */
 
-import {CVWorkerMsgs} from '../worker-msgs.js';
-import {GetUserMediaARSource} from './getusermedia-source.js';
-import {ARENAUtils} from '../../../utils';
+import { CVWorkerMsgs } from '../worker-msgs.js';
+import { GetUserMediaARSource } from './getusermedia-source.js';
+import { ARENAUtils } from '../../../utils';
 
 /**
  * Grab front facing camera frames using getUserMedia()
  */
 export class WebARCameraCapture {
     static instance = null;
+
     /* worker to send images captured */
     cvWorker;
 
     video;
+
     canvas;
+
     canvasCtx;
 
     // last captured frame timestamp (Date.now())
     frameTs;
+
     // last captured frame width
     frameWidth;
+
     // last captured frame height
     frameHeight;
+
     // last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
     // this is the grayscale image we will pass to the detector
     frameGsPixels;
+
     // last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4])
     framePixels;
+
     // last captured frame camera properties
     frameCamera;
+
     /* worker to send images captured */
     cvWorker;
 
@@ -58,7 +67,7 @@ export class WebARCameraCapture {
         this.frameWidth = 1280;
         this.frameHeight = 720;
         const options = {
-            cameraFacingMode: cameraFacingMode,
+            cameraFacingMode,
             width: this.frameWidth,
             height: this.frameHeight,
         };
@@ -70,22 +79,25 @@ export class WebARCameraCapture {
      */
     initCamera() {
         return new Promise((resolve, reject) => {
-            this.arSource.init().then((videoElem) => {
-                this.video = videoElem;
-                document.body.appendChild(videoElem);
+            this.arSource
+                .init()
+                .then((videoElem) => {
+                    this.video = videoElem;
+                    document.body.appendChild(videoElem);
 
-                this.canvas = document.createElement('canvas');
-                this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
+                    this.canvas = document.createElement('canvas');
+                    this.canvasCtx = this.canvas.getContext('2d', { willReadFrequently: true });
 
-                // init frame size to screen size
-                this.onResize();
-                window.addEventListener('resize', this.onResize.bind(this));
+                    // init frame size to screen size
+                    this.onResize();
+                    window.addEventListener('resize', this.onResize.bind(this));
 
-                resolve(this);
-            }).catch((err) => {
-                console.warn(err);
-                reject(err);
-            });
+                    resolve(this);
+                })
+                .catch((err) => {
+                    console.warn(err);
+                    reject(err);
+                });
         });
     }
 
@@ -97,8 +109,8 @@ export class WebARCameraCapture {
         this.arSource.resize(window.innerWidth, window.innerHeight);
         this.arSource.copyDimensionsTo(this.canvas);
 
-        const videoWidth = this.video.videoWidth;
-        const videoHeight = this.video.videoHeight;
+        const { videoWidth } = this.video;
+        const { videoHeight } = this.video;
 
         if (ARENAUtils.isLandscapeMode()) {
             this.frameWidth = Math.max(videoWidth, videoHeight);
@@ -115,9 +127,7 @@ export class WebARCameraCapture {
         sceneEl.setAttribute('arena-webar-session', 'frameWidth', this.frameWidth);
         sceneEl.setAttribute('arena-webar-session', 'frameHeight', this.frameHeight);
 
-        this.frameGsPixels = new Uint8ClampedArray(
-            this.frameWidth * this.frameHeight,
-        ); // grayscale (1 value per pixel)
+        this.frameGsPixels = new Uint8ClampedArray(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
 
         // update camera intrinsics
         this.frameCamera = this.getCameraIntrinsics();
@@ -131,7 +141,7 @@ export class WebARCameraCapture {
     setCVWorker(worker, frameRequested = true) {
         this.cvWorker = worker;
 
-        if (frameRequested) requestAnimationFrame( this.getCameraImagePixels.bind(this));
+        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels.bind(this));
     }
 
     /**
@@ -166,7 +176,7 @@ export class WebARCameraCapture {
         const imageDataPixels = imageData.data;
 
         for (let i = 0, j = 0; i < imageDataPixels.length; i += 4, j++) {
-            const grayscale = Math.round( (imageDataPixels[i] + imageDataPixels[i + 1] + imageDataPixels[i + 2]) / 3);
+            const grayscale = Math.round((imageDataPixels[i] + imageDataPixels[i + 1] + imageDataPixels[i + 2]) / 3);
             this.frameGsPixels[j] = grayscale; // single grayscale value
         }
         /*
@@ -194,9 +204,7 @@ export class WebARCameraCapture {
         };
 
         // post frame data, marking the pixel buffer as transferable
-        this.cvWorker.postMessage(camFrameMsg, [
-            camFrameMsg.grayscalePixels.buffer,
-        ]);
+        this.cvWorker.postMessage(camFrameMsg, [camFrameMsg.grayscalePixels.buffer]);
     }
 
     /**
@@ -208,8 +216,8 @@ export class WebARCameraCapture {
     getCameraIntrinsics() {
         return {
             // Focal lengths in pixels (these are equal for square pixels)
-            cx: (this.frameWidth / 2),
-            cy: (this.frameHeight / 2),
+            cx: this.frameWidth / 2,
+            cy: this.frameHeight / 2,
             // Principal point in pixels (typically at or near the center of the viewport)
             fx: this.frameWidth,
             fy: this.frameWidth,
@@ -218,4 +226,3 @@ export class WebARCameraCapture {
         };
     }
 }
-
