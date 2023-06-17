@@ -5,3 +5,4 @@ src/components/vendor/
 *.min.js
 *_wasm.js
 webxrios.js
+build/third-party/*
