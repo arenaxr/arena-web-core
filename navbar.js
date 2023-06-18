@@ -44,7 +44,7 @@ $(document).ready(() => {
         const btnCopyStorePath = $('#btn-copy-store-path');
         // highlight active page in navbar
         $('.nav-item a')
-            .filter(() => {
+            .filter(function checkActiveURL() {
                 const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
                 const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
                 if (loc === 'files') {
