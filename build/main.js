@@ -1,8 +1,9 @@
 /* global ARENAAUTH, ARENADefaults, ClipboardJS, JSONEditor, Swal, THREE, $ */
 
-import * as PersistObjects from './persist-objects';
-import ARENAUserAccount from './arena-account';
-import * as MQTTPattern from './third-party/mqtt-pattern';
+/* eslint-disable import/extensions */
+import * as PersistObjects from './persist-objects.js';
+import ARENAUserAccount from './arena-account.js';
+import * as MQTTPattern from './third-party/mqtt-pattern.js';
 
 const Alert = Swal.mixin({
     toast: true,
