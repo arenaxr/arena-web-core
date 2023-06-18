@@ -1,6 +1,6 @@
 /* eslint-disable require-jsdoc */
 
-/* global d3 */
+/* global _, d3, Paho */
 
 const reloadIntervalMilli = 30000;
 
@@ -37,7 +37,7 @@ let mqttc;
 let mqttUsername;
 let mqttToken;
 
-programData = {
+const programData = {
     prog1: {
         name: 'arena/py/pytestenv',
         filename: 'pytest.py',
@@ -53,7 +53,7 @@ programData = {
         fileid: 'na',
         filetype: 'PY',
         args: [],
-        env: ['SCENE=test', 'NAMESPACE=wiselab', `MQTTH=${location.hostname}`],
+        env: ['SCENE=test', 'NAMESPACE=wiselab', `MQTTH=${window.location.hostname}`],
         channels: {},
     },
 };
@@ -163,20 +163,20 @@ document.getElementsByTagName('body')[0].onresize = function () {
 };
 
 function stdoutMsg(mId, msg) {
-    if (stdout[mId] == undefined) stdout[mId] = { ts: Date.now(), ml: [] };
+    if (stdout[mId] === undefined) stdout[mId] = { ts: Date.now(), ml: [] };
     stdout[mId].ml.push(msg);
-    if (selectedMod == undefined) return;
-    if (selectedMod.uuid == mId) {
+    if (selectedMod === undefined) return;
+    if (selectedMod.uuid === mId) {
         stdoutBox.value += `${msg}\n`;
         stdoutBox.scrollTop = stdoutBox.scrollHeight;
     }
 }
 
 function rtDbgMsg(rtId, msg) {
-    if (rtdbg[rtId] == undefined) rtdbg[rtId] = { ts: Date.now(), ml: [] };
+    if (rtdbg[rtId] === undefined) rtdbg[rtId] = { ts: Date.now(), ml: [] };
     rtdbg[rtId].ml.push(msg);
-    if (selectedRt == undefined) return;
-    if (selectedRt.uuid == rtId) {
+    if (selectedRt === undefined) return;
+    if (selectedRt.uuid === rtId) {
         rtDebugBox.value += `${msg}\n`;
         rtDebugBox.scrollTop = rtDebugBox.scrollHeight;
     }
@@ -184,7 +184,7 @@ function rtDbgMsg(rtId, msg) {
 
 function displayTree(treeData) {
     // Set the dimensions and margins of the diagram
-    panel = document.getElementById('panel');
+    const panel = document.getElementById('panel');
     const margin = {
         top: 20,
         right: 90,
@@ -200,8 +200,8 @@ function displayTree(treeData) {
 
     d3.select('svg').remove();
 
-    // if (svg == undefined) {
-    svg = d3
+    // if (svg === undefined) {
+    const svg = d3
         .select('#panel')
         .append('svg')
         .attr('width', width + margin.right + margin.left)
@@ -263,11 +263,11 @@ function displayTree(treeData) {
 
     function update(source) {
         // Assigns the x and y position for the nodes
-        const treeData = treemap(root);
+        const _treeData = treemap(root);
 
         // Compute the new tree layout.
-        const nodes = treeData.descendants();
-        const links = treeData.descendants().slice(1);
+        const nodes = _treeData.descendants();
+        const links = _treeData.descendants().slice(1);
 
         // Normalize for fixed-depth.
         nodes.forEach((d) => {
@@ -319,7 +319,7 @@ function displayTree(treeData) {
             .attr('x', (d) => (d.children || d._children ? -13 : 13))
             .attr('text-anchor', (d) => (d.children || d._children ? 'end' : 'start'))
             .on('mouseover', (d) => {
-                dispText = d.data.name;
+                let dispText = d.data.name;
                 if (d.data.type === 'runtime') {
                     dispText =
                         `Runtime: ${dispText}<br/>` +
@@ -444,7 +444,7 @@ function displayTree(treeData) {
 
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
-        path = `M ${s.y} ${s.x}
+        const path = `M ${s.y} ${s.x}
             C ${(s.y + d.y) / 2} ${s.x},
               ${(s.y + d.y) / 2} ${d.x},
               ${d.y} ${d.x}`;
@@ -474,7 +474,7 @@ function displayTree(treeData) {
 
 async function sendRequest(mthd = 'POST', rsrc = '', data = {}) {
     // Default options are marked with *
-    url = `${document.location.protocol}//${window.location.host}${rsrc}`;
+    const url = `${document.location.protocol}//${window.location.host}${rsrc}`;
     const response = await fetch(url, {
         method: mthd, // *GET, POST, PUT, DELETE, etc.
         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
@@ -484,15 +484,15 @@ async function sendRequest(mthd = 'POST', rsrc = '', data = {}) {
         },
         referrer: 'no-referrer', // no-referrer, *client
     });
-    if ((mthd = 'POST')) {
+    if (mthd === 'POST') {
         response.body = JSON.stringify(data); // body data type must match 'Content-Type' header
     }
-    return await response.json(); // parses JSON response into native JavaScript objects
+    return response.json(); // parses JSON response into native JavaScript objects
 }
 
 async function loadTreeData(redraw = false, addElement = undefined) {
-    cData = await sendRequest('GET', '/arts-api/v1/runtimes/');
-    realmName = topic.reg.split('/')[0];
+    const cData = await sendRequest('GET', '/arts-api/v1/runtimes/');
+    const realmName = topic.reg.split('/')[0];
 
     // add deleted modules
     cData.forEach((rt) => {
@@ -508,13 +508,13 @@ async function loadTreeData(redraw = false, addElement = undefined) {
         true;
     }
 
-    td = {
+    const td = {
         name: realmName,
         t: 't1',
         children: cData,
     };
 
-    if (redraw || _.isEqual(treeData, td) == false) {
+    if (redraw || _.isEqual(treeData, td) === false) {
         treeData = td;
         displayTree(treeData);
     }
@@ -523,9 +523,9 @@ async function loadTreeData(redraw = false, addElement = undefined) {
 // Called after DOMContentLoaded
 function startConnect() {
     // Generate a random client ID
-    clientID = `clientID-${parseInt(Math.random() * 100)}`;
+    const clientID = `clientID-${parseInt(Math.random() * 100, 10)}`;
 
-    connStr = document.getElementById('mqtt_conn_str').value;
+    const connStr = document.getElementById('mqtt_conn_str').value;
 
     // Print output for the user in the messages div
     console.info(`Connecting to: ${connStr}`);
@@ -541,7 +541,7 @@ function startConnect() {
     // Connect the client, if successful, call onConnect function
     mqttc.connect({
         onSuccess: onConnect,
-        useSSL: document.location.protocol == 'https:',
+        useSSL: document.location.protocol === 'https:',
         userName: mqttUsername,
         password: mqttToken,
     });
@@ -595,7 +595,8 @@ function onMessageArrived(message) {
         return;
     }
 
-    if (message.destinationName == topic.ctl) {
+    let modInstance;
+    if (message.destinationName === topic.ctl) {
         let msgReq;
         try {
             msgReq = JSON.parse(message.payloadString);
@@ -603,8 +604,8 @@ function onMessageArrived(message) {
             console.error(`Error parsing message:${message.payloadString} ${err}`);
             return;
         }
-        if (msgReq.type == 'arts_resp') {
-            if (msgReq.data.result == 'ok') {
+        if (msgReq.type === 'arts_resp') {
+            if (msgReq.data.result === 'ok') {
                 modInstance = msgReq.data.details;
                 console.info(`Ok: ${JSON.stringify(modInstance, null, 2)}`);
                 moduleSelected(modInstance);
@@ -612,12 +613,12 @@ function onMessageArrived(message) {
                 console.error((statusBox.value += `Error: ${msgReq.data.details}`));
             }
         }
-        if (msgReq.type == 'arts_req') {
-            if (msgReq.action == 'delete') {
+        if (msgReq.type === 'arts_req') {
+            if (msgReq.action === 'delete') {
                 console.log('HERE', msgReq);
                 try {
                     // save deleted module
-                    if (deletedModules[msgReq.data.parent.uuid] == undefined) {
+                    if (deletedModules[msgReq.data.parent.uuid] === undefined) {
                         deletedModules[msgReq.data.parent.uuid] = [];
                     }
                     deletedModules[msgReq.data.parent.uuid].push(msgReq.data);
@@ -629,7 +630,7 @@ function onMessageArrived(message) {
         }
     }
 
-    if (message.destinationName == topic.reg) {
+    if (message.destinationName === topic.reg) {
         loadTreeData();
     }
 
@@ -650,11 +651,14 @@ function uuidv4() {
 }
 
 function createModule() {
-    mname = document.getElementById('mname').value;
-    fn = document.getElementById('filename').value;
-    fid = document.getElementById('fileid').value;
-    ft = document.getElementById('filetype').value;
+    const mname = document.getElementById('mname').value;
+    const fn = document.getElementById('filename').value;
+    const fid = document.getElementById('fileid').value;
+    const ft = document.getElementById('filetype').value;
 
+    let args;
+    let env;
+    let channels;
     try {
         args = JSON.parse(document.getElementById('args').value);
         env = JSON.parse(document.getElementById('env').value);
@@ -662,11 +666,11 @@ function createModule() {
     } catch (err) {
         console.error(err);
     }
-    parentid = runtimeSelect.value;
+    const parentid = runtimeSelect.value;
 
     pendingUuid = uuidv4();
 
-    req = {
+    const req = {
         object_id: pendingUuid,
         action: 'create',
         type: 'arts_req',
@@ -688,7 +692,7 @@ function createModule() {
         };
     }
 
-    reqJson = JSON.stringify(req);
+    const reqJson = JSON.stringify(req);
     console.info(`Publishing (${topic.ctl}):${JSON.stringify(req, null, 2)}`);
     mqttc.send(topic.ctl, reqJson);
 
@@ -696,16 +700,17 @@ function createModule() {
 }
 
 function deleteModule(rtuuid) {
+    let mData;
     try {
         mData = JSON.parse(moduleSelect.value);
     } catch (err) {
         console.warn('Need to select an existing module.');
     }
-    sendtoid = sendrtSelect.value;
+    const sendtoid = sendrtSelect.value;
 
     pendingUuid = uuidv4();
 
-    req = {
+    const req = {
         object_id: pendingUuid,
         action: 'delete',
         type: 'arts_req',
@@ -717,7 +722,7 @@ function deleteModule(rtuuid) {
         req.data.send_to_runtime = sendtoid;
     }
 
-    reqJson = JSON.stringify(req);
+    const reqJson = JSON.stringify(req);
     console.info(`Publishing (${topic.ctl}):${JSON.stringify(req, null, 2)}`);
     mqttc.send(topic.ctl, reqJson);
 
@@ -725,7 +730,7 @@ function deleteModule(rtuuid) {
 }
 
 function deleteRuntime() {
-    rtid = delrtSelect.value;
+    const rtid = delrtSelect.value;
 
     if (rtid.length < 1) {
         console.warn('Need to select an existing runtime.');
@@ -734,7 +739,7 @@ function deleteRuntime() {
 
     pendingUuid = uuidv4();
 
-    req = {
+    const req = {
         object_id: pendingUuid,
         action: 'delete',
         type: 'arts_req',
@@ -744,7 +749,7 @@ function deleteRuntime() {
         },
     };
 
-    reqJson = JSON.stringify(req);
+    const reqJson = JSON.stringify(req);
     console.info(`Publishing (${topic.reg}):${JSON.stringify(req, null, 2)}`);
     mqttc.send(topic.reg, reqJson);
 
@@ -761,18 +766,18 @@ async function demoMigrateModule() {
         return;
     }
     // assumes index 0 is used for "Select" label
-    rt1i = getRandomInt(1, runtimeSelect.options.length - 1);
-    rt2i = getRandomInt(1, runtimeSelect.options.length - 1);
-    while (rt1i == rt2i) rt2i = getRandomInt(1, runtimeSelect.options.length - 1);
+    const rt1i = getRandomInt(1, runtimeSelect.options.length - 1);
+    let rt2i = getRandomInt(1, runtimeSelect.options.length - 1);
+    while (rt1i === rt2i) rt2i = getRandomInt(1, runtimeSelect.options.length - 1);
 
-    rt1uuid = runtimeSelect.options[rt1i].value;
-    rt2uuid = runtimeSelect.options[rt2i].value;
+    const rt1uuid = runtimeSelect.options[rt1i].value;
+    const rt2uuid = runtimeSelect.options[rt2i].value;
 
     pendingUuid = uuidv4();
 
-    muuid = uuidv4();
+    const muuid = uuidv4();
 
-    req = {
+    let req = {
         object_id: pendingUuid,
         action: 'create',
         type: 'arts_req',
@@ -792,7 +797,7 @@ async function demoMigrateModule() {
         },
     };
 
-    reqJson = JSON.stringify(req);
+    let reqJson = JSON.stringify(req);
     console.info(`Publishing (${topic.reg}):${JSON.stringify(req, null, 2)}`);
     mqttc.send(topic.ctl, reqJson);
 
@@ -870,7 +875,7 @@ function openTab(evt, tabName) {
 }
 
 function toggleSection(section) {
-    const visible = document.getElementById(section).style.display == 'block';
+    const visible = document.getElementById(section).style.display === 'block';
     if (visible) {
         document.getElementById(section).style.display = 'none';
         document.getElementById(`${section}_icon`).className = 'fas fa-angle-down fa-lg';
@@ -883,7 +888,7 @@ function toggleSection(section) {
 function moduleSelected(modData) {
     openTab({ currentTarget: document.getElementById('_modules') }, 'modules');
     selectedRt = undefined;
-    if (selectedMod == undefined || selectedMod.uuid != modData.uuid) {
+    if (selectedMod === undefined || selectedMod.uuid !== modData.uuid) {
         moduleSelect.value = JSON.stringify(modData);
         selectedMod = modData;
 
@@ -895,14 +900,14 @@ function moduleSelected(modData) {
             });
             stdoutBox.scrollTop = stdoutBox.scrollHeight;
         }
-        moduleLabel.innerText = `Stdout for module '${selectedMod.name}' (${selectedMod.uuid})` + ` :`;
+        moduleLabel.innerText = `Stdout for module '${selectedMod.name}' (${selectedMod.uuid}) :`;
     }
 }
 
 function runtimeSelected(rtData) {
     openTab({ currentTarget: document.getElementById('_runtimes') }, 'runtimes');
     selectedMod = undefined;
-    if (selectedRt == undefined || selectedRt.uuid != rtData.uuid) {
+    if (selectedRt === undefined || selectedRt.uuid === rtData.uuid) {
         selectedRt = rtData;
         runtimeSelect.value = selectedRt.uuid;
         delrtSelect.value = selectedRt.uuid;

@@ -1,4 +1,4 @@
-/* global ARENAAUTH, ARENADefaults, ClipboardJS, Swal, $ */
+/* global ARENAAUTH, ARENADefaults, ClipboardJS, JSONEditor, Swal, THREE, $ */
 
 import * as PersistObjects from './persist-objects';
 import ARENAUserAccount from './arena-account';
