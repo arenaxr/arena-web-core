@@ -11,3 +11,5 @@ CHANGELOG.md
 static/arenaxr-bootstrap/arenaxr-bootstrap.css
 package.json
 package-lock.json
+src/components/thickline/lib/THREE.MeshLine.js
+src/systems/armarker/camera-capture/base64-binary.js
