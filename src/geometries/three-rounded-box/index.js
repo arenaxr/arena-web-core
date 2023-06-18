@@ -5,24 +5,19 @@
  * @author benolayinka / github.com/benolayinka
  * https://github.com/invenktive/three-rounded-box/blob/ffe80b143dd0caa82cd4dd3f4e8956bcd23fbb85/index.js
  */
-export default function(THREE) {
+export default function (THREE) {
     return class RoundedBoxGeometry extends THREE.BufferGeometry {
         constructor(width, height, depth, radius, radiusSegments) {
             super();
             this.type = 'RoundedBoxGeometry';
             // validate params ===================================
 
-            radiusSegments = !isNaN(radiusSegments) ?
-                Math.max(1, Math.floor(radiusSegments)) :
-                1;
+            radiusSegments = !isNaN(radiusSegments) ? Math.max(1, Math.floor(radiusSegments)) : 1;
             width = !isNaN(width) ? width : 1;
             height = !isNaN(height) ? height : 1;
             depth = !isNaN(depth) ? depth : 1;
             radius = !isNaN(radius) ? radius : 0.15;
-            radius = Math.min(
-                radius,
-                Math.min(width, Math.min(height, Math.min(depth))) / 2,
-            );
+            radius = Math.min(radius, Math.min(width, Math.min(height, Math.min(depth))) / 2);
             const edgeHalfWidth = width / 2 - radius;
             const edgeHalfHeight = height / 2 - radius;
             const edgeHalfDepth = depth / 2 - radius;
@@ -41,15 +36,9 @@ export default function(THREE) {
             const totalVertexCount = (rs1 * radiusSegments + 1) << 3;
 
             // make buffers ======================================
-            const positions = new THREE.BufferAttribute(
-                new Float32Array(totalVertexCount * 3),
-                3,
-            );
+            const positions = new THREE.BufferAttribute(new Float32Array(totalVertexCount * 3), 3);
 
-            const normals = new THREE.BufferAttribute(
-                new Float32Array(totalVertexCount * 3),
-                3,
-            );
+            const normals = new THREE.BufferAttribute(new Float32Array(totalVertexCount * 3), 3);
 
             // some consts =========================================
             const cornerVerts = [];
@@ -87,11 +76,7 @@ export default function(THREE) {
                 }
                 // construct 1/8 sphere ==============================
                 const PIhalf = Math.PI / 2;
-                const cornerOffset = new THREE.Vector3(
-                    edgeHalfWidth,
-                    edgeHalfHeight,
-                    edgeHalfDepth,
-                );
+                const cornerOffset = new THREE.Vector3(edgeHalfWidth, edgeHalfHeight, edgeHalfDepth);
                 for (let y = 0; y <= radiusSegments; y++) {
                     const v = y / radiusSegments;
                     const va = v * PIhalf; // arrange in 90 deg
@@ -99,10 +84,7 @@ export default function(THREE) {
                     const sinVa = Math.sin(va);
                     if (y == radiusSegments) {
                         vertex.set(0, 1, 0);
-                        const vert = vertex
-                            .clone()
-                            .multiplyScalar(radius)
-                            .add(cornerOffset);
+                        const vert = vertex.clone().multiplyScalar(radius).add(cornerOffset);
 
                         cornerVerts[0].push(vert);
                         vertexPool.push(vert);
@@ -120,10 +102,7 @@ export default function(THREE) {
                         vertex.y = sinVa;
                         vertex.z = cosVa * Math.sin(ha);
                         // copy sphere point, scale by radius, offset by half whd
-                        const vert = vertex
-                            .clone()
-                            .multiplyScalar(radius)
-                            .add(cornerOffset);
+                        const vert = vertex.clone().multiplyScalar(radius).add(cornerOffset);
                         cornerVerts[0].push(vert);
                         vertexPool.push(vert);
 
@@ -346,17 +325,9 @@ export default function(THREE) {
                     for (let u = 0; u <= end; u++) {
                         // const dInd = u != end ? radiusSegments + u * rs1 : cornerVertNumber - 1;
                         const a = cStart + radiusSegments + u * rs1;
-                        const b =
-                            cStart +
-                            (u != end ?
-                                radiusSegments + (u + 1) * rs1 :
-                                cornerVertNumber - 1);
+                        const b = cStart + (u != end ? radiusSegments + (u + 1) * rs1 : cornerVertNumber - 1);
                         const c = cEnd + radiusSegments + u * rs1;
-                        const d =
-                            cEnd +
-                            (u != end ?
-                                radiusSegments + (u + 1) * rs1 :
-                                cornerVertNumber - 1);
+                        const d = cEnd + (u != end ? radiusSegments + (u + 1) * rs1 : cornerVertNumber - 1);
                         if (!needsFlip[i]) {
                             indices.push(a);
                             indices.push(b);
@@ -379,18 +350,8 @@ export default function(THREE) {
             // fill buffers ======================================
             let index = 0;
             for (let i = 0; i < vertexPool.length; i++) {
-                positions.setXYZ(
-                    index,
-                    vertexPool[i].x,
-                    vertexPool[i].y,
-                    vertexPool[i].z,
-                );
-                normals.setXYZ(
-                    index,
-                    normalPool[i].x,
-                    normalPool[i].y,
-                    normalPool[i].z,
-                );
+                positions.setXYZ(index, vertexPool[i].x, vertexPool[i].y, vertexPool[i].z);
+                normals.setXYZ(index, normalPool[i].x, normalPool[i].y, normalPool[i].z);
                 index++;
             }
             this.setIndex(new THREE.BufferAttribute(new Uint16Array(indices), 1));

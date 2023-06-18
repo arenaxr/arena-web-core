@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "light"
-                                    ]
+                                    "enum": ["light"]
                                 },
                                 "angle": {
                                     "title": "angle (spot)",
@@ -70,13 +68,7 @@
                                         "type": {
                                             "title": "type",
                                             "type": "string",
-                                            "enum": [
-                                                "ambient",
-                                                "directional",
-                                                "hemisphere",
-                                                "point",
-                                                "spot"
-                                            ],
+                                            "enum": ["ambient", "directional", "hemisphere", "point", "spot"],
                                             "description": "One of ambient, directional, hemisphere, point, spot.",
                                             "default": "directional"
                                         },
@@ -206,13 +198,7 @@
                                 "type": {
                                     "title": "type",
                                     "type": "string",
-                                    "enum": [
-                                        "ambient",
-                                        "directional",
-                                        "hemisphere",
-                                        "point",
-                                        "spot"
-                                    ],
+                                    "enum": ["ambient", "directional", "hemisphere", "point", "spot"],
                                     "description": "One of ambient, directional, hemisphere, point, spot.",
                                     "default": "directional"
                                 }
@@ -249,18 +235,10 @@
                             "z": 1
                         }
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

@@ -1,7 +1,8 @@
 {
     "title": "Event",
     "description": "Generate an event message for an object.",
-    "allOf": [{
+    "allOf": [
+        {
             "$ref": "./schemas/definitions-arena-event.json#/properties"
         },
         {
@@ -26,11 +27,7 @@
                                     "type": "number"
                                 }
                             },
-                            "required": [
-                                "x",
-                                "y",
-                                "z"
-                            ],
+                            "required": ["x", "y", "z"],
                             "type": "object",
                             "title": "Position"
                         },
@@ -47,11 +44,7 @@
                                     "type": "number"
                                 }
                             },
-                            "required": [
-                                "x",
-                                "y",
-                                "z"
-                            ],
+                            "required": ["x", "y", "z"],
                             "title": "Click Position"
                         }
                     },
@@ -69,18 +62,10 @@
                             "z": 0
                         }
                     },
-                    "required": [
-                        "position",
-                        "source"
-                    ]
+                    "required": ["position", "source"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data"
-    ]
+    "required": ["object_id", "action", "type", "data"]
 }

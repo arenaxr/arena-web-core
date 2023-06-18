@@ -1,94 +1,77 @@
 {
-    "properties":{
-       "parent":{
-          "description":"Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
-          "title":"Parent",
-          "type":"string"
-       },
-       "position":{
-          "description":"3D object position",
-          "properties":{
-             "x":{
-                "default":0,
-                "type":"number"
-             },
-             "y":{
-                "default":0,
-                "type":"number"
-             },
-             "z":{
-                "default":0,
-                "type":"number"
-             }
-          },
-          "required":[
-             "x",
-             "y",
-             "z"
-          ],
-          "type":"object",
-          "title":"Position"
-       },
-       "rotation":{
-          "description":"3D object rotation in quaternion representation; Right-handed coordinate system. Euler degrees are deprecated in wire message format.",
-          "properties":{
-             "w":{
-                "default":1,
-                "type":"number"
-             },
-             "x":{
-                "default":0,
-                "type":"number"
-             },
-             "y":{
-                "default":0,
-                "type":"number"
-             },
-             "z":{
-                "default":0,
-                "type":"number"
-             }
-          },
-          "required":[
-             "w",
-             "x",
-             "y",
-             "z"
-          ],
-          "type":"object",
-          "title":"Rotation"
-       },
-       "scale":{
-          "default":{
-             "x":1,
-             "y":1,
-             "z":1
-          },
-          "description":"3D object scale",
-          "id":"scale",
-          "properties":{
-             "x":{
-                "type":"number"
-             },
-             "y":{
-                "type":"number"
-             },
-             "z":{
-                "type":"number"
-             }
-          },
-          "required":[
-             "x",
-             "y",
-             "z"
-          ],
-          "type":"object",
-          "title":"Scale"
-       }
+    "properties": {
+        "parent": {
+            "description": "Parent's object_id. Child objects inherit attributes of their parent, for example scale and translation.",
+            "title": "Parent",
+            "type": "string"
+        },
+        "position": {
+            "description": "3D object position",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object",
+            "title": "Position"
+        },
+        "rotation": {
+            "description": "3D object rotation in quaternion representation; Right-handed coordinate system. Euler degrees are deprecated in wire message format.",
+            "properties": {
+                "w": {
+                    "default": 1,
+                    "type": "number"
+                },
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["w", "x", "y", "z"],
+            "type": "object",
+            "title": "Rotation"
+        },
+        "scale": {
+            "default": {
+                "x": 1,
+                "y": 1,
+                "z": 1
+            },
+            "description": "3D object scale",
+            "id": "scale",
+            "properties": {
+                "x": {
+                    "type": "number"
+                },
+                "y": {
+                    "type": "number"
+                },
+                "z": {
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object",
+            "title": "Scale"
+        }
     },
-    "required": [
-        "object_type",
-        "position",
-        "rotation"
-    ]
+    "required": ["object_type", "position", "rotation"]
 }

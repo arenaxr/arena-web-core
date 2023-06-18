@@ -1,9 +1,9 @@
 {
-  "name": "three-shim",
-  "version": "0.152.0",
-  "description": "Shim for window.THREE after AFRAME load",
-  "main": "index.js",
-  "scripts": {},
-  "author": "CONIX Center",
-  "license": "BSD-3-Clause"
+    "name": "three-shim",
+    "version": "0.152.0",
+    "description": "Shim for window.THREE after AFRAME load",
+    "main": "index.js",
+    "scripts": {},
+    "author": "CONIX Center",
+    "license": "BSD-3-Clause"
 }

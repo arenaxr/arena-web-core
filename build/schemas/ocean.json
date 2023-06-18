@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "ocean"
-                                    ]
+                                    "enum": ["ocean"]
                                 },
                                 "width": {
                                     "description": "Width of the ocean area.",
@@ -87,21 +85,10 @@
                             "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "width",
-                        "depth",
-                        "color"
-                    ]
+                    "required": ["object_type", "width", "depth", "color"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "cone"
-                                    ]
+                                    "enum": ["cone"]
                                 },
                                 "height": {
                                     "type": "number",
@@ -92,20 +90,10 @@
                             "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "height",
-                        "radiusBottom"
-                    ]
+                    "required": ["object_type", "height", "radiusBottom"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

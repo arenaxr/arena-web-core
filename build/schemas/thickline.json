@@ -15,15 +15,13 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "thickline"
-                                    ]
+                                    "enum": ["thickline"]
                                 },
                                 "color": {
                                     "default": "#000000",
                                     "format": "color",
                                     "type": "string"
-                                  },
+                                },
                                 "lineWidth": {
                                     "type": "number",
                                     "title": "Line width",
@@ -34,14 +32,7 @@
                                     "title": "Line width styler",
                                     "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. You may also choose one of the preset functions",
                                     "default": "default",
-                                    "enum": [
-                                        "default",
-                                        "grow",
-                                        "shrink",
-                                        "center-sharp",
-                                        "center-smooth",
-                                        "sine-wave"
-                                    ]
+                                    "enum": ["default", "grow", "shrink", "center-sharp", "center-smooth", "sine-wave"]
                                 },
                                 "path": {
                                     "type": "string",
@@ -64,19 +55,10 @@
                         "path": "-2 -1 0, 0 20 0, 10 -1 10",
                         "color": "#7f7f7f"
                     },
-                    "required": [
-                        "object_type",
-                        "path"
-                    ]
+                    "required": ["object_type", "path"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

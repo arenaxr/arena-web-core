@@ -1,36 +1,29 @@
 {
-    "properties":{
-       "object_id":{
-          "description":"A uuid or otherwise unique identifier for this object",
-          "minLength":3,
-          "type":"string"
-       },
-       "persist":{
-          "default":true,
-          "description":"Persist this object in the database (default true = persist on server)",
-          "type":"boolean"
-       },
-       "type":{
-          "description":"One of the message types: object (3D A-Frame Object), scene-options, program (derived from 'type' select above)",
-          "enum":[
-             "object"
-          ],
-          "type":"string"
-       },
-       "action":{
-          "default":"create",
-          "description":"One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
-          "enum":[
-             "create",
-             "delete",
-             "update",
-             "clientEvent"
-          ],
-          "type":"string"
-       },
-       "ttl":{
-         "description":"When applied to an entity, the entity will remove itself from DOM after the specified number of seconds. Update is allowed, which will reset the timer to start from that moment.",
-         "type":"integer"
-       }
+    "properties": {
+        "object_id": {
+            "description": "A uuid or otherwise unique identifier for this object",
+            "minLength": 3,
+            "type": "string"
+        },
+        "persist": {
+            "default": true,
+            "description": "Persist this object in the database (default true = persist on server)",
+            "type": "boolean"
+        },
+        "type": {
+            "description": "One of the message types: object (3D A-Frame Object), scene-options, program (derived from 'type' select above)",
+            "enum": ["object"],
+            "type": "string"
+        },
+        "action": {
+            "default": "create",
+            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+            "enum": ["create", "delete", "update", "clientEvent"],
+            "type": "string"
+        },
+        "ttl": {
+            "description": "When applied to an entity, the entity will remove itself from DOM after the specified number of seconds. Update is allowed, which will reset the timer to start from that moment.",
+            "type": "integer"
+        }
     }
- }
+}

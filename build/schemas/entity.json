@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "entity"
-                                    ]
+                                    "enum": ["entity"]
                                 },
                                 "geometry": {
                                     "properties": {
@@ -51,10 +49,10 @@
                                     "title": "UI Panel",
                                     "description": "The rounded UI panel primitive.",
                                     "type": "object",
-                                    "default":{
-                                        "depth":0.05,
-                                        "height":1,
-                                        "width":1
+                                    "default": {
+                                        "depth": 0.05,
+                                        "height": 1,
+                                        "width": 1
                                     },
                                     "properties": {
                                         "depth": {
@@ -88,18 +86,10 @@
                     "default": {
                         "object_type": "entity"
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }
