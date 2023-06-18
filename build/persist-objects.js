@@ -422,15 +422,16 @@ export async function populateNamespaceList(nsInput, nsList) {
         persist.namespaces.push(persist.authState.username);
     }
 
-    const option = document.createElement('option');
     // add public namespace if needed
     if (persist.namespaces.indexOf('public') < 0) {
+        const option = document.createElement('option');
         option.text = 'public';
         nsList.appendChild(option);
     }
 
     // populate list
     for (let i = 0; i < persist.namespaces.length; i++) {
+        const option = document.createElement('option');
         option.text = persist.namespaces[i];
         nsList.appendChild(option);
     }
