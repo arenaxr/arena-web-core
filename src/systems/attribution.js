@@ -12,9 +12,12 @@
  *    title: "Model Title"
  * @module attribution-system
  */
+
+/* global AFRAME */
+
 AFRAME.registerSystem('attribution', {
     schema: {},
-    init: function() {
+    init() {
         this.entities = [];
     },
     /**
@@ -22,16 +25,15 @@ AFRAME.registerSystem('attribution', {
      * @param {object} el - The attribution a-frame element to register.
      * @alias module:attribution-system
      */
-    registerComponent: function(el) {
+    registerComponent(el) {
         this.entities.push(el);
-        if (el.getAttribute('attribution').extractAssetExtras == false) return;
-        const _this = this; // save reference to system
+        if (el.getAttribute('attribution').extractAssetExtras === false) return;
         // if element has a gltf-model component try to extract attribution from gltf asset extras
-        el.addEventListener('loaded', function() {
-            if (el.components.hasOwnProperty('gltf-model')) {
-                el.addEventListener('model-loaded', function() {
+        el.addEventListener('loaded', () => {
+            if (Object.hasOwn(el.components, 'gltf-model')) {
+                el.addEventListener('model-loaded', () => {
                     const gltfComponent = el.components['gltf-model'];
-                    _this.extractAttributionFromGtlfAsset(el, gltfComponent);
+                    this.extractAttributionFromGtlfAsset(el, gltfComponent);
                 });
             }
         });
@@ -41,7 +43,7 @@ AFRAME.registerSystem('attribution', {
      * @param {object} el - The attribution a-frame element.
      * @alias module:attribution-system
      */
-    unregisterComponent: function(el) {
+    unregisterComponent(el) {
         const index = this.entities.indexOf(el);
         this.entities.splice(index, 1);
     },
@@ -52,17 +54,28 @@ AFRAME.registerSystem('attribution', {
      * @example <caption>Query the system for an HTML table of credits:</caption>
      *    document.querySelector("a-scene").systems["attribution"].getAttributionTable();
      */
-    getAttributionTable: function() {
-        if (this.entities.length == 0) return undefined;
-        let table='<table>';
-        for (i = 0; i < this.entities.length; i++) {
+    getAttributionTable() {
+        if (this.entities.length === 0) return undefined;
+        let table = '<table>';
+        for (let i = 0; i < this.entities.length; i++) {
             const attr = this.entities[i].getAttribute('attribution');
-            const title = (attr.sourceURL.length > 0) ? `<a href=${attr.sourceURL} target='_blank'>${attr.title}</a>` : `${attr.title}`;
-            const author = (attr.authorURL.length > 0) ? `<a href=${attr.authorURL} target='_blank'>${attr.author}</a>` : `${attr.author}`;
-            const license = (attr.licenseURL.length > 0) ? `<a href=${attr.licenseURL} target='_blank'>${attr.license}</a>` : `${attr.license}`;
-            table += `<tr><td align='left'><small>${title} (id:${attr.id}) by ${author}, ${license}.</small></td></tr>`;
+            const title =
+                attr.sourceURL.length > 0
+                    ? `<a href='${attr.sourceURL}' target='_blank'>${attr.title}</a>`
+                    : `${attr.title}`;
+            const author =
+                attr.authorURL.length > 0
+                    ? `<a href='${attr.authorURL}' target='_blank'>${attr.author}</a>`
+                    : `${attr.author}`;
+            const license =
+                attr.licenseURL.length > 0
+                    ? `<a href='${attr.licenseURL}' target='_blank'>${attr.license}</a>`
+                    : `${attr.license}`;
+            table += `<tr><td style='text-align: left'>
+                        <small>${title} (id:${attr.id}) by ${author}, ${license}.</small>
+                      </td></tr>`;
         }
-        table+='</table>';
+        table += '</table>';
         return table;
     },
     /**
@@ -79,15 +92,16 @@ AFRAME.registerSystem('attribution', {
      * @param {object} gltfComponent - the GLTF model to extract properties from
      * @alias module:attribution-system
      */
-    extractAttributionFromGtlfAsset: function(el, gltfComponent) {
+    extractAttributionFromGtlfAsset(el, gltfComponent) {
         // check gltf's asset.extras (sketchfab) and scene.userData (blender)
-        let attr1 = {}; let attr2 = {};
-        if (gltfComponent.model && gltfComponent.model.hasOwnProperty('asset')) {
-            if (gltfComponent.model.asset.hasOwnProperty('extras')) {
+        let attr1 = {};
+        let attr2 = {};
+        if (gltfComponent.model && Object.hasOwn(gltfComponent.model, 'asset')) {
+            if (Object.hasOwn(gltfComponent.model.asset, 'extras')) {
                 attr1 = this.parseExtrasAttributes(gltfComponent.model.asset.extras);
             }
         }
-        if (gltfComponent.model && gltfComponent.model.hasOwnProperty('userData')) {
+        if (gltfComponent.model && Object.hasOwn(gltfComponent.model, 'userData')) {
             attr2 = this.parseExtrasAttributes(gltfComponent.model.userData);
         }
         Object.assign(attr2, attr1); // merge data from asset.extras and scene.userData;  asset.extras is preferred
@@ -99,7 +113,7 @@ AFRAME.registerSystem('attribution', {
      * @return {object} - a dictionary with the author, license, source and title parsed
      * @alias module:attribution-system
      */
-    parseExtrasAttributes: function(extras) {
+    parseExtrasAttributes(extras) {
         const attrObj = {};
         this.parseAttribute(extras, attrObj, 'author');
         this.parseAttribute(extras, attrObj, 'license');
@@ -111,17 +125,17 @@ AFRAME.registerSystem('attribution', {
      * Parse attribute given as parameter. Tries to find the attribute and add it to 'attribution' dictionary
      * @param {object} extras - the source for the attribute data
      * @param {object} attribution - the destination attribute dictionary
-     * @param {object} attribute - which attribute to parse
+     * @param {string} attribute - which attribute to parse
      * @return {boolean} - true/false if it could find the attribute
      * @alias module:attribution-system
      */
-    parseAttribute: function(extras, attribution, attribute) {
-        if (!extras.hasOwnProperty(attribute)) return false;
-        const r = new RegExp(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g); // fairly permissive url regex
+    parseAttribute(extras, attribution, attribute) {
+        if (!Object.hasOwn(extras, attribute)) return false;
+        const r = /(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/g; // fairly permissive url regex
         const match = r.exec(extras[attribute]); // extract url
-        const url = (match) ? match[0] : undefined;
-        const value = extras[attribute].replace(url, '').replace('(', '').replace(')', '').trim(); // remove url, parenthesis and extra spaces
-        attribution[attribute] = value;
+        const url = match ? match[0] : undefined;
+        /* eslint-disable no-param-reassign */
+        attribution[attribute] = extras[attribute].replace(url, '').replace('(', '').replace(')', '').trim(); // remove url, parenthesis and extra spaces
         attribution[`${attribute}URL`] = url;
         return true;
     },

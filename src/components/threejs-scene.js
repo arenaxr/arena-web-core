@@ -17,18 +17,18 @@
  */
 AFRAME.registerComponent('threejs-scene', {
     schema: {
-        url: {type: 'string', default: ''},
+        url: { type: 'string', default: '' },
     },
 
-    init: function() {
+    init() {
         this.model = null;
         this.loader = null;
         this.loader = new THREE.ObjectLoader();
     },
 
-    update: function(oldData) {
+    update() {
         const self = this;
-        const el = this.el;
+        const { el } = this;
 
         if (!this.data.url) {
             console.error('no url given');
@@ -41,25 +41,25 @@ AFRAME.registerComponent('threejs-scene', {
             // resource URL
             this.data.url,
             // onLoad callback
-            function(obj) {
+            (obj) => {
                 // Add the loaded object to the scene
                 self.model = obj;
                 el.setObject3D('mesh', self.model);
-                el.emit('model-loaded', {format: 'threejs-scene', model: self.model});
+                el.emit('model-loaded', { format: 'threejs-scene', model: self.model });
                 console.log('loaded');
             },
             // onProgress callback
-            function(xhr) {
-                console.log((xhr.loaded / xhr.total) * 100 + '% loaded');
+            (xhr) => {
+                console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
             },
             // onError callback
-            function(err) {
+            () => {
                 console.error('Error loading three.js scene');
-            },
+            }
         );
     },
 
-    remove: function() {
+    remove() {
         if (!this.model) {
             return;
         }

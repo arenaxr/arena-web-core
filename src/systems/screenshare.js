@@ -11,49 +11,47 @@
  *
  */
 AFRAME.registerSystem('screenshareable', {
-    schema: {
+    schema: {},
 
-    },
-
-    init: function() {
+    init() {
         this.screenshareables = {};
     },
 
-    registerComponent: function(object) {
+    registerComponent(object) {
         const objId = object.el.id.trim();
         this.screenshareables[objId] = object;
     },
 
-    unregisterComponent: function(object) {
+    unregisterComponent(object) {
         const objId = object.el.id.trim();
         delete this.screenshareables[objId];
     },
 
-    getAll: function() {
+    getAll() {
         return this.screenshareables;
     },
 
-    getAllAsList: function() {
+    getAllAsList() {
         return Object.keys(this.screenshareables);
     },
 
-    asHTMLSelect: function() {
+    asHTMLSelect() {
         // creates an HTML select list for usage in screen share icon
-        let res = `<select id="screenshareables" class="swal2-select" multiple>`;
+        let res = `<select id='screenshareables' class='swal2-select' multiple>`;
         if (Object.keys(this.screenshareables).length > 0) {
-            for (const obj of Object.keys(this.screenshareables)) {
-                res += `<option value="${obj}">${obj}</option>`;
-            }
+            Object.keys(this.screenshareables).forEach((obj) => {
+                res += `<option value='${obj}'>${obj}</option>`;
+            });
         } else {
             // add only one option: the default screen share object name
             const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
-            res += `<option value="${defaultScreenObj}">${defaultScreenObj}</option>`;
+            res += `<option value='${defaultScreenObj}'>${defaultScreenObj}</option>`;
         }
         res += `</select>`;
         return res;
     },
 
-    get: function(object) {
+    get(object) {
         const objId = object.el.id.trim();
         return this.screenshareable[objId];
     },

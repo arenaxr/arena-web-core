@@ -1,13 +1,13 @@
 /* global AFRAME, ARENA */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
 AFRAME.registerComponent('ar-hit-test-listener', {
     schema: {
-        enabled: {type: 'boolean', default: true},
+        enabled: { type: 'boolean', default: true },
     },
 
-    init: function() {
+    init() {
         this.enterARHandler = this.enterARHandler.bind(this);
         this.exitARHandler = this.exitARHandler.bind(this);
         this.hitStartHandler = this.hitStartHandler.bind(this);
@@ -18,44 +18,44 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         this.isMobile = AFRAME.utils.device.isMobile();
     },
 
-    remove: function() {
+    remove() {
         this.el.removeEventListener('enter-vr', this.enterARHandler);
         this.el.removeEventListener('exit-vr', this.exitARHandler);
     },
 
-    enterARHandler: function() {
+    enterARHandler() {
         if (this.el.is('ar-mode')) {
             this.el.addEventListener('ar-hit-test-select-start', this.hitStartHandler);
             this.el.addEventListener('ar-hit-test-select', this.hitEndHandler);
             if (this.isMobile) {
-                this.el.setAttribute('cursor', {rayOrigin: 'xrselect', fuse: false});
-                this.el.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
+                this.el.setAttribute('cursor', { rayOrigin: 'xrselect', fuse: false });
+                this.el.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
                 this.mouseCursor.removeAttribute('cursor');
                 this.mouseCursor.removeAttribute('raycaster');
 
-                this.el.components['cursor'].onEnterVR(); // Manually trigger cursor
+                this.el.components.cursor.onEnterVR(); // Manually trigger cursor
             }
         }
     },
 
-    exitARHandler: function() {
+    exitARHandler() {
         this.el.removeEventListener('ar-hit-test-select-start', this.hitStartHandler);
         this.el.removeEventListener('ar-hit-test-select', this.hitEndHandler);
         if (this.isMobile) {
             this.el.removeAttribute('cursor');
             this.el.removeAttribute('raycaster');
-            this.mouseCursor.setAttribute('cursor', {rayOrigin: 'mouse'});
-            this.mouseCursor.setAttribute('raycaster', {objects: '[click-listener],[click-listener-local]'});
+            this.mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
+            this.mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
         }
     },
 
-    hitStartHandler: function(evt) {
+    hitStartHandler(evt) {
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const camPosition = camera.components['arena-camera'].data.position;
 
         const clickPos = ARENAUtils.vec3ToObject(camPosition);
-        const {position, rotation} = ARENAUtils.setClickData(evt);
+        const { position, rotation } = ARENAUtils.setClickData(evt);
 
         if ('inputSource' in evt.detail) {
             // original hit-test event; simply publish to MQTT
@@ -64,7 +64,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                 action: 'clientEvent',
                 type: 'hitstart',
                 data: {
-                    clickPos: clickPos,
+                    clickPos,
                     position,
                     rotation,
                     source: ARENA.camName,
@@ -74,13 +74,13 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         }
     },
 
-    hitEndHandler: function(evt) {
+    hitEndHandler(evt) {
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
         const camPosition = camera.components['arena-camera'].data.position;
 
         const clickPos = ARENAUtils.vec3ToObject(camPosition);
-        const {position, rotation} = ARENAUtils.setClickData(evt);
+        const { position, rotation } = ARENAUtils.setClickData(evt);
 
         if ('inputSource' in evt.detail) {
             // original hit-test event; simply publish to MQTT
@@ -89,7 +89,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
                 action: 'clientEvent',
                 type: 'hitend',
                 data: {
-                    clickPos: clickPos,
+                    clickPos,
                     position,
                     rotation,
                     source: ARENA.camName,

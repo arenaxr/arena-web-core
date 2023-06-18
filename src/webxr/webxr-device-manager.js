@@ -6,10 +6,12 @@
  * @date 2023
  */
 
-import {ARENAUtils} from '../utils';
+/* global AFRAME */
+
+import { ARENAUtils } from '../utils';
 
 AFRAME.registerComponent('webxr-device-manager', {
-    init: function() {
+    init() {
         if (ARENAUtils.isWebXRViewer()) {
             this.el.sceneEl.setAttribute('webxr-viewer', true);
             this.el.sceneEl.removeAttribute('ar-hit-test-listener');
@@ -21,13 +23,13 @@ AFRAME.registerComponent('webxr-device-manager', {
         window.addEventListener('exit-vr', this.onExitVR);
     },
 
-    onEnterVR: function() {
+    onEnterVR() {
         if (this.el.sceneEl.is('ar-mode')) {
             document.getElementById('env').setAttribute('visible', false);
         }
     },
 
-    onExitVR: function() {
+    onExitVR() {
         if (this.el.sceneEl.is('ar-mode')) {
             document.getElementById('env').setAttribute('visible', true);
         }

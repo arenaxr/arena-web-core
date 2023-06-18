@@ -20,22 +20,22 @@
  */
 AFRAME.registerComponent('ttl', {
     schema: {
-        seconds: {type: 'number'},
+        seconds: { type: 'number' },
     },
-    init: function() {
+    init() {
         const now = new Date();
         now.setSeconds(now.getSeconds() + this.data.seconds);
         this.expireAt = now;
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
-    update: function(oldData) {
+    update(oldData) {
         if (oldData.seconds !== this.data.expireAt) {
             const now = new Date();
             now.setSeconds(now.getSeconds() + this.data.seconds);
             this.expireAt = now;
         }
     },
-    tick: function() {
+    tick() {
         const now = new Date();
         if (now > this.expireAt) {
             this.el.parentNode.removeChild(this.el);

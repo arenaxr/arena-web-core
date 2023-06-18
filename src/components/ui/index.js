@@ -1,1 +1,1 @@
-import './panel.js';
+import './panel';

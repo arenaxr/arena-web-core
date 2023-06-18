@@ -1,27 +1,22 @@
-import {
-	Color
-} from 'three';
-
 /**
  * Luminosity
  * http://en.wikipedia.org/wiki/Luminosity
  */
 
+/* global THREE */
+
 const LuminosityHighPassShader = {
+    shaderID: 'luminosityHighPass',
 
-	shaderID: 'luminosityHighPass',
+    uniforms: {
+        tDiffuse: { value: null },
+        luminosityThreshold: { value: 1.0 },
+        smoothWidth: { value: 1.0 },
+        defaultColor: { value: new THREE.Color(0x000000) },
+        defaultOpacity: { value: 0.0 },
+    },
 
-	uniforms: {
-
-		'tDiffuse': { value: null },
-		'luminosityThreshold': { value: 1.0 },
-		'smoothWidth': { value: 1.0 },
-		'defaultColor': { value: new Color( 0x000000 ) },
-		'defaultOpacity': { value: 0.0 }
-
-	},
-
-	vertexShader: /* glsl */`
+    vertexShader: /* glsl */ `
 
 		varying vec2 vUv;
 
@@ -33,7 +28,7 @@ const LuminosityHighPassShader = {
 
 		}`,
 
-	fragmentShader: /* glsl */`
+    fragmentShader: /* glsl */ `
 
 		uniform sampler2D tDiffuse;
 		uniform vec3 defaultColor;
@@ -57,8 +52,7 @@ const LuminosityHighPassShader = {
 
 			gl_FragColor = mix( outputColor, texel, alpha );
 
-		}`
-
+		}`,
 };
 
-export { LuminosityHighPassShader };
+export default LuminosityHighPassShader;

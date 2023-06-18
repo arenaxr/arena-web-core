@@ -6,16 +6,27 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, THREE */
 
-import { ARENADefaults } from "../../conf/defaults";
-
-const bind = AFRAME.utils.bind;
+const { bind } = AFRAME.utils;
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
 
-AFRAME.components['wasd-controls'].Component.prototype.init = function() {
+/**
+ * @param {object} keys
+ * @return {boolean}
+ */
+function isEmptyObject(keys) {
+    let key;
+    // eslint-disable-next-line
+    for (key in keys) {
+        return false;
+    }
+    return true;
+}
+
+AFRAME.components['wasd-controls'].Component.prototype.init = function init() {
     // Navigation
     this.navGroup = null;
     this.navNode = null;
@@ -40,37 +51,37 @@ AFRAME.components['wasd-controls'].Component.prototype.init = function() {
 };
 
 const wasdSchema = AFRAME.components['wasd-controls'].Component.prototype.schema;
-Object.assign(wasdSchema, {constrainToNavMesh: {default: false}});
+Object.assign(wasdSchema, { constrainToNavMesh: { default: false } });
 AFRAME.components['wasd-controls'].Component.prototype.schema = AFRAME.schema.process(wasdSchema);
 
-AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, delta) {
-    const data = this.data;
-    const el = this.el;
-    const velocity = this.velocity;
+AFRAME.components['wasd-controls'].Component.prototype.tick = function tick(time, delta) {
+    const { data } = this;
+    const { el } = this;
+    const { velocity } = this;
 
-    if (!velocity[data.adAxis] && !velocity[data.wsAxis] &&
-        isEmptyObject(this.keys)) {
+    if (!velocity[data.adAxis] && !velocity[data.wsAxis] && isEmptyObject(this.keys)) {
         return;
     }
 
     // Update velocity.
-    delta = delta / 1000;
+    // eslint-disable-next-line no-param-reassign
+    delta /= 1000;
     this.updateVelocity(delta);
 
     if (!velocity[data.adAxis] && !velocity[data.wsAxis]) {
         return;
     }
-    const nav = el.sceneEl.systems.nav;
+    const { nav } = el.sceneEl.systems;
     if (data.constrainToNavMesh && nav?.navMesh && !data.fly) {
         if (velocity.lengthSq() < EPS) return;
 
-        this.navStart.copy(el.object3D.position).y -= ARENADefaults.camHeight;
+        this.navStart.copy(el.object3D.position).y -= ARENA.defaults.camHeight;
         this.navEnd.copy(this.navStart).add(this.getMovementVector(delta));
 
         this.navGroup = this.navGroup === null ? nav.getGroup(this.navStart) : this.navGroup;
         this.navNode = this.navNode || nav.getNode(this.navStart, this.navGroup);
         this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
-        this.clampedEnd.y += ARENADefaults.camHeight;
+        this.clampedEnd.y += ARENA.defaults.camHeight;
         el.object3D.position.copy(this.clampedEnd);
     } else {
         // Get movement vector and translate position.
@@ -78,31 +89,33 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function(time, del
     }
 };
 
-
-AFRAME.components['wasd-controls'].Component.prototype.resetNav = function(checkPolygon = false, clampStep = false) {
-    const nav = this.el.sceneEl.systems.nav;
+AFRAME.components['wasd-controls'].Component.prototype.resetNav = function resetNav(
+    checkPolygon = false,
+    clampStep = false
+) {
+    const { nav } = this.el.sceneEl.systems;
     if (nav.navMesh) {
-        this.navStart.copy(this.el.object3D.position).y -= ARENADefaults.camHeight;
+        this.navStart.copy(this.el.object3D.position).y -= ARENA.defaults.camHeight;
         this.navEnd.copy(this.navStart);
         this.navGroup = nav.getGroup(this.navStart, checkPolygon);
         this.navNode = nav.getNode(this.navStart, this.navGroup, checkPolygon);
         this.navNode = nav.clampStep(this.navStart, this.navEnd, this.navGroup, this.navNode, this.clampedEnd);
         if (clampStep) {
-            this.clampedEnd.y += ARENADefaults.camHeight;
+            this.clampedEnd.y += ARENA.defaults.camHeight;
             this.el.object3D.position.copy(this.clampedEnd);
         }
     }
 };
 
-AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function(delta) {
+AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function updateVelocity(delta) {
     let adSign;
-    const data = this.data;
-    const keys = this.keys;
-    const velocity = this.velocity;
+    const { data } = this;
+    const { keys } = this;
+    const { velocity } = this;
     let wsSign;
 
-    const adAxis = data.adAxis;
-    const wsAxis = data.wsAxis;
+    const { adAxis } = data;
+    const { wsAxis } = data;
 
     // If FPS too low, reset velocity.
     if (delta > MAX_DELTA) {
@@ -112,13 +125,13 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
     }
 
     // https://gamedev.stackexchange.com/questions/151383/frame-rate-independant-movement-with-acceleration
-    const scaledEasing = Math.pow(1 / this.easing, delta * 60);
+    const scaledEasing = (1 / this.easing) ** (delta * 60);
     // Velocity Easing.
     if (velocity[adAxis] !== 0) {
-        velocity[adAxis] = velocity[adAxis] * scaledEasing;
+        velocity[adAxis] *= scaledEasing;
     }
     if (velocity[wsAxis] !== 0) {
-        velocity[wsAxis] = velocity[wsAxis] * scaledEasing;
+        velocity[wsAxis] *= scaledEasing;
     }
 
     // Clamp velocity easing.
@@ -134,7 +147,7 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
     }
 
     // Update velocity using keys pressed.
-    const acceleration = data.acceleration;
+    const { acceleration } = data;
     if (data.adEnabled) {
         adSign = data.adInverted ? -1 : 1;
         if (keys.KeyA) {
@@ -154,16 +167,3 @@ AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function
         }
     }
 };
-
-/**
- * @param {object} keys
- * @return {boolean}
- */
-function isEmptyObject(keys) {
-    let key;
-    // eslint-disable-next-line guard-for-in
-    for (key in keys) {
-        return false;
-    }
-    return true;
-}

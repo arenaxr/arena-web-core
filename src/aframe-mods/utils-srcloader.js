@@ -11,25 +11,21 @@
 
 const IMG_EXTENSIONS = ['jpg', 'jpeg', 'png', 'bmp', 'webp', 'tiff'];
 
-/**
- * Validate a texture, either as a selector or as a URL.
- * Detects whether `src` is pointing to an image or video and invokes the appropriate
- * callback.
- *
- * `src` will be passed into the callback
- *
- * @params {string|Element} src - URL or media element.
- * @params {function} isImageCb - callback if texture is an image.
- * @params {function} isVideoCb - callback if texture is a video.
- */
-function validateSrc(src, isImageCb, isVideoCb) {
-    checkIsImage(src, function isAnImageUrl(isImage) {
-        if (isImage) {
-            isImageCb(src);
-            return;
-        }
-        isVideoCb(src);
-    });
+function checkIsImageFallback(src, onResult) {
+    function onLoad() {
+        onResult(true);
+    }
+
+    function onError() {
+        onResult(false);
+    }
+
+    const tester = new Image();
+    tester.addEventListener('load', onLoad);
+
+    tester.addEventListener('error', onError);
+
+    tester.src = src;
 }
 
 /**
@@ -53,24 +49,24 @@ function checkIsImage(src, onResult) {
             onResult(true);
             return;
         }
-    } catch {}
+    } catch {
+        // empty
+    }
 
     const request = new XMLHttpRequest();
 
     // Try to send HEAD request to check if image first.
     request.open('HEAD', src);
-    request.addEventListener('load', function(event) {
+    request.addEventListener('load', () => {
         let contentType;
         if (request.status >= 200 && request.status < 300) {
             contentType = request.getResponseHeader('Content-Type');
             if (contentType == null) {
                 checkIsImageFallback(src, onResult);
+            } else if (contentType.startsWith('image')) {
+                onResult(true);
             } else {
-                if (contentType.startsWith('image')) {
-                    onResult(true);
-                } else {
-                    onResult(false);
-                }
+                onResult(false);
             }
         } else {
             checkIsImageFallback(src, onResult);
@@ -80,18 +76,25 @@ function checkIsImage(src, onResult) {
     request.send();
 }
 
-function checkIsImageFallback(src, onResult) {
-    const tester = new Image();
-    tester.addEventListener('load', onLoad);
-    function onLoad() {
-        onResult(true);
-    }
-    tester.addEventListener('error', onError);
-    function onError() {
-        onResult(false);
-    }
-    tester.src = src;
+/**
+ * Validate a texture, either as a selector or as a URL.
+ * Detects whether `src` is pointing to an image or video and invokes the appropriate
+ * callback.
+ *
+ * `src` will be passed into the callback
+ *
+ * @params {string|Element} src - URL or media element.
+ * @params {function} isImageCb - callback if texture is an image.
+ * @params {function} isVideoCb - callback if texture is a video.
+ */
+function validateSrc(src, isImageCb, isVideoCb) {
+    checkIsImage(src, (isImage) => {
+        if (isImage) {
+            isImageCb(src);
+            return;
+        }
+        isVideoCb(src);
+    });
 }
-
 
 AFRAME.utils.srcLoader.validateSrc = validateSrc;

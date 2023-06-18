@@ -6,10 +6,10 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
-import { ARENADefaults } from '../../conf/defaults.js';
-import { ARENA_EVENTS } from '../constants/events';
+import { ARENA_EVENTS } from '../constants';
+
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 
 /**
@@ -20,20 +20,19 @@ const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
  */
 AFRAME.registerComponent('network-latency', {
     schema: {
-        enabled: {type: 'boolean', default: true},
-        updateIntervalMs: {type: 'number', default: 10000}, // updates every 10s
-        latencyTopic: {type: 'string', default: ARENADefaults.latencyTopic},
+        enabled: { type: 'boolean', default: true },
+        updateIntervalMs: { type: 'number', default: 10000 }, // updates every 10s
+        latencyTopic: { type: 'string', default: ARENA.defaults.latencyTopic },
     },
 
-    init: function() {
+    init() {
         this.initialized = false;
         ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.ready.bind(this));
     },
-    ready: function() {
-        const data = this.data;
-        const el = this.el;
+    ready() {
+        const { data, el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.mqtt = sceneEl.systems['arena-mqtt'];
 
@@ -50,12 +49,8 @@ AFRAME.registerComponent('network-latency', {
         this.initialized = true;
     },
 
-    tick: function() {
+    tick() {
         if (!this.initialized || !this.enabled) return;
-        const data = this.data;
-        const el = this.el;
-
-        const sceneEl = el.sceneEl;
 
         // publish empty message with qos of 2 for network graph to update latency
         if (ARENA.events.eventData[ARENA_EVENTS.MQTT_LOADED] && this.mqtt.isConnected()) {

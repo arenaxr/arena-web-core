@@ -1,6 +1,8 @@
-$(document).ready(function() {
+/* global getStorePath, Swal, $ */
+
+$(document).ready(() => {
     // add page header
-    $('#header').load('/header.html', function() {
+    $('#header').load('/header.html', () => {
         // update auth state in nav bar
         fetch('/user/user_state')
             .then((response) => response.json())
@@ -10,46 +12,52 @@ $(document).ready(function() {
                 authDrop.attr('data-bs-toggle', 'dropdown');
                 authDrop.attr('aria-haspopup', 'true');
                 authDrop.attr('aria-expanded', 'false');
-                $('#auth-dropdown').after(
-                    '<ul class=\'dropdown-menu dropdown-menu-end\' role=\'menu\' aria-labelledby=\'auth-dropdown\'></ul>');
-                $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/conf/versions.html">Version</a></li>');
+                authDrop.after(
+                    "<ul class='dropdown-menu dropdown-menu-end' role='menu' aria-labelledby='auth-dropdown'></ul>"
+                );
+                const dropdownMenu = $('ul .dropdown-menu');
+                dropdownMenu.append('<li><a class="dropdown-item" href="/conf/versions.html">Version</a></li>');
                 if (data.authenticated) {
                     authDrop.html(data.username);
-                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
-                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" id="show_perms" href="#">Permissions</a></li>');
-                    $('#show_perms').on('click', function() {
+                    dropdownMenu.append('<li><a class="dropdown-item" href="/user/profile">Profile</a></li>');
+                    dropdownMenu.append('<li><a class="dropdown-item" id="show_perms" href="#">Permissions</a></li>');
+                    $('#show_perms').on('click', () => {
                         const frame = document.getElementsByTagName('iframe');
-                        const win = (frame && frame.length > 0) ? frame[0].contentWindow : window;
+                        const win = frame && frame.length > 0 ? frame[0].contentWindow : window;
                         if (typeof win.ARENAAUTH.showPerms !== 'undefined') {
                             win.ARENAAUTH.showPerms();
                         } else {
-                            alert('No MQTT permissions');
+                            window.alert('No MQTT permissions');
                         }
                     });
-                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/logout">Logout</a></li>');
+                    dropdownMenu.append('<li><a class="dropdown-item" href="/user/logout">Logout</a></li>');
                 } else {
                     authDrop.html('Login');
-                    $('ul .dropdown-menu').append('<li><a class="dropdown-item" href="/user/login">Login</a></li>')
-                        .on('click', function(e) {
-                            localStorage.setItem('request_uri', location.href);
+                    dropdownMenu
+                        .append('<li><a class="dropdown-item" href="/user/login">Login</a></li>')
+                        .on('click', (e) => {
+                            localStorage.setItem('request_uri', window.location.href);
                         });
                 }
             });
 
+        const btnCopyStorePath = $('#btn-copy-store-path');
         // highlight active page in navbar
-        $('.nav-item a').filter(function() {
-            const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
-            const loc = location.pathname.replace(/^\/+|\/+$/g, '');
-            if (loc == 'files') {
-                $('#btn-copy-store-path').show();
-            } else {
-                $('#btn-copy-store-path').hide();
-            }
-            return link == loc;
-        }).addClass('active');
+        $('.nav-item a')
+            .filter(() => {
+                const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
+                const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
+                if (loc === 'files') {
+                    btnCopyStorePath.show();
+                } else {
+                    btnCopyStorePath.hide();
+                }
+                return link === loc;
+            })
+            .addClass('active');
 
         // copy the file store public path
-        $('#btn-copy-store-path').on('click', function(e) {
+        btnCopyStorePath.on('click', (e) => {
             e.preventDefault();
             let storePath = getStorePath();
             if (storePath.startsWith('/storemng/files')) {
@@ -62,7 +70,7 @@ $(document).ready(function() {
             }
         });
 
-        $('.coming-soon').on('click', function(e) {
+        $('.coming-soon').on('click', (e) => {
             e.preventDefault();
             alert('COMING SOON');
         });

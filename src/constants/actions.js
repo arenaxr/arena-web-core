@@ -6,11 +6,13 @@
  * @date 2023
  */
 
-export const ACTIONS = Object.freeze({
-    CREATE:         'create',
-    UPDATE:         'update',
-    DELETE:         'delete',
-    CLIENT_EVENT:   'clientEvent',
-    GET_PERSIST:    'getPersist',
+const ACTIONS = Object.freeze({
+    CREATE: 'create',
+    UPDATE: 'update',
+    DELETE: 'delete',
+    CLIENT_EVENT: 'clientEvent',
+    GET_PERSIST: 'getPersist',
     RETURN_PERSIST: 'returnPersist',
 });
+
+export default ACTIONS;

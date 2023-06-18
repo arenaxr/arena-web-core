@@ -1,10 +1,12 @@
-import {FullScreenQuad, Pass} from './pass';
-import {CompositorShader} from '../shaders/compositor-shader';
-import {DecoderShader} from '../shaders/decoder-shader';
+/* global THREE */
+
+import { FullScreenQuad, Pass } from './pass';
+import CompositorShader from '../shaders/compositor-shader';
+import DecoderShader from '../shaders/decoder-shader';
 
 const FRAME_ID_LENGTH = 32;
 
-export class CompositorPass extends Pass {
+export default class CompositorPass extends Pass {
     constructor(camera, remoteRenderTarget) {
         super();
 
@@ -13,7 +15,7 @@ export class CompositorPass extends Pass {
 
         this.uniforms = THREE.UniformsUtils.clone(CompositorShader.uniforms);
         this.material = new THREE.ShaderMaterial({
-            defines: Object.assign({}, CompositorShader.defines),
+            defines: { ...CompositorShader.defines },
             uniforms: this.uniforms,
             vertexShader: CompositorShader.vertexShader,
             fragmentShader: CompositorShader.fragmentShader,
@@ -26,7 +28,7 @@ export class CompositorPass extends Pass {
 
         const decoderUniform = THREE.UniformsUtils.clone(DecoderShader.uniforms);
         const decoderMaterial = new THREE.ShaderMaterial({
-            defines: Object.assign({}, DecoderShader.defines),
+            defines: { ...DecoderShader.defines },
             uniforms: decoderUniform,
             vertexShader: DecoderShader.vertexShader,
             fragmentShader: DecoderShader.fragmentShader,
@@ -37,7 +39,7 @@ export class CompositorPass extends Pass {
 
         this.decoderFsQuad = new FullScreenQuad(decoderMaterial);
         this.decoderRenderTarget = new THREE.WebGLRenderTarget(FRAME_ID_LENGTH, 1);
-        this.pixelBuffer = new Uint8Array( FRAME_ID_LENGTH * 4 );
+        this.pixelBuffer = new Uint8Array(FRAME_ID_LENGTH * 4);
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
@@ -67,23 +69,24 @@ export class CompositorPass extends Pass {
 
         renderer.setRenderTarget(currentRenderTarget);
 
-        var value = 0, value1 = 0;
-        for (var i = 0; i < FRAME_ID_LENGTH; i++) {
-            if (this.pixelBuffer[4*i+1] / 255 > 0.5) {
-                value += (1 << i);
+        let value = 0;
+        let value1 = 0;
+        for (let i = 0; i < FRAME_ID_LENGTH; i++) {
+            if (this.pixelBuffer[4 * i + 1] / 255 > 0.5) {
+                value += 1 << i;
             }
-            if (this.pixelBuffer[4*i+2] / 255 > 0.5) {
-                value1 += (1 << i);
+            if (this.pixelBuffer[4 * i + 2] / 255 > 0.5) {
+                value1 += 1 << i;
             }
         }
 
         if (value !== value1) {
             if (value % 100 < 10) return value;
-            else if (value1 % 100 < 10) return value1;
-            else return undefined;
+            if (value1 % 100 < 10) return value1;
+            return undefined;
         }
         if (value % 100 < 10) return value;
-        else return undefined;
+        return undefined;
     }
 
     setCameraMats(cameraL, cameraR) {
@@ -125,24 +128,24 @@ export class CompositorPass extends Pass {
         this.material.uniforms.tLocalColor.value = readBuffer.texture;
         this.material.uniforms.tLocalDepth.value = readBuffer.depthTexture;
 
-        this.material.defines.IS_SRGB = (renderer.outputColorSpace === THREE.SRGBColorSpace);
+        this.material.defines.IS_SRGB = renderer.outputColorSpace === THREE.SRGBColorSpace;
 
         this.material.uniforms.cameraNear.value = this.camera.near;
         this.material.uniforms.cameraFar.value = this.camera.far;
 
-		if (this.renderToScreen) {
-			renderer.setRenderTarget( currentRenderTarget );
-			this.fsQuad.render( renderer );
-		} else {
-			renderer.setRenderTarget( writeBuffer );
-			if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-			this.fsQuad.render( renderer );
-		}
+        if (this.renderToScreen) {
+            renderer.setRenderTarget(currentRenderTarget);
+            this.fsQuad.render(renderer);
+        } else {
+            renderer.setRenderTarget(writeBuffer);
+            if (this.clear) renderer.clear(renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil);
+            this.fsQuad.render(renderer);
+        }
     }
 
-	dispose() {
-		this.material.dispose();
+    dispose() {
+        this.material.dispose();
         this.decoderMaterial.dispose();
-		this.fsQuad.dispose();
-	}
+        this.fsQuad.dispose();
+    }
 }

@@ -6,8 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, JitsiMeetJS */
-// import $ from 'jquery';
+/* global AFRAME, ARENA, JitsiMeetJS, $ */
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
 
 // log lib-jitsi-meet.js version
@@ -20,23 +19,23 @@ if (JitsiMeetJS) {
  */
 AFRAME.registerSystem('arena-jitsi', {
     schema: {
-        jitsiHost: {type: 'string', default: ARENADefaults.jitsiHost},
-        arenaAppId: {type: 'string', default: 'arena'},
-        screensharePrefix: {type: 'string', default: '#5cr33n5h4r3'}, // unique prefix for screenshare clients
-        arenaUserPrefix: {type: 'string', default: '#4r3n4'}, // unique arena client "tag"
-        newUserTimeoutMs: {type: 'number', default: 2000},
-        pano: {type: 'boolean', default: false},
+        jitsiHost: { type: 'string', default: ARENA.defaults.jitsiHost },
+        arenaAppId: { type: 'string', default: 'arena' },
+        screensharePrefix: { type: 'string', default: '#5cr33n5h4r3' }, // unique prefix for screenshare clients
+        arenaUserPrefix: { type: 'string', default: '#4r3n4' }, // unique arena client "tag"
+        newUserTimeoutMs: { type: 'number', default: 2000 },
+        pano: { type: 'boolean', default: false },
     },
 
-    init: function() {
-        const data = this.data;
+    init() {
+        const { data } = this;
 
         this.connectOptions = {
             hosts: {
                 domain: data.jitsiHost.split(':')[0], // remove port, if exists.
-                muc: 'conference.' + data.jitsiHost.split(':')[0], // remove port, if exists. FIXME: use XEP-0030
+                muc: `conference.${data.jitsiHost.split(':')[0]}`, // remove port, if exists. FIXME: use XEP-0030
             },
-            bosh: '//' + data.jitsiHost + '/http-bind', // FIXME: use xep-0156 for that
+            bosh: `//${data.jitsiHost}/http-bind`, // FIXME: use xep-0156 for that
 
             // The name of client node advertised in XEP-0115 'c' stanza
             clientNode: 'http://jitsi.org/jitsimeet',
@@ -95,14 +94,14 @@ AFRAME.registerSystem('arena-jitsi', {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
     },
     ready() {
-        const el = this.el;
-        const sceneEl = el.sceneEl;
+        const { el } = this;
+        const { sceneEl } = el;
 
         this.arena = sceneEl.systems['arena-scene'];
         this.health = sceneEl.systems['arena-health-ui'];
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
 
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
@@ -129,24 +128,33 @@ AFRAME.registerSystem('arena-jitsi', {
      * Connect to the Jitsi server.
      */
     connect() {
-        const data = this.data;
-        const el = this.el;
+        const { data } = this;
 
-        const sceneEl = el.sceneEl;
-
-        JitsiMeetJS.mediaDevices.addEventListener(JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED, this.onDeviceListChanged);
+        JitsiMeetJS.mediaDevices.addEventListener(
+            JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
+            this.onDeviceListChanged
+        );
 
         // Firefox does not allow audio output device change
         try {
             const prefAudioOutput = localStorage.getItem('prefAudioOutput');
             JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
-        } catch {}
+        } catch {
+            // empty
+        }
 
         JitsiMeetJS.init(this.initOptions);
         console.info('Jitsi, connecting:', this.connectOptions);
 
-        this.connection = new JitsiMeetJS.JitsiConnection(data.arenaAppId, this.arena.mqttToken.mqtt_token, this.connectOptions);
-        this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
+        this.connection = new JitsiMeetJS.JitsiConnection(
+            data.arenaAppId,
+            this.arena.mqttToken.mqtt_token,
+            this.connectOptions
+        );
+        this.connection.addEventListener(
+            JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
+            this.onConnectionSuccess
+        );
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
         this.connection.connect();
@@ -159,16 +167,16 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {string} participantId Participant id
      * @param {string} trackType track type ('audio'/'video')
      */
-    connectArena: function(participantId, trackType) {
+    connectArena(participantId, trackType) {
         this.jitsiId = participantId;
-        console.debug('connectArena: ' + participantId, trackType);
+        console.debug(`connectArena: ${participantId}`, trackType);
     },
 
     /**
      * Handles local tracks.
      * @param {[]} tracks Array with JitsiTrack objects
-      */
-    onLocalTracks: async function(tracks) {
+     */
+    async onLocalTracks(tracks) {
         this.localTracks = tracks;
 
         for (let i = 0; i < this.localTracks.length; i++) {
@@ -187,6 +195,8 @@ AFRAME.registerSystem('arena-jitsi', {
             );
 
             // append our own video/audio elements to <body>
+
+            /* eslint-disable no-await-in-loop */
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
                 const cornerVidEl = document.getElementById('cornerVideo');
@@ -206,7 +216,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 }
                 this.jitsiAudioTrack = track;
             }
-
+            /* eslint-disable no-await-in-loop */
             if (this.initialized) {
                 // mobile only?
                 track.mute();
@@ -227,7 +237,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {string} participantId Jitsi participant Id
      * @return {object} screenShare scene object
      */
-    updateScreenShareObject: function(screenShareId, videoId, participantId) {
+    updateScreenShareObject(screenShareId, videoId, participantId) {
         if (!screenShareId) return;
 
         let screenShareEl = document.getElementById(screenShareId);
@@ -251,18 +261,17 @@ AFRAME.registerSystem('arena-jitsi', {
         screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
         screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
         this.screenShareDict[participantId] = screenShareEl;
-        return screenShareEl;
     },
 
     /**
      * Handles remote tracks
      * @param {object} track JitsiTrack object
      */
-    onRemoteTrack: async function(track) {
-        const data = this.data;
-        const el = this.el;
+    async onRemoteTrack(track) {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         if (track.isLocal()) {
             return;
@@ -275,7 +284,7 @@ AFRAME.registerSystem('arena-jitsi', {
             this.remoteTracks[participantId] = [null, null]; // create array to hold their tracks
         }
 
-        if (track.getType() == 'audio') {
+        if (track.getType() === 'audio') {
             if (this.remoteTracks[participantId][0]) {
                 this.remoteTracks[participantId][0].dispose();
             }
@@ -284,10 +293,10 @@ AFRAME.registerSystem('arena-jitsi', {
             const audioId = `audio${participantId}`;
             // create HTML audio elem to store audio
             if (!document.getElementById(audioId)) {
-                $('a-assets').append(`<audio id='${audioId}' playsinline/>`);
+                $('a-assets').append(`<audio id='${audioId}'/>`);
             }
             track.attach($(`#${audioId}`)[0]);
-        } else if (track.getType() == 'video') {
+        } else if (track.getType() === 'video') {
             if (this.remoteTracks[participantId][1]) {
                 this.remoteTracks[participantId][1].dispose();
             }
@@ -295,10 +304,12 @@ AFRAME.registerSystem('arena-jitsi', {
 
             const videoId = `video${participantId}`;
             // create HTML video elem to store video
-            if (!document.getElementById(videoId)) {
-                $('a-assets').append(`<video autoplay='1' id='${videoId}' playsinline/>`);
+            let vidEl = document.getElementById(videoId);
+            if (!vidEl) {
+                vidEl = $(`<video autoplay='autoplay' id='${videoId}' playsinline/>`);
+                $('a-assets').append(vidEl);
             }
-            track.attach($(`#${videoId}`)[0]);
+            track.attach(vidEl[0]);
 
             const user = this.conference.getParticipantById(participantId);
             let camNames = user.getProperty('arenaCameraName');
@@ -308,7 +319,7 @@ AFRAME.registerSystem('arena-jitsi', {
             if (camNames.includes(data.screensharePrefix)) {
                 let dn = user.getProperty('screenshareDispName');
                 if (!dn) dn = user.getDisplayName();
-                if (!dn) dn = `No Name #${id}`;
+                if (!dn) dn = `No Name #${participantId}`;
                 const camName = user.getProperty('screenshareCamName');
                 let objectIds = user.getProperty('screenshareObjIds');
 
@@ -316,9 +327,9 @@ AFRAME.registerSystem('arena-jitsi', {
                     sceneEl.emit(JITSI_EVENTS.SCREENSHARE, {
                         jid: participantId,
                         id: participantId,
-                        dn: dn,
+                        dn,
                         cn: camName,
-                        scene: thiss.arena.namespacedScene,
+                        scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
                     objectIds = objectIds.split(',');
@@ -327,16 +338,17 @@ AFRAME.registerSystem('arena-jitsi', {
                     for (let i = 0; i < objectIds.length; i++) {
                         if (objectIds[i]) {
                             const video = $(`#${videoId}`);
-                            video.on('loadeddata', (e) => {
+                            video.on('loadeddata', () => {
                                 this.updateScreenShareObject(objectIds[i], videoId, participantId);
                             });
                         }
                     }
-                } else { // display as external user; possible spoofer
+                } else {
+                    // display as external user; possible spoofer
                     sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                         jid: participantId,
                         id: participantId,
-                        dn: dn,
+                        dn,
                         cn: undefined,
                         scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
@@ -365,11 +377,10 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      * This function is executed when the this.conference is joined
      */
-    onConferenceJoined: function() {
-        const data = this.data;
-        const el = this.el;
+    onConferenceJoined() {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         console.debug('Joined conf! localTracks.length: ', this.localTracks.length);
 
@@ -405,7 +416,7 @@ AFRAME.registerSystem('arena-jitsi', {
 
         sceneEl.emit(JITSI_EVENTS.CONNECTED, {
             scene: this.arena.namespacedScene,
-            pl: pl,
+            pl,
         });
     },
 
@@ -413,11 +424,11 @@ AFRAME.registerSystem('arena-jitsi', {
      * Called when user joins
      * @param {string} id
      */
-    onUserJoined: async function(id) {
-        const data = this.data;
-        const el = this.el;
+    async onUserJoined(id) {
+        const { data } = this;
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         console.debug('New user joined:', id, this.conference.getParticipantById(id).getDisplayName());
         this.remoteTracks[id] = [null, null]; // create an array to hold tracks of new user
@@ -442,8 +453,8 @@ AFRAME.registerSystem('arena-jitsi', {
             // user join event args, to be emited below
             const userJoinedArgs = {
                 jid: id,
-                id: id,
-                dn: dn,
+                id,
+                dn,
                 cn: undefined,
                 scene: this.arena.namespacedScene,
                 src: EVENT_SOURCES.JITSI,
@@ -468,11 +479,10 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {string} id user Id
      * @param {object} user user object (JitsiParticipant)
      */
-    onUserLeft: function(id, user) {
-        const data = this.data;
-        const el = this.el;
+    onUserLeft(id, user) {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         console.debug('user left:', id);
 
@@ -501,11 +511,10 @@ AFRAME.registerSystem('arena-jitsi', {
      * Called when dominant speaker changes.
      * @param {string} id user Id
      */
-    onDominantSpeakerChanged: function(id) {
-        const data = this.data;
-        const el = this.el;
+    onDominantSpeakerChanged(id) {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         // console.log(`(conference) Dominant Speaker ID: ${id}`);
         this.prevActiveSpeaker = this.activeSpeaker;
@@ -531,11 +540,10 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      * This function is called when connection is established successfully
      */
-    onConnectionSuccess: function() {
-        const data = this.data;
-        const el = this.el;
+    onConnectionSuccess() {
+        const { data, el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         console.info('Conference server connected!');
         this.conference = this.connection.initJitsiConference(this.conferenceName, this.confOptions);
@@ -562,9 +570,9 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.on(JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED, (userID, audioLevel) =>
             console.debug(`${userID} - ${audioLevel}`)
         );
-        this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
-            console.debug(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`)
-        );
+        // this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
+        //     console.debug(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`)
+        // );
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
@@ -573,7 +581,7 @@ AFRAME.registerSystem('arena-jitsi', {
             sceneEl.emit(JITSI_EVENTS.STATS_LOCAL, {
                 jid: this.jitsiId,
                 id: this.arena.idTag,
-                stats: stats,
+                stats,
             });
         });
         this.conference.on(JitsiMeetJS.events.connectionQuality.REMOTE_STATS_UPDATED, (id, stats) => {
@@ -581,7 +589,7 @@ AFRAME.registerSystem('arena-jitsi', {
             sceneEl.emit(JITSI_EVENTS.STATS_REMOTE, {
                 jid: id,
                 id: arenaId,
-                stats: stats,
+                stats,
             });
         });
         this.conference.on(JitsiMeetJS.events.conference.ENDPOINT_MESSAGE_RECEIVED, (id, statusPayload) => {
@@ -589,7 +597,7 @@ AFRAME.registerSystem('arena-jitsi', {
         });
 
         // set the ARENA user's name with a "unique" ARENA tag
-        this.conference.setDisplayName(this.arena.displayName + ` (${data.arenaUserPrefix}_${this.arena.idTag})`);
+        this.conference.setDisplayName(`${this.arena.displayName} (${data.arenaUserPrefix}_${this.arena.idTag})`);
 
         // set local properties
         this.conference.setLocalParticipantProperty('arenaId', this.arena.idTag);
@@ -612,7 +620,7 @@ AFRAME.registerSystem('arena-jitsi', {
                     if (arenaId && arenaDisplayName && arenaCameraName) {
                         // clear timeout for new user notification
                         clearInterval(this.newUserTimers[id]);
-                        delete(this.newUserTimers[id]);
+                        delete this.newUserTimers[id];
                         // emit new user event
                         sceneEl.emit(JITSI_EVENTS.USER_JOINED, {
                             jid: id,
@@ -624,7 +632,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         });
                     }
                 }
-            },
+            }
         );
 
         this.conference.join(); // this.conference.join(password);
@@ -632,28 +640,27 @@ AFRAME.registerSystem('arena-jitsi', {
         this.spatialAudioOn = AFRAME.utils.device.isMobile();
         if (!this.spatialAudioOn) {
             // only tested and working on mac on chrome
-            navigator.mediaDevices.enumerateDevices().then(function(devices) {
+            navigator.mediaDevices.enumerateDevices().then((devices) => {
                 const headphonesConnected = devices
                     .filter((device) => /audio\w+/.test(device.kind))
                     .find((device) => device.label.toLowerCase().includes('head'));
                 this.spatialAudioOn = !!headphonesConnected;
-            }.bind(this));
+            });
         }
         this.health.removeError('connection.connectionFailed');
     },
 
-    updateUserStatus: function() {
-        const data = this.data;
-        const el = this.el;
+    updateUserStatus() {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         const statusPayload = {
             jid: this.jitsiId,
             id: this.arena.idTag,
             status: {
                 role: this.conference.getRole(),
-            }
+            },
         };
         this.conference.sendEndpointMessage('', statusPayload);
         sceneEl.emit(JITSI_EVENTS.STATUS, statusPayload);
@@ -663,11 +670,10 @@ AFRAME.registerSystem('arena-jitsi', {
      * Called for conference errors/failures
      * @param {*} err
      */
-    onConferenceError: function(err) {
-        const data = this.data;
-        const el = this.el;
+    onConferenceError(err) {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         console.error(`Conference error ${err}!`);
         sceneEl.emit(JITSI_EVENTS.CONFERENCE_ERROR, {
@@ -679,13 +685,12 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      * This function is called when the this.connection fails.
      */
-    onConnectionFailed: function() {
-        const data = this.data;
-        const el = this.el;
+    onConnectionFailed() {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
-        const err ='connection.connectionFailed';
+        const err = 'connection.connectionFailed';
         console.error('Conference server connection failed!');
         sceneEl.emit(JITSI_EVENTS.CONFERENCE_ERROR, {
             errorCode: err,
@@ -697,16 +702,19 @@ AFRAME.registerSystem('arena-jitsi', {
      * This function is called when device list changes
      * @param {object} devices List of devices
      */
-    onDeviceListChanged: function(devices) {
+    onDeviceListChanged(devices) {
         console.info('current devices', devices);
     },
 
     /**
      * This function is called when we disconnect.
      */
-    disconnect: function() {
+    disconnect() {
         console.warn('Conference server disconnected!');
-        this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, this.onConnectionSuccess);
+        this.connection.removeEventListener(
+            JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED,
+            this.onConnectionSuccess
+        );
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, this.onConnectionFailed);
         this.connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
     },
@@ -714,7 +722,7 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      * called on unload; release tracks, leave this.conference
      */
-    unload: function() {
+    unload() {
         for (let i = 0; i < this.localTracks.length; i++) {
             this.localTracks[i].dispose();
         }
@@ -726,7 +734,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * Connect audio and video and start sending local tracks
      * @return {promise}
      */
-    avConnect: async function() {
+    async avConnect() {
         const prefAudioInput = localStorage.getItem('prefAudioInput');
         const prefVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
@@ -738,7 +746,7 @@ AFRAME.registerSystem('arena-jitsi', {
             deviceOpts.minFps = 5;
             deviceOpts.constraints = {
                 video: {
-                    aspectRatio: 2 / 1,
+                    aspectRatio: 2,
                     height: {
                         ideal: 1920,
                         max: 1920,
@@ -756,15 +764,15 @@ AFRAME.registerSystem('arena-jitsi', {
         try {
             let vidConstraint = true;
             if (prefVideoInput) {
-                vidConstraint = {deviceId: {exact: prefVideoInput}};
+                vidConstraint = { deviceId: { exact: prefVideoInput } };
                 try {
-                    await navigator.mediaDevices.getUserMedia({video: vidConstraint});
+                    await navigator.mediaDevices.getUserMedia({ video: vidConstraint });
                     deviceOpts.cameraDeviceId = prefVideoInput;
                 } catch {
-                    await navigator.mediaDevices.getUserMedia({video: true});
+                    await navigator.mediaDevices.getUserMedia({ video: true });
                 }
             } else {
-                await navigator.mediaDevices.getUserMedia({video: true});
+                await navigator.mediaDevices.getUserMedia({ video: true });
             }
             devices.push('video');
             this.withVideo = true;
@@ -787,68 +795,64 @@ AFRAME.registerSystem('arena-jitsi', {
                         localStorage.setItem('hideNoAV', 'true');
                     }
                 });
-            }*/
+            } */
         }
         this.avConnected = true;
 
-        JitsiMeetJS.createLocalTracks({devices, ...deviceOpts}).
-            then(async (tracks) => {
+        JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
+            .then(async (tracks) => {
                 await this.onLocalTracks(tracks);
-                if (this.withVideo) setupCornerVideo.bind(this)();
+                if (this.withVideo) this.setupCornerVideo.bind(this)();
             })
             .catch((err) => {
                 this.initialized = false;
                 console.warn(err);
             });
+    },
+
+    /**
+     * show user video in the corner
+     */
+    setupCornerVideo() {
+        let localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+
+        // video window for jitsi
+        this.jitsiVideoElem = document.getElementById('cornerVideo');
+        this.jitsiVideoElem.classList.add('flip-video');
+        this.jitsiVideoElem.classList.add('arena-corner-video');
+        this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
+        this.jitsiVideoElem.style.display = 'none';
 
         /**
-         * show user video in the corner
+         * set video element size
          */
-        const _this = this;
-        function setupCornerVideo() {
-            let localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
-
-            // video window for jitsi
-            _this.jitsiVideoElem = document.getElementById('cornerVideo');
-            _this.jitsiVideoElem.classList.add('flip-video');
-            _this.jitsiVideoElem.classList.add('arena-corner-video');
-            _this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
-            _this.jitsiVideoElem.style.display = 'none';
-
-            /**
-             * set video element size
-             */
-            function setCornerVideoHeight() {
-                const videoWidth = localVideoWidth;
-                const videoHeight = _this.jitsiVideoElem.videoHeight /
-                                        (_this.jitsiVideoElem.videoWidth / videoWidth);
-                _this.jitsiVideoElem.style.width = videoWidth + 'px';
-                _this.jitsiVideoElem.style.height = videoHeight + 'px';
-            }
-
-            _this.jitsiVideoElem.onloadedmetadata = () => {
-                setCornerVideoHeight();
-            };
-
-            // mobile only
-            window.addEventListener('orientationchange', () => {
-                localVideoWidth = Number(window.innerWidth / 5);
-                setCornerVideoHeight();
-            });
+        function setCornerVideoHeight() {
+            const videoWidth = localVideoWidth;
+            const videoHeight = this.jitsiVideoElem.videoHeight / (this.jitsiVideoElem.videoWidth / videoWidth);
+            this.jitsiVideoElem.style.width = `${videoWidth}px`;
+            this.jitsiVideoElem.style.height = `${videoHeight}px`;
         }
+
+        this.jitsiVideoElem.onloadedmetadata = setCornerVideoHeight.bind(this);
+
+        // mobile only
+        window.addEventListener('orientationchange', () => {
+            localVideoWidth = Number(window.innerWidth / 5);
+            setCornerVideoHeight();
+        });
     },
 
     /**
      * Show the client user's video
      */
-    showVideo: function() {
+    showVideo() {
         if (this.jitsiVideoElem) this.jitsiVideoElem.style.display = 'block';
     },
 
     /**
      * Hide the client user's video
      */
-    hideVideo: function() {
+    hideVideo() {
         if (this.jitsiVideoElem) this.jitsiVideoElem.style.display = 'none';
     },
 
@@ -856,7 +860,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * Getter for the client users Jitsi Id
      * @return {string} The Jitsi Id
      */
-    getJitsiId: function() {
+    getJitsiId() {
         return this.jitsiId;
     },
 
@@ -864,7 +868,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * Has the active speaker changed
      * @return {boolean} if the active speaker has changed
      */
-    activeSpeakerChanged: function() {
+    activeSpeakerChanged() {
         return this.prevActiveSpeaker !== this.activeSpeaker;
     },
 
@@ -872,10 +876,11 @@ AFRAME.registerSystem('arena-jitsi', {
      * Begin the audio feed
      * @return {*} Promise for the track unmute
      */
-    unmuteAudio: function() {
-        return new Promise(function(resolve, reject) {
+    unmuteAudio() {
+        return new Promise((resolve, reject) => {
             if (this.jitsiAudioTrack) {
-                this.jitsiAudioTrack.unmute()
+                this.jitsiAudioTrack
+                    .unmute()
                     .then(() => {
                         this.hasAudio = true;
                         resolve();
@@ -886,17 +891,18 @@ AFRAME.registerSystem('arena-jitsi', {
             } else {
                 reject(new Error('Jitsi is not ready yet'));
             }
-        }.bind(this));
+        });
     },
 
     /**
      * End the audio feed
      * @return {*} Promise for the track mute
      */
-    muteAudio: function() {
-        return new Promise(function(resolve, reject) {
+    muteAudio() {
+        return new Promise((resolve, reject) => {
             if (this.jitsiAudioTrack) {
-                this.jitsiAudioTrack.mute()
+                this.jitsiAudioTrack
+                    .mute()
                     .then(() => {
                         this.hasAudio = false;
                         resolve();
@@ -907,17 +913,18 @@ AFRAME.registerSystem('arena-jitsi', {
             } else {
                 reject(new Error('Jitsi is not ready yet'));
             }
-        }.bind(this));
+        });
     },
 
     /**
      * Begin the video feed
      * @return {*} Promise for the track unmute
      */
-    startVideo: function() {
-        return new Promise(function(resolve, reject) {
+    startVideo() {
+        return new Promise((resolve, reject) => {
             if (this.jitsiVideoTrack) {
-                this.jitsiVideoTrack.unmute()
+                this.jitsiVideoTrack
+                    .unmute()
                     .then(() => {
                         this.hasVideo = true;
                         resolve();
@@ -928,17 +935,18 @@ AFRAME.registerSystem('arena-jitsi', {
             } else {
                 reject(new Error('Jitsi is not ready yet'));
             }
-        }.bind(this));
+        });
     },
 
     /**
      * End the video feed
      * @return {*} Promise for the track mute
      */
-    stopVideo: function() {
-        return new Promise(function(resolve, reject) {
+    stopVideo() {
+        return new Promise((resolve, reject) => {
             if (this.jitsiVideoTrack) {
-                this.jitsiVideoTrack.mute()
+                this.jitsiVideoTrack
+                    .mute()
                     .then(() => {
                         this.hasVideo = false;
                         resolve();
@@ -949,7 +957,7 @@ AFRAME.registerSystem('arena-jitsi', {
             } else {
                 reject(new Error('Jitsi is not ready yet'));
             }
-        }.bind(this));
+        });
     },
 
     /**
@@ -957,12 +965,11 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {*} jitsiId The jitsi user id
      * @return {*} remote track object
      */
-    getAudioTrack: function(jitsiId) {
+    getAudioTrack(jitsiId) {
         if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][0];
-        } else {
-            return null;
         }
+        return null;
     },
 
     /**
@@ -970,12 +977,11 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {*} jitsiId The jitsi user id
      * @return {*} remote track object
      */
-    getVideoTrack: function(jitsiId) {
+    getVideoTrack(jitsiId) {
         if (this.remoteTracks[jitsiId]) {
             return this.remoteTracks[jitsiId][1];
-        } else {
-            return null;
         }
+        return null;
     },
 
     /**
@@ -985,8 +991,8 @@ AFRAME.registerSystem('arena-jitsi', {
      * https://github.com/jitsi/jitsi-videobridge/blob/master/doc/allocation.md
      * @param {*} panoIds Array of jitsi ids panoramic, first is 'on-stage', others get lower res.
      * @param {*} constraints ID and resolution value object to update.
-    */
-    setResolutionRemotes: function(panoIds = [], constraints = {}) {
+     */
+    setResolutionRemotes(panoIds = [], constraints = {}) {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         // The endpoint ids of the participants that are prioritized up to a higher resolution.
@@ -1000,11 +1006,11 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.setReceiverConstraints(videoConstraints);
     },
 
-    setDefaultResolutionRemotes: function(resolution) {
+    setDefaultResolutionRemotes(resolution) {
         const videoConstraints = {};
         videoConstraints.colibriClass = 'ReceiverVideoConstraints';
         videoConstraints.defaultConstraints = {
-            'maxHeight': resolution,
+            maxHeight: resolution,
         };
         this.conference.setReceiverConstraints(videoConstraints);
     },
@@ -1014,7 +1020,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {*} participantJitsiId The user to kick out
      * @param {*} msg The message for the user
      */
-    kickout: function(participantJitsiId, msg) {
+    kickout(participantJitsiId, msg) {
         if (this.conference) {
             this.conference.kickParticipant(participantJitsiId, msg);
         }
@@ -1023,7 +1029,7 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      * Disconnect from the conference
      */
-    leave: function() {
+    leave() {
         this.unload();
         this.disconnect();
     },
@@ -1033,8 +1039,8 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {*} participantJitsiId
      * @returns
      */
-    getUserId: function(participantJitsiId) {
-        if (this.jitsiId == participantJitsiId) return this.arena.camName;
+    getUserId(participantJitsiId) {
+        if (this.jitsiId === participantJitsiId) return this.arena.camName;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
     },
@@ -1045,7 +1051,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {*} property
      * @returns
      */
-    getProperty: function(participantJitsiId, property) {
+    getProperty(participantJitsiId, property) {
         return this.conference.getParticipantById(participantJitsiId).getProperty(property);
     },
 
@@ -1054,16 +1060,17 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {int} quality Connection Quality
      * @return {string} Color string
      */
-    getConnectionColor: function(quality) {
+    getConnectionColor(quality) {
         if (quality > 66.7) {
             return 'green';
-        } else if (quality > 33.3) {
-            return 'orange';
-        } else if (quality > 0) {
-            return 'gold';
-        } else {
-            return 'red';
         }
+        if (quality > 33.3) {
+            return 'orange';
+        }
+        if (quality > 0) {
+            return 'gold';
+        }
+        return 'red';
     },
 
     /**
@@ -1073,7 +1080,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {Object} status The jisti video status object if any
      * @return {string} Readable stats
      */
-    getConnectionText: function(name, stats, status) {
+    getConnectionText(name, stats, status) {
         const lines = [];
         let sendmax = '';
         lines.push(`Name: ${name}`);
@@ -1112,26 +1119,22 @@ AFRAME.registerSystem('arena-jitsi', {
      * @private
      * @return {string}
      */
-    _extractResolutionString: function(stats) {
-        const {
-            framerate,
-            resolution,
-        } = stats;
+    _extractResolutionString(stats) {
+        const { framerate, resolution } = stats;
 
-        const resolutionString = Object.keys(resolution || {})
-            .map((ssrc) => {
-                const {
-                    width,
-                    height,
-                } = resolution[ssrc];
+        const resolutionString =
+            Object.keys(resolution || {})
+                .map((ssrc) => {
+                    const { width, height } = resolution[ssrc];
 
-                return `${width}x${height}`;
-            })
-            .join(', ') || null;
+                    return `${width}x${height}`;
+                })
+                .join(', ') || null;
 
-        const frameRateString = Object.keys(framerate || {})
-            .map((ssrc) => framerate[ssrc])
-            .join(', ') || null;
+        const frameRateString =
+            Object.keys(framerate || {})
+                .map((ssrc) => framerate[ssrc])
+                .join(', ') || null;
 
         return resolutionString && frameRateString ? `${resolutionString}@${frameRateString}fps` : undefined;
     },
@@ -1143,23 +1146,17 @@ AFRAME.registerSystem('arena-jitsi', {
      * @private
      * @return {string}
      */
-    _extractCodecs: function(stats) {
-        const {
-            codec,
-        } = stats;
+    _extractCodecs(stats) {
+        const { codec } = stats;
 
         let codecString;
 
         // Only report one codec, in case there are multiple for a user.
-        Object.keys(codec || {})
-            .forEach((ssrc) => {
-                const {
-                    audio,
-                    video,
-                } = codec[ssrc];
+        Object.keys(codec || {}).forEach((ssrc) => {
+            const { audio, video } = codec[ssrc];
 
-                codecString = `${audio}, ${video}`;
-            });
+            codecString = `${audio}, ${video}`;
+        });
 
         return codecString;
     },

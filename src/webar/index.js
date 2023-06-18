@@ -5,16 +5,18 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-import './webar-session.js';
-import {WebARCameraCapture} from '../systems/armarker/camera-capture/ccwebar';
-import {ARENAUtils} from '../utils';
+/* global ARENA */
+
+import './webar-session';
+import WebARCameraCapture from '../systems/armarker/camera-capture/ccwebar';
+import { ARENAUtils } from '../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 
 /**
  * Helper functions for WebAR session
  */
-export class ARENAWebARUtils {
+export default class ARENAWebARUtils {
     /**
      * Starts a WebAR session
      */
@@ -63,10 +65,10 @@ export class ARENAWebARUtils {
 
         const sceneEl = document.querySelector('a-scene');
         const vrModeUI = sceneEl.components['vr-mode-ui'];
-        const enterAREl = vrModeUI.enterAREl;
+        const { enterAREl } = vrModeUI;
         enterAREl.classList.remove(HIDDEN_CLASS);
         enterAREl.removeEventListener('click', vrModeUI.onEnterARButtonClick, true);
-        enterAREl.addEventListener('click', function() {
+        enterAREl.addEventListener('click', () => {
             ARENAWebARUtils.enterARNonWebXR();
         });
     }

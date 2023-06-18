@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA */
+/* global AFRAME */
 
 /**
  * @fileoverview Load scene from persistence.
@@ -44,28 +44,27 @@ AFRAME.registerComponent('load-scene', {
 
     multiple: true,
 
-    init: function() {
-        const self = this;
-    },
+    init() {},
 
-    update: function(oldData) {
+    update() {
         // this in fact only gets called when the component that it is - gets updated
         // unlike the update method in Unity that gets called every frame
-        const data = this.data; // Component property values.
-        const el = this.el; // Reference to the component's entity.
+        const { data } = this; // Component property values.
+        const { el } = this; // Reference to the component's entity.
 
-        if (data.on) { // we have an event?
-            el.addEventListener(data.on, function(evt) {
+        if (data.on) {
+            // we have an event?
+            el.addEventListener(data.on, function loadCallback(evt) {
                 if ('cursorEl' in evt.detail) {
                     // internal click event, our scene only
                 } else {
                     // MQTT click event that everyone gets
-                    console.debug('load-scene url=' + data.url);
+                    console.debug(`load-scene url=${data.url}`);
                     if (!this.loaded) {
-                        ARENA.loadArenaScene(data.url, data.position, data.rotation);
+                        // ARENA.loadArenaScene(data.url, data.position, data.rotation);
                         this.loaded = true;
                     } else {
-                        ARENA.unloadArenaScene(data.url);
+                        // ARENA.unloadArenaScene(data.url);
                         this.loaded = false;
                     }
                 }
@@ -76,16 +75,16 @@ AFRAME.registerComponent('load-scene', {
         }
     },
 
-    pause: function() {
+    pause() {
         // this.removeEventListeners()
     },
-    play: function() {
+    play() {
         // this.addEventListeners()
     },
     // handle component removal (why can't it just go away?)
-    remove: function() {
-        const data = this.data;
-        const el = this.el;
+    remove() {
+        const { data } = this;
+        const { el } = this;
 
         // remove event listener
         if (data.event) {

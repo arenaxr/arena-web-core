@@ -1,10 +1,14 @@
+/* eslint-disable camelcase */
+
+/* global AFRAME */
+
 const warn = AFRAME.utils.debug('ARENA:message:warn');
 const error = AFRAME.utils.debug('ARENA:message:error');
 
 /**
  * Message parser and verifier
  */
-export class Parser {
+export default class Parser {
     /**
      * Parses a message and ensures it has an object_id and data
      * @param {string} source caller source for logging
@@ -17,21 +21,21 @@ export class Parser {
             return undefined;
         }
 
-        const object_id = message.object_id;
+        const { object_id } = message;
         if (object_id === undefined) {
             error(source, 'Malformed message (no object_id):', JSON.stringify(message));
             return undefined;
         }
 
-        const data = message.data;
+        const { data } = message;
         if (data === undefined) {
             error(source, 'Malformed message (no data field):', JSON.stringify(message));
             return undefined;
         }
 
         return {
-            object_id: object_id,
-            data: data,
+            object_id,
+            data,
         };
     }
 }

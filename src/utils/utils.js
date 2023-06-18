@@ -6,12 +6,14 @@
  * @date 2020
  */
 
+/* global AFRAME, ARENA, THREE */
+
 import MQTTPattern from 'mqtt-pattern';
 
 /**
  * Wrapper class for various utility functions
  */
-export class ARENAUtils {
+export default class ARENAUtils {
     /**
      * Extracts URL params
      * @param {string} parameter URL parameter
@@ -31,9 +33,7 @@ export class ARENAUtils {
      * Register a callback for the geolocation of user's device
      *
      * The callback should take the following arguments
-     * @callback onLocationCallback
-     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successful; "default" location if error
-     * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error
+     * @param callback onLocationCallback
      */
     static getLocation(callback) {
         const urlLat = ARENAUtils.getUrlParam('lat', undefined);
@@ -44,27 +44,25 @@ export class ARENAUtils {
                     latitude: urlLat,
                     longitude: urlLong,
                 },
-                undefined,
+                undefined
             );
-        } else {
-            if (navigator.geolocation) {
-                const options = {
-                    enableHighAccuracy: true,
-                    timeout: 5000,
-                    maximumAge: 0,
-                };
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        if (callback) callback(position.coords, undefined);
-                    },
-                    (err) => {
-                        console.warn(`Error getting device location: ${err.message}`);
-                        console.warn('Defaulting to campus location');
-                        if (callback) callback({latitude: 40.4427, longitude: 79.943}, err);
-                    },
-                    options,
-                );
-            }
+        } else if (navigator.geolocation) {
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+            };
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    if (callback) callback(position.coords, undefined);
+                },
+                (err) => {
+                    console.warn(`Error getting device location: ${err.message}`);
+                    console.warn('Defaulting to campus location');
+                    if (callback) callback({ latitude: 40.4427, longitude: 79.943 }, err);
+                },
+                options
+            );
         }
     }
 
@@ -107,7 +105,8 @@ export class ARENAUtils {
                 y: parseFloat(evt.detail.intersection.point.y.toFixed(3)),
                 z: parseFloat(evt.detail.intersection.point.z.toFixed(3)),
             };
-        } else if (evt.detail.position && evt.detail.orientation) {
+        }
+        if (evt.detail.position && evt.detail.orientation) {
             return {
                 position: {
                     x: parseFloat(evt.detail.position.x.toFixed(3)),
@@ -121,14 +120,13 @@ export class ARENAUtils {
                     w: parseFloat(evt.detail.orientation.w.toFixed(3)),
                 },
             };
-        } else {
-            console.info('WARN: empty coords data');
-            return {
-                x: 0,
-                y: 0,
-                z: 0,
-            };
         }
+        console.info('WARN: empty coords data');
+        return {
+            x: 0,
+            y: 0,
+            z: 0,
+        };
     }
 
     /**
@@ -242,7 +240,7 @@ export class ARENAUtils {
      */
     static uuidv4() {
         return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
         );
     }
 
@@ -251,7 +249,10 @@ export class ARENAUtils {
      * @return {boolean} True if device is in landscape mode.
      */
     static isLandscapeMode() {
-        return window.orientation == 90 || window.orientation == -90;
+        return (
+            window.screen.orientation.type === 'landscape-primary' ||
+            window.screen.orientation.type === 'landscape-secondary'
+        );
     }
 
     /**
@@ -273,16 +274,16 @@ export class ARENAUtils {
      * @param {THREE.Quaternion|THREE.Euler} data.rotation rotation to set
      */
     static updatePose(targetObject3D, data) {
-        const {position, rotation} = data;
+        const { position, rotation } = data;
         if (rotation) {
             // has 'w' coordinate: a quaternion
-            if (rotation.hasOwnProperty('w')) {
+            if (Object.hasOwn(rotation, 'w')) {
                 targetObject3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
             } else {
                 targetObject3D.rotation.set(
                     THREE.MathUtils.degToRad(rotation.x),
                     THREE.MathUtils.degToRad(rotation.y),
-                    THREE.MathUtils.degToRad(rotation.z),
+                    THREE.MathUtils.degToRad(rotation.z)
                 ); // otherwise its a rotation given in degrees
             }
         }
@@ -348,7 +349,7 @@ export class ARENAUtils {
     static updateModelComponents(o3d, data) {
         // Traverse once, instead of doing a lookup for each modelUpdate key
         o3d.traverse((child) => {
-            if (data.hasOwnProperty(child.name)) {
+            if (Object.hasOwn(data, child.name)) {
                 ARENAUtils.updatePose(child, data[child.name]);
             }
         });

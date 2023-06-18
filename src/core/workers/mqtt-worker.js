@@ -14,7 +14,9 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
  */
 class MQTTWorker {
     messageHandlers = {};
+
     subscriptions = [];
+
     connectionLostHandlers = [];
 
     /**
@@ -40,8 +42,8 @@ class MQTTWorker {
         ];
 
         const mqttClient = new Paho.Client(ARENAConfig.mqttHostURI, `webClient-${ARENAConfig.idTag}`);
-        mqttClient.onConnected = async (reconnected, uri) => await this.onConnected(reconnected, uri);
-        mqttClient.onConnectionLost = async (response) => await this.onConnectionLost(response);
+        mqttClient.onConnected = async (reconnected, uri) => this.onConnected(reconnected, uri);
+        mqttClient.onConnectionLost = async (response) => this.onConnectionLost(response);
         mqttClient.onMessageArrived = this.onMessageArrivedDispatcher.bind(this);
         this.mqttClient = mqttClient;
     }
@@ -55,7 +57,7 @@ class MQTTWorker {
      */
     connect(mqttClientOptions, onSuccessCallBack, lwMsg = undefined, lwTopic = undefined) {
         const opts = {
-            onFailure: function(res) {
+            onFailure(res) {
                 this.healthCheck({
                     addError: 'mqttScene.connection',
                 });
@@ -67,7 +69,7 @@ class MQTTWorker {
             opts.onSuccess = onSuccessCallBack;
         } else {
             opts.onSuccess = () => {
-                console.info("ARENA MQTT scene connection success!");
+                console.info('ARENA MQTT scene connection success!');
             };
         }
 
@@ -85,9 +87,9 @@ class MQTTWorker {
     }
 
     /**
-   * Subscribe to a topic and add it to list of subscriptions
-   * @param {string} topic
-   */
+     * Subscribe to a topic and add it to list of subscriptions
+     * @param {string} topic
+     */
     subscribe(topic) {
         if (!this.subscriptions.includes(topic)) {
             this.subscriptions.push(topic);
@@ -113,7 +115,7 @@ class MQTTWorker {
      */
     onMessageArrivedDispatcher(message) {
         const topic = message.destinationName;
-        const topicCategory = topic.split("/")[1];
+        const topicCategory = topic.split('/')[1];
         const handler = this.messageHandlers[topicCategory];
         if (handler) {
             handler(message);
@@ -149,15 +151,17 @@ class MQTTWorker {
      * @param {number} qos
      * @param {boolean} retained
      */
-    async publish(topic, payload, qos=0, retained=false) {
+    async publish(topic, payload, qos = 0, retained = false) {
         if (!this.mqttClient.isConnected()) return;
 
+        /* eslint-disable no-param-reassign */
         if (typeof payload === 'object') {
             // add timestamp to all published messages
-            payload['timestamp'] = new Date().toISOString();
+            payload.timestamp = new Date().toISOString();
 
             payload = JSON.stringify(payload);
         }
+        /* eslint-disable no-param-reassign */
         this.mqttClient.publish(topic, payload, qos, retained);
     }
 
@@ -171,24 +175,14 @@ class MQTTWorker {
             removeError: 'mqttScene.connection',
         });
 
-        if (reconnect) {
-            // For reconnect, do not reinitialize user state, that will warp user back and lose
-            // current state. Instead, reconnection should naturally allow messages to continue.
-            // need to resubscribe however, to keep receiving messages
-            // await this.restartJitsi();
-            for (const topic of this.subscriptions) {
-                this.mqttClient.subscribe(topic);
-            }
-            console.warn(`ARENA MQTT scene reconnected to ${uri}`);
-            return; // do not continue!
-        }
-
-        // first connection for this client
-        console.debug(`ARENA MQTT scene init user state, connected to ${uri}`);
-
-        // start listening for MQTT messages
-        for (const topic of this.subscriptions) {
+        this.subscriptions.forEach((topic) => {
             this.mqttClient.subscribe(topic);
+        });
+
+        if (reconnect) {
+            console.warn(`ARENA MQTT scene reconnected to ${uri}`);
+        } else {
+            console.info(`ARENA MQTT scene connected to ${uri}`);
         }
     }
 

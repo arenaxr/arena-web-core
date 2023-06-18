@@ -10,36 +10,36 @@
  * ARENA A-Frame components
  */
 
-import './ar-hit-test-listener.js';
-import './arena-camera.js';
-import './arena-hand.js';
-import './arena-user.js';
-import './armarker.js';
-import './attribution.js';
-import './build-watch-object.js';
-import './build-watch-scene.js';
-import './click-listener.js';
-import './collision-listener.js';
-import './gesture-detector.js';
-import './gltf-lod.js';
-import './goto-url.js';
-import './hide-on-enter-vr.js';
-import './impulse.js';
-import './jitsi-video.js';
-import './landmark.js';
-import './load-scene.js';
-import './material-extras.js';
-import './network-latency.js';
-import './pcd-model.js';
-import './press-and-move.js';
-import './screenshare.js';
-import './stats-monitor.js';
-import './text-input.js';
-import './thickline/index.js';
-import './threejs-scene.js';
-import './ttl.js';
+import './ar-hit-test-listener';
+import './arena-camera';
+import './arena-hand';
+import './arena-user';
+import './armarker';
+import './attribution';
+import './build-watch-object';
+import './build-watch-scene';
+import './click-listener';
+import './collision-listener';
+import './gesture-detector';
+import './gltf-lod';
+import './goto-url';
+import './hide-on-enter-vr';
+import './impulse';
+import './jitsi-video';
+import './landmark';
+// import './load-scene';
+import './material-extras';
+import './network-latency';
+import './pcd-model';
+import './press-and-move';
+import './screenshare';
+import './stats-monitor';
+import './text-input';
+import './thickline/index';
+import './threejs-scene';
+import './ttl';
 import './ui';
-import './video-control.js';
+import './video-control';
 
 /**
  * Additional A-Frame components and systems
@@ -52,11 +52,11 @@ import 'aframe-blink-controls'; // Controller teleport
 import '@c-frame/aframe-particle-system-component'; // particle system environment
 
 // NPM import overrides
-import './vendor/animation-mixer.js'; // Override animation mixer
+import './vendor/animation-mixer'; // Override animation mixer
 
 // direct file imports
-import './vendor/aframe-look-at-component.min.js'; // Look at component https://github.com/supermedium/superframe#readme
-import './vendor/aframe-multisrc-component.js'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
-import './vendor/aframe-spe-particles-component.min.js'; // particle system: https://github.com/arenaxr/aframe-spe-particles-component
-import './vendor/transparent-occlude.js'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
-import './vendor/morphTarget.js'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component
+import './vendor/aframe-look-at-component.min'; // Look at component https://github.com/supermedium/superframe#readme
+import './vendor/aframe-multisrc-component'; // add separate image/video textures: https://github.com/elbobo/aframe-multisrc-component
+import './vendor/aframe-spe-particles-component.min'; // particle system: https://github.com/arenaxr/aframe-spe-particles-component
+import './vendor/transparent-occlude'; // borrowed from aframe-render-order.js: https://github.com/supermedium/superframe#readme
+import './vendor/morphTarget'; // target and control a gltf model's morphTargets: https://github.com/elbobo/aframe-gltf-morph-component

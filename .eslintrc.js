@@ -19,6 +19,7 @@ module.exports = {
                 tabWidth: 4,
                 ignoreUrls: true,
                 ignoreComments: true,
+                ignoreTemplateLiterals: true,
             },
         ],
         'prettier/prettier': [
@@ -33,5 +34,7 @@ module.exports = {
         'no-plusplus': 'off',
         'no-bitwise': 'off',
         'no-underscore-dangle': 'off',
+        'no-constructor-return': 'off',
+        'no-param-reassign': 'warn',
     },
 };

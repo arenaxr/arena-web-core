@@ -1,17 +1,27 @@
-export const DecoderShader = {
+/* global THREE */
+
+import vertGLSL from './glsl/decoder/vert.glsl';
+import fragGLSL from './glsl/decoder/frag.glsl';
+
+const DecoderShader = {
     uniforms: {
         tRemoteFrame: {
-            type: 't', value: new THREE.Texture(),
+            type: 't',
+            value: new THREE.Texture(),
         },
         remoteSize: {
-            type: 'i2', value: [0, 0],
+            type: 'i2',
+            value: [0, 0],
         },
         frameIDLength: {
-            type: 'int', value: 32,
+            type: 'int',
+            value: 32,
         },
     },
 
-    vertexShader: require('./glsl/decoder/vert.glsl'),
+    vertexShader: vertGLSL,
 
-    fragmentShader: require('./glsl/decoder/frag.glsl'),
+    fragmentShader: fragGLSL,
 };
+
+export default DecoderShader;

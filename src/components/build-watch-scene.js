@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  *
@@ -7,6 +5,8 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
+
+/* global AFRAME */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
@@ -23,7 +23,7 @@ AFRAME.registerComponent('build-watch-scene', {
     },
     // TODO: reduce logging to a reasonable level, similar to build page
     multiple: false,
-    init: function () {
+    init() {
         const observer = new MutationObserver(this.sceneNodesUpdate);
         console.log('build3d watching scene children...');
         observer.observe(this.el, {
@@ -33,7 +33,7 @@ AFRAME.registerComponent('build-watch-scene', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
-    sceneNodesUpdate: function (mutationList, observer) {
+    sceneNodesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'childList':
@@ -42,7 +42,10 @@ AFRAME.registerComponent('build-watch-scene', {
                         mutation.addedNodes.forEach((node) => {
                             console.log('add node:', node.nodeName, node.components);
                             // new blank entities are added by the user in the inspector
-                            if (node.nodeName.toLowerCase() == 'a-entity' && Object.keys(node.components).length == 0) {
+                            if (
+                                node.nodeName.toLowerCase() === 'a-entity' &&
+                                Object.keys(node.components).length === 0
+                            ) {
                                 console.log('add build-watch-object:');
                                 node.setAttribute('build-watch-object', 'enabled', true);
                             }
@@ -58,10 +61,12 @@ AFRAME.registerComponent('build-watch-scene', {
                         });
                     }
                     break;
+                default:
+                // skip
             }
         });
     },
-    cursorAttributesUpdate: function (mutationList, observer) {
+    cursorAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -71,10 +76,12 @@ AFRAME.registerComponent('build-watch-scene', {
                         mutation.oldValue
                     );
                     // TODO: we are writing to DOM to frequently, try diffing a change graph...
+                    // eslint-disable-next-line no-case-declarations
+                    let values;
                     if (mutation.attributeName === 'class') {
                         if (mutation.target.className.includes('a-mouse-cursor-hover')) {
                             // flush selected attr to dom from grab cursor update
-                            el = AFRAME.INSPECTOR.selectedEntity;
+                            const el = AFRAME.INSPECTOR.selectedEntity;
                             if (el) {
                                 console.log('toolbar flush', el.id, toolbarName);
                                 switch (toolbarName) {
@@ -93,15 +100,19 @@ AFRAME.registerComponent('build-watch-scene', {
                                         el.setAttribute('scale', values);
                                         AFRAME.INSPECTOR.selectedEntity.components.scale.flushToDOM();
                                         break;
+                                    default:
+                                    // skip
                                 }
                             }
                         }
                     }
                     break;
+                default:
+                // skip
             }
         });
     },
-    transformToolbarUpdate: function (mutationList, observer) {
+    transformToolbarUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
             switch (mutation.type) {
                 case 'attributes':
@@ -117,10 +128,12 @@ AFRAME.registerComponent('build-watch-scene', {
                         }
                     }
                     break;
+                default:
+                // skip
             }
         });
     },
-    tick: function () {
+    tick() {
         // TODO: move these detectors out to a more reliable timing condition
         if (!this.scenegraphDiv) {
             this.scenegraphDiv = document.getElementById('scenegraph');
@@ -138,11 +151,12 @@ AFRAME.registerComponent('build-watch-scene', {
                 line.innerHTML += `Pub MQTT: watching local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
-                    }
+            }
         }
         if (!this.cursor) {
             if (document.getElementsByClassName('a-grab-cursor').length > 0) {
                 console.log('cursorTest ok');
+                // eslint-disable-next-line prefer-destructuring
                 this.cursor = document.getElementsByClassName('a-grab-cursor')[0];
                 if (this.cursor) {
                     // watch for mouse down use of grab tools
@@ -160,6 +174,7 @@ AFRAME.registerComponent('build-watch-scene', {
         if (!this.transformToolbar) {
             if (document.getElementsByClassName('toolbarButtons').length > 0) {
                 console.log('transformTest ok');
+                // eslint-disable-next-line prefer-destructuring
                 this.transformToolbar = document.getElementsByClassName('toolbarButtons')[0];
                 if (this.transformToolbar) {
                     // watch for active toolbar grab tool change

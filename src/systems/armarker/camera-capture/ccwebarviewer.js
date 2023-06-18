@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Camera capture for custom iOS browser (WebXRViewer/WebARViewer)
  * https://apps.apple.com/us/app/webxr-viewer/id1295998056
@@ -8,35 +6,41 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2021
  */
-import {Base64Binary} from './base64-binary.js';
-import {CVWorkerMsgs} from '../worker-msgs.js';
+import { Base64Binary } from './base64-binary';
+import CVWorkerMsgs from '../worker-msgs';
 
 /**
-  *
-  */
-export class WebARViewerCameraCapture {
+ *
+ */
+export default class WebARViewerCameraCapture {
     static instance = null;
+
     /* buffer we process in the frames received  */
     buffIndex = 0;
+
     /* last captured frame width */
     frameWidth;
+
     /* last captured frame height */
     frameHeight;
+
     /* last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
         this is the grayscale image we will pass to the detector */
     frameGsPixels = undefined;
+
     /* last captured frame camera properties */
     frameCamera = undefined;
+
     /* cv worker requested another frame */
     frameRequested = true;
+
     /* worker to send images captured */
     cvWorker;
 
     /**
-      * Setup camera frame capture
-      * @param {boolean} [debug=false] - debug messages on/off
-      */
-    constructor(debug = false) {
+     * Setup camera frame capture
+     */
+    constructor() {
         // singleton
         if (WebARViewerCameraCapture.instance) {
             return WebARViewerCameraCapture.instance;
@@ -48,10 +52,10 @@ export class WebARViewerCameraCapture {
     }
 
     /**
-      * Indicate CV worker to send frames to (ar marker system expects this call to be implemented)
-      * @param {object} worker - the worker instance to whom we post frame messages
-      * @param {boolean} [requestFrame=true] - set request frame flag
-      */
+     * Indicate CV worker to send frames to (ar marker system expects this call to be implemented)
+     * @param {object} worker - the worker instance to whom we post frame messages
+     * @param {boolean} [requestFrame=true] - set request frame flag
+     */
     setCVWorker(worker, requestFrame = true) {
         this.cvWorker = worker;
 
@@ -59,11 +63,11 @@ export class WebARViewerCameraCapture {
     }
 
     /**
-      * Request next camera frame; we let the CV worker indicate when its ready
-      * (ar marker system expects this call to be implemented)
-      * @param {object} [grayscalePixels=undefined] - the pixel buffer intance we posted (to return ownership to us)
-      * @param {boolean} [worker=undefined] - replace the worker instance to send frames to
-      */
+     * Request next camera frame; we let the CV worker indicate when its ready
+     * (ar marker system expects this call to be implemented)
+     * @param {object} [grayscalePixels=undefined] - the pixel buffer intance we posted (to return ownership to us)
+     * @param {boolean} [worker=undefined] - replace the worker instance to send frames to
+     */
     requestCameraFrame(grayscalePixels = undefined, worker = undefined) {
         if (grayscalePixels) {
             this.frameGsPixels = grayscalePixels;
@@ -73,47 +77,47 @@ export class WebARViewerCameraCapture {
     }
 
     /**
-      * WebXRViewer/WebARViewer deliver camera frames to this 'processCV' function
-      * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
-      * @example <caption>Frame object example:</caption>
-      * {
-      * "_buffers": [{
-      * "size": {
-      *     "bytesPerRow": 320,
-      *     "width": 320,
-      *     "height": 180,
-      *     "bytesPerPixel": 1
-      * },
-      * "buffer": null,
-      * "_buffer": ""  // base64-encoded image buffer
-      * }, {
-      * "size": {
-      *     "bytesPerRow": 320,
-      *     "width": 160,
-      *     "bytesPerPixel": 2,
-      *     "height": 90
-      * },
-      * "buffer": null,
-      * "_buffer": "..." // base64-encoded image buffer
-      * }],
-      * "_pixelFormat": "YUV420P",
-      * "_timestamp": 56838.57325050002,
-      * "_camera": {
-      * "cameraIntrinsics": [246.94888305664062, 0, 0, 0, 246.94888305664062,
-      *                      0, 154.91513061523438, 89.52093505859375, 1],
-      * "interfaceOrientation": 1,
-      * "cameraImageResolution": {
-      *     "height": 720,
-      *     "width": 1280
-      * },
-      * "viewMatrix": [ ... ], // 4x4 matrix as an 16-element array
-      * "inverse_viewMatrix": [ ... ], // 4x4 matrix as an 16-element array
-      * "projectionMatrix": [ ... ], // 4x4 matrix as an 16-element array
-      * "arCamera": true,
-      * "cameraOrientation": -90
-      * }
-      * };
-      */
+     * WebXRViewer/WebARViewer deliver camera frames to this 'processCV' function
+     * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
+     * @example <caption>Frame object example:</caption>
+     * {
+     * "_buffers": [{
+     * "size": {
+     *     "bytesPerRow": 320,
+     *     "width": 320,
+     *     "height": 180,
+     *     "bytesPerPixel": 1
+     * },
+     * "buffer": null,
+     * "_buffer": ""  // base64-encoded image buffer
+     * }, {
+     * "size": {
+     *     "bytesPerRow": 320,
+     *     "width": 160,
+     *     "bytesPerPixel": 2,
+     *     "height": 90
+     * },
+     * "buffer": null,
+     * "_buffer": "..." // base64-encoded image buffer
+     * }],
+     * "_pixelFormat": "YUV420P",
+     * "_timestamp": 56838.57325050002,
+     * "_camera": {
+     * "cameraIntrinsics": [246.94888305664062, 0, 0, 0, 246.94888305664062,
+     *                      0, 154.91513061523438, 89.52093505859375, 1],
+     * "interfaceOrientation": 1,
+     * "cameraImageResolution": {
+     *     "height": 720,
+     *     "width": 1280
+     * },
+     * "viewMatrix": [ ... ], // 4x4 matrix as an 16-element array
+     * "inverse_viewMatrix": [ ... ], // 4x4 matrix as an 16-element array
+     * "projectionMatrix": [ ... ], // 4x4 matrix as an 16-element array
+     * "arCamera": true,
+     * "cameraOrientation": -90
+     * }
+     * };
+     */
     async processCV(frame) {
         if (!this.frameRequested) return;
 
@@ -124,9 +128,9 @@ export class WebARViewerCameraCapture {
     }
 
     /**
-      * Process received frames to extract grayscale pixels and post them to cv worker
-      * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
-      */
+     * Process received frames to extract grayscale pixels and post them to cv worker
+     * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
+     */
     getCameraImagePixels(frame) {
         // we expect the image at _buffers[this.buffIndex]
         if (!frame._buffers[this.buffIndex]) {
@@ -134,16 +138,15 @@ export class WebARViewerCameraCapture {
             return;
         }
         // check if camera frame changed size
-        if ( this.frameGsPixels == undefined ||
-             this.frameCamera == undefined ||
-             this.frameWidth != frame._buffers[this.buffIndex].size.width ||
-             this.frameHeight != frame._buffers[this.buffIndex].size.height
+        if (
+            this.frameGsPixels === undefined ||
+            this.frameCamera === undefined ||
+            this.frameWidth !== frame._buffers[this.buffIndex].size.width ||
+            this.frameHeight !== frame._buffers[this.buffIndex].size.height
         ) {
             this.frameWidth = frame._buffers[this.buffIndex].size.width;
             this.frameHeight = frame._buffers[this.buffIndex].size.height;
-            this.frameGsPixels = new Uint8Array(
-                this.frameWidth * this.frameHeight,
-            ); // grayscale (1 value per pixel)
+            this.frameGsPixels = new Uint8Array(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
 
             // update camera intrinsics
             this.frameCamera = this.getCameraIntrinsics(frame._camera);
@@ -154,7 +157,7 @@ export class WebARViewerCameraCapture {
         const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
         const byteArrayView = new Uint8Array(byteArray);
         // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
-        for (let i = 0; i<this.frameWidth * this.frameHeight; i++) {
+        for (let i = 0; i < this.frameWidth * this.frameHeight; i++) {
             this.frameGsPixels[i] = byteArrayView[i];
         }
 
@@ -179,10 +182,10 @@ export class WebARViewerCameraCapture {
     }
 
     /**
-      * Extract camera intrinsics from matrix provided by WebXRViewer/WebARViewer
-      * @param {object} camera - the frame's camera object given by WebXRViewer/WebARViewer
-      * @return {object} - camera's focal length (fx, fy) and principal point (cx, cy)
-      */
+     * Extract camera intrinsics from matrix provided by WebXRViewer/WebARViewer
+     * @param {object} camera - the frame's camera object given by WebXRViewer/WebARViewer
+     * @return {object} - camera's focal length (fx, fy) and principal point (cx, cy)
+     */
     getCameraIntrinsics(camera) {
         return {
             // Focal lengths in pixels (these are equal for square pixels)

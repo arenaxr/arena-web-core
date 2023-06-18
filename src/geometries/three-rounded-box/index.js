@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * @author pailhead / http://dusanbosnjak.com
  * @author benolayinka / github.com/benolayinka

@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA */
 import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
 
 /**
@@ -19,19 +19,18 @@ import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
  */
 AFRAME.registerComponent('jitsi-video', {
     schema: {
-        jitsiId: {type: 'string', default: ''},
-        displayName: {type: 'string', default: ''},
+        jitsiId: { type: 'string', default: '' },
+        displayName: { type: 'string', default: '' },
     },
 
-    init: function() {
+    init() {
         ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, this.ready.bind(this));
     },
 
-    ready: function() {
-        const data = this.data;
-        const el = this.el;
+    ready() {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.onJitsiConnect = this.onJitsiConnect.bind(this);
         this.onJitsiNewUser = this.onJitsiNewUser.bind(this);
@@ -42,8 +41,8 @@ AFRAME.registerComponent('jitsi-video', {
         sceneEl.addEventListener(JITSI_EVENTS.USER_LEFT, this.onJitsiUserLeft);
     },
 
-    update: function(oldData) {
-        const data = this.data;
+    update(oldData) {
+        const { data } = this;
         if (!data) return;
 
         if (data.jitsiId !== oldData.jitsiId) {
@@ -55,7 +54,7 @@ AFRAME.registerComponent('jitsi-video', {
         }
     },
 
-    onJitsiConnect: function(e) {
+    onJitsiConnect(e) {
         const args = e.detail;
         if (this.data.jitsiId !== '') {
             this.updateVideo();
@@ -76,14 +75,13 @@ AFRAME.registerComponent('jitsi-video', {
             if (user.dn === this.data.displayName) {
                 this.data.jitsiId = user.jid;
                 this.updateVideo();
-                return;
             }
         });
 
         this.updateVideo();
     },
 
-    onJitsiNewUser: function(e) {
+    onJitsiNewUser(e) {
         const user = e.detail;
         if (this.data.displayName === '') return;
 
@@ -93,20 +91,20 @@ AFRAME.registerComponent('jitsi-video', {
         }
     },
 
-    onJitsiUserLeft: function(e) {
+    onJitsiUserLeft(e) {
         if (e.detail.jid === this.data.jitsiId) {
             this.el.removeAttribute('material', 'src');
         }
     },
 
-    setVideoSrc: function() {
+    setVideoSrc() {
         const pano = this.el.tagName.toLowerCase() === 'a-videosphere';
         if (pano) {
             this.el.setAttribute('src', `#${this.videoID}`); // video only! (no audio)
             // ensure panoramic videospheres have max download resolution
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
-                const data = user.components['arena-user'].data;
+                const { data } = user.components['arena-user'];
                 if (data.jitsiId === this.data.jitsiId) {
                     data.pano = pano;
                 }
@@ -119,8 +117,8 @@ AFRAME.registerComponent('jitsi-video', {
         this.el.setAttribute('material', 'shader', 'flat');
     },
 
-    updateVideo: function() {
-        const data = this.data;
+    updateVideo() {
+        const { data } = this;
         if (!data) return;
 
         if (!data.jitsiId) {
@@ -150,7 +148,8 @@ AFRAME.registerComponent('jitsi-video', {
             return;
         }
 
-        if (jitsiVideo.readyState == 4) { // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+        if (jitsiVideo.readyState === 4) {
+            // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
             this.setVideoSrc();
             return;
         }
@@ -159,7 +158,7 @@ AFRAME.registerComponent('jitsi-video', {
         this.retryWaitVideoLoad();
     },
 
-    retryWaitVideoLoad: function() {
+    retryWaitVideoLoad() {
         setTimeout(async () => {
             this.updateVideo();
         }, 500); // try again in a bit

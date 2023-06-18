@@ -1,7 +1,3 @@
-/* global AFRAME */
-import he from 'he';
-import Swal from 'sweetalert2';
-
 /**
  * @fileoverview Model loading progress system. Manage model load messages.
  *
@@ -14,6 +10,9 @@ import Swal from 'sweetalert2';
  * Display and update an alert with load info; Used by the model loading progress system.
  * @private
  */
+
+/* global AFRAME */
+
 class LoadAlertTable {
     constructor(maxRows = 10, errorsOnTop = true, timeoutMs = 4000, rowTimeout = 2000) {
         this.maxRows = maxRows;
@@ -28,7 +27,7 @@ class LoadAlertTable {
         this.titleSpan.className = 'alert-title';
         this.alertBox.appendChild(this.titleSpan);
 
-        this.bodySpan = document.createElement("div");
+        this.bodySpan = document.createElement('div');
         this.bodySpan.className = 'alert-body';
         this.alertBox.appendChild(this.bodySpan);
 
@@ -53,16 +52,17 @@ class LoadAlertTable {
         }
         let nCols = 0;
         if (rows.length > 0) nCols = rows[0].cols.length; // assume the smae number of columns in all lines
-        for (let i = 0; i < Math.min(this.maxRows, rows.length); i++) {
-            let lineClass = "normal";
-            if (rows[i].isError) lineClass = "error";
+        let i;
+        for (i = 0; i < Math.min(this.maxRows, rows.length); i++) {
+            let lineClass = 'normal';
+            if (rows[i].isError) lineClass = 'error';
             tableHTML += `
-                <tr><td class="alert-table ${lineClass}"><span>${rows[i].cols.join(`</span></td>
-                <td class="alert-table ${lineClass}"><span>`)}</span></td></tr>`;
+                <tr><td class='alert-table ${lineClass}'><span>${rows[i].cols.join(`</span></td>
+                <td class='alert-table ${lineClass}'><span>`)}</span></td></tr>`;
             nCols++;
         }
-        if (i > this.maxRows) tableHTML += `<tr><td colspan=${nCols}>(more not shown...)</td></tr>`;
-        tableHTML += "</table>";
+        if (i > this.maxRows) tableHTML += `<tr><td colspan='${nCols}'>(more not shown...)</td></tr>`;
+        tableHTML += '</table>';
 
         return tableHTML;
     }
@@ -108,14 +108,9 @@ AFRAME.registerSystem('model-progress', {
      * Init system
      * @alias module:model-progress
      */
-    init: function() {
+    init() {
         this.loadProgress = {};
-        this.loadAlert = new LoadAlertTable(
-            this.ALERT_MAX_ROWS,
-            true,
-            this.ALERT_TIMEOUT,
-            this.ALERT_TIMEOUT / 2
-        );
+        this.loadAlert = new LoadAlertTable(this.ALERT_MAX_ROWS, true, this.ALERT_TIMEOUT, this.ALERT_TIMEOUT / 2);
     },
     /**
      * Register model to deal with load events
@@ -123,7 +118,7 @@ AFRAME.registerSystem('model-progress', {
      * @param {object} src - the model source
      * @alias module:model-progress
      */
-    registerModel: function(el, src) {
+    registerModel(el, src) {
         if (!AFRAME.THREE.Cache.files[src]) {
             this.loadProgress[src] = {
                 done: false,
@@ -146,7 +141,7 @@ AFRAME.registerSystem('model-progress', {
      * @param {object} src - the model source
      * @alias module:model-progress
      */
-    unregisterModelBySrc: function(src) {
+    unregisterModelBySrc(src) {
         delete this.loadProgress[src];
     },
     /**
@@ -155,7 +150,7 @@ AFRAME.registerSystem('model-progress', {
      * @param {object} evt model event
      * @alias module:model-progress
      */
-    updateProgress: function(failed, evt) {
+    updateProgress(failed, evt) {
         const thisProgress = this.loadProgress[evt.detail.src];
         if (thisProgress) {
             thisProgress.failed = failed;
@@ -187,16 +182,16 @@ AFRAME.registerSystem('model-progress', {
         let percent;
         const progressEntries = Object.entries(this.loadProgress);
         if (progressEntries.length > 0) {
-            for (const [src, lp] of progressEntries) {
+            progressEntries.forEach(([src, lp]) => {
                 const filename = decodeURIComponent(src)
-                    .replace(/^.*[\\\/]/, "")
-                    .split("?")[0];
+                    .replace(/^.*[\\/]/, '')
+                    .split('?')[0];
                 const shortName =
                     filename.length < this.FN_MAX_LENGTH
                         ? filename
                         : `…${filename.substring(filename.length - this.FN_MAX_LENGTH)}`;
 
-                let progressStr = "";
+                let progressStr = '';
                 if (lp.failed === false) {
                     if (lp.total > 0) {
                         const progress = (lp.loaded / lp.total) * 100;
@@ -212,8 +207,8 @@ AFRAME.registerSystem('model-progress', {
                     errors++;
                 }
                 if (lp.done) doneCount++;
-                files.push({cols: [shortName, progressStr], isError: lp.failed});
-            }
+                files.push({ cols: [shortName, progressStr], isError: lp.failed });
+            });
             percent = (pSum / progressEntries.length).toFixed(1);
             title = `Loading : ${percent}% (${doneCount}/${progressEntries.length}`;
             if (errors > 0) {

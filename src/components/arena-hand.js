@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Tracking Hand controller movement in real time.
  *
@@ -8,11 +6,11 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA, THREE */
 
 import { ARENA_EVENTS } from '../constants';
 
-// path to controler models
+// path to controller models
 const handControllerPath = {
     Left: 'static/models/hands/valve_index_left.gltf',
     Right: 'static/models/hands/valve_index_right.gltf',
@@ -60,13 +58,13 @@ function eventAction(evt, eventName, myThis) {
  */
 AFRAME.registerComponent('arena-hand', {
     schema: {
-        enabled: {type: 'boolean', default: false},
-        hand: {type: 'string', default: 'left'},
+        enabled: { type: 'boolean', default: false },
+        hand: { type: 'string', default: 'left' },
     },
 
     dependencies: ['laser-controls'],
 
-    init: function() {
+    init() {
         this.rotation = new THREE.Quaternion();
         this.position = new THREE.Vector3();
         this.lastPose = '';
@@ -75,11 +73,10 @@ AFRAME.registerComponent('arena-hand', {
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
     },
 
-    ready: function() {
-        const data = this.data;
-        const el = this.el;
+    ready() {
+        const { data, el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.arena = sceneEl.systems['arena-scene'];
 
@@ -97,13 +94,13 @@ AFRAME.registerComponent('arena-hand', {
                 type: 'object',
                 data: {
                     object_type: `hand${data.hand}`,
-                    position: {x: 0, y: -1, z: 0},
+                    position: { x: 0, y: -1, z: 0 },
                     url: this.getControllerURL(),
                     dep: this.arena.camName,
                 },
             };
             if (msg.data.url.includes('magicleap')) {
-                msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
+                msg.data.scale = { x: 0.01, y: 0.01, z: 0.01 };
             }
             this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
             data.enabled = true;
@@ -158,8 +155,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     getControllerURL() {
-        const data = this.data;
-        const el = this.el;
+        const { data, el } = this;
 
         let url = el.getAttribute('gltf-model');
         if (!url) url = handControllerPath[data.hand];
@@ -168,7 +164,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     publishPose() {
-        const data = this.data;
+        const { data } = this;
         if (!data.enabled || !data.hand) return;
         // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
@@ -183,7 +179,8 @@ AFRAME.registerComponent('arena-hand', {
                     y: parseFloat(this.position.y.toFixed(3)),
                     z: parseFloat(this.position.z.toFixed(3)),
                 },
-                rotation: { // always send quaternions over the wire
+                rotation: {
+                    // always send quaternions over the wire
                     x: parseFloat(this.rotation._x.toFixed(3)),
                     y: parseFloat(this.rotation._y.toFixed(3)),
                     z: parseFloat(this.rotation._z.toFixed(3)),
@@ -194,12 +191,12 @@ AFRAME.registerComponent('arena-hand', {
             },
         };
         if (msg.data.url.includes('magicleap')) {
-            msg.data.scale = {x: 0.01, y: 0.01, z: 0.01};
+            msg.data.scale = { x: 0.01, y: 0.01, z: 0.01 };
         }
         this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
     },
 
-    tick: function(t, dt) {
+    tick() {
         if (!this.initialized) return;
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
@@ -211,7 +208,7 @@ AFRAME.registerComponent('arena-hand', {
         const rotationCoords = AFRAME.utils.coordinates.stringify(this.rotation);
         const positionCoords = AFRAME.utils.coordinates.stringify(this.position);
 
-        const newPose = rotationCoords + ' ' + positionCoords;
+        const newPose = `${rotationCoords} ${positionCoords}`;
         if (this.lastPose !== newPose) {
             this.publishPose();
             this.lastPose = newPose;

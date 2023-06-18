@@ -1,9 +1,4 @@
-/* eslint-disable no-invalid-this */
-/* eslint-disable valid-jsdoc */
-/* eslint-disable max-len */
-/* eslint-disable camelcase */
-/* eslint-disable no-var */
-/* eslint-disable require-jsdoc */
+/* eslint-disable */
 ;(function() {
     var root = this;
 
@@ -308,9 +303,9 @@
     }
 
     /**
- * Fast method to advance the line by one position.  The oldest position is removed.
- * @param position
- */
+     * Fast method to advance the line by one position.  The oldest position is removed.
+     * @param position
+     */
     MeshLine.prototype.advance = function(position) {
         var positions = this.attributes.position.array;
         var previous = this.attributes.previous.array;

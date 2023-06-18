@@ -1,6 +1,6 @@
-/* global AFRAME */
+/* global AFRAME, THREE */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
 /**
  * @fileoverview Component loads/unloads gltfs by simple user distance-based LOD
@@ -14,11 +14,11 @@ const CACHE_FREE_DELAY = 3000; // ms
 AFRAME.registerComponent('gltf-lod-advanced', {
     dependencies: ['gltf-model'],
     schema: {
-        updateRate: {type: 'number', default: 333},
-        fade: {type: 'number', default: 0},
-        enabled: {type: 'boolean', default: true},
+        updateRate: { type: 'number', default: 333 },
+        fade: { type: 'number', default: 0 },
+        enabled: { type: 'boolean', default: true },
     },
-    init: function() {
+    init() {
         this.camDistance = new THREE.Vector3();
         this.tempDistance = new THREE.Vector3();
         this.currentLevel = undefined;
@@ -31,17 +31,18 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
         this.updateLevels();
     },
-    updateLevels: function() {
+    updateLevels() {
         this.levels = Array.from(this.el.children).filter((child) => child.hasAttribute('lod-level'));
         // Sort desc by distance
         this.levels.sort((a, b) => b.getAttribute('lod-level').distance - a.getAttribute('lod-level').distance);
-        for (const level of this.levels) {
+        this.levels.forEach((level) => {
             if (level !== this.currentLevel) {
+                // eslint-disable-next-line no-param-reassign
                 level.object3D.visible = false;
             }
-        }
+        });
     },
-    tick: function() {
+    tick() {
         if (!this.data.enabled) {
             return;
         }
@@ -52,14 +53,14 @@ AFRAME.registerComponent('gltf-lod-advanced', {
             this.camDistance = this.tempDistance;
             let nextLevel;
             let nextDistance;
-            for (const level of this.levels) {
+            this.levels.every((level) => {
                 nextDistance = level.getAttribute('lod-level').distance;
                 if (this.camDistance <= nextDistance) {
                     nextLevel = level;
-                } else {
-                    break;
+                    return true;
                 }
-            }
+                return false;
+            });
             if (nextLevel && nextLevel !== this.currentLevel) {
                 // Check threshold if returning to previous level
                 if (nextLevel === this.previousLevel && Math.abs(this.camDistance - nextDistance) <= LOD_THRESHOLD) {
@@ -87,7 +88,7 @@ AFRAME.registerComponent('gltf-lod-advanced', {
                     nextLevel.setAttribute('gltf-model', nextModel);
                     nextLevel.object3D.visible = true;
                     if (this.data.fade) {
-                        nextLevel.setAttribute('material', {transparent: true});
+                        nextLevel.setAttribute('material', { transparent: true });
                         nextLevel.setAttribute('animation', {
                             property: 'components.material.material.opacity',
                             from: 0,
@@ -105,11 +106,11 @@ AFRAME.registerComponent('gltf-lod-advanced', {
 
 AFRAME.registerComponent('lod-level', {
     schema: {
-        'distance': {type: 'number', default: 10},
-        'gltf-model': {type: 'string'},
-        'retainCache': {type: 'boolean', default: false},
+        distance: { type: 'number', default: 10 },
+        'gltf-model': { type: 'string' },
+        retainCache: { type: 'boolean', default: false },
     },
-    init: function() {
+    init() {
         const lodParent = this.el.parentEl.components['gltf-lod'];
         if (lodParent?.levels && !lodParent.levels.includes(this.el)) {
             lodParent.updateLevels();
@@ -117,20 +118,19 @@ AFRAME.registerComponent('lod-level', {
     },
 });
 
-
 /**
  * @brief Simple LOD swap between default (low) and detailed (high) models
  */
 AFRAME.registerComponent('gltf-model-lod', {
     dependencies: ['gltf-model'],
     schema: {
-        updateRate: {type: 'number', default: 333},
-        retainCache: {type: 'boolean', default: false},
-        detailedUrl: {type: 'string'},
-        detailedDistance: {type: 'number', default: 10},
-        enabled: {type: 'boolean', default: true},
+        updateRate: { type: 'number', default: 333 },
+        retainCache: { type: 'boolean', default: false },
+        detailedUrl: { type: 'string' },
+        detailedDistance: { type: 'number', default: 10 },
+        enabled: { type: 'boolean', default: true },
     },
-    init: function() {
+    init() {
         this.camDistance = new THREE.Vector3();
         this.tempDistance = new THREE.Vector3();
         this.showDetailed = false;
@@ -142,7 +142,7 @@ AFRAME.registerComponent('gltf-model-lod', {
         this.cacheFreeTimer = null;
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
     },
-    tick: function() {
+    tick() {
         if (!this.data.enabled || !this.defaultUrl) {
             return;
         }
@@ -153,11 +153,11 @@ AFRAME.registerComponent('gltf-model-lod', {
             this.camDistance = this.tempDistance;
             const distDiff = this.camDistance - this.data.detailedDistance;
             // Switch from default to detailed when inside (dist - threshold)
-            if (!this.showDetailed && distDiff <= -LOD_THRESHOLD ) {
+            if (!this.showDetailed && distDiff <= -LOD_THRESHOLD) {
                 window.clearTimeout(this.cacheFreeTimer); // Stop cache freeing timer, if active
                 this.el.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(this.data.detailedUrl));
                 this.showDetailed = true;
-            // Switch from detailed to default when outside (dist + threshold)
+                // Switch from detailed to default when outside (dist + threshold)
             } else if (this.showDetailed && distDiff >= LOD_THRESHOLD) {
                 this.el.setAttribute('gltf-model', this.defaultUrl);
                 this.showDetailed = false;

@@ -1,15 +1,17 @@
-import {CompositorPass} from '../postprocessing/passes/compositor-pass';
+/* global AFRAME, THREE */
+
+import CompositorPass from '../postprocessing/passes/compositor-pass';
 
 AFRAME.registerSystem('compositor', {
-    init: function() {
-        const sceneEl = this.sceneEl;
+    init() {
+        const { sceneEl } = this;
 
         if (!sceneEl.hasLoaded) {
             sceneEl.addEventListener('renderstart', this.init.bind(this));
             return;
         }
 
-        this.effects = sceneEl.systems['effects'];
+        this.effects = sceneEl.systems.effects;
 
         this.isWebXRViewer = navigator.userAgent.includes('WebXRViewer');
 
@@ -39,19 +41,16 @@ AFRAME.registerSystem('compositor', {
         }
     },
 
-    addRemoteRenderTarget: function(remoteRenderTarget) {
-        const sceneEl = this.sceneEl;
-        const renderer = sceneEl.renderer;
-
-        const scene = sceneEl.object3D;
-        const camera = sceneEl.camera;
+    addRemoteRenderTarget(remoteRenderTarget) {
+        const { sceneEl } = this;
+        const { camera } = sceneEl;
 
         this.pass = new CompositorPass(camera, remoteRenderTarget);
         this.effects.insertPass(this.pass, 0);
     },
 
-    decomposeProj: function(projMat) {
-        const elements = projMat.elements;
+    decomposeProj(projMat) {
+        const { elements } = projMat;
         const x = elements[0];
         const a = elements[2];
         const y = elements[5];
@@ -59,31 +58,40 @@ AFRAME.registerSystem('compositor', {
         const c = elements[10];
         const d = elements[11];
         const e = elements[14];
-        return [x,a,y,b,c,d,e];
+        return [x, a, y, b, c, d, e];
     },
 
-    closestKeyInDict: function(k, d, thres=10) {
-        var result, minDist = Infinity;
-        for (var key in d) {
-            var dist = Math.abs(key - k);
+    /**
+     * Find the closest key in a dictionary to a given key
+     * @param {Number} k index
+     * @param {Object} d dictionary {key: value
+     * @param {Number} thres threshold
+     * @returns {*}
+     */
+    closestKeyInDict(k, d, thres = 10) {
+        let result;
+        let minDist = Infinity;
+        Object.keys(d).forEach((key) => {
+            const dist = Math.abs(key - k);
             if (dist <= thres && dist <= minDist) {
                 result = key;
                 minDist = dist;
             }
-        }
+        });
 
         return result;
     },
 
-    updateRenderingState: function() {
-        const renderer = this.sceneEl.renderer;
-        const render = renderer.render;
-        const sceneEl = this.sceneEl;
+    updateRenderingState() {
+        const { renderer } = this.sceneEl;
+        const { sceneEl } = this;
 
-        const scene = sceneEl.object3D;
-        const camera = sceneEl.camera;
+        const { camera } = sceneEl;
 
-        let hasDualCameras, ipd, leftProj, rightProj;
+        let hasDualCameras;
+        let ipd;
+        let leftProj;
+        let rightProj;
 
         const cameraVR = renderer.xr.getCamera();
 
@@ -96,9 +104,9 @@ AFRAME.registerSystem('compositor', {
 
             const cameraL = this.effects.cameras[0];
             const cameraR = this.effects.cameras[1];
-            this.cameraLPos.setFromMatrixPosition( cameraL.matrixWorld );
-            this.cameraRPos.setFromMatrixPosition( cameraR.matrixWorld );
-            ipd = this.cameraLPos.distanceTo( this.cameraRPos );
+            this.cameraLPos.setFromMatrixPosition(cameraL.matrixWorld);
+            this.cameraRPos.setFromMatrixPosition(cameraR.matrixWorld);
+            ipd = this.cameraLPos.distanceTo(this.cameraRPos);
 
             this.cameraLProj.copy(cameraL.projectionMatrix);
             this.cameraRProj.copy(cameraR.projectionMatrix);
@@ -109,10 +117,10 @@ AFRAME.registerSystem('compositor', {
             this.pass.setCameraMats(cameraL, cameraR);
 
             AFRAME.utils.entity.setComponentProperty(sceneEl, 'arena-hybrid-render-client', {
-                hasDualCameras: hasDualCameras,
-                ipd: ipd,
-                leftProj: leftProj,
-                rightProj: rightProj,
+                hasDualCameras,
+                ipd,
+                leftProj,
+                rightProj,
             });
         } else if (this.effects.cameras.length === 1) {
             // we just have a single xr camera here
@@ -142,25 +150,24 @@ AFRAME.registerSystem('compositor', {
             // console.log("[frame id]", currTime - frameTimestamp);
 
             if (currFrameID >= this.prevFrameID) {
-                const pose = currFrame.pose;
+                const { pose } = currFrame;
                 if (pose.length === 2) {
                     const cameraL = cameraVR.cameras[0];
                     const cameraR = cameraVR.cameras[1];
                     const poseL = pose[0];
                     const poseR = pose[1];
-                    this.pass.setCameraMatsRemote(poseL, cameraL.projectionMatrix,
-                                                  poseR, cameraR.projectionMatrix);
+                    this.pass.setCameraMatsRemote(poseL, cameraL.projectionMatrix, poseR, cameraR.projectionMatrix);
                 } else {
                     this.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
                 }
             }
 
-            for (let key in this.prevFrames) {
-                if (this.prevFrames.hasOwnProperty(key) && key < currFrameID) {
+            Object.keys(this.prevFrames).forEach((key) => {
+                if (Object.hasOwn(this.prevFrames, key) && key < currFrameID) {
                     delete this.prevFrames[key];
                 }
-            }
+            });
             this.prevFrameID = currFrameID;
         }
-    }
+    },
 });

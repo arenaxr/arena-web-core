@@ -1,3 +1,5 @@
+/* global AFRAME */
+
 const info = AFRAME.utils.debug('ARENA:delete:info');
 const warn = AFRAME.utils.debug('ARENA:delete:warn');
 const error = AFRAME.utils.debug('ARENA:delete:error');
@@ -5,13 +7,13 @@ const error = AFRAME.utils.debug('ARENA:delete:error');
 /**
  * Delete object handler
  */
-export class Delete {
+export default class Delete {
     /**
      * Delete handler
      * @param {object} message message to be parsed
      */
     static handle(message) {
-        const id = message.id;
+        const { id } = message;
         if (id === undefined) {
             error('Malformed message (no object_id):', JSON.stringify(message));
         }
@@ -31,7 +33,7 @@ export class Delete {
         });
 
         // Remove element itself
-        const parentEl = entityEl.parentEl;
+        const { parentEl } = entityEl;
         if (parentEl) {
             parentEl.removeChild(entityEl);
         }

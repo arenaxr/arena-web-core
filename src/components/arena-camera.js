@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA, THREE */
 
 import { ARENA_EVENTS } from '../constants';
 import { ARENAUtils } from '../utils';
@@ -27,31 +27,30 @@ import { ARENAUtils } from '../utils';
  */
 AFRAME.registerComponent('arena-camera', {
     schema: {
-        enabled: {type: 'boolean', default: false},
-        vioEnabled: {type: 'boolean', default: false},
-        displayName: {type: 'string', default: 'No Name'},
-        color: {type: 'string', default: '#' + ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)},
-        rotation: {type: 'vec4', default: new THREE.Quaternion()},
-        position: {type: 'vec3', default: new THREE.Vector3()},
-        vioRotation: {type: 'vec4', default: new THREE.Quaternion()},
-        vioPosition: {type: 'vec3', default: new THREE.Vector3()},
-        showStats: {type: 'boolean', default: false},
+        enabled: { type: 'boolean', default: false },
+        vioEnabled: { type: 'boolean', default: false },
+        displayName: { type: 'string', default: 'No Name' },
+        color: { type: 'string', default: `#${ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)}` },
+        rotation: { type: 'vec4', default: new THREE.Quaternion() },
+        position: { type: 'vec3', default: new THREE.Vector3() },
+        vioRotation: { type: 'vec4', default: new THREE.Quaternion() },
+        vioPosition: { type: 'vec3', default: new THREE.Vector3() },
+        showStats: { type: 'boolean', default: false },
     },
 
     /**
      * Send initial camera create message; Setup heartbeat timer
      * @ignore
      */
-    init: function() {
+    init() {
         this.initialized = false;
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
     },
 
-    ready: function() {
-        const data = this.data;
-        const el = this.el;
+    ready() {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
@@ -88,7 +87,8 @@ AFRAME.registerComponent('arena-camera', {
                 window.bgHeartbeatTimer = setInterval(() => {
                     // 30 minute timeout
                     if (window.bgHeartbeatCount >= 30 * 60) {
-                        return clearInterval(window.bgHeartbeatTimer);
+                        clearInterval(window.bgHeartbeatTimer);
+                        return;
                     }
                     this.publishPose();
                     window.bgHeartbeatCount++;
@@ -108,14 +108,14 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     publishPose(action = 'update') {
-        const data = this.data;
+        const { data } = this;
 
         if (!data.enabled) return;
 
         const msg = {
             object_id: this.arena.camName,
             displayName: data.displayName,
-            action: action,
+            action,
             type: 'object',
             data: {
                 object_type: 'camera',
@@ -124,7 +124,8 @@ AFRAME.registerComponent('arena-camera', {
                     y: parseFloat(data.position.y.toFixed(3)),
                     z: parseFloat(data.position.z.toFixed(3)),
                 },
-                rotation: { // always send quaternions over the wire
+                rotation: {
+                    // always send quaternions over the wire
                     x: parseFloat(data.rotation._x.toFixed(3)),
                     y: parseFloat(data.rotation._y.toFixed(3)),
                     z: parseFloat(data.rotation._z.toFixed(3)),
@@ -165,11 +166,11 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     publishVio(action = 'update') {
-        const data = this.data;
+        const { data } = this;
 
         const msg = {
             object_id: this.arena.camName,
-            action: action,
+            action,
             type: 'object',
             data: {
                 object_type: 'camera',
@@ -178,7 +179,8 @@ AFRAME.registerComponent('arena-camera', {
                     y: parseFloat(data.vioPosition.y.toFixed(3)),
                     z: parseFloat(data.vioPosition.z.toFixed(3)),
                 },
-                rotation: { // always send quaternions over the wire
+                rotation: {
+                    // always send quaternions over the wire
                     x: parseFloat(data.vioRotation._x.toFixed(3)),
                     y: parseFloat(data.vioRotation._y.toFixed(3)),
                     z: parseFloat(data.vioRotation._z.toFixed(3)),
@@ -195,12 +197,16 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     update(oldData) {
-        const data = this.data;
+        const { data } = this;
         if (oldData.showStats !== data.showStats) {
-            document.getElementById('pose-stats').style.display = (data.showStats) ? 'block' : 'none';
-            if (this.data.showStats) { // update initial position of stats when opened
-                document.getElementById('pose-stats').textContent =
-                    `Position: ${ARENAUtils.coordsToText(data.position)}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(data.rotation)}`;
+            document.getElementById('pose-stats').style.display = data.showStats ? 'block' : 'none';
+            if (this.data.showStats) {
+                // update initial position of stats when opened
+                document.getElementById('pose-stats').textContent = `Position: ${ARENAUtils.coordsToText(
+                    data.position
+                )}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
+                    data.rotation
+                )}`;
             }
         }
     },
@@ -210,10 +216,9 @@ AFRAME.registerComponent('arena-camera', {
      * If a position or rotation change is detected, or time for a heartbeat, trigger message publish
      * @ignore
      */
-    tick: function(t, dt) {
+    tick() {
         if (!this.initialized) return;
-        const data = this.data;
-        const el = this.el;
+        const { data, el } = this;
 
         this.heartBeatCounter++;
 
@@ -233,7 +238,7 @@ AFRAME.registerComponent('arena-camera', {
 
         const rotationCoords = ARENAUtils.rotToText(data.rotation);
         const positionCoords = ARENAUtils.coordsToText(data.position);
-        const newPose = rotationCoords + ' ' + positionCoords;
+        const newPose = `${rotationCoords} ${positionCoords}`;
 
         // update position if pose changed, or every 1 sec heartbeat
         if (this.heartBeatCounter % (1000 / this.arena.params.camUpdateIntervalMs) === 0) {
@@ -250,21 +255,29 @@ AFRAME.registerComponent('arena-camera', {
         } else if (this.lastPose !== newPose) {
             // Only update frustum if camera pose has changed and video culling is enabled
             if (this.isVideoFrustumCullingEnabled()) {
-                const cam = el.components['camera'].camera;
+                const cam = el.components.camera.camera;
                 this.frustum.setFromProjectionMatrix(
-                    this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse),
+                    this.frustMatrix.multiplyMatrices(cam.projectionMatrix, cam.matrixWorldInverse)
                 );
             }
             this.publishPose();
             if (this.data.showStats) {
-                document.getElementById('pose-stats').textContent =
-                    `Position: ${ARENAUtils.coordsToText(data.position)}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(data.rotation)}`;
+                document.getElementById('pose-stats').textContent = `Position: ${ARENAUtils.coordsToText(
+                    data.position
+                )}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
+                    data.rotation
+                )}`;
             }
         }
         if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
 
-        if (!this.videoDefaultResolutionSet && ARENA && this.jitsi.initialized && this.arena.videoDefaultResolutionConstraint) {
+        if (
+            !this.videoDefaultResolutionSet &&
+            ARENA &&
+            this.jitsi.initialized &&
+            this.arena.videoDefaultResolutionConstraint
+        ) {
             // set scene-options, videoDefaultResolutionConstraint, only once
             this.jitsi.setDefaultResolutionRemotes(this.arena.videoDefaultResolutionConstraint);
             this.videoDefaultResolutionSet = true;

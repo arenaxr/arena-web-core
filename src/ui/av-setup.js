@@ -8,24 +8,24 @@
  * Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
  */
 
-/* global ARENA */
+/* global AFRAME, ARENA, mdb */
 
 import Swal from 'sweetalert2';
+import createAudioMeter from './volume-meter';
 import { ARENA_EVENTS } from '../constants';
 
 AFRAME.registerSystem('arena-av-setup', {
     schema: {
-        htmlSrc: {type: 'string', default: 'static/html/avsetup.html'},
+        htmlSrc: { type: 'string', default: 'static/html/avsetup.html' },
     },
 
-    init: function() {
+    init() {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
     },
-    ready: function() {
-        const data = this.data;
-        const el = this.el;
+    ready() {
+        const { el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
         this.arena = sceneEl.systems['arena-scene'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
 
@@ -36,8 +36,6 @@ AFRAME.registerSystem('arena-av-setup', {
         this.gotStream = this.gotStream.bind(this);
         this.micDrawLoop = this.micDrawLoop.bind(this);
 
-        if (this.arena.params.noav) return;
-
         try {
             this.loadHTML().then(() => {
                 // Manually init MDB form elements with Material design
@@ -46,7 +44,7 @@ AFRAME.registerSystem('arena-av-setup', {
                 });
 
                 this.addListeners();
-                this.setupAVCallback = ()=>{}; // noop
+                this.setupAVCallback = () => {}; // noop
 
                 this.mediaStreamSource = null;
                 this.meterProcess = null;
@@ -58,11 +56,11 @@ AFRAME.registerSystem('arena-av-setup', {
                 ARENA.events.emit(ARENA_EVENTS.SETUPAV_LOADED);
             });
         } catch (err) {
-            console.error("Error loading AV setup HTML: ", err);
+            console.error('Error loading AV setup HTML: ', err);
         }
     },
 
-    loadHTML: async function() {
+    async loadHTML() {
         const htmlRes = await fetch(this.data.htmlSrc);
         const html = await htmlRes.text();
         document.body.insertAdjacentHTML('afterbegin', html);
@@ -88,7 +86,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.videoElement.style.borderRadius = '10px';
     },
 
-    show: function(callback) {
+    show(callback) {
         if (callback) {
             this.setupAVCallback = callback;
         }
@@ -117,8 +115,8 @@ AFRAME.registerSystem('arena-av-setup', {
         } else if (localStorage.getItem('headModelPathIdx')) {
             headModelPathIdx = localStorage.getItem('headModelPathIdx');
         }
-        this.headModelPathSelect.selectedIndex = (headModelPathIdx <
-            this.headModelPathSelect.length) ? headModelPathIdx : 0;
+        this.headModelPathSelect.selectedIndex =
+            headModelPathIdx < this.headModelPathSelect.length ? headModelPathIdx : 0;
         if (localStorage.getItem('display_name')) {
             this.displayName.value = localStorage.getItem('display_name');
             // this.displayName.focus();
@@ -129,7 +127,7 @@ AFRAME.registerSystem('arena-av-setup', {
     /**
      * Initialize listeners
      */
-    addListeners: function() {
+    addListeners() {
         this.audioInSelect.onchange = this.getStream;
         this.videoSelect.onchange = this.getStream;
         // This will fail on a lot of browsers :(
@@ -188,13 +186,15 @@ AFRAME.registerSystem('arena-av-setup', {
             this.enterSceneBtn.textContent = 'Return to Scene';
             this.setupAVCallback();
 
-            this.el.sceneEl.emit(ARENA_EVENTS.NEW_SETTINGS, {userName: this.displayName.value});
+            this.el.sceneEl.emit(ARENA_EVENTS.NEW_SETTINGS, { userName: this.displayName.value });
         });
-        document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
-        document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
+        const readonlyNamespace = document.getElementById('readonlyNamespace');
+        const readonlySceneName = document.getElementById('readonlySceneName');
+        [readonlyNamespace.value, readonlySceneName.value] = ARENA.namespacedScene.split('/');
     },
 
-    getStream: function(_evt=undefined, {prefAudioInput, prefVideoInput} = {}, silent) {
+    // eslint-disable-next-line default-param-last,no-unused-vars
+    getStream(_evt = undefined, { prefAudioInput, prefVideoInput } = {}, silent) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
                 track.stop();
@@ -203,10 +203,11 @@ AFRAME.registerSystem('arena-av-setup', {
         const audioSource = prefAudioInput || this.audioInSelect.value;
         const videoSource = prefVideoInput || this.videoSelect.value;
         const constraints = {
-            audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-            video: {deviceId: videoSource ? {exact: videoSource} : undefined},
+            audio: { deviceId: audioSource ? { exact: audioSource } : undefined },
+            video: { deviceId: videoSource ? { exact: videoSource } : undefined },
         };
-        return navigator.mediaDevices.getUserMedia(constraints)
+        return navigator.mediaDevices
+            .getUserMedia(constraints)
             .then(this.gotStream)
             .catch((e) => {
                 // Prefer failed, don't popup alert, just fallback to detect-all
@@ -221,7 +222,7 @@ AFRAME.registerSystem('arena-av-setup', {
      * Alias
      * @return {Promise<MediaDeviceInfo[]>}
      */
-    getDevices: function() {
+    getDevices() {
         // AFAICT in Safari this only gets default devices until gUM is called :/
         return navigator.mediaDevices.enumerateDevices();
     },
@@ -230,35 +231,35 @@ AFRAME.registerSystem('arena-av-setup', {
      * Populates select dropdowns with detected devices
      * @param {MediaDeviceInfo[]} deviceInfos - List of enumerated devices
      */
-    gotDevices: function(deviceInfos) {
+    gotDevices(deviceInfos) {
         // Faster than innerHTML. No options have listeners so this is ok
         this.audioInSelect.textContent = '';
         this.audioOutSelect.textContent = '';
         this.videoSelect.textContent = '';
         window.deviceInfos = deviceInfos; // make available to console
-        for (const deviceInfo of deviceInfos) {
+        deviceInfos.forEach((deviceInfo) => {
             const option = document.createElement('option');
             option.value = deviceInfo.deviceId;
             switch (deviceInfo.kind) {
-            case 'audioinput':
-                option.text = deviceInfo.label || `Microphone ${this.audioInSelect.length + 1}`;
-                option.text = deviceInfo.deviceId ? option.text : 'No Microphone Detected';
-                this.audioInSelect.appendChild(option);
-                break;
-            case 'audiooutput':
-                option.text = deviceInfo.label || `Speaker ${this.audioOutSelect.length + 1}`;
-                option.text = deviceInfo.deviceId ? option.text : 'Default Speaker';
-                this.audioOutSelect.appendChild(option);
-                break;
-            case 'videoinput':
-                option.text = deviceInfo.label || `Camera ${this.videoSelect.length + 1}`;
-                option.text = deviceInfo.deviceId ? option.text : 'No Camera Detected';
-                this.videoSelect.appendChild(option);
-                break;
-            default:
+                case 'audioinput':
+                    option.text = deviceInfo.label || `Microphone ${this.audioInSelect.length + 1}`;
+                    option.text = deviceInfo.deviceId ? option.text : 'No Microphone Detected';
+                    this.audioInSelect.appendChild(option);
+                    break;
+                case 'audiooutput':
+                    option.text = deviceInfo.label || `Speaker ${this.audioOutSelect.length + 1}`;
+                    option.text = deviceInfo.deviceId ? option.text : 'Default Speaker';
+                    this.audioOutSelect.appendChild(option);
+                    break;
+                case 'videoinput':
+                    option.text = deviceInfo.label || `Camera ${this.videoSelect.length + 1}`;
+                    option.text = deviceInfo.deviceId ? option.text : 'No Camera Detected';
+                    this.videoSelect.appendChild(option);
+                    break;
+                default:
                 //
             }
-        }
+        });
         const noElementOption = document.createElement('option');
         noElementOption.setAttribute('selected', 'selected');
         noElementOption.text = 'No Device Detected';
@@ -269,19 +270,15 @@ AFRAME.registerSystem('arena-av-setup', {
             this.videoSelect.appendChild(noElementOption.cloneNode(true));
         }
         if (window.stream) {
-            const currentAudioIndex = [...this.audioInSelect.options].
-                findIndex((option) => option.text ===
-                    window.stream.getAudioTracks()[0].label);
-            this.audioInSelect.selectedIndex = (currentAudioIndex === -1) ?
-                0 :
-                currentAudioIndex;
+            const currentAudioIndex = [...this.audioInSelect.options].findIndex(
+                (option) => option.text === window.stream.getAudioTracks()[0].label
+            );
+            this.audioInSelect.selectedIndex = currentAudioIndex === -1 ? 0 : currentAudioIndex;
 
-            const currentVideoIndex = [...this.videoSelect.options].
-                findIndex((option) => option.text ===
-                    window.stream.getVideoTracks()[0].label);
-            this.videoSelect.selectedIndex = (currentVideoIndex === -1) ?
-                0 :
-                currentVideoIndex;
+            const currentVideoIndex = [...this.videoSelect.options].findIndex(
+                (option) => option.text === window.stream.getVideoTracks()[0].label
+            );
+            this.videoSelect.selectedIndex = currentVideoIndex === -1 ? 0 : currentVideoIndex;
         } else {
             this.audioInSelect.selectedIndex = 0;
             this.videoSelect.selectedIndex = 0;
@@ -303,22 +300,23 @@ AFRAME.registerSystem('arena-av-setup', {
      * @return {Promise<MediaStream | void>}
      */
 
-
     /**
      * Attempts to updates a/v dropdowns with devices from a stream.
      * Also initializes sound processing to display microphone volume meter
      * @param {MediaStream} stream - Stream created by gUM
      */
-    gotStream: function(stream) {
+    gotStream(stream) {
         window.stream = stream; // make stream available to console
-        this.audioInSelect.selectedIndex = [...this.audioInSelect.options].
-            findIndex((option) => option.text === stream.getAudioTracks()[0].label);
-        this.videoSelect.selectedIndex = [...this.videoSelect.options].
-            findIndex((option) => option.text === stream.getVideoTracks()[0].label);
+        this.audioInSelect.selectedIndex = [...this.audioInSelect.options].findIndex(
+            (option) => option.text === stream.getAudioTracks()[0].label
+        );
+        this.videoSelect.selectedIndex = [...this.videoSelect.options].findIndex(
+            (option) => option.text === stream.getVideoTracks()[0].label
+        );
         this.videoElement.srcObject = stream;
 
         // Mic Test Meter via https://github.com/cwilso/volume-meter/
-        this.meterProcess && this.meterProcess.shutdown();
+        this.meterProcess?.shutdown();
         this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
         this.mediaStreamSource.connect(this.meterProcess);
         this.micDrawLoop();
@@ -346,7 +344,7 @@ AFRAME.registerSystem('arena-av-setup', {
         }
     },
 
-    detectDevices: function(_evt, silent = false)  {
+    detectDevices(_evt, silent = false) {
         const preferredDevices = {
             prefAudioInput: localStorage.getItem('prefAudioInput'),
             prefVideoInput: localStorage.getItem('prefVideoInput'),
@@ -360,11 +358,11 @@ AFRAME.registerSystem('arena-av-setup', {
     /**
      * Animation loop to draw detected microphone audio level
      */
-    micDrawLoop: function() {
+    micDrawLoop() {
         // set bar based on the current volume
         const vol = this.meterProcess.volume * 100 * 3;
         this.micMeter.setAttribute('style', `width: ${vol}%`);
-        this.micMeter.setAttribute('aria-valuenow', '' + vol);
+        this.micMeter.setAttribute('aria-valuenow', `${vol}`);
         // set up the next visual callback if setupPanel is not hidden
         if (!this.setupPanel.classList.contains('d-none')) {
             window.requestAnimationFrame(this.micDrawLoop);
@@ -373,6 +371,3 @@ AFRAME.registerSystem('arena-av-setup', {
         }
     },
 });
-
-
-

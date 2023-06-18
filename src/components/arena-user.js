@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, THREE */
-
 /**
  * @fileoverview Another user's camera in the ARENA. Handles Jitsi and display name updates.
  *
@@ -8,8 +6,81 @@
  * @date 2020
  */
 
-import { ARENADefaults } from '../../conf/defaults.js';
+/* global AFRAME, ARENA, THREE */
+
 import { ARENA_EVENTS } from '../constants';
+
+/**
+ * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
+ * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
+ * @param {Object} gainNode
+ * @param {boolean} spatialAudioOn
+ * @private
+ */
+async function enableChromeAEC(gainNode, spatialAudioOn) {
+    /**
+     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
+     *  1. grab the GainNode from the scene's THREE.AudioListener
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
+     *     this prevents hearing the audio twice.
+     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
+     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
+     *  6. connect the other RTCPeerConnection's stream to a new audio element.
+     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
+     *  while preserving all the audio processing that was performed via the WebAudio API.
+     */
+
+    const audioEl = new Audio();
+    audioEl.setAttribute('autoplay', 'autoplay');
+    audioEl.setAttribute('playsinline', 'playsinline');
+
+    const context = THREE.AudioContext.getContext();
+    const loopbackDestination = context.createMediaStreamDestination();
+    const outboundPeerConnection = new RTCPeerConnection();
+    const inboundPeerConnection = new RTCPeerConnection();
+
+    const onError = (e) => {
+        console.error('RTCPeerConnection loopback initialization error', e);
+    };
+
+    outboundPeerConnection.addEventListener('icecandidate', (e) => {
+        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+    });
+
+    inboundPeerConnection.addEventListener('icecandidate', (e) => {
+        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+    });
+
+    inboundPeerConnection.addEventListener('track', (e) => {
+        [audioEl.srcObject] = e.streams;
+    });
+
+    try {
+        /* The following should never fail, but just in case, we won't disconnect/reconnect
+           the gainNode unless all of this succeeds */
+        loopbackDestination.stream.getTracks().forEach((track) => {
+            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+        });
+
+        const offer = await outboundPeerConnection.createOffer();
+        outboundPeerConnection.setLocalDescription(offer);
+        await inboundPeerConnection.setRemoteDescription(offer);
+
+        const answer = await inboundPeerConnection.createAnswer();
+        inboundPeerConnection.setLocalDescription(answer);
+        outboundPeerConnection.setRemoteDescription(answer);
+
+        gainNode.disconnect();
+        if (spatialAudioOn) {
+            gainNode.connect(context.destination);
+        } else {
+            gainNode.connect(loopbackDestination);
+        }
+    } catch (e) {
+        onError(e);
+    }
+}
 
 /**
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
@@ -25,32 +96,31 @@ import { ARENA_EVENTS } from '../constants';
  */
 AFRAME.registerComponent('arena-user', {
     schema: {
-        color: {type: 'color', default: 'white'},
-        headModelPath: {type: 'string', default: ARENADefaults.headModelPath},
-        presence: {type: 'string', default: 'Standard'},
-        jitsiId: {type: 'string', default: ''},
-        displayName: {type: 'string', default: ''},
-        hasAudio: {type: 'boolean', default: false},
-        hasVideo: {type: 'boolean', default: false},
-        jitsiQuality: {type: 'number', default: 100.0},
-        resolutionStep: {type: 'number', default: 180},
-        pano: {type: 'boolean', default: false},
+        color: { type: 'color', default: 'white' },
+        headModelPath: { type: 'string', default: ARENA.defaults.headModelPath },
+        presence: { type: 'string', default: 'Standard' },
+        jitsiId: { type: 'string', default: '' },
+        displayName: { type: 'string', default: '' },
+        hasAudio: { type: 'boolean', default: false },
+        hasVideo: { type: 'boolean', default: false },
+        jitsiQuality: { type: 'number', default: 100.0 },
+        resolutionStep: { type: 'number', default: 180 },
+        pano: { type: 'boolean', default: false },
     },
 
-    init: function() {
+    init() {
         this.jitsiReady = false;
-        const data = this.data;
-        const el = this.el;
+        const { data, el } = this;
 
-        const sceneEl = el.sceneEl;
+        const { sceneEl } = el;
 
         this.arena = sceneEl.systems['arena-scene'];
         this.jitsi = sceneEl.systems['arena-jitsi'];
-        this.chat = sceneEl.systems["arena-chat-ui"];
+        this.chat = sceneEl.systems['arena-chat-ui'];
 
-        this.idTag = el.id.replace("camera_", "");
+        this.idTag = el.id.replace('camera_', '');
         el.setAttribute('rotation.order', 'YXZ');
-        el.object3D.position.set(0, ARENADefaults.camHeight, 0);
+        el.object3D.position.set(0, ARENA.defaults.camHeight, 0);
         el.object3D.rotation.set(0, 0, 0);
 
         const name = el.id;
@@ -90,8 +160,9 @@ AFRAME.registerComponent('arena-user', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
 
-
-        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, () => this.jitsiReady = true );
+        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, () => {
+            this.jitsiReady = true;
+        });
     },
 
     aec(listener) {
@@ -112,11 +183,11 @@ AFRAME.registerComponent('arena-user', {
     },
 
     drawMicrophone() {
-        const el = this.el;
-        const data = this.data;
+        const { el } = this;
+        const { data } = this;
 
-        const name = 'muted_' + el.id;
-        let micIconEl = document.querySelector('#' + name);
+        const name = `muted_${el.id}`;
+        let micIconEl = document.querySelector(`#${name}`);
         if (!micIconEl) {
             micIconEl = document.createElement('a-image');
             micIconEl.setAttribute('id', name);
@@ -134,21 +205,21 @@ AFRAME.registerComponent('arena-user', {
     },
 
     removeMicrophone() {
-        const el = this.el;
+        const { el } = this;
 
-        const name = 'muted_' + el.id;
-        const micIconEl = document.querySelector('#' + name);
+        const name = `muted_${el.id}`;
+        const micIconEl = document.querySelector(`#${name}`);
         if (micIconEl) {
             el.removeChild(micIconEl);
         }
     },
 
     drawQuality() {
-        const el = this.el;
-        const data = this.data;
+        const { el } = this;
+        const { data } = this;
 
-        const name = 'quality_' + el.id;
-        let qualIconEl = document.querySelector('#' + name);
+        const name = `quality_${el.id}`;
+        let qualIconEl = document.querySelector(`#${name}`);
         if (!qualIconEl) {
             qualIconEl = document.createElement('a-image');
             qualIconEl.setAttribute('id', name);
@@ -167,10 +238,10 @@ AFRAME.registerComponent('arena-user', {
     },
 
     removeQuality() {
-        const el = this.el;
+        const { el } = this;
 
-        const name = 'quality_' + el.id;
-        const qualIconEl = document.querySelector('#' + name);
+        const name = `quality_${el.id}`;
+        const qualIconEl = document.querySelector(`#${name}`);
         if (qualIconEl) {
             el.removeChild(qualIconEl);
         }
@@ -179,18 +250,19 @@ AFRAME.registerComponent('arena-user', {
     getQualityIcon(quality) {
         if (quality > 66.7) {
             return 'url(/src/ui/images/signal-good.png)';
-        } else if (quality > 33.3) {
-            return 'url(/src/ui/images/signal-poor.png)';
-        } else if (quality > 0) {
-            return 'url(/src/ui/images/signal-weak.png)';
-        } else {
-            return 'url(/src/ui/images/signal-bad.png)';
         }
+        if (quality > 33.3) {
+            return 'url(/src/ui/images/signal-poor.png)';
+        }
+        if (quality > 0) {
+            return 'url(/src/ui/images/signal-weak.png)';
+        }
+        return 'url(/src/ui/images/signal-bad.png)';
     },
 
     drawVideoCube() {
-        const el = this.el;
-        const data = this.data;
+        const { el } = this;
+        const { data } = this;
 
         // attach video to head
         const videoCube = document.createElement('a-box');
@@ -226,7 +298,7 @@ AFRAME.registerComponent('arena-user', {
     },
 
     removeVideoCube() {
-        const el = this.el;
+        const { el } = this;
 
         // remove video cubes
         if (el.contains(this.videoCube)) {
@@ -243,7 +315,7 @@ AFRAME.registerComponent('arena-user', {
     },
 
     updateVideo() {
-        const data = this.data;
+        const { data } = this;
         if (!data) return;
 
         /* Handle Jitsi Video */
@@ -265,7 +337,7 @@ AFRAME.registerComponent('arena-user', {
     },
 
     createAudio() {
-        const el = this.el;
+        const { el } = this;
         el.setAttribute('sound', `src: #${this.audioID}`);
 
         this.aec(el.sceneEl.audioListener);
@@ -287,9 +359,9 @@ AFRAME.registerComponent('arena-user', {
     },
 
     updateAudio() {
-        const data = this.data;
+        const { data } = this;
         if (!data) return;
-        const el = this.el;
+        const { el } = this;
 
         /* Handle Jitsi Audio */
         this.audioID = `audio${data.jitsiId}`;
@@ -301,7 +373,7 @@ AFRAME.registerComponent('arena-user', {
 
             const jitsiAudio = document.getElementById(this.audioID);
             if (jitsiAudio) {
-                const sound = el.components.sound;
+                const { sound } = el.components;
                 if (!this.distReached && !sound) {
                     this.createAudio();
                 }
@@ -312,11 +384,14 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
+    /* eslint-disable  no-param-reassign */
     muteAudio() {
-        const el = this.el;
+        const { el } = this;
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => t.enabled = false);
+            jistiAudio.srcObject.getTracks().forEach((t) => {
+                t.enabled = false;
+            });
         }
         el.removeAttribute('sound');
     },
@@ -324,7 +399,9 @@ AFRAME.registerComponent('arena-user', {
     unmuteAudio() {
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => t.enabled = true);
+            jistiAudio.srcObject.getTracks().forEach((t) => {
+                t.enabled = true;
+            });
         }
     },
 
@@ -332,7 +409,9 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (!jistiVideo.paused) jistiVideo.pause();
-            jistiVideo.srcObject.getTracks().forEach((t) => t.enabled = false);
+            jistiVideo.srcObject.getTracks().forEach((t) => {
+                t.enabled = false;
+            });
         }
     },
 
@@ -340,30 +419,33 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (jistiVideo.paused) jistiVideo.play();
-            jistiVideo.srcObject.getTracks().forEach((t) => t.enabled = true);
+            jistiVideo.srcObject.getTracks().forEach((t) => {
+                t.enabled = true;
+            });
         }
     },
+    /* eslint-disable  no-param-reassign */
 
     evaluateRemoteResolution(resolutionStep) {
-        if (resolutionStep != this.data.resolutionStep) {
+        if (resolutionStep !== this.data.resolutionStep) {
             this.data.resolutionStep = resolutionStep;
             const panoIds = [];
             const constraints = {};
             const users = document.querySelectorAll('[arena-user]');
             users.forEach((user) => {
-                const data = user.components['arena-user'].data;
+                const { data } = user.components['arena-user'];
                 const jitsiSourceName = `${data.jitsiId}-v0`;
                 if (data.pano) {
                     panoIds.push(jitsiSourceName);
                 }
                 if (data.resolutionStep > 0 && data.resolutionStep < 180) {
                     constraints[jitsiSourceName] = {
-                        'maxHeight': 180,
-                        'maxFrameRate': data.resolutionStep,
+                        maxHeight: 180,
+                        maxFrameRate: data.resolutionStep,
                     }; // start dropping FPS, not res
                 } else {
                     constraints[jitsiSourceName] = {
-                        'maxHeight': data.resolutionStep,
+                        maxHeight: data.resolutionStep,
                     }; // use distance based res for 0 and 180+
                 }
             });
@@ -376,37 +458,44 @@ AFRAME.registerComponent('arena-user', {
         const fov = 80;
         const cubeHeight = 0.4;
         const cubeDepth = 0.6;
-        const actualDist = distance - (cubeDepth / 2);
-        const frustumHeightAtVideo = 2 * actualDist * Math.tan(fov * 0.5 * Math.PI / 180);
+        const actualDist = distance - cubeDepth / 2;
+        const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
         const videoRatio2Window = cubeHeight / frustumHeightAtVideo;
         const actualCubeRes = winHeight * videoRatio2Window;
         // provide max video resolution for distance and screen resolution,
         // use approximate gradations of actual camera heights
         if (actualCubeRes < 45) {
             return 5; // below 180p, overload with FPS
-        } else if (actualCubeRes < 90) {
-            return 15; // below 180p, overload with FPS
-        } else if (actualCubeRes < 180) {
-            return 180; // Thumbnail
-        } else if (actualCubeRes < 360) {
-            return 360;
-        } else if (actualCubeRes < 480) {
-            return 480; // SD (standard definition)
-        } else if (actualCubeRes < 720) {
-            return 720; // HD (high definition)
-        } else if (actualCubeRes < 1080) {
-            return 1080; // Full HD
-        } else if (actualCubeRes < 1440) {
-            return 1440;
-        } else if (actualCubeRes < 1800) {
-            return 1800;
-        } else {
-            return 2160; // UHD/4K
         }
+        if (actualCubeRes < 90) {
+            return 15; // below 180p, overload with FPS
+        }
+        if (actualCubeRes < 180) {
+            return 180; // Thumbnail
+        }
+        if (actualCubeRes < 360) {
+            return 360;
+        }
+        if (actualCubeRes < 480) {
+            return 480; // SD (standard definition)
+        }
+        if (actualCubeRes < 720) {
+            return 720; // HD (high definition)
+        }
+        if (actualCubeRes < 1080) {
+            return 1080; // Full HD
+        }
+        if (actualCubeRes < 1440) {
+            return 1440;
+        }
+        if (actualCubeRes < 1800) {
+            return 1800;
+        }
+        return 2160; // UHD/4K
     },
 
-    update: function(oldData) {
-        const data = this.data;
+    update(oldData) {
+        const { data } = this;
 
         if (data.color !== oldData.color) {
             this.headText.setAttribute('color', data.color);
@@ -423,22 +512,22 @@ AFRAME.registerComponent('arena-user', {
 
         if (data.presence !== oldData.presence) {
             switch (data.presence) {
-            case 'Standard':
-                this.headText.setAttribute('visible', true);
-                this.headModel.setAttribute('visible', true);
-                this.headText.setAttribute('position', '0 0.45 0.05');
-                // redraw mic
-                this.removeMicrophone();
-                this.drawMicrophone();
-                break;
-            case 'Portal':
-                this.headText.setAttribute('position', '0 1.7 0.05');
-                // redraw mic
-                this.removeMicrophone();
-                this.drawMicrophone();
-                break;
-            default:
-                break;
+                case 'Standard':
+                    this.headText.setAttribute('visible', true);
+                    this.headModel.setAttribute('visible', true);
+                    this.headText.setAttribute('position', '0 0.45 0.05');
+                    // redraw mic
+                    this.removeMicrophone();
+                    this.drawMicrophone();
+                    break;
+                case 'Portal':
+                    this.headText.setAttribute('position', '0 1.7 0.05');
+                    // redraw mic
+                    this.removeMicrophone();
+                    this.drawMicrophone();
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -451,7 +540,7 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
-    remove: function () {
+    remove() {
         // camera special case, look for hands to delete
         const elHandL = document.getElementById(`handLeft_${this.idTag}`);
         if (elHandL) elHandL.remove();
@@ -462,9 +551,9 @@ AFRAME.registerComponent('arena-user', {
         this.chat?.populateUserList();
     },
 
-    tick: function() {
+    tick() {
         if (!this.jitsiReady) return;
-        const data = this.data;
+        const { data } = this;
 
         // do periodic a/v updates
         if (data.jitsiId) {
@@ -519,74 +608,3 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 });
-
-/**
- * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
- * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
- * @param {Object} gainNode
- * @private
- */
-async function enableChromeAEC(gainNode, spatialAudioOn) {
-    /**
-     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-     *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
-     *     this prevents hearing the audio twice.
-     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-     *  6. connect the other RTCPeerConnection's stream to a new audio element.
-     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
-     *  while preserving all the audio processing that was performed via the WebAudio API.
-     */
-
-    const audioEl = new Audio();
-    audioEl.setAttribute('autoplay', 'autoplay');
-    audioEl.setAttribute('playsinline', 'playsinline');
-
-    const context = THREE.AudioContext.getContext();
-    const loopbackDestination = context.createMediaStreamDestination();
-    const outboundPeerConnection = new RTCPeerConnection();
-    const inboundPeerConnection = new RTCPeerConnection();
-
-    const onError = (e) => {
-        console.error('RTCPeerConnection loopback initialization error', e);
-    };
-
-    outboundPeerConnection.addEventListener('icecandidate', (e) => {
-        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('icecandidate', (e) => {
-        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('track', (e) => {
-        audioEl.srcObject = e.streams[0];
-    });
-
-    try {
-        /* The following should never fail, but just in case, we won't disconnect/reconnect
-           the gainNode unless all of this succeeds */
-        loopbackDestination.stream.getTracks().forEach((track) => {
-            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
-        });
-
-        const offer = await outboundPeerConnection.createOffer();
-        outboundPeerConnection.setLocalDescription(offer);
-        await inboundPeerConnection.setRemoteDescription(offer);
-
-        const answer = await inboundPeerConnection.createAnswer();
-        inboundPeerConnection.setLocalDescription(answer);
-        outboundPeerConnection.setRemoteDescription(answer);
-
-        gainNode.disconnect();
-        if (spatialAudioOn) {
-            gainNode.connect(context.destination);
-        } else {
-            gainNode.connect(loopbackDestination);
-        }
-    } catch (e) {
-        onError(e);
-    }
-}

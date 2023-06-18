@@ -6,16 +6,15 @@
  * Further improved by Daniel Sturk
  */
 
+/* global THREE */
+
 const FXAAShader = {
+    uniforms: {
+        tDiffuse: { value: null },
+        resolution: { value: new THREE.Vector2(1 / 1024, 1 / 512) },
+    },
 
-	uniforms: {
-
-		'tDiffuse': { value: null },
-		'resolution': { value: new THREE.Vector2( 1 / 1024, 1 / 512 ) }
-
-	},
-
-	vertexShader: /* glsl */`
+    vertexShader: /* glsl */ `
 
 		varying vec2 vUv;
 
@@ -26,7 +25,7 @@ const FXAAShader = {
 
 		}`,
 
-	fragmentShader: `
+    fragmentShader: `
 	precision highp float;
 
 	uniform sampler2D tDiffuse;
@@ -38,7 +37,7 @@ const FXAAShader = {
 	// FXAA 3.11 implementation by NVIDIA, ported to WebGL by Agost Biro (biro@archilogic.com)
 
 	//----------------------------------------------------------------------------------
-	// File:        es3-kepler\FXAA\assets\shaders/FXAA_DefaultES.frag
+	// File:        es3-kepler\\FXAA\\assets\\shaders/FXAA_DefaultES.frag
 	// SDK Version: v3.00
 	// Email:       gameworks@nvidia.com
 	// Site:        http://developer.nvidia.com/
@@ -275,8 +274,7 @@ const FXAAShader = {
 			);
 
 	}
-	`
-
+	`,
 };
 
-export { FXAAShader };
+export default FXAAShader;
