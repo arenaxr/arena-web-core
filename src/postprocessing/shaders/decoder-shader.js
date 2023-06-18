@@ -1,5 +1,8 @@
 /* global THREE */
 
+import vertGLSL from './glsl/decoder/vert.glsl';
+import fragGLSL from './glsl/decoder/frag.glsl';
+
 const DecoderShader = {
     uniforms: {
         tRemoteFrame: {
@@ -16,9 +19,9 @@ const DecoderShader = {
         },
     },
 
-    vertexShader: require('./glsl/decoder/vert.glsl'),
+    vertexShader: vertGLSL,
 
-    fragmentShader: require('./glsl/decoder/frag.glsl'),
+    fragmentShader: fragGLSL,
 };
 
 export default DecoderShader;

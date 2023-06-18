@@ -1,5 +1,8 @@
 /* global THREE */
 
+import vertGLSL from './glsl/compositor/vert.glsl';
+import fragGLSL from './glsl/compositor/frag.glsl';
+
 const CompositorShader = {
     uniforms: {
         defines: {
@@ -79,9 +82,9 @@ const CompositorShader = {
         },
     },
 
-    vertexShader: require('./glsl/compositor/vert.glsl'),
+    vertexShader: vertGLSL,
 
-    fragmentShader: require('./glsl/compositor/frag.glsl'),
+    fragmentShader: fragGLSL,
 };
 
 export default CompositorShader;
