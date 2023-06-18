@@ -1,7 +1,7 @@
 {
-   "event":{
-      "description":"Events are ephemeral messages used to send user events like mouse movements or controller actions.",
-      "file":"schemas/event.json",
-      "title":"Event"
-   }
+    "event": {
+        "description": "Events are ephemeral messages used to send user events like mouse movements or controller actions.",
+        "file": "schemas/event.json",
+        "title": "Event"
+    }
 }

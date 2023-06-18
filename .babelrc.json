@@ -1,5 +1,6 @@
 {
-  "plugins": [
-    ["@parcel/babel-plugin-transform-runtime"],
-    ["@babel/plugin-transform-template-literals", {"loose": true }]]
+    "plugins": [
+        ["@parcel/babel-plugin-transform-runtime"],
+        ["@babel/plugin-transform-template-literals", { "loose": true }]
+    ]
 }

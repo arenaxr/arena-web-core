@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "cylinder"
-                                    ]
+                                    "enum": ["cylinder"]
                                 },
                                 "height": {
                                     "type": "number",
@@ -87,20 +85,10 @@
                             "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "radius",
-                        "height"
-                    ]
+                    "required": ["object_type", "radius", "height"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

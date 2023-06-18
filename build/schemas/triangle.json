@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "triangle"
-                                    ]
+                                    "enum": ["triangle"]
                                 },
                                 "vertexA": {
                                     "title": "vertex A",
@@ -32,11 +30,7 @@
                                             "type": "number"
                                         }
                                     },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "required": ["x", "y", "z"],
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -56,11 +50,7 @@
                                             "type": "number"
                                         }
                                     },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "required": ["x", "y", "z"],
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -80,11 +70,7 @@
                                             "type": "number"
                                         }
                                     },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "required": ["x", "y", "z"],
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -137,21 +123,10 @@
                             "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "vertexA",
-                        "vertexB",
-                        "vertexC"
-                    ]
+                    "required": ["object_type", "vertexA", "vertexB", "vertexC"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

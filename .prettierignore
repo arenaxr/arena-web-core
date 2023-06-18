@@ -9,3 +9,5 @@ build/third-party/*
 CHANGELOG.md
 *.gltf
 static/arenaxr-bootstrap/arenaxr-bootstrap.css
+package.json
+package-lock.json
