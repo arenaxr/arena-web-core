@@ -34,5 +34,6 @@ module.exports = {
         'no-bitwise': 'off',
         'no-underscore-dangle': 'off',
         'no-constructor-return': 'off',
+        'no-param-reassign': 'warn',
     },
 };
