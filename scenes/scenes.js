@@ -114,12 +114,9 @@ window.addEventListener('onauth', async (e) => {
         });
     };
 
-    $(userSceneSelect).on('select2:select', checkUserSceneSelect);
-    $(publicSceneSelect).on('select2:select', checkPublicSceneSelect);
-
-    function checkUserSceneSelect(e) {
+    function checkUserSceneSelect(_e) {
         if (e.target.value) {
-            window.userSceneId = e.target.value;
+            window.userSceneId = _e.target.value;
             updateUriBuilderCheckboxes(true);
             updateUserSceneUrlBox(`${window.location.origin}/${e.target.value}`);
             scenePermsLink.href = `${window.location.origin}/user/profile/scenes/${e.target.value}`;
@@ -132,19 +129,23 @@ window.addEventListener('onauth', async (e) => {
         }
     }
 
-    function checkPublicSceneSelect(e) {
-        if (e.target.value) {
+    function checkPublicSceneSelect(_e) {
+        if (_e.target.value) {
             window.publicSceneId = e.target.value;
-            publicSceneUrl.value = `${window.location.origin}/${e.target.value}`;
+            publicSceneUrl.value = `${window.location.origin}/${_e.target.value}`;
             togglePublicSceneButtons(true);
-            console.log('valid public', e.target.value);
+            console.log('valid public', _e.target.value);
         } else {
             window.publicSceneId = '';
             publicSceneUrl.value = '';
             togglePublicSceneButtons(false);
-            console.log('invalid public', e.target.value);
+            console.log('invalid public', _e.target.value);
         }
     }
+
+    $(userSceneSelect).on('select2:select', checkUserSceneSelect);
+    $(publicSceneSelect).on('select2:select', checkPublicSceneSelect);
+
     enterPublicSceneBtn.addEventListener('click', () => (window.location = publicSceneUrl.value));
     enterArPublicSceneBtn.addEventListener('click', () => (window.location = `${publicSceneUrl.value}?armode=1`));
     copyUserSceneUrlBtn.addEventListener('click', () => {
@@ -276,8 +277,8 @@ window.addEventListener('onauth', async (e) => {
         document.getElementById('doCloneSceneContainer').classList.remove('d-none');
     }
 
-    newSceneNameInput.addEventListener('keyup', (e) => {
-        if (e.target.value) {
+    newSceneNameInput.addEventListener('keyup', (_e) => {
+        if (_e.target.value) {
             doCloneSceneBtn.classList.remove('disabled');
         } else {
             doCloneSceneBtn.classList.add('disabled');

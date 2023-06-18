@@ -1,4 +1,4 @@
-/* global ARENAAUTH, Swal */
+/* global ARENAAUTH, ARENADefaults, ClipboardJS, Swal, $ */
 
 import * as PersistObjects from './persist-objects';
 import ARENAUserAccount from './arena-account';
@@ -92,7 +92,7 @@ window.addEventListener('onauth', async (e) => {
     };
 
     const updateLink = function () {
-        if (sceneinput.disabled == true) {
+        if (sceneinput.disabled === true) {
             sceneLinks.style = 'display:none';
             return;
         }
@@ -104,7 +104,7 @@ window.addEventListener('onauth', async (e) => {
     };
 
     const updateUrl = function () {
-        if (sceneinput.disabled == true) return;
+        if (sceneinput.disabled === true) return;
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('scene', `${namespaceinput.value}/${sceneinput.value}`);
         window.history.pushState({ path: newUrl.href }, '', decodeURIComponent(newUrl.href));
@@ -168,7 +168,7 @@ window.addEventListener('onauth', async (e) => {
             action,
             persist,
             type: obj.type,
-            data: obj.attributes != undefined ? obj.attributes : obj.data,
+            data: obj.attributes !== undefined ? obj.attributes : obj.data,
         };
         return arenaObj;
     };
@@ -283,14 +283,14 @@ window.addEventListener('onauth', async (e) => {
     function newSceneModal(theNewScene = undefined) {
         Swal.fire({
             title: 'Add New or Unlisted Scene',
-            html: `<div class="input-prepend">
-                    <span class="add-on" style="width:125px">Namespace</span>
-                    <input type="text" class="input-medium" style="width:215px" list="modalnamespacelist" placeholder="Select Namespace..." id="modalnamespaceinput">
-                    <datalist id="modalnamespacelist"></datalist>
+            html: `<div class='input-prepend'>
+                    <span class='add-on' style='width:125px'>Namespace</span>
+                    <input type='text' class='input-medium' style='width:215px' list='modalnamespacelist' placeholder='Select Namespace...' id='modalnamespaceinput'>
+                    <datalist id='modalnamespacelist'></datalist>
                   </div>
-                  <div class="input-prepend">
-                    <span class="add-on" style="width:125px">Scene</span>
-                    <input type="text" style="width:215px" id="modalscenename" placeholder="New Scene Name">
+                  <div class='input-prepend'>
+                    <span class='add-on' style='width:125px'>Scene</span>
+                    <input type='text' style='width:215px' id='modalscenename' placeholder='New Scene Name'>
                   </div>
                   <p><small>You can enter an existing unlisted Scene. New Scenes will be created with default permissions.</small></p>`,
             width: 600,
@@ -318,7 +318,7 @@ window.addEventListener('onauth', async (e) => {
                 });
                 modalNsInput.addEventListener('focusout', () => {
                     if (savedModalNs && savedModalNs.length > 0) modalNsInput.value = savedModalNs;
-                    if (modalNsInput && modalNsInput.value.length == 0 && modalNsList && modalNsList.options[0])
+                    if (modalNsInput && modalNsInput.value.length === 0 && modalNsList && modalNsList.options[0])
                         modalNsInput.value = modalNsList.options[0].value;
                 });
             },
@@ -398,8 +398,8 @@ window.addEventListener('onauth', async (e) => {
         Swal.fire({
             title: 'Import from JSON',
             html: `<div>
-                   <p style="text-align:center">Select JSON File</p>
-                   <input type="file" accept=".json,.txt" id="jsonfile">
+                   <p style='text-align:center'>Select JSON File</p>
+                   <input type='file' accept='.json,.txt' id='jsonfile'>
                    </div>`,
             width: 700,
             confirmButtonText: 'Import',
@@ -436,7 +436,7 @@ window.addEventListener('onauth', async (e) => {
                     return;
                 }
                 if (!importObjs) return;
-                if (sceneinput.disabled == true && !result.value.newscene) {
+                if (sceneinput.disabled === true && !result.value.newscene) {
                     Alert.fire({
                         icon: 'error',
                         title: 'New scene not requested.',
@@ -521,7 +521,7 @@ window.addEventListener('onauth', async (e) => {
             return;
         }
         // if object has an object_id field, auto create a uuid
-        if (obj.object_id != undefined) {
+        if (obj.object_id !== undefined) {
             obj.object_id = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
                 (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
             );
@@ -557,7 +557,7 @@ window.addEventListener('onauth', async (e) => {
     // Focus out listener for namespace
     namespaceinput.addEventListener('focusout', async () => {
         if (saved_namespace && saved_namespace.length > 0) namespaceinput.value = saved_namespace;
-        if (saved_namespace && saved_namespace.length == 0 && namespacelist && namespacelist.options[0])
+        if (saved_namespace && saved_namespace.length === 0 && namespacelist && namespacelist.options[0])
             namespaceinput.value = namespacelist.options[0].value;
     });
 
@@ -566,7 +566,7 @@ window.addEventListener('onauth', async (e) => {
         if (sceneinput.disabled === true) return;
         let foundScene = false;
         for (let i = 0; i < scenelist.options.length; i++) {
-            if (scenelist.options[i].value == sceneinput.value) {
+            if (scenelist.options[i].value === sceneinput.value) {
                 foundScene = true;
                 break;
             }
@@ -596,7 +596,7 @@ window.addEventListener('onauth', async (e) => {
     // Focus out listener for scene
     sceneinput.addEventListener('focusout', async () => {
         if (saved_scene && saved_scene.length > 0) sceneinput.value = saved_scene;
-        if (saved_scene && saved_scene.length == 0 && scenelist && scenelist.options[0])
+        if (saved_scene && saved_scene.length === 0 && scenelist && scenelist.options[0])
             sceneinput.value = scenelist.options[0].value;
     });
 
@@ -668,9 +668,9 @@ window.addEventListener('onauth', async (e) => {
         Swal.fire({
             title: 'Copy selected objects',
             html: `<p>Copy to existing scene</p>
-                   <div class="input-prepend">
-                    <span class="add-on" style="width:120px">Destination Scene</span>
-                    <select id="modalsceneinput" style="width:215px"></select>
+                   <div class='input-prepend'>
+                    <span class='add-on' style='width:120px'>Destination Scene</span>
+                    <select id='modalsceneinput' style='width:215px'></select>
                   </div>`,
             confirmButtonText: 'Copy Objects',
             focusConfirm: false,
@@ -723,7 +723,7 @@ window.addEventListener('onauth', async (e) => {
     });
 
     window.addObjHandler = async function () {
-        if (validate.value != 'valid') {
+        if (validate.value !== 'valid') {
             alert('Please check validation errors.');
             Alert.fire({
                 icon: 'error',

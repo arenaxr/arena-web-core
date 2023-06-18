@@ -1,3 +1,5 @@
+/* global ARENADefaults, cytoscape, Paho */
+
 window.addEventListener('onauth', (e) => {
     const cy = (window.cy = cytoscape({
         container: document.getElementById('cy'),
@@ -19,11 +21,11 @@ window.addEventListener('onauth', (e) => {
                 selector: 'node[class="client"]',
                 style: {
                     content(elem) {
-                        let additional_info = '';
+                        let additionalInfo = '';
                         if (elem.data('latency') !== null && elem.data('latency') !== undefined) {
-                            additional_info = `\n(${elem.data('latency')} ms)`;
+                            additionalInfo = `\n(${elem.data('latency')} ms)`;
                         }
-                        return elem.data('id') + additional_info;
+                        return elem.data('id') + additionalInfo;
                     },
                     'font-size': 3.5,
                     shape: 'round-rectangle',
@@ -93,10 +95,10 @@ window.addEventListener('onauth', (e) => {
     let paused = false;
 
     const worker = new Worker(new URL('./graph.worker.js', import.meta.url));
-    worker.onmessage = (e) => {
-        const msg = e.data;
+    worker.onmessage = (_e) => {
+        const msg = _e.data;
         switch (msg.type) {
-            case 'result': {
+            case 'result':
                 try {
                     cy.json({ elements: msg.json });
                     runLayout();
@@ -104,7 +106,9 @@ window.addEventListener('onauth', (e) => {
                     console.log(err.message);
                     console.log(JSON.stringify(msg.json, undefined, 2));
                 }
-            }
+                break;
+            default:
+            // skip
         }
     };
 
@@ -127,6 +131,7 @@ window.addEventListener('onauth', (e) => {
             password: e.detail.mqtt_token,
         });
     }
+
     init();
 
     function onConnect() {
@@ -217,11 +222,12 @@ window.addEventListener('onauth', (e) => {
         }
         requestAnimationFrame(timer);
     }
+
     timer();
 
     pauseBtn.addEventListener('click', () => {
         paused = !paused;
-        if (currIdx != prevJSON.length - 1) {
+        if (currIdx !== prevJSON.length - 1) {
             currIdx = prevJSON.length - 1;
             updateGraph(prevJSON[currIdx]);
         }
@@ -235,7 +241,7 @@ window.addEventListener('onauth', (e) => {
             currIdx = prevJSON.length - 1;
             paused = false;
         }
-        if (prevIdx != currIdx) {
+        if (prevIdx !== currIdx) {
             updateGraph(prevJSON[currIdx]);
         }
     });
@@ -247,7 +253,7 @@ window.addEventListener('onauth', (e) => {
         if (currIdx < 0) {
             currIdx = 0;
         }
-        if (prevIdx != currIdx) {
+        if (prevIdx !== currIdx) {
             updateGraph(prevJSON[currIdx]);
         }
     });

@@ -1,3 +1,5 @@
+/* global getStorePath, Swal, $ */
+
 $(document).ready(() => {
     // add page header
     $('#header').load('/header-old.html', () => {
@@ -5,14 +7,16 @@ $(document).ready(() => {
         fetch('/user/user_state')
             .then((response) => response.json())
             .then((data) => {
-                $('#auth-dropdown').attr('class', 'dropdown-toggle');
-                $('#auth-dropdown').attr('data-toggle', 'dropdown');
-                $('#auth-dropdown').after("<ul class='dropdown-menu' role='menu' aria-labelledby='dropdownMenu'></ul>");
-                $('ul .dropdown-menu').append('<li><a href="/conf/versions.html">Version</a></li>');
+                const authDrop = $('#auth-dropdown');
+                authDrop.attr('class', 'dropdown-toggle');
+                authDrop.attr('data-toggle', 'dropdown');
+                authDrop.after("<ul class='dropdown-menu' role='menu' aria-labelledby='dropdownMenu'></ul>");
+                const dropdownMenu = $('ul .dropdown-menu');
+                dropdownMenu.append('<li><a href="/conf/versions.html">Version</a></li>');
                 if (data.authenticated) {
-                    $('#auth-dropdown').html(`${data.username} <b class="caret"></b>`);
-                    $('ul .dropdown-menu').append('<li><a href="/user/profile">Profile</a></li>');
-                    $('ul .dropdown-menu').append('<li><a id="show_perms" href="#">Permissions</a></li>');
+                    authDrop.html(`${data.username} <b class='caret'></b>`);
+                    dropdownMenu.append('<li><a href="/user/profile">Profile</a></li>');
+                    dropdownMenu.append('<li><a id="show_perms" href="#">Permissions</a></li>');
                     $('#show_perms').on('click', () => {
                         const frame = document.getElementsByTagName('iframe');
                         const win = frame && frame.length > 0 ? frame[0].contentWindow : window;
@@ -22,14 +26,12 @@ $(document).ready(() => {
                             alert('No MQTT permissions');
                         }
                     });
-                    $('ul .dropdown-menu').append('<li><a href="/user/logout">Logout</a></li>');
+                    dropdownMenu.append('<li><a href="/user/logout">Logout</a></li>');
                 } else {
-                    $('#auth-dropdown').html('Login <b class="caret"></b>');
-                    $('ul .dropdown-menu')
-                        .append('<li><a href="/user/login">Login</a></li>')
-                        .on('click', (e) => {
-                            localStorage.setItem('request_uri', location.href);
-                        });
+                    authDrop.html('Login <b class="caret"></b>');
+                    dropdownMenu.append('<li><a href="/user/login">Login</a></li>').on('click', (e) => {
+                        localStorage.setItem('request_uri', window.location.href);
+                    });
                 }
             });
 
@@ -37,13 +39,13 @@ $(document).ready(() => {
         $('.nav-item a')
             .filter(function () {
                 const link = new URL(this.href).pathname.replace(/^\/+|\/+$/g, '');
-                const loc = location.pathname.replace(/^\/+|\/+$/g, '');
-                if (loc == 'files') {
+                const loc = window.location.pathname.replace(/^\/+|\/+$/g, '');
+                if (loc === 'files') {
                     $('#btn-copy-store-path').show();
                 } else {
                     $('#btn-copy-store-path').hide();
                 }
-                return link == loc;
+                return link === loc;
             })
             .parent()
             .addClass('active');

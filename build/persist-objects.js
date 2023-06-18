@@ -6,6 +6,8 @@
  * @date 2020
  */
 
+/* global Alert, ARENAAUTH, ARENADefaults, Swal, THREE */
+
 import MqttClient from './mqtt-client';
 import ARENAUserAccount from './arena-account';
 
@@ -30,7 +32,7 @@ function type_order(type) {
  *
  */
 export async function init(settings) {
-    if (settings.objList == undefined) throw 'Must provide a list element';
+    if (settings.objList === undefined) throw 'Must provide a list element';
     // handle default settings
     settings = settings || {};
     persist = {
@@ -38,7 +40,7 @@ export async function init(settings) {
         persistUri:
             settings.persistUri !== undefined
                 ? settings.persistUri
-                : `${location.hostname + (location.port ? `:${location.port}` : '')}/persist/`,
+                : `${window.location.hostname + (window.location.port ? `:${window.location.port}` : '')}/persist/`,
         objList: settings.objList,
         addEditSection: settings.addEditSection,
         editObjHandler: settings.editObjHandler,
@@ -137,7 +139,7 @@ export function clearObjectList(noObjNotification = undefined) {
         persist.objList.removeChild(persist.objList.firstChild);
     }
 
-    if (noObjNotification == undefined) return;
+    if (noObjNotification === undefined) return;
 
     const li = document.createElement('li');
     const t = document.createTextNode(noObjNotification);
@@ -147,7 +149,7 @@ export function clearObjectList(noObjNotification = undefined) {
 }
 
 export async function fetchSceneObjects(scene) {
-    if (persist.persistUri == undefined) {
+    if (persist.persistUri === undefined) {
         throw 'Persist DB URL not defined.'; // should be called after persist_url is set
     }
     let sceneObjs;
@@ -203,7 +205,7 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
     });
 
     // console.log(sceneobjs);
-    if (sceneObjs.length == 0) {
+    if (sceneObjs.length === 0) {
         const li = document.createElement('li');
         const t = document.createTextNode('No objects in the scene');
         li.appendChild(t);
@@ -251,22 +253,22 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
         li.setAttribute('data-obj', JSON.stringify(sceneObjs[i]));
         let inputValue = '';
 
-        if (sceneObjs[i].attributes == undefined) continue;
-        if (objTypeFilter[sceneObjs[i].type] == false) continue;
-        if (re.test(sceneObjs[i].object_id) == false) continue;
+        if (sceneObjs[i].attributes === undefined) continue;
+        if (objTypeFilter[sceneObjs[i].type] === false) continue;
+        if (re.test(sceneObjs[i].object_id) === false) continue;
 
-        if (sceneObjs[i].type == 'object') {
+        if (sceneObjs[i].type === 'object') {
             inputValue = `${sceneObjs[i].object_id} ( ${sceneObjs[i].attributes.object_type} )`;
             img.src = 'assets/3dobj-icon.png';
-            if (objTypeFilter[sceneObjs[i].attributes.object_type] == false) continue;
-        } else if (sceneObjs[i].type == 'program') {
-            const ptype = sceneObjs[i].attributes.filetype == 'WA' ? 'WASM program' : 'python program';
+            if (objTypeFilter[sceneObjs[i].attributes.object_type] === false) continue;
+        } else if (sceneObjs[i].type === 'program') {
+            const ptype = sceneObjs[i].attributes.filetype === 'WA' ? 'WASM program' : 'python program';
             inputValue = `${sceneObjs[i].object_id} ( ${ptype}: ${sceneObjs[i].attributes.filename} )`;
             img.src = 'assets/program-icon.png';
-        } else if (sceneObjs[i].type == 'scene-options') {
+        } else if (sceneObjs[i].type === 'scene-options') {
             inputValue = `${sceneObjs[i].object_id} ( scene options )`;
             img.src = 'assets/options-icon.png';
-        } else if (sceneObjs[i].type == 'landmarks') {
+        } else if (sceneObjs[i].type === 'landmarks') {
             inputValue = `${sceneObjs[i].object_id} ( landmarks )`;
             img.src = 'assets/map-icon.png';
         }
@@ -316,12 +318,12 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             };
         })();
 
-        if (sceneObjs[i].object_id == focusObjectId) {
+        if (sceneObjs[i].object_id === focusObjectId) {
             persist.editObjHandler(sceneObjs[i]);
         }
 
         // add 3d edit "button"
-        if (sceneObjs[i].type != 'program') {
+        if (sceneObjs[i].type !== 'program') {
             const editspan3d = document.createElement('span');
             const ielem3d = document.createElement('i');
             ielem3d.className = 'icon-fullscreen';
@@ -330,8 +332,8 @@ export async function populateObjectList(scene, filter, objTypeFilter, focusObje
             editspan3d.appendChild(ielem3d);
             li.appendChild(editspan3d);
 
-            editspan3d.onclick = function () {
-                if (sceneObjs[i].type == 'scene-options') {
+            editspan3d.onclick = function onEditClick() {
+                if (sceneObjs[i].type === 'scene-options') {
                     window.open(`/${scene}?build3d=1&objectId=env`, 'Arena3dEditor');
                 } else {
                     window.open(`/${scene}?build3d=1&objectId=${sceneObjs[i].object_id}`, 'Arena3dEditor');
@@ -350,9 +352,9 @@ export async function populateNamespaceList(nsInput, nsList) {
     let scenes = [];
     // get editable scenes...
     try {
-        const u_scenes = await ARENAUserAccount.userScenes();
-        u_scenes.forEach((u_scene) => {
-            scenes.push(u_scene.name);
+        const uScenes = await ARENAUserAccount.userScenes();
+        uScenes.forEach((uScene) => {
+            scenes.push(uScene.name);
         });
     } catch (err) {
         Alert.fire({
@@ -365,7 +367,7 @@ export async function populateNamespaceList(nsInput, nsList) {
     }
 
     // get public scenes...
-    if (persist.persistUri == undefined) {
+    if (persist.persistUri === undefined) {
         throw 'Persist DB URL not defined.'; // should be called after persist_url is set
     }
     let sceneObjs;
@@ -382,8 +384,8 @@ export async function populateNamespaceList(nsInput, nsList) {
         if (!data.ok) {
             throw 'Fetch request result not ok';
         }
-        const p_scenes = await data.json();
-        scenes.push(...p_scenes);
+        const pScenes = await data.json();
+        scenes.push(...pScenes);
     } catch (err) {
         console.error(err);
         return undefined;
@@ -420,16 +422,15 @@ export async function populateNamespaceList(nsInput, nsList) {
         persist.namespaces.push(persist.authState.username);
     }
 
+    const option = document.createElement('option');
     // add public namespace if needed
     if (persist.namespaces.indexOf('public') < 0) {
-        var option = document.createElement('option');
         option.text = 'public';
         nsList.appendChild(option);
     }
 
     // populate list
     for (let i = 0; i < persist.namespaces.length; i++) {
-        var option = document.createElement('option');
         option.text = persist.namespaces[i];
         nsList.appendChild(option);
     }
@@ -446,7 +447,7 @@ export function emptySceneInput(sceneInput) {
 
 export function populateSceneList(ns, sceneInput, sceneList, selected = undefined) {
     if (!persist.authState.authenticated) return; // should not be called when we are not logged in
-    if (persist.scenes.length == 0) {
+    if (persist.scenes.length === 0) {
         emptySceneInput(sceneInput);
         return;
     }
@@ -463,10 +464,10 @@ export function populateSceneList(ns, sceneInput, sceneList, selected = undefine
         if (ns && persist.scenes[i].ns !== ns) continue;
         if (!first) first = persist.scenes[i].name;
         if (selected) {
-            if (selected == persist.scenes[i].name) selectedExists = true;
+            if (selected === persist.scenes[i].name) selectedExists = true;
         }
         const option = document.createElement('option');
-        option.text = ns == undefined ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
+        option.text = ns === undefined ? `${persist.scenes[i].ns}/${persist.scenes[i].name}` : persist.scenes[i].name;
         // sceneList.add(option);
         sceneList.appendChild(option);
     }
@@ -502,7 +503,7 @@ export function populateNewSceneNamespaces(nsInput, nsList) {
 }
 
 export async function addNewScene(ns, sceneName, newObjs) {
-    const exists = persist.scenes.find((scene) => scene.ns == ns && scene.name == sceneName);
+    const exists = persist.scenes.find((scene) => scene.ns === ns && scene.name === sceneName);
     if (!exists) {
         try {
             const result = await ARENAUserAccount.requestUserNewScene(`${ns}/${sceneName}`);
@@ -566,7 +567,7 @@ export function performActionArgObjList(action, scene, objList, json = true) {
             action,
             persist: true,
             type: obj.type,
-            data: obj.attributes != undefined ? obj.attributes : obj.data,
+            data: obj.attributes !== undefined ? obj.attributes : obj.data,
         });
         if (!scene) {
             scene = `${obj.namespace}/${obj.sceneId}`;
@@ -607,7 +608,7 @@ export async function addObject(obj, scene) {
     if (!persist.mqttConnected) mqttReconnect();
 
     for (let i = 0; i < persist.currentSceneObjs.length; i++) {
-        if (persist.currentSceneObjs[i].object_id == obj.object_id) {
+        if (persist.currentSceneObjs[i].object_id === obj.object_id) {
             found = true;
             break;
         }
@@ -641,7 +642,7 @@ export async function addObject(obj, scene) {
     // set overwrite to true so previous attributes are removed
     if (found) obj.overwrite = true;
 
-    const persistAlert = obj.persist == false ? '<br/><strong>Object not persisted.</strong>' : '';
+    const persistAlert = obj.persist === false ? '<br/><strong>Object not persisted.</strong>' : '';
     const objJson = JSON.stringify(obj);
     const topic = `realm/s/${scene}/${obj.object_id}`;
     console.info(`Publish [ ${topic}]: ${objJson}`);
@@ -657,8 +658,8 @@ export async function addObject(obj, scene) {
         return;
     }
 
-    if (obj.action == 'update') {
-        if (found == true)
+    if (obj.action === 'update') {
+        if (found === true)
             Alert.fire({
                 icon: 'warning',
                 title: 'Updated',

@@ -1,4 +1,7 @@
 /* eslint-disable require-jsdoc */
+
+/* global d3 */
+
 const reloadIntervalMilli = 30000;
 
 let cfg;
@@ -438,6 +441,7 @@ function displayTree(treeData) {
             d.y0 = d.y;
         });
     }
+
     // Creates a curved (diagonal) path from parent to the child nodes
     function diagonal(s, d) {
         path = `M ${s.y} ${s.x}
