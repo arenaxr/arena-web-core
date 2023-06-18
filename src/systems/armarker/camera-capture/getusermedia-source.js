@@ -6,7 +6,7 @@
  * @date 2022
  */
 
-export class GetUserMediaARSource {
+export default class GetUserMediaARSource {
     constructor(options) {
         this.options = {
             cameraFacingMode: 'environment',
@@ -62,16 +62,18 @@ export class GetUserMediaARSource {
     }
 
     copyDimensionsTo(elem) {
+        /* eslint-disable no-param-reassign */
         elem.style.width = this.video.style.width;
         elem.style.height = this.video.style.height;
         elem.style.marginLeft = this.video.style.marginLeft;
         elem.style.marginTop = this.video.style.marginTop;
+        /* eslint-enable no-param-reassign */
     }
 
     init() {
         return new Promise((resolve, reject) => {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                return reject();
+                reject();
             }
 
             navigator.mediaDevices
@@ -85,9 +87,10 @@ export class GetUserMediaARSource {
                 })
                 .then((stream) => {
                     this.video.srcObject = stream;
-                    this.video.onloadedmetadata = (e) => {
-                        this.video.play();
-                        resolve(this.video);
+                    this.video.onloadedmetadata = () => {
+                        this.video.play().then(() => {
+                            resolve(this.video);
+                        });
                     };
                 })
                 .catch((err) => {

@@ -1,5 +1,7 @@
-import { EffectComposer } from './effect-composer';
-import { UnrealBloomPass } from './passes/unreal-bloom-pass';
+/* global AFRAME, THREE */
+
+import EffectComposer from './effect-composer';
+import UnrealBloomPass from './passes/unreal-bloom-pass';
 
 AFRAME.registerSystem('effects', {
     init() {
@@ -45,7 +47,6 @@ AFRAME.registerSystem('effects', {
     onResize() {
         const { sceneEl } = this;
         const { renderer } = sceneEl;
-        const { camera } = sceneEl;
 
         const rendererSize = new THREE.Vector2();
         renderer.getSize(rendererSize);
@@ -64,9 +65,7 @@ AFRAME.registerSystem('effects', {
         const { sceneEl } = this;
 
         const scene = sceneEl.object3D;
-        const { camera } = sceneEl;
 
-        const cameraEl = camera.el;
         const system = this;
 
         let isDigest = false;
@@ -77,7 +76,7 @@ AFRAME.registerSystem('effects', {
 
         this.originalRenderFunc = render;
 
-        scene.onBeforeRender = function (renderer, scene, camera) {
+        scene.onBeforeRender = function onBeforeRender(_renderer, _scene, camera) {
             if (camera instanceof THREE.ArrayCamera) {
                 system.cameras = camera.cameras;
             } else {
@@ -87,10 +86,10 @@ AFRAME.registerSystem('effects', {
 
         let currentXREnabled = renderer.xr.enabled;
 
-        renderer.render = function () {
+        renderer.render = function renderFunc(...args) {
             if (isDigest) {
                 // render "normally"
-                render.apply(this, arguments);
+                render.apply(this, args);
             } else {
                 isDigest = true;
 
@@ -102,12 +101,12 @@ AFRAME.registerSystem('effects', {
 
                 // store "normal" rendering output to this.renderTarget (1)
                 this.setRenderTarget(system.composer.readBuffer);
-                render.apply(this, arguments);
+                render.apply(this, args);
                 this.setRenderTarget(currentRenderTarget);
 
                 // save render state (2)
                 currentXREnabled = this.xr.enabled;
-                currentShadowMapEnabled = this.shadowMap.enabled;
+                // const currentShadowMapEnabled = this.shadowMap.enabled;
 
                 // disable xr
                 this.xr.enabled = false;
@@ -138,7 +137,6 @@ AFRAME.registerSystem('effects', {
         const { renderer } = sceneEl;
 
         const scene = sceneEl.object3D;
-        const { camera } = sceneEl;
 
         if (this.binded === false) return;
         this.binded = false;

@@ -1,8 +1,12 @@
-import { CopyShader } from './shaders/CopyShader';
-import { ShaderPass } from './passes/shader-pass';
+/* eslint-disable no-param-reassign */
+
+/* global THREE */
+
+import CopyShader from './shaders/CopyShader';
+import ShaderPass from './passes/shader-pass';
 
 // https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/EffectComposer.js
-export class EffectComposer {
+export default class EffectComposer {
     constructor(renderer, renderTarget) {
         this.renderer = renderer;
 
@@ -88,28 +92,35 @@ export class EffectComposer {
         for (let i = 0, il = this.passes.length; i < il; i++) {
             const pass = this.passes[i];
 
-            if (pass.enabled === false) continue;
+            if (pass.enabled) {
+                pass.renderToScreen = this.renderToScreen && this.isLastEnabledPass(i);
+                pass.render(
+                    this.renderer,
+                    this.writeBuffer,
+                    this.readBuffer,
+                    currentRenderTarget,
+                    deltaTime,
+                    maskActive
+                );
 
-            pass.renderToScreen = this.renderToScreen && this.isLastEnabledPass(i);
-            pass.render(this.renderer, this.writeBuffer, this.readBuffer, currentRenderTarget, deltaTime, maskActive);
+                if (pass.needsSwap) {
+                    this.swapBuffers();
+                }
 
-            if (pass.needsSwap) {
-                this.swapBuffers();
+                // if ( MaskPass !== undefined ) {
+
+                // 	if ( pass instanceof MaskPass ) {
+
+                // 		maskActive = true;
+
+                // 	} else if ( pass instanceof ClearMaskPass ) {
+
+                // 		maskActive = false;
+
+                // 	}
+
+                // }
             }
-
-            // if ( MaskPass !== undefined ) {
-
-            // 	if ( pass instanceof MaskPass ) {
-
-            // 		maskActive = true;
-
-            // 	} else if ( pass instanceof ClearMaskPass ) {
-
-            // 		maskActive = false;
-
-            // 	}
-
-            // }
         }
 
         this.renderer.setRenderTarget(currentRenderTarget);
@@ -118,9 +129,9 @@ export class EffectComposer {
     reset(renderTarget) {
         if (renderTarget === undefined) {
             const rendererSize = new THREE.Vector2();
-            renderer.getSize(rendererSize);
+            const size = this.renderer.getSize(rendererSize);
 
-            const pixelRatio = renderer.getPixelRatio();
+            const pixelRatio = this.renderer.getPixelRatio();
             this._width = size.width;
             this._height = size.height;
 

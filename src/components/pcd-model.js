@@ -1,5 +1,5 @@
 /* global AFRAME */
-import { PCDLoader } from './vendor/pcd-loader.js';
+import { PCDLoader } from './vendor/pcd-loader';
 
 /**
  * @fileoverview Load PCD models
@@ -27,7 +27,7 @@ AFRAME.registerComponent('pcd-model', {
         this.points = null;
         this.loader = new PCDLoader();
     },
-    update(oldData) {
+    update() {
         const self = this;
         const { el } = this;
         const src = this.data.src ? this.data.src : this.data.url;
@@ -48,6 +48,7 @@ AFRAME.registerComponent('pcd-model', {
                 _this.points = points;
                 el.setObject3D('mesh', points);
                 el.emit('model-loaded', { format: 'pcd', model: self.model });
+                // eslint-disable-next-line no-param-reassign
                 points.material.size = _this.data.pointSize ? _this.data.pointSize : 1;
                 if (_this.data.color) points.material.color.set(_this.data.color);
             },

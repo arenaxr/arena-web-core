@@ -1,4 +1,6 @@
-export const CompositorShader = {
+/* global THREE */
+
+const CompositorShader = {
     uniforms: {
         defines: {
             IS_SRGB: true,
@@ -81,3 +83,5 @@ export const CompositorShader = {
 
     fragmentShader: require('./glsl/compositor/frag.glsl'),
 };
+
+export default CompositorShader;

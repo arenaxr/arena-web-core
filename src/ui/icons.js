@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, ARENAAUTH */
 
 import Swal from 'sweetalert2';
 import { ARENA_EVENTS } from '../constants';
@@ -19,6 +19,42 @@ const SpeedState = Object.freeze({
     FAST: 1,
     SLOW: 2,
 });
+
+/**
+ * Creates a button that will be displayed as an icon on the left of the screen
+ * @param {string} initialImage name of initial image to be displayed
+ * @param {string} tooltip tip to be displayed on hover
+ * @param {function} onClick function that will be run on click
+ * @return {Object} div that is the parent of the button
+ */
+function createIconButton(initialImage, tooltip, onClick) {
+    // Create elements.
+    const wrapper = document.createElement('div');
+    const iconButton = document.createElement('button');
+    iconButton.style.backgroundImage = `url('src/ui/images/${initialImage}.png')`;
+    iconButton.className = ICON_BTN_CLASS;
+    iconButton.setAttribute('id', `btn-${initialImage}`);
+    iconButton.setAttribute('title', tooltip);
+
+    // Insert elements.
+    wrapper.appendChild(iconButton);
+    iconButton.addEventListener('click', (evt) => {
+        onClick();
+        evt.stopPropagation();
+
+        // Button focus is different per browser, so set manual focus. In general, we need to check
+        // UI elements on our overlay that can keep input focus, since the natural implementation
+        // on most browsers is that input elements capture tab/arrow/+chars for DOM navigation and
+        // input.
+
+        // Chrome appears to leave focus on the button, but we need it back to body for 3D navigation.
+        document.activeElement.blur();
+        document.body.focus();
+    });
+
+    wrapper.onClick = onClick;
+    return wrapper;
+}
 
 /**
  * SideMenu component
@@ -62,8 +98,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     ready() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
 
@@ -208,6 +243,17 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
     createAdditionalSettings() {
         const sceneWriter = this.arena.isUserSceneWriter();
+
+        /**
+         * Embolden text.
+         * @param {*} el Element object
+         * @param {*} text Text to bold
+         */
+        function appendBold(el, text) {
+            const b = document.createElement('b');
+            b.innerText = text;
+            el.append(b);
+        }
 
         // Add settings panel
         this.settingsPopup = document.createElement('div');
@@ -383,31 +429,17 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         formDiv.appendChild(iconCredits);
 
         const _this = this;
-        closeSettingsButton.onclick = function () {
+        closeSettingsButton.onclick = function onCloseClick() {
             _this.settingsPopup.style.display = 'none'; // close settings panel
             _this.saveSettings();
         };
 
-        saveSettingsButton.onclick = function () {
+        saveSettingsButton.onclick = function onSaveClick() {
             _this.saveSettings();
         };
-
-        /**
-         * Embolden text.
-         * @param {*} el Element object
-         * @param {*} text Text to bold
-         */
-        function appendBold(el, text) {
-            const b = document.createElement('b');
-            b.innerText = text;
-            el.append(b);
-        }
     },
 
     onAudioButtonClick() {
-        const { data } = this;
-        const { el } = this;
-
         if (!this.jitsi.hasAudio) {
             // toggled
             this.jitsi
@@ -431,7 +463,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     onVideoButtonClick() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -468,7 +499,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     async onAvatarButtonClick() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -478,7 +508,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         // dynamically import face tracking module
         let faceTracker = document.querySelector('a-scene').systems['face-tracking'];
         if (faceTracker === undefined) {
-            await import('../systems/face-tracking/index.js');
+            await import('../systems/face-tracking/index');
             faceTracker = document.querySelector('a-scene').systems['face-tracking'];
             if (!faceTracker) return;
         }
@@ -500,7 +530,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     onAVButtonClick() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -511,7 +540,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     onSpeedButtonClick() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -546,7 +574,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     onFlyingButtonClick() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -570,7 +597,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     onScreenshareButtonClick() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -600,9 +626,9 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     ),
                 showCancelButton: true,
                 reverseButtons: true,
-            }).then((result) => {
-                if (!result.isConfirmed || result.value.length == 0) return;
-                const objectIds = result.value;
+            }).then((res) => {
+                if (!res.isConfirmed || res.value.length === 0) return;
+                const objectIds = res.value;
 
                 const screenshareWindow = window.open('./screenshare', '_blank');
                 screenshareWindow.params = {
@@ -666,7 +692,6 @@ AFRAME.registerSystem('arena-side-menu-ui', {
     },
 
     saveSettings() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -729,39 +754,3 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         this._buttonList[button].onClick();
     },
 });
-
-/**
- * Creates a button that will be displayed as an icon on the left of the screen
- * @param {string} initialImage name of initial image to be displayed
- * @param {string} tooltip tip to be displayed on hover
- * @param {function} onClick function that will be run on click
- * @return {Object} div that is the parent of the button
- */
-function createIconButton(initialImage, tooltip, onClick) {
-    // Create elements.
-    const wrapper = document.createElement('div');
-    const iconButton = document.createElement('button');
-    iconButton.style.backgroundImage = `url('src/ui/images/${initialImage}.png')`;
-    iconButton.className = ICON_BTN_CLASS;
-    iconButton.setAttribute('id', `btn-${initialImage}`);
-    iconButton.setAttribute('title', tooltip);
-
-    // Insert elements.
-    wrapper.appendChild(iconButton);
-    iconButton.addEventListener('click', (evt) => {
-        onClick();
-        evt.stopPropagation();
-
-        // Button focus is different per browser, so set manual focus. In general, we need to check
-        // UI elements on our overlay that can keep input focus, since the natural implementation
-        // on most browsers is that input elements capture tab/arrow/+chars for DOM navigation and
-        // input.
-
-        // Chrome appears to leave focus on the button, but we need it back to body for 3D navigation.
-        document.activeElement.blur();
-        document.body.focus();
-    });
-
-    wrapper.onClick = onClick;
-    return wrapper;
-}

@@ -8,9 +8,10 @@
  * Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
  */
 
-/* global ARENA */
+/* global AFRAME, ARENA, mdb */
 
 import Swal from 'sweetalert2';
+import createAudioMeter from './volume-meter';
 import { ARENA_EVENTS } from '../constants';
 
 AFRAME.registerSystem('arena-av-setup', {
@@ -22,7 +23,6 @@ AFRAME.registerSystem('arena-av-setup', {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.ready.bind(this));
     },
     ready() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -190,10 +190,12 @@ AFRAME.registerSystem('arena-av-setup', {
 
             this.el.sceneEl.emit(ARENA_EVENTS.NEW_SETTINGS, { userName: this.displayName.value });
         });
-        document.getElementById('readonlyNamespace').value = ARENA.namespacedScene.split('/')[0];
-        document.getElementById('readonlySceneName').value = ARENA.namespacedScene.split('/')[1];
+        const readonlyNamespace = document.getElementById('readonlyNamespace');
+        const readonlySceneName = document.getElementById('readonlySceneName');
+        [readonlyNamespace.value, readonlySceneName.value] = ARENA.namespacedScene.split('/');
     },
 
+    // eslint-disable-next-line default-param-last,no-unused-vars
     getStream(_evt = undefined, { prefAudioInput, prefVideoInput } = {}, silent) {
         if (window.stream) {
             window.stream.getTracks().forEach((track) => {
@@ -237,7 +239,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.audioOutSelect.textContent = '';
         this.videoSelect.textContent = '';
         window.deviceInfos = deviceInfos; // make available to console
-        for (const deviceInfo of deviceInfos) {
+        deviceInfos.forEach((deviceInfo) => {
             const option = document.createElement('option');
             option.value = deviceInfo.deviceId;
             switch (deviceInfo.kind) {
@@ -259,7 +261,7 @@ AFRAME.registerSystem('arena-av-setup', {
                 default:
                 //
             }
-        }
+        });
         const noElementOption = document.createElement('option');
         noElementOption.setAttribute('selected', 'selected');
         noElementOption.text = 'No Device Detected';
@@ -316,7 +318,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.videoElement.srcObject = stream;
 
         // Mic Test Meter via https://github.com/cwilso/volume-meter/
-        this.meterProcess && this.meterProcess.shutdown();
+        this.meterProcess?.shutdown();
         this.mediaStreamSource = this.audioContext.createMediaStreamSource(stream);
         this.mediaStreamSource.connect(this.meterProcess);
         this.micDrawLoop();

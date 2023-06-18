@@ -48,7 +48,7 @@ AFRAME.registerComponent('load-scene', {
         const self = this;
     },
 
-    update(oldData) {
+    update() {
         // this in fact only gets called when the component that it is - gets updated
         // unlike the update method in Unity that gets called every frame
         const { data } = this; // Component property values.
@@ -56,17 +56,17 @@ AFRAME.registerComponent('load-scene', {
 
         if (data.on) {
             // we have an event?
-            el.addEventListener(data.on, function (evt) {
+            el.addEventListener(data.on, function loadCallback(evt) {
                 if ('cursorEl' in evt.detail) {
                     // internal click event, our scene only
                 } else {
                     // MQTT click event that everyone gets
                     console.debug(`load-scene url=${data.url}`);
                     if (!this.loaded) {
-                        ARENA.loadArenaScene(data.url, data.position, data.rotation);
+                        // ARENA.loadArenaScene(data.url, data.position, data.rotation);
                         this.loaded = true;
                     } else {
-                        ARENA.unloadArenaScene(data.url);
+                        // ARENA.unloadArenaScene(data.url);
                         this.loaded = false;
                     }
                 }

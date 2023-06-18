@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA, THREE */
 
 import { ARENA_EVENTS } from '../constants';
 import { ARENAUtils } from '../utils';
@@ -48,7 +48,6 @@ AFRAME.registerComponent('arena-camera', {
     },
 
     ready() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -88,7 +87,8 @@ AFRAME.registerComponent('arena-camera', {
                 window.bgHeartbeatTimer = setInterval(() => {
                     // 30 minute timeout
                     if (window.bgHeartbeatCount >= 30 * 60) {
-                        return clearInterval(window.bgHeartbeatTimer);
+                        clearInterval(window.bgHeartbeatTimer);
+                        return;
                     }
                     this.publishPose();
                     window.bgHeartbeatCount++;
@@ -216,10 +216,9 @@ AFRAME.registerComponent('arena-camera', {
      * If a position or rotation change is detected, or time for a heartbeat, trigger message publish
      * @ignore
      */
-    tick(t, dt) {
+    tick() {
         if (!this.initialized) return;
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         this.heartBeatCounter++;
 

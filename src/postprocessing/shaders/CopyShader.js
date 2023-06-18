@@ -36,4 +36,4 @@ const CopyShader = {
 		}`,
 };
 
-export { CopyShader };
+export default CopyShader;

@@ -9,7 +9,7 @@
 
 /* global AFRAME */
 
-AFRAME.components['hide-on-enter-ar'].Component.prototype.init = function () {
+AFRAME.components['hide-on-enter-ar'].Component.prototype.init = function init() {
     this.gltfAttributes = null;
     this.gltfLodAttributes = null;
     this.gltfLodAdvancedAttributes = null;

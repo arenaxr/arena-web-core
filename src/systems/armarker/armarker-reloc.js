@@ -1,5 +1,4 @@
 /* eslint-disable no-throw-literal */
-/* global ARENA */
 
 /**
  * @fileoverview Relocalization from AR Marker detection events
@@ -10,10 +9,14 @@
  * @authors Ivan Liang, Nuno Pereira
  */
 
+/* global ARENA, THREE */
+
+import { ARENAUtils } from '../../utils';
+
 /**
  *
  */
-export class ARMarkerRelocalization {
+export default class ARMarkerRelocalization {
     /* singleton instance */
     static instance = null;
 
@@ -84,7 +87,7 @@ export class ARMarkerRelocalization {
         ARMarkerRelocalization.instance = this;
 
         // check/init internal options
-        if (networkedLocationSolver == true) {
+        if (networkedLocationSolver === true) {
             if (!ARENA) throw 'Networked tag solver requires ARENA functionality.';
             console.info('networkedLocationSolver = true; letting relocalization up to a networked solver.');
         }
@@ -208,10 +211,10 @@ export class ARMarkerRelocalization {
         if (this.networkedLocationSolver) {
             // create message
             const jsonMsg = { ...this.DFT_DETECTION_MSG, timestamp, vio, detections: [] };
-            for (const detection of detections) {
+            detections.forEach((detection) => {
                 const d = detection;
                 if (d.pose.e > this.DTAG_ERROR_THRESH) {
-                    continue;
+                    return;
                 }
                 delete d.corners;
                 delete d.center;
@@ -221,24 +224,26 @@ export class ARMarkerRelocalization {
                     d.refTag = indexedTag;
                 }
                 jsonMsg.detections.push(d);
-            }
+            });
             ARENA.Mqtt.publish(`${ARENA.defaults.realm}/g/a/${ARENA.camName}`, JSON.stringify(jsonMsg));
         }
         // this the one
         if (!this.networkedLocationSolver) {
             let localizerTag = false;
             const pubDetList = [];
-            for (const detection of detections) {
+            detections.forEach((detection) => {
                 if (detection.pose.e > this.DTAG_ERROR_THRESH) {
                     // eslint-disable-next-line max-len
                     if (this.debug)
                         console.warn(
                             `Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`
                         );
-                    continue;
+                    return;
                 }
+                /* eslint-disable no-param-reassign */
                 delete detection.corners;
                 delete detection.center;
+                /* eslint-disable no-param-reassign */
                 let refTag = null;
                 // get marker data
                 const indexedTag = this.arMakerSystem.getMarker(detection.id);
@@ -247,14 +252,14 @@ export class ARMarkerRelocalization {
                     if (this.debug) {
                         console.debug('ARMarker system has no data about tag id:', detection.id);
                     }
-                    continue;
+                    return;
                 }
                 if (this.debug) {
                     console.debug('ARMarker system found tag:', refTag);
                 }
 
                 // publish this detection ?
-                if (refTag.publish == true) {
+                if (refTag.publish) {
                     detection.refTag = refTag;
                     pubDetList.push(detection);
                 }
@@ -276,7 +281,7 @@ export class ARMarkerRelocalization {
                         */
                         this.arMakerSystem.initialLocalized = true;
                     }
-                } else if (refTag.dynamic && refTag.publish == false) {
+                } else if (refTag.dynamic && refTag.publish === false) {
                     // tag is dynamic? push update if publish=false
                     if (ARENA && ARENA.isUserSceneWriter()) {
                         // Dynamic + writable, push marker update
@@ -359,7 +364,7 @@ export class ARMarkerRelocalization {
                         );
                     ARENA.Mqtt.publish(`${ARENA.defaults.realm}/g/a/${ARENA.camName}`, JSON.stringify(jsonMsg));
                 }
-            }
+            });
         }
     }
 

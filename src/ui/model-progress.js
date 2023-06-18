@@ -1,7 +1,3 @@
-/* global AFRAME */
-import he from 'he';
-import Swal from 'sweetalert2';
-
 /**
  * @fileoverview Model loading progress system. Manage model load messages.
  *
@@ -14,6 +10,9 @@ import Swal from 'sweetalert2';
  * Display and update an alert with load info; Used by the model loading progress system.
  * @private
  */
+
+/* global AFRAME */
+
 class LoadAlertTable {
     constructor(maxRows = 10, errorsOnTop = true, timeoutMs = 4000, rowTimeout = 2000) {
         this.maxRows = maxRows;
@@ -53,15 +52,16 @@ class LoadAlertTable {
         }
         let nCols = 0;
         if (rows.length > 0) nCols = rows[0].cols.length; // assume the smae number of columns in all lines
-        for (let i = 0; i < Math.min(this.maxRows, rows.length); i++) {
+        let i;
+        for (i = 0; i < Math.min(this.maxRows, rows.length); i++) {
             let lineClass = 'normal';
             if (rows[i].isError) lineClass = 'error';
             tableHTML += `
-                <tr><td class="alert-table ${lineClass}"><span>${rows[i].cols.join(`</span></td>
-                <td class="alert-table ${lineClass}"><span>`)}</span></td></tr>`;
+                <tr><td class='alert-table ${lineClass}'><span>${rows[i].cols.join(`</span></td>
+                <td class='alert-table ${lineClass}'><span>`)}</span></td></tr>`;
             nCols++;
         }
-        if (i > this.maxRows) tableHTML += `<tr><td colspan=${nCols}>(more not shown...)</td></tr>`;
+        if (i > this.maxRows) tableHTML += `<tr><td colspan='${nCols}'>(more not shown...)</td></tr>`;
         tableHTML += '</table>';
 
         return tableHTML;
@@ -182,9 +182,9 @@ AFRAME.registerSystem('model-progress', {
         let percent;
         const progressEntries = Object.entries(this.loadProgress);
         if (progressEntries.length > 0) {
-            for (const [src, lp] of progressEntries) {
+            progressEntries.forEach(([src, lp]) => {
                 const filename = decodeURIComponent(src)
-                    .replace(/^.*[\\\/]/, '')
+                    .replace(/^.*[\\/]/, '')
                     .split('?')[0];
                 const shortName =
                     filename.length < this.FN_MAX_LENGTH
@@ -208,7 +208,7 @@ AFRAME.registerSystem('model-progress', {
                 }
                 if (lp.done) doneCount++;
                 files.push({ cols: [shortName, progressStr], isError: lp.failed });
-            }
+            });
             percent = (pSum / progressEntries.length).toFixed(1);
             title = `Loading : ${percent}% (${doneCount}/${progressEntries.length}`;
             if (errors > 0) {

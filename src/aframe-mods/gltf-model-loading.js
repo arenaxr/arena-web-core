@@ -8,7 +8,7 @@
 
 /* global AFRAME */
 
-AFRAME.components['gltf-model'].Component.prototype.update = function () {
+AFRAME.components['gltf-model'].Component.prototype.update = function update() {
     const self = this;
     const { el } = this;
     const src = this.data;

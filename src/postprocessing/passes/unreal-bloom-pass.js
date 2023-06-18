@@ -1,6 +1,8 @@
-import { Pass, FullScreenQuad } from './pass.js';
-import { CopyShader } from '../shaders/CopyShader.js';
-import { LuminosityHighPassShader } from '../shaders/LuminosityHighPassShader.js';
+/* global THREE */
+
+import { Pass, FullScreenQuad } from './pass';
+import CopyShader from '../shaders/CopyShader';
+import LuminosityHighPassShader from '../shaders/LuminosityHighPassShader';
 
 /**
  * UnrealBloomPass is inspired by the bloom pass of Unreal Engine. It creates a
@@ -183,6 +185,7 @@ class UnrealBloomPass extends Pass {
         renderer.getClearColor(this._oldClearColor);
         this.oldClearAlpha = renderer.getClearAlpha();
         const oldAutoClear = renderer.autoClear;
+        // eslint-disable-next-line no-param-reassign
         renderer.autoClear = false;
 
         renderer.setClearColor(this.clearColor, 0);
@@ -261,6 +264,7 @@ class UnrealBloomPass extends Pass {
         // Restore renderer settings
 
         renderer.setClearColor(this._oldClearColor, this.oldClearAlpha);
+        // eslint-disable-next-line no-param-reassign
         renderer.autoClear = oldAutoClear;
     }
 
@@ -365,4 +369,4 @@ class UnrealBloomPass extends Pass {
 UnrealBloomPass.BlurDirectionX = new THREE.Vector2(1.0, 0.0);
 UnrealBloomPass.BlurDirectionY = new THREE.Vector2(0.0, 1.0);
 
-export { UnrealBloomPass };
+export default UnrealBloomPass;

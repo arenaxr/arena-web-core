@@ -6,20 +6,19 @@
  * @date 2023
  */
 
-/* global AFRAME, THREE */
+/* global AFRAME, ARENA, Swal, THREE, $ */
 
-import { ARENADefaults } from '../../conf/defaults.js';
 import { ARENAUtils } from '../utils';
-import { ARENAWebARUtils } from '../webar';
+import ARENAWebARUtils from '../webar';
 import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
 
 AFRAME.registerSystem('arena-scene', {
     schema: {
-        devInstance: { type: 'boolean', default: ARENADefaults.devInstance },
-        persistHost: { type: 'string', default: ARENADefaults.persistHost },
-        persistPath: { type: 'string', default: ARENADefaults.persistPath },
-        camHeight: { type: 'number', default: ARENADefaults.camHeight },
-        disallowJWT: { type: 'boolean', default: !!ARENADefaults.disallowJWT },
+        devInstance: { type: 'boolean', default: ARENA.defaults.devInstance },
+        persistHost: { type: 'string', default: ARENA.defaults.persistHost },
+        persistPath: { type: 'string', default: ARENA.defaults.persistPath },
+        camHeight: { type: 'number', default: ARENA.defaults.camHeight },
+        disallowJWT: { type: 'boolean', default: !!ARENA.defaults.disallowJWT },
     },
 
     init() {
@@ -35,7 +34,6 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     ready(evt) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -78,7 +76,7 @@ AFRAME.registerSystem('arena-scene', {
         this.mqttToken = evt.detail;
 
         // id tag including name is set from authentication service
-        this.setIdTag(this.mqttToken.ids.userid, ARENA);
+        this.setIdTag(this.mqttToken.ids.userid);
 
         if (this.isUsersPermitted()) {
             this.showEchoDisplayName();
@@ -175,7 +173,6 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     loadScene() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -210,7 +207,7 @@ AFRAME.registerSystem('arena-scene', {
      * @param {string} idTag user name to set; will use url parameter value or default is no name is given
      */
     setIdTag(idTag) {
-        if (idTag === undefined) throw 'setIdTag: idTag not defined.'; // idTag must be set
+        if (idTag === undefined) throw new Error('setIdTag: idTag not defined.'); // idTag must be set
         this.idTag = idTag;
 
         // set camName
@@ -251,15 +248,14 @@ AFRAME.registerSystem('arena-scene', {
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
     isUsersPermitted() {
-        const { data } = this;
         if (this.params.build3d) return false; // build3d is used on a new page
         return ARENAUtils.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
     },
 
     /**
      * Checks token for full scene object write permissions.
-     * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
-     * @return {boolean} True if the user has permission to write in this scene.
+     // * @param {object} mqttToken - token with user permissions; Defaults to currently loaded MQTT token
+     // * @return {boolean} True if the user has permission to write in this scene.
      */
     isUserSceneWriter() {
         return ARENAUtils.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
@@ -288,8 +284,7 @@ AFRAME.registerSystem('arena-scene', {
      * loads this user's presence and camera
      */
     loadUser() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
 
@@ -344,7 +339,9 @@ AFRAME.registerSystem('arena-scene', {
                         const closestGroup = navSys.getGroup(startPos, false);
                         const closestNode = navSys.getNode(startPos, closestGroup, false);
                         navSys.clampStep(startPos, startPos, closestGroup, closestNode, startPos);
-                    } catch {}
+                    } catch {
+                        /* empty */
+                    }
                 }
                 cameraEl.object3D.position.copy(startPos);
                 cameraEl.object3D.position.y += data.camHeight;
@@ -371,8 +368,6 @@ AFRAME.registerSystem('arena-scene', {
      * Expects all known objects to be loaded first.
      */
     loadArenaInspector() {
-        const { data } = this;
-
         const { sceneEl } = this.el;
 
         let el;
@@ -383,6 +378,16 @@ AFRAME.registerSystem('arena-scene', {
         }
         sceneEl.components.inspector.openInspector(el || null);
         console.log('build3d', 'A-Frame Inspector loaded');
+
+        function updateInspectorPanel(perm, jqSelect) {
+            $(jqSelect).css('opacity', '.75');
+            if (!perm) {
+                // no permission to edit
+                $(jqSelect).css('background-color', 'orange');
+                $(jqSelect).css('pointer-events', 'none');
+                $(`${jqSelect} :input`).attr('disabled', true);
+            }
+        }
 
         setTimeout(() => {
             const perm = this.isUserSceneWriter();
@@ -406,27 +411,16 @@ AFRAME.registerSystem('arena-scene', {
                 window.location.reload();
             });
         }, 2000);
-
-        function updateInspectorPanel(perm, jqSelect) {
-            $(jqSelect).css('opacity', '.75');
-            if (!perm) {
-                // no permission to edit
-                $(jqSelect).css('background-color', 'orange');
-                $(jqSelect).css('pointer-events', 'none');
-                $(`${jqSelect} :input`).attr('disabled', true);
-            }
-        }
     },
 
     /**
      * loads scene objects from specified persistence URL if specified,
      * or this.persistenceUrl if not
-     * @param {string} [urlToLoad] which url to load arena from
+     * @param {[{Object}]} [sceneObjs] Objects to load
      * @param {string} [parentName] parentObject to attach sceneObjects to
      * @param {string} [prefixName] prefix to add to container
      */
     loadSceneObjects(sceneObjs, parentName, prefixName) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -507,13 +501,13 @@ AFRAME.registerSystem('arena-scene', {
             const [objId, obj] = iter.next().value; // get first entry
             if (obj.type === 'program') {
                 // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                const avars = {
-                    scene: this.sceneName,
-                    namespace: this.nameSpace,
-                    cameraid: this.camName,
-                    username: this.getDisplayName(),
-                    mqtth: this.mqttHost,
-                };
+                // const avars = {
+                //     scene: this.sceneName,
+                //     namespace: this.nameSpace,
+                //     cameraid: this.camName,
+                //     username: this.getDisplayName(),
+                //     mqtth: this.mqttHost,
+                // };
                 // ask runtime manager to start this program
                 // this.RuntimeManager.createModuleFromPersist(obj, avars);
                 arenaObjects.delete(objId);
@@ -536,51 +530,51 @@ AFRAME.registerSystem('arena-scene', {
      * or this.persistenceUrl if not
      * @param {string} urlToLoad which url to unload arena from
      */
-    unloadArenaScene(urlToLoad) {
-        const xhr = new XMLHttpRequest();
-        xhr.withCredentials = !data.disallowJWT;
-        if (urlToLoad) {
-            xhr.open('GET', urlToLoad);
-        } else {
-            xhr.open('GET', this.persistenceUrl);
-        }
-
-        xhr.send();
-        xhr.responseType = 'json';
-        xhr.onload = () => {
-            if (xhr.status !== 200) {
-                Swal.fire({
-                    title: 'Error loading initial scene data',
-                    text: `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
-                    icon: 'error',
-                    showConfirmButton: true,
-                    confirmButtonText: 'Ok',
-                });
-            } else {
-                const arenaObjects = xhr.response;
-                const l = arenaObjects.length;
-                for (let i = 0; i < l; i++) {
-                    const obj = arenaObjects[i];
-                    if (obj.object_id === this.camName) {
-                        // don't load our own camera/head assembly
-                    } else {
-                        const msg = {
-                            object_id: obj.object_id,
-                            action: 'delete',
-                        };
-                        onMessageArrived(undefined, msg);
-                    }
-                }
-            }
-        };
-    },
+    // unloadArenaScene(urlToLoad) {
+    //     const { data } = this;
+    //     const xhr = new XMLHttpRequest();
+    //     xhr.withCredentials = !data.disallowJWT;
+    //     if (urlToLoad) {
+    //         xhr.open('GET', urlToLoad);
+    //     } else {
+    //         xhr.open('GET', this.persistenceUrl);
+    //     }
+    //
+    //     xhr.send();
+    //     xhr.responseType = 'json';
+    //     xhr.onload = () => {
+    //         if (xhr.status !== 200) {
+    //             Swal.fire({
+    //                 title: 'Error loading initial scene data',
+    //                 text: `${xhr.status}: ${xhr.statusText} ${JSON.stringify(xhr.response)}`,
+    //                 icon: 'error',
+    //                 showConfirmButton: true,
+    //                 confirmButtonText: 'Ok',
+    //             });
+    //         } else {
+    //             const arenaObjects = xhr.response;
+    //             const l = arenaObjects.length;
+    //             for (let i = 0; i < l; i++) {
+    //                 const obj = arenaObjects[i];
+    //                 if (obj.object_id === this.camName) {
+    //                     // don't load our own camera/head assembly
+    //                 } else {
+    //                     const msg = {
+    //                         object_id: obj.object_id,
+    //                         action: 'delete',
+    //                     };
+    //                     onMessageArrived(undefined, msg);
+    //                 }
+    //             }
+    //         }
+    //     };
+    // },
 
     /**
      * Loads and applies scene-options (if it exists), otherwise set to default environment
      * @param {Object} sceneData - scene data from persistence, already JSON parsed
      */
     loadSceneOptions(sceneData) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -603,7 +597,7 @@ AFRAME.registerSystem('arena-scene', {
 
             if (sceneOptions.physics) {
                 // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-                import('../systems/vendor/aframe-physics-system.min.js');
+                import('../systems/vendor/aframe-physics-system.min');
                 document.getElementById('groundPlane').setAttribute('static-body', 'true');
             }
 
@@ -642,14 +636,14 @@ AFRAME.registerSystem('arena-scene', {
             }
 
             // save scene options
-            for (const [attribute, value] of Object.entries(sceneOptions)) {
+            Object.entries(sceneOptions).forEach(([attribute, value]) => {
                 ARENA[attribute] = value;
-            }
+            });
 
             const envPresets = options['env-presets'];
-            for (const [attribute, value] of Object.entries(envPresets)) {
+            Object.entries(envPresets).forEach(([attribute, value]) => {
                 environment.setAttribute('environment', attribute, value);
-            }
+            });
             sceneRoot.appendChild(environment);
 
             const rendererSettings = options['renderer-settings'];
@@ -705,9 +699,9 @@ AFRAME.registerSystem('arena-scene', {
         let headModelPathIdx = 0;
         const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
         const sceneHeadModelPathIdx = sceneHist[this.namespacedScene]?.headModelPathIdx;
-        if (sceneHeadModelPathIdx != undefined) {
+        if (sceneHeadModelPathIdx !== undefined) {
             headModelPathIdx = sceneHeadModelPathIdx;
-        } else if (headModelPathSelect.selectedIndex == 0) {
+        } else if (headModelPathSelect.selectedIndex === 0) {
             // if default ARENA head used, replace with default scene head
             headModelPathIdx = defaultHeadsLen;
         } else if (localStorage.getItem('headModelPathIdx')) {

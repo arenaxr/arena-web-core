@@ -1,15 +1,17 @@
-import { Pass, FullScreenQuad } from './pass.js';
-import { DigitalGlitch } from '../shaders/DigitalGlitch.js';
+/* global THREE */
+
+import { FullScreenQuad, Pass } from './pass';
+import DigitalGlitch from '../shaders/DigitalGlitch';
 
 class GlitchPass extends Pass {
-    constructor(dt_size = 64) {
+    constructor(dtSize = 64) {
         super();
 
         const shader = DigitalGlitch;
 
         this.uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
-        this.heightMap = this.generateHeightmap(dt_size);
+        this.heightMap = this.generateHeightmap(dtSize);
 
         this.uniforms.tDisp.value = this.heightMap;
 
@@ -33,7 +35,7 @@ class GlitchPass extends Pass {
         this.uniforms.seed.value = Math.random(); // default seeding
         this.uniforms.byp.value = 0;
 
-        if (this.curF % this.randX == 0 || this.goWild == true) {
+        if (this.curF % this.randX === 0 || this.goWild === true) {
             this.uniforms.amount.value = Math.random() / 30;
             this.uniforms.angle.value = THREE.MathUtils.randFloat(-Math.PI, Math.PI);
             this.uniforms.seed_x.value = THREE.MathUtils.randFloat(-1, 1);
@@ -49,7 +51,7 @@ class GlitchPass extends Pass {
             this.uniforms.distortion_y.value = THREE.MathUtils.randFloat(0, 1);
             this.uniforms.seed_x.value = THREE.MathUtils.randFloat(-0.3, 0.3);
             this.uniforms.seed_y.value = THREE.MathUtils.randFloat(-0.3, 0.3);
-        } else if (this.goWild == false) {
+        } else if (this.goWild === false) {
             this.uniforms.byp.value = 1;
         }
 
@@ -69,16 +71,15 @@ class GlitchPass extends Pass {
         this.randX = THREE.MathUtils.randInt(120, 240);
     }
 
-    generateHeightmap(dt_size) {
-        const data_arr = new Float32Array(dt_size * dt_size);
-        const length = dt_size * dt_size;
+    generateHeightmap(dtSize) {
+        const dataArr = new Float32Array(dtSize * dtSize);
+        const length = dtSize * dtSize;
 
         for (let i = 0; i < length; i++) {
-            const val = THREE.MathUtils.randFloat(0, 1);
-            data_arr[i] = val;
+            dataArr[i] = THREE.MathUtils.randFloat(0, 1);
         }
 
-        const texture = new THREE.DataTexture(data_arr, dt_size, dt_size, THREE.RedFormat, THREE.FloatType);
+        const texture = new THREE.DataTexture(dataArr, dtSize, dtSize, THREE.RedFormat, THREE.FloatType);
         texture.needsUpdate = true;
         return texture;
     }
@@ -92,4 +93,4 @@ class GlitchPass extends Pass {
     }
 }
 
-export { GlitchPass };
+export default GlitchPass;

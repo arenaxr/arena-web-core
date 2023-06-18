@@ -6,10 +6,10 @@
  * @date 2023
  */
 
-import { ARENADefaults } from '../conf/defaults';
+/* global AFRAME, ARENA */
 
 // ARENA version from automated scripts
-import { ARENA_VERSION_MSG } from './arena-version';
+import ARENA_VERSION_MSG from './arena-version';
 
 // replace console with our logging (only when not in dev)
 import { ARENAMqttConsole } from './utils';
@@ -27,7 +27,7 @@ import './webar';
 
 console.info(ARENA_VERSION_MSG);
 
-if (!ARENADefaults.devInstance) {
+if (!ARENA.defaults.devInstance) {
     // will queue messages until MQTT connection is available (indicated by console.setOptions())
     ARENAMqttConsole.init();
 }

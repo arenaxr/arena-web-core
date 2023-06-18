@@ -39,10 +39,9 @@ AFRAME.registerComponent('textinput', {
     init() {},
 
     update() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
-        el.addEventListener(data.on, function (evt) {
+        el.addEventListener(data.on, function onEvtCallback() {
             Swal.fire({
                 title: data.title.substring(0, 140),
                 input: 'textarea',

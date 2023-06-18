@@ -6,8 +6,8 @@
  * @date 2020
  */
 
-import { ClientEvent } from './client-event.js';
-import { CreateUpdate } from './create-update.js';
-import { Delete } from './delete.js';
+import ClientEvent from './client-event';
+import CreateUpdate from './create-update';
+import Delete from './delete';
 
 export { ClientEvent, CreateUpdate, Delete };

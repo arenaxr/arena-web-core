@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, THREE */
+/* global AFRAME, ARENA, THREE */
 
 import { ARENAUtils } from '../utils';
 
@@ -21,6 +21,15 @@ const OBSERVER_CONFIG = {
     attributes: true,
     subtree: true,
 };
+
+function copyArray(dest, source) {
+    /* eslint-disable no-param-reassign */
+    dest.length = 0;
+    for (let i = 0; i < source.length; i++) {
+        dest[i] = source[i];
+    }
+    /* eslint-disable no-param-reassign */
+}
 
 /**
  * Supermedium/aabb-collider#24a9d3e. Renamed to box-collider for clarity
@@ -40,7 +49,7 @@ AFRAME.registerComponent('box-collider', {
     },
 
     init() {
-        this.centerDifferenceVec3 = new THREE.Vector3();
+        // this.centerDifferenceVec3 = new THREE.Vector3();
         this.clearedIntersectedEls = [];
         this.closestIntersectedEl = null;
         this.boundingBox = new THREE.Box3();
@@ -81,7 +90,7 @@ AFRAME.registerComponent('box-collider', {
         if (this.data.debug) {
             if (this.boxHelper) {
                 this.el.sceneEl.object3D.remove(this.boxHelper);
-                this.boxHelper.dispose && this.boxHelper.dispose();
+                this.boxHelper?.dispose();
                 this.boxHelper = null;
             }
             for (let i = 0; i < this.objectEls.length; i++) {
@@ -89,22 +98,24 @@ AFRAME.registerComponent('box-collider', {
                 if (boxHelper) {
                     this.el.sceneEl.object3D.remove(boxHelper);
                     this.objectEls[i].object3D.boxHelper = null;
-                    boxHelper.dispose && boxHelper.dispose();
+                    boxHelper?.dispose();
                 }
             }
         }
     },
 
     tick(time) {
-        const { boundingBox } = this;
-        const { centerDifferenceVec3 } = this;
-        const { clearedIntersectedEls } = this;
-        const { el } = this;
-        const { intersectedEls } = this;
-        const { newIntersectedEls } = this;
-        const { objectEls } = this;
-        const { prevCheckTime } = this;
-        const { previousIntersectedEls } = this;
+        const {
+            boundingBox,
+            centerDifferenceVec3,
+            clearedIntersectedEls,
+            el,
+            intersectedEls,
+            newIntersectedEls,
+            objectEls,
+            prevCheckTime,
+            previousIntersectedEls,
+        } = this;
 
         let closestCenterDifference;
         let newClosestEl;
@@ -150,6 +161,7 @@ AFRAME.registerComponent('box-collider', {
         copyArray(previousIntersectedEls, intersectedEls);
 
         // Populate intersectedEls array.
+        /* eslint-disable no-continue */
         intersectedEls.length = 0;
         for (i = 0; i < objectEls.length; i++) {
             if (objectEls[i] === this.el) {
@@ -168,7 +180,7 @@ AFRAME.registerComponent('box-collider', {
                     if (boxHelper) {
                         el.sceneEl.object3D.remove(boxHelper);
                         objectEls[i].object3D.boxHelper = null;
-                        boxHelper.dispose && boxHelper.dispose();
+                        boxHelper?.dispose();
                     }
                 }
                 continue;
@@ -179,6 +191,7 @@ AFRAME.registerComponent('box-collider', {
                 intersectedEls.push(objectEls[i]);
             }
         }
+        /* eslint-disable no-continue */
 
         // Get newly intersected entities.
         newIntersectedEls.length = 0;
@@ -258,10 +271,10 @@ AFRAME.registerComponent('box-collider', {
      * AABB collision detection.
      * 3D version of https://www.youtube.com/watch?v=ghqD3e37R7E
      */
-    isIntersecting: (function () {
+    isIntersecting: (function isIntersectingFactory() {
         const boundingBox = new THREE.Box3();
 
-        return function (el) {
+        return function intersectingFn(el) {
             let box;
 
             // Dynamic, recalculate each tick.
@@ -328,13 +341,6 @@ AFRAME.registerComponent('box-collider', {
         this.dirty = false;
     },
 });
-
-function copyArray(dest, source) {
-    dest.length = 0;
-    for (let i = 0; i < source.length; i++) {
-        dest[i] = source[i];
-    }
-}
 
 AFRAME.registerComponent('box-collision-listener', {
     schema: {

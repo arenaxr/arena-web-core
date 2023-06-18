@@ -6,15 +6,15 @@
  * @date 2022
  */
 import UUID from 'uuidjs';
-import MQTTClient from './mqtt-client.js';
-import RuntimeMsgs from './runtime-msgs.js';
+import MQTTClient from './mqtt-client';
+import RuntimeMsgs from './runtime-msgs';
 
 /**
  * Send requests to orchestrator: register as a runtime, create modules from persist objects.
  * TODO: start modules on the browser
  * (code from https://github.com/SilverLineFramework/runtime-browser/)
  */
-export class RuntimeMngr {
+export default class RuntimeMngr {
     /* singleton instance */
     static instance = null;
 
@@ -129,7 +129,7 @@ export class RuntimeMngr {
 
         // on unload, send delete client modules requests
         const rt = this;
-        window.onbeforeunload = function () {
+        window.onbeforeunload = function beforeUnload() {
             rt.cleanup();
         };
     }
@@ -187,9 +187,9 @@ export class RuntimeMngr {
      * Register runtime with orchestrator
      */
     register() {
-        if (this.isRegistered == true) return;
+        if (this.isRegistered === true) return;
 
-        if (this.debug == true) console.info('Runtime-Mngr: Registering...');
+        if (this.debug === true) console.info('Runtime-Mngr: Registering...');
 
         const regMsg = this.rtMsgs.registerRuntime();
         this.regRequestUuid = regMsg.object_id; // save message uuid for confirmation
@@ -212,15 +212,15 @@ export class RuntimeMngr {
             return;
         }
 
-        if (this.debug == true) console.info('Runtime-Mngr: rcv msg', msg);
+        if (this.debug === true) console.info('Runtime-Mngr: rcv msg', msg);
 
-        if (this.isRegistered == false) {
+        if (this.isRegistered === false) {
             // response from orchestrator
             if (msg.type === RuntimeMsgs.Type.resp) {
                 // response to reg request ?
-                if (this.regRequestUuid && msg.object_id == this.regRequestUuid) {
+                if (this.regRequestUuid && msg.object_id === this.regRequestUuid) {
                     // check if result was ok
-                    if (msg.data.result != RuntimeMsgs.Result.ok) {
+                    if (msg.data.result !== RuntimeMsgs.Result.ok) {
                         console.error(`Error registering runtime:${msg.data}`);
                         return;
                     }
@@ -253,7 +253,7 @@ export class RuntimeMngr {
         if (this.pendingModulesArgs.length > 0) {
             const rtMngr = this;
             this.pendingModulesArgs.forEach((args) => {
-                if (rtMngr.debug == true) {
+                if (rtMngr.debug === true) {
                     console.info('Runtime-Mngr: Starting module', args.persistObj);
                 }
                 rtMngr.createModuleFromPersist(args.persistObj, args.replaceVars);
@@ -262,7 +262,7 @@ export class RuntimeMngr {
         this.pendingModulesArgs = [];
 
         // signal init is done and ready to roll
-        if (this.onInitCallback != undefined) {
+        if (this.onInitCallback !== undefined) {
             this.onInitCallback();
         }
     }
@@ -306,7 +306,7 @@ export class RuntimeMngr {
         const modCreateMsg = this.rtMsgs.createModuleFromPersistObj(persistObj, replaceVars);
 
         // if instantiate 'per client', save this module data to delete before exit
-        if (persistObj.attributes.instantiate == 'client') {
+        if (persistObj.attributes.instantiate === 'client') {
             this.clientModules.push(modCreateMsg.data);
         }
 

@@ -1,4 +1,6 @@
-import { CompositorPass } from '../postprocessing/passes/compositor-pass';
+/* global AFRAME, THREE */
+
+import CompositorPass from '../postprocessing/passes/compositor-pass';
 
 AFRAME.registerSystem('compositor', {
     init() {
@@ -41,9 +43,6 @@ AFRAME.registerSystem('compositor', {
 
     addRemoteRenderTarget(remoteRenderTarget) {
         const { sceneEl } = this;
-        const { renderer } = sceneEl;
-
-        const scene = sceneEl.object3D;
         const { camera } = sceneEl;
 
         this.pass = new CompositorPass(camera, remoteRenderTarget);
@@ -65,23 +64,21 @@ AFRAME.registerSystem('compositor', {
     closestKeyInDict(k, d, thres = 10) {
         let result;
         let minDist = Infinity;
-        for (const key in d) {
+        d.forEach((key) => {
             const dist = Math.abs(key - k);
             if (dist <= thres && dist <= minDist) {
                 result = key;
                 minDist = dist;
             }
-        }
+        });
 
         return result;
     },
 
     updateRenderingState() {
         const { renderer } = this.sceneEl;
-        const { render } = renderer;
         const { sceneEl } = this;
 
-        const scene = sceneEl.object3D;
         const { camera } = sceneEl;
 
         let hasDualCameras;
@@ -158,11 +155,11 @@ AFRAME.registerSystem('compositor', {
                 }
             }
 
-            for (const key in this.prevFrames) {
-                if (this.prevFrames.hasOwnProperty(key) && key < currFrameID) {
+            this.prevFrames.forEach((key) => {
+                if (Object.hasOwn(this.prevFrames, key) && key < currFrameID) {
                     delete this.prevFrames[key];
                 }
-            }
+            });
             this.prevFrameID = currFrameID;
         }
     },

@@ -1,3 +1,5 @@
+/* global AFRAME, THREE */
+
 AFRAME.registerComponent('remote-render', {
     schema: {
         enabled: { type: 'boolean', default: false },
@@ -5,8 +7,7 @@ AFRAME.registerComponent('remote-render', {
     },
 
     init() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         this.getObjectStats = this.getObjectStats.bind(this);
 
@@ -17,6 +18,21 @@ AFRAME.registerComponent('remote-render', {
                 this.getObjectStats();
             }
         }
+    },
+
+    clipCornersToViewport(corners) {
+        const clippedCorners = [];
+
+        corners.forEach((corner) => {
+            const clippedCorner = new THREE.Vector3(
+                Math.min(Math.max(corner.x, -1), 1),
+                Math.min(Math.max(corner.y, -1), 1),
+                corner.z
+            );
+            clippedCorners.push(clippedCorner);
+        });
+
+        return clippedCorners;
     },
 
     getObjectStats() {
@@ -64,22 +80,7 @@ AFRAME.registerComponent('remote-render', {
                 projectedCorners.push(projectedCorner);
             });
 
-            function clipCornersToViewport(corners) {
-                const clippedCorners = [];
-
-                corners.forEach((corner) => {
-                    const clippedCorner = new THREE.Vector3(
-                        Math.min(Math.max(corner.x, -1), 1),
-                        Math.min(Math.max(corner.y, -1), 1),
-                        corner.z
-                    );
-                    clippedCorners.push(clippedCorner);
-                });
-
-                return clippedCorners;
-            }
-
-            const clippedCorners = clipCornersToViewport(projectedCorners);
+            const clippedCorners = this.clipCornersToViewport(projectedCorners);
 
             const viewportWidth = window.innerWidth;
             const viewportHeight = window.innerHeight;
@@ -98,7 +99,7 @@ AFRAME.registerComponent('remote-render', {
         }
     },
 
-    update(oldData) {
+    update() {
         // console.log('[render-client]', this.el.id, this.data.enabled);
 
         this.el.setAttribute('visible', !this.data.enabled);

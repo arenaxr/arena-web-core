@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-/* global AFRAME */
+/* global AFRAME, THREE */
 
 import { ARENAUtils } from '../utils';
 
@@ -68,7 +68,7 @@ AFRAME.registerComponent('material-extras', {
 
         if (transparentOccluder !== this.data.transparentOccluder) {
             // a transparent occluder has renderOrder=0 and colorWrite=false
-            if (this.data.transparentOccluder == true) {
+            if (this.data.transparentOccluder === true) {
                 this.previousData = { renderOrder: this.data.renderOrder, colorWrite: this.data.colorWrite };
                 this.el.setAttribute('material-extras', 'renderOrder', 0);
                 this.el.setAttribute('material-extras', 'colorWrite', false);
@@ -84,7 +84,7 @@ AFRAME.registerComponent('material-extras', {
         if (this.doUpdate) this.updateMaterial();
     },
     loadTexture(src) {
-        if (src.length == 0) return;
+        if (src.length === 0) return;
         this.loader.load(
             ARENAUtils.crossOriginDropboxSrc(src),
             // onLoad callback
@@ -102,6 +102,7 @@ AFRAME.registerComponent('material-extras', {
         );
     },
     updateMeshMaterial(mesh) {
+        /* eslint-disable no-param-reassign */
         if (!mesh) return;
         mesh.renderOrder = this.data.renderOrder;
         if (!mesh.material) return;
@@ -112,6 +113,7 @@ AFRAME.registerComponent('material-extras', {
             mesh.material.map.colorSpace = THREE[this.data.colorSpace];
         }
         mesh.material.needsUpdate = true;
+        /* eslint-disable no-param-reassign */
     },
     updateMaterial() {
         this.updateMeshMaterial(this.el.object3D);

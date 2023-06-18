@@ -1,11 +1,12 @@
-/* global THREE */
+/* global AFRAME, ARENA, THREE */
+
 const warn = AFRAME.utils.debug('ARENA:client-event:warn');
 const error = AFRAME.utils.debug('ARENA:client-event:error');
 
 /**
  * Client Event handler
  */
-export class ClientEvent {
+export default class ClientEvent {
     /**
      * Client Event handler
      * @param {object} message message to be parsed

@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, $ */
 
 import { ARENAUtils } from '../utils';
 
@@ -61,7 +61,7 @@ AFRAME.registerComponent('video-control', {
         );
 
         const frameId = `${this.videoNum}_frameId`;
-        theAssets.append(`<image id='${frameId}' src='${frameSrc}'/>`);
+        theAssets.append(`<img alt='videoFrame' id='${frameId}' src='${frameSrc}'/>`);
 
         this.player.setAttribute('material', 'src', `#${frameId}`);
 
@@ -82,13 +82,13 @@ AFRAME.registerComponent('video-control', {
             this.video.pause();
         }
 
-        this.eventHandlerFn = function (evt) {
-            if (evt.detail.cursorEl || (anyoneClicks && evt.detail.clicker && evt.detail.clicker != ARENA.camName)) {
+        this.eventHandlerFn = function eventHandlerFn(evt) {
+            if (evt.detail.cursorEl || (anyoneClicks && evt.detail.clicker && evt.detail.clicker !== ARENA.camName)) {
                 const theSource = this.player.getAttribute('arenaVideo');
                 const theVideoId = this.player.getAttribute('videoId');
                 const theFrameId = this.player.getAttribute('frameId');
 
-                if (theSource != frameSrc) {
+                if (theSource !== frameSrc) {
                     // FRAME
                     this.video.pause(); // pause the html video elem ==> pause aframe video elem
                     this.player.setAttribute('material', 'src', `#${theFrameId}`);
@@ -106,7 +106,7 @@ AFRAME.registerComponent('video-control', {
         this.el.addEventListener('mousedown', this.eventHandlerFn.bind(this));
     },
 
-    update(oldData) {
+    update() {
         const { volume } = this.data;
         this.video.volume = volume;
     },
@@ -121,8 +121,7 @@ AFRAME.registerComponent('video-control', {
 
     // handle component removal
     remove() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         // remove event listener
         if (data.event) {

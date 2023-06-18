@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA */
-
 /**
  * @fileoverview Tracking Hand controller movement in real time.
  *
@@ -8,11 +6,11 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA, THREE */
 
 import { ARENA_EVENTS } from '../constants';
 
-// path to controler models
+// path to controller models
 const handControllerPath = {
     Left: 'static/models/hands/valve_index_left.gltf',
     Right: 'static/models/hands/valve_index_right.gltf',
@@ -76,8 +74,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     ready() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
 
@@ -158,8 +155,7 @@ AFRAME.registerComponent('arena-hand', {
     },
 
     getControllerURL() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         let url = el.getAttribute('gltf-model');
         if (!url) url = handControllerPath[data.hand];
@@ -200,7 +196,7 @@ AFRAME.registerComponent('arena-hand', {
         this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
     },
 
-    tick(t, dt) {
+    tick() {
         if (!this.initialized) return;
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;

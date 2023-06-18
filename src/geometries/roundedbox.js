@@ -8,7 +8,7 @@
  * @date 2020
  */
 
-import roundedBox from './three-rounded-box/index.js';
+import roundedBox from './three-rounded-box/index';
 
 const RoundedBoxGeometry = roundedBox(THREE);
 

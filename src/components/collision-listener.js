@@ -12,13 +12,13 @@
  * Listen for collisions, callback on event.
  * Requires [Physics for A-Frame VR]{@link https://github.com/n5ro/aframe-physics-system}
  * @module collision-listener
- * @requires aframe-physics-system
+ * @requires 'aframe-physics-system'
  */
 AFRAME.registerComponent('collision-listener', {
     // listen for collisions, call defined function on event evt
     init() {
         // console.log("collision-listener Component init");
-        this.el.addEventListener('collide', function (evt) {
+        this.el.addEventListener('collide', function onCollide(evt) {
             // colliding object, only act if is clients' own
             const collider = evt.detail.body.el.id;
             if (collider !== 'my-camera') {

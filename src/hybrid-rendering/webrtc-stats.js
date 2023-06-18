@@ -1,4 +1,4 @@
-export class WebRTCStatsLogger {
+export default class WebRTCStatsLogger {
     constructor(peerConnection, signaler, logToConsole = true) {
         this.peerConnection = peerConnection;
         this.signaler = signaler;
@@ -19,7 +19,7 @@ export class WebRTCStatsLogger {
             }
 
             if (this.logToConsole) {
-                if (stat.codecId != undefined) {
+                if (stat.codecId !== undefined) {
                     const codec = report.get(stat.codecId);
                     console.log(`Codec: ${codec.mimeType}`);
 
@@ -36,7 +36,7 @@ export class WebRTCStatsLogger {
                     }
                 }
 
-                if (stat.kind == 'video') {
+                if (stat.kind === 'video') {
                     console.log(`Decoder: ${stat.decoderImplementation}`);
                     console.log(`Resolution: ${stat.frameWidth}x${stat.frameHeight}`);
                     console.log(`Framerate: ${stat.framesPerSecond}`);
@@ -88,13 +88,15 @@ export class WebRTCStatsLogger {
                     const bitrate = (8 * (stat.bytesReceived - lastStats.bytesReceived)) / duration / 1000;
                     console.log(`Bitrate: ${bitrate.toFixed(3)} kbit/sec`);
 
+                    // eslint-disable-next-line no-param-reassign
                     stat.bitrate = bitrate;
                 }
             }
 
-            for (const key in additionalStats) {
+            Object.keys(additionalStats).forEach((key) => {
+                // eslint-disable-next-line no-param-reassign
                 stat[key] = additionalStats[key];
-            }
+            });
 
             if (stat.latency) {
                 console.log(`Latency: ${stat.latency} ms`);

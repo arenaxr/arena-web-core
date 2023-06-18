@@ -1,3 +1,5 @@
+/* global ARENA */
+
 import { ARENAUtils } from '../../utils';
 
 const Paho = require('paho-mqtt');
@@ -16,7 +18,7 @@ const CLIENT_CANDIDATE_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/client/candida
 const CLIENT_HEALTH_CHECK = 'realm/g/a/hybrid_rendering/client/health';
 const CLIENT_STATS_TOPIC_PREFIX = 'realm/g/a/hybrid_rendering/stats_browser';
 
-export class MQTTSignaling {
+export default class MQTTSignaling {
     constructor(id, mqttHost, username, mqttToken) {
         this.id = id;
         this.connectionId = null;
@@ -41,7 +43,7 @@ export class MQTTSignaling {
         this.client = new Paho.Client(this.mqttHost, `hybrid-mqtt-client-${this.id}`);
 
         const _this = this;
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.client.connect({
                 cleanSession: true,
                 userName: this.mqttUsername,
@@ -75,24 +77,24 @@ export class MQTTSignaling {
     mqttOnMessageArrived(message) {
         const signal = JSON.parse(message.payloadString);
         // ignore other clients
-        if (signal.source == 'client') return;
+        if (signal.source === 'client') return;
 
         // ignore own messages
-        if (signal.id == this.id) return;
+        if (signal.id === this.id) return;
 
-        if (this.connectionId != null && signal.id != this.connectionId) return;
+        if (this.connectionId != null && signal.id !== this.connectionId) return;
 
         // console.log('[render-client]', signal);
-        if (signal.type == 'connect') {
+        if (signal.type === 'connect') {
             if (this.onConnect) this.onConnect();
-        } else if (signal.type == 'offer') {
+        } else if (signal.type === 'offer') {
             this.connectionId = signal.id;
             if (this.onOffer) this.onOffer(signal.data);
-        } else if (signal.type == 'answer') {
+        } else if (signal.type === 'answer') {
             if (this.onAnswer) this.onAnswer(signal.data);
-        } else if (signal.type == 'ice') {
+        } else if (signal.type === 'ice') {
             if (this.onIceCandidate) this.onIceCandidate(signal.data);
-        } else if (signal.type == 'health') {
+        } else if (signal.type === 'health') {
             if (this.onHealthCheck) this.onHealthCheck(signal.data);
         }
     }
@@ -110,8 +112,8 @@ export class MQTTSignaling {
     }
 
     sendConnectACK() {
-        const width = Math.max(screen.width, screen.height);
-        const height = Math.min(screen.width, screen.height);
+        const width = Math.max(window.screen.width, window.screen.height);
+        const height = Math.min(window.screen.width, window.screen.height);
         const connectData = {
             id: this.id,
             deviceType: ARENAUtils.getDeviceType(),

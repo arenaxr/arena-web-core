@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, THREE */
 
 import { ARENAUtils } from '../utils';
 
@@ -35,11 +35,12 @@ AFRAME.registerComponent('gltf-lod-advanced', {
         this.levels = Array.from(this.el.children).filter((child) => child.hasAttribute('lod-level'));
         // Sort desc by distance
         this.levels.sort((a, b) => b.getAttribute('lod-level').distance - a.getAttribute('lod-level').distance);
-        for (const level of this.levels) {
+        this.levels.forEach((level) => {
             if (level !== this.currentLevel) {
+                // eslint-disable-next-line no-param-reassign
                 level.object3D.visible = false;
             }
-        }
+        });
     },
     tick() {
         if (!this.data.enabled) {
@@ -52,14 +53,14 @@ AFRAME.registerComponent('gltf-lod-advanced', {
             this.camDistance = this.tempDistance;
             let nextLevel;
             let nextDistance;
-            for (const level of this.levels) {
+            this.levels.every((level) => {
                 nextDistance = level.getAttribute('lod-level').distance;
                 if (this.camDistance <= nextDistance) {
                     nextLevel = level;
-                } else {
-                    break;
+                    return true;
                 }
-            }
+                return false;
+            });
             if (nextLevel && nextLevel !== this.currentLevel) {
                 // Check threshold if returning to previous level
                 if (nextLevel === this.previousLevel && Math.abs(this.camDistance - nextDistance) <= LOD_THRESHOLD) {

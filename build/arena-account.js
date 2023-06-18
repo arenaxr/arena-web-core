@@ -6,6 +6,8 @@
  * @date 2020
  */
 
+/* global ARENAAUTH, ARENADefaults, KJUR */
+
 /**
  * Wrapper class to perform requests to arena account
  */

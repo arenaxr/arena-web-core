@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, THREE */
 
 /**
  * @fileoverview Support user camera movement with the mouse.
@@ -27,8 +27,6 @@ AFRAME.registerComponent('press-and-move', {
     },
 
     init() {
-        const { data } = this;
-
         // Navigation
         this.navGroup = null;
         this.navNode = null;
@@ -49,7 +47,7 @@ AFRAME.registerComponent('press-and-move', {
             'touchstart',
             (evt) => {
                 // evt.preventDefault();
-                if (evt.touches.length === 1 || evt.touches.length == 2) {
+                if (evt.touches.length === 1 || evt.touches.length === 2) {
                     if (evt.touches.length === 1) {
                         self.direction = 1;
                     } else if (evt.touches.length === 2) {
@@ -62,7 +60,7 @@ AFRAME.registerComponent('press-and-move', {
             { passive: false }
         );
 
-        window.addEventListener('touchend', (evt) => {
+        window.addEventListener('touchend', () => {
             self.startTouchTime = null;
         });
     },
@@ -107,11 +105,11 @@ AFRAME.registerComponent('press-and-move', {
         velocity.z -= acceleration * delta;
     },
 
-    getMovementVector: (function () {
+    getMovementVector: (function getMovementVectorFactory() {
         const directionVector = new THREE.Vector3(0, 0, 0);
         const rotationEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
-        return function (delta) {
+        return function getMovementVector(delta) {
             const rotation = this.el.getAttribute('rotation');
             const { velocity } = this;
 
@@ -150,14 +148,14 @@ AFRAME.registerComponent('press-and-move', {
     },
 
     tick(time, delta) {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
         const { velocity } = this;
 
         const currTime = performance.now();
         if (this.startTouchTime !== null) {
             if (currTime - this.startTouchTime < data.longPressDurationThreshold) return;
 
+            // eslint-disable-next-line no-param-reassign
             delta /= 1000;
             this.updateVelocity(delta);
 

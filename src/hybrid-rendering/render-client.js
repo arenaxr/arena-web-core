@@ -1,6 +1,8 @@
-import { MQTTSignaling } from './signaling/mqtt-signaling';
-import { WebRTCStatsLogger } from './webrtc-stats';
-import { HybridRenderingUtils } from './utils';
+/* global AFRAME, ARENA, THREE */
+
+import MQTTSignaling from './signaling/mqtt-signaling';
+import WebRTCStatsLogger from './webrtc-stats';
+import HybridRenderingUtils from './utils';
 import { ARENA_EVENTS } from '../constants';
 
 const pcConfig = {
@@ -51,7 +53,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         );
     },
     async ready() {
-        const { data } = this;
         const { el } = this;
         const { sceneEl } = el;
 
@@ -89,7 +90,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     connectToCloud() {
-        const { data } = this;
         this.signaler.connectionId = null;
 
         console.debug('[render-client] connecting...');
@@ -134,13 +134,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.remoteVideo.srcObject = stream;
     },
 
-    onRemoteVideoLoaded(evt) {
-        const { data } = this;
-        const { el } = this;
-
-        const { sceneEl } = el;
-        const { renderer } = sceneEl;
-
+    onRemoteVideoLoaded() {
         // console.log('[render-client], remote video loaded!');
         const videoTexture = new THREE.VideoTexture(this.remoteVideo);
         videoTexture.minFilter = THREE.NearestFilter;
@@ -301,9 +295,10 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             })
             .then(() => {
                 const receivers = this.pc.getReceivers();
-                for (const receiver of receivers) {
+                receivers.forEach((receiver) => {
+                    // eslint-disable-next-line no-param-reassign
                     receiver.playoutDelayHint = 0;
-                }
+                });
             })
             .catch((err) => {
                 console.error(err);
@@ -345,12 +340,15 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         const { data } = this;
         while (this.connected) {
             this.stats.getStats({ latency: this.compositor.latency });
+            // eslint-disable-next-line no-await-in-loop
             await this.sleep(data.getStatsInterval);
         }
     },
 
     sleep(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+        return new Promise((resolve) => {
+            setTimeout(resolve, ms);
+        });
     },
 
     sendStatus() {
@@ -390,7 +388,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     update(oldData) {
-        const { el } = this;
         const { data } = this;
 
         let updateStatus = false;
@@ -414,13 +411,11 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         if (updateStatus) this.sendStatus();
     },
 
-    tick(t, dt) {
+    tick(t) {
         if (!this.initialized) return;
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
-        const scene = sceneEl.object3D;
         const { camera } = sceneEl;
 
         const { renderer } = sceneEl;
