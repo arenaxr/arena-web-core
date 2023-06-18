@@ -5,7 +5,7 @@ body {
 }
 
 .leave-button {
-    background-color: rgba(0, 0, 0, 0.20);
+    background-color: rgba(0, 0, 0, 0.2);
     border: none;
     color: black;
     font-weight: bold;
@@ -22,10 +22,10 @@ body {
     position: absolute;
     z-index: 9999;
 
-    animation: iconfadein 2.0s;
-    -moz-animation: iconfadein 2.0s; /* Firefox */
-    -webkit-animation: iconfadein 2.0s; /* Safari and Chrome */
-    -o-animation: iconfadein 2.0s; /* Opera */
+    animation: iconfadein 2s;
+    -moz-animation: iconfadein 2s; /* Firefox */
+    -webkit-animation: iconfadein 2s; /* Safari and Chrome */
+    -o-animation: iconfadein 2s; /* Opera */
     animation-fill-mode: forwards;
 }
 
@@ -35,6 +35,10 @@ body {
 }
 
 @keyframes iconfadein {
-    0% { opacity: 0.0; }
-    100% { opacity: 1.0; }
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
 }

@@ -15,9 +15,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "image"
-                                    ]
+                                    "enum": ["image"]
                                 }
                             },
                             "url": {
@@ -58,21 +56,10 @@
                             "z": 1
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "url",
-                        "position",
-                        "rotation"
-                    ]
+                    "required": ["object_type", "url", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

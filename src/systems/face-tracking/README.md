@@ -4,7 +4,7 @@
 
 ## JSON Format
 
-To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
+To get face data, subscribe to topic `realm/s/<scene>/camera_<id>/face`
 
 ```
 {
@@ -29,11 +29,12 @@ To get face data, subscribe to topic ```realm/s/<scene>/camera_<id>/face```
 
 Download and install [emsdk](https://emscripten.org/docs/getting_started/downloads.html) (version 1.39.16 works best), [opencv](https://github.com/opencv/opencv), and [dlib](https://github.com/davisking/dlib). Build WASM for [opencv_js](https://docs.opencv.org/3.4/d4/da1/tutorial_js_setup.html).
 
-Run ```build.sh``` to build. Optional flag ```--force```.
+Run `build.sh` to build. Optional flag `--force`.
 
 See [here](https://github.com/EdwardLu2018/wasm-face-tracking).
 
 ## Landmark Locations for Reference
+
 ![landmarks](./img/face_landmarks.jpg)
 
 ## Citations
@@ -45,4 +46,5 @@ C. Sagonas, G. Tzimiropoulos, S. Zafeiriou, M. Pantic. A semi-automatic methodol
 C. Sagonas, G. Tzimiropoulos, S. Zafeiriou, M. Pantic. 300 Faces in-the-Wild Challenge: The first facial landmark localization Challenge. Proceedings of IEEE Int’l Conf. on Computer Vision (ICCV-W), 300 Faces in-the-Wild Challenge (300-W). Sydney, Australia, December 2013.
 
 <!-- markdown-link-check-disable-next-line -->
+
 More info here: [https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/](https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/)

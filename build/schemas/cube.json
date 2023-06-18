@@ -16,9 +16,7 @@
                                     "type": "string",
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "cube"
-                                    ]
+                                    "enum": ["cube"]
                                 },
                                 "depth": {
                                     "type": "number",
@@ -67,18 +65,10 @@
                     "default": {
                         "object_type": "cube"
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }
