@@ -7,9 +7,9 @@
  */
 
 /* global Alert, ARENAAUTH, ARENADefaults, Swal, THREE */
-
-import MqttClient from './mqtt-client';
-import ARENAUserAccount from './arena-account';
+/* eslint-disable import/extensions */
+import MqttClient from './mqtt-client.js';
+import ARENAUserAccount from './arena-account.js';
 
 let persist;
 
