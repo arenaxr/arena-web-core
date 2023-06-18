@@ -2,25 +2,24 @@ function doubleToBits(f) {
     return new Uint32Array(Float64Array.of(f).buffer);
 }
 
-export class HybridRenderingUtils {
+export default class HybridRenderingUtils {
     static doublesToCamMsg(...args) {
         let arrayLength = 0;
-        for (const arg of args) {
+        args.forEach((arg) => {
             if (typeof arg === 'number') {
                 arrayLength += 2;
             }
-        }
+        });
 
         const msg = new Uint32Array(arrayLength);
         let i = 0;
-        for (const arg of args) {
+        args.forEach((arg) => {
             if (typeof arg === 'number') {
                 const bits = doubleToBits(arg);
-                msg[i] = bits[0];
-                msg[i + 1] = bits[1];
+                [msg[i], msg[i + 1]] = bits;
                 i += 2;
             }
-        }
+        });
 
         return msg;
     }

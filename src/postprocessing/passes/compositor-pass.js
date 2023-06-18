@@ -1,10 +1,12 @@
+/* global THREE */
+
 import { FullScreenQuad, Pass } from './pass';
-import { CompositorShader } from '../shaders/compositor-shader';
-import { DecoderShader } from '../shaders/decoder-shader';
+import CompositorShader from '../shaders/compositor-shader';
+import DecoderShader from '../shaders/decoder-shader';
 
 const FRAME_ID_LENGTH = 32;
 
-export class CompositorPass extends Pass {
+export default class CompositorPass extends Pass {
     constructor(camera, remoteRenderTarget) {
         super();
 

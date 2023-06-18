@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, THREE */
-
 /**
  * @fileoverview Another user's camera in the ARENA. Handles Jitsi and display name updates.
  *
@@ -8,8 +6,81 @@
  * @date 2020
  */
 
-import { ARENADefaults } from '../../conf/defaults.js';
+/* global AFRAME, ARENA, THREE */
+
 import { ARENA_EVENTS } from '../constants';
+
+/**
+ * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
+ * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
+ * @param {Object} gainNode
+ * @param {boolean} spatialAudioOn
+ * @private
+ */
+async function enableChromeAEC(gainNode, spatialAudioOn) {
+    /**
+     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
+     *  1. grab the GainNode from the scene's THREE.AudioListener
+     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
+     *     this prevents hearing the audio twice.
+     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
+     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
+     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
+     *  6. connect the other RTCPeerConnection's stream to a new audio element.
+     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
+     *  while preserving all the audio processing that was performed via the WebAudio API.
+     */
+
+    const audioEl = new Audio();
+    audioEl.setAttribute('autoplay', 'autoplay');
+    audioEl.setAttribute('playsinline', 'playsinline');
+
+    const context = THREE.AudioContext.getContext();
+    const loopbackDestination = context.createMediaStreamDestination();
+    const outboundPeerConnection = new RTCPeerConnection();
+    const inboundPeerConnection = new RTCPeerConnection();
+
+    const onError = (e) => {
+        console.error('RTCPeerConnection loopback initialization error', e);
+    };
+
+    outboundPeerConnection.addEventListener('icecandidate', (e) => {
+        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+    });
+
+    inboundPeerConnection.addEventListener('icecandidate', (e) => {
+        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
+    });
+
+    inboundPeerConnection.addEventListener('track', (e) => {
+        [audioEl.srcObject] = e.streams;
+    });
+
+    try {
+        /* The following should never fail, but just in case, we won't disconnect/reconnect
+           the gainNode unless all of this succeeds */
+        loopbackDestination.stream.getTracks().forEach((track) => {
+            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
+        });
+
+        const offer = await outboundPeerConnection.createOffer();
+        outboundPeerConnection.setLocalDescription(offer);
+        await inboundPeerConnection.setRemoteDescription(offer);
+
+        const answer = await inboundPeerConnection.createAnswer();
+        inboundPeerConnection.setLocalDescription(answer);
+        outboundPeerConnection.setRemoteDescription(answer);
+
+        gainNode.disconnect();
+        if (spatialAudioOn) {
+            gainNode.connect(context.destination);
+        } else {
+            gainNode.connect(loopbackDestination);
+        }
+    } catch (e) {
+        onError(e);
+    }
+}
 
 /**
  * Another user's camera in the ARENA. Handles Jitsi and display name updates.
@@ -26,7 +97,7 @@ import { ARENA_EVENTS } from '../constants';
 AFRAME.registerComponent('arena-user', {
     schema: {
         color: { type: 'color', default: 'white' },
-        headModelPath: { type: 'string', default: ARENADefaults.headModelPath },
+        headModelPath: { type: 'string', default: ARENA.defaults.headModelPath },
         presence: { type: 'string', default: 'Standard' },
         jitsiId: { type: 'string', default: '' },
         displayName: { type: 'string', default: '' },
@@ -39,8 +110,7 @@ AFRAME.registerComponent('arena-user', {
 
     init() {
         this.jitsiReady = false;
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
 
@@ -50,7 +120,7 @@ AFRAME.registerComponent('arena-user', {
 
         this.idTag = el.id.replace('camera_', '');
         el.setAttribute('rotation.order', 'YXZ');
-        el.object3D.position.set(0, ARENADefaults.camHeight, 0);
+        el.object3D.position.set(0, ARENA.defaults.camHeight, 0);
         el.object3D.rotation.set(0, 0, 0);
 
         const name = el.id;
@@ -90,7 +160,9 @@ AFRAME.registerComponent('arena-user', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
 
-        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, () => (this.jitsiReady = true));
+        ARENA.events.addEventListener(ARENA_EVENTS.JITSI_LOADED, () => {
+            this.jitsiReady = true;
+        });
     },
 
     aec(listener) {
@@ -312,11 +384,14 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 
+    /* eslint-disable  no-param-reassign */
     muteAudio() {
         const { el } = this;
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => (t.enabled = false));
+            jistiAudio.srcObject.getTracks().forEach((t) => {
+                t.enabled = false;
+            });
         }
         el.removeAttribute('sound');
     },
@@ -324,7 +399,9 @@ AFRAME.registerComponent('arena-user', {
     unmuteAudio() {
         const jistiAudio = document.getElementById(this.audioID);
         if (jistiAudio) {
-            jistiAudio.srcObject.getTracks().forEach((t) => (t.enabled = true));
+            jistiAudio.srcObject.getTracks().forEach((t) => {
+                t.enabled = true;
+            });
         }
     },
 
@@ -332,7 +409,9 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (!jistiVideo.paused) jistiVideo.pause();
-            jistiVideo.srcObject.getTracks().forEach((t) => (t.enabled = false));
+            jistiVideo.srcObject.getTracks().forEach((t) => {
+                t.enabled = false;
+            });
         }
     },
 
@@ -340,12 +419,15 @@ AFRAME.registerComponent('arena-user', {
         const jistiVideo = document.getElementById(this.videoID);
         if (jistiVideo) {
             if (jistiVideo.paused) jistiVideo.play();
-            jistiVideo.srcObject.getTracks().forEach((t) => (t.enabled = true));
+            jistiVideo.srcObject.getTracks().forEach((t) => {
+                t.enabled = true;
+            });
         }
     },
+    /* eslint-disable  no-param-reassign */
 
     evaluateRemoteResolution(resolutionStep) {
-        if (resolutionStep != this.data.resolutionStep) {
+        if (resolutionStep !== this.data.resolutionStep) {
             this.data.resolutionStep = resolutionStep;
             const panoIds = [];
             const constraints = {};
@@ -526,74 +608,3 @@ AFRAME.registerComponent('arena-user', {
         }
     },
 });
-
-/**
- * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)
- * https://github.com/mozilla/hubs/blob/master/src/systems/audio-system.js
- * @param {Object} gainNode
- * @private
- */
-async function enableChromeAEC(gainNode, spatialAudioOn) {
-    /**
-     *  workaround for: https://bugs.chromium.org/p/chromium/issues/detail?id=687574
-     *  1. grab the GainNode from the scene's THREE.AudioListener
-     *  2. disconnect the GainNode from the AudioDestinationNode (basically the audio out),
-     *     this prevents hearing the audio twice.
-     *  3. create a local webrtc connection between two RTCPeerConnections (see this example: https://webrtc.github.io/samples/src/content/peerconnection/pc1/)
-     *  4. create a new MediaStreamDestination from the scene's THREE.AudioContext and connect the GainNode to it.
-     *  5. add the MediaStreamDestination's track  to one of those RTCPeerConnections
-     *  6. connect the other RTCPeerConnection's stream to a new audio element.
-     *  All audio is now routed through Chrome's audio mixer, thus enabling AEC,
-     *  while preserving all the audio processing that was performed via the WebAudio API.
-     */
-
-    const audioEl = new Audio();
-    audioEl.setAttribute('autoplay', 'autoplay');
-    audioEl.setAttribute('playsinline', 'playsinline');
-
-    const context = THREE.AudioContext.getContext();
-    const loopbackDestination = context.createMediaStreamDestination();
-    const outboundPeerConnection = new RTCPeerConnection();
-    const inboundPeerConnection = new RTCPeerConnection();
-
-    const onError = (e) => {
-        console.error('RTCPeerConnection loopback initialization error', e);
-    };
-
-    outboundPeerConnection.addEventListener('icecandidate', (e) => {
-        inboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('icecandidate', (e) => {
-        outboundPeerConnection.addIceCandidate(e.candidate).catch(onError);
-    });
-
-    inboundPeerConnection.addEventListener('track', (e) => {
-        audioEl.srcObject = e.streams[0];
-    });
-
-    try {
-        /* The following should never fail, but just in case, we won't disconnect/reconnect
-           the gainNode unless all of this succeeds */
-        loopbackDestination.stream.getTracks().forEach((track) => {
-            outboundPeerConnection.addTrack(track, loopbackDestination.stream);
-        });
-
-        const offer = await outboundPeerConnection.createOffer();
-        outboundPeerConnection.setLocalDescription(offer);
-        await inboundPeerConnection.setRemoteDescription(offer);
-
-        const answer = await inboundPeerConnection.createAnswer();
-        inboundPeerConnection.setLocalDescription(answer);
-        outboundPeerConnection.setRemoteDescription(answer);
-
-        gainNode.disconnect();
-        if (spatialAudioOn) {
-            gainNode.connect(context.destination);
-        } else {
-            gainNode.connect(loopbackDestination);
-        }
-    } catch (e) {
-        onError(e);
-    }
-}

@@ -1,10 +1,14 @@
+/* eslint-disable camelcase */
+
+/* global AFRAME */
+
 const warn = AFRAME.utils.debug('ARENA:message:warn');
 const error = AFRAME.utils.debug('ARENA:message:error');
 
 /**
  * Message parser and verifier
  */
-export class Parser {
+export default class Parser {
     /**
      * Parses a message and ensures it has an object_id and data
      * @param {string} source caller source for logging

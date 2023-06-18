@@ -3,7 +3,7 @@
  *
  */
 
-let _this;
+/* global Paho */
 
 const nretries = 2;
 
@@ -37,18 +37,16 @@ export default class MqttClient {
 
         // console.log(st.mqtt_username);
 
-        if (this.settings.dbg == true) console.log(this.settings);
-
-        _this = this;
+        if (this.settings.dbg === true) console.log(this.settings);
     }
 
     async connect() {
         if (this.settings.uri) {
-            if (this.settings.dbg == true) console.log('Connecting [uri]: ', this.settings.uri);
+            if (this.settings.dbg === true) console.log('Connecting [uri]: ', this.settings.uri);
             // init Paho client connection
             this.mqttc = new Paho.Client(this.settings.uri, this.settings.clientid);
         } else {
-            const wss = this.settings.useSSL == true ? 'wss://' : 'ws://';
+            const wss = this.settings.useSSL === true ? 'wss://' : 'ws://';
             console.log(
                 `Connecting [host,port,path]: ${wss}${this.settings.host}:${this.settings.port}${this.settings.path}`
             );
@@ -71,15 +69,15 @@ export default class MqttClient {
             // connect the client, if successful, call onConnect function
             _this.mqttc.connect({
                 onSuccess: () => {
-                    if (_this.settings.subscribeTopics != undefined) {
+                    if (_this.settings.subscribeTopics !== undefined) {
                         // Subscribe to the requested topic
                         if (_this.settings.subscribeTopics.length > 0) {
-                            if (_this.settings.dbg == true)
+                            if (_this.settings.dbg === true)
                                 console.log(`Subscribing to: ${_this.settings.subscribeTopics}\n`);
                             _this.mqttc.subscribe(_this.settings.subscribeTopics);
                         }
                     }
-                    if (_this.settings.onConnectCallback != undefined)
+                    if (_this.settings.onConnectCallback !== undefined)
                         _this.settings.onConnectCallback(_this.settings.onConnectCallbackContext);
                     resolve();
                 },
@@ -98,14 +96,14 @@ export default class MqttClient {
         if (typeof payload !== 'string') payload = JSON.stringify(payload);
         const msg = new Paho.Message(payload);
         msg.destinationName = topic;
-        _this.settings.onMessageCallback(msg);
+        this.settings.onMessageCallback(msg);
     }
 
     disconnect() {
         try {
             this.mqttc.disconnect();
         } catch (err) {
-            if (this.settings.dbg == true) console.error('MQTT Disconnected.');
+            if (this.settings.dbg === true) console.error('MQTT Disconnected.');
         }
     }
 
@@ -113,10 +111,10 @@ export default class MqttClient {
      * Callback; Called when the client loses its connection
      */
     onConnectionLost(responseObject) {
-        if (this.settings.dbg == true) console.log('Mqtt client disconnected...');
+        if (this.settings.dbg === true) console.log('Mqtt client disconnected...');
 
         if (responseObject.errorCode !== 0) {
-            if (this.settings.dbg == true) console.error(`Mqtt ERROR: ${responseObject.errorMessage}\n`);
+            if (this.settings.dbg === true) console.error(`Mqtt ERROR: ${responseObject.errorMessage}\n`);
         }
     }
 
@@ -124,19 +122,20 @@ export default class MqttClient {
      * Callback; Called when a message arrives
      */
     onMessageArrived(message) {
-        if (this.settings.dbg == true) console.log(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}\n`);
+        if (this.settings.dbg === true)
+            console.log(`Mqtt Msg [${message.destinationName}]: ${message.payloadString}\n`);
 
-        if (this.settings.onMessageCallback != undefined) this.settings.onMessageCallback(message);
+        if (this.settings.onMessageCallback !== undefined) this.settings.onMessageCallback(message);
     }
 
     publish(topic, payload) {
         if (typeof payload !== 'string') payload = JSON.stringify(payload);
-        if (this.settings.dbg == true) console.log(`Publishing (${topic}):${payload}`);
+        if (this.settings.dbg === true) console.log(`Publishing (${topic}):${payload}`);
         this.mqttc.send(topic, payload, 0, false);
     }
 
     subscribe(topic) {
-        if (this.settings.dbg == true) console.log(`Subscribing :${topic}`);
+        if (this.settings.dbg === true) console.log(`Subscribing :${topic}`);
         this.mqttc.subscribe(topic);
     }
 

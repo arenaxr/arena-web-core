@@ -60,7 +60,7 @@ AFRAME.registerComponent('landmark', {
     remove() {
         this.system.unregisterComponent(this);
     },
-
+    /* eslint-disable no-param-reassign */
     teleportTo(moveEl = undefined) {
         const myCam = document.getElementById('my-camera');
         if (moveEl === undefined) moveEl = myCam;
@@ -102,6 +102,7 @@ AFRAME.registerComponent('landmark', {
             }
         }
     },
+    /* eslint-disable no-param-reassign */
 });
 
 AFRAME.registerSystem('landmark', {
@@ -112,7 +113,6 @@ AFRAME.registerSystem('landmark', {
     },
 
     registerComponent(landmark) {
-        const { data } = this;
         const { el } = this;
         const { sceneEl } = el;
 
@@ -130,7 +130,6 @@ AFRAME.registerSystem('landmark', {
     },
 
     unregisterComponent(landmark) {
-        const { data } = this;
         const { el } = this;
         const { sceneEl } = el;
 

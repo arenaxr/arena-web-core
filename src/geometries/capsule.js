@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Capsule geometry. Adds geometry to render a capsule primitive.
  *
@@ -7,6 +5,8 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
+
+/* global AFRAME, THREE */
 
 AFRAME.registerGeometry('capsule', {
     schema: {

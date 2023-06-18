@@ -21,8 +21,7 @@ AFRAME.registerComponent('stats-monitor', {
     multiple: false,
 
     init() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
 
@@ -51,7 +50,6 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     registerListeners() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -60,7 +58,6 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     unregisterListeners() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -76,7 +73,7 @@ AFRAME.registerComponent('stats-monitor', {
         this.callStats = e.detail.stats;
     },
 
-    tick(time, timeDelta) {
+    tick() {
         if (!this.rafDiv) {
             this.rafDiv = document.querySelector('.rs-counter-base:nth-child(1) .rs-counter-value');
             return;
@@ -135,7 +132,10 @@ AFRAME.registerComponent('stats-monitor', {
         // display the stats on the HUD
         if (ARENA && ARENA.params.hudstats && this.hudStatsText) {
             const pctHeap = Math.trunc((this.usedJSHeapSize / this.jsHeapSizeLimit) * 100).toFixed(0);
-            let str = `[Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\nRAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}`;
+            let str = `
+            [Browser]\nPlatform: ${navigator.platform}\nVersion: ${navigator.appVersion}\nFPS: ${this.fps}\n
+            RAF: ${this.raf}\nUsed Heap: ${this.usedJSHeapSize} (${pctHeap}%)\nMax Heap: ${this.jsHeapSizeLimit}
+            `;
             if (ARENA && ARENA.Jitsi && this.callStats) {
                 str += `\n\n[Jitsi]\n${ARENA.Jitsi.getConnectionText(
                     ARENA.displayName,

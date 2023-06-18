@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Camera capture for custom iOS browser (WebXRViewer/WebARViewer)
  * https://apps.apple.com/us/app/webxr-viewer/id1295998056
@@ -8,13 +6,13 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2021
  */
-import { Base64Binary } from './base64-binary.js';
-import { CVWorkerMsgs } from '../worker-msgs.js';
+import { Base64Binary } from './base64-binary';
+import CVWorkerMsgs from '../worker-msgs';
 
 /**
  *
  */
-export class WebARViewerCameraCapture {
+export default class WebARViewerCameraCapture {
     static instance = null;
 
     /* buffer we process in the frames received  */
@@ -41,9 +39,8 @@ export class WebARViewerCameraCapture {
 
     /**
      * Setup camera frame capture
-     * @param {boolean} [debug=false] - debug messages on/off
      */
-    constructor(debug = false) {
+    constructor() {
         // singleton
         if (WebARViewerCameraCapture.instance) {
             return WebARViewerCameraCapture.instance;
@@ -142,10 +139,10 @@ export class WebARViewerCameraCapture {
         }
         // check if camera frame changed size
         if (
-            this.frameGsPixels == undefined ||
-            this.frameCamera == undefined ||
-            this.frameWidth != frame._buffers[this.buffIndex].size.width ||
-            this.frameHeight != frame._buffers[this.buffIndex].size.height
+            this.frameGsPixels === undefined ||
+            this.frameCamera === undefined ||
+            this.frameWidth !== frame._buffers[this.buffIndex].size.width ||
+            this.frameHeight !== frame._buffers[this.buffIndex].size.height
         ) {
             this.frameWidth = frame._buffers[this.buffIndex].size.width;
             this.frameHeight = frame._buffers[this.buffIndex].size.height;

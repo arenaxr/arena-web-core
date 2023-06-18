@@ -1,4 +1,7 @@
+/* eslint-disable max-classes-per-file */
 // Helper for passes that need to fill the viewport with a single quad.
+
+/* global THREE */
 
 const _camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 

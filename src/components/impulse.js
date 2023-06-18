@@ -1,5 +1,3 @@
-/* global AFRAME */
-
 /**
  * @fileoverview Component to apply an impulse to an object to set it in motion
  *
@@ -7,6 +5,8 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
+
+/* global AFRAME, THREE */
 
 /**
  * One physics feature is applying an impulse to an object to set it in motion.
@@ -41,11 +41,9 @@ AFRAME.registerComponent('impulse', {
 
     multiple: true,
 
-    init() {
-        const self = this;
-    },
+    init() {},
 
-    update(oldData) {
+    update() {
         const { data } = this; // Component property values.
         const { el } = this; // Reference to the component's entity.
 
@@ -70,8 +68,7 @@ AFRAME.registerComponent('impulse', {
     },
     // handle component removal
     remove() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         // remove event listener
         if (data.event) {

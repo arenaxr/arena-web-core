@@ -10,6 +10,15 @@
 
 const MAX_DELTA = 0.2;
 
+function isEmptyObject(keys) {
+    let key;
+    // eslint-disable-next-line
+    for (key in keys) {
+        return false;
+    }
+    return true;
+}
+
 AFRAME.registerComponent('arrow-controls', {
     schema: {
         acceleration: { default: 1.1 },
@@ -84,8 +93,7 @@ AFRAME.registerComponent('arrow-controls', {
     },
 
     tick(time, delta) {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
         const { keys } = this;
         const { acceleration } = data;
 
@@ -100,6 +108,7 @@ AFRAME.registerComponent('arrow-controls', {
             return;
         }
 
+        // eslint-disable-next-line no-param-reassign
         delta /= 1000;
 
         // If FPS too low, ignore.
@@ -116,11 +125,3 @@ AFRAME.registerComponent('arrow-controls', {
         }
     },
 });
-
-function isEmptyObject(keys) {
-    let key;
-    for (key in keys) {
-        return false;
-    }
-    return true;
-}

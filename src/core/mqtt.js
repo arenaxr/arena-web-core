@@ -6,12 +6,11 @@
  * @date 2023
  */
 
-/* global ARENA */
+/* global AFRAME, ARENA */
 
 // 'use strict';
 import { proxy, wrap } from 'comlink';
-import { ARENADefaults } from '../../conf/defaults.js';
-import { ClientEvent, CreateUpdate, Delete } from '../message-actions/index.js';
+import { ClientEvent, CreateUpdate, Delete } from '../message-actions/index';
 import { ARENA_EVENTS, ACTIONS } from '../constants';
 
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
@@ -19,8 +18,8 @@ const error = AFRAME.utils.debug('ARENA:MQTT:error');
 
 AFRAME.registerSystem('arena-mqtt', {
     schema: {
-        mqttHost: { type: 'string', default: ARENADefaults.mqttHost },
-        mqttPath: { type: 'array', default: ARENADefaults.mqttPath },
+        mqttHost: { type: 'string', default: ARENA.defaults.mqttHost },
+        mqttPath: { type: 'array', default: ARENA.defaults.mqttPath },
     },
 
     init() {
@@ -66,9 +65,6 @@ AFRAME.registerSystem('arena-mqtt', {
     },
 
     async initWorker() {
-        const { data } = this;
-        const { el } = this;
-
         const { renderTopic } = this.arena;
         const { idTag } = this.arena;
 
@@ -170,7 +166,8 @@ AFRAME.registerSystem('arena-mqtt', {
         let topicUser;
         if (message.destinationName) {
             // This is a Paho.MQTT.Message
-            topicUser = message.destinationName.split('/')[4];
+            // [realm, category, namespace, scene, user]
+            [, , , , topicUser] = message.destinationName.split('/');
         }
 
         switch (

@@ -1,4 +1,6 @@
-import { Pass, FullScreenQuad } from './pass.js';
+/* global THREE */
+
+import { Pass, FullScreenQuad } from './pass';
 
 class ShaderPass extends Pass {
     constructor(shader, textureID) {
@@ -50,4 +52,4 @@ class ShaderPass extends Pass {
     }
 }
 
-export { ShaderPass };
+export default ShaderPass;

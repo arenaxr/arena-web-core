@@ -1,5 +1,3 @@
-/* global AFRAME, ARENA, THREE, ARENAUtils */
-
 /**
  * @fileoverview ARMarker System. Supports ARMarkers in a scene.
  * Attempts to detect device and setup camera capture accordingly:
@@ -13,12 +11,14 @@
  * @date 2020
  */
 
-import { WebXRCameraCapture } from './camera-capture/ccwebxr';
-import { WebARCameraCapture } from './camera-capture/ccwebar';
-import { ARHeadsetCameraCapture } from './camera-capture/ccarheadset';
-import { WebARViewerCameraCapture } from './camera-capture/ccwebarviewer';
-import { ARMarkerRelocalization } from './armarker-reloc';
-import { CVWorkerMsgs } from './worker-msgs';
+/* global AFRAME, ARENA, THREE */
+
+import WebXRCameraCapture from './camera-capture/ccwebxr';
+import WebARCameraCapture from './camera-capture/ccwebar';
+import ARHeadsetCameraCapture from './camera-capture/ccarheadset';
+import WebARViewerCameraCapture from './camera-capture/ccwebarviewer';
+import ARMarkerRelocalization from './armarker-reloc';
+import CVWorkerMsgs from './worker-msgs';
 import { ARENA_EVENTS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
@@ -73,7 +73,6 @@ AFRAME.registerSystem('armarker', {
     },
 
     ready() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -107,7 +106,7 @@ AFRAME.registerSystem('armarker', {
      * @param {object} oldData - previous attribute values.
      * @alias module:armarker-system
      */
-    update(oldData) {
+    update() {
         // TODO: Do stuff with `this.data`...
     },
     /**
@@ -222,7 +221,7 @@ AFRAME.registerSystem('armarker', {
         this.cvPipelineInitialized = true;
 
         // send size of known markers to cvWorker (so it can compute pose)
-        for (const [mid, marker] of Object.entries(this.markers)) {
+        Object.entries(this.markers).forEach(([mid, marker]) => {
             const newMarker = {
                 type: CVWorkerMsgs.type.KNOWN_MARKER_ADD,
                 // marker id
@@ -231,7 +230,7 @@ AFRAME.registerSystem('armarker', {
                 size: marker.data.size / 1000,
             };
             this.cvWorker.postMessage(newMarker);
-        }
+        });
     },
     /**
      * Handle messages from cvWorker (detector)
@@ -296,7 +295,7 @@ AFRAME.registerSystem('armarker', {
         const position = ARENA.clientCoords;
 
         // ATLASUpdateIntervalSecs=0: only update tags at init
-        if (this.data.ATLASUpdateIntervalSecs === 0 && !init) return;
+        if (this.data.ATLASUpdateIntervalSecs === 0 && !init) return false;
 
         // limit to ATLASUpdateIntervalSecs update interval
         if (new Date() - this.lastATLASUpdate < this.data.ATLASUpdateIntervalSecs * 1000) {
@@ -404,6 +403,7 @@ AFRAME.registerSystem('armarker', {
      */
     getMarker(markerid) {
         if (!(typeof markerid === 'string' || markerid instanceof String)) {
+            // eslint-disable-next-line no-param-reassign
             markerid = String(markerid); // convert markerid to string
         }
         const sceneTag = this.markers[markerid];

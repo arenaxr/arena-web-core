@@ -6,11 +6,10 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, ARENAAUTH, THREE, $ */
 
 import 'linkifyjs';
 import 'linkifyjs/string';
-import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 import Swal from 'sweetalert2';
 import { proxy } from 'comlink';
 import { ARENAUtils } from '../utils';
@@ -43,7 +42,6 @@ AFRAME.registerSystem('arena-chat-ui', {
         );
     },
     async ready() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -63,10 +61,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.userId = this.arena.idTag;
         this.cameraId = this.arena.camName;
         this.userName = this.arena.getDisplayName();
-        this.realm = ARENADefaults.realm;
+        this.realm = ARENA.defaults.realm;
         this.nameSpace = this.arena.nameSpace;
         this.scene = this.arena.namespacedScene;
-        this.devInstance = ARENADefaults.devInstance;
+        this.devInstance = ARENA.defaults.devInstance;
         this.isSceneWriter = this.arena.isUserSceneWriter();
 
         this.keepalive_interval_ms = 30000;
@@ -103,7 +101,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.subscribePublicTopic = `${this.realm}/c/${this.nameSpace}/o/#`;
 
         // send private messages to a user (publish only)
-        this.publishPrivateTopic = `${this.realm}/c/${this.nameSpace}/p/\{to_uid\}/${`${this.userId}${btoa(
+        this.publishPrivateTopic = `${this.realm}/c/${this.nameSpace}/p/{to_uid}/${`${this.userId}${btoa(
             this.userId
         )}`}`;
 
@@ -276,8 +274,8 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
         });
 
-        this.chatBtn.onclick = function () {
-            if (_this.chatPopup.style.display == 'none') {
+        this.chatBtn.onclick = function onChatClick() {
+            if (_this.chatPopup.style.display === 'none') {
                 _this.chatPopup.style.display = 'block';
                 _this.usersPopup.style.display = 'none';
                 _this.chatDot.style.display = 'none';
@@ -294,8 +292,8 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
         };
 
-        this.usersBtn.onclick = function () {
-            if (_this.usersPopup.style.display == 'none') {
+        this.usersBtn.onclick = function onUsersClick() {
+            if (_this.usersPopup.style.display === 'none') {
                 _this.chatPopup.style.display = 'none';
                 _this.usersPopup.style.display = 'block';
                 _this.lmPopup.style.display = 'none';
@@ -305,21 +303,21 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
         };
 
-        this.closeChatBtn.onclick = function () {
+        this.closeChatBtn.onclick = function onCloseChatClick() {
             _this.chatPopup.style.display = 'none';
         };
 
-        this.closeUsersBtn.onclick = function () {
+        this.closeUsersBtn.onclick = function onCloseUsersClick() {
             _this.usersPopup.style.display = 'none';
         };
 
-        this.msgBtn.onclick = function () {
+        this.msgBtn.onclick = function onMsgClick() {
             if (_this.msgTxt.value.length > 0) _this.sendMsg(_this.msgTxt.value);
             _this.msgTxt.value = '';
         };
 
-        this.lmBtn.onclick = function () {
-            if (_this.lmPopup.style.display == 'none') {
+        this.lmBtn.onclick = function onLandmarkClick() {
+            if (_this.lmPopup.style.display === 'none') {
                 _this.chatPopup.style.display = 'none';
                 _this.usersPopup.style.display = 'none';
                 _this.lmPopup.style.display = 'block';
@@ -328,13 +326,13 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
         };
 
-        this.closeLmBtn.onclick = function () {
+        this.closeLmBtn.onclick = function onCloseLandmarkClick() {
             _this.lmPopup.style.display = 'none';
         };
 
         this.msgTxt.addEventListener('keyup', (event) => {
             event.preventDefault();
-            if (event.keyCode === 13) {
+            if (event.key === 'Enter') {
                 if (_this.msgTxt.value.length > 1) _this.sendMsg(_this.msgTxt.value);
                 _this.msgTxt.value = '';
             }
@@ -342,7 +340,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         // send sound on/off msg to all
         if (this.silenceAllBtn) {
-            this.silenceAllBtn.onclick = function () {
+            this.silenceAllBtn.onclick = function onSilenceAllClick() {
                 Swal.fire({
                     title: 'Are you sure?',
                     text: 'This will send a mute request to all users.',
@@ -428,14 +426,10 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onUserJoin(e) {
-        const { data } = this;
-        const { el } = this;
-
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
         if (!this.liveUsers[user.id]) {
-            const _this = this;
             this.liveUsers[user.id] = {
                 jid: user.jid,
                 un: user.dn,
@@ -454,14 +448,10 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onScreenshare(e) {
-        const { data } = this;
-        const { el } = this;
-
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         // check if jitsi knows about someone we don't; add to user list
         if (!this.liveUsers[user.id]) {
-            const _this = this;
             this.liveUsers[user.id] = {
                 jid: user.jid,
                 un: user.dn,
@@ -480,9 +470,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onUserLeft(e) {
-        const { data } = this;
-        const { el } = this;
-
         if (e.detail.src === EVENT_SOURCES.CHAT) return; // ignore our events
         const user = e.detail;
         if (!this.liveUsers[user.id]) return;
@@ -496,39 +483,34 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onDominantSpeakerChanged(e) {
-        const { data } = this;
-        const { el } = this;
-
         const user = e.detail;
-        const roomName = this.scene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        const roomName = this.scene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
         if (user.scene === roomName) {
             // if speaker exists, show speaker graph in user list
-            const speaker_id = user.id ? user.id : this.userId; // or self is speaker
-            if (this.liveUsers[speaker_id]) {
-                this.liveUsers[speaker_id].speaker = true;
+            const speakerId = user.id ? user.id : this.userId; // or self is speaker
+            if (this.liveUsers[speakerId]) {
+                this.liveUsers[speakerId].speaker = true;
             }
             // if previous speaker exists, show speaker graph in user list
             if (this.liveUsers[user.pid]) {
                 this.liveUsers[user.pid].speaker = false;
             }
-            this.isSpeaker = speaker_id === this.userId;
+            this.isSpeaker = speakerId === this.userId;
             this.populateUserList();
         }
     },
 
     /**
      * Called when user is talking on mute.
-     * @param {Object} e event object; e.detail contains the callback arguments
      */
-    onTalkWhileMuted(e) {
+    onTalkWhileMuted() {
         this.displayAlert(`You are talking on mute.`, 2000, 'warning');
     },
 
     /**
      * Called when user's microphone is very noisy.
-     * @param {Object} e event object; e.detail contains the callback arguments
      */
-    onNoisyMic(e) {
+    onNoisyMic() {
         this.displayAlert(`Your microphone appears to be noisy.`, 2000, 'warning');
     },
 
@@ -544,9 +526,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onJitsiStatsLocal(e) {
-        const { data } = this;
-        const { el } = this;
-
         const { jid } = e.detail;
         const { stats } = e.detail;
         // local
@@ -559,10 +538,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         const _this = this;
         Object.keys(this.liveUsers).forEach((arenaId) => {
             if (!_this.liveUsers[arenaId].stats) _this.liveUsers[arenaId].stats = {};
-            const { jid } = _this.liveUsers[arenaId];
-            _this.liveUsers[arenaId].stats.resolution = stats.resolution[jid];
-            _this.liveUsers[arenaId].stats.framerate = stats.framerate[jid];
-            _this.liveUsers[arenaId].stats.codec = stats.codec[jid];
+            const { jid: _jid } = _this.liveUsers[arenaId];
+            _this.liveUsers[arenaId].stats.resolution = stats.resolution[_jid];
+            _this.liveUsers[arenaId].stats.framerate = stats.framerate[_jid];
+            _this.liveUsers[arenaId].stats.codec = stats.codec[_jid];
         });
         this.populateUserList();
     },
@@ -572,9 +551,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onJitsiStatsRemote(e) {
-        const { data } = this;
-        const { el } = this;
-
         const { jid } = e.detail;
         const arenaId = e.detail.id ? e.detail.id : e.detail.jid;
         const { stats } = e.detail;
@@ -600,14 +576,10 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} e event object; e.detail contains the callback arguments
      */
     onJitsiStatus(e) {
-        const { data } = this;
-        const { el } = this;
-
-        const { jid } = e.detail;
         const arenaId = e.detail.id;
         const { status } = e.detail;
         // local
-        if (this.userId == arenaId) {
+        if (this.userId === arenaId) {
             this.status = status;
         }
         // remote
@@ -629,9 +601,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Subscribe to mqtt channels.
      */
     async connect() {
-        const { data } = this;
-        const { el } = this;
-
         if (this.connected === true) return;
         this.mqttc = ARENA.Mqtt.MQTTWorker;
 
@@ -655,9 +624,8 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Chat MQTT connection lost handler.
-     * @param {Object} message Broker message.
      */
-    onConnectionLost(message) {
+    onConnectionLost() {
         console.error('Chat disconnected.');
         this.connected = false;
     },
@@ -676,9 +644,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {*} msgTxt The message text.
      */
     sendMsg(msgTxt) {
-        const { data } = this;
-        const { el } = this;
-
         const now = new Date();
         const msg = {
             object_id: ARENAUtils.uuidv4(),
@@ -693,7 +658,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             text: msgTxt,
         };
         const dstTopic =
-            this.toSel.value == 'scene' || this.toSel.value == 'all'
+            this.toSel.value === 'scene' || this.toSel.value === 'all'
                 ? this.publishPublicTopic
                 : this.publishPrivateTopic.replace('{to_uid}', this.toSel.value);
         // console.log('sending', msg, 'to', dstTopic);
@@ -710,7 +675,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} mqttMsg The MQTT Paho message object.
      */
     onMessageArrived(mqttMsg) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -719,12 +683,12 @@ AFRAME.registerSystem('arena-chat-ui', {
         // console.log('Received:', msg);
 
         // ignore invalid and our own messages
-        if (msg.from_uid == undefined) return;
-        if (msg.to_uid == undefined) return;
-        if (msg.from_uid == this.userId) return;
+        if (msg.from_uid === undefined) return;
+        if (msg.to_uid === undefined) return;
+        if (msg.from_uid === this.userId) return;
 
         // save user data and timestamp
-        if (this.liveUsers[msg.from_uid] == undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
+        if (this.liveUsers[msg.from_uid] === undefined && msg.from_un !== undefined && msg.from_scene !== undefined) {
             this.liveUsers[msg.from_uid] = {
                 un: msg.from_un,
                 scene: msg.from_scene,
@@ -749,15 +713,15 @@ AFRAME.registerSystem('arena-chat-ui', {
         }
 
         // process commands
-        if (msg.type == 'chat-ctrl') {
-            if (msg.text == 'sound:off') {
+        if (msg.type === 'chat-ctrl') {
+            if (msg.text === 'sound:off') {
                 // console.log('muteAudio', this.jitsi.hasAudio);
                 // only mute
                 if (this.jitsi.hasAudio) {
                     const sideMenu = sceneEl.systems['arena-side-menu-ui'];
                     sideMenu.clickButton(sideMenu.buttons.AUDIO);
                 }
-            } else if (msg.text == 'logout') {
+            } else if (msg.text === 'logout') {
                 const warn = `You have been asked to leave in 5 seconds by ${msg.from_un}.`;
                 this.displayAlert(warn, 5000, 'warning');
                 setTimeout(() => {
@@ -772,7 +736,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         if (msg.to_uid !== this.userId && msg.to_uid !== 'all' && msg.to_uid !== 'scene') return;
 
         // drop messages to scenes different from our scene
-        if (msg.to_uid === 'scene' && msg.from_scene != this.scene) return;
+        if (msg.to_uid === 'scene' && msg.from_scene !== this.scene) return;
 
         this.txtAddMsg(msg.text, `${msg.from_desc} ${new Date(msg.from_time).toLocaleTimeString()}`, 'other');
 
@@ -790,11 +754,16 @@ AFRAME.registerSystem('arena-chat-ui', {
     /**
      * Adds a text message to the text message panel.
      * @param {string} msg The message text.
-     * @param {string} status The 'from' display user name.
-     * @param {string} whoClass Sender scope: self, other.
+     * @param {string} status The 'from' display username.
+     * @param {string} who Sender scope: self, other.
      */
-    txtAddMsg(msg, status, whoClass) {
-        if (whoClass !== 'self' && whoClass !== 'other') whoClass = 'other';
+    txtAddMsg(msg, status, who) {
+        let whoClass;
+        if (who !== 'self' && who !== 'other') {
+            whoClass = 'other';
+        } else {
+            whoClass = who;
+        }
         const statusSpan = document.createElement('span');
         statusSpan.className = `status ${whoClass}`; // "self" | "other"
         statusSpan.textContent = status;
@@ -802,21 +771,22 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         const msgSpan = document.createElement('span');
         msgSpan.className = `msg ${whoClass}`; // "self" | "other"
-        const host = `https:\/\/${window.location.host.replace(/\./g, '\\.')}`;
-        const pattern = `${host}\/[a-zA-Z0-9]*\/[a-zA-Z0-9]*(.*)*`; // permissive regex for a scene
+        const host = `https://${window.location.host.replace(/\./g, '\\.')}`;
+        const pattern = `${host}/[a-zA-Z0-9]*/[a-zA-Z0-9]*(.*)*`; // permissive regex for a scene
         const regex = new RegExp(pattern);
 
+        let displayMsg;
         if (msg.match(regex) != null) {
             // no new tab if we have a link to an arena scene
-            msg = msg.linkify({
+            displayMsg = msg.linkify({
                 target: '_parent',
             });
         } else {
-            msg = msg.linkify({
+            displayMsg = msg.linkify({
                 target: '_blank',
             });
         }
-        msgSpan.innerHTML = msg;
+        msgSpan.innerHTML = displayMsg;
         this.msgList.appendChild(msgSpan);
 
         // scroll to bottom
@@ -829,7 +799,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} newUser The new user object to add.
      */
     populateUserList(newUser = undefined) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -848,10 +817,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         let nTotalUsers = 1;
         Object.keys(this.liveUsers).forEach((key) => {
             nTotalUsers++; // count all users
-            if (_this.liveUsers[key].scene == _this.scene) nSceneUsers++; // only count users in the same scene
+            if (_this.liveUsers[key].scene === _this.scene) nSceneUsers++; // only count users in the same scene
             userList.push({
                 uid: key,
-                sort_key: _this.liveUsers[key].scene == _this.scene ? 'aaa' : 'zzz',
+                sort_key: _this.liveUsers[key].scene === _this.scene ? 'aaa' : 'zzz',
                 scene: _this.liveUsers[key].scene,
                 un: _this.liveUsers[key].un,
                 cid: _this.liveUsers[key].cid,
@@ -878,23 +847,23 @@ AFRAME.registerSystem('arena-chat-ui', {
             this.displayAlert(msg, 5000, alertType);
         }
 
-        const uli = document.createElement('li');
-        uli.textContent = `${this.userName} (Me)`;
+        const meUli = document.createElement('li');
+        meUli.textContent = `${this.userName} (Me)`;
         if (this.isSpeaker) {
-            uli.style.color = 'green';
+            meUli.style.color = 'green';
         }
-        _this.usersList.appendChild(uli);
-        this.addJitsiStats(uli, this.stats, this.status, uli.textContent);
-        const uBtnCtnr = document.createElement('div');
-        uBtnCtnr.className = 'users-list-btn-ctnr';
-        uli.appendChild(uBtnCtnr);
+        _this.usersList.appendChild(meUli);
+        this.addJitsiStats(meUli, this.stats, this.status, meUli.textContent);
+        const myUBtnCtnr = document.createElement('div');
+        myUBtnCtnr.className = 'users-list-btn-ctnr';
+        meUli.appendChild(myUBtnCtnr);
 
         const usspan = document.createElement('span');
         usspan.className = 'users-list-btn s';
-        usspan.title = 'Mute User';
-        uBtnCtnr.appendChild(usspan);
+        usspan.title = 'Mute Myself';
+        myUBtnCtnr.appendChild(usspan);
         // span click event (sound off)
-        usspan.onclick = function () {
+        usspan.onclick = () => {
             // only mute
             if (this.jitsi.hasAudio) {
                 const sideMenu = sceneEl.systems['arena-side-menu-ui'];
@@ -905,11 +874,11 @@ AFRAME.registerSystem('arena-chat-ui', {
         // list users
         userList.forEach((user) => {
             const uli = document.createElement('li');
-            const name = user.type !== UserType.SCREENSHARE ? user.un : `${user.un}\'s Screen Share`;
+            const name = user.type !== UserType.SCREENSHARE ? user.un : `${user.un}'s Screen Share`;
             if (user.speaker) {
                 uli.style.color = 'green';
             }
-            uli.textContent = `${user.scene == _this.scene ? '' : `${user.scene}/`}${decodeURI(name)}${
+            uli.textContent = `${user.scene === _this.scene ? '' : `${user.scene}/`}${decodeURI(name)}${
                 user.type === UserType.EXTERNAL ? ' (external)' : ''
             }`;
             if (user.type !== UserType.SCREENSHARE) {
@@ -925,18 +894,18 @@ AFRAME.registerSystem('arena-chat-ui', {
                 // span click event (move us to be in front of another clicked user)
                 const { cid } = user;
                 const { scene } = user;
-                fuspan.onclick = function () {
+                fuspan.onclick = function findUserClick() {
                     _this.moveToFrontOfCamera(cid, scene);
                 };
 
-                if (user.scene == _this.scene) {
+                if (user.scene === _this.scene) {
                     const sspan = document.createElement('span');
                     sspan.className = 'users-list-btn s';
                     sspan.title = 'Mute User';
                     uBtnCtnr.appendChild(sspan);
 
                     // span click event (send sound on/off msg to ussr)
-                    sspan.onclick = function () {
+                    sspan.onclick = function muteUserClick() {
                         if (!_this.isUserAuthenticated(_this.cameraId)) {
                             _this.displayAlert('Anonymous users may not mute others.', 3000);
                             return;
@@ -951,7 +920,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                         kospan.className = 'users-list-btn ko';
                         kospan.title = 'Remove User';
                         uBtnCtnr.appendChild(kospan);
-                        kospan.onclick = function () {
+                        kospan.onclick = function kickUserClick() {
                             Swal.fire({
                                 title: 'Are you sure?',
                                 text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
@@ -979,7 +948,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                     // only update 'to' select for new users
                     const op = document.createElement('option');
                     op.value = user.uid;
-                    op.textContent = `to: ${decodeURI(user.un)}${user.scene != _this.scene ? ` (${user.scene})` : ''}`;
+                    op.textContent = `to: ${decodeURI(user.un)}${user.scene !== _this.scene ? ` (${user.scene})` : ''}`;
                     _this.toSel.appendChild(op);
                 }
             }
@@ -1007,24 +976,25 @@ AFRAME.registerSystem('arena-chat-ui', {
         uli.appendChild(spanStats);
         // show current stats on hover/mouseover
         const _this = this;
-        iconStats.onmouseover = function () {
+        iconStats.onmouseover = function statsMouseOver() {
             spanStats.textContent = stats ? _this.jitsi.getConnectionText(name, stats, status) : 'None';
-            const offset_ul = $('.user-list').offset();
-            const midpoint_w = offset_ul.left + $('.user-list').width() / 2;
-            const midpoint_h = offset_ul.top + $('.user-list').height() / 2;
-            const offset_sig = $(this).offset();
-            const off_left = offset_sig.left < midpoint_w ? offset_sig.left : 0;
-            const off_top = offset_sig.top < midpoint_h ? 10 : offset_ul.top - offset_sig.top;
+            const userList = $('.user-list');
+            const offsetUl = userList.offset();
+            const midpointW = offsetUl.left + userList.width() / 2;
+            const midpointH = offsetUl.top + userList.height() / 2;
+            const offsetSig = $(this).offset();
+            const offLeft = offsetSig.left < midpointW ? offsetSig.left : 0;
+            const offTop = offsetSig.top < midpointH ? 10 : offsetUl.top - offsetSig.top;
             $(this).next('span').fadeIn(200).addClass('videoTextTooltip');
-            $(this).next('span').css('left', `${off_left}px`);
-            $(this).next('span').css('top', `${off_top}px`);
+            $(this).next('span').css('left', `${offLeft}px`);
+            $(this).next('span').css('top', `${offTop}px`);
         };
-        iconStats.onmouseleave = function () {
+        iconStats.onmouseleave = function statsMouseLeave() {
             $(this).next('span').fadeOut(200);
         };
 
         // show moderator info
-        if (status && status.role == 'moderator') {
+        if (status && status.role === 'moderator') {
             const iconModerator = document.createElement('i');
             iconModerator.className = 'fa fa-crown';
             iconModerator.style.color = 'black';
@@ -1039,9 +1009,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {Object} lm The landmark object.
      */
     addLandmark(lm) {
-        const { data } = this;
-        const { el } = this;
-
         const uli = document.createElement('li');
         uli.id = `lmList_${lm.el.id}`;
         uli.textContent = lm.data.label.length > 45 ? `${lm.data.label.substring(0, 45)}...` : lm.data.label;
@@ -1056,7 +1023,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         lmBtnCtnr.appendChild(lspan);
 
         // setup click event
-        lspan.onclick = function () {
+        lspan.onclick = function onTeleportClick() {
             lm.teleportTo();
         };
         this.lmList.appendChild(uli);
@@ -1078,9 +1045,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Adds UI elements to select dropdown message destination.
      */
     addToSelOptions() {
-        const { data } = this;
-        const { el } = this;
-
         let op = document.createElement('option');
         op.value = 'scene';
         op.textContent = `to: scene ${this.scene}`;
@@ -1094,7 +1058,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
     /**
      * Send a chat system keepalive control message.
-     * @param {boolean} tryconnect True, to first try connecting to MQTT.
      */
     keepalive() {
         this.ctrlMsg('all', 'keepalive');
@@ -1107,9 +1070,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {string} text Body of the message/command.
      */
     ctrlMsg(to, text) {
-        const { data } = this;
-        const { el } = this;
-
         let dstTopic;
         if (to === 'all' || to === 'scene') {
             dstTopic = this.publishPublicTopic; // public messages
@@ -1140,9 +1100,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * Is called periodically = keepalive_interval_ms * 3.
      */
     userCleanup() {
-        const { data } = this;
-        const { el } = this;
-
         const now = new Date().getTime();
         const _this = this;
         Object.keys(_this.liveUsers).forEach((key) => {
@@ -1162,26 +1119,27 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {string} type Style of message: success, error, warning, info, question
      */
     displayAlert(msg, timeMs, type = 'info') {
+        let typeIcon = type;
         if (type !== 'info' && type !== 'success' && type !== 'error' && type !== 'warning' && type !== 'question')
-            type = 'error';
+            typeIcon = 'error';
         let backgroundColor;
         let iconColor;
-        if (type == 'error') {
+        if (type === 'error') {
             iconColor = '#616161';
             backgroundColor = '#ff9e9e';
         }
-        if (type == 'warning') {
+        if (type === 'warning') {
             iconColor = '#616161';
             backgroundColor = '#f8bb86';
         }
 
         this.Alert.fire({
-            icon: type,
+            icon: typeIcon,
             titleText: msg,
             timer: timeMs,
             iconColor,
             background: backgroundColor,
-        });
+        }).then(() => {});
     },
 
     /**
@@ -1190,7 +1148,6 @@ AFRAME.registerSystem('arena-chat-ui', {
      * @param {string} scene The scene name
      */
     moveToFrontOfCamera(cameraId, scene) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -1204,7 +1161,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             let devPath = '';
             if (this.devInstance && path.length > 0) {
                 try {
-                    devPath = path.match(/(?:x|dev)\/([^\/]+)\/?/g)[0];
+                    [devPath] = path.match(/(?:x|dev)\/([^/]+)\/?/g);
                 } catch (e) {
                     // no devPath
                 }

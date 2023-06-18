@@ -7,16 +7,15 @@
  * @date 2022
  */
 
-import { CVWorkerMsgs } from '../worker-msgs.js';
+/* global ARENA */
+
+import CVWorkerMsgs from '../worker-msgs';
 
 /**
  * Grab front facing camera frames using getUserMedia()
  */
-export class ARHeadsetCameraCapture {
+export default class ARHeadsetCameraCapture {
     static instance = null;
-
-    /* worker to send images captured */
-    cvWorker;
 
     video;
 
@@ -25,7 +24,7 @@ export class ARHeadsetCameraCapture {
     canvasCtx;
 
     // last captured frame timestamp (Date.now())
-    frameTs;
+    // frameTs;
 
     // last captured frame width
     frameWidth;
@@ -38,7 +37,7 @@ export class ARHeadsetCameraCapture {
     frameGsPixels;
 
     // last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4])
-    framePixels;
+    // framePixels;
 
     // last captured frame camera properties
     frameCamera;
@@ -52,8 +51,20 @@ export class ARHeadsetCameraCapture {
 
     /* projection matrices for supported headsets [TODO: get more values/check these] */
     headsetPM = {
-        ml: [2.842104, 0, 0, 0, 0, 3.897521, 0, 0, -0.000893, -0.004491, -1.171066, -1, 0, 0, -0.83912, 0],
-        hl: [2.842104, 0, 0, 0, 0, 3.897521, 0, 0, -0.000893, -0.004491, -1.171066, -1, 0, 0, -0.83912, 0],
+        // prettier-ignore
+        ml: [
+            2.842104, 0, 0, 0,
+            0, 3.897521, 0, 0,
+            -0.000893, -0.004491, -1.171066, -1,
+            0, 0, -0.83912, 0
+        ],
+        // prettier-ignore
+        hl: [
+            2.842104, 0, 0, 0,
+            0, 3.897521, 0, 0,
+            -0.000893, -0.004491, -1.171066, -1,
+            0, 0, -0.83912, 0
+        ],
     };
 
     /* selected projection matrix for device */
@@ -63,9 +74,8 @@ export class ARHeadsetCameraCapture {
      * Setup camera frame capture
      * @param {object} arHeadset - heaset name to lookup in headsetPM list
      * @param {object} [arMarkerSystem=undefined] - the AFRAME ARMarker system
-     * @param {object} [debug=false] - debug messages on/off
      */
-    constructor(arHeadset, arMarkerSystem, debug = false) {
+    constructor(arHeadset, arMarkerSystem) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw 'No getUserMedia support found for camera capture.';
         }
@@ -113,7 +123,7 @@ export class ARHeadsetCameraCapture {
             .getUserMedia(options)
             .then((ms) => {
                 this.video.srcObject = ms;
-                this.video.onloadedmetadata = (e) => {
+                this.video.onloadedmetadata = () => {
                     this.video.play();
                 };
             })

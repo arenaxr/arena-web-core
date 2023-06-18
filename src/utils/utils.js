@@ -6,12 +6,14 @@
  * @date 2020
  */
 
+/* global AFRAME, ARENA, THREE */
+
 import MQTTPattern from 'mqtt-pattern';
 
 /**
  * Wrapper class for various utility functions
  */
-export class ARENAUtils {
+export default class ARENAUtils {
     /**
      * Extracts URL params
      * @param {string} parameter URL parameter
@@ -31,9 +33,7 @@ export class ARENAUtils {
      * Register a callback for the geolocation of user's device
      *
      * The callback should take the following arguments
-     * @callback onLocationCallback
-     * @param coords {object} a {GeolocationCoordinates} object defining the current location, if successful; "default" location if error
-     * @param err {object} a {GeolocationPositionError} object if an error was returned; undefined if no error
+     * @param callback onLocationCallback
      */
     static getLocation(callback) {
         const urlLat = ARENAUtils.getUrlParam('lat', undefined);
@@ -249,7 +249,10 @@ export class ARENAUtils {
      * @return {boolean} True if device is in landscape mode.
      */
     static isLandscapeMode() {
-        return window.orientation == 90 || window.orientation == -90;
+        return (
+            window.screen.orientation.type === 'landscape-primary' ||
+            window.screen.orientation.type === 'landscape-secondary'
+        );
     }
 
     /**
@@ -274,7 +277,7 @@ export class ARENAUtils {
         const { position, rotation } = data;
         if (rotation) {
             // has 'w' coordinate: a quaternion
-            if (rotation.hasOwnProperty('w')) {
+            if (Object.hasOwn(rotation, 'w')) {
                 targetObject3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
             } else {
                 targetObject3D.rotation.set(
@@ -346,7 +349,7 @@ export class ARENAUtils {
     static updateModelComponents(o3d, data) {
         // Traverse once, instead of doing a lookup for each modelUpdate key
         o3d.traverse((child) => {
-            if (data.hasOwnProperty(child.name)) {
+            if (Object.hasOwn(data, child.name)) {
                 ARENAUtils.updatePose(child, data[child.name]);
             }
         });

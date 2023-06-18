@@ -1,3 +1,7 @@
+/* eslint-disable no-case-declarations */
+
+/* global AFRAME, ARENA, THREE */
+
 import { ARENAUtils } from '../utils';
 import { ACTIONS } from '../constants';
 
@@ -20,7 +24,7 @@ const cameraLookAtError = AFRAME.utils.debug('ARENA:camera look-at:error');
 /**
  * Create/Update object handler
  */
-export class CreateUpdate {
+export default class CreateUpdate {
     /**
      * Create/Update handler
      * @param {int} action action to carry out; one of: ACTIONS.CREATE, ACTIONS.UPDATE
@@ -28,6 +32,18 @@ export class CreateUpdate {
      */
     static handle(action, message) {
         const { id } = message;
+
+        /**
+         * Enable/Disable object MutationObserver for build-3d watcher.
+         * @param {*} entityEl The scene object to observe mutations
+         * @param {*} msg Incoming ARENA message payload.
+         * @param {*} enable true=start mutation observer, false=pause mutation observer
+         */
+        function enableBuildWatchObject(entityEl, msg, enable) {
+            if (msg.persist) {
+                entityEl.setAttribute('build-watch-object', 'enabled', enable);
+            }
+        }
 
         switch (message.type) {
             case 'object':
@@ -149,7 +165,7 @@ export class CreateUpdate {
                     const cameraRigObj3D = document.getElementById('cameraRig').object3D;
                     const { position, rotation } = message.data;
                     if (rotation) {
-                        if (rotation.hasOwnProperty('w')) {
+                        if (Object.hasOwn(rotation, 'w')) {
                             // has 'w' coordinate: a quaternion
                             cameraSpinnerObj3D.quaternion.set(rotation.x, rotation.y, rotation.z, rotation.w);
                         } else {
@@ -173,9 +189,9 @@ export class CreateUpdate {
                 const environment = document.createElement('a-entity');
                 environment.id = 'env';
                 const envPresets = message.data['env-presets'];
-                for (const [attribute, value] of Object.entries(envPresets)) {
+                Object.entries(envPresets).forEach(([attribute, value]) => {
                     environment.setAttribute('environment', attribute, value);
-                }
+                });
                 environmentOld.parentNode.replaceChild(environment, environmentOld);
                 return;
 
@@ -190,18 +206,6 @@ export class CreateUpdate {
                 } else {
                     updateWarn('Unknown type:', JSON.stringify(message));
                 }
-        }
-
-        /**
-         * Enable/Disable object MutationObserver for build-3d watcher.
-         * @param {*} entityEl The scene object to observe mutations
-         * @param {*} msg Incoming ARENA message payload.
-         * @param {*} enable true=start mutation observer, false=pause mutation observer
-         */
-        function enableBuildWatchObject(entityEl, msg, enable) {
-            if (msg.persist) {
-                entityEl.setAttribute('build-watch-object', 'enabled', enable);
-            }
         }
     }
 
@@ -225,51 +229,51 @@ export class CreateUpdate {
         let isGeometry = false;
         switch (type) {
             case 'camera':
-                if (data.hasOwnProperty('color')) {
+                if (Object.hasOwn(data, 'color')) {
                     entityEl.setAttribute('arena-user', 'color', data.color);
                 }
-                if (data.hasOwnProperty('headModelPath')) {
+                if (Object.hasOwn(data, 'headModelPath')) {
                     entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
                 }
-                if (data.hasOwnProperty('presence')) {
+                if (Object.hasOwn(data, 'presence')) {
                     entityEl.setAttribute('arena-user', 'presence', data.presence); // update presence
                 }
                 // decide if we need draw or delete videoCube around head
-                if (message.hasOwnProperty('jitsiId')) {
+                if (Object.hasOwn(message, 'jitsiId')) {
                     entityEl.setAttribute('arena-user', 'jitsiId', message.jitsiId);
                     entityEl.setAttribute('arena-user', 'hasVideo', message.hasVideo);
                     entityEl.setAttribute('arena-user', 'hasAudio', message.hasAudio);
                 }
-                if (message.hasOwnProperty('displayName')) {
+                if (Object.hasOwn(message, 'displayName')) {
                     entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
                 }
                 break;
             case 'gltf-model':
-                if (ARENA.params.armode && data.hasOwnProperty('hide-on-enter-ar')) {
+                if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
-                if (ARENA.params.vr && data.hasOwnProperty('hide-on-enter-vr')) {
+                if (ARENA.params.vr && Object.hasOwn(data, 'hide-on-enter-vr')) {
                     warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
                 // support both url and src property
-                if (data.hasOwnProperty('url')) {
+                if (Object.hasOwn(data, 'url')) {
                     data.src = data.url; // make src=url
                     delete data.url; // remove attribute so we don't set it later
                 }
                 // gltf is a special case in that the src is applied to the component 'gltf-model'
-                if (data.hasOwnProperty('src')) {
-                    if (!(data.hasOwnProperty('remote-render') && data['remote-render'].enabled === true)) {
+                if (Object.hasOwn(data, 'src')) {
+                    if (!(Object.hasOwn(data, 'remote-render') && data['remote-render'].enabled === true)) {
                         entityEl.setAttribute('gltf-model', ARENAUtils.crossOriginDropboxSrc(data.src));
                     }
                     delete data.src; // remove attribute so we don't set it later
                 }
                 // add attribution by default, if not given
-                if (!data.hasOwnProperty('attribution')) {
+                if (!Object.hasOwn(data, 'attribution')) {
                     entityEl.setAttribute('attribution', 'extractAssetExtras', true);
                 }
-                if (data.hasOwnProperty('modelUpdate')) {
+                if (Object.hasOwn(data, 'modelUpdate')) {
                     /*
                  Only apply update directly on update. If this is a CREATE msg (from persist most likely), let a
                  element prop be set and actual updates deferred, to be picked up by gltf-model after model load.
@@ -278,6 +282,7 @@ export class CreateUpdate {
                     if (message.action === ACTIONS.UPDATE) {
                         ARENAUtils.updateModelComponents(entityEl.object3D, modelUpdateData);
                     } else {
+                        // eslint-disable-next-line no-param-reassign
                         entityEl.deferredModelUpdate = modelUpdateData;
                     }
                     delete data.modelUpdate; // remove attribute so we don't set it later
@@ -285,7 +290,7 @@ export class CreateUpdate {
                 break;
             case 'headtext':
                 // handle changes to other users head text
-                if (message.hasOwnProperty('displayName')) {
+                if (Object.hasOwn(message, 'displayName')) {
                     entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
                 }
                 break;
@@ -293,15 +298,15 @@ export class CreateUpdate {
                 // image is just a textured plane
                 // TODO: create an aframe component for this
                 entityEl.setAttribute('geometry', 'primitive', 'plane');
-                if (data.hasOwnProperty('url')) {
+                if (Object.hasOwn(data, 'url')) {
                     entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url));
                     delete data.url; // remove attribute so we don't set it later
                 }
-                if (data.hasOwnProperty('src')) {
+                if (Object.hasOwn(data, 'src')) {
                     entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.src));
                     delete data.src; // remove attribute so we don't set it later
                 }
-                if (!data.hasOwnProperty('material-extras')) {
+                if (!Object.hasOwn(data, 'material-extras')) {
                     // default images to SRGBColorSpace, if not specified
                     entityEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
                     entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
@@ -315,16 +320,18 @@ export class CreateUpdate {
                     entityEl.setAttribute('text', 'value', data.text);
                     delete data.text;
                 }
-                if (!data.hasOwnProperty('side')) entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)
-                if (!data.hasOwnProperty('width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
-                if (!data.hasOwnProperty('align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
+                if (!Object.hasOwn(data, 'side')) entityEl.setAttribute('text', 'side', 'double'); // default to double (aframe default=front)
+                if (!Object.hasOwn(data, 'width')) entityEl.setAttribute('text', 'width', 5); // default to width to 5 (aframe default=derived from geometry)
+                if (!Object.hasOwn(data, 'align')) entityEl.setAttribute('text', 'align', 'center'); // default to align to center (aframe default=left)
                 break;
             case 'handLeft':
             case 'handRight':
                 entityEl.setAttribute('gltf-model', data.url);
                 delete data[type];
+                break;
             case 'cube':
                 type = 'box'; // arena legacy! new libraries/persist objects should use box!
+            // eslint-disable-next-line no-fallthrough
             case 'box':
             case 'circle':
             case 'cone':
@@ -368,7 +375,7 @@ export class CreateUpdate {
 
         if (typeof ARENA.clickableOnlyEvents !== 'undefined' && !ARENA.clickableOnlyEvents) {
             // unusual case: clickableOnlyEvents = true by default
-            if (!entityEl.hasOwnProperty('click-listener')) {
+            if (!Object.hasOwn(entityEl, 'click-listener')) {
                 // attach click-listener to all objects that don't already have them
                 entityEl.setAttribute('click-listener', '');
             }
@@ -384,12 +391,13 @@ export class CreateUpdate {
      */
     static setGeometryAttributes(entityEl, data, gName) {
         if (!AFRAME.geometries[gName]) return; // no geometry registered with this name
-        for (const [attribute, value] of Object.entries(data)) {
+        Object.entries(data).forEach(([attribute, value]) => {
             if (AFRAME.geometries[gName].Geometry.prototype.schema[attribute]) {
                 entityEl.setAttribute('geometry', attribute, value);
+                // eslint-disable-next-line no-param-reassign
                 delete data[attribute]; // we handled this attribute; remove it
             }
-        }
+        });
     }
 
     /**
@@ -401,10 +409,11 @@ export class CreateUpdate {
      */
     static setComponentAttributes(entityEl, data, cName) {
         if (!AFRAME.components[cName]) return; // no component registered with this name
-        for (let [attribute, value] of Object.entries(data)) {
+        Object.entries(data).forEach(([attribute, value]) => {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
                 // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute == 'src' || attribute == 'url') {
+                if (attribute === 'src' || attribute === 'url') {
+                    // eslint-disable-next-line no-param-reassign
                     value = ARENAUtils.crossOriginDropboxSrc(value);
                 }
 
@@ -414,9 +423,10 @@ export class CreateUpdate {
                 } else {
                     entityEl.setAttribute(cName, attribute, value);
                 }
+                // eslint-disable-next-line no-param-reassign
                 delete data[attribute]; // we handled this attribute; remove it
             }
-        }
+        });
     }
 
     /**
@@ -426,7 +436,7 @@ export class CreateUpdate {
      * @param {object} data data part of the message with the attributes
      */
     static setEntityAttributes(entityEl, data) {
-        for (const [attribute, value] of Object.entries(data)) {
+        Object.entries(data).forEach(([attribute, value]) => {
             // console.info("Set entity attribute [id type - attr value]:", entityEl.getAttribute('id'), attribute, value);
 
             // handle some special cases for attributes (e.g. attributes set directly to the THREE.js object);
@@ -434,7 +444,7 @@ export class CreateUpdate {
             switch (attribute) {
                 case 'rotation':
                     // rotation is set directly in the THREE.js object, for performance reasons
-                    if (value.hasOwnProperty('w')) {
+                    if (Object.hasOwn(value, 'w')) {
                         entityEl.object3D.quaternion.set(value.x, value.y, value.z, value.w); // has 'w' coordinate: a quaternion
                     } else {
                         entityEl.object3D.rotation.set(
@@ -449,7 +459,7 @@ export class CreateUpdate {
                     entityEl.object3D.position.set(value.x, value.y, value.z);
                     break;
                 case 'color':
-                    if (!entityEl.hasOwnProperty('text')) {
+                    if (!Object.hasOwn(entityEl, 'text')) {
                         entityEl.setAttribute('material', 'color', value);
                     } else {
                         entityEl.setAttribute('text', 'color', value);
@@ -467,6 +477,7 @@ export class CreateUpdate {
                 case 'url':
                     // replace dropbox links in any 'src'/'url' attributes that get here
                     entityEl.setAttribute(attribute, ARENAUtils.crossOriginDropboxSrc(value));
+                    break;
                 default:
                     // all other attributes are pushed directly to aframe
                     if (value === null) {
@@ -474,12 +485,13 @@ export class CreateUpdate {
                         entityEl.removeAttribute(attribute);
                     } else {
                         // replace dropbox links in any url or src attribute inside value
-                        if (value.hasOwnProperty('src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
-                        if (value.hasOwnProperty('url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
+                        /* eslint-disable no-param-reassign */
+                        if (Object.hasOwn(value, 'src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
+                        if (Object.hasOwn(value, 'url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                         entityEl.setAttribute(attribute, value);
                     }
             } // switch attribute
-        }
+        });
     }
 
     /**
@@ -517,7 +529,7 @@ export class CreateUpdate {
                 // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
                 if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
                 if (r) {
-                    if (r.hasOwnProperty('w')) {
+                    if (Object.hasOwn(r, 'w')) {
                         overrideQuat.set(r.x, r.y, r.z, r.w);
                         myCamera.object3D.rotation.setFromQuaternion(overrideQuat);
                     } else {
@@ -537,7 +549,7 @@ export class CreateUpdate {
             }
 
             let { target } = message.data;
-            if (!target.hasOwnProperty('x')) {
+            if (!Object.hasOwn(target, 'x')) {
                 // check if an object id was given
                 const targetObj = document.getElementById(target);
                 if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
@@ -548,7 +560,7 @@ export class CreateUpdate {
             }
 
             // x, y, z given
-            if (target.hasOwnProperty('x') && target.hasOwnProperty('y') && target.hasOwnProperty('z')) {
+            if (Object.hasOwn(target, 'x') && Object.hasOwn(target, 'y') && Object.hasOwn(target, 'z')) {
                 myCamera.components['look-controls'].yawObject.lookAt(target.x, target.y, target.z);
                 myCamera.components['look-controls'].pitchObject.lookAt(target.x, target.y, target.z);
                 cameraLookAtWarn(message);

@@ -13,12 +13,15 @@ import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 export default class MQTTClient {
     constructor(st) {
         // handle default this.settings
+        // eslint-disable-next-line no-param-reassign
         st = st || {};
         this.settings = {
             mqtt_host:
                 st.mqtt_host !== undefined
                     ? st.mqtt_host
-                    : `wss://${location.hostname}${location.port ? `:${location.port}` : ''}/mqtt/`,
+                    : `wss://${window.location.hostname}${
+                          window.location.port ? `:${window.location.port}` : ''
+                      }/mqtt/`,
             useSSL: st.useSSL !== undefined ? st.useSSL : true,
             mqtt_username: st.mqtt_username !== undefined ? st.mqtt_username : 'non_auth',
             mqtt_token: st.mqtt_token !== undefined ? st.mqtt_token : null,
@@ -41,14 +44,15 @@ export default class MQTTClient {
     }
 
     async connect(force = false) {
-        if (this.connected == true && force == false) return;
+        if (this.connected === true && force === false) return;
         this.mqttc = new Paho.Client(this.settings.mqtt_host, this.settings.userid);
 
         this.mqttc.onConnectionLost = this.onConnectionLost.bind(this);
         this.mqttc.onMessageArrived = this.onMessageArrived.bind(this);
 
         const _this = this;
-        return new Promise((resolve, reject) => {
+        // eslint-disable-next-line consistent-return
+        return new Promise((resolve) => {
             _this.mqttc.connect({
                 onSuccess: () => {
                     console.info('MQTT Connected.');
@@ -58,6 +62,7 @@ export default class MQTTClient {
                 onFailure: () => {
                     console.error('MQTT failed to connect.');
                     _this.connected = false;
+                    // eslint-disable-next-line no-throw-literal
                     throw 'MQTT: Error connecting.';
                 },
                 willMessage: _this.settings.willMessage,
@@ -69,17 +74,17 @@ export default class MQTTClient {
         });
     }
 
-    onConnectionLost(message) {
+    onConnectionLost() {
         console.error('MQTT Client Disconnect.');
         this.connected = false;
     }
 
-    subscribe(topic, qos = 0) {
-        this.mqttc.subscribe(topic, qos);
+    subscribe(topic, opts) {
+        this.mqttc.subscribe(topic, opts);
     }
 
-    unsubscribe(topic, qos = 0) {
-        this.mqttc.unsubscribe(topic);
+    unsubscribe(topic, opts) {
+        this.mqttc.unsubscribe(topic, opts);
     }
 
     async publish(topic, payload, qos = 0, retained = false) {

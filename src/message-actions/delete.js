@@ -1,3 +1,5 @@
+/* global AFRAME */
+
 const info = AFRAME.utils.debug('ARENA:delete:info');
 const warn = AFRAME.utils.debug('ARENA:delete:warn');
 const error = AFRAME.utils.debug('ARENA:delete:error');
@@ -5,7 +7,7 @@ const error = AFRAME.utils.debug('ARENA:delete:error');
 /**
  * Delete object handler
  */
-export class Delete {
+export default class Delete {
     /**
      * Delete handler
      * @param {object} message message to be parsed

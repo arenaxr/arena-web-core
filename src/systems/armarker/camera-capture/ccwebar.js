@@ -7,18 +7,15 @@
  * @date 2022
  */
 
-import { CVWorkerMsgs } from '../worker-msgs.js';
-import { GetUserMediaARSource } from './getusermedia-source.js';
+import CVWorkerMsgs from '../worker-msgs';
+import GetUserMediaARSource from './getusermedia-source';
 import { ARENAUtils } from '../../../utils';
 
 /**
  * Grab front facing camera frames using getUserMedia()
  */
-export class WebARCameraCapture {
+export default class WebARCameraCapture {
     static instance = null;
-
-    /* worker to send images captured */
-    cvWorker;
 
     video;
 
@@ -27,7 +24,7 @@ export class WebARCameraCapture {
     canvasCtx;
 
     // last captured frame timestamp (Date.now())
-    frameTs;
+    // frameTs;
 
     // last captured frame width
     frameWidth;
@@ -40,7 +37,7 @@ export class WebARCameraCapture {
     frameGsPixels;
 
     // last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4])
-    framePixels;
+    // framePixels;
 
     // last captured frame camera properties
     frameCamera;
@@ -51,9 +48,8 @@ export class WebARCameraCapture {
     /**
      * Setup camera frame capture
      * @param {object} [cameraFacingMode='environment'] - as defined by MediaTrackConstraints.facingMode
-     * @param {object} [debug=false] - debug messages on/off
      */
-    constructor(cameraFacingMode = 'environment', debug = false) {
+    constructor(cameraFacingMode = 'environment') {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw 'No getUserMedia support found for camera capture.';
         }
@@ -170,7 +166,7 @@ export class WebARCameraCapture {
             imageData = this.canvasCtx.getImageData(0, 0, this.frameWidth, this.frameHeight);
         } catch (err) {
             console.warn('Failed to get video frame. Video not started ?', err);
-            setTimeout(getCameraImagePixels.bind(this), 1000); // try again..
+            setTimeout(this.getCameraImagePixels.bind(this), 1000); // try again..
             return;
         }
         const imageDataPixels = imageData.data;

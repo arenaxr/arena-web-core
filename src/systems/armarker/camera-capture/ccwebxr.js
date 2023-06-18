@@ -9,12 +9,14 @@
  * @date 2021
  */
 
-import { CVWorkerMsgs } from '../worker-msgs.js';
+/* global THREE */
+
+import CVWorkerMsgs from '../worker-msgs';
 
 /**
  * Grab camera frames using WebXR Raw Camera Access API
  */
-export class WebXRCameraCapture {
+export default class WebXRCameraCapture {
     /* singleton instance */
     static instance = null;
 
@@ -77,8 +79,8 @@ export class WebXRCameraCapture {
         }
         WebXRCameraCapture.instance = this;
 
-        if (xrSession == undefined) throw 'WebXRCC: No XRSession!';
-        if (gl == undefined) throw 'WebXRCC: No gl handle!';
+        if (xrSession === undefined) throw 'WebXRCC: No XRSession!';
+        if (gl === undefined) throw 'WebXRCC: No gl handle!';
 
         if (debug) {
             const cameraEl = document.getElementById('my-camera'); // assume camera is called 'my-camera' (ARENA)
@@ -101,10 +103,10 @@ export class WebXRCameraCapture {
 
         this.gl = gl;
 
-        const webGlBinding = window.XRWebGLBinding;
+        const WebGlBinding = window.XRWebGLBinding;
         // check if we have webXR camera capture available
-        if (webGlBinding) {
-            this.glBinding = new webGlBinding(xrSession, gl);
+        if (WebGlBinding) {
+            this.glBinding = new WebGlBinding(xrSession, gl);
             if (this.glBinding && this.glBinding.getCameraImage) {
                 this.fb = gl.createFramebuffer();
                 const webxrSystem = document.getElementById('ARENAScene').systems.webxr;
@@ -180,9 +182,9 @@ export class WebXRCameraCapture {
         const glLayer = session.renderState.baseLayer;
         // check if camera frame changed size
         if (
-            this.frameCamera == undefined ||
-            this.frameWidth != view.camera.width ||
-            this.frameHeight != view.camera.height
+            this.frameCamera === undefined ||
+            this.frameWidth !== view.camera.width ||
+            this.frameHeight !== view.camera.height
         ) {
             // const viewport = glLayer.getViewport(view);
 
@@ -293,14 +295,14 @@ export class WebXRCameraCapture {
 
         const pose = frame.getViewerPose(this.xrRefSpace);
         if (!pose) return;
-        for (const view of pose.views) {
+        pose.views.forEach((view) => {
             if (view.camera) {
                 // only capture next frame on request
                 this.frameRequested = false;
 
                 this.getCameraFramePixels(time, session, view);
             }
-        }
+        });
     }
 
     /**

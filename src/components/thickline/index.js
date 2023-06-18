@@ -1,3 +1,5 @@
+/* global AFRAME, THREE */
+
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
 }
@@ -14,13 +16,13 @@ const lineWidthStylers = {
     shrink(p) {
         return 1 - p;
     },
-    'center-sharp': function (p) {
+    'center-sharp': function centerSharp(p) {
         return 1 - Math.abs(2 * p - 1);
     },
-    'center-smooth': function (p) {
+    'center-smooth': function centerSmooth(p) {
         return Math.sin(p * 3.1415);
     },
-    'sine-wave': function (p) {
+    'sine-wave': function sineWave(p) {
         return 0.5 + 0.5 * Math.sin((p - 0.5) * 2 * 3.1415 * 10);
     },
 };
@@ -89,11 +91,7 @@ AFRAME.registerComponent('thickline', {
 
         geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
 
-        const widthFn =
-            lineWidthStylers[this.data.lineWidthStyler] ??
-            function () {
-                return 1;
-            };
+        const widthFn = lineWidthStylers[this.data.lineWidthStyler] ?? (() => 1);
         // ? try {var w = widthFn(0);} catch(e) {warn(e);}
         const line = new THREE.MeshLine();
         line.setGeometry(geometry, widthFn);

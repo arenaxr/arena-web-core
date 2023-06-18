@@ -6,8 +6,8 @@
  * @date 2020
  */
 
-import MqttClient from './mqtt-client.js';
-import { ARENAUserAccount } from './arena-account.js';
+import MqttClient from './mqtt-client';
+import ARENAUserAccount from './arena-account';
 
 let persist;
 

@@ -1,3 +1,5 @@
+/* global AFRAME */
+
 AFRAME.registerComponent('panel', {
     schema: {
         width: { default: 1 },

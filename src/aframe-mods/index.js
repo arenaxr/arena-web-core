@@ -6,10 +6,10 @@
  * @date 2023
  */
 
-import './aabb-collider.js';
-import './arrow-controls.js';
-import './gltf-model-model-update.js';
-import './gltf-model-loading.js';
-import './wasd-speed-controls.js';
-import './webrtc-positional-sound.js';
-import './utils-srcloader.js';
+import './aabb-collider';
+import './arrow-controls';
+import './gltf-model-model-update';
+import './gltf-model-loading';
+import './wasd-speed-controls';
+import './webrtc-positional-sound';
+import './utils-srcloader';

@@ -6,5 +6,5 @@
  * @date 2023
  */
 
-import './webxr-device-manager.js';
-import './webxr-viewer.js';
+import './webxr-device-manager';
+import './webxr-viewer';

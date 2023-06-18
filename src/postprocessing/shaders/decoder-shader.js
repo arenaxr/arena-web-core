@@ -1,4 +1,6 @@
-export const DecoderShader = {
+/* global THREE */
+
+const DecoderShader = {
     uniforms: {
         tRemoteFrame: {
             type: 't',
@@ -18,3 +20,5 @@ export const DecoderShader = {
 
     fragmentShader: require('./glsl/decoder/frag.glsl'),
 };
+
+export default DecoderShader;

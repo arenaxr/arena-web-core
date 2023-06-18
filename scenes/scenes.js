@@ -1,3 +1,5 @@
+/* global axios, ARENAAUTH, Swal, $ */
+
 window.publicButtons = []; // 1 or 2 buttons depending on auth
 
 function showEl(el, flex = false) {
@@ -8,10 +10,10 @@ function showEl(el, flex = false) {
 
 function hideEls(els, flex = false) {
     const showClass = flex ? 'd-flex' : 'd-block';
-    for (const el of els) {
+    els.forEach((el) => {
         el.classList.add('d-none');
         el.classList.remove(showClass);
-    }
+    });
 }
 
 function changePage(page = 'sceneSelect') {
@@ -45,7 +47,8 @@ window.addEventListener('onauth', async (e) => {
         changePage('#sceneSelect');
     });
 
-    $('select').each(function () {
+    const selectEl = $('select');
+    selectEl.each(function selectEach() {
         $(this).select2({
             theme: 'bootstrap4',
             width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
@@ -54,7 +57,7 @@ window.addEventListener('onauth', async (e) => {
             closeOnSelect: !$(this).attr('multiple'),
         });
     });
-    $('select').val(null).trigger('change');
+    selectEl.val(null).trigger('change');
 
     const usernameSelect = document.getElementById('username');
     $(usernameSelect).text(username);
@@ -106,7 +109,7 @@ window.addEventListener('onauth', async (e) => {
     };
 
     const togglePublicSceneButtons = (toggle) => {
-        publicButtons.forEach((btn) => {
+        window.publicButtons.forEach((btn) => {
             toggle ? btn.classList.remove('disabled') : btn.classList.add('disabled');
         });
     };
@@ -160,9 +163,9 @@ window.addEventListener('onauth', async (e) => {
     uriBuilderCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('change', () => {
             const uriSettings = [];
-            uriBuilderCheckboxes.forEach((checkbox) => {
-                if (checkbox.checked) {
-                    uriSettings.push(checkbox.id);
+            uriBuilderCheckboxes.forEach((_checkbox) => {
+                if (_checkbox.checked) {
+                    uriSettings.push(_checkbox.id);
                 }
             });
             const sceneUrl = new URL(`${window.location.origin}/${window.userSceneId}`);
@@ -192,6 +195,8 @@ window.addEventListener('onauth', async (e) => {
                     case 'noavCheck':
                         sceneUrl.searchParams.append('noav', '1');
                         break;
+                    default:
+                    // skip
                 }
             });
             updateUserSceneUrlBox(sceneUrl.href);
@@ -230,7 +235,7 @@ window.addEventListener('onauth', async (e) => {
                         html: `${deleteUserSceneBtn.value} has been deleted.`,
                         icon: 'info',
                         willClose: () => {
-                            location.reload();
+                            window.location.reload();
                         },
                     });
                 })

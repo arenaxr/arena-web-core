@@ -1,3 +1,5 @@
+/* eslint-disable camelcase */
+
 /**
  * @fileoverview Runtime message factory (create/delete runtimes, modules)
  *
@@ -174,27 +176,26 @@ export default class RuntimeMsgs {
     /**
      * Create module message from persist object
      * @param {object} persistObj - module persist data (See example)
-     * @param {object} replaceVars - dictionary of extra variables to replace (e.g. {scene: "ascene"})
+     * @param {object} extraVars - dictionary of extra variables to replace (e.g. {scene: "ascene"})
      */
     createModuleFromPersistObj(persistObj, extraVars = {}) {
         const pdata = persistObj.attributes;
 
         // function to replace variables
-        function replaceVars(text, rvars) {
-            let result;
-            for (const [key, value] of Object.entries(rvars)) {
+        function replaceVars(text) {
+            let result = text;
+            Object.entries(extraVars).forEach(([key, value]) => {
                 if (value !== undefined) {
                     const re = new RegExp(`\\$\\{${key}\\}`, 'g');
                     result = text.replace(re, value);
-                    text = result;
                 }
-            }
+            });
             return result;
         }
 
         let muuid = UUID.generate(); // for per client, create a random uuid;
         // check if instantiate is "single"
-        if (pdata.instantiate == 'single') {
+        if (pdata.instantiate === 'single') {
             // object_id in persist obj is used as the uuid, if it is a valid uuid
             const uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
             if (uuid_regex.test(persistObj.object_id)) muuid = persistObj.object_id;
@@ -219,7 +220,7 @@ export default class RuntimeMsgs {
         let args;
         let env;
         if (pdata.args) args = pdata.args.map((arg) => replaceVars(arg, rvars));
-        if (pdata.env) env = pdata.env.map((env) => replaceVars(env, rvars));
+        if (pdata.env) env = pdata.env.map((_env) => replaceVars(_env, rvars));
 
         // replace variables in channel path and params
         if (pdata.channels) {
@@ -230,7 +231,7 @@ export default class RuntimeMsgs {
         }
 
         let fn;
-        if (pdata.filetype == RuntimeMsgs.FileType.wasm) {
+        if (pdata.filetype === RuntimeMsgs.FileType.wasm) {
             // full filename using file store location, name (in the form namespace/program-folder), entry filename
             fn = [this.rt.getFSLocation(), pdata.name, pdata.filename].join('/').replace(/([^:])(\/\/+)/g, '$1/');
         } else fn = pdata.filename; // just the filename
@@ -239,8 +240,8 @@ export default class RuntimeMsgs {
         let apis = [];
         if (pdata.apis !== undefined) apis = pdata.apis;
         else {
-            if (pdata.filetype == RuntimeMsgs.FileType.wasm) apis = RuntimeMsgs.Apis.wasm;
-            if (pdata.filetype == RuntimeMsgs.FileType.python) apis = RuntimeMsgs.Apis.python;
+            if (pdata.filetype === RuntimeMsgs.FileType.wasm) apis = RuntimeMsgs.Apis.wasm;
+            if (pdata.filetype === RuntimeMsgs.FileType.python) apis = RuntimeMsgs.Apis.python;
         }
 
         // create new ARTS message using persist obj data
@@ -249,7 +250,7 @@ export default class RuntimeMsgs {
                 name: pdata.name,
                 uuid: muuid,
                 // parent is this runtime if affinity is client; otherwise, from request parent which can be undefined to let orchestrator decide
-                parent: pdata.affinity == 'client' ? { uuid: this.rt.getUuid() } : pdata.parent,
+                parent: pdata.affinity === 'client' ? { uuid: this.rt.getUuid() } : pdata.parent,
                 filename: fn,
                 filetype: pdata.filetype,
                 channels: pdata.channels,
@@ -261,7 +262,7 @@ export default class RuntimeMsgs {
         );
 
         // check affinity
-        if (pdata.affinity == 'single') {
+        if (pdata.affinity === 'single') {
             // object_id in persist obj is used as the uuid, if it is a valid uuid
             const regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
             if (regex.test(persistObj.object_id)) {

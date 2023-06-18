@@ -6,8 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, JitsiMeetJS */
-// import $ from 'jquery';
+/* global AFRAME, ARENA, JitsiMeetJS, $ */
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
 
 // log lib-jitsi-meet.js version
@@ -20,7 +19,7 @@ if (JitsiMeetJS) {
  */
 AFRAME.registerSystem('arena-jitsi', {
     schema: {
-        jitsiHost: { type: 'string', default: ARENADefaults.jitsiHost },
+        jitsiHost: { type: 'string', default: ARENA.defaults.jitsiHost },
         arenaAppId: { type: 'string', default: 'arena' },
         screensharePrefix: { type: 'string', default: '#5cr33n5h4r3' }, // unique prefix for screenshare clients
         arenaUserPrefix: { type: 'string', default: '#4r3n4' }, // unique arena client "tag"
@@ -102,7 +101,7 @@ AFRAME.registerSystem('arena-jitsi', {
         this.health = sceneEl.systems['arena-health-ui'];
 
         // we use the scene name as the jitsi room name, handle RFC 3986 reserved chars as = '_'
-        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,\/:;=?@[\]]/g, '_');
+        this.conferenceName = this.arena.namespacedScene.toLowerCase().replace(/[!#$&'()*+,/:;=?@[\]]/g, '_');
 
         JitsiMeetJS.setLogLevel(JitsiMeetJS.logLevels.ERROR);
 
@@ -130,9 +129,6 @@ AFRAME.registerSystem('arena-jitsi', {
      */
     connect() {
         const { data } = this;
-        const { el } = this;
-
-        const { sceneEl } = el;
 
         JitsiMeetJS.mediaDevices.addEventListener(
             JitsiMeetJS.events.mediaDevices.DEVICE_LIST_CHANGED,
@@ -143,7 +139,9 @@ AFRAME.registerSystem('arena-jitsi', {
         try {
             const prefAudioOutput = localStorage.getItem('prefAudioOutput');
             JitsiMeetJS.mediaDevices.setAudioOutputDevice(prefAudioOutput);
-        } catch {}
+        } catch {
+            // empty
+        }
 
         JitsiMeetJS.init(this.initOptions);
         console.info('Jitsi, connecting:', this.connectOptions);
@@ -197,6 +195,8 @@ AFRAME.registerSystem('arena-jitsi', {
             );
 
             // append our own video/audio elements to <body>
+
+            /* eslint-disable no-await-in-loop */
             if (track.getType() === 'video') {
                 // use already defined e.g. <video id="cornerVideo" ...>
                 const cornerVidEl = document.getElementById('cornerVideo');
@@ -216,7 +216,7 @@ AFRAME.registerSystem('arena-jitsi', {
                 }
                 this.jitsiAudioTrack = track;
             }
-
+            /* eslint-disable no-await-in-loop */
             if (this.initialized) {
                 // mobile only?
                 track.mute();
@@ -261,7 +261,6 @@ AFRAME.registerSystem('arena-jitsi', {
         screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
         screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
         this.screenShareDict[participantId] = screenShareEl;
-        return screenShareEl;
     },
 
     /**
@@ -285,7 +284,7 @@ AFRAME.registerSystem('arena-jitsi', {
             this.remoteTracks[participantId] = [null, null]; // create array to hold their tracks
         }
 
-        if (track.getType() == 'audio') {
+        if (track.getType() === 'audio') {
             if (this.remoteTracks[participantId][0]) {
                 this.remoteTracks[participantId][0].dispose();
             }
@@ -294,10 +293,10 @@ AFRAME.registerSystem('arena-jitsi', {
             const audioId = `audio${participantId}`;
             // create HTML audio elem to store audio
             if (!document.getElementById(audioId)) {
-                $('a-assets').append(`<audio id='${audioId}' playsinline/>`);
+                $('a-assets').append(`<audio id='${audioId}'/>`);
             }
             track.attach($(`#${audioId}`)[0]);
-        } else if (track.getType() == 'video') {
+        } else if (track.getType() === 'video') {
             if (this.remoteTracks[participantId][1]) {
                 this.remoteTracks[participantId][1].dispose();
             }
@@ -305,10 +304,12 @@ AFRAME.registerSystem('arena-jitsi', {
 
             const videoId = `video${participantId}`;
             // create HTML video elem to store video
-            if (!document.getElementById(videoId)) {
-                $('a-assets').append(`<video autoplay='1' id='${videoId}' playsinline/>`);
+            let vidEl = document.getElementById(videoId);
+            if (!vidEl) {
+                vidEl = $(`<video autoplay='autoplay' id='${videoId}' playsinline/>`);
+                $('a-assets').append(vidEl);
             }
-            track.attach($(`#${videoId}`)[0]);
+            track.attach(vidEl[0]);
 
             const user = this.conference.getParticipantById(participantId);
             let camNames = user.getProperty('arenaCameraName');
@@ -318,7 +319,7 @@ AFRAME.registerSystem('arena-jitsi', {
             if (camNames.includes(data.screensharePrefix)) {
                 let dn = user.getProperty('screenshareDispName');
                 if (!dn) dn = user.getDisplayName();
-                if (!dn) dn = `No Name #${id}`;
+                if (!dn) dn = `No Name #${participantId}`;
                 const camName = user.getProperty('screenshareCamName');
                 let objectIds = user.getProperty('screenshareObjIds');
 
@@ -328,7 +329,7 @@ AFRAME.registerSystem('arena-jitsi', {
                         id: participantId,
                         dn,
                         cn: camName,
-                        scene: thiss.arena.namespacedScene,
+                        scene: this.arena.namespacedScene,
                         src: EVENT_SOURCES.JITSI,
                     });
                     objectIds = objectIds.split(',');
@@ -337,7 +338,7 @@ AFRAME.registerSystem('arena-jitsi', {
                     for (let i = 0; i < objectIds.length; i++) {
                         if (objectIds[i]) {
                             const video = $(`#${videoId}`);
-                            video.on('loadeddata', (e) => {
+                            video.on('loadeddata', () => {
                                 this.updateScreenShareObject(objectIds[i], videoId, participantId);
                             });
                         }
@@ -377,7 +378,6 @@ AFRAME.registerSystem('arena-jitsi', {
      * This function is executed when the this.conference is joined
      */
     onConferenceJoined() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -480,7 +480,6 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {object} user user object (JitsiParticipant)
      */
     onUserLeft(id, user) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -513,7 +512,6 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {string} id user Id
      */
     onDominantSpeakerChanged(id) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -543,8 +541,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * This function is called when connection is established successfully
      */
     onConnectionSuccess() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         const { sceneEl } = el;
 
@@ -573,9 +570,9 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference.on(JitsiMeetJS.events.conference.TRACK_AUDIO_LEVEL_CHANGED, (userID, audioLevel) =>
             console.debug(`${userID} - ${audioLevel}`)
         );
-        this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
-            console.debug(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`)
-        );
+        // this.conference.on(JitsiMeetJS.events.conference.PHONE_NUMBER_CHANGED, () =>
+        //     console.debug(`${conference.getPhoneNumber()} - ${conference.getPhonePin()}`)
+        // );
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_FAILED, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.conference.CONFERENCE_ERROR, this.onConferenceError);
         this.conference.on(JitsiMeetJS.events.connectionQuality.LOCAL_STATS_UPDATED, (stats) => {
@@ -654,7 +651,6 @@ AFRAME.registerSystem('arena-jitsi', {
     },
 
     updateUserStatus() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -675,7 +671,6 @@ AFRAME.registerSystem('arena-jitsi', {
      * @param {*} err
      */
     onConferenceError(err) {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -691,7 +686,6 @@ AFRAME.registerSystem('arena-jitsi', {
      * This function is called when the this.connection fails.
      */
     onConnectionFailed() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -752,7 +746,7 @@ AFRAME.registerSystem('arena-jitsi', {
             deviceOpts.minFps = 5;
             deviceOpts.constraints = {
                 video: {
-                    aspectRatio: 2 / 1,
+                    aspectRatio: 2,
                     height: {
                         ideal: 1920,
                         max: 1920,
@@ -808,47 +802,44 @@ AFRAME.registerSystem('arena-jitsi', {
         JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
             .then(async (tracks) => {
                 await this.onLocalTracks(tracks);
-                if (this.withVideo) setupCornerVideo.bind(this)();
+                if (this.withVideo) this.setupCornerVideo.bind(this)();
             })
             .catch((err) => {
                 this.initialized = false;
                 console.warn(err);
             });
+    },
+
+    /**
+     * show user video in the corner
+     */
+    setupCornerVideo() {
+        let localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+
+        // video window for jitsi
+        this.jitsiVideoElem = document.getElementById('cornerVideo');
+        this.jitsiVideoElem.classList.add('flip-video');
+        this.jitsiVideoElem.classList.add('arena-corner-video');
+        this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
+        this.jitsiVideoElem.style.display = 'none';
 
         /**
-         * show user video in the corner
+         * set video element size
          */
-        const _this = this;
-        function setupCornerVideo() {
-            let localVideoWidth = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
-
-            // video window for jitsi
-            _this.jitsiVideoElem = document.getElementById('cornerVideo');
-            _this.jitsiVideoElem.classList.add('flip-video');
-            _this.jitsiVideoElem.classList.add('arena-corner-video');
-            _this.jitsiVideoElem.style.opacity = '0.9'; // slightly see through
-            _this.jitsiVideoElem.style.display = 'none';
-
-            /**
-             * set video element size
-             */
-            function setCornerVideoHeight() {
-                const videoWidth = localVideoWidth;
-                const videoHeight = _this.jitsiVideoElem.videoHeight / (_this.jitsiVideoElem.videoWidth / videoWidth);
-                _this.jitsiVideoElem.style.width = `${videoWidth}px`;
-                _this.jitsiVideoElem.style.height = `${videoHeight}px`;
-            }
-
-            _this.jitsiVideoElem.onloadedmetadata = () => {
-                setCornerVideoHeight();
-            };
-
-            // mobile only
-            window.addEventListener('orientationchange', () => {
-                localVideoWidth = Number(window.innerWidth / 5);
-                setCornerVideoHeight();
-            });
+        function setCornerVideoHeight() {
+            const videoWidth = localVideoWidth;
+            const videoHeight = this.jitsiVideoElem.videoHeight / (this.jitsiVideoElem.videoWidth / videoWidth);
+            this.jitsiVideoElem.style.width = `${videoWidth}px`;
+            this.jitsiVideoElem.style.height = `${videoHeight}px`;
         }
+
+        this.jitsiVideoElem.onloadedmetadata = setCornerVideoHeight.bind(this);
+
+        // mobile only
+        window.addEventListener('orientationchange', () => {
+            localVideoWidth = Number(window.innerWidth / 5);
+            setCornerVideoHeight();
+        });
     },
 
     /**
@@ -1049,7 +1040,7 @@ AFRAME.registerSystem('arena-jitsi', {
      * @returns
      */
     getUserId(participantJitsiId) {
-        if (this.jitsiId == participantJitsiId) return this.arena.camName;
+        if (this.jitsiId === participantJitsiId) return this.arena.camName;
         // our arena id (camera name) is the jitsi display name
         return this.conference.getParticipantById(participantJitsiId)._displayName;
     },

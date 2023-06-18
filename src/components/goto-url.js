@@ -37,14 +37,13 @@ AFRAME.registerComponent('goto-url', {
     init() {},
 
     update(oldData) {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         let fired = false;
         el.removeEventListener(oldData.on, this.eventHandlerFn);
         if (data.on && data.url) {
             // we have an event?
-            this.eventHandlerFn = function () {
+            this.eventHandlerFn = function eventHandlerFn() {
                 if (!fired) {
                     fired = true;
                     Swal.fire({
@@ -84,8 +83,7 @@ AFRAME.registerComponent('goto-url', {
 
     // handle component removal
     remove() {
-        const { data } = this;
-        const { el } = this;
+        const { data, el } = this;
 
         // remove event listener
         if (data.on) {

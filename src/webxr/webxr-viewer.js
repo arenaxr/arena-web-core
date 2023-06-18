@@ -2,6 +2,8 @@
  * WebXR viewer handler and pseudo-click generator
  *
  */
+/* global AFRAME */
+
 AFRAME.registerComponent('webxr-viewer', {
     init() {
         this.onEnterVR = this.onEnterVR.bind(this);
@@ -10,8 +12,6 @@ AFRAME.registerComponent('webxr-viewer', {
 
     onEnterVR() {
         const { el } = this;
-        const { data } = this;
-
         const { sceneEl } = el;
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -36,7 +36,7 @@ AFRAME.registerComponent('webxr-viewer', {
             cursorParent.appendChild(cursor);
 
             // handle tap events
-            document.addEventListener('mousedown', (e) => {
+            document.addEventListener('mousedown', () => {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
@@ -54,7 +54,7 @@ AFRAME.registerComponent('webxr-viewer', {
                 }
             });
 
-            document.addEventListener('mouseup', (e) => {
+            document.addEventListener('mouseup', () => {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);

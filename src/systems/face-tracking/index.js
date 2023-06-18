@@ -6,7 +6,7 @@
  *
  */
 
-import { FaceTracker, FaceTrackerSource } from './face-tracker.min.js';
+import { FaceTracker, FaceTrackerSource } from './face-tracker.min';
 
 AFRAME.registerSystem('face-tracking', {
     schema: {
@@ -61,7 +61,7 @@ AFRAME.registerSystem('face-tracking', {
             this.writeOverlayText(`Downloading Face Model: ${progress}%`);
         });
 
-        window.addEventListener('onFaceTrackerLoading', (e) => {
+        window.addEventListener('onFaceTrackerLoading', () => {
             let i = 0;
             if (!_this.initializingTimer) {
                 _this.initializingTimer = setInterval(() => {
@@ -104,7 +104,7 @@ AFRAME.registerSystem('face-tracking', {
      * System attribute update
      * @param {object} oldData - previous attribute values.
      */
-    update(oldData) {
+    update() {
         // TODO: Do stuff with `this.data`...
     },
 
@@ -202,13 +202,13 @@ AFRAME.registerSystem('face-tracking', {
      * @return {boolean} whether or not the landmarks has a valid face or not
      */
     hasFace(landmarks) {
-        if (!landmarks || landmarks.length == 0) return false;
+        if (!landmarks || landmarks.length === 0) return false;
 
         let numZeros = 0;
         for (let i = 0; i < landmarks.length; i++) {
             // if (i % 2 == 0 && landmarks[i] > width) return false;
             // if (i % 2 == 1 && landmarks[i] > height) return false;
-            if (landmarks[i] == 0) numZeros++;
+            if (landmarks[i] === 0) numZeros++;
         }
         return numZeros <= landmarks.length / 2;
     },
@@ -352,14 +352,14 @@ AFRAME.registerSystem('face-tracking', {
 
     run() {
         this.restart();
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             resolve();
         });
     },
 
     stop() {
         this.stopFaceTracking();
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             resolve();
         });
     },

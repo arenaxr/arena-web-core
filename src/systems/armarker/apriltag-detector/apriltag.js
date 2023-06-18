@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
+/* eslint-disable no-restricted-globals */
 
 /**
  * @fileoverview Process grayscale camera frames in WASM detector.
@@ -13,6 +14,7 @@
  * @authors Nuno Pereira
  */
 
+/* global importScripts, AprilTagWasm */
 importScripts('./apriltag_wasm.js');
 
 // CV Worker message types (**copy of worker-msgs.js**)
@@ -125,7 +127,7 @@ class Apriltag {
      * @param {Array} grayscaleImg grayscale image buffer
      * @param {Number} imgWidth image with
      * @param {Number} imgHeight image height
-     * @return {detection} detection object
+     * @return {Array} detection object
      */
     detect(grayscaleImg, imgWidth, imgHeight) {
         // set_img_buffer allocates the buffer for image and returns it; just returns the previously allocated buffer if size has not changed
@@ -138,7 +140,7 @@ class Apriltag {
               char *str;
               size_t alloc_size; // allocated size */
         const strJsonLen = this._Module.getValue(strJsonPtr, 'i32'); // get len from struct
-        if (strJsonLen == 0) {
+        if (strJsonLen === 0) {
             // returned empty string
             return [];
         }
@@ -172,10 +174,10 @@ class Apriltag {
      */
     set_tag_size(tagid, size) {
         let _tagid = tagid;
-        if (isNaN(_tagid)) {
+        if (Number.isNaN(_tagid)) {
             // try to convert to number
-            _tagid = parseInt(tagid);
-            if (isNaN(_tagid)) {
+            _tagid = Number.parseInt(tagid, 10);
+            if (Number.isNaN(_tagid)) {
                 console.warn(`Apriltag Tagid must be a number! Ignoring given size for tagId '${tagid}'.`);
                 return;
             }
@@ -250,45 +252,6 @@ const aprilTag = new Apriltag(() => {
     }); // process pending marker data msgs
 });
 
-// process worker messages
-onmessage = async function (e) {
-    const cvWorkerMsg = e.data;
-
-    // console.log('CV Worker received message');
-    switch (cvWorkerMsg.type) {
-        // process a new image frame
-        case CVWorkerMsgs.type.PROCESS_GSFRAME:
-            if (!initDone) {
-                // return empty detection result
-                const resMsg = {
-                    type: CVWorkerMsgs.type.FRAME_RESULTS,
-                    detections: [],
-                    ts: performance.now(),
-                    grayscalePixels: cvWorkerMsg.grayscalePixels,
-                };
-                // post detection results, returning ownership of the pixel buffer
-                self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
-                return;
-            }
-            processGsFrame(cvWorkerMsg);
-            break;
-        case CVWorkerMsgs.type.KNOWN_MARKER_ADD:
-            if (!initDone) {
-                pendingMarkerMsgs.push(cvWorkerMsg);
-                return;
-            }
-            console.debug('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
-            // let the detector know the size of markers, so it can compute their pose
-            aprilTag.set_tag_size(cvWorkerMsg.markerid, cvWorkerMsg.size);
-            break;
-        case CVWorkerMsgs.type.KNOWN_MARKER_DEL:
-            // TODO (maybe we don't need to remove?)
-            break;
-        default:
-            console.warn('CVWorker: unknow message received.', cvWorkerMsg);
-    }
-};
-
 /**
  * Process grayscale camera frame
  * @param {object} frame - The received camera frame
@@ -326,3 +289,42 @@ async function processGsFrame(frame) {
     // post detection results, returning ownership of the pixel buffer
     self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
 }
+
+// process worker messages
+onmessage = async function onmessage(e) {
+    const cvWorkerMsg = e.data;
+
+    // console.log('CV Worker received message');
+    switch (cvWorkerMsg.type) {
+        // process a new image frame
+        case CVWorkerMsgs.type.PROCESS_GSFRAME:
+            if (!initDone) {
+                // return empty detection result
+                const resMsg = {
+                    type: CVWorkerMsgs.type.FRAME_RESULTS,
+                    detections: [],
+                    ts: performance.now(),
+                    grayscalePixels: cvWorkerMsg.grayscalePixels,
+                };
+                // post detection results, returning ownership of the pixel buffer
+                self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
+                return;
+            }
+            await processGsFrame(cvWorkerMsg);
+            break;
+        case CVWorkerMsgs.type.KNOWN_MARKER_ADD:
+            if (!initDone) {
+                pendingMarkerMsgs.push(cvWorkerMsg);
+                return;
+            }
+            console.debug('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
+            // let the detector know the size of markers, so it can compute their pose
+            aprilTag.set_tag_size(cvWorkerMsg.markerid, cvWorkerMsg.size);
+            break;
+        case CVWorkerMsgs.type.KNOWN_MARKER_DEL:
+            // TODO (maybe we don't need to remove?)
+            break;
+        default:
+            console.warn('CVWorker: unknow message received.', cvWorkerMsg);
+    }
+};

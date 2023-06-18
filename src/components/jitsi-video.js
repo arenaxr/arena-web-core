@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA */
 import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
 
 /**
@@ -28,7 +28,6 @@ AFRAME.registerComponent('jitsi-video', {
     },
 
     ready() {
-        const { data } = this;
         const { el } = this;
 
         const { sceneEl } = el;
@@ -149,7 +148,7 @@ AFRAME.registerComponent('jitsi-video', {
             return;
         }
 
-        if (jitsiVideo.readyState == 4) {
+        if (jitsiVideo.readyState === 4) {
             // https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
             this.setVideoSrc();
             return;

@@ -6,11 +6,11 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, THREE */
 
 import { ARENAUtils } from '../utils';
 
-AFRAME.components['gltf-model'].Component.prototype.init = function () {
+AFRAME.components['gltf-model'].Component.prototype.init = function init() {
     const self = this;
     const dracoLoader = this.system.getDRACOLoader();
     const meshoptDecoder = this.system.getMeshoptDecoder();
@@ -21,8 +21,8 @@ AFRAME.components['gltf-model'].Component.prototype.init = function () {
         this.loader.setDRACOLoader(dracoLoader);
     }
     if (meshoptDecoder) {
-        this.ready = meshoptDecoder.then((meshoptDecoder) => {
-            self.loader.setMeshoptDecoder(meshoptDecoder);
+        this.ready = meshoptDecoder.then((_meshoptDecoder) => {
+            self.loader.setMeshoptDecoder(_meshoptDecoder);
         });
     } else {
         this.ready = Promise.resolve();

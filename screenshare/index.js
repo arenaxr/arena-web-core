@@ -2,14 +2,6 @@
 
 if (!window.params) window.close();
 
-// create exit button
-const exitButton = document.createElement('button');
-exitButton.id = 'exitButton';
-exitButton.className = 'leave-button';
-exitButton.title = 'End Screen Sharing';
-exitButton.innerHTML = 'Exit';
-exitButton.onclick = unload;
-
 const options = window.params.connectOptions;
 const { appID } = window.params;
 const { token } = window.params;
@@ -23,6 +15,26 @@ let conference = null;
 
 let localTracks = [];
 const remoteTracks = {};
+
+/**
+ *
+ */
+function unload() {
+    for (let i = 0; i < localTracks.length; i++) {
+        localTracks[i].dispose();
+    }
+    conference.leave();
+    connection.disconnect();
+    window.close();
+}
+
+// create exit button
+const exitButton = document.createElement('button');
+exitButton.id = 'exitButton';
+exitButton.className = 'leave-button';
+exitButton.title = 'End Screen Sharing';
+exitButton.innerHTML = 'Exit';
+exitButton.onclick = unload;
 
 /**
  * Handles local tracks.
@@ -50,9 +62,10 @@ function onLocalTracks(tracks) {
         } else {
             // desktop
             $('body').append(`<video autoplay='1' id='localScreenShare${i}' class='screen-share' playsinline/>`);
-            $(`#localScreenShare${i}`).css('width', '100%');
-            $(`#localScreenShare${i}`).css('height', 'auto');
-            localTracks[i].attach($(`#localScreenShare${i}`)[0]);
+            const thisLocalScreenshare = $(`#localScreenShare${i}`);
+            thisLocalScreenshare.css('width', '100%');
+            thisLocalScreenshare.css('height', 'auto');
+            localTracks[i].attach(thisLocalScreenshare[0]);
         }
         if (isJoined) {
             conference.addTrack(localTracks[i]);
@@ -135,18 +148,6 @@ function disconnect() {
     connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_ESTABLISHED, onConnectionSuccess);
     connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_FAILED, onConnectionFailed);
     connection.removeEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, disconnect);
-}
-
-/**
- *
- */
-function unload() {
-    for (let i = 0; i < localTracks.length; i++) {
-        localTracks[i].dispose();
-    }
-    conference.leave();
-    connection.disconnect();
-    window.close();
 }
 
 $(window).bind('beforeunload', unload);

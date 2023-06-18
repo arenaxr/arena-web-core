@@ -26,7 +26,7 @@ AFRAME.registerComponent('threejs-scene', {
         this.loader = new THREE.ObjectLoader();
     },
 
-    update(oldData) {
+    update() {
         const self = this;
         const { el } = this;
 
@@ -53,7 +53,7 @@ AFRAME.registerComponent('threejs-scene', {
                 console.log(`${(xhr.loaded / xhr.total) * 100}% loaded`);
             },
             // onError callback
-            (err) => {
+            () => {
                 console.error('Error loading three.js scene');
             }
         );

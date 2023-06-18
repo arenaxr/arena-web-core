@@ -95,4 +95,4 @@ const DigitalGlitch = {
 		}`,
 };
 
-export { DigitalGlitch };
+export default DigitalGlitch;

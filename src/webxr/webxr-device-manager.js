@@ -6,6 +6,8 @@
  * @date 2023
  */
 
+/* global AFRAME */
+
 import { ARENAUtils } from '../utils';
 
 AFRAME.registerComponent('webxr-device-manager', {
