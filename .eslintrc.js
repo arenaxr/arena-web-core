@@ -33,5 +33,6 @@ module.exports = {
         'no-plusplus': 'off',
         'no-bitwise': 'off',
         'no-underscore-dangle': 'off',
+        'no-constructor-return': 'off',
     },
 };
