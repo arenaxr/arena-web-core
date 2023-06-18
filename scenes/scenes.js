@@ -115,12 +115,12 @@ window.addEventListener('onauth', async (e) => {
     };
 
     function checkUserSceneSelect(_e) {
-        if (e.target.value) {
+        if (_e.target.value) {
             window.userSceneId = _e.target.value;
             updateUriBuilderCheckboxes(true);
-            updateUserSceneUrlBox(`${window.location.origin}/${e.target.value}`);
-            scenePermsLink.href = `${window.location.origin}/user/profile/scenes/${e.target.value}`;
-            deleteUserSceneBtn.value = e.target.value;
+            updateUserSceneUrlBox(`${window.location.origin}/${_e.target.value}`);
+            scenePermsLink.href = `${window.location.origin}/user/profile/scenes/${_e.target.value}`;
+            deleteUserSceneBtn.value = _e.target.value;
             toggleUserSceneButtons(true);
         } else {
             window.userSceneId = '';
@@ -131,7 +131,7 @@ window.addEventListener('onauth', async (e) => {
 
     function checkPublicSceneSelect(_e) {
         if (_e.target.value) {
-            window.publicSceneId = e.target.value;
+            window.publicSceneId = _e.target.value;
             publicSceneUrl.value = `${window.location.origin}/${_e.target.value}`;
             togglePublicSceneButtons(true);
             console.log('valid public', _e.target.value);
