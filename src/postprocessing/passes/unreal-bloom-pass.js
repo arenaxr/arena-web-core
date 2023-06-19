@@ -14,10 +14,10 @@ import LuminosityHighPassShader from '../shaders/LuminosityHighPassShader';
  * - https://docs.unrealengine.com/latest/INT/Engine/Rendering/PostProcessEffects/Bloom/
  */
 class UnrealBloomPass extends Pass {
-    constructor(resolution, strength, radius, threshold) {
+    constructor({ resolution, strength = 0.5, radius = 0.1, threshold = 0 } = {}) {
         super();
 
-        this.strength = strength !== undefined ? strength : 1;
+        this.strength = strength;
         this.radius = radius;
         this.threshold = threshold;
         this.resolution =
