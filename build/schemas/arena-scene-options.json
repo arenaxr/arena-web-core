@@ -455,6 +455,59 @@
             "type": "object",
             "description": "ARENA Scene Options"
         },
+        "post-processing": {
+            "properties": {
+                "bloom": {
+                    "properties": {
+                        "resolution": {
+                            "properties": {
+                                "height": {
+                                    "default": 256,
+                                    "description": "Height (px) of the bloom effect",
+                                    "title": "Height",
+                                    "type": "number"
+                                },
+                                "width": {
+                                    "default": 256,
+                                    "description": "Width (px) of the bloom effect",
+                                    "title": "Width",
+                                    "type": "number"
+                                }
+                            },
+                            "required": ["width", "height"],
+                            "title": "Resolution",
+                            "type": "object"
+                        },
+                        "strength": {
+                            "default": 0.5,
+                            "description": "Strength of the bloom effect",
+                            "title": "Strength",
+                            "type": "number"
+                        },
+                        "radius": {
+                            "default": 0.1,
+                            "description": "Radius of the bloom effect",
+                            "title": "Radius",
+                            "type": "number"
+                        },
+                        "threshold": {
+                            "default": 0,
+                            "description": "Threshold of the bloom effect",
+                            "title": "Threshold",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["strength", "radius", "threshold", "resolution"],
+                    "description": "Use bloom post-processing effect",
+                    "title": "Bloom",
+                    "type": "object"
+                }
+            },
+            "required": [],
+            "title": "Post-Processing Effects",
+            "type": "object",
+            "description": "These effects are enabled in desktop and XR views"
+        },
         "Vector3": {
             "properties": {
                 "x": {
@@ -503,6 +556,9 @@
                 },
                 "scene-options": {
                     "$ref": "#/definitions/scene-options"
+                },
+                "post-processing": {
+                    "$ref": "#/definitions/post-processing"
                 }
             },
             "required": ["env-presets", "scene-options"],
