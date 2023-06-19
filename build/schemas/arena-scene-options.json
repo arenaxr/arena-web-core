@@ -501,6 +501,19 @@
                     "description": "Use bloom post-processing effect",
                     "title": "Bloom",
                     "type": "object"
+                },
+                "glitch": {
+                    "properties": {
+                        "dtSize": {
+                            "default": 64,
+                            "title": "Heightmap size",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["dtSize"],
+                    "description": "Use Glitch post-processing effect",
+                    "title": "Glitch",
+                    "type": "object"
                 }
             },
             "required": [],

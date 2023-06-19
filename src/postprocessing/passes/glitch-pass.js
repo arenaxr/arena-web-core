@@ -4,7 +4,7 @@ import { FullScreenQuad, Pass } from './pass';
 import DigitalGlitch from '../shaders/DigitalGlitch';
 
 class GlitchPass extends Pass {
-    constructor(dtSize = 64) {
+    constructor({ dtSize = 64 }) {
         super();
 
         const shader = DigitalGlitch;
