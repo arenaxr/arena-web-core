@@ -35,7 +35,7 @@ AFRAME.registerSystem('compositor', {
         // special case: unbind postprocessing effects when this is the only pass
         if (this.effects.composer.passes.length === 1) {
             this.effects.composer.passes = [];
-            this.effects.unbind();
+            this.effects.unbindRenderer();
         } else {
             this.effects.composer.passes.shift();
         }
@@ -83,10 +83,10 @@ AFRAME.registerSystem('compositor', {
     },
 
     updateRenderingState() {
-        const { renderer } = this.sceneEl;
-        const { sceneEl } = this;
-
-        const { camera } = sceneEl;
+        const {
+            sceneEl,
+            sceneEl: { camera, renderer },
+        } = this;
 
         let hasDualCameras;
         let ipd;

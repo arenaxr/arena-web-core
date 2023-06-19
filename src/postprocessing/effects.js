@@ -1,18 +1,21 @@
 /* global AFRAME, THREE */
 
 import EffectComposer from './effect-composer';
-import UnrealBloomPass from './passes/unreal-bloom-pass';
+import { EFFECTS } from '../constants';
 
 AFRAME.registerSystem('effects', {
     init() {
-        const { sceneEl } = this;
+        const {
+            sceneEl,
+            sceneEl: { renderer },
+        } = this;
 
         if (!sceneEl.hasLoaded) {
             sceneEl.addEventListener('renderstart', this.init.bind(this));
             return;
         }
 
-        const { renderer } = sceneEl;
+        this.arenaEffects = Object.fromEntries(Object.keys(EFFECTS).map((key) => [key, null]));
 
         this.cameras = [];
 
@@ -26,27 +29,58 @@ AFRAME.registerSystem('effects', {
 
         this.binded = false;
 
-        // this.addPass(new UnrealBloomPass());
-
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
         renderer.xr.addEventListener('sessionstart', this.onResize.bind(this));
         renderer.xr.addEventListener('sessionend', this.onResize.bind(this));
     },
 
-    addPass(pass) {
-        this.composer.addPass(pass);
-        this.bind();
+    addPass(passName, opts) {
+        if (!(passName in EFFECTS)) {
+            console.error(`Pass ${passName} does not exist`);
+            return;
+        }
+        if (this.arenaEffects[passName] === null) {
+            this.arenaEffects[passName] = new EFFECTS[passName](opts);
+            this.composer.addPass(this.arenaEffects[passName]);
+        } else {
+            console.warn(`Pass ${passName} already enabled`);
+        }
+        this.bindRenderer();
     },
 
+    /**
+     * Remove a pass from the composer.
+     * @param passName name of pass to remove
+     */
+    removePass(passName) {
+        if (this.arenaEffects[passName] !== null) {
+            this.composer.removePass(this.arenaEffects[passName]);
+            this.arenaEffects[passName] = null;
+        } else {
+            console.warn(`Pass ${passName} already disabled`);
+        }
+    },
+
+    /**
+     * Insert an already-instantiated pass into the composer. If the pass is already present in the
+     * effect system's internal mapping, no action is taken.
+     * @param {Pass} pass to insert
+     * @param {Number} index array index to insert at
+     */
     insertPass(pass, index) {
+        if (Object.values(this.arenaEffects).includes(pass)) {
+            console.warn(`Pass already exists`);
+            return;
+        }
         this.composer.insertPass(pass, index);
-        this.bind();
+        this.bindRenderer();
     },
 
     onResize() {
-        const { sceneEl } = this;
-        const { renderer } = sceneEl;
+        const {
+            sceneEl: { renderer },
+        } = this;
 
         const rendererSize = new THREE.Vector2();
         renderer.getSize(rendererSize);
@@ -59,18 +93,20 @@ AFRAME.registerSystem('effects', {
         this.dt = dt;
     },
 
-    bind() {
-        const { renderer } = this.sceneEl;
-        const { render } = renderer;
-        const { sceneEl } = this;
+    bindRenderer() {
+        if (this.binded === true) return;
 
-        const scene = sceneEl.object3D;
+        const {
+            sceneEl: {
+                object3D: scene,
+                renderer,
+                renderer: { render },
+            },
+        } = this;
 
         const system = this;
 
         let isDigest = false;
-
-        if (this.binded === true) return;
 
         this.binded = true;
 
@@ -132,11 +168,10 @@ AFRAME.registerSystem('effects', {
         };
     },
 
-    unbind() {
-        const { sceneEl } = this;
-        const { renderer } = sceneEl;
-
-        const scene = sceneEl.object3D;
+    unbindRenderer() {
+        const {
+            sceneEl: { renderer, object3D: scene },
+        } = this;
 
         if (this.binded === false) return;
         this.binded = false;

@@ -56,6 +56,9 @@ export default class EffectComposer {
     }
 
     insertPass(pass, index) {
+        if (this.passes.indexOf(pass) !== -1) {
+            return; // Pass already exists, remove it first before inserting it again.
+        }
         this.passes.splice(index, 0, pass);
         pass.setSize(this._width, this._height);
     }
