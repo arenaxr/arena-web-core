@@ -502,6 +502,19 @@
                     "title": "Bloom",
                     "type": "object"
                 },
+                "fxaa": {
+                    "properties": {
+                        "options": {
+                            "default": " ",
+                            "title": "placeholder options",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["options"],
+                    "description": "Use FXAA post-processing effect",
+                    "title": "FXAA",
+                    "type": "object"
+                },
                 "glitch": {
                     "properties": {
                         "dtSize": {
