@@ -460,23 +460,10 @@
                 "bloom": {
                     "properties": {
                         "resolution": {
-                            "properties": {
-                                "height": {
-                                    "default": 256,
-                                    "description": "Height (px) of the bloom effect",
-                                    "title": "Height",
-                                    "type": "number"
-                                },
-                                "width": {
-                                    "default": 256,
-                                    "description": "Width (px) of the bloom effect",
-                                    "title": "Width",
-                                    "type": "number"
-                                }
-                            },
-                            "required": ["width", "height"],
-                            "title": "Resolution",
-                            "type": "object"
+                          "default": 256,
+                          "description": "Resolution of the bloom effect (width and height)",
+                          "title": "Resolution",
+                          "type": "number"
                         },
                         "strength": {
                             "default": 0.5,
