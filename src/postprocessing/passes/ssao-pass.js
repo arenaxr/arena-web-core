@@ -16,10 +16,16 @@ class SSAOPass extends Pass {
 
         this.clear = true;
 
-        const { camera, object3D: scene } = AFRAME.scenes[0];
+        const {
+            camera,
+            object3D: scene,
+            renderer: { outputColorSpace },
+        } = AFRAME.scenes[0];
 
         this.camera = camera;
         this.scene = scene;
+
+        this.isSRGB = outputColorSpace === THREE.SRGBColorSpace;
 
         this.kernelRadius = kernelRadius;
         this.kernelSize = 32;
@@ -215,9 +221,15 @@ class SSAOPass extends Pass {
                 break;
 
             case SSAOPass.OUTPUT.Default:
+                if (this.isSRGB) {
+                    this.copyMaterial.uniforms.convertSRGB.value = true;
+                }
                 this.copyMaterial.uniforms.tDiffuse.value = this.beautyRenderTarget.texture;
                 this.copyMaterial.blending = THREE.NoBlending;
                 this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                if (this.isSRGB) {
+                    this.copyMaterial.uniforms.convertSRGB.value = false;
+                }
 
                 this.copyMaterial.uniforms.tDiffuse.value = this.blurRenderTarget.texture;
                 this.copyMaterial.blending = THREE.CustomBlending;

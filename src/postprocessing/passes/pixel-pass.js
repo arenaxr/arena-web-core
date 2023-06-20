@@ -14,9 +14,17 @@ class RenderPixelatedPass extends Pass {
         this.normalMaterial = new THREE.MeshNormalMaterial();
 
         this.fsQuad = new FullScreenQuad(this.pixelatedMaterial);
-        const { camera, object3D: scene } = AFRAME.scenes[0];
+
+        const {
+            camera,
+            object3D: scene,
+            renderer: { outputColorSpace },
+        } = AFRAME.scenes[0];
         this.scene = scene;
         this.camera = camera;
+
+        this.isSRGB = outputColorSpace === THREE.SRGBColorSpace;
+        this.fsQuad.material.uniforms.isSRGB.value = this.isSRGB;
 
         this.normalEdgeStrength = normalEdgeStrength;
         this.depthEdgeStrength = depthEdgeStrength;
@@ -102,6 +110,7 @@ class RenderPixelatedPass extends Pass {
                 },
                 normalEdgeStrength: { value: 0 },
                 depthEdgeStrength: { value: 0 },
+                isSRGB: { value: true },
             },
             vertexShader: /* glsl */ `
 			varying vec2 vUv;
@@ -116,6 +125,7 @@ class RenderPixelatedPass extends Pass {
 			uniform vec4 resolution;
 			uniform float normalEdgeStrength;
 			uniform float depthEdgeStrength;
+			uniform bool isSRGB;
 			varying vec2 vUv;
 			float getDepth(int x, int y) {
 				return texture2D( tDepth, vUv + vec2(x, y) * resolution.zw ).r;
@@ -166,6 +176,9 @@ class RenderPixelatedPass extends Pass {
 					nei = normalEdgeIndicator(depth, normal);
 				float Strength = dei > 0.0 ? (1.0 - depthEdgeStrength * dei) : (1.0 + normalEdgeStrength * nei);
 				gl_FragColor = texel * Strength;
+				if (isSRGB) {
+				    gl_FragColor = LinearTosRGB(gl_FragColor);
+	            }		    
 			}`,
         });
     }
