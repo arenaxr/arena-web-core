@@ -104,7 +104,7 @@ class SMAAPass extends Pass {
         this.fsQuad = new FullScreenQuad(null);
     }
 
-    render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
         // pass 1
 
         this.uniformsEdges.tDiffuse.value = readBuffer.texture;
@@ -130,7 +130,7 @@ class SMAAPass extends Pass {
         this.fsQuad.material = this.materialBlend;
 
         if (this.renderToScreen) {
-            renderer.setRenderTarget(null);
+            renderer.setRenderTarget(currentRenderTarget);
             this.fsQuad.render(renderer);
         } else {
             renderer.setRenderTarget(writeBuffer);
