@@ -65,7 +65,7 @@ class RenderPixelatedPass extends Pass {
         this.setSize(this.resolution.x, this.resolution.y);
     }
 
-    render(renderer, writeBuffer) {
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
         const { uniforms } = this.fsQuad.material;
         uniforms.normalEdgeStrength.value = this.normalEdgeStrength;
         uniforms.depthEdgeStrength.value = this.depthEdgeStrength;
@@ -84,14 +84,13 @@ class RenderPixelatedPass extends Pass {
         uniforms.tNormal.value = this.normalRenderTarget.texture;
 
         if (this.renderToScreen) {
-            renderer.setRenderTarget(null);
+            renderer.setRenderTarget(currentRenderTarget);
+            this.fsQuad.render(renderer);
         } else {
             renderer.setRenderTarget(writeBuffer);
-
             if (this.clear) renderer.clear();
+            this.fsQuad.render(renderer);
         }
-
-        this.fsQuad.render(renderer);
     }
 
     createPixelatedMaterial() {
