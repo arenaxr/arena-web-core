@@ -590,6 +590,29 @@
                     "title": "SSAO",
                     "type": "object"
                 },
+                "pixel": {
+                    "properties": {
+                        "pixelSize": {
+                            "default": 6,
+                            "title": "Pixel size",
+                            "type": "number"
+                        },
+                        "normalEdgeStrength": {
+                            "default": 0.3,
+                            "title": "Normal edge strength",
+                            "type": "number"
+                        },
+                        "depthEdgeStrength": {
+                            "default": 0.4,
+                            "title": "Depth edge strength",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["pixelSize", "normalEdgeStrength", "depthEdgeStrength"],
+                    "description": "Use Pixelation post-processing effect",
+                    "title": "Pixel",
+                    "type": "object"
+                },
                 "glitch": {
                     "properties": {
                         "dtSize": {

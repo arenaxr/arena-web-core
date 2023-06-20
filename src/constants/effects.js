@@ -4,6 +4,7 @@ import FXAAPass from '../postprocessing/passes/fxaa-pass';
 import SAOPass from '../postprocessing/passes/sao-pass';
 import SSAOPass from '../postprocessing/passes/ssao-pass';
 import SMAAPass from '../postprocessing/passes/sma-pass';
+import RenderPixelatedPass from '../postprocessing/passes/pixel-pass';
 
 const EFFECTS = {
     bloom: UnrealBloomPass,
@@ -12,6 +13,7 @@ const EFFECTS = {
     sao: SAOPass,
     ssao: SSAOPass,
     smaa: SMAAPass,
+    pixel: RenderPixelatedPass,
 };
 
 export default EFFECTS;
