@@ -460,10 +460,10 @@
                 "bloom": {
                     "properties": {
                         "resolution": {
-                          "default": 256,
-                          "description": "Resolution of the bloom effect (width and height)",
-                          "title": "Resolution",
-                          "type": "number"
+                            "default": 256,
+                            "description": "Resolution of the bloom effect (width and height)",
+                            "title": "Resolution",
+                            "type": "number"
                         },
                         "strength": {
                             "default": 0.5,
@@ -508,25 +508,25 @@
                             "type": "boolean"
                         },
                         "saoBias": {
-                          "default": 0.5,
-                          "title": "Bias",
-                          "type": "number"
+                            "default": 0.5,
+                            "title": "Bias",
+                            "type": "number"
                         },
                         "saoIntensity": {
-                          "default": 0.18,
-                          "title": "Intensity",
-                          "type": "number"
+                            "default": 0.18,
+                            "title": "Intensity",
+                            "type": "number"
                         },
                         "saoScale": {
-                          "default": 1,
-                          "title": "Scale",
-                          "type": "number"
+                            "default": 1,
+                            "title": "Scale",
+                            "type": "number"
                         },
                         "saoKernelRadius": {
                             "default": 100,
                             "title": "Kernel Radius",
                             "type": "number"
-                            },
+                        },
                         "saoMinResolution": {
                             "default": 0,
                             "title": "Min Resolution",
@@ -553,11 +553,7 @@
                             "type": "number"
                         }
                     },
-                    "required": [
-                        "resolution",
-                        "useDepthTexture",
-                        "useNormals"
-                    ],
+                    "required": ["resolution", "useDepthTexture", "useNormals"],
                     "description": "Use scalable ambient occlusion (SAO) post-processing effect",
                     "title": "SAO",
                     "type": "object"
@@ -655,19 +651,13 @@
             "type": "boolean"
         },
         "type": {
-            "enum": [
-                "scene-options"
-            ],
+            "enum": ["scene-options"],
             "type": "string"
         },
         "action": {
             "default": "create",
             "description": "One of 3 basic Create/Update/Delete actions",
-            "enum": [
-                "create",
-                "delete",
-                "update"
-            ],
+            "enum": ["create", "delete", "update"],
             "type": "string"
         },
         "data": {
@@ -685,20 +675,11 @@
                     "$ref": "#/definitions/post-processing"
                 }
             },
-            "required": [
-                "env-presets",
-                "scene-options"
-            ],
+            "required": ["env-presets", "scene-options"],
             "title": "Scene Config Data"
         }
     },
-    "required": [
-        "action",
-        "data",
-        "object_id",
-        "persist",
-        "type"
-    ],
+    "required": ["action", "data", "object_id", "persist", "type"],
     "title": "Scene Config",
     "type": "object"
 }
