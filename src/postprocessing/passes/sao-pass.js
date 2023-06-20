@@ -166,13 +166,13 @@ class SAOPass extends Pass {
         this.fsQuad = new FullScreenQuad(null);
     }
 
-    render(renderer, writeBuffer, readBuffer /* , deltaTime, maskActive */) {
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
         // Rendering readBuffer first when rendering to screen
         if (this.renderToScreen) {
             this.materialCopy.blending = THREE.NoBlending;
             this.materialCopy.uniforms.tDiffuse.value = readBuffer.texture;
             this.materialCopy.needsUpdate = true;
-            this.renderPass(renderer, this.materialCopy, null);
+            this.renderPass(renderer, this.materialCopy, currentRenderTarget);
         }
 
         if (this.params.output === 1) {
@@ -276,7 +276,7 @@ class SAOPass extends Pass {
         }
 
         // Rendering SAOPass result on top of previous pass
-        this.renderPass(renderer, outputMaterial, this.renderToScreen ? null : readBuffer);
+        this.renderPass(renderer, outputMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
         renderer.setClearColor(this._oldClearColor, this.oldClearAlpha);
         renderer.autoClear = oldAutoClear;
