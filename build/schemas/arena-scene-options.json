@@ -615,6 +615,19 @@
                     "description": "Use FXAA post-processing effect. You may want to place this last in effects list.",
                     "title": "FXAA",
                     "type": "object"
+                },
+                "smaa": {
+                    "properties": {
+                        "options": {
+                            "default": " ",
+                            "title": "placeholder options",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["options"],
+                    "description": "Use SMAA post-processing effect. You may want to place this last in effects list.",
+                    "title": "SMAA",
+                    "type": "object"
                 }
             },
             "required": [],
