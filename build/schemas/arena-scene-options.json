@@ -562,6 +562,38 @@
                     "title": "SAO",
                     "type": "object"
                 },
+                "ssao": {
+                    "properties": {
+                        "resolution": {
+                            "default": 512,
+                            "description": "Resolution of the SSAO effect (width and height)",
+                            "title": "Resolution",
+                            "type": "number"
+                        },
+                        "kernelRadius": {
+                            "default": 8,
+                            "description": "Kernel radius of the SSAO effect",
+                            "title": "Kernel Radius",
+                            "type": "number"
+                        },
+                        "minDistance": {
+                            "default": 0.005,
+                            "description": "Minimum distance of the SSAO effect",
+                            "title": "Minimum Distance",
+                            "type": "number"
+                        },
+                        "maxDistance": {
+                            "default": 0.1,
+                            "description": "Maximum distance of the SSAO effect",
+                            "title": "Maximum Distance",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["resolution", "kernelRadius", "minDistance", "maxDistance"],
+                    "description": "Use screen space ambient occlusion (SSAO) post-processing effect",
+                    "title": "SSAO",
+                    "type": "object"
+                },
                 "glitch": {
                     "properties": {
                         "dtSize": {
