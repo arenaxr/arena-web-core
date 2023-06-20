@@ -16,7 +16,7 @@
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": [
-                                        "obj-model"
+                                        "object-model"
                                     ]
                                 },
                                 "obj": {
@@ -43,7 +43,7 @@
                     "title": "OBJ Model Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "obj-model",
+                        "object_type": "object-model",
                         "position": {
                             "x": 0,
                             "y": 0,

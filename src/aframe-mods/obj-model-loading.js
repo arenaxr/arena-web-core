@@ -8,7 +8,7 @@
 
 /* global AFRAME */
 
-AFRAME.components['obj-model'].Component.prototype.update = function() {
+AFRAME.components['object-model'].Component.prototype.update = function() {
     const self = this;
     const el = this.el;
     const src = this.data;
