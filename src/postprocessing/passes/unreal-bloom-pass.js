@@ -14,14 +14,13 @@ import LuminosityHighPassShader from '../shaders/LuminosityHighPassShader';
  * - https://docs.unrealengine.com/latest/INT/Engine/Rendering/PostProcessEffects/Bloom/
  */
 class UnrealBloomPass extends Pass {
-    constructor(resolution, strength, radius, threshold) {
+    constructor({ resolution = 256, strength = 0.5, radius = 0.1, threshold = 0 } = {}) {
         super();
 
-        this.strength = strength !== undefined ? strength : 1;
+        this.strength = strength;
         this.radius = radius;
         this.threshold = threshold;
-        this.resolution =
-            resolution !== undefined ? new THREE.Vector2(resolution.x, resolution.y) : new THREE.Vector2(256, 256);
+        this.resolution = new THREE.Vector2(resolution, resolution);
 
         // create color only once here, reuse it later inside the render function
         this.clearColor = new THREE.Color(0, 0, 0);

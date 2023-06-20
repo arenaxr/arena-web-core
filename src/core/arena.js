@@ -655,6 +655,18 @@ AFRAME.registerSystem('arena-scene', {
                             : (renderer[attribute] = value);
                 });
             }
+
+            const postProcessing = options['post-processing'];
+            const effectsSystem = sceneEl.systems.effects;
+            if (postProcessing) {
+                Object.entries(postProcessing).forEach(([effectName, opts]) => {
+                    if (opts === null) {
+                        effectsSystem.removePass(effectName);
+                    } else {
+                        effectsSystem.addPass(effectName, opts);
+                    }
+                });
+            }
         } else {
             environment.setAttribute('environment', 'preset', 'default');
             environment.setAttribute('environment', 'seed', 3);

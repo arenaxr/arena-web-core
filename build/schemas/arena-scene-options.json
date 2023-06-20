@@ -455,6 +455,209 @@
             "type": "object",
             "description": "ARENA Scene Options"
         },
+        "post-processing": {
+            "properties": {
+                "bloom": {
+                    "properties": {
+                        "resolution": {
+                            "default": 256,
+                            "description": "Resolution of the bloom effect (width and height)",
+                            "title": "Resolution",
+                            "type": "number"
+                        },
+                        "strength": {
+                            "default": 0.5,
+                            "description": "Strength of the bloom effect",
+                            "title": "Strength",
+                            "type": "number"
+                        },
+                        "radius": {
+                            "default": 0.1,
+                            "description": "Radius of the bloom effect",
+                            "title": "Radius",
+                            "type": "number"
+                        },
+                        "threshold": {
+                            "default": 0,
+                            "description": "Threshold of the bloom effect",
+                            "title": "Threshold",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["strength", "radius", "threshold", "resolution"],
+                    "description": "Use bloom post-processing effect",
+                    "title": "Bloom",
+                    "type": "object"
+                },
+                "sao": {
+                    "properties": {
+                        "resolution": {
+                            "default": 256,
+                            "description": "Resolution of the SAO effect (width and height)",
+                            "title": "Resolution",
+                            "type": "number"
+                        },
+                        "useDepthTexture": {
+                            "default": false,
+                            "title": "useDepthTexture",
+                            "type": "boolean"
+                        },
+                        "useNormals": {
+                            "default": false,
+                            "title": "useNormals",
+                            "type": "boolean"
+                        },
+                        "saoBias": {
+                            "default": 0.5,
+                            "title": "Bias",
+                            "type": "number"
+                        },
+                        "saoIntensity": {
+                            "default": 0.18,
+                            "title": "Intensity",
+                            "type": "number"
+                        },
+                        "saoScale": {
+                            "default": 1,
+                            "title": "Scale",
+                            "type": "number"
+                        },
+                        "saoKernelRadius": {
+                            "default": 100,
+                            "title": "Kernel Radius",
+                            "type": "number"
+                        },
+                        "saoMinResolution": {
+                            "default": 0,
+                            "title": "Min Resolution",
+                            "type": "number"
+                        },
+                        "saoBlur": {
+                            "default": true,
+                            "title": "Blur",
+                            "type": "boolean"
+                        },
+                        "saoBlurRadius": {
+                            "default": 8,
+                            "title": "Blur Radius",
+                            "type": "number"
+                        },
+                        "saoBlurStdDev": {
+                            "default": 4,
+                            "title": "Blur StdDev",
+                            "type": "number"
+                        },
+                        "saoBlurDepthCutoff": {
+                            "default": 0.01,
+                            "title": "Blur Depth Cutoff",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["resolution", "useDepthTexture", "useNormals"],
+                    "description": "Use scalable ambient occlusion (SAO) post-processing effect",
+                    "title": "SAO",
+                    "type": "object"
+                },
+                "ssao": {
+                    "properties": {
+                        "resolution": {
+                            "default": 512,
+                            "description": "Resolution of the SSAO effect (width and height)",
+                            "title": "Resolution",
+                            "type": "number"
+                        },
+                        "kernelRadius": {
+                            "default": 8,
+                            "description": "Kernel radius of the SSAO effect",
+                            "title": "Kernel Radius",
+                            "type": "number"
+                        },
+                        "minDistance": {
+                            "default": 0.005,
+                            "description": "Minimum distance of the SSAO effect",
+                            "title": "Minimum Distance",
+                            "type": "number"
+                        },
+                        "maxDistance": {
+                            "default": 0.1,
+                            "description": "Maximum distance of the SSAO effect",
+                            "title": "Maximum Distance",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["resolution", "kernelRadius", "minDistance", "maxDistance"],
+                    "description": "Use screen space ambient occlusion (SSAO) post-processing effect",
+                    "title": "SSAO",
+                    "type": "object"
+                },
+                "pixel": {
+                    "properties": {
+                        "pixelSize": {
+                            "default": 6,
+                            "title": "Pixel size",
+                            "type": "number"
+                        },
+                        "normalEdgeStrength": {
+                            "default": 0.3,
+                            "title": "Normal edge strength",
+                            "type": "number"
+                        },
+                        "depthEdgeStrength": {
+                            "default": 0.4,
+                            "title": "Depth edge strength",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["pixelSize", "normalEdgeStrength", "depthEdgeStrength"],
+                    "description": "Use Pixelation post-processing effect",
+                    "title": "Pixel",
+                    "type": "object"
+                },
+                "glitch": {
+                    "properties": {
+                        "dtSize": {
+                            "default": 64,
+                            "title": "Heightmap size",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["dtSize"],
+                    "description": "Use Glitch post-processing effect",
+                    "title": "Glitch",
+                    "type": "object"
+                },
+                "fxaa": {
+                    "properties": {
+                        "options": {
+                            "default": " ",
+                            "title": "placeholder options",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["options"],
+                    "description": "Use FXAA post-processing effect. You may want to place this last in effects list.",
+                    "title": "FXAA",
+                    "type": "object"
+                },
+                "smaa": {
+                    "properties": {
+                        "options": {
+                            "default": " ",
+                            "title": "placeholder options",
+                            "type": "string"
+                        }
+                    },
+                    "required": ["options"],
+                    "description": "Use SMAA post-processing effect. You may want to place this last in effects list.",
+                    "title": "SMAA",
+                    "type": "object"
+                }
+            },
+            "required": [],
+            "title": "Post-Processing Effects",
+            "type": "object",
+            "description": "These effects are enabled in desktop and XR views"
+        },
         "Vector3": {
             "properties": {
                 "x": {
@@ -503,6 +706,9 @@
                 },
                 "scene-options": {
                     "$ref": "#/definitions/scene-options"
+                },
+                "post-processing": {
+                    "$ref": "#/definitions/post-processing"
                 }
             },
             "required": ["env-presets", "scene-options"],

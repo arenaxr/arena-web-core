@@ -1,19 +1,25 @@
-/* global THREE */
+/* global AFRAME, THREE */
 
 import { FullScreenQuad, Pass } from './pass';
 import DigitalGlitch from '../shaders/DigitalGlitch';
 
 class GlitchPass extends Pass {
-    constructor(dtSize = 64) {
+    constructor({ dtSize = 64 }) {
         super();
 
         const shader = DigitalGlitch;
+
+        const {
+            renderer: { outputColorSpace },
+        } = AFRAME.scenes[0];
+        this.isSRGB = outputColorSpace === THREE.SRGBColorSpace;
 
         this.uniforms = THREE.UniformsUtils.clone(shader.uniforms);
 
         this.heightMap = this.generateHeightmap(dtSize);
 
         this.uniforms.tDisp.value = this.heightMap;
+        this.uniforms.isSRGB.value = this.isSRGB;
 
         this.material = new THREE.ShaderMaterial({
             uniforms: this.uniforms,
