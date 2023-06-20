@@ -158,7 +158,7 @@ class SSAOPass extends Pass {
         this.fsQuad.dispose();
     }
 
-    render(renderer, writeBuffer /* , readBuffer, deltaTime, maskActive */) {
+    render(renderer, writeBuffer, readBuffer, currentRenderTarget /* , deltaTime, maskActive */) {
         if (renderer.capabilities.isWebGL2 === false) this.noiseTexture.format = THREE.LuminanceFormat;
 
         // render beauty
@@ -190,33 +190,33 @@ class SSAOPass extends Pass {
             case SSAOPass.OUTPUT.SSAO:
                 this.copyMaterial.uniforms.tDiffuse.value = this.ssaoRenderTarget.texture;
                 this.copyMaterial.blending = THREE.NoBlending;
-                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
                 break;
 
             case SSAOPass.OUTPUT.Blur:
                 this.copyMaterial.uniforms.tDiffuse.value = this.blurRenderTarget.texture;
                 this.copyMaterial.blending = THREE.NoBlending;
-                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
                 break;
 
             case SSAOPass.OUTPUT.Beauty:
                 this.copyMaterial.uniforms.tDiffuse.value = this.beautyRenderTarget.texture;
                 this.copyMaterial.blending = THREE.NoBlending;
-                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
                 break;
 
             case SSAOPass.OUTPUT.Depth:
-                this.renderPass(renderer, this.depthRenderMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.depthRenderMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
                 break;
 
             case SSAOPass.OUTPUT.Normal:
                 this.copyMaterial.uniforms.tDiffuse.value = this.normalRenderTarget.texture;
                 this.copyMaterial.blending = THREE.NoBlending;
-                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
                 break;
 
@@ -226,14 +226,14 @@ class SSAOPass extends Pass {
                 }
                 this.copyMaterial.uniforms.tDiffuse.value = this.beautyRenderTarget.texture;
                 this.copyMaterial.blending = THREE.NoBlending;
-                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
                 if (this.isSRGB) {
                     this.copyMaterial.uniforms.convertSRGB.value = false;
                 }
 
                 this.copyMaterial.uniforms.tDiffuse.value = this.blurRenderTarget.texture;
                 this.copyMaterial.blending = THREE.CustomBlending;
-                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? null : writeBuffer);
+                this.renderPass(renderer, this.copyMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
 
                 break;
 
