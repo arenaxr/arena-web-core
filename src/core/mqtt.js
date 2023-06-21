@@ -77,9 +77,9 @@ AFRAME.registerSystem('arena-mqtt', {
             },
             proxy(this.mqttHealthCheck.bind(this))
             // proxy(() => {
-            //     if (ARENA.Jitsi && !ARENA.Jitsi.initialized) {
+            //     if (ARENA.jitsi && !ARENA.jitsi.initialized) {
             //         // eslint-disable-next-line new-cap
-            //         ARENA.Jitsi = ARENA.Jitsi(ARENA.jitsiServer);
+            //         ARENA.jitsi = ARENA.jitsi(ARENA.jitsiServer);
             //         warn(`ARENA Jitsi restarting...`);
             //     }
             // }),

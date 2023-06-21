@@ -64,8 +64,8 @@ AFRAME.registerComponent('jitsi-video', {
         if (this.data.displayName === '') return;
 
         // check local video first
-        if (ARENA.Jitsi && ARENA.getDisplayName() === this.data.displayName) {
-            this.data.jitsiId = ARENA.Jitsi.getJitsiId();
+        if (ARENA.jitsi && ARENA.getDisplayName() === this.data.displayName) {
+            this.data.jitsiId = ARENA.jitsi.getJitsiId();
             this.updateVideo();
             return;
         }
@@ -125,17 +125,17 @@ AFRAME.registerComponent('jitsi-video', {
             return;
         }
 
-        if (ARENA.Jitsi.getJitsiId() === data.jitsiId) {
+        if (ARENA.jitsi.getJitsiId() === data.jitsiId) {
             const pano = this.el.tagName.toLowerCase() === 'a-videosphere';
             if (pano) {
                 // ensure panoramic videosphere local has max upload resolution, update local tracks
-                ARENA.Jitsi.pano = pano;
-                ARENA.Jitsi.avConnect();
+                ARENA.jitsi.pano = pano;
+                ARENA.jitsi.avConnect();
             }
             this.videoID = 'cornerVideo';
         } else {
             this.videoID = `video${data.jitsiId}`;
-            if (!ARENA.Jitsi.getVideoTrack(data.jitsiId)) {
+            if (!ARENA.jitsi.getVideoTrack(data.jitsiId)) {
                 this.retryWaitVideoLoad();
                 return;
             }
