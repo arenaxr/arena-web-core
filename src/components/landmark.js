@@ -113,10 +113,11 @@ AFRAME.registerSystem('landmark', {
     },
 
     registerComponent(landmark) {
-        const { el } = this;
-        const { sceneEl } = el;
+        const {
+            el: { sceneEl },
+        } = this;
 
-        const chat = sceneEl.components['arena-chat-ui'];
+        const chat = sceneEl.systems['arena-chat-ui'];
         this.landmarks[landmark.el.id] = landmark;
         if (landmark.data.startingPosition === true) {
             this.registeredStarts++;
@@ -130,10 +131,11 @@ AFRAME.registerSystem('landmark', {
     },
 
     unregisterComponent(landmark) {
-        const { el } = this;
-        const { sceneEl } = el;
+        const {
+            el: { sceneEl },
+        } = this;
 
-        const chat = sceneEl.components['arena-chat-ui'];
+        const chat = sceneEl.systems['arena-chat-ui'];
         delete this.landmarks[landmark.el.id];
         // TODO: fix loading order of chat and landmarks
         if (chat && landmark.data.startingPosition === false) {
