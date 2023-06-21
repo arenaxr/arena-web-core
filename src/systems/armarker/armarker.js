@@ -105,7 +105,6 @@ AFRAME.registerSystem('armarker', {
                     this.webXRSessionStarted(xrSession).then(() => {
                         xrSession.requestReferenceSpace('local-floor').then((xrRefSpace) => {
                             this.xrRefSpace = xrRefSpace;
-                            xrSession.requestAnimationFrame(this.onXRFrame.bind(this));
                         });
                     });
                 }
@@ -460,17 +459,17 @@ AFRAME.registerSystem('armarker', {
 
     /**
      * Add an anchor to the origin of the XR reference space, persisting if possible. This is NOT pose synced
-     * to the originating frame, but since this is triggered off a marker detection requiring low motion
-     * and good visual acquisition of target area, this is close enough.
-     * @param {XRFrame} frame - The XRFrame to use for creating the anchor
-     * @param {XRSpace} xrSpace - The anchor object to create
+     * to the originating frame, but since this likely triggered off a marker detection requiring low motion
+     * and good visual acquisition of target area, or outside-in localizer like Optitrack, good enough.
+     * @param {{position: {x, y, z}, rotation: {x,y,z,w}}} originAnchor - The anchor object to create
      */
-    setOriginAnchor(frame, xrSpace) {
-        const anchorPose = new XRRigidTransform(
-            this.pendingOriginAnchor.position,
-            this.pendingOriginAnchor.orientation
-        );
-        frame.createAnchor(anchorPose, xrSpace).then((anchor) => {
+    setOriginAnchor({ position, rotation }) {
+        const anchorPose = new XRRigidTransform(position, rotation);
+        const xrFrame = AFRAME.scenes[0].frame;
+        if (!xrFrame) {
+            console.error("No XRFrame available, can't set origin anchor");
+        }
+        xrFrame.createAnchor(anchorPose, this.xrRefSpace).then((anchor) => {
             // Persist, currently Quest browser only
             if (anchor.requestPersistentHandle) {
                 const oldPersistAnchor = window.localStorage.getItem('originAnchor');
@@ -488,17 +487,5 @@ AFRAME.registerSystem('armarker', {
             this.originAnchor = anchor;
             this.pendingOriginAnchor = false;
         });
-    },
-    /**
-     * RAF callback, check for any pending origin anchors to set from a marker detection
-     * @param _time
-     * @param frame
-     */
-    onXRFrame(_time, frame) {
-        // Address any pending origin anchors
-        if (this.pendingOriginAnchor) {
-            this.setOriginAnchor(frame, this.xrRefSpace);
-        }
-        this.sceneEl.xrSession?.requestAnimationFrame(this.onXRFrame.bind(this));
     },
 });
