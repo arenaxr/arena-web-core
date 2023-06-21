@@ -636,7 +636,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     appID: this.jitsi.data.arenaAppId,
                     token: this.arena.mqttToken,
                     screenSharePrefix: this.jitsi.data.screensharePrefix,
-                    conferenceName: this.jitsi.arenaConferenceName,
+                    conferenceName: this.jitsi.conferenceName,
                     displayName: cameraEl.getAttribute('arena-camera').displayName,
                     camName: this.arena.camName,
                     objectIds: objectIds.join(),

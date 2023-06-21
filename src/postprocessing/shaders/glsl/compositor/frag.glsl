@@ -22,7 +22,7 @@ uniform mat4 remoteLProjectionMatrix, remoteLMatrixWorld;
 uniform mat4 cameraRProjectionMatrix, cameraRMatrixWorld;
 uniform mat4 remoteRProjectionMatrix, remoteRMatrixWorld;
 
-#define DEPTH_SCALAR    (10.0)
+#define DEPTH_SCALAR    (1.0)
 
 const float onePixel = (1.0 / 255.0);
 
@@ -31,7 +31,7 @@ const bool stretchBorders = true;
 
 float readDepthRemote(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
-    return depth / DEPTH_SCALAR;
+    return depth / DEPTH_SCALAR - onePixel;
 }
 
 float readDepthLocal(sampler2D depthSampler, vec2 coord) {
@@ -236,6 +236,6 @@ void main() {
     // color = vec4(localColor.rgb, 1.0);
     gl_FragColor = color;
 
-    // gl_FragColor.rgb = vec3(localDepth);
-    // gl_FragColor.a = 1.0;
+    /* gl_FragColor.rgb = vec3(remoteDepth);
+     * gl_FragColor.a = 1.0; */
 }
