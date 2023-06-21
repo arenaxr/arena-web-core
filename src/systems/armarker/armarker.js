@@ -11,7 +11,7 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE */
+/* global AFRAME, ARENA, THREE, XRRigidTransform */
 
 import WebXRCameraCapture from './camera-capture/ccwebxr';
 import WebARCameraCapture from './camera-capture/ccwebar';
@@ -102,11 +102,7 @@ AFRAME.registerSystem('armarker', {
             sceneEl.addEventListener('enter-vr', () => {
                 if (sceneEl.is('ar-mode')) {
                     const { xrSession } = sceneEl;
-                    this.webXRSessionStarted(xrSession).then(() => {
-                        xrSession.requestReferenceSpace('local-floor').then((xrRefSpace) => {
-                            this.xrRefSpace = xrRefSpace;
-                        });
-                    });
+                    this.webXRSessionStarted(xrSession).then(() => {});
                 }
             });
         }
@@ -124,23 +120,54 @@ AFRAME.registerSystem('armarker', {
      * @param {object} xrSession - Handle to the WebXR session
      */
     async webXRSessionStarted(xrSession) {
-        if (xrSession !== undefined) {
-            this.webXRSession = xrSession;
-            this.gl = this.el.renderer.getContext();
+        if (xrSession === undefined) {
+            return;
+        }
+        this.webXRSession = xrSession;
+        this.gl = this.el.renderer.getContext();
+        this.xrRefSpace = await xrSession.requestReferenceSpace('local-floor');
 
-            // make sure gl context is XR compatible
-            try {
-                await this.gl.makeXRCompatible();
-            } catch (err) {
-                console.error('Could not make make gl context XR compatible!', err);
-            }
+        // make sure gl context is XR compatible
+        try {
+            await this.gl.makeXRCompatible();
+        } catch (err) {
+            console.error('Could not make make gl context XR compatible!', err);
         }
 
         const persistedOriginAnchor = window.localStorage.getItem('originAnchor');
         if (xrSession.persistentAnchors && persistedOriginAnchor) {
-            xrSession.restorePersistentAnchor(persistedOriginAnchor).then((anchor) => {
-                this.originAnchor = anchor;
-            });
+            xrSession
+                .restorePersistentAnchor(persistedOriginAnchor)
+                .then((anchor) => {
+                    this.originAnchor = anchor;
+                    const { frame } = this.el.sceneEl;
+                    if (frame) {
+                        const originPose = frame.getPose(anchor, this.xrRefSpace);
+                        if (originPose) {
+                            const {
+                                transform: { position, orientation },
+                            } = originPose;
+                            const orientationQuat = new THREE.Quaternion(
+                                orientation.x,
+                                orientation.y,
+                                orientation.z,
+                                orientation.w
+                            );
+                            const rig = document.getElementById('cameraRig');
+                            const spinner = document.getElementById('cameraSpinner');
+                            rig.object3D.position.copy(position);
+                            spinner.object3D.rotation.setFromQuaternion(orientationQuat);
+                        }
+                    } else {
+                        console.warn('could not obtain a xrFrame to find set persisted anchor rig');
+                    }
+                })
+                .catch(() => {
+                    console.warn('Could not restore persisted origin anchor');
+                    window.localStorage.removeItem('originAnchor');
+                });
+        } else {
+            window.localStorage.removeItem('originAnchor');
         }
 
         // init cv pipeline, if we are not using an external localizer

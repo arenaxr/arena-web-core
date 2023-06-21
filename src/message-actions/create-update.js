@@ -142,14 +142,7 @@ export default class CreateUpdate {
                 if (buildWatchScene) enableBuildWatchObject(entityEl, message, true);
 
                 if (id === ARENA.params.camFollow) {
-                    this.handleCameraOverride(ACTIONS.UPDATE, {
-                        id: ARENA.camName,
-                        data: {
-                            object_type: 'camera',
-                            position: message.data.position,
-                            rotation: message.data.rotation,
-                        },
-                    });
+                    ARENAUtils.relocateUserCamera(entityEl.object3D.position, entityEl.object3D.rotation);
                 }
                 return;
 
@@ -512,7 +505,7 @@ export default class CreateUpdate {
 
     /**
      * Camera override handler
-     * @param {string} action message action
+     * @param {int} action message action
      * @param {object} message message to be parsed
      */
     static handleCameraOverride(action, message) {
@@ -526,36 +519,15 @@ export default class CreateUpdate {
                 error('camera override', 'local camera object does not exist! (create camera before)');
                 return;
             }
+            const {
+                data: { position, rotation },
+            } = message;
 
-            const p = message.data.position;
-            const r = message.data.rotation;
-            if (AFRAME.scenes[0]?.xrSession) {
-                // Apply transform to rig based off xrSession camera pose
-                const rig = document.getElementById('cameraRig');
-                const spinner = document.getElementById('cameraSpinner');
-                const target = document.getElementById(ARENA.params.camFollow);
-                if (target) {
-                    camMatrixInverse.copy(myCamera.object3D.matrix).invert();
-                    // rig matrix = target * camera inverse
-                    rigMatrix.multiplyMatrices(target.object3D.matrixWorld, camMatrixInverse);
-                    rig.object3D.position.setFromMatrixPosition(rigMatrix);
-                    spinner.object3D.rotation.setFromRotationMatrix(rigMatrix);
-                }
+            const target = document.getElementById(ARENA.params.camFollow);
+            if (target) {
+                ARENAUtils.relocateUserCamera(undefined, undefined, target.object3D.matrixWorld);
             } else {
-                // Do direct camera control. If there was a rig offset already ... maybe we should reset it?
-                if (p) myCamera.object3D.position.set(p.x, p.y, p.z);
-                if (r) {
-                    if (Object.hasOwn(r, 'w')) {
-                        overrideQuat.set(r.x, r.y, r.z, r.w);
-                        myCamera.object3D.rotation.setFromQuaternion(overrideQuat);
-                    } else {
-                        myCamera.object3D.rotation.set(
-                            THREE.MathUtils.degToRad(r.x),
-                            THREE.MathUtils.degToRad(r.y),
-                            THREE.MathUtils.degToRad(r.z)
-                        );
-                    }
-                }
+                ARENAUtils.relocateUserCamera(position, rotation);
             }
         } else if (message.data.object_type === 'look-at') {
             // camera look-at
