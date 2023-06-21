@@ -172,14 +172,13 @@ AFRAME.registerComponent('arena-user', {
             audioCtx.resume();
             if (audioCtx.state === 'running') {
                 if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
-                    enableChromeAEC(listener.gain, this.jitsi.spatialAudioOn);
+                    // We now always try to enable w/ spatial audio, tbd if we need to undo this
+                    enableChromeAEC(listener.gain, true);
                 }
-                document.body.removeEventListener('touchmove', resume, false);
-                document.body.removeEventListener('mousemove', resume, false);
             }
         };
-        document.body.addEventListener('touchmove', resume, false);
-        document.body.addEventListener('mousemove', resume, false);
+        document.body.addEventListener('touchmove', resume, { once: true });
+        document.body.addEventListener('mousemove', resume, { once: true });
     },
 
     drawMicrophone() {

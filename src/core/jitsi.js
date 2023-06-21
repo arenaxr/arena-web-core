@@ -636,17 +636,6 @@ AFRAME.registerSystem('arena-jitsi', {
         );
 
         this.conference.join(); // this.conference.join(password);
-
-        this.spatialAudioOn = AFRAME.utils.device.isMobile();
-        if (!this.spatialAudioOn) {
-            // only tested and working on mac on chrome
-            navigator.mediaDevices.enumerateDevices().then((devices) => {
-                const headphonesConnected = devices
-                    .filter((device) => /audio\w+/.test(device.kind))
-                    .find((device) => device.label.toLowerCase().includes('head'));
-                this.spatialAudioOn = !!headphonesConnected;
-            });
-        }
         this.health.removeError('connection.connectionFailed');
     },
 
