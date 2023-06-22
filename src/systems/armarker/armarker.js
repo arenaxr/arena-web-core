@@ -140,9 +140,8 @@ AFRAME.registerSystem('armarker', {
                 .restorePersistentAnchor(persistedOriginAnchor)
                 .then((anchor) => {
                     this.originAnchor = anchor;
-                    const { frame } = this.el.sceneEl;
-                    if (frame) {
-                        const originPose = frame.getPose(anchor, this.xrRefSpace);
+                    xrSession.requestAnimationFrame((time, frame) => {
+                        const originPose = frame.getPose(anchor.anchorSpace, this.xrRefSpace);
                         if (originPose) {
                             const {
                                 transform: { position, orientation },
@@ -158,12 +157,13 @@ AFRAME.registerSystem('armarker', {
                             rig.object3D.position.copy(position);
                             spinner.object3D.rotation.setFromQuaternion(orientationQuat);
                         }
-                    } else {
-                        console.warn('could not obtain a xrFrame to find set persisted anchor rig');
-                    }
+                    });
                 })
                 .catch(() => {
                     console.warn('Could not restore persisted origin anchor');
+                    xrSession.persistentAnchors.forEach((anchor) => {
+                        xrSession.deletePersistentAnchor(anchor).then(() => {});
+                    });
                     window.localStorage.removeItem('originAnchor');
                 });
         } else {
