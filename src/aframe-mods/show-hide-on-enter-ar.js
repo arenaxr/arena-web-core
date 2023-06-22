@@ -17,7 +17,7 @@ AFRAME.components['hide-on-enter-ar'].Component.prototype.init = function init()
     this.el.sceneEl.addEventListener('enter-vr', () => {
         if (self.el.sceneEl.is('ar-mode')) {
             self.el.object3D.visible = false;
-            self.gltfAttributes = self.el.getAttribute('gltf-model');
+            self.gltfAttributes = { ...self.el.getAttribute('gltf-model') };
             if (self.gltfAttributes) {
                 self.el.removeAttribute('gtf-model');
             }
