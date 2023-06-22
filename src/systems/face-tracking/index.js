@@ -19,7 +19,7 @@ AFRAME.registerSystem('face-tracking', {
         this.enabled = !AFRAME.utils.device.isMobile();
         if (!this.enabled) return;
 
-        this.width = ARENA.localVideoWidth;
+        this.width = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
         this.height = Math.ceil((window.screen.height / window.screen.width) * this.width);
 
         this.prevJSON = null;
@@ -48,6 +48,8 @@ AFRAME.registerSystem('face-tracking', {
             const videoHeight = video.videoHeight / (video.videoWidth / videoWidth);
             video.style.height = `${videoHeight}px`;
             document.body.appendChild(video);
+
+            console.log(faceTrackerSource);
 
             _this.overlayCanvas = document.createElement('canvas');
             _this.overlayCanvas.id = 'face-tracking-overlay';

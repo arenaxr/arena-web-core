@@ -36,7 +36,7 @@ AFRAME.registerComponent('remote-render', {
     },
 
     // Function to calculate the solid angle subtended by a bounding box
-    solidAngleSubtendedByBoundingBox: function(center, dimensions) {
+    solidAngleSubtendedByBoundingBox(center, dimensions) {
         const width = dimensions.x;
         const height = dimensions.y;
         const depth = dimensions.z;
@@ -70,11 +70,9 @@ AFRAME.registerComponent('remote-render', {
 
         const box = new THREE.Box3().setFromObject(object);
 
-        // Step 2: Calculate the center of the bounding box
         const center = new THREE.Vector3();
         box.getCenter(center);
 
-        // Step 3: Calculate the solid angle subtended by the bounding box
         const dimensions = new THREE.Vector3();
         box.getSize(dimensions);
 

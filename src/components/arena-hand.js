@@ -20,12 +20,12 @@ const handControllerPath = {
  * Generates a hand event
  * @param {Object} evt event
  * @param {string} eventName name of event, i.e. 'triggerup'
- * @param {Object} myThis reference to object that generated the event
+ * @param {Object} el reference to object that generated the event
  * @private
  */
-function eventAction(evt, eventName, myThis) {
+function eventAction(evt, eventName, el) {
     const newPosition = new THREE.Vector3();
-    myThis.object3D.getWorldPosition(newPosition);
+    el.object3D.getWorldPosition(newPosition);
 
     const coordsData = {
         x: newPosition.x.toFixed(3),
@@ -34,7 +34,7 @@ function eventAction(evt, eventName, myThis) {
     };
 
     // publish to MQTT
-    const objName = myThis.name;
+    const objName = el.name;
     if (objName) {
         // publishing events attached to user id objects allows sculpting security
         this.arena.Mqtt.publish(`${this.arena.outputTopic}${objName}`, {
@@ -60,6 +60,22 @@ AFRAME.registerComponent('arena-hand', {
     schema: {
         enabled: { type: 'boolean', default: false },
         hand: { type: 'string', default: 'left' },
+        /* eslint-disable prettier/prettier */
+        downEvents: {
+            default: [
+                'gripdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
+                'pointup', 'thumbup', 'pointingstart', 'pistolstart',
+                'thumbstickdown',
+            ],
+        },
+        upEvents: {
+            default: [
+                'gripup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
+                'pointdown', 'thumbdown', 'pointingend', 'pistolend',
+                'thumbstickup',
+            ],
+        },
+        /* eslint-disable prettier/prettier */
     },
 
     dependencies: ['laser-controls'],
@@ -116,38 +132,17 @@ AFRAME.registerComponent('arena-hand', {
             });
         });
 
-        /*
-        el.addEventListener('triggerup', function(evt) {
-            eventAction(evt, 'triggerup', this);
+        data.downEvents.forEach((b) => {
+            el.addEventListener(b, (evt) => {
+                eventAction(evt, b, el);
+            });
         });
-        el.addEventListener('triggerdown', function(evt) {
-            eventAction(evt, 'triggerdown', this);
+
+        data.upEvents.forEach((b) => {
+            el.addEventListener(b, (evt) => {
+                eventAction(evt, b, el);
+            });
         });
-        el.addEventListener('gripup', function(evt) {
-            eventAction(evt, 'gripup', this);
-        });
-        el.addEventListener('gripdown', function(evt) {
-            eventAction(evt, 'gripdown', this);
-        });
-        el.addEventListener('menuup', function(evt) {
-            eventAction(evt, 'menuup', this);
-        });
-        el.addEventListener('menudown', function(evt) {
-            eventAction(evt, 'menudown', this);
-        });
-        el.addEventListener('systemup', function(evt) {
-            eventAction(evt, 'systemup', this);
-        });
-        el.addEventListener('systemdown', function(evt) {
-            eventAction(evt, 'systemdown', this);
-        });
-        el.addEventListener('trackpadup', function(evt) {
-            eventAction(evt, 'trackpadup', this);
-        });
-        el.addEventListener('trackpaddown', function(evt) {
-            eventAction(evt, 'trackpaddown', this);
-        });
-         */
 
         this.tick = AFRAME.utils.throttleTick(this.tick, this.arena.params.camUpdateIntervalMs, this);
 
@@ -198,6 +193,7 @@ AFRAME.registerComponent('arena-hand', {
 
     tick() {
         if (!this.initialized) return;
+
         if (!this.name) {
             this.name = this.data.hand === 'Left' ? this.arena.handLName : this.arena.handRName;
         }
