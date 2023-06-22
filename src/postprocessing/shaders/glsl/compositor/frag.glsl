@@ -207,7 +207,7 @@ void main() {
     }
 
     // force srgb
-#ifndef IS_SRGB
+#ifdef IS_SRGB
     localColor = LinearTosRGB(localColor);
 #endif
 
