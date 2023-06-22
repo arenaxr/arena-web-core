@@ -10,6 +10,7 @@ import './aabb-collider';
 import './arrow-controls';
 import './gltf-model-model-update';
 import './gltf-model-loading';
+import './show-hide-on-enter-ar';
 import './wasd-speed-controls';
 import './webrtc-positional-sound';
 import './utils-srcloader';

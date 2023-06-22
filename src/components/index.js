@@ -23,7 +23,7 @@ import './collision-listener';
 import './gesture-detector';
 import './gltf-lod';
 import './goto-url';
-import './hide-on-enter-vr';
+import './show-hide-on-enter-vr';
 import './impulse';
 import './jitsi-video';
 import './landmark';

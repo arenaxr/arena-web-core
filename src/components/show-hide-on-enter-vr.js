@@ -28,16 +28,39 @@ AFRAME.registerComponent('hide-on-enter-vr', {
             }
         });
         this.el.sceneEl.addEventListener('exit-vr', () => {
-            if (self.gltfAttributes) {
-                self.setAttribute('gltf-model', self.gltfAttributes);
+            if (self.el.sceneEl.is('vr-mode')) {
+                if (self.gltfAttributes) {
+                    self.setAttribute('gltf-model', self.gltfAttributes);
+                }
+                if (self.gltfLodAttributes) {
+                    self.setAttribute('gltf-model-lod', 'enabled', true);
+                }
+                if (self.gltfLodAdvancedAttributes) {
+                    self.setAttribute('gltf-lod-advanced', 'enabled', true);
+                }
+                self.el.object3D.visible = true;
             }
-            if (self.gltfLodAttributes) {
-                self.setAttribute('gltf-model-lod', 'enabled', true);
+        });
+    },
+});
+
+/**
+ * VR-only visibility, opposite behavior of hide-on-enter-vr. Implies that the object is not visible in other modes
+ */
+
+AFRAME.registerComponent('show-on-enter-vr', {
+    init() {
+        const self = this;
+        self.el.object3D.visible = !!self.el.sceneEl.is('vr-mode');
+        this.el.sceneEl.addEventListener('exit-vr', () => {
+            if (self.el.sceneEl.is('vr-mode')) {
+                self.el.object3D.visible = false;
             }
-            if (self.gltfLodAdvancedAttributes) {
-                self.setAttribute('gltf-lod-advanced', 'enabled', true);
+        });
+        this.el.sceneEl.addEventListener('enter-vr', () => {
+            if (self.el.sceneEl.is('vr-mode')) {
+                self.el.object3D.visible = true;
             }
-            self.el.object3D.visible = true;
         });
     },
 });

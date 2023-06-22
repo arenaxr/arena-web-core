@@ -32,15 +32,39 @@ AFRAME.components['hide-on-enter-ar'].Component.prototype.init = function init()
         }
     });
     this.el.sceneEl.addEventListener('exit-vr', () => {
-        if (self.gltfAttributes) {
-            self.setAttribute('gltf-model', self.gltfAttributes);
+        if (self.el.sceneEl.is('ar-mode')) {
+            if (self.gltfAttributes) {
+                self.setAttribute('gltf-model', self.gltfAttributes);
+            }
+            if (self.gltfLodAttributes) {
+                self.setAttribute('gltf-model-lod', 'enabled', true);
+            }
+            if (self.gltfLodAdvancedAttributes) {
+                self.setAttribute('gltf-lod-advanced', 'enabled', true);
+            }
+            self.el.object3D.visible = true;
         }
-        if (self.gltfLodAttributes) {
-            self.setAttribute('gltf-model-lod', 'enabled', true);
-        }
-        if (self.gltfLodAdvancedAttributes) {
-            self.setAttribute('gltf-lod-advanced', 'enabled', true);
-        }
-        self.el.object3D.visible = true;
     });
 };
+
+/**
+ * AR-only visibility, opposite behavior of aframe/hide-on-enter-ar.
+ *  Implies that the object is not visible in other modes
+ */
+
+AFRAME.registerComponent('show-on-enter-ar', {
+    init() {
+        const self = this;
+        self.el.object3D.visible = !!self.el.sceneEl.is('ar-mode');
+        this.el.sceneEl.addEventListener('exit-vr', () => {
+            if (self.el.sceneEl.is('ar-mode')) {
+                self.el.object3D.visible = false;
+            }
+        });
+        this.el.sceneEl.addEventListener('enter-vr', () => {
+            if (self.el.sceneEl.is('ar-mode')) {
+                self.el.object3D.visible = true;
+            }
+        });
+    },
+});
