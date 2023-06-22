@@ -489,10 +489,10 @@ AFRAME.registerSystem('armarker', {
      * to the originating frame, but since this likely triggered off a marker detection requiring low motion
      * and good visual acquisition of target area, or outside-in localizer like Optitrack, good enough.
      * @param {{position: {x, y, z}, rotation: {x,y,z,w}}} originAnchor - The anchor object to create
+     * @param {XRFrame} xrFrame - must be passed directly from requestAnimationFrame callback
      */
-    setOriginAnchor({ position, rotation }) {
+    setOriginAnchor({ position, rotation }, xrFrame) {
         const anchorPose = new XRRigidTransform(position, rotation);
-        const xrFrame = AFRAME.scenes[0].frame;
         if (!xrFrame) {
             console.error("No XRFrame available, can't set origin anchor");
         }

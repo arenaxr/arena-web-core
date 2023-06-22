@@ -173,7 +173,8 @@ export default class CreateUpdate {
                     if (position) {
                         cameraRigObj3D.position.set(position.x, position.y, position.z);
                     }
-                    if (AFRAME.scenes[0].xrSession?.persistentAnchors) {
+                    const { xrSession } = AFRAME.scenes[0];
+                    if (xrSession?.persistentAnchors) {
                         /*
                         Only add if persist anchor support, which implies a device (e.g. quest)
                         that retains map of area. Otherwise, there is no guarantee that the device
@@ -187,7 +188,9 @@ export default class CreateUpdate {
                         } else {
                             rotQuat = rotation;
                         }
-                        arMarkerSys.setOriginAnchor({ position, rotation });
+                        xrSession.requestAnimationFrame((time, frame) => {
+                            arMarkerSys.setOriginAnchor({ position, rotation }, frame);
+                        });
                     }
                 }
                 return;
