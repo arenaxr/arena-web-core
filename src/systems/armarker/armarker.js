@@ -125,7 +125,6 @@ AFRAME.registerSystem('armarker', {
         }
         this.webXRSession = xrSession;
         this.gl = this.el.renderer.getContext();
-        this.xrRefSpace = await xrSession.requestReferenceSpace('local-floor');
 
         // make sure gl context is XR compatible
         try {
@@ -133,6 +132,8 @@ AFRAME.registerSystem('armarker', {
         } catch (err) {
             console.error('Could not make make gl context XR compatible!', err);
         }
+
+        this.xrRefSpace = AFRAME.scenes[0].renderer.xr.getReferenceSpace();
 
         const persistedOriginAnchor = window.localStorage.getItem('originAnchor');
         if (xrSession.persistentAnchors && persistedOriginAnchor) {
