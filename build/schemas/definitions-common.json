@@ -312,6 +312,18 @@
             "type": "boolean",
             "enum": [true]
         },
+        "show-on-enter-ar": {
+            "description": "Show object when entering AR. Hidden otherwise",
+            "title": "Show in AR",
+            "type": "boolean",
+            "enum": [true]
+        },
+        "show-on-enter-vr": {
+            "description": "Show object when entering VR. Hidden otherwise",
+            "title": "Show in VR",
+            "type": "boolean",
+            "enum": [true]
+        },
         "impulse": {
             "description": "The force applied using physics. Requires click-listener",
             "properties": {
