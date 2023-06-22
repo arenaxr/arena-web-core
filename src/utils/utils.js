@@ -354,4 +354,54 @@ export default class ARENAUtils {
             }
         });
     }
+
+    static camMatrixInverse = new THREE.Matrix4();
+
+    static rigMatrix = new THREE.Matrix4();
+
+    static overrideQuat = new THREE.Quaternion();
+
+    /**
+     * Camera relocation, handles both desktop and XR session (requires rig and spinner offset)
+     * @param {{x, y, z}} [position] - new  position
+     * @param {THREE.Euler|{x,y,z,w}} [rotation] - new rotation. Euler if copied from Object3D, quat if from pubsub
+     * @param {THREE.Matrix4} [poseMatrix] - new pose matrix (optional, overrides position and rotation)
+     */
+    static relocateUserCamera(position, rotation, poseMatrix) {
+        const userCamera = document.getElementById('my-camera');
+        if (!userCamera) return;
+        if (AFRAME.scenes[0].xrSession) {
+            const rig = document.getElementById('cameraRig');
+            const spinner = document.getElementById('cameraSpinner');
+            if (poseMatrix) {
+                // target pose matrix given, calculate rig and spinner
+                this.camMatrixInverse.copy(userCamera.object3D.matrix).invert();
+                this.rigMatrix.multiplyMatrices(poseMatrix, this.camMatrixInverse);
+                rig.object3D.position.setFromMatrixPosition(this.rigMatrix);
+                spinner.object3D.rotation.setFromRotationMatrix(this.rigMatrix);
+            } else {
+                // position and/or rotation given, use them
+                if (position) rig.object3D.position.copy(position);
+                if (rotation) {
+                    if (Object.hasOwn(rotation, 'w')) {
+                        this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+                        spinner.object3D.rotation.setFromQuaternion(this.overrideQuat);
+                    } else {
+                        // This is an euler from another object3d
+                        spinner.object3D.rotation.copy(rotation);
+                    }
+                }
+            }
+        } else {
+            if (position) userCamera.object3D.position.set(position.x, position.y, position.z);
+            if (rotation) {
+                if (Object.hasOwn(rotation, 'w')) {
+                    this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
+                    userCamera.object3D.rotation.setFromQuaternion(this.overrideQuat);
+                } else {
+                    userCamera.object3D.rotation.copy(rotation);
+                }
+            }
+        }
+    }
 }

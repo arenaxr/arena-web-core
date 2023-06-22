@@ -11,7 +11,7 @@
  * @date 2020
  */
 
-/* global AFRAME, ARENA, THREE */
+/* global AFRAME, ARENA, THREE, XRRigidTransform */
 
 import WebXRCameraCapture from './camera-capture/ccwebxr';
 import WebARCameraCapture from './camera-capture/ccwebar';
@@ -60,6 +60,9 @@ AFRAME.registerSystem('armarker', {
     // if we detected WebXRViewer/WebARViewer
     isWebXRViewer: ARENAUtils.isWebXRViewer(),
     initialLocalized: false,
+
+    originAnchor: undefined,
+    pendingOriginAnchor: undefined,
     /*
      * Init system
      * @param {object} marker - The marker component object to register.
@@ -94,10 +97,13 @@ AFRAME.registerSystem('armarker', {
             sceneEl.systems.webxr.sceneEl.setAttribute('optionalFeatures', optionalFeatures);
         }
 
-        // listner for xr session start
+        // listener for AR session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
             sceneEl.addEventListener('enter-vr', () => {
-                this.webXRSessionStarted(sceneEl.xrSession);
+                if (sceneEl.is('ar-mode')) {
+                    const { xrSession } = sceneEl;
+                    this.webXRSessionStarted(xrSession).then(() => {});
+                }
             });
         }
     },
@@ -114,16 +120,54 @@ AFRAME.registerSystem('armarker', {
      * @param {object} xrSession - Handle to the WebXR session
      */
     async webXRSessionStarted(xrSession) {
-        if (xrSession !== undefined) {
-            this.webXRSession = xrSession;
-            this.gl = this.el.renderer.getContext();
+        if (xrSession === undefined) {
+            return;
+        }
+        this.webXRSession = xrSession;
+        this.gl = this.el.renderer.getContext();
+        this.xrRefSpace = await xrSession.requestReferenceSpace('local-floor');
 
-            // make sure gl context is XR compatible
-            try {
-                await this.gl.makeXRCompatible();
-            } catch (err) {
-                console.error('Could not make make gl context XR compatible!', err);
-            }
+        // make sure gl context is XR compatible
+        try {
+            await this.gl.makeXRCompatible();
+        } catch (err) {
+            console.error('Could not make make gl context XR compatible!', err);
+        }
+
+        const persistedOriginAnchor = window.localStorage.getItem('originAnchor');
+        if (xrSession.persistentAnchors && persistedOriginAnchor) {
+            xrSession
+                .restorePersistentAnchor(persistedOriginAnchor)
+                .then((anchor) => {
+                    this.originAnchor = anchor;
+                    xrSession.requestAnimationFrame((time, frame) => {
+                        const originPose = frame.getPose(anchor.anchorSpace, this.xrRefSpace);
+                        if (originPose) {
+                            const {
+                                transform: { position, orientation },
+                            } = originPose;
+                            const orientationQuat = new THREE.Quaternion(
+                                orientation.x,
+                                orientation.y,
+                                orientation.z,
+                                orientation.w
+                            );
+                            const rig = document.getElementById('cameraRig');
+                            const spinner = document.getElementById('cameraSpinner');
+                            rig.object3D.position.copy(position);
+                            spinner.object3D.rotation.setFromQuaternion(orientationQuat);
+                        }
+                    });
+                })
+                .catch(() => {
+                    console.warn('Could not restore persisted origin anchor');
+                    xrSession.persistentAnchors.forEach((anchor) => {
+                        xrSession.deletePersistentAnchor(anchor).then(() => {});
+                    });
+                    window.localStorage.removeItem('originAnchor');
+                });
+        } else {
+            window.localStorage.removeItem('originAnchor');
         }
 
         // init cv pipeline, if we are not using an external localizer
@@ -438,5 +482,37 @@ AFRAME.registerSystem('armarker', {
             this.getARMArkersFromATLAS();
         }
         return this.ATLASMarkers[String(markerid)];
+    },
+
+    /**
+     * Add an anchor to the origin of the XR reference space, persisting if possible. This is NOT pose synced
+     * to the originating frame, but since this likely triggered off a marker detection requiring low motion
+     * and good visual acquisition of target area, or outside-in localizer like Optitrack, good enough.
+     * @param {{position: {x, y, z}, rotation: {x,y,z,w}}} originAnchor - The anchor object to create
+     * @param {XRFrame} xrFrame - must be passed directly from requestAnimationFrame callback
+     */
+    setOriginAnchor({ position, rotation }, xrFrame) {
+        const anchorPose = new XRRigidTransform(position, rotation);
+        if (!xrFrame) {
+            console.error("No XRFrame available, can't set origin anchor");
+        }
+        xrFrame.createAnchor(anchorPose, this.xrRefSpace).then((anchor) => {
+            // Persist, currently Quest browser only
+            if (anchor.requestPersistentHandle) {
+                const oldPersistAnchor = window.localStorage.getItem('originAnchor');
+                if (oldPersistAnchor) {
+                    // Delete the old anchor
+                    this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
+                }
+                anchor.requestPersistentHandle().then((handle) => {
+                    // Save the new one
+                    window.localStorage.setItem('originAnchor', handle);
+                });
+            } else if (this.originAnchor) {
+                this.originAnchor.delete();
+            }
+            this.originAnchor = anchor;
+            this.pendingOriginAnchor = false;
+        });
     },
 });

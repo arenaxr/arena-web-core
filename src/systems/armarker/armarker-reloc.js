@@ -9,7 +9,7 @@
  * @authors Ivan Liang, Nuno Pereira
  */
 
-/* global ARENA, THREE */
+/* global AFRAME, ARENA, THREE */
 
 import { ARENAUtils } from '../../utils';
 
@@ -71,9 +71,11 @@ export default class ARMarkerRelocalization {
 
     ROT_THRESH = 0.02175;
 
+    arenaScene;
+
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
-     * @param {function} arMakerSys - ARMarker system; to lookup markers
+     * @param {object} arMakerSys - ARMarker system; to lookup markers
      * @param {object} detectionsEventTarget - Detections event target
      * @param {boolean} [networkedLocationSolver=false] - If true, send detection messages to pubsub
      * @param {boolean} [debug=false] - If true, output debug messages
@@ -124,6 +126,8 @@ export default class ARMarkerRelocalization {
             this.MOVE_THRESH = 0.05;
             this.ROT_THRESH = 0.087;
         }
+
+        [this.arenaScene] = AFRAME.scenes;
     }
 
     /**
@@ -279,6 +283,17 @@ export default class ARMarkerRelocalization {
                           // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
                           this.rigMatrixT.transpose();
                         */
+
+                        const { xrSession } = this.arenaScene;
+                        xrSession.requestAnimationFrame((time, frame) => {
+                            this.arMakerSystem.setOriginAnchor({
+                                // Copy values
+                                ...this.cameraRigObj3D.position,
+                                ...this.cameraSpinnerObj3D.quaternion,
+                                frame,
+                            });
+                        });
+
                         this.arMakerSystem.initialLocalized = true;
                     }
                 } else if (refTag.dynamic && refTag.publish === false) {
