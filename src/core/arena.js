@@ -87,9 +87,6 @@ AFRAME.registerSystem('arena-scene', {
 
         this.events.emit(ARENA_EVENTS.USER_PARAMS_LOADED, true);
 
-        // setup webar session
-        ARENAWebARUtils.handleARButtonForNonWebXRMobile();
-
         // setup event listeners
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, (e) => {
             const args = e.detail;
@@ -195,6 +192,9 @@ AFRAME.registerSystem('arena-scene', {
         }
 
         this.loadUser();
+
+        // setup webar session
+        ARENAWebARUtils.handleARButtonForNonWebXRMobile();
 
         console.info(`* ARENA Started * Scene:${this.namespacedScene}; User:${this.userName}; idTag:${this.idTag}`);
 

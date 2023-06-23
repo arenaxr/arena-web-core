@@ -48,7 +48,7 @@ AFRAME.registerComponent('arena-webar-session', {
         camera.setAttribute('look-controls', 'magicWindowTrackingEnabled', true);
 
         // Disable handoff of orientation to THREE when `ar-mode` and VR-capability is detected
-        document.getElementById('my-camera').components['look-controls'].updateOrientation = () => {
+        document.getElementById('my-camera').components['look-controls'].updateOrientation = function() {
             const { object3D } = this.el;
             const { pitchObject, yawObject } = this;
 
