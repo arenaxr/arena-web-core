@@ -17,39 +17,6 @@ const handControllerPath = {
 };
 
 /**
- * Generates a hand event
- * @param {Object} evt event
- * @param {string} eventName name of event, i.e. 'triggerup'
- * @param {Object} el reference to object that generated the event
- * @private
- */
-function eventAction(evt, eventName, el) {
-    const newPosition = new THREE.Vector3();
-    el.object3D.getWorldPosition(newPosition);
-
-    const coordsData = {
-        x: newPosition.x.toFixed(3),
-        y: newPosition.y.toFixed(3),
-        z: newPosition.z.toFixed(3),
-    };
-
-    // publish to MQTT
-    const objName = el.name;
-    if (objName) {
-        // publishing events attached to user id objects allows sculpting security
-        this.arena.Mqtt.publish(`${this.arena.outputTopic}${objName}`, {
-            object_id: objName,
-            action: 'clientEvent',
-            type: eventName,
-            data: {
-                position: coordsData,
-                source: this.arena.camName,
-            },
-        });
-    }
-}
-
-/**
  *  Tracking Hand controller movement in real time.
  * @module arena-hand
  * @property {boolean} enabled - Controller enabled.
@@ -94,6 +61,8 @@ AFRAME.registerComponent('arena-hand', {
 
         const { sceneEl } = el;
 
+        this.mqtt = sceneEl.systems['arena-mqtt'];
+
         this.arena = sceneEl.systems['arena-scene'];
 
         // capitalize hand type
@@ -118,7 +87,7 @@ AFRAME.registerComponent('arena-hand', {
             if (msg.data.url.includes('magicleap')) {
                 msg.data.scale = { x: 0.01, y: 0.01, z: 0.01 };
             }
-            this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
+            this.mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
             data.enabled = true;
         });
 
@@ -126,21 +95,22 @@ AFRAME.registerComponent('arena-hand', {
             el.setAttribute('visible', false);
             el.setAttribute('collision-publisher', 'enabled', false);
             // when disconnected, try to cleanup hands
-            this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, {
+            this.mqtt.publish(`${this.arena.outputTopic}${this.name}`, {
                 object_id: this.name,
                 action: 'delete',
             });
         });
 
+        const _this = this;
         data.downEvents.forEach((b) => {
             el.addEventListener(b, (evt) => {
-                eventAction(evt, b, el);
+                _this.eventAction(evt, b);
             });
         });
 
         data.upEvents.forEach((b) => {
             el.addEventListener(b, (evt) => {
-                eventAction(evt, b, el);
+                _this.eventAction(evt, b);
             });
         });
 
@@ -188,7 +158,35 @@ AFRAME.registerComponent('arena-hand', {
         if (msg.data.url.includes('magicleap')) {
             msg.data.scale = { x: 0.01, y: 0.01, z: 0.01 };
         }
-        this.arena.Mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
+        this.mqtt.publish(`${this.arena.outputTopic}${this.name}`, msg);
+    },
+
+    eventAction(evt, eventName) {
+        const { el } = this;
+
+        const newPosition = new THREE.Vector3();
+        el.object3D.getWorldPosition(newPosition);
+
+        const coordsData = {
+            x: newPosition.x.toFixed(3),
+            y: newPosition.y.toFixed(3),
+            z: newPosition.z.toFixed(3),
+        };
+
+        // publish to MQTT
+        const handName = this.name;
+        if (handName) {
+            // publishing events attached to user id objects allows sculpting security
+            this.mqtt.publish(`${this.arena.outputTopic}${handName}`, {
+                object_id: handName,
+                action: 'clientEvent',
+                type: eventName,
+                data: {
+                    position: coordsData,
+                    source: handName,
+                },
+            });
+        }
     },
 
     tick() {

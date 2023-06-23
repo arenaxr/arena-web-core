@@ -16,8 +16,14 @@ export default class ClientEvent {
         const { data } = message;
         const clicker = data.source;
 
-        // ignore clicks from the camera
+        // ignore events from ourselves
         if (clicker === ARENA.camName) {
+            return;
+        }
+        if (clicker === ARENA.handLName) {
+            return;
+        }
+        if (clicker === ARENA.handRName) {
             return;
         }
 
@@ -28,7 +34,7 @@ export default class ClientEvent {
 
         const entityEl = document.getElementById(id);
         if (!entityEl) {
-            error('clientEvent', `Object with object_id "${id}" does not exist!`);
+            error(`Object with object_id "${id}" does not exist!`);
             return;
         }
 
@@ -40,7 +46,7 @@ export default class ClientEvent {
                 parseFloat(data.position.z)
             );
         } else {
-            warn('clientEvent', 'Malformed message (no data.position):', JSON.stringify(message));
+            warn('Malformed message (no data.position):', JSON.stringify(message));
         }
 
         switch (message.type) {
