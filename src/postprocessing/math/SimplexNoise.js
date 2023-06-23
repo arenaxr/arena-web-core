@@ -288,6 +288,7 @@ class SimplexNoise {
         } else {
             // x0<y0
 
+            // eslint-disable-next-line no-lonely-if
             if (y0 < z0) {
                 i1 = 0;
                 j1 = 0;

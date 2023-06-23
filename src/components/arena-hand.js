@@ -29,17 +29,19 @@ AFRAME.registerComponent('arena-hand', {
         hand: { type: 'string', default: 'left' },
         /* eslint-disable prettier/prettier */
         downEvents: {
+            // prettier-ignore
             default: [
                 'gripdown', 'gripclose', 'abuttondown', 'bbuttondown', 'xbuttondown', 'ybuttondown',
                 'pointup', 'thumbup', 'pointingstart', 'pistolstart',
-                'thumbstickdown',
+                'thumbstickdown'
             ],
         },
         upEvents: {
+            // prettier-ignore
             default: [
                 'gripup', 'gripopen', 'abuttonup', 'bbuttonup', 'xbuttonup', 'ybuttonup',
                 'pointdown', 'thumbdown', 'pointingend', 'pistolend',
-                'thumbstickup',
+                'thumbstickup'
             ],
         },
         /* eslint-disable prettier/prettier */

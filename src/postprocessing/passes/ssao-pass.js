@@ -209,7 +209,11 @@ class SSAOPass extends Pass {
                 break;
 
             case SSAOPass.OUTPUT.Depth:
-                this.renderPass(renderer, this.depthRenderMaterial, this.renderToScreen ? currentRenderTarget : writeBuffer);
+                this.renderPass(
+                    renderer,
+                    this.depthRenderMaterial,
+                    this.renderToScreen ? currentRenderTarget : writeBuffer
+                );
 
                 break;
 
