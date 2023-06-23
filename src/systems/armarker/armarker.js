@@ -120,55 +120,54 @@ AFRAME.registerSystem('armarker', {
      * @param {object} xrSession - Handle to the WebXR session
      */
     async webXRSessionStarted(xrSession) {
-        if (xrSession === undefined) {
-            return;
-        }
-        this.webXRSession = xrSession;
-        this.gl = this.el.renderer.getContext();
+        if (xrSession !== undefined) {
+            this.webXRSession = xrSession;
+            this.gl = this.el.renderer.getContext();
 
-        // make sure gl context is XR compatible
-        try {
-            await this.gl.makeXRCompatible();
-        } catch (err) {
-            console.error('Could not make make gl context XR compatible!', err);
-        }
+            // make sure gl context is XR compatible
+            try {
+                await this.gl.makeXRCompatible();
+            } catch (err) {
+                console.error('Could not make make gl context XR compatible!', err);
+            }
 
-        this.xrRefSpace = AFRAME.scenes[0].renderer.xr.getReferenceSpace();
+            this.xrRefSpace = AFRAME.scenes[0].renderer.xr.getReferenceSpace();
 
-        const persistedOriginAnchor = window.localStorage.getItem('originAnchor');
-        if (xrSession.persistentAnchors && persistedOriginAnchor) {
-            xrSession
-                .restorePersistentAnchor(persistedOriginAnchor)
-                .then((anchor) => {
-                    this.originAnchor = anchor;
-                    xrSession.requestAnimationFrame((time, frame) => {
-                        const originPose = frame.getPose(anchor.anchorSpace, this.xrRefSpace);
-                        if (originPose) {
-                            const {
-                                transform: { position, orientation },
-                            } = originPose;
-                            const orientationQuat = new THREE.Quaternion(
-                                orientation.x,
-                                orientation.y,
-                                orientation.z,
-                                orientation.w
-                            );
-                            const rig = document.getElementById('cameraRig');
-                            const spinner = document.getElementById('cameraSpinner');
-                            rig.object3D.position.copy(position);
-                            spinner.object3D.rotation.setFromQuaternion(orientationQuat);
-                        }
+            const persistedOriginAnchor = window.localStorage.getItem('originAnchor');
+            if (xrSession.persistentAnchors && persistedOriginAnchor) {
+                xrSession
+                    .restorePersistentAnchor(persistedOriginAnchor)
+                    .then((anchor) => {
+                        this.originAnchor = anchor;
+                        xrSession.requestAnimationFrame((time, frame) => {
+                            const originPose = frame.getPose(anchor.anchorSpace, this.xrRefSpace);
+                            if (originPose) {
+                                const {
+                                    transform: { position, orientation },
+                                } = originPose;
+                                const orientationQuat = new THREE.Quaternion(
+                                    orientation.x,
+                                    orientation.y,
+                                    orientation.z,
+                                    orientation.w
+                                );
+                                const rig = document.getElementById('cameraRig');
+                                const spinner = document.getElementById('cameraSpinner');
+                                rig.object3D.position.copy(position);
+                                spinner.object3D.rotation.setFromQuaternion(orientationQuat);
+                            }
+                        });
+                    })
+                    .catch(() => {
+                        console.warn('Could not restore persisted origin anchor');
+                        xrSession.persistentAnchors.forEach((anchor) => {
+                            xrSession.deletePersistentAnchor(anchor).then(() => {});
+                        });
+                        window.localStorage.removeItem('originAnchor');
                     });
-                })
-                .catch(() => {
-                    console.warn('Could not restore persisted origin anchor');
-                    xrSession.persistentAnchors.forEach((anchor) => {
-                        xrSession.deletePersistentAnchor(anchor).then(() => {});
-                    });
-                    window.localStorage.removeItem('originAnchor');
-                });
-        } else {
-            window.localStorage.removeItem('originAnchor');
+            } else {
+                window.localStorage.removeItem('originAnchor');
+            }
         }
 
         // init cv pipeline, if we are not using an external localizer
@@ -493,6 +492,10 @@ AFRAME.registerSystem('armarker', {
      * @param {XRFrame} xrFrame - must be passed directly from requestAnimationFrame callback
      */
     setOriginAnchor({ position, rotation }, xrFrame) {
+        if (!this.webXRSession || !this.xrRefSpace) {
+            // This may be a webar session. Don't try to anchor
+            return;
+        }
         const anchorPose = new XRRigidTransform(position, rotation);
         if (!xrFrame) {
             console.error("No XRFrame available, can't set origin anchor");
