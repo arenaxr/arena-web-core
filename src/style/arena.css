@@ -30,6 +30,7 @@
 .arena-button {
     background: rgba(0, 0, 0, 0) 50% 50% no-repeat;
     border: 0;
+    border-radius: 10px;
     cursor: pointer;
     min-width: 45px;
     min-height: 45px;
@@ -41,46 +42,11 @@
     touch-action: manipulation; /* Prevent iOS double tap zoom on the button */
 }
 
-.arena-side-menu-button {
-    background-size: 60% 60%;
-    margin-bottom: 10px;
-}
-
-/* Button used to open the chat form - fixed at the bottom of the page */
-
-.landmarks-button,
-.users-button,
-.chat-button {
-    background-size: 52% 52%;
-    bottom: 0;
-}
-
-.arena-button:active,
 .arena-button:hover {
     background-color: #ef2d5e;
 }
 
-@media screen and (max-height: 640px) {
-    .side-menu {
-        top: 20px;
-        right: 20px;
-    }
-
-    .arena-button {
-        min-width: 45px;
-        min-height: 45px;
-        margin-bottom: 5px;
-    }
-}
-
-@keyframes iconfadein {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-}
+/* Buttons used to control various settings - fixed at the top left of the page */
 
 .side-menu-container {
     position: fixed;
@@ -108,6 +74,41 @@
     flex-direction: column;
     flex-wrap: nowrap;
     padding: 5px 5px 0;
+}
+
+.arena-side-menu-button {
+    background-size: 60% 60%;
+    margin-bottom: 10px;
+}
+
+@media screen and (max-height: 640px) {
+    .side-menu {
+        top: 20px;
+        right: 20px;
+    }
+
+    .arena-button {
+        min-width: 45px;
+        min-height: 45px;
+        margin-bottom: 5px;
+    }
+}
+
+@keyframes iconfadein {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Buttons used to open the chat form - fixed at the bottom of the page */
+.landmarks-button,
+.users-button,
+.chat-button {
+    background-size: 52% 52%;
+    bottom: 0;
 }
 
 .settings-popup {
@@ -562,11 +563,6 @@
     padding: 5px 11px;
     top: 3px;
     border: 2px solid #464646;
-}
-
-.lm-list-btn:hover,
-.users-list-btn:hover {
-    background-color: #ef2d5e;
 }
 
 .chat-button .dot {
