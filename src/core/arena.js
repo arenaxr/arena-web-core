@@ -184,6 +184,8 @@ AFRAME.registerSystem('arena-scene', {
             } else {
                 ARENAWebARUtils.enterARNonWebXR();
             }
+        } else if (this.params.vrmode) {
+            sceneEl.enterVR();
         }
 
         if (this.params.build3d) {

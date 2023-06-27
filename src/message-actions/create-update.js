@@ -265,7 +265,7 @@ export default class CreateUpdate {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
-                if (ARENA.params.vr && Object.hasOwn(data, 'hide-on-enter-vr')) {
+                if (ARENA.params.vrmode && Object.hasOwn(data, 'hide-on-enter-vr')) {
                     warn(`Skipping hide-on-enter-vr GLTF: ${entityEl.getAttribute('id')}`);
                     return false; // do not add this object
                 }
