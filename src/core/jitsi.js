@@ -529,7 +529,7 @@ AFRAME.registerSystem('arena-jitsi', {
         const prevJitsiId = this.conference.getParticipantById(this.prevActiveSpeaker);
         if (prevJitsiId) prevArenaId = prevJitsiId.getProperty('arenaId');
 
-        sceneEl.emit(JITSI_EVENTS.DOMINANT_SPEAKER, {
+        sceneEl.emit(JITSI_EVENTS.DOMINANT_SPEAKER_CHANGED, {
             id: actArenaId,
             pid: prevArenaId,
             scene: this.conferenceName,

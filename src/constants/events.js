@@ -27,7 +27,7 @@ export const JITSI_EVENTS = Object.freeze({
     SCREENSHARE: 'onarenajitsiscreenshare',
     DOMINANT_SPEAKER_CHANGED: 'onarenajitsidominantspeakerchanged',
     TALK_WHILE_MUTED: 'onarenajitsitalkwhilemuted',
-    NOISY_MIC: 'onarenajitsinosymic',
+    NOISY_MIC: 'onarenajitsinoisymic',
     STATS_LOCAL: 'onarenajitsistatslocal',
     STATS_REMOTE: 'onarenajitsistatsremote',
     STATUS: 'onarenajitsistatus',
