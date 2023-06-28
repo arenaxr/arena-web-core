@@ -35,17 +35,17 @@ AFRAME.registerComponent('remote-render', {
         return clippedCorners;
     },
 
-    // Function to calculate the solid angle subtended by a bounding box
-    solidAngleSubtendedByBoundingBox(center, dimensions) {
+    solidAngleSubtendedByBoundingBox(cameraPosition, center, dimensions) {
         const width = dimensions.x;
         const height = dimensions.y;
         const depth = dimensions.z;
 
-        // Calculate the diagonal length of the bounding box
-        const diagonalLength = Math.sqrt(width * width + height * height + depth * depth);
+        const diagonalLength = Math.sqrt(width * width + height * height + depth * depth) / 2;
+        const A = Math.PI * diagonalLength ** 2;
 
-        // Calculate the solid angle using the formula for a spherical cap
-        const solidAngle = 2 * Math.PI * (1 - Math.cos(diagonalLength / 2));
+        const r = cameraPosition.distanceTo(center);
+
+        const solidAngle = A / r ** 2;
 
         return solidAngle;
     },
@@ -68,7 +68,7 @@ AFRAME.registerComponent('remote-render', {
 
         console.log('Triangle count:', el.id, triangleCount);
 
-        const box = new THREE.Box3().setFromObject(object);
+        const box = new THREE.Box3().setFromObject(el.object3D);
 
         const center = new THREE.Vector3();
         box.getCenter(center);
@@ -76,7 +76,11 @@ AFRAME.registerComponent('remote-render', {
         const dimensions = new THREE.Vector3();
         box.getSize(dimensions);
 
-        const solidAngle = this.solidAngleSubtendedByBoundingBox(center, dimensions);
+        // const box1 = new THREE.BoxHelper(el.object3D, 0xffff00);
+        // sceneEl.object3D.add(box1);
+
+        const cameraPosition = camera.position;
+        const solidAngle = this.solidAngleSubtendedByBoundingBox(cameraPosition, center, dimensions);
 
         console.log('Total solid angle:', el.id, solidAngle);
     },
