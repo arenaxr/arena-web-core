@@ -589,7 +589,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             // toggled off
             cameraEl.components['wasd-controls'].resetNav();
             cameraEl.components['press-and-move'].resetNav();
-            cameraEl.object3D.position.y = this.arena.startCoords.y + this.arena.defaults.camHeight;
+            cameraEl.object3D.position.y = this.arena.defaults.camHeight;
             this.flyingButton.childNodes[0].style.backgroundImage = "url('src/ui/images/flying-off.png')";
         }
         cameraEl.setAttribute('wasd-controls', { fly: this.flying });

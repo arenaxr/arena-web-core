@@ -22,7 +22,7 @@ uniform mat4 remoteLProjectionMatrix, remoteLMatrixWorld;
 uniform mat4 cameraRProjectionMatrix, cameraRMatrixWorld;
 uniform mat4 remoteRProjectionMatrix, remoteRMatrixWorld;
 
-#define DEPTH_SCALAR    (1.0)
+#define DEPTH_SCALAR    (10.0)
 
 const float onePixel = (1.0 / 255.0);
 
@@ -31,7 +31,7 @@ const bool stretchBorders = true;
 
 float readDepthRemote(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
-    return depth / DEPTH_SCALAR - onePixel;
+    return depth / DEPTH_SCALAR;
 }
 
 float readDepthLocal(sampler2D depthSampler, vec2 coord) {
