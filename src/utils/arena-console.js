@@ -141,6 +141,10 @@ export default class ARENAMqttConsole {
                     consoleLog(args, 'warn');
                     mqttLog(args, 'warn');
                 },
+                debug(...args) {
+                    consoleLog(args, 'debug');
+                    mqttLog(args, 'debug');
+                },
                 error(...args) {
                     consoleLog(args, 'error');
                     mqttLog(args, 'error');
