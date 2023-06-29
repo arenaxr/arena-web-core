@@ -99,7 +99,7 @@ AFRAME.registerSystem('armarker', {
 
         // listener for AR session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
-            sceneEl.addEventListener('enter-vr', () => {
+            sceneEl.renderer.xr.addEventListener('sessionstart', () => {
                 if (sceneEl.is('ar-mode')) {
                     const { xrSession } = sceneEl;
                     this.webXRSessionStarted(xrSession).then(() => {});
