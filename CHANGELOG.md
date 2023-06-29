@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.1](https://github.com/arenaxr/arena-web-core/compare/v1.20.0...v1.20.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* update Dockerfile set arena_version.js ([8704b85](https://github.com/arenaxr/arena-web-core/commit/8704b85fe228c898cc7c271ce0d24035657f9886))
+
 ## [1.20.0](https://github.com/arenaxr/arena-web-core/compare/v1.19.1...v1.20.0) (2023-06-29)
 
 
