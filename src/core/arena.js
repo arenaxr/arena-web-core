@@ -465,7 +465,7 @@ AFRAME.registerSystem('arena-scene', {
             if (parent && document.getElementById(parent) === null) {
                 // Check for circular references
                 if (obj.object_id === parent || descendants.includes(parent)) {
-                    console.log('Circular reference detected, skipping', obj.object_id);
+                    console.warn('Circular reference detected, skipping', obj.object_id);
                     arenaObjects.delete(obj.object_id);
                     return;
                 }
@@ -475,7 +475,7 @@ AFRAME.registerSystem('arena-scene', {
                     createObj(arenaObjects.get(parent), [...descendants, obj.object_id]);
                 } else {
                     // Parent doesn't exist in DOM, doesn't exist in pending arenaObjects, skip orphan
-                    console.log('Orphaned object detected, skipping', obj.object_id);
+                    console.warn('Orphaned object detected, skipping', obj.object_id);
                     arenaObjects.delete(obj.object_id);
                     return;
                 }

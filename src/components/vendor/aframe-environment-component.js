@@ -299,7 +299,7 @@
 	      Object.assign(this.environmentData, this.data);
 	      Object.assign(this.environmentData, this.presets[this.data.preset]);
 	      Object.assign(this.environmentData, this.el.components.environment.attrValue);
-	      console.log(this.environmentData);
+	      // console.log(this.environmentData);
 	    }
 
 	    var skyType = this.environmentData.skyType;
