@@ -68,7 +68,7 @@ export default class CreateUpdate {
                 // create entity, if does not exist
                 let addObj = false;
                 if (!entityEl) {
-                    createWarn(`Object with object_id "${id}" does not exist; Creating...`);
+                    // createWarn(`Object with object_id "${id}" does not exist; Creating...`);
 
                     // create object
                     if (message.data.object_type === 'videosphere') {
