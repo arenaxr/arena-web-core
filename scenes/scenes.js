@@ -27,6 +27,16 @@ window.addEventListener('onauth', async (e) => {
     const username = e.detail.mqtt_username;
     const mqttToken = e.detail.mqtt_token;
     const auth = ARENAAUTH.getAuthStatus();
+
+    if (!auth.authenticated) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Please do a non-anonymous login.',
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+        }).then(ARENAAUTH.signOut);
+    }
+
     window.username = auth.username;
 
     // Rudimentary routing based on location hash
