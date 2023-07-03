@@ -826,6 +826,7 @@ window.addEventListener('onauth', async (e) => {
             allowEscapeKey: false,
             allowOutsideClick: false,
         }).then(ARENAAUTH.signOut);
+        return;
     }
 
     arenaHostLbl.value = hostData.host;
