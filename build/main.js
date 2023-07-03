@@ -22,7 +22,7 @@ window.addEventListener('onauth', async (e) => {
     let jsoneditor;
     let dfts;
     let objSchemas;
-    let dftSceneObjects;
+    let dftSceneObjects = [];
     const objTypeFilter = {};
 
     const username = e.detail.mqtt_username;
