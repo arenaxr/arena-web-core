@@ -35,6 +35,7 @@ window.addEventListener('onauth', async (e) => {
             allowEscapeKey: false,
             allowOutsideClick: false,
         }).then(ARENAAUTH.signOut);
+        return;
     }
 
     window.username = auth.username;
