@@ -35,6 +35,7 @@ AFRAME.registerSystem('arena-av-setup', {
         this.getStream = this.getStream.bind(this);
         this.gotStream = this.gotStream.bind(this);
         this.micDrawLoop = this.micDrawLoop.bind(this);
+        this.detectDevices = this.detectDevices.bind(this);
 
         try {
             this.loadHTML().then(() => {
