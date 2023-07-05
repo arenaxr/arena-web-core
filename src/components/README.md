@@ -103,153 +103,139 @@ Update <em>is</em> allowed, which will reset the timer to start from that moment
 <a name="module_arena-camera"></a>
 
 ## arena-camera
-
 Tracking camera movement in real time. Emits camera pose change and VIO change events.
 
 **Properties**
 
-| Name        | Type                              | Description                                               |
-| ----------- | --------------------------------- | --------------------------------------------------------- |
-| enabled     | <code>boolean</code>              | Indicates whether camera tracking is enabled.             |
-| vioEnabled  | <code>boolean</code>              | Indicates whether to publish VIO on every tick (if true). |
-| displayName | <code>string</code>               | User display name (used to publish camera data).          |
-| color       | <code>string</code>               | Head text color.                                          |
-| rotation    | <code>Array.&lt;number&gt;</code> | Last camera rotation value.                               |
-| position    | <code>Array.&lt;number&gt;</code> | Last camera position value.                               |
-| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value.                                  |
-| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value.                                  |
-| showStats   | <code>boolean</code>              | Display camera position on the screen.                    |
+| Name | Type | Description |
+| --- | --- | --- |
+| enabled | <code>boolean</code> | Indicates whether camera tracking is enabled. |
+| vioEnabled | <code>boolean</code> | Indicates whether to publish VIO on every tick (if true). |
+| displayName | <code>string</code> | User display name (used to publish camera data). |
+| color | <code>string</code> | Head text color. |
+| rotation | <code>Array.&lt;number&gt;</code> | Last camera rotation value. |
+| position | <code>Array.&lt;number&gt;</code> | Last camera position value. |
+| vioRotation | <code>Array.&lt;number&gt;</code> | Last VIO rotation value. |
+| vioPosition | <code>Array.&lt;number&gt;</code> | Last VIO position value. |
+| showStats | <code>boolean</code> | Display camera position on the screen. |
 
 <a name="module_arena-hand"></a>
 
 ## arena-hand
-
 Tracking Hand controller movement in real time.
 
 **Properties**
 
-| Name    | Type                 | Description         |
-| ------- | -------------------- | ------------------- |
+| Name | Type | Description |
+| --- | --- | --- |
 | enabled | <code>boolean</code> | Controller enabled. |
-| hand    | <code>string</code>  | Controller hand.    |
+| hand | <code>string</code> | Controller hand. |
 
 <a name="module_arena-user"></a>
 
 ## arena-user
-
 Another user's camera in the ARENA. Handles Jitsi and display name updates.
 
 **Properties**
 
-| Name            | Type                 | Default                                                     | Description                         |
-| --------------- | -------------------- | ----------------------------------------------------------- | ----------------------------------- |
-| [color]         | <code>color</code>   | <code>white</code>                                          | The color for the user's name text. |
-| [headModelPath] | <code>string</code>  | <code>&quot;/static/models/avatars/robobit.glb&quot;</code> | Path to user head model             |
-| [presence]      | <code>string</code>  |                                                             | type of presence for user           |
-| [jitsiId]       | <code>string</code>  |                                                             | User jitsi id.                      |
-| [displayName]   | <code>string</code>  |                                                             | User display name.                  |
-| [hasAudio]      | <code>boolean</code> | <code>false</code>                                          | Whether the user has audio on.      |
-| [hasVideo]      | <code>boolean</code> | <code>false</code>                                          | Whether the user has video on.      |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [color] | <code>color</code> | <code>white</code> | The color for the user's name text. |
+| [headModelPath] | <code>string</code> | <code>&quot;/static/models/avatars/robobit.glb&quot;</code> | Path to user head model |
+| [presence] | <code>string</code> |  | type of presence for user |
+| [jitsiId] | <code>string</code> |  | User jitsi id. |
+| [displayName] | <code>string</code> |  | User display name. |
+| [hasAudio] | <code>boolean</code> | <code>false</code> | Whether the user has audio on. |
+| [hasVideo] | <code>boolean</code> | <code>false</code> | Whether the user has video on. |
 
 <a name="module_armarker"></a>
 
 ## armarker
-
 ARMarker Component. Supports ARMarkers in a scene
 
 **Properties**
 
-| Name         | Type                 | Default                                 | Description                                                                                        |
-| ------------ | -------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [markertype] | <code>string</code>  | <code>&quot;apriltag_36h11&quot;</code> | The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb'                                     |
-| [dynamic]    | <code>boolean</code> | <code>false</code>                      | Whether tag is a static and used to for camera relocalization, or dynamically changes position     |
-| [publish]    | <code>boolean</code> | <code>false</code>                      | Publish tag detections.                                                                            |
-| [markerid]   | <code>string</code>  |                                         | Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]) |
-| [size]       | <code>number</code>  | <code>150</code>                        | Size of the marker (assumed to be a square), if applicable (mm).                                   |
-| [url]        | <code>string</code>  |                                         | A URL associated with the marker.                                                                  |
-| [lat]        | <code>number</code>  | <code>0</code>                          | Marker latitude.                                                                                   |
-| [long]       | <code>number</code>  | <code>0</code>                          | Marker longitude.                                                                                  |
-| [ele]        | <code>number</code>  | <code>0</code>                          | Marker elevation.                                                                                  |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [markertype] | <code>string</code> | <code>&quot;apriltag_36h11&quot;</code> | The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb' |
+| [dynamic] | <code>boolean</code> | <code>false</code> | Whether tag is a static and used to for camera relocalization, or dynamically changes position |
+| [publish] | <code>boolean</code> | <code>false</code> | Publish tag detections. |
+| [markerid] | <code>string</code> |  | Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]) |
+| [size] | <code>number</code> | <code>150</code> | Size of the marker (assumed to be a square), if applicable (mm). |
+| [url] | <code>string</code> |  | A URL associated with the marker. |
+| [lat] | <code>number</code> | <code>0</code> | Marker latitude. |
+| [long] | <code>number</code> | <code>0</code> | Marker longitude. |
+| [ele] | <code>number</code> | <code>0</code> | Marker elevation. |
 
 <a name="module_attribution"></a>
 
 ## attribution
-
 Attribution Component. Saves attribution data in any entity. The following properties can be saved.
-
 <!-- markdown-link-check-disable-next-line -->
-
 If `extractAssetExtras=true` (default), the [attribution system](https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties) attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)
 
 **Properties**
 
-| Name                 | Type                 | Default                           | Description                                                                                      |
-| -------------------- | -------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------ |
-| [author]             | <code>string</code>  | <code>&quot;Unknown&quot;</code>  | Author name; e.g. "Vaptor-Studio"                                                                |
-| [authorURL]          | <code>string</code>  |                                   | Author homepage/profile; e.g. https://sketchfab.com/VapTor                                       |
-| [license]            | <code>string</code>  | <code>&quot;Unknown&quot;</code>  | License summary/short name; e.g. "CC-BY-4.0".                                                    |
-| [licenseURL]         | <code>string</code>  |                                   | License URL; e.g. http://creativecommons.org/licenses/by/4.0/                                    |
-| [source]             | <code>string</code>  | <code>&quot;Unknown&quot;</code>  | Model source e.g. "Sketchfab".                                                                   |
-| [sourceURL]          | <code>string</code>  |                                   | Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7             |
-| [title]              | <code>string</code>  | <code>&quot;No Title&quot;</code> | Model title; e.g. "Spinosaurus".                                                                 |
-| id                   | <code>string</code>  |                                   | The entity id in the scene; automatically filled in on component init                            |
-| [extractAssetExtras] | <code>boolean</code> | <code>true</code>                 | Extract attribution info from asset extras; will override attribution info given (default: true) |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [author] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Author name; e.g. "Vaptor-Studio" |
+| [authorURL] | <code>string</code> |  | Author homepage/profile; e.g. https://sketchfab.com/VapTor |
+| [license] | <code>string</code> | <code>&quot;Unknown&quot;</code> | License summary/short name; e.g. "CC-BY-4.0". |
+| [licenseURL] | <code>string</code> |  | License URL; e.g. http://creativecommons.org/licenses/by/4.0/ |
+| [source] | <code>string</code> | <code>&quot;Unknown&quot;</code> | Model source e.g. "Sketchfab". |
+| [sourceURL] | <code>string</code> |  | Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7 |
+| [title] | <code>string</code> | <code>&quot;No Title&quot;</code> | Model title; e.g. "Spinosaurus". |
+| id | <code>string</code> |  | The entity id in the scene; automatically filled in on component init |
+| [extractAssetExtras] | <code>boolean</code> | <code>true</code> | Extract attribution info from asset extras; will override attribution info given (default: true) |
 
 <a name="module_build-watch-object"></a>
 
 ## build-watch-object
-
 Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
 
 <a name="module_build-watch-scene"></a>
 
 ## build-watch-scene
-
 Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
 
 <a name="module_click-listener"></a>
 
 ## click-listener
-
 Keep track of mouse events and publish corresponding events
 
 **Todo**
 
--   [ ] Consolidate event listeners (they are very similar)
+- [ ] Consolidate event listeners (they are very similar)
 
 <a name="module_collision-listener"></a>
 
 ## collision-listener
-
 Listen for collisions, callback on event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>  
+**Requires**: <code>module:&#x27;aframe-physics-system&#x27;</code>  
 <a name="module_gesture-detector"></a>
 
 ## gesture-detector
-
 Detect multi-finger touch gestures. Publish events accordingly.
 Based off 8th Wall's [gesture-detector](https://github.com/8thwall/web/tree/master/examples/aframe)
 
 <a name="module_goto-url"></a>
 
 ## goto-url
-
 Load new URL when object is clicked
 
 **Properties**
 
-| Name   | Type                | Default                          | Description                                                                                                                                           |
-| ------ | ------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| on     | <code>string</code> |                                  | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
-| url    | <code>string</code> |                                  | The destination url e.g. https://example.com                                                                                                          |
-| [dest] | <code>string</code> | <code>&quot;sametab&quot;</code> | Where to open the URL; one of 'popup', 'newtab', 'sametab'                                                                                            |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| on | <code>string</code> |  | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
+| url | <code>string</code> |  | The destination url e.g. https://example.com |
+| [dest] | <code>string</code> | <code>&quot;sametab&quot;</code> | Where to open the URL; one of 'popup', 'newtab', 'sametab' |
 
 <a name="module_impulse"></a>
 
 ## impulse
-
 One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
@@ -258,79 +244,73 @@ Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 <a name="module_jitsi-video"></a>
 
 ## jitsi-video
-
 Apply a jitsi video to a geometry
 Jitsi video source can be defined using a jitsiId or (ARENA/Jitsi) display name
 
 **Properties**
 
-| Name          | Type                | Description                                                                                                                 |
-| ------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| [jitsiId]     | <code>string</code> | JitsiId of the video source; If defined will override displayName                                                           |
+| Name | Type | Description |
+| --- | --- | --- |
+| [jitsiId] | <code>string</code> | JitsiId of the video source; If defined will override displayName |
 | [displayName] | <code>string</code> | ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. Editing this property requires reload |
 
 <a name="module_landmark"></a>
 
 ## landmark
-
 Component-System of teleport destination Landmarks
 
 **Properties**
 
-| Name                 | Type                       | Default                                    | Description                                                         |
-| -------------------- | -------------------------- | ------------------------------------------ | ------------------------------------------------------------------- |
-| [randomRadiusMin]    | <code>number</code>        | <code>0</code>                             | Min for a random range to teleport to. Max must > 0                 |
-| [randomRadiusMax]    | <code>number</code>        | <code>0</code>                             | Max for a random range to teleport to.                              |
-| [offsetPosition]     | <code>THREE.Vector3</code> | <code>{0,1.6,0}</code>                     | vector3 {x,y,z} to use as static teleport offset                    |
-| [constrainToNavMesh] | <code>string</code>        | <code>&quot;&#x27;false&#x27;&quot;</code> | Teleports here should snap to navmesh. ['false', 'any', 'coplanar'] |
-| [startingPosition]   | <code>boolean</code>       | <code>false</code>                         | True: use as a random scene load-in position                        |
-| [lookAtLandmark]     | <code>boolean</code>       | <code>true</code>                          | True: After teleporting, user should rotate @ landmark              |
-| label                | <code>string</code>        | <code>&quot;&#x27;&#x27;&quot;</code>      | Display label for Landmarks UI menu                                 |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [randomRadiusMin] | <code>number</code> | <code>0</code> | Min for a random range to teleport to. Max must > 0 |
+| [randomRadiusMax] | <code>number</code> | <code>0</code> | Max for a random range to teleport to. |
+| [offsetPosition] | <code>THREE.Vector3</code> | <code>{0,1.6,0}</code> | vector3 {x,y,z} to use as static teleport offset |
+| [constrainToNavMesh] | <code>string</code> | <code>&quot;&#x27;false&#x27;&quot;</code> | Teleports here should snap to navmesh. ['false', 'any', 'coplanar'] |
+| [startingPosition] | <code>boolean</code> | <code>false</code> | True: use as a random scene load-in position |
+| [lookAtLandmark] | <code>boolean</code> | <code>true</code> | True: After teleporting, user should rotate @ landmark |
+| label | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Display label for Landmarks UI menu |
 
 <a name="module_load-scene"></a>
 
 ## load-scene
-
 Load scene from persistence.
 
 **Todo**
 
--   [ ] this component is currently not used and probably needs to be updated
+- [ ] this component is currently not used and probably needs to be updated
 
 <a name="module_material-extras"></a>
 
 ## material-extras
-
 Allows to set extra material properties, namely texture colorspace, whether to render the material's color and render order.
 The properties set here access directly [Three.js material](https://threejs.org/docs/#api/en/materials/Material).
 Implements a timeout scheme in lack of better management of the timing/events causing properties to not be available.
 
 **Properties**
 
-| Name                  | Type                 | Default                                 | Description                                                                                                                                                                             |
-| --------------------- | -------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [overrideSrc]         | <code>string</code>  | <code>&quot;&#x27;&#x27;&quot;</code>   | Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF).                                                                                                       |
-| [colorSpace]          | <code>string</code>  | <code>&quot;SRGBColorSpace&quot;</code> | The material colorspace; See [Three.js material](https://threejs.org/docs/#api/en/materials/Material).                                                                                  |
-| [colorWrite]          | <code>boolean</code> | <code>true</code>                       | Whether to render the material's color. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material).                                                                   |
-| [renderOrder]         | <code>number</code>  | <code>1</code>                          | This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder](https://threejs.org/docs/#api/en/core/Object3D.renderOrder). |
-| [transparentOccluder] | <code>boolean</code> | <code>false</code>                      | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.                                                                                 |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [overrideSrc] | <code>string</code> | <code>&quot;&#x27;&#x27;&quot;</code> | Overrides the material in all meshes of an object (e.g. a basic shape or a GLTF). |
+| [colorSpace] | <code>string</code> | <code>&quot;SRGBColorSpace&quot;</code> | The material colorspace; See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [colorWrite] | <code>boolean</code> | <code>true</code> | Whether to render the material's color. See [Three.js material](https://threejs.org/docs/#api/en/materials/Material). |
+| [renderOrder] | <code>number</code> | <code>1</code> | This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder](https://threejs.org/docs/#api/en/core/Object3D.renderOrder). |
+| [transparentOccluder] | <code>boolean</code> | <code>false</code> | If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder. |
 
 <a name="module_network-latency"></a>
 
 ## network-latency
-
 Publish with qos of 2 for network graph to update latency
 
 **Properties**
 
-| Name               | Type                | Default            | Description                              |
-| ------------------ | ------------------- | ------------------ | ---------------------------------------- |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
 | UPDATE_INTERVAL_MS | <code>number</code> | <code>10000</code> | Interval to send the periodic pings (ms) |
 
 <a name="module_pcd-model"></a>
 
 ## pcd-model
-
 Load Point Cloud Data (PCD) models using three.js example loader
 Point Cloud Data is a file format for Point Cloud Library.
 https://en.wikipedia.org/wiki/Point_Cloud_Library
@@ -338,94 +318,88 @@ https://en.wikipedia.org/wiki/Point_Cloud_Library
 <a name="module_press-and-move"></a>
 
 ## press-and-move
-
 Press and move camera; User camera movement with the mouse.
 Based off [wasd controls](https://github.com/aframevr/aframe/blob/master/src/components/wasd-controls.js)
 
 **Properties**
 
-| Name           | Type                 | Default           | Description                                                       |
-| -------------- | -------------------- | ----------------- | ----------------------------------------------------------------- |
-| [acceleration] | <code>number</code>  | <code>30</code>   | Movement acceleration.                                            |
-| [enabled]      | <code>boolean</code> | <code>true</code> | Is the camera movement component enabled.                         |
-| [fly]          | <code>boolean</code> | <code>true</code> | Is the camera at a fixed height (`fly=false`) or not (`fly=true`) |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [acceleration] | <code>number</code> | <code>30</code> | Movement acceleration. |
+| [enabled] | <code>boolean</code> | <code>true</code> | Is the camera movement component enabled. |
+| [fly] | <code>boolean</code> | <code>true</code> | Is the camera at a fixed height (`fly=false`) or not (`fly=true`) |
 
 <a name="module_screenshareable"></a>
 
 ## screenshareable
-
 Screenshare-able Component. Allows an object to be screenshared upon
 
 <a name="module_textinput"></a>
 
 ## textinput
-
 Opens an HTML prompt when clicked. Sends text input as an event on MQTT
 
 **Properties**
 
-| Name          | Type                | Default                                                           | Description                                                                                                                                           |
-| ------------- | ------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [on]          | <code>string</code> | <code>&quot;mousedown&quot;</code>                                | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
-| [title]       | <code>string</code> | <code>&quot;Text Input&quot;</code>                               | The prompt title                                                                                                                                      |
-| [label]       | <code>string</code> | <code>&quot;Input text below (max is 140 characters)&quot;</code> | Text prompt label                                                                                                                                     |
-| [placeholder] | <code>string</code> | <code>&quot;Type here&quot;</code>                                | Text input place holder                                                                                                                               |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [on] | <code>string</code> | <code>&quot;mousedown&quot;</code> | A case-sensitive string representing the [event type](https://developer.mozilla.org/en-US/docs/Web/Events) to listen for, e.g. 'mousedown', 'mouseup' |
+| [title] | <code>string</code> | <code>&quot;Text Input&quot;</code> | The prompt title |
+| [label] | <code>string</code> | <code>&quot;Input text below (max is 140 characters)&quot;</code> | Text prompt label |
+| [placeholder] | <code>string</code> | <code>&quot;Type here&quot;</code> | Text input place holder |
 
 <a name="module_threejs-scene"></a>
 
 ## threejs-scene
-
 Load a [THREE.js scene](https://threejs.org/docs/#api/en/scenes/Scene). THREE.js scene format is an almost direct serialization of the THREE.js objects, and can be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA
 For a move portable format, using glTF is preferred.
 
 **Properties**
 
-| Name | Type                | Description                |
-| ---- | ------------------- | -------------------------- |
-| url  | <code>string</code> | the three.js scene to load |
+| Name | Type | Description |
+| --- | --- | --- |
+| url | <code>string</code> | the three.js scene to load |
 
 <a name="module_ttl"></a>
 
 ## ttl
-
 Time To Live (TTL) component.
 
 When applied to an entity, the entity will remove itself from DOM after the specified number of seconds.
-Update _is_ allowed, which will reset the timer to start from that moment.
+Update *is* allowed, which will reset the timer to start from that moment.
 
 **Properties**
 
-| Name     | Type                | Description                                                                                                          |
-| -------- | ------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| seconds  | <code>number</code> | Seconds until entity is removed                                                                                      |
+| Name | Type | Description |
+| --- | --- | --- |
+| seconds | <code>number</code> | Seconds until entity is removed |
 | expireAt | <code>object</code> | Expiration time [Date object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date) |
 
 <a name="module_video-control"></a>
 
 ## video-control
-
 Adds a video to an entity and controls its playback.
 
 **Properties**
 
-| Name            | Type                 | Default            | Description                                             |
-| --------------- | -------------------- | ------------------ | ------------------------------------------------------- |
-| video_object    | <code>string</code>  |                    | the object id of the element where to display the video |
-| video_path      | <code>string</code>  |                    | path/url to the video                                   |
-| [frame_object]  | <code>string</code>  |                    | path/url to the keyframe to display                     |
-| [anyone_clicks] | <code>boolean</code> | <code>true</code>  | anyone clicks                                           |
-| [video_loop]    | <code>boolean</code> | <code>true</code>  | video loop                                              |
-| [autoplay]      | <code>boolean</code> | <code>false</code> | video autoplays on load                                 |
-| [volume]        | <code>number</code>  | <code>1</code>     | video sound volume                                      |
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| video_object | <code>string</code> |  | the object id of the element where to display the video |
+| video_path | <code>string</code> |  | path/url to the video |
+| [frame_object] | <code>string</code> |  | path/url to the keyframe to display |
+| [anyone_clicks] | <code>boolean</code> | <code>true</code> | anyone clicks |
+| [video_loop] | <code>boolean</code> | <code>true</code> | video loop |
+| [autoplay] | <code>boolean</code> | <code>false</code> | video autoplays on load |
+| [volume] | <code>number</code> | <code>1</code> | video sound volume |
 
 <a name="jitsiStatsLocalCallback"></a>
 
 ## jitsiStatsLocalCallback(e)
-
 Called when Jitsi local stats are updated, used to save local status for stats-monitor.
 
-**Kind**: global function
+**Kind**: global function  
 
-| Param | Type                | Description                                            |
-| ----- | ------------------- | ------------------------------------------------------ |
-| e     | <code>Object</code> | event object; e.detail contains the callback arguments |
+| Param | Type | Description |
+| --- | --- | --- |
+| e | <code>Object</code> | event object; e.detail contains the callback arguments |
+
