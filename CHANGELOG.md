@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.20.3](https://github.com/arenaxr/arena-web-core/compare/v1.20.2...v1.20.3) (2023-07-06)
+
+
+### Bug Fixes
+
+* bind av-setup detectDevices to system ([c7038f4](https://github.com/arenaxr/arena-web-core/commit/c7038f42c911f3dcd2bd6697ba12bad98ea43b7a))
+* do not init local av with armode/vrmode ([f9e8d7e](https://github.com/arenaxr/arena-web-core/commit/f9e8d7e20b47ae7ba6ac48ec23a0e4f2ce6eb8ed))
+* remove async load of mdb css due to safari ([81c2904](https://github.com/arenaxr/arena-web-core/commit/81c29049e59b4e55ee0b320302c8588d9f81ff3c))
+* WebXRViewer doesn't init ARMarkerSys ([1306e7b](https://github.com/arenaxr/arena-web-core/commit/1306e7b960b1eb85af56bc3419ddfc6d293a140a))
+
 ## [1.20.2](https://github.com/arenaxr/arena-web-core/compare/v1.20.1...v1.20.2) (2023-06-29)
 
 
