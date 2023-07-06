@@ -99,6 +99,8 @@ AFRAME.registerSystem('armarker', {
 
         // listener for AR session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
+            // This is delayed from `enter-vr` to a referenceSpace is acquired.
+            // Will not fire for WebXR browser (see webxr-device-manager)
             sceneEl.renderer.xr.addEventListener('sessionstart', () => {
                 if (sceneEl.is('ar-mode')) {
                     const { xrSession } = sceneEl;
