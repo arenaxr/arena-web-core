@@ -159,7 +159,9 @@ AFRAME.registerSystem('arena-jitsi', {
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
         this.connection.connect();
 
-        this.avConnect();
+        if (!this.arena.params.armode && !this.arena.params.vrmode) {
+            this.avConnect();
+        }
     },
 
     /**
