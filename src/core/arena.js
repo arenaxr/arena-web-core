@@ -7,10 +7,11 @@
  */
 
 /* global AFRAME, ARENA, Swal, THREE, $ */
-
+ 
 import { ARENAUtils } from '../utils';
 import ARENAWebARUtils from '../webar';
 import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
+import RuntimeMngr from './runtime-mngr';
 
 AFRAME.registerSystem('arena-scene', {
     schema: {
@@ -27,6 +28,7 @@ AFRAME.registerSystem('arena-scene', {
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
             this.fetchSceneObjects().then(() => {});
         });
+        ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, this.initRuntimeMngr.bind(this));
         ARENA.events.addMultiEventListener(
             [ARENA_EVENTS.MQTT_LOADED, ARENA_EVENTS.USER_PARAMS_LOADED, 'loaded'],
             this.loadScene.bind(this)
@@ -169,6 +171,30 @@ AFRAME.registerSystem('arena-scene', {
             });
     },
 
+    /**
+     * Init runtime manager; must be called after mqtt is loaded
+     */
+    async initRuntimeMngr() {
+        const mqtt = this.sceneEl.systems['arena-mqtt'];
+
+        console.info("mqttToken", this.mqttToken);
+        // init runtime manager
+        this.RuntimeManager = new RuntimeMngr({
+            realm: this.defaults.realm,
+            mqttHost: mqtt.mqttHostURI,
+            onInitCallback: function() {
+                console.info('Runtime init done.');
+            },
+            name: `rt-${this.idTag}`,
+            mqttUsername: this.mqttToken.mqtt_username,
+            mqttToken: this.mqttToken.mqtt_token,
+        });
+        this.RuntimeManager.init();
+    },
+
+    /**
+     * Load Scene; checks URI parameters 
+     */
     loadScene() {
         const { el } = this;
 
@@ -503,15 +529,15 @@ AFRAME.registerSystem('arena-scene', {
             const [objId, obj] = iter.next().value; // get first entry
             if (obj.type === 'program') {
                 // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                // const avars = {
-                //     scene: this.sceneName,
-                //     namespace: this.nameSpace,
-                //     cameraid: this.camName,
-                //     username: this.getDisplayName(),
-                //     mqtth: this.mqttHost,
-                // };
+                const avars = {
+                     scene: this.sceneName,
+                     namespace: this.nameSpace,
+                     cameraid: this.camName,
+                     username: this.getDisplayName(),
+                     mqtth: mqtt.mqttHost,
+                };
                 // ask runtime manager to start this program
-                // this.RuntimeManager.createModuleFromPersist(obj, avars);
+                this.RuntimeManager.createModuleFromPersist(obj, avars);
                 arenaObjects.delete(objId);
             } else if (obj.type === 'object') {
                 if (containerObjName && obj.attributes.parent === undefined) {

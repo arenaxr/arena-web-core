@@ -1,7 +1,7 @@
 /**
  * @fileoverview Paho MQTT client wrapper;
  * The runtime manager has its own mqtt client
- * TODO: reconcile with other mqtt clients (main arena client, chat ?)
+ * TODO: reconcile with other mqtt clients (main arena client, chat ?); this is hard due to last will
  *
  * Open source software under the terms in /LICENSE
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
