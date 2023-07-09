@@ -194,6 +194,7 @@ window.ARENAAUTH = {
      * @param {boolean} completeOnload wait for page load before firing callback
      */
     async requestMqttToken(authType, mqttUsername, completeOnload = false) {
+        const nonScenePaths = ['/scenes/', '/build/', '/programs/', '/network/', '/files/'];
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
@@ -204,7 +205,7 @@ window.ARENAAUTH = {
 
         if (ARENA.params.scene) {
             authParams.scene = decodeURIComponent(ARENA.params.scene);
-        } else {
+        } else if (!nonScenePaths.includes(window.location.pathname)) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
