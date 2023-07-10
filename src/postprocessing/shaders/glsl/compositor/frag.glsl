@@ -22,12 +22,29 @@ uniform mat4 remoteLProjectionMatrix, remoteLMatrixWorld;
 uniform mat4 cameraRProjectionMatrix, cameraRMatrixWorld;
 uniform mat4 remoteRProjectionMatrix, remoteRMatrixWorld;
 
-#define DEPTH_SCALAR    (20.0)
+#define DEPTH_SCALAR    (500.0)
 
 const float onePixel = (1.0 / 255.0);
 
 const bool doAsyncTimeWarp = true;
 const bool stretchBorders = true;
+
+// adapted from: https://gist.github.com/hecomi/9580605
+float linear01Depth(float depth) {
+    float x = 1.0 - cameraFar / cameraNear;
+    float y = cameraFar / cameraNear;
+    float z = x / cameraFar;
+    float w = y / cameraFar;
+    return 1.0 / (x * depth + y);
+}
+
+float linearEyeDepth(float depth) {
+    float x = 1.0 - cameraFar / cameraNear;
+    float y = cameraFar / cameraNear;
+    float z = x / cameraFar;
+    float w = y / cameraFar;
+    return 1.0 / (z * depth + w);
+}
 
 float readDepthRemote(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
@@ -36,11 +53,7 @@ float readDepthRemote(sampler2D depthSampler, vec2 coord) {
 
 float readDepthLocal(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
-    /* float viewZ = perspectiveDepthToViewZ( depth, cameraNear, cameraFar );
-     * viewZ = viewZToOrthographicDepth( viewZ, cameraNear, cameraFar );
-     * return viewZ; */
-    depth = 2.0 * (cameraFar * cameraNear) / ((cameraFar + cameraNear) - depth * (cameraFar - cameraNear));
-    depth = (depth - cameraNear) / (cameraFar - cameraNear);
+    depth = linear01Depth(depth);
     return depth;
 }
 
