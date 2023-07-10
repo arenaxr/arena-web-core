@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.20.4](https://github.com/arenaxr/arena-web-core/compare/v1.20.3...v1.20.4) (2023-07-10)
+
+
+### Bug Fixes
+
+* add runtime manager again after refactor ([74643fb](https://github.com/arenaxr/arena-web-core/commit/74643fb0bec9360a55c354c1ef4dfe39beb8b1b4))
+* **auth:** only show profile when authenticated ([0588c59](https://github.com/arenaxr/arena-web-core/commit/0588c5913fcdaba4b55f306f83227eafe784638b))
+* **auth:** only show profile when authenticated ([2ed296b](https://github.com/arenaxr/arena-web-core/commit/2ed296b85d9d62153a426a462f06d7a769219003))
+* don't req `scene` auth token when unneeded ([6b7d172](https://github.com/arenaxr/arena-web-core/commit/6b7d1726f99fe82f9835f636f8b3f2f8f3ad8479))
+
 ## [1.20.3](https://github.com/arenaxr/arena-web-core/compare/v1.20.2...v1.20.3) (2023-07-06)
 
 
