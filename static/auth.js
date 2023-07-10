@@ -1,4 +1,4 @@
-/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal */
+/* global ARENA, ARENAAUTH, ARENADefaults, KJUR, Swal, $ */
 
 // auth.js
 //
