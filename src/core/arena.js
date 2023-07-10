@@ -177,7 +177,6 @@ AFRAME.registerSystem('arena-scene', {
     async initRuntimeMngr() {
         const mqtt = this.sceneEl.systems['arena-mqtt'];
 
-        console.info("mqttToken", this.mqttToken);
         // init runtime manager
         this.RuntimeManager = new RuntimeMngr({
             realm: this.defaults.realm,

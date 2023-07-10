@@ -162,7 +162,6 @@ export default class RuntimeMngr {
     async init() {
         // mqtt connect; setup delete runtime msg as last will
         const rtMngr = this;
-        console.info(rtMngr);
         this.mc = new MQTTClient({
             mqtt_host: rtMngr.mqttHost,
             mqtt_username: rtMngr.mqttUsername,
