@@ -181,17 +181,9 @@ export default class RuntimeMsgs {
     createModuleFromPersistObj(persistObj, extraVars = {}) {
         const pdata = persistObj.attributes;
 
-        // function to replace variables
-        function replaceVars(text) {
-            let result = text;
-            Object.entries(extraVars).forEach(([key, value]) => {
-                if (value !== undefined) {
-                    const re = new RegExp(`\\$\\{${key}\\}`, 'g');
-                    result = text.replace(re, value);
-                }
-            });
-            return result;
-        }
+        // replaces variables given a dictionary of replacements; e.g:
+        // replaceVars('SCENE=${cameraid}', { cameraid: 'camera_1479408135_nuno' }) returns 'SCENE=camera_1479408135_nuno'
+        var replaceVars = (tplText, args) => tplText.replace(/\${(\w+)}/g, (_, v) => args[v]);
 
         let muuid = UUID.generate(); // for per client, create a random uuid;
         // check if instantiate is "single"
@@ -219,7 +211,7 @@ export default class RuntimeMsgs {
         // replace variables in args and env
         let args;
         let env;
-        if (pdata.args) args = pdata.args.map((arg) => replaceVars(arg, rvars));
+        if (pdata.args) args = pdata.args.map((_arg) => replaceVars(_arg, rvars));
         if (pdata.env) env = pdata.env.map((_env) => replaceVars(_env, rvars));
 
         // replace variables in channel path and params
