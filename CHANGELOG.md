@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.5](https://github.com/arenaxr/arena-web-core/compare/v1.20.4...v1.20.5) (2023-07-10)
+
+
+### Bug Fixes
+
+* variable replacement on module create ([aa152c7](https://github.com/arenaxr/arena-web-core/commit/aa152c770e586e0cafaedc14cd6f46c5a5095668))
+
 ## [1.20.4](https://github.com/arenaxr/arena-web-core/compare/v1.20.3...v1.20.4) (2023-07-10)
 
 
