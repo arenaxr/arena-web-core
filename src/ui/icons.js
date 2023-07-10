@@ -334,14 +334,17 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             pagesDiv.append(' | ');
         }
 
-        const profile = document.createElement('a');
-        profile.href = '#';
-        profile.innerHTML = 'Profile';
-        profile.title = 'Open your user account Profile in a new page';
-        profile.onclick = ARENAAUTH.showProfile;
-        pagesDiv.append(profile);
+        if (this.authenticated) {
+            const profile = document.createElement('a');
+            profile.href = `/user/profile`;
+            profile.target = '_blank';
+            profile.rel = 'noopener noreferrer';
+            profile.innerHTML = 'Profile';
+            profile.title = 'Open your user account Profile in a new page';
+            pagesDiv.append(profile);
 
-        pagesDiv.append(' | ');
+            pagesDiv.append(' | ');
+        }
 
         const docs = document.createElement('a');
         docs.href = 'https://docs.arenaxr.org';
@@ -685,6 +688,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
 
         const auth = ARENAAUTH.getAuthStatus();
         this.sceneNameDiv.textContent = this.arena.namespacedScene;
+        this.authenticated = auth.authenticated;
         this.authType.textContent = auth.type;
         this.authUsername.textContent = auth.username;
         this.authFullname.textContent = auth.fullname;
