@@ -92,12 +92,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     connectToCloud() {
         this.signaler.connectionId = null;
 
-        console.debug('[render-client] connecting...');
+        console.log('[render-client] connecting...');
         this.signaler.sendConnectACK();
     },
 
     onRemoteTrack(evt) {
-        console.debug('got remote stream');
+        console.log('[render-client] got remote stream');
 
         const stream = new MediaStream();
         stream.addTrack(evt.track);
@@ -132,6 +132,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         // this.remoteVideo.style.display = 'block';
         this.remoteVideo.style.display = 'none';
         this.remoteVideo.srcObject = stream;
+        this.remoteVideo.play();
     },
 
     onRemoteVideoLoaded() {
@@ -187,7 +188,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 preferredCodecs.splice(selectedCodecIndex, 1);
                 preferredCodecs.unshift(selectedCodec);
             }
-            console.debug('[render-client] codecs', preferredCodecs);
+            console.log('[render-client] codecs', preferredCodecs);
             transceiver.setCodecPreferences(preferredCodecs);
         }
     },
@@ -201,7 +202,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.pc.ontrack = this.onRemoteTrack.bind(this);
         this.pc.oniceconnectionstatechange = () => {
             if (_this.pc) {
-                console.debug('[render-client] iceConnectionState changed:', this.pc.iceConnectionState);
+                console.log('[render-client] iceConnectionState changed:', this.pc.iceConnectionState);
                 if (_this.pc.iceConnectionState === 'disconnected') {
                     _this.handleCloudDisconnect();
                 }
@@ -210,19 +211,19 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         this.inputDataChannel = this.pc.createDataChannel('client-input', dataChannelOptions);
         this.inputDataChannel.onopen = () => {
-            console.debug('[render-client] input data channel opened');
+            console.log('[render-client] input data channel opened');
         };
         this.inputDataChannel.onclose = () => {
-            console.debug('[render-client] input data channel closed');
+            console.log('[render-client] input data channel closed');
             _this.handleCloudDisconnect();
         };
 
         this.statusDataChannel = this.pc.createDataChannel('client-status', dataChannelOptions);
         this.statusDataChannel.onopen = () => {
-            console.debug('[render-client] status data channel opened');
+            console.log('[render-client] status data channel opened');
         };
         this.statusDataChannel.onclose = () => {
-            console.debug('[render-client] status data channel closed');
+            console.log('[render-client] status data channel closed');
             _this.handleCloudDisconnect();
         };
 
@@ -288,7 +289,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             .createAnswer()
             .then((description) => {
                 this.pc.setLocalDescription(description).then(() => {
-                    console.debug('sending answer');
+                    console.log('sending answer');
                     this.signaler.sendAnswer(this.pc.localDescription);
                     this.createOffer();
                 });
