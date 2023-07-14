@@ -5,6 +5,10 @@ import WebRTCStatsLogger from './webrtc-stats';
 import HybridRenderingUtils from './utils';
 import { ARENA_EVENTS } from '../constants';
 
+const info = AFRAME.utils.debug('ARENA:render-client:info');
+const warn = AFRAME.utils.debug('ARENA:render-client:warn');
+const error = AFRAME.utils.debug('ARENA:render-client:error');
+
 const pcConfig = {
     sdpSemantics: 'unified-plan',
     bundlePolicy: 'balanced',
@@ -52,6 +56,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.ready.bind(this)
         );
     },
+
     async ready() {
         const { el } = this;
         const { sceneEl } = el;
@@ -59,7 +64,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.arena = sceneEl.systems['arena-scene'];
         this.mqtt = sceneEl.systems['arena-mqtt'];
 
-        console.info('[render-client] Starting...');
+        info('Starting Hybrid Rendering...');
         this.connected = false;
         this.frameID = 0;
 
@@ -92,12 +97,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     connectToCloud() {
         this.signaler.connectionId = null;
 
-        console.log('[render-client] connecting...');
+        info('Connecting to remote server...');
         this.signaler.sendConnectACK();
     },
 
     onRemoteTrack(evt) {
-        console.log('[render-client] got remote stream');
+        info('Got remote stream! Hybrid Rendering session started.');
 
         const stream = new MediaStream();
         stream.addTrack(evt.track);
@@ -136,7 +141,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     onRemoteVideoLoaded() {
-        // console.log('[render-client], remote video loaded!');
+        // console.debug('[render-client], remote video loaded!');
         const videoTexture = new THREE.VideoTexture(this.remoteVideo);
         videoTexture.minFilter = THREE.NearestFilter;
         videoTexture.magFilter = THREE.NearestFilter;
@@ -155,7 +160,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     onIceCandidate(event) {
-        // console.log('pc ICE candidate: \n ' + event.candidate);
+        // console.debug('pc ICE candidate: \n ' + event.candidate);
         if (event.candidate != null) {
             this.signaler.sendCandidate(event.candidate);
         }
@@ -188,13 +193,13 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 preferredCodecs.splice(selectedCodecIndex, 1);
                 preferredCodecs.unshift(selectedCodec);
             }
-            console.log('[render-client] codecs', preferredCodecs);
+            // console.debug('codecs', preferredCodecs);
             transceiver.setCodecPreferences(preferredCodecs);
         }
     },
 
     gotOffer(offer) {
-        // console.log('got offer.');
+        // console.debug('got offer.');
 
         const _this = this;
         this.pc = new RTCPeerConnection(pcConfig);
@@ -202,7 +207,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.pc.ontrack = this.onRemoteTrack.bind(this);
         this.pc.oniceconnectionstatechange = () => {
             if (_this.pc) {
-                console.log('[render-client] iceConnectionState changed:', this.pc.iceConnectionState);
+                // console.debug('iceConnectionState changed:', this.pc.iceConnectionState);
                 if (_this.pc.iceConnectionState === 'disconnected') {
                     _this.handleCloudDisconnect();
                 }
@@ -211,19 +216,19 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         this.inputDataChannel = this.pc.createDataChannel('client-input', dataChannelOptions);
         this.inputDataChannel.onopen = () => {
-            console.log('[render-client] input data channel opened');
+            // console.debug('input data channel opened');
         };
         this.inputDataChannel.onclose = () => {
-            console.log('[render-client] input data channel closed');
+            // console.debug('input data channel closed');
             _this.handleCloudDisconnect();
         };
 
         this.statusDataChannel = this.pc.createDataChannel('client-status', dataChannelOptions);
         this.statusDataChannel.onopen = () => {
-            console.log('[render-client] status data channel opened');
+            // console.debug('status data channel opened');
         };
         this.statusDataChannel.onclose = () => {
-            console.log('[render-client] status data channel closed');
+            // console.debug('status data channel closed');
             _this.handleCloudDisconnect();
         };
 
@@ -240,7 +245,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     createOffer() {
-        // console.log('creating offer.');
+        // console.debug('creating offer.');
 
         this.pc
             .createOffer(sdpConstraints)
@@ -248,7 +253,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 this.pc
                     .setLocalDescription(description)
                     .then(() => {
-                        // console.log('sending offer.');
+                        // console.debug('sending offer.');
                         this.signaler.sendOffer(this.pc.localDescription);
                     })
                     .catch((err) => {
@@ -261,7 +266,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     gotAnswer(answer) {
-        // console.log('got answer.');
+        // console.debug('got answer.');
 
         this.pc
             .setRemoteDescription(new RTCSessionDescription(answer))
@@ -281,7 +286,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     createAnswer(isMac) {
-        // console.log('creating answer.');
+        // console.debug('creating answer.');
 
         this.setupTransceivers(isMac);
 
@@ -289,7 +294,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             .createAnswer()
             .then((description) => {
                 this.pc.setLocalDescription(description).then(() => {
-                    console.log('sending answer');
+                    // console.debug('sending answer');
                     this.signaler.sendAnswer(this.pc.localDescription);
                     this.createOffer();
                 });
@@ -307,7 +312,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     gotIceCandidate(candidate) {
-        // console.log('got ice.');
+        // console.debug('got ice.');
         if (this.connected) {
             this.pc.addIceCandidate(new RTCIceCandidate(candidate));
         }
@@ -318,6 +323,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     handleCloudDisconnect() {
+        warn('Hybrid Rendering session ended.');
+
         if (!this.connected) return;
 
         const env = document.getElementById('env');
