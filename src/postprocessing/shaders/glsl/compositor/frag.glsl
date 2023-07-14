@@ -233,7 +233,7 @@ void main() {
         if (remoteDepth < localDepth) {
             color = vec4(remoteColor.rgb, 1.0);
             // handle passthrough
-            if (arMode && remoteDepth >= (1.0-5.0*onePixel) / DEPTH_SCALAR) {
+            if (arMode && remoteDepth >= (1.0-(5.0*onePixel))) {
                 color = localColor;
             }
         }
