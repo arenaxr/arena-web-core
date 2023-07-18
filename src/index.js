@@ -16,7 +16,6 @@ import { ARENAMqttConsole } from './utils';
 
 import './aframe-mods'; // AFRAME modifications
 import './core'; // ARENA core systems
-import './ui'; // 2D UI systems
 import './systems'; // custom AFRAME systems
 import './geometries'; // custom AFRAME geometries
 import './components'; // custom AFRAME components

@@ -12,7 +12,7 @@
 
 import Swal from 'sweetalert2';
 import createAudioMeter from './volume-meter';
-import { ARENA_EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../../constants';
 
 AFRAME.registerSystem('arena-av-setup', {
     schema: {

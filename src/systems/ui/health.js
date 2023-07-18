@@ -105,10 +105,10 @@ AFRAME.registerSystem('arena-health-ui', {
         const icon = document.getElementById('error-icon');
         if (icon) icon.style.display = 'block';
         // set error viewing level
-        let imgSrc = 'src/ui/images/exclamation-warn.png';
+        let imgSrc = 'src/systems/ui/images/exclamation-warn.png';
         Object.entries(this.activeErrors).forEach(([, v]) => {
             if (v.class === 'health-error-label') {
-                imgSrc = 'src/ui/images/exclamation-error.png';
+                imgSrc = 'src/systems/ui/images/exclamation-error.png';
             }
         });
         $('#error-img').attr('src', imgSrc);
