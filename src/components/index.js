@@ -38,6 +38,8 @@ import './ttl';
 import './ui';
 import './video-control';
 
+import './hybrid-rendering/remote-render';
+
 /**
  * Additional A-Frame components and systems
  */

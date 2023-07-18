@@ -18,7 +18,6 @@ import './aframe-mods'; // AFRAME modifications
 import './systems'; // custom AFRAME systems
 import './geometries'; // custom AFRAME geometries
 import './components'; // custom AFRAME components
-import './hybrid-rendering'; // hybrid rendering
 
 console.info(ARENA_VERSION_MSG);
 

@@ -17,6 +17,7 @@ import './vendor/nav-system'; // Override nav system
 import './core'; // ARENA core systems
 import './ui'; // 2D UI systems
 import './postprocessing'; // post-processing
+import './hybrid-rendering'; // hybrid rendering
 import './webar';
 import './webxr'; // special handler for webxr devices
 
