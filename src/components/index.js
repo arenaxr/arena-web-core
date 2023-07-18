@@ -10,14 +10,12 @@
  * ARENA A-Frame components
  */
 
-import './ar-hit-test-listener';
 import './arena-camera';
 import './arena-hand';
 import './arena-user';
 import './armarker';
 import './attribution';
 import './build-watch-object';
-import './build-watch-scene';
 import './click-listener';
 import './collision-listener';
 import './gesture-detector';
@@ -33,7 +31,6 @@ import './network-latency';
 import './pcd-model';
 import './press-and-move';
 import './screenshare';
-import './stats-monitor';
 import './text-input';
 import './thickline/index';
 import './threejs-scene';
