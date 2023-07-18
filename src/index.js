@@ -15,14 +15,10 @@ import ARENA_VERSION_MSG from './arena-version';
 import { ARENAMqttConsole } from './utils';
 
 import './aframe-mods'; // AFRAME modifications
-import './core'; // ARENA core systems
 import './systems'; // custom AFRAME systems
 import './geometries'; // custom AFRAME geometries
 import './components'; // custom AFRAME components
-import './postprocessing'; // post-processing
 import './hybrid-rendering'; // hybrid rendering
-import './webxr'; // special handler for webxr devices
-import './webar';
 
 console.info(ARENA_VERSION_MSG);
 

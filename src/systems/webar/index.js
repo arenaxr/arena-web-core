@@ -8,8 +8,8 @@
 /* global ARENA */
 
 import './webar-session';
-import WebARCameraCapture from '../systems/armarker/camera-capture/ccwebar';
-import { ARENAUtils } from '../utils';
+import WebARCameraCapture from '../armarker/camera-capture/ccwebar';
+import { ARENAUtils } from '../../utils';
 
 const HIDDEN_CLASS = 'a-hidden';
 
