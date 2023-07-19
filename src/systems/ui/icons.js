@@ -9,7 +9,7 @@
 /* global AFRAME, ARENA, ARENAAUTH */
 
 import Swal from 'sweetalert2';
-import { ARENA_EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../../constants';
 import './remove-stats-exit-fullscreen';
 
 const ICON_BTN_CLASS = 'arena-button arena-side-menu-button';
@@ -31,7 +31,7 @@ function createIconButton(initialImage, tooltip, onClick) {
     // Create elements.
     const wrapper = document.createElement('div');
     const iconButton = document.createElement('button');
-    iconButton.style.backgroundImage = `url('src/ui/images/${initialImage}.png')`;
+    iconButton.style.backgroundImage = `url('src/systems/ui/images/${initialImage}.png')`;
     iconButton.className = ICON_BTN_CLASS;
     iconButton.setAttribute('id', `btn-${initialImage}`);
     iconButton.setAttribute('title', tooltip);
@@ -446,7 +446,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.jitsi
                 .unmuteAudio()
                 .then(() => {
-                    this.audioButton.childNodes[0].style.backgroundImage = "url('src/ui/images/audio-on.png')";
+                    this.audioButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/audio-on.png')";
                 })
                 .catch((err) => {
                     console.log(err);
@@ -455,7 +455,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.jitsi
                 .muteAudio()
                 .then(() => {
-                    this.audioButton.childNodes[0].style.backgroundImage = "url('src/ui/images/audio-off.png')";
+                    this.audioButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/audio-off.png')";
                 })
                 .catch((err) => {
                     console.log(err);
@@ -475,8 +475,8 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.jitsi
                 .startVideo()
                 .then(() => {
-                    this.videoButton.childNodes[0].style.backgroundImage = "url('src/ui/images/video-on.png')";
-                    this.avatarButton.childNodes[0].style.backgroundImage = "url('src/ui/images/avatar-off.png')";
+                    this.videoButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/video-on.png')";
+                    this.avatarButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/avatar-off.png')";
                     this.jitsi.showVideo();
                     const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
                     if (faceTracker !== undefined && faceTracker.isRunning()) {
@@ -487,7 +487,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                     console.log(err);
                 });
         } else {
-            this.videoButton.childNodes[0].style.backgroundImage = "url('src/ui/images/video-off.png')";
+            this.videoButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/video-off.png')";
             this.jitsi
                 .stopVideo()
                 .then(() => {
@@ -509,7 +509,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         // dynamically import face tracking module
         let faceTracker = document.querySelector('a-scene').systems['face-tracking'];
         if (faceTracker === undefined) {
-            await import('../systems/face-tracking/index');
+            await import('../face-tracking/index');
             faceTracker = document.querySelector('a-scene').systems['face-tracking'];
             if (!faceTracker) return;
         }
@@ -517,15 +517,15 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         if (!faceTracker.isRunning()) {
             // toggled
             faceTracker.run().then(() => {
-                this.avatarButton.childNodes[0].style.backgroundImage = "url('src/ui/images/avatar-on.png')";
+                this.avatarButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/avatar-on.png')";
                 this.jitsi.stopVideo().then(() => {
-                    this.videoButton.childNodes[0].style.backgroundImage = "url('src/ui/images/video-off.png')";
+                    this.videoButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/video-off.png')";
                     this.jitsi.hideVideo();
                 });
             });
         } else {
             faceTracker.stop().then(() => {
-                this.avatarButton.childNodes[0].style.backgroundImage = "url('src/ui/images/avatar-off.png')";
+                this.avatarButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/avatar-off.png')";
             });
         }
     },
@@ -558,17 +558,17 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         this.speedState = (this.speedState + 1) % 3;
         if (this.speedState === SpeedState.MEDIUM) {
             // medium
-            this.speedButton.childNodes[0].style.backgroundImage = "url('src/ui/images/speed-medium.png')";
+            this.speedButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/speed-medium.png')";
             cameraEl.setAttribute('wasd-controls', { acceleration: 30 * speedMod });
             cameraEl.setAttribute('press-and-move', { acceleration: 30 * speedMod });
         } else if (this.speedState === SpeedState.FAST) {
             // fast
-            this.speedButton.childNodes[0].style.backgroundImage = "url('src/ui/images/speed-fast.png')";
+            this.speedButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/speed-fast.png')";
             cameraEl.setAttribute('wasd-controls', { acceleration: 60 * speedMod });
             cameraEl.setAttribute('press-and-move', { acceleration: 60 * speedMod });
         } else if (this.speedState === SpeedState.SLOW) {
             // slow
-            this.speedButton.childNodes[0].style.backgroundImage = "url('src/ui/images/speed-slow.png')";
+            this.speedButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/speed-slow.png')";
             cameraEl.setAttribute('wasd-controls', { acceleration: 15 * speedMod });
             cameraEl.setAttribute('press-and-move', { acceleration: 15 * speedMod });
         }
@@ -585,13 +585,13 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         this.flying = !this.flying;
         if (this.flying) {
             // toggled on
-            this.flyingButton.childNodes[0].style.backgroundImage = "url('src/ui/images/flying-on.png')";
+            this.flyingButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/flying-on.png')";
         } else {
             // toggled off
             cameraEl.components['wasd-controls'].resetNav();
             cameraEl.components['press-and-move'].resetNav();
             cameraEl.object3D.position.y = this.arena.defaults.camHeight;
-            this.flyingButton.childNodes[0].style.backgroundImage = "url('src/ui/images/flying-off.png')";
+            this.flyingButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/flying-off.png')";
         }
         cameraEl.setAttribute('wasd-controls', { fly: this.flying });
         cameraEl.setAttribute('press-and-move', { fly: this.flying });

@@ -10,8 +10,8 @@
 
 // 'use strict';
 import { proxy, wrap } from 'comlink';
-import { ClientEvent, CreateUpdate, Delete } from '../message-actions/index';
-import { ARENA_EVENTS, ACTIONS } from '../constants';
+import { ClientEvent, CreateUpdate, Delete } from '../../message-actions/index';
+import { ARENA_EVENTS, ACTIONS } from '../../constants';
 
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
 const error = AFRAME.utils.debug('ARENA:MQTT:error');

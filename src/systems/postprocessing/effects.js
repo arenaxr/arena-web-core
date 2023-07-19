@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 import EffectComposer from './effect-composer';
-import { EFFECTS } from '../constants';
+import { EFFECTS } from '../../constants';
 
 AFRAME.registerSystem('effects', {
     init() {

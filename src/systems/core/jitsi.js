@@ -7,7 +7,7 @@
  */
 
 /* global AFRAME, ARENA, JitsiMeetJS, $ */
-import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
+import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
 
 // log lib-jitsi-meet.js version
 if (JitsiMeetJS) {

@@ -7,10 +7,10 @@
  */
 
 /* global AFRAME, ARENA, Swal, THREE, $ */
- 
-import { ARENAUtils } from '../utils';
+
+import { ARENAUtils } from '../../utils';
 import ARENAWebARUtils from '../webar';
-import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
+import { ARENA_EVENTS, JITSI_EVENTS } from '../../constants';
 import RuntimeMngr from './runtime-mngr';
 
 AFRAME.registerSystem('arena-scene', {
@@ -192,7 +192,7 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     /**
-     * Load Scene; checks URI parameters 
+     * Load Scene; checks URI parameters
      */
     loadScene() {
         const { el } = this;
@@ -624,7 +624,7 @@ AFRAME.registerSystem('arena-scene', {
 
             if (sceneOptions.physics) {
                 // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
-                import('../systems/vendor/aframe-physics-system.min');
+                import('../vendor/aframe-physics-system.min');
                 document.getElementById('groundPlane').setAttribute('static-body', 'true');
             }
 

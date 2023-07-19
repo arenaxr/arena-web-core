@@ -3,7 +3,7 @@
 import MQTTSignaling from './signaling/mqtt-signaling';
 import WebRTCStatsLogger from './webrtc-stats';
 import HybridRenderingUtils from './utils';
-import { ARENA_EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../../constants';
 
 const info = AFRAME.utils.debug('ARENA:render-client:info');
 const warn = AFRAME.utils.debug('ARENA:render-client:warn');

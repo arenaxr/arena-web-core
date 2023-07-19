@@ -12,8 +12,8 @@ import 'linkifyjs';
 import 'linkifyjs/string';
 import Swal from 'sweetalert2';
 import { proxy } from 'comlink';
-import { ARENAUtils } from '../utils';
-import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../constants';
+import { ARENAUtils } from '../../utils';
+import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
 
 const UserType = Object.freeze({
     EXTERNAL: 'external',
@@ -129,7 +129,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.chatBtn = document.createElement('div');
         this.chatBtn.className = 'arena-button chat-button';
         this.chatBtn.setAttribute('title', 'Chat');
-        this.chatBtn.style.backgroundImage = "url('src/ui/images/message.png')";
+        this.chatBtn.style.backgroundImage = "url('src/systems/ui/images/message.png')";
         btnGroup.appendChild(this.chatBtn);
 
         this.chatDot = document.createElement('span');
@@ -140,7 +140,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.usersBtn = document.createElement('div');
         this.usersBtn.className = 'arena-button users-button';
         this.usersBtn.setAttribute('title', 'User List');
-        this.usersBtn.style.backgroundImage = "url('src/ui/images/users.png')";
+        this.usersBtn.style.backgroundImage = "url('src/systems/ui/images/users.png')";
         btnGroup.appendChild(this.usersBtn);
 
         this.usersDot = document.createElement('span');
@@ -151,7 +151,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.lmBtn = document.createElement('div');
         this.lmBtn.className = 'arena-button landmarks-button';
         this.lmBtn.setAttribute('title', 'Landmarks');
-        this.lmBtn.style.backgroundImage = "url('src/ui/images/landmarks.png')";
+        this.lmBtn.style.backgroundImage = "url('src/systems/ui/images/landmarks.png')";
         btnGroup.appendChild(this.lmBtn);
         this.lmBtn.style.display = 'none';
 

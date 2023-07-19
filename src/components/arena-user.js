@@ -198,7 +198,7 @@ AFRAME.registerComponent('arena-user', {
             } else {
                 micIconEl.setAttribute('position', '-0.75 1.25 -0.035');
             }
-            micIconEl.setAttribute('src', 'url(/src/ui/images/audio-off.png)');
+            micIconEl.setAttribute('src', 'url(src/systems/ui/images/audio-off.png)');
             el.appendChild(micIconEl);
         }
     },
@@ -248,15 +248,15 @@ AFRAME.registerComponent('arena-user', {
 
     getQualityIcon(quality) {
         if (quality > 66.7) {
-            return 'url(/src/ui/images/signal-good.png)';
+            return 'url(src/systems/ui/images/signal-good.png)';
         }
         if (quality > 33.3) {
-            return 'url(/src/ui/images/signal-poor.png)';
+            return 'url(src/systems/ui/images/signal-poor.png)';
         }
         if (quality > 0) {
-            return 'url(/src/ui/images/signal-weak.png)';
+            return 'url(src/systems/ui/images/signal-weak.png)';
         }
-        return 'url(/src/ui/images/signal-bad.png)';
+        return 'url(src/systems/ui/images/signal-bad.png)';
     },
 
     drawVideoCube() {
