@@ -80,6 +80,14 @@ const CompositorShader = {
             type: 'mat4',
             value: new THREE.Matrix4(),
         },
+        remoteLForward: {
+            type: 'vec3',
+            value: new THREE.Vector3(),
+        },
+        remoteRForward: {
+            type: 'vec3',
+            value: new THREE.Vector3(),
+        },
     },
 
     vertexShader: vertGLSL,

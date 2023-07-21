@@ -104,8 +104,18 @@ export default class CompositorPass extends Pass {
     setCameraMatsRemote(remoteLPose, remoteLProj, remoteRPose, remoteRProj) {
         this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteLProj);
         this.material.uniforms.remoteLMatrixWorld.value.copy(remoteLPose);
+        this.getWorldDirection(remoteLPose, this.material.uniforms.remoteLForward.value);
+
         if (remoteRProj) this.material.uniforms.remoteRProjectionMatrix.value.copy(remoteRProj);
-        if (remoteRPose) this.material.uniforms.remoteRMatrixWorld.value.copy(remoteRPose);
+        if (remoteRPose) {
+            this.material.uniforms.remoteRMatrixWorld.value.copy(remoteRPose);
+            this.getWorldDirection(remoteRPose, this.material.uniforms.remoteRForward.value);
+        }
+    }
+
+    getWorldDirection(matrixWorld, target) {
+        const e = matrixWorld.elements;
+        return target.set(-e[8], -e[9], -e[10]).normalize();
     }
 
     onEnterVR() {
