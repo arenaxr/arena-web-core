@@ -24,6 +24,6 @@ import './webxr'; // special handler for webxr devices
 import './ar-hit-test-listener';
 import './armarker';
 import './attribution';
-import './build-watch-scene';
+import './build3d';
 import './screenshare';
 import './stats-monitor';

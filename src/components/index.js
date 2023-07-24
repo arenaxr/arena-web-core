@@ -15,7 +15,6 @@ import './arena-hand';
 import './arena-user';
 import './armarker';
 import './attribution';
-import './build-watch-object';
 import './click-listener';
 import './collision-listener';
 import './gesture-detector';
