@@ -10,14 +10,10 @@
  * ARENA A-Frame components
  */
 
-import './arena-camera';
-import './arena-hand';
-import './arena-user';
 import './armarker';
 import './attribution';
 import './click-listener';
 import './collision-listener';
-import './gesture-detector';
 import './gltf-lod';
 import './goto-url';
 import './show-hide-on-enter-vr';
@@ -26,9 +22,7 @@ import './jitsi-video';
 import './landmark';
 // import './load-scene';
 import './material-extras';
-import './network-latency';
 import './pcd-model';
-import './press-and-move';
 import './screenshare';
 import './text-input';
 import './thickline/index';

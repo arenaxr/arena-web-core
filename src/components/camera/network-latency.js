@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA */
 
-import { ARENA_EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../../constants';
 
 const Paho = require('paho-mqtt'); // https://www.npmjs.com/package/paho-mqtt
 

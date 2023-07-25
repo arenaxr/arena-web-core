@@ -6,7 +6,7 @@
  *
  */
 
-import { ARENAUtils } from '../utils';
+import { ARENAUtils } from '../../utils';
 
 /**
  * Detect multi-finger touch gestures. Publish events accordingly.
