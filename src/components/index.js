@@ -12,6 +12,7 @@
 
 import './object';
 // import './load-scene';
+import './ui';
 import './thickline/index';
 import './hybrid-rendering/remote-render';
 
