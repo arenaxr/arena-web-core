@@ -20,10 +20,6 @@ import './postprocessing'; // post-processing
 import './hybrid-rendering'; // hybrid rendering
 import './webar';
 import './webxr'; // special handler for webxr devices
-
-import './ar-hit-test-listener';
 import './armarker';
-import './attribution';
-import './build-watch-scene';
-import './screenshare';
-import './stats-monitor';
+import './build3d';
+import './scene';

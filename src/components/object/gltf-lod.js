@@ -1,6 +1,6 @@
 /* global AFRAME, THREE */
 
-import { ARENAUtils } from '../utils';
+import { ARENAUtils } from '../../utils';
 
 /**
  * @fileoverview Component loads/unloads gltfs by simple user distance-based LOD

@@ -7,7 +7,7 @@
  */
 
 /* global AFRAME, ARENA */
-import { ARENA_EVENTS, JITSI_EVENTS } from '../constants';
+import { ARENA_EVENTS, JITSI_EVENTS } from '../../constants';
 
 /**
  * Apply a jitsi video to a geometry

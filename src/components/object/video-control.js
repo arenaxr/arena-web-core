@@ -1,6 +1,6 @@
 /* global AFRAME, ARENA, $ */
 
-import { ARENAUtils } from '../utils';
+import { ARENAUtils } from '../../utils';
 
 /**
  * @fileoverview Adds a video to an entity and controls its playback.

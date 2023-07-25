@@ -1,5 +1,5 @@
 /* global AFRAME */
-import { PCDLoader } from './vendor/pcd-loader';
+import { PCDLoader } from '../vendor/pcd-loader';
 
 /**
  * @fileoverview Load PCD models

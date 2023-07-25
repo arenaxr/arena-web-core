@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA, THREE */
 
-import { ARENA_EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../../constants';
 
 /**
  * Workaround for AEC when using Web Audio API (https://bugs.chromium.org/p/chromium/issues/detail?id=687574)

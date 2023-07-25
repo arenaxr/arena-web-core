@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA, THREE */
 
-import { ARENA_EVENTS } from '../constants';
+import { ARENA_EVENTS } from '../../constants';
 
 /**
  * Component-System of teleport destination Landmarks

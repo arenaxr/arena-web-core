@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 /* global AFRAME, THREE */
 
-import { ARENAUtils } from '../utils';
+import { ARENAUtils } from '../../utils';
 
 /**
  * @fileoverview Material extras component.

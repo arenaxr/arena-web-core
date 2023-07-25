@@ -8,8 +8,8 @@
 
 /* global AFRAME, ARENA, THREE */
 
-import { ARENA_EVENTS } from '../constants';
-import { ARENAUtils } from '../utils';
+import { ARENA_EVENTS } from '../../constants';
+import { ARENAUtils } from '../../utils';
 
 /**
  * Tracking camera movement in real time. Emits camera pose change and VIO change events.
