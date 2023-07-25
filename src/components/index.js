@@ -10,6 +10,7 @@
  * ARENA A-Frame components
  */
 
+import './camera';
 import './object';
 // import './load-scene';
 import './ui';
