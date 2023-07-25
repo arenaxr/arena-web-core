@@ -10,27 +10,9 @@
  * ARENA A-Frame components
  */
 
-import './armarker';
-import './attribution';
-import './click-listener';
-import './collision-listener';
-import './gltf-lod';
-import './goto-url';
-import './show-hide-on-enter-vr';
-import './impulse';
-import './jitsi-video';
-import './landmark';
+import './object';
 // import './load-scene';
-import './material-extras';
-import './pcd-model';
-import './screenshare';
-import './text-input';
 import './thickline/index';
-import './threejs-scene';
-import './ttl';
-import './ui';
-import './video-control';
-
 import './hybrid-rendering/remote-render';
 
 /**
