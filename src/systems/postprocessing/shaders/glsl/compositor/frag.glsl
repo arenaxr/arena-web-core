@@ -29,7 +29,7 @@ const bool stretchBorders = true;
 #define DO_ASYNC_TIMEWARP
 // #define REPROJECT_MOVEMENT // (WIP)
 
-#define DEPTH_SCALAR    (500.0)
+#define DEPTH_SCALAR    (50.0)
 
 // adapted from: https://gist.github.com/hecomi/9580605
 float linear01Depth(float depth) {
