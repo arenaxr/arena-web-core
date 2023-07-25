@@ -2,8 +2,8 @@
 
 /* global AFRAME, ARENA, THREE */
 
-import { ARENAUtils } from '../utils';
-import { ACTIONS } from '../constants';
+import { ARENAUtils } from '../../../utils';
+import { ACTIONS } from '../../../constants';
 
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
