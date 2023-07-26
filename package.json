@@ -33,6 +33,7 @@
     "paho-mqtt": "^1.1.0",
     "sweetalert2": "^10.16.6",
     "three": "file:src/shims/three-shim",
+    "three-mesh-ui": "github:felixmariotto/three-mesh-ui#8294586",
     "three-pathfinding": "^1.1.0",
     "three-shim": "file:src/shims/three-shim",
     "uuidjs": "^4.2.11",
