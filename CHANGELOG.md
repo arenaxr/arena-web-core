@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.6](https://github.com/arenaxr/arena-web-core/compare/v1.20.5...v1.20.6) (2023-07-26)
+
+
+### Bug Fixes
+
+* remote video playback in safari ([6d1a88c](https://github.com/arenaxr/arena-web-core/commit/6d1a88c5cbdb4b38fb93775e7404410c7ab00025))
+
 ## [1.20.5](https://github.com/arenaxr/arena-web-core/compare/v1.20.4...v1.20.5) (2023-07-10)
 
 
