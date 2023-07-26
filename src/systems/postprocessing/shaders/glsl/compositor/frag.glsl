@@ -71,8 +71,14 @@ vec2 worldToViewport(vec3 pt, mat4 projectionMatrix, mat4 matrixWorld) {
 }
 
 vec3 getWorldPos(vec3 cameraVector, vec3 cameraForward, vec3 cameraPos, vec2 uv) {
+    float x = 1.0 - cameraFar / cameraNear;
+    float y = cameraFar / cameraNear;
+
+    float depth01 = readDepthRemote(tRemoteFrame, uv);
+    float depth = (1.0 / depth01 - y) / x;
+
     float d = dot(cameraForward, cameraVector);
-    float sceneDistance = linearEyeDepth(readDepthRemote(tRemoteFrame, uv)) / d;
+    float sceneDistance = linearEyeDepth(depth) / d;
     vec3 worldPos = cameraPos + cameraVector * sceneDistance;
     return worldPos;
 }
