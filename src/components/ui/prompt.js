@@ -1,4 +1,5 @@
-/* global AFRAME */
+/* global AFRAME, THREE */
+
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAColors, ARENALayout } from '../../systems/ui/constants';
 import buttonBase from './buttons';
@@ -37,6 +38,7 @@ AFRAME.registerComponent('arenaui-prompt', {
         object3DContainer.add(container);
 
         const contentContainer = new ThreeMeshUI.Block({
+            backgroundSide: THREE.DoubleSide,
             width: data.width,
             padding: ARENALayout.contentPadding,
             margin: 0,

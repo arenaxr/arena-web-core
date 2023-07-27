@@ -174,6 +174,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
     init() {
         buttonBase.init.bind(this)();
         this.buttonContainer = new ThreeMeshUI.Block({
+            backgroundSide: THREE.DoubleSide,
             backgroundColor: ARENAColors.bg,
             justifyContent: 'center',
             alignItems: 'stretch',

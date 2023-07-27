@@ -50,6 +50,7 @@ AFRAME.registerComponent('arenaui-card', {
         let imgContainerBlock;
         if (data.img) {
             imgContainerBlock = new ThreeMeshUI.Block({
+                backgroundSide: THREE.DoubleSide,
                 width: data.widthScale,
                 backgroundColor: ARENAColors.bg,
                 backgroundOpacity: 1,
@@ -93,6 +94,7 @@ AFRAME.registerComponent('arenaui-card', {
         }
 
         const textContainer = new ThreeMeshUI.Block({
+            backgroundSide: THREE.DoubleSide,
             width: data.img
                 ? ARENALayout.textImageRatio * data.widthScale
                 : (1 + ARENALayout.textImageRatio) * data.widthScale,
