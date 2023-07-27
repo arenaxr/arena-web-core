@@ -160,13 +160,13 @@ AFRAME.registerComponent('arenaui-card', {
     update(oldData) {
         const { data } = this;
         if (data.title !== oldData.title) {
-            this.title.set({ textContent: data.title });
+            this.title?.set({ textContent: data.title });
         }
         if (data.body !== oldData.body) {
-            this.body.set({ textContent: data.body });
+            this.body?.set({ textContent: data.body });
         }
         if (data.bodyAlign !== oldData.bodyAlign) {
-            this.body.set({ textAlign: data.bodyAlign });
+            this.body?.set({ textAlign: data.bodyAlign });
         }
         if (data.img !== oldData.img) {
             new THREE.TextureLoader().load(data.img, (texture) => {
@@ -176,11 +176,17 @@ AFRAME.registerComponent('arenaui-card', {
             });
         }
         if (data.img && data.imgCaption !== oldData.imgCaption) {
-            this.imgCaption.set({ textContent: data.imgCaption });
+            if (data.imgCaption && oldData.imgCaption) {
+                this.imgCaption?.set({ textContent: data.imgCaption });
+            } else if (!data.imgCaption && oldData.imgCaption) {
+                this.img?.remove(this.imgCaption);
+            } else if (data.imgCaption && oldData.imgCaption === '') {
+                this.addImgCaption();
+            }
         }
         if (data.imgDirection !== oldData.imgDirection) {
             if (data.img) {
-                this.imgContainer.set({
+                this.imgContainer?.set({
                     borderRadius:
                         data.imgDirection === 'right'
                             ? [0, ARENALayout.borderRadius, ARENALayout.borderRadius, 0]
@@ -193,31 +199,31 @@ AFRAME.registerComponent('arenaui-card', {
                 } else {
                     this.container.set({ flexDirection: 'row-reverse' });
                 }
-                this.bodyContainer.set({ borderRadius: textBorderRadius });
+                this.bodyContainer?.set({ borderRadius: textBorderRadius });
             }
         }
-        if (data.imgSize !== oldData.imgSize) {
-            this.img.set({ backgroundSize: data.imgSize });
+        if (data.img && data.imgSize !== oldData.imgSize) {
+            this.img?.set({ backgroundSize: data.imgSize });
         }
         if (data.fontSize !== oldData.fontSize) {
-            this.title.set({ fontSize: data.fontSize * 1.4 });
-            this.body.set({ fontSize: data.fontSize });
-            if (this.img && this.caption) {
-                this.caption.set({ fontSize: data.fontSize });
+            this.title?.set({ fontSize: data.fontSize * 1.4 });
+            this.body?.set({ fontSize: data.fontSize });
+            if (this.img) {
+                this.caption?.set({ fontSize: data.fontSize });
             }
         }
         if (data.widthScale !== oldData.widthScale) {
-            this.imgContainer.set({ width: data.widthScale });
-            this.body.set({
+            this.imgContainer?.set({ width: data.widthScale });
+            this.body?.set({
                 width: data.img
                     ? ARENALayout.textImageRatio * data.widthScale
                     : (1 + ARENALayout.textImageRatio) * data.widthScale,
             });
         }
         if (this.closeButton && data.closeButton !== oldData.closeButton) {
-            if (data.closeButton) {
+            if (data.closeButton && oldData.closeButton === false) {
                 this.addCloseButton();
-            } else {
+            } else if (!data.closeButton && oldData.closeButton) {
                 this.removeCloseButton();
             }
         }
