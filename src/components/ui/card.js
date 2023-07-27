@@ -16,6 +16,8 @@ AFRAME.registerComponent('arenaui-card', {
     body: undefined,
     imgCaption: undefined,
     bodyContainer: undefined,
+    outerMeshContainer: undefined,
+    closeButton: undefined,
 
     schema: {
         title: { type: 'string', default: '' },
@@ -155,26 +157,10 @@ AFRAME.registerComponent('arenaui-card', {
         container.add(contentContainer);
 
         if (data.closeButton) {
-            const buttonContainer = new ThreeMeshUI.Block({
-                backgroundColor: '#000000',
-                backgroundOpacity: 0.25,
-                justifyContent: 'center',
-                flexDirection: 'row',
-                fontFamily: 'Roboto',
-                padding: 0,
-                offset: 0,
-                margin: [0.025, 0, 0, 0],
-                borderRadius: 0.11,
-            });
-            const closeButton = this.createButton('Close', () => {
-                this.el.remove();
-            });
-            closeButton.set({ fontSize: 0.04 });
-            buttonContainer.add(closeButton);
-            container.add(buttonContainer);
-            el.setAttribute('click-listener-local', 'enabled: true');
+            this.addCloseButton();
         }
 
+        this.outerMeshContainer = container;
         object3DContainer.add(container);
         el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
     },
@@ -186,6 +172,9 @@ AFRAME.registerComponent('arenaui-card', {
         }
         if (data.body !== oldData.body) {
             this.body.set({ textContent: data.body });
+        }
+        if (data.bodyAlign !== oldData.bodyAlign) {
+            this.body.set({ textAlign: data.bodyAlign });
         }
         if (data.img !== oldData.img) {
             new THREE.TextureLoader().load(data.img, (texture) => {
@@ -233,5 +222,41 @@ AFRAME.registerComponent('arenaui-card', {
                     : (1 + ARENALayout.textImageRatio) * data.widthScale,
             });
         }
+        if (this.closeButton && data.closeButton !== oldData.closeButton) {
+            if (data.closeButton) {
+                this.addCloseButton();
+            } else {
+                this.removeCloseButton();
+            }
+        }
+    },
+
+    addCloseButton() {
+        const { el, outerMeshContainer } = this;
+        const buttonContainer = new ThreeMeshUI.Block({
+            backgroundColor: '#000000',
+            backgroundOpacity: 0.25,
+            justifyContent: 'center',
+            flexDirection: 'row',
+            fontFamily: 'Roboto',
+            padding: 0,
+            offset: 0,
+            margin: [0.025, 0, 0, 0],
+            borderRadius: 0.11,
+        });
+        const closeButton = this.createButton('Close', () => {
+            this.el.remove();
+        });
+        closeButton.set({ fontSize: 0.04 });
+        this.closeButton = buttonContainer;
+        buttonContainer.add(closeButton);
+        outerMeshContainer.add(buttonContainer);
+        el.setAttribute('click-listener-local', 'enabled: true');
+    },
+
+    removeCloseButton() {
+        this.outerMeshContainer.remove(this.closeButton);
+        this.closeButton = undefined;
+        this.el.removeAttribute('click-listener-local');
     },
 });
