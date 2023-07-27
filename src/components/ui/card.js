@@ -45,6 +45,7 @@ AFRAME.registerComponent('arenaui-card', {
             justifyContent: 'center',
             alignItems: 'center',
         });
+        this.outerMeshContainer = container;
 
         let imgContainerBlock;
         if (data.img) {
@@ -77,20 +78,12 @@ AFRAME.registerComponent('arenaui-card', {
                 });
             });
 
-            if (data.imgCaption) {
-                const caption = new ThreeMeshUI.Text({
-                    width: 'auto',
-                    textAlign: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: ARENAColors.bg,
-                    textContent: data.imgCaption,
-                    fontSize: data.fontSize,
-                    padding: ARENALayout.containerPadding,
-                    margin: [0, 0, ARENALayout.containerPadding, 0],
-                    borderRadius: ARENALayout.borderRadius / 2,
-                });
-                imgSubBock.add(caption);
-                this.imgCaption = caption;
+            if (data.img && data.imgCaption) {
+                if (data.imgCaption) {
+                    this.addImgCaption();
+                } else if (this.img && this.imgCaption) {
+                    this.img.remove(this.imgCaption);
+                }
             }
         }
 
@@ -160,7 +153,6 @@ AFRAME.registerComponent('arenaui-card', {
             this.addCloseButton();
         }
 
-        this.outerMeshContainer = container;
         object3DContainer.add(container);
         el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
     },
@@ -183,7 +175,7 @@ AFRAME.registerComponent('arenaui-card', {
                 });
             });
         }
-        if (data.imgCaption !== oldData.imgCaption) {
+        if (data.img && data.imgCaption !== oldData.imgCaption) {
             this.imgCaption.set({ textContent: data.imgCaption });
         }
         if (data.imgDirection !== oldData.imgDirection) {
@@ -231,6 +223,23 @@ AFRAME.registerComponent('arenaui-card', {
         }
     },
 
+    addImgCaption() {
+        const { data, img } = this;
+        const caption = new ThreeMeshUI.Text({
+            width: 'auto',
+            textAlign: 'center',
+            justifyContent: 'center',
+            backgroundColor: ARENAColors.bg,
+            textContent: data.imgCaption,
+            fontSize: data.fontSize,
+            padding: ARENALayout.containerPadding,
+            margin: [0, 0, ARENALayout.containerPadding, 0],
+            borderRadius: ARENALayout.borderRadius / 2,
+        });
+        img.add(caption);
+        this.imgCaption = caption;
+    },
+
     addCloseButton() {
         const { el, outerMeshContainer } = this;
         const buttonContainer = new ThreeMeshUI.Block({
@@ -255,8 +264,9 @@ AFRAME.registerComponent('arenaui-card', {
     },
 
     removeCloseButton() {
-        this.outerMeshContainer.remove(this.closeButton);
+        const { el, outerMeshContainer } = this;
+        outerMeshContainer.remove(this.closeButton);
         this.closeButton = undefined;
-        this.el.removeAttribute('click-listener-local');
+        el.removeAttribute('click-listener-local');
     },
 });
