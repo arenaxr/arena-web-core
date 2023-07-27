@@ -133,9 +133,10 @@ const buttonBase = {
                     const thisMsg = {
                         object_id: this.el.id,
                         action: 'clientEvent',
-                        type: 'clickButton',
+                        type: 'buttonClick',
                         data: {
                             clickPos,
+                            buttonName,
                             position: coordsData,
                             source: ARENA.camName,
                         },
