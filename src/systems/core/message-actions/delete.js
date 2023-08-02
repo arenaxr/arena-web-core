@@ -24,13 +24,17 @@ export default class Delete {
             return;
         }
 
-        // CLean up linked dependants
-        document.querySelectorAll(`[dep=${id}]`).forEach((depEl) => {
-            const depParentEl = depEl.parentEl;
-            if (depParentEl) {
-                depParentEl.removeChild(depEl);
-            }
-        });
+        // Clean up linked dependants
+        try {
+            document.querySelectorAll(`[dep=${id}]`).forEach((depEl) => {
+                const depParentEl = depEl.parentEl;
+                if (depParentEl) {
+                    depParentEl.removeChild(depEl);
+                }
+            });
+        } catch (e) {
+            /* empty */
+        }
 
         // Remove element itself
         const { parentEl } = entityEl;
