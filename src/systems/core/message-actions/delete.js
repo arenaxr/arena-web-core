@@ -24,7 +24,7 @@ export default class Delete {
             return;
         }
 
-        // Clean up linked dependants
+        // Clean up linked dependents
         try {
             document.querySelectorAll(`[dep=${id}]`).forEach((depEl) => {
                 const depParentEl = depEl.parentEl;
@@ -33,7 +33,7 @@ export default class Delete {
                 }
             });
         } catch (e) {
-            /* empty */
+            console.error( e );
         }
 
         // Remove element itself
