@@ -364,7 +364,7 @@ window.addEventListener('onauth', async (e) => {
             title: 'Select GLB Twin File to Upload',
             input: 'file',
             inputAttributes: {
-                accept: 'model/gltf-binary, *.glb',
+                // accept: 'model/gltf-binary, *.glb', // not working on XRBrowser
                 'aria-label': 'Select GLB',
             },
             showLoaderOnConfirm: true,
