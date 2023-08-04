@@ -48,6 +48,7 @@ window.addEventListener('onauth', async (e) => {
     const deleteSceneButton = document.getElementById('deletescene');
     const importSceneButton = document.getElementById('importscene');
     const exportSceneButton = document.getElementById('exportscene');
+    const uploadTwinButton = document.getElementById('uploadtwin');
     const setValueButton = document.getElementById('setvalue');
     const selectSchema = document.getElementById('objtype');
     const genidButton = document.getElementById('genid');
@@ -356,6 +357,63 @@ window.addEventListener('onauth', async (e) => {
             }, 500); // refresh after a while, so that delete messages are processed
         });
     }
+
+    uploadTwinButton.addEventListener('click', async () => {
+        // await Swal.fire({
+        Swal.fire({
+            title: 'Select GLB Twin File to Upload',
+            input: 'file',
+            inputAttributes: {
+                accept: 'model/gltf-binary, *.glb',
+                'aria-label': 'Select GLB',
+            },
+            showLoaderOnConfirm: true,
+            preConfirm: (resultFileOpen) => {
+                console.debug(resultFileOpen);
+                const reader = new FileReader();
+                // console.log(file);
+                reader.onload = (evt) => {
+                    let timerInterval;
+                    Swal.fire({
+                        title: 'Wait for Upload',
+                        // imageUrl: evt.target.result,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            // return fetch(`/users/upload`, {
+                            return fetch(
+                                `/storemng/api/resources/twins/scene/${sceneinput.value}/${resultFileOpen.file.filename}`,
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        Accept: 'application/json',
+                                    },
+                                    body: reader,
+                                }
+                            )
+                                .then((response) => {
+                                    console.debug(response);
+                                    if (!response.ok) {
+                                        throw new Error(response.statusText);
+                                    }
+                                    return response.json();
+                                })
+                                .catch((error) => {
+                                    Swal.showValidationMessage(`Request failed: ${error}`);
+                                });
+                        },
+                        willClose: () => {
+                            console.log('Nothing');
+                        },
+                    }).then((resultDidOpen) => {
+                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                            console.log('Upload twin dialog timed out!');
+                        }
+                    });
+                };
+                reader.readAsDataURL(resultFileOpen);
+            },
+        });
+    });
 
     openAddSceneButton.addEventListener('click', async () => {
         newSceneModal();
