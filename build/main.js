@@ -373,7 +373,6 @@ window.addEventListener('onauth', async (e) => {
                 const reader = new FileReader();
                 // console.log(file);
                 reader.onload = (evt) => {
-                    let timerInterval;
                     Swal.fire({
                         title: 'Wait for Upload',
                         // imageUrl: evt.target.result,
@@ -381,7 +380,7 @@ window.addEventListener('onauth', async (e) => {
                             Swal.showLoading();
                             // return fetch(`/users/upload`, {
                             return fetch(
-                                `/storemng/api/resources/users/${namespaceinput.value}/twins/${sceneinput.value}/${resultFileOpen.name}`,
+                                `/storemng/api/resources/users/${username}/twins/${sceneinput.value}/${resultFileOpen.name}`,
                                 {
                                     method: 'PUT',
                                     headers: {
