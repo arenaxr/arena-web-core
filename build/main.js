@@ -382,7 +382,7 @@ window.addEventListener('onauth', async (e) => {
                             return fetch(
                                 `/storemng/api/resources/users/${username}/twins/${sceneinput.value}/${resultFileOpen.name}`,
                                 {
-                                    method: 'PUT',
+                                    method: 'POST',
                                     headers: {
                                         Accept: 'application/octet-stream',
                                     },
