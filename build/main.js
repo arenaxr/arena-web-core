@@ -384,9 +384,9 @@ window.addEventListener('onauth', async (e) => {
                                 `/storemng/api/resources/users/${namespaceinput.value}/twins/${sceneinput.value}/${resultFileOpen.name}`,
                                 {
                                     method: 'POST',
-                                    headers: {
-                                        Accept: 'application/json',
-                                    },
+                                    // headers: {
+                                    //     Accept: 'application/json',
+                                    // },
                                     body: reader,
                                 }
                             )
