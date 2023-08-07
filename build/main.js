@@ -384,9 +384,9 @@ window.addEventListener('onauth', async (e) => {
                                 `/storemng/api/resources/users/${namespaceinput.value}/twins/${sceneinput.value}/${resultFileOpen.name}`,
                                 {
                                     method: 'PUT',
-                                    // headers: {
-                                    //     Accept: 'application/json',
-                                    // },
+                                    headers: {
+                                        Accept: 'application/octet-stream',
+                                    },
                                     body: reader,
                                 }
                             )
