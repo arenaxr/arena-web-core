@@ -381,7 +381,7 @@ window.addEventListener('onauth', async (e) => {
                             Swal.showLoading();
                             // return fetch(`/users/upload`, {
                             return fetch(
-                                `/storemng/api/resources/twins/scene/${sceneinput.value}/${resultFileOpen.file.filename}`,
+                                `/storemng/api/resources/users/${namespaceinput.value}/twins/${sceneinput.value}/${resultFileOpen.name}`,
                                 {
                                     method: 'POST',
                                     headers: {
