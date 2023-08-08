@@ -175,16 +175,23 @@ AFRAME.registerComponent('arenaui-button-panel', {
     init() {
         const { data } = this;
         buttonBase.init.bind(this)();
+        const shadowContainer = new ThreeMeshUI.Block({
+            backgroundColor: '#000000',
+            backgroundOpacity: 0.25,
+            padding: ARENALayout.containerPadding,
+            borderRadius: ARENALayout.borderRadius,
+        });
         const buttonOuterContainer = new ThreeMeshUI.Block({
             backgroundSide: THREE.DoubleSide,
             backgroundColor: ARENAColors.bg,
-            justifyContent: 'center',
+            backgroundOpacity: 0.8,
             alignItems: 'stretch',
             fontFamily: 'Roboto',
-            padding: 0.02,
-            borderRadius: 0.11,
+            padding: [ARENALayout.containerPadding * 2, ARENALayout.containerPadding],
+            borderRadius: ARENALayout.borderRadius,
             flexDirection: 'column',
         });
+        shadowContainer.add(buttonOuterContainer);
         if (data.title) {
             const title = new ThreeMeshUI.Text({
                 textAlign: 'center',
@@ -198,9 +205,10 @@ AFRAME.registerComponent('arenaui-button-panel', {
         }
         this.buttonContainer = new ThreeMeshUI.Block({
             alignItems: 'stretch',
+            whiteSpace: 'nowrap',
         });
         buttonOuterContainer.add(this.buttonContainer);
-        this.object3DContainer.add(buttonOuterContainer);
+        this.object3DContainer.add(shadowContainer);
     },
 
     update(oldData) {
