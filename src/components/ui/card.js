@@ -53,7 +53,7 @@ AFRAME.registerComponent('arenaui-card', {
                 backgroundSide: THREE.DoubleSide,
                 width: data.widthScale,
                 backgroundColor: ARENAColors.bg,
-                backgroundOpacity: 1,
+                backgroundOpacity: 0.8,
                 borderRadius: data.imgDirection === 'right' ? borderRadiusRight : borderRadiusLeft,
             });
             this.imgContainer = imgContainerBlock;
