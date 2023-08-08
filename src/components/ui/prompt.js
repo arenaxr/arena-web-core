@@ -71,7 +71,7 @@ AFRAME.registerComponent('arenaui-prompt', {
                 width: '100%',
                 fontSize: 0.035 * 2,
                 alignItems: 'start',
-                textAlign: 'justify',
+                textAlign: 'center',
                 backgroundOpacity: 0,
                 textContent: data.description,
             });
