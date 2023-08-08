@@ -92,7 +92,7 @@ const buttonBase = {
             const selectedButton = this.buttonMap[evt.detail.intersection?.object.parent.name];
             if (selectedButton) {
                 selectedButton.el.set(BUTTONSTATES.selected);
-                selectedButton.prevState = 'hover'; // Assume that we are hovering before click
+                selectedButton.prevState = selectedButton.state; // Probably hover but may be default w/ touchscreen
                 selectedButton.state = 'selected';
                 selectedButton.selector = evt.detail.cursorEl;
             }
