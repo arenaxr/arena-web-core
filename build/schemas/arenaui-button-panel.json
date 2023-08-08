@@ -25,6 +25,12 @@
                     "type": "string"
                   }
                 },
+                "title": {
+                  "type": "string",
+                  "title": "Title",
+                  "description": "Title to display above buttons (optional).",
+                  "default": ""
+                },
                 "vertical": {
                   "type": "boolean",
                   "title": "Vertical button layout",
@@ -44,6 +50,7 @@
           "default": {
             "object_type": "arenaui-panel",
             "buttons": ["Confirm", "Cancel"],
+            "title": "",
             "vertical": false,
             "position": {
               "x": 0,
@@ -57,7 +64,7 @@
               "z": 0
             }
           },
-          "required": ["object_type", "buttons"]
+          "required": ["object_type", "title", "vertical", "buttons"]
         }
       }
     }

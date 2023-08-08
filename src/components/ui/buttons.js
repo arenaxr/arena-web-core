@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, EVENTS } from '../../systems/ui/constants';
+import { ARENAColors, ARENALayout, EVENTS } from '../../systems/ui/constants';
 
 // BUTTONS
 const buttonOptions = {
@@ -168,12 +168,14 @@ AFRAME.registerComponent('arenaui-button-panel', {
     buttonContainer: undefined,
     schema: {
         buttons: { type: 'array', default: ['Confirm', 'Cancel'] },
+        title: { type: 'string', default: '' },
         vertical: { type: 'boolean', default: false },
     },
 
     init() {
+        const { data } = this;
         buttonBase.init.bind(this)();
-        this.buttonContainer = new ThreeMeshUI.Block({
+        const buttonOuterContainer = new ThreeMeshUI.Block({
             backgroundSide: THREE.DoubleSide,
             backgroundColor: ARENAColors.bg,
             justifyContent: 'center',
@@ -181,16 +183,33 @@ AFRAME.registerComponent('arenaui-button-panel', {
             fontFamily: 'Roboto',
             padding: 0.02,
             borderRadius: 0.11,
+            flexDirection: 'column',
         });
-        this.object3DContainer.add(this.buttonContainer);
+        if (data.title) {
+            const title = new ThreeMeshUI.Text({
+                textAlign: 'center',
+                fontSize: 0.075,
+                margin: ARENALayout.containerPadding * 2,
+                fontColor: ARENAColors.buttonText * 1.25,
+                textContent: data.title,
+            });
+            buttonOuterContainer.add(title);
+            this.title = title;
+        }
+        this.buttonContainer = new ThreeMeshUI.Block({
+            alignItems: 'stretch',
+        });
+        buttonOuterContainer.add(this.buttonContainer);
+        this.object3DContainer.add(buttonOuterContainer);
     },
 
     update(oldData) {
-        if (this.data.buttons !== oldData?.buttons) {
+        const { data, title } = this;
+        if (data.buttons !== oldData?.buttons) {
             this.buttonContainer.remove(...Object.values(this.buttonMap).map((b) => b.el));
             this.buttonMap = {};
             // Buttons creation, with the options objects passed in parameters.
-            this.data.buttons.forEach((buttonName) => {
+            data.buttons.forEach((buttonName) => {
                 const button = this.createButton(buttonName);
                 this.buttonContainer.add(button);
             });
@@ -198,6 +217,9 @@ AFRAME.registerComponent('arenaui-button-panel', {
         }
         if (this.data.vertical !== oldData?.vertical) {
             this.buttonContainer.set({ flexDirection: this.data.vertical ? 'column' : 'row' });
+        }
+        if (data.title !== oldData?.title && title) {
+            title.set({ textContent: data.title });
         }
     },
 });
