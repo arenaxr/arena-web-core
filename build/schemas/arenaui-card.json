@@ -31,7 +31,7 @@
                 "bodyAlign": {
                     "type": "string",
                     "title": "Body Text Alignment",
-                    "default": "center",
+                    "default": "left",
                     "enum": ["left", "center", "right", "justify"]
                 },
                 "img": {
@@ -88,7 +88,7 @@
             "object_type": "arenaui-card-panel",
             "title": "",
             "body": "",
-            "bodyAlign": "center",
+            "bodyAlign": "left",
             "img": "",
             "imgCaption": "",
             "imgSize": "cover",
