@@ -163,7 +163,6 @@ window.ARENAAUTH = {
      * Processes user sign out.
      */
     signOut() {
-        localStorage.removeItem('auth_choice');
         // back to signin page
         window.location.href = this.signOutPath;
     },
