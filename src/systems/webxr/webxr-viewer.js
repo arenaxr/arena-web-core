@@ -28,6 +28,7 @@ AFRAME.registerComponent('webxr-viewer', {
             cursor.setAttribute('scale', '0.1 0.1 0.1');
             cursor.setAttribute('position', '0 0 -0.1');
             cursor.setAttribute('max-distance', '10000');
+            cursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
             if (urlParams.get('noreticle')) {
                 cursor.setAttribute('material', 'transparent: "true"; opacity: 0');
             } else {
