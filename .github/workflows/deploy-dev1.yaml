@@ -22,6 +22,7 @@ jobs:
                   key: ${{ secrets.ARENA_DEV1_DEPLOY_KEY }}
                   port: ${{ secrets.DEPLOY_PORT }}
                   envs: TARGET
+                  script_stop: true
                   script: |
                       cd  $TARGET
                       git checkout master
