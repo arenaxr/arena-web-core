@@ -164,7 +164,7 @@ window.ARENAAUTH = {
      */
     signOut() {
         // back to signin page
-        window.location.href = this.signOutPath;
+        window.location.href = window.ARENAAUTH.signOutPath;
     },
     /**
      * Utility function to get cookie value
