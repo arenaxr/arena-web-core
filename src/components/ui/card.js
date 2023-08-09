@@ -1,6 +1,7 @@
-/* global AFRAME, THREE */
+/* global AFRAME, ARENA, THREE */
 
 import ThreeMeshUI from 'three-mesh-ui';
+import { ARENAUtils } from '../../utils';
 import { ARENAColors, ARENALayout } from '../../systems/ui/constants';
 import buttonBase from './buttons';
 
@@ -261,7 +262,22 @@ AFRAME.registerComponent('arenaui-card', {
             margin: [0.025, 0, 0, 0],
             borderRadius: 0.11,
         });
-        const closeButton = this.createButton('Close', () => {
+        const closeButton = this.createButton('Close', (evtDetail) => {
+            const { position } = document.getElementById('my-camera').components['arena-camera'].data;
+            const clickPos = ARENAUtils.vec3ToObject(position);
+            const coordsData = ARENAUtils.setClickData({ detail: evtDetail });
+            const thisMsg = {
+                object_id: this.el.id,
+                action: 'clientEvent',
+                type: 'buttonClick',
+                data: {
+                    clickPos,
+                    buttonName: 'Close',
+                    position: coordsData,
+                    source: ARENA.camName,
+                },
+            };
+            ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
             this.el.remove();
         });
         closeButton.set({ fontSize: 0.04 });
