@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.20.7](https://github.com/arenaxr/arena-web-core/compare/v1.20.6...v1.20.7) (2023-08-09)
+
+
+### Bug Fixes
+
+* catch and log errors from parsing linked dependent messages ([be2cee1](https://github.com/arenaxr/arena-web-core/commit/be2cee133f4d08dd76e36572d6a48d5d8e062eb8))
+* move fs logout to site logout ([95724a9](https://github.com/arenaxr/arena-web-core/commit/95724a9d86ead35e2741c14f6e3502d24e5323c1))
+* show passthrough for atw gaps in hybrid rendering for ar devices ([4a69cd9](https://github.com/arenaxr/arena-web-core/commit/4a69cd9432269050ddc81a11e4de86d886a205e0))
+* WebXR Browser broken CV pipeline ([976c43f](https://github.com/arenaxr/arena-web-core/commit/976c43f253cdf1aad58a2c10498f1fa9c2849b04))
+
 ## [1.20.6](https://github.com/arenaxr/arena-web-core/compare/v1.20.5...v1.20.6) (2023-07-26)
 
 
