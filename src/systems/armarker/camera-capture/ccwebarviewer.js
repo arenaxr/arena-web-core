@@ -49,6 +49,13 @@ export default class WebARViewerCameraCapture {
 
         // WebXRViewer/WebARViewer deliver camera frames to 'processCV'
         window.processCV = this.processCV.bind(this);
+
+        // For no obvious reason, parcel is optimizing away the import of Base64Binary, so we force include here...
+        try {
+            console.debug(Base64Binary, Base64Binary.decodeArrayBuffer());
+        } catch {
+            //
+        }
     }
 
     /**
