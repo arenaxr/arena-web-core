@@ -25,6 +25,8 @@
 
 // auth namespace
 window.ARENAAUTH = {
+    signInPath: `//${window.location.host}/user/login`,
+    signOutPath: `//${window.location.host}/user/logout`,
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
      */
@@ -46,8 +48,6 @@ window.ARENAAUTH = {
         };
     },
     authCheck() {
-        this.signInPath = `//${window.location.host}/user/login`;
-        this.signOutPath = `//${window.location.host}/user/logout`;
         this.setArenaParams();
         ARENA.userName = ARENA.params.name ?? ARENA.defaults.userName;
         // For now, just an alias for legacy code.
