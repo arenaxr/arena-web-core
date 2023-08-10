@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout, EVENTS } from '../../systems/ui/constants';
+import { ARENAColors, ARENALayout, EVENTS } from '../../constants/ui';
 
 // BUTTONS
 const buttonOptions = {

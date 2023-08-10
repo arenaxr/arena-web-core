@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 import ThreeMeshUI from 'three-mesh-ui';
-import { ARENAColors, ARENALayout } from '../../systems/ui/constants';
+import { ARENAColors, ARENALayout } from '../../constants/ui';
 import buttonBase from './buttons';
 
 AFRAME.registerComponent('arenaui-prompt', {

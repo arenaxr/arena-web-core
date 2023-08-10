@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout } from '../../systems/ui/constants';
+import { ARENAColors, ARENALayout } from '../../constants/ui';
 import buttonBase from './buttons';
 
 const borderRadiusLeft = [ARENALayout.borderRadius, 0, 0, ARENALayout.borderRadius];

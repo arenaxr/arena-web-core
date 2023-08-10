@@ -3,7 +3,7 @@
 import ThreeMeshUI from 'three-mesh-ui';
 import FontJSON from './fonts/Roboto-msdf.json';
 import FontImage from './fonts/Roboto-msdf.png';
-import { EVENTS } from './constants';
+import { EVENTS } from '../../constants/ui';
 
 AFRAME.registerSystem('arena-ui', {
     init() {
