@@ -1,4 +1,19 @@
 {
+    "arenaui-card": {
+        "description": "ARENAUI Card",
+        "file": "schemas/arenaui-card.json",
+        "title": "ARENAUI Card"
+    },
+    "arenaui-button-panel": {
+        "description": "ARENAUI Button Panel",
+        "file": "schemas/arenaui-button-panel.json",
+        "title": "ARENAUI Button Panel"
+    },
+    "arenaui-prompt": {
+        "description": "ARENAUI Prompt",
+        "file": "schemas/arenaui-prompt.json",
+        "title": "ARENAUI Prompt"
+    },
     "box": {
         "description": "Box Geometry",
         "file": "schemas/box.json",

@@ -37,36 +37,40 @@ AFRAME.registerComponent('webxr-viewer', {
             cursorParent.appendChild(cursor);
 
             // handle tap events
-            document.addEventListener('mousedown', () => {
+            document.addEventListener('touchstart', () => {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
+                    const { object, point } = intersection;
                     intersectedEl.emit(
                         'mousedown',
                         {
                             clicker: window.ARENA.camName,
                             intersection: {
-                                point: intersection.point,
+                                point,
+                                object,
                             },
-                            cursorEl: true,
+                            cursorEl: cursor,
                         },
                         false
                     );
                 }
             });
 
-            document.addEventListener('mouseup', () => {
+            document.addEventListener('touchend', () => {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
+                    const { object, point } = intersection;
                     intersectedEl.emit(
                         'mouseup',
                         {
                             clicker: window.ARENA.camName,
                             intersection: {
-                                point: intersection.point,
+                                point,
+                                object,
                             },
-                            cursorEl: true,
+                            cursorEl: cursor,
                         },
                         false
                     );

@@ -102,7 +102,7 @@
                             arena-hand="hand:left"
                             laser-controls="hand:left"
                             blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
-                            raycaster="objects: [click-listener]"
+                            raycaster="objects: [click-listener],[click-listener-local]"
                         ></a-entity>
                         <a-entity
                             id="rightHand"
@@ -111,7 +111,7 @@
                             visible="false"
                             arena-hand="hand:right"
                             laser-controls="hand:right"
-                            raycaster="objects: [click-listener]"
+                            raycaster="objects: [click-listener],[click-listener-local]"
                         ></a-entity>
                     </a-entity>
                 </a-entity>
