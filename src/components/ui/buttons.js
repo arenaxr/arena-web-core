@@ -197,7 +197,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
                 textAlign: 'center',
                 fontSize: ARENATypography.button,
                 margin: ARENALayout.containerPadding * 2,
-                fontColor: ARENAColors.buttonText,
+                color: ARENAColors.buttonText,
                 textContent: data.title,
             });
             buttonOuterContainer.add(title);
