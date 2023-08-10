@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout } from '../../constants/ui';
+import { ARENAColors, ARENALayout, ARENATypography } from '../../constants/ui';
 import buttonBase from './buttons';
 
 const borderRadiusLeft = [ARENALayout.borderRadius, 0, 0, ARENALayout.borderRadius];
@@ -28,7 +28,7 @@ AFRAME.registerComponent('arenaui-card', {
         imgCaption: { type: 'string', default: '' },
         imgDirection: { type: 'string', default: 'right' },
         imgSize: { type: 'string', default: 'cover' }, // ['cover', 'contain', 'stretch']
-        fontSize: { type: 'number', default: 0.035 },
+        fontSize: { type: 'number', default: ARENATypography.body },
         widthScale: { type: 'number', default: 1 }, // Scale factor
         closeButton: { type: 'boolean', default: false },
     },
@@ -54,7 +54,7 @@ AFRAME.registerComponent('arenaui-card', {
                 backgroundSide: THREE.DoubleSide,
                 width: data.widthScale,
                 backgroundColor: ARENAColors.bg,
-                backgroundOpacity: 0.8,
+                backgroundOpacity: ARENAColors.bgOpacity,
                 borderRadius: data.imgDirection === 'right' ? borderRadiusRight : borderRadiusLeft,
             });
             this.imgContainer = imgContainerBlock;
@@ -67,7 +67,7 @@ AFRAME.registerComponent('arenaui-card', {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'end',
-                backgroundColor: '#FFFFFF',
+                backgroundColor: ARENAColors.captionBg,
                 backgroundOpacity: 1,
                 backgroundSize: data.imgSize,
             });
@@ -99,9 +99,9 @@ AFRAME.registerComponent('arenaui-card', {
             width: data.img
                 ? ARENALayout.textImageRatio * data.widthScale
                 : (1 + ARENALayout.textImageRatio) * data.widthScale,
-            padding: 0.1,
+            padding: ARENALayout.contentPadding,
             backgroundColor: ARENAColors.bg,
-            backgroundOpacity: 0.8,
+            backgroundOpacity: ARENAColors.bgOpacity,
             flexDirection: 'column',
             justifyContent: 'space-evenly',
             borderRadius: textBorderRadius,
@@ -111,7 +111,7 @@ AFRAME.registerComponent('arenaui-card', {
         if (data.title) {
             const title = new ThreeMeshUI.Text({
                 textAlign: 'center',
-                fontSize: data.fontSize * 1.4,
+                fontSize: data.fontSize * ARENATypography.titleRatio,
                 margin: [0, ARENALayout.containerPadding, ARENALayout.containerPadding, ARENALayout.containerPadding],
                 textContent: data.title,
             });
@@ -134,8 +134,8 @@ AFRAME.registerComponent('arenaui-card', {
         const contentContainer = new ThreeMeshUI.Block({
             padding: ARENALayout.containerPadding,
             margin: 0,
-            backgroundColor: '#000000',
-            backgroundOpacity: 0.25,
+            backgroundColor: ARENAColors.textBg,
+            backgroundOpacity: ARENAColors.textBgOpacity,
             borderRadius: ARENALayout.borderRadius,
             flexDirection: 'row',
             alignItems: 'stretch',
@@ -209,7 +209,7 @@ AFRAME.registerComponent('arenaui-card', {
             this.img?.set({ backgroundSize: data.imgSize });
         }
         if (data.fontSize !== oldData.fontSize) {
-            this.title?.set({ fontSize: data.fontSize * 1.4 });
+            this.title?.set({ fontSize: data.fontSize * ARENATypography.titleRatio });
             this.body?.set({ fontSize: data.fontSize });
             if (this.img) {
                 this.caption?.set({ fontSize: data.fontSize });
@@ -252,15 +252,15 @@ AFRAME.registerComponent('arenaui-card', {
     addCloseButton() {
         const { el, outerMeshContainer } = this;
         const buttonContainer = new ThreeMeshUI.Block({
-            backgroundColor: '#000000',
-            backgroundOpacity: 0.25,
+            backgroundColor: ARENAColors.textBg,
+            backgroundOpacity: ARENAColors.textBgOpacity,
             justifyContent: 'center',
             flexDirection: 'row',
             fontFamily: 'Roboto',
             padding: 0,
             offset: 0,
-            margin: [0.025, 0, 0, 0],
-            borderRadius: 0.11,
+            margin: [ARENALayout.containerPadding, 0, 0, 0],
+            borderRadius: ARENALayout.borderRadius,
         });
         const closeButton = this.createButton('Close', (evtDetail) => {
             const { position } = document.getElementById('my-camera').components['arena-camera'].data;
@@ -280,7 +280,7 @@ AFRAME.registerComponent('arenaui-card', {
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${ARENA.camName}`, thisMsg);
             this.el.remove();
         });
-        closeButton.set({ fontSize: 0.04 });
+        closeButton.set({ fontSize: ARENATypography.buttonSmall });
         this.closeButton = buttonContainer;
         buttonContainer.add(closeButton);
         outerMeshContainer.add(buttonContainer);

@@ -2,39 +2,39 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout, EVENTS } from '../../constants/ui';
+import { ARENAColors, ARENALayout, ARENATypography, EVENTS } from '../../constants/ui';
 
 // BUTTONS
 const buttonOptions = {
     width: 'auto',
     height: 'auto',
     justifyContent: 'center',
-    offset: 0.04,
-    margin: 0.02,
-    borderRadius: 0.075,
+    offset: ARENALayout.buttonDefaultOffset,
+    margin: ARENALayout.buttonMargin,
+    borderRadius: ARENALayout.buttonBorderRadius,
     textAlign: 'center',
-    padding: [0.015, 0.075],
-    backgroundOpacity: 0.9,
-    fontSize: 0.075,
+    padding: ARENALayout.buttonPadding,
+    backgroundOpacity: ARENAColors.buttonBgOpacity,
+    fontSize: ARENATypography.button,
 };
 
 const buttonTextOptions = {
     offset: 0,
-    padding: [0.005, 0],
+    padding: ARENALayout.buttonTextPadding,
     color: ARENAColors.buttonText,
 };
 
 const BUTTONSTATES = {
     default: {
-        offset: 0.03,
+        offset: ARENALayout.buttonDefaultOffset,
         backgroundColor: ARENAColors.buttonBg,
     },
     hover: {
-        offset: 0.03,
+        offset: ARENALayout.buttonDefaultOffset,
         backgroundColor: ARENAColors.buttonBgHover,
     },
     selected: {
-        offset: 0.015,
+        offset: ARENALayout.buttonDownOffset,
         backgroundColor: ARENAColors.buttonBgSelected,
     },
 };
@@ -176,15 +176,15 @@ AFRAME.registerComponent('arenaui-button-panel', {
         const { data } = this;
         buttonBase.init.bind(this)();
         const shadowContainer = new ThreeMeshUI.Block({
-            backgroundColor: '#000000',
-            backgroundOpacity: 0.25,
+            backgroundColor: ARENAColors.textBg,
+            backgroundOpacity: ARENAColors.textBgOpacity,
             padding: ARENALayout.containerPadding,
             borderRadius: ARENALayout.borderRadius,
         });
         const buttonOuterContainer = new ThreeMeshUI.Block({
             backgroundSide: THREE.DoubleSide,
             backgroundColor: ARENAColors.bg,
-            backgroundOpacity: 0.8,
+            backgroundOpacity: ARENAColors.bgOpacity,
             alignItems: 'stretch',
             fontFamily: 'Roboto',
             padding: [ARENALayout.containerPadding * 2, ARENALayout.containerPadding],
@@ -195,9 +195,9 @@ AFRAME.registerComponent('arenaui-button-panel', {
         if (data.title) {
             const title = new ThreeMeshUI.Text({
                 textAlign: 'center',
-                fontSize: 0.075,
+                fontSize: ARENATypography.button,
                 margin: ARENALayout.containerPadding * 2,
-                fontColor: ARENAColors.buttonText * 1.25,
+                fontColor: ARENAColors.buttonText,
                 textContent: data.title,
             });
             buttonOuterContainer.add(title);

@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 import ThreeMeshUI from 'three-mesh-ui';
-import { ARENAColors, ARENALayout } from '../../constants/ui';
+import { ARENAColors, ARENALayout, ARENATypography } from '../../constants/ui';
 import buttonBase from './buttons';
 
 AFRAME.registerComponent('arenaui-prompt', {
@@ -29,8 +29,8 @@ AFRAME.registerComponent('arenaui-prompt', {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: '#000000',
-            backgroundOpacity: 0.25,
+            backgroundColor: ARENAColors.textBg,
+            backgroundOpacity: ARENAColors.textBgOpacity,
             padding: ARENALayout.containerPadding,
             margin: 0,
             borderRadius: ARENALayout.borderRadius,
@@ -44,7 +44,7 @@ AFRAME.registerComponent('arenaui-prompt', {
             margin: 0,
             borderRadius: ARENALayout.borderRadius,
             backgroundColor: ARENAColors.bg,
-            backgroundOpacity: 0.8,
+            backgroundOpacity: ARENAColors.bgOpacity,
             flexDirection: 'column',
             justifyContent: 'space-evenly',
         });
@@ -53,7 +53,7 @@ AFRAME.registerComponent('arenaui-prompt', {
         if (data.title) {
             const title = new ThreeMeshUI.Text({
                 textAlign: 'center',
-                fontSize: 0.035 * 4,
+                fontSize: ARENATypography.body * ARENATypography.bigTitleRatio,
                 margin: [
                     0,
                     ARENALayout.containerPadding,
@@ -69,7 +69,7 @@ AFRAME.registerComponent('arenaui-prompt', {
         if (data.description) {
             const description = new ThreeMeshUI.Text({
                 width: '100%',
-                fontSize: 0.035 * 2,
+                fontSize: ARENATypography.body * ARENATypography.descriptionRatio,
                 alignItems: 'start',
                 textAlign: 'center',
                 backgroundOpacity: 0,
@@ -81,13 +81,13 @@ AFRAME.registerComponent('arenaui-prompt', {
         }
 
         this.buttonContainer = new ThreeMeshUI.Block({
-            margin: [0.05, 0, 0, 0],
+            margin: [ARENALayout.buttonMargin * 2, 0, 0, 0],
             justifyContent: 'center',
             alignItems: 'stretch',
             flexDirection: 'row',
             fontFamily: 'Roboto',
-            padding: 0.02,
-            borderRadius: 0.11,
+            padding: ARENALayout.containerPadding,
+            borderRadius: ARENALayout.buttonBorderRadius,
         });
         contentContainer.add(this.buttonContainer);
 
