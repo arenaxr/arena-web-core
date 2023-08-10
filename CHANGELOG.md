@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.20.8](https://github.com/arenaxr/arena-web-core/compare/v1.20.7...v1.20.8) (2023-08-09)
+
+
+### Bug Fixes
+
+* reference to signoutpath ([d76324a](https://github.com/arenaxr/arena-web-core/commit/d76324a65ce5cf8ea238ffd7624ba3f6d340c7ad))
+
 ## [1.20.7](https://github.com/arenaxr/arena-web-core/compare/v1.20.6...v1.20.7) (2023-08-09)
 
 
