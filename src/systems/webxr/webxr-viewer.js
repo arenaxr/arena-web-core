@@ -41,14 +41,16 @@ AFRAME.registerComponent('webxr-viewer', {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
+                    const { object, point } = intersection;
                     intersectedEl.emit(
                         'mousedown',
                         {
                             clicker: window.ARENA.camName,
                             intersection: {
-                                point: intersection.point,
+                                point,
+                                object,
                             },
-                            cursorEl: true,
+                            cursorEl: cursor,
                         },
                         false
                     );
@@ -59,14 +61,16 @@ AFRAME.registerComponent('webxr-viewer', {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
+                    const { object, point } = intersection;
                     intersectedEl.emit(
                         'mouseup',
                         {
                             clicker: window.ARENA.camName,
                             intersection: {
-                                point: intersection.point,
+                                point,
+                                object,
                             },
-                            cursorEl: true,
+                            cursorEl: cursor,
                         },
                         false
                     );
