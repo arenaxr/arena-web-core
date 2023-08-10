@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.21.0](https://github.com/arenaxr/arena-web-core/compare/v1.20.8...v1.21.0) (2023-08-10)
+
+
+### Features
+
+* add initial test arenaui components/systems ([6848fb7](https://github.com/arenaxr/arena-web-core/commit/6848fb74fb0ddb23ba4257ea0deb93a103465d70))
+
+
+### Bug Fixes
+
+* card image background corner ([2f4a73f](https://github.com/arenaxr/arena-web-core/commit/2f4a73f9df3d33fe9283b2d9aa71c7ad935c053e))
+* deprecated ThreeMesh fontColor to color ([0f88f4a](https://github.com/arenaxr/arena-web-core/commit/0f88f4a6b42e2e49ff749c97fa5a8fe87af70066))
+* Use touchstart/end for webxr-viewer AR click ([66750ab](https://github.com/arenaxr/arena-web-core/commit/66750ab1cd2adfee699d67ce3e8cdc6bcd3c44e6))
+
 ## [1.20.8](https://github.com/arenaxr/arena-web-core/compare/v1.20.7...v1.20.8) (2023-08-09)
 
 
