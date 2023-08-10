@@ -37,7 +37,7 @@ AFRAME.registerComponent('webxr-viewer', {
             cursorParent.appendChild(cursor);
 
             // handle tap events
-            document.addEventListener('mousedown', () => {
+            document.addEventListener('touchstart', () => {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
@@ -57,7 +57,7 @@ AFRAME.registerComponent('webxr-viewer', {
                 }
             });
 
-            document.addEventListener('mouseup', () => {
+            document.addEventListener('touchend', () => {
                 const { intersectedEl } = cursor.components.cursor;
                 if (intersectedEl) {
                     const intersection = cursor.components.raycaster.getIntersection(intersectedEl);
