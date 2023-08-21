@@ -16,6 +16,7 @@ AFRAME.registerComponent('arenaui-prompt', {
         description: { type: 'string', default: '' },
         buttons: { type: 'array', default: ['Confirm', 'Cancel'] },
         width: { type: 'number', default: 1.5 },
+        font: { type: 'string', default: 'Roboto' },
     },
     init() {
         buttonBase.init.bind(this)();
@@ -24,7 +25,6 @@ AFRAME.registerComponent('arenaui-prompt', {
 
         const container = new ThreeMeshUI.Block({
             ref: 'container',
-            fontFamily: 'Roboto',
             color: ARENAColors.text,
             flexDirection: 'column',
             justifyContent: 'center',
@@ -38,6 +38,7 @@ AFRAME.registerComponent('arenaui-prompt', {
         object3DContainer.add(container);
 
         const contentContainer = new ThreeMeshUI.Block({
+            fontFamily: data.font,
             backgroundSide: THREE.DoubleSide,
             width: data.width,
             padding: ARENALayout.contentPadding,
@@ -85,7 +86,7 @@ AFRAME.registerComponent('arenaui-prompt', {
             justifyContent: 'center',
             alignItems: 'stretch',
             flexDirection: 'row',
-            fontFamily: 'Roboto',
+            fontFamily: data.font,
             padding: ARENALayout.containerPadding,
             borderRadius: ARENALayout.buttonBorderRadius,
         });
@@ -116,6 +117,9 @@ AFRAME.registerComponent('arenaui-prompt', {
                 this.buttonContainer.add(button);
             });
             this.el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
+        }
+        if (data.font !== oldData.font) {
+            this.container?.set({ fontFamily: data.font });
         }
         this.el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
     },

@@ -15,12 +15,17 @@
                   "type": "string",
                   "title": "3D object type",
                   "description": "3D object type (derived from 'type' select above).",
-                  "enum": ["arenaui-button-panel"]
+                  "enum": [
+                    "arenaui-button-panel"
+                  ]
                 },
                 "buttons": {
                   "type": "array",
                   "title": "Buttons",
-                  "default": ["Confirm", "Cancel"],
+                  "default": [
+                    "Confirm",
+                    "Cancel"
+                  ],
                   "items": {
                     "type": "string"
                   }
@@ -35,6 +40,16 @@
                   "type": "boolean",
                   "title": "Vertical button layout",
                   "default": false
+                },
+                "font": {
+                  "type": "string",
+                  "title": "Font",
+                  "description": "Font to use for button text",
+                  "default": "Roboto",
+                  "enum": [
+                    "Roboto",
+                    "Roboto-Mono"
+                  ]
                 }
               }
             },
@@ -49,7 +64,10 @@
           "additionalProperties": true,
           "default": {
             "object_type": "arenaui-panel",
-            "buttons": ["Confirm", "Cancel"],
+            "buttons": [
+              "Confirm",
+              "Cancel"
+            ],
             "title": "",
             "vertical": false,
             "position": {
@@ -64,10 +82,21 @@
               "z": 0
             }
           },
-          "required": ["object_type", "title", "vertical", "buttons"]
+          "required": [
+            "object_type",
+            "title",
+            "vertical",
+            "buttons"
+          ]
         }
       }
     }
   ],
-  "required": ["object_id", "action", "type", "data", "persist"]
+  "required": [
+    "object_id",
+    "action",
+    "type",
+    "data",
+    "persist"
+  ]
 }

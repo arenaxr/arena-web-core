@@ -31,6 +31,7 @@ AFRAME.registerComponent('arenaui-card', {
         fontSize: { type: 'number', default: ARENATypography.body },
         widthScale: { type: 'number', default: 1 }, // Scale factor
         closeButton: { type: 'boolean', default: false },
+        font: { type: 'string', default: 'Roboto' },
     },
 
     init() {
@@ -40,7 +41,7 @@ AFRAME.registerComponent('arenaui-card', {
 
         const container = new ThreeMeshUI.Block({
             ref: 'container',
-            fontFamily: 'Roboto',
+            fontFamily: data.font,
             color: ARENAColors.text,
             flexDirection: 'column',
             justifyContent: 'center',
@@ -230,6 +231,9 @@ AFRAME.registerComponent('arenaui-card', {
                 this.removeCloseButton();
             }
         }
+        if (data.font !== oldData.font) {
+            this.outerMeshContainer?.set({ fontFamily: data.font });
+        }
     },
 
     addImgCaption() {
@@ -250,13 +254,13 @@ AFRAME.registerComponent('arenaui-card', {
     },
 
     addCloseButton() {
-        const { el, outerMeshContainer } = this;
+        const { data, el, outerMeshContainer } = this;
         const buttonContainer = new ThreeMeshUI.Block({
             backgroundColor: ARENAColors.textBg,
             backgroundOpacity: ARENAColors.textBgOpacity,
             justifyContent: 'center',
             flexDirection: 'row',
-            fontFamily: 'Roboto',
+            fontFamily: data.font,
             padding: 0,
             offset: 0,
             margin: [ARENALayout.containerPadding, 0, 0, 0],

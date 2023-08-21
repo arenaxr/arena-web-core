@@ -166,10 +166,12 @@ AFRAME.registerComponent('arenaui-button-panel', {
     ...buttonBase,
 
     buttonContainer: undefined,
+    outerContainer: undefined,
     schema: {
         buttons: { type: 'array', default: ['Confirm', 'Cancel'] },
         title: { type: 'string', default: '' },
         vertical: { type: 'boolean', default: false },
+        font: { type: 'string', default: 'Roboto' },
     },
 
     init() {
@@ -186,11 +188,12 @@ AFRAME.registerComponent('arenaui-button-panel', {
             backgroundColor: ARENAColors.bg,
             backgroundOpacity: ARENAColors.bgOpacity,
             alignItems: 'stretch',
-            fontFamily: 'Roboto',
+            fontFamily: data.font,
             padding: [ARENALayout.containerPadding * 2, ARENALayout.containerPadding],
             borderRadius: ARENALayout.borderRadius,
             flexDirection: 'column',
         });
+        this.outerContainer = buttonOuterContainer;
         shadowContainer.add(buttonOuterContainer);
         if (data.title) {
             const title = new ThreeMeshUI.Text({
@@ -228,6 +231,9 @@ AFRAME.registerComponent('arenaui-button-panel', {
         }
         if (data.title !== oldData?.title && title) {
             title.set({ textContent: data.title });
+        }
+        if (data.font !== oldData?.font) {
+            this.outerContainer.set({ fontFamily: data.font });
         }
     },
 });

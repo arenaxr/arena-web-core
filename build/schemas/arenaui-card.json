@@ -15,7 +15,9 @@
                   "type": "string",
                   "title": "3D object type",
                   "description": "3D object type (derived from 'type' select above).",
-                  "enum": ["arenaui-card"]
+                  "enum": [
+                    "arenaui-card"
+                  ]
                 },
                 "title": {
                   "type": "string",
@@ -29,10 +31,15 @@
                   "description": "This is the text body of the card."
                 },
                 "bodyAlign": {
-                    "type": "string",
-                    "title": "Body Text Alignment",
-                    "default": "left",
-                    "enum": ["left", "center", "right", "justify"]
+                  "type": "string",
+                  "title": "Body Text Alignment",
+                  "default": "left",
+                  "enum": [
+                    "left",
+                    "center",
+                    "right",
+                    "justify"
+                  ]
                 },
                 "img": {
                   "type": "string",
@@ -47,21 +54,28 @@
                   "description": "This will caption the image"
                 },
                 "imgDirection": {
-                    "type": "string",
-                    "title": "Image Direction",
-                    "default": "right",
-                    "enum": ["left", "right"]
+                  "type": "string",
+                  "title": "Image Direction",
+                  "default": "right",
+                  "enum": [
+                    "left",
+                    "right"
+                  ]
                 },
                 "imgSize": {
-                    "type": "string",
-                    "title": "Image sizing",
-                    "default": "cover",
-                    "enum": ["cover", "contain", "stretch"]
+                  "type": "string",
+                  "title": "Image sizing",
+                  "default": "cover",
+                  "enum": [
+                    "cover",
+                    "contain",
+                    "stretch"
+                  ]
                 },
                 "fontSize": {
                   "type": "number",
-                    "title": "Font Size",
-                    "default": 0.035
+                  "title": "Font Size",
+                  "default": 0.035
                 },
                 "widthScale": {
                   "type": "number",
@@ -72,6 +86,16 @@
                   "type": "boolean",
                   "title": "Show close button",
                   "default": false
+                },
+                "font": {
+                  "type": "string",
+                  "title": "Font",
+                  "description": "Font to use for button text",
+                  "default": "Roboto",
+                  "enum": [
+                    "Roboto",
+                    "Roboto-Mono"
+                  ]
                 }
               }
             },
@@ -107,10 +131,21 @@
               "z": 0
             }
           },
-          "required": ["object_type", "title", "body", "img"]
+          "required": [
+            "object_type",
+            "title",
+            "body",
+            "img"
+          ]
         }
       }
     }
   ],
-  "required": ["object_id", "action", "type", "data", "persist"]
+  "required": [
+    "object_id",
+    "action",
+    "type",
+    "data",
+    "persist"
+  ]
 }

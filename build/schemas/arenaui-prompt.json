@@ -15,7 +15,9 @@
                   "type": "string",
                   "title": "3D object type",
                   "description": "3D object type (derived from 'type' select above).",
-                  "enum": ["arenaui-prompt"]
+                  "enum": [
+                    "arenaui-prompt"
+                  ]
                 },
                 "title": {
                   "type": "string",
@@ -30,7 +32,10 @@
                 "buttons": {
                   "type": "array",
                   "title": "Buttons",
-                  "default": ["Confirm", "Cancel"],
+                  "default": [
+                    "Confirm",
+                    "Cancel"
+                  ],
                   "items": {
                     "type": "string"
                   }
@@ -39,6 +44,16 @@
                   "type": "number",
                   "title": "Override width",
                   "default": 1.5
+                },
+                "font": {
+                  "type": "string",
+                  "title": "Font",
+                  "description": "Font to use for button text",
+                  "default": "Roboto",
+                  "enum": [
+                    "Roboto",
+                    "Roboto-Mono"
+                  ]
                 }
               }
             },
@@ -48,14 +63,17 @@
             {
               "$ref": "./schemas/definitions-common.json#/properties"
             }
-           ],
+          ],
           "title": "Prompt Data",
           "additionalProperties": true,
           "default": {
             "object_type": "arenaui-prompt",
             "title": "Prompt",
             "description": "This is a prompt. Please confirm or cancel.",
-            "buttons": ["Confirm", "Cancel"],
+            "buttons": [
+              "Confirm",
+              "Cancel"
+            ],
             "width": 1.5,
             "position": {
               "x": 0,
@@ -69,11 +87,22 @@
               "z": 0
             }
           },
-          "required": ["object_type", "title", "buttons", "width"]
+          "required": [
+            "object_type",
+            "title",
+            "buttons",
+            "width"
+          ]
         }
       }
     }
   ],
-  "required": ["object_id", "action", "type", "data", "persist"]
+  "required": [
+    "object_id",
+    "action",
+    "type",
+    "data",
+    "persist"
+  ]
 }
 
