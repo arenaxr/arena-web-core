@@ -46,6 +46,8 @@ const ARENALayout = {
     textImageRatio: 0.5, // ratio of text to image width
     buttonDefaultOffset: 0.03,
     buttonDownOffset: 0.015,
+    buttonImgBorder: 0.0075,
+    buttonImgDefaultSize: 0.3,
 };
 
 const EVENTS = {

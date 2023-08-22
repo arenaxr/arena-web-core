@@ -266,7 +266,7 @@ AFRAME.registerComponent('arenaui-card', {
             margin: [ARENALayout.containerPadding, 0, 0, 0],
             borderRadius: ARENALayout.borderRadius,
         });
-        const closeButton = this.createButton('Close', (evtDetail) => {
+        const closeButton = this.createButton('Close', 0, (evtDetail) => {
             const { position } = document.getElementById('my-camera').components['arena-camera'].data;
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setClickData({ detail: evtDetail });

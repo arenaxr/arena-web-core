@@ -23,11 +23,49 @@
                   "type": "array",
                   "title": "Buttons",
                   "default": [
-                    "Confirm",
-                    "Cancel"
+                    {
+                      "name": "Option 1"
+                    },
+                    {
+                      "name": "Option 2"
+                    }
                   ],
+                  "uniqueItems": false,
                   "items": {
-                    "type": "string"
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "title": "Button Name"
+                      },
+                      "img": {
+                        "type": "string",
+                        "title": "Image URL for Image button",
+                        "description": "Optional, leave blank for text button"
+                      },
+                      "size": {
+                        "type": "number",
+                        "title": "Square size for image buttons",
+                        "description": "Optional",
+                        "default": 0.3
+                      },
+                      "height": {
+                        "type": "number",
+                        "title": "Button Height",
+                        "description": "Optional for image buttons, overrides size"
+                      },
+                      "width": {
+                        "type": "number",
+                        "title": "Button Width",
+                        "description": "Optional for image buttons, overrides size"
+                      },
+                      "borderRadius": {
+                        "type": "number",
+                        "title": "Button Border Radius",
+                        "description": "Optional for image buttons, overrides default 0.075"
+                      }
+                    },
+                    "required": ["name"]
                   }
                 },
                 "title": {
