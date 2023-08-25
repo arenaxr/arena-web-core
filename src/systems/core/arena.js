@@ -35,7 +35,7 @@ AFRAME.registerSystem('arena-scene', {
             if (ARENA.params.debug) {
                 ARENAMqttConsole.init({
                     dbgTopic: `${ARENA.params.realm}/proc/debug/stdout/${ARENA.camName}`,
-                    publish: ARENA.Mqtt.publish,
+                    publish: ARENA.Mqtt.publish.bind(ARENA.Mqtt),
                 });
             }
         });
