@@ -45,6 +45,7 @@ AFRAME.registerSystem('arena-mqtt', {
         const { camName } = this.arena;
         const { outputTopic } = this.arena;
         // Do not pass functions in mqttClientOptions
+        ARENA.Mqtt = this; // Restore old alias
         this.connect(
             {
                 reconnect: true,
@@ -61,7 +62,7 @@ AFRAME.registerSystem('arena-mqtt', {
             outputTopic + camName
         );
 
-        ARENA.Mqtt = this; // Restore old alias
+
     },
 
     async initWorker() {
