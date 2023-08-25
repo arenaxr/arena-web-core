@@ -38,6 +38,10 @@ export default class ARENAMqttConsole {
         dbgTopic = ARENAMqttConsole.dftDbgTopic,
         publish = undefined,
     } = {}) {
+        if (publish === undefined) {
+            console.warn("ARENA.MqttConsole: publish not defined, can't log to mqtt");
+            return;
+        }
         window.console = (function console(jsConsole) {
             // declare internal variables; mostly for setOptions
             let _consoleDebug = consoleDebug;
