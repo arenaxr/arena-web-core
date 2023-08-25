@@ -11,20 +11,12 @@
 // ARENA version from automated scripts
 import ARENA_VERSION_MSG from './arena-version';
 
-// replace console with our logging (only when not in dev)
-import { ARENAMqttConsole } from './utils';
-
 import './aframe-mods'; // AFRAME modifications
 import './systems'; // custom AFRAME systems
 import './geometries'; // custom AFRAME geometries
 import './components'; // custom AFRAME components
 
 console.info(ARENA_VERSION_MSG);
-
-if (!ARENA.defaults.devInstance) {
-    // will queue messages until MQTT connection is available (indicated by console.setOptions())
-    ARENAMqttConsole.init();
-}
 
 // load css
 if (AFRAME.utils.device.isBrowserEnvironment) {
