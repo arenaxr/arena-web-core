@@ -32,7 +32,7 @@ AFRAME.registerSystem('arena-scene', {
             this.initRuntimeMngr.bind(this);
 
             // replace console with our logging
-            if (ARENA.params.debug) {
+            if (!ARENA.defaults.devInstance || ARENA.params.debug) {
                 ARENAMqttConsole.init({
                     dbgTopic: `${ARENA.params.realm}/proc/debug/stdout/${ARENA.camName}`,
                     publish: ARENA.Mqtt.publish.bind(ARENA.Mqtt),
