@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.21.1](https://github.com/arenaxr/arena-web-core/compare/v1.21.0...v1.21.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* bind publish to ARENA.Mqtt ([5f73683](https://github.com/arenaxr/arena-web-core/commit/5f73683eb47b064f87e15347c3ca9b95cb8019eb))
+* don't init arena-console w/o a pub func ([6866f8a](https://github.com/arenaxr/arena-web-core/commit/6866f8a07402acddb7aa77c6f1f94a94347dc1d9))
+* Move arena-console init to MQTT_LOADED ([259c7fc](https://github.com/arenaxr/arena-web-core/commit/259c7fc048dad8a74b669dbc223bd6c9086411fb))
+
 ## [1.21.0](https://github.com/arenaxr/arena-web-core/compare/v1.20.8...v1.21.0) (2023-08-10)
 
 
