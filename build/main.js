@@ -48,7 +48,8 @@ window.addEventListener('onauth', async (e) => {
     const deleteSceneButton = document.getElementById('deletescene');
     const importSceneButton = document.getElementById('importscene');
     const exportSceneButton = document.getElementById('exportscene');
-    const uploadTwinButton = document.getElementById('uploadtwin');
+    const uploadImageButton = document.getElementById('uploadimage');
+    const uploadModelButton = document.getElementById('uploadmodel');
     const setValueButton = document.getElementById('setvalue');
     const selectSchema = document.getElementById('objtype');
     const genidButton = document.getElementById('genid');
@@ -358,54 +359,82 @@ window.addEventListener('onauth', async (e) => {
         });
     }
 
-    uploadTwinButton.addEventListener('click', async () => {
-        // await Swal.fire({
-        Swal.fire({
-            title: 'Select GLB Twin File to Upload',
+    /**
+     * Utility function to get cookie value
+     * @param {string} name cookie name
+     * @return {string} cookie value
+     */
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === `${name}=`) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    uploadImageButton.addEventListener('click', async () => {
+        await Swal.fire({
+            title: 'Please Select Image File',
             input: 'file',
             inputAttributes: {
                 // accept: 'model/gltf-binary, *.glb', // not working on XRBrowser
-                'aria-label': 'Select GLB',
+                accept: 'image/*',
+                'aria-label': 'Select Image',
             },
             showLoaderOnConfirm: true,
             preConfirm: (resultFileOpen) => {
                 console.debug(resultFileOpen);
                 const reader = new FileReader();
-                // console.log(file);
                 reader.onload = (evt) => {
+                    const file = document.querySelector('.swal2-file');
+                    if (!file) {
+                        Swal.showValidationMessage('File not loaded!');
+                    }
+                    const token = getCookie('auth');
                     Swal.fire({
                         title: 'Wait for Upload',
-                        // imageUrl: evt.target.result,
+                        imageUrl: evt.target.result,
+                        imageHeight: 200,
+                        imageWidth: 200,
+                        imageAlt: 'The uploaded picture',
                         didOpen: () => {
                             Swal.showLoading();
-                            // return fetch(`/users/upload`, {
                             return fetch(
-                                `/storemng/api/resources/users/${username}/twins/${sceneinput.value}/${resultFileOpen.name}`,
+                                `/storemng/api/resources/users/${username}/twins/${sceneinput.value}/${resultFileOpen.name}?override=true`,
                                 {
                                     method: 'POST',
                                     headers: {
-                                        Accept: 'application/octet-stream',
+                                        Accept: resultFileOpen.type,
+                                        'X-Auth': `${token}`,
                                     },
-                                    body: reader,
+                                    body: file.files[0],
                                 }
                             )
-                                .then((response) => {
-                                    console.debug(response);
-                                    if (!response.ok) {
-                                        throw new Error(response.statusText);
+                                .then((responsePostFS) => {
+                                    console.debug(responsePostFS);
+                                    if (!responsePostFS.ok) {
+                                        throw new Error(responsePostFS.statusText);
                                     }
-                                    return response.json();
+                                    return responsePostFS.statusText;
                                 })
                                 .catch((error) => {
                                     Swal.showValidationMessage(`Request failed: ${error}`);
                                 });
                         },
                         willClose: () => {
-                            console.log('Nothing');
+                            console.debug('Nothing');
                         },
                     }).then((resultDidOpen) => {
                         if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                            console.log('Upload twin dialog timed out!');
+                            console.error('Upload binary file dialog timed out!');
                         }
                     });
                 };
