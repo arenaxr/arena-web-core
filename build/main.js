@@ -380,92 +380,12 @@ window.addEventListener('onauth', async (e) => {
         return cookieValue;
     }
 
+    // TODO: switch image/model
+    uploadModelButton.addEventListener('click', async () => {
+        await uploadSceneFileStore(true, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter);
+    });
     uploadImageButton.addEventListener('click', async () => {
-        await Swal.fire({
-            title: 'Please Select Image File',
-            input: 'file',
-            inputAttributes: {
-                // accept: 'model/gltf-binary, *.glb', // not working on XRBrowser
-                accept: 'image/*',
-                'aria-label': 'Select Image',
-            },
-            showLoaderOnConfirm: true,
-            preConfirm: (resultFileOpen) => {
-                console.debug(resultFileOpen);
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    const file = document.querySelector('.swal2-file');
-                    if (!file) {
-                        Swal.showValidationMessage('File not loaded!');
-                    }
-                    const token = getCookie('auth');
-                    const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
-                    Swal.fire({
-                        title: 'Wait for Upload',
-                        imageUrl: evt.target.result,
-                        imageHeight: 200,
-                        imageWidth: 200,
-                        imageAlt: 'The uploaded picture',
-                        didOpen: () => {
-                            Swal.showLoading();
-                            return fetch(`/storemng/api/resources/${storePath}?override=true`, {
-                                method: 'POST',
-                                headers: {
-                                    Accept: resultFileOpen.type,
-                                    'X-Auth': `${token}`,
-                                },
-                                body: file.files[0],
-                            })
-                                .then((responsePostFS) => {
-                                    console.debug(responsePostFS);
-                                    if (!responsePostFS.ok) {
-                                        throw new Error(responsePostFS.statusText);
-                                    }
-                                    Swal.hideLoading();
-                                    const safeFilename = resultFileOpen.name.replace(/(\W+)/gi, '-');
-                                    const uploadObjectId = `image-${safeFilename}`;
-                                    const uploadObj = {
-                                        object_id: uploadObjectId,
-                                        type: 'object',
-                                        data: {
-                                            object_type: 'image',
-                                            url: `store/${storePath}`,
-                                            material: {
-                                                side: 'double',
-                                            },
-                                        },
-                                    };
-                                    const scene = `${namespaceinput.value}/${sceneinput.value}`;
-                                    PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
-                                    setTimeout(async () => {
-                                        await PersistObjects.populateObjectList(
-                                            `${namespaceinput.value}/${sceneinput.value}`,
-                                            objFilter.value,
-                                            objTypeFilter,
-                                            uploadObjectId
-                                        );
-                                        reload();
-                                        updateLink();
-                                        updateUrl();
-                                    }, 500);
-                                })
-                                .catch((error) => {
-                                    Swal.hideLoading();
-                                    Swal.showValidationMessage(`Request failed: ${error}`);
-                                });
-                        },
-                        willClose: () => {
-                            console.debug('Nothing');
-                        },
-                    }).then((resultDidOpen) => {
-                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                            console.error('Upload binary file dialog timed out!');
-                        }
-                    });
-                };
-                reader.readAsDataURL(resultFileOpen);
-            },
-        });
+        await uploadSceneFileStore(false, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter);
     });
 
     openAddSceneButton.addEventListener('click', async () => {
@@ -1032,6 +952,100 @@ Swal.fire({
         });
     }
 });
+
+async function uploadSceneFileStore(model, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter) {
+    const strType = model ? 'GLB' : 'Image';
+    const objType = model ? 'gltf-model' : 'image';
+    await Swal.fire({
+        title: `Please Select ${strType} File`,
+        input: 'file',
+        inputAttributes: {
+            accept: model ? 'model/gltf-binary, *.glb' : 'image/*', // not working on XRBrowser
+            'aria-label': `Select  ${strType}`,
+        },
+        showLoaderOnConfirm: true,
+        preConfirm: (resultFileOpen) => {
+            console.debug(resultFileOpen);
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const file = document.querySelector('.swal2-file');
+                if (!file) {
+                    Swal.showValidationMessage(`${strType} file not loaded!`);
+                }
+                // TODO: request token endpoint
+                const token = getCookie('auth');
+                const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
+                // TODO: report filename, size
+                // TODO: allow object id edit
+                // TODO: allow image checkboxes front, back, double
+                // TODO: allow model checkboxes hide in ar/vr (recommendations)
+                Swal.fire({
+                    title: 'Wait for Upload',
+                    imageUrl: evt.target.result,
+                    imageHeight: 200,
+                    imageWidth: 200,
+                    imageAlt: `The uploaded ${strType}`,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        return fetch(`/storemng/api/resources/${storePath}?override=true`, {
+                            method: 'POST',
+                            headers: {
+                                Accept: resultFileOpen.type,
+                                'X-Auth': `${token}`,
+                            },
+                            body: file.files[0],
+                        })
+                            .then((responsePostFS) => {
+                                console.debug(responsePostFS);
+                                if (!responsePostFS.ok) {
+                                    throw new Error(responsePostFS.statusText);
+                                }
+                                Swal.hideLoading();
+                                // TODO: strip ext
+                                const safeFilename = resultFileOpen.name.replace(/(\W+)/gi, '-');
+                                const uploadObjectId = `${objType}-${safeFilename}`;
+                                const uploadObj = {
+                                    object_id: uploadObjectId,
+                                    type: 'object',
+                                    data: {
+                                        object_type: objType,
+                                        url: `store/${storePath}`,
+                                        // material: {
+                                        //     side: 'double',
+                                        // },
+                                    },
+                                };
+                                const scene = `${namespaceinput.value}/${sceneinput.value}`;
+                                PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
+                                setTimeout(async () => {
+                                    await PersistObjects.populateObjectList(
+                                        `${namespaceinput.value}/${sceneinput.value}`,
+                                        objFilter.value,
+                                        objTypeFilter,
+                                        uploadObjectId
+                                    );
+
+                                    $(`label[innerHTML='${uploadObjectId} (${objType})']`).focus();
+                                }, 500);
+                            })
+                            .catch((error) => {
+                                Swal.hideLoading();
+                                Swal.showValidationMessage(`Request failed: ${error}`);
+                            });
+                    },
+                    willClose: () => {
+                        console.debug('Nothing');
+                    },
+                }).then((resultDidOpen) => {
+                    if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                        console.error(`Upload ${strType} file dialog timed out!`);
+                    }
+                });
+            };
+            reader.readAsDataURL(resultFileOpen);
+        },
+    });
+}
 
 /**
  * Enable some "publish" buttons by token access
