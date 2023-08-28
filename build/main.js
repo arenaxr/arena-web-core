@@ -399,6 +399,7 @@ window.addEventListener('onauth', async (e) => {
                         Swal.showValidationMessage('File not loaded!');
                     }
                     const token = getCookie('auth');
+                    const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
                     Swal.fire({
                         title: 'Wait for Upload',
                         imageUrl: evt.target.result,
@@ -407,25 +408,49 @@ window.addEventListener('onauth', async (e) => {
                         imageAlt: 'The uploaded picture',
                         didOpen: () => {
                             Swal.showLoading();
-                            return fetch(
-                                `/storemng/api/resources/users/${username}/twins/${sceneinput.value}/${resultFileOpen.name}?override=true`,
-                                {
-                                    method: 'POST',
-                                    headers: {
-                                        Accept: resultFileOpen.type,
-                                        'X-Auth': `${token}`,
-                                    },
-                                    body: file.files[0],
-                                }
-                            )
+                            return fetch(`/storemng/api/resources/${storePath}?override=true`, {
+                                method: 'POST',
+                                headers: {
+                                    Accept: resultFileOpen.type,
+                                    'X-Auth': `${token}`,
+                                },
+                                body: file.files[0],
+                            })
                                 .then((responsePostFS) => {
                                     console.debug(responsePostFS);
                                     if (!responsePostFS.ok) {
                                         throw new Error(responsePostFS.statusText);
                                     }
-                                    return responsePostFS.statusText;
+                                    Swal.hideLoading();
+                                    const safeFilename = resultFileOpen.name.replace(/(\W+)/gi, '-');
+                                    const uploadObjectId = `image-${safeFilename}`;
+                                    const uploadObj = {
+                                        object_id: uploadObjectId,
+                                        type: 'object',
+                                        data: {
+                                            object_type: 'image',
+                                            url: `store/${storePath}`,
+                                            material: {
+                                                side: 'double',
+                                            },
+                                        },
+                                    };
+                                    const scene = `${namespaceinput.value}/${sceneinput.value}`;
+                                    PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
+                                    setTimeout(async () => {
+                                        await PersistObjects.populateObjectList(
+                                            `${namespaceinput.value}/${sceneinput.value}`,
+                                            objFilter.value,
+                                            objTypeFilter,
+                                            uploadObjectId
+                                        );
+                                        reload();
+                                        updateLink();
+                                        updateUrl();
+                                    }, 500);
                                 })
                                 .catch((error) => {
+                                    Swal.hideLoading();
                                     Swal.showValidationMessage(`Request failed: ${error}`);
                                 });
                         },
