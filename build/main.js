@@ -960,7 +960,7 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
         title: `Please Select ${strType} File`,
         input: 'file',
         inputAttributes: {
-            accept: model ? 'model/gltf-binary, *.glb' : 'image/*', // not working on XRBrowser
+            accept: model ? '*/*' : 'image/*', // 'model/gltf-binary, *.glb' not working on XRBrowser
             'aria-label': `Select  ${strType}`,
         },
         showLoaderOnConfirm: true,
@@ -1001,8 +1001,8 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                                     throw new Error(responsePostFS.statusText);
                                 }
                                 Swal.hideLoading();
-                                // TODO: strip ext
-                                const safeFilename = resultFileOpen.name.replace(/(\W+)/gi, '-');
+                                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+                                const safeFilename = fn.replace(/(\W+)/gi, '-');
                                 const uploadObjectId = `${objType}-${safeFilename}`;
                                 const uploadObj = {
                                     object_id: uploadObjectId,
@@ -1013,6 +1013,7 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                                         // material: {
                                         //     side: 'double',
                                         // },
+                                        // 'hide-on-enter-ar': true,
                                     },
                                 };
                                 const scene = `${namespaceinput.value}/${sceneinput.value}`;
