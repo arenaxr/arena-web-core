@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.21.2](https://github.com/arenaxr/arena-web-core/compare/v1.21.1...v1.21.2) (2023-08-28)
+
+
+### Bug Fixes
+
+* race condition b/w programs vs runtime-mngr ([ff76797](https://github.com/arenaxr/arena-web-core/commit/ff76797244e00e328d7e35fd1c76e79df7101de1))
+
 ## [1.21.1](https://github.com/arenaxr/arena-web-core/compare/v1.21.0...v1.21.1) (2023-08-25)
 
 
