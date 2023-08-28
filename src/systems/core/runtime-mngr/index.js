@@ -1,3 +1,5 @@
+/* global ARENA */
+
 /**
  * @fileoverview Register as a runtime; Send requests to orchestrator
  *
@@ -8,6 +10,7 @@
 import UUID from 'uuidjs';
 import MQTTClient from './mqtt-client';
 import RuntimeMsgs from './runtime-msgs';
+import { ARENA_EVENTS } from '../../../constants';
 
 /**
  * Send requests to orchestrator: register as a runtime, create modules from persist objects.
@@ -179,6 +182,7 @@ export default class RuntimeMngr {
 
         // registration
         this.register();
+        ARENA.events.emit(ARENA_EVENTS.RUNTIME_MNGR_LOADED, true);
     }
 
     /**

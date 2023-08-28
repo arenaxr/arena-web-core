@@ -29,7 +29,7 @@ AFRAME.registerSystem('arena-scene', {
             this.fetchSceneObjects().then(() => {});
         });
         ARENA.events.addEventListener(ARENA_EVENTS.MQTT_LOADED, () => {
-            this.initRuntimeMngr.bind(this);
+            this.initRuntimeMngr().then(() => {});
 
             // replace console with our logging
             if (!ARENA.defaults.devInstance || ARENA.params.debug) {
@@ -462,6 +462,8 @@ AFRAME.registerSystem('arena-scene', {
 
         const { sceneEl } = el;
 
+        const programs = [];
+
         if (sceneObjs.length === 0) {
             console.warn('No scene objects found in persistence.');
             sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, true);
@@ -537,16 +539,8 @@ AFRAME.registerSystem('arena-scene', {
             const iter = arenaObjects.entries();
             const [objId, obj] = iter.next().value; // get first entry
             if (obj.type === 'program') {
-                // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
-                const avars = {
-                    scene: this.sceneName,
-                    namespace: this.nameSpace,
-                    cameraid: this.camName,
-                    username: this.getDisplayName(),
-                    mqtth: mqtt.mqttHost,
-                };
-                // ask runtime manager to start this program
-                this.RuntimeManager.createModuleFromPersist(obj, avars);
+                // Defer to end with separate event listener for runtime mngr load
+                programs.push(obj);
                 arenaObjects.delete(objId);
             } else if (obj.type === 'object') {
                 if (containerObjName && obj.attributes.parent === undefined) {
@@ -559,6 +553,20 @@ AFRAME.registerSystem('arena-scene', {
                 arenaObjects.delete(objId);
             }
         }
+        ARENA.events.addEventListener(ARENA_EVENTS.RUNTIME_MNGR_LOADED, () => {
+            // arena variables that are replaced; keys are the variable names e.g. ${scene},${cameraid}, ...
+            const avars = {
+                scene: this.sceneName,
+                namespace: this.nameSpace,
+                cameraid: this.camName,
+                username: this.getDisplayName(),
+                mqtth: mqtt.mqttHost,
+            };
+            programs.forEach((program) => {
+                // ask runtime manager to start this program
+                this.RuntimeManager.createModuleFromPersist(program, avars);
+            });
+        });
         sceneEl.emit(ARENA_EVENTS.SCENE_OBJ_LOADED, !containerObjName);
     },
 
