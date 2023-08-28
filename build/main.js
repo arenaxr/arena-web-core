@@ -966,11 +966,17 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
         showLoaderOnConfirm: true,
         preConfirm: (resultFileOpen) => {
             console.debug(resultFileOpen);
+            const validGLBExt = /\.glb$/i.test(resultFileOpen.name);
+            if (!validGLBExt) {
+                Swal.showValidationMessage(`${strType} file type only!`);
+                return;
+            }
             const reader = new FileReader();
             reader.onload = (evt) => {
                 const file = document.querySelector('.swal2-file');
                 if (!file) {
                     Swal.showValidationMessage(`${strType} file not loaded!`);
+                    return;
                 }
                 // TODO: request token endpoint
                 const token = getCookie('auth');
