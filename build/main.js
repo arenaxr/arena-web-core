@@ -956,21 +956,30 @@ Swal.fire({
 async function uploadSceneFileStore(model, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter) {
     const strType = model ? 'GLB' : 'Image';
     const objType = model ? 'gltf-model' : 'image';
+    const accept = model ? '*/*' : 'image/*'; // 'model/gltf-binary, *.glb' not working on XRBrowser
+
     await Swal.fire({
-        title: `Please Select ${strType} File`,
+        title: `Upload ${strType} to File Store and Scene`,
         input: 'file',
         inputAttributes: {
-            accept: model ? '*/*' : 'image/*', // 'model/gltf-binary, *.glb' not working on XRBrowser
+            accept: `${accept}`,
             'aria-label': `Select  ${strType}`,
         },
+        confirmButtonText: 'Upload',
+        focusConfirm: false,
+        showCancelButton: true,
+        cancelButtonText: 'Cancel',
         showLoaderOnConfirm: true,
         preConfirm: (resultFileOpen) => {
             console.debug(resultFileOpen);
-            const validGLBExt = /\.glb$/i.test(resultFileOpen.name);
-            if (!validGLBExt) {
+            if (model && !/\.glb$/i.test(resultFileOpen.name)) {
                 Swal.showValidationMessage(`${strType} file type only!`);
                 return;
             }
+            const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+            const safeFilename = fn.replace(/(\W+)/gi, '-');
+            const uploadObjectId = `${objType}-${safeFilename}`;
+
             const reader = new FileReader();
             reader.onload = (evt) => {
                 const file = document.querySelector('.swal2-file');
@@ -978,8 +987,28 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                     Swal.showValidationMessage(`${strType} file not loaded!`);
                     return;
                 }
-                // TODO: request token endpoint
-                const token = getCookie('auth');
+                // request fs token endpoint if auth not ready or expired
+                let token = getCookie('auth');
+                if (!isTokenUsable(token)) {
+                    const csrftoken = getCookie('csrftoken');
+                    fetch('/user/storelogin', {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                        },
+                    })
+                        .then((responseGetLoginFS) => {
+                            console.debug(responseGetLoginFS);
+                            if (!responseGetLoginFS.ok) {
+                                throw new Error(responseGetLoginFS.statusText);
+                            }
+                            token = getCookie('auth');
+                        })
+                        .catch((error) => {
+                            Swal.showValidationMessage(`Request failed: ${error}`);
+                        });
+                }
+
                 const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
                 // TODO: report filename, size
                 // TODO: allow object id edit
@@ -988,11 +1017,12 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                 Swal.fire({
                     title: 'Wait for Upload',
                     imageUrl: evt.target.result,
-                    imageHeight: 200,
-                    imageWidth: 200,
+                    // imageHeight: 200,
+                    // imageWidth: 200,
                     imageAlt: `The uploaded ${strType}`,
                     didOpen: () => {
                         Swal.showLoading();
+                        // request fs file upload with fs auth
                         return fetch(`/storemng/api/resources/${storePath}?override=true`, {
                             method: 'POST',
                             headers: {
@@ -1007,9 +1037,6 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                                     throw new Error(responsePostFS.statusText);
                                 }
                                 Swal.hideLoading();
-                                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
-                                const safeFilename = fn.replace(/(\W+)/gi, '-');
-                                const uploadObjectId = `${objType}-${safeFilename}`;
                                 const uploadObj = {
                                     object_id: uploadObjectId,
                                     type: 'object',
@@ -1108,6 +1135,16 @@ function isUserSceneEditor(mqtt_token, objectsTopic) {
         if (matchJWT(objectsTopic, perms.publ)) {
             return true;
         }
+    }
+    return false;
+}
+
+function isTokenUsable(token) {
+    if (token) {
+        const tokenObj = KJUR.jws.JWS.parse(token);
+        const exp = tokenObj.payloadObj.exp * 1000;
+        const now = new Date().getTime();
+        return now < exp;
     }
     return false;
 }
