@@ -15,7 +15,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
         this.el.addEventListener('enter-vr', this.enterARHandler);
         this.el.addEventListener('exit-vr', this.exitARHandler);
         this.mouseCursor = document.getElementById('mouse-cursor');
-        this.isMobile = AFRAME.utils.device.isMobile();
+        this.isMobile = ARENAUtils.isMobile();
     },
 
     remove() {

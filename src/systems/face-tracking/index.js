@@ -16,10 +16,10 @@ AFRAME.registerSystem('face-tracking', {
     },
 
     async init() {
-        this.enabled = !AFRAME.utils.device.isMobile();
+        this.enabled = !ARENA.utils.isMobile();
         if (!this.enabled) return;
 
-        this.width = AFRAME.utils.device.isMobile() ? Number(window.innerWidth / 5) : 300;
+        this.width = 300;
         this.height = Math.ceil((window.screen.height / window.screen.width) * this.width);
 
         this.prevJSON = null;

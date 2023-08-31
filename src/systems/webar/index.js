@@ -21,7 +21,7 @@ export default class ARENAWebARUtils {
      * Starts a WebAR session
      */
     static enterARNonWebXR() {
-        // if (!AFRAME.utils.device.isMobile()) {
+        // if (!ARENA.utils.isMobile()) {
         //     return;
         // }
 

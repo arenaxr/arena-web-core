@@ -176,7 +176,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.avatarButton.style.display = 'none';
             this.settingsButtons.push(this.avatarButton);
 
-            if (usersPermitted && !AFRAME.utils.device.isMobile()) {
+            if (usersPermitted && !ARENA.utils.isMobile()) {
                 this._buttonList[this.buttons.AVATAR] = this.avatarButton;
                 this.iconsDiv.appendChild(this.avatarButton); // no avatar on mobile - face model is too large
             }
@@ -214,7 +214,7 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             this.screenshareButton.style.display = 'none';
             this.settingsButtons.push(this.screenshareButton);
 
-            if (jitsiPermitted && !AFRAME.utils.device.isMobile()) {
+            if (jitsiPermitted && !ARENA.utils.isMobile()) {
                 // no screenshare on mobile - doesn't work
                 this._buttonList[this.buttons.SCREENSHARE] = this.screenshareButton;
                 this.iconsDiv.appendChild(this.screenshareButton);
@@ -476,7 +476,8 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                 .startVideo()
                 .then(() => {
                     this.videoButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/video-on.png')";
-                    this.avatarButton.childNodes[0].style.backgroundImage = "url('src/systems/ui/images/avatar-off.png')";
+                    this.avatarButton.childNodes[0].style.backgroundImage =
+                        "url('src/systems/ui/images/avatar-off.png')";
                     this.jitsi.showVideo();
                     const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
                     if (faceTracker !== undefined && faceTracker.isRunning()) {

@@ -171,7 +171,7 @@ AFRAME.registerComponent('arena-user', {
         const resume = () => {
             audioCtx.resume();
             if (audioCtx.state === 'running') {
-                if (!AFRAME.utils.device.isMobile() && /chrome/i.test(navigator.userAgent)) {
+                if (!ARENA.utils.isMobile() && /chrome/i.test(navigator.userAgent)) {
                     // We now always try to enable w/ spatial audio, tbd if we need to undo this
                     enableChromeAEC(listener.gain, true);
                 }
