@@ -380,7 +380,7 @@ window.addEventListener('onauth', async (e) => {
         return cookieValue;
     }
 
-    // TODO: switch image/model
+    // switch image/model
     uploadModelButton.addEventListener('click', async () => {
         await uploadSceneFileStore(true, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter);
     });
@@ -957,9 +957,17 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
     const strType = model ? 'GLB' : 'Image';
     const objType = model ? 'gltf-model' : 'image';
     const accept = model ? '*/*' : 'image/*'; // 'model/gltf-binary, *.glb' not working on XRBrowser
+    const htmlopt = model
+        ? `<div style="float: left;">
+            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
+            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
+            </div>`
+        : '';
+    const htmlval = `${htmlopt}`;
 
     await Swal.fire({
         title: `Upload ${strType} to File Store and Scene`,
+        html: htmlval,
         input: 'file',
         inputAttributes: {
             accept: `${accept}`,
@@ -978,6 +986,7 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
             const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
             const safeFilename = fn.replace(/(\W+)/gi, '-');
             const uploadObjectId = `${objType}-${safeFilename}`;
+            let hideinar = false;
 
             const reader = new FileReader();
             reader.onload = async (evt) => {
@@ -985,6 +994,10 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                 if (!file) {
                     Swal.showValidationMessage(`${strType} file not loaded!`);
                     return;
+                }
+                if (model) {
+                    // allow model checkboxes hide in ar/vr (recommendations)
+                    hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
                 }
                 // request fs token endpoint if auth not ready or expired
                 let token = getCookie('auth');
@@ -999,7 +1012,6 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                 }
                 const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
                 // TODO: allow object id edit
-                // TODO: allow model checkboxes hide in ar/vr (recommendations)
                 Swal.fire({
                     title: 'Wait for Upload',
                     imageUrl: evt.target.result,
@@ -1029,9 +1041,11 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                                     data: {
                                         object_type: objType,
                                         url: `store/${storePath}`,
-                                        // TODO: 'hide-on-enter-ar': true,
                                     },
                                 };
+                                if (hideinar) {
+                                    uploadObj.data['hide-on-enter-ar'] = true;
+                                }
                                 const scene = `${namespaceinput.value}/${sceneinput.value}`;
                                 PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
                                 setTimeout(async () => {
