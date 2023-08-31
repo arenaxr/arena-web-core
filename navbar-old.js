@@ -4,9 +4,11 @@ $(document).ready(() => {
     // add page header
     $('#header').load('/header-old.html', () => {
         // update auth state in nav bar
+        let auth = null;
         fetch('/user/user_state')
             .then((response) => response.json())
             .then((data) => {
+                auth = data;
                 const authDrop = $('#auth-dropdown');
                 authDrop.attr('class', 'dropdown-toggle');
                 authDrop.attr('data-toggle', 'dropdown');
@@ -55,8 +57,9 @@ $(document).ready(() => {
             e.preventDefault();
             let storePath = getStorePath();
             if (storePath.startsWith('/storemng/files')) {
-                storePath = storePath.replace('/storemng/files', '/store');
-                const fullPath = `${window.location.protocol}//${window.location.host}${storePath}`;
+                storePath = storePath.replace('/storemng/files', '');
+                const storeUnscopedPrefix = auth.is_staff ? '' : `/users/${auth.username}`;
+                const fullPath = `${window.location.protocol}//${window.location.host}/store${storeUnscopedPrefix}${storePath}`;
                 navigator.clipboard.writeText(fullPath);
                 Swal.fire('Copied!', fullPath, 'success');
             } else {
