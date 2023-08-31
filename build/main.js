@@ -971,7 +971,6 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
         cancelButtonText: 'Cancel',
         showLoaderOnConfirm: true,
         preConfirm: (resultFileOpen) => {
-            console.debug(resultFileOpen);
             if (model && !/\.glb$/i.test(resultFileOpen.name)) {
                 Swal.showValidationMessage(`${strType} file type only!`);
                 return;
@@ -981,7 +980,7 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
             const uploadObjectId = `${objType}-${safeFilename}`;
 
             const reader = new FileReader();
-            reader.onload = (evt) => {
+            reader.onload = async (evt) => {
                 const file = document.querySelector('.swal2-file');
                 if (!file) {
                     Swal.showValidationMessage(`${strType} file not loaded!`);
@@ -990,36 +989,24 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                 // request fs token endpoint if auth not ready or expired
                 let token = getCookie('auth');
                 if (!isTokenUsable(token)) {
-                    const csrftoken = getCookie('csrftoken');
-                    fetch('/user/storelogin', {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRFToken': csrftoken,
-                        },
-                    })
-                        .then((responseGetLoginFS) => {
-                            console.debug(responseGetLoginFS);
-                            if (!responseGetLoginFS.ok) {
-                                throw new Error(responseGetLoginFS.statusText);
-                            }
-                            token = getCookie('auth');
-                        })
-                        .catch((error) => {
-                            Swal.showValidationMessage(`Request failed: ${error}`);
-                        });
+                    try {
+                        await ARENAUserAccount.requestStoreLogin();
+                    } catch (err) {
+                        Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
+                        return;
+                    }
+                    token = getCookie('auth');
                 }
-
                 const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
-                // TODO: report filename, size
                 // TODO: allow object id edit
-                // TODO: allow image checkboxes front, back, double
                 // TODO: allow model checkboxes hide in ar/vr (recommendations)
                 Swal.fire({
                     title: 'Wait for Upload',
                     imageUrl: evt.target.result,
-                    // imageHeight: 200,
-                    // imageWidth: 200,
                     imageAlt: `The uploaded ${strType}`,
+                    showConfirmButton: false,
+                    showCancelButton: true,
+                    cancelButtonText: 'Cancel',
                     didOpen: () => {
                         Swal.showLoading();
                         // request fs file upload with fs auth
@@ -1032,7 +1019,6 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                             body: file.files[0],
                         })
                             .then((responsePostFS) => {
-                                console.debug(responsePostFS);
                                 if (!responsePostFS.ok) {
                                     throw new Error(responsePostFS.statusText);
                                 }
@@ -1043,10 +1029,7 @@ async function uploadSceneFileStore(model, getCookie, username, sceneinput, name
                                     data: {
                                         object_type: objType,
                                         url: `store/${storePath}`,
-                                        // material: {
-                                        //     side: 'double',
-                                        // },
-                                        // 'hide-on-enter-ar': true,
+                                        // TODO: 'hide-on-enter-ar': true,
                                     },
                                 };
                                 const scene = `${namespaceinput.value}/${sceneinput.value}`;
