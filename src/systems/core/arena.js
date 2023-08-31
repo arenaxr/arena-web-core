@@ -23,6 +23,8 @@ AFRAME.registerSystem('arena-scene', {
     },
 
     init() {
+        this.utils = ARENAUtils;
+
         window.addEventListener(ARENA_EVENTS.ON_AUTH, this.ready.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, this.fetchSceneOptions.bind(this));
         ARENA.events.addEventListener(ARENA_EVENTS.USER_PARAMS_LOADED, () => {
