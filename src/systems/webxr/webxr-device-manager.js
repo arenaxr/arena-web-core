@@ -12,27 +12,49 @@ import { ARENAUtils } from '../../utils';
 
 AFRAME.registerComponent('webxr-device-manager', {
     init() {
-        if (ARENAUtils.isWebXRViewer()) {
-            this.el.sceneEl.setAttribute('webxr-viewer', true);
-            this.el.sceneEl.removeAttribute('ar-hit-test-listener');
+        const { el: sceneEl } = this;
+        this.isWebXRViewer = ARENAUtils.isWebXRViewer();
+        if (this.isWebXRViewer) {
+            sceneEl.setAttribute('webxr-viewer', true);
+            sceneEl.removeAttribute('ar-hit-test-listener');
         }
 
-        this.onWebXRViewerEnterVR = this.onWebXRViewerEnterVR.bind(this);
-        this.onWebXRViewerExitVR = this.onWebXRViewerExitVR.bind(this);
-        window.addEventListener('enter-vr', this.onWebXRViewerEnterVR);
-        window.addEventListener('exit-vr', this.onWebXRViewerExitVR);
+        this.onWebXREnterVR = this.onWebXREnterVR.bind(this);
+        this.onWebXRRExitVR = this.onWebXRRExitVR.bind(this);
+        sceneEl.addEventListener('enter-vr', this.onWebXREnterVR);
+        sceneEl.addEventListener('exit-vr', this.onWebXRRExitVR);
+
+        this.isMobile = ARENAUtils.isMobile();
+        this.mouseCursor = document.getElementById('mouse-cursor');
     },
 
-    onWebXRViewerEnterVR() {
-        if (this.el.sceneEl.is('ar-mode')) {
+    onWebXREnterVR() {
+        const { el, mouseCursor, isMobile, isWebXRViewer } = this;
+        const { sceneEl } = el;
+        if (sceneEl.is('ar-mode')) {
+            if (isMobile && !isWebXRViewer) {
+                mouseCursor.removeAttribute('cursor');
+                mouseCursor.removeAttribute('raycaster');
+                el.setAttribute('cursor', { rayOrigin: 'xrselect', fuse: false });
+                el.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
+
+                el.components.cursor.onEnterVR(); // Manually trigger cursor callback
+            }
             document.getElementById('env').setAttribute('visible', false);
-            const arMarkerSys = this.el.sceneEl.systems.armarker;
-            arMarkerSys.webXRSessionStarted(this.el.sceneEl.xrSession);
+            const arMarkerSys = sceneEl.systems.armarker;
+            arMarkerSys.webXRSessionStarted(sceneEl.xrSession);
         }
     },
 
-    onWebXRViewerExitVR() {
-        if (this.el.sceneEl.is('ar-mode')) {
+    onWebXRRExitVR() {
+        const { el: sceneEl, mouseCursor, isMobile, isWebXRViewer } = this;
+        if (sceneEl.is('ar-mode')) {
+            if (isMobile && !isWebXRViewer) {
+                sceneEl.removeAttribute('cursor');
+                sceneEl.removeAttribute('raycaster');
+                mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
+                mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
+            }
             document.getElementById('env').setAttribute('visible', true);
         }
     },
