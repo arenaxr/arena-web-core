@@ -380,12 +380,140 @@ window.addEventListener('onauth', async (e) => {
         return cookieValue;
     }
 
+    async function uploadSceneFileStore(model) {
+        const strType = model ? 'GLB' : 'Image';
+        const objType = model ? 'gltf-model' : 'image';
+        const accept = model ? '*/*' : 'image/*'; // 'model/gltf-binary, *.glb' not working on XRBrowser
+        const htmlopt = model
+            ? `<div style="float: left;">
+            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
+            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
+            </div>`
+            : '';
+        const htmlval = `${htmlopt}`;
+
+        await Swal.fire({
+            title: `Upload ${strType} to Filestore and Scene`,
+            html: htmlval,
+            input: 'file',
+            inputAttributes: {
+                accept: `${accept}`,
+                'aria-label': `Select  ${strType}`,
+            },
+            confirmButtonText: 'Upload',
+            focusConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            showLoaderOnConfirm: true,
+            preConfirm: (resultFileOpen) => {
+                if (model && !/\.glb$/i.test(resultFileOpen.name)) {
+                    Swal.showValidationMessage(`${strType} file type only!`);
+                    return;
+                }
+                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+                const safeFilename = fn.replace(/(\W+)/gi, '-');
+                const uploadObjectId = `${objType}-${safeFilename}`;
+                let hideinar = false;
+
+                const reader = new FileReader();
+                reader.onload = async (evt) => {
+                    const file = document.querySelector('.swal2-file');
+                    if (!file) {
+                        Swal.showValidationMessage(`${strType} file not loaded!`);
+                        return;
+                    }
+                    if (model) {
+                        // allow model checkboxes hide in ar/vr (recommendations)
+                        hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
+                    }
+                    // request fs token endpoint if auth not ready or expired
+                    let token = getCookie('auth');
+                    if (!isTokenUsable(token)) {
+                        try {
+                            await ARENAUserAccount.requestStoreLogin();
+                        } catch (err) {
+                            Swal.showValidationMessage(`Error requesting filestore login: ${err.statusText}`);
+                            return;
+                        }
+                        token = getCookie('auth');
+                    }
+                    // update user/staff scoped path
+                    const storeResPrefix = authState.is_staff ? `users/${username}/` : ``;
+                    const userFilePath = `scenes/${sceneinput.value}/${resultFileOpen.name}`;
+                    const storeResPath = `${storeResPrefix}${userFilePath}`;
+                    const storeExtPath = `store/users/${username}/${userFilePath}`;
+                    // TODO: allow object id edit
+                    Swal.fire({
+                        title: 'Wait for Upload',
+                        imageUrl: evt.target.result,
+                        imageAlt: `The uploaded ${strType}`,
+                        showConfirmButton: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancel',
+                        didOpen: () => {
+                            Swal.showLoading();
+                            // request fs file upload with fs auth
+                            return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
+                                method: 'POST',
+                                headers: {
+                                    Accept: resultFileOpen.type,
+                                    'X-Auth': `${token}`,
+                                },
+                                body: file.files[0],
+                            })
+                                .then((responsePostFS) => {
+                                    if (!responsePostFS.ok) {
+                                        throw new Error(responsePostFS.statusText);
+                                    }
+                                    Swal.hideLoading();
+                                    const uploadObj = {
+                                        object_id: uploadObjectId,
+                                        type: 'object',
+                                        data: {
+                                            object_type: objType,
+                                            url: `${storeExtPath}`,
+                                        },
+                                    };
+                                    if (hideinar) {
+                                        uploadObj.data['hide-on-enter-ar'] = true;
+                                    }
+                                    const scene = `${namespaceinput.value}/${sceneinput.value}`;
+                                    PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
+                                    setTimeout(async () => {
+                                        await PersistObjects.populateObjectList(
+                                            `${namespaceinput.value}/${sceneinput.value}`,
+                                            objFilter.value,
+                                            objTypeFilter,
+                                            uploadObjectId
+                                        );
+
+                                        $(`label[innerHTML='${uploadObjectId} (${objType})']`).focus();
+                                    }, 500);
+                                })
+                                .catch((error) => {
+                                    Swal.hideLoading();
+                                    Swal.showValidationMessage(`Request failed: ${error}`);
+                                });
+                        },
+                        willClose: () => {
+                            console.debug('Nothing');
+                        },
+                    }).then((resultDidOpen) => {
+                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                            console.error(`Upload ${strType} file dialog timed out!`);
+                        }
+                    });
+                };
+                reader.readAsDataURL(resultFileOpen);
+            },
+        });
+    }
     // switch image/model
     uploadModelButton.addEventListener('click', async () => {
-        await uploadSceneFileStore(true, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter);
+        await uploadSceneFileStore(true);
     });
     uploadImageButton.addEventListener('click', async () => {
-        await uploadSceneFileStore(false, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter);
+        await uploadSceneFileStore(false);
     });
 
     openAddSceneButton.addEventListener('click', async () => {
@@ -952,131 +1080,6 @@ Swal.fire({
         });
     }
 });
-
-async function uploadSceneFileStore(model, getCookie, username, sceneinput, namespaceinput, objFilter, objTypeFilter) {
-    const strType = model ? 'GLB' : 'Image';
-    const objType = model ? 'gltf-model' : 'image';
-    const accept = model ? '*/*' : 'image/*'; // 'model/gltf-binary, *.glb' not working on XRBrowser
-    const htmlopt = model
-        ? `<div style="float: left;">
-            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
-            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
-            </div>`
-        : '';
-    const htmlval = `${htmlopt}`;
-
-    await Swal.fire({
-        title: `Upload ${strType} to File Store and Scene`,
-        html: htmlval,
-        input: 'file',
-        inputAttributes: {
-            accept: `${accept}`,
-            'aria-label': `Select  ${strType}`,
-        },
-        confirmButtonText: 'Upload',
-        focusConfirm: false,
-        showCancelButton: true,
-        cancelButtonText: 'Cancel',
-        showLoaderOnConfirm: true,
-        preConfirm: (resultFileOpen) => {
-            if (model && !/\.glb$/i.test(resultFileOpen.name)) {
-                Swal.showValidationMessage(`${strType} file type only!`);
-                return;
-            }
-            const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
-            const safeFilename = fn.replace(/(\W+)/gi, '-');
-            const uploadObjectId = `${objType}-${safeFilename}`;
-            let hideinar = false;
-
-            const reader = new FileReader();
-            reader.onload = async (evt) => {
-                const file = document.querySelector('.swal2-file');
-                if (!file) {
-                    Swal.showValidationMessage(`${strType} file not loaded!`);
-                    return;
-                }
-                if (model) {
-                    // allow model checkboxes hide in ar/vr (recommendations)
-                    hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
-                }
-                // request fs token endpoint if auth not ready or expired
-                let token = getCookie('auth');
-                if (!isTokenUsable(token)) {
-                    try {
-                        await ARENAUserAccount.requestStoreLogin();
-                    } catch (err) {
-                        Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
-                        return;
-                    }
-                    token = getCookie('auth');
-                }
-                const storePath = `users/${username}/upload/${sceneinput.value}/${resultFileOpen.name}`;
-                // TODO: allow object id edit
-                Swal.fire({
-                    title: 'Wait for Upload',
-                    imageUrl: evt.target.result,
-                    imageAlt: `The uploaded ${strType}`,
-                    showConfirmButton: false,
-                    showCancelButton: true,
-                    cancelButtonText: 'Cancel',
-                    didOpen: () => {
-                        Swal.showLoading();
-                        // request fs file upload with fs auth
-                        return fetch(`/storemng/api/resources/${storePath}?override=true`, {
-                            method: 'POST',
-                            headers: {
-                                Accept: resultFileOpen.type,
-                                'X-Auth': `${token}`,
-                            },
-                            body: file.files[0],
-                        })
-                            .then((responsePostFS) => {
-                                if (!responsePostFS.ok) {
-                                    throw new Error(responsePostFS.statusText);
-                                }
-                                Swal.hideLoading();
-                                const uploadObj = {
-                                    object_id: uploadObjectId,
-                                    type: 'object',
-                                    data: {
-                                        object_type: objType,
-                                        url: `store/${storePath}`,
-                                    },
-                                };
-                                if (hideinar) {
-                                    uploadObj.data['hide-on-enter-ar'] = true;
-                                }
-                                const scene = `${namespaceinput.value}/${sceneinput.value}`;
-                                PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
-                                setTimeout(async () => {
-                                    await PersistObjects.populateObjectList(
-                                        `${namespaceinput.value}/${sceneinput.value}`,
-                                        objFilter.value,
-                                        objTypeFilter,
-                                        uploadObjectId
-                                    );
-
-                                    $(`label[innerHTML='${uploadObjectId} (${objType})']`).focus();
-                                }, 500);
-                            })
-                            .catch((error) => {
-                                Swal.hideLoading();
-                                Swal.showValidationMessage(`Request failed: ${error}`);
-                            });
-                    },
-                    willClose: () => {
-                        console.debug('Nothing');
-                    },
-                }).then((resultDidOpen) => {
-                    if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                        console.error(`Upload ${strType} file dialog timed out!`);
-                    }
-                });
-            };
-            reader.readAsDataURL(resultFileOpen);
-        },
-    });
-}
 
 /**
  * Enable some "publish" buttons by token access
