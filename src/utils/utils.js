@@ -311,9 +311,18 @@ export default class ARENAUtils {
      *
      * @return {string} "ml", "hl", "unknown".
      */
+
+    static isMagicLeap() {
+        return window.mlWorld;
+    }
+
+    static isHololens() {
+        return navigator.xr && navigator.userAgent.includes('Edg');
+    }
+
     static detectARHeadset() {
-        if (window.mlWorld) return 'ml';
-        if (navigator.xr && navigator.userAgent.includes('Edg')) return 'hl';
+        if (this.isMagicLeap()) return 'ml';
+        if (this.isHololens()) return 'hl';
         return 'unknown';
     }
 
