@@ -1,10 +1,8 @@
 /* global AFRAME, THREE */
 
-import { SkinnedMesh } from 'three-shim';
-
 AFRAME.registerComponent('blipout', {
     schema: {
-        duration: { type: 'number', default: 1000 },
+        duration: { type: 'number', default: 750 },
     },
     init() {
         const {
@@ -35,12 +33,36 @@ AFRAME.registerComponent('blipout', {
         const minY = bbox.min.y;
         const maxY = bbox.max.y;
         const midY = (minY + maxY) / 2;
+        const width = bbox.max.x - bbox.min.x;
+        const depth = bbox.max.z - bbox.min.z;
 
         // Create clipping planes
         const planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), -minY); // Clips everything below
         const planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), maxY); // Clips everything above
 
-        // Set planes to clip each material
+        // Add visible mesh planes to match clipping
+        const meshPlaneBot = new THREE.Mesh(
+            new THREE.PlaneGeometry(width, depth),
+            new THREE.MeshPhongMaterial({
+                color: 0x049ef4,
+                emissive: 0x000080,
+                specular: 0xffffff,
+                transparent: true,
+                opacity: 0.75,
+                shininess: 100,
+                side: THREE.DoubleSide,
+            })
+        );
+        bbox.getCenter(meshPlaneBot.position); // align in world pos
+        meshPlaneBot.rotation.x = -Math.PI / 2; // rotate flat
+
+        const meshPlaneTop = meshPlaneBot.clone(); // clone bottom
+
+        meshPlaneBot.position.y = minY;
+        meshPlaneTop.position.y = maxY;
+
+        sceneEl.object3D.add(meshPlaneBot, meshPlaneTop); // Add to sceneroot for world space
+
         matTargets.forEach((matTarget) => {
             /* eslint-disable no-param-reassign */
             matTarget.material.clippingPlanes = [planeBot, planeTop];
@@ -49,17 +71,20 @@ AFRAME.registerComponent('blipout', {
         });
 
         AFRAME.ANIME({
-            targets: planeBot,
+            targets: [planeBot, meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
             constant: -midY,
-            easing: 'easeOutCubic',
+            y: midY,
+            easing: 'easeInOutSine',
             duration: this.data.duration,
         });
         AFRAME.ANIME({
-            targets: planeTop,
+            targets: [planeTop, meshPlaneTop.position],
             constant: midY,
-            easing: 'easeOutCubic',
+            y: midY,
+            easing: 'easeInOutSine',
             duration: this.data.duration + 1, // ensure later than bottom
             complete: () => {
+                sceneEl.object3D.remove(meshPlaneBot, meshPlaneTop);
                 el.remove.bind(el)();
             },
         });
