@@ -12,6 +12,7 @@
 
 import './armarker';
 import './attribution';
+import './blipout';
 import './click-listener';
 import './collision-listener';
 import './gltf-lod';
