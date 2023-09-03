@@ -247,6 +247,12 @@
                     "type": "boolean",
                     "description": "Animate out on delete, set false to disable"
                 },
+                "geometry": {
+                    "default": "rect",
+                    "description": "Geometry of the blipout plane",
+                    "type": "string",
+                    "enum": ["rect", "disk", "ring"]
+                },
                 "duration": {
                     "default": 750,
                     "type": "number",
@@ -254,6 +260,7 @@
                 }
             },
             "required": [
+                "geometry",
                 "duration"
             ]
         },
