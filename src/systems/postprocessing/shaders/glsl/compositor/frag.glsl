@@ -26,7 +26,7 @@ const float onePixel = (1.0 / 255.0);
 
 const bool stretchBorders = true;
 
-#define DO_ASYNC_TIMEWARP
+// #define DO_ASYNC_TIMEWARP
 // #define REPROJECT_MOVEMENT // (WIP)
 
 #define DEPTH_SCALAR    (50.0)
@@ -117,7 +117,6 @@ void main() {
     bool leftEye   = (hasDualCameras && vUv.x < 0.5);
     bool rightEye  = (hasDualCameras && vUv.x >= 0.5);
 
-#ifdef DO_ASYNC_TIMEWARP
     bool occluded = false;
 
     float x;
@@ -154,11 +153,14 @@ void main() {
         remoteMatrixWorld      = remoteRMatrixWorld;
     }
 
+    vec2 uv3 = vec2(x, vUv.y);
+
+#if (DO_ASYNC_TIMEWARP == 1)
     vec3 cameraVector = mix( mix(cameraTopLeft, cameraTopRight, x),
                              mix(cameraBotLeft, cameraBotRight, x),
                              1.0 - vUv.y );
 
-    vec2 uv3 = worldToViewport(remotePos + cameraVector, remoteProjectionMatrix, remoteMatrixWorld);
+    uv3 = worldToViewport(remotePos + cameraVector, remoteProjectionMatrix, remoteMatrixWorld);
 
 #ifdef REPROJECT_MOVEMENT
     if (!(arMode || vrMode)) {
@@ -194,7 +196,8 @@ void main() {
             break;
         }
     }
-#endif
+#endif // REPROJECT_MOVEMENT
+#endif // DO_ASYNC_TIMEWARP
 
     if (targetWidthGreater) {
         coordRemoteColor = vec2(
@@ -285,16 +288,12 @@ void main() {
             remoteColor = localColor;
         }
     }
-#endif
-#else
-    remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
-    remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
-#endif
+#endif // REPROJECT_MOVEMENT
 
     // force srgb
 #ifdef IS_SRGB
     localColor = LinearTosRGB(localColor);
-#endif
+#endif // IS_SRGB
 
     vec4 color = localColor;
     // if (!targetWidthGreater ||

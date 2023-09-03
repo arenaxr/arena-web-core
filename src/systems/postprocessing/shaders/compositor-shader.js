@@ -4,10 +4,11 @@ import vertGLSL from './glsl/compositor/vert.glsl';
 import fragGLSL from './glsl/compositor/frag.glsl';
 
 const CompositorShader = {
+    defines: {
+        IS_SRGB: true,
+        DO_ASYNC_TIMEWARP: (ARENA.params.atw === undefined ? 1 : ARENA.params.atw),
+    },
     uniforms: {
-        defines: {
-            IS_SRGB: true,
-        },
         tLocalColor: {
             type: 't',
             value: new THREE.Texture(),
