@@ -253,6 +253,12 @@
                     "type": "string",
                     "enum": ["rect", "disk", "ring"]
                 },
+                "planes": {
+                    "default": "both",
+                    "description": "Which which planes (and direction) to animate out",
+                    "type": "string",
+                    "enum": ["both", "top", "bottom"]
+                },
                 "duration": {
                     "default": 750,
                     "type": "number",

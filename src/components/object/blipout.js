@@ -5,6 +5,7 @@ AFRAME.registerComponent('blipout', {
         enabled: { type: 'boolean', default: true },
         duration: { type: 'number', default: 750 },
         geometry: { type: 'string', default: 'rect' }, // [rect, disk, ring]
+        planes: { type: 'string', default: 'both' }, // [both, top, bottom]
     },
     blip() {
         const {
@@ -40,9 +41,16 @@ AFRAME.registerComponent('blipout', {
         const depth = bbox.max.z - bbox.min.z;
         const radius = Math.max(width, depth) / 2;
 
+        const clipPlanes = [];
         // Create clipping planes
-        const planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), -minY); // Clips everything below
-        const planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), maxY); // Clips everything above
+        if (data.planes === 'bottom' || data.planes === 'both') {
+            this.planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), -minY); // Clips everything below
+            clipPlanes.push(this.planeBot);
+        }
+        if (data.planes === 'top' || data.planes === 'both') {
+            this.planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), maxY); // Clips everything above
+            clipPlanes.push(this.planeTop);
+        }
 
         const planeMeshMaterial = new THREE.MeshPhongMaterial({
             color: 0x049ef4,
@@ -54,60 +62,91 @@ AFRAME.registerComponent('blipout', {
             side: THREE.DoubleSide,
         });
 
+        let baseMeshPlane;
         switch (data.geometry) {
             case 'disk': {
                 // 2d disk
-                this.meshPlaneBot = new THREE.Mesh(new THREE.RingGeometry(0, radius), planeMeshMaterial);
+                baseMeshPlane = new THREE.Mesh(new THREE.RingGeometry(0, radius), planeMeshMaterial);
                 break;
             }
             case 'ring': {
                 // 2d ring
-                this.meshPlaneBot = new THREE.Mesh(
+                baseMeshPlane = new THREE.Mesh(
                     new THREE.RingGeometry(radius, Math.min(radius + 0.15, radius * 1.1)),
                     planeMeshMaterial
                 );
                 break;
             }
             default: // 2d rect
-                this.meshPlaneBot = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), planeMeshMaterial);
+                baseMeshPlane = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), planeMeshMaterial);
+        }
+        bbox.getCenter(baseMeshPlane.position); // align in world pos
+        baseMeshPlane.rotation.x = -Math.PI / 2; // rotate horizontal flat
+
+        switch (data.planes) {
+            case 'bottom': {
+                // Only bottom plane
+                this.meshPlaneBot = baseMeshPlane;
+                this.meshPlaneBot.position.y = minY; // Starts at bottom
+                this.meshPlanes = [this.meshPlaneBot];
+                break;
+            }
+            case 'top': {
+                // Only top plane
+                this.meshPlaneTop = baseMeshPlane;
+                this.meshPlaneTop.position.y = maxY; // Starts at top
+                this.meshPlanes = [this.meshPlaneTop];
+                break;
+            }
+            default: {
+                // Both planes
+                this.meshPlaneBot = baseMeshPlane;
+                this.meshPlaneTop = baseMeshPlane.clone();
+                this.meshPlaneBot.position.y = minY;
+                this.meshPlaneTop.position.y = maxY;
+                this.meshPlanes = [this.meshPlaneBot, this.meshPlaneTop];
+            }
         }
 
-        // Add visible mesh planes to match clipping
-
-        bbox.getCenter(this.meshPlaneBot.position); // align in world pos
-        this.meshPlaneBot.rotation.x = -Math.PI / 2; // rotate horizontal flat
-
-        this.meshPlaneTop = this.meshPlaneBot.clone(); // clone bottom as top
-
-        this.meshPlaneBot.position.y = minY; // Only variation is difference in y pos
-        this.meshPlaneTop.position.y = maxY;
-
-        sceneEl.object3D.add(this.meshPlaneBot, this.meshPlaneTop); // Add to sceneroot for world space
+        sceneEl.object3D.add(...this.meshPlanes); // Add to sceneroot for world space
 
         matTargets.forEach((matTarget) => {
             /* eslint-disable no-param-reassign */
-            matTarget.material.clippingPlanes = [planeBot, planeTop];
+            matTarget.material.clippingPlanes = clipPlanes;
             matTarget.material.clipShadows = true;
             /* eslint-disable no-param-reassign */
         });
 
-        AFRAME.ANIME({
-            targets: [planeBot, this.meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
-            constant: -midY,
-            y: midY,
-            easing: 'easeInOutSine',
-            duration: data.duration,
-        });
-        AFRAME.ANIME({
-            targets: [planeTop, this.meshPlaneTop.position],
-            constant: midY,
-            y: midY,
-            easing: 'easeInOutSine',
-            duration: data.duration + 1, // ensure later than bottom
-            complete: () => {
-                sceneEl.object3D.remove(this.meshPlaneBot, this.meshPlaneTop);
-                el.remove.bind(el)();
-            },
-        });
+        if (data.planes === 'bottom' || data.planes === 'both') {
+            const target = data.planes === 'both' ? midY : maxY;
+            AFRAME.ANIME({
+                targets: [this.planeBot, this.meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
+                constant: -target,
+                y: target,
+                easing: 'easeInOutSine',
+                duration: data.duration,
+                complete: () => {
+                    if (data.planes === 'bottom') {
+                        // Only do remove if this is only plane
+                        sceneEl.object3D.remove(...this.meshPlanes);
+                        el.remove.bind(el)();
+                    }
+                },
+            });
+        }
+        if (data.planes === 'top' || data.planes === 'both') {
+            const target = data.planes === 'both' ? midY : minY;
+            AFRAME.ANIME({
+                targets: [this.planeTop, this.meshPlaneTop.position],
+                constant: target,
+                y: target,
+                easing: 'easeInOutSine',
+                duration: data.duration + 1, // ensure later than bottom
+                complete: () => {
+                    sceneEl.object3D.remove(...this.meshPlanes);
+                    el.remove.bind(el)();
+                },
+            });
+        }
     },
 });
