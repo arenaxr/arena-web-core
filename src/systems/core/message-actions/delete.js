@@ -27,19 +27,25 @@ export default class Delete {
         // Clean up linked dependents
         try {
             document.querySelectorAll(`[dep=${id}]`).forEach((depEl) => {
-                const depParentEl = depEl.parentEl;
-                if (depParentEl) {
-                    depParentEl.removeChild(depEl);
-                }
+                this.blipRemove(depEl);
             });
         } catch (e) {
-            console.error( e );
+            console.error(e);
         }
 
         // Remove element itself
-        const { parentEl } = entityEl;
-        if (parentEl) {
-            parentEl.removeChild(entityEl);
+        this.blipRemove(entityEl);
+    }
+
+    /**
+     * Remove element with blip effect if it has the component and is set as enabled
+     * @param el - element to remove
+     */
+    static blipRemove(el) {
+        if (el.components.blipout?.data?.enabled) {
+            el.components.blipout.blip();
+        } else {
+            el.remove();
         }
     }
 }

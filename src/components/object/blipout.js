@@ -2,9 +2,10 @@
 
 AFRAME.registerComponent('blipout', {
     schema: {
+        enabled: { type: 'boolean', default: true },
         duration: { type: 'number', default: 750 },
     },
-    init() {
+    blip() {
         const {
             el,
             el: { object3D, sceneEl },
