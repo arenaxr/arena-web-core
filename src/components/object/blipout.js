@@ -88,14 +88,12 @@ AFRAME.registerComponent('blipout', {
                 // Only bottom plane
                 this.meshPlaneBot = baseMeshPlane;
                 this.meshPlaneBot.position.y = minY; // Starts at bottom
-                this.meshPlanes = [this.meshPlaneBot];
                 break;
             }
             case 'top': {
                 // Only top plane
                 this.meshPlaneTop = baseMeshPlane;
                 this.meshPlaneTop.position.y = maxY; // Starts at top
-                this.meshPlanes = [this.meshPlaneTop];
                 break;
             }
             default: {
@@ -104,11 +102,8 @@ AFRAME.registerComponent('blipout', {
                 this.meshPlaneTop = baseMeshPlane.clone();
                 this.meshPlaneBot.position.y = minY;
                 this.meshPlaneTop.position.y = maxY;
-                this.meshPlanes = [this.meshPlaneBot, this.meshPlaneTop];
             }
         }
-
-        sceneEl.object3D.add(...this.meshPlanes); // Add to sceneroot for world space
 
         matTargets.forEach((matTarget) => {
             /* eslint-disable no-param-reassign */
@@ -118,8 +113,10 @@ AFRAME.registerComponent('blipout', {
         });
 
         if (data.planes === 'bottom' || data.planes === 'both') {
+            sceneEl.object3D.add(this.meshPlaneBot); // Add to sceneroot for world space
             const target = data.planes === 'both' ? midY : maxY;
-            AFRAME.ANIME({
+            const tlBot = AFRAME.ANIME.timeline();
+            tlBot.add({
                 targets: [this.planeBot, this.meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
                 constant: -target,
                 y: target,
@@ -128,23 +125,41 @@ AFRAME.registerComponent('blipout', {
                 complete: () => {
                     if (data.planes === 'bottom') {
                         // Only do remove if this is only plane
-                        sceneEl.object3D.remove(...this.meshPlanes);
                         el.remove.bind(el)();
                     }
                 },
             });
+            tlBot.add({
+                targets: this.meshPlaneBot.scale,
+                x: 0,
+                y: 0,
+                duration: 250,
+                complete: () => {
+                    sceneEl.object3D.remove(this.meshPlaneBot);
+                },
+            });
         }
         if (data.planes === 'top' || data.planes === 'both') {
+            sceneEl.object3D.add(this.meshPlaneTop); // Add to sceneroot for world space
             const target = data.planes === 'both' ? midY : minY;
-            AFRAME.ANIME({
+            const tlTop = AFRAME.ANIME.timeline();
+            tlTop.add({
                 targets: [this.planeTop, this.meshPlaneTop.position],
                 constant: target,
                 y: target,
                 easing: 'easeInOutSine',
                 duration: data.duration + 1, // ensure later than bottom
                 complete: () => {
-                    sceneEl.object3D.remove(...this.meshPlanes);
                     el.remove.bind(el)();
+                },
+            });
+            tlTop.add({
+                targets: this.meshPlaneTop.scale,
+                x: 0,
+                y: 0,
+                duration: 250,
+                complete: () => {
+                    sceneEl.object3D.remove(this.meshPlaneTop);
                 },
             });
         }
