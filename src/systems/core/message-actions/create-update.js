@@ -235,6 +235,12 @@ export default class CreateUpdate {
             warn('Malformed message; type is undefined; attributes might not be set correctly.');
         }
 
+        if (message.action === ACTIONS.CREATE && data.blip?.blipin === true) {
+            // special case where we want to handle this attribute before any others like gltf or geometry
+            entityEl.setAttribute('blip', data.blip);
+            delete data.blip; // remove attribute so we don't reset it later
+        }
+
         // handle geometries and some type special cases
         // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the
         // special cases

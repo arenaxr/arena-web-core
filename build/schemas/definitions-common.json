@@ -237,12 +237,17 @@
             "title": "Collision Listener (legacy)",
             "type": "string"
         },
-        "blipout": {
-            "description": "When the object is deleted, it will animate out of the scene instead of disappearing instantly",
-            "title": "Blip Out on Delete",
+        "blip": {
+            "description": "When the object is created or deleted, it will animate in/out of the scene instead of appearing/disappearing instantly. Must have a geometric mesh.",
+            "title": "Blip Effect",
             "type": "object",
             "properties": {
-                "enabled": {
+                "blipin": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Animate in on create, set false to disable"
+                },
+                "blipout": {
                     "default": true,
                     "type": "boolean",
                     "description": "Animate out on delete, set false to disable"
@@ -266,6 +271,9 @@
                 }
             },
             "required": [
+                "blipin",
+                "blipout",
+                "planes",
                 "geometry",
                 "duration"
             ]

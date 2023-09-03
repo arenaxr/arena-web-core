@@ -1,13 +1,32 @@
 /* global AFRAME, THREE */
 
-AFRAME.registerComponent('blipout', {
+AFRAME.registerComponent('blip', {
     schema: {
-        enabled: { type: 'boolean', default: true },
+        blipin: { type: 'boolean', default: true },
+        blipout: { type: 'boolean', default: true },
         duration: { type: 'number', default: 750 },
         geometry: { type: 'string', default: 'rect' }, // [rect, disk, ring]
         planes: { type: 'string', default: 'both' }, // [both, top, bottom]
     },
-    blip() {
+    init() {
+        const {
+            data,
+            el,
+            el: { object3D },
+        } = this;
+        if (data.blipin === true && object3D.children.length === 0) {
+            object3D.visible = false;
+            // On initial node creation, no geometry or material is loaded yet
+            el.addEventListener(
+                'object3dset',
+                () => {
+                    this.blip('in');
+                },
+                { once: true }
+            );
+        }
+    },
+    blip(dir) {
         const {
             data,
             el,
@@ -15,7 +34,9 @@ AFRAME.registerComponent('blipout', {
         } = this;
         if (!el.getAttribute('geometry') && !el.getAttribute('gltf-model')) {
             // Only blip geometry and gltfs
-            el.remove();
+            if (dir === 'out') {
+                el.remove();
+            }
             return;
         }
         sceneEl.renderer.localClippingEnabled = true;
@@ -26,8 +47,10 @@ AFRAME.registerComponent('blipout', {
         ];
         const matTargets = meshTargets.filter((matTarget) => matTarget.material);
         if (matTargets.length === 0) {
-            // No materials to clip (???), just remove it
-            el.remove();
+            // No materials to clip (???), just remove it and/or return
+            if (dir === 'out') {
+                el.remove();
+            }
             return;
         }
 
@@ -42,13 +65,25 @@ AFRAME.registerComponent('blipout', {
         const radius = Math.max(width, depth) / 2;
 
         const clipPlanes = [];
+
+        // Determine start end (for blip out)
+        let botStart = -minY;
+        let topStart = maxY;
+        let botEnd = data.planes === 'both' ? -midY : -maxY;
+        let topEnd = data.planes === 'both' ? midY : minY;
+        if (dir === 'in') {
+            // Swap directions for blip in
+            [botEnd, botStart] = [botStart, botEnd];
+            [topEnd, topStart] = [topStart, topEnd];
+        }
+
         // Create clipping planes
         if (data.planes === 'bottom' || data.planes === 'both') {
-            this.planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), -minY); // Clips everything below
+            this.planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), botStart); // Clips everything below
             clipPlanes.push(this.planeBot);
         }
         if (data.planes === 'top' || data.planes === 'both') {
-            this.planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), maxY); // Clips everything above
+            this.planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), topStart); // Clips everything above
             clipPlanes.push(this.planeTop);
         }
 
@@ -82,26 +117,27 @@ AFRAME.registerComponent('blipout', {
         }
         bbox.getCenter(baseMeshPlane.position); // align in world pos
         baseMeshPlane.rotation.x = -Math.PI / 2; // rotate horizontal flat
+        baseMeshPlane.scale.set(0.01, 0.01, 0.01); // can't use 0, messes up texture
 
         switch (data.planes) {
             case 'bottom': {
                 // Only bottom plane
                 this.meshPlaneBot = baseMeshPlane;
-                this.meshPlaneBot.position.y = minY; // Starts at bottom
+                this.meshPlaneBot.position.y = -botStart; // This is inverted from constant
                 break;
             }
             case 'top': {
                 // Only top plane
                 this.meshPlaneTop = baseMeshPlane;
-                this.meshPlaneTop.position.y = maxY; // Starts at top
+                this.meshPlaneTop.position.y = topStart;
                 break;
             }
             default: {
                 // Both planes
                 this.meshPlaneBot = baseMeshPlane;
                 this.meshPlaneTop = baseMeshPlane.clone();
-                this.meshPlaneBot.position.y = minY;
-                this.meshPlaneTop.position.y = maxY;
+                this.meshPlaneBot.position.y = -botStart;
+                this.meshPlaneTop.position.y = topStart;
             }
         }
 
@@ -112,18 +148,29 @@ AFRAME.registerComponent('blipout', {
             /* eslint-disable no-param-reassign */
         });
 
+        if (dir === 'in') {
+            object3D.visible = true;
+        }
+
         if (data.planes === 'bottom' || data.planes === 'both') {
             sceneEl.object3D.add(this.meshPlaneBot); // Add to sceneroot for world space
-            const target = data.planes === 'both' ? midY : maxY;
-            const tlBot = AFRAME.ANIME.timeline();
+            const tlBot = AFRAME.ANIME.timeline({
+                easing: 'linear',
+            });
+            tlBot.add({
+                targets: this.meshPlaneBot.scale,
+                x: 1,
+                y: 1,
+                duration: 333,
+            });
             tlBot.add({
                 targets: [this.planeBot, this.meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
-                constant: -target,
-                y: target,
+                constant: botEnd,
+                y: -botEnd, // Once again inverted from constant
                 easing: 'easeInOutSine',
                 duration: data.duration,
                 complete: () => {
-                    if (data.planes === 'bottom') {
+                    if (data.planes === 'bottom' && dir === 'out') {
                         // Only do remove if this is only plane
                         el.remove.bind(el)();
                     }
@@ -133,7 +180,7 @@ AFRAME.registerComponent('blipout', {
                 targets: this.meshPlaneBot.scale,
                 x: 0,
                 y: 0,
-                duration: 250,
+                duration: 333,
                 complete: () => {
                     sceneEl.object3D.remove(this.meshPlaneBot);
                 },
@@ -141,23 +188,30 @@ AFRAME.registerComponent('blipout', {
         }
         if (data.planes === 'top' || data.planes === 'both') {
             sceneEl.object3D.add(this.meshPlaneTop); // Add to sceneroot for world space
-            const target = data.planes === 'both' ? midY : minY;
-            const tlTop = AFRAME.ANIME.timeline();
+            const tlTop = AFRAME.ANIME.timeline({ easing: 'linear' });
+            tlTop.add({
+                targets: this.meshPlaneTop.scale,
+                x: 1,
+                y: 1,
+                duration: 333,
+            });
             tlTop.add({
                 targets: [this.planeTop, this.meshPlaneTop.position],
-                constant: target,
-                y: target,
+                constant: topEnd,
+                y: topEnd,
                 easing: 'easeInOutSine',
                 duration: data.duration + 1, // ensure later than bottom
                 complete: () => {
-                    el.remove.bind(el)();
+                    if (dir === 'out') {
+                        el.remove.bind(el)();
+                    }
                 },
             });
             tlTop.add({
                 targets: this.meshPlaneTop.scale,
                 x: 0,
                 y: 0,
-                duration: 250,
+                duration: 333,
                 complete: () => {
                     sceneEl.object3D.remove(this.meshPlaneTop);
                 },

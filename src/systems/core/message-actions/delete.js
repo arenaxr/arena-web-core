@@ -1,7 +1,5 @@
 /* global AFRAME */
 
-const info = AFRAME.utils.debug('ARENA:delete:info');
-const warn = AFRAME.utils.debug('ARENA:delete:warn');
 const error = AFRAME.utils.debug('ARENA:delete:error');
 
 /**
@@ -42,8 +40,8 @@ export default class Delete {
      * @param el - element to remove
      */
     static blipRemove(el) {
-        if (el.components.blipout?.data?.enabled) {
-            el.components.blipout.blip();
+        if (el.components.blip?.data?.blipout === true) {
+            el.components.blip.blip('out');
         } else {
             el.remove();
         }
