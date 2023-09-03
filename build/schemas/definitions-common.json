@@ -237,6 +237,26 @@
             "title": "Collision Listener (legacy)",
             "type": "string"
         },
+        "blipout": {
+            "description": "When the object is deleted, it will animate out of the scene instead of disappearing instantly",
+            "title": "Blip Out on Delete",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Animate out on delete, set false to disable"
+                },
+                "duration": {
+                    "default": 750,
+                    "type": "number",
+                    "description": "Animation duration in milliseconds"
+                }
+            },
+            "required": [
+                "duration"
+            ]
+        },
         "color": {
             "deprecated": true,
             "default": "#ffa500",
