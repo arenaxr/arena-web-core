@@ -15,17 +15,24 @@ AFRAME.registerComponent('blip', {
             el: { object3D },
         } = this;
         if (data.blipin === true && object3D.children.length === 0) {
+            this.checkBlipIn = this.checkBlipIn.bind(this);
+            this.initCount = 0;
             object3D.visible = false;
             // On initial node creation, no geometry or material is loaded yet
-            el.addEventListener(
-                'object3dset',
-                () => {
-                    this.blip('in');
-                },
-                { once: true }
-            );
+            el.addEventListener('object3dset', this.checkBlipIn, { once: true });
+            // Object3D is set before geometry and material
+            el.addEventListener('loaded', this.checkBlipIn, { once: true });
         }
     },
+    checkBlipIn() {
+        this.initCount += 1;
+        if (this.initCount === 2) {
+            setTimeout(() => {
+                this.blip('in');
+            }, 50); // Need to release main thread for geometry to load properly
+        }
+    },
+
     blip(dir) {
         const {
             data,
