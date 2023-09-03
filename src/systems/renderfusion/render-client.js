@@ -166,15 +166,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         }
     },
 
-    setupTransceivers(isMac) {
+    setupTransceivers() {
         if (supportsSetCodecPreferences) {
-            // Mac's H264 encoder produced colors that are a bit off, so prefer VP9
-            if (isMac) {
-                preferredCodec = 'video/VP9';
-                preferredSdpFmtpPrefix = '';
-                preferredSdpFmtpLine = 'profile-id=0';
-            }
-
             const transceiver = this.pc.getTransceivers()[0];
             // const transceiver = this.pc.addTransceiver('video', {direction: 'recvonly'});
             const { codecs } = RTCRtpSender.getCapabilities('video');
@@ -237,7 +230,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         this.pc
             .setRemoteDescription(new RTCSessionDescription(offer))
             .then(() => {
-                this.createAnswer(offer.isMac);
+                this.createAnswer();
             })
             .catch((err) => {
                 console.error(err);
@@ -285,10 +278,10 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             });
     },
 
-    createAnswer(isMac) {
+    createAnswer() {
         // console.debug('creating answer.');
 
-        this.setupTransceivers(isMac);
+        this.setupTransceivers();
 
         this.pc
             .createAnswer()

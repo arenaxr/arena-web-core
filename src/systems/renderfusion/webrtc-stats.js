@@ -101,7 +101,7 @@ export default class WebRTCStatsLogger {
             });
 
             if (stat.latency) {
-                info(`Latency: ${stat.latency} ms`);
+                info(`E2E Latency: ${stat.latency} ms`);
             }
 
             this.signaler.sendStats(stat);

@@ -15,7 +15,7 @@ import './object';
 // import './load-scene';
 import './ui';
 import './thickline/index';
-import './hybrid-rendering/remote-render';
+import './renderfusion/remote-render';
 
 /**
  * Additional A-Frame components and systems
