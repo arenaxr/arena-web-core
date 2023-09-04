@@ -260,7 +260,7 @@
                 },
                 "planes": {
                     "default": "both",
-                    "description": "Which which planes (and direction) to animate out",
+                    "description": "Which which clipping planes to use for effect. A top plane clips above it, bottom clips below it",
                     "type": "string",
                     "enum": ["both", "top", "bottom"]
                 },
