@@ -125,6 +125,8 @@ AFRAME.registerComponent('arena-user', {
 
         const name = el.id;
 
+        el.setAttribute('blip', { blipin: false, geometry: 'disk', applyDescendants: true });
+
         const decodeName = decodeURI(name.split('_')[2]);
         const personName = decodeName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         this.headText = document.createElement('a-text');
@@ -140,6 +142,7 @@ AFRAME.registerComponent('arena-user', {
         this.headText.setAttribute('width', 5); // try setting last
 
         this.headModel = document.createElement('a-entity');
+        this.headModel.setAttribute('blip', { geometry: 'disk', blipout: false });
         this.headModel.setAttribute('id', `head-model-${name}`);
         this.headModel.setAttribute('rotation', '0 180 0');
         this.headModel.setAttribute('scale', '1 1 1');
