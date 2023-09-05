@@ -123,9 +123,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.remoteVideo.style.left = '15px';
             this.remoteVideo.style.width = '384px';
             this.remoteVideo.style.height = '108px';
-            if (window.matchMedia('(min-width: 1600px)').matches) {
-                document.body.appendChild(this.remoteVideo);
-            }
+            document.body.appendChild(this.remoteVideo);
 
             /* const geometry = new THREE.PlaneGeometry(19.2, 10.8);
              * const material = new THREE.MeshBasicMaterial({ map: remoteRenderTarget.texture });
