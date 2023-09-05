@@ -120,8 +120,6 @@ AFRAME.registerComponent('arena-user', {
 
         this.idTag = el.id.replace('camera_', '');
         el.setAttribute('rotation.order', 'YXZ');
-        el.object3D.position.set(0, ARENA.defaults.camHeight, 0);
-        el.object3D.rotation.set(0, 0, 0);
 
         const name = el.id;
 
