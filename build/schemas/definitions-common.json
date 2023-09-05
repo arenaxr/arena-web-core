@@ -237,6 +237,52 @@
             "title": "Collision Listener (legacy)",
             "type": "string"
         },
+        "blip": {
+            "description": "When the object is created or deleted, it will animate in/out of the scene instead of appearing/disappearing instantly. Must have a geometric mesh.",
+            "title": "Blip Effect",
+            "type": "object",
+            "properties": {
+                "blipin": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Animate in on create, set false to disable"
+                },
+                "blipout": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Animate out on delete, set false to disable"
+                },
+                "geometry": {
+                    "default": "rect",
+                    "description": "Geometry of the blipout plane",
+                    "type": "string",
+                    "enum": ["rect", "disk", "ring"]
+                },
+                "planes": {
+                    "default": "both",
+                    "description": "Which which clipping planes to use for effect. A top plane clips above it, bottom clips below it",
+                    "type": "string",
+                    "enum": ["both", "top", "bottom"]
+                },
+                "duration": {
+                    "default": 750,
+                    "type": "number",
+                    "description": "Animation duration in milliseconds"
+                },
+                "applyDescendants": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "Apply blipout effect to include all descendents. Does not work for blipin"
+                }
+            },
+            "required": [
+                "blipin",
+                "blipout",
+                "planes",
+                "geometry",
+                "duration"
+            ]
+        },
         "color": {
             "deprecated": true,
             "default": "#ffa500",
