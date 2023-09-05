@@ -310,6 +310,9 @@ export default class CreateUpdate {
                 // image is just a textured plane
                 // TODO: create an aframe component for this
                 entityEl.setAttribute('geometry', 'primitive', 'plane');
+                // don't strip out other plane geometry attributes users may want
+                type = 'plane';
+                isGeometry = true;
                 if (Object.hasOwn(data, 'url')) {
                     entityEl.setAttribute('material', 'src', ARENAUtils.crossOriginDropboxSrc(data.url));
                     delete data.url; // remove attribute so we don't set it later
