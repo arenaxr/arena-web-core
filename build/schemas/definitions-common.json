@@ -268,6 +268,11 @@
                     "default": 750,
                     "type": "number",
                     "description": "Animation duration in milliseconds"
+                },
+                "applyDescendants": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "Apply blipout effect to include all descendents. Does not work for blipin"
                 }
             },
             "required": [

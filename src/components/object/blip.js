@@ -7,6 +7,7 @@ AFRAME.registerComponent('blip', {
         duration: { type: 'number', default: 750 },
         geometry: { type: 'string', default: 'rect' }, // [rect, disk, ring]
         planes: { type: 'string', default: 'both' }, // [both, top, bottom]
+        applyDescendants: { type: 'boolean', default: false },
     },
     init() {
         const {
@@ -40,19 +41,38 @@ AFRAME.registerComponent('blip', {
             el: { object3D, sceneEl },
         } = this;
         if (!el.getAttribute('geometry') && !el.getAttribute('gltf-model')) {
-            // Only blip geometry and gltfs
-            if (dir === 'out') {
+            // Only blip in geometry and gltfs, exception for out w/ descendants
+            if (dir === 'out' && data.applyDescendants === false) {
                 el.remove();
+            } else if (dir === 'in') {
+                return;
             }
-            return;
         }
         sceneEl.renderer.localClippingEnabled = true;
         sceneEl.renderer.clipShadows = true;
+
+        const addMatTargets = [];
+
         const meshTargets = [
             ...object3D.getObjectsByProperty('isMesh', true),
             ...object3D.getObjectsByProperty('isSkinnedMesh', true),
         ];
         const matTargets = meshTargets.filter((matTarget) => matTarget.material);
+
+        if (data.applyDescendants && dir === 'out') {
+            const descendants = el.getElementsByTagName('*');
+            descendants.forEach((descendant) => {
+                if (!descendant.object3D) return;
+                const descMeshTargets = [
+                    ...descendant.object3D.getObjectsByProperty('isMesh', true),
+                    ...descendant.object3D.getObjectsByProperty('isSkinnedMesh', true),
+                ];
+                const descMatTargets = descMeshTargets.filter((matTarget) => matTarget.material);
+                addMatTargets.push(...descMatTargets);
+            });
+            matTargets.push(...addMatTargets);
+        }
+
         if (matTargets.length === 0) {
             // No materials to clip (???), just remove it and/or return
             if (dir === 'out') {
@@ -64,6 +84,13 @@ AFRAME.registerComponent('blip', {
         // Determine min and max heights of object
         const bbox = new THREE.Box3();
         bbox.setFromObject(object3D);
+
+        if (data.applyDescendants && dir === 'out') {
+            addMatTargets.forEach((matTarget) => {
+                bbox.expandByObject(matTarget);
+            });
+        }
+
         const minY = bbox.min.y;
         const maxY = bbox.max.y;
         const midY = (minY + maxY) / 2;
