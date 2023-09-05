@@ -465,7 +465,6 @@ window.addEventListener('onauth', async (e) => {
                                     if (!responsePostFS.ok) {
                                         throw new Error(responsePostFS.statusText);
                                     }
-                                    Swal.hideLoading();
                                     const uploadObj = {
                                         object_id: uploadObjectId,
                                         type: 'object',
@@ -476,6 +475,20 @@ window.addEventListener('onauth', async (e) => {
                                     };
                                     if (hideinar) {
                                         uploadObj.data['hide-on-enter-ar'] = true;
+                                    }
+                                    if (!model) {
+                                        // try to preserve image aspect ratio in mesh, user can scale to resize
+                                        // TODO: web runtime for image seems to not obey mesh params
+                                        const img = Swal.getPopup().querySelector('.swal2-image');
+                                        if (img.width > img.height) {
+                                            const ratio = img.width / img.height;
+                                            uploadObj.data.width = ratio;
+                                            uploadObj.data.height = 1.0;
+                                        } else {
+                                            const ratio = img.height / img.width;
+                                            uploadObj.data.width = 1.0;
+                                            uploadObj.data.height = ratio;
+                                        }
                                     }
                                     const scene = `${namespaceinput.value}/${sceneinput.value}`;
                                     PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
@@ -491,8 +504,10 @@ window.addEventListener('onauth', async (e) => {
                                     }, 500);
                                 })
                                 .catch((error) => {
-                                    Swal.hideLoading();
                                     Swal.showValidationMessage(`Request failed: ${error}`);
+                                })
+                                .finally(() => {
+                                    Swal.hideLoading();
                                 });
                         },
                         willClose: () => {
