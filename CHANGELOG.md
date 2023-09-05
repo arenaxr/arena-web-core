@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.22.0](https://github.com/arenaxr/arena-web-core/compare/v1.21.2...v1.22.0) (2023-09-04)
+
+
+### Features
+
+* Add build page model/image filestore upload buttons ([#577](https://github.com/arenaxr/arena-web-core/issues/577)) ([abb0f11](https://github.com/arenaxr/arena-web-core/commit/abb0f1122b53fb7af663abcc38da2568501f483f))
+* add url param to disable atw for remote rendering ([0a852aa](https://github.com/arenaxr/arena-web-core/commit/0a852aabc35f5dc77957b749233f76621cee7e98))
+* **build:** add model upload hide-in-ar for digital twin option ([3377cf1](https://github.com/arenaxr/arena-web-core/commit/3377cf1c62b6b57e6788066b3b92064d7d122008))
+
+
+### Bug Fixes
+
+* **build:** fixed auth await for updated fs token ([f4c69d9](https://github.com/arenaxr/arena-web-core/commit/f4c69d925cf29ef1dde8c87d202e5f1b4ea7179c))
+* **build:** make consistant uplaod file path ([1d0411e](https://github.com/arenaxr/arena-web-core/commit/1d0411e579871c2451926239c20eb010a7c1bf78))
+* **fs:** fixed filestore path link to use de-scoped resource path ([b5afcce](https://github.com/arenaxr/arena-web-core/commit/b5afccee1cbfa8e0ecd6aeb667e62797621a82b2))
+* working window listener for XRBrowser touch ([fef91cf](https://github.com/arenaxr/arena-web-core/commit/fef91cfe1c8ac61a56bf350e832f36a6dc7b8b12))
+
 ## [1.21.2](https://github.com/arenaxr/arena-web-core/compare/v1.21.1...v1.21.2) (2023-08-28)
 
 
