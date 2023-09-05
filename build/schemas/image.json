@@ -23,6 +23,26 @@
                                 "format": "uri",
                                 "title": "Url",
                                 "type": "string"
+                            },
+                            "height": {
+                                "type": "number",
+                                "title": "height",
+                                "default": 1
+                            },
+                            "segmentsHeight": {
+                                "type": "number",
+                                "title": "segments height",
+                                "default": 1
+                            },
+                            "segmentsWidth": {
+                                "type": "number",
+                                "title": "segments width",
+                                "default": 1
+                            },
+                            "width": {
+                                "type": "number",
+                                "title": "width",
+                                "default": 1
                             }
                         },
                         {
@@ -39,6 +59,8 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "image",
+                        "width": 1,
+                        "height": 1,
                         "position": {
                             "x": 0,
                             "y": 0,
