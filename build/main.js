@@ -478,7 +478,6 @@ window.addEventListener('onauth', async (e) => {
                                     }
                                     if (!model) {
                                         // try to preserve image aspect ratio in mesh, user can scale to resize
-                                        // TODO: web runtime for image seems to not obey mesh params
                                         const img = Swal.getPopup().querySelector('.swal2-image');
                                         if (img.width > img.height) {
                                             const ratio = img.width / img.height;
