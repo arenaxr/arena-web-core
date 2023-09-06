@@ -275,13 +275,7 @@
                     "description": "Apply blipout effect to include all descendents. Does not work for blipin"
                 }
             },
-            "required": [
-                "blipin",
-                "blipout",
-                "planes",
-                "geometry",
-                "duration"
-            ]
+            "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
         "color": {
             "deprecated": true,

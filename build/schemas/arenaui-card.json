@@ -1,151 +1,123 @@
 {
-  "title": "ARENAUI Card Panel",
-  "description": "ARENAUI element which displays text and optionally an image.",
-  "allOf": [
-    {
-      "$ref": "./schemas/definitions-arena-object.json#/properties"
-    },
-    {
-      "properties": {
-        "data": {
-          "allOf": [
-            {
-              "properties": {
-                "object_type": {
-                  "type": "string",
-                  "title": "3D object type",
-                  "description": "3D object type (derived from 'type' select above).",
-                  "enum": [
-                    "arenaui-card"
-                  ]
-                },
-                "title": {
-                  "type": "string",
-                  "title": "Title",
-                  "default": ""
-                },
-                "body": {
-                  "type": "string",
-                  "title": "Body",
-                  "default": "",
-                  "description": "This is the text body of the card."
-                },
-                "bodyAlign": {
-                  "type": "string",
-                  "title": "Body Text Alignment",
-                  "default": "left",
-                  "enum": [
-                    "left",
-                    "center",
-                    "right",
-                    "justify"
-                  ]
-                },
-                "img": {
-                  "type": "string",
-                  "title": "Image URL",
-                  "description": "This image will be embedded alongside the body text",
-                  "default": ""
-                },
-                "imgCaption": {
-                  "type": "string",
-                  "title": "Image Caption",
-                  "default": "",
-                  "description": "This will caption the image"
-                },
-                "imgDirection": {
-                  "type": "string",
-                  "title": "Image Direction",
-                  "default": "right",
-                  "enum": [
-                    "left",
-                    "right"
-                  ]
-                },
-                "imgSize": {
-                  "type": "string",
-                  "title": "Image sizing",
-                  "default": "cover",
-                  "enum": [
-                    "cover",
-                    "contain",
-                    "stretch"
-                  ]
-                },
-                "fontSize": {
-                  "type": "number",
-                  "title": "Font Size",
-                  "default": 0.035
-                },
-                "widthScale": {
-                  "type": "number",
-                  "title": "Width scale multiplier",
-                  "default": 1
-                },
-                "closeButton": {
-                  "type": "boolean",
-                  "title": "Show close button",
-                  "default": false
-                },
-                "font": {
-                  "type": "string",
-                  "title": "Font",
-                  "description": "Font to use for button text",
-                  "default": "Roboto",
-                  "enum": [
-                    "Roboto",
-                    "Roboto-Mono"
-                  ]
+    "title": "ARENAUI Card Panel",
+    "description": "ARENAUI element which displays text and optionally an image.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type (derived from 'type' select above).",
+                                    "enum": ["arenaui-card"]
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "title": "Title",
+                                    "default": ""
+                                },
+                                "body": {
+                                    "type": "string",
+                                    "title": "Body",
+                                    "default": "",
+                                    "description": "This is the text body of the card."
+                                },
+                                "bodyAlign": {
+                                    "type": "string",
+                                    "title": "Body Text Alignment",
+                                    "default": "left",
+                                    "enum": ["left", "center", "right", "justify"]
+                                },
+                                "img": {
+                                    "type": "string",
+                                    "title": "Image URL",
+                                    "description": "This image will be embedded alongside the body text",
+                                    "default": ""
+                                },
+                                "imgCaption": {
+                                    "type": "string",
+                                    "title": "Image Caption",
+                                    "default": "",
+                                    "description": "This will caption the image"
+                                },
+                                "imgDirection": {
+                                    "type": "string",
+                                    "title": "Image Direction",
+                                    "default": "right",
+                                    "enum": ["left", "right"]
+                                },
+                                "imgSize": {
+                                    "type": "string",
+                                    "title": "Image sizing",
+                                    "default": "cover",
+                                    "enum": ["cover", "contain", "stretch"]
+                                },
+                                "fontSize": {
+                                    "type": "number",
+                                    "title": "Font Size",
+                                    "default": 0.035
+                                },
+                                "widthScale": {
+                                    "type": "number",
+                                    "title": "Width scale multiplier",
+                                    "default": 1
+                                },
+                                "closeButton": {
+                                    "type": "boolean",
+                                    "title": "Show close button",
+                                    "default": false
+                                },
+                                "font": {
+                                    "type": "string",
+                                    "title": "Font",
+                                    "description": "Font to use for button text",
+                                    "default": "Roboto",
+                                    "enum": ["Roboto", "Roboto-Mono"]
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "Card Panel Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "arenaui-card-panel",
+                        "title": "",
+                        "body": "",
+                        "bodyAlign": "left",
+                        "img": "",
+                        "imgCaption": "",
+                        "imgSize": "cover",
+                        "fontSize": 0.035,
+                        "widthScale": 1,
+                        "closeButton": true,
+                        "position": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "rotation": {
+                            "w": 1,
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        }
+                    },
+                    "required": ["object_type", "title", "body", "img"]
                 }
-              }
-            },
-            {
-              "$ref": "./schemas/definitions-entity.json#/properties"
-            },
-            {
-              "$ref": "./schemas/definitions-common.json#/properties"
             }
-          ],
-          "title": "Card Panel Data",
-          "additionalProperties": true,
-          "default": {
-            "object_type": "arenaui-card-panel",
-            "title": "",
-            "body": "",
-            "bodyAlign": "left",
-            "img": "",
-            "imgCaption": "",
-            "imgSize": "cover",
-            "fontSize": 0.035,
-            "widthScale": 1,
-            "closeButton": true,
-            "position": {
-              "x": 0,
-              "y": 0,
-              "z": 0
-            },
-            "rotation": {
-              "w": 1,
-              "x": 0,
-              "y": 0,
-              "z": 0
-            }
-          },
-          "required": [
-            "object_type",
-            "title",
-            "body",
-            "img"
-          ]
         }
-      }
-    }
-  ],
-  "required": [
-    "object_id",
-    "action",
-    "type",
-    "data",
-    "persist"
-  ]
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

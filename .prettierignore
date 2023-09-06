@@ -13,3 +13,4 @@ package.json
 package-lock.json
 src/components/thickline/lib/THREE.MeshLine.js
 src/systems/armarker/camera-capture/base64-binary.js
+src/systems/ui/fonts/
