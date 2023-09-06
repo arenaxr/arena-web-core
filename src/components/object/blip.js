@@ -1,5 +1,7 @@
 /* global AFRAME, THREE */
 
+const SCALE_IN_DURATION = 333;
+
 AFRAME.registerComponent('blip', {
     schema: {
         blipin: { type: 'boolean', default: true },
@@ -98,7 +100,7 @@ AFRAME.registerComponent('blip', {
         const depth = bbox.max.z - bbox.min.z;
         const radius = Math.max(width, depth) / 2;
 
-        const clipPlanes = [];
+        this.clipPlanes = [];
 
         // Determine start end (for blip out)
         let botStart = -minY;
@@ -114,11 +116,11 @@ AFRAME.registerComponent('blip', {
         // Create clipping planes
         if (data.planes === 'bottom' || data.planes === 'both') {
             this.planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), botStart); // Clips everything below
-            clipPlanes.push(this.planeBot);
+            this.clipPlanes.push(this.planeBot);
         }
         if (data.planes === 'top' || data.planes === 'both') {
             this.planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), topStart); // Clips everything above
-            clipPlanes.push(this.planeTop);
+            this.clipPlanes.push(this.planeTop);
         }
 
         const planeMeshMaterial = new THREE.MeshPhongMaterial({
@@ -177,13 +179,22 @@ AFRAME.registerComponent('blip', {
 
         matTargets.forEach((matTarget) => {
             /* eslint-disable no-param-reassign */
-            matTarget.material.clippingPlanes = clipPlanes;
+            matTarget.material.clippingPlanes = this.clipPlanes;
             matTarget.material.clipShadows = true;
             /* eslint-disable no-param-reassign */
         });
 
         if (dir === 'in') {
             object3D.visible = true;
+            setTimeout(() => {
+                /*
+                 Backup in case animation doesn't complete from bg tab or other disruption. anime.js has
+                 aberrant behavior when tab is not in focus, presumably due to throttled requestAnimationFrame.
+                 */
+                if (this.meshPlaneBot) sceneEl.object3D.remove(this.meshPlaneBot);
+                if (this.meshPlaneTop) sceneEl.object3D.remove(this.meshPlaneTop);
+                this.cleanup();
+            }, data.duration + 2 * SCALE_IN_DURATION + 100); // Full animation + 100ms buffer
         }
 
         if (data.planes === 'bottom' || data.planes === 'both') {
@@ -195,7 +206,7 @@ AFRAME.registerComponent('blip', {
                 targets: this.meshPlaneBot.scale,
                 x: 1,
                 y: 1,
-                duration: 333,
+                duration: SCALE_IN_DURATION,
             });
             tlBot.add({
                 targets: [this.planeBot, this.meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
@@ -203,20 +214,19 @@ AFRAME.registerComponent('blip', {
                 y: -botEnd, // Once again inverted from constant
                 easing: 'easeInOutSine',
                 duration: data.duration,
-                complete: () => {
-                    if (data.planes === 'bottom' && dir === 'out') {
-                        // Only do remove if this is only plane
-                        el.remove.bind(el)();
-                    }
-                },
             });
             tlBot.add({
                 targets: this.meshPlaneBot.scale,
                 x: 0,
                 y: 0,
-                duration: 333,
+                duration: SCALE_IN_DURATION,
                 complete: () => {
                     sceneEl.object3D.remove(this.meshPlaneBot);
+                    if (data.planes === 'bottom' && dir === 'out') {
+                        // Only do remove if this is only plane
+                        el.remove.bind(el)();
+                    }
+                    if (dir === 'in') this.cleanup();
                 },
             });
         }
@@ -227,7 +237,7 @@ AFRAME.registerComponent('blip', {
                 targets: this.meshPlaneTop.scale,
                 x: 1,
                 y: 1,
-                duration: 333,
+                duration: SCALE_IN_DURATION,
             });
             tlTop.add({
                 targets: [this.planeTop, this.meshPlaneTop.position],
@@ -235,21 +245,28 @@ AFRAME.registerComponent('blip', {
                 y: topEnd,
                 easing: 'easeInOutSine',
                 duration: data.duration + 1, // ensure later than bottom
-                complete: () => {
-                    if (dir === 'out') {
-                        el.remove.bind(el)();
-                    }
-                },
             });
             tlTop.add({
                 targets: this.meshPlaneTop.scale,
                 x: 0,
                 y: 0,
-                duration: 333,
+                duration: SCALE_IN_DURATION,
                 complete: () => {
                     sceneEl.object3D.remove(this.meshPlaneTop);
+                    if (dir === 'in') this.cleanup();
+                    if (dir === 'out') {
+                        el.remove.bind(el)();
+                    }
                 },
             });
         }
+    },
+    cleanup() {
+        // Remove clipping plane references
+        this.clipPlanes.length = 0;
+        this.planeBot = null;
+        this.planeTop = null;
+        this.meshPlaneBot = null;
+        this.meshPlaneTop = null;
     },
 });
