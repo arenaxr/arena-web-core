@@ -10,6 +10,7 @@
 
 import { ARENAUtils } from '../utils';
 
+// AFRAME Monkeypatch (src/components/gltf-model.js)
 AFRAME.components['gltf-model'].Component.prototype.init = function init() {
     const self = this;
     const dracoLoader = this.system.getDRACOLoader();

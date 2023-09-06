@@ -11,9 +11,9 @@ const { Pathfinding } = require('three-pathfinding');
 const ZONE = 'level';
 
 /**
- * nav
- *
  * Pathfinding system, using PatrolJS.
+ *
+ * AFRAME Monkeypatch - AFRAME Extras Nav (src/pathfinding/system.js)
  */
 
 AFRAME.systems.nav.prototype.init = function init() {
@@ -23,6 +23,8 @@ AFRAME.systems.nav.prototype.init = function init() {
 };
 
 /**
+ * AFRAME Monkeypatch - AFRAME Extras Nav (src/pathfinding/system.js)
+ *
  * @param {THREE.Geometry} geometry
  */
 AFRAME.systems.nav.prototype.setNavMeshGeometry = function setNavMeshGeometry(geometry) {
@@ -32,6 +34,8 @@ AFRAME.systems.nav.prototype.setNavMeshGeometry = function setNavMeshGeometry(ge
 };
 
 /**
+ * AFRAME Monkeypatch - AFRAME Extras Nav (src/pathfinding/system.js)
+ *
  * @param  {THREE.Vector3} start
  * @param  {THREE.Vector3} end
  * @param  {number} groupID
@@ -42,6 +46,8 @@ AFRAME.systems.nav.prototype.getPath = function getPath(start, end, groupID) {
 };
 
 /**
+ * AFRAME Monkeypatch - AFRAME Extras Nav (src/pathfinding/system.js)
+ *
  * @param {THREE.Vector3} position
  * @param {boolean} checkPolygon - Check coplanar groups only
  * @return {number}
@@ -51,6 +57,8 @@ AFRAME.systems.nav.prototype.getGroup = function getGroup(position, checkPolygon
 };
 
 /**
+ * AFRAME Monkeypatch - AFRAME Extras Nav (src/pathfinding/system.js)
+ *
  * @param  {THREE.Vector3} position
  * @param  {number} groupID
  * @param  {boolean} checkPolygon - Restrict getClosest node to coplanar
@@ -61,6 +69,8 @@ AFRAME.systems.nav.prototype.getNode = function getNode(position, groupID, check
 };
 
 /**
+ * AFRAME Monkeypatch - AFRAME Extras Nav (src/pathfinding/system.js)
+ *
  * @param  {THREE.Vector3} start Starting position.
  * @param  {THREE.Vector3} end Desired ending position.
  * @param  {number} groupID

@@ -44,6 +44,7 @@ function copyArray(a, b) {
 
 const isUIButtonObject = (obj) => obj.name === 'UIBackgroundBox' && obj.parent?.isMeshUIButton;
 
+// AFRAME Monkeypatch (src/components/raycaster.js)
 AFRAME.components.raycaster.Component.prototype.init = function init() {
     this.clearedIntersectedEls = [];
     this.unitLineEndVec3 = new THREE.Vector3();
@@ -80,6 +81,7 @@ AFRAME.components.raycaster.Component.prototype.init = function init() {
     this.intersectionDetail = {};
 };
 
+// AFRAME Monkeypatch (src/components/raycaster.js)
 AFRAME.components.raycaster.Component.prototype.checkIntersections = function checkIntersections() {
     const { clearedIntersectedEls } = this;
     const { el } = this;
