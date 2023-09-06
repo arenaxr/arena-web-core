@@ -8,16 +8,16 @@ import { ACTIONS } from '../../../constants';
 // default render order of objects; reserve 0 for occlusion
 const RENDER_ORDER = 1;
 
-const camMatrixInverse = new THREE.Matrix4();
-const rigMatrix = new THREE.Matrix4();
-const overrideQuat = new THREE.Quaternion();
+// const camMatrixInverse = new THREE.Matrix4();
+// const rigMatrix = new THREE.Matrix4();
+// const overrideQuat = new THREE.Quaternion();
 
 const warn = AFRAME.utils.debug('ARENA:warn');
 const error = AFRAME.utils.debug('ARENA:error');
 const createWarn = AFRAME.utils.debug('ARENA:create:warn');
 const updateWarn = AFRAME.utils.debug('ARENA:update:warn');
-const createError = AFRAME.utils.debug('ARENA:create:error');
-const updateError = AFRAME.utils.debug('ARENA:update:error');
+// const createError = AFRAME.utils.debug('ARENA:create:error');
+// const updateError = AFRAME.utils.debug('ARENA:update:error');
 const cameraLookAtWarn = AFRAME.utils.debug('ARENA:camera look-at:warn');
 const cameraLookAtError = AFRAME.utils.debug('ARENA:camera look-at:error');
 

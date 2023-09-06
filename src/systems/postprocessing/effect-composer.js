@@ -2,8 +2,8 @@
 
 /* global THREE */
 
-import CopyShader from './shaders/CopyShader';
-import ShaderPass from './passes/shader-pass';
+// import CopyShader from './shaders/CopyShader';
+// import ShaderPass from './passes/shader-pass';
 
 // https://github.com/mrdoob/three.js/blob/master/examples/jsm/postprocessing/EffectComposer.js
 export default class EffectComposer {

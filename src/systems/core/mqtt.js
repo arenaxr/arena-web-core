@@ -14,7 +14,7 @@ import { ClientEvent, CreateUpdate, Delete } from './message-actions/index';
 import { ARENA_EVENTS, ACTIONS } from '../../constants';
 
 const warn = AFRAME.utils.debug('ARENA:MQTT:warn');
-const error = AFRAME.utils.debug('ARENA:MQTT:error');
+// const error = AFRAME.utils.debug('ARENA:MQTT:error');
 
 AFRAME.registerSystem('arena-mqtt', {
     schema: {
@@ -61,8 +61,6 @@ AFRAME.registerSystem('arena-mqtt', {
             // last will topic
             outputTopic + camName
         );
-
-
     },
 
     async initWorker() {

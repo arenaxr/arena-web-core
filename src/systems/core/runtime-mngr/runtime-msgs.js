@@ -183,7 +183,7 @@ export default class RuntimeMsgs {
 
         // replaces variables given a dictionary of replacements; e.g:
         // replaceVars('SCENE=${cameraid}', { cameraid: 'camera_1479408135_nuno' }) returns 'SCENE=camera_1479408135_nuno'
-        var replaceVars = (tplText, args) => tplText.replace(/\${(\w+)}/g, (_, v) => args[v]);
+        const replaceVars = (tplText, args) => tplText.replace(/\${(\w+)}/g, (_, v) => args[v]);
 
         let muuid = UUID.generate(); // for per client, create a random uuid;
         // check if instantiate is "single"

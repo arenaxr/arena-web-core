@@ -6,7 +6,7 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA */
+/* global AFRAME */
 
 // ARENA version from automated scripts
 import ARENA_VERSION_MSG from './arena-version';

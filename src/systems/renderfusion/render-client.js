@@ -7,7 +7,7 @@ import { ARENA_EVENTS } from '../../constants';
 
 const info = AFRAME.utils.debug('ARENA:render-client:info');
 const warn = AFRAME.utils.debug('ARENA:render-client:warn');
-const error = AFRAME.utils.debug('ARENA:render-client:error');
+// const error = AFRAME.utils.debug('ARENA:render-client:error');
 
 const pcConfig = {
     sdpSemantics: 'unified-plan',
@@ -23,9 +23,9 @@ const sdpConstraints = {
 };
 
 const invalidCodecs = ['video/red', 'video/ulpfec', 'video/rtx'];
-let preferredCodec = 'video/H264';
-let preferredSdpFmtpPrefix = 'level-asymmetry-allowed=1;packetization-mode=1;';
-let preferredSdpFmtpLine = 'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f';
+const preferredCodec = 'video/H264';
+const preferredSdpFmtpPrefix = 'level-asymmetry-allowed=1;packetization-mode=1;';
+const preferredSdpFmtpLine = 'level-asymmetry-allowed=1;packetization-mode=1;profile-level-id=42e01f';
 
 const dataChannelOptions = {
     ordered: true,
