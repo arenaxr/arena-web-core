@@ -187,14 +187,14 @@ AFRAME.registerComponent('blip', {
         if (dir === 'in') {
             object3D.visible = true;
             setTimeout(() => {
-                /*
-                 Backup in case animation doesn't complete from bg tab or other disruption. anime.js has
-                 aberrant behavior when tab is not in focus, presumably due to throttled requestAnimationFrame.
-                 */
+                // Backup in case animation doesn't complete from bg tab or other disruption per known anime.js behavior
                 if (this.meshPlaneBot) sceneEl.object3D.remove(this.meshPlaneBot);
                 if (this.meshPlaneTop) sceneEl.object3D.remove(this.meshPlaneTop);
                 this.cleanup();
             }, data.duration + 2 * SCALE_IN_DURATION + 100); // Full animation + 100ms buffer
+        } else {
+            // Also needed on delete, lest a tab be brought back to fg and _all_ interim
+            setTimeout(el.remove.bind(el), data.duration + 2 * SCALE_IN_DURATION + 100);
         }
 
         if (data.planes === 'bottom' || data.planes === 'both') {
