@@ -28,15 +28,7 @@ window.addEventListener('onauth', async (e) => {
     const mqttToken = e.detail.mqtt_token;
     const auth = ARENAAUTH.getAuthStatus();
 
-    if (!auth.authenticated) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Please do a non-anonymous login.',
-            allowEscapeKey: false,
-            allowOutsideClick: false,
-        }).then(ARENAAUTH.signOut);
-        return;
-    }
+    // all auth types should have access to this page, even anonymous users should be able to read public scenes
 
     window.username = auth.username;
 
