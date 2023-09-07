@@ -17,8 +17,9 @@ AFRAME.registerComponent('blip', {
             el,
             el: { object3D },
         } = this;
+        this.cleanup = this.cleanup.bind(this);
+        this.checkBlipIn = this.checkBlipIn.bind(this);
         if (data.blipin === true && object3D.children.length === 0) {
-            this.checkBlipIn = this.checkBlipIn.bind(this);
             this.initCount = 0;
             object3D.visible = false;
             // On initial node creation, no geometry or material is loaded yet
@@ -123,7 +124,7 @@ AFRAME.registerComponent('blip', {
             this.clipPlanes.push(this.planeTop);
         }
 
-        const planeMeshMaterial = new THREE.MeshPhongMaterial({
+        this.planeMeshMaterial = new THREE.MeshPhongMaterial({
             color: 0x049ef4,
             emissive: 0x000080,
             specular: 0xffffff,
@@ -137,19 +138,19 @@ AFRAME.registerComponent('blip', {
         switch (data.geometry) {
             case 'disk': {
                 // 2d disk
-                baseMeshPlane = new THREE.Mesh(new THREE.RingGeometry(0, radius), planeMeshMaterial);
+                baseMeshPlane = new THREE.Mesh(new THREE.RingGeometry(0, radius), this.planeMeshMaterial);
                 break;
             }
             case 'ring': {
                 // 2d ring
                 baseMeshPlane = new THREE.Mesh(
                     new THREE.RingGeometry(radius, Math.min(radius + 0.15, radius * 1.1)),
-                    planeMeshMaterial
+                    this.planeMeshMaterial
                 );
                 break;
             }
             default: // 2d rect
-                baseMeshPlane = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), planeMeshMaterial);
+                baseMeshPlane = new THREE.Mesh(new THREE.PlaneGeometry(width, depth), this.planeMeshMaterial);
         }
         bbox.getCenter(baseMeshPlane.position); // align in world pos
         baseMeshPlane.rotation.x = -Math.PI / 2; // rotate horizontal flat
@@ -185,17 +186,22 @@ AFRAME.registerComponent('blip', {
         });
 
         if (dir === 'in') {
+            // Unhide blipin object now that clipping planes are set
             object3D.visible = true;
-            setTimeout(() => {
-                // Backup in case animation doesn't complete from bg tab or other disruption per known anime.js behavior
-                if (this.meshPlaneBot) sceneEl.object3D.remove(this.meshPlaneBot);
-                if (this.meshPlaneTop) sceneEl.object3D.remove(this.meshPlaneTop);
-                this.cleanup();
-            }, data.duration + 2 * SCALE_IN_DURATION + 100); // Full animation + 100ms buffer
-        } else {
-            // Also needed on delete, lest a tab be brought back to fg and _all_ interim
-            setTimeout(el.remove.bind(el), data.duration + 2 * SCALE_IN_DURATION + 100);
         }
+
+        setTimeout(() => {
+            if (!this.el) return;
+            // Backup in case animation doesn't complete from bg tab or other disruption per known anime.js behavior
+            if (dir === 'out') {
+                try {
+                    el.remove();
+                } catch {
+                    /* empty */
+                }
+            }
+            this.cleanup(sceneEl);
+        }, data.duration + 2 * SCALE_IN_DURATION + 500); // Full animation + 500ms buffer
 
         if (data.planes === 'bottom' || data.planes === 'both') {
             sceneEl.object3D.add(this.meshPlaneBot); // Add to sceneroot for world space
@@ -221,12 +227,17 @@ AFRAME.registerComponent('blip', {
                 y: 0,
                 duration: SCALE_IN_DURATION,
                 complete: () => {
-                    sceneEl.object3D.remove(this.meshPlaneBot);
-                    if (data.planes === 'bottom' && dir === 'out') {
-                        // Only do remove if this is only plane
-                        el.remove.bind(el)();
+                    if (data.planes === 'bottom') {
+                        if (dir === 'out') {
+                            // Only do remove if this is only plane
+                            try {
+                                el.remove();
+                            } catch {
+                                /* empty */
+                            }
+                        }
+                        this.cleanup(sceneEl);
                     }
-                    if (dir === 'in') this.cleanup();
                 },
             });
         }
@@ -252,21 +263,38 @@ AFRAME.registerComponent('blip', {
                 y: 0,
                 duration: SCALE_IN_DURATION,
                 complete: () => {
-                    sceneEl.object3D.remove(this.meshPlaneTop);
-                    if (dir === 'in') this.cleanup();
                     if (dir === 'out') {
-                        el.remove.bind(el)();
+                        try {
+                            el.remove();
+                        } catch {
+                            /* empty */
+                        }
                     }
+                    this.cleanup(sceneEl);
                 },
             });
         }
     },
-    cleanup() {
+    /* We include sceneEl in cleanup as it will be lost after el remove */
+    cleanup(sceneEl) {
         // Remove clipping plane references
+        try {
+            if (this.meshPlaneBot) {
+                sceneEl.object3D.remove(this.meshPlaneBot);
+                this.meshPlaneBot.geometry.dispose();
+                this.meshPlaneBot = null;
+            }
+            if (this.meshPlaneTop) {
+                sceneEl.object3D.remove(this.meshPlaneTop);
+                this.meshPlaneTop.geometry.dispose();
+                this.meshPlaneTop = null;
+            }
+        } catch {
+            /* empty */
+        }
+        this.planeMeshMaterial.dispose();
         this.clipPlanes.length = 0;
         this.planeBot = null;
         this.planeTop = null;
-        this.meshPlaneBot = null;
-        this.meshPlaneTop = null;
     },
 });
