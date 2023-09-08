@@ -15,10 +15,19 @@ AFRAME.registerComponent('blip', {
         const {
             data,
             el,
-            el: { object3D },
+            el: { object3D, sceneEl },
         } = this;
-        this.cleanup = this.cleanup.bind(this);
+
+        AFRAME.ANIME.suspendWhenDocumentHidden = false;
+        sceneEl.renderer.localClippingEnabled = true;
+        sceneEl.renderer.clipShadows = true;
+
+        this.animations = [];
+        this.clipPlanes = [];
+        this.time = undefined;
+
         this.checkBlipIn = this.checkBlipIn.bind(this);
+
         if (data.blipin === true && object3D.children.length === 0) {
             this.initCount = 0;
             object3D.visible = false;
@@ -39,10 +48,14 @@ AFRAME.registerComponent('blip', {
 
     blip(dir) {
         const {
+            animations,
+            clipPlanes,
             data,
             el,
+            time,
             el: { object3D, sceneEl },
         } = this;
+        if (time !== undefined || animations.length !== 0) this.cleanup(sceneEl);
         if (!el.getAttribute('geometry') && !el.getAttribute('gltf-model')) {
             // Only blip in geometry and gltfs, exception for out w/ descendants
             if (dir === 'out' && data.applyDescendants === false) {
@@ -51,8 +64,6 @@ AFRAME.registerComponent('blip', {
                 return;
             }
         }
-        sceneEl.renderer.localClippingEnabled = true;
-        sceneEl.renderer.clipShadows = true;
 
         const addMatTargets = [];
 
@@ -117,11 +128,11 @@ AFRAME.registerComponent('blip', {
         // Create clipping planes
         if (data.planes === 'bottom' || data.planes === 'both') {
             this.planeBot = new THREE.Plane(new THREE.Vector3(0, 1, 0), botStart); // Clips everything below
-            this.clipPlanes.push(this.planeBot);
+            clipPlanes.push(this.planeBot);
         }
         if (data.planes === 'top' || data.planes === 'both') {
             this.planeTop = new THREE.Plane(new THREE.Vector3(0, -1, 0), topStart); // Clips everything above
-            this.clipPlanes.push(this.planeTop);
+            clipPlanes.push(this.planeTop);
         }
 
         this.planeMeshMaterial = new THREE.MeshPhongMaterial({
@@ -180,7 +191,7 @@ AFRAME.registerComponent('blip', {
 
         matTargets.forEach((matTarget) => {
             /* eslint-disable no-param-reassign */
-            matTarget.material.clippingPlanes = this.clipPlanes;
+            matTarget.material.clippingPlanes = clipPlanes;
             matTarget.material.clipShadows = true;
             /* eslint-disable no-param-reassign */
         });
@@ -190,29 +201,15 @@ AFRAME.registerComponent('blip', {
             object3D.visible = true;
         }
 
-        setTimeout(() => {
-            if (!this.el) return;
-            // Backup in case animation doesn't complete from bg tab or other disruption per known anime.js behavior
-            if (dir === 'out') {
-                try {
-                    el.remove();
-                } catch {
-                    /* empty */
-                }
-            }
-            this.cleanup(sceneEl);
-        }, data.duration + 2 * SCALE_IN_DURATION + 500); // Full animation + 500ms buffer
+        this.time = 0; // "enable" time tracking/animation
 
         if (data.planes === 'bottom' || data.planes === 'both') {
             sceneEl.object3D.add(this.meshPlaneBot); // Add to sceneroot for world space
-            const tlBot = AFRAME.ANIME.timeline({
-                easing: 'linear',
-            });
+            const tlBot = AFRAME.ANIME.timeline({ easing: 'linear', autoplay: false, duration: SCALE_IN_DURATION });
             tlBot.add({
                 targets: this.meshPlaneBot.scale,
                 x: 1,
                 y: 1,
-                duration: SCALE_IN_DURATION,
             });
             tlBot.add({
                 targets: [this.planeBot, this.meshPlaneBot.position], // constant, y ignored in vec3, plane respectively
@@ -225,7 +222,6 @@ AFRAME.registerComponent('blip', {
                 targets: this.meshPlaneBot.scale,
                 x: 0,
                 y: 0,
-                duration: SCALE_IN_DURATION,
                 complete: () => {
                     if (data.planes === 'bottom') {
                         if (dir === 'out') {
@@ -240,15 +236,16 @@ AFRAME.registerComponent('blip', {
                     }
                 },
             });
+            tlBot.began = true;
+            animations.push(tlBot);
         }
         if (data.planes === 'top' || data.planes === 'both') {
             sceneEl.object3D.add(this.meshPlaneTop); // Add to sceneroot for world space
-            const tlTop = AFRAME.ANIME.timeline({ easing: 'linear' });
+            const tlTop = AFRAME.ANIME.timeline({ easing: 'linear', autoplay: false, duration: SCALE_IN_DURATION });
             tlTop.add({
                 targets: this.meshPlaneTop.scale,
                 x: 1,
                 y: 1,
-                duration: SCALE_IN_DURATION,
             });
             tlTop.add({
                 targets: [this.planeTop, this.meshPlaneTop.position],
@@ -261,7 +258,6 @@ AFRAME.registerComponent('blip', {
                 targets: this.meshPlaneTop.scale,
                 x: 0,
                 y: 0,
-                duration: SCALE_IN_DURATION,
                 complete: () => {
                     if (dir === 'out') {
                         try {
@@ -273,6 +269,8 @@ AFRAME.registerComponent('blip', {
                     this.cleanup(sceneEl);
                 },
             });
+            tlTop.began = true;
+            animations.push(tlTop);
         }
     },
     /* We include sceneEl in cleanup as it will be lost after el remove */
@@ -292,9 +290,19 @@ AFRAME.registerComponent('blip', {
         } catch {
             /* empty */
         }
-        this.planeMeshMaterial.dispose();
+        this.planeMeshMaterial?.dispose();
         this.clipPlanes.length = 0;
         this.planeBot = null;
         this.planeTop = null;
+        this.animations.length = 0;
+        this.time = undefined;
+    },
+    tick(t, dt) {
+        const { animations } = this;
+        if (this.time === undefined || animations.length === 0) return; // Don't bother ticking when not blipping. Acts as enabled flag
+        this.time += dt;
+        animations.forEach((animation) => {
+            animation.tick(this.time);
+        });
     },
 });
