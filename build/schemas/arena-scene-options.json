@@ -66,7 +66,7 @@
                     "type": "boolean"
                 },
                 "dressingVariance": {
-                    "$ref": "#/definitions/Vector3",
+                    "$ref": "#/definitions/vector3",
                     "default": {
                         "x": 1,
                         "y": 1,
@@ -125,7 +125,7 @@
                     "type": "string"
                 },
                 "groundScale": {
-                    "$ref": "#/definitions/Vector3",
+                    "$ref": "#/definitions/vector3",
                     "default": {
                         "x": 1,
                         "y": 1,
@@ -169,7 +169,7 @@
                     "type": "string"
                 },
                 "lightPosition": {
-                    "$ref": "#/definitions/Vector3",
+                    "$ref": "#/definitions/vector3",
                     "default": {
                         "x": 0,
                         "y": 1,
@@ -658,15 +658,19 @@
             "type": "object",
             "description": "These effects are enabled in desktop and XR views"
         },
-        "Vector3": {
+        "vector3": {
+            "title": "Vector3",
             "properties": {
                 "x": {
+                    "default": 0,
                     "type": "number"
                 },
                 "y": {
+                    "default": 0,
                     "type": "number"
                 },
                 "z": {
+                    "default": 0,
                     "type": "number"
                 }
             },

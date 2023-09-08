@@ -50,21 +50,19 @@
             "title": "Rotation"
         },
         "scale": {
-            "default": {
-                "x": 1,
-                "y": 1,
-                "z": 1
-            },
             "description": "3D object scale",
             "id": "scale",
             "properties": {
                 "x": {
+                    "default": 1,
                     "type": "number"
                 },
                 "y": {
+                    "default": 1,
                     "type": "number"
                 },
                 "z": {
+                    "default": 1,
                     "type": "number"
                 }
             },

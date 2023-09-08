@@ -109,12 +109,6 @@
                                     "type": "number",
                                     "default": 4
                                 },
-                                "text": {
-                                    "type": "string",
-                                    "deprecated": true,
-                                    "title": "Text Value (deprecated; don't use)",
-                                    "description": "(deprecated) Please use attribute 'value' in new Text objects;"
-                                },
                                 "transparent": {
                                     "description": "Whether text is transparent.",
                                     "type": "boolean",

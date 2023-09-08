@@ -18,12 +18,15 @@
                             "description": "The event destination position in 3D.",
                             "properties": {
                                 "x": {
+                                    "default": 0,
                                     "type": "number"
                                 },
                                 "y": {
+                                    "default": 0,
                                     "type": "number"
                                 },
                                 "z": {
+                                    "default": 0,
                                     "type": "number"
                                 }
                             },
@@ -33,18 +36,7 @@
                         },
                         "clickPos": {
                             "description": "The event origination position in 3D.",
-                            "properties": {
-                                "x": {
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "type": "number"
-                                },
-                                "z": {
-                                    "type": "number"
-                                }
-                            },
-                            "required": ["x", "y", "z"],
+                            "$ref": "#/definitions/vector3",
                             "title": "Click Position"
                         }
                     },
@@ -67,5 +59,26 @@
             }
         }
     ],
-    "required": ["object_id", "action", "type", "data"]
+    "required": ["object_id", "action", "type", "data"],
+    "definitions": {
+        "vector3": {
+            "title": "Vector3",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object"
+        }
+    }
 }
