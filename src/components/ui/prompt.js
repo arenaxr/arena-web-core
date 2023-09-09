@@ -7,10 +7,6 @@ import buttonBase from './buttons';
 AFRAME.registerComponent('arenaui-prompt', {
     ...buttonBase,
 
-    title: undefined,
-    description: undefined,
-    buttonContainer: undefined,
-
     schema: {
         title: { type: 'string', default: '' },
         description: { type: 'string', default: '' },
