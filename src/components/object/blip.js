@@ -112,8 +112,6 @@ AFRAME.registerComponent('blip', {
         const depth = bbox.max.z - bbox.min.z;
         const radius = Math.max(width, depth) / 2;
 
-        this.clipPlanes = [];
-
         // Determine start end (for blip out)
         let botStart = -minY;
         let topStart = maxY;
@@ -200,6 +198,19 @@ AFRAME.registerComponent('blip', {
             // Unhide blipin object now that clipping planes are set
             object3D.visible = true;
         }
+
+        setTimeout(() => {
+            if (!this.el) return;
+            // Backup in case animation doesn't complete from bg tab or other disruption per known anime.js behavior
+            if (dir === 'out') {
+                try {
+                    el.remove();
+                } catch {
+                    /* empty */
+                }
+            }
+            this.cleanup(sceneEl);
+        }, data.duration + 2 * SCALE_IN_DURATION + 500); // Full animation + 500ms buffer
 
         this.time = 0; // "enable" time tracking/animation
 
