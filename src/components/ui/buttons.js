@@ -43,9 +43,6 @@ const BUTTONSTATES = {
 };
 
 const buttonBase = {
-    buttonMap: undefined,
-    object3DContainer: undefined,
-
     init() {
         this.buttonMap = {};
         this.object3DContainer = new THREE.Object3D();
