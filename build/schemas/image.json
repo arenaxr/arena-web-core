@@ -16,33 +16,33 @@
                                     "title": "3D object type",
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": ["image"]
+                                },
+                                "url": {
+                                    "description": "Image URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/images/image.png); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/images/image.png))",
+                                    "format": "uri",
+                                    "title": "Url",
+                                    "type": "string"
+                                },
+                                "height": {
+                                    "type": "number",
+                                    "title": "height",
+                                    "default": 1
+                                },
+                                "segmentsHeight": {
+                                    "type": "number",
+                                    "title": "segments height",
+                                    "default": 1
+                                },
+                                "segmentsWidth": {
+                                    "type": "number",
+                                    "title": "segments width",
+                                    "default": 1
+                                },
+                                "width": {
+                                    "type": "number",
+                                    "title": "width",
+                                    "default": 1
                                 }
-                            },
-                            "url": {
-                                "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
-                                "format": "uri",
-                                "title": "Url",
-                                "type": "string"
-                            },
-                            "height": {
-                                "type": "number",
-                                "title": "height",
-                                "default": 1
-                            },
-                            "segmentsHeight": {
-                                "type": "number",
-                                "title": "segments height",
-                                "default": 1
-                            },
-                            "segmentsWidth": {
-                                "type": "number",
-                                "title": "segments width",
-                                "default": 1
-                            },
-                            "width": {
-                                "type": "number",
-                                "title": "width",
-                                "default": 1
                             }
                         },
                         {
