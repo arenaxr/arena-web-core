@@ -19,18 +19,7 @@
                                 },
                                 "end": {
                                     "title": "vertex B (end)",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": ["x", "y", "z"],
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -44,18 +33,7 @@
                                 },
                                 "start": {
                                     "title": "vertex A (start)",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": ["x", "y", "z"],
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,
                                         "y": 0.5,
@@ -101,5 +79,26 @@
             }
         }
     ],
-    "required": ["object_id", "action", "type", "data", "persist"]
+    "required": ["object_id", "action", "type", "data", "persist"],
+    "definitions": {
+        "vector3": {
+            "title": "Vector3",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object"
+        }
+    }
 }
