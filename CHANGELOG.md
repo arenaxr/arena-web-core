@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.23.0](https://github.com/arenaxr/arena-web-core/compare/v1.22.0...v1.23.0) (2023-09-10)
+
+
+### Features
+
+* add blip in/out vfx ([397ac8c](https://github.com/arenaxr/arena-web-core/commit/397ac8c4d7996ce601920dc791f4141dac488403))
+
+
+### Bug Fixes
+
+* add backup timeout for el del on blipout ([6456414](https://github.com/arenaxr/arena-web-core/commit/6456414d5217672101743961f974f3332df535fe))
+* **build:** add image geometry properties to schema ([81474ba](https://github.com/arenaxr/arena-web-core/commit/81474ba8c62d996306784366dede169c93d94ad7))
+* **build:** fixed errors in particle-system schema ([6351d87](https://github.com/arenaxr/arena-web-core/commit/6351d87765568581ffc404807de487f1caaa0643))
+* **build:** place image properties at proper level ([8d29291](https://github.com/arenaxr/arena-web-core/commit/8d29291cc99d3e632b2e395f4d4c217fb9896020))
+* **build:** preserve mesh aspect ratio in image file upload ([e57e53c](https://github.com/arenaxr/arena-web-core/commit/e57e53ce8e949b786d869ae0398d88fbd782c7e6))
+* defer until object fully loaded ([b189691](https://github.com/arenaxr/arena-web-core/commit/b189691d8f645673c09f8946896c362df945e180))
+* **image:** allow users to set image plane geometry attributes ([dadb766](https://github.com/arenaxr/arena-web-core/commit/dadb766b1e2459c6f1aec3ad8a357b2082d2c23a))
+* remove init camera pos/rot set in arena-users ([985f998](https://github.com/arenaxr/arena-web-core/commit/985f998edabe707a341f9a229ebc80989e2646d9))
+* **scenes:** allow anon users access to public scenes list ([322b673](https://github.com/arenaxr/arena-web-core/commit/322b6737cbc88e2d665f3a38b236d68938ceb370))
+* set ANIME tick to aframe tick to enable in XR ([e1a0556](https://github.com/arenaxr/arena-web-core/commit/e1a055668a3426ff947b28db3f7de3184dee10d4))
+
 ## [1.22.0](https://github.com/arenaxr/arena-web-core/compare/v1.21.2...v1.22.0) (2023-09-04)
 
 
