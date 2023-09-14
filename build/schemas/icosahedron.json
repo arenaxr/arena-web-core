@@ -18,7 +18,7 @@
                                     "enum": ["icosahedron"]
                                 },
                                 "detail": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "detail",
                                     "default": 0
                                 },

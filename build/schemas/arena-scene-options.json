@@ -34,7 +34,7 @@
                     "max": 1000,
                     "min": 0,
                     "title": "Dressing Amount",
-                    "type": "number"
+                    "type": "integer"
                 },
                 "dressingColor": {
                     "default": "#795449",
@@ -218,7 +218,7 @@
                     "max": 1000,
                     "min": 0,
                     "title": "Randomization Seed",
-                    "type": "number"
+                    "type": "integer"
                 },
                 "shadow": {
                     "default": false,

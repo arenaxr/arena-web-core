@@ -23,7 +23,7 @@
                                     "default": 1
                                 },
                                 "segments": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments",
                                     "default": 32
                                 },

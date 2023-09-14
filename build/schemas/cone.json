@@ -38,12 +38,12 @@
                                     "default": 0.01
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments height",
                                     "default": 18
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 36
                                 },

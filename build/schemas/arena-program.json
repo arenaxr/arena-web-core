@@ -102,7 +102,7 @@
                                         "description": "Destination host address (client socket; ignored for now)"
                                     },
                                     "port": {
-                                        "type": "number",
+                                        "type": "integer",
                                         "description": "Destination port (client socket; ignored for now)"
                                     }
                                 }

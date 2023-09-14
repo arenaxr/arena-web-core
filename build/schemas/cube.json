@@ -29,17 +29,17 @@
                                     "default": 1
                                 },
                                 "segmentsDepth": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments depth",
                                     "default": 1
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments height",
                                     "default": 1
                                 },
                                 "segmentsWidth": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments width",
                                     "default": 1
                                 },

@@ -33,12 +33,12 @@
                                     "default": 1
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments height",
                                     "default": 18
                                 },
                                 "segmentsWidth": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments width",
                                     "default": 36
                                 },

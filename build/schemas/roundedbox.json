@@ -38,7 +38,7 @@
                                     "default": 0.15
                                 },
                                 "radiusSegments": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radius",
                                     "default": 10
                                 }

@@ -33,12 +33,12 @@
                                     "default": 0.4
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 36
                                 },
                                 "segmentsTubular": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments tubular",
                                     "default": 32
                                 }

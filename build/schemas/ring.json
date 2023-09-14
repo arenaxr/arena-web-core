@@ -28,12 +28,12 @@
                                     "default": 1.2
                                 },
                                 "segmentsPhi": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments phi",
                                     "default": 10
                                 },
                                 "segmentsTheta": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments theta",
                                     "default": 32
                                 },

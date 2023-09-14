@@ -28,12 +28,12 @@
                                     "default": 1
                                 },
                                 "segmentsCap": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments capsule",
                                     "default": 18
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 36
                                 }
