@@ -140,6 +140,7 @@ window.addEventListener('onauth', async (e) => {
             schema,
             startval,
             ajax: true,
+            ajaxBase: document.location.pathname,
         });
 
         // When the value of the editor changes, update the JSON output and validation message
@@ -191,6 +192,8 @@ window.addEventListener('onauth', async (e) => {
         jsoneditor = new JSONEditor(editor, {
             schema,
             startval: updateobj,
+            ajax: true,
+            ajaxBase: document.location.pathname,
         });
 
         await jsoneditor.on('ready', () => {
@@ -281,6 +284,7 @@ window.addEventListener('onauth', async (e) => {
     JSONEditor.defaults.options.object_layout = 'normal';
     JSONEditor.defaults.options.show_errors = 'interaction';
     JSONEditor.defaults.options.ajax = true;
+    JSONEditor.defaults.options.ajaxBase = document.location.pathname;
 
     // show new scene modal
     function newSceneModal(theNewScene = undefined) {
