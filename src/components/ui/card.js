@@ -28,6 +28,7 @@ AFRAME.registerComponent('arenaui-card', {
         imgCaption: { type: 'string', default: '' },
         imgDirection: { type: 'string', default: 'right' },
         imgSize: { type: 'string', default: 'cover' }, // ['cover', 'contain', 'stretch']
+        textImageRatio: { type: 'number', default: ARENALayout.textImageRatio }, // Ratio of image to text
         fontSize: { type: 'number', default: ARENATypography.body },
         widthScale: { type: 'number', default: 1 }, // Scale factor
         closeButton: { type: 'boolean', default: false },
@@ -97,9 +98,7 @@ AFRAME.registerComponent('arenaui-card', {
 
         const textContainer = new ThreeMeshUI.Block({
             backgroundSide: THREE.DoubleSide,
-            width: data.img
-                ? ARENALayout.textImageRatio * data.widthScale
-                : (1 + ARENALayout.textImageRatio) * data.widthScale,
+            width: data.img ? data.textImageRatio * data.widthScale : (1 + data.textImageRatio) * data.widthScale,
             padding: ARENALayout.contentPadding,
             backgroundColor: ARENAColors.bg,
             backgroundOpacity: ARENAColors.bgOpacity,
@@ -219,9 +218,7 @@ AFRAME.registerComponent('arenaui-card', {
         if (data.widthScale !== oldData.widthScale) {
             this.imgContainer?.set({ width: data.widthScale });
             this.body?.set({
-                width: data.img
-                    ? ARENALayout.textImageRatio * data.widthScale
-                    : (1 + ARENALayout.textImageRatio) * data.widthScale,
+                width: data.img ? data.textImageRatio * data.widthScale : (1 + data.textImageRatio) * data.widthScale,
             });
         }
         if (this.closeButton && data.closeButton !== oldData.closeButton) {
