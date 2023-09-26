@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout, ARENATypography } from '../../constants/ui';
+import { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography } from '../../constants/ui';
 import buttonBase from './buttons';
 
 const borderRadiusLeft = [ARENALayout.borderRadius, 0, 0, ARENALayout.borderRadius];
@@ -33,6 +33,7 @@ AFRAME.registerComponent('arenaui-card', {
         widthScale: { type: 'number', default: 1 }, // Scale factor
         closeButton: { type: 'boolean', default: false },
         font: { type: 'string', default: 'Roboto' },
+        theme: { type: 'string', default: 'light' },
     },
 
     init() {
@@ -43,7 +44,7 @@ AFRAME.registerComponent('arenaui-card', {
         const container = new ThreeMeshUI.Block({
             ref: 'container',
             fontFamily: data.font,
-            color: ARENAColors.text,
+            color: this.ARENAColors.text,
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
@@ -55,8 +56,8 @@ AFRAME.registerComponent('arenaui-card', {
             imgContainerBlock = new ThreeMeshUI.Block({
                 backgroundSide: THREE.DoubleSide,
                 width: data.widthScale,
-                backgroundColor: ARENAColors.bg,
-                backgroundOpacity: ARENAColors.bgOpacity,
+                backgroundColor: this.ARENAColors.bg,
+                backgroundOpacity: this.ARENAColors.bgOpacity,
                 borderRadius: data.imgDirection === 'right' ? borderRadiusRight : borderRadiusLeft,
             });
             this.imgContainer = imgContainerBlock;
@@ -69,7 +70,7 @@ AFRAME.registerComponent('arenaui-card', {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'end',
-                backgroundColor: ARENAColors.captionBg,
+                backgroundColor: this.ARENAColors.captionBg,
                 backgroundOpacity: 1,
                 backgroundSize: data.imgSize,
             });
@@ -100,8 +101,8 @@ AFRAME.registerComponent('arenaui-card', {
             backgroundSide: THREE.DoubleSide,
             width: data.img ? data.textImageRatio * data.widthScale : (1 + data.textImageRatio) * data.widthScale,
             padding: ARENALayout.contentPadding,
-            backgroundColor: ARENAColors.bg,
-            backgroundOpacity: ARENAColors.bgOpacity,
+            backgroundColor: this.ARENAColors.bg,
+            backgroundOpacity: this.ARENAColors.bgOpacity,
             flexDirection: 'column',
             justifyContent: 'space-evenly',
             borderRadius: textBorderRadius,
@@ -134,8 +135,8 @@ AFRAME.registerComponent('arenaui-card', {
         const contentContainer = new ThreeMeshUI.Block({
             padding: ARENALayout.containerPadding,
             margin: 0,
-            backgroundColor: ARENAColors.textBg,
-            backgroundOpacity: ARENAColors.textBgOpacity,
+            backgroundColor: this.ARENAColors.textBg,
+            backgroundOpacity: this.ARENAColors.textBgOpacity,
             borderRadius: ARENALayout.borderRadius,
             flexDirection: 'row',
             alignItems: 'stretch',
@@ -231,6 +232,9 @@ AFRAME.registerComponent('arenaui-card', {
         if (data.font !== oldData.font) {
             this.outerMeshContainer?.set({ fontFamily: data.font });
         }
+        if (data.theme !== oldData.theme) {
+            this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+        }
     },
 
     addImgCaption() {
@@ -239,7 +243,7 @@ AFRAME.registerComponent('arenaui-card', {
             width: 'auto',
             textAlign: 'center',
             justifyContent: 'center',
-            backgroundColor: ARENAColors.bg,
+            backgroundColor: this.ARENAColors.bg,
             textContent: data.imgCaption,
             fontSize: data.fontSize,
             padding: ARENALayout.containerPadding,
@@ -253,8 +257,8 @@ AFRAME.registerComponent('arenaui-card', {
     addCloseButton() {
         const { data, el, outerMeshContainer } = this;
         const buttonContainer = new ThreeMeshUI.Block({
-            backgroundColor: ARENAColors.textBg,
-            backgroundOpacity: ARENAColors.textBgOpacity,
+            backgroundColor: this.ARENAColors.textBg,
+            backgroundOpacity: this.ARENAColors.textBgOpacity,
             justifyContent: 'center',
             flexDirection: 'row',
             fontFamily: data.font,

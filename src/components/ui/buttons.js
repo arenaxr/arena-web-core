@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout, ARENATypography, EVENTS } from '../../constants/ui';
+import { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography, EVENTS } from '../../constants/ui';
 
 // BUTTONS
 const buttonOptions = {
@@ -14,31 +14,31 @@ const buttonOptions = {
     borderRadius: ARENALayout.buttonBorderRadius,
     textAlign: 'center',
     padding: ARENALayout.buttonPadding,
-    backgroundOpacity: ARENAColors.buttonBgOpacity,
+    backgroundOpacity: this.ARENAColors.buttonBgOpacity,
     fontSize: ARENATypography.button,
 };
 
 const buttonTextOptions = {
     offset: 0,
     padding: ARENALayout.buttonTextPadding,
-    color: ARENAColors.buttonText,
+    color: this.ARENAColors.buttonText,
 };
 
 const BUTTONSTATES = {
     default: {
         offset: ARENALayout.buttonDefaultOffset,
-        backgroundColor: ARENAColors.buttonBg,
-        borderColor: ARENAColors.buttonBg,
+        backgroundColor: this.ARENAColors.buttonBg,
+        borderColor: this.ARENAColors.buttonBg,
     },
     hover: {
         offset: ARENALayout.buttonDefaultOffset,
-        backgroundColor: ARENAColors.buttonBgHover,
-        borderColor: ARENAColors.buttonBgHover,
+        backgroundColor: this.ARENAColors.buttonBgHover,
+        borderColor: this.ARENAColors.buttonBgHover,
     },
     selected: {
         offset: ARENALayout.buttonDownOffset,
-        backgroundColor: ARENAColors.buttonBgSelected,
-        borderColor: ARENAColors.buttonBgSelected,
+        backgroundColor: this.ARENAColors.buttonBgSelected,
+        borderColor: this.ARENAColors.buttonBgSelected,
     },
 };
 
@@ -203,15 +203,15 @@ AFRAME.registerComponent('arenaui-button-panel', {
         const { data } = this;
         buttonBase.init.bind(this)();
         const shadowContainer = new ThreeMeshUI.Block({
-            backgroundColor: ARENAColors.textBg,
-            backgroundOpacity: ARENAColors.textBgOpacity,
+            backgroundColor: this.ARENAColors.textBg,
+            backgroundOpacity: this.ARENAColors.textBgOpacity,
             padding: ARENALayout.containerPadding,
             borderRadius: ARENALayout.borderRadius,
         });
         const buttonOuterContainer = new ThreeMeshUI.Block({
             backgroundSide: THREE.DoubleSide,
-            backgroundColor: ARENAColors.bg,
-            backgroundOpacity: ARENAColors.bgOpacity,
+            backgroundColor: this.ARENAColors.bg,
+            backgroundOpacity: this.ARENAColors.bgOpacity,
             alignItems: 'stretch',
             fontFamily: data.font,
             padding: [ARENALayout.containerPadding * 2, ARENALayout.containerPadding],
@@ -225,7 +225,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
                 textAlign: 'center',
                 fontSize: ARENATypography.button,
                 margin: ARENALayout.containerPadding * 2,
-                color: ARENAColors.buttonText,
+                color: this.ARENAColors.buttonText,
                 textContent: data.title,
             });
             buttonOuterContainer.add(title);
@@ -259,6 +259,9 @@ AFRAME.registerComponent('arenaui-button-panel', {
         }
         if (data.font !== oldData?.font) {
             this.outerContainer.set({ fontFamily: data.font });
+        }
+        if (data.theme !== oldData.theme) {
+            this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
         }
     },
 });

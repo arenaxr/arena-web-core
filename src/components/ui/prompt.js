@@ -1,7 +1,7 @@
 /* global AFRAME, THREE */
 
 import ThreeMeshUI from 'three-mesh-ui';
-import { ARENAColors, ARENALayout, ARENATypography } from '../../constants/ui';
+import { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography } from '../../constants/ui';
 import buttonBase from './buttons';
 
 AFRAME.registerComponent('arenaui-prompt', {
@@ -21,12 +21,12 @@ AFRAME.registerComponent('arenaui-prompt', {
 
         const container = new ThreeMeshUI.Block({
             ref: 'container',
-            color: ARENAColors.text,
+            color: this.ARENAColors.text,
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            backgroundColor: ARENAColors.textBg,
-            backgroundOpacity: ARENAColors.textBgOpacity,
+            backgroundColor: this.ARENAColors.textBg,
+            backgroundOpacity: this.ARENAColors.textBgOpacity,
             padding: ARENALayout.containerPadding,
             margin: 0,
             borderRadius: ARENALayout.borderRadius,
@@ -40,8 +40,8 @@ AFRAME.registerComponent('arenaui-prompt', {
             padding: ARENALayout.contentPadding,
             margin: 0,
             borderRadius: ARENALayout.borderRadius,
-            backgroundColor: ARENAColors.bg,
-            backgroundOpacity: ARENAColors.bgOpacity,
+            backgroundColor: this.ARENAColors.bg,
+            backgroundOpacity: this.ARENAColors.bgOpacity,
             flexDirection: 'column',
             justifyContent: 'space-evenly',
         });
@@ -116,6 +116,9 @@ AFRAME.registerComponent('arenaui-prompt', {
         }
         if (data.font !== oldData.font) {
             this.container?.set({ fontFamily: data.font });
+        }
+        if (data.theme !== oldData.theme) {
+            this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
         }
         this.el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
     },
