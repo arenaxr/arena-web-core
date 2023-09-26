@@ -19,6 +19,8 @@ AFRAME.registerComponent('arenaui-prompt', {
 
         const { data, el, object3DContainer } = this;
 
+        this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+
         const container = new ThreeMeshUI.Block({
             ref: 'container',
             color: this.ARENAColors.text,
