@@ -6,6 +6,12 @@
             "title": "Buffer",
             "type": "boolean"
         },
+        "color": {
+            "title": "DEPRECATED (color)",
+            "type": "string",
+            "description": "DEPRECATED: data.color is deprecated for primitive geometry, use data.material.color instead.",
+            "deprecated": true
+        },
         "jitsi-video": {
             "description": "Apply a jitsi video source to the geometry",
             "title": "Jitsi Video",
@@ -154,6 +160,12 @@
             "required": ["srcspath", "srcs"],
             "title": "Multi Source",
             "type": "object"
+        },
+        "screenshareable": {
+            "default": true,
+            "description": "Whether or not a user can screenshare on an object",
+            "title": "Screenshare-able",
+            "type": "boolean"
         },
         "skipCache": {
             "default": false,

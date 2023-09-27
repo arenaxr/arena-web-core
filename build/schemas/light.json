@@ -60,6 +60,12 @@
                                     "description": "Light strength.",
                                     "default": 1.0
                                 },
+                                "light": {
+                                    "title": "DEPRECATED (light)",
+                                    "type": "object",
+                                    "description": "DEPRECATED: data.light.[property] is deprecated, use object_type: light and data.[property] instead.",
+                                    "deprecated": true
+                                },
                                 "penumbra": {
                                     "title": "penumbra (spot)",
                                     "type": "number",

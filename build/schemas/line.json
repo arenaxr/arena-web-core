@@ -17,8 +17,16 @@
                                     "description": "3D object type (derived from 'type' select above).",
                                     "enum": ["line"]
                                 },
+                                "color": {
+                                    "title": "Color",
+                                    "description": "Line color.",
+                                    "default": "#74BEC1",
+                                    "format": "color",
+                                    "type": "string"
+                                },
                                 "end": {
                                     "title": "vertex B (end)",
+                                    "description": "End coordinate.",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
@@ -27,12 +35,14 @@
                                     }
                                 },
                                 "opacity": {
+                                    "title": "Opacity",
+                                    "description": "Line opacity.",
                                     "type": "number",
-                                    "title": "Line Opacity",
                                     "default": 1
                                 },
                                 "start": {
                                     "title": "vertex A (start)",
+                                    "description": "Start point coordinate.",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,
@@ -41,20 +51,15 @@
                                     }
                                 },
                                 "visible": {
-                                    "type": "boolean",
                                     "title": "Visible",
+                                    "description": "Whether the material is visible.",
+                                    "type": "boolean",
                                     "default": true
                                 }
                             }
                         },
                         {
                             "$ref": "./schemas/definitions-entity.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
                     "title": "Line Data",

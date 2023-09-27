@@ -109,6 +109,12 @@
                                     "type": "number",
                                     "default": 4
                                 },
+                                "text": {
+                                    "title": "DEPRECATED (text)",
+                                    "type": "string",
+                                    "description": "DEPRECATED: data.text is deprecated for object_type: text, use data.value instead.",
+                                    "deprecated": true
+                                },
                                 "transparent": {
                                     "description": "Whether text is transparent.",
                                     "type": "boolean",

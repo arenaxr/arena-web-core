@@ -627,12 +627,6 @@
             "title": "Url",
             "type": "string"
         },
-        "screenshareable": {
-            "default": true,
-            "description": "Whether or not a user can screenshare on an object",
-            "title": "Screenshare-able",
-            "type": "boolean"
-        },
         "remote-render": {
             "description": "Whether or not an object should be remote rendered [Experimental]",
             "properties": {
