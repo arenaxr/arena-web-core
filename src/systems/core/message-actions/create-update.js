@@ -242,29 +242,14 @@ export default class CreateUpdate {
         }
 
         // handle geometries and some type special cases
-        // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the
+        // TODO: using components (e.g. for image, ...) that handle these would allow to remove most of the
         // special cases
         let isGeometry = false;
         switch (type) {
             case 'camera':
-                if (Object.hasOwn(data, 'color')) {
-                    entityEl.setAttribute('arena-user', 'color', data.color);
-                }
-                if (Object.hasOwn(data, 'headModelPath')) {
-                    entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
-                }
-                if (Object.hasOwn(data, 'presence')) {
-                    entityEl.setAttribute('arena-user', 'presence', data.presence); // update presence
-                }
-                // decide if we need draw or delete videoCube around head
-                if (Object.hasOwn(message, 'jitsiId')) {
-                    entityEl.setAttribute('arena-user', 'jitsiId', message.jitsiId);
-                    entityEl.setAttribute('arena-user', 'hasVideo', message.hasVideo);
-                    entityEl.setAttribute('arena-user', 'hasAudio', message.hasAudio);
-                }
-                if (Object.hasOwn(message, 'displayName')) {
-                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
-                }
+                Object.entries(data).forEach(([attribute, value]) => {
+                    entityEl.setAttribute('arena-user', attribute, value);
+                });
                 break;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
@@ -304,12 +289,6 @@ export default class CreateUpdate {
                         entityEl.deferredModelUpdate = modelUpdateData;
                     }
                     delete data.modelUpdate; // remove attribute so we don't set it later
-                }
-                break;
-            case 'headtext':
-                // handle changes to other users head text
-                if (Object.hasOwn(message, 'displayName')) {
-                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
                 }
                 break;
             case 'image':

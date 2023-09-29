@@ -114,7 +114,6 @@ AFRAME.registerComponent('arena-camera', {
 
         const msg = {
             object_id: this.arena.camName,
-            displayName: data.displayName,
             action,
             type: 'object',
             data: {
@@ -132,22 +131,23 @@ AFRAME.registerComponent('arena-camera', {
                     w: parseFloat(rotation._w.toFixed(3)),
                 },
                 color: data.color,
+                displayName: data.displayName,
             },
         };
         const presence = document.getElementById('presence');
         if (presence) {
-            msg.presence = presence.value;
+            msg.data.presence = presence.value;
         }
 
         if (this.jitsi.initialized) {
-            msg.jitsiId = this.jitsi.getJitsiId();
-            msg.hasAudio = this.jitsi.hasAudio;
-            msg.hasVideo = this.jitsi.hasVideo;
+            msg.data.jitsiId = this.jitsi.getJitsiId();
+            msg.data.hasAudio = this.jitsi.hasAudio;
+            msg.data.hasVideo = this.jitsi.hasVideo;
         }
 
         const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
         if (faceTracker && faceTracker.isEnabled()) {
-            msg.hasAvatar = faceTracker.isRunning();
+            msg.data.hasAvatar = faceTracker.isRunning();
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');
