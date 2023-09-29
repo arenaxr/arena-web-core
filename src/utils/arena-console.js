@@ -157,6 +157,10 @@ export default class ARENAMqttConsole {
                     consoleLog(args, 'info');
                     mqttLog(args, 'info');
                 },
+                assert(...args) {
+                    consoleLog(args, 'assert');
+                    mqttLog(args, 'assert');
+                },
                 setOptions(newOpts) {
                     // Avoid shadowing outer scope's variables
                     const options = {
