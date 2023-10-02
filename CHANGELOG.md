@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.23.1](https://github.com/arenaxr/arena-web-core/compare/v1.23.0...v1.23.1) (2023-10-02)
+
+
+### Bug Fixes
+
+* **auth:** fixed anonymous build page scenes redirect after login ([0f92857](https://github.com/arenaxr/arena-web-core/commit/0f92857f4e34a6e9ae51948d2911d56c98b9adf3))
+* **console:** also bind console.assert to not throw exceptions in spe-particles ([b4c7c5b](https://github.com/arenaxr/arena-web-core/commit/b4c7c5b802eac5fc14633873dd52a9321ed9ac6f))
+* **schema:** update integer types to match components ([091c918](https://github.com/arenaxr/arena-web-core/commit/091c9183a0a02197c10d1538681fc919ae559777))
+
 ## [1.23.0](https://github.com/arenaxr/arena-web-core/compare/v1.22.0...v1.23.0) (2023-09-10)
 
 
