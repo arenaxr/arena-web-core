@@ -102,6 +102,9 @@ window.ARENAAUTH = {
      * This is a blocking request
      */
     requestAuthState() {
+        // 'remember' uri for post-login, just before login redirect
+        localStorage.setItem('request_uri', window.location.href);
+
         const xhr = new XMLHttpRequest();
         xhr.open('GET', `/user/user_state`, false); // Blocking call
         xhr.setRequestHeader('X-CSRFToken', this.getCookie('csrftoken'));
@@ -153,8 +156,6 @@ window.ARENAAUTH = {
                 this.requestMqttToken('anonymous', anonName, true).then();
             } else {
                 // user is logged out or new and not logged in
-                // 'remember' uri for post-login, just before login redirect
-                localStorage.setItem('request_uri', window.location.href);
                 window.location.href = this.signInPath;
             }
         }
@@ -163,6 +164,8 @@ window.ARENAAUTH = {
      * Processes user sign out.
      */
     signOut() {
+        // 'remember' uri for post-login, just before login redirect
+        localStorage.setItem('request_uri', window.location.href);
         // back to signin page
         window.location.href = window.ARENAAUTH.signOutPath;
     },
