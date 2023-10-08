@@ -107,6 +107,7 @@ AFRAME.registerComponent('jitsi-video', {
                 const { data } = user.components['arena-user'];
                 if (data.jitsiId === this.data.jitsiId) {
                     data.pano = pano;
+                    data.panoRadius = this.el.geometry.radius;
                 }
             });
         } else {
