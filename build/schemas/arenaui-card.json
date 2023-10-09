@@ -98,7 +98,7 @@
                     "title": "Card Panel Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "arenaui-card-panel",
+                        "object_type": "arenaui-card",
                         "title": "",
                         "body": "",
                         "bodyAlign": "left",

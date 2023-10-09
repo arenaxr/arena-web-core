@@ -96,7 +96,7 @@
                     "title": "Button Panel Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "arenaui-panel",
+                        "object_type": "arenaui-button-panel",
                         "buttons": ["Confirm", "Cancel"],
                         "title": "",
                         "vertical": false,
