@@ -8,3 +8,4 @@
 
 import './webxr-device-manager';
 import './webxr-viewer';
+import './mesh-dump';
