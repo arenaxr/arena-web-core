@@ -37,7 +37,7 @@ const ARENAColorsDark = {
     bg: BG_DARK,
     bgOpacity: 1,
     buttonText: TEXT_DARK,
-    buttonBg: new THREE.Color(0x4f4f4f),
+    buttonBg: new THREE.Color(0x626262),
     buttonBgOpacity: 1,
     buttonBgHover: new THREE.Color(0x757575),
     buttonBgSelected: null,
