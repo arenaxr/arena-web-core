@@ -13,6 +13,7 @@ AFRAME.registerComponent('arenaui-prompt', {
         buttons: { type: 'array', default: ['Confirm', 'Cancel'] },
         width: { type: 'number', default: 1.5 },
         font: { type: 'string', default: 'Roboto' },
+        theme: { type: 'string', default: 'light' },
     },
     init() {
         buttonBase.init.bind(this)();

@@ -208,6 +208,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
         title: { type: 'string', default: '' },
         vertical: { type: 'boolean', default: false },
         font: { type: 'string', default: 'Roboto' },
+        theme: { type: 'string', default: 'light' },
     },
 
     init() {
