@@ -2,7 +2,7 @@
 
 import ThreeMeshUI from 'three-mesh-ui';
 import { ARENAUtils } from '../../utils';
-import { ARENAColors, ARENALayout, ARENATypography, EVENTS } from '../../constants/ui';
+import { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography, EVENTS } from '../../constants/ui';
 
 // BUTTONS
 const buttonOptions = {
@@ -14,32 +14,12 @@ const buttonOptions = {
     borderRadius: ARENALayout.buttonBorderRadius,
     textAlign: 'center',
     padding: ARENALayout.buttonPadding,
-    backgroundOpacity: ARENAColors.buttonBgOpacity,
     fontSize: ARENATypography.button,
 };
 
 const buttonTextOptions = {
     offset: 0,
     padding: ARENALayout.buttonTextPadding,
-    color: ARENAColors.buttonText,
-};
-
-const BUTTONSTATES = {
-    default: {
-        offset: ARENALayout.buttonDefaultOffset,
-        backgroundColor: ARENAColors.buttonBg,
-        borderColor: ARENAColors.buttonBg,
-    },
-    hover: {
-        offset: ARENALayout.buttonDefaultOffset,
-        backgroundColor: ARENAColors.buttonBgHover,
-        borderColor: ARENAColors.buttonBgHover,
-    },
-    selected: {
-        offset: ARENALayout.buttonDownOffset,
-        backgroundColor: ARENAColors.buttonBgSelected,
-        borderColor: ARENAColors.buttonBgSelected,
-    },
 };
 
 const buttonBase = {
@@ -49,6 +29,31 @@ const buttonBase = {
         this.el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
         this.el.setAttribute('click-listener-local', 'enabled: true');
         this.registerListeners();
+
+        this.ARENAColors = this.data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+
+        this.buttonOptions = { ...buttonOptions, backgroundOpacity: this.ARENAColors.buttonBgOpacity };
+        this.createButtonStates();
+    },
+
+    createButtonStates() {
+        this.buttonStates = {
+            default: {
+                offset: ARENALayout.buttonDefaultOffset,
+                backgroundColor: this.ARENAColors.buttonBg,
+                borderColor: this.ARENAColors.buttonBg,
+            },
+            hover: {
+                offset: ARENALayout.buttonDefaultOffset,
+                backgroundColor: this.ARENAColors.buttonBgHover,
+                borderColor: this.ARENAColors.buttonBgHover,
+            },
+            selected: {
+                offset: ARENALayout.buttonDownOffset,
+                backgroundColor: this.ARENAColors.buttonBgSelected,
+                borderColor: this.ARENAColors.buttonBgSelected,
+            },
+        };
     },
 
     registerListeners() {
@@ -69,7 +74,7 @@ const buttonBase = {
         if ('UIEl' in evt.detail) {
             const hoveredButton = this.buttonMap[evt.detail.UIEl];
             if (hoveredButton) {
-                hoveredButton.el.set(BUTTONSTATES.hover);
+                hoveredButton.el.set(this.buttonStates.hover);
                 hoveredButton.prevState = 'default';
                 hoveredButton.state = 'hover';
             }
@@ -80,7 +85,7 @@ const buttonBase = {
         evt.detail.clearedUIEls?.forEach((el) => {
             const hoveredButton = this.buttonMap[el.parent.name];
             if (hoveredButton) {
-                hoveredButton.el.set(BUTTONSTATES.default); // Force default state
+                hoveredButton.el.set(this.buttonStates.default); // Force default state
                 hoveredButton.prevState = 'default';
                 hoveredButton.state = 'default';
             }
@@ -91,7 +96,7 @@ const buttonBase = {
         if ('cursorEl' in evt.detail) {
             const selectedButton = this.buttonMap[evt.detail.intersection?.object.parent.name];
             if (selectedButton) {
-                selectedButton.el.set(BUTTONSTATES.selected);
+                selectedButton.el.set(this.buttonStates.selected);
                 selectedButton.prevState = selectedButton.state; // Probably hover but may be default w/ touchscreen
                 selectedButton.state = 'selected';
                 selectedButton.selector = evt.detail.cursorEl;
@@ -108,7 +113,7 @@ const buttonBase = {
             // Clear previously selected button from this cursor in any case
             const prevSelectedButton = Object.values(this.buttonMap).find((b) => b.selector === evt.detail.cursorEl);
             if (prevSelectedButton) {
-                prevSelectedButton.el.set(BUTTONSTATES[prevSelectedButton.prevState]);
+                prevSelectedButton.el.set(this.buttonStates[prevSelectedButton.prevState]);
                 prevSelectedButton.prevState = 'default';
                 prevSelectedButton.state = 'default';
                 prevSelectedButton.selector = undefined;
@@ -117,7 +122,7 @@ const buttonBase = {
     },
 
     createButton(buttonEl, index, clickFn) {
-        const button = new ThreeMeshUI.Block(buttonOptions);
+        const button = new ThreeMeshUI.Block(this.buttonOptions);
         button.isMeshUIButton = true;
         const buttonName = typeof buttonEl === 'string' ? buttonEl : buttonEl.name;
         // Handles legacy string values
@@ -141,9 +146,15 @@ const buttonBase = {
                 return null;
             }
         } else {
-            button.add(new ThreeMeshUI.Text({ ...buttonTextOptions, textContent: buttonName }));
+            button.add(
+                new ThreeMeshUI.Text({
+                    ...buttonTextOptions,
+                    textContent: buttonName,
+                    color: this.ARENAColors.buttonText,
+                })
+            );
         }
-        button.set({ name: buttonName, ...BUTTONSTATES.default });
+        button.set({ name: buttonName, ...this.buttonStates.default });
         this.buttonMap[buttonName] = {
             el: button,
             index,
@@ -197,21 +208,25 @@ AFRAME.registerComponent('arenaui-button-panel', {
         title: { type: 'string', default: '' },
         vertical: { type: 'boolean', default: false },
         font: { type: 'string', default: 'Roboto' },
+        theme: { type: 'string', default: 'light' },
     },
 
     init() {
         const { data } = this;
         buttonBase.init.bind(this)();
+
+        this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+
         const shadowContainer = new ThreeMeshUI.Block({
-            backgroundColor: ARENAColors.textBg,
-            backgroundOpacity: ARENAColors.textBgOpacity,
+            backgroundColor: this.ARENAColors.textBg,
+            backgroundOpacity: this.ARENAColors.textBgOpacity,
             padding: ARENALayout.containerPadding,
             borderRadius: ARENALayout.borderRadius,
         });
         const buttonOuterContainer = new ThreeMeshUI.Block({
             backgroundSide: THREE.DoubleSide,
-            backgroundColor: ARENAColors.bg,
-            backgroundOpacity: ARENAColors.bgOpacity,
+            backgroundColor: this.ARENAColors.bg,
+            backgroundOpacity: this.ARENAColors.bgOpacity,
             alignItems: 'stretch',
             fontFamily: data.font,
             padding: [ARENALayout.containerPadding * 2, ARENALayout.containerPadding],
@@ -225,7 +240,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
                 textAlign: 'center',
                 fontSize: ARENATypography.button,
                 margin: ARENALayout.containerPadding * 2,
-                color: ARENAColors.buttonText,
+                color: this.ARENAColors.buttonText,
                 textContent: data.title,
             });
             buttonOuterContainer.add(title);
@@ -259,6 +274,9 @@ AFRAME.registerComponent('arenaui-button-panel', {
         }
         if (data.font !== oldData?.font) {
             this.outerContainer.set({ fontFamily: data.font });
+        }
+        if (data.theme !== oldData.theme) {
+            this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
         }
     },
 });

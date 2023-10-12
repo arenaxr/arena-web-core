@@ -46,6 +46,12 @@
                                     "description": "Font to use for button text",
                                     "default": "Roboto",
                                     "enum": ["Roboto", "Roboto-Mono"]
+                                },
+                                "theme": {
+                                    "type": "string",
+                                    "title": "Color Theme",
+                                    "default": "light",
+                                    "enum": ["light", "dark"]
                                 }
                             }
                         },

@@ -2,6 +2,9 @@
 
 const BLACK = new THREE.Color(0x000000);
 const WHITE = new THREE.Color(0xffffff);
+const TEXT_LIGHT = new THREE.Color(0x3c3c3c);
+const TEXT_DARK = new THREE.Color(0xf0f0f0);
+const BG_DARK = new THREE.Color(0x3d3d3d);
 
 const ARENATypography = {
     body: 0.035,
@@ -12,14 +15,14 @@ const ARENATypography = {
     buttonSmall: 0.04,
 };
 
-const ARENAColors = {
-    text: new THREE.Color(0x3c3c3c),
+const ARENAColorsLight = {
+    text: TEXT_LIGHT,
     textBg: BLACK,
     captionBg: WHITE,
     textBgOpacity: 0.25,
     bg: new THREE.Color(0xf3f3f3),
     bgOpacity: 0.8,
-    buttonText: new THREE.Color(0x3c3c3c),
+    buttonText: TEXT_LIGHT,
     buttonBg: new THREE.Color(0xededed),
     buttonBgOpacity: 0.9,
     buttonBgHover: new THREE.Color(0xd1d1d1),
@@ -27,12 +30,17 @@ const ARENAColors = {
 };
 
 const ARENAColorsDark = {
-    text: new THREE.Color(0x3c3c3c),
-    bg: new THREE.Color(0xf3f3f3),
-    buttonText: new THREE.Color(0xa8a8a8),
-    buttonTextHover: new THREE.Color(0xf3f3f3),
-    buttonBg: new THREE.Color(0x373737),
-    buttonBgSelected: new THREE.Color(0x151515),
+    text: TEXT_DARK,
+    textBg: BG_DARK,
+    captionBg: WHITE,
+    textBgOpacity: 0.25,
+    bg: BG_DARK,
+    bgOpacity: 1,
+    buttonText: TEXT_DARK,
+    buttonBg: new THREE.Color(0x626262),
+    buttonBgOpacity: 1,
+    buttonBgHover: new THREE.Color(0x757575),
+    buttonBgSelected: null,
 };
 
 const ARENALayout = {
@@ -58,4 +66,4 @@ const EVENTS = {
     INTERSECTION_CLOSEST_ENTITY_CHANGED: 'raycaster-closest-entity-changed',
 };
 
-export { ARENAColors, ARENALayout, ARENATypography, EVENTS };
+export { ARENAColorsLight, ARENAColorsDark, ARENALayout, ARENATypography, EVENTS };
