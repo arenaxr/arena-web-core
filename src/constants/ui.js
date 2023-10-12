@@ -32,7 +32,7 @@ const ARENAColorsLight = {
 const ARENAColorsDark = {
     text: TEXT_DARK,
     textBg: BG_DARK,
-    captionBg: BLACK,
+    captionBg: WHITE,
     textBgOpacity: 0.25,
     bg: BG_DARK,
     bgOpacity: 1,
