@@ -26,11 +26,27 @@ AFRAME.registerSystem('mesh-dump', {
             // First may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
-            console.log(frame.detectedMeshes);
+            const xrRefSpace = this.sceneEl.renderer.xr.getReferenceSpace();
             frame.detectedMeshes.forEach((mesh) => {
                 ARENA.Mqtt.publish(
                     `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}`,
-                    JSON.stringify({ vertices: mesh.vertices, indices: mesh.indices, semanticLabel: mesh })
+                    JSON.stringify({
+                        vertices: mesh.vertices,
+                        indices: mesh.indices,
+                        semanticLabel: mesh.semanticLabel,
+                        meshPose: frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix,
+                    })
+                );
+            });
+            frame.detectedPlanes.forEach((plane) => {
+                ARENA.Mqtt.publish(
+                    `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}`,
+                    JSON.stringify({
+                        polygon: plane.polygon,
+                        orientation: plane.orientation,
+                        semanticLabel: plane.semanticLabel,
+                        planePose: frame.getPose(plane.planeSpace, xrRefSpace).transform.matrix,
+                    })
                 );
             });
         }
