@@ -105,9 +105,8 @@ AFRAME.registerComponent('arena-user', {
         hasVideo: { type: 'boolean', default: false },
         jitsiQuality: { type: 'number', default: 100.0 },
         resolutionStep: { type: 'number', default: 180 },
-        distance: { type: 'number', default: 0 },
         pano: { type: 'boolean', default: false },
-        panoRadius: { type: 'number', default: 5000 },
+        panoId: { type: 'string', default: '' },
     },
 
     init() {
@@ -160,6 +159,9 @@ AFRAME.registerComponent('arena-user', {
 
         // used in tick()
         this.entityPos = this.el.object3D.position;
+        this.panoEl = null;
+        this.panoRadius = 0;
+        this.distance = 0;
 
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
 
@@ -438,7 +440,7 @@ AFRAME.registerComponent('arena-user', {
                 const { data } = user.components['arena-user'];
                 const jitsiSourceName = `${data.jitsiId}-v0`;
                 if (data.pano) {
-                    if (data.distance < data.panoRadius) {
+                    if (this.distance < this.panoRadius) {
                         // inside videosphere, allow 'on-stage' resolution
                         panoIds.push(jitsiSourceName);
                     }
@@ -459,14 +461,14 @@ AFRAME.registerComponent('arena-user', {
     },
 
     getOptimalResolutionStep(distance, winHeight) {
-        // Option 1: videosphere W/H/D is data.panoRadius x 2
+        // Option 1: videosphere W/H/D is panoRadius x 2
         // Option 2: video cube W x H x D is 0.6m x 0.4m x 0.6m
         const fov = 80;
         const cubeHeight = 0.4;
         const cubeDepth = 0.6;
         const actualDist = distance - (this.data.pano ? 0 : cubeDepth / 2);
         const frustumHeightAtVideo = 2 * actualDist * Math.tan((fov * 0.5 * Math.PI) / 180);
-        const videoRatio2Window = (this.data.pano ? this.data.panoRadius * 2 : cubeHeight) / frustumHeightAtVideo;
+        const videoRatio2Window = (this.data.pano ? this.panoRadius * 2 : cubeHeight) / frustumHeightAtVideo;
         const actualCubeRes = winHeight * videoRatio2Window;
         // provide max video resolution for distance and screen resolution,
         // use approximate gradations of actual camera heights
@@ -571,7 +573,16 @@ AFRAME.registerComponent('arena-user', {
         const myCamPos = myCam.object3D.position;
         const arenaCameraComponent = myCam.components['arena-camera'];
 
-        data.distance = myCamPos.distanceTo(this.entityPos);
+        this.distance = myCamPos.distanceTo(this.entityPos);
+        // use videosphere distance/size when mapped from jitsi-video
+        if (data.panoEl == null && data.panoId !== '') {
+            this.panoEl = document.querySelector(`#${data.panoId}`);
+        }
+        if (this.panoEl != null) {
+            const panoPos = this.panoEl.object3D.position;
+            this.distance = myCamPos.distanceTo(panoPos);
+            this.panoRadius = this.panoEl.getAttribute('geometry').radius;
+        }
 
         // frustum culling for WebRTC video streams;
         if (this.videoID && this.videoCube && ARENA.jitsi?.conference) {
@@ -582,19 +593,19 @@ AFRAME.registerComponent('arena-user', {
                 }
             }
             if (data.pano) {
-                const resolutionStep = this.getOptimalResolutionStep(data.distance, window.innerHeight);
+                const resolutionStep = this.getOptimalResolutionStep(this.distance, window.innerHeight);
                 this.evaluateRemoteResolution(resolutionStep);
             } else if (inFieldOfView === false) {
                 this.muteVideo();
                 this.evaluateRemoteResolution(0);
             } else if (arenaCameraComponent && arenaCameraComponent.isVideoDistanceConstraintsEnabled()) {
                 // check if A/V cut off distance has been reached
-                if (data.distance > ARENA.maxAVDist) {
+                if (this.distance > ARENA.maxAVDist) {
                     this.muteVideo();
                     this.evaluateRemoteResolution(0);
                 } else {
                     this.unmuteVideo();
-                    const resolutionStep = this.getOptimalResolutionStep(data.distance, window.innerHeight);
+                    const resolutionStep = this.getOptimalResolutionStep(this.distance, window.innerHeight);
                     this.evaluateRemoteResolution(resolutionStep);
                 }
             } else {
@@ -605,7 +616,7 @@ AFRAME.registerComponent('arena-user', {
 
         if (this.audioID) {
             // check if A/V cut off distance has been reached
-            if (data.distance > ARENA.maxAVDist) {
+            if (this.distance > ARENA.maxAVDist) {
                 this.muteAudio();
                 this.distReached = true;
             } else {
