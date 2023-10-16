@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.23.2](https://github.com/arenaxr/arena-web-core/compare/v1.23.1...v1.23.2) (2023-10-16)
+
+
+### Bug Fixes
+
+* **build:** fix euler degree rotation editor updates ([a279ab3](https://github.com/arenaxr/arena-web-core/commit/a279ab3cb61a811547d50408f76c2f72c5173f3c))
+* dark card img bg color ([3c63169](https://github.com/arenaxr/arena-web-core/commit/3c6316938304e72e660c3a8fec7902be41a45793))
+* **jitsi:** allow degradation of multi-videospheres by user position ([#588](https://github.com/arenaxr/arena-web-core/issues/588)) ([19233ed](https://github.com/arenaxr/arena-web-core/commit/19233ed834bc803a146d9819a1b936fcd800d8c7))
+* **jitsi:** allow videosphere resolution based on sphere not avatar ([76402cb](https://github.com/arenaxr/arena-web-core/commit/76402cbf7cd484f862a92019630918b5f597aa19))
+* **schema:** small fixes to default arenaui object types ([5e8b033](https://github.com/arenaxr/arena-web-core/commit/5e8b033ead0f1b18f84a58fc1e958f7a273c5e99))
+
 ## [1.23.1](https://github.com/arenaxr/arena-web-core/compare/v1.23.0...v1.23.1) (2023-10-02)
 
 
