@@ -573,15 +573,17 @@ AFRAME.registerComponent('arena-user', {
         const myCamPos = myCam.object3D.position;
         const arenaCameraComponent = myCam.components['arena-camera'];
 
-        this.distance = myCamPos.distanceTo(this.entityPos);
         // use videosphere distance/size when mapped from jitsi-video
         if (data.panoEl == null && data.panoId !== '') {
             this.panoEl = document.querySelector(`#${data.panoId}`);
+            this.panoRadius = this.panoEl.getAttribute('geometry').radius;
         }
+        // distance calc
         if (this.panoEl != null) {
             const panoPos = this.panoEl.object3D.position;
             this.distance = myCamPos.distanceTo(panoPos);
-            this.panoRadius = this.panoEl.getAttribute('geometry').radius;
+        } else {
+            this.distance = myCamPos.distanceTo(this.entityPos);
         }
 
         // frustum culling for WebRTC video streams;
