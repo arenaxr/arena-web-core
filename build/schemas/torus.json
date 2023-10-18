@@ -30,7 +30,7 @@
                                 "radiusTubular": {
                                     "type": "number",
                                     "title": "radius tubular",
-                                    "default": 0.4
+                                    "default": 0.2
                                 },
                                 "segmentsRadial": {
                                     "type": "integer",
