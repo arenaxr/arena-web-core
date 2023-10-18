@@ -65,24 +65,9 @@
                     "title": "Prompt Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "arenaui-prompt",
-                        "title": "Prompt",
-                        "description": "This is a prompt. Please confirm or cancel.",
-                        "buttons": ["Confirm", "Cancel"],
-                        "width": 1.5,
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "arenaui-prompt"
                     },
-                    "required": ["object_type", "title", "buttons", "width"]
+                    "required": ["object_type", "title", "buttons", "width", "position", "rotation"]
                 }
             }
         }

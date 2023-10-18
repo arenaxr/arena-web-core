@@ -102,23 +102,9 @@
                     "title": "Button Panel Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "arenaui-button-panel",
-                        "buttons": ["Confirm", "Cancel"],
-                        "title": "",
-                        "vertical": false,
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "arenaui-button-panel"
                     },
-                    "required": ["object_type", "title", "vertical", "buttons"]
+                    "required": ["object_type", "title", "vertical", "buttons", "position", "rotation"]
                 }
             }
         }

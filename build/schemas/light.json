@@ -157,28 +157,9 @@
                     "title": "Light Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "light",
-                        "color": "#ffffff",
-                        "intensity": 1,
-                        "type": "directional",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "light"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "color", "intensity", "type", "position", "rotation"]
                 }
             }
         }

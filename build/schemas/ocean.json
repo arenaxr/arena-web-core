@@ -75,9 +75,6 @@
                     "additionalProperties": true,
                     "default": {
                         "object_type": "ocean",
-                        "width": 10,
-                        "depth": 10,
-                        "color": "#7AD2F7",
                         "rotation": {
                             "w": -0.70711,
                             "x": 0.70711,
@@ -85,7 +82,7 @@
                             "z": 0
                         }
                     },
-                    "required": ["object_type", "width", "depth", "color"]
+                    "required": ["object_type", "width", "depth", "color", "position", "rotation"]
                 }
             }
         }

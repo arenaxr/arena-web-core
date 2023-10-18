@@ -163,25 +163,9 @@
                     "title": "Text Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "text",
-                        "font": "roboto",
-                        "side": "double",
-                        "value": "",
-                        "width": 5,
-                        "color": "white",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "text"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "font",  "side",  "value",  "color",  "position", "rotation"]
                 }
             }
         }

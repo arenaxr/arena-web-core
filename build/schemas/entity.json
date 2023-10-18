@@ -42,17 +42,13 @@
                                                 "triangle"
                                             ]
                                         }
-                                    }
+                                    },
+                                    "required": ["primitive"]
                                 },
                                 "panel": {
                                     "title": "UI Panel",
                                     "description": "The rounded UI panel primitive.",
                                     "type": "object",
-                                    "default": {
-                                        "depth": 0.05,
-                                        "height": 1,
-                                        "width": 1
-                                    },
                                     "properties": {
                                         "depth": {
                                             "type": "number",
@@ -69,7 +65,8 @@
                                             "title": "width",
                                             "default": 1
                                         }
-                                    }
+                                    },
+                                    "required": ["depth", "height", "width"]
                                 }
                             }
                         },
@@ -85,7 +82,7 @@
                     "default": {
                         "object_type": "entity"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "position", "rotation"]
                 }
             }
         }

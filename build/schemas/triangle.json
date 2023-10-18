@@ -21,8 +21,8 @@
                                     "title": "vertex A",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
-                                        "x": -0.5,
-                                        "y": -0.5,
+                                        "x": 0,
+                                        "y": 0.5,
                                         "z": 0
                                     }
                                 },
@@ -39,7 +39,7 @@
                                     "title": "vertex C",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
-                                        "x": -0.5,
+                                        "x": 0.5,
                                         "y": -0.5,
                                         "z": 0
                                     }
@@ -62,35 +62,9 @@
                         "object_type": "triangle",
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "vertexA": {
-                            "x": 0,
-                            "y": 0.5,
-                            "z": 0
-                        },
-                        "vertexB": {
-                            "x": -0.5,
-                            "y": -0.5,
-                            "z": 0
-                        },
-                        "vertexC": {
-                            "x": 0.5,
-                            "y": -0.5,
-                            "z": 0
                         }
                     },
-                    "required": ["object_type", "vertexA", "vertexB", "vertexC"]
+                    "required": ["object_type", "vertexA", "vertexB", "vertexC", "position", "rotation"]
                 }
             }
         }
