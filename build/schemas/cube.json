@@ -63,9 +63,12 @@
                     "title": "Cube (deprecated; don't use) Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "cube"
+                        "object_type": "cube",
+                        "material": {
+                            "color": "#7f7f7f"
+                        }
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "width", "height", "depth", "position", "rotation"]
                 }
             }
         }

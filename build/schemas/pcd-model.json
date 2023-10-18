@@ -51,27 +51,9 @@
                     "title": "PCD Model Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "pcd-model",
-                        "pointSize": 0.01,
-                        "pointColor": "#7f7f7f",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "pcd-model"
                     },
-                    "required": ["object_type", "url", "pointSize", "position", "rotation", "scale"]
+                    "required": ["object_type", "url", "pointColor", "pointSize", "position", "rotation", "scale"]
                 }
             }
         }

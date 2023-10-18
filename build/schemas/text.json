@@ -18,6 +18,7 @@
                                     "enum": ["text"]
                                 },
                                 "align": {
+                                    "type": "string",
                                     "description": "Multi-line text alignment (left, center, right).",
                                     "default": "left",
                                     "enum": ["left", "center", "right"]
@@ -28,11 +29,13 @@
                                     "type": "number"
                                 },
                                 "anchor": {
+                                    "type": "string",
                                     "description": "Horizontal positioning (left, center, right, align).",
                                     "default": "center",
                                     "enum": ["left", "right", "center", "align"]
                                 },
                                 "baseline": {
+                                    "type": "string",
                                     "description": "Vertical positioning (top, center, bottom).",
                                     "default": "center",
                                     "enum": ["top", "center", "bottom"]
@@ -86,6 +89,7 @@
                                     "default": 1.0
                                 },
                                 "shader": {
+                                    "type": "string",
                                     "description": "Shader used to render text.",
                                     "default": "sdf",
                                     "enum": [
@@ -100,6 +104,7 @@
                                     ]
                                 },
                                 "side": {
+                                    "type": "string",
                                     "description": "Side to render. (front, back, double)",
                                     "default": "double",
                                     "enum": ["front", "back", "double"]
@@ -126,6 +131,7 @@
                                     "type": "string"
                                 },
                                 "whiteSpace": {
+                                    "type": "string",
                                     "description": "How whitespace should be handled (i.e., normal, pre, nowrap).</a>",
                                     "default": "normal",
                                     "enum": ["normal", "pre", "nowrap"]
@@ -163,25 +169,9 @@
                     "title": "Text Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "text",
-                        "font": "roboto",
-                        "side": "double",
-                        "value": "",
-                        "width": 5,
-                        "color": "white",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "text"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "font",  "side",  "value",  "color",  "position", "rotation"]
                 }
             }
         }

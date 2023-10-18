@@ -65,21 +65,9 @@
                     "title": "Line Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "line",
-                        "end": {
-                            "x": -0.5,
-                            "y": -0.5,
-                            "z": 0
-                        },
-                        "start": {
-                            "x": 0,
-                            "y": 0.5,
-                            "z": 0
-                        },
-                        "visible": true,
-                        "color": "#7f7f7f"
+                        "object_type": "line"
                     },
-                    "required": ["object_type", "start", "end"]
+                    "required": ["object_type", "start", "end", "color"]
                 }
             }
         }

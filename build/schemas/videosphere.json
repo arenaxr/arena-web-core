@@ -64,21 +64,9 @@
                     "title": "Videosphere Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "videosphere",
-                        "radius": 5000,
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "videosphere"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "radius", "position", "rotation"]
                 }
             }
         }

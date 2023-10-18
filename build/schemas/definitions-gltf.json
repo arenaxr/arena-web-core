@@ -50,12 +50,6 @@
             "type": "object"
         },
         "gltf-model-lod": {
-            "default": {
-                "detailedUrl": "",
-                "detailedDistance": 10,
-                "updateRate": 333,
-                "retainCache": false
-            },
             "description": "Simple switch between the default gltf-model and a detailed one when a user camera is within specified distance",
             "properties": {
                 "detailedUrl": {
@@ -84,7 +78,8 @@
                 }
             },
             "title": "GLTF Model Level of Detail",
-            "type": "object"
+            "type": "object",
+            "required": ["detailedUrl", "detailedDistance", "updateRate", "retainCache"]
         },
         "modelUpdate": {
             "title": "GLTF Model Update",
