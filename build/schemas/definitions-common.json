@@ -134,7 +134,7 @@
                 "buildable": {
                     "type": "boolean",
                     "title": "buildable",
-                    "description": "",
+                    "description": "Whether tag has 'dynamic' toggled on click. Used to position a tag, then lock into position.",
                     "default": false
                 },
                 "dynamic": {
