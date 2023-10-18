@@ -18,8 +18,12 @@
                                     "enum": ["entity"]
                                 },
                                 "geometry": {
+                                    "title": "Geometry",
+                                    "description": "The primitive mesh geometry.",
+                                    "type": "object",
                                     "properties": {
                                         "primitive": {
+                                            "default": "box",
                                             "type": "string",
                                             "title": "primitive",
                                             "description": "The geometry primitive.",
