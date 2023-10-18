@@ -14,8 +14,9 @@
  * ARMarker Component. Supports ARMarkers in a scene
  * @module armarker
  * @property {string} [markertype=apriltag_36h11] - The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb'
- * @property {boolean} [dynamic=false] - Whether tag is a static and used to for camera relocalization, or dynamically changes position
- * @property {boolean} [publish=false] - Publish tag detections.
+ * @property {boolean} [dynamic=false] - Whether tag is a static and used to for camera relocalization, or dynamic and used for object tracking
+ * @property {boolean} [publish=false] - Force publish of tag detections to realm/g/, even without networked solver mode
+ * @property {boolean} [buildable=false] - Whether tag has "dynamic" toggled on click. Used to position a tag, then lock into position
  * @property {string} [markerid] - Marker id. Typically an integer (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])
  * @property {number} [size=150] - Size of the marker (assumed to be a square), if applicable (mm).
  * @property {string} [url] - A URL associated with the marker.
@@ -35,6 +36,10 @@ AFRAME.registerComponent('armarker', {
             type: 'boolean',
         },
         publish: {
+            default: false,
+            type: 'boolean',
+        },
+        buildable: {
             default: false,
             type: 'boolean',
         },
@@ -71,7 +76,7 @@ AFRAME.registerComponent('armarker', {
             this.el.setAttribute('material', 'wireframe', this.data.dynamic);
             this.el.setAttribute('click-listener', true);
             this.el.addEventListener('mousedown', (evt) => {
-                if (evt.detail.cursorEl) {
+                if (evt.detail.cursorEl && this.data.buildable) {
                     // Only track native click event
                     this.data.dynamic = !this.data.dynamic;
                     this.el.setAttribute('material', 'wireframe', this.data.dynamic);
