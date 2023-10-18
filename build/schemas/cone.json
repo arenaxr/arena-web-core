@@ -77,7 +77,7 @@
                             "color": "#7f7f7f"
                         }
                     },
-                    "required": ["object_type", "height", "radiusBottom", "position", "rotation"]
+                    "required": ["object_type", "height", "radiusTop", "radiusBottom", "position", "rotation"]
                 }
             }
         }
