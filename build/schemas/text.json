@@ -86,7 +86,7 @@
                                 "opacity": {
                                     "description": "Opacity, on a scale from 0 to 1, where 0 means fully transparent and 1 means fully opaque.",
                                     "type": "number",
-                                    "default": 1.0
+                                    "default": 1
                                 },
                                 "shader": {
                                     "type": "string",

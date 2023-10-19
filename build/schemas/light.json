@@ -39,13 +39,13 @@
                                     "title": "decay (point and spot)",
                                     "type": "number",
                                     "description": "Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
-                                    "default": 1.0
+                                    "default": 1
                                 },
                                 "distance": {
                                     "title": "distance (point and spot)",
                                     "type": "number",
                                     "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
-                                    "default": 0.0
+                                    "default": 0
                                 },
                                 "groundColor": {
                                     "title": "ground color (hemisphere)",
@@ -58,7 +58,7 @@
                                     "title": "intensity",
                                     "type": "number",
                                     "description": "Light strength.",
-                                    "default": 1.0
+                                    "default": 1
                                 },
                                 "light": {
                                     "title": "DEPRECATED (light)",
@@ -70,7 +70,7 @@
                                     "title": "penumbra (spot)",
                                     "type": "number",
                                     "description": "Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
-                                    "default": 0.0
+                                    "default": 0
                                 },
                                 "shadowBias": {
                                     "title": "shadowBias (castShadow=true)",
