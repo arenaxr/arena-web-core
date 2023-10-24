@@ -1,5 +1,6 @@
 /* global AFRAME, ARENA */
 
+import { StaticGeometryGenerator } from 'three-mesh-bvh';
 import { ARENAUtils } from '../../utils';
 
 /**
@@ -28,10 +29,17 @@ AFRAME.registerComponent('click-listener', {
         this.mousedownHandler = this.mousedownHandler.bind(this);
         this.mouseupHandler = this.mouseupHandler.bind(this);
 
-        const mesh = this.el.getObject3D('mesh');
+        let mesh = this.el.getObject3D('mesh');
         if (mesh) {
+            // If this is a gltf, this will not be set yet
             mesh.computeBoundsTree();
         }
+        this.el.addEventListener('model-loaded', () => {
+            mesh = this.el.getObject3D('mesh');
+            const generator = new StaticGeometryGenerator(mesh);
+            const geometry = generator.generate();
+            geometry.computeBoundsTree();
+        });
     },
 
     update(oldData) {
