@@ -2,9 +2,9 @@
 
 const BLACK = new THREE.Color(0x000000);
 const WHITE = new THREE.Color(0xffffff);
-const TEXT_LIGHT = new THREE.Color(0x3c3c3c);
-const TEXT_DARK = new THREE.Color(0xf0f0f0);
-const BG_DARK = new THREE.Color(0x3d3d3d);
+const TEXT_LIGHT = new THREE.Color(0x3c3c3c).convertLinearToSRGB();
+const TEXT_DARK = new THREE.Color(0xf0f0f0).convertLinearToSRGB();
+const BG_DARK = new THREE.Color(0x3d3d3d).convertLinearToSRGB();
 
 const ARENATypography = {
     body: 0.035,
@@ -20,12 +20,12 @@ const ARENAColorsLight = {
     textBg: BLACK,
     captionBg: WHITE,
     textBgOpacity: 0.25,
-    bg: new THREE.Color(0xf3f3f3),
+    bg: new THREE.Color(0xf3f3f3).convertLinearToSRGB(),
     bgOpacity: 0.8,
     buttonText: TEXT_LIGHT,
-    buttonBg: new THREE.Color(0xededed),
+    buttonBg: new THREE.Color(0xededed).convertLinearToSRGB(),
     buttonBgOpacity: 0.9,
-    buttonBgHover: new THREE.Color(0xd1d1d1),
+    buttonBgHover: new THREE.Color(0xd1d1d1).convertLinearToSRGB(),
     buttonBgSelected: WHITE,
 };
 
@@ -37,9 +37,9 @@ const ARENAColorsDark = {
     bg: BG_DARK,
     bgOpacity: 1,
     buttonText: TEXT_DARK,
-    buttonBg: new THREE.Color(0x626262),
+    buttonBg: new THREE.Color(0x2e2e2e).convertLinearToSRGB(),
     buttonBgOpacity: 1,
-    buttonBgHover: new THREE.Color(0x757575),
+    buttonBgHover: new THREE.Color(0x373737).convertLinearToSRGB(),
     buttonBgSelected: null,
 };
 
