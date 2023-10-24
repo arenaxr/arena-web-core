@@ -10,3 +10,4 @@ import './ar-hit-test-listener';
 import './attribution';
 import './screenshare';
 import './stats-monitor';
+import './three-mesh-bvh';

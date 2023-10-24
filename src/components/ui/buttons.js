@@ -265,6 +265,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
                 if (button) this.buttonContainer.add(button);
             });
             this.el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
+            this.object3DContainer.computeBoundsTree();
         }
         if (this.data.vertical !== oldData?.vertical) {
             this.buttonContainer.set({ flexDirection: this.data.vertical ? 'column' : 'row' });

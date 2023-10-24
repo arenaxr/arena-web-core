@@ -116,6 +116,7 @@ AFRAME.registerComponent('arenaui-prompt', {
                 if (button) this.buttonContainer.add(button);
             });
             this.el.setObject3D('mesh', this.object3DContainer); // Make sure to update for AFRAME
+            this.object3DContainer.computeBoundsTree();
         }
         if (data.font !== oldData.font) {
             this.container?.set({ fontFamily: data.font });

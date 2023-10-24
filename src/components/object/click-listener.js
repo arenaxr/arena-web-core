@@ -27,6 +27,11 @@ AFRAME.registerComponent('click-listener', {
         this.mouseenterHandler = this.mouseenterHandler.bind(this);
         this.mousedownHandler = this.mousedownHandler.bind(this);
         this.mouseupHandler = this.mouseupHandler.bind(this);
+
+        const mesh = this.el.getObject3D('mesh');
+        if (mesh) {
+            mesh.computeBoundsTree();
+        }
     },
 
     update(oldData) {

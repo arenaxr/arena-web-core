@@ -57,6 +57,7 @@ AFRAME.components.raycaster.Component.prototype.init = function init() {
     this.prevIntersectedEls = [];
     this.rawIntersections = [];
     this.raycaster = new THREE.Raycaster();
+    this.raycaster.firstHitOnly = true;
     this.updateOriginDirection();
     this.setDirty = this.setDirty.bind(this);
     this.updateLine = this.updateLine.bind(this);
