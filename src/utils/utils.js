@@ -276,7 +276,7 @@ export default class ARENAUtils {
      * @param {THREE.Quaternion|THREE.Euler} data.rotation rotation to set
      */
     static updatePose(targetObject3D, data) {
-        const { position, rotation } = data;
+        const { position, rotation, scale } = data;
         if (rotation) {
             // has 'w' coordinate: a quaternion
             if (Object.hasOwn(rotation, 'w')) {
@@ -291,6 +291,9 @@ export default class ARENAUtils {
         }
         if (position) {
             targetObject3D.position.set(position.x, position.y, position.z);
+        }
+        if (scale) {
+            targetObject3D.scale.set(scale.x, scale.y, scale.z);
         }
     }
 
