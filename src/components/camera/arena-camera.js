@@ -31,10 +31,6 @@ AFRAME.registerComponent('arena-camera', {
         vioEnabled: { type: 'boolean', default: false },
         displayName: { type: 'string', default: 'No Name' },
         color: { type: 'string', default: `#${ARENAUtils.numToPaddedHex(Math.floor(Math.random() * 16777215), 6)}` },
-        rotation: { type: 'vec4', default: new THREE.Quaternion() },
-        position: { type: 'vec3', default: new THREE.Vector3() },
-        vioRotation: { type: 'vec4', default: new THREE.Quaternion() },
-        vioPosition: { type: 'vec3', default: new THREE.Vector3() },
         showStats: { type: 'boolean', default: false },
     },
 
@@ -45,6 +41,10 @@ AFRAME.registerComponent('arena-camera', {
     init() {
         this.initialized = false;
         ARENA.events.addEventListener(ARENA_EVENTS.ARENA_LOADED, this.ready.bind(this));
+        this.rotation = new THREE.Quaternion();
+        this.position = new THREE.Vector3();
+        this.vioRotation = new THREE.Quaternion();
+        this.vioPosition = new THREE.Vector3();
     },
 
     ready() {
@@ -108,7 +108,7 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     publishPose(action = 'update') {
-        const { data } = this;
+        const { data, position, rotation } = this;
 
         if (!data.enabled) return;
 
@@ -120,16 +120,16 @@ AFRAME.registerComponent('arena-camera', {
             data: {
                 object_type: 'camera',
                 position: {
-                    x: parseFloat(data.position.x.toFixed(3)),
-                    y: parseFloat(data.position.y.toFixed(3)),
-                    z: parseFloat(data.position.z.toFixed(3)),
+                    x: parseFloat(position.x.toFixed(3)),
+                    y: parseFloat(position.y.toFixed(3)),
+                    z: parseFloat(position.z.toFixed(3)),
                 },
                 rotation: {
                     // always send quaternions over the wire
-                    x: parseFloat(data.rotation._x.toFixed(3)),
-                    y: parseFloat(data.rotation._y.toFixed(3)),
-                    z: parseFloat(data.rotation._z.toFixed(3)),
-                    w: parseFloat(data.rotation._w.toFixed(3)),
+                    x: parseFloat(rotation._x.toFixed(3)),
+                    y: parseFloat(rotation._y.toFixed(3)),
+                    z: parseFloat(rotation._z.toFixed(3)),
+                    w: parseFloat(rotation._w.toFixed(3)),
                 },
                 color: data.color,
             },
@@ -166,7 +166,7 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     publishVio(action = 'update') {
-        const { data } = this;
+        const { data, vioPosition, vioRotation } = this;
 
         const msg = {
             object_id: this.arena.camName,
@@ -175,16 +175,16 @@ AFRAME.registerComponent('arena-camera', {
             data: {
                 object_type: 'camera',
                 position: {
-                    x: parseFloat(data.vioPosition.x.toFixed(3)),
-                    y: parseFloat(data.vioPosition.y.toFixed(3)),
-                    z: parseFloat(data.vioPosition.z.toFixed(3)),
+                    x: parseFloat(vioPosition.x.toFixed(3)),
+                    y: parseFloat(vioPosition.y.toFixed(3)),
+                    z: parseFloat(vioPosition.z.toFixed(3)),
                 },
                 rotation: {
                     // always send quaternions over the wire
-                    x: parseFloat(data.vioRotation._x.toFixed(3)),
-                    y: parseFloat(data.vioRotation._y.toFixed(3)),
-                    z: parseFloat(data.vioRotation._z.toFixed(3)),
-                    w: parseFloat(data.vioRotation._w.toFixed(3)),
+                    x: parseFloat(vioRotation._x.toFixed(3)),
+                    y: parseFloat(vioRotation._y.toFixed(3)),
+                    z: parseFloat(vioRotation._z.toFixed(3)),
+                    w: parseFloat(vioRotation._w.toFixed(3)),
                 },
                 color: data.color,
             },
@@ -197,15 +197,15 @@ AFRAME.registerComponent('arena-camera', {
      * @ignore
      */
     update(oldData) {
-        const { data } = this;
+        const { data, position, rotation } = this;
         if (oldData.showStats !== data.showStats) {
             document.getElementById('pose-stats').style.display = data.showStats ? 'block' : 'none';
             if (this.data.showStats) {
                 // update initial position of stats when opened
                 document.getElementById('pose-stats').textContent = `Position: ${ARENAUtils.coordsToText(
-                    data.position
-                )}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
-                    data.rotation
+                    position
+                )}\r\nQ Rotation: ${ARENAUtils.rotToText(rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
+                    rotation
                 )}`;
             }
         }
@@ -218,12 +218,12 @@ AFRAME.registerComponent('arena-camera', {
      */
     tick() {
         if (!this.initialized) return;
-        const { data, el } = this;
+        const { data, el, position, rotation } = this;
 
         this.heartBeatCounter++;
 
-        data.rotation.setFromRotationMatrix(el.object3D.matrixWorld);
-        data.position.setFromMatrixPosition(el.object3D.matrixWorld);
+        rotation.setFromRotationMatrix(el.object3D.matrixWorld);
+        position.setFromMatrixPosition(el.object3D.matrixWorld);
 
         this.camParent = el.object3D.parent.matrixWorld;
         this.cam = el.object3D.matrixWorld;
@@ -232,12 +232,15 @@ AFRAME.registerComponent('arena-camera', {
         // this.cpi.getInverse(this.camParent);
         this.cpi.multiply(this.cam);
 
-        this.vioMatrix.copy(this.cpi);
-        data.vioRotation.setFromRotationMatrix(this.cpi);
-        data.vioPosition.setFromMatrixPosition(this.cpi);
+        if (data.vioEnabled) {
+            this.vioMatrix.copy(this.cpi);
+            vioRotation.setFromRotationMatrix(this.cpi);
+            vioPosition.setFromMatrixPosition(this.cpi);
+            this.publishVio(); // publish vio on every tick (if enabled)
+        }
 
-        const rotationCoords = ARENAUtils.rotToText(data.rotation);
-        const positionCoords = ARENAUtils.coordsToText(data.position);
+        const rotationCoords = ARENAUtils.rotToText(rotation);
+        const positionCoords = ARENAUtils.coordsToText(position);
         const newPose = `${rotationCoords} ${positionCoords}`;
 
         // update position if pose changed, or every 1 sec heartbeat
@@ -263,13 +266,12 @@ AFRAME.registerComponent('arena-camera', {
             this.publishPose();
             if (this.data.showStats) {
                 document.getElementById('pose-stats').textContent = `Position: ${ARENAUtils.coordsToText(
-                    data.position
-                )}\r\nQ Rotation: ${ARENAUtils.rotToText(data.rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
-                    data.rotation
+                    position
+                )}\r\nQ Rotation: ${ARENAUtils.rotToText(rotation)}\r\nEA Rotation: ${ARENAUtils.rotToEulerText(
+                    rotation
                 )}`;
             }
         }
-        if (data.vioEnabled) this.publishVio(); // publish vio on every tick (if enabled)
         this.lastPose = newPose;
 
         if (

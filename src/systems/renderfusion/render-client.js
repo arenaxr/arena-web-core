@@ -40,8 +40,6 @@ const supportsSetCodecPreferences =
 AFRAME.registerComponent('arena-hybrid-render-client', {
     schema: {
         enabled: { type: 'boolean', default: false },
-        position: { type: 'vec3', default: new THREE.Vector3() },
-        rotation: { type: 'vec4', default: new THREE.Quaternion() },
         getStatsInterval: { type: 'number', default: 5000 },
         ipd: { type: 'number', default: 0.064 },
         hasDualCameras: { type: 'boolean', default: false },
@@ -55,6 +53,12 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             [ARENA_EVENTS.ARENA_LOADED, ARENA_EVENTS.MQTT_LOADED],
             this.ready.bind(this)
         );
+        this.position = new THREE.Vector3();
+        this.rotation = new THREE.Quaternion();
+        this.currPos = new THREE.Vector3(); // Reuse to avoid allocation
+        this.currRot = new THREE.Quaternion();
+        this.camPoseL = new THREE.Matrix4();
+        this.camPoseR = new THREE.Matrix4();
     },
 
     async ready() {
@@ -412,12 +416,17 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
     tick(t) {
         if (!this.initialized) return;
-        const { data, el } = this;
-
-        const { sceneEl } = el;
-        const { camera } = sceneEl;
-
-        const { renderer } = sceneEl;
+        const {
+            el: {
+                sceneEl: { camera, renderer },
+            },
+            position,
+            rotation,
+            currPos,
+            currRot,
+            camPoseL,
+            camPoseR,
+        } = this;
 
         const cameraVR = renderer.xr.getCamera();
 
@@ -425,19 +434,17 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             const camPose = new THREE.Matrix4();
             camPose.copy(camera.matrixWorld);
 
-            const currPos = new THREE.Vector3();
-            const currRot = new THREE.Quaternion();
             currPos.setFromMatrixPosition(camPose);
             currRot.setFromRotationMatrix(camPose);
 
             let changed = false;
-            if (data.position.distanceTo(currPos) > 0.01) {
-                data.position.copy(currPos);
+            if (position.distanceTo(currPos) > 0.01) {
+                position.copy(currPos);
                 changed = true;
             }
 
-            if (data.rotation.angleTo(currRot) > 0.01) {
-                data.rotation.copy(currRot);
+            if (rotation.angleTo(currRot) > 0.01) {
+                rotation.copy(currRot);
                 changed = true;
             }
 
@@ -447,8 +454,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
             this.inputDataChannel.send(camMsg);
 
             if (renderer.xr.enabled === true && renderer.xr.isPresenting === true) {
-                const camPoseL = new THREE.Matrix4();
-                const camPoseR = new THREE.Matrix4();
                 camPoseL.copy(cameraVR.cameras[0].matrixWorld);
                 camPoseR.copy(cameraVR.cameras[1].matrixWorld);
 

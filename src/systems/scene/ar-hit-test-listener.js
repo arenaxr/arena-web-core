@@ -36,7 +36,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     hitStartHandler(evt) {
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const camPosition = camera.components['arena-camera'].data.position;
+        const camPosition = camera.components['arena-camera'].position;
 
         const clickPos = ARENAUtils.vec3ToObject(camPosition);
         const { position, rotation } = ARENAUtils.setClickData(evt);
@@ -61,7 +61,7 @@ AFRAME.registerComponent('ar-hit-test-listener', {
     hitEndHandler(evt) {
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const camPosition = camera.components['arena-camera'].data.position;
+        const camPosition = camera.components['arena-camera'].position;
 
         const clickPos = ARENAUtils.vec3ToObject(camPosition);
         const { position, rotation } = ARENAUtils.setClickData(evt);
