@@ -57,7 +57,7 @@ AFRAME.registerComponent('click-listener', {
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'].data;
+        const { position } = camera.components['arena-camera'];
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setClickData(evt);
@@ -87,7 +87,7 @@ AFRAME.registerComponent('click-listener', {
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'].data;
+        const { position } = camera.components['arena-camera'];
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setClickData(evt);
@@ -117,7 +117,7 @@ AFRAME.registerComponent('click-listener', {
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'].data;
+        const { position } = camera.components['arena-camera'];
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setCoordsData(evt);
@@ -146,7 +146,7 @@ AFRAME.registerComponent('click-listener', {
         }
         if (this.data.enabled === false) return;
         const camera = document.getElementById('my-camera');
-        const { position } = camera.components['arena-camera'].data;
+        const { position } = camera.components['arena-camera'];
 
         const clickPos = ARENAUtils.vec3ToObject(position);
         const coordsData = ARENAUtils.setCoordsData(evt);

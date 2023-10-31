@@ -270,7 +270,7 @@ AFRAME.registerComponent('arenaui-card', {
             borderRadius: ARENALayout.borderRadius,
         });
         const closeButton = this.createButton('Close', 0, (evtDetail) => {
-            const { position } = document.getElementById('my-camera').components['arena-camera'].data;
+            const { position } = document.getElementById('my-camera').components['arena-camera'];
             const clickPos = ARENAUtils.vec3ToObject(position);
             const coordsData = ARENAUtils.setClickData({ detail: evtDetail });
             const thisMsg = {
