@@ -85,6 +85,22 @@ AFRAME.registerSystem('arena-av-setup', {
         // style video element
         this.videoElement.classList.add('flip-video');
         this.videoElement.style.borderRadius = '10px';
+
+        let headModelPathIdx = 0;
+        if (ARENA.sceneHeadModels) {
+            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
+            const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
+            if (this.sceneHeadModelPathIdx !== undefined) {
+                headModelPathIdx = sceneHeadModelPathIdx;
+            } else if (this.headModelPathSelect.selectedIndex === 0) {
+                // if default ARENA head used, replace with default scene head
+                headModelPathIdx = this.headModelPathSelect.length;
+            }
+        } else if (localStorage.getItem('headModelPathIdx')) {
+            headModelPathIdx = localStorage.getItem('headModelPathIdx');
+        }
+        this.headModelPathSelect.selectedIndex =
+            headModelPathIdx < this.headModelPathSelect.length ? headModelPathIdx : 0;
     },
 
     show(callback) {
@@ -103,21 +119,6 @@ AFRAME.registerSystem('arena-av-setup', {
         }
 
         this.setupPanel.classList.remove('d-none');
-        let headModelPathIdx = 0;
-        if (ARENA.sceneHeadModels) {
-            const sceneHist = JSON.parse(localStorage.getItem('sceneHistory')) || {};
-            const sceneHeadModelPathIdx = sceneHist[ARENA.namespacedScene]?.headModelPathIdx;
-            if (this.sceneHeadModelPathIdx !== undefined) {
-                headModelPathIdx = sceneHeadModelPathIdx;
-            } else if (this.headModelPathSelect.selectedIndex === 0) {
-                // if default ARENA head used, replace with default scene head
-                headModelPathIdx = this.headModelPathSelect.length;
-            }
-        } else if (localStorage.getItem('headModelPathIdx')) {
-            headModelPathIdx = localStorage.getItem('headModelPathIdx');
-        }
-        this.headModelPathSelect.selectedIndex =
-            headModelPathIdx < this.headModelPathSelect.length ? headModelPathIdx : 0;
         if (localStorage.getItem('display_name')) {
             this.displayName.value = localStorage.getItem('display_name');
             // this.displayName.focus();
