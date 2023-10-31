@@ -247,10 +247,12 @@ export default class CreateUpdate {
         let isGeometry = false;
         switch (type) {
             case 'camera':
-                Object.entries(data).forEach(([attribute, value]) => {
-                    entityEl.setAttribute('arena-user', attribute, value);
-                });
-                break;
+                this.setEntityAttributes(entityEl, {
+                    position: data.position,
+                    rotation: data.rotation,
+                    'arena-user': data['arena-user'],
+                }); // Only set permitted camera attributes, return
+                return;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
@@ -326,9 +328,14 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
-                entityEl.setAttribute('gltf-model', data.url);
-                delete data[type];
-                break;
+                this.setEntityAttributes(entityEl, {
+                    position: data.position,
+                    rotation: data.rotation,
+                    scale: data.scale,
+                    'gltf-model': data.url,
+                    // TODO: Add support new component for arena-other-user-hand for grab handling
+                }); // Only set permitted hands attributes, return
+                return;
             case 'cube':
                 type = 'box'; // arena legacy! new libraries/persist objects should use box!
             // eslint-disable-next-line no-fallthrough

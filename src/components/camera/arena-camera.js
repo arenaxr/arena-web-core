@@ -112,6 +112,7 @@ AFRAME.registerComponent('arena-camera', {
 
         if (!data.enabled) return;
 
+        const arenaUser = { displayName: data.displayName, color: data.color };
         const msg = {
             object_id: this.arena.camName,
             action,
@@ -130,31 +131,30 @@ AFRAME.registerComponent('arena-camera', {
                     z: parseFloat(rotation._z.toFixed(3)),
                     w: parseFloat(rotation._w.toFixed(3)),
                 },
-                color: data.color,
-                displayName: data.displayName,
+                'arena-user': arenaUser,
             },
         };
         const presence = document.getElementById('presence');
         if (presence) {
-            msg.data.presence = presence.value;
+            arenaUser.presence = presence.value;
         }
 
         if (this.jitsi.initialized) {
-            msg.data.jitsiId = this.jitsi.getJitsiId();
-            msg.data.hasAudio = this.jitsi.hasAudio;
-            msg.data.hasVideo = this.jitsi.hasVideo;
+            arenaUser.jitsiId = this.jitsi.getJitsiId();
+            arenaUser.hasAudio = this.jitsi.hasAudio;
+            arenaUser.hasVideo = this.jitsi.hasVideo;
         }
 
         const faceTracker = document.querySelector('a-scene').systems['face-tracking'];
         if (faceTracker && faceTracker.isEnabled()) {
-            msg.data.hasAvatar = faceTracker.isRunning();
+            arenaUser.hasAvatar = faceTracker.isRunning();
         }
 
         const headModelPathSelect = document.getElementById('headModelPathSelect');
         if (headModelPathSelect) {
-            msg.data.headModelPath = headModelPathSelect.value;
+            arenaUser.headModelPath = headModelPathSelect.value;
         } else {
-            msg.data.headModelPath = this.arena.defaults.headModelPath;
+            arenaUser.headModelPath = this.arena.defaults.headModelPath;
         }
 
         this.mqtt.publish(`${this.arena.outputTopic}${this.arena.camName}`, msg); // extra timestamp info at end for debugging
