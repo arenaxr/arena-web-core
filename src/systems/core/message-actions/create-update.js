@@ -242,30 +242,17 @@ export default class CreateUpdate {
         }
 
         // handle geometries and some type special cases
-        // TODO: using components (e.g. for headtext, image, ...) that handle these would allow to remove most of the
+        // TODO: using components (e.g. for image, ...) that handle these would allow to remove most of the
         // special cases
         let isGeometry = false;
         switch (type) {
             case 'camera':
-                if (Object.hasOwn(data, 'color')) {
-                    entityEl.setAttribute('arena-user', 'color', data.color);
-                }
-                if (Object.hasOwn(data, 'headModelPath')) {
-                    entityEl.setAttribute('arena-user', 'headModelPath', data.headModelPath); // update head model
-                }
-                if (Object.hasOwn(data, 'presence')) {
-                    entityEl.setAttribute('arena-user', 'presence', data.presence); // update presence
-                }
-                // decide if we need draw or delete videoCube around head
-                if (Object.hasOwn(message, 'jitsiId')) {
-                    entityEl.setAttribute('arena-user', 'jitsiId', message.jitsiId);
-                    entityEl.setAttribute('arena-user', 'hasVideo', message.hasVideo);
-                    entityEl.setAttribute('arena-user', 'hasAudio', message.hasAudio);
-                }
-                if (Object.hasOwn(message, 'displayName')) {
-                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
-                }
-                break;
+                this.setEntityAttributes(entityEl, {
+                    position: data.position,
+                    rotation: data.rotation,
+                    'arena-user': data['arena-user'],
+                }); // Only set permitted camera attributes, return
+                return;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
@@ -306,12 +293,6 @@ export default class CreateUpdate {
                     delete data.modelUpdate; // remove attribute so we don't set it later
                 }
                 break;
-            case 'headtext':
-                // handle changes to other users head text
-                if (Object.hasOwn(message, 'displayName')) {
-                    entityEl.setAttribute('arena-user', 'displayName', message.displayName); // update head text
-                }
-                break;
             case 'image':
                 // image is just a textured plane
                 // TODO: create an aframe component for this
@@ -347,9 +328,14 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
-                entityEl.setAttribute('gltf-model', data.url);
-                delete data[type];
-                break;
+                this.setEntityAttributes(entityEl, {
+                    position: data.position,
+                    rotation: data.rotation,
+                    scale: data.scale,
+                    'gltf-model': data.url,
+                    // TODO: Add support new component for arena-other-user-hand for grab handling
+                }); // Only set permitted hands attributes, return
+                return;
             case 'cube':
                 type = 'box'; // arena legacy! new libraries/persist objects should use box!
             // eslint-disable-next-line no-fallthrough
