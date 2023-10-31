@@ -252,7 +252,7 @@ export default class CreateUpdate {
                     rotation: data.rotation,
                     'arena-user': data['arena-user'],
                 }); // Only set permitted camera attributes, return
-                return;
+                return true;
             case 'gltf-model':
                 if (ARENA.params.armode && Object.hasOwn(data, 'hide-on-enter-ar')) {
                     warn(`Skipping hide-on-enter-ar GLTF: ${entityEl.getAttribute('id')}`);
@@ -335,7 +335,7 @@ export default class CreateUpdate {
                     'gltf-model': data.url,
                     // TODO: Add support new component for arena-other-user-hand for grab handling
                 }); // Only set permitted hands attributes, return
-                return;
+                return true;
             case 'cube':
                 type = 'box'; // arena legacy! new libraries/persist objects should use box!
             // eslint-disable-next-line no-fallthrough
