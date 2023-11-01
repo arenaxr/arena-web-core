@@ -8,9 +8,8 @@
  * Ref : https://github.com/samdutton/simpl/blob/gh-pages/getusermedia/sources/js/main.js
  */
 
-/* global AFRAME, ARENA, mdb */
+/* global AFRAME, ARENA, mdb, Swal */
 
-import Swal from 'sweetalert2';
 import createAudioMeter from './volume-meter';
 import { ARENA_EVENTS } from '../../constants';
 

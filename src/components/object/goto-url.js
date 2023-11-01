@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, Swal */
 
 /**
  * @fileoverview Goto URL Component.
@@ -7,8 +7,6 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-
-import Swal from 'sweetalert2';
 
 /**
  * Load new URL when object is clicked

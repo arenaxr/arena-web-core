@@ -6,11 +6,10 @@
  * @date 2023
  */
 
-/* global AFRAME, ARENA, ARENAAUTH, THREE, $ */
+/* global AFRAME, ARENA, ARENAAUTH, Swal, THREE, $ */
 
 import 'linkifyjs';
 import 'linkifyjs/string';
-import Swal from 'sweetalert2';
 import { proxy } from 'comlink';
 import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';

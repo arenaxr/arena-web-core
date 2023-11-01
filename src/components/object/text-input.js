@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA */
+/* global AFRAME, ARENA, Swal */
 
 /**
  * @fileoverview Present an HTML prompt to user
@@ -7,8 +7,6 @@
  * Copyright (c) 2020, The CONIX Research Center. All rights reserved.
  * @date 2020
  */
-
-import Swal from 'sweetalert2';
 
 /**
  * Opens an HTML prompt when clicked. Sends text input as an event on MQTT
