@@ -1,7 +1,6 @@
 /* global AFRAME, THREE */
 
 import EffectComposer from './effect-composer';
-import { EFFECTS } from '../../constants';
 
 AFRAME.registerSystem('effects', {
     init() {
@@ -15,7 +14,9 @@ AFRAME.registerSystem('effects', {
             return;
         }
 
-        this.arenaEffects = Object.fromEntries(Object.keys(EFFECTS).map((key) => [key, null]));
+        this.availableEffects = {};
+        this.arenaEffects = {};
+        this.effectsLoaded = false;
 
         this.cameras = [];
 
@@ -35,14 +36,23 @@ AFRAME.registerSystem('effects', {
         renderer.xr.addEventListener('sessionend', this.onResize.bind(this));
     },
 
+    async loadEffects() {
+        if (this.effectsLoaded) return;
+        const { default: effects } = await import('./effect-passes');
+        this.availableEffects = effects;
+        this.arenaEffects = Object.fromEntries(Object.keys(effects).map((key) => [key, null]));
+        this.effectsLoaded = true;
+    },
+
     addPass(passName, opts) {
-        if (!(passName in EFFECTS)) {
+        const { arenaEffects, availableEffects, composer } = this;
+        if (!(passName in availableEffects)) {
             console.error(`Pass ${passName} does not exist`);
             return;
         }
-        if (this.arenaEffects[passName] === null) {
-            this.arenaEffects[passName] = new EFFECTS[passName](opts);
-            this.composer.addPass(this.arenaEffects[passName]);
+        if (arenaEffects[passName] === null) {
+            arenaEffects[passName] = new availableEffects[passName](opts);
+            composer.addPass(arenaEffects[passName]);
         } else {
             console.warn(`Pass ${passName} already enabled`);
         }

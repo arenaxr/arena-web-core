@@ -1,30 +1,32 @@
-/* global AFRAME, THREE */
+/* global AFRAME, ARENA, THREE */
 
 import ThreeMeshUI from 'three-mesh-ui';
-import RegularFontJSON from './fonts/Roboto-Regular-msdf.json';
 import RegularFontImage from './fonts/Roboto-Regular.png';
-import MonoFontJSON from './fonts/Roboto-Mono-msdf.json';
 import MonoFontImage from './fonts/Roboto-Mono.png';
 import { EVENTS } from '../../constants/ui';
 
 AFRAME.registerSystem('arena-ui', {
     init() {
-        ThreeMeshUI.FontLibrary.prepare(
-            ThreeMeshUI.FontLibrary.addFontFamily('Roboto').addVariant(
-                '400',
-                'normal',
-                RegularFontJSON,
-                RegularFontImage
-            ),
-            ThreeMeshUI.FontLibrary.addFontFamily('Roboto-Mono').addVariant(
-                '400',
-                'normal',
-                MonoFontJSON,
-                MonoFontImage
-            )
-        ).then(() => {
-            // console.log('Roboto font loaded');
-        });
+        Promise.all([import('./fonts/Roboto-Regular-msdf.json'), import('./fonts/Roboto-Mono-msdf.json')]).then(
+            ([RegularFontJSON, MonoFontJSON]) => {
+                ThreeMeshUI.FontLibrary.prepare(
+                    ThreeMeshUI.FontLibrary.addFontFamily('Roboto').addVariant(
+                        '400',
+                        'normal',
+                        RegularFontJSON,
+                        RegularFontImage
+                    ),
+                    ThreeMeshUI.FontLibrary.addFontFamily('Roboto-Mono').addVariant(
+                        '400',
+                        'normal',
+                        MonoFontJSON,
+                        MonoFontImage
+                    )
+                ).then(() => {
+                    // console.log('Roboto font loaded');
+                });
+            }
+        );
     },
     tick() {
         ThreeMeshUI.update();

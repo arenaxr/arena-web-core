@@ -704,14 +704,16 @@ AFRAME.registerSystem('arena-scene', {
             }
 
             const postProcessing = options['post-processing'];
-            const effectsSystem = sceneEl.systems.effects;
             if (postProcessing) {
-                Object.entries(postProcessing).forEach(([effectName, opts]) => {
-                    if (opts === null) {
-                        effectsSystem.removePass(effectName);
-                    } else {
-                        effectsSystem.addPass(effectName, opts);
-                    }
+                const effectsSystem = sceneEl.systems.effects;
+                effectsSystem.loadEffects().then(() => {
+                    Object.entries(postProcessing).forEach(([effectName, opts]) => {
+                        if (opts === null) {
+                            effectsSystem.removePass(effectName);
+                        } else {
+                            effectsSystem.addPass(effectName, opts);
+                        }
+                    });
                 });
             }
         } else {
