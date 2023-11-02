@@ -5,8 +5,18 @@
         "title": "Event"
     },
     "camera": {
-        "description": "User Camera is the pose and arena-user component data representing a user avatar.",
+        "description": "Camera is the pose and arena-user component data representing a user avatar.",
         "file": "schemas/camera.json",
-        "title": "User Camera"
+        "title": "Camera"
+    },
+    "handLeft": {
+        "description": "Hand is the (left or right) hand metadata pose and controller type of the user avatar.",
+        "file": "schemas/hand.json",
+        "title": "Hand"
+    },
+    "handRight": {
+        "description": "Hand is the (left or right) hand metadata pose and controller type of the user avatar.",
+        "file": "schemas/hand.json",
+        "title": "Hand"
     }
 }

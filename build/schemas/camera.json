@@ -1,6 +1,6 @@
 {
-    "title": "User Camera",
-    "description": "User Camera is the pose and arena-user component data representing a user avatar.",
+    "title": "Camera",
+    "description": "Camera is the pose and arena-user component data representing a user avatar.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -19,7 +19,7 @@
                                 },
                                 "arena-user": {
                                     "description": "Another user's camera in the ARENA. Handles Jitsi and display name updates.",
-                                    "title": "ARENA User",
+                                    "title": "User Avatar",
                                     "type": "object",
                                     "properties": {
                                         "displayName": {
@@ -29,22 +29,24 @@
                                             "default": ""
                                         },
                                         "color": {
-                                            "type": "color",
+                                            "format": "color",
                                             "title": "color",
+                                            "type": "string",
                                             "description": "The color for the user's name text.",
                                             "default": "white"
                                         },
                                         "headModelPath": {
                                             "type": "string",
                                             "title": "headModelPath",
-                                            "description": "Path to user head model",
+                                            "description": "Path to user avatar head model",
                                             "default": "/static/models/avatars/robobit.glb"
                                         },
                                         "presence": {
                                             "type": "string",
                                             "title": "presence",
                                             "description": "Type of presence for user",
-                                            "default": "Standard"
+                                            "default": "Standard",
+                                            "enum": ["Standard", "Portal"]
                                         },
                                         "jitsiId": {
                                             "type": "string",
@@ -79,7 +81,7 @@
                             "$ref": "./schemas/definitions-entity.json#/properties"
                         }
                     ],
-                    "title": "User Camera Data",
+                    "title": "Camera Data",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "camera"
