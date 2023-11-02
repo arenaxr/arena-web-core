@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.23.3](https://github.com/arenaxr/arena-web-core/compare/v1.23.2...v1.23.3) (2023-11-02)
+
+
+### Bug Fixes
+
+* **arena-user:** publish/read all camera data in data block ([73e382e](https://github.com/arenaxr/arena-web-core/commit/73e382ebf1656cdbbd67bda815005c401d22759c))
+* arenaui colors to SRGB ([68d818c](https://github.com/arenaxr/arena-web-core/commit/68d818c228c84b9c6b4edd0a7c0866bf34b1f08b))
+* **build:** eliminate redundant (and conflicting) defaults in wire schema  ([#592](https://github.com/arenaxr/arena-web-core/issues/592)) ([fff3450](https://github.com/arenaxr/arena-web-core/commit/fff3450aeffebe705758cbadbc5c9267e9d32865))
+* localStorage saved head model set on subsequent loads ([fd6372f](https://github.com/arenaxr/arena-web-core/commit/fd6372fa1898f8829dfd41fd962c290764bdbe0e))
+* remove hand tracking from webr features ([50a01c9](https://github.com/arenaxr/arena-web-core/commit/50a01c976f7996c4beae6306f7183be114d8ba01))
+* return bool true from arena-camera/hands create-update ([9d6d749](https://github.com/arenaxr/arena-web-core/commit/9d6d749ccaedd05a0017a463c8d7ea18d4dd95e3))
+* update lingering arena-camera.position from 41caa23 ([8e94b14](https://github.com/arenaxr/arena-web-core/commit/8e94b1479abfc270a05f9c417f88d4c11f7eda6c))
+
 ## [1.23.2](https://github.com/arenaxr/arena-web-core/compare/v1.23.1...v1.23.2) (2023-10-16)
 
 
