@@ -2,6 +2,14 @@
 
 ## [1.23.3](https://github.com/arenaxr/arena-web-core/compare/v1.23.2...v1.23.3) (2023-11-02)
 
+### Refactor
+
+* **BREAKING CHANGE**: All `arena-user` attributes (descriptors of users in the scene) now are published under the
+                       `arena-user` key within the `data` block, rather than the top-level or directly under `data`
+                       of the of the MQTT message.
+* **BREAKING CHANGE**: Only `position` and `rotation` attributes are processed
+                       within `data` besides `arena-user` for `object_type:"camera"`. L/R hand objects also are
+                       filtered to only process `position`, `rotation`, `scale` attributes alongside `url`.
 
 ### Bug Fixes
 
