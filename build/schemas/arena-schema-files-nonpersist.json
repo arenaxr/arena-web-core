@@ -3,5 +3,10 @@
         "description": "Events are ephemeral messages used to send user events like mouse movements or controller actions.",
         "file": "schemas/event.json",
         "title": "Event"
+    },
+    "camera": {
+        "description": "User Camera is the pose and arena-user component data representing a user avatar.",
+        "file": "schemas/camera.json",
+        "title": "User Camera"
     }
 }
