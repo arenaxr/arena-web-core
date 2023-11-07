@@ -112,7 +112,7 @@ AFRAME.registerSystem('arena-jitsi', {
             const _this = this;
             ARENA.events.addEventListener(ARENA_EVENTS.SETUPAV_LOADED, () => {
                 // Only show if no previous preferences were set / first time AV setup
-                if (localStorage.getItem('prefAudioInput') === null) {
+                if (localStorage.getItem('prefAudioInput') === null && ARENA.params.skipav === undefined) {
                     window.setupAV(() => {
                         // Initialize Jitsi videoconferencing after A/V setup window
                         _this.connect();
@@ -159,9 +159,7 @@ AFRAME.registerSystem('arena-jitsi', {
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
         this.connection.connect();
 
-        if (!this.arena.params.armode && !this.arena.params.vrmode) {
-            this.avConnect();
-        }
+        this.avConnect();
     },
 
     /**
