@@ -219,7 +219,7 @@ AFRAME.registerSystem('arena-scene', {
             if (ARENAUtils.isWebXRViewer() || AFRAME.utils.device.checkARSupport()) {
                 sceneEl.enterAR();
             } else {
-                ARENAWebARUtils.enterARNonWebXR();
+                window.setTimeout(ARENAWebARUtils.enterARNonWebXR, 1500);
             }
         } else if (this.params.vrmode) {
             sceneEl.enterVR();
