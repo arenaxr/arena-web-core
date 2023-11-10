@@ -20,10 +20,10 @@
 <!-- markdown-link-check-disable-next-line -->
 <p>If <code>extractAssetExtras=true</code> (default), the <a href="https://help.sketchfab.com/hc/en-us/articles/202512396-Model-Properties">attribution system</a> attempts to extract data automatically from the model (requires models with authorship metadata; e.g. models downloaded from sketchfab have these data)</p>
 </dd>
-<dt><a href="#module_build-watch-object">build-watch-object</a></dt>
+<dt><a href="#module_build3d-mqtt-object">build3d-mqtt-object</a></dt>
 <dd><p>Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.</p>
 </dd>
-<dt><a href="#module_build-watch-scene">build-watch-scene</a></dt>
+<dt><a href="#module_build3d-mqtt-scene">build3d-mqtt-scene</a></dt>
 <dd><p>Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.</p>
 </dd>
 <dt><a href="#module_click-listener">click-listener</a></dt>
@@ -195,15 +195,15 @@ If `extractAssetExtras=true` (default), the [attribution system](https://help.sk
 | id                   | <code>string</code>  |                                   | The entity id in the scene; automatically filled in on component init                            |
 | [extractAssetExtras] | <code>boolean</code> | <code>true</code>                 | Extract attribution info from asset extras; will override attribution info given (default: true) |
 
-<a name="module_build-watch-object"></a>
+<a name="module_build3d-mqtt-object"></a>
 
-## build-watch-object
+## build3d-mqtt-object
 
 Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
 
-<a name="module_build-watch-scene"></a>
+<a name="module_build3d-mqtt-scene"></a>
 
-## build-watch-scene
+## build3d-mqtt-scene
 
 Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
 
@@ -224,7 +224,7 @@ Keep track of mouse events and publish corresponding events
 Listen for collisions, callback on event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:&#x27;aframe-physics-system&#x27;</code>  
+**Requires**: <code>module:&#x27;aframe-physics-system&#x27;</code>
 <a name="module_gesture-detector"></a>
 
 ## gesture-detector
@@ -254,7 +254,7 @@ One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
 Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
 
-**Requires**: <code>module:aframe-physics-system</code>  
+**Requires**: <code>module:aframe-physics-system</code>
 <a name="module_jitsi-video"></a>
 
 ## jitsi-video

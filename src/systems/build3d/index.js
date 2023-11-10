@@ -1,2 +1,2 @@
-import './build-watch-scene';
-import './build-watch-object';
+import './build3d-mqtt-scene';
+import './build3d-mqtt-object';

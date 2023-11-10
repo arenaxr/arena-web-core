@@ -45,7 +45,7 @@ function extractDataFullDOM(mutation) {
         }
         switch (attr.name) {
             case 'id':
-            case 'build-watch-object':
+            case 'build3d-mqtt-object':
                 // skip
                 break;
             case 'position':
@@ -107,7 +107,7 @@ function extractDataUpdates(mutation, attribute, changes) {
     }
     switch (mutation.attributeName) {
         case 'id':
-        case 'build-watch-object':
+        case 'build3d-mqtt-object':
             // skip
             break;
         case 'position':
@@ -157,10 +157,10 @@ function extractDataUpdates(mutation, attribute, changes) {
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
- * @module build-watch-object
+ * @module build3d-mqtt-object
  */
 // TODO: reduce logging to a reasonable level, similar to build page
-AFRAME.registerComponent('build-watch-object', {
+AFRAME.registerComponent('build3d-mqtt-object', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     schema: {
         enabled: {
@@ -188,7 +188,7 @@ AFRAME.registerComponent('build-watch-object', {
                         mutation.target.id,
                         mutation.oldValue
                     );
-                    if (mutation.attributeName === 'build-watch-object') {
+                    if (mutation.attributeName === 'build3d-mqtt-object') {
                         return; // no need to handle on/off mutations to our own component
                     }
                     if (mutation.target.id) {

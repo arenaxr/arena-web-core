@@ -41,7 +41,7 @@ export default class CreateUpdate {
          */
         function enableBuildWatchObject(entityEl, msg, enable) {
             if (msg.persist) {
-                entityEl.setAttribute('build-watch-object', 'enabled', enable);
+                entityEl.setAttribute('build3d-mqtt-object', 'enabled', enable);
             }
         }
 
@@ -61,7 +61,7 @@ export default class CreateUpdate {
                     return;
                 }
 
-                const buildWatchScene = document.querySelector('a-scene').getAttribute('build-watch-scene');
+                const buildWatchScene = document.querySelector('a-scene').getAttribute('build3d-mqtt-scene');
 
                 let entityEl = document.getElementById(id);
 

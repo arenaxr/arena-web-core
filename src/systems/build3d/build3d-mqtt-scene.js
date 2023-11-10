@@ -10,10 +10,10 @@
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
- * @module build-watch-scene
+ * @module build3d-mqtt-scene
  */
 let toolbarName = 'translate';
-AFRAME.registerComponent('build-watch-scene', {
+AFRAME.registerComponent('build3d-mqtt-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     schema: {
         sceneOptionsObject: {
@@ -46,8 +46,8 @@ AFRAME.registerComponent('build-watch-scene', {
                                 node.nodeName.toLowerCase() === 'a-entity' &&
                                 Object.keys(node.components).length === 0
                             ) {
-                                console.log('add build-watch-object:');
-                                node.setAttribute('build-watch-object', 'enabled', true);
+                                console.log('add build3d-mqtt-object:');
+                                node.setAttribute('build3d-mqtt-object', 'enabled', true);
                             }
                         });
                     }
@@ -192,7 +192,7 @@ AFRAME.registerComponent('build-watch-scene', {
             this.env = document.getElementById('env');
             if (this.env) {
                 console.log('envTest ok');
-                this.env.setAttribute('build-watch-object', 'enabled', true);
+                this.env.setAttribute('build3d-mqtt-object', 'enabled', true);
             }
         }
     },

@@ -242,7 +242,7 @@ AFRAME.registerSystem('arena-scene', {
         }
 
         if (this.isBuild3dEnabled()) {
-            sceneEl.setAttribute('build-watch-scene', true);
+            sceneEl.setAttribute('build3d-mqtt-scene', true);
             sceneEl.setAttribute('debug', true);
         }
 
