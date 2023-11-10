@@ -17,13 +17,20 @@ AFRAME.registerSystem('debug-ui', {
                 const debugCard = document.createElement('a-entity');
                 debugCard.setAttribute('arenaui-card', {
                     title: 'Debug',
-                    body: '...',
+                    body: '',
                     fontSize: 0.018,
                     widthScale: '0.5',
                 });
                 debugCard.setAttribute('position', { x: 0, y: 0.2, z: -1 });
                 document.getElementById('my-camera').appendChild(debugCard);
-                ARENA.debugCard = debugCard;
+                ARENA.debugXR = (text) => {
+                    const prevText = debugCard.getAttribute('arenaui-card').body;
+                    if (text === undefined) {
+                        debugCard.setAttribute('arenaui-card', { body: '' });
+                    } else {
+                        debugCard.setAttribute('arenaui-card', { body: `${prevText}\n${text}` });
+                    }
+                };
             });
         }
     },
@@ -55,8 +62,11 @@ AFRAME.registerSystem('mesh-dump', {
             // First may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
+            ARENA.debugXR('Detected planes. ');
             const refFloor = document.getElementById('ref_floor');
+            const xrRefSpace = this.sceneEl.renderer.xr.getReferenceSpace();
             if (refFloor) {
+                ARENA.debugXR('Found ref floor plane');
                 let floorPlane;
                 // eslint-disable-next-line no-restricted-syntax
                 for (const plane of frame.detectedPlanes) {
@@ -65,10 +75,10 @@ AFRAME.registerSystem('mesh-dump', {
                         break;
                     }
                 }
-                const xrRefSpace = this.sceneEl.renderer.xr.getReferenceSpace();
+                ARENA.debugXR('Found detected floor plane');
                 const planePose = frame.getPose(floorPlane.planeSpace, xrRefSpace).transform.matrix;
                 const planePos = new THREE.Vector3();
-                planePos.setFromMatrix4(planePose);
+                planePos.setFromMatrixPosition(planePose);
                 // const dVectors = floorPlane.polygon.map((p) => new THREE.Vector2(p.x, p.y));
                 // dVectors.pop(); // Remove loop-closing end-point
                 // const floorCentroid = new THREE.Vector2();
@@ -77,8 +87,11 @@ AFRAME.registerSystem('mesh-dump', {
                 // offset.sub(new THREE.Vector3(floorCentroid.x, 0, floorCentroid.y));
                 offset.sub(planePos);
                 offset.y = 0; // Don't move vertically
+                ARENA.debugXR();
+                ARENA.debugXR(`Relocating by ${offset.x}, ${offset.y}, ${offset.z}`);
                 ARENA.utils.relocateUserCamera(offset);
             } else {
+                ARENA.debugXR('Found floor, no ref, publishing ref');
                 frame.detectedMeshes.forEach((mesh) => {
                     ARENA.Mqtt.publish(
                         `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}`,
