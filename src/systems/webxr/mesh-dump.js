@@ -1,5 +1,7 @@
 /* global AFRAME, ARENA, THREE */
 
+import { ARENA_EVENTS } from '../../constants';
+
 function computeCentroid(points, centroid) {
     centroid.set(0, 0);
     points.forEach((p) => {
@@ -7,6 +9,25 @@ function computeCentroid(points, centroid) {
     });
     centroid.divideScalar(points.length);
 }
+
+AFRAME.registerSystem('debug-ui', {
+    init() {
+        if (ARENA.params.debugUI) {
+            ARENA.events.addMultiEventListener([ARENA_EVENTS.ARENA_LOADED], () => {
+                const debugCard = document.createElement('a-entity');
+                debugCard.setAttribute('arenaui-card', {
+                    title: 'Debug',
+                    body: '...',
+                    fontSize: 0.018,
+                    widthScale: '0.5',
+                });
+                debugCard.setAttribute('position', { x: 0, y: 0.2, z: -1 });
+                document.getElementById('my-camera').appendChild(debugCard);
+                ARENA.debugCard = debugCard;
+            });
+        }
+    },
+});
 
 AFRAME.registerSystem('mesh-dump', {
     init() {
