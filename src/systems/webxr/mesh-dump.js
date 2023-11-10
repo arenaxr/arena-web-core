@@ -76,18 +76,20 @@ AFRAME.registerSystem('mesh-dump', {
                     }
                 }
                 ARENA.debugXR('Found detected floor plane');
-                const planePose = frame.getPose(floorPlane.planeSpace, xrRefSpace).transform.matrix;
+                const planePose = new THREE.Matrix4();
+                planePose.fromArray(frame.getPose(floorPlane.planeSpace, xrRefSpace).transform.matrix);
                 const planePos = new THREE.Vector3();
                 planePos.setFromMatrixPosition(planePose);
                 // const dVectors = floorPlane.polygon.map((p) => new THREE.Vector2(p.x, p.y));
                 // dVectors.pop(); // Remove loop-closing end-point
                 // const floorCentroid = new THREE.Vector2();
                 // computeCentroid(dVectors, floorCentroid);
-                const offset = new THREE.Vector3(refFloor.x, refFloor.y, refFloor.z);
+                const refFloorPos = refFloor.object3D.position;
+                const offset = new THREE.Vector3(refFloorPos.x, refFloorPos.y, refFloorPos.z);
                 // offset.sub(new THREE.Vector3(floorCentroid.x, 0, floorCentroid.y));
                 offset.sub(planePos);
                 offset.y = 0; // Don't move vertically
-                ARENA.debugXR();
+
                 ARENA.debugXR(`Relocating by ${offset.x}, ${offset.y}, ${offset.z}`);
                 ARENA.utils.relocateUserCamera(offset);
             } else {
