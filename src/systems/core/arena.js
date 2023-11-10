@@ -107,7 +107,23 @@ AFRAME.registerSystem('arena-scene', {
             if (!args.userName) return; // only handle a user name change
             this.showEchoDisplayName();
         });
-
+        ARENA.events.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, (e) => {
+            if (this.params.build3d) {
+                if (this.isBuild3dEnabled()) {
+                    this.loadArenaInspector();
+                } else {
+                    Swal.fire({
+                        title: 'Build 3D',
+                        text: `Build 3D not enabled. You do not have the required permission to edit this scene.`,
+                        icon: 'error',
+                        showConfirmButton: true,
+                        confirmButtonText: 'Ok',
+                    }).then((result) => {
+                        this.removeBuild3d();
+                    });
+                }
+            }
+        });
         sceneEl.addEventListener(JITSI_EVENTS.DOMINANT_SPEAKER_CHANGED, (e) => {
             const speaker = !e.detail.id || e.detail.id === this.idTag; // self is speaker
             this.showEchoDisplayName(speaker);
@@ -225,7 +241,7 @@ AFRAME.registerSystem('arena-scene', {
             sceneEl.enterVR();
         }
 
-        if (this.params.build3d) {
+        if (this.isBuild3dEnabled()) {
             sceneEl.setAttribute('build-watch-scene', true);
             sceneEl.setAttribute('debug', true);
         }
@@ -277,7 +293,7 @@ AFRAME.registerSystem('arena-scene', {
      * @return {boolean} True if the user has permission to stream audio/video in this scene.
      */
     isJitsiPermitted() {
-        if (this.params.build3d) return false; // build3d is used on a new page
+        if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
         return !!this.mqttToken.token_payload.room;
     },
 
@@ -287,7 +303,7 @@ AFRAME.registerSystem('arena-scene', {
      * @return {boolean} True if the user has permission to send/receive chats in this scene.
      */
     isUsersPermitted() {
-        if (this.params.build3d) return false; // build3d is used on a new page
+        if (this.isBuild3dEnabled()) return false; // build3d is used on a new page
         return ARENAUtils.matchJWT(`${this.params.realm}/c/${this.nameSpace}/o/#`, this.mqttToken.token_payload.subs);
     },
 
@@ -298,6 +314,13 @@ AFRAME.registerSystem('arena-scene', {
      */
     isUserSceneWriter() {
         return ARENAUtils.matchJWT(this.renderTopic, this.mqttToken.token_payload.publ);
+    },
+
+    /**
+     * Checks the state of build3d request and for scene write permissions.
+     */
+    isBuild3dEnabled() {
+        return this.params.build3d && this.isUserSceneWriter();
     },
 
     /**
@@ -391,10 +414,6 @@ AFRAME.registerSystem('arena-scene', {
                 cameraEl.setAttribute('arena-camera', 'vioEnabled', true);
             }
 
-            if (this.params.build3d) {
-                this.loadArenaInspector();
-            }
-
             // TODO (mwfarb): fix race condition in slow networks; too mitigate, warn user for now
             if (this.health) {
                 this.health.removeError('slow.network');
@@ -405,27 +424,20 @@ AFRAME.registerSystem('arena-scene', {
     /**
      * Loads the a-frame inspector, with MutationObserver connected to MQTT.
      * Expects all known objects to be loaded first.
+     * Expects that permissions have been checked so users won't be confused if publish fails.
      */
     loadArenaInspector() {
         const { sceneEl } = this.el;
 
         let el;
         if (this.params.objectId) {
-            el = document.getElementById(this.params.objectId); // requested id
-        } else {
-            el = document.querySelector('[build-watch-object]'); // first id
+            el = document.getElementById(this.params.objectId); // requested id if any
         }
         sceneEl.components.inspector.openInspector(el || null);
         console.log('build3d', 'A-Frame Inspector loaded');
 
         function updateInspectorPanel(perm, jqSelect) {
             $(jqSelect).css('opacity', '.75');
-            if (!perm) {
-                // no permission to edit
-                $(jqSelect).css('background-color', 'orange');
-                $(jqSelect).css('pointer-events', 'none');
-                $(`${jqSelect} :input`).attr('disabled', true);
-            }
         }
 
         setTimeout(() => {
@@ -436,20 +448,26 @@ AFRAME.registerSystem('arena-scene', {
 
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(() => {
-                // remove the build3d a-frame inspector
-                const url = new URL(window.location.href);
-                url.searchParams.delete('build3d');
-                url.searchParams.delete('objectId');
-                window.parent.window.history.pushState(
-                    {
-                        path: url.href,
-                    },
-                    '',
-                    decodeURIComponent(url.href)
-                );
-                window.location.reload();
+                this.removeBuild3d();
             });
         }, 2000);
+    },
+
+    /**
+     *  remove the build3d a-frame inspector
+     */
+    removeBuild3d() {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('build3d');
+        url.searchParams.delete('objectId');
+        window.parent.window.history.pushState(
+            {
+                path: url.href,
+            },
+            '',
+            decodeURIComponent(url.href)
+        );
+        window.location.reload();
     },
 
     /**
