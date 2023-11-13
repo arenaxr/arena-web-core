@@ -266,6 +266,8 @@ AFRAME.registerSystem('armarker', {
         this.cvPipelineInitializing = false;
         this.cvPipelineInitialized = true;
 
+        ARENA.events.emit(ARENA_EVENTS.CV_INITIALIZED);
+
         // send size of known markers to cvWorker (so it can compute pose)
         Object.entries(this.markers).forEach(([mid, marker]) => {
             const newMarker = {

@@ -117,6 +117,8 @@ AFRAME.registerSystem('arena-jitsi', {
                         // Initialize Jitsi videoconferencing after A/V setup window
                         _this.connect();
                     });
+                } else if (ARENA.params.armode && ARENA.params.skipav) {
+                    ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, _this.connect.bind(_this));
                 } else {
                     ARENA.events.addEventListener(ARENA_EVENTS.SCENE_OBJ_LOADED, _this.connect.bind(_this));
                 }
