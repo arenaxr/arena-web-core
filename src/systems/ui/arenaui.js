@@ -6,7 +6,13 @@ import MonoFontImage from './fonts/Roboto-Mono.png';
 import { EVENTS } from '../../constants/ui';
 
 AFRAME.registerSystem('arena-ui', {
+    schema: {
+        updateRate: { type: 'number', default: 50 },
+    },
+
     init() {
+        this.tick = AFRAME.utils.throttleTick(this.tick, this.data.updateRate, this);
+
         Promise.all([import('./fonts/Roboto-Regular-msdf.json'), import('./fonts/Roboto-Mono-msdf.json')]).then(
             ([RegularFontJSON, MonoFontJSON]) => {
                 ThreeMeshUI.FontLibrary.prepare(
