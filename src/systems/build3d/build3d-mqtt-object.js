@@ -8,7 +8,7 @@
 
 /* global AFRAME, ARENA */
 
-const symbols = { create: 'CRE', update: 'UPD', delete: 'DEL' };
+const symbols = { create: 'create', update: 'update', delete: 'delete' };
 
 function LogToUser(msg, attributeName, changes) {
     const inspectorMqttLog = document.getElementById('inspectorMqttLog');
