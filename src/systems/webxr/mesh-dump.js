@@ -10,6 +10,50 @@ function computeCentroid(points, centroid) {
     centroid.divideScalar(points.length);
 }
 
+function findBestAlignment(refPoints, dPoints) {
+    let bestDistance = Infinity;
+    let bestMatrix = null;
+    let bestRotation = 0;
+    let bestIndex = -1;
+    const tempMatrix = new THREE.Matrix3();
+    const rotatedVector = new THREE.Vector2();
+
+    // Try aligning each corner of xRect to each corner of refRect
+    for (let i = 0; i < refPoints.length; i++) {
+        for (let j = 0; j < dPoints.length; j++) {
+            // Calculate the angle difference
+            const angle = refPoints[i].angle() - dPoints[j].angle();
+
+            // Reset the temporary matrix for new rotation
+            tempMatrix.identity().rotate(angle);
+
+            // Calculate the sum of squared distances between the rotated xRect and refRect
+            let distance = 0;
+            for (let k = 0; k < dPoints.length; k++) {
+                // Apply the matrix to rotate the point
+                rotatedVector.copy(dPoints[k]).applyMatrix3(tempMatrix);
+                distance += rotatedVector.distanceToSquared(refPoints[(i + k) % refPoints.length]);
+            }
+
+            // Check if this is the best alignment so far
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestRotation = angle;
+                bestIndex = j;
+                // Clone the temporary matrix to store the best one
+                bestMatrix = tempMatrix.clone();
+            }
+        }
+    }
+
+    return {
+        distance: bestDistance,
+        matrix: bestMatrix,
+        rotation: bestRotation,
+        index: bestIndex,
+    };
+}
+
 AFRAME.registerSystem('debug-ui', {
     init() {
         if (ARENA.params.debugUI) {
@@ -39,7 +83,7 @@ AFRAME.registerSystem('debug-ui', {
 
 AFRAME.registerSystem('mesh-dump', {
     schema: {
-        directionObjectName: { type: 'string', default: 'plant' },
+        directionObjectName: { type: 'string', default: 'door' },
     },
 
     init() {
@@ -99,19 +143,42 @@ AFRAME.registerSystem('mesh-dump', {
                 offsetPos.sub(planePos);
                 offsetPos.y = 0; // Don't move vertically
                 ARENA.debugXR(`Relocating position by ${offsetPos.x}, ${offsetPos.y}, ${offsetPos.z}`);
+                // Get points of refFloor
+                const { width, height } = refFloor.getAttribute('geometry');
+                const rVectors = [
+                    new THREE.Vector2(width / 2, height / 2),
+                    new THREE.Vector2(-width / 2, height / 2),
+                    new THREE.Vector2(-width / 2, -height / 2),
+                    new THREE.Vector2(width / 2, -height / 2),
+                ];
                 // Get points of detected floor
                 const dVectors = floorPlane.polygon.map((p) => new THREE.Vector2(p.x, p.z));
                 dVectors.pop(); // Remove loop-closing end-point
+                // If we have a directionPlane, add corresponding points
                 if (directionPlane) {
                     const directionBox = document.getElementById('directionBox');
                     if (directionBox) {
                         dVectors.push(
-                            new THREE.Vector2(directionBox.object3D.position.x, directionBox.object3D.position.z)
+                            new THREE.Vector2(
+                                refFloor.object3D.position.x - directionBox.object3D.position.x,
+                                refFloor.object3D.position.z - directionBox.object3D.position.z
+                            )
                         );
                     }
+                    const directionPlanePose = new THREE.Matrix4();
+                    directionPlanePose.fromArray(frame.getPose(directionPlane.planeSpace, xrRefSpace).transform.matrix);
+                    const directionPlanePos = new THREE.Vector3();
+                    directionPlanePos.setFromMatrixPosition(directionPlanePose);
+                    rVectors.push(directionPlanePos);
                 }
-
-                ARENA.utils.relocateUserCamera(offsetPos);
+                // Find best alignment
+                const { matrix } = findBestAlignment(rVectors, dVectors);
+                const offsetRotation = new THREE.Quaternion();
+                offsetRotation.setFromMatrix4(matrix);
+                ARENA.debugXR(
+                    `Rotating by ${offsetRotation.x}, ${offsetRotation.y}, ${offsetRotation.z}, ${offsetRotation.w}`
+                );
+                ARENA.utils.relocateUserCamera(offsetPos, offsetRotation);
             } else {
                 ARENA.debugXR('Found floor, no ref, publishing ref');
                 frame.detectedMeshes.forEach((mesh) => {
