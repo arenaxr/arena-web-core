@@ -77,9 +77,8 @@ AFRAME.registerComponent('arena-webar-session', {
     hideVRButtons() {
         const { el } = this;
 
-        const { enterAREl } = el.components['vr-mode-ui'];
+        const { enterAREl, enterVREl } = el.components['xr-mode-ui'];
         enterAREl.classList.add(HIDDEN_CLASS);
-        const { enterVREl } = el.components['vr-mode-ui'];
         enterVREl.classList.add(HIDDEN_CLASS);
     },
 
