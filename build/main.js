@@ -48,8 +48,7 @@ window.addEventListener('onauth', async (e) => {
     const deleteSceneButton = document.getElementById('deletescene');
     const importSceneButton = document.getElementById('importscene');
     const exportSceneButton = document.getElementById('exportscene');
-    const uploadImageButton = document.getElementById('uploadimage');
-    const uploadModelButton = document.getElementById('uploadmodel');
+    const uploadFilestoreButton = document.getElementById('uploadfilestore');
     const setValueButton = document.getElementById('setvalue');
     const selectSchema = document.getElementById('objtype');
     const genidButton = document.getElementById('genid');
@@ -383,16 +382,22 @@ window.addEventListener('onauth', async (e) => {
         return cookieValue;
     }
 
-    async function uploadSceneFileStore(model) {
-        const strType = model ? 'GLB' : 'Image';
-        const objType = model ? 'gltf-model' : 'image';
-        const accept = model ? '*/*' : 'image/*'; // 'model/gltf-binary, *.glb' not working on XRBrowser
-        const htmlopt = model
-            ? `<div style="float: left;">
+    const fileTypes = {
+        'gltf-model': '*/*', // 'model/gltf-binary, *.glb' not working on XRBrowser
+        image: 'image/*',
+    };
+
+    async function uploadSceneFileStore(objtype) {
+        const strType = objtype;
+        const objType = objtype;
+        const accept = fileTypes[objtype];
+        const htmlopt =
+            objtype === 'gltf-model'
+                ? `<div style="float: left;">
             <input type="checkbox" id="cbhideinar" name="cbhideinar" >
             <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
             </div>`
-            : '';
+                : '';
         const htmlval = `${htmlopt}`;
 
         await Swal.fire({
@@ -526,11 +531,10 @@ window.addEventListener('onauth', async (e) => {
         });
     }
     // switch image/model
-    uploadModelButton.addEventListener('click', async () => {
-        await uploadSceneFileStore(true);
-    });
-    uploadImageButton.addEventListener('click', async () => {
-        await uploadSceneFileStore(false);
+    uploadFilestoreButton.addEventListener('click', async () => {
+        const obj = JSON.parse(output.value);
+        console.log('schema', obj);
+        await uploadSceneFileStore(obj.data.object_type);
     });
 
     openAddSceneButton.addEventListener('click', async () => {
