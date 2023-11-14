@@ -142,39 +142,45 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             if (this.scenegraphDiv) {
                 console.log('scenegraphTest ok');
 
+                // container
                 const inspectorMqttLogWrap = document.createElement('div');
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
                 inspectorMqttLogWrap.className = 'outliner';
                 inspectorMqttLogWrap.tabIndex = 2;
-                // inspectorMqttLogWrap.style.zIndex = '9999999';
-                inspectorMqttLogWrap.style.width = '100%';
-                // inspectorMqttLogWrap.style.left = '0';
+                // inspectorMqttLogWrap.style.width = '100%';
+                inspectorMqttLogWrap.style.width = '-webkit-fill-available';
                 inspectorMqttLogWrap.style.bottom = '0';
                 inspectorMqttLogWrap.style.position = 'fixed';
                 inspectorMqttLogWrap.style.height = '25%';
                 inspectorMqttLogWrap.style.display = 'flex';
                 inspectorMqttLogWrap.style.flexDirection = 'column';
-                // inspectorMqttLogWrap.style.flexGrow = '2';
-                // inspectorMqttLogWrap.style.justifyContent = 'space-between';
-                inspectorMqttLogWrap.backgroundColor = '#242424';
-                inspectorMqttLogWrap.color = 'c3c3c3';
                 this.scenegraphDiv.appendChild(inspectorMqttLogWrap);
 
+                // title
                 const inspectorMqttTitle = document.createElement('span');
                 inspectorMqttTitle.id = 'inspectorMqttTitle';
                 inspectorMqttTitle.className = 'outliner';
                 inspectorMqttTitle.style.backgroundColor = 'darkgreen';
-                // inspectorMqttTitle.style.display = 'inline';
-                inspectorMqttTitle.textContent = "ARENA's Build3d";
-                // inspectorMqttLogWrap.style.height = '14px';
+                inspectorMqttTitle.style.color = 'white';
+                inspectorMqttTitle.style.opacity = '.75';
                 inspectorMqttTitle.style.width = '100%';
+                inspectorMqttTitle.style.paddingLeft = '10px';
+                inspectorMqttTitle.textContent = "ARENA's Build3D MQTT Publish Log";
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
 
+                // log
                 const inspectorMqttLog = document.createElement('div');
                 inspectorMqttLog.id = 'inspectorMqttLog';
                 inspectorMqttLog.className = 'outliner';
                 inspectorMqttLog.style.overflowY = 'auto';
                 inspectorMqttLog.style.width = '100%';
+                inspectorMqttLog.style.height = '100%';
+                inspectorMqttLog.style.backgroundColor = '#242424';
+                inspectorMqttLog.style.color = 'c3c3c3';
+                inspectorMqttLog.style.opacity = '.75';
+                inspectorMqttLog.style.paddingLeft = '10px';
+                inspectorMqttLog.style.fontFamily = 'monospace,monospace';
+                inspectorMqttLog.style.fontSize = '10px';
                 inspectorMqttLogWrap.appendChild(inspectorMqttLog);
 
                 const line = document.createElement('span');
