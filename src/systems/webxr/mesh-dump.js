@@ -23,12 +23,13 @@ AFRAME.registerSystem('debug-ui', {
                 });
                 debugCard.setAttribute('position', { x: 0, y: 0.2, z: -1 });
                 document.getElementById('my-camera').appendChild(debugCard);
-                ARENA.debugXR = (text) => {
+                ARENA.debugXR = (text, newline = true) => {
                     const prevText = debugCard.getAttribute('arenaui-card').body;
                     if (text === undefined) {
                         debugCard.setAttribute('arenaui-card', { body: '' });
                     } else {
-                        debugCard.setAttribute('arenaui-card', { body: `${prevText}\n${text}` });
+                        const n = newline ? '\n' : '';
+                        debugCard.setAttribute('arenaui-card', { body: `${prevText}${n}${text}` });
                     }
                 };
             });
@@ -37,6 +38,10 @@ AFRAME.registerSystem('debug-ui', {
 });
 
 AFRAME.registerSystem('mesh-dump', {
+    schema: {
+        directionObjectName: { type: 'string', default: 'plant' },
+    },
+
     init() {
         const { sceneEl } = this;
 
@@ -68,30 +73,45 @@ AFRAME.registerSystem('mesh-dump', {
             if (refFloor) {
                 ARENA.debugXR('Found ref floor plane');
                 let floorPlane;
+                let directionPlane;
                 // eslint-disable-next-line no-restricted-syntax
+                ARENA.debugXR('Planes: ', false);
                 for (const plane of frame.detectedPlanes) {
+                    ARENA.debugXR(`${plane.semanticLabel} | `, false);
                     if (plane.semanticLabel === 'floor') {
                         floorPlane = plane;
-                        break;
+                    }
+                    if (plane.semanticLabel === this.data.directionObjectName) {
+                        directionPlane = plane;
                     }
                 }
+                // Get detected floor pose
                 ARENA.debugXR('Found detected floor plane');
                 const planePose = new THREE.Matrix4();
                 planePose.fromArray(frame.getPose(floorPlane.planeSpace, xrRefSpace).transform.matrix);
                 const planePos = new THREE.Vector3();
+                const planeRot = new THREE.Matrix3();
                 planePos.setFromMatrixPosition(planePose);
-                // const dVectors = floorPlane.polygon.map((p) => new THREE.Vector2(p.x, p.y));
-                // dVectors.pop(); // Remove loop-closing end-point
-                // const floorCentroid = new THREE.Vector2();
-                // computeCentroid(dVectors, floorCentroid);
+                planeRot.setFromMatrix4(planePose);
+                // Calculate offset from refFloor to detected floor
                 const refFloorPos = refFloor.object3D.position;
-                const offset = new THREE.Vector3(refFloorPos.x, refFloorPos.y, refFloorPos.z);
-                // offset.sub(new THREE.Vector3(floorCentroid.x, 0, floorCentroid.y));
-                offset.sub(planePos);
-                offset.y = 0; // Don't move vertically
+                const offsetPos = new THREE.Vector3(refFloorPos.x, refFloorPos.y, refFloorPos.z);
+                offsetPos.sub(planePos);
+                offsetPos.y = 0; // Don't move vertically
+                ARENA.debugXR(`Relocating position by ${offsetPos.x}, ${offsetPos.y}, ${offsetPos.z}`);
+                // Get points of detected floor
+                const dVectors = floorPlane.polygon.map((p) => new THREE.Vector2(p.x, p.z));
+                dVectors.pop(); // Remove loop-closing end-point
+                if (directionPlane) {
+                    const directionBox = document.getElementById('directionBox');
+                    if (directionBox) {
+                        dVectors.push(
+                            new THREE.Vector2(directionBox.object3D.position.x, directionBox.object3D.position.z)
+                        );
+                    }
+                }
 
-                ARENA.debugXR(`Relocating by ${offset.x}, ${offset.y}, ${offset.z}`);
-                ARENA.utils.relocateUserCamera(offset);
+                ARENA.utils.relocateUserCamera(offsetPos);
             } else {
                 ARENA.debugXR('Found floor, no ref, publishing ref');
                 frame.detectedMeshes.forEach((mesh) => {
