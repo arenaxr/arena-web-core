@@ -446,6 +446,9 @@ AFRAME.registerSystem('arena-scene', {
             updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
+            const scene = document.querySelector('a-scene');
+            scene.play();
+
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(() => {
                 this.removeBuild3d();
