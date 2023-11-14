@@ -448,6 +448,11 @@ AFRAME.registerSystem('arena-scene', {
 
             const scene = document.querySelector('a-scene');
             scene.play();
+            console.log('build3d', 'scene.play()');
+
+            // <a id="playPauseScene" class="button fa fa-pause" title="Pause scene"></a>
+            $('#playPauseScene').trigger('click');
+            console.log('build3d', 'playPauseScene click');
 
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(() => {
