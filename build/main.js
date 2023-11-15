@@ -436,7 +436,7 @@ window.addEventListener('onauth', async (e) => {
                         try {
                             await ARENAUserAccount.requestStoreLogin();
                         } catch (err) {
-                            Swal.showValidationMessage(`Error requesting filestore login: ${err.statusText}`);
+                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
                             return;
                         }
                         token = getCookie('auth');
@@ -498,7 +498,12 @@ window.addEventListener('onauth', async (e) => {
                                     // push updated data to forms
                                     output.value = JSON.stringify(obj, null, 2);
                                     jsoneditor.setValue(obj);
-                                    Swal.close();
+                                    Alert.fire({
+                                        icon: 'info',
+                                        title: 'File Store Upload Success',
+                                        html: `File ${resultFileOpen.name} uploaded to File Store. Don't forget to publish your JSON with the new File Store URL.`,
+                                        timer: 10000,
+                                    });
                                 })
                                 .catch((error) => {
                                     Swal.showValidationMessage(`Request failed: ${error}`);
