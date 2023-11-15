@@ -49,6 +49,22 @@
             "title": "Animation Mixer",
             "type": "object"
         },
+        "gltf-opacity": {
+            "description": "Apply oApacity to the model",
+            "properties": {
+                "opacity": {
+                    "type": "number",
+                    "title": "opacity",
+                    "description": "Opacity value to apply to the model. 1 is fully opaque, 0 is fully transparent.",
+                    "default": 1
+                }
+            },
+            "title": "GLTF Opacity",
+            "type": "object",
+            "required": [
+                "opacity"
+            ]
+        },
         "gltf-model-lod": {
             "description": "Simple switch between the default gltf-model and a detailed one when a user camera is within specified distance",
             "properties": {
