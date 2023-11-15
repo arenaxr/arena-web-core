@@ -470,13 +470,8 @@ window.addEventListener('onauth', async (e) => {
                                     try {
                                         obj = JSON.parse(output.value);
                                     } catch (err) {
-                                        Alert.fire({
-                                            icon: 'error',
-                                            title: 'Invalid JSON input',
-                                            html: `Error: ${err}`,
-                                            timer: 8000,
-                                        });
-                                        return;
+                                        console.error(err);
+                                        throw err;
                                     }
                                     obj.data.url = `${storeExtPath}`;
                                     if (hideinar) {
