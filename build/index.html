@@ -97,18 +97,11 @@
                             title="Refresh Scene List from User Account"
                             ><i class="icon-refresh"></i
                         ></a>
-                        <br />
                         <a class="btn btn-small" href="#" id="importscene" title="Import from JSON file">
                             { } <i class="icon-upload"></i>
                         </a>
                         <a class="btn btn-small" href="#" id="exportscene" title="Export to JSON file" download>
                             { } <i class="icon-download"></i>
-                        </a>
-                        <a class="btn btn-small" href="#" id="uploadmodel" title="Upload Model to Filestore and Scene">
-                            <img src="assets/3dobj-icon.png" width="14" />↑
-                        </a>
-                        <a class="btn btn-small" href="#" id="uploadimage" title="Upload Image to Filestore and Scene">
-                            <i class="icon-picture"></i>↑
                         </a>
                     </form>
                     <div id="scenelinks">
@@ -193,6 +186,9 @@
                             </button>
                             <button class="btn btn-small" type="button" id="genid" title="Generate a Random object_id">
                                 <i class="icon-tag"></i>Gen object_id
+                            </button>
+                            <button class="btn btn-small" type="button" id="uploadfilestore" title="Filestore Upload and Gen Url">
+                                <i class="icon-file"></i>Filestore Upload/Gen Url
                             </button>
                             <button class="btn btn-primary btn-small addobj" type="button" title="Add or Update Object">
                                 <i class="icon-plus"></i> Add/Update Object

@@ -48,8 +48,7 @@ window.addEventListener('onauth', async (e) => {
     const deleteSceneButton = document.getElementById('deletescene');
     const importSceneButton = document.getElementById('importscene');
     const exportSceneButton = document.getElementById('exportscene');
-    const uploadImageButton = document.getElementById('uploadimage');
-    const uploadModelButton = document.getElementById('uploadmodel');
+    const uploadFilestoreButton = document.getElementById('uploadfilestore');
     const setValueButton = document.getElementById('setvalue');
     const selectSchema = document.getElementById('objtype');
     const genidButton = document.getElementById('genid');
@@ -66,6 +65,13 @@ window.addEventListener('onauth', async (e) => {
     let newScene = true;
     let saved_namespace;
     let saved_scene;
+
+    const uploadFileTypes = {
+        image: 'image/*',
+        'gltf-model': '*.glb',
+        'pcd-model': '*.pcd',
+        'threejs-scene': '*.json',
+    };
 
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
@@ -156,6 +162,8 @@ window.addEventListener('onauth', async (e) => {
                 validate.value = 'valid';
             }
             insertEulerRotationEditor(json);
+            uploadFilestoreButton.style.display =
+                uploadFileTypes[json.data.object_type] === undefined ? 'none' : 'inline';
         });
 
         const typeSel = document.getElementsByName('root[type]')[0];
@@ -383,25 +391,24 @@ window.addEventListener('onauth', async (e) => {
         return cookieValue;
     }
 
-    async function uploadSceneFileStore(model) {
-        const strType = model ? 'GLB' : 'Image';
-        const objType = model ? 'gltf-model' : 'image';
-        const accept = model ? '*/*' : 'image/*'; // 'model/gltf-binary, *.glb' not working on XRBrowser
-        const htmlopt = model
-            ? `<div style="float: left;">
+    async function uploadSceneFileStore(objtype) {
+        const accept = uploadFileTypes[objtype];
+        const htmlopt =
+            objtype === 'gltf-model'
+                ? `<div style="float: left;">
             <input type="checkbox" id="cbhideinar" name="cbhideinar" >
             <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
             </div>`
-            : '';
+                : '';
         const htmlval = `${htmlopt}`;
 
         await Swal.fire({
-            title: `Upload ${strType} to Filestore and Scene`,
+            title: `Upload ${objtype} to Filestore`,
             html: htmlval,
             input: 'file',
             inputAttributes: {
                 accept: `${accept}`,
-                'aria-label': `Select  ${strType}`,
+                'aria-label': `Select ${objtype}`,
             },
             confirmButtonText: 'Upload',
             focusConfirm: false,
@@ -409,23 +416,17 @@ window.addEventListener('onauth', async (e) => {
             cancelButtonText: 'Cancel',
             showLoaderOnConfirm: true,
             preConfirm: (resultFileOpen) => {
-                if (model && !/\.glb$/i.test(resultFileOpen.name)) {
-                    Swal.showValidationMessage(`${strType} file type only!`);
-                    return;
-                }
                 const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
                 const safeFilename = fn.replace(/(\W+)/gi, '-');
-                const uploadObjectId = `${objType}-${safeFilename}`;
                 let hideinar = false;
-
                 const reader = new FileReader();
                 reader.onload = async (evt) => {
                     const file = document.querySelector('.swal2-file');
                     if (!file) {
-                        Swal.showValidationMessage(`${strType} file not loaded!`);
+                        Swal.showValidationMessage(`${objtype} file not loaded!`);
                         return;
                     }
-                    if (model) {
+                    if (objtype === 'gltf-model') {
                         // allow model checkboxes hide in ar/vr (recommendations)
                         hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
                     }
@@ -435,7 +436,7 @@ window.addEventListener('onauth', async (e) => {
                         try {
                             await ARENAUserAccount.requestStoreLogin();
                         } catch (err) {
-                            Swal.showValidationMessage(`Error requesting filestore login: ${err.statusText}`);
+                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
                             return;
                         }
                         token = getCookie('auth');
@@ -445,11 +446,10 @@ window.addEventListener('onauth', async (e) => {
                     const userFilePath = `scenes/${sceneinput.value}/${resultFileOpen.name}`;
                     const storeResPath = `${storeResPrefix}${userFilePath}`;
                     const storeExtPath = `store/users/${username}/${userFilePath}`;
-                    // TODO: allow object id edit
                     Swal.fire({
                         title: 'Wait for Upload',
                         imageUrl: evt.target.result,
-                        imageAlt: `The uploaded ${strType}`,
+                        imageAlt: `The uploaded ${objtype}`,
                         showConfirmButton: false,
                         showCancelButton: true,
                         cancelButtonText: 'Cancel',
@@ -468,42 +468,42 @@ window.addEventListener('onauth', async (e) => {
                                     if (!responsePostFS.ok) {
                                         throw new Error(responsePostFS.statusText);
                                     }
-                                    const uploadObj = {
-                                        object_id: uploadObjectId,
-                                        type: 'object',
-                                        data: {
-                                            object_type: objType,
-                                            url: `${storeExtPath}`,
-                                        },
-                                    };
-                                    if (hideinar) {
-                                        uploadObj.data['hide-on-enter-ar'] = true;
+                                    let obj;
+                                    try {
+                                        obj = JSON.parse(output.value);
+                                    } catch (err) {
+                                        console.error(err);
+                                        throw err;
                                     }
-                                    if (!model) {
+                                    if (obj.object_id === '') {
+                                        obj.object_id = safeFilename;
+                                    }
+                                    obj.data.url = `${storeExtPath}`;
+                                    if (hideinar) {
+                                        obj.data['hide-on-enter-ar'] = true;
+                                    }
+                                    if (objtype === 'image') {
                                         // try to preserve image aspect ratio in mesh, user can scale to resize
                                         const img = Swal.getPopup().querySelector('.swal2-image');
                                         if (img.width > img.height) {
                                             const ratio = img.width / img.height;
-                                            uploadObj.data.width = ratio;
-                                            uploadObj.data.height = 1.0;
+                                            obj.data.width = ratio;
+                                            obj.data.height = 1.0;
                                         } else {
                                             const ratio = img.height / img.width;
-                                            uploadObj.data.width = 1.0;
-                                            uploadObj.data.height = ratio;
+                                            obj.data.width = 1.0;
+                                            obj.data.height = ratio;
                                         }
                                     }
-                                    const scene = `${namespaceinput.value}/${sceneinput.value}`;
-                                    PersistObjects.performActionArgObjList('create', scene, [uploadObj], false);
-                                    setTimeout(async () => {
-                                        await PersistObjects.populateObjectList(
-                                            `${namespaceinput.value}/${sceneinput.value}`,
-                                            objFilter.value,
-                                            objTypeFilter,
-                                            uploadObjectId
-                                        );
-
-                                        $(`label[innerHTML='${uploadObjectId} (${objType})']`).focus();
-                                    }, 500);
+                                    // push updated data to forms
+                                    output.value = JSON.stringify(obj, null, 2);
+                                    jsoneditor.setValue(obj);
+                                    Alert.fire({
+                                        icon: 'info',
+                                        title: 'File Store Upload Success',
+                                        html: `File ${resultFileOpen.name} uploaded to File Store. Don't forget to publish your JSON with the new File Store URL.`,
+                                        timer: 10000,
+                                    });
                                 })
                                 .catch((error) => {
                                     Swal.showValidationMessage(`Request failed: ${error}`);
@@ -517,7 +517,7 @@ window.addEventListener('onauth', async (e) => {
                         },
                     }).then((resultDidOpen) => {
                         if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
-                            console.error(`Upload ${strType} file dialog timed out!`);
+                            console.error(`Upload ${objtype} file dialog timed out!`);
                         }
                     });
                 };
@@ -526,11 +526,9 @@ window.addEventListener('onauth', async (e) => {
         });
     }
     // switch image/model
-    uploadModelButton.addEventListener('click', async () => {
-        await uploadSceneFileStore(true);
-    });
-    uploadImageButton.addEventListener('click', async () => {
-        await uploadSceneFileStore(false);
+    uploadFilestoreButton.addEventListener('click', async () => {
+        const obj = JSON.parse(output.value);
+        await uploadSceneFileStore(obj.data.object_type);
     });
 
     openAddSceneButton.addEventListener('click', async () => {
