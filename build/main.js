@@ -408,7 +408,7 @@ window.addEventListener('onauth', async (e) => {
             input: 'file',
             inputAttributes: {
                 accept: `${accept}`,
-                'aria-label': `Select  ${objtype}`,
+                'aria-label': `Select ${objtype}`,
             },
             confirmButtonText: 'Upload',
             focusConfirm: false,
@@ -416,9 +416,6 @@ window.addEventListener('onauth', async (e) => {
             cancelButtonText: 'Cancel',
             showLoaderOnConfirm: true,
             preConfirm: (resultFileOpen) => {
-                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
-                const safeFilename = fn.replace(/(\W+)/gi, '-');
-                // const uploadObjectId = `${objtype}-${safeFilename}`;
                 let hideinar = false;
                 const reader = new FileReader();
                 reader.onload = async (evt) => {
@@ -469,8 +466,18 @@ window.addEventListener('onauth', async (e) => {
                                     if (!responsePostFS.ok) {
                                         throw new Error(responsePostFS.statusText);
                                     }
-                                    const obj = output.value;
-                                    console.log('obj', obj);
+                                    let obj;
+                                    try {
+                                        obj = JSON.parse(output.value);
+                                    } catch (err) {
+                                        Alert.fire({
+                                            icon: 'error',
+                                            title: 'Invalid JSON input',
+                                            html: `Error: ${err}`,
+                                            timer: 8000,
+                                        });
+                                        return;
+                                    }
                                     obj.data.url = `${storeExtPath}`;
                                     if (hideinar) {
                                         obj.data['hide-on-enter-ar'] = true;
@@ -491,6 +498,7 @@ window.addEventListener('onauth', async (e) => {
                                     // push updated data to forms
                                     output.value = JSON.stringify(obj, null, 2);
                                     jsoneditor.setValue(obj);
+                                    Swal.close();
                                 })
                                 .catch((error) => {
                                     Swal.showValidationMessage(`Request failed: ${error}`);
