@@ -416,6 +416,8 @@ window.addEventListener('onauth', async (e) => {
             cancelButtonText: 'Cancel',
             showLoaderOnConfirm: true,
             preConfirm: (resultFileOpen) => {
+                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+                const safeFilename = fn.replace(/(\W+)/gi, '-');
                 let hideinar = false;
                 const reader = new FileReader();
                 reader.onload = async (evt) => {
@@ -472,6 +474,9 @@ window.addEventListener('onauth', async (e) => {
                                     } catch (err) {
                                         console.error(err);
                                         throw err;
+                                    }
+                                    if (obj.object_id === '') {
+                                        obj.object_id = safeFilename;
                                     }
                                     obj.data.url = `${storeExtPath}`;
                                     if (hideinar) {
