@@ -119,7 +119,7 @@ AFRAME.registerComponent('material-extras', {
         }
         if (this.data.opacity !== 1) {
             mesh.material.transparent = true;
-            mesh.material.opacity = this.data.opacity;
+            mesh.material.opacity = this.data.gltfOpacity;
         } else {
             mesh.material.transparent = false;
         }
