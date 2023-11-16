@@ -28,6 +28,7 @@ function extractDataFullDOM(mutation) {
     mutation.target.attributes.forEach((attr) => {
         const attribute = mutation.target.getAttribute(attr.name);
         switch (attr.name) {
+            case 'gaussian_splatting':
             case 'gltf-model':
             case 'image':
             case 'light':
@@ -70,7 +71,12 @@ function extractDataFullDOM(mutation) {
                 data = { ...data, ...attribute };
                 delete data.primitive;
                 if (mutation.target.nodeName.toLowerCase() === 'a-videosphere') {
+                    // sphere shouldn't overwrite videosphere
                     data.object_type = 'videosphere';
+                } else if (attribute.primitive === 'plane') {
+                    // plane shouldn't overwrite image
+                    console.log(mutation.target.attributes);
+                    data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
                 } else {
                     data.object_type = attribute.primitive;
                 }
@@ -90,6 +96,7 @@ function extractDataFullDOM(mutation) {
 function extractDataUpdates(mutation, attribute, changes) {
     let data = {};
     switch (mutation.attributeName) {
+        case 'gaussian_splatting':
         case 'gltf-model':
         case 'image':
         case 'light':
@@ -134,7 +141,12 @@ function extractDataUpdates(mutation, attribute, changes) {
                 delete data.primitive;
             }
             if (mutation.target.nodeName.toLowerCase() === 'a-videosphere') {
+                // sphere shouldn't overwrite videosphere
                 data.object_type = 'videosphere';
+            } else if (attribute.primitive === 'plane') {
+                // plane shouldn't overwrite image
+                console.log(mutation.target.attributes);
+                data.object_type = mutation.target.hasAttribute('src') ? 'image' : attribute.primitive;
             } else {
                 data.object_type = attribute.primitive;
             }
@@ -167,7 +179,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             type: 'boolean',
             default: true,
         },
-        // TODO: fix the openJsonEditor staying checked state, messes up some refresh
         openJsonEditor: {
             type: 'boolean',
             default: false,
@@ -250,7 +261,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
         }
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {
-            this.data.openJsonEditor = false; // restore
+            this.el.setAttribute('build3d-mqtt-object', 'openJsonEditor', false); // restore
             this.update();
             window.open(`/build/?scene=${ARENA.namespacedScene}&objectId=${this.el.id}`, 'ArenaJsonEditor');
         }
