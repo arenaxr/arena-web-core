@@ -16,7 +16,7 @@
                   "title": "3D object type",
                   "description": "3D object type (derived from 'type' select above).",
                   "enum": [
-                    "entity"
+                    "gaussian_splatting"
                   ]
                 },
                 "src": {
@@ -55,7 +55,7 @@
           "title": "3D Gaussian Splat",
           "additionalProperties": true,
           "default": {
-            "object_type": "entity"
+            "object_type": "gaussian_splatting"
           },
           "required": [
             "object_type",
