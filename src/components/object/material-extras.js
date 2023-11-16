@@ -117,7 +117,7 @@ AFRAME.registerComponent('material-extras', {
             mesh.material.map = this.texture;
             mesh.material.map.colorSpace = THREE[this.data.colorSpace];
         }
-        if (this.data.opacity !== 1) {
+        if (this.data.gltfOpacity !== 1) {
             mesh.material.transparent = true;
             mesh.material.opacity = this.data.gltfOpacity;
         } else {
