@@ -25,6 +25,7 @@ import './renderfusion/remote-render';
 import 'aframe-environment-component'; // pretty environments
 import 'aframe-blink-controls'; // Controller teleport
 import '@c-frame/aframe-particle-system-component'; // particle system environment
+import 'aframe-gaussian-splatting-component';
 
 // NPM import overrides
 import './vendor/animation-mixer'; // Override animation mixer

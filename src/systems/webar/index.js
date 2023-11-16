@@ -64,7 +64,7 @@ export default class ARENAWebARUtils {
         }
 
         const sceneEl = document.querySelector('a-scene');
-        const vrModeUI = sceneEl.components['vr-mode-ui'];
+        const vrModeUI = sceneEl.components['xr-mode-ui'];
         const { enterAREl } = vrModeUI;
         enterAREl.classList.remove(HIDDEN_CLASS);
         enterAREl.removeEventListener('click', vrModeUI.onEnterARButtonClick, true);

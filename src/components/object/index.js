@@ -16,6 +16,7 @@ import './blip';
 import './click-listener';
 import './collision-listener';
 import './gltf-lod';
+import './gltf-opacity';
 import './goto-url';
 import './show-hide-on-enter-vr';
 import './impulse';

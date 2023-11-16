@@ -43,9 +43,6 @@
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-gltf.json#/properties"
                         }
                     ],
                     "title": "PCD Model Data",
