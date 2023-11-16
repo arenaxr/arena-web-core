@@ -59,7 +59,7 @@
         "file": "schemas/gltf-model.json",
         "title": "GLTF Model"
     },
-    "gaussian-splat": {
+    "gaussian_splatting": {
         "description": "Load 3D Gaussian Splat",
         "file": "schemas/gaussian-splat.json",
         "title": "3D Gaussian Splat"
