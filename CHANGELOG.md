@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.24.0](https://github.com/arenaxr/arena-web-core/compare/v1.23.4...v1.24.0) (2023-11-16)
+
+
+### Features
+
+* add gaussian splatting component ([0368dfd](https://github.com/arenaxr/arena-web-core/commit/0368dfd0dbc932bc35875375ab84f7e3318a83a5))
+* Add material-extras gltfOpacity option ([a8eeddf](https://github.com/arenaxr/arena-web-core/commit/a8eeddf3acf60e5e3f7711fbb22fa1be1a1bf084))
+
+
+### Bug Fixes
+
+* (build3d): change component name *build-watch* =&gt; *build3d-mqtt* ([ed5e9c3](https://github.com/arenaxr/arena-web-core/commit/ed5e9c32b7fd3e9afd1415339925151b668d7bae))
+* align schema key for gaussian_splatting ([0a8615a](https://github.com/arenaxr/arena-web-core/commit/0a8615a4879ff770b89921ec96d638f6a7216b96))
+* better atw and atw bug fix for vr devices ([9dbd42a](https://github.com/arenaxr/arena-web-core/commit/9dbd42a9c8bac649dcb9424e6a35c7cac45a26cc))
+* **build3d:** check permissions on build3d request, show error otherwise ([d749053](https://github.com/arenaxr/arena-web-core/commit/d7490537d1e3e3396a8045e60934c51a2abf5cf8))
+* **build:** add gaussian_splatting upload to filestore ([9e9269d](https://github.com/arenaxr/arena-web-core/commit/9e9269de2c4cb71c3db5ae1b7a5cf59b65b29af0))
+* **build:** streamlined FileStore upload flow ([#597](https://github.com/arenaxr/arena-web-core/issues/597)) ([4470c68](https://github.com/arenaxr/arena-web-core/commit/4470c68e2873a1c19124b40f6b5a97233a1db68c))
+* splatting object type ([e85d619](https://github.com/arenaxr/arena-web-core/commit/e85d6196f497761b6a98b97bddc7c35cecc068f1))
+* typo ([4e1a1f3](https://github.com/arenaxr/arena-web-core/commit/4e1a1f3dd33b28c1737275d5dcef3413fa56907a))
+
 ## [1.23.3](https://github.com/arenaxr/arena-web-core/compare/v1.23.2...v1.23.3) (2023-11-02)
 
 ### Refactor
