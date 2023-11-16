@@ -21,6 +21,7 @@ import { ARENAUtils } from '../../utils';
  * @property {boolean} [colorWrite=true] - Whether to render the material's color. See [Three.js material]{@link https://threejs.org/docs/#api/en/materials/Material}.
  * @property {number} [renderOrder=1] - This value allows the default rendering order of scene graph objects to be overridden. See [Three.js Object3D.renderOrder]{@link https://threejs.org/docs/#api/en/core/Object3D.renderOrder}.
  * @property {boolean} [transparentOccluder=false] - If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder.
+ * @property {number} [gltfOpacity=1] - Traverses object materials, setting opacity of each one.
  */
 AFRAME.registerComponent('material-extras', {
     dependencies: ['material'],
@@ -34,6 +35,7 @@ AFRAME.registerComponent('material-extras', {
         renderOrder: { default: 1 },
         occluderRenderOrder: { default: -1 },
         transparentOccluder: { default: false },
+        gltfOpacity: { default: 1 },
     },
     retryTimeouts: [1000, 5000],
     init() {
@@ -63,6 +65,9 @@ AFRAME.registerComponent('material-extras', {
             }
             if (oldData.overrideSrc !== this.data.overrideSrc) {
                 this.loadTexture(this.data.overrideSrc);
+            }
+            if (oldData.gltfOpacity !== this.data.gltfOpacity) {
+                this.doUpdate = true;
             }
         }
 
@@ -111,6 +116,12 @@ AFRAME.registerComponent('material-extras', {
         if (mesh.material.map && this.texture) {
             mesh.material.map = this.texture;
             mesh.material.map.colorSpace = THREE[this.data.colorSpace];
+        }
+        if (this.data.opacity !== 1) {
+            mesh.material.transparent = true;
+            mesh.material.opacity = this.data.opacity;
+        } else {
+            mesh.material.transparent = false;
         }
         mesh.material.needsUpdate = true;
         /* eslint-disable no-param-reassign */
