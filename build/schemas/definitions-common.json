@@ -459,15 +459,17 @@
                     "description": "If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder."
                 },
                 "gltfOpacity": {
-                        "type": "number",
-                        "title": "opacity",
-                        "description": "Opacity value to apply to the model. 1 is fully opaque, 0 is fully transparent.",
-                        "default": 1
+                    "type": "number",
+                    "description": "Opacity value to apply to the model. 1 is fully opaque, 0 is fully transparent.",
+                    "default": 1
                 }
             },
             "title": "Material extras",
             "type": "object",
-            "required": ["encoding"]
+            "required": [
+              "encoding",
+              "gltfOpacity"
+            ]
         },
         "shadow": {
             "title": "Shadow",
