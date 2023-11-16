@@ -50,7 +50,7 @@
             "type": "object"
         },
         "gltf-opacity": {
-            "description": "Apply oApacity to the model",
+            "description": "Apply opacity to the model",
             "properties": {
                 "opacity": {
                     "type": "number",
