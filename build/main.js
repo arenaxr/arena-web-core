@@ -479,7 +479,11 @@ window.addEventListener('onauth', async (e) => {
                                     if (obj.object_id === '') {
                                         obj.object_id = safeFilename;
                                     }
-                                    obj.data.url = `${storeExtPath}`;
+                                    if (objtype === 'gaussian_splatting') {
+                                        obj.data.src = `${storeExtPath}`;
+                                    } else {
+                                        obj.data.url = `${storeExtPath}`;
+                                    }
                                     if (hideinar) {
                                         obj.data['hide-on-enter-ar'] = true;
                                     }
