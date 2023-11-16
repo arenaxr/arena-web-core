@@ -59,6 +59,11 @@
         "file": "schemas/gltf-model.json",
         "title": "GLTF Model"
     },
+    "gaussian-splat": {
+        "description": "Load 3D Gaussian Splat",
+        "file": "schemas/gaussian-splat.json",
+        "title": "3D Gaussian Splat"
+    },
     "image": {
         "description": "Display an image on a plane",
         "file": "schemas/image.json",
