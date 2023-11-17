@@ -5,13 +5,15 @@
 
 ### Bug Fixes
 
-* another typo in material-extras ([8068a9a](https://github.com/arenaxr/arena-web-core/commit/8068a9ac3bfd3bcc6a41505225384721c316ee36))
+* update AFRAME w/ pre-rls that fixes ar-hit-test anchor tracking ([9915844](https://github.com/arenaxr/arena-web-core/commit/991584445085e40decad197d4c2d57cfaf61e387))
+* another typo in material-extras, video cubes transparency restored ([8068a9a](https://github.com/arenaxr/arena-web-core/commit/8068a9ac3bfd3bcc6a41505225384721c316ee36))
 
 ## [1.24.0](https://github.com/arenaxr/arena-web-core/compare/v1.23.4...v1.24.0) (2023-11-16)
 
 
 ### Features
 
+* Update AFRAME v1.5.0
 * add gaussian splatting component ([0368dfd](https://github.com/arenaxr/arena-web-core/commit/0368dfd0dbc932bc35875375ab84f7e3318a83a5))
 * Add material-extras gltfOpacity option ([a8eeddf](https://github.com/arenaxr/arena-web-core/commit/a8eeddf3acf60e5e3f7711fbb22fa1be1a1bf084))
 
