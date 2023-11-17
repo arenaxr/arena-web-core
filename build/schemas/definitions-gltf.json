@@ -49,21 +49,25 @@
             "title": "Animation Mixer",
             "type": "object"
         },
-        "gltf-opacity": {
-            "description": "Apply opacity to the model",
+        "gltf-morph": {
+            "description": "Allows you to target and control a gltf model's morphTargets created in Blender. \n\nMore properties at <a href='https://github.com/elbobo/aframe-gltf-morph-component'>https://github.com/elbobo/aframe-gltf-morph-component</a>",
             "properties": {
-                "opacity": {
+                "morphtarget": {
+                    "type": "string",
+                    "title": "Morph Target",
+                    "description": "Name of morphTarget, can be found as part of the GLTF model",
+                    "default": ""
+                },
+                "value": {
                     "type": "number",
-                    "title": "opacity",
-                    "description": "Opacity value to apply to the model. 1 is fully opaque, 0 is fully transparent.",
-                    "default": 1
+                    "title": "Morph Value",
+                    "description": "Value that you want to set that morphTarget to (0 - 1)",
+                    "default": 0
                 }
             },
-            "title": "GLTF Opacity",
+            "title": "GLTF Morph",
             "type": "object",
-            "required": [
-                "opacity"
-            ]
+            "required": ["morphtarget", "value"]
         },
         "gltf-model-lod": {
             "description": "Simple switch between the default gltf-model and a detailed one when a user camera is within specified distance",

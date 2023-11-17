@@ -1,6 +1,6 @@
 {
   "title": "3D Gaussian Splat",
-  "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering",
+  "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering. \n\nMore information : <a href='https://github.com/quadjr/aframe-gaussian-splatting'>https://github.com/quadjr/aframe-gaussian-splatting</a>",
   "allOf": [
     {
       "$ref": "./schemas/definitions-arena-object.json#/properties"
