@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.24.1](https://github.com/arenaxr/arena-web-core/compare/v1.24.0...v1.24.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* another typo in material-extras ([8068a9a](https://github.com/arenaxr/arena-web-core/commit/8068a9ac3bfd3bcc6a41505225384721c316ee36))
+
 ## [1.24.0](https://github.com/arenaxr/arena-web-core/compare/v1.23.4...v1.24.0) (2023-11-16)
 
 
