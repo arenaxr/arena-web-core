@@ -183,7 +183,7 @@ AFRAME.registerSystem('mesh-dump', {
                 ARENA.debugXR('Found floor, no ref, publishing ref');
                 frame.detectedMeshes.forEach((mesh) => {
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}`,
+                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/meshes`,
                         JSON.stringify({
                             vertices: mesh.vertices,
                             indices: mesh.indices,
@@ -194,7 +194,7 @@ AFRAME.registerSystem('mesh-dump', {
                 });
                 frame.detectedPlanes.forEach((plane) => {
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}`,
+                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/planes`,
                         JSON.stringify({
                             polygon: plane.polygon,
                             orientation: plane.orientation,
