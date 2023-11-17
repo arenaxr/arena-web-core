@@ -49,6 +49,26 @@
             "title": "Animation Mixer",
             "type": "object"
         },
+        "gltf-morph": {
+            "description": "Allows you to target and control a gltf model's morphTargets created in Blender. \n\nMore properties at <a href='https://github.com/elbobo/aframe-gltf-morph-component'>https://github.com/elbobo/aframe-gltf-morph-component</a>",
+            "properties": {
+                "morphtarget": {
+                    "type": "string",
+                    "title": "Morph Target",
+                    "description": "Name of morphTarget, can be found as part of the GLTF model",
+                    "default": ""
+                },
+                "value": {
+                    "type": "number",
+                    "title": "Morph Value",
+                    "description": "Value that you want to set that morphTarget to (0 - 1)",
+                    "default": 0
+                }
+            },
+            "title": "GLTF Morph",
+            "type": "object",
+            "required": ["morphtarget", "value"]
+        },
         "gltf-model-lod": {
             "description": "Simple switch between the default gltf-model and a detailed one when a user camera is within specified distance",
             "properties": {
