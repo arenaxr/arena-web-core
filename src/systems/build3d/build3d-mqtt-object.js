@@ -214,7 +214,11 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         };
                         // use aframe-watcher updates to send only changes updated
                         let changes;
-                        if (AFRAME.INSPECTOR.history && AFRAME.INSPECTOR.history.updates[mutation.target.id]) {
+                        if (
+                            AFRAME.INSPECTOR &&
+                            AFRAME.INSPECTOR.history &&
+                            AFRAME.INSPECTOR.history.updates[mutation.target.id]
+                        ) {
                             changes = AFRAME.INSPECTOR.history.updates[mutation.target.id][mutation.attributeName];
                         }
                         if (msg.action === 'update') {
