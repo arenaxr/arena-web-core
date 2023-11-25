@@ -95,6 +95,10 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
         window.addEventListener('enter-vr', this.onEnterVR.bind(this));
         window.addEventListener('exit-vr', this.onExitVR.bind(this));
+        document.addEventListener('fullscreenchange', this.onEnterVR.bind(this));
+        document.addEventListener('mozfullscreenchange', this.onEnterVR.bind(this));
+        document.addEventListener('MSFullscreenChange', this.onEnterVR.bind(this));
+        document.addEventListener('webkitfullscreenchange', this.onEnterVR.bind(this));
 
         this.initialized = true;
     },
@@ -356,16 +360,23 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     sendStatus() {
+        if (!this.connected) return;
+
         const { el } = this;
         const { data } = this;
         const { sceneEl } = el;
 
-        const isVRMode = sceneEl.is('vr-mode');
-        const isARMode = sceneEl.is('ar-mode');
+        const isFullScreen =
+            (document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement) !== undefined;
+        const isVRMode = sceneEl.is('vr-mode') && !isFullScreen;
+        const isARMode = sceneEl.is('ar-mode') && !isFullScreen;
         const hasDualCameras = (isVRMode && !isARMode) || data.hasDualCameras;
         this.statusDataChannel.send(
             JSON.stringify({
-                isVRMode: true,
+                isVRMode,
                 isARMode,
                 hasDualCameras,
                 ipd: data.ipd,
@@ -377,18 +388,11 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     },
 
     onEnterVR() {
-        if (!this.connected) return;
         this.sendStatus();
     },
 
     onExitVR() {
-        if (!this.connected) return;
-        this.statusDataChannel.send(
-            JSON.stringify({
-                isVRMode: false,
-                ts: new Date().getTime(),
-            })
-        );
+        this.sendStatus();
     },
 
     update(oldData) {
