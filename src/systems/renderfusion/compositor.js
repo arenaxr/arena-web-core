@@ -156,9 +156,9 @@ AFRAME.registerSystem('compositor', {
                     const cameraR = cameraVR.cameras[1];
                     const poseL = pose[0];
                     const poseR = pose[1];
-                    this.pass.setCameraMatsRemote(poseL, cameraL.projectionMatrix, poseR, cameraR.projectionMatrix);
+                    this.pass.setCameraMatsRemote(cameraL.projectionMatrix, poseL, cameraR.projectionMatrix, poseR);
                 } else {
-                    this.pass.setCameraMatsRemote(pose, camera.projectionMatrix);
+                    this.pass.setCameraMatsRemote(camera.projectionMatrix, pose);
                 }
             }
 

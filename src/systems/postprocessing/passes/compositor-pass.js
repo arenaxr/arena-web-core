@@ -91,24 +91,84 @@ export default class CompositorPass extends Pass {
 
     setCameraMats(cameraL, cameraR) {
         if (cameraL) {
-            this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraL.projectionMatrix);
-            this.material.uniforms.cameraLMatrixWorld.value.copy(cameraL.matrixWorld);
+            // only update if changed
+            if (!this.material.uniforms.cameraLProjectionMatrix.value.equals(cameraL.projectionMatrix)) {
+                this.material.uniforms.cameraLProjectionMatrix.value.copy(cameraL.projectionMatrix);
+
+                this.material.uniforms.cameraLProjectionMatrixInverse.value.copy(cameraL.projectionMatrix);
+                this.material.uniforms.cameraLProjectionMatrixInverse.value.invert();
+            }
+
+            // only update if changed
+            if (!this.material.uniforms.cameraLMatrixWorld.value.equals(cameraL.matrixWorld)) {
+                this.material.uniforms.cameraLMatrixWorld.value.copy(cameraL.matrixWorld);
+
+                this.material.uniforms.cameraLMatrixWorldInverse.value.copy(cameraL.matrixWorld);
+                this.material.uniforms.cameraLMatrixWorldInverse.value.invert();
+            }
         }
 
         if (cameraR) {
-            this.material.uniforms.cameraRProjectionMatrix.value.copy(cameraR.projectionMatrix);
-            this.material.uniforms.cameraRMatrixWorld.value.copy(cameraR.matrixWorld);
+            // only update if changed
+            if (!this.material.uniforms.cameraRProjectionMatrix.value.equals(cameraR.projectionMatrix)) {
+                this.material.uniforms.cameraRProjectionMatrix.value.copy(cameraR.projectionMatrix);
+
+                this.material.uniforms.cameraRProjectionMatrixInverse.value.copy(cameraR.projectionMatrix);
+                this.material.uniforms.cameraRProjectionMatrixInverse.value.invert();
+            }
+
+            // only update if changed
+            if (!this.material.uniforms.cameraRMatrixWorld.value.equals(cameraR.matrixWorld)) {
+                this.material.uniforms.cameraRMatrixWorld.value.copy(cameraR.matrixWorld);
+
+                this.material.uniforms.cameraRMatrixWorldInverse.value.copy(cameraR.matrixWorld);
+                this.material.uniforms.cameraRMatrixWorldInverse.value.invert();
+            }
         }
     }
 
-    setCameraMatsRemote(remoteLPose, remoteLProj, remoteRPose, remoteRProj) {
-        this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteLProj);
-        this.material.uniforms.remoteLMatrixWorld.value.copy(remoteLPose);
-        this.getWorldDirection(remoteLPose, this.material.uniforms.remoteLForward.value);
+    setCameraMatsRemote(remoteLProj, remoteLPose, remoteRProj, remoteRPose) {
+        if (remoteLProj) {
+            // only update if changed
+            if (!this.material.uniforms.remoteLProjectionMatrix.value.equals(remoteLProj)) {
+                this.material.uniforms.remoteLProjectionMatrix.value.copy(remoteLProj);
 
-        if (remoteRProj) this.material.uniforms.remoteRProjectionMatrix.value.copy(remoteRProj);
+                this.material.uniforms.remoteLProjectionMatrixInverse.value.copy(remoteLProj);
+                this.material.uniforms.remoteLProjectionMatrixInverse.value.invert();
+            }
+        }
+
+        if (remoteLPose) {
+            // only update if changed
+            if (!this.material.uniforms.remoteLMatrixWorld.value.equals(remoteLPose)) {
+                this.material.uniforms.remoteLMatrixWorld.value.copy(remoteLPose);
+
+                this.material.uniforms.remoteLMatrixWorldInverse.value.copy(remoteLPose);
+                this.material.uniforms.remoteLMatrixWorldInverse.value.invert();
+            }
+
+            this.getWorldDirection(remoteLPose, this.material.uniforms.remoteLForward.value);
+        }
+
+        if (remoteRProj) {
+            // only update if changed
+            if (!this.material.uniforms.remoteRProjectionMatrix.value.equals(remoteRProj)) {
+                this.material.uniforms.remoteRProjectionMatrix.value.copy(remoteRProj);
+
+                this.material.uniforms.remoteRProjectionMatrixInverse.value.copy(remoteRProj);
+                this.material.uniforms.remoteRProjectionMatrixInverse.value.invert();
+            }
+        }
+
         if (remoteRPose) {
-            this.material.uniforms.remoteRMatrixWorld.value.copy(remoteRPose);
+            // only update if changed
+            if (!this.material.uniforms.remoteRMatrixWorld.value.equals(remoteRPose)) {
+                this.material.uniforms.remoteRMatrixWorld.value.copy(remoteRPose);
+
+                this.material.uniforms.remoteRMatrixWorldInverse.value.copy(remoteRPose);
+                this.material.uniforms.remoteRMatrixWorldInverse.value.invert();
+            }
+
             this.getWorldDirection(remoteRPose, this.material.uniforms.remoteRForward.value);
         }
     }
