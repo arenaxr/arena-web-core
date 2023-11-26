@@ -1,7 +1,7 @@
 {
     "properties": {
         "animation": {
-            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/animation.html'>https://aframe.io/docs/1.4.0/components/animation.html</a>",
+            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>https://aframe.io/docs/1.5.0/components/animation.html</a>",
             "properties": {
                 "autoplay": {
                     "default": true,
@@ -491,7 +491,7 @@
             "required": ["cast", "receive"]
         },
         "sound": {
-            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/sound.html'>https://aframe.io/docs/1.4.0/components/sound.html</a>",
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>https://aframe.io/docs/1.5.0/components/sound.html</a>",
             "properties": {
                 "autoplay": {
                     "default": false,

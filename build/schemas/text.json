@@ -1,6 +1,6 @@
 {
     "title": "Text",
-    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/text.html'>https://aframe.io/docs/1.4.0/components/text.html</a>",
+    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>https://aframe.io/docs/1.5.0/components/text.html</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

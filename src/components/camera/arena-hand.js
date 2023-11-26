@@ -199,7 +199,7 @@ AFRAME.registerComponent('arena-hand', {
         }
 
         // TODO:(mwfarb): resolve oculus-touch controls publishing +43 x-axis rotation orientationOffset from arena-web
-        // TODO:(mwfarb): https://aframe.io/docs/1.4.0/components/tracked-controls.html#value_orientationoffset
+        // TODO:(mwfarb): https://aframe.io/docs/1.5.0/components/tracked-controls.html#value_orientationoffset
         // TODO:(mwfarb): We could apply the orientationOffset to the external publish if we need to...
 
         this.rotation.setFromRotationMatrix(this.el.object3D.matrixWorld);
