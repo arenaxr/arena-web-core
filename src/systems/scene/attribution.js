@@ -33,7 +33,7 @@ AFRAME.registerSystem('attribution', {
             if (Object.hasOwn(el.components, 'gltf-model')) {
                 el.addEventListener('model-loaded', () => {
                     const gltfComponent = el.components['gltf-model'];
-                    this.extractAttributionFromGtlfAsset(el, gltfComponent);
+                    this.extractAttributionFromGltfAsset(el, gltfComponent);
                 });
             }
         });
@@ -92,7 +92,7 @@ AFRAME.registerSystem('attribution', {
      * @param {object} gltfComponent - the GLTF model to extract properties from
      * @alias module:attribution-system
      */
-    extractAttributionFromGtlfAsset(el, gltfComponent) {
+    extractAttributionFromGltfAsset(el, gltfComponent) {
         // check gltf's asset.extras (sketchfab) and scene.userData (blender)
         let attr1 = {};
         let attr2 = {};

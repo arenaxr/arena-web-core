@@ -37,7 +37,7 @@ title: 'Model Title';
     -   [registerComponent(el)](#exp_module_attribution-system--registerComponent) ⏏
     -   [unregisterComponent(el)](#exp_module_attribution-system--unregisterComponent) ⏏
     -   [getAttributionTable()](#exp_module_attribution-system--getAttributionTable) ⇒ <code>string</code> ⏏
-    -   [extractAttributionFromGtlfAsset(el, gltfComponent)](#exp_module_attribution-system--extractAttributionFromGtlfAsset) ⏏
+    -   [extractAttributionFromGltfAsset(el, gltfComponent)](#exp_module_attribution-system--extractAttributionFromGltfAsset) ⏏
     -   [parseExtrasAttributes(extras)](#exp_module_attribution-system--parseExtrasAttributes) ⇒ <code>object</code> ⏏
     -   [parseAttribute(extras, attribution, attribute)](#exp_module_attribution-system--parseAttribute) ⇒ <code>boolean</code> ⏏
 
@@ -71,17 +71,17 @@ Unregister an attribution component
 
 Collect all attribution components and return an HTML table with credits
 
-**Kind**: Exported function  
-**Returns**: <code>string</code> - - an HTML table with the scene credits  
+**Kind**: Exported function
+**Returns**: <code>string</code> - - an HTML table with the scene credits
 **Example** _(Query the system for an HTML table of credits:)_
 
 ```js
 document.querySelector('a-scene').systems['attribution'].getAttributionTable();
 ```
 
-<a name="exp_module_attribution-system--extractAttributionFromGtlfAsset"></a>
+<a name="exp_module_attribution-system--extractAttributionFromGltfAsset"></a>
 
-### extractAttributionFromGtlfAsset(el, gltfComponent) ⏏
+### extractAttributionFromGltfAsset(el, gltfComponent) ⏏
 
 Extract author, license, source and title assuming sketchfab format:
 author: "AuthorName (url-link-to-author)"
@@ -105,7 +105,7 @@ If both are found, data will be merged with preference to properties in asset.ex
 
 Parse author, license, source and title attributes.
 
-**Kind**: Exported function  
+**Kind**: Exported function
 **Returns**: <code>object</code> - - a dictionary with the author, license, source and title parsed
 
 | Param  | Type                | Description                                                        |
@@ -118,7 +118,7 @@ Parse author, license, source and title attributes.
 
 Parse attribute given as parameter. Tries to find the attribute and add it to 'attribution' dictionary
 
-**Kind**: Exported function  
+**Kind**: Exported function
 **Returns**: <code>boolean</code> - - true/false if it could find the attribute
 
 | Param       | Type                | Description                          |
