@@ -136,19 +136,55 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
     tick() {
         // TODO: move these detectors out to a more reliable timing condition
         if (!this.scenegraphDiv) {
-            this.scenegraphDiv = document.getElementById('scenegraph');
+            // this.scenegraphDiv = document.getElementById('scenegraph');
+            // this.scenegraphDiv = document.getElementById('inspectorContainer');
+            this.scenegraphDiv = document.getElementById('viewportBar');
             if (this.scenegraphDiv) {
                 console.log('scenegraphTest ok');
+
+                // container
+                const inspectorMqttLogWrap = document.createElement('div');
+                inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
+                inspectorMqttLogWrap.className = 'outliner';
+                inspectorMqttLogWrap.tabIndex = 2;
+                // inspectorMqttLogWrap.style.width = '100%';
+                inspectorMqttLogWrap.style.width = '-webkit-fill-available';
+                inspectorMqttLogWrap.style.bottom = '0';
+                inspectorMqttLogWrap.style.position = 'fixed';
+                inspectorMqttLogWrap.style.height = '25%';
+                inspectorMqttLogWrap.style.display = 'flex';
+                inspectorMqttLogWrap.style.flexDirection = 'column';
+                this.scenegraphDiv.appendChild(inspectorMqttLogWrap);
+
+                // title
+                const inspectorMqttTitle = document.createElement('span');
+                inspectorMqttTitle.id = 'inspectorMqttTitle';
+                inspectorMqttTitle.className = 'outliner';
+                inspectorMqttTitle.style.backgroundColor = 'darkgreen';
+                inspectorMqttTitle.style.color = 'white';
+                inspectorMqttTitle.style.opacity = '.75';
+                inspectorMqttTitle.style.width = '100%';
+                inspectorMqttTitle.style.paddingLeft = '10px';
+                inspectorMqttTitle.textContent = "ARENA's Build3D MQTT Publish Log";
+                inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
+
+                // log
                 const inspectorMqttLog = document.createElement('div');
                 inspectorMqttLog.id = 'inspectorMqttLog';
                 inspectorMqttLog.className = 'outliner';
-                inspectorMqttLog.tabIndex = 1;
-                inspectorMqttLog.style.height = '50%';
-                inspectorMqttLog.style.overflow = 'overflow';
-                this.scenegraphDiv.appendChild(inspectorMqttLog);
+                inspectorMqttLog.style.overflowY = 'auto';
+                inspectorMqttLog.style.width = '100%';
+                inspectorMqttLog.style.height = '100%';
+                inspectorMqttLog.style.backgroundColor = '#242424';
+                inspectorMqttLog.style.color = 'c3c3c3';
+                inspectorMqttLog.style.opacity = '.75';
+                inspectorMqttLog.style.paddingLeft = '10px';
+                inspectorMqttLog.style.fontFamily = 'monospace,monospace';
+                inspectorMqttLog.style.fontSize = '10px';
+                inspectorMqttLogWrap.appendChild(inspectorMqttLog);
 
                 const line = document.createElement('span');
-                line.innerHTML += `Pub MQTT: watching local changes...`;
+                line.innerHTML += `Watching for local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
             }
