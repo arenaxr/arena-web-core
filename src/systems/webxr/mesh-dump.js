@@ -180,10 +180,10 @@ AFRAME.registerSystem('mesh-dump', {
                 );
                 ARENA.utils.relocateUserCamera(offsetPos, offsetRotation);
             } else {
-                ARENA.debugXR('Found floor, no ref, publishing ref');
+                ARENA.debugXR('Found plane and mesh, no ref floor, publishing ref');
                 frame.detectedMeshes.forEach((mesh) => {
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${this.arena.camName}/meshes`,
+                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${ARENA.camName}/meshes`,
                         JSON.stringify({
                             vertices: Object.values(mesh.vertices),
                             indices: Object.values(mesh.indices),
@@ -194,7 +194,7 @@ AFRAME.registerSystem('mesh-dump', {
                 });
                 frame.detectedPlanes.forEach((plane) => {
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${this.arena.camName}/planes`,
+                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${ARENA.camName}/planes`,
                         JSON.stringify({
                             polygon: plane.polygon,
                             orientation: plane.orientation,
