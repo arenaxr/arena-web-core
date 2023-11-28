@@ -106,8 +106,8 @@ AFRAME.registerSystem('mesh-dump', {
         xrSession.requestAnimationFrame(this.onRAF);
     },
     async onRAF(_time, frame) {
-        if (frame.detectedPlanes === undefined) return;
-        if (frame.detectedPlanes.size === 0) {
+        if (frame.detectedPlanes === undefined || frame.detectedMeshes === undefined) return;
+        if (frame.detectedPlanes.size === 0 || frame.detectedMeshes.size === 0) {
             // First may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
@@ -183,10 +183,10 @@ AFRAME.registerSystem('mesh-dump', {
                 ARENA.debugXR('Found floor, no ref, publishing ref');
                 frame.detectedMeshes.forEach((mesh) => {
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/meshes`,
+                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${this.arena.camName}/meshes`,
                         JSON.stringify({
-                            vertices: mesh.vertices,
-                            indices: mesh.indices,
+                            vertices: Object.values(mesh.vertices),
+                            indices: Object.values(mesh.indices),
                             semanticLabel: mesh.semanticLabel,
                             meshPose: frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix,
                         })
@@ -194,7 +194,7 @@ AFRAME.registerSystem('mesh-dump', {
                 });
                 frame.detectedPlanes.forEach((plane) => {
                     ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/planes`,
+                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${this.arena.camName}/planes`,
                         JSON.stringify({
                             polygon: plane.polygon,
                             orientation: plane.orientation,
