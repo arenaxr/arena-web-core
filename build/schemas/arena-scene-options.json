@@ -401,10 +401,41 @@
                     "type": "number"
                 },
                 "physics": {
-                    "default": false,
-                    "description": "If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`.",
+                    "description": "If true, will load the aframe-physics-system. Required for the following: `dynamic-body`, `impulse`, `collision-listener`. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
                     "title": "Physics System",
-                    "type": "boolean"
+                    "type": "object",
+                    "properties": {
+                        "debug": {
+                            "default": true,
+                            "description": "Whether to show wireframes for debugging.",
+                            "type": "boolean"
+                        },
+                        "gravity": {
+                            "default": -9.8,
+                            "type": "number",
+                            "description": "Force of gravity (in m/s^2)."
+                        },
+                        "iterations": {
+                            "default": 10,
+                            "description": "The number of solver iterations determines quality of the constraints in the world. The more iterations, the more correct simulation. More iterations need more computations though. If you have a large gravity force in your world, you will need more iterations.",
+                            "type": "integer"
+                        },
+                        "maxInterval": {
+                            "default": 0.0667,
+                            "description": "Maximum simulated time (in milliseconds) that may be taken by the physics engine per frame. Effectively prevents weird 'jumps' when the player returns to the scene after a few minutes, at the expense of pausing physics during this time.",
+                            "type": "number"
+                        },
+                        "friction": {
+                            "default": 0.01,
+                            "description": "Coefficient of friction.",
+                            "type": "number"
+                        },
+                        "restitution": {
+                            "default": 0.3,
+                            "description": "Coefficient of restitution (bounciness).",
+                            "type": "number"
+                        }
+                    }
                 },
                 "ar-hit-test": {
                     "properties": {
