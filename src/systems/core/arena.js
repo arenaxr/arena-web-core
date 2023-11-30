@@ -672,7 +672,7 @@ AFRAME.registerSystem('arena-scene', {
                 // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
                 import('../vendor/aframe-physics-system.min');
                 const physicsWait = setInterval(() => {
-                    // wait for physics system and static-body component to be registered
+                    // wait for physics system and static-body component to be registered, needs 15-30 ms
                     if (AFRAME.components['static-body']) {
                         clearInterval(physicsWait);
                         document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
