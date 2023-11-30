@@ -10,7 +10,7 @@
 
 /**
  * Listen for collisions, callback on event.
- * Requires [Physics for A-Frame VR]{@link https://github.com/n5ro/aframe-physics-system}
+ * Requires [Physics for A-Frame VR]{@link https://github.com/c-frame/aframe-physics-system}
  * @module collision-listener
  * @requires 'aframe-physics-system'
  */
