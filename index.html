@@ -61,12 +61,16 @@
 
             <a-entity id="sceneRoot">
                 <!-- ground plane so falling objects don't fall through floor -->
-                <a-entity
+                <a-box
+                    color="#FFAAEE"
+                    depth="1000"
+                    height="0.01"
                     id="groundPlane"
+                    opacity=".01"
                     position="0 -0.01 0"
-                    geometry="primitive: box; width: 1000; depth: 1000; height: 0.01;"
-                    dynamic-body="type: static"
-                ></a-entity>
+                    transparent="true"
+                    width="1000"
+                ></a-box>
 
                 <a-entity id="cameraRig" position="0 0 0">
                     <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">
