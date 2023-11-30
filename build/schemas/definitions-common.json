@@ -276,17 +276,78 @@
             },
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
-        "dynamic-body": {
-            "description": "Physics type attached to the object. \n\nMore properties at <a href='https://github.com/n5ro/aframe-physics-system#dynamic-body-and-static-body'>https://github.com/n5ro/aframe-physics-system#dynamic-body-and-static-body</a>",
+        "static-body": {
+            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
             "properties": {
+                "shape": {
+                    "default": "auto",
+                    "type": "string",
+                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
+                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices"
+                },
+                "cylinderAxis": {
+                    "default": "y",
+                    "enum": [ "x", "y", "z"],
+                    "type": "string",
+                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
+                },
+                "sphereRadius": {
+                    "type": "number",
+                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
+                },
                 "type": {
                     "default": "static",
-                    "enum": ["static", "dynamic"],
-                    "type": "string"
+                    "enum": [ "dynamic", "static"],
+                    "type": "string",
+                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
                 }
             },
-            "required": ["type"],
-            "title": "Physics",
+            "title": "Physics Static Body",
+            "type": "object"
+        },
+        "dynamic-body": {
+            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
+            "properties": {
+                "mass": {
+                    "default": 5,
+                    "minimum": 0.000001,
+                    "type": "number",
+                    "description": "Simulated mass of the object, > 0."
+                },
+                "linearDamping": {
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Resistance to movement."
+                },
+                "angularDamping": {
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Resistance to rotation."
+                },
+                "shape": {
+                    "default": "auto",
+                    "type": "string",
+                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
+                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices"
+                },
+                "cylinderAxis": {
+                    "default": "y",
+                    "enum": [ "x", "y", "z"],
+                    "type": "string",
+                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
+                },
+                "sphereRadius": {
+                    "type": "number",
+                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
+                },
+                "type": {
+                    "default": "dynamic",
+                    "enum": [ "dynamic", "static"],
+                    "type": "string",
+                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
+                }
+            },
+            "title": "Physics Dynamic Body",
             "type": "object"
         },
         "goto-landmark": {
@@ -356,16 +417,23 @@
             "enum": [true]
         },
         "impulse": {
-            "description": "The force applied using physics. Requires click-listener",
+            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires click-listener and physics.",
             "properties": {
                 "force": {
-                    "type": "string"
+                    "description": "impulse vector",
+                    "default": "{x: 1, y: 1, z: 1}",
+                    "$ref": "#/definitions/vector3"
                 },
                 "on": {
+                    "description": "Event to listen 'on'.",
+                    "default": "",
+                    "enum": ["mousedown", "mouseup"],
                     "type": "string"
                 },
                 "position": {
-                    "type": "string"
+                    "description": "world position",
+                    "default": "{x: 1, y: 1, z: 1}",
+                    "$ref": "#/definitions/vector3"
                 }
             },
             "title": "Impulse",
