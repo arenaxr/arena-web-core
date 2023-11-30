@@ -405,10 +405,11 @@
                     "title": "Physics System",
                     "type": "object",
                     "properties": {
-                        "debug": {
-                            "default": true,
-                            "description": "Whether to show wireframes for debugging.",
-                            "type": "boolean"
+                        "driver": {
+                            "default": "local",
+                            "enum": ["local", "worker", "ammo"],
+                            "description": "The physics driver type. `local`/`worker` use CANNON.js driver. `local` is default. `worker` is a local web worker to offload physics. `ammo` uses AMMO.js driver. `network` is reserved but not implemented.",
+                            "type": "string"
                         },
                         "gravity": {
                             "default": -9.8,
@@ -434,6 +435,20 @@
                             "default": 0.3,
                             "description": "Coefficient of restitution (bounciness).",
                             "type": "number"
+                        },
+                        "debug": {
+                            "default": false,
+                            "description": "Whether to show wireframes for debugging.",
+                            "type": "boolean"
+                        },
+                        "stats": {
+                            "description": "Where to output performance stats (if any), panel, console, events (or some combination).",
+                            "default": [],
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "enum": ["panel", "console", "events"]
+                            }
                         }
                     }
                 },

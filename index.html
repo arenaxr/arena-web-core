@@ -44,7 +44,7 @@
             name="ARENAScene"
             id="ARENAScene"
             background="color: black"
-            stats="false"
+            stats="true"
             stats-monitor="enabled: false"
             arena-hybrid-render-client
             renderer="antialias: true; maxCanvasWidth: 3840; maxCanvasHeight: 3840;"
@@ -55,21 +55,18 @@
             gltf-model="dracoDecoderPath: /static/vendor/draco-1.5.4/;"
             inspector="url: static/vendor/aframe-inspector.min.js;"
             xr-mode-ui="XRMode:xr"
+            physics="debug:true; stats: panel, console;"
         >
             <a-assets></a-assets>
 
             <a-entity id="sceneRoot">
                 <!-- ground plane so falling objects don't fall through floor -->
-                <a-box
-                    color="#FFAAEE"
-                    depth="1000"
-                    height="0.01"
+                <a-entity
                     id="groundPlane"
-                    opacity=".01"
                     position="0 -0.01 0"
-                    transparent="true"
-                    width="1000"
-                ></a-box>
+                    geometry="primitive: box; width: 1000; depth: 1000; height: 0.01;"
+                    dynamic-body="type: static"
+                ></a-entity>
 
                 <a-entity id="cameraRig" position="0 0 0">
                     <a-entity id="cameraSpinner" name="PerspectiveCamera" position="0 0 0" tag="MainCamera">

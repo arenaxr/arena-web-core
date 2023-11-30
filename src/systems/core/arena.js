@@ -671,7 +671,8 @@ AFRAME.registerSystem('arena-scene', {
             if (sceneOptions.physics) {
                 // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
                 import('../vendor/aframe-physics-system.min');
-                document.getElementById('groundPlane').setAttribute('static-body', 'true');
+                // document.getElementById('groundPlane').setAttribute('dynamic-body', 'type', 'static');
+                // sceneEl.setAttribute('physics', sceneOptions.physics);
             }
 
             if (sceneOptions['ar-hit-test']) {
