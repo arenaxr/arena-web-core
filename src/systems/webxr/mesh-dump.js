@@ -1,58 +1,7 @@
 /* global AFRAME, ARENA, THREE */
 
+import { Packr } from 'msgpackr';
 import { ARENA_EVENTS } from '../../constants';
-
-function computeCentroid(points, centroid) {
-    centroid.set(0, 0);
-    points.forEach((p) => {
-        centroid.add(p);
-    });
-    centroid.divideScalar(points.length);
-}
-
-function findBestAlignment(refPoints, dPoints) {
-    let bestDistance = Infinity;
-    let bestMatrix = null;
-    let bestRotation = 0;
-    let bestIndex = -1;
-    const tempMatrix = new THREE.Matrix3();
-    const rotatedVector = new THREE.Vector2();
-
-    // Try aligning each corner of xRect to each corner of refRect
-    for (let i = 0; i < refPoints.length; i++) {
-        for (let j = 0; j < dPoints.length; j++) {
-            // Calculate the angle difference
-            const angle = refPoints[i].angle() - dPoints[j].angle();
-
-            // Reset the temporary matrix for new rotation
-            tempMatrix.identity().rotate(angle);
-
-            // Calculate the sum of squared distances between the rotated xRect and refRect
-            let distance = 0;
-            for (let k = 0; k < dPoints.length; k++) {
-                // Apply the matrix to rotate the point
-                rotatedVector.copy(dPoints[k]).applyMatrix3(tempMatrix);
-                distance += rotatedVector.distanceToSquared(refPoints[(i + k) % refPoints.length]);
-            }
-
-            // Check if this is the best alignment so far
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestRotation = angle;
-                bestIndex = j;
-                // Clone the temporary matrix to store the best one
-                bestMatrix = tempMatrix.clone();
-            }
-        }
-    }
-
-    return {
-        distance: bestDistance,
-        matrix: bestMatrix,
-        rotation: bestRotation,
-        index: bestIndex,
-    };
-}
 
 AFRAME.registerSystem('debug-ui', {
     init() {
@@ -77,6 +26,8 @@ AFRAME.registerSystem('debug-ui', {
                     }
                 };
             });
+        } else {
+            ARENA.debugXR = () => {};
         }
     },
 });
@@ -100,6 +51,10 @@ AFRAME.registerSystem('mesh-dump', {
 
         this.onRAF = this.onRAF.bind(this);
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
+        this.packr = new Packr({
+            useRecords: false,
+            useFloat32: true,
+        });
     },
     async webXRSessionStarted(xrSession) {
         if (xrSession === undefined) return;
@@ -111,99 +66,33 @@ AFRAME.registerSystem('mesh-dump', {
             // First may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
-            ARENA.debugXR('Detected planes. ');
-            const refFloor = document.getElementById('ref_floor');
+            ARENA.debugXR('Found plane and mesh, publishing ref');
             const xrRefSpace = this.sceneEl.renderer.xr.getReferenceSpace();
-            if (refFloor) {
-                ARENA.debugXR('Found ref floor plane');
-                let floorPlane;
-                let directionPlane;
-                // eslint-disable-next-line no-restricted-syntax
-                ARENA.debugXR('Planes: ', false);
-                for (const plane of frame.detectedPlanes) {
-                    ARENA.debugXR(`${plane.semanticLabel} | `, false);
-                    if (plane.semanticLabel === 'floor') {
-                        floorPlane = plane;
-                    }
-                    if (plane.semanticLabel === this.data.directionObjectName) {
-                        directionPlane = plane;
-                    }
-                }
-                // Get detected floor pose
-                ARENA.debugXR('Found detected floor plane');
-                const planePose = new THREE.Matrix4();
-                planePose.fromArray(frame.getPose(floorPlane.planeSpace, xrRefSpace).transform.matrix);
-                const planePos = new THREE.Vector3();
-                const planeRot = new THREE.Matrix3();
-                planePos.setFromMatrixPosition(planePose);
-                planeRot.setFromMatrix4(planePose);
-                // Calculate offset from refFloor to detected floor
-                const refFloorPos = refFloor.object3D.position;
-                const offsetPos = new THREE.Vector3(refFloorPos.x, refFloorPos.y, refFloorPos.z);
-                offsetPos.sub(planePos);
-                offsetPos.y = 0; // Don't move vertically
-                ARENA.debugXR(`Relocating position by ${offsetPos.x}, ${offsetPos.y}, ${offsetPos.z}`);
-                // Get points of refFloor
-                const { width, height } = refFloor.getAttribute('geometry');
-                const rVectors = [
-                    new THREE.Vector2(width / 2, height / 2),
-                    new THREE.Vector2(-width / 2, height / 2),
-                    new THREE.Vector2(-width / 2, -height / 2),
-                    new THREE.Vector2(width / 2, -height / 2),
-                ];
-                // Get points of detected floor
-                const dVectors = floorPlane.polygon.map((p) => new THREE.Vector2(p.x, p.z));
-                dVectors.pop(); // Remove loop-closing end-point
-                // If we have a directionPlane, add corresponding points
-                if (directionPlane) {
-                    const directionBox = document.getElementById('directionBox');
-                    if (directionBox) {
-                        dVectors.push(
-                            new THREE.Vector2(
-                                refFloor.object3D.position.x - directionBox.object3D.position.x,
-                                refFloor.object3D.position.z - directionBox.object3D.position.z
-                            )
-                        );
-                    }
-                    const directionPlanePose = new THREE.Matrix4();
-                    directionPlanePose.fromArray(frame.getPose(directionPlane.planeSpace, xrRefSpace).transform.matrix);
-                    const directionPlanePos = new THREE.Vector3();
-                    directionPlanePos.setFromMatrixPosition(directionPlanePose);
-                    rVectors.push(directionPlanePos);
-                }
-                // Find best alignment
-                const { matrix } = findBestAlignment(rVectors, dVectors);
-                const offsetRotation = new THREE.Quaternion();
-                offsetRotation.setFromMatrix4(matrix);
-                ARENA.debugXR(
-                    `Rotating by ${offsetRotation.x}, ${offsetRotation.y}, ${offsetRotation.z}, ${offsetRotation.w}`
-                );
-                ARENA.utils.relocateUserCamera(offsetPos, offsetRotation);
-            } else {
-                ARENA.debugXR('Found plane and mesh, no ref floor, publishing ref');
-                frame.detectedMeshes.forEach((mesh) => {
+            frame.detectedMeshes.forEach((mesh) => {
+                if (mesh.semanticLabel === 'global mesh') {
+                    const msg = JSON.stringify({
+                        vertices: Object.values(mesh.vertices),
+                        indices: Object.values(mesh.indices),
+                        semanticLabel: mesh.semanticLabel,
+                        meshPose: Object.values(frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix),
+                    });
                     ARENA.Mqtt.publish(
                         `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${ARENA.camName}/meshes`,
-                        JSON.stringify({
-                            vertices: Object.values(mesh.vertices),
-                            indices: Object.values(mesh.indices),
-                            semanticLabel: mesh.semanticLabel,
-                            meshPose: frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix,
-                        })
+                        msg
                     );
-                });
-                frame.detectedPlanes.forEach((plane) => {
-                    ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${ARENA.camName}/planes`,
-                        JSON.stringify({
-                            polygon: plane.polygon,
-                            orientation: plane.orientation,
-                            semanticLabel: plane.semanticLabel,
-                            planePose: frame.getPose(plane.planeSpace, xrRefSpace).transform.matrix,
-                        })
-                    );
-                });
-            }
+                }
+            });
+            // frame.detectedPlanes.forEach((plane) => {
+            //     ARENA.Mqtt.publish(
+            //         `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${ARENA.camName}/planes`,
+            //         JSON.stringify({
+            //             polygon: plane.polygon,
+            //             orientation: plane.orientation,
+            //             semanticLabel: plane.semanticLabel,
+            //             planePose: frame.getPose(plane.planeSpace, xrRefSpace).transform.matrix,
+            //         })
+            //     );
+            // });
         }
     },
 });
