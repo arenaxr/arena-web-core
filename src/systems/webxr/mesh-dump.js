@@ -66,19 +66,23 @@ AFRAME.registerSystem('mesh-dump', {
             // First may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
-            ARENA.debugXR('Found plane and mesh, publishing ref');
+            ARENA.debugXR('Found plane and mesh', false);
             const xrRefSpace = this.sceneEl.renderer.xr.getReferenceSpace();
             frame.detectedMeshes.forEach((mesh) => {
                 if (mesh.semanticLabel === 'global mesh') {
-                    const msg = JSON.stringify({
+                    const msg = this.packr.pack({
                         vertices: Object.values(mesh.vertices),
                         indices: Object.values(mesh.indices),
                         semanticLabel: mesh.semanticLabel,
                         meshPose: Object.values(frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix),
                     });
+                    ARENA.debugXR(' packing and publishing global mesh');
                     ARENA.Mqtt.publish(
                         `${ARENA.defaults.realm}/proc/debug/${ARENA.namespacedScene}/${ARENA.camName}/meshes`,
-                        msg
+                        msg,
+                        undefined,
+                        undefined,
+                        true
                     );
                 }
             });
