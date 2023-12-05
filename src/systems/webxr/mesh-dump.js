@@ -5,6 +5,7 @@ import { ARENA_EVENTS } from '../../constants';
 
 AFRAME.registerSystem('debug-ui', {
     init() {
+        ARENA.debugXR = console.log;
         if (ARENA.params.debugUI) {
             ARENA.events.addMultiEventListener([ARENA_EVENTS.ARENA_LOADED], () => {
                 const debugCard = document.createElement('a-entity');
@@ -26,8 +27,6 @@ AFRAME.registerSystem('debug-ui', {
                     }
                 };
             });
-        } else {
-            ARENA.debugXR = () => {};
         }
     },
 });
