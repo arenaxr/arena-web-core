@@ -420,7 +420,7 @@ AFRAME.registerSystem('armarker', {
     },
     /**
      * Get all markers registered with the system
-     * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for;
+     * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb', 'vive', 'optitrack' to filter for;
      *                         No argument or undefined will return all
      * @return {object} - a dictionary of markers
      * @alias module:armarker-system

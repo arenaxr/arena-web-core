@@ -13,7 +13,7 @@
 /**
  * ARMarker Component. Supports ARMarkers in a scene
  * @module armarker
- * @property {string} [markertype=apriltag_36h11] - The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb'
+ * @property {string} [markertype=apriltag_36h11] - The marker type. One of 'apriltag_36h11', 'lightanchor', 'uwb', 'vive', 'optitrack'
  * @property {boolean} [dynamic=false] - Whether tag is a static and used to for camera relocalization, or dynamic and used for object tracking
  * @property {boolean} [publish=false] - Force publish of tag detections to realm/g/, even without networked solver mode
  * @property {boolean} [buildable=false] - Whether tag has "dynamic" toggled on click. Used to position a tag, then lock into position
@@ -29,8 +29,8 @@ AFRAME.registerComponent('armarker', {
     schema: {
         markertype: {
             default: 'apriltag_36h11',
-            oneOf: ['apriltag_36h11', 'lightanchor', 'uwb'],
-        }, // markertype: apriltag_36h11, lightanchor, uwb
+            oneOf: ['apriltag_36h11', 'lightanchor', 'uwb', 'vive', 'optitrack'],
+        },
         dynamic: {
             default: false,
             type: 'boolean',
