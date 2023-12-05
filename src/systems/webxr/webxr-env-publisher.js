@@ -2,14 +2,14 @@
 
 import { Packr } from 'msgpackr';
 
-AFRAME.registerSystem('mesh-dump', {
+AFRAME.registerSystem('xr-env-publisher', {
     schema: {
         publishMeshes: { type: 'boolean', default: true },
         onlyGlobalMesh: { type: 'boolean', default: true },
         publishPlanes: { type: 'boolean', default: false },
         publishTopicBase: {
             type: 'string',
-            default: `${ARENA.defaults.realm}/d/${ARENA.namespacedScene}/${ARENA.camName}`,
+            default: `${ARENA.defaults.realm}/d/`,
         },
     },
     init() {
@@ -62,7 +62,13 @@ AFRAME.registerSystem('mesh-dump', {
                         meshPose: Object.values(frame.getPose(mesh.meshSpace, xrRefSpace).transform.matrix),
                     });
                     ARENA.debugXR(`Packing and publishing ${mesh.semanticLabel}`);
-                    ARENA.Mqtt.publish(`${publishTopicBase}/meshes`, msg, undefined, undefined, true);
+                    ARENA.Mqtt.publish(
+                        `${publishTopicBase}${ARENA.namespacedScene}/${ARENA.camName}/meshes`,
+                        msg,
+                        undefined,
+                        undefined,
+                        true
+                    );
                 });
             }
             if (publishPlanes) {
@@ -74,7 +80,13 @@ AFRAME.registerSystem('mesh-dump', {
                         planePose: frame.getPose(plane.planeSpace, xrRefSpace).transform.matrix,
                     });
                     ARENA.debugXR(`Packing and publishing ${plane.semanticLabel}`);
-                    ARENA.Mqtt.publish(`${publishTopicBase}/planes`, msg, undefined, undefined, true);
+                    ARENA.Mqtt.publish(
+                        `${publishTopicBase}${ARENA.namespacedScene}/${ARENA.camName}/planes`,
+                        msg,
+                        undefined,
+                        undefined,
+                        true
+                    );
                 });
             }
         }
