@@ -48,7 +48,7 @@ AFRAME.registerSystem('xr-env-publisher', {
             // First may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
-            ARENA.debugXR('Found plane and/or mesh', false);
+            ARENA.debugXR(`Found ${frame.detectedPlanes.size} planes, ${frame.detectedMeshes.size} meshes`, false);
             const xrRefSpace = this.sceneEl.renderer.xr.getReferenceSpace();
             if (publishMeshes) {
                 frame.detectedMeshes.forEach((mesh) => {
