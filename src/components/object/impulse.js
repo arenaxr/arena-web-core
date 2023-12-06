@@ -11,7 +11,7 @@
 /**
  * One physics feature is applying an impulse to an object to set it in motion.
  * This happens in conjunction with an event.
- * Requires [Physics for A-Frame VR]{@link https://github.com/n5ro/aframe-physics-system}
+ * Requires [Physics for A-Frame VR]{@link https://github.com/c-frame/aframe-physics-system}
  * @module impulse
  * @requires aframe-physics-system
  *

@@ -669,7 +669,7 @@ AFRAME.registerSystem('arena-scene', {
             Object.assign(sceneOptions, options['scene-options']);
 
             if (sceneOptions.physics) {
-                // physics system, build with cannon-js: https://github.com/n5ro/aframe-physics-system
+                // physics system, build with cannon-js: https://github.com/c-frame/aframe-physics-system
                 import('../vendor/aframe-physics-system.min');
                 const physicsWait = setInterval(() => {
                     // wait for physics system and static-body component to be registered, needs 15-30 ms

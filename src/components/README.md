@@ -31,7 +31,7 @@
 </dd>
 <dt><a href="#module_collision-listener">collision-listener</a></dt>
 <dd><p>Listen for collisions, callback on event.
-Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-Frame VR</a></p>
+Requires <a href="https://github.com/c-frame/aframe-physics-system">Physics for A-Frame VR</a></p>
 </dd>
 <dt><a href="#module_gesture-detector">gesture-detector</a></dt>
 <dd><p>Detect multi-finger touch gestures. Publish events accordingly.
@@ -43,7 +43,7 @@ Based off 8th Wall&#39;s <a href="https://github.com/8thwall/web/tree/master/exa
 <dt><a href="#module_impulse">impulse</a></dt>
 <dd><p>One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
-Requires <a href="https://github.com/n5ro/aframe-physics-system">Physics for A-Frame VR</a></p>
+Requires <a href="https://github.com/c-frame/aframe-physics-system">Physics for A-Frame VR</a></p>
 </dd>
 <dt><a href="#module_jitsi-video">jitsi-video</a></dt>
 <dd><p>Apply a jitsi video to a geometry
@@ -222,7 +222,7 @@ Keep track of mouse events and publish corresponding events
 ## collision-listener
 
 Listen for collisions, callback on event.
-Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
+Requires [Physics for A-Frame VR](https://github.com/c-frame/aframe-physics-system)
 
 **Requires**: <code>module:&#x27;aframe-physics-system&#x27;</code>
 <a name="module_gesture-detector"></a>
@@ -252,7 +252,7 @@ Load new URL when object is clicked
 
 One physics feature is applying an impulse to an object to set it in motion.
 This happens in conjunction with an event.
-Requires [Physics for A-Frame VR](https://github.com/n5ro/aframe-physics-system)
+Requires [Physics for A-Frame VR](https://github.com/c-frame/aframe-physics-system)
 
 **Requires**: <code>module:aframe-physics-system</code>
 <a name="module_jitsi-video"></a>
