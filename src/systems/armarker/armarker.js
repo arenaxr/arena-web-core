@@ -162,9 +162,13 @@ AFRAME.registerSystem('armarker', {
                     })
                     .catch(() => {
                         console.warn('Could not restore persisted origin anchor');
-                        xrSession.persistentAnchors.forEach((anchor) => {
-                            xrSession.deletePersistentAnchor(anchor).then(() => {});
-                        });
+                        try {
+                            xrSession.persistentAnchors.forEach((anchor) => {
+                                xrSession.deletePersistentAnchor(anchor).then(() => {});
+                            });
+                        } catch (err) {
+                            console.warn('Could not delete persisted origin anchor');
+                        }
                         window.localStorage.removeItem('originAnchor');
                     });
             } else {
