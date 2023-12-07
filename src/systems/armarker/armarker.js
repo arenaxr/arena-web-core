@@ -188,6 +188,7 @@ AFRAME.registerSystem('armarker', {
      */
     async initCVPipeline() {
         if (this.cvPipelineInitializing || this.cvPipelineInitialized) return;
+        if (AFRAME.utils.device.isOculusBrowser()) return;
         this.cvPipelineInitializing = true;
         // try to set up a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
         if (this.isWebXRViewer) {

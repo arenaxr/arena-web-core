@@ -151,11 +151,11 @@ class MQTTWorker {
      * @param {number} qos
      * @param {boolean} retained
      */
-    async publish(topic, payload, qos = 0, retained = false) {
+    async publish(topic, payload, qos = 0, retained = false, raw = false) {
         if (!this.mqttClient.isConnected()) return;
 
         /* eslint-disable no-param-reassign */
-        if (typeof payload === 'object') {
+        if (typeof payload === 'object' && raw === false) {
             // add timestamp to all published messages
             payload.timestamp = new Date().toISOString();
 

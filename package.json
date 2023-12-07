@@ -30,6 +30,7 @@
     "he": "^1.2.0",
     "linkifyjs": "^2.1.9",
     "mqtt-pattern": "^1.2.0",
+    "msgpackr": "^1.10.0",
     "paho-mqtt": "^1.1.0",
     "three": "file:src/shims/three-shim",
     "three-mesh-ui": "github:felixmariotto/three-mesh-ui#8294586",

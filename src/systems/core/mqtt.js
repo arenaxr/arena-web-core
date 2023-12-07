@@ -113,8 +113,8 @@ AFRAME.registerSystem('arena-mqtt', {
      * @param {number} qos
      * @param {boolean} retained
      */
-    async publish(topic, payload, qos = 0, retained = false) {
-        await this.MQTTWorker.publish(topic, payload, qos, retained);
+    async publish(topic, payload, qos = 0, retained = false, raw = false) {
+        await this.MQTTWorker.publish(topic, payload, qos, retained, raw);
     },
 
     /**
