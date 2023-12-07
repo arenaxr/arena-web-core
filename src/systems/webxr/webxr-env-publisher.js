@@ -9,7 +9,7 @@ AFRAME.registerSystem('xr-env-publisher', {
         publishPlanes: { type: 'boolean', default: false },
         publishTopicBase: {
             type: 'string',
-            default: `${ARENA.defaults.realm}/d/`,
+            default: `${ARENA.defaults.realm}/env/`,
         },
     },
     init() {
