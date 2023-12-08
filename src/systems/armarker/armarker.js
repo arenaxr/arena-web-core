@@ -22,6 +22,8 @@ import CVWorkerMsgs from './worker-msgs';
 import { ARENA_EVENTS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
+const MAX_PERSISTENT_ANCHORS = 7;
+
 /**
  * ARMarker System. Supports ARMarkers in a scene.
  * @module armarker-system
@@ -517,10 +519,21 @@ AFRAME.registerSystem('armarker', {
                     // Delete the old anchor
                     this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
                 }
-                anchor.requestPersistentHandle().then((handle) => {
-                    // Save the new one
-                    window.localStorage.setItem('originAnchor', handle);
-                });
+                // Check how many anchors there are, Quest has a low limit currently
+                if (this.webXRSession.persistentAnchors.size >= MAX_PERSISTENT_ANCHORS) {
+                    // Delete the oldest anchor
+                    const oldestAnchor = this.webXRSession.persistentAnchors.values().next().value;
+                    this.webXRSession.deletePersistentAnchor(oldestAnchor);
+                }
+                anchor
+                    .requestPersistentHandle()
+                    .then((handle) => {
+                        // Save the new one
+                        window.localStorage.setItem('originAnchor', handle);
+                    })
+                    .catch((err) => {
+                        console.error('Could not persist anchor', err);
+                    });
             } else if (this.originAnchor) {
                 this.originAnchor.delete();
             }
