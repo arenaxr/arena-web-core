@@ -310,7 +310,7 @@
             "properties": {
                 "mass": {
                     "default": 5,
-                    "minimum": 0.000001,
+                    "exclusiveMinimum": 0,
                     "type": "number",
                     "description": "Simulated mass of the object, > 0."
                 },
