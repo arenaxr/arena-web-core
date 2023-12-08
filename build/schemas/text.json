@@ -171,7 +171,7 @@
                     "default": {
                         "object_type": "text"
                     },
-                    "required": ["object_type", "font",  "side",  "value",  "color",  "position", "rotation"]
+                    "required": ["object_type", "font", "side", "value", "color", "position", "rotation"]
                 }
             }
         }

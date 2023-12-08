@@ -287,7 +287,7 @@
                 },
                 "cylinderAxis": {
                     "default": "y",
-                    "enum": [ "x", "y", "z"],
+                    "enum": ["x", "y", "z"],
                     "type": "string",
                     "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
                 },
@@ -297,7 +297,7 @@
                 },
                 "type": {
                     "default": "static",
-                    "enum": [ "dynamic", "static"],
+                    "enum": ["dynamic", "static"],
                     "type": "string",
                     "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
                 }
@@ -332,7 +332,7 @@
                 },
                 "cylinderAxis": {
                     "default": "y",
-                    "enum": [ "x", "y", "z"],
+                    "enum": ["x", "y", "z"],
                     "type": "string",
                     "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
                 },
@@ -342,7 +342,7 @@
                 },
                 "type": {
                     "default": "dynamic",
-                    "enum": [ "dynamic", "static"],
+                    "enum": ["dynamic", "static"],
                     "type": "string",
                     "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
                 }
@@ -534,10 +534,7 @@
             },
             "title": "Material extras",
             "type": "object",
-            "required": [
-              "encoding",
-              "gltfOpacity"
-            ]
+            "required": ["encoding", "gltfOpacity"]
         },
         "shadow": {
             "title": "Shadow",
