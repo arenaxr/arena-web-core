@@ -511,19 +511,19 @@ AFRAME.registerSystem('armarker', {
         if (!xrFrame) {
             console.error("No XRFrame available, can't set origin anchor");
         }
-        xrFrame.createAnchor(anchorPose, this.xrRefSpace).then((anchor) => {
+        xrFrame.createAnchor(anchorPose, this.xrRefSpace).then(async (anchor) => {
             // Persist, currently Quest browser only
             if (anchor.requestPersistentHandle) {
                 const oldPersistAnchor = window.localStorage.getItem('originAnchor');
                 if (oldPersistAnchor) {
                     // Delete the old anchor
-                    this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
+                    await this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
                 }
                 // Check how many anchors there are, Quest has a low limit currently
                 if (this.webXRSession.persistentAnchors.length >= MAX_PERSISTENT_ANCHORS) {
                     // Delete the oldest anchor
                     const oldestAnchor = this.webXRSession.persistentAnchors.values().next().value;
-                    this.webXRSession.deletePersistentAnchor(oldestAnchor);
+                    await this.webXRSession.deletePersistentAnchor(oldestAnchor);
                 }
                 anchor
                     .requestPersistentHandle()
