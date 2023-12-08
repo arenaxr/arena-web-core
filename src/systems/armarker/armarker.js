@@ -520,7 +520,7 @@ AFRAME.registerSystem('armarker', {
                     this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
                 }
                 // Check how many anchors there are, Quest has a low limit currently
-                if (this.webXRSession.persistentAnchors.size >= MAX_PERSISTENT_ANCHORS) {
+                if (this.webXRSession.persistentAnchors.length >= MAX_PERSISTENT_ANCHORS) {
                     // Delete the oldest anchor
                     const oldestAnchor = this.webXRSession.persistentAnchors.values().next().value;
                     this.webXRSession.deletePersistentAnchor(oldestAnchor);
