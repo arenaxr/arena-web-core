@@ -63,6 +63,8 @@
                                 "opacity": {
                                     "description": "Wave opacity.",
                                     "default": 0.8,
+                                    "minimum": 0,
+                                    "maximum": 1,
                                     "type": "number"
                                 }
                             }

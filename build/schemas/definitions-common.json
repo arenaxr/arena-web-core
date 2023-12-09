@@ -529,6 +529,8 @@
                 "gltfOpacity": {
                     "type": "number",
                     "description": "Opacity value to apply to the model. 1 is fully opaque, 0 is fully transparent.",
+                    "minimum": 0,
+                    "maximum": 1,
                     "default": 1
                 }
             },

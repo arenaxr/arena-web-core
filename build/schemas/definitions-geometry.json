@@ -88,6 +88,8 @@
                 },
                 "opacity": {
                     "default": 1,
+                    "minimum": 0,
+                    "maximum": 1,
                     "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
                     "type": "number"
                 },

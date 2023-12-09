@@ -38,6 +38,8 @@
                                     "title": "Opacity",
                                     "description": "Line opacity.",
                                     "type": "number",
+                                    "minimum": 0,
+                                    "maximum": 1,
                                     "default": 1
                                 },
                                 "start": {
