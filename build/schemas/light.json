@@ -1,6 +1,7 @@
 {
     "title": "Light",
     "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>https://aframe.io/docs/1.5.0/components/light.html</a>",
+    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -8,6 +9,7 @@
         {
             "properties": {
                 "data": {
+                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -62,6 +64,7 @@
                                 },
                                 "light": {
                                     "title": "DEPRECATED (light)",
+                                    "format": "grid",
                                     "type": "object",
                                     "description": "DEPRECATED: data.light.[property] is deprecated, use object_type: light and data.[property] instead.",
                                     "deprecated": true

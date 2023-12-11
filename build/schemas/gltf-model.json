@@ -1,6 +1,7 @@
 {
     "title": "GLTF Model",
     "description": "Load a GLTF model. \n\nBesides applying standard rotation and position attributes to the center-point of the GLTF model, the individual child components can also be manually manipulated. See format details in the `modelUpdate` data attribute.",
+    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -8,6 +9,7 @@
         {
             "properties": {
                 "data": {
+                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {

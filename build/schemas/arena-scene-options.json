@@ -249,6 +249,7 @@
             "required": ["active", "preset"],
             "title": "Environment Presets",
             "type": "object",
+            "format": "grid",
             "description": "A-Frame Environment presets. \n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>https://github.com/supermedium/aframe-environment-component</a>"
         },
         "renderer-settings": {
@@ -282,6 +283,7 @@
             "required": ["outputColorSpace"],
             "title": "Renderer Settings",
             "type": "object",
+            "format": "grid",
             "description": "These settings are fed into three.js WebGLRenderer properties"
         },
         "scene-options": {
@@ -308,6 +310,7 @@
                     "maxItems": 10,
                     "items": {
                         "type": "object",
+                        "format": "grid",
                         "title": "Head Models",
                         "properties": {
                             "name": {
@@ -439,6 +442,7 @@
                     "required": ["enabled", "src"],
                     "title": "AR Hit Test Settings",
                     "type": "object",
+                    "format": "grid",
                     "description": "A-Frame AR Hit Test Settings. More properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>https://aframe.io/docs/1.5.0/components/ar-hit-test.html</a>"
                 }
             },
@@ -453,6 +457,7 @@
             ],
             "title": "Scene Options",
             "type": "object",
+            "format": "grid",
             "description": "ARENA Scene Options"
         },
         "post-processing": {
@@ -487,6 +492,7 @@
                     "required": ["strength", "radius", "threshold", "resolution"],
                     "description": "Use bloom post-processing effect",
                     "title": "Bloom",
+                    "format": "grid",
                     "type": "object"
                 },
                 "sao": {
@@ -556,6 +562,7 @@
                     "required": ["resolution", "useDepthTexture", "useNormals"],
                     "description": "Use scalable ambient occlusion (SAO) post-processing effect",
                     "title": "SAO",
+                    "format": "grid",
                     "type": "object"
                 },
                 "ssao": {
@@ -588,6 +595,7 @@
                     "required": ["resolution", "kernelRadius", "minDistance", "maxDistance"],
                     "description": "Use screen space ambient occlusion (SSAO) post-processing effect",
                     "title": "SSAO",
+                    "format": "grid",
                     "type": "object"
                 },
                 "pixel": {
@@ -611,6 +619,7 @@
                     "required": ["pixelSize", "normalEdgeStrength", "depthEdgeStrength"],
                     "description": "Use Pixelation post-processing effect",
                     "title": "Pixel",
+                    "format": "grid",
                     "type": "object"
                 },
                 "glitch": {
@@ -624,6 +633,7 @@
                     "required": ["dtSize"],
                     "description": "Use Glitch post-processing effect",
                     "title": "Glitch",
+                    "format": "grid",
                     "type": "object"
                 },
                 "fxaa": {
@@ -637,6 +647,7 @@
                     "required": ["options"],
                     "description": "Use FXAA post-processing effect. You may want to place this last in effects list.",
                     "title": "FXAA",
+                    "format": "grid",
                     "type": "object"
                 },
                 "smaa": {
@@ -650,11 +661,13 @@
                     "required": ["options"],
                     "description": "Use SMAA post-processing effect. You may want to place this last in effects list.",
                     "title": "SMAA",
+                    "format": "grid",
                     "type": "object"
                 }
             },
             "required": [],
             "title": "Post-Processing Effects",
+            "format": "grid",
             "type": "object",
             "description": "These effects are enabled in desktop and XR views"
         },
@@ -675,6 +688,7 @@
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object"
         }
     },
@@ -721,5 +735,6 @@
     },
     "required": ["action", "data", "object_id", "persist", "type"],
     "title": "Scene Config",
+    "format": "grid",
     "type": "object"
 }

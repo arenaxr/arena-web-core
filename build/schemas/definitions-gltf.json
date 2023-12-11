@@ -47,6 +47,7 @@
             },
             "required": ["clip"],
             "title": "Animation Mixer",
+            "format": "grid",
             "type": "object"
         },
         "gltf-morph": {
@@ -66,6 +67,7 @@
                 }
             },
             "title": "GLTF Morph",
+            "format": "grid",
             "type": "object",
             "required": ["morphtarget", "value"]
         },
@@ -98,17 +100,20 @@
                 }
             },
             "title": "GLTF Model Level of Detail",
+            "format": "grid",
             "type": "object",
             "required": ["detailedUrl", "detailedDistance", "updateRate", "retainCache"]
         },
         "modelUpdate": {
             "title": "GLTF Model Update",
+            "format": "grid",
             "type": "object",
             "description": "The GLTF-specific `modelUpdate` attribute is an object with child component names as keys. The top-level keys are the names of the child components to be updated. The values of each are nested `position` and `rotation` attributes to set as new values, respectively. Either `position` or `rotation` can be omitted if unchanged.",
             "additionalProperties": true,
             "patternProperties": {
                 "^[A-Za-z][A-Za-z0-9_-]*$": {
                     "type": "object",
+                    "format": "grid",
                     "description": "One of this model's named child components.",
                     "properties": {
                         "position": {
@@ -127,6 +132,7 @@
                                 }
                             },
                             "required": ["x", "y", "z"],
+                            "format": "grid",
                             "type": "object",
                             "title": "Position"
                         },
@@ -150,6 +156,7 @@
                                 }
                             },
                             "required": ["w", "x", "y", "z"],
+                            "format": "grid",
                             "type": "object",
                             "title": "Rotation"
                         }

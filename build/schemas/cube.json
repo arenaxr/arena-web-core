@@ -1,6 +1,7 @@
 {
     "title": "Cube (deprecated; don't use)",
     "description": "Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
+    "format": "grid",
     "deprecated": true,
     "allOf": [
         {
@@ -9,6 +10,7 @@
         {
             "properties": {
                 "data": {
+                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {

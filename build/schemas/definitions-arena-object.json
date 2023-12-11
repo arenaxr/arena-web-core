@@ -1,5 +1,6 @@
 {
     "properties": {
+        "format": "grid",
         "object_id": {
             "description": "A uuid or otherwise unique identifier for this object",
             "minLength": 3,

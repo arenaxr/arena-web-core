@@ -1,6 +1,7 @@
 {
     "title": "Hand",
     "description": "Hand is the (left or right) hand metadata pose and controller type of the user avatar.",
+    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -8,6 +9,7 @@
         {
             "properties": {
                 "data": {
+                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {

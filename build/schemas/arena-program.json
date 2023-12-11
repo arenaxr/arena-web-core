@@ -2,6 +2,7 @@
     "definitions": {
         "program": {
             "type": "object",
+            "format": "grid",
             "title": "Program Data",
             "description": "Object data payload; Program config data",
             "properties": {
@@ -71,6 +72,7 @@
                     "uniqueItems": false,
                     "items": {
                         "type": "object",
+                        "format": "grid",
                         "title": "Channels",
                         "properties": {
                             "path": {
@@ -90,6 +92,7 @@
                             },
                             "params": {
                                 "type": "object",
+                                "format": "grid",
                                 "title": "Parameters",
                                 "description": "Type (i.e. pubsub/client)-specific parameters",
                                 "properties": {
@@ -126,6 +129,7 @@
         }
     },
     "type": "object",
+    "format": "grid",
     "title": "Program",
     "properties": {
         "object_id": {

@@ -120,6 +120,7 @@
                 }
             },
             "title": "Animation",
+            "format": "grid",
             "type": "object"
         },
         "armarker": {
@@ -193,11 +194,13 @@
             },
             "required": ["markertype", "markerid", "size", "buildable", "dynamic"],
             "title": "ARMarker",
+            "format": "grid",
             "type": "object"
         },
         "click-listener": {
             "description": "Object will listen for clicks",
             "title": "Click Listener",
+            "format": "grid",
             "type": "object",
             "properties": {
                 "enabled": {
@@ -216,6 +219,7 @@
         "box-collision-listener": {
             "description": "Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps",
             "title": "Box Collision Listener",
+            "format": "grid",
             "type": "object",
             "properties": {
                 "enabled": {
@@ -239,6 +243,7 @@
         "blip": {
             "description": "When the object is created or deleted, it will animate in/out of the scene instead of appearing/disappearing instantly. Must have a geometric mesh.",
             "title": "Blip Effect",
+            "format": "grid",
             "type": "object",
             "properties": {
                 "blipin": {
@@ -303,6 +308,7 @@
                 }
             },
             "title": "Physics Static Body",
+            "format": "grid",
             "type": "object"
         },
         "dynamic-body": {
@@ -348,6 +354,7 @@
                 }
             },
             "title": "Physics Dynamic Body",
+            "format": "grid",
             "type": "object"
         },
         "goto-landmark": {
@@ -367,6 +374,7 @@
             },
             "required": ["landmark", "on"],
             "title": "Goto Landmark",
+            "format": "grid",
             "type": "object"
         },
         "goto-url": {
@@ -390,6 +398,7 @@
             },
             "required": ["dest", "on", "url"],
             "title": "Goto URL",
+            "format": "grid",
             "type": "object"
         },
         "hide-on-enter-ar": {
@@ -437,10 +446,12 @@
                 }
             },
             "title": "Impulse",
+            "format": "grid",
             "type": "object"
         },
         "landmark": {
             "title": "Landmark",
+            "format": "grid",
             "type": "object",
             "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is constrained by a navmesh (when it exists)",
             "properties": {
@@ -535,11 +546,13 @@
                 }
             },
             "title": "Material extras",
+            "format": "grid",
             "type": "object",
             "required": ["encoding", "gltfOpacity"]
         },
         "shadow": {
             "title": "Shadow",
+            "format": "grid",
             "type": "object",
             "properties": {
                 "cast": {
@@ -634,11 +647,13 @@
                 }
             },
             "title": "Positional Sound",
+            "format": "grid",
             "type": "object"
         },
         "textinput": {
             "title": "Text Input",
             "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
+            "format": "grid",
             "type": "object",
             "properties": {
                 "on": {
@@ -696,6 +711,7 @@
                 }
             },
             "title": "Remote Render",
+            "format": "grid",
             "type": "object"
         },
         "video-control": {
@@ -743,6 +759,7 @@
             },
             "required": ["video_object", "frame_object", "video_path"],
             "title": "Video",
+            "format": "grid",
             "type": "object"
         },
         "attribution": {
@@ -787,6 +804,7 @@
                 }
             },
             "title": "Attribution",
+            "format": "grid",
             "type": "object"
         },
         "particle-system": {
@@ -946,6 +964,7 @@
             },
             "required": ["texture", "size"],
             "title": "Particle System",
+            "format": "grid",
             "type": "object"
         },
         "spe-particles": {
@@ -1293,6 +1312,7 @@
             },
             "required": [],
             "title": "SPE Particles",
+            "format": "grid",
             "type": "object"
         },
         "look-at": {
@@ -1315,6 +1335,7 @@
                 }
             },
             "required": ["x", "y"],
+            "format": "grid",
             "type": "object"
         },
         "vector3": {
@@ -1334,6 +1355,7 @@
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object"
         }
     }

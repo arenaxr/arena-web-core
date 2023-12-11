@@ -1,6 +1,7 @@
 {
     "title": "Event",
     "description": "Generate an event message for an object.",
+    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-event.json#/properties"
@@ -31,6 +32,7 @@
                                 }
                             },
                             "required": ["x", "y", "z"],
+                            "format": "grid",
                             "type": "object",
                             "title": "Position"
                         },
@@ -71,6 +73,7 @@
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object"
         }
     }

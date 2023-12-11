@@ -1,6 +1,7 @@
 {
     "title": "ARENAUI Prompt",
     "description": "ARENAUI element which displays prompt with button actions.",
+    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -8,6 +9,7 @@
         {
             "properties": {
                 "data": {
+                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {

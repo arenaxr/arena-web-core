@@ -1,6 +1,7 @@
 {
     "title": "ARENAUI Button Panel",
     "description": "ARENAUI element which displays a vertical or horizontal panel of buttons.",
+    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -8,6 +9,7 @@
         {
             "properties": {
                 "data": {
+                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -30,6 +32,7 @@
                                     ],
                                     "uniqueItems": false,
                                     "items": {
+                                        "format": "grid",
                                         "type": "object",
                                         "properties": {
                                             "name": {
