@@ -1,7 +1,6 @@
 {
     "title": "3D Gaussian Splat",
-    "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering. \n\nMore information : <a href='https://github.com/quadjr/aframe-gaussian-splatting'>https://github.com/quadjr/aframe-gaussian-splatting</a>",
-    "format": "grid",
+    "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering. \n\nMore information : <a href='https://github.com/quadjr/aframe-gaussian-splatting'>aframe gaussian splatting</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -20,7 +18,7 @@
                                     "enum": ["gaussian_splatting"]
                                 },
                                 "src": {
-                                    "description": "Splat URL. Dropbox share links also accepted. Store files paths under '/store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
                                     "format": "uri",
                                     "title": "src",
                                     "type": "string"

@@ -1,7 +1,6 @@
 {
     "title": "Three.js Scene",
-    "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred) \n\nFormat: <a href='https://threejs.org/docs/#api/en/scenes/Scene'>https://threejs.org/docs/#api/en/scenes/Scene</a>",
-    "format": "grid",
+    "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred) \n\nFormat: <a href='https://threejs.org/docs/#api/en/scenes/Scene'>threejs Scene</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -20,9 +18,9 @@
                                     "enum": ["threejs-scene"]
                                 },
                                 "url": {
-                                    "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
                                     "format": "uri",
-                                    "title": "Url",
+                                    "title": "Threejs Model Url",
                                     "type": "string"
                                 }
                             }

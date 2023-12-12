@@ -1,7 +1,6 @@
 {
     "title": "GLTF Model",
     "description": "Load a GLTF model. \n\nBesides applying standard rotation and position attributes to the center-point of the GLTF model, the individual child components can also be manually manipulated. See format details in the `modelUpdate` data attribute.",
-    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -20,9 +18,9 @@
                                     "enum": ["gltf-model"]
                                 },
                                 "url": {
-                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under '/store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
-                                    "format": "uri",
-                                    "title": "Url",
+                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
+                                    "format": "normal",
+                                    "title": "GLTF Model Url",
                                     "type": "string"
                                 }
                             }

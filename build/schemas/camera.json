@@ -1,7 +1,6 @@
 {
     "title": "Camera",
     "description": "Camera is the pose and arena-user component data representing a user avatar.",
-    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -22,7 +20,6 @@
                                 "arena-user": {
                                     "description": "Another user's camera in the ARENA. Handles Jitsi and display name updates.",
                                     "title": "User Avatar",
-                                    "format": "grid",
                                     "type": "object",
                                     "properties": {
                                         "displayName": {

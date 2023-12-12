@@ -1,7 +1,6 @@
 {
     "title": "PCD Model",
-    "description": "Load a PCD model. \n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>https://pointclouds.org/documentation/tutorials/index.html</a>",
-    "format": "grid",
+    "description": "Load a PCD model. \n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>point clouds</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -20,9 +18,9 @@
                                     "enum": ["pcd-model"]
                                 },
                                 "url": {
-                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under 'store/users/<username>' (e.g. /store/users/wiselab/pcd-models/bunny.pcd); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/pcd-models/bunny.pcd).",
+                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
                                     "format": "uri",
-                                    "title": "Url",
+                                    "title": "PCD Model Url",
                                     "type": "string"
                                 },
                                 "pointSize": {

@@ -1,7 +1,6 @@
 {
     "title": "Entity (generic object)",
     "description": "Entities are the base of all objects in the scene. Entities are containers into which components can be attached.",
-    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -22,7 +20,6 @@
                                 "geometry": {
                                     "title": "Geometry",
                                     "description": "The primitive mesh geometry.",
-                                    "format": "grid",
                                     "type": "object",
                                     "properties": {
                                         "primitive": {
@@ -55,7 +52,6 @@
                                 "panel": {
                                     "title": "UI Panel",
                                     "description": "The rounded UI panel primitive.",
-                                    "format": "grid",
                                     "type": "object",
                                     "properties": {
                                         "depth": {

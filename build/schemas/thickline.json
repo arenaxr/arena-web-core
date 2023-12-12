@@ -1,7 +1,6 @@
 {
     "title": "Thickline",
     "description": "Draw a line that can have a custom width",
-    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {

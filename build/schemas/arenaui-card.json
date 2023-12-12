@@ -1,7 +1,6 @@
 {
     "title": "ARENAUI Card Panel",
     "description": "ARENAUI element which displays text and optionally an image.",
-    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {

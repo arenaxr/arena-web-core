@@ -15,7 +15,6 @@
         "jitsi-video": {
             "description": "Apply a jitsi video source to the geometry",
             "title": "Jitsi Video",
-            "format": "grid",
             "type": "object",
             "properties": {
                 "jitsiId": {
@@ -30,7 +29,7 @@
             "required": ["displayName"]
         },
         "material": {
-            "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>https://aframe.io/docs/1.5.0/components/material.html</a>",
+            "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>aframe material</a>",
             "properties": {
                 "alphaTest": {
                     "default": 0,
@@ -85,7 +84,6 @@
                         }
                     },
                     "required": ["x", "y"],
-                    "format": "grid",
                     "type": "object"
                 },
                 "opacity": {
@@ -110,7 +108,6 @@
                         }
                     },
                     "required": ["x", "y"],
-                    "format": "grid",
                     "type": "object"
                 },
                 "shader": {
@@ -147,7 +144,6 @@
                 }
             },
             "title": "Material",
-            "format": "grid",
             "type": "object"
         },
         "multisrc": {
@@ -165,7 +161,6 @@
             },
             "required": ["srcspath", "srcs"],
             "title": "Multi Source",
-            "format": "grid",
             "type": "object"
         },
         "screenshareable": {

@@ -1,7 +1,6 @@
 {
     "title": "Hand",
     "description": "Hand is the (left or right) hand metadata pose and controller type of the user avatar.",
-    "format": "grid",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -22,6 +20,7 @@
                                 "url": {
                                     "type": "string",
                                     "title": "Hand Model Url",
+                                    "format": "uri",
                                     "description": "Path to user avatar hand model",
                                     "default": "static/models/hands/valve_index_left.gltf"
                                 },

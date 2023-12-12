@@ -1,7 +1,7 @@
 {
     "properties": {
         "animation": {
-            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>https://aframe.io/docs/1.5.0/components/animation.html</a>",
+            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>aframe animation.</a>",
             "properties": {
                 "autoplay": {
                     "default": true,
@@ -120,7 +120,6 @@
                 }
             },
             "title": "Animation",
-            "format": "grid",
             "type": "object"
         },
         "armarker": {
@@ -187,20 +186,19 @@
                 },
                 "url": {
                     "default": "",
-                    "url": "size",
+                    "format": "uri",
+                    "title": "Tag Url",
                     "description": "URL associated with the tag",
                     "type": "string"
                 }
             },
             "required": ["markertype", "markerid", "size", "buildable", "dynamic"],
             "title": "ARMarker",
-            "format": "grid",
             "type": "object"
         },
         "click-listener": {
             "description": "Object will listen for clicks",
             "title": "Click Listener",
-            "format": "grid",
             "type": "object",
             "properties": {
                 "enabled": {
@@ -219,7 +217,6 @@
         "box-collision-listener": {
             "description": "Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps",
             "title": "Box Collision Listener",
-            "format": "grid",
             "type": "object",
             "properties": {
                 "enabled": {
@@ -243,7 +240,6 @@
         "blip": {
             "description": "When the object is created or deleted, it will animate in/out of the scene instead of appearing/disappearing instantly. Must have a geometric mesh.",
             "title": "Blip Effect",
-            "format": "grid",
             "type": "object",
             "properties": {
                 "blipin": {
@@ -282,7 +278,7 @@
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
         "static-body": {
-            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
+            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>aframe physics system.</a>",
             "properties": {
                 "shape": {
                     "default": "auto",
@@ -308,11 +304,10 @@
                 }
             },
             "title": "Physics Static Body",
-            "format": "grid",
             "type": "object"
         },
         "dynamic-body": {
-            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
+            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>aframe physics system.</a>",
             "properties": {
                 "mass": {
                     "default": 5,
@@ -354,7 +349,6 @@
                 }
             },
             "title": "Physics Dynamic Body",
-            "format": "grid",
             "type": "object"
         },
         "goto-landmark": {
@@ -374,7 +368,6 @@
             },
             "required": ["landmark", "on"],
             "title": "Goto Landmark",
-            "format": "grid",
             "type": "object"
         },
         "goto-url": {
@@ -392,13 +385,13 @@
                 },
                 "url": {
                     "default": "",
+                    "title": "Landmark Url",
                     "format": "uri",
                     "type": "string"
                 }
             },
             "required": ["dest", "on", "url"],
             "title": "Goto URL",
-            "format": "grid",
             "type": "object"
         },
         "hide-on-enter-ar": {
@@ -446,12 +439,10 @@
                 }
             },
             "title": "Impulse",
-            "format": "grid",
             "type": "object"
         },
         "landmark": {
             "title": "Landmark",
-            "format": "grid",
             "type": "object",
             "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is constrained by a navmesh (when it exists)",
             "properties": {
@@ -499,7 +490,7 @@
             "required": ["label", "randomRadiusMin", "randomRadiusMax", "lookAtLandmark"]
         },
         "material-extras": {
-            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>https://threejs.org/docs/#api/en/materials/Material</a>",
+            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>threejs Material</a>",
             "properties": {
                 "overrideSrc": {
                     "type": "string",
@@ -546,13 +537,11 @@
                 }
             },
             "title": "Material extras",
-            "format": "grid",
             "type": "object",
             "required": ["encoding", "gltfOpacity"]
         },
         "shadow": {
             "title": "Shadow",
-            "format": "grid",
             "type": "object",
             "properties": {
                 "cast": {
@@ -571,7 +560,7 @@
             "required": ["cast", "receive"]
         },
         "sound": {
-            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>https://aframe.io/docs/1.5.0/components/sound.html</a>",
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>aframe sound</a>",
             "properties": {
                 "autoplay": {
                     "default": false,
@@ -647,13 +636,11 @@
                 }
             },
             "title": "Positional Sound",
-            "format": "grid",
             "type": "object"
         },
         "textinput": {
             "title": "Text Input",
             "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
-            "format": "grid",
             "type": "object",
             "properties": {
                 "on": {
@@ -696,9 +683,9 @@
             "required": ["on", "title", "label", "placeholder"]
         },
         "url": {
-            "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+            "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
             "format": "uri",
-            "title": "Url",
+            "title": "General Url",
             "type": "string"
         },
         "remote-render": {
@@ -711,7 +698,6 @@
                 }
             },
             "title": "Remote Render",
-            "format": "grid",
             "type": "object"
         },
         "video-control": {
@@ -759,7 +745,6 @@
             },
             "required": ["video_object", "frame_object", "video_path"],
             "title": "Video",
-            "format": "grid",
             "type": "object"
         },
         "attribution": {
@@ -804,11 +789,10 @@
                 }
             },
             "title": "Attribution",
-            "format": "grid",
             "type": "object"
         },
         "particle-system": {
-            "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>https://github.com/c-frame/aframe-particle-system-component</a>",
+            "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>aframe particle system component</a>",
             "properties": {
                 "preset": {
                     "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
@@ -964,11 +948,10 @@
             },
             "required": ["texture", "size"],
             "title": "Particle System",
-            "format": "grid",
             "type": "object"
         },
         "spe-particles": {
-            "description": "GPU based particle systems in A-Frame. \n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>https://github.com/harlyq/aframe-spe-particles-component</a>",
+            "description": "GPU based particle systems in A-Frame. \n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>aframe spe particles component</a>",
             "properties": {
                 "acceleration": {
                     "description": "for sphere and disc distributions, only the x axis is used",
@@ -1312,7 +1295,6 @@
             },
             "required": [],
             "title": "SPE Particles",
-            "format": "grid",
             "type": "object"
         },
         "look-at": {
@@ -1335,7 +1317,6 @@
                 }
             },
             "required": ["x", "y"],
-            "format": "grid",
             "type": "object"
         },
         "vector3": {
@@ -1355,7 +1336,6 @@
                 }
             },
             "required": ["x", "y", "z"],
-            "format": "grid",
             "type": "object"
         }
     }

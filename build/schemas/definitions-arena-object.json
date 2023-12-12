@@ -1,6 +1,5 @@
 {
     "properties": {
-        "format": "grid",
         "object_id": {
             "description": "A uuid or otherwise unique identifier for this object",
             "minLength": 3,
@@ -18,7 +17,7 @@
         },
         "action": {
             "default": "create",
-            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+            "description": "One of 3 basic Create, Update, Delete actions or a special client event action (e.g. a click)",
             "enum": ["create", "delete", "update", "clientEvent"],
             "type": "string"
         },

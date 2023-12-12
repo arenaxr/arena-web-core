@@ -1,7 +1,6 @@
 {
     "title": "Text",
-    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>https://aframe.io/docs/1.5.0/components/text.html</a>",
-    "format": "grid",
+    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>aframe text</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -9,7 +8,6 @@
         {
             "properties": {
                 "data": {
-                    "format": "grid",
                     "allOf": [
                         {
                             "properties": {
@@ -136,7 +134,7 @@
                                 },
                                 "whiteSpace": {
                                     "type": "string",
-                                    "description": "How whitespace should be handled (i.e., normal, pre, nowrap).</a>",
+                                    "description": "How whitespace should be handled (i.e., normal, pre, nowrap).",
                                     "default": "normal",
                                     "enum": ["normal", "pre", "nowrap"]
                                 },
