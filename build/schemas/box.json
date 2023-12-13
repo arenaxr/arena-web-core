@@ -60,6 +60,7 @@
                         }
                     ],
                     "title": "Box Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "box",
