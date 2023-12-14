@@ -16,14 +16,22 @@ AFRAME.registerSystem('xr-env-publisher', {
         const { sceneEl } = this;
 
         this.onRAF = this.onRAF.bind(this);
-        sceneEl.renderer.xr.addEventListener('sessionstart', this.webXRSessionStarted.bind(this));
+        this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
+
+        sceneEl.renderer.xr.addEventListener('sessionstart', () => {
+            if (sceneEl.is('ar-mode')) {
+                const { xrSession } = sceneEl;
+                this.webXRSessionStarted(xrSession).then(() => {});
+            }
+        });
+
         this.packr = new Packr({
             useRecords: false,
             useFloat32: true,
         });
     },
     async webXRSessionStarted(xrSession) {
-        if (xrSession === undefined || !this.sceneEl.is('ar-mode')) return;
+        if (xrSession === undefined) return;
         xrSession.requestAnimationFrame(this.onRAF);
     },
     async onRAF(_time, frame) {
