@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.25.0](https://github.com/arenaxr/arena-web-core/compare/v1.24.1...v1.25.0) (2023-12-14)
+
+
+### Features
+
+* add (renamed) XR env-publisher ([8e703ee](https://github.com/arenaxr/arena-web-core/commit/8e703ee2a1b0ec6723016a9f97fdc3039dec2fdd))
+* add raw flag for mqtt publish ([82fe4f1](https://github.com/arenaxr/arena-web-core/commit/82fe4f1fdee93dfd0f0f529084fbb5221e97a31a))
+* add xr system `debug-ui` ([2ced380](https://github.com/arenaxr/arena-web-core/commit/2ced3801ce5d753895cae82244e7cc8afc6539d2))
+
+
+### Bug Fixes
+
+* **build3d:** improve logging window, small bug fixes, failed attempts at auto-play ([#600](https://github.com/arenaxr/arena-web-core/issues/600)) ([342a833](https://github.com/arenaxr/arena-web-core/commit/342a833338dd33b8d931caecf40ef26424d790c2))
+* **build:** add missing gltf-morph to schema ([52b9220](https://github.com/arenaxr/arena-web-core/commit/52b92201475fa522ffce1fafca7acd9387c3ee24))
+* **build:** add range validation for opacity ([c31b744](https://github.com/arenaxr/arena-web-core/commit/c31b744da5a77bb95e675036f93c8386f651995f))
+* **build:** add roation/scale range validation ([e4ab61c](https://github.com/arenaxr/arena-web-core/commit/e4ab61c70ad5197178533fe0ee47dfd62d6a89ef))
+* **build:** add schema for detailed physics dynamic/static bodies ([00c2849](https://github.com/arenaxr/arena-web-core/commit/00c284936ed95d7a9b1e241ee724cab7c732e7c9))
+* dont send vrmode=true to remote server when in fullscreen mode ([fb20678](https://github.com/arenaxr/arena-web-core/commit/fb206784dfe3187254039b2a0270f1b845fd4194))
+* handle persistent anchor setting failure ([7f3cad4](https://github.com/arenaxr/arena-web-core/commit/7f3cad4c210e35dca0543daf681f7f5432b00d0c))
+* **physics:** wait to load aframe-physics before making groundPlane static ([7c67816](https://github.com/arenaxr/arena-web-core/commit/7c678161c7fa614e366a3c92ec2b05f85ee55027))
+* precompute proj and pose matrix inverse for atw to improve performance ([ecf17a9](https://github.com/arenaxr/arena-web-core/commit/ecf17a997b2be4328e075df690ae88b589df90bc))
+* xr-env-publisher init listener ([d900add](https://github.com/arenaxr/arena-web-core/commit/d900add10278755ad260b21185a0d9f70cbb7fd4))
+
 ## [1.24.1](https://github.com/arenaxr/arena-web-core/compare/v1.24.0...v1.24.1) (2023-11-17)
 
 
