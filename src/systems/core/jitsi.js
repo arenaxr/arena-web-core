@@ -7,6 +7,7 @@
  */
 
 /* global AFRAME, ARENA, JitsiMeetJS, $ */
+import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
 
 // log lib-jitsi-meet.js version
@@ -161,7 +162,9 @@ AFRAME.registerSystem('arena-jitsi', {
         this.connection.addEventListener(JitsiMeetJS.events.connection.CONNECTION_DISCONNECTED, this.disconnect);
         this.connection.connect();
 
-        this.avConnect();
+        if (!(ARENA.params.armode && ARENAUtils.isWebXRViewer())) {
+            this.avConnect();
+        }
     },
 
     /**
