@@ -65,6 +65,7 @@
                         }
                     ],
                     "title": "Cylinder Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "cylinder",

@@ -40,6 +40,7 @@
                         }
                     ],
                     "title": "Tetrahedron Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "tetrahedron",

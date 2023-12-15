@@ -1306,6 +1306,7 @@
     "definitions": {
         "vector2": {
             "title": "Vector2",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,
@@ -1321,6 +1322,7 @@
         },
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,

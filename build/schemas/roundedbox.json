@@ -55,6 +55,7 @@
                         }
                     ],
                     "title": "Rounded Box Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "roundedbox",

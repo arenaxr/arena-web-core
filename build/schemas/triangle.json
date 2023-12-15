@@ -57,6 +57,7 @@
                         }
                     ],
                     "title": "Triangle Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "triangle",
@@ -73,6 +74,7 @@
     "definitions": {
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,
