@@ -1,7 +1,7 @@
 {
     "properties": {
         "animation": {
-            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>aframe animation.</a> Easing properties are detailed at <a href='https://easings.net'>easings.net</a>.",
+            "description": "Animate and tween values.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>A-Frame Animation</a> component. Easing properties are detailed at <a href='https://easings.net'>easings.net</a>.",
             "properties": {
                 "autoplay": {
                     "default": true,
@@ -278,7 +278,7 @@
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
         "static-body": {
-            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>aframe physics system.</a>",
+            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
             "properties": {
                 "shape": {
                     "default": "auto",
@@ -307,7 +307,7 @@
             "type": "object"
         },
         "dynamic-body": {
-            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>aframe physics system.</a>",
+            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
             "properties": {
                 "mass": {
                     "default": 5,
@@ -493,7 +493,7 @@
             "required": ["label", "randomRadiusMin", "randomRadiusMax", "lookAtLandmark"]
         },
         "material-extras": {
-            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>threejs Material</a>",
+            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order.\n\nThe properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
             "properties": {
                 "overrideSrc": {
                     "type": "string",
@@ -563,7 +563,7 @@
             "required": ["cast", "receive"]
         },
         "sound": {
-            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>aframe sound</a>",
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>A-Frame Sound</a>.",
             "properties": {
                 "autoplay": {
                     "default": false,
@@ -795,7 +795,7 @@
             "type": "object"
         },
         "particle-system": {
-            "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>aframe particle system component</a>",
+            "description": "Particle system component for A-Frame.\n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>C-Frame Particle System</a> component.",
             "properties": {
                 "preset": {
                     "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
@@ -960,7 +960,7 @@
             "type": "object"
         },
         "spe-particles": {
-            "description": "GPU based particle systems in A-Frame. \n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>aframe spe particles component</a>",
+            "description": "GPU based particle systems in A-Frame.\n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>A-Frame SPE Particles</a> component.",
             "properties": {
                 "acceleration": {
                     "description": "for sphere and disc distributions, only the x axis is used",

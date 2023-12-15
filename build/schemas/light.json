@@ -1,6 +1,6 @@
 {
     "title": "Light",
-    "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>aframe light</a>",
+    "description": "A light.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>A-Frame Light</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

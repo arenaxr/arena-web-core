@@ -29,7 +29,7 @@
             "required": ["displayName"]
         },
         "material": {
-            "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>aframe material</a>",
+            "description": "The material properties of the object’s surface.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>A-Frame Material</a>.",
             "properties": {
                 "alphaTest": {
                     "default": 0,

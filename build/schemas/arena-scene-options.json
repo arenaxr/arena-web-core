@@ -252,7 +252,7 @@
             "required": ["active", "preset"],
             "title": "Environment Presets",
             "type": "object",
-            "description": "A-Frame Environment presets. \n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>aframe environment component.</a>"
+            "description": "A-Frame Environment presets.\n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>A-Frame Environment Component</a>."
         },
         "renderer-settings": {
             "properties": {
@@ -443,7 +443,7 @@
                     "required": ["enabled", "src"],
                     "title": "AR Hit Test Settings",
                     "type": "object",
-                    "description": "A-Frame AR Hit Test Settings. More properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>ar hit test</a>"
+                    "description": "A-Frame AR Hit Test Settings.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>AR Hit Test</a> component."
                 }
             },
             "required": [
