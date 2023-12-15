@@ -27,6 +27,7 @@
                                 "end": {
                                     "title": "vertex B (end)",
                                     "description": "End coordinate.",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
@@ -45,6 +46,7 @@
                                 "start": {
                                     "title": "vertex A (start)",
                                     "description": "Start point coordinate.",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,

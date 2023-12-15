@@ -423,7 +423,8 @@
             "properties": {
                 "force": {
                     "description": "impulse vector",
-                    "default": "{x: 1, y: 1, z: 1}",
+                    "default": {"x": 1, "y": 1, "z": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "on": {
@@ -434,7 +435,8 @@
                 },
                 "position": {
                     "description": "world position",
-                    "default": "{x: 1, y: 1, z: 1}",
+                    "default": {"x": 1, "y": 1, "z": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 }
             },
@@ -463,6 +465,7 @@
                         "z": 0
                     },
                     "description": "Use as a static teleport x,y,z offset",
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "constrainToNavMesh": {
@@ -807,7 +810,8 @@
                 },
                 "positionSpread": {
                     "description": "Describes this emitter's position variance on a per-particle basis.",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "type": {
@@ -833,22 +837,26 @@
                 },
                 "accelerationValue": {
                     "description": "Describes this emitter's base acceleration.",
-                    "default": "{x: 0, y: -10, z: 0}",
+                    "default": {"x": 0, "y": -10, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "accelerationSpread": {
                     "description": "Describes this emitter's acceleration variance on a per-particle basis.",
-                    "default": "{x: 10, y: 0, z: 10}",
+                    "default": {"x": 10, "y": 0, "z": 10},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "velocityValue": {
                     "description": "Describes this emitter's base velocity.",
-                    "default": "{x: 0, y: 25, z: 0}",
+                    "default": {"x": 0, "y": 25, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "velocitySpread": {
                     "description": "Describes this emitter's acceleration variance on a per-particle basis.",
-                    "default": "{x: 10, y: 7.5, z: 10}",
+                    "default": {"x": 10, "y": 7.5, "z": 10},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "dragValue": {
@@ -913,6 +921,7 @@
                 "texture": {
                     "description": "The texture used by this emitter. Examples: [star2.png, smokeparticle.png, raindrop.png], like path 'static/images/textures/star2.png'",
                     "type": "string",
+                    "format": "uri",
                     "default": "static/images/textures/star2.png"
                 },
                 "randomise": {
@@ -955,7 +964,8 @@
             "properties": {
                 "acceleration": {
                     "description": "for sphere and disc distributions, only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "accelerationDistribution": {
@@ -966,7 +976,8 @@
                 },
                 "accelerationSpread": {
                     "description": "spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "activeMultiplier": {
@@ -1023,6 +1034,7 @@
                     "default": [],
                     "type": "array",
                     "items": {
+                        "format": "grid",
                         "$ref": "#/definitions/vector3"
                     }
                 },
@@ -1129,12 +1141,14 @@
                 },
                 "positionOffset": {
                     "description": "fixed offset to the apply to the emitter relative to its parent entity",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "positionSpread": {
                     "description": "particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "radius": {
@@ -1144,7 +1158,8 @@
                 },
                 "radiusScale": {
                     "description": "scales the emitter for sphere and disc shapes to form oblongs and ellipses",
-                    "default": "{x: 1, y: 1, z: 1}",
+                    "default": {"x": 1, "y": 1, "z": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "randomizeAcceleration": {
@@ -1205,12 +1220,14 @@
                 },
                 "rotationAxis": {
                     "description": "local axis when using rotation",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationAxisSpread": {
                     "description": "variance in the axis of rotation",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationSpread": {
@@ -1244,6 +1261,7 @@
                 "texture": {
                     "description": "texture to be used for each particle, may be a spritesheet.  Examples: [blob.png, fog.png, square.png, explosion_sheet.png, fireworks_sheet.png], like path 'static/images/textures/blob.png'",
                     "default": "",
+                    "format": "uri",
                     "type": "string"
                 },
                 "textureFrameCount": {
@@ -1258,7 +1276,8 @@
                 },
                 "textureFrames": {
                     "description": "x and y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop)",
-                    "default": "{x: 1, y: 1}",
+                    "default": {"x": 1, "y": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector2"
                 },
                 "useTransparency": {
@@ -1268,7 +1287,8 @@
                 },
                 "velocity": {
                     "description": "for sphere and disc distributions, only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "velocityDistribution": {
@@ -1279,7 +1299,8 @@
                 },
                 "velocitySpread": {
                     "description": "variance for the velocity",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "wiggle": {

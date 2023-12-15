@@ -19,6 +19,7 @@
                                 },
                                 "vertexA": {
                                     "title": "vertex A",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,
@@ -28,6 +29,7 @@
                                 },
                                 "vertexB": {
                                     "title": "vertex B",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
@@ -37,6 +39,7 @@
                                 },
                                 "vertexC": {
                                     "title": "vertex C",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0.5,
