@@ -1,7 +1,7 @@
 {
     "properties": {
         "animation": {
-            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>aframe animation.</a>",
+            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>aframe animation.</a> Easing properties are detailed at <a href='https://easings.net'>easings.net</a>.",
             "properties": {
                 "autoplay": {
                     "default": true,
@@ -56,7 +56,7 @@
                         "linear"
                     ],
                     "default": "easeInQuad",
-                    "description": "Easing function of animation. To ease in, ease out, ease in and out (https://easings.net).",
+                    "description": "Easing function of animation. To ease in, ease out, ease in and out. See easings.net for more.",
                     "type": "string"
                 },
                 "elasticity": {
@@ -686,7 +686,7 @@
             "required": ["on", "title", "label", "placeholder"]
         },
         "url": {
-            "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
+            "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
             "format": "uri",
             "title": "General Url",
             "type": "string"

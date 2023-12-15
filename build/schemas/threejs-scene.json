@@ -1,6 +1,6 @@
 {
     "title": "Three.js Scene",
-    "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred) \n\nFormat: <a href='https://threejs.org/docs/#api/en/scenes/Scene'>threejs Scene</a>",
+    "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred) \n\nFormat: <a href='https://threejs.org/docs/#api/en/scenes/Scene'>threejs Scene</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -18,9 +18,9 @@
                                     "enum": ["threejs-scene"]
                                 },
                                 "url": {
-                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
+                                    "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
                                     "format": "uri",
-                                    "title": "Threejs Model Url",
+                                    "title": "Three.js Model Url",
                                     "type": "string"
                                 }
                             }

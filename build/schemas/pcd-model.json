@@ -1,6 +1,6 @@
 {
     "title": "PCD Model",
-    "description": "Load a PCD model. \n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>point clouds</a>",
+    "description": "Load a PCD model. \n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>point clouds</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -18,7 +18,7 @@
                                     "enum": ["pcd-model"]
                                 },
                                 "url": {
-                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
+                                    "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "PCD Model Url",
                                     "type": "string"

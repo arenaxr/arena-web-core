@@ -1,6 +1,6 @@
 {
     "title": "Image",
-    "description": "Display an image on a plane",
+    "description": "Display an image on a plane. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a>",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -18,7 +18,7 @@
                                     "enum": ["image"]
                                 },
                                 "url": {
-                                    "description": "See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox.</a> ",
+                                    "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "Image Url",
                                     "type": "string"
