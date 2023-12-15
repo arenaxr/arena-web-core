@@ -175,7 +175,7 @@
                     "default": "apriltag_36h11",
                     "enum": ["apriltag_36h11", "lightanchor", "uwb", "vive", "optitrack"],
                     "title": "markertype",
-                    "description": "The marker type (apriltag_36h11, lightanchor, uwb, vive, optitrack)",
+                    "description": "The marker type, technology-based.",
                     "type": "string"
                 },
                 "size": {
@@ -469,7 +469,7 @@
                     "$ref": "#/definitions/vector3"
                 },
                 "constrainToNavMesh": {
-                    "description": "Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
+                    "description": "Teleports should snap to navmesh.",
                     "enum": ["false", "any", "coplanar"],
                     "type": "string",
                     "default": "false"
@@ -798,7 +798,7 @@
             "description": "Particle system component for A-Frame.\n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>C-Frame Particle System</a> component.",
             "properties": {
                 "preset": {
-                    "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
+                    "description": "Preset configuration.",
                     "enum": ["default", "dust", "snow", "rain"],
                     "type": "string",
                     "default": "default"
@@ -1055,7 +1055,7 @@
                     "type": "string"
                 },
                 "distribution": {
-                    "description": "distribution for particle positions, velocities and acceleration. will be overriden by specific '...Distribution' attributes",
+                    "description": "distribution for particle positions, velocities and acceleration. will be overridden by specific '...Distribution' attributes",
                     "default": "box",
                     "enum": ["box", "sphere", "disc"],
                     "type": "string"

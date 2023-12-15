@@ -25,7 +25,7 @@
                 },
                 "loop": {
                     "default": "repeat",
-                    "description": "once, repeat, or pingpong. In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
+                    "description": "In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
                     "enum": ["once", "repeat", "pingpong"],
                     "type": "string"
                 },

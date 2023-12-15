@@ -38,7 +38,7 @@
                 },
                 "blending": {
                     "default": "normal",
-                    "description": "The blending mode for the material’s RGB and Alpha sent to the WebGLRenderer. Can be one of none, normal, additive, subtractive or multiply",
+                    "description": "The blending mode for the material’s RGB and Alpha sent to the WebGLRenderer.",
                     "enum": ["none", "normal", "additive", "subtractive", "multiply"],
                     "type": "string"
                 },
@@ -117,7 +117,7 @@
                 },
                 "side": {
                     "default": "front",
-                    "description": "Which sides of the mesh to render. Can be one of front, back, or double.",
+                    "description": "Which sides of the mesh to render.",
                     "enum": ["front", "back", "double"],
                     "type": "string"
                 },
@@ -133,7 +133,7 @@
                 },
                 "vertexColors": {
                     "default": "none",
-                    "description": "Whether to use vertex or face colors to shade the material. Can be one of none, vertex, or face.",
+                    "description": "Whether to use vertex or face colors to shade the material.",
                     "enum": ["none", "vertex", "face"],
                     "type": "string"
                 },
@@ -143,6 +143,7 @@
                     "type": "boolean"
                 }
             },
+            "format": "grid",
             "title": "Material",
             "type": "object"
         },
