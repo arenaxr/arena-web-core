@@ -15,17 +15,16 @@ AFRAME.registerSystem('xr-env-publisher', {
     init() {
         const { sceneEl } = this;
 
-        if (ARENA.params.debugMesh) {
-            sceneEl.renderer.xr.addEventListener('sessionstart', () => {
-                if (sceneEl.is('ar-mode')) {
-                    const { xrSession } = sceneEl;
-                    this.webXRSessionStarted(xrSession).then(() => {});
-                }
-            });
-        }
-
         this.onRAF = this.onRAF.bind(this);
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
+
+        sceneEl.renderer.xr.addEventListener('sessionstart', () => {
+            if (sceneEl.is('ar-mode')) {
+                const { xrSession } = sceneEl;
+                this.webXRSessionStarted(xrSession).then(() => {});
+            }
+        });
+
         this.packr = new Packr({
             useRecords: false,
             useFloat32: true,
@@ -40,12 +39,13 @@ AFRAME.registerSystem('xr-env-publisher', {
             data: { publishMeshes, publishPlanes, publishTopicBase, onlyGlobalMesh },
         } = this;
         if (
+            // No mesh or plane support
             (publishPlanes && frame.detectedPlanes === undefined) ||
             (publishMeshes && frame.detectedMeshes === undefined)
         )
             return;
         if ((publishPlanes && frame.detectedPlanes.size === 0) || (publishMeshes && frame.detectedMeshes.size === 0)) {
-            // First may be empty
+            // First frame may be empty
             this.sceneEl.xrSession.requestAnimationFrame(this.onRAF);
         } else {
             ARENA.debugXR(`Found ${frame.detectedPlanes.size} planes, ${frame.detectedMeshes.size} meshes`, false);
