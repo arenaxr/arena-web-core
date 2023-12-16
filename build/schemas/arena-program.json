@@ -127,6 +127,7 @@
     },
     "type": "object",
     "title": "Program",
+    "format": "grid",
     "properties": {
         "object_id": {
             "type": "string",
@@ -135,15 +136,15 @@
             "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
         },
         "action": {
-            "type": "string",
-            "description": "One of 3 basic Create, Update, Delete actions or a special client event action (e.g. a click)",
-            "enum": ["create", "delete", "update", "clientEvent"],
-            "default": "create"
+            "default": "create",
+            "description": "Message action create, update, delete.",
+            "enum": ["create", "delete", "update"],
+            "type": "string"
         },
         "persist": {
-            "type": "boolean",
+            "default": true,
             "description": "Persist this object in the database",
-            "default": true
+            "type": "boolean"
         },
         "type": {
             "type": "string",

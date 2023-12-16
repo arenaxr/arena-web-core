@@ -31,8 +31,8 @@
                 "dressingAmount": {
                     "default": 10,
                     "description": "Number of objects used for dressing",
-                    "max": 1000,
-                    "min": 0,
+                    "maximum": 1000,
+                    "minimum": 0,
                     "title": "Dressing Amount",
                     "type": "integer"
                 },
@@ -46,16 +46,16 @@
                 "dressingOnPlayArea": {
                     "default": 0,
                     "description": "Amount of dressing on play area.",
-                    "max": 1,
-                    "min": 0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Dressing on Play Area",
                     "type": "number"
                 },
                 "dressingScale": {
                     "default": 5,
                     "description": "Height (in meters) of dressing objects.",
-                    "max": 100,
-                    "min": 0,
+                    "maximum": 100,
+                    "minimum": 0,
                     "title": "Dressing Scale",
                     "type": "number"
                 },
@@ -85,8 +85,8 @@
                 "fog": {
                     "default": 0,
                     "description": "Amount of fog (0 = none, 1 = full fog). The color is estimated automatically.",
-                    "max": 1,
-                    "min": 0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Fog",
                     "type": "number"
                 },
@@ -146,8 +146,8 @@
                 "groundYScale": {
                     "default": 3,
                     "description": "Maximum height (in meters) of ground's features (hills, mountains, peaks..).",
-                    "max": 50,
-                    "min": 0,
+                    "maximum": 50,
+                    "minimum": 0,
                     "title": "Ground Features Height",
                     "type": "number"
                 },
@@ -184,8 +184,8 @@
                 "playArea": {
                     "default": 1,
                     "description": "Radius of the area in the center reserved for the player and the gameplay. The ground is flat in there and no objects are placed inside.",
-                    "max": 10,
-                    "min": 0.5,
+                    "maximum": 10,
+                    "minimum": 0.5,
                     "title": "Play Area",
                     "type": "number"
                 },
@@ -218,8 +218,8 @@
                 "seed": {
                     "default": 1,
                     "description": "Seed for randomization. If you don't like the layout of the elements, try another value for the seed.",
-                    "max": 1000,
-                    "min": 0,
+                    "maximum": 1000,
+                    "minimum": 0,
                     "title": "Randomization Seed",
                     "type": "integer"
                 },
@@ -393,7 +393,7 @@
                 },
                 "videoDefaultResolutionConstraint": {
                     "default": 180,
-                    "min": 180,
+                    "minimum": 180,
                     "description": "Sets the default max resolution for all users. Ignored when videoDistanceConstraints = true.",
                     "title": "Video Default Resolution Constraint",
                     "type": "number"
@@ -683,6 +683,7 @@
             "type": "object"
         }
     },
+    "format": "grid",
     "properties": {
         "object_id": {
             "default": "scene-options",
@@ -701,7 +702,7 @@
         },
         "action": {
             "default": "create",
-            "description": "One of 3 basic Create, Update, Delete actions",
+            "description": "Message action create, update, delete.",
             "enum": ["create", "delete", "update"],
             "type": "string"
         },

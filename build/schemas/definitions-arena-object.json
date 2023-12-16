@@ -8,7 +8,7 @@
         },
         "persist": {
             "default": true,
-            "description": "Persist this object in the database.",
+            "description": "Persist this object in the database",
             "type": "boolean"
         },
         "type": {
@@ -18,8 +18,8 @@
         },
         "action": {
             "default": "create",
-            "description": "Message action: CRUD or client event.",
-            "enum": ["create", "delete", "update", "clientEvent"],
+            "description": "Message action create, update, delete.",
+            "enum": ["create", "delete", "update"],
             "type": "string"
         },
         "ttl": {
