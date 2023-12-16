@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["cylinder"]
                                 },
                                 "height": {
@@ -65,6 +65,7 @@
                         }
                     ],
                     "title": "Cylinder Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "cylinder",

@@ -1,7 +1,7 @@
 {
     "properties": {
         "animation-mixer": {
-            "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'. \n\nMore properties at <a href='https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation'>https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation</a>",
+            "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'.\n\nMore properties at <a href='https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation'>A-Frame Extras Animation</a>.",
             "properties": {
                 "clampWhenFinished": {
                     "default": false,
@@ -25,7 +25,7 @@
                 },
                 "loop": {
                     "default": "repeat",
-                    "description": "once, repeat, or pingpong. In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
+                    "description": "In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
                     "enum": ["once", "repeat", "pingpong"],
                     "type": "string"
                 },
@@ -50,7 +50,7 @@
             "type": "object"
         },
         "gltf-morph": {
-            "description": "Allows you to target and control a gltf model's morphTargets created in Blender. \n\nMore properties at <a href='https://github.com/elbobo/aframe-gltf-morph-component'>https://github.com/elbobo/aframe-gltf-morph-component</a>",
+            "description": "Allows you to target and control a gltf model's morphTargets created in Blender.\n\nMore properties at <a href='https://github.com/elbobo/aframe-gltf-morph-component'>A-Frame GLTF Morph</a> component.",
             "properties": {
                 "morphtarget": {
                     "type": "string",

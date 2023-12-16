@@ -14,12 +14,13 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["handLeft", "handRight"]
                                 },
                                 "url": {
                                     "type": "string",
                                     "title": "Hand Model Url",
+                                    "format": "uri",
                                     "description": "Path to user avatar hand model",
                                     "default": "static/models/hands/valve_index_left.gltf"
                                 },

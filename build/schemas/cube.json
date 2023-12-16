@@ -15,7 +15,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["cube"]
                                 },
                                 "depth": {
@@ -61,6 +61,7 @@
                         }
                     ],
                     "title": "Cube (deprecated; don't use) Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "cube",

@@ -22,6 +22,7 @@
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object",
             "title": "Position"
         },
@@ -54,6 +55,7 @@
                 }
             },
             "required": ["w", "x", "y", "z"],
+            "format": "grid",
             "type": "object",
             "title": "Rotation"
         },
@@ -78,6 +80,7 @@
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object",
             "title": "Scale"
         }

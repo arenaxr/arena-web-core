@@ -1,6 +1,6 @@
 {
     "title": "Text",
-    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>https://aframe.io/docs/1.5.0/components/text.html</a>",
+    "description": "Display text.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>A-Frame Text</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,12 +14,12 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["text"]
                                 },
                                 "align": {
                                     "type": "string",
-                                    "description": "Multi-line text alignment (left, center, right).",
+                                    "description": "Multi-line text alignment.",
                                     "default": "left",
                                     "enum": ["left", "center", "right"]
                                 },
@@ -30,13 +30,13 @@
                                 },
                                 "anchor": {
                                     "type": "string",
-                                    "description": "Horizontal positioning (left, center, right, align).",
+                                    "description": "Horizontal positioning.",
                                     "default": "center",
                                     "enum": ["left", "right", "center", "align"]
                                 },
                                 "baseline": {
                                     "type": "string",
-                                    "description": "Vertical positioning (top, center, bottom).",
+                                    "description": "Vertical positioning.",
                                     "default": "center",
                                     "enum": ["top", "center", "bottom"]
                                 },
@@ -107,7 +107,7 @@
                                 },
                                 "side": {
                                     "type": "string",
-                                    "description": "Side to render. (front, back, double)",
+                                    "description": "Side to render.",
                                     "default": "double",
                                     "enum": ["front", "back", "double"]
                                 },
@@ -134,7 +134,7 @@
                                 },
                                 "whiteSpace": {
                                     "type": "string",
-                                    "description": "How whitespace should be handled (i.e., normal, pre, nowrap).</a>",
+                                    "description": "How whitespace should be handled.",
                                     "default": "normal",
                                     "enum": ["normal", "pre", "nowrap"]
                                 },

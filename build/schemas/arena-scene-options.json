@@ -4,7 +4,7 @@
             "properties": {
                 "active": {
                     "default": true,
-                    "description": "Show/hides the environment presets component. Use this instead of using the visible attribute.",
+                    "description": "Shows or hides the environment presets component. Use this instead of using the visible attribute.",
                     "title": "Active",
                     "type": "boolean"
                 },
@@ -67,6 +67,7 @@
                 },
                 "dressingVariance": {
                     "$ref": "#/definitions/vector3",
+                    "format": "grid",
                     "default": {
                         "x": 1,
                         "y": 1,
@@ -126,6 +127,7 @@
                 },
                 "groundScale": {
                     "$ref": "#/definitions/vector3",
+                    "format": "grid",
                     "default": {
                         "x": 1,
                         "y": 1,
@@ -170,6 +172,7 @@
                 },
                 "lightPosition": {
                     "$ref": "#/definitions/vector3",
+                    "format": "grid",
                     "default": {
                         "x": 0,
                         "y": 1,
@@ -249,7 +252,7 @@
             "required": ["active", "preset"],
             "title": "Environment Presets",
             "type": "object",
-            "description": "A-Frame Environment presets. \n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>https://github.com/supermedium/aframe-environment-component</a>"
+            "description": "A-Frame Environment presets.\n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>A-Frame Environment Component</a>."
         },
         "renderer-settings": {
             "properties": {
@@ -318,6 +321,7 @@
                             "url": {
                                 "title": "Head Model URL",
                                 "type": "string",
+                                "format": "uri",
                                 "description": "The head model GLTF URL. You must scale and rotate your source GLTFs appropriately."
                             }
                         },
@@ -439,7 +443,7 @@
                     "required": ["enabled", "src"],
                     "title": "AR Hit Test Settings",
                     "type": "object",
-                    "description": "A-Frame AR Hit Test Settings. More properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>https://aframe.io/docs/1.5.0/components/ar-hit-test.html</a>"
+                    "description": "A-Frame AR Hit Test Settings.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>AR Hit Test</a> component."
                 }
             },
             "required": [
@@ -660,6 +664,7 @@
         },
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,
@@ -696,7 +701,7 @@
         },
         "action": {
             "default": "create",
-            "description": "One of 3 basic Create/Update/Delete actions",
+            "description": "One of 3 basic Create, Update, Delete actions",
             "enum": ["create", "delete", "update"],
             "type": "string"
         },

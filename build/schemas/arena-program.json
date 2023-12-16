@@ -136,7 +136,7 @@
         },
         "action": {
             "type": "string",
-            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+            "description": "One of 3 basic Create, Update, Delete actions or a special client event action (e.g. a click)",
             "enum": ["create", "delete", "update", "clientEvent"],
             "default": "create"
         },

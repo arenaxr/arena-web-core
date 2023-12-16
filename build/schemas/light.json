@@ -1,6 +1,6 @@
 {
     "title": "Light",
-    "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>https://aframe.io/docs/1.5.0/components/light.html</a>",
+    "description": "A light.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>A-Frame Light</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["light"]
                                 },
                                 "angle": {

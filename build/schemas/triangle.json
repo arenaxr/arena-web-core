@@ -14,11 +14,12 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["triangle"]
                                 },
                                 "vertexA": {
                                     "title": "vertex A",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,
@@ -28,6 +29,7 @@
                                 },
                                 "vertexB": {
                                     "title": "vertex B",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
@@ -37,6 +39,7 @@
                                 },
                                 "vertexC": {
                                     "title": "vertex C",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0.5,
@@ -57,6 +60,7 @@
                         }
                     ],
                     "title": "Triangle Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "triangle",
@@ -73,6 +77,7 @@
     "definitions": {
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,

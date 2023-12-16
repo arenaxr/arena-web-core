@@ -1,7 +1,7 @@
 {
     "properties": {
         "animation": {
-            "description": "Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>https://aframe.io/docs/1.5.0/components/animation.html</a>",
+            "description": "Animate and tween values.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>A-Frame Animation</a> component. Easing properties are detailed at <a href='https://easings.net'>easings.net</a>.",
             "properties": {
                 "autoplay": {
                     "default": true,
@@ -56,7 +56,7 @@
                         "linear"
                     ],
                     "default": "easeInQuad",
-                    "description": "Easing function of animation. To ease in, ease out, ease in and out (https://easings.net).",
+                    "description": "Easing function of animation. To ease in, ease out, ease in and out. See easings.net for more.",
                     "type": "string"
                 },
                 "elasticity": {
@@ -175,7 +175,7 @@
                     "default": "apriltag_36h11",
                     "enum": ["apriltag_36h11", "lightanchor", "uwb", "vive", "optitrack"],
                     "title": "markertype",
-                    "description": "The marker type (apriltag_36h11, lightanchor, uwb, vive, optitrack)",
+                    "description": "The marker type, technology-based.",
                     "type": "string"
                 },
                 "size": {
@@ -186,7 +186,8 @@
                 },
                 "url": {
                     "default": "",
-                    "url": "size",
+                    "format": "uri",
+                    "title": "Tag Url",
                     "description": "URL associated with the tag",
                     "type": "string"
                 }
@@ -277,7 +278,7 @@
             "required": ["blipin", "blipout", "planes", "geometry", "duration"]
         },
         "static-body": {
-            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
+            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
             "properties": {
                 "shape": {
                     "default": "auto",
@@ -306,7 +307,7 @@
             "type": "object"
         },
         "dynamic-body": {
-            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled. \n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md</a>",
+            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
             "properties": {
                 "mass": {
                     "default": 5,
@@ -384,6 +385,7 @@
                 },
                 "url": {
                     "default": "",
+                    "title": "Landmark Url",
                     "format": "uri",
                     "type": "string"
                 }
@@ -421,7 +423,8 @@
             "properties": {
                 "force": {
                     "description": "impulse vector",
-                    "default": "{x: 1, y: 1, z: 1}",
+                    "default": {"x": 1, "y": 1, "z": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "on": {
@@ -432,7 +435,8 @@
                 },
                 "position": {
                     "description": "world position",
-                    "default": "{x: 1, y: 1, z: 1}",
+                    "default": {"x": 1, "y": 1, "z": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 }
             },
@@ -461,10 +465,11 @@
                         "z": 0
                     },
                     "description": "Use as a static teleport x,y,z offset",
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "constrainToNavMesh": {
-                    "description": "Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
+                    "description": "Teleports should snap to navmesh.",
                     "enum": ["false", "any", "coplanar"],
                     "type": "string",
                     "default": "false"
@@ -488,7 +493,7 @@
             "required": ["label", "randomRadiusMin", "randomRadiusMax", "lookAtLandmark"]
         },
         "material-extras": {
-            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>https://threejs.org/docs/#api/en/materials/Material</a>",
+            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order.\n\nThe properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
             "properties": {
                 "overrideSrc": {
                     "type": "string",
@@ -558,7 +563,7 @@
             "required": ["cast", "receive"]
         },
         "sound": {
-            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>https://aframe.io/docs/1.5.0/components/sound.html</a>",
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>A-Frame Sound</a>.",
             "properties": {
                 "autoplay": {
                     "default": false,
@@ -681,9 +686,9 @@
             "required": ["on", "title", "label", "placeholder"]
         },
         "url": {
-            "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
+            "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
             "format": "uri",
-            "title": "Url",
+            "title": "General Url",
             "type": "string"
         },
         "remote-render": {
@@ -790,10 +795,10 @@
             "type": "object"
         },
         "particle-system": {
-            "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>https://github.com/c-frame/aframe-particle-system-component</a>",
+            "description": "Particle system component for A-Frame.\n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>C-Frame Particle System</a> component.",
             "properties": {
                 "preset": {
-                    "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
+                    "description": "Preset configuration.",
                     "enum": ["default", "dust", "snow", "rain"],
                     "type": "string",
                     "default": "default"
@@ -805,7 +810,8 @@
                 },
                 "positionSpread": {
                     "description": "Describes this emitter's position variance on a per-particle basis.",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "type": {
@@ -831,22 +837,26 @@
                 },
                 "accelerationValue": {
                     "description": "Describes this emitter's base acceleration.",
-                    "default": "{x: 0, y: -10, z: 0}",
+                    "default": {"x": 0, "y": -10, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "accelerationSpread": {
                     "description": "Describes this emitter's acceleration variance on a per-particle basis.",
-                    "default": "{x: 10, y: 0, z: 10}",
+                    "default": {"x": 10, "y": 0, "z": 10},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "velocityValue": {
                     "description": "Describes this emitter's base velocity.",
-                    "default": "{x: 0, y: 25, z: 0}",
+                    "default": {"x": 0, "y": 25, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "velocitySpread": {
                     "description": "Describes this emitter's acceleration variance on a per-particle basis.",
-                    "default": "{x: 10, y: 7.5, z: 10}",
+                    "default": {"x": 10, "y": 7.5, "z": 10},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "dragValue": {
@@ -911,6 +921,7 @@
                 "texture": {
                     "description": "The texture used by this emitter. Examples: [star2.png, smokeparticle.png, raindrop.png], like path 'static/images/textures/star2.png'",
                     "type": "string",
+                    "format": "uri",
                     "default": "static/images/textures/star2.png"
                 },
                 "randomise": {
@@ -949,11 +960,12 @@
             "type": "object"
         },
         "spe-particles": {
-            "description": "GPU based particle systems in A-Frame. \n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>https://github.com/harlyq/aframe-spe-particles-component</a>",
+            "description": "GPU based particle systems in A-Frame.\n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>A-Frame SPE Particles</a> component.",
             "properties": {
                 "acceleration": {
                     "description": "for sphere and disc distributions, only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "accelerationDistribution": {
@@ -964,7 +976,8 @@
                 },
                 "accelerationSpread": {
                     "description": "spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "activeMultiplier": {
@@ -1021,6 +1034,7 @@
                     "default": [],
                     "type": "array",
                     "items": {
+                        "format": "grid",
                         "$ref": "#/definitions/vector3"
                     }
                 },
@@ -1041,7 +1055,7 @@
                     "type": "string"
                 },
                 "distribution": {
-                    "description": "distribution for particle positions, velocities and acceleration. will be overriden by specific '...Distribution' attributes",
+                    "description": "distribution for particle positions, velocities and acceleration. will be overridden by specific '...Distribution' attributes",
                     "default": "box",
                     "enum": ["box", "sphere", "disc"],
                     "type": "string"
@@ -1127,12 +1141,14 @@
                 },
                 "positionOffset": {
                     "description": "fixed offset to the apply to the emitter relative to its parent entity",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "positionSpread": {
                     "description": "particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "radius": {
@@ -1142,7 +1158,8 @@
                 },
                 "radiusScale": {
                     "description": "scales the emitter for sphere and disc shapes to form oblongs and ellipses",
-                    "default": "{x: 1, y: 1, z: 1}",
+                    "default": {"x": 1, "y": 1, "z": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "randomizeAcceleration": {
@@ -1203,12 +1220,14 @@
                 },
                 "rotationAxis": {
                     "description": "local axis when using rotation",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationAxisSpread": {
                     "description": "variance in the axis of rotation",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationSpread": {
@@ -1242,6 +1261,7 @@
                 "texture": {
                     "description": "texture to be used for each particle, may be a spritesheet.  Examples: [blob.png, fog.png, square.png, explosion_sheet.png, fireworks_sheet.png], like path 'static/images/textures/blob.png'",
                     "default": "",
+                    "format": "uri",
                     "type": "string"
                 },
                 "textureFrameCount": {
@@ -1256,7 +1276,8 @@
                 },
                 "textureFrames": {
                     "description": "x and y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop)",
-                    "default": "{x: 1, y: 1}",
+                    "default": {"x": 1, "y": 1},
+                    "format": "grid",
                     "$ref": "#/definitions/vector2"
                 },
                 "useTransparency": {
@@ -1266,7 +1287,8 @@
                 },
                 "velocity": {
                     "description": "for sphere and disc distributions, only the x axis is used",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "velocityDistribution": {
@@ -1277,7 +1299,8 @@
                 },
                 "velocitySpread": {
                     "description": "variance for the velocity",
-                    "default": "{x: 0, y: 0, z: 0}",
+                    "default": {"x": 0, "y": 0, "z": 0},
+                    "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "wiggle": {
@@ -1304,6 +1327,7 @@
     "definitions": {
         "vector2": {
             "title": "Vector2",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,
@@ -1319,6 +1343,7 @@
         },
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,

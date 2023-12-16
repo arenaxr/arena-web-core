@@ -36,6 +36,7 @@
                         },
                         "clickPos": {
                             "description": "The event origination position in 3D.",
+                            "format": "grid",
                             "$ref": "#/definitions/vector3",
                             "title": "Click Position",
                             "default": {
@@ -56,6 +57,7 @@
     "definitions": {
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,

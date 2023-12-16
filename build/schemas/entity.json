@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["entity"]
                                 },
                                 "geometry": {
@@ -51,6 +51,7 @@
                                 },
                                 "panel": {
                                     "title": "UI Panel",
+                                    "format": "grid",
                                     "description": "The rounded UI panel primitive.",
                                     "type": "object",
                                     "properties": {

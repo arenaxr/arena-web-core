@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["line"]
                                 },
                                 "color": {
@@ -27,6 +27,7 @@
                                 "end": {
                                     "title": "vertex B (end)",
                                     "description": "End coordinate.",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
@@ -45,6 +46,7 @@
                                 "start": {
                                     "title": "vertex A (start)",
                                     "description": "Start point coordinate.",
+                                    "format": "grid",
                                     "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,
@@ -78,6 +80,7 @@
     "definitions": {
         "vector3": {
             "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
                     "default": 0,
