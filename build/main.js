@@ -288,7 +288,6 @@ window.addEventListener('onauth', async (e) => {
     // set defaults
     JSONEditor.defaults.options.display_required_only = true;
     JSONEditor.defaults.options.required_by_default = false;
-    JSONEditor.defaults.options.disable_collapse = true;
     JSONEditor.defaults.options.theme = 'bootstrap2';
     JSONEditor.defaults.options.iconlib = 'fontawesome4';
     JSONEditor.defaults.options.object_layout = 'normal';
