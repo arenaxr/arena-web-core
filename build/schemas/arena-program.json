@@ -1,158 +1,239 @@
 {
-    "definitions": {
-        "program": {
-            "type": "object",
-            "title": "Program Data",
-            "description": "Object data payload; Program config data",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": "Name of the program in the format namespace/program-name",
-                    "minLength": 5,
-                    "pattern": "[0-9a-zA-Z]+/[0-9a-zA-Z]+"
-                },
-                "affinity": {
-                    "type": "string",
-                    "description": "Indicates the module affinity (client=client's runtime; none or empty=any suitable/available runtime)",
-                    "enum": ["client", "none"],
-                    "default": "client"
-                },
-                "instantiate": {
-                    "type": "string",
-                    "description": "Single instance of the program (=single), or let every client create a program instance (=client). Per client instance will create new uuid for each program.",
-                    "enum": ["single", "client"],
-                    "default": "client"
-                },
-                "filename": {
-                    "type": "string",
-                    "description": "Filename of the entry binary",
-                    "minLength": 5
-                },
-                "filetype": {
-                    "type": "string",
-                    "description": "Type of the program (WA=WASM or PY=Python)",
-                    "enum": ["WA", "PY"],
-                    "default": ["WA"]
-                },
-                "parent": {
-                    "type": "string",
-                    "description": "Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); usually left blank.",
-                    "minLength": 5,
-                    "default": "pytest"
-                },
-                "args": {
-                    "type": "array",
-                    "description": "Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
-                    "uniqueItems": false,
-                    "items": {
-                        "type": "string",
-                        "title": "args"
-                    }
-                },
-                "env": {
-                    "type": "array",
-                    "description": "Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
-                    "uniqueItems": false,
-                    "items": {
-                        "type": "string",
-                        "title": "env"
-                    },
-                    "default": [
-                        "MID=${moduleid}",
-                        "SCENE=${scene}",
-                        "NAMESPACE=${namespace}",
-                        "MQTTH=${mqtth}",
-                        "REALM=realm"
-                    ]
-                },
-                "channels": {
-                    "type": "array",
-                    "description": "Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future; currently only supported for WASM programs).",
-                    "uniqueItems": false,
-                    "items": {
-                        "type": "object",
-                        "title": "Channels",
-                        "properties": {
-                            "path": {
-                                "type": "string",
-                                "description": "Folder visible by the program."
-                            },
-                            "type": {
-                                "type": "string",
-                                "description": "Pubsub or client socket",
-                                "enum": ["pubsub", "client"],
-                                "default": "pubsub"
-                            },
-                            "mode": {
-                                "type": "string",
-                                "description": "Access mode",
-                                "enum": ["r", "w", "rw"]
-                            },
-                            "params": {
-                                "type": "object",
-                                "title": "Parameters",
-                                "description": "Type (i.e. pubsub/client)-specific parameters",
-                                "properties": {
-                                    "topic": {
-                                        "type": "string",
-                                        "description": "Pubsub topic (pubsub)"
-                                    },
-                                    "host": {
-                                        "type": "string",
-                                        "description": "Destination host address (client socket; ignored for now)"
-                                    },
-                                    "port": {
-                                        "type": "number",
-                                        "description": "Destination port (client socket; ignored for now)"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "required": ["path", "type", "mode"],
-                    "default": [
-                        {
-                            "path": "/ch/${scene}",
-                            "type": "pubsub",
-                            "mode": "rw",
-                            "params": {
-                                "topic": "realm/s/${scene}"
-                            }
-                        }
-                    ]
+    "definitions":{
+       "program":{
+          "type":"object",
+          "title":"Program Data",
+          "description":"Object data payload; Program config data",
+          "properties":{
+             "name":{
+                "type":"string",
+                "description":"Name of the program in the format namespace/program-name",
+                "minLength":5,
+                "pattern":"[0-9a-zA-Z]+/[0-9a-zA-Z]+"
+             },
+             "affinity":{
+                "type":"string",
+                "description":"Indicates the module affinity (client=client's runtime; none or empty=any suitable/available runtime)",
+                "enum":[
+                   "client",
+                   "none"
+                ],
+                "default":"client"
+             },
+             "instantiate":{
+                "type":"string",
+                "description":"Single instance of the program (=single), or let every client create a program instance (=client). Per client instance will create new uuid for each program.",
+                "enum":[
+                   "single",
+                   "client"
+                ],
+                "default":"client"
+             },
+             "filename":{
+                "type":"string",
+                "description":"Filename of the entry binary",
+                "minLength":5
+             },
+             "filetype":{
+                "type":"string",
+                "description":"Type of the program (WA=WASM or PY=Python)",
+                "enum":[
+                   "WA",
+                   "PY"
+                ],
+                "default":[
+                   "WA"
+                ]
+             },
+             "parent":{
+                "type":"string",
+                "description":"Request the orchestrator to deploy to this runtime (can be a runtime name or UUID); usually left blank.",
+                "minLength":5,
+                "default":"pytest"
+             },
+             "args":{
+                "type":"array",
+                "description":"Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
+                "uniqueItems":false,
+                "items":{
+                   "type":"string",
+                   "title":"args"
                 }
-            },
-            "required": ["name", "filename", "filetype", "instantiate", "parent", "env"]
-        }
+             },
+             "env":{
+                "type":"array",
+                "description":"Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
+                "uniqueItems":false,
+                "items":{
+                   "type":"string",
+                   "title":"env"
+                },
+                "default":[
+                   "MID=${moduleid}",
+                   "SCENE=${scene}",
+                   "NAMESPACE=${namespace}",
+                   "MQTTH=${mqtth}",
+                   "REALM=realm"
+                ]
+             },
+             "channels":{
+                "type":"array",
+                "description":"Channels describe files representing access to IO from pubsub and client sockets (possibly more in the future; currently only supported for WASM programs).",
+                "uniqueItems":false,
+                "items":{
+                   "type":"object",
+                   "title":"Channels",
+                   "properties":{
+                      "path":{
+                         "type":"string",
+                         "description":"Folder visible by the program."
+                      },
+                      "type":{
+                         "type":"string",
+                         "description":"Pubsub or client socket",
+                         "enum":[
+                            "pubsub",
+                            "client"
+                         ],
+                         "default":"pubsub"
+                      },
+                      "mode":{
+                         "type":"string",
+                         "description":"Access mode",
+                         "enum":[
+                            "r",
+                            "w",
+                            "rw"
+                         ]
+                      },
+                      "params":{
+                         "type":"object",
+                         "title":"Parameters",
+                         "description":"Type (i.e. pubsub/client)-specific parameters",
+                         "properties":{
+                            "topic":{
+                               "type":"string",
+                               "description":"Pubsub topic (pubsub)"
+                            },
+                            "host":{
+                               "type":"string",
+                               "description":"Destination host address (client socket; ignored for now)"
+                            },
+                            "port":{
+                               "type":"number",
+                               "description":"Destination port (client socket; ignored for now)"
+                            }
+                         }
+                      }
+                   }
+                },
+                "required":[
+                   "path",
+                   "type",
+                   "mode"
+                ],
+                "default":[
+                   {
+                      "path":"/ch/${scene}",
+                      "type":"pubsub",
+                      "mode":"rw",
+                      "params":{
+                         "topic":"realm/s/${scene}"
+                      }
+                   }
+                ]
+             },
+             "info":{
+                "type":"object",
+                "title":"Execution info",
+                "description":"Program execution info, added at runtime",
+                "properties":{
+                   "create_time":{
+                      "type":"string",
+                      "description":"Program creation time."
+                   },
+                   "last_active_time":{
+                      "type":"string",
+                      "description":"Program last publish/receive time."
+                   },
+                   "last_pub_time":{
+                      "type":"string",
+                      "description":"Program last publish time."
+                   },
+                   "pub_msgs":{
+                      "type":"integer",
+                      "description":"Number of published messages."
+                   },
+                   "pub_msgs_per_sec":{
+                      "type":"number",
+                      "description":"Published messages per second avg."
+                   },
+                   "rcv_msgs":{
+                      "type":"integer",
+                      "description":"Number of received messages."
+                   },
+                   "rcv_msgs_per_sec":{
+                      "type":"number",
+                      "description":"Received messages per second avg."
+                   },
+                   "last_rcv_time":{
+                      "type":"string",
+                      "description":"Last message receive time."
+                   }
+                }
+             }
+          },
+          "required":[
+             "name",
+             "filename",
+             "filetype",
+             "instantiate",
+             "parent",
+             "env"
+          ]
+       }
     },
-    "type": "object",
-    "title": "Program",
-    "properties": {
-        "object_id": {
-            "type": "string",
-            "description": "Object identifier; Must be a valid UUID.",
-            "minLength": 36,
-            "pattern": "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
-        },
-        "action": {
-            "type": "string",
-            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
-            "enum": ["create", "delete", "update", "clientEvent"],
-            "default": "create"
-        },
-        "persist": {
-            "type": "boolean",
-            "description": "Persist this object in the database",
-            "default": true
-        },
-        "type": {
-            "type": "string",
-            "enum": ["program"]
-        },
-        "data": {
-            "$ref": "#/definitions/program",
-            "description": "Object data payload; Program config data"
-        }
+    "type":"object",
+    "title":"Program",
+    "properties":{
+       "object_id":{
+          "type":"string",
+          "description":"Object identifier; Must be a valid UUID.",
+          "minLength":36,
+          "pattern":"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+       },
+       "action":{
+          "type":"string",
+          "description":"One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+          "enum":[
+             "create",
+             "delete",
+             "update",
+             "clientEvent"
+          ],
+          "default":"create"
+       },
+       "persist":{
+          "type":"boolean",
+          "description":"Persist this object in the database",
+          "default":true
+       },
+       "type":{
+          "type":"string",
+          "enum":[
+             "program"
+          ]
+       },
+       "data":{
+          "$ref":"#/definitions/program",
+          "description":"Object data payload; Program config data"
+       }
     },
-    "required": ["object_id", "action", "persist", "type", "data"]
-}
+    "required":[
+       "object_id",
+       "action",
+       "persist",
+       "type",
+       "data"
+    ]
+ }
