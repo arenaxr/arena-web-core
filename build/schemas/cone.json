@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["cone"]
                                 },
                                 "height": {
@@ -38,12 +38,12 @@
                                     "default": 0.01
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments height",
                                     "default": 18
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 36
                                 },
@@ -70,27 +70,15 @@
                         }
                     ],
                     "title": "Cone Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "cone",
-                        "height": 1,
-                        "radiusBottom": 1,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": ["object_type", "height", "radiusBottom"]
+                    "required": ["object_type", "height", "radiusTop", "radiusBottom", "position", "rotation"]
                 }
             }
         }

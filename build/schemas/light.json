@@ -1,6 +1,6 @@
 {
     "title": "Light",
-    "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/light.html'>https://aframe.io/docs/1.4.0/components/light.html</a>",
+    "description": "A light.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>A-Frame Light</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["light"]
                                 },
                                 "angle": {
@@ -39,13 +39,13 @@
                                     "title": "decay (point and spot)",
                                     "type": "number",
                                     "description": "Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
-                                    "default": 1.0
+                                    "default": 1
                                 },
                                 "distance": {
                                     "title": "distance (point and spot)",
                                     "type": "number",
                                     "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
-                                    "default": 0.0
+                                    "default": 0
                                 },
                                 "groundColor": {
                                     "title": "ground color (hemisphere)",
@@ -58,76 +58,19 @@
                                     "title": "intensity",
                                     "type": "number",
                                     "description": "Light strength.",
-                                    "default": 1.0
+                                    "default": 1
                                 },
                                 "light": {
-                                    "title": "light (deprecated; don't use)",
-                                    "deprecated": true,
-                                    "description": "These attributes (light, intensity, color, ...) can be set directly on the light object (instead of this light attribute inside the light object); dont use in new light objects",
-                                    "properties": {
-                                        "type": {
-                                            "title": "type",
-                                            "type": "string",
-                                            "enum": ["ambient", "directional", "hemisphere", "point", "spot"],
-                                            "description": "One of ambient, directional, hemisphere, point, spot.",
-                                            "default": "directional"
-                                        },
-                                        "color": {
-                                            "title": "light color",
-                                            "type": "string",
-                                            "format": "color",
-                                            "default": "#ffffff",
-                                            "description": "Light color."
-                                        },
-                                        "intensity": {
-                                            "title": "intensity",
-                                            "type": "number",
-                                            "description": "Light strength."
-                                        },
-                                        "groundColor": {
-                                            "title": "ground color",
-                                            "type": "string",
-                                            "format": "color",
-                                            "default": "#ffffff",
-                                            "description": "Light color from below. NOTE: Hemisphere light type only"
-                                        },
-                                        "decay": {
-                                            "title": "decay",
-                                            "type": "number",
-                                            "description": "Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
-                                            "default": 1.0
-                                        },
-                                        "distance": {
-                                            "title": "distance",
-                                            "type": "number",
-                                            "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
-                                            "default": 0.0
-                                        },
-                                        "angle": {
-                                            "title": "angle",
-                                            "type": "number",
-                                            "description": "Maximum extent of spot light from its direction (in degrees). NOTE: Spot light type only.",
-                                            "default": 60
-                                        },
-                                        "penumbra": {
-                                            "title": "penumbra",
-                                            "type": "number",
-                                            "description": "Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
-                                            "default": 0.0
-                                        },
-                                        "target": {
-                                            "title": "target",
-                                            "type": "object",
-                                            "description": "element the spot should point to. set to null to transform spotlight by orientation, pointing to it\u2019s -Z axis. NOTE: Spot light type only.",
-                                            "default": null
-                                        }
-                                    }
+                                    "title": "DEPRECATED (light)",
+                                    "type": "object",
+                                    "description": "DEPRECATED: data.light.[property] is deprecated, use object_type: light and data.[property] instead.",
+                                    "deprecated": true
                                 },
                                 "penumbra": {
                                     "title": "penumbra (spot)",
                                     "type": "number",
                                     "description": "Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
-                                    "default": 0.0
+                                    "default": 0
                                 },
                                 "shadowBias": {
                                     "title": "shadowBias (castShadow=true)",
@@ -214,28 +157,9 @@
                     "title": "Light Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "light",
-                        "color": "#ffffff",
-                        "intensity": 1,
-                        "type": "directional",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "light"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "color", "intensity", "type", "position", "rotation"]
                 }
             }
         }

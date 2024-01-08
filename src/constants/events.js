@@ -18,6 +18,8 @@ export const ARENA_EVENTS = Object.freeze({
     ON_LOCATION: 'onarenalocation',
     SETUPAV_LOADED: 'onsetupavloaded',
     STARTPOS_LOADED: 'onarenastartposloaded',
+    RUNTIME_MNGR_LOADED: 'onarenaruntimemanagerloaded',
+    CV_INITIALIZED: 'onarenacvinitialized',
 });
 
 export const JITSI_EVENTS = Object.freeze({

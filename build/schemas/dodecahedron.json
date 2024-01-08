@@ -14,11 +14,11 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["dodecahedron"]
                                 },
                                 "detail": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "detail",
                                     "default": 0
                                 },
@@ -40,26 +40,15 @@
                         }
                     ],
                     "title": "Dodecahedron Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "dodecahedron",
-                        "radius": 1,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": ["object_type", "radius"]
+                    "required": ["object_type", "radius", "position", "rotation"]
                 }
             }
         }

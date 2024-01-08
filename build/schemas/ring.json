@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["ring"]
                                 },
                                 "radiusInner": {
@@ -28,12 +28,12 @@
                                     "default": 1.2
                                 },
                                 "segmentsPhi": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments phi",
                                     "default": 10
                                 },
                                 "segmentsTheta": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments theta",
                                     "default": 32
                                 },
@@ -60,27 +60,15 @@
                         }
                     ],
                     "title": "Ring Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "ring",
-                        "radiusInner": 0.5,
-                        "radiusOuter": 1,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": ["object_type", "radiusInner", "radiusOuter"]
+                    "required": ["object_type", "radiusInner", "radiusOuter", "position", "rotation"]
                 }
             }
         }

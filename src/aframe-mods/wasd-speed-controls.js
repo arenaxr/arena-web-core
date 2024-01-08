@@ -26,6 +26,7 @@ function isEmptyObject(keys) {
     return true;
 }
 
+// AFRAME Monkeypatch (src/components/wasd-controls.js)
 AFRAME.components['wasd-controls'].Component.prototype.init = function init() {
     // Navigation
     this.navGroup = null;
@@ -52,8 +53,11 @@ AFRAME.components['wasd-controls'].Component.prototype.init = function init() {
 
 const wasdSchema = AFRAME.components['wasd-controls'].Component.prototype.schema;
 Object.assign(wasdSchema, { constrainToNavMesh: { default: false } });
+
+// AFRAME Monkeypatch (src/components/wasd-controls.js)
 AFRAME.components['wasd-controls'].Component.prototype.schema = AFRAME.schema.process(wasdSchema);
 
+// AFRAME Monkeypatch (src/components/wasd-controls.js)
 AFRAME.components['wasd-controls'].Component.prototype.tick = function tick(time, delta) {
     const { data } = this;
     const { el } = this;
@@ -89,6 +93,7 @@ AFRAME.components['wasd-controls'].Component.prototype.tick = function tick(time
     }
 };
 
+// AFRAME Monkeypatch (src/components/wasd-controls.js)
 AFRAME.components['wasd-controls'].Component.prototype.resetNav = function resetNav(
     checkPolygon = false,
     clampStep = false
@@ -107,6 +112,7 @@ AFRAME.components['wasd-controls'].Component.prototype.resetNav = function reset
     }
 };
 
+// AFRAME Monkeypatch (src/components/wasd-controls.js)
 AFRAME.components['wasd-controls'].Component.prototype.updateVelocity = function updateVelocity(delta) {
     let adSign;
     const { data } = this;

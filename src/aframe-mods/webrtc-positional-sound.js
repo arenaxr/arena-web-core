@@ -10,6 +10,7 @@
 
 const warn = AFRAME.utils.debug('components:sound:warn');
 
+// AFRAME Monkeypatch (src/components/sound.js)
 AFRAME.components.sound.schema.src.parse = function assetParse(value) {
     let el;
 
@@ -43,6 +44,7 @@ AFRAME.components.sound.schema.src.parse = function assetParse(value) {
     return value;
 };
 
+// AFRAME Monkeypatch (src/components/sound.js)
 const Sound = AFRAME.components.sound.Component;
 Sound.prototype.update = function update(oldData) {
     const { data } = this;

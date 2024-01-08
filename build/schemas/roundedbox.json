@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["roundedbox"]
                                 },
                                 "depth": {
@@ -38,7 +38,7 @@
                                     "default": 0.15
                                 },
                                 "radiusSegments": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radius",
                                     "default": 10
                                 }
@@ -55,29 +55,15 @@
                         }
                     ],
                     "title": "Rounded Box Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "roundedbox",
-                        "depth": 1,
-                        "height": 1,
-                        "width": 1,
-                        "radius": 0.15,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": ["object_type", "width", "height", "depth", "radius"]
+                    "required": ["object_type", "width", "height", "depth", "radius", "position", "rotation"]
                 }
             }
         }

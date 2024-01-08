@@ -1,24 +1,25 @@
 {
+    "format": "grid",
     "properties": {
         "object_id": {
-            "description": "A uuid or otherwise unique identifier for this object",
+            "description": "A uuid or otherwise unique identifier for this object.",
             "minLength": 3,
             "type": "string"
         },
         "persist": {
             "default": true,
-            "description": "Persist this object in the database (default true = persist on server)",
+            "description": "Persist this object in the database",
             "type": "boolean"
         },
         "type": {
-            "description": "One of the message types: object (3D A-Frame Object), scene-options, program (derived from 'type' select above)",
+            "description": "One of the message types.",
             "enum": ["object"],
             "type": "string"
         },
         "action": {
             "default": "create",
-            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
-            "enum": ["create", "delete", "update", "clientEvent"],
+            "description": "Message action create, update, delete.",
+            "enum": ["create", "delete", "update"],
             "type": "string"
         },
         "ttl": {

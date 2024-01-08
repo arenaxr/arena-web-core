@@ -1,5 +1,5 @@
 <!-- Based of: https://www.jeremydorn.com/json-editor -->
-<!DOCTYPE html>
+<!doctype html>
 <html>
     <head>
         <meta charset="utf-8" />
@@ -20,6 +20,7 @@
                 font-family: GeneralFoundicons;
                 font-style: normal;
             }
+
             body,
             html {
                 height: 100%;
@@ -89,12 +90,6 @@
                         <a class="btn btn-small btn-danger" href="#" id="deletescene" title="Delete Current Scene"
                             ><i class="icon-trash"></i
                         ></a>
-                        <a class="btn btn-small" href="#" id="importscene" title="Import from JSON file"
-                            ><i class="icon-upload"></i
-                        ></a>
-                        <a class="btn btn-small" href="#" id="exportscene" title="Export to JSON file" download
-                            ><i class="icon-download"></i
-                        ></a>
                         <a
                             class="btn btn-small"
                             href="#"
@@ -102,6 +97,12 @@
                             title="Refresh Scene List from User Account"
                             ><i class="icon-refresh"></i
                         ></a>
+                        <a class="btn btn-small" href="#" id="importscene" title="Import from JSON file">
+                            { } <i class="icon-upload"></i>
+                        </a>
+                        <a class="btn btn-small" href="#" id="exportscene" title="Export to JSON file" download>
+                            { } <i class="icon-download"></i>
+                        </a>
                     </form>
                     <div id="scenelinks">
                         <p>
@@ -185,6 +186,14 @@
                             </button>
                             <button class="btn btn-small" type="button" id="genid" title="Generate a Random object_id">
                                 <i class="icon-tag"></i>Gen object_id
+                            </button>
+                            <button
+                                class="btn btn-small"
+                                type="button"
+                                id="uploadfilestore"
+                                title="Filestore Upload and Gen Url"
+                            >
+                                <i class="icon-file"></i>Filestore Upload/Gen Url
                             </button>
                             <button class="btn btn-primary btn-small addobj" type="button" title="Add or Update Object">
                                 <i class="icon-plus"></i> Add/Update Object

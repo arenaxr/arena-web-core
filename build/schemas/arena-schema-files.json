@@ -1,4 +1,19 @@
 {
+    "arenaui-card": {
+        "description": "ARENAUI Card",
+        "file": "schemas/arenaui-card.json",
+        "title": "ARENAUI Card"
+    },
+    "arenaui-button-panel": {
+        "description": "ARENAUI Button Panel",
+        "file": "schemas/arenaui-button-panel.json",
+        "title": "ARENAUI Button Panel"
+    },
+    "arenaui-prompt": {
+        "description": "ARENAUI Prompt",
+        "file": "schemas/arenaui-prompt.json",
+        "title": "ARENAUI Prompt"
+    },
     "box": {
         "description": "Box Geometry",
         "file": "schemas/box.json",
@@ -43,6 +58,11 @@
         "description": "Load a GLTF model",
         "file": "schemas/gltf-model.json",
         "title": "GLTF Model"
+    },
+    "gaussian_splatting": {
+        "description": "Load 3D Gaussian Splat",
+        "file": "schemas/gaussian-splat.json",
+        "title": "3D Gaussian Splat"
     },
     "image": {
         "description": "Display an image on a plane",

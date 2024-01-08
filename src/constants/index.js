@@ -8,6 +8,5 @@
 
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from './events';
 import ACTIONS from './actions';
-import EFFECTS from './effects';
 
-export { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, ACTIONS, EFFECTS };
+export { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES, ACTIONS };

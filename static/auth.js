@@ -25,6 +25,8 @@
 
 // auth namespace
 window.ARENAAUTH = {
+    signInPath: `//${window.location.host}/user/login`,
+    signOutPath: `//${window.location.host}/user/logout`,
     /**
      * Merge defaults and any URL params into single ARENA.params obj. Nonexistent keys should be checked as undefined.
      */
@@ -46,8 +48,6 @@ window.ARENAAUTH = {
         };
     },
     authCheck() {
-        this.signInPath = `//${window.location.host}/user/login`;
-        this.signOutPath = `//${window.location.host}/user/logout`;
         this.setArenaParams();
         ARENA.userName = ARENA.params.name ?? ARENA.defaults.userName;
         // For now, just an alias for legacy code.
@@ -102,6 +102,9 @@ window.ARENAAUTH = {
      * This is a blocking request
      */
     requestAuthState() {
+        // 'remember' uri for post-login, just before login redirect
+        localStorage.setItem('request_uri', window.location.href);
+
         const xhr = new XMLHttpRequest();
         xhr.open('GET', `/user/user_state`, false); // Blocking call
         xhr.setRequestHeader('X-CSRFToken', this.getCookie('csrftoken'));
@@ -153,8 +156,6 @@ window.ARENAAUTH = {
                 this.requestMqttToken('anonymous', anonName, true).then();
             } else {
                 // user is logged out or new and not logged in
-                // 'remember' uri for post-login, just before login redirect
-                localStorage.setItem('request_uri', window.location.href);
                 window.location.href = this.signInPath;
             }
         }
@@ -163,9 +164,10 @@ window.ARENAAUTH = {
      * Processes user sign out.
      */
     signOut() {
-        localStorage.removeItem('auth_choice');
+        // 'remember' uri for post-login, just before login redirect
+        localStorage.setItem('request_uri', window.location.href);
         // back to signin page
-        window.location.href = this.signOutPath;
+        window.location.href = window.ARENAAUTH.signOutPath;
     },
     /**
      * Utility function to get cookie value
@@ -194,6 +196,7 @@ window.ARENAAUTH = {
      * @param {boolean} completeOnload wait for page load before firing callback
      */
     async requestMqttToken(authType, mqttUsername, completeOnload = false) {
+        const nonScenePaths = ['/scenes/', '/build/', '/programs/', '/network/', '/files/'];
         const authParams = {
             username: mqttUsername,
             id_auth: authType,
@@ -204,7 +207,7 @@ window.ARENAAUTH = {
 
         if (ARENA.params.scene) {
             authParams.scene = decodeURIComponent(ARENA.params.scene);
-        } else {
+        } else if (!nonScenePaths.includes(window.location.pathname)) {
             // handle full ARENA scene
             if (ARENA.sceneName) {
                 authParams.scene = ARENA.namespacedScene;
@@ -380,7 +383,7 @@ window.onload = function authOnLoad() {
         const head = document.getElementsByTagName('head')[0];
         const script = document.createElement('script');
         script.type = 'text/javascript';
-        script.src = 'https://cdn.jsdelivr.net/npm/sweetalert2@10';
+        script.src = 'static/vendor/sweetalert2.all.min.js';
         head.appendChild(script);
     }
 };

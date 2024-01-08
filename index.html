@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
@@ -20,6 +20,7 @@
         <!-- login auth check with calls to mqtt connect placed in an `onauth` event listener -->
         <script src="static/vendor/jsrsasign-all-min.js" type="text/javascript"></script>
         <script src="static/auth.js"></script>
+        <script src="static/vendor/sweetalert2.all.min.js" async></script>
 
         <!-- jquery, needed by lib jitsi -->
         <script src="static/vendor/jquery-2.1.1.min.js"></script>
@@ -34,10 +35,9 @@
         <!-- main arena bundle -->
         <script src="dist/index.js"></script>
 
-        <!-- 2D UI, load async since  -->
-        <link rel="stylesheet" href="static/vendor/mdb/mdb.min.css" media="print" />
-        <link rel="stylesheet" href="static/vendor/fontawesome-5/css/all.min.css" media="print" />
-        <script src="static/styleloader.js"></script>
+        <!-- 2D UI  -->
+        <link rel="stylesheet" href="static/vendor/mdb/mdb.min.css" />
+        <link rel="stylesheet" href="static/vendor/fontawesome-5/css/all.min.css" />
     </head>
     <body>
         <a-scene
@@ -48,13 +48,13 @@
             stats-monitor="enabled: false"
             arena-hybrid-render-client
             renderer="antialias: true; maxCanvasWidth: 3840; maxCanvasHeight: 3840;"
-            webxr="optionalFeatures: anchors, hit-test, dom-overlay, computerVision; overlayElement: overlay;"
+            webxr="optionalFeatures: anchors, hit-test, dom-overlay, computerVision, mesh-detection, plane-detection; overlayElement: overlay;"
             webxr-device-manager
             ar-hit-test="enabled:true; src: static/images/blank-pixel.png; mapSize: 0.005 0.005;"
             ar-hit-test-listener
             gltf-model="dracoDecoderPath: /static/vendor/draco-1.5.4/;"
             inspector="url: static/vendor/aframe-inspector.min.js;"
-            vr-mode-ui="enterAREnabled: true"
+            xr-mode-ui="XRMode:xr"
         >
             <a-assets></a-assets>
 
@@ -86,6 +86,7 @@
                             press-and-move="constrainToNavMesh:true"
                             wasd-controls="fly: false; acceleration: 30; constrainToNavMesh:true"
                             geometry="primitive: box; width: 0.25; height: 0.25; depth: 0.25"
+                            material="opacity: 0.1"
                             box-collider="collideNonVisible:true"
                             box-collision-publisher
                         >
@@ -103,7 +104,7 @@
                             arena-hand="hand:left"
                             laser-controls="hand:left"
                             blink-controls="cameraRig: #cameraRig; collisionEntities: [nav-mesh]; teleportOrigin: #my-camera"
-                            raycaster="objects: [click-listener]"
+                            raycaster="objects: [click-listener],[click-listener-local]"
                         ></a-entity>
                         <a-entity
                             id="rightHand"
@@ -112,7 +113,7 @@
                             visible="false"
                             arena-hand="hand:right"
                             laser-controls="hand:right"
-                            raycaster="objects: [click-listener]"
+                            raycaster="objects: [click-listener],[click-listener-local]"
                         ></a-entity>
                     </a-entity>
                 </a-entity>
@@ -133,7 +134,7 @@
         </div>
 
         <div class="error-icon" id="error-icon">
-            <img id="error-img" src="src/health/images/exclamation-error.png" />
+            <img id="error-img" src="src/systems/ui/images/exclamation-error.png" />
             <div id="error-block" class="error-block"></div>
         </div>
         <span class="echo-name" id="echo-name"></span>

@@ -7,7 +7,7 @@
         },
         "persist": {
             "default": false,
-            "description": "Persist this object in the database (default false = do not persist on server)",
+            "description": "Persist this object in the database",
             "type": "boolean"
         },
         "type": {
@@ -34,7 +34,8 @@
             "type": "string"
         },
         "action": {
-            "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+            "default": "clientEvent",
+            "description": "Message action client event.",
             "enum": ["clientEvent"],
             "type": "string"
         }

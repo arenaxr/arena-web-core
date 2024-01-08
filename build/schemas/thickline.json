@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["thickline"]
                                 },
                                 "color": {
@@ -49,13 +49,9 @@
                     "title": "Thickline Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "thickline",
-                        "lineWidth": 5,
-                        "lineWidthStyler": "default",
-                        "path": "-2 -1 0, 0 20 0, 10 -1 10",
-                        "color": "#7f7f7f"
+                        "object_type": "thickline"
                     },
-                    "required": ["object_type", "path"]
+                    "required": ["object_type", "path", "lineWidth", "lineWidthStyler", "color"]
                 }
             }
         }

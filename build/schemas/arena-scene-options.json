@@ -4,7 +4,7 @@
             "properties": {
                 "active": {
                     "default": true,
-                    "description": "Show/hides the environment presets component. Use this instead of using the visible attribute.",
+                    "description": "Shows or hides the environment presets component. Use this instead of using the visible attribute.",
                     "title": "Active",
                     "type": "boolean"
                 },
@@ -31,10 +31,10 @@
                 "dressingAmount": {
                     "default": 10,
                     "description": "Number of objects used for dressing",
-                    "max": 1000,
-                    "min": 0,
+                    "maximum": 1000,
+                    "minimum": 0,
                     "title": "Dressing Amount",
-                    "type": "number"
+                    "type": "integer"
                 },
                 "dressingColor": {
                     "default": "#795449",
@@ -46,16 +46,16 @@
                 "dressingOnPlayArea": {
                     "default": 0,
                     "description": "Amount of dressing on play area.",
-                    "max": 1,
-                    "min": 0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Dressing on Play Area",
                     "type": "number"
                 },
                 "dressingScale": {
                     "default": 5,
                     "description": "Height (in meters) of dressing objects.",
-                    "max": 100,
-                    "min": 0,
+                    "maximum": 100,
+                    "minimum": 0,
                     "title": "Dressing Scale",
                     "type": "number"
                 },
@@ -66,7 +66,8 @@
                     "type": "boolean"
                 },
                 "dressingVariance": {
-                    "$ref": "#/definitions/Vector3",
+                    "$ref": "#/definitions/vector3",
+                    "format": "grid",
                     "default": {
                         "x": 1,
                         "y": 1,
@@ -84,8 +85,8 @@
                 "fog": {
                     "default": 0,
                     "description": "Amount of fog (0 = none, 1 = full fog). The color is estimated automatically.",
-                    "max": 1,
-                    "min": 0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "title": "Fog",
                     "type": "number"
                 },
@@ -125,7 +126,8 @@
                     "type": "string"
                 },
                 "groundScale": {
-                    "$ref": "#/definitions/Vector3",
+                    "$ref": "#/definitions/vector3",
+                    "format": "grid",
                     "default": {
                         "x": 1,
                         "y": 1,
@@ -144,8 +146,8 @@
                 "groundYScale": {
                     "default": 3,
                     "description": "Maximum height (in meters) of ground's features (hills, mountains, peaks..).",
-                    "max": 50,
-                    "min": 0,
+                    "maximum": 50,
+                    "minimum": 0,
                     "title": "Ground Features Height",
                     "type": "number"
                 },
@@ -169,7 +171,8 @@
                     "type": "string"
                 },
                 "lightPosition": {
-                    "$ref": "#/definitions/Vector3",
+                    "$ref": "#/definitions/vector3",
+                    "format": "grid",
                     "default": {
                         "x": 0,
                         "y": 1,
@@ -181,8 +184,8 @@
                 "playArea": {
                     "default": 1,
                     "description": "Radius of the area in the center reserved for the player and the gameplay. The ground is flat in there and no objects are placed inside.",
-                    "max": 10,
-                    "min": 0.5,
+                    "maximum": 10,
+                    "minimum": 0.5,
                     "title": "Play Area",
                     "type": "number"
                 },
@@ -215,10 +218,10 @@
                 "seed": {
                     "default": 1,
                     "description": "Seed for randomization. If you don't like the layout of the elements, try another value for the seed.",
-                    "max": 1000,
-                    "min": 0,
+                    "maximum": 1000,
+                    "minimum": 0,
                     "title": "Randomization Seed",
-                    "type": "number"
+                    "type": "integer"
                 },
                 "shadow": {
                     "default": false,
@@ -249,7 +252,7 @@
             "required": ["active", "preset"],
             "title": "Environment Presets",
             "type": "object",
-            "description": "A-Frame Environment presets. \n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>https://github.com/supermedium/aframe-environment-component</a>"
+            "description": "A-Frame Environment presets.\n\nMore properties at <a href='https://github.com/supermedium/aframe-environment-component'>A-Frame Environment Component</a>."
         },
         "renderer-settings": {
             "properties": {
@@ -318,6 +321,7 @@
                             "url": {
                                 "title": "Head Model URL",
                                 "type": "string",
+                                "format": "uri",
                                 "description": "The head model GLTF URL. You must scale and rotate your source GLTFs appropriately."
                             }
                         },
@@ -389,7 +393,7 @@
                 },
                 "videoDefaultResolutionConstraint": {
                     "default": 180,
-                    "min": 180,
+                    "minimum": 180,
                     "description": "Sets the default max resolution for all users. Ignored when videoDistanceConstraints = true.",
                     "title": "Video Default Resolution Constraint",
                     "type": "number"
@@ -439,7 +443,7 @@
                     "required": ["enabled", "src"],
                     "title": "AR Hit Test Settings",
                     "type": "object",
-                    "description": "A-Frame AR Hit Test Settings. More properties at <a href='https://aframe.io/docs/1.4.0/components/ar-hit-test.html'>https://aframe.io/docs/1.4.0/components/ar-hit-test.html</a>"
+                    "description": "A-Frame AR Hit Test Settings.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>AR Hit Test</a> component."
                 }
             },
             "required": [
@@ -658,15 +662,20 @@
             "type": "object",
             "description": "These effects are enabled in desktop and XR views"
         },
-        "Vector3": {
+        "vector3": {
+            "title": "Vector3",
+            "format": "grid",
             "properties": {
                 "x": {
+                    "default": 0,
                     "type": "number"
                 },
                 "y": {
+                    "default": 0,
                     "type": "number"
                 },
                 "z": {
+                    "default": 0,
                     "type": "number"
                 }
             },
@@ -674,6 +683,7 @@
             "type": "object"
         }
     },
+    "format": "grid",
     "properties": {
         "object_id": {
             "default": "scene-options",
@@ -692,7 +702,7 @@
         },
         "action": {
             "default": "create",
-            "description": "One of 3 basic Create/Update/Delete actions",
+            "description": "Message action create, update, delete.",
             "enum": ["create", "delete", "update"],
             "type": "string"
         },

@@ -1,0 +1,50 @@
+{
+    "title": "Hand",
+    "description": "Hand is the (left or right) hand metadata pose and controller type of the user avatar.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["handLeft", "handRight"]
+                                },
+                                "url": {
+                                    "type": "string",
+                                    "title": "Hand Model Url",
+                                    "format": "uri",
+                                    "description": "Path to user avatar hand model",
+                                    "default": "static/models/hands/valve_index_left.gltf"
+                                },
+                                "dep": {
+                                    "type": "string",
+                                    "title": "Dependant Object Id",
+                                    "description": "Camera object_id this hand belongs to.",
+                                    "default": ""
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        }
+                    ],
+                    "title": "Hand Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "handLeft"
+                    },
+                    "required": ["object_type", "position", "rotation", "url", "dep"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

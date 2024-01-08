@@ -22,6 +22,7 @@
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object",
             "title": "Position"
         },
@@ -30,45 +31,56 @@
             "properties": {
                 "w": {
                     "default": 1,
+                    "minimum": -1,
+                    "maximum": 1,
                     "type": "number"
                 },
                 "x": {
                     "default": 0,
+                    "minimum": -1,
+                    "maximum": 1,
                     "type": "number"
                 },
                 "y": {
                     "default": 0,
+                    "minimum": -1,
+                    "maximum": 1,
                     "type": "number"
                 },
                 "z": {
                     "default": 0,
+                    "minimum": -1,
+                    "maximum": 1,
                     "type": "number"
                 }
             },
             "required": ["w", "x", "y", "z"],
+            "format": "grid",
             "type": "object",
             "title": "Rotation"
         },
         "scale": {
-            "default": {
-                "x": 1,
-                "y": 1,
-                "z": 1
-            },
             "description": "3D object scale",
             "id": "scale",
             "properties": {
                 "x": {
+                    "default": 1,
+                    "exclusiveMinimum": 0,
                     "type": "number"
                 },
                 "y": {
+                    "default": 1,
+                    "exclusiveMinimum": 0,
                     "type": "number"
                 },
                 "z": {
+                    "default": 1,
+                    "exclusiveMinimum": 0,
                     "type": "number"
                 }
             },
             "required": ["x", "y", "z"],
+            "format": "grid",
             "type": "object",
             "title": "Scale"
         }

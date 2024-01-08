@@ -1,0 +1,95 @@
+{
+    "title": "Camera",
+    "description": "Camera is the pose and arena-user component data representing a user avatar.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["camera"]
+                                },
+                                "arena-user": {
+                                    "description": "Another user's camera in the ARENA. Handles Jitsi and display name updates.",
+                                    "title": "User Avatar",
+                                    "type": "object",
+                                    "properties": {
+                                        "displayName": {
+                                            "type": "string",
+                                            "title": "displayName",
+                                            "description": "User display name.",
+                                            "default": ""
+                                        },
+                                        "color": {
+                                            "format": "color",
+                                            "title": "color",
+                                            "type": "string",
+                                            "description": "The color for the user's name text.",
+                                            "default": "white"
+                                        },
+                                        "headModelPath": {
+                                            "type": "string",
+                                            "title": "headModelPath",
+                                            "description": "Path to user avatar head model",
+                                            "default": "/static/models/avatars/robobit.glb"
+                                        },
+                                        "presence": {
+                                            "type": "string",
+                                            "title": "presence",
+                                            "description": "Type of presence for user",
+                                            "default": "Standard",
+                                            "enum": ["Standard", "Portal"]
+                                        },
+                                        "jitsiId": {
+                                            "type": "string",
+                                            "title": "depth",
+                                            "description": "User Jitsi ID.",
+                                            "default": ""
+                                        },
+                                        "hasAudio": {
+                                            "type": "bool",
+                                            "title": "hasAudio",
+                                            "description": "Whether the user has audio on.",
+                                            "default": false
+                                        },
+                                        "hasVideo": {
+                                            "type": "bool",
+                                            "title": "hasVideo",
+                                            "description": "Whether the user has video on.",
+                                            "default": false
+                                        },
+                                        "hasAvatar": {
+                                            "type": "bool",
+                                            "title": "hasAvatar",
+                                            "description": "Whether the user has facial feature capture on.",
+                                            "default": false
+                                        }
+                                    },
+                                    "required": ["displayName", "color", "headModelPath"]
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        }
+                    ],
+                    "title": "Camera Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "camera"
+                    },
+                    "required": ["object_type", "position", "rotation", "arena-user"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

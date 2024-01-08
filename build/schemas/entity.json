@@ -14,12 +14,16 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["entity"]
                                 },
                                 "geometry": {
+                                    "title": "Geometry",
+                                    "description": "The primitive mesh geometry.",
+                                    "type": "object",
                                     "properties": {
                                         "primitive": {
+                                            "default": "box",
                                             "type": "string",
                                             "title": "primitive",
                                             "description": "The geometry primitive.",
@@ -42,17 +46,14 @@
                                                 "triangle"
                                             ]
                                         }
-                                    }
+                                    },
+                                    "required": ["primitive"]
                                 },
                                 "panel": {
                                     "title": "UI Panel",
+                                    "format": "grid",
                                     "description": "The rounded UI panel primitive.",
                                     "type": "object",
-                                    "default": {
-                                        "depth": 0.05,
-                                        "height": 1,
-                                        "width": 1
-                                    },
                                     "properties": {
                                         "depth": {
                                             "type": "number",
@@ -69,7 +70,8 @@
                                             "title": "width",
                                             "default": 1
                                         }
-                                    }
+                                    },
+                                    "required": ["depth", "height", "width"]
                                 }
                             }
                         },
@@ -85,7 +87,7 @@
                     "default": {
                         "object_type": "entity"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "position", "rotation"]
                 }
             }
         }

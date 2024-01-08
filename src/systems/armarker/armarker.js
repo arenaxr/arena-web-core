@@ -22,6 +22,8 @@ import CVWorkerMsgs from './worker-msgs';
 import { ARENA_EVENTS } from '../../constants';
 import { ARENAUtils } from '../../utils';
 
+const MAX_PERSISTENT_ANCHORS = 7;
+
 /**
  * ARMarker System. Supports ARMarkers in a scene.
  * @module armarker-system
@@ -99,6 +101,8 @@ AFRAME.registerSystem('armarker', {
 
         // listener for AR session start
         if (sceneEl.hasWebXR && navigator.xr && navigator.xr.addEventListener) {
+            // This is delayed from `enter-vr` to a referenceSpace is acquired.
+            // Will not fire for WebXR browser (see webxr-device-manager)
             sceneEl.renderer.xr.addEventListener('sessionstart', () => {
                 if (sceneEl.is('ar-mode')) {
                     const { xrSession } = sceneEl;
@@ -160,8 +164,12 @@ AFRAME.registerSystem('armarker', {
                     })
                     .catch(() => {
                         console.warn('Could not restore persisted origin anchor');
-                        xrSession.persistentAnchors.forEach((anchor) => {
-                            xrSession.deletePersistentAnchor(anchor).then(() => {});
+                        xrSession.persistentAnchors.forEach(async (anchor) => {
+                            try {
+                                await xrSession.restorePersistentAnchor(anchor);
+                            } catch (err) {
+                                console.warn('Could not delete persisted anchor');
+                            }
                         });
                         window.localStorage.removeItem('originAnchor');
                     });
@@ -186,6 +194,7 @@ AFRAME.registerSystem('armarker', {
      */
     async initCVPipeline() {
         if (this.cvPipelineInitializing || this.cvPipelineInitialized) return;
+        if (AFRAME.utils.device.isOculusBrowser()) return;
         this.cvPipelineInitializing = true;
         // try to set up a WebXRViewer/WebARViewer (custom iOS browser) camera capture pipeline
         if (this.isWebXRViewer) {
@@ -263,6 +272,8 @@ AFRAME.registerSystem('armarker', {
 
         this.cvPipelineInitializing = false;
         this.cvPipelineInitialized = true;
+
+        ARENA.events.emit(ARENA_EVENTS.CV_INITIALIZED);
 
         // send size of known markers to cvWorker (so it can compute pose)
         Object.entries(this.markers).forEach(([mid, marker]) => {
@@ -416,7 +427,7 @@ AFRAME.registerSystem('armarker', {
     },
     /**
      * Get all markers registered with the system
-     * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb' to filter for;
+     * @param {object} mtype - The marker type 'apriltag_36h11', 'lightanchor', 'uwb', 'vive', 'optitrack' to filter for;
      *                         No argument or undefined will return all
      * @return {object} - a dictionary of markers
      * @alias module:armarker-system
@@ -500,18 +511,29 @@ AFRAME.registerSystem('armarker', {
         if (!xrFrame) {
             console.error("No XRFrame available, can't set origin anchor");
         }
-        xrFrame.createAnchor(anchorPose, this.xrRefSpace).then((anchor) => {
+        xrFrame.createAnchor(anchorPose, this.xrRefSpace).then(async (anchor) => {
             // Persist, currently Quest browser only
             if (anchor.requestPersistentHandle) {
                 const oldPersistAnchor = window.localStorage.getItem('originAnchor');
                 if (oldPersistAnchor) {
                     // Delete the old anchor
-                    this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
+                    await this.webXRSession.deletePersistentAnchor(oldPersistAnchor);
                 }
-                anchor.requestPersistentHandle().then((handle) => {
-                    // Save the new one
-                    window.localStorage.setItem('originAnchor', handle);
-                });
+                // Check how many anchors there are, Quest has a low limit currently
+                if (this.webXRSession.persistentAnchors.length >= MAX_PERSISTENT_ANCHORS) {
+                    // Delete the oldest anchor
+                    const oldestAnchor = this.webXRSession.persistentAnchors.values().next().value;
+                    await this.webXRSession.deletePersistentAnchor(oldestAnchor);
+                }
+                anchor
+                    .requestPersistentHandle()
+                    .then((handle) => {
+                        // Save the new one
+                        window.localStorage.setItem('originAnchor', handle);
+                    })
+                    .catch((err) => {
+                        console.error('Could not persist anchor', err);
+                    });
             } else if (this.originAnchor) {
                 this.originAnchor.delete();
             }

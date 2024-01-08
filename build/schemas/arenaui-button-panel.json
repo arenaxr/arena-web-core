@@ -1,0 +1,113 @@
+{
+    "title": "ARENAUI Button Panel",
+    "description": "ARENAUI element which displays a vertical or horizontal panel of buttons.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["arenaui-button-panel"]
+                                },
+                                "buttons": {
+                                    "type": "array",
+                                    "title": "Buttons",
+                                    "default": [
+                                        {
+                                            "name": "Option 1"
+                                        },
+                                        {
+                                            "name": "Option 2"
+                                        }
+                                    ],
+                                    "uniqueItems": false,
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "title": "Button Name"
+                                            },
+                                            "img": {
+                                                "type": "string",
+                                                "title": "Image URL for Image button",
+                                                "description": "Optional, leave blank for text button"
+                                            },
+                                            "size": {
+                                                "type": "number",
+                                                "title": "Square size for image buttons",
+                                                "description": "Optional",
+                                                "default": 0.3
+                                            },
+                                            "height": {
+                                                "type": "number",
+                                                "title": "Button Height",
+                                                "description": "Optional for image buttons, overrides size"
+                                            },
+                                            "width": {
+                                                "type": "number",
+                                                "title": "Button Width",
+                                                "description": "Optional for image buttons, overrides size"
+                                            },
+                                            "borderRadius": {
+                                                "type": "number",
+                                                "title": "Button Border Radius",
+                                                "description": "Optional for image buttons, overrides default 0.075"
+                                            }
+                                        },
+                                        "required": ["name"]
+                                    }
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "title": "Title",
+                                    "description": "Title to display above buttons (optional).",
+                                    "default": ""
+                                },
+                                "vertical": {
+                                    "type": "boolean",
+                                    "title": "Vertical button layout",
+                                    "default": false
+                                },
+                                "font": {
+                                    "type": "string",
+                                    "title": "Font",
+                                    "description": "Font to use for button text",
+                                    "default": "Roboto",
+                                    "enum": ["Roboto", "Roboto-Mono"]
+                                },
+                                "theme": {
+                                    "type": "string",
+                                    "title": "Color Theme",
+                                    "default": "light",
+                                    "enum": ["light", "dark"]
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "Button Panel Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "arenaui-button-panel"
+                    },
+                    "required": ["object_type", "title", "vertical", "buttons", "position", "rotation"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

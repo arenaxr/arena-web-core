@@ -3,7 +3,7 @@
 }
 
 .arena-av-setup {
-    z-index: 999;
+    z-index: 99999;
     position: relative;
     background-color: rgba(0, 0, 0, 0.6);
 }

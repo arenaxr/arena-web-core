@@ -48,6 +48,7 @@ window.addEventListener('onauth', async (e) => {
     const deleteSceneButton = document.getElementById('deletescene');
     const importSceneButton = document.getElementById('importscene');
     const exportSceneButton = document.getElementById('exportscene');
+    const uploadFilestoreButton = document.getElementById('uploadfilestore');
     const setValueButton = document.getElementById('setvalue');
     const selectSchema = document.getElementById('objtype');
     const genidButton = document.getElementById('genid');
@@ -64,6 +65,14 @@ window.addEventListener('onauth', async (e) => {
     let newScene = true;
     let saved_namespace;
     let saved_scene;
+
+    const uploadFileTypes = {
+        image: 'image/*',
+        'gltf-model': '*.glb',
+        'pcd-model': '*.pcd',
+        'threejs-scene': '*.json',
+        gaussian_splatting: '*.splat',
+    };
 
     // copy to clipboard buttons
     new ClipboardJS(document.querySelector('#copy_json'), {
@@ -154,6 +163,8 @@ window.addEventListener('onauth', async (e) => {
                 validate.value = 'valid';
             }
             insertEulerRotationEditor(json);
+            uploadFilestoreButton.style.display =
+                uploadFileTypes[json.data.object_type] === undefined ? 'none' : 'inline';
         });
 
         const typeSel = document.getElementsByName('root[type]')[0];
@@ -212,7 +223,7 @@ window.addEventListener('onauth', async (e) => {
      * Seeks the Rotation block (if any) and inserts a user-friendly Euler degree editor.
      * @param {*} json The object returned from editor.getValue().
      */
-    var insertEulerRotationEditor = function (json) {
+    let insertEulerRotationEditor = function (json) {
         editor.querySelectorAll('[data-schemapath="root.data.rotation"]').forEach((rowRotation) => {
             // divide rotation attribute into 2 GUI columns
             const rowQuat = rowRotation.childNodes[3];
@@ -232,10 +243,10 @@ window.addEventListener('onauth', async (e) => {
             let elEz;
             $('#rotation-euler').load('rotation-euler.html', () => {
                 // update euler degrees on form from quaternions
-                elEx = document.getElementsByName('root[data][rotation][euler-x]')[0];
-                elEy = document.getElementsByName('root[data][rotation][euler-y]')[0];
-                elEz = document.getElementsByName('root[data][rotation][euler-z]')[0];
-                const e = new THREE.Euler().setFromQuaternion(
+                [elEx] = document.getElementsByName('root[data][rotation][euler-x]');
+                [elEy] = document.getElementsByName('root[data][rotation][euler-y]');
+                [elEz] = document.getElementsByName('root[data][rotation][euler-z]');
+                const eu = new THREE.Euler().setFromQuaternion(
                     new THREE.Quaternion(
                         parseFloat(elQx.value),
                         parseFloat(elQy.value),
@@ -243,12 +254,15 @@ window.addEventListener('onauth', async (e) => {
                         parseFloat(elQw.value)
                     )
                 );
-                elEx.value = parseFloat(THREE.MathUtils.radToDeg(e.x).toFixed(3));
-                elEy.value = parseFloat(THREE.MathUtils.radToDeg(e.y).toFixed(3));
-                elEz.value = parseFloat(THREE.MathUtils.radToDeg(e.z).toFixed(3));
+                elEx.value = parseFloat(THREE.MathUtils.radToDeg(eu.x).toFixed(3));
+                elEy.value = parseFloat(THREE.MathUtils.radToDeg(eu.y).toFixed(3));
+                elEz.value = parseFloat(THREE.MathUtils.radToDeg(eu.z).toFixed(3));
             });
             rowEuler.addEventListener('change', () => {
                 // update quaternions on form from euler degree changes
+                [elEx] = document.getElementsByName('root[data][rotation][euler-x]');
+                [elEy] = document.getElementsByName('root[data][rotation][euler-y]');
+                [elEz] = document.getElementsByName('root[data][rotation][euler-z]');
                 const q = new THREE.Quaternion().setFromEuler(
                     new THREE.Euler(
                         THREE.MathUtils.degToRad(elEx.value),
@@ -356,6 +370,171 @@ window.addEventListener('onauth', async (e) => {
             }, 500); // refresh after a while, so that delete messages are processed
         });
     }
+
+    /**
+     * Utility function to get cookie value
+     * @param {string} name cookie name
+     * @return {string} cookie value
+     */
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === `${name}=`) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    async function uploadSceneFileStore(objtype) {
+        const accept = uploadFileTypes[objtype];
+        const htmlopt =
+            objtype === 'gltf-model'
+                ? `<div style="float: left;">
+            <input type="checkbox" id="cbhideinar" name="cbhideinar" >
+            <label for="cbhideinar" style="display: inline-block;">Room-scale digital-twin model? Hide in AR.</label>
+            </div>`
+                : '';
+        const htmlval = `${htmlopt}`;
+
+        await Swal.fire({
+            title: `Upload ${objtype} to Filestore`,
+            html: htmlval,
+            input: 'file',
+            inputAttributes: {
+                accept: `${accept}`,
+                'aria-label': `Select ${objtype}`,
+            },
+            confirmButtonText: 'Upload',
+            focusConfirm: false,
+            showCancelButton: true,
+            cancelButtonText: 'Cancel',
+            showLoaderOnConfirm: true,
+            preConfirm: (resultFileOpen) => {
+                const fn = resultFileOpen.name.substr(0, resultFileOpen.name.lastIndexOf('.'));
+                const safeFilename = fn.replace(/(\W+)/gi, '-');
+                let hideinar = false;
+                const reader = new FileReader();
+                reader.onload = async (evt) => {
+                    const file = document.querySelector('.swal2-file');
+                    if (!file) {
+                        Swal.showValidationMessage(`${objtype} file not loaded!`);
+                        return;
+                    }
+                    if (objtype === 'gltf-model') {
+                        // allow model checkboxes hide in ar/vr (recommendations)
+                        hideinar = Swal.getPopup().querySelector('#cbhideinar').checked;
+                    }
+                    // request fs token endpoint if auth not ready or expired
+                    let token = getCookie('auth');
+                    if (!isTokenUsable(token)) {
+                        try {
+                            await ARENAUserAccount.requestStoreLogin();
+                        } catch (err) {
+                            Swal.showValidationMessage(`Error requesting file store login: ${err.statusText}`);
+                            return;
+                        }
+                        token = getCookie('auth');
+                    }
+                    // update user/staff scoped path
+                    const storeResPrefix = authState.is_staff ? `users/${username}/` : ``;
+                    const userFilePath = `scenes/${sceneinput.value}/${resultFileOpen.name}`;
+                    const storeResPath = `${storeResPrefix}${userFilePath}`;
+                    const storeExtPath = `store/users/${username}/${userFilePath}`;
+                    Swal.fire({
+                        title: 'Wait for Upload',
+                        imageUrl: evt.target.result,
+                        imageAlt: `The uploaded ${objtype}`,
+                        showConfirmButton: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancel',
+                        didOpen: () => {
+                            Swal.showLoading();
+                            // request fs file upload with fs auth
+                            return fetch(`/storemng/api/resources/${storeResPath}?override=true`, {
+                                method: 'POST',
+                                headers: {
+                                    Accept: resultFileOpen.type,
+                                    'X-Auth': `${token}`,
+                                },
+                                body: file.files[0],
+                            })
+                                .then((responsePostFS) => {
+                                    if (!responsePostFS.ok) {
+                                        throw new Error(responsePostFS.statusText);
+                                    }
+                                    let obj;
+                                    try {
+                                        obj = JSON.parse(output.value);
+                                    } catch (err) {
+                                        console.error(err);
+                                        throw err;
+                                    }
+                                    if (obj.object_id === '') {
+                                        obj.object_id = safeFilename;
+                                    }
+                                    if (objtype === 'gaussian_splatting') {
+                                        obj.data.src = `${storeExtPath}`;
+                                    } else {
+                                        obj.data.url = `${storeExtPath}`;
+                                    }
+                                    if (hideinar) {
+                                        obj.data['hide-on-enter-ar'] = true;
+                                    }
+                                    if (objtype === 'image') {
+                                        // try to preserve image aspect ratio in mesh, user can scale to resize
+                                        const img = Swal.getPopup().querySelector('.swal2-image');
+                                        if (img.width > img.height) {
+                                            const ratio = img.width / img.height;
+                                            obj.data.width = ratio;
+                                            obj.data.height = 1.0;
+                                        } else {
+                                            const ratio = img.height / img.width;
+                                            obj.data.width = 1.0;
+                                            obj.data.height = ratio;
+                                        }
+                                    }
+                                    // push updated data to forms
+                                    output.value = JSON.stringify(obj, null, 2);
+                                    jsoneditor.setValue(obj);
+                                    Alert.fire({
+                                        icon: 'info',
+                                        title: 'File Store Upload Success',
+                                        html: `File ${resultFileOpen.name} uploaded to File Store. Don't forget to publish your JSON with the new File Store URL.`,
+                                        timer: 10000,
+                                    });
+                                })
+                                .catch((error) => {
+                                    Swal.showValidationMessage(`Request failed: ${error}`);
+                                })
+                                .finally(() => {
+                                    Swal.hideLoading();
+                                });
+                        },
+                        willClose: () => {
+                            console.debug('Nothing');
+                        },
+                    }).then((resultDidOpen) => {
+                        if (resultDidOpen.dismiss === Swal.DismissReason.timer) {
+                            console.error(`Upload ${objtype} file dialog timed out!`);
+                        }
+                    });
+                };
+                reader.readAsDataURL(resultFileOpen);
+            },
+        });
+    }
+    // switch image/model
+    uploadFilestoreButton.addEventListener('click', async () => {
+        const obj = JSON.parse(output.value);
+        await uploadSceneFileStore(obj.data.object_type);
+    });
 
     openAddSceneButton.addEventListener('click', async () => {
         newSceneModal();
@@ -976,6 +1155,16 @@ function isUserSceneEditor(mqtt_token, objectsTopic) {
         if (matchJWT(objectsTopic, perms.publ)) {
             return true;
         }
+    }
+    return false;
+}
+
+function isTokenUsable(token) {
+    if (token) {
+        const tokenObj = KJUR.jws.JWS.parse(token);
+        const exp = tokenObj.payloadObj.exp * 1000;
+        const now = new Date().getTime();
+        return now < exp;
     }
     return false;
 }

@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["videosphere"]
                                 },
                                 "autoplay": {
@@ -38,12 +38,12 @@
                                     "default": 5000
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments height",
                                     "default": 64
                                 },
                                 "segmentsWidth": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments width",
                                     "default": 64
                                 },
@@ -64,21 +64,9 @@
                     "title": "Videosphere Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "videosphere",
-                        "radius": 5000,
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "videosphere"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "radius", "position", "rotation"]
                 }
             }
         }

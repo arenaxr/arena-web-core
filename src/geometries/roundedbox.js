@@ -17,7 +17,7 @@ AFRAME.registerGeometry('roundedbox', {
         width: { default: 1, min: 0 },
         height: { default: 1, min: 0 },
         depth: { default: 1, min: 0 },
-        radius: { default: 1, min: 0 },
+        radius: { default: 0.15, min: 0 },
         radiusSegments: { default: 10, min: 0 },
     },
 

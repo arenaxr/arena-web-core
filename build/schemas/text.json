@@ -1,6 +1,6 @@
 {
     "title": "Text",
-    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/text.html'>https://aframe.io/docs/1.4.0/components/text.html</a>",
+    "description": "Display text.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>A-Frame Text</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,11 +14,12 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["text"]
                                 },
                                 "align": {
-                                    "description": "Multi-line text alignment (left, center, right).",
+                                    "type": "string",
+                                    "description": "Multi-line text alignment.",
                                     "default": "left",
                                     "enum": ["left", "center", "right"]
                                 },
@@ -28,12 +29,14 @@
                                     "type": "number"
                                 },
                                 "anchor": {
-                                    "description": "Horizontal positioning (left, center, right, align).",
+                                    "type": "string",
+                                    "description": "Horizontal positioning.",
                                     "default": "center",
                                     "enum": ["left", "right", "center", "align"]
                                 },
                                 "baseline": {
-                                    "description": "Vertical positioning (top, center, bottom).",
+                                    "type": "string",
+                                    "description": "Vertical positioning.",
                                     "default": "center",
                                     "enum": ["top", "center", "bottom"]
                                 },
@@ -83,9 +86,12 @@
                                 "opacity": {
                                     "description": "Opacity, on a scale from 0 to 1, where 0 means fully transparent and 1 means fully opaque.",
                                     "type": "number",
-                                    "default": 1.0
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "default": 1
                                 },
                                 "shader": {
+                                    "type": "string",
                                     "description": "Shader used to render text.",
                                     "default": "sdf",
                                     "enum": [
@@ -100,7 +106,8 @@
                                     ]
                                 },
                                 "side": {
-                                    "description": "Side to render. (front, back, double)",
+                                    "type": "string",
+                                    "description": "Side to render.",
                                     "default": "double",
                                     "enum": ["front", "back", "double"]
                                 },
@@ -110,10 +117,10 @@
                                     "default": 4
                                 },
                                 "text": {
+                                    "title": "DEPRECATED (text)",
                                     "type": "string",
-                                    "deprecated": true,
-                                    "title": "Text Value (deprecated; don't use)",
-                                    "description": "(deprecated) Please use attribute 'value' in new Text objects;"
+                                    "description": "DEPRECATED: data.text is deprecated for object_type: text, use data.value instead.",
+                                    "deprecated": true
                                 },
                                 "transparent": {
                                     "description": "Whether text is transparent.",
@@ -126,7 +133,8 @@
                                     "type": "string"
                                 },
                                 "whiteSpace": {
-                                    "description": "How whitespace should be handled (i.e., normal, pre, nowrap).</a>",
+                                    "type": "string",
+                                    "description": "How whitespace should be handled.",
                                     "default": "normal",
                                     "enum": ["normal", "pre", "nowrap"]
                                 },
@@ -163,25 +171,9 @@
                     "title": "Text Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "text",
-                        "font": "roboto",
-                        "side": "double",
-                        "value": "",
-                        "width": 5,
-                        "color": "white",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "text"
                     },
-                    "required": ["object_type"]
+                    "required": ["object_type", "font", "side", "value", "color", "position", "rotation"]
                 }
             }
         }

@@ -1,6 +1,6 @@
 {
     "title": "Image",
-    "description": "Display an image on a plane",
+    "description": "Display an image on a plane.\n\nSee guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,15 +14,35 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["image"]
+                                },
+                                "url": {
+                                    "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
+                                    "format": "uri",
+                                    "title": "Image Url",
+                                    "type": "string"
+                                },
+                                "height": {
+                                    "type": "number",
+                                    "title": "height",
+                                    "default": 1
+                                },
+                                "segmentsHeight": {
+                                    "type": "integer",
+                                    "title": "segments height",
+                                    "default": 1
+                                },
+                                "segmentsWidth": {
+                                    "type": "integer",
+                                    "title": "segments width",
+                                    "default": 1
+                                },
+                                "width": {
+                                    "type": "number",
+                                    "title": "width",
+                                    "default": 1
                                 }
-                            },
-                            "url": {
-                                "description": "Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
-                                "format": "uri",
-                                "title": "Url",
-                                "type": "string"
                             }
                         },
                         {
@@ -38,25 +58,9 @@
                     "title": "Image Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "image",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "image"
                     },
-                    "required": ["object_type", "url", "position", "rotation"]
+                    "required": ["object_type", "url", "width", "height", "position", "rotation"]
                 }
             }
         }

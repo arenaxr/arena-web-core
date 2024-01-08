@@ -97,4 +97,5 @@ function validateSrc(src, isImageCb, isVideoCb) {
     });
 }
 
+// AFRAME Monkeypatch (src/utils/src-loader.js)
 AFRAME.utils.srcLoader.validateSrc = validateSrc;

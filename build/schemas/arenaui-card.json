@@ -1,0 +1,115 @@
+{
+    "title": "ARENAUI Card Panel",
+    "description": "ARENAUI element which displays text and optionally an image.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["arenaui-card"]
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "title": "Title",
+                                    "default": ""
+                                },
+                                "body": {
+                                    "type": "string",
+                                    "title": "Body",
+                                    "default": "",
+                                    "description": "This is the text body of the card."
+                                },
+                                "bodyAlign": {
+                                    "type": "string",
+                                    "title": "Body Text Alignment",
+                                    "default": "left",
+                                    "enum": ["left", "center", "right", "justify"]
+                                },
+                                "img": {
+                                    "type": "string",
+                                    "title": "Image URL",
+                                    "description": "This image will be embedded alongside the body text",
+                                    "default": ""
+                                },
+                                "imgCaption": {
+                                    "type": "string",
+                                    "title": "Image Caption",
+                                    "default": "",
+                                    "description": "This will caption the image"
+                                },
+                                "imgDirection": {
+                                    "type": "string",
+                                    "title": "Image Direction",
+                                    "default": "right",
+                                    "enum": ["left", "right"]
+                                },
+                                "imgSize": {
+                                    "type": "string",
+                                    "title": "Image sizing",
+                                    "default": "cover",
+                                    "enum": ["cover", "contain", "stretch"]
+                                },
+                                "textImageRatio": {
+                                    "type": "number",
+                                    "title": "Text to Image Width Ratio",
+                                    "default": 0.5,
+                                    "minimum": 0
+                                },
+                                "fontSize": {
+                                    "type": "number",
+                                    "title": "Font Size",
+                                    "default": 0.035
+                                },
+                                "widthScale": {
+                                    "type": "number",
+                                    "title": "Width scale multiplier",
+                                    "default": 1
+                                },
+                                "closeButton": {
+                                    "type": "boolean",
+                                    "title": "Show close button",
+                                    "default": false
+                                },
+                                "font": {
+                                    "type": "string",
+                                    "title": "Font",
+                                    "description": "Font to use for button text",
+                                    "default": "Roboto",
+                                    "enum": ["Roboto", "Roboto-Mono"]
+                                },
+                                "theme": {
+                                    "type": "string",
+                                    "title": "Color Theme",
+                                    "default": "light",
+                                    "enum": ["light", "dark"]
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "Card Panel Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "arenaui-card"
+                    },
+                    "required": ["object_type", "title", "body", "img", "position", "rotation"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

@@ -14,7 +14,7 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": ["torusKnot"]
                                 },
                                 "p": {
@@ -35,15 +35,15 @@
                                 "radiusTubular": {
                                     "type": "number",
                                     "title": "radius tubular",
-                                    "default": 0.4
+                                    "default": 0.2
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 8
                                 },
                                 "segmentsTubular": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments tubular",
                                     "default": 100
                                 }
@@ -60,27 +60,15 @@
                         }
                     ],
                     "title": "Torus Knot Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "torusKnot",
-                        "radius": 1,
-                        "radiusTubular": 0.4,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": ["object_type", "radius"]
+                    "required": ["object_type", "radius", "radiusTubular", "position", "rotation"]
                 }
             }
         }
