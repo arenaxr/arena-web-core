@@ -143,12 +143,40 @@
                    }
                 ]
              },
-             "info":{
+             "run_info":{
                 "type":"object",
                 "title":"Execution info",
                 "description":"Program execution info, added at runtime",
                 "properties":{
-                   "create_time":{
+                  "web_host":{
+                     "type":"string",
+                     "description":"ARENA web host."
+                  },
+                  "namespace":{
+                     "type":"string",
+                     "description":"ARENA namespace."
+                  },
+                  "scene":{
+                     "type":"string",
+                     "description":"ARENA scene."
+                  },
+                  "realm":{
+                     "type":"string",
+                     "description":"ARENA realm."
+                  },
+                  "filename":{
+                     "type":"string",
+                     "description":"Executable filename."
+                  },
+                  "args":{
+                     "type":"string",
+                     "description":"Command line arguments."
+                  },
+                  "env":{
+                     "type":"string",
+                     "description":"Value of ARENA-py environment variables."
+                  },
+                  "create_time":{
                       "type":"string",
                       "description":"Program creation time."
                    },
