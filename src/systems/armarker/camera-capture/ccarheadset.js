@@ -190,6 +190,9 @@ export default class ARHeadsetCameraCapture {
      * @private
      */
     async getCameraImagePixels(time) {
+        if (this.frameGsPixels.length === 0) {
+            return;
+        }
         let imageData;
         try {
             this.canvasCtx.drawImage(this.video, 0, 0, this.frameWidth, this.frameHeight);
