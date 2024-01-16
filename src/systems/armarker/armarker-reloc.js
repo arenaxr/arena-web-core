@@ -285,14 +285,16 @@ export default class ARMarkerRelocalization {
                         */
 
                         const { xrSession } = this.arenaScene;
-                        xrSession.requestAnimationFrame((time, frame) => {
-                            this.arMakerSystem.setOriginAnchor({
-                                // Copy values
-                                ...this.cameraRigObj3D.position,
-                                ...this.cameraSpinnerObj3D.quaternion,
-                                frame,
+                        if (xrSession) {
+                            xrSession.requestAnimationFrame((time, frame) => {
+                                this.arMakerSystem.setOriginAnchor({
+                                    // Copy values
+                                    ...this.cameraRigObj3D.position,
+                                    ...this.cameraSpinnerObj3D.quaternion,
+                                    frame,
+                                });
                             });
-                        });
+                        }
 
                         this.arMakerSystem.initialLocalized = true;
                     }
