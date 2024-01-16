@@ -793,16 +793,18 @@ AFRAME.registerSystem('arena-jitsi', {
         }
         this.avConnected = true;
 
-        JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
-            .then(async (tracks) => {
-                await this.onLocalTracks(tracks);
-                if (this.withVideo) this.setupCornerVideo.bind(this)();
-                this.stopVideo();
-            })
-            .catch((err) => {
-                this.initialized = false;
-                console.warn(err);
-            });
+        if (!ARENA.params.armode) {
+            JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
+                .then(async (tracks) => {
+                    await this.onLocalTracks(tracks);
+                    if (this.withVideo) this.setupCornerVideo.bind(this)();
+                    this.stopVideo();
+                })
+                .catch((err) => {
+                    this.initialized = false;
+                    console.warn(err);
+                });
+        }
     },
 
     /**
