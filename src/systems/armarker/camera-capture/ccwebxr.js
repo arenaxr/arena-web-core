@@ -103,6 +103,8 @@ export default class WebXRCameraCapture {
 
         this.gl = gl;
 
+        this.onXRFrame = this.onXRFrame.bind(this);
+
         const WebGlBinding = window.XRWebGLBinding;
         // check if we have webXR camera capture available
         if (WebGlBinding) {
@@ -112,7 +114,7 @@ export default class WebXRCameraCapture {
                 const webxrSystem = document.getElementById('ARENAScene').systems.webxr;
                 xrSession.requestReferenceSpace(webxrSystem.sessionReferenceSpaceType).then((xrRefSpace) => {
                     this.xrRefSpace = xrRefSpace;
-                    xrSession.requestAnimationFrame(this.onXRFrame.bind(this));
+                    xrSession.requestAnimationFrame(this.onXRFrame);
                 });
             } else throw 'WebXRCC: WebXR camera access not found!';
         } else throw 'WebXRCC: XRWebGLBinding not found!';
@@ -290,7 +292,7 @@ export default class WebXRCameraCapture {
      */
     onXRFrame(time, frame) {
         const { session } = frame;
-        session.requestAnimationFrame(this.onXRFrame.bind(this));
+        session.requestAnimationFrame(this.onXRFrame);
         if (!this.frameRequested) return;
 
         const pose = frame.getViewerPose(this.xrRefSpace);

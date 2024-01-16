@@ -86,6 +86,8 @@ export default class ARHeadsetCameraCapture {
         }
         ARHeadsetCameraCapture.instance = this;
 
+        this.getCameraImagePixels = this.getCameraImagePixels.bind(this);
+
         this.arHeadset = arHeadset;
         if (!this.headsetPM[arHeadset]) {
             // eslint-disable-next-line max-len
@@ -160,7 +162,7 @@ export default class ARHeadsetCameraCapture {
     setCVWorker(worker, frameRequested = true) {
         this.cvWorker = worker;
 
-        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels);
     }
 
     /**
@@ -179,7 +181,7 @@ export default class ARHeadsetCameraCapture {
             this.frameGsPixels = grayscalePixels;
         }
         if (worker) this.cvWorker = worker;
-        requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        requestAnimationFrame(this.getCameraImagePixels);
     }
 
     /**
@@ -194,7 +196,7 @@ export default class ARHeadsetCameraCapture {
             imageData = this.canvasCtx.getImageData(0, 0, this.frameWidth, this.frameHeight);
         } catch (err) {
             console.warn('Failed to get video frame. Video not started ?', err);
-            setTimeout(this.getCameraImagePixels.bind(this), 1000); // try again..
+            setTimeout(this.getCameraImagePixels, 1000); // try again..
             return;
         }
         const imageDataPixels = imageData.data;

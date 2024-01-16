@@ -68,6 +68,7 @@ export default class WebARCameraCapture {
             height: this.frameHeight,
         };
         this.arSource = new GetUserMediaARSource(options);
+        this.getCameraImagePixels = this.getCameraImagePixels.bind(this);
     }
 
     /**
@@ -142,7 +143,7 @@ export default class WebARCameraCapture {
     setCVWorker(worker, frameRequested = true) {
         this.cvWorker = worker;
 
-        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels);
     }
 
     /**
@@ -156,7 +157,7 @@ export default class WebARCameraCapture {
             this.frameGsPixels = grayscalePixels;
         }
         if (worker) this.cvWorker = worker;
-        requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        requestAnimationFrame(this.getCameraImagePixels);
     }
 
     /**
@@ -171,7 +172,7 @@ export default class WebARCameraCapture {
             imageData = this.canvasCtx.getImageData(0, 0, this.frameWidth, this.frameHeight);
         } catch (err) {
             console.warn('Failed to get video frame. Video not started ?', err);
-            setTimeout(this.getCameraImagePixels.bind(this), 1000); // try again..
+            setTimeout(this.getCameraImagePixels, 1000); // try again..
             return;
         }
         const imageDataPixels = imageData.data;
