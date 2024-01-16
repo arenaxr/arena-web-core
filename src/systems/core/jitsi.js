@@ -797,6 +797,7 @@ AFRAME.registerSystem('arena-jitsi', {
             .then(async (tracks) => {
                 await this.onLocalTracks(tracks);
                 if (this.withVideo) this.setupCornerVideo.bind(this)();
+                this.stopVideo();
             })
             .catch((err) => {
                 this.initialized = false;
