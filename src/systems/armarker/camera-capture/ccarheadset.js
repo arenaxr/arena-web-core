@@ -97,6 +97,9 @@ export default class ARHeadsetCameraCapture {
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
+        if (this.canvas.transferControlToOffscreen) {
+            this.canvas = this.canvas.transferControlToOffscreen();
+        }
         this.canvasCtx = this.canvas.getContext('2d', { willReadFrequently: true });
 
         this.frameWidth = 1280;

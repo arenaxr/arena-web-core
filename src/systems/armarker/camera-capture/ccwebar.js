@@ -82,6 +82,9 @@ export default class WebARCameraCapture {
                     document.body.appendChild(videoElem);
 
                     this.canvas = document.createElement('canvas');
+                    if (this.canvas.transferControlToOffscreen) {
+                        this.canvas = this.canvas.transferControlToOffscreen();
+                    }
                     this.canvasCtx = this.canvas.getContext('2d', { willReadFrequently: true });
 
                     // init frame size to screen size
@@ -103,7 +106,9 @@ export default class WebARCameraCapture {
      */
     onResize() {
         this.arSource.resize(window.innerWidth, window.innerHeight);
-        this.arSource.copyDimensionsTo(this.canvas);
+        if (this.canvas.style) {
+            this.arSource.copyDimensionsTo(this.canvas);
+        }
 
         const { videoWidth } = this.video;
         const { videoHeight } = this.video;
