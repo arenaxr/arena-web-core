@@ -20,11 +20,13 @@
                                 "color": {
                                     "default": "#000000",
                                     "format": "color",
+                                    "description": "Line color",
                                     "type": "string"
                                 },
                                 "lineWidth": {
                                     "type": "number",
                                     "title": "Line width",
+                                    "description": "Width of line in px",
                                     "default": 1
                                 },
                                 "lineWidthStyler": {

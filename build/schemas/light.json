@@ -142,7 +142,7 @@
                                     "title": "type",
                                     "type": "string",
                                     "enum": ["ambient", "directional", "hemisphere", "point", "spot"],
-                                    "description": "One of ambient, directional, hemisphere, point, spot.",
+                                    "description": "The type of light, or what shape the light should take.",
                                     "default": "directional"
                                 }
                             }
