@@ -118,6 +118,7 @@ class MQTTWorker {
         const topicCategory = topic.split('/')[1];
         const handler = this.messageHandlers[topicCategory];
         if (handler) {
+            message.workerTimestamp = new Date().getTime();
             handler(message);
         }
     }
