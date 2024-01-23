@@ -9,6 +9,8 @@
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
+let lastMetricTick = new Date().getTime();
+
 /**
  * Main ARENA MQTT webworker client
  */
@@ -134,6 +136,11 @@ class MQTTWorker {
     tock(topicCategory) {
         const batch = this.messageQueues[topicCategory];
         this.messageQueues[topicCategory] = [];
+        const now = new Date().getTime();
+        if (now - lastMetricTick > 1000) {
+            console.log(`Worker batching ${batch.length} messages for ${topicCategory}`);
+            lastMetricTick = now;
+        }
         return batch;
     }
 
