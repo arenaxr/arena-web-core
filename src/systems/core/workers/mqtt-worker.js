@@ -19,6 +19,8 @@ class MQTTWorker {
 
     connectionLostHandlers = [];
 
+    messageQueues = {};
+
     /**
      * @param {object} ARENAConfig
      * @param {function} healthCheck
@@ -116,11 +118,23 @@ class MQTTWorker {
     onMessageArrivedDispatcher(message) {
         const topic = message.destinationName;
         const topicCategory = topic.split('/')[1];
-        const handler = this.messageHandlers[topicCategory];
-        if (handler) {
-            message.workerTimestamp = new Date().getTime();
-            handler(message);
+        // const handler = this.messageHandlers[topicCategory];
+        message.workerTimestamp = new Date().getTime();
+        try {
+            message.payloadObj = JSON.parse(message.payloadString);
+            this.messageQueues[topicCategory].push(message);
+        } catch (e) {
+            // Ignore
         }
+        // if (handler) {
+        //     handler(message);
+        // }
+    }
+
+    tock(topicCategory) {
+        const batch = this.messageQueues[topicCategory];
+        this.messageQueues[topicCategory] = [];
+        return batch;
     }
 
     /**
@@ -143,6 +157,15 @@ class MQTTWorker {
         } else {
             this.messageHandlers[topicCategory] = mainHandler;
         }
+    }
+
+    /**
+     * Register a message handler for a given topic category beneath realm (second level).
+     * @param {string} topicCategory - the topic category to register a handler for
+
+     */
+    registerMessageQueue(topicCategory) {
+        this.messageQueues[topicCategory] = [];
     }
 
     /**
