@@ -686,9 +686,9 @@
             "required": ["on", "title", "label", "placeholder"]
         },
         "url": {
-            "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
+            "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
             "format": "uri",
-            "title": "General Url",
+            "title": "Url",
             "type": "string"
         },
         "remote-render": {

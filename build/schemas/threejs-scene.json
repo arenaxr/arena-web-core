@@ -18,9 +18,9 @@
                                     "enum": ["threejs-scene"]
                                 },
                                 "url": {
-                                    "description": "Store File Store file paths under 'store/users/<username>', see CDN and other storage options in the description above.",
+                                    "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
                                     "format": "uri",
-                                    "title": "Three.js Model Url",
+                                    "title": "Url",
                                     "type": "string"
                                 }
                             }
