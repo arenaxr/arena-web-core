@@ -9,7 +9,9 @@
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
+const MINTOCKINTERVAL = 1000;
 let lastMetricTick = new Date().getTime();
+let lastTock = new Date().getTime();
 
 /**
  * Main ARENA MQTT webworker client
@@ -120,32 +122,43 @@ class MQTTWorker {
      * @param {Paho.Message} message
      */
     onMessageArrivedDispatcher(message) {
+        const now = new Date().getTime();
         const topic = message.destinationName;
         const topicCategory = topic.split('/')[1];
-        // const handler = this.messageHandlers[topicCategory];
+        const handler = this.messageHandlers[topicCategory];
         const trimmedMessage = {
             destinationName: message.destinationName,
             payloadString: message.payloadString,
-            workerTimestamp: new Date().getTime(),
+            workerTimestamp: now,
         };
-        if (this.messageQueueConf[topicCategory]) {
-            try {
-                trimmedMessage.payloadObj = JSON.parse(message.payloadString);
-            } catch (e) {
-                // Ignore
+        if (this.messageQueues[topicCategory]) {
+            if (this.messageQueueConf[topicCategory]) {
+                try {
+                    trimmedMessage.payloadObj = JSON.parse(message.payloadString);
+                } catch (e) {
+                    // Ignore
+                }
             }
+            this.messageQueues[topicCategory].push(trimmedMessage);
+            // Been too long since last tock (lost focus?), flush queue to main thread instead of waiting for pull
+            if (now - lastTock > MINTOCKINTERVAL && handler) {
+                const batch = this.messageQueues[topicCategory];
+                this.messageQueues[topicCategory] = [];
+                lastTock = now;
+                console.log(`Worker flushing ${batch.length} messages for ${topicCategory}`);
+                batch.forEach(handler);
+            }
+        } else if (handler) {
+            handler(trimmedMessage);
         }
-        this.messageQueues[topicCategory].push(trimmedMessage);
-        // if (handler) {
-        //     handler(message);
-        // }
     }
 
     tock(topicCategory) {
         const batch = this.messageQueues[topicCategory];
         this.messageQueues[topicCategory] = [];
         const now = new Date().getTime();
-        if (now - lastMetricTick > 1000) {
+        lastTock = now;
+        if (now - lastMetricTick > MINTOCKINTERVAL) {
             console.log(`Worker batching ${batch.length} messages for ${topicCategory}`);
             lastMetricTick = now;
         }
