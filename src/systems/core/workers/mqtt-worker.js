@@ -23,6 +23,8 @@ class MQTTWorker {
 
     messageQueues = {};
 
+    messageQueueConf = {};
+
     /**
      * @param {object} ARENAConfig
      * @param {function} healthCheck
@@ -121,13 +123,19 @@ class MQTTWorker {
         const topic = message.destinationName;
         const topicCategory = topic.split('/')[1];
         // const handler = this.messageHandlers[topicCategory];
-        message.workerTimestamp = new Date().getTime();
-        try {
-            message.payloadObj = JSON.parse(message.payloadString);
-            this.messageQueues[topicCategory].push(message);
-        } catch (e) {
-            // Ignore
+        const trimmedMessage = {
+            destinationName: message.destinationName,
+            payloadString: message.payloadString,
+            workerTimestamp: new Date().getTime(),
+        };
+        if (this.messageQueueConf[topicCategory]) {
+            try {
+                trimmedMessage.payloadObj = JSON.parse(message.payloadString);
+            } catch (e) {
+                // Ignore
+            }
         }
+        this.messageQueues[topicCategory].push(trimmedMessage);
         // if (handler) {
         //     handler(message);
         // }
@@ -169,10 +177,11 @@ class MQTTWorker {
     /**
      * Register a message handler for a given topic category beneath realm (second level).
      * @param {string} topicCategory - the topic category to register a handler for
-
+     * @param {boolean} isJson - whether the payload is expected to be well-formed json
      */
-    registerMessageQueue(topicCategory) {
+    registerMessageQueue(topicCategory, isJson) {
         this.messageQueues[topicCategory] = [];
+        this.messageQueueConf[topicCategory] = isJson;
     }
 
     /**
