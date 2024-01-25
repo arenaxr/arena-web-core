@@ -46,7 +46,6 @@ AFRAME.registerSystem('arena-jitsi', {
         this.conference = null;
         this.initialized = false;
 
-        this.avConnected = false;
         this.withVideo = false;
 
         this.jitsiId = null;
@@ -755,18 +754,19 @@ AFRAME.registerSystem('arena-jitsi', {
             };
         }
 
+        let stream;
         try {
             let vidConstraint = true;
             if (prefVideoInput) {
                 vidConstraint = { deviceId: { exact: prefVideoInput } };
                 try {
-                    await navigator.mediaDevices.getUserMedia({ video: vidConstraint });
+                    stream = await navigator.mediaDevices.getUserMedia({ video: vidConstraint });
                     deviceOpts.cameraDeviceId = prefVideoInput;
                 } catch {
-                    await navigator.mediaDevices.getUserMedia({ video: true });
+                    stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 }
             } else {
-                await navigator.mediaDevices.getUserMedia({ video: true });
+                stream = await navigator.mediaDevices.getUserMedia({ video: true });
             }
             devices.push('video');
             this.withVideo = true;
@@ -791,14 +791,16 @@ AFRAME.registerSystem('arena-jitsi', {
                 });
             } */
         }
-        this.avConnected = true;
+        stream?.getTracks().forEach((track) => track.stop());
 
         if (!ARENA.params.armode) {
             JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
                 .then(async (tracks) => {
                     await this.onLocalTracks(tracks);
-                    if (this.withVideo) this.setupCornerVideo.bind(this)();
-                    this.stopVideo();
+                    if (this.withVideo) {
+                        this.setupCornerVideo.bind(this)();
+                        this.stopVideo();
+                    }
                 })
                 .catch((err) => {
                     this.initialized = false;

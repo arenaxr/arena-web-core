@@ -10,6 +10,7 @@
 /* global ARENA */
 
 import CVWorkerMsgs from '../worker-msgs';
+import { ARENAUtils } from '../../../utils';
 
 /**
  * Grab front facing camera frames using getUserMedia()
@@ -99,7 +100,7 @@ export default class ARHeadsetCameraCapture {
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
-        if (this.canvas.transferControlToOffscreen) {
+        if (ARENAUtils.isWebGLOffscreenCanvasSupported(this.canvas)) {
             this.canvas = this.canvas.transferControlToOffscreen();
         }
         this.canvasCtx = this.canvas.getContext('2d', { willReadFrequently: true });
