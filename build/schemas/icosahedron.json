@@ -1,6 +1,6 @@
 {
     "title": "Icosahedron",
-    "description": "icosahedron Geometry.",
+    "description": "Icosahedron Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
