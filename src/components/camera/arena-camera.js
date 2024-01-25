@@ -218,7 +218,7 @@ AFRAME.registerComponent('arena-camera', {
      */
     tick() {
         if (!this.initialized) return;
-        const { data, el, position, rotation } = this;
+        const { data, el, position, rotation, vioPosition, vioRotation } = this;
 
         this.heartBeatCounter++;
 
