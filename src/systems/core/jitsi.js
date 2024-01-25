@@ -797,8 +797,10 @@ AFRAME.registerSystem('arena-jitsi', {
             JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
                 .then(async (tracks) => {
                     await this.onLocalTracks(tracks);
-                    if (this.withVideo) this.setupCornerVideo.bind(this)();
-                    this.stopVideo();
+                    if (this.withVideo) {
+                        this.setupCornerVideo.bind(this)();
+                        this.stopVideo();
+                    }
                 })
                 .catch((err) => {
                     this.initialized = false;
