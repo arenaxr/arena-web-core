@@ -360,6 +360,24 @@ export default class ARENAUtils {
     }
 
     /**
+     * Checks if this device supports OffscreenCanvas with WebGL (Safari must be >= 17)
+     */
+    static isWebGLOffscreenCanvasSupported(canvas) {
+        if (canvas.transferControlToOffscreen === undefined) {
+            return false;
+        }
+        // Check safari
+        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+            const versionMatch = navigator.userAgent.match(/version\/(\d+)/i);
+            const safariVersion = versionMatch ? parseInt(versionMatch[1], 10) : 0;
+            if (safariVersion < 17) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Returns device type.
      * @return {string} device type (desktop, mobile, headset)
      */
