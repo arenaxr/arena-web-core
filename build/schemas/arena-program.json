@@ -3,17 +3,17 @@
       "program": {
          "type": "object",
          "title": "Program Data",
-         "description": "Object data payload; Program config data",
+         "description": "Object data payload; Program config data.",
          "properties": {
             "name": {
                "type": "string",
-               "description": "Name of the program in the format namespace/program-name",
+               "description": "Name of the program in the format namespace/program-name.",
                "minLength": 5,
                "pattern": "[0-9a-zA-Z]+/[0-9a-zA-Z]+"
             },
             "affinity": {
                "type": "string",
-               "description": "Indicates the module affinity (client=client's runtime; none or empty=any suitable/available runtime)",
+               "description": "Indicates the module affinity (client=client's runtime; none or empty=any suitable/available runtime).",
                "enum": [
                   "client",
                   "none"
@@ -31,12 +31,12 @@
             },
             "filename": {
                "type": "string",
-               "description": "Filename of the entry binary",
+               "description": "Filename of the entry binary.",
                "minLength": 5
             },
             "filetype": {
                "type": "string",
-               "description": "Type of the program (WA=WASM or PY=Python)",
+               "description": "Type of the program (WA=WASM or PY=Python).",
                "enum": [
                   "WA",
                   "PY"
@@ -53,7 +53,7 @@
             },
             "args": {
                "type": "array",
-               "description": "Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
+               "description": "Command-line arguments (passed in argv). Supports variables: ${scene}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}.",
                "uniqueItems": false,
                "items": {
                   "type": "string",
@@ -62,7 +62,7 @@
             },
             "env": {
                "type": "array",
-               "description": "Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}",
+               "description": "Environment variables. Supports variables: ${scene}, ${namespace}, ${mqtth}, ${cameraid}, ${username}, ${runtimeid}, ${moduleid}, ${query-string-key}.",
                "uniqueItems": false,
                "items": {
                   "type": "string",
@@ -90,7 +90,7 @@
                      },
                      "type": {
                         "type": "string",
-                        "description": "Pubsub or client socket",
+                        "description": "Pubsub or client socket.",
                         "enum": [
                            "pubsub",
                            "client"
@@ -99,7 +99,7 @@
                      },
                      "mode": {
                         "type": "string",
-                        "description": "Access mode",
+                        "description": "Access mode.",
                         "enum": [
                            "r",
                            "w",
@@ -109,19 +109,19 @@
                      "params": {
                         "type": "object",
                         "title": "Parameters",
-                        "description": "Type (i.e. pubsub/client)-specific parameters",
+                        "description": "Type (i.e. pubsub/client)-specific parameters.",
                         "properties": {
                            "topic": {
                               "type": "string",
-                              "description": "Pubsub topic (pubsub)"
+                              "description": "Pubsub topic (pubsub)."
                            },
                            "host": {
                               "type": "string",
-                              "description": "Destination host address (client socket; ignored for now)"
+                              "description": "Destination host address (client socket; ignored for now)."
                            },
                            "port": {
                               "type": "number",
-                              "description": "Destination port (client socket; ignored for now)"
+                              "description": "Destination port (client socket; ignored for now)."
                            }
                         }
                      }
@@ -146,7 +146,7 @@
             "run_info": {
                "type": "object",
                "title": "Execution info",
-               "description": "Program execution info, added at runtime",
+               "description": "Program execution info, added at runtime.",
                "properties": {
                   "web_host": {
                      "type": "string",
@@ -232,18 +232,17 @@
       },
       "action": {
          "type": "string",
-         "description": "One of 3 basic Create/Update/Delete actions or a special client event action (e.g. a click)",
+         "description": "Message action create, update, delete.",
          "enum": [
             "create",
             "delete",
-            "update",
-            "clientEvent"
+            "update"
          ],
          "default": "create"
       },
       "persist": {
          "type": "boolean",
-         "description": "Persist this object in the database",
+         "description": "Persist this object in the database.",
          "default": true
       },
       "type": {
