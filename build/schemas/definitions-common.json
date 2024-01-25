@@ -572,7 +572,7 @@
                 },
                 "distanceModel": {
                     "default": "inverse",
-                    "description": "Sound model: linear, inverse, or exponential.",
+                    "description": "Sound model.",
                     "enum": ["linear", "inverse", "exponential"],
                     "type": "string"
                 },
