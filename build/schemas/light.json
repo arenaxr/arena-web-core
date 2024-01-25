@@ -20,7 +20,7 @@
                                 "angle": {
                                     "title": "angle (spot)",
                                     "type": "number",
-                                    "description": "Maximum extent of spot light from its direction (in degrees). NOTE: Spot light type only.",
+                                    "description": "Maximum extent of spot light from its direction (in degrees). Requires type:spot.",
                                     "default": 60
                                 },
                                 "castShadow": {
@@ -38,13 +38,13 @@
                                 "decay": {
                                     "title": "decay (point and spot)",
                                     "type": "number",
-                                    "description": "Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
+                                    "description": "Amount the light dims along the distance of the light. Requires type:point or type:spot.",
                                     "default": 1
                                 },
                                 "distance": {
                                     "title": "distance (point and spot)",
                                     "type": "number",
-                                    "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
+                                    "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. Requires type:point or type:spot.",
                                     "default": 0
                                 },
                                 "groundColor": {
@@ -52,7 +52,7 @@
                                     "type": "string",
                                     "format": "color",
                                     "default": "#ffffff",
-                                    "description": "Light color from below. NOTE: Hemisphere light type only"
+                                    "description": "Light color from below. Requires type:hemisphere."
                                 },
                                 "intensity": {
                                     "title": "intensity",
@@ -69,7 +69,7 @@
                                 "penumbra": {
                                     "title": "penumbra (spot)",
                                     "type": "number",
-                                    "description": "Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
+                                    "description": "Percent of the spotlight cone that is attenuated due to penumbra. Requires type:spot.",
                                     "default": 0
                                 },
                                 "shadowBias": {
@@ -135,7 +135,7 @@
                                 "target": {
                                     "title": "target (spot)",
                                     "type": "string",
-                                    "description": "Id of element the spot should point to. set to null to transform spotlight by orientation, pointing to it\u2019s -Z axis. NOTE: Spot light type only.",
+                                    "description": "Id of element the spot should point to. set to null to transform spotlight by orientation, pointing to it's -Z axis. Requires type:spot.",
                                     "default": null
                                 },
                                 "type": {

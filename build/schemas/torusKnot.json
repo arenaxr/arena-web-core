@@ -1,6 +1,6 @@
 {
     "title": "Torus Knot",
-    "description": "Torus Knot Geometry",
+    "description": "Torus Knot Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

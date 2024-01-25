@@ -47,7 +47,7 @@
                                     "type": "string"
                                 },
                                 "font": {
-                                    "description": "Font to render text, either the name of one of A-Frame's stock fonts or a URL to a font file",
+                                    "description": "Font to render text, either the name of one of A-Frame's stock fonts or a URL to a font file.",
                                     "type": "string",
                                     "default": "roboto",
                                     "enum": [
@@ -63,11 +63,11 @@
                                     ]
                                 },
                                 "fontImage": {
-                                    "description": "Font image texture path to render text. Defaults to the font's name with extension replaced to .png. Don't need to specify if using a stock font. (derived from font name)",
+                                    "description": "Font image texture path to render text. Defaults to the font's name with extension replaced to .png. Don't need to specify if using a stock font. (derived from font name).",
                                     "type": "string"
                                 },
                                 "height": {
-                                    "description": "Height of text block. (derived from text size)",
+                                    "description": "Height of text block. (derived from text size).",
                                     "type": "number"
                                 },
                                 "letterSpacing": {
@@ -76,7 +76,7 @@
                                     "default": 0
                                 },
                                 "lineHeight": {
-                                    "description": "Line height in pixels. (derived from font file)",
+                                    "description": "Line height in pixels. (derived from font file).",
                                     "type": "number"
                                 },
                                 "opacity": {
@@ -135,7 +135,7 @@
                                     "enum": ["normal", "pre", "nowrap"]
                                 },
                                 "width": {
-                                    "description": "Width in meters. (derived from geometry if exists)",
+                                    "description": "Width in meters. (derived from geometry if exists).",
                                     "type": "number",
                                     "default": 5
                                 },
@@ -145,7 +145,7 @@
                                     "default": 40
                                 },
                                 "wrapPixels": {
-                                    "description": "Number of pixels before wrapping text. (derived from wrapCount)",
+                                    "description": "Number of pixels before wrapping text. (derived from wrapCount).",
                                     "type": "number"
                                 },
                                 "xOffset": {

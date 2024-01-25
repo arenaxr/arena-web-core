@@ -1,6 +1,6 @@
 {
     "title": "Circle",
-    "description": "Circle Geometry",
+    "description": "Circle Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

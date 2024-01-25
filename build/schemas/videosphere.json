@@ -1,6 +1,6 @@
 {
     "title": "Videosphere",
-    "description": "Videosphere Geometry",
+    "description": "Videosphere Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -19,36 +19,36 @@
                                 },
                                 "autoplay": {
                                     "default": true,
-                                    "description": "autoplay",
+                                    "title": "Autoplay",
                                     "type": "boolean"
                                 },
                                 "crossOrigin": {
                                     "default": "anonymous",
                                     "type": "string",
-                                    "title": "crossOrigin"
+                                    "title": "Cross Origin"
                                 },
                                 "loop": {
                                     "default": true,
-                                    "title": "loop",
+                                    "title": "Loop",
                                     "type": "boolean"
                                 },
                                 "radius": {
                                     "type": "number",
-                                    "title": "radius",
+                                    "title": "Radius",
                                     "default": 5000
                                 },
                                 "segmentsHeight": {
                                     "type": "integer",
-                                    "title": "segments height",
+                                    "title": "Segments Height",
                                     "default": 64
                                 },
                                 "segmentsWidth": {
                                     "type": "integer",
-                                    "title": "segments width",
+                                    "title": "Segments Width",
                                     "default": 64
                                 },
                                 "src": {
-                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'.",
                                     "format": "uri",
                                     "type": "string"
                                 }

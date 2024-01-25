@@ -1,6 +1,6 @@
 {
     "title": "Thickline",
-    "description": "Draw a line that can have a custom width",
+    "description": "Draw a line that can have a custom width.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -20,26 +20,26 @@
                                 "color": {
                                     "default": "#000000",
                                     "format": "color",
-                                    "description": "Line color",
+                                    "description": "Line color.",
                                     "type": "string"
                                 },
                                 "lineWidth": {
                                     "type": "number",
                                     "title": "Line width",
-                                    "description": "Width of line in px",
+                                    "description": "Width of line in px.",
                                     "default": 1
                                 },
                                 "lineWidthStyler": {
                                     "type": "string",
                                     "title": "Line width styler",
-                                    "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. You may also choose one of the preset functions",
+                                    "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. You may also choose one of the preset functions.",
                                     "default": "default",
                                     "enum": ["default", "grow", "shrink", "center-sharp", "center-smooth", "sine-wave"]
                                 },
                                 "path": {
                                     "type": "string",
                                     "title": "Line path",
-                                    "description": "Comma-separated list of x y z coordinates of the line vertices",
+                                    "description": "Comma-separated list of x y z coordinates of the line vertices.",
                                     "default": "-2 -1 0, 0 20 0, 10 -1 10"
                                 }
                             }

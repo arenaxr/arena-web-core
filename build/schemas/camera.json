@@ -38,13 +38,13 @@
                                         "headModelPath": {
                                             "type": "string",
                                             "title": "headModelPath",
-                                            "description": "Path to user avatar head model",
+                                            "description": "Path to user avatar head model.",
                                             "default": "/static/models/avatars/robobit.glb"
                                         },
                                         "presence": {
                                             "type": "string",
                                             "title": "presence",
-                                            "description": "Type of presence for user",
+                                            "description": "Type of presence for user.",
                                             "default": "Standard",
                                             "enum": ["Standard", "Portal"]
                                         },

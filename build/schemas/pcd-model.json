@@ -24,13 +24,13 @@
                                     "type": "string"
                                 },
                                 "pointSize": {
-                                    "description": "Size of the points",
+                                    "description": "Size of the points.",
                                     "title": "Points Size",
                                     "type": "number",
                                     "default": 0.01
                                 },
                                 "pointColor": {
-                                    "description": "Color of the points",
+                                    "description": "Color of the points.",
                                     "title": "Points Color",
                                     "format": "color",
                                     "type": "string",

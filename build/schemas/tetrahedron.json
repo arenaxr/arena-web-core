@@ -1,6 +1,6 @@
 {
     "title": "Tetrahedron",
-    "description": "Tetrahedron Geometry",
+    "description": "Tetrahedron Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

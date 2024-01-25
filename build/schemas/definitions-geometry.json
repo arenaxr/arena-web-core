@@ -13,23 +13,23 @@
             "deprecated": true
         },
         "jitsi-video": {
-            "description": "Apply a jitsi video source to the geometry",
+            "description": "Apply a jitsi video source to the geometry.",
             "title": "Jitsi Video",
             "type": "object",
             "properties": {
                 "jitsiId": {
-                    "description": "JitsiId of the video source; If defined will override displayName",
+                    "description": "JitsiId of the video source; If defined will override displayName.",
                     "type": "string"
                 },
                 "displayName": {
-                    "description": "ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. (* change requires reload* ) ",
+                    "description": "ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. (* change requires reload* ).",
                     "type": "string"
                 }
             },
             "required": ["displayName"]
         },
         "material": {
-            "description": "The material properties of the object’s surface.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>A-Frame Material</a>.",
+            "description": "The material properties of the object's surface.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>A-Frame Material</a>.",
             "properties": {
                 "alphaTest": {
                     "default": 0,
@@ -38,7 +38,7 @@
                 },
                 "blending": {
                     "default": "normal",
-                    "description": "The blending mode for the material’s RGB and Alpha sent to the WebGLRenderer.",
+                    "description": "The blending mode for the material's RGB and Alpha sent to the WebGLRenderer.",
                     "enum": ["none", "normal", "additive", "subtractive", "multiply"],
                     "type": "string"
                 },
@@ -122,7 +122,7 @@
                     "type": "string"
                 },
                 "src": {
-                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'.",
                     "format": "uri",
                     "type": "string"
                 },
@@ -151,11 +151,11 @@
             "description": "Define multiple visual sources applied to an object.",
             "properties": {
                 "srcs": {
-                    "description": "A comma-delimited list if URIs, e.g. “side1.png, side2.png, side3.png, side4.png, side5.png, side6.png” (required).",
+                    "description": "A comma-delimited list if URIs, e.g. 'side1.png, side2.png, side3.png, side4.png, side5.png, side6.png' (required).",
                     "type": "string"
                 },
                 "srcspath": {
-                    "description": "URI, relative or full path of a directory containing srcs, e.g. “store/users/wiselab/images/dice/” (required).",
+                    "description": "URI, relative or full path of a directory containing srcs, e.g. 'store/users/wiselab/images/dice/' (required).",
                     "format": "uri",
                     "type": "string"
                 }
@@ -166,7 +166,7 @@
         },
         "screenshareable": {
             "default": true,
-            "description": "Whether or not a user can screenshare on an object",
+            "description": "Whether or not a user can screenshare on an object.",
             "title": "Screenshare-able",
             "type": "boolean"
         },

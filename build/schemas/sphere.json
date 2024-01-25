@@ -1,6 +1,6 @@
 {
     "title": "Sphere",
-    "description": "Sphere Geometry",
+    "description": "Sphere Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

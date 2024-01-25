@@ -21,7 +21,7 @@
                                     "type": "string",
                                     "title": "Hand Model Url",
                                     "format": "uri",
-                                    "description": "Path to user avatar hand model",
+                                    "description": "Path to user avatar hand model.",
                                     "default": "static/models/hands/valve_index_left.gltf"
                                 },
                                 "dep": {

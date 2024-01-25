@@ -30,7 +30,7 @@
                 },
                 "dressingAmount": {
                     "default": 10,
-                    "description": "Number of objects used for dressing",
+                    "description": "Number of objects used for dressing.",
                     "maximum": 1000,
                     "minimum": 0,
                     "title": "Dressing Amount",
@@ -225,13 +225,13 @@
                 },
                 "shadow": {
                     "default": false,
-                    "description": "Shadows on/off. Sky light casts shadows on the ground of all those objects with shadow component applied",
+                    "description": "Shadows on/off. Sky light casts shadows on the ground of all those objects with shadow component applied.",
                     "title": "Shadow",
                     "type": "boolean"
                 },
                 "shadowSize": {
                     "default": 10,
-                    "description": "Size of the shadow, if applied",
+                    "description": "Size of the shadow, if applied.",
                     "title": "Shadow size",
                     "type": "number"
                 },
@@ -243,7 +243,7 @@
                 },
                 "skyType": {
                     "default": "color",
-                    "description": "A sky type",
+                    "description": "A sky type.",
                     "enum": ["atmosphere", "color", "gradient", "none"],
                     "title": "Sky Type",
                     "type": "string"
@@ -258,13 +258,13 @@
             "properties": {
                 "localClippingEnabled": {
                     "default": false,
-                    "description": "Defines whether the renderer respects object-level clipping planes",
+                    "description": "Defines whether the renderer respects object-level clipping planes.",
                     "title": "Local Clipping Enabled",
                     "type": "boolean"
                 },
                 "outputColorSpace": {
                     "default": "SRGBColorSpace",
-                    "description": "Defines the output color space of the renderer (three.js default is SRGBColorSpace)",
+                    "description": "Defines the output color space of the renderer (three.js default is SRGBColorSpace).",
                     "enum": ["SRGBColorSpace", "LinearSRGBColorSpace", "DisplayP3ColorSpace", "NoColorSpace"],
                     "title": "Output Color Space",
                     "type": "string"
@@ -277,7 +277,7 @@
                 },
                 "sortObjects": {
                     "default": true,
-                    "description": "Defines whether the renderer should sort objects",
+                    "description": "Defines whether the renderer should sort objects.",
                     "title": "Sort Objects",
                     "type": "boolean"
                 }
@@ -285,19 +285,19 @@
             "required": ["outputColorSpace"],
             "title": "Renderer Settings",
             "type": "object",
-            "description": "These settings are fed into three.js WebGLRenderer properties"
+            "description": "These settings are fed into three.js WebGLRenderer properties."
         },
         "scene-options": {
             "properties": {
                 "clickableOnlyEvents": {
                     "default": true,
-                    "description": "true = publish only mouse events for objects with click-listeners; false = all objects publish mouse events",
+                    "description": "True = publish only mouse events for objects with click-listeners; False = all objects publish mouse events.",
                     "title": "Events Publish Behavior",
                     "type": "boolean"
                 },
                 "distanceModel": {
                     "default": "inverse",
-                    "description": "Algorithm to use to reduce the volume of the audio source as it moves away from the listener",
+                    "description": "Algorithm to use to reduce the volume of the audio source as it moves away from the listener.",
                     "enum": ["exponential", "inverse", "linear"],
                     "title": "Positional Audio Distance Model",
                     "type": "string"
@@ -337,13 +337,13 @@
                 },
                 "maxAVDist": {
                     "default": 20,
-                    "description": "Maximum distance between cameras/users until audio and video are cut off. For saving bandwidth on scenes with large amounts of user activity at once",
+                    "description": "Maximum distance between cameras/users until audio and video are cut off. For saving bandwidth on scenes with large amounts of user activity at once.",
                     "title": "Maximum Audio/Video Cut Off Distance",
                     "type": "number"
                 },
                 "navMesh": {
                     "default": "",
-                    "description": "Navigation Mesh URL",
+                    "description": "Navigation Mesh URL.",
                     "minLength": 5,
                     "title": "Nav. Mesh",
                     "type": "string"
@@ -356,38 +356,38 @@
                 },
                 "privateScene": {
                     "default": false,
-                    "description": "false = scene will be visible; true = scene will not show in listings",
+                    "description": "False = scene will be visible; True = scene will not show in listings.",
                     "title": "Scene Privacy",
                     "type": "boolean"
                 },
                 "refDistance": {
                     "default": 1,
-                    "description": "Distance at which the volume reduction starts taking effect",
+                    "description": "Distance at which the volume reduction starts taking effect.",
                     "title": "Positional Audio Reference Distance",
                     "type": "number"
                 },
                 "rolloffFactor": {
                     "default": 1,
-                    "description": "How quickly the volume is reduced as the source moves away from the listener",
+                    "description": "How quickly the volume is reduced as the source moves away from the listener.",
                     "title": "Positional Audio Rolloff Factor",
                     "type": "number"
                 },
                 "screenshare": {
                     "default": "screenshare",
-                    "description": "Name of the 3D object used when sharing desktop",
+                    "description": "Name of the 3D object used when sharing desktop.",
                     "minLength": 5,
                     "title": "Screenshare object name",
                     "type": "string"
                 },
                 "videoFrustumCulling": {
                     "default": true,
-                    "description": "If false, will disable video frustum culling (video frustum culling stops video from users outside of view)",
+                    "description": "If false, will disable video frustum culling (video frustum culling stops video from users outside of view).",
                     "title": "Video Frustum Culling",
                     "type": "boolean"
                 },
                 "videoDistanceConstraints": {
                     "default": true,
-                    "description": "If false, will disable video distance constraints (video resolution decreases with distance from users in view)",
+                    "description": "If false, will disable video distance constraints (video resolution decreases with distance from users in view).",
                     "title": "Video Distance Constraints",
                     "type": "boolean"
                 },
@@ -400,7 +400,7 @@
                 },
                 "volume": {
                     "default": 1,
-                    "description": "Volume for users in a scene",
+                    "description": "Volume for users in a scene.",
                     "title": "Positional Audio Volume",
                     "type": "number"
                 },
@@ -414,29 +414,29 @@
                     "properties": {
                         "enabled": {
                             "default": true,
-                            "description": "Whether to do hit-testing or not",
+                            "description": "Whether to do hit-testing or not.",
                             "type": "boolean"
                         },
                         "src": {
                             "default": "static/images/reticle-gray.png",
                             "type": "string",
                             "format": "uri",
-                            "description": "Image to use for the reticle"
+                            "description": "Image to use for the reticle."
                         },
                         "type": {
                             "default": "footprint",
-                            "description": "'footprint' or 'map' footprint is the shape of the model",
+                            "description": "Footprint is the shape of the model.",
                             "enum": ["footprint", "map"],
                             "type": "string"
                         },
                         "footprintDepth": {
                             "default": 0.1,
-                            "description": "Amount of the model used for the footprint, 1 is full height",
+                            "description": "Amount of the model used for the footprint, 1 is full height.",
                             "type": "number"
                         },
                         "mapSize": {
                             "default": "0.5 0.5",
-                            "description": "If no target is set then this is the size of the map",
+                            "description": "If no target is set then this is the size of the map.",
                             "type": "string"
                         }
                     },
@@ -457,7 +457,7 @@
             ],
             "title": "Scene Options",
             "type": "object",
-            "description": "ARENA Scene Options"
+            "description": "ARENA Scene Options."
         },
         "post-processing": {
             "properties": {
@@ -465,31 +465,31 @@
                     "properties": {
                         "resolution": {
                             "default": 256,
-                            "description": "Resolution of the bloom effect (width and height)",
+                            "description": "Resolution of the bloom effect (width and height).",
                             "title": "Resolution",
                             "type": "number"
                         },
                         "strength": {
                             "default": 0.5,
-                            "description": "Strength of the bloom effect",
+                            "description": "Strength of the bloom effect.",
                             "title": "Strength",
                             "type": "number"
                         },
                         "radius": {
                             "default": 0.1,
-                            "description": "Radius of the bloom effect",
+                            "description": "Radius of the bloom effect.",
                             "title": "Radius",
                             "type": "number"
                         },
                         "threshold": {
                             "default": 0,
-                            "description": "Threshold of the bloom effect",
+                            "description": "Threshold of the bloom effect.",
                             "title": "Threshold",
                             "type": "number"
                         }
                     },
                     "required": ["strength", "radius", "threshold", "resolution"],
-                    "description": "Use bloom post-processing effect",
+                    "description": "Use bloom post-processing effect.",
                     "title": "Bloom",
                     "type": "object"
                 },
@@ -497,7 +497,7 @@
                     "properties": {
                         "resolution": {
                             "default": 256,
-                            "description": "Resolution of the SAO effect (width and height)",
+                            "description": "Resolution of the SAO effect (width and height).",
                             "title": "Resolution",
                             "type": "number"
                         },
@@ -558,7 +558,7 @@
                         }
                     },
                     "required": ["resolution", "useDepthTexture", "useNormals"],
-                    "description": "Use scalable ambient occlusion (SAO) post-processing effect",
+                    "description": "Use scalable ambient occlusion (SAO) post-processing effect.",
                     "title": "SAO",
                     "type": "object"
                 },
@@ -566,31 +566,31 @@
                     "properties": {
                         "resolution": {
                             "default": 512,
-                            "description": "Resolution of the SSAO effect (width and height)",
+                            "description": "Resolution of the SSAO effect (width and height).",
                             "title": "Resolution",
                             "type": "number"
                         },
                         "kernelRadius": {
                             "default": 8,
-                            "description": "Kernel radius of the SSAO effect",
+                            "description": "Kernel radius of the SSAO effect.",
                             "title": "Kernel Radius",
                             "type": "number"
                         },
                         "minDistance": {
                             "default": 0.005,
-                            "description": "Minimum distance of the SSAO effect",
+                            "description": "Minimum distance of the SSAO effect.",
                             "title": "Minimum Distance",
                             "type": "number"
                         },
                         "maxDistance": {
                             "default": 0.1,
-                            "description": "Maximum distance of the SSAO effect",
+                            "description": "Maximum distance of the SSAO effect.",
                             "title": "Maximum Distance",
                             "type": "number"
                         }
                     },
                     "required": ["resolution", "kernelRadius", "minDistance", "maxDistance"],
-                    "description": "Use screen space ambient occlusion (SSAO) post-processing effect",
+                    "description": "Use screen space ambient occlusion (SSAO) post-processing effect.",
                     "title": "SSAO",
                     "type": "object"
                 },
@@ -613,7 +613,7 @@
                         }
                     },
                     "required": ["pixelSize", "normalEdgeStrength", "depthEdgeStrength"],
-                    "description": "Use Pixelation post-processing effect",
+                    "description": "Use Pixelation post-processing effect.",
                     "title": "Pixel",
                     "type": "object"
                 },
@@ -626,7 +626,7 @@
                         }
                     },
                     "required": ["dtSize"],
-                    "description": "Use Glitch post-processing effect",
+                    "description": "Use Glitch post-processing effect.",
                     "title": "Glitch",
                     "type": "object"
                 },
@@ -660,7 +660,7 @@
             "required": [],
             "title": "Post-Processing Effects",
             "type": "object",
-            "description": "These effects are enabled in desktop and XR views"
+            "description": "These effects are enabled in desktop and XR views."
         },
         "vector3": {
             "title": "Vector3",
@@ -687,13 +687,13 @@
     "properties": {
         "object_id": {
             "default": "scene-options",
-            "description": "A uuid or otherwise unique identifier for this object",
+            "description": "A uuid or otherwise unique identifier for this object.",
             "minLength": 3,
             "type": "string"
         },
         "persist": {
             "default": true,
-            "description": "Persist this object in the database",
+            "description": "Persist this object in the database.",
             "type": "boolean"
         },
         "type": {

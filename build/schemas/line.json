@@ -1,6 +1,6 @@
 {
     "title": "Line",
-    "description": "Draw a line",
+    "description": "Draw a line.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

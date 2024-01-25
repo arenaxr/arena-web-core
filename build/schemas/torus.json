@@ -1,6 +1,6 @@
 {
     "title": "Torus",
-    "description": "Torus Geometry",
+    "description": "Torus Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

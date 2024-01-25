@@ -1,6 +1,6 @@
 {
     "title": "Triangle",
-    "description": "Triangle Geometry",
+    "description": "Triangle Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

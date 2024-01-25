@@ -39,28 +39,28 @@
                                             "img": {
                                                 "type": "string",
                                                 "title": "Image URL for Image button",
-                                                "description": "Optional, leave blank for text button"
+                                                "description": "Optional, leave blank for text button."
                                             },
                                             "size": {
                                                 "type": "number",
-                                                "title": "Square size for image buttons",
+                                                "title": "Square size for image buttons.",
                                                 "description": "Optional",
                                                 "default": 0.3
                                             },
                                             "height": {
                                                 "type": "number",
                                                 "title": "Button Height",
-                                                "description": "Optional for image buttons, overrides size"
+                                                "description": "Optional for image buttons, overrides size."
                                             },
                                             "width": {
                                                 "type": "number",
                                                 "title": "Button Width",
-                                                "description": "Optional for image buttons, overrides size"
+                                                "description": "Optional for image buttons, overrides size."
                                             },
                                             "borderRadius": {
                                                 "type": "number",
                                                 "title": "Button Border Radius",
-                                                "description": "Optional for image buttons, overrides default 0.075"
+                                                "description": "Optional for image buttons, overrides default 0.075."
                                             }
                                         },
                                         "required": ["name"]
@@ -80,7 +80,7 @@
                                 "font": {
                                     "type": "string",
                                     "title": "Font",
-                                    "description": "Font to use for button text",
+                                    "description": "Font to use for button text.",
                                     "default": "Roboto",
                                     "enum": ["Roboto", "Roboto-Mono"]
                                 },

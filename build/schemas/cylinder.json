@@ -1,6 +1,6 @@
 {
     "title": "Cylinder",
-    "description": "cylinder Geometry",
+    "description": "Cylinder Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

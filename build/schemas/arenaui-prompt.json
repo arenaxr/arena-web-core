@@ -43,7 +43,7 @@
                                 "font": {
                                     "type": "string",
                                     "title": "Font",
-                                    "description": "Font to use for button text",
+                                    "description": "Font to use for button text.",
                                     "default": "Roboto",
                                     "enum": ["Roboto", "Roboto-Mono"]
                                 },

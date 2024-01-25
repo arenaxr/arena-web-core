@@ -55,13 +55,13 @@
                 "morphtarget": {
                     "type": "string",
                     "title": "Morph Target",
-                    "description": "Name of morphTarget, can be found as part of the GLTF model",
+                    "description": "Name of morphTarget, can be found as part of the GLTF model.",
                     "default": ""
                 },
                 "value": {
                     "type": "number",
                     "title": "Morph Value",
-                    "description": "Value that you want to set that morphTarget to (0 - 1)",
+                    "description": "Value that you want to set that morphTarget to (0 - 1).",
                     "default": 0
                 }
             },
@@ -75,25 +75,25 @@
                 "detailedUrl": {
                     "type": "string",
                     "title": "detailedUrl",
-                    "description": "Alternative 'detailed' gltf model to load by URL",
+                    "description": "Alternative 'detailed' gltf model to load by URL.",
                     "default": ""
                 },
                 "detailedDistance": {
                     "type": "number",
                     "title": "detailedDistance",
-                    "description": "At what distance to switch between the models",
+                    "description": "At what distance to switch between the models.",
                     "default": 10
                 },
                 "updateRate": {
                     "type": "number",
                     "title": "updateRate",
-                    "description": "How often user camera is checked for LOD (default 333ms)",
+                    "description": "How often user camera is checked for LOD (default 333ms).",
                     "default": 333
                 },
                 "retainCache": {
                     "type": "boolean",
                     "title": "retainCache",
-                    "description": "Whether to skip freeing the detailed model from browser cache (default false)",
+                    "description": "Whether to skip freeing the detailed model from browser cache (default false).",
                     "default": false
                 }
             },

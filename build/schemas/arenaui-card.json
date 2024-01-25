@@ -37,14 +37,14 @@
                                 "img": {
                                     "type": "string",
                                     "title": "Image URL",
-                                    "description": "This image will be embedded alongside the body text",
+                                    "description": "This image will be embedded alongside the body text.",
                                     "default": ""
                                 },
                                 "imgCaption": {
                                     "type": "string",
                                     "title": "Image Caption",
                                     "default": "",
-                                    "description": "This will caption the image"
+                                    "description": "This will caption the image."
                                 },
                                 "imgDirection": {
                                     "type": "string",
@@ -82,7 +82,7 @@
                                 "font": {
                                     "type": "string",
                                     "title": "Font",
-                                    "description": "Font to use for button text",
+                                    "description": "Font to use for button text.",
                                     "default": "Roboto",
                                     "enum": ["Roboto", "Roboto-Mono"]
                                 },

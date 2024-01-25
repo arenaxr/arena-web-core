@@ -24,7 +24,7 @@
                                     "type": "string"
                                 },
                                 "cutoutEntity": {
-                                    "description": "Selector to a box primitive that uses scale and position to define the bounds of splat points to render",
+                                    "description": "Selector to a box primitive that uses scale and position to define the bounds of splat points to render.",
                                     "type": "string",
                                     "title": "Cutout Entity (Optional)",
                                     "default": ""

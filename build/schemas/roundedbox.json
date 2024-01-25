@@ -1,6 +1,6 @@
 {
     "title": "Rounded Box",
-    "description": "Rounded Box Geometry",
+    "description": "Rounded Box Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"

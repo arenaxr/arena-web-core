@@ -1,51 +1,51 @@
 {
     "arenaui-card": {
-        "description": "ARENAUI Card",
+        "description": "ARENAUI Card.",
         "file": "schemas/arenaui-card.json",
         "title": "ARENAUI Card"
     },
     "arenaui-button-panel": {
-        "description": "ARENAUI Button Panel",
+        "description": "ARENAUI Button Panel.",
         "file": "schemas/arenaui-button-panel.json",
         "title": "ARENAUI Button Panel"
     },
     "arenaui-prompt": {
-        "description": "ARENAUI Prompt",
+        "description": "ARENAUI Prompt.",
         "file": "schemas/arenaui-prompt.json",
         "title": "ARENAUI Prompt"
     },
     "box": {
-        "description": "Box Geometry",
+        "description": "Box Geometry.",
         "file": "schemas/box.json",
         "title": "Box"
     },
     "circle": {
-        "description": "Circle Geometry",
+        "description": "Circle Geometry.",
         "file": "schemas/circle.json",
         "title": "Circle"
     },
     "capsule": {
-        "description": "Capsule Geometry",
+        "description": "Capsule Geometry.",
         "file": "schemas/capsule.json",
         "title": "Capsule"
     },
     "cone": {
-        "description": "Cone Geometry",
+        "description": "Cone Geometry.",
         "file": "schemas/cone.json",
         "title": "Cone"
     },
     "cube": {
-        "description": "Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
+        "description": "Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes.",
         "file": "schemas/cube.json",
         "title": "Cube (deprecated; don't use)"
     },
     "cylinder": {
-        "description": "Cylinder Geometry",
+        "description": "Cylinder Geometry.",
         "file": "schemas/cylinder.json",
         "title": "Cylinder"
     },
     "dodecahedron": {
-        "description": "Dodecahedron Geometry",
+        "description": "Dodecahedron Geometry.",
         "file": "schemas/dodecahedron.json",
         "title": "Dodecahedron"
     },
@@ -55,117 +55,117 @@
         "title": "Entity (generic object)"
     },
     "gltf-model": {
-        "description": "Load a GLTF model",
+        "description": "Load a GLTF model.",
         "file": "schemas/gltf-model.json",
         "title": "GLTF Model"
     },
     "gaussian_splatting": {
-        "description": "Load 3D Gaussian Splat",
+        "description": "Load 3D Gaussian Splat.",
         "file": "schemas/gaussian-splat.json",
         "title": "3D Gaussian Splat"
     },
     "image": {
-        "description": "Display an image on a plane",
+        "description": "Display an image on a plane.",
         "file": "schemas/image.json",
         "title": "Image"
     },
     "icosahedron": {
-        "description": "Icosahedron Geometry",
+        "description": "Icosahedron Geometry.",
         "file": "schemas/icosahedron.json",
         "title": "Icosahedron"
     },
     "light": {
-        "description": "A light",
+        "description": "A light.",
         "file": "schemas/light.json",
         "title": "Light"
     },
     "line": {
-        "description": "Draw a line",
+        "description": "Draw a line.",
         "file": "schemas/line.json",
         "title": "Line"
     },
     "ocean": {
-        "description": "Ocean",
+        "description": "Draw a wave-form plane.",
         "file": "schemas/ocean.json",
         "title": "Ocean"
     },
     "octahedron": {
-        "description": "Octahedron Geometry",
+        "description": "Octahedron Geometry.",
         "file": "schemas/octahedron.json",
         "title": "Octahedron"
     },
     "pcd-model": {
-        "description": "Load a PCD model",
+        "description": "Load a PCD model.",
         "file": "schemas/pcd-model.json",
         "title": "PCD Model"
     },
     "plane": {
-        "description": "Plane Geometry",
+        "description": "Plane Geometry.",
         "file": "schemas/plane.json",
         "title": "Plane"
     },
     "program": {
-        "description": "ARENA program data",
+        "description": "ARENA program data.",
         "file": "schemas/arena-program.json",
         "title": "Program"
     },
     "ring": {
-        "description": "Ring Geometry",
+        "description": "Ring Geometry.",
         "file": "schemas/ring.json",
         "title": "Ring"
     },
     "roundedbox": {
-        "description": "Rounded Box Geometry",
+        "description": "Rounded Box Geometry.",
         "file": "schemas/roundedbox.json",
         "title": "Rounded Box"
     },
     "scene-options": {
-        "description": "ARENA scene options",
+        "description": "ARENA scene options.",
         "file": "schemas/arena-scene-options.json",
         "title": "Scene Options"
     },
     "sphere": {
-        "description": "Sphere Geometry",
+        "description": "Sphere Geometry.",
         "file": "schemas/sphere.json",
         "title": "Sphere"
     },
     "tetrahedron": {
-        "description": "Tetrahedron Geometry",
+        "description": "Tetrahedron Geometry.",
         "file": "schemas/tetrahedron.json",
         "title": "Tetrahedron"
     },
     "text": {
-        "description": "Display text",
+        "description": "Display text.",
         "file": "schemas/text.json",
         "title": "Text"
     },
     "thickline": {
-        "description": "Draw a line that can have a custom width",
+        "description": "Draw a line that can have a custom width.",
         "file": "schemas/thickline.json",
         "title": "Thickline"
     },
     "threejs-scene": {
-        "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred)",
+        "description": "Load a Three.js Scene (might be THREE.js version-specific; you can see THREE.js version in the JS console once you open ARENA; using glTF is preferred).",
         "file": "schemas/threejs-scene.json",
         "title": "Three.js Scene"
     },
     "torus": {
-        "description": "Torus Geometry",
+        "description": "Torus Geometry.",
         "file": "schemas/torus.json",
         "title": "Torus"
     },
     "torusKnot": {
-        "description": "Torus Knot Geometry",
+        "description": "Torus Knot Geometry.",
         "file": "schemas/torusKnot.json",
         "title": "Torus Knot"
     },
     "triangle": {
-        "description": "Triangle Geometry",
+        "description": "Triangle Geometry.",
         "file": "schemas/triangle.json",
         "title": "Triangle"
     },
     "videosphere": {
-        "description": "Videosphere 360 Video",
+        "description": "Videosphere 360 Video.",
         "file": "schemas/videosphere.json",
         "title": "Videosphere"
     }
