@@ -26,6 +26,7 @@
                                 "castShadow": {
                                     "title": "castShadow (point, spot, directional)",
                                     "type": "boolean",
+                                    "description": "Whether this light casts shadows on the scene.",
                                     "default": false
                                 },
                                 "color": {
@@ -33,7 +34,7 @@
                                     "type": "string",
                                     "format": "color",
                                     "default": "#ffffff",
-                                    "description": "Light color."
+                                    "description": "Light color. For 'hemisphere', light color from above."
                                 },
                                 "decay": {
                                     "title": "decay (point and spot)",
@@ -47,6 +48,12 @@
                                     "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. Requires type:point or type:spot.",
                                     "default": 0
                                 },
+                                "envMap": {
+                                    "title": "envMap",
+                                    "type": "string",
+                                    "description": "Cube Map to load.",
+                                    "default": null
+                                },
                                 "groundColor": {
                                     "title": "ground color (hemisphere)",
                                     "type": "string",
@@ -57,7 +64,7 @@
                                 "intensity": {
                                     "title": "intensity",
                                     "type": "number",
-                                    "description": "Light strength.",
+                                    "description": "Amount of light provided.",
                                     "default": 1
                                 },
                                 "light": {
@@ -75,67 +82,79 @@
                                 "shadowBias": {
                                     "title": "shadowBias (castShadow=true)",
                                     "type": "number",
+                                    "description": "Offset depth when deciding whether a surface is in shadow. Tiny adjustments here (in the order of +/-0.0001) may reduce artifacts in shadows.",
                                     "default": 0
                                 },
                                 "shadowCameraBottom": {
                                     "title": "shadowCameraBottom (castShadow=true)",
                                     "type": "number",
+                                    "description": "Bottom plane of shadow camera frustum. Requires type:directional.",
                                     "default": -5
                                 },
                                 "shadowCameraFar": {
                                     "title": "shadowCameraFar (castShadow=true)",
                                     "type": "number",
+                                    "description": "Far plane of shadow camera frustum.",
                                     "default": 500
                                 },
                                 "shadowCameraFov": {
                                     "title": "shadowCameraFov (castShadow=true)",
                                     "type": "number",
-                                    "default": 90
+                                    "description": "Shadow camera's FOV. Requires type:point or spot.",
+                                    "default": 50
                                 },
                                 "shadowCameraLeft": {
                                     "title": "shadowCameraBottom (castShadow=true)",
                                     "type": "number",
+                                    "description": "Left plane of shadow camera frustum. Requires type:directional.",
                                     "default": -5
                                 },
                                 "shadowCameraNear": {
                                     "title": "shadowCameraNear (castShadow=true)",
                                     "type": "number",
+                                    "description": "Near plane of shadow camera frustum.",
                                     "default": 0.5
                                 },
                                 "shadowCameraRight": {
                                     "title": "shadowCameraRight (castShadow=true)",
                                     "type": "number",
+                                    "description": "Right plane of shadow camera frustum. Requires type:directional.",
                                     "default": 5
                                 },
                                 "shadowCameraTop": {
                                     "title": "shadowCameraTop (castShadow=true)",
                                     "type": "number",
+                                    "description": "Top plane of shadow camera frustum. Requires type:directional.",
                                     "default": 5
                                 },
                                 "shadowCameraVisible": {
                                     "title": "shadowCameraVisible (castShadow=true)",
                                     "type": "boolean",
+                                    "description": "Displays a visual aid showing the shadow camera's position and frustum. This is the light's view of the scene, used to project shadows.",
                                     "default": false
                                 },
                                 "shadowMapHeight": {
                                     "title": "shadowMapHeight (castShadow=true)",
                                     "type": "number",
+                                    "description": "Shadow map's vertical resolution. Larger shadow maps display more crisp shadows, at the cost of performance.",
                                     "default": 512
                                 },
                                 "shadowMapWidth": {
                                     "title": "shadowMapWidth (castShadow=true)",
                                     "type": "number",
+                                    "description": "Shadow map's horizontal resolution.",
                                     "default": 512
                                 },
                                 "shadowRadius": {
                                     "title": "shadowRadius (castShadow=true)",
                                     "type": "number",
+                                    "description": "",
                                     "default": 1
                                 },
                                 "target": {
                                     "title": "target (spot)",
                                     "type": "string",
-                                    "description": "Id of element the spot should point to. set to null to transform spotlight by orientation, pointing to it's -Z axis. Requires type:spot.",
+                                    "description": "Id of element the spot should point to. Set to null to transform spotlight by orientation, pointing to it's -Z axis. Requires type:spot.",
                                     "default": null
                                 },
                                 "type": {
