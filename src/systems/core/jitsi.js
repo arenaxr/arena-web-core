@@ -728,6 +728,9 @@ AFRAME.registerSystem('arena-jitsi', {
      * @return {promise}
      */
     async avConnect() {
+        if (ARENA.params.armode) {
+            return;
+        }
         const prefAudioInput = localStorage.getItem('prefAudioInput');
         const prefVideoInput = localStorage.getItem('prefVideoInput');
         const devices = ['audio'];
@@ -793,20 +796,18 @@ AFRAME.registerSystem('arena-jitsi', {
         }
         stream?.getTracks().forEach((track) => track.stop());
 
-        if (!ARENA.params.armode) {
-            JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
-                .then(async (tracks) => {
-                    await this.onLocalTracks(tracks);
-                    if (this.withVideo) {
-                        this.setupCornerVideo.bind(this)();
-                        this.stopVideo();
-                    }
-                })
-                .catch((err) => {
-                    this.initialized = false;
-                    console.warn(err);
-                });
-        }
+        JitsiMeetJS.createLocalTracks({ devices, ...deviceOpts })
+            .then(async (tracks) => {
+                await this.onLocalTracks(tracks);
+                if (this.withVideo) {
+                    this.setupCornerVideo.bind(this)();
+                    this.stopVideo();
+                }
+            })
+            .catch((err) => {
+                this.initialized = false;
+                console.warn(err);
+            });
     },
 
     /**
