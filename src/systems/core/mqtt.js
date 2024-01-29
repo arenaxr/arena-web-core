@@ -84,7 +84,13 @@ AFRAME.registerSystem('arena-mqtt', {
             // }),
         );
         this.onSceneMessageArrived = this.onSceneMessageArrived.bind(this);
-        worker.registerMessageHandler('s', proxy(this.onSceneMessageArrived.bind(this)), true);
+        worker.registerMessageHandler(
+            's',
+            proxy((messages) => {
+                messages.forEach(this.onSceneMessageArrived);
+            }),
+            true
+        );
         worker.registerMessageQueue('s', true);
         return worker;
     },
