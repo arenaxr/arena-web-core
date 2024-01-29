@@ -9,7 +9,7 @@
 import { expose } from 'comlink';
 import * as Paho from 'paho-mqtt'; // https://www.npmjs.com/package/paho-mqtt
 
-const MINTOCKINTERVAL = 1000;
+const MINTOCKINTERVAL = 3 * 1000;
 let lastMetricTick = new Date().getTime();
 let lastTock = new Date().getTime();
 
@@ -146,7 +146,7 @@ class MQTTWorker {
                 this.messageQueues[topicCategory] = [];
                 lastTock = now;
                 console.log(`Worker flushing ${batch.length} messages for ${topicCategory}`);
-                batch.forEach(handler);
+                handler(batch);
             }
         } else if (handler) {
             handler(trimmedMessage);
