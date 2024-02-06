@@ -11,12 +11,14 @@ import { skinning } from '../accessors/SkinningNode.js';
 import { morph } from '../accessors/MorphNode.js';
 import { texture } from '../accessors/TextureNode.js';
 import { cubeTexture } from '../accessors/CubeTextureNode.js';
-import { lightsWithoutWrap } from '../lighting/LightsNode.js';
+import { lightsNode } from '../lighting/LightsNode.js';
 import { mix } from '../math/MathNode.js';
 import { float, vec3, vec4 } from '../shadernode/ShaderNode.js';
 import AONode from '../lighting/AONode.js';
 import { lightingContext } from '../lighting/LightingContextNode.js';
 import EnvironmentNode from '../lighting/EnvironmentNode.js';
+import { depthPixel } from '../display/ViewportDepthNode.js';
+import { cameraLogDepth } from '../accessors/CameraNode.js';
 
 const NodeMaterials = new Map();
 
@@ -32,12 +34,11 @@ class NodeMaterial extends ShaderMaterial {
 
 		this.forceSinglePass = false;
 
-		this.unlit = this.constructor === NodeMaterial.prototype.constructor; // Extended materials are not unlit by default
-
 		this.fog = true;
 		this.lights = true;
 		this.normals = true;
-		this.colorSpace = true;
+
+		this.colorSpaced = true;
 
 		this.lightsNode = null;
 		this.envNode = null;
@@ -51,7 +52,12 @@ class NodeMaterial extends ShaderMaterial {
 
 		this.positionNode = null;
 
-		this.outputNode = null; // @TODO: Rename to fragmentNode
+		this.depthNode = null;
+		this.shadowNode = null;
+
+		this.outputNode = null;
+
+		this.fragmentNode = null;
 		this.vertexNode = null;
 
 	}
@@ -74,7 +80,7 @@ class NodeMaterial extends ShaderMaterial {
 
 		builder.addStack();
 
-		builder.stack.outputNode = this.setupPosition( builder );
+		builder.stack.outputNode = this.vertexNode || this.setupPosition( builder );
 
 		builder.addFlow( 'vertex', builder.removeStack() );
 
@@ -82,9 +88,11 @@ class NodeMaterial extends ShaderMaterial {
 
 		builder.addStack();
 
-		let outputNode;
+		let resultNode;
 
-		if ( this.unlit === false ) {
+		if ( this.fragmentNode === null ) {
+
+			if ( this.depthWrite === true ) this.setupDepth( builder );
 
 			if ( this.normals === true ) this.setupNormal( builder );
 
@@ -93,34 +101,60 @@ class NodeMaterial extends ShaderMaterial {
 
 			const outgoingLightNode = this.setupLighting( builder );
 
-			outputNode = this.setupOutput( builder, vec4( outgoingLightNode, diffuseColor.a ) );
+			resultNode = this.setupOutput( builder, vec4( outgoingLightNode, diffuseColor.a ) );
 
 			// OUTPUT NODE
 
-			output.assign( outputNode );
+			output.assign( resultNode );
 
 			//
 
-			if ( this.outputNode !== null ) outputNode = this.outputNode;
+			if ( this.outputNode !== null ) resultNode = this.outputNode;
 
 		} else {
 
-			outputNode = this.setupOutput( builder, this.outputNode || vec4( 0, 0, 0, 1 ) );
+			resultNode = this.setupOutput( builder, this.fragmentNode );
 
 		}
 
-		builder.stack.outputNode = outputNode;
+		builder.stack.outputNode = resultNode;
 
 		builder.addFlow( 'fragment', builder.removeStack() );
 
 	}
 
+	setupDepth( builder ) {
+
+		const { renderer } = builder;
+
+		// Depth
+
+		let depthNode = this.depthNode;
+
+		if ( depthNode === null && renderer.logarithmicDepthBuffer === true ) {
+
+			const fragDepth = modelViewProjection().w.add( 1 );
+
+			depthNode = fragDepth.log2().mul( cameraLogDepth ).mul( 0.5 );
+
+		}
+
+		if ( depthNode !== null ) {
+
+			depthPixel.assign( depthNode ).append();
+
+		}
+
+	}
+
 	setupPosition( builder ) {
 
-		const object = builder.object;
+		const { object } = builder;
 		const geometry = object.geometry;
 
 		builder.addStack();
+
+		// Vertex
 
 		if ( geometry.morphAttributes.position || geometry.morphAttributes.normal || geometry.morphAttributes.color ) {
 
@@ -146,9 +180,12 @@ class NodeMaterial extends ShaderMaterial {
 
 		}
 
-		builder.context.vertex = builder.removeStack();
+		const mvp = modelViewProjection();
 
-		return this.vertexNode || modelViewProjection();
+		builder.context.vertex = builder.removeStack();
+		builder.context.mvp = mvp;
+
+		return mvp;
 
 	}
 
@@ -160,7 +197,7 @@ class NodeMaterial extends ShaderMaterial {
 
 		if ( this.vertexColors === true && geometry.hasAttribute( 'color' ) ) {
 
-			colorNode = vec4( colorNode.xyz.mul( attribute( 'color' ) ), colorNode.a );
+			colorNode = vec4( colorNode.xyz.mul( attribute( 'color', 'vec3' ) ), colorNode.a );
 
 		}
 
@@ -253,15 +290,15 @@ class NodeMaterial extends ShaderMaterial {
 
 		}
 
-		let lightsNode = this.lightsNode || builder.lightsNode;
+		let lightsN = this.lightsNode || builder.lightsNode;
 
 		if ( materialLightsNode.length > 0 ) {
 
-			lightsNode = lightsWithoutWrap( [ ...lightsNode.lightNodes, ...materialLightsNode ] );
+			lightsN = lightsNode( [ ...lightsN.lightNodes, ...materialLightsNode ] );
 
 		}
 
-		return lightsNode;
+		return lightsN;
 
 	}
 
@@ -316,7 +353,7 @@ class NodeMaterial extends ShaderMaterial {
 
 		const toneMappingNode = builder.toneMappingNode;
 
-		if ( toneMappingNode ) {
+		if ( this.toneMapped === true && toneMappingNode ) {
 
 			outputNode = vec4( toneMappingNode.context( { color: outputNode.rgb } ), outputNode.a );
 
@@ -334,29 +371,9 @@ class NodeMaterial extends ShaderMaterial {
 
 		// ENCODING
 
-		if ( this.colorSpace === true ) {
+		if ( this.colorSpaced === true ) {
 
-			const renderTarget = renderer.getRenderTarget();
-
-			let outputColorSpace;
-
-			if ( renderTarget !== null ) {
-
-				if ( Array.isArray( renderTarget.texture ) ) {
-
-					outputColorSpace = renderTarget.texture[ 0 ].colorSpace;
-
-				} else {
-
-					outputColorSpace = renderTarget.texture.colorSpace;
-
-				}
-
-			} else {
-
-				outputColorSpace = renderer.outputColorSpace;
-
-			}
+			const outputColorSpace = renderer.currentColorSpace;
 
 			if ( outputColorSpace !== LinearSRGBColorSpace && outputColorSpace !== NoColorSpace ) {
 
@@ -479,7 +496,12 @@ class NodeMaterial extends ShaderMaterial {
 
 		this.positionNode = source.positionNode;
 
+		this.depthNode = source.depthNode;
+		this.shadowNode = source.shadowNode;
+
 		this.outputNode = source.outputNode;
+
+		this.fragmentNode = source.fragmentNode;
 		this.vertexNode = source.vertexNode;
 
 		return super.copy( source );
@@ -521,7 +543,12 @@ export default NodeMaterial;
 export function addNodeMaterial( type, nodeMaterial ) {
 
 	if ( typeof nodeMaterial !== 'function' || ! type ) throw new Error( `Node material ${ type } is not a class` );
-	if ( NodeMaterials.has( type ) ) throw new Error( `Redefinition of node material ${ type }` );
+	if ( NodeMaterials.has( type ) ) {
+
+		console.warn( `Redefinition of node material ${ type }` );
+		return;
+
+	}
 
 	NodeMaterials.set( type, nodeMaterial );
 	nodeMaterial.type = type;

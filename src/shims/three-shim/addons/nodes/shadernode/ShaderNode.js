@@ -15,7 +15,13 @@ const NodeElements = new Map(); // @TODO: Currently only a few nodes are added, 
 
 export function addNodeElement( name, nodeElement ) {
 
-	if ( NodeElements.has( name ) ) throw new Error( `Redefinition of node element ${ name }` );
+	if ( NodeElements.has( name ) ) {
+
+		console.warn( `Redefinition of node element ${ name }` );
+		return;
+
+	}
+
 	if ( typeof nodeElement !== 'function' ) throw new Error( `Node element ${ name } is not a function` );
 
 	NodeElements.set( name, nodeElement );
@@ -40,7 +46,13 @@ const shaderNodeHandler = {
 
 			if ( node.isStackNode !== true && prop === 'assign' ) {
 
-				return ( ...params ) => currentStack.assign( nodeObj, ...params );
+				return ( ...params ) => {
+
+					currentStack.assign( nodeObj, ...params );
+
+					return nodeObj;
+
+				};
 
 			} else if ( NodeElements.has( prop ) ) {
 
@@ -271,6 +283,12 @@ class ShaderCallNodeInternal extends Node {
 
 			}
 
+			if ( builder.currentFunctionNode !== null ) {
+
+				builder.currentFunctionNode.includes.push( functionNode );
+
+			}
+
 			return nodeObject( functionNode.call( inputNodes ) );
 
 		}
@@ -323,7 +341,7 @@ class ShaderNodeInternal extends Node {
 
 	get isArrayInput() {
 
-		return /^\(\s+?\[/.test( this.jsFunc.toString() );
+		return /^\((\s+)?\[/.test( this.jsFunc.toString() );
 
 	}
 
@@ -505,7 +523,18 @@ addNodeClass( 'ShaderNode', ShaderNode );
 
 //
 
-export const setCurrentStack = stack => currentStack = stack;
+export const setCurrentStack = ( stack ) => {
+
+	if ( currentStack === stack ) {
+
+		//throw new Error( 'Stack already defined.' );
+
+	}
+
+	currentStack = stack;
+
+};
+
 export const getCurrentStack = () => currentStack;
 
 export const If = ( ...params ) => currentStack.if( ...params );
@@ -545,6 +574,11 @@ export const ivec4 = new ConvertType( 'ivec4' );
 export const uvec4 = new ConvertType( 'uvec4' );
 export const bvec4 = new ConvertType( 'bvec4' );
 
+export const mat2 = new ConvertType( 'mat2' );
+export const imat2 = new ConvertType( 'imat2' );
+export const umat2 = new ConvertType( 'umat2' );
+export const bmat2 = new ConvertType( 'bmat2' );
+
 export const mat3 = new ConvertType( 'mat3' );
 export const imat3 = new ConvertType( 'imat3' );
 export const umat3 = new ConvertType( 'umat3' );
@@ -575,6 +609,10 @@ addNodeElement( 'vec4', vec4 );
 addNodeElement( 'ivec4', ivec4 );
 addNodeElement( 'uvec4', uvec4 );
 addNodeElement( 'bvec4', bvec4 );
+addNodeElement( 'mat2', mat2 );
+addNodeElement( 'imat2', imat2 );
+addNodeElement( 'umat2', umat2 );
+addNodeElement( 'bmat2', bmat2 );
 addNodeElement( 'mat3', mat3 );
 addNodeElement( 'imat3', imat3 );
 addNodeElement( 'umat3', umat3 );

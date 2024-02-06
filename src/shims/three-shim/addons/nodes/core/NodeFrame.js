@@ -47,26 +47,31 @@ class NodeFrame {
 		const updateType = node.getUpdateBeforeType();
 		const reference = node.updateReference( this );
 
-		const { frameMap, renderMap } = this._getMaps( this.updateBeforeMap, reference );
-
 		if ( updateType === NodeUpdateType.FRAME ) {
+
+			const { frameMap } = this._getMaps( this.updateBeforeMap, reference );
 
 			if ( frameMap.get( node ) !== this.frameId ) {
 
-				frameMap.set( node, this.frameId );
+				if ( node.updateBefore( this ) !== false ) {
 
-				node.updateBefore( this );
+					frameMap.set( node, this.frameId );
+
+				}
 
 			}
 
 		} else if ( updateType === NodeUpdateType.RENDER ) {
 
-			if ( renderMap.get( node ) !== this.renderId || frameMap.get( node ) !== this.frameId ) {
+			const { renderMap } = this._getMaps( this.updateBeforeMap, reference );
 
-				renderMap.set( node, this.renderId );
-				frameMap.set( node, this.frameId );
+			if ( renderMap.get( node ) !== this.renderId ) {
 
-				node.updateBefore( this );
+				if ( node.updateBefore( this ) !== false ) {
+
+					renderMap.set( node, this.renderId );
+
+				}
 
 			}
 
@@ -83,26 +88,31 @@ class NodeFrame {
 		const updateType = node.getUpdateType();
 		const reference = node.updateReference( this );
 
-		const { frameMap, renderMap } = this._getMaps( this.updateMap, reference );
-
 		if ( updateType === NodeUpdateType.FRAME ) {
+
+			const { frameMap } = this._getMaps( this.updateMap, reference );
 
 			if ( frameMap.get( node ) !== this.frameId ) {
 
-				frameMap.set( node, this.frameId );
+				if ( node.update( this ) !== false ) {
 
-				node.update( this );
+					frameMap.set( node, this.frameId );
+
+				}
 
 			}
 
 		} else if ( updateType === NodeUpdateType.RENDER ) {
 
-			if ( renderMap.get( node ) !== this.renderId || frameMap.get( node ) !== this.frameId ) {
+			const { renderMap } = this._getMaps( this.updateMap, reference );
 
-				renderMap.set( node, this.renderId );
-				frameMap.set( node, this.frameId );
+			if ( renderMap.get( node ) !== this.renderId ) {
 
-				node.update( this );
+				if ( node.update( this ) !== false ) {
+
+					renderMap.set( node, this.renderId );
+
+				}
 
 			}
 
