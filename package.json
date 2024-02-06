@@ -14,8 +14,7 @@
   },
   "overrides": {
     "super-three": "file:src/shims/three-shim",
-    "three": "file:src/shims/three-shim",
-    "three-pathfinding": "^1.1.0"
+    "three": "file:src/shims/three-shim"
   },
   "dependencies": {
     "@c-frame/aframe-particle-system-component": "^1.1.4",
