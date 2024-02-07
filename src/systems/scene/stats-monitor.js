@@ -74,17 +74,8 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     tick() {
-        if (!this.rafDiv) {
-            this.rafDiv = document.querySelector('.rs-counter-base:nth-child(1) .rs-counter-value');
-            return;
-        }
-        this.raf = parseFloat(this.rafDiv.innerHTML, 10);
-
-        if (!this.fpsDiv) {
-            this.fpsDiv = document.querySelector('.rs-counter-base:nth-child(2) .rs-counter-value');
-            return;
-        }
-        this.fps = parseFloat(this.fpsDiv.innerHTML, 10);
+        this.raf = this.el.sceneEl.components.stats.stats('rAF').value();
+        this.fps = this.el.sceneEl.components.stats.stats('FPS').value();
 
         if (window.performance && window.performance.memory) {
             const { memory } = window.performance;
