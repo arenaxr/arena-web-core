@@ -5,6 +5,7 @@
 
 ### Features
 
+* Update to prerelease AFRAME#71f1a2b for hand tracking and iOS > 12 fixes
 * add runtime info to program schema ([d003a55](https://github.com/arenaxr/arena-web-core/commit/d003a550201ee776225d879dec70153b7f415a47))
 * adding more program info properties ([0c3030b](https://github.com/arenaxr/arena-web-core/commit/0c3030b0591f127f6cd86b57b23f15393e0ed21b))
 * attempt offscreencanvas for ccar/ccwebar cv ([b1c4d04](https://github.com/arenaxr/arena-web-core/commit/b1c4d0495a403c082a241a7bb94f0b245163c82d)), closes [#611](https://github.com/arenaxr/arena-web-core/issues/611)
