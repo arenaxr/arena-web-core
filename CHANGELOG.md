@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.26.0](https://github.com/arenaxr/arena-web-core/compare/v1.25.0...v1.26.0) (2024-02-08)
+
+
+### Features
+
+* add runtime info to program schema ([d003a55](https://github.com/arenaxr/arena-web-core/commit/d003a550201ee776225d879dec70153b7f415a47))
+* adding more program info properties ([0c3030b](https://github.com/arenaxr/arena-web-core/commit/0c3030b0591f127f6cd86b57b23f15393e0ed21b))
+* attempt offscreencanvas for ccar/ccwebar cv ([b1c4d04](https://github.com/arenaxr/arena-web-core/commit/b1c4d0495a403c082a241a7bb94f0b245163c82d)), closes [#611](https://github.com/arenaxr/arena-web-core/issues/611)
+
+
+### Bug Fixes
+
+* **build:** refactor schema and target grid layout to save whitespace on build page ([#606](https://github.com/arenaxr/arena-web-core/issues/606)) ([84ef265](https://github.com/arenaxr/arena-web-core/commit/84ef26508c999d6f251eef609ece2b27c4b45b5a))
+* check for xrSession to setOriginAnchor ([d4641e7](https://github.com/arenaxr/arena-web-core/commit/d4641e7aaf3225f903f178c5f71d433abf76668f))
+* only stopVideo on jitsi start if withVideo ([b9376d8](https://github.com/arenaxr/arena-web-core/commit/b9376d8c85c6ca3d1d453cd9f5cddff610c3581a))
+* **particle-system:** remove particle-system, favoring spe-particles in schema ([b8899e3](https://github.com/arenaxr/arena-web-core/commit/b8899e364a5896c25b556c9eeea51616809e2040))
+* references to vio pose vars ([2f57b54](https://github.com/arenaxr/arena-web-core/commit/2f57b54bae68ef4a45c78654d309f377a747362e))
+* release test gUM vid stream ([f4f5bb3](https://github.com/arenaxr/arena-web-core/commit/f4f5bb38a1caf31cde73c86ee7d59739ba809b34))
+
 ## [1.25.0](https://github.com/arenaxr/arena-web-core/compare/v1.24.1...v1.25.0) (2023-12-14)
 
 
