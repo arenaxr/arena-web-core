@@ -367,8 +367,8 @@ AFRAME.registerComponent('box-collision-publisher', {
                     type: 'collision-start',
                     data: {
                         source: sourceName,
-                        position: ARENAUtils.getWorldPos(inEl),
-                        collidePosition: ARENAUtils.getWorldPos(thisEl),
+                        targetPosition: ARENAUtils.getWorldPos(inEl),
+                        position: ARENAUtils.getWorldPos(thisEl),
                     },
                 };
                 // This is either the camera or a hand
@@ -384,8 +384,8 @@ AFRAME.registerComponent('box-collision-publisher', {
                     type: 'collision-end',
                     data: {
                         source: sourceName,
-                        position: ARENAUtils.getWorldPos(inEl),
-                        collidePosition: ARENAUtils.getWorldPos(thisEl),
+                        targetPosition: ARENAUtils.getWorldPos(inEl),
+                        position: ARENAUtils.getWorldPos(thisEl),
                     },
                 };
                 // This is either the camera or a hand
