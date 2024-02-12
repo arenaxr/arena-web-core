@@ -87,7 +87,6 @@ AFRAME.registerComponent('landmark', {
             }
         }
         if (moveEl === myCam) {
-            moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
             if (this.data.lookAtLandmark) {
                 const rotTemp = new THREE.Euler();
                 rotTemp.copy(moveEl.object3D.rotation);
@@ -99,6 +98,7 @@ AFRAME.registerComponent('landmark', {
                 moveEl.components['look-controls'].yawObject.rotation.y = this.el.object3D.rotation.y;
                 moveEl.components['look-controls'].pitchObject.rotation.x = this.el.object3D.rotation.x;
             }
+            moveEl.object3D.position.copy(dest).y += ARENA.defaults.camHeight;
             if (closestNode) {
                 moveEl.components['wasd-controls'].resetNav();
                 moveEl.components['press-and-move'].resetNav();
