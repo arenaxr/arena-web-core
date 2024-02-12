@@ -538,8 +538,9 @@ export default class CreateUpdate {
             if (!Object.hasOwn(target, 'x')) {
                 // check if an object id was given
                 const targetObj = document.getElementById(target);
-                if (targetObj) target = targetObj.object3D.position; // will be processed as x, y, z below
-                else {
+                if (targetObj) {
+                    target = targetObj.object3D.position; // will be processed as x, y, z below
+                } else {
                     cameraLookAtError('target not found.');
                     return;
                 }
@@ -547,8 +548,12 @@ export default class CreateUpdate {
 
             // x, y, z given
             if (Object.hasOwn(target, 'x') && Object.hasOwn(target, 'y') && Object.hasOwn(target, 'z')) {
-                myCamera.components['look-controls'].yawObject.lookAt(target.x, target.y, target.z);
-                myCamera.components['look-controls'].pitchObject.lookAt(target.x, target.y, target.z);
+                const rotTemp = new THREE.Euler();
+                rotTemp.copy(myCamera.object3D.rotation);
+                myCamera.object3D.lookAt(target.x, target.y, target.z);
+                myCamera.components['look-controls'].yawObject.rotation.y = myCamera.object3D.rotation.y;
+                myCamera.components['look-controls'].pitchObject.rotation.x = myCamera.object3D.rotation.x;
+                myCamera.object3D.rotation.copy(rotTemp);
                 cameraLookAtWarn(message);
             }
         }

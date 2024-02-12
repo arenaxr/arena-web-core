@@ -423,6 +423,8 @@ export default class ARENAUtils {
 
     static overrideQuat = new THREE.Quaternion();
 
+    static overrideEuler = new THREE.Euler();
+
     /**
      * Camera relocation, handles both desktop and XR session (requires rig and spinner offset)
      * @param {{x, y, z}} [position] - new  position
@@ -457,11 +459,24 @@ export default class ARENAUtils {
         } else {
             if (position) userCamera.object3D.position.set(position.x, position.y, position.z);
             if (rotation) {
+                const lookComponent = userCamera.components['look-controls'];
+                const userCamRotationObj = userCamera.object3D.rotation;
                 if (Object.hasOwn(rotation, 'w')) {
                     this.overrideQuat.set(rotation.x, rotation.y, rotation.z, rotation.w);
-                    userCamera.object3D.rotation.setFromQuaternion(this.overrideQuat);
+                    this.overrideEuler.setFromQuaternion(this.overrideQuat);
+                    if (lookComponent) {
+                        // Modify look component axes separately
+                        lookComponent.yawObject.rotation.y = this.overrideEuler.y;
+                        lookComponent.pitchObject.rotation.x = this.overrideEuler.x;
+                    } else {
+                        // Directly mod camera rotation
+                        userCamRotationObj.setFromQuaternion(this.overrideQuat);
+                    }
+                } else if (lookComponent) {
+                    lookComponent.yawObject.rotation.y = rotation.y;
+                    lookComponent.pitchObject.rotation.x = rotation.x;
                 } else {
-                    userCamera.object3D.rotation.copy(rotation);
+                    userCamRotationObj.copy(rotation);
                 }
             }
         }

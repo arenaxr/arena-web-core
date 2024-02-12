@@ -93,8 +93,13 @@ AFRAME.registerComponent('landmark', {
                     moveEl.object3D.position.x - thisWorldPos.x,
                     moveEl.object3D.position.z - thisWorldPos.z
                 );
+                moveEl.components['look-controls'].pitchObject.rotation.x = Math.atan2(
+                    moveEl.object3D.position.y - thisWorldPos.y,
+                    moveEl.object3D.position.z - thisWorldPos.z
+                );
             } else {
-                moveEl.components['look-controls'].yawObject.rotation.copy(this.el.object3D.rotation);
+                moveEl.components['look-controls'].yawObject.rotation.y = this.el.object3D.rotation.y;
+                moveEl.components['look-controls'].pitchObject.rotation.x = this.el.object3D.rotation.x;
             }
             if (closestNode) {
                 moveEl.components['wasd-controls'].resetNav();
