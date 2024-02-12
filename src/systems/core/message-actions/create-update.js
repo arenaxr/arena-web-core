@@ -528,7 +528,7 @@ export default class CreateUpdate {
                 ARENAUtils.relocateUserCamera(position, rotation);
             }
         } else if (message.data.object_type === 'look-at') {
-            // camera look-at
+            // Note: this only makes sense when not in webxr session
             if (!myCamera) {
                 cameraLookAtError('local camera object does not exist! (create camera before)');
                 return;
@@ -548,12 +548,15 @@ export default class CreateUpdate {
 
             // x, y, z given
             if (Object.hasOwn(target, 'x') && Object.hasOwn(target, 'y') && Object.hasOwn(target, 'z')) {
-                const rotTemp = new THREE.Euler();
-                rotTemp.copy(myCamera.object3D.rotation);
-                myCamera.object3D.lookAt(target.x, target.y, target.z);
-                myCamera.components['look-controls'].yawObject.rotation.y = -myCamera.object3D.rotation.y;
-                myCamera.components['look-controls'].pitchObject.rotation.x = myCamera.object3D.rotation.x;
-                myCamera.object3D.rotation.copy(rotTemp);
+                const cameraPos = myCamera.object3D.position;
+                myCamera.components['look-controls'].yawObject.rotation.y = Math.atan2(
+                    cameraPos.x - target.x,
+                    cameraPos.z - target.z
+                );
+                myCamera.components['look-controls'].pitchObject.rotation.x = Math.atan2(
+                    target.y - cameraPos.y,
+                    Math.sqrt((cameraPos.x - target.x) ** 2 + (cameraPos.z - target.z) ** 2)
+                );
                 cameraLookAtWarn(message);
             }
         }

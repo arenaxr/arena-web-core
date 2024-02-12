@@ -89,12 +89,17 @@ AFRAME.registerComponent('landmark', {
         if (moveEl === myCam) {
             moveEl.object3D.position.copy(dest);
             if (this.data.lookAtLandmark) {
-                const rotTemp = new THREE.Euler();
-                rotTemp.copy(moveEl.object3D.rotation);
-                moveEl.object3D.lookAt(thisWorldPos);
-                moveEl.components['look-controls'].yawObject.rotation.y = -moveEl.object3D.rotation.y;
-                moveEl.components['look-controls'].pitchObject.rotation.x = moveEl.object3D.rotation.x;
-                moveEl.object3D.rotation.copy(rotTemp);
+                moveEl.components['look-controls'].yawObject.rotation.y = Math.atan2(
+                    moveEl.object3D.position.x - thisWorldPos.x,
+                    moveEl.object3D.position.z - thisWorldPos.z
+                );
+                moveEl.components['look-controls'].pitchObject.rotation.x = Math.atan2(
+                    thisWorldPos.y - moveEl.object3D.position.y,
+                    Math.sqrt(
+                        (moveEl.object3D.position.x - thisWorldPos.x) ** 2 +
+                            (moveEl.object3D.position.z - thisWorldPos.z) ** 2
+                    )
+                );
             } else {
                 moveEl.components['look-controls'].yawObject.rotation.y = this.el.object3D.rotation.y;
                 moveEl.components['look-controls'].pitchObject.rotation.x = this.el.object3D.rotation.x;
