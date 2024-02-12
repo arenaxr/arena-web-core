@@ -69,8 +69,8 @@ AFRAME.registerComponent('box-collider', {
         this.observer = new MutationObserver(this.setDirty);
         this.dirty = true;
 
-        this.hitStartEventDetail = { intersectedEls: this.newIntersectedEls };
-        this.hitEndEventDetail = { endIntersectedEls: this.clearedIntersectedEls };
+        this.collideStartEventDetail = { intersectedEls: this.newIntersectedEls };
+        this.collideEndEventDetail = { endIntersectedEls: this.clearedIntersectedEls };
 
         this.tempMatrixWorld = new THREE.Matrix4();
         this.tempMatrixWorldSceneCam = new THREE.Matrix4();
@@ -208,7 +208,7 @@ AFRAME.registerComponent('box-collider', {
                 continue;
             }
             if (!previousIntersectedEls[i].hasAttribute('box-collider')) {
-                previousIntersectedEls[i].emit('hitend');
+                previousIntersectedEls[i].emit('box-collide-end');
             }
             clearedIntersectedEls.push(previousIntersectedEls[i]);
         }
@@ -221,7 +221,7 @@ AFRAME.registerComponent('box-collider', {
             if (newIntersectedEls[i].hasAttribute('box-collider')) {
                 continue;
             }
-            newIntersectedEls[i].emit('hitstart');
+            newIntersectedEls[i].emit('box-collide-start');
         }
 
         // Calculate closest intersected entity based on centers.
@@ -259,11 +259,11 @@ AFRAME.registerComponent('box-collider', {
         }
 
         if (clearedIntersectedEls.length) {
-            el.emit('hitend', this.hitEndEventDetail);
+            el.emit('box-collide-end', this.collideEndEventDetail);
         }
 
         if (newIntersectedEls.length) {
-            el.emit('hitstart', this.hitStartEventDetail);
+            el.emit('box-collide-start', this.collideStartEventDetail);
         }
     },
 
@@ -358,41 +358,39 @@ AFRAME.registerComponent('box-collision-publisher', {
     },
     init() {
         const thisEl = this.el;
-        thisEl.addEventListener('hitstart', (e) => {
-            const objName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
-            const thisMsg = {
-                object_id: objName,
-                action: 'clientEvent',
-                type: 'collision-start',
-                data: {
-                    source: objName,
-                    position: ARENAUtils.getWorldPos(thisEl),
-                    targets: e.detail.intersectedEls.map((inEl) => ({
-                        id: inEl.id,
+        thisEl.addEventListener('box-collide-start', (e) => {
+            e.detail.intersectedEls.forEach((inEl) => {
+                const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
+                const thisMsg = {
+                    object_id: inEl.id,
+                    action: 'clientEvent',
+                    type: 'collision-start',
+                    data: {
+                        source: sourceName,
                         position: ARENAUtils.getWorldPos(inEl),
-                    })),
-                },
-            };
-            // This is either the camera or a hand
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
+                        collidePosition: ARENAUtils.getWorldPos(thisEl),
+                    },
+                };
+                // This is either the camera or a hand
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${sourceName}`, thisMsg);
+            });
         });
-        thisEl.addEventListener('hitend', (e) => {
-            const objName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
-            const thisMsg = {
-                object_id: objName,
-                action: 'clientEvent',
-                type: 'collision-end',
-                data: {
-                    source: objName,
-                    position: ARENAUtils.getWorldPos(thisEl),
-                    targets: e.detail.endIntersectedEls.map((inEl) => ({
-                        id: inEl.id,
+        thisEl.addEventListener('box-collide-end', (e) => {
+            e.detail.endIntersectedEls.forEach((inEl) => {
+                const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
+                const thisMsg = {
+                    object_id: inEl.id,
+                    action: 'clientEvent',
+                    type: 'collision-end',
+                    data: {
+                        source: sourceName,
                         position: ARENAUtils.getWorldPos(inEl),
-                    })),
-                },
-            };
-            // This is either the camera or a hand
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
+                        collidePosition: ARENAUtils.getWorldPos(thisEl),
+                    },
+                };
+                // This is either the camera or a hand
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${sourceName}`, thisMsg);
+            });
         });
     },
 });
