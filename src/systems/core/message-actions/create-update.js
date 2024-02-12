@@ -551,7 +551,7 @@ export default class CreateUpdate {
                 const rotTemp = new THREE.Euler();
                 rotTemp.copy(myCamera.object3D.rotation);
                 myCamera.object3D.lookAt(target.x, target.y, target.z);
-                myCamera.components['look-controls'].yawObject.rotation.y = myCamera.object3D.rotation.y;
+                myCamera.components['look-controls'].yawObject.rotation.y = -myCamera.object3D.rotation.y;
                 myCamera.components['look-controls'].pitchObject.rotation.x = myCamera.object3D.rotation.x;
                 myCamera.object3D.rotation.copy(rotTemp);
                 cameraLookAtWarn(message);

@@ -92,7 +92,7 @@ AFRAME.registerComponent('landmark', {
                 const rotTemp = new THREE.Euler();
                 rotTemp.copy(moveEl.object3D.rotation);
                 moveEl.object3D.lookAt(thisWorldPos);
-                moveEl.components['look-controls'].yawObject.rotation.y = moveEl.object3D.rotation.y;
+                moveEl.components['look-controls'].yawObject.rotation.y = -moveEl.object3D.rotation.y;
                 moveEl.components['look-controls'].pitchObject.rotation.x = moveEl.object3D.rotation.x;
                 moveEl.object3D.rotation.copy(rotTemp);
             } else {
