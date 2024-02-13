@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.26.1](https://github.com/arenaxr/arena-web-core/compare/v1.26.0...v1.26.1) (2024-02-13)
+
+
+### Bug Fixes
+
+* camera overrides and lookats w/ look-controls ([6deef09](https://github.com/arenaxr/arena-web-core/commit/6deef091ec22477e74b21ccf0368210a11716607))
+* (hotfix) use safe getter for scene stats component ([6342083](https://github.com/arenaxr/arena-web-core/commit/63420836323ba811fb54e3dd22f2f134d5d3407f))
+
 ## [1.26.0](https://github.com/arenaxr/arena-web-core/compare/v1.25.0...v1.26.0) (2024-02-08)
 
 
