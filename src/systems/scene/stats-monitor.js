@@ -74,8 +74,8 @@ AFRAME.registerComponent('stats-monitor', {
     },
 
     tick() {
-        this.raf = this.el.sceneEl.components.stats.stats('rAF').value();
-        this.fps = this.el.sceneEl.components.stats.stats('FPS').value();
+        this.raf = this.el.sceneEl.components.stats?.stats('rAF')?.value() ?? 0;
+        this.fps = this.el.sceneEl.components.stats?.stats('FPS')?.value() ?? 0;
 
         if (window.performance && window.performance.memory) {
             const { memory } = window.performance;
