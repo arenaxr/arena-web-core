@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.26.2](https://github.com/arenaxr/arena-web-core/compare/v1.26.1...v1.26.2) (2024-02-16)
+
+
+### Bug Fixes
+
+* **screenshare:** fixed screenshare failure validating token ([60d712e](https://github.com/arenaxr/arena-web-core/commit/60d712e8fc39ac2fc359ae7549b0c982faa7cb73))
+
 ## [1.26.1](https://github.com/arenaxr/arena-web-core/compare/v1.26.0...v1.26.1) (2024-02-13)
 
 
