@@ -4,7 +4,7 @@ if (!window.params) window.close();
 
 const options = window.params.connectOptions;
 const { appID } = window.params;
-const { token } = window.params;
+const token = window.params.token.mqtt_token;
 const confOptions = {
     openBridgeChannel: true,
 };
