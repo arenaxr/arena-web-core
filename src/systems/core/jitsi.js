@@ -678,13 +678,13 @@ AFRAME.registerSystem('arena-jitsi', {
     /**
      * This function is called when the this.connection fails.
      */
-    onConnectionFailed() {
+    onConnectionFailed(errType, msg, credentials, details) {
         const { el } = this;
 
         const { sceneEl } = el;
 
         const err = 'connection.connectionFailed';
-        console.error('Conference server connection failed!');
+        console.error('Conference server connection failed!', errType, msg, credentials, details);
         sceneEl.emit(JITSI_EVENTS.CONFERENCE_ERROR, {
             errorCode: err,
         });

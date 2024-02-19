@@ -128,8 +128,8 @@ function onConnectionSuccess() {
 /**
  * This function is called when the connection fail.
  */
-function onConnectionFailed() {
-    console.error('Connection Failed!');
+function onConnectionFailed(errType, msg, credentials, details) {
+    console.error('Connection Failed!', errType, msg, credentials, details);
 }
 
 /**
