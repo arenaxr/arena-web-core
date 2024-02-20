@@ -64,7 +64,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.nameSpace = this.arena.nameSpace;
         this.scene = this.arena.namespacedScene;
         this.devInstance = ARENA.defaults.devInstance;
-        this.isSceneWriter = this.arena.isUserSceneWriter();
+        this.isModerator = this.isModerator(this.user.status);
 
         this.keepalive_interval_ms = 30000;
 
@@ -200,7 +200,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.closeUsersBtn.innerText = '×';
         this.usersPopup.appendChild(this.closeUsersBtn);
 
-        if (this.isSceneWriter) {
+        if (this.isModerator) {
             const muteAllDiv = document.createElement('div');
             muteAllDiv.className = 'mute-all';
             this.usersPopup.appendChild(muteAllDiv);
@@ -638,6 +638,10 @@ AFRAME.registerSystem('arena-chat-ui', {
         return !cameraId.includes('anonymous');
     },
 
+    isModerator(status) {
+        return status && status.role === 'moderator';
+    },
+
     /**
      * Method to publish outgoing chat messages, gathers destination from UI.
      * @param {*} msgTxt The message text.
@@ -993,7 +997,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         };
 
         // show moderator info
-        if (status && status.role === 'moderator') {
+        if (this.isModerator(status)) {
             const iconModerator = document.createElement('i');
             iconModerator.className = 'fa fa-crown';
             iconModerator.style.color = 'black';
