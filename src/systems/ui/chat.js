@@ -909,10 +909,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
                     // span click event (send sound on/off msg to ussr)
                     sspan.onclick = function muteUserClick() {
-                        if (!_this.isUserAuthenticated(_this.cameraId)) {
-                            _this.displayAlert('Anonymous users may not mute others.', 3000);
-                            return;
-                        }
                         // message to target user
                         _this.ctrlMsg(user.uid, 'sound:off');
                     };
