@@ -913,31 +913,31 @@ AFRAME.registerSystem('arena-chat-ui', {
                         _this.ctrlMsg(user.uid, 'sound:off');
                     };
 
-                    // remove user to be rendered for scene editors only
-                    if (_this.isSceneWriter) {
-                        const kospan = document.createElement('span');
-                        kospan.className = 'users-list-btn ko';
-                        kospan.title = 'Remove User';
-                        uBtnCtnr.appendChild(kospan);
-                        kospan.onclick = function kickUserClick() {
-                            Swal.fire({
-                                title: 'Are you sure?',
-                                text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Yes',
-                                reverseButtons: true,
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
-                                    _this.ctrlMsg(user.uid, 'logout');
-                                    // kick jitsi channel directly as well
-                                    const warn = `You have been asked to leave by ${_this.userName}.`;
-                                    this.jitsi.kickout(user.uid, warn);
-                                }
-                            });
-                        };
-                    }
+                    // Remove user to be rendered for all users, allowing full moderation for all.
+                    // This follows Jitsi's philosophy that everyone should have the power to kick
+                    // out inappropriate participants: https://jitsi.org/security/.
+                    const kospan = document.createElement('span');
+                    kospan.className = 'users-list-btn ko';
+                    kospan.title = 'Remove User';
+                    uBtnCtnr.appendChild(kospan);
+                    kospan.onclick = function kickUserClick() {
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: `This will send an automatic logout request to ${decodeURI(user.un)}.`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes',
+                            reverseButtons: true,
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                _this.displayAlert(`Notifying ${decodeURI(user.un)} of removal.`, 5000);
+                                _this.ctrlMsg(user.uid, 'logout');
+                                // kick jitsi channel directly as well
+                                const warn = `You have been asked to leave by ${_this.userName}.`;
+                                this.jitsi.kickout(user.uid, warn);
+                            }
+                        });
+                    };
 
                     if (user.type === UserType.EXTERNAL) uli.className = 'external';
                 } else {
