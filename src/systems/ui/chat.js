@@ -64,7 +64,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.nameSpace = this.arena.nameSpace;
         this.scene = this.arena.namespacedScene;
         this.devInstance = ARENA.defaults.devInstance;
-        this.isModerator = this.isModerator(this.user.status);
+        this.isModerator = true; //this.isModerator(this.user.status);
 
         this.keepalive_interval_ms = 30000;
 
