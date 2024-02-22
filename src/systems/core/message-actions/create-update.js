@@ -209,6 +209,7 @@ export default class CreateUpdate {
 
             case 'face-features':
             case 'landmarks':
+            case 'program':
                 // TODO : Remove once all existing persist landmark entities have converted
                 return;
 
