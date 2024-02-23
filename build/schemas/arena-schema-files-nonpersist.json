@@ -4,6 +4,11 @@
         "file": "schemas/camera.json",
         "title": "Camera"
     },
+    "camera-override": {
+        "description": "Camera Override is used to re-position and re-pose a client's camera.",
+        "file": "schemas/arena-override.json",
+        "title": "Camera Override"
+    },
     "event": {
         "description": "Events are ephemeral messages used to send user events like mouse movements or controller actions.",
         "file": "schemas/event.json",

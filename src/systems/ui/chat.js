@@ -934,7 +934,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                                 _this.ctrlMsg(user.uid, 'logout');
                                 // kick jitsi channel directly as well
                                 const warn = `You have been asked to leave by ${_this.userName}.`;
-                                this.jitsi.kickout(user.uid, warn);
+                                _this.jitsi.kickout(user.uid, warn);
                             }
                         });
                     };
