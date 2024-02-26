@@ -560,6 +560,14 @@ export default class CreateUpdate {
                 );
                 cameraLookAtWarn(message);
             }
+        } else if (message.data.object_type === 'teleport-to-landmark') {
+            const { landmarkObj } = message.data;
+            if (landmarkObj) {
+                const landmarkContainer = document.getElementById(`lmList_${landmarkObj}`);
+                if (landmarkContainer) {
+                    landmarkContainer.children[0]?.children[0]?.click();
+                }
+            }
         }
     }
 }

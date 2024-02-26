@@ -34,6 +34,8 @@ AFRAME.registerComponent('arenaui-card', {
         closeButton: { type: 'boolean', default: false },
         font: { type: 'string', default: 'Roboto' },
         theme: { type: 'string', default: 'light' },
+        themeOverride: { type: 'array', default: [] }, // Annoyingly can't be an object, so we have to use an array
+        materialSides: { type: 'string', default: 'both' },
     },
 
     init() {
@@ -42,6 +44,11 @@ AFRAME.registerComponent('arenaui-card', {
         const { data, el, object3DContainer } = this;
 
         this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+        data.themeOverride.forEach((override) => {
+            if (override[0] in this.ARENAColors) {
+                this.ARENAColors[override[0]] = override[1]; // Tuple of key-value
+            }
+        });
 
         const container = new ThreeMeshUI.Block({
             ref: 'container',
@@ -56,7 +63,7 @@ AFRAME.registerComponent('arenaui-card', {
         let imgContainerBlock;
         if (data.img) {
             imgContainerBlock = new ThreeMeshUI.Block({
-                backgroundSide: THREE.DoubleSide,
+                backgroundSide: data.materialSides === 'both' ? THREE.DoubleSide : THREE.FrontSide,
                 width: data.widthScale,
                 backgroundColor: this.ARENAColors.bg,
                 backgroundOpacity: this.ARENAColors.bgOpacity,
@@ -236,6 +243,13 @@ AFRAME.registerComponent('arenaui-card', {
         }
         if (data.theme !== oldData.theme) {
             this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+        }
+        if (data.themeOverride !== oldData.themeOverride) {
+            data.themeOverride.forEach((override) => {
+                if (override[0] in this.ARENAColors) {
+                    this.ARENAColors[override[0]] = override[1]; // Tuple of key-value
+                }
+            });
         }
     },
 
