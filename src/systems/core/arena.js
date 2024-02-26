@@ -680,8 +680,9 @@ AFRAME.registerSystem('arena-scene', {
                 }, 10);
             }
 
-            if (sceneOptions['ar-hit-test']) {
-                sceneEl.setAttribute('ar-hit-test', sceneOptions['ar-hit-test']);
+            if (sceneOptions['ar-hit-test']?.enabled === false) {
+                sceneEl.removeAttribute('ar-hit-test-listener');
+                sceneEl.removeAttribute('ar-hit-test');
             }
 
             // deal with scene attribution
