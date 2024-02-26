@@ -91,6 +91,13 @@
                                     "title": "Color Theme",
                                     "default": "light",
                                     "enum": ["light", "dark"]
+                                },
+                                "materialSides": {
+                                    "type": "string",
+                                    "title": "Material Sides",
+                                    "default": "both",
+                                    "enum": ["both", "front"],
+                                    "description": "Which sides display the rendered UI material"
                                 }
                             }
                         },

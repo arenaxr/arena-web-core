@@ -209,6 +209,8 @@ AFRAME.registerComponent('arenaui-button-panel', {
         vertical: { type: 'boolean', default: false },
         font: { type: 'string', default: 'Roboto' },
         theme: { type: 'string', default: 'light' },
+        themeOverride: { type: 'array', default: [] }, // Annoyingly can't be an object, so we have to use an array
+        materialSides: { type: 'string', default: 'both' },
     },
 
     init() {
@@ -216,6 +218,11 @@ AFRAME.registerComponent('arenaui-button-panel', {
         buttonBase.init.bind(this)();
 
         this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+        data.themeOverride.forEach((override) => {
+            if (override[0] in this.ARENAColors) {
+                this.ARENAColors[override[0]] = override[1]; // Tuple of key-value
+            }
+        });
 
         const shadowContainer = new ThreeMeshUI.Block({
             backgroundColor: this.ARENAColors.textBg,
@@ -224,7 +231,7 @@ AFRAME.registerComponent('arenaui-button-panel', {
             borderRadius: ARENALayout.borderRadius,
         });
         const buttonOuterContainer = new ThreeMeshUI.Block({
-            backgroundSide: THREE.DoubleSide,
+            backgroundSide: data.materialSides === 'both' ? THREE.DoubleSide : THREE.FrontSide,
             backgroundColor: this.ARENAColors.bg,
             backgroundOpacity: this.ARENAColors.bgOpacity,
             alignItems: 'stretch',
@@ -277,6 +284,13 @@ AFRAME.registerComponent('arenaui-button-panel', {
         }
         if (data.theme !== oldData.theme) {
             this.ARENAColors = data.theme === 'light' ? ARENAColorsLight : ARENAColorsDark;
+        }
+        if (data.themeOverride !== oldData.themOverride) {
+            data.themeOverride.forEach((override) => {
+                if (override[0] in this.ARENAColors) {
+                    this.ARENAColors[override[0]] = override[1]; // Tuple of key-value
+                }
+            });
         }
     },
 });
