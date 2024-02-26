@@ -94,7 +94,7 @@
                                     "type": "string",
                                     "title": "Material Sides",
                                     "default": "both",
-                                    "enum": ["Both", "Front"],
+                                    "enum": ["both", "front"],
                                     "description": "Which sides display the rendered UI material"
                                 }
                             }
