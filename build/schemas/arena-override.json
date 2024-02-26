@@ -13,12 +13,18 @@
                      "description": "3D object type.",
                      "enum": [
                         "camera",
-                        "look-at"
+                        "look-at",
+                        "teleport-to-landmark"
                      ]
                   },
                   "target": {
                      "type": "string",
                      "description": "Look at target object_id or position. Requires object_type: look-at",
+                     "default": null
+                  },
+                  "landmarkObj": {
+                     "type": "string",
+                     "description": "Teleport to the same id as the target object. Requires object_type: teleport-to-landmark",
                      "default": null
                   }
                }
