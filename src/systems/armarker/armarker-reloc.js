@@ -287,12 +287,14 @@ export default class ARMarkerRelocalization {
                         const { xrSession } = this.arenaScene;
                         if (xrSession) {
                             xrSession.requestAnimationFrame((time, frame) => {
-                                this.arMakerSystem.setOriginAnchor({
-                                    // Copy values
-                                    ...this.cameraRigObj3D.position,
-                                    ...this.cameraSpinnerObj3D.quaternion,
-                                    frame,
-                                });
+                                this.arMakerSystem.setOriginAnchor(
+                                    {
+                                        // Copy values
+                                        position: { ...this.cameraRigObj3D.position },
+                                        rotation: { ...this.cameraSpinnerObj3D.quaternion },
+                                    },
+                                    frame
+                                );
                             });
                         }
 

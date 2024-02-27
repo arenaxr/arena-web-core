@@ -507,10 +507,11 @@ AFRAME.registerSystem('armarker', {
             // This may be a webar session. Don't try to anchor
             return;
         }
-        const anchorPose = new XRRigidTransform(position, rotation);
         if (!xrFrame) {
             console.error("No XRFrame available, can't set origin anchor");
+            return;
         }
+        const anchorPose = new XRRigidTransform(position, rotation);
         xrFrame.createAnchor(anchorPose, this.xrRefSpace).then(async (anchor) => {
             // Persist, currently Quest browser only
             if (anchor.requestPersistentHandle) {
