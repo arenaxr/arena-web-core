@@ -680,9 +680,13 @@ AFRAME.registerSystem('arena-scene', {
                 }, 10);
             }
 
-            if (sceneOptions['ar-hit-test']?.enabled === false) {
-                sceneEl.removeAttribute('ar-hit-test-listener');
-                sceneEl.removeAttribute('ar-hit-test');
+            if (sceneOptions['ar-hit-test']?.enabled !== false) {
+                sceneEl.setAttribute('ar-hit-test', {
+                    enabled: true,
+                    src: 'static/images/blank-pixel.png',
+                    mapSize: { x: 0.005, y: 0.005 },
+                });
+                sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
             }
 
             // deal with scene attribution
