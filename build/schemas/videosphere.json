@@ -35,7 +35,7 @@
                                 "radius": {
                                     "type": "number",
                                     "title": "Radius",
-                                    "default": 5000
+                                    "default": 500
                                 },
                                 "segmentsHeight": {
                                     "type": "integer",
