@@ -40,7 +40,7 @@
                                 "segmentsHeight": {
                                     "type": "integer",
                                     "title": "Segments Height",
-                                    "default": 64
+                                    "default": 32
                                 },
                                 "segmentsWidth": {
                                     "type": "integer",
