@@ -27,11 +27,12 @@ AFRAME.registerComponent('webxr-device-manager', {
         this.isMobile = ARENAUtils.isMobile();
         this.mouseCursor = document.getElementById('mouse-cursor');
         this.cameraSpinner = document.getElementById('cameraSpinner');
+        this.lHand = document.getElementById('leftHand');
+        this.rHand = document.getElementById('rightHand');
     },
 
     onWebXREnterVR() {
-        const { el, mouseCursor, cameraSpinner, isMobile, isWebXRViewer } = this;
-        const { sceneEl } = el;
+        const { el: sceneEl, mouseCursor, cameraSpinner, lHand, rHand, isMobile, isWebXRViewer } = this;
         if (sceneEl.is('ar-mode')) {
             if (isMobile && !isWebXRViewer) {
                 mouseCursor.removeAttribute('cursor');
@@ -40,6 +41,12 @@ AFRAME.registerComponent('webxr-device-manager', {
                 cameraSpinner.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
                 cameraSpinner.setAttribute('cursor', { rayOrigin: 'xrselect', fuse: false });
                 cameraSpinner.components.cursor.onEnterVR(); // Manually trigger cursor callback for xr event binds
+            } else if (!isWebXRViewer) {
+                // non-mobile, non-WebXR browser, maybe headset? Enable hands, disable mouse raycaster
+                mouseCursor.removeAttribute('cursor');
+                mouseCursor.removeAttribute('raycaster');
+                lHand.setAttribute('raycaster', 'enabled', true);
+                rHand.setAttribute('raycaster', 'enabled', true);
             }
             document.getElementById('env').setAttribute('visible', false);
             const arMarkerSys = sceneEl.systems.armarker;
@@ -48,13 +55,19 @@ AFRAME.registerComponent('webxr-device-manager', {
     },
 
     onWebXRRExitVR() {
-        const { el: sceneEl, mouseCursor, cameraSpinner, isMobile, isWebXRViewer } = this;
+        const { el: sceneEl, mouseCursor, cameraSpinner, lHand, rHand, isMobile, isWebXRViewer } = this;
         if (sceneEl.is('ar-mode')) {
             if (isMobile && !isWebXRViewer) {
                 cameraSpinner.removeAttribute('cursor');
                 cameraSpinner.removeAttribute('raycaster');
                 mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
                 mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
+            } else if (!isWebXRViewer) {
+                // non-mobile, non-WebXR browser, maybe headset?
+                mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
+                mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
+                lHand.setAttribute('raycaster', 'enabled', false);
+                rHand.setAttribute('raycaster', 'enabled', false);
             }
             document.getElementById('env').setAttribute('visible', true);
         }
