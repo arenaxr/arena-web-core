@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.26.3](https://github.com/arenaxr/arena-web-core/compare/v1.26.2...v1.26.3) (2024-02-28)
+
+
+### Bug Fixes
+
+* bad raytrace xrselect after reloc in xr ([730657e](https://github.com/arenaxr/arena-web-core/commit/730657ef66c5e65068dfa9786b4af839ad30d844))
+* **jitsi:** allow all users access to kick out moderation ([6eba98d](https://github.com/arenaxr/arena-web-core/commit/6eba98d8e1c8999ee09c5e55e1a7e3bdec9b4f57))
+* **jitsi:** allow anonymous users ability to moderate loud users with mute ([a0428af](https://github.com/arenaxr/arena-web-core/commit/a0428afb1507cc7fd4f843eed0e62cea5dbd0519))
+* **jitsi:** allow moderators, not owners, access to mute all ([3cc4da5](https://github.com/arenaxr/arena-web-core/commit/3cc4da510340ddf59c43c9447f422a19683685b7))
+* **jitsi:** fixed sending kick command to xmpp ([8d37c2e](https://github.com/arenaxr/arena-web-core/commit/8d37c2e9f69d052a426ab4bbe1d025b09436c2c0))
+* **jitsi:** log all error data on connection fail ([b775abb](https://github.com/arenaxr/arena-web-core/commit/b775abbe6847aa6f8eca38c68d049a2d5b60445f))
+* **program:** remove warning for program message updates ([2494ac4](https://github.com/arenaxr/arena-web-core/commit/2494ac4d3c2fb808e91cd5bb140caa277ae7f241))
+* typo for button panel options enum ([20b4fd2](https://github.com/arenaxr/arena-web-core/commit/20b4fd2fe76f760c69a5ff64c5eb5e41af84592d))
+* update cursor/raycasters for both ar and vr ([b761673](https://github.com/arenaxr/arena-web-core/commit/b7616730ea9b9d70b968c8e03c52181a47e2670a))
+* update videosphere default radius to match a-frame ([b63c5aa](https://github.com/arenaxr/arena-web-core/commit/b63c5aa2d3a06ae5c27dc8356e3e58c006864c53))
+
 ## [1.26.2](https://github.com/arenaxr/arena-web-core/compare/v1.26.1...v1.26.2) (2024-02-16)
 
 
