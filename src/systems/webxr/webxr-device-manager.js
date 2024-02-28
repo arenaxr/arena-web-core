@@ -33,21 +33,21 @@ AFRAME.registerComponent('webxr-device-manager', {
 
     onWebXREnterVR() {
         const { el: sceneEl, mouseCursor, cameraSpinner, lHand, rHand, isMobile, isWebXRViewer } = this;
+        if (isMobile && !isWebXRViewer) {
+            mouseCursor.removeAttribute('cursor');
+            mouseCursor.removeAttribute('raycaster');
+            cameraSpinner.renderer = sceneEl.renderer; // Manually set renderer for cursor component (assumes sceneEl)
+            cameraSpinner.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
+            cameraSpinner.setAttribute('cursor', { rayOrigin: 'xrselect', fuse: false });
+            cameraSpinner.components.cursor.onEnterVR(); // Manually trigger cursor callback for xr event binds
+        } else if (!isWebXRViewer) {
+            // non-mobile, non-WebXR browser, maybe headset? Enable hands, disable mouse raycaster
+            mouseCursor.removeAttribute('cursor');
+            mouseCursor.removeAttribute('raycaster');
+            lHand.setAttribute('raycaster', 'enabled', true);
+            rHand.setAttribute('raycaster', 'enabled', true);
+        }
         if (sceneEl.is('ar-mode')) {
-            if (isMobile && !isWebXRViewer) {
-                mouseCursor.removeAttribute('cursor');
-                mouseCursor.removeAttribute('raycaster');
-                cameraSpinner.renderer = sceneEl.renderer; // Manually set renderer for cursor component (assumes sceneEl)
-                cameraSpinner.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
-                cameraSpinner.setAttribute('cursor', { rayOrigin: 'xrselect', fuse: false });
-                cameraSpinner.components.cursor.onEnterVR(); // Manually trigger cursor callback for xr event binds
-            } else if (!isWebXRViewer) {
-                // non-mobile, non-WebXR browser, maybe headset? Enable hands, disable mouse raycaster
-                mouseCursor.removeAttribute('cursor');
-                mouseCursor.removeAttribute('raycaster');
-                lHand.setAttribute('raycaster', 'enabled', true);
-                rHand.setAttribute('raycaster', 'enabled', true);
-            }
             document.getElementById('env').setAttribute('visible', false);
             const arMarkerSys = sceneEl.systems.armarker;
             arMarkerSys.webXRSessionStarted(sceneEl.xrSession);
@@ -56,19 +56,19 @@ AFRAME.registerComponent('webxr-device-manager', {
 
     onWebXRRExitVR() {
         const { el: sceneEl, mouseCursor, cameraSpinner, lHand, rHand, isMobile, isWebXRViewer } = this;
+        if (isMobile && !isWebXRViewer) {
+            cameraSpinner.removeAttribute('cursor');
+            cameraSpinner.removeAttribute('raycaster');
+            mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
+            mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
+        } else if (!isWebXRViewer) {
+            // non-mobile, non-WebXR browser, maybe headset?
+            mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
+            mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
+            lHand.setAttribute('raycaster', 'enabled', false);
+            rHand.setAttribute('raycaster', 'enabled', false);
+        }
         if (sceneEl.is('ar-mode')) {
-            if (isMobile && !isWebXRViewer) {
-                cameraSpinner.removeAttribute('cursor');
-                cameraSpinner.removeAttribute('raycaster');
-                mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
-                mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
-            } else if (!isWebXRViewer) {
-                // non-mobile, non-WebXR browser, maybe headset?
-                mouseCursor.setAttribute('raycaster', { objects: '[click-listener],[click-listener-local]' });
-                mouseCursor.setAttribute('cursor', { rayOrigin: 'mouse' });
-                lHand.setAttribute('raycaster', 'enabled', false);
-                rHand.setAttribute('raycaster', 'enabled', false);
-            }
             document.getElementById('env').setAttribute('visible', true);
         }
     },
