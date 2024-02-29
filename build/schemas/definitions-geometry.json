@@ -113,6 +113,7 @@
                 "shader": {
                     "default": "standard",
                     "description": "Which material to use. Defaults to the standard material. Can be set to the flat material or to a registered custom shader material.",
+                    "enum": ["portal", "flat", "standard", "phong", "sdf", "msdf", "shadow", "skyshader", "gradientshader"],
                     "type": "string"
                 },
                 "side": {
