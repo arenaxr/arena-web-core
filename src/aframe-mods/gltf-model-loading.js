@@ -23,22 +23,24 @@ AFRAME.components['gltf-model'].Component.prototype.update = function update() {
     // register with model-progress system to handle model loading events
     document.querySelector('a-scene').systems['model-progress'].registerModel(el, src);
 
-    this.loader.load(
-        src,
-        (gltfModel) => {
-            self.model = gltfModel.scene || gltfModel.scenes[0];
-            self.model.animations = gltfModel.animations;
-            self.model.asset = gltfModel.asset; // save asset
-            el.setObject3D('mesh', self.model);
-            el.emit('model-loaded', { format: 'gltf', model: self.model });
-        },
-        (xhr) => {
-            el.emit('model-progress', { src, loaded: xhr.loaded, total: xhr.total });
-        },
-        (error) => {
-            const message = error && error.message ? error.message : 'Failed to load glTF model';
-            console.error(message);
-            el.emit('model-error', { format: 'gltf', src });
-        }
-    );
+    this.ready.then(() => {
+        self.loader.load(
+            src,
+            (gltfModel) => {
+                self.model = gltfModel.scene || gltfModel.scenes[0];
+                self.model.animations = gltfModel.animations;
+                self.model.asset = gltfModel.asset; // save asset
+                el.setObject3D('mesh', self.model);
+                el.emit('model-loaded', { format: 'gltf', model: self.model });
+            },
+            (xhr) => {
+                el.emit('model-progress', { src, loaded: xhr.loaded, total: xhr.total });
+            },
+            (error) => {
+                const message = error && error.message ? error.message : 'Failed to load glTF model';
+                console.error(message);
+                el.emit('model-error', { format: 'gltf', src });
+            }
+        );
+    });
 };
