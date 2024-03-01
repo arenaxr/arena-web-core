@@ -240,7 +240,7 @@
                     "default": 2,
                     "description": "Width in px of the rendered line.",
                     "type": "integer"
-                },
+                }
             },
             "format": "grid",
             "title": "Material",
