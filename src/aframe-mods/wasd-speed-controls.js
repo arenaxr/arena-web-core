@@ -8,7 +8,6 @@
 
 /* global AFRAME, ARENA, THREE */
 
-const { bind } = AFRAME.utils;
 const CLAMP_VELOCITY = 0.00001;
 const MAX_DELTA = 0.2;
 const EPS = 10e-6;
@@ -42,12 +41,12 @@ AFRAME.components['wasd-controls'].Component.prototype.init = function init() {
     this.velocity = new THREE.Vector3();
 
     // Bind methods and add event listeners.
-    this.onBlur = bind(this.onBlur, this);
-    this.onContextMenu = bind(this.onContextMenu, this);
-    this.onFocus = bind(this.onFocus, this);
-    this.onKeyDown = bind(this.onKeyDown, this);
-    this.onKeyUp = bind(this.onKeyUp, this);
-    this.onVisibilityChange = bind(this.onVisibilityChange, this);
+    this.onBlur = this.onBlur.bind(this);
+    this.onContextMenu = this.onContextMenu.bind(this);
+    this.onFocus = this.onFocus.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
+    this.onVisibilityChange = this.onVisibilityChange.bind(this);
     this.attachVisibilityEventListeners();
 };
 
