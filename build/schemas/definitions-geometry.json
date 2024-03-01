@@ -33,7 +33,15 @@
             "properties": {
                 "alphaTest": {
                     "default": 0,
+                    "minimum": 0,
+                    "maximum": 1,
                     "description": "Alpha test threshold for transparency.",
+                    "type": "number"
+                },
+                "anisotropy": {
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "The anisotropic filtering sample rate to use for the textures. A value of 0 means the default value will be used, see renderer.",
                     "type": "number"
                 },
                 "blending": {
@@ -43,10 +51,15 @@
                     "type": "string"
                 },
                 "color": {
-                    "default": "#7f7f7f",
+                    "default": "#ffffff",
                     "description": "Base diffuse color.",
                     "format": "color",
-                    "title": "color",
+                    "type": "string"
+                },
+                "combine": {
+                    "default": "mix",
+                    "description": "How the environment map mixes with the material. Requires shader: phong.",
+                    "enum": ["mix", "add", "multiply"],
                     "type": "string"
                 },
                 "depthTest": {
@@ -54,15 +67,48 @@
                     "description": "Whether depth testing is enabled when rendering the material.",
                     "type": "boolean"
                 },
+                "depthWrite": {
+                    "default": true,
+                    "description": "Render when depth test succeeds.",
+                    "type": "boolean"
+                },
                 "dithering": {
                     "default": true,
                     "description": "Whether material is dithered with noise. Removes banding from gradients like ones produced by lighting.",
                     "type": "boolean"
                 },
+                "emissive": {
+                    "default": "#000000",
+                    "description": "The color of the emissive lighting component. Used to make objects produce light even without other lighting in the scene. Requires shader: standard or phong",
+                    "format": "color",
+                    "type": "string"
+                },
+                "emissiveIntensity": {
+                    "default": 1,
+                    "description": "Intensity of the emissive lighting component. Requires shader: standard or phong",
+                    "type": "number"
+                },
                 "flatShading": {
                     "default": false,
                     "description": "Use THREE.FlatShading rather than THREE.StandardShading.",
                     "type": "boolean"
+                },
+                "fog": {
+                    "default": true,
+                    "description": "Whether or not material is affected by fog.",
+                    "type": "boolean"
+                },
+                "height": {
+                    "default": 256,
+                    "description": "Height of video (in pixels), if defining a video texture. Requires shader: standard or flat.",
+                    "type": "integer"
+                },
+                "metalness": {
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "How metallic the material is from 0 to 1. Requires shader: standard.",
+                    "type": "number"
                 },
                 "npot": {
                     "default": false,
@@ -71,8 +117,8 @@
                 },
                 "offset": {
                     "default": {
-                        "x": 1,
-                        "y": 1
+                        "x": 0,
+                        "y": 0
                     },
                     "description": "Texture offset to be used.",
                     "properties": {
@@ -93,12 +139,27 @@
                     "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
                     "type": "number"
                 },
+                "reflectivity": {
+                    "default": 0.9,
+                    "description": "How much the environment map affects the surface. Requires shader: phong.",
+                    "type": "number"
+                },
+                "refract": {
+                    "default": false,
+                    "description": "Whether the defined envMap should refract. Requires shader: phong.",
+                    "type": "boolean"
+                },
+                "refractionRatio": {
+                    "default": 0.98,
+                    "description": "1/refractive index of the material. Requires shader: phong.",
+                    "type": "number"
+                },
                 "repeat": {
                     "default": {
                         "x": 1,
                         "y": 1
                     },
-                    "description": "Texture repeat to be used.",
+                    "description": "How many times a texture (defined by src) repeats in the X and Y direction.",
                     "properties": {
                         "x": {
                             "type": "number"
@@ -110,11 +171,23 @@
                     "required": ["x", "y"],
                     "type": "object"
                 },
+                "roughness": {
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "How rough the material is from 0 to 1. A rougher material will scatter reflected light in more directions than a smooth material. Requires shader: standard.",
+                    "type": "number"
+                },
                 "shader": {
                     "default": "standard",
                     "description": "Which material to use. Defaults to the standard material. Can be set to the flat material or to a registered custom shader material.",
-                    "enum": ["portal", "flat", "standard", "phong", "sdf", "msdf", "shadow", "skyshader", "gradientshader"],
+                    "enum": ["flat", "standard", "phong"],
                     "type": "string"
+                },
+                "shininess": {
+                    "default": 30,
+                    "description": "How shiny the specular highlight is; a higher value gives a sharper highlight. Requires shader: phong.",
+                    "type": "number"
                 },
                 "side": {
                     "default": "front",
@@ -122,27 +195,52 @@
                     "enum": ["front", "back", "double"],
                     "type": "string"
                 },
+                "specular": {
+                    "default": "#111111",
+                    "description": "This defines how shiny the material is and the color of its shine. Requires shader: phong.",
+                    "format": "color",
+                    "type": "string"
+                },
                 "src": {
                     "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'.",
                     "format": "uri",
                     "type": "string"
+                },
+                "toneMapped": {
+                    "default": true,
+                    "description": "Whether to ignore toneMapping, set to false you are using renderer.toneMapping and an element should appear to emit light. Requires shader: flat.",
+                    "type": "boolean"
                 },
                 "transparent": {
                     "default": false,
                     "description": "Whether material is transparent. Transparent entities are rendered after non-transparent entities.",
                     "type": "boolean"
                 },
-                "vertexColors": {
-                    "default": "none",
+                "vertexColorsEnabled": {
+                    "default": false,
                     "description": "Whether to use vertex or face colors to shade the material.",
-                    "enum": ["none", "vertex", "face"],
-                    "type": "string"
+                    "type": "boolean"
                 },
                 "visible": {
                     "default": true,
                     "description": "Whether material is visible. Raycasters will ignore invisible materials.",
                     "type": "boolean"
-                }
+                },
+                "width": {
+                    "default": 512,
+                    "description": "Width of video (in pixels), if defining a video texture. Requires shader: standard or flat.",
+                    "type": "integer"
+                },
+                "wireframe": {
+                    "default": false,
+                    "description": "Whether to render just the geometry edges.",
+                    "type": "boolean"
+                },
+                "wireframeLinewidth": {
+                    "default": 2,
+                    "description": "Width in px of the rendered line.",
+                    "type": "integer"
+                },
             },
             "format": "grid",
             "title": "Material",
@@ -161,7 +259,8 @@
                     "type": "string"
                 }
             },
-            "required": ["srcspath", "srcs"],
+            "required": ["srcspath",
+                "srcs"],
             "title": "Multi Source",
             "type": "object"
         },
