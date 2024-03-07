@@ -444,6 +444,35 @@
                     "title": "AR Hit Test Settings",
                     "type": "object",
                     "description": "A-Frame AR Hit Test Settings.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/ar-hit-test.html'>AR Hit Test</a> component."
+                },
+                "openvps": {
+                    "properties": {
+                        "enabled": {
+                            "default": false,
+                            "description": "Whether to use OpenVPS.",
+                            "type": "boolean"
+                        },
+                        "url": {
+                            "default": "",
+                            "description": "URL of the OpenVPS server.",
+                            "type": "string",
+                            "format": "uri"
+                        },
+                        "interval": {
+                            "default": 5000,
+                            "description": "Interval in milliseconds to query the OpenVPS server.",
+                            "type": "number"
+                        },
+                        "imgQuality": {
+                            "default": 0.8,
+                            "description": "Image quality to use for camera image compression",
+                            "type": "number"
+                        }
+                    },
+                    "required": ["enabled", "url"],
+                    "title": "OpenVPS Settings",
+                    "type": "object",
+                    "description": "Set an OpenVPS server to localize by camera image on mobile devices"
                 }
             },
             "required": [
