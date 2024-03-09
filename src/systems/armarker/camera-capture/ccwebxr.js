@@ -238,14 +238,11 @@ export default class WebXRCameraCapture {
         // bind back to xr session's framebuffer
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glLayer.framebuffer);
 
-        // Flip the image horizontally for offscreenCanvas
         if (this.needOffscreenCanvas && this.getOffscreenCanvas()) {
             this.offscreenCanvas.width = this.frameWidth;
             this.offscreenCanvas.height = this.frameHeight;
             const ctx = this.offscreenCanvas.getContext('2d');
             ctx.putImageData(this.framePixels, 0, 0);
-            ctx.scale(-1, 1);
-            ctx.drawImage(this.offscreenCanvas, -this.frameWidth, 0);
         }
 
         // grayscale and mirror image

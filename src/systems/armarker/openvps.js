@@ -41,6 +41,8 @@ AFRAME.registerComponent('openvps', {
         this.webxrActive = false;
         // Use offscreen canvas to flip the camera image, not mutate original canvas
         this.flipOffscreenCanvas = document.createElement('offscreenCanvas');
+        this.flipHorizontal = true;
+        this.flipVertical = true;
     },
 
     webXRSessionStarted() {
@@ -85,7 +87,7 @@ AFRAME.registerComponent('openvps', {
         });
     },
     async uploadImage() {
-        const { data, cameraEl, flipOffscreenCanvas } = this;
+        const { data, cameraEl, flipOffscreenCanvas, flipHorizontal, flipVertical } = this;
         const cameraCanvas = this.getCanvas();
         if (!cameraCanvas) {
             console.error('No camera image canvas found');
@@ -95,8 +97,13 @@ AFRAME.registerComponent('openvps', {
         flipOffscreenCanvas.width = cameraCanvas.width;
         flipOffscreenCanvas.height = cameraCanvas.height;
         const flipCtx = flipOffscreenCanvas.getContext('2d');
-        flipCtx.scale(1, -1); // Flip the image vertically
-        flipCtx.drawImage(cameraCanvas, cameraCanvas.width, -cameraCanvas.height);
+        flipCtx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1); // Flip the image horizontally and/or vertically
+
+        flipCtx.drawImage(
+            cameraCanvas,
+            (flipHorizontal ? -1 : 0) * cameraCanvas.width, // Offset by -1 * width if flipHorizontal, otherwise 0
+            (flipVertical ? -1 : 0) * cameraCanvas.height // Offset by -1 * height if flipVertical, otherwise 0
+        );
 
         const imgBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
 
