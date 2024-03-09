@@ -11,6 +11,7 @@
 import 'linkifyjs';
 import 'linkifyjs/string';
 import { proxy } from 'comlink';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS, JITSI_EVENTS, EVENT_SOURCES } from '../../constants';
 
@@ -18,6 +19,35 @@ const UserType = Object.freeze({
     EXTERNAL: 'external',
     SCREENSHARE: 'screenshare',
     ARENA: 'arena',
+});
+
+const notifyTypes = Object.freeze({
+    info: Notify.info,
+    warning: Notify.warning,
+    error: Notify.failure,
+    success: Notify.success,
+});
+
+Notify.init({
+    position: 'center-top',
+    width: '440px',
+    timeout: 1500,
+    showOnlyTheLastOne: false,
+    messageMaxLength: 100,
+    fontFamily: 'Roboto',
+    fontSize: '1em',
+    clickToClose: true,
+    info: {
+        textColor: '#545454',
+        notiflixIconColor: '#26c0d3',
+        background: '#FFFFFF',
+    },
+    error: {
+        notiflixIconColor: '#FFFFFF',
+    },
+    warning: {
+        notiflixIconColor: '#FFFFFF',
+    },
 });
 
 /**
@@ -109,17 +139,6 @@ AFRAME.registerSystem('arena-chat-ui', {
 
         // counter for unread msgs
         this.unreadMsgs = 0;
-
-        // sweetalert mixin for our messages
-        this.Alert = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            showCloseButton: true,
-            timerProgressBar: true,
-            timer: 1500,
-            background: '#d3e2e6',
-        });
 
         // create chat html elements
         const btnGroup = document.getElementById('chat-button-group');
@@ -847,7 +866,7 @@ AFRAME.registerSystem('arena-chat-ui', {
             }
             let alertType = 'info';
             if (newUser.type !== 'arena') alertType = 'warning';
-            this.displayAlert(msg, 5000, alertType);
+            this.displayAlert(msg, 5000, alertType, true);
         }
 
         const meUli = document.createElement('li');
@@ -1112,33 +1131,21 @@ AFRAME.registerSystem('arena-chat-ui', {
     },
 
     /**
-     * Uses Sweetalert library to popup a toast message.
+     * Uses Notiflix library to popup a toast message.
      * @param {string} msg Text of the message.
      * @param {number} timeMs Duration of message in milliseconds.
      * @param {string} type Style of message: success, error, warning, info, question
+     * @param {boolean} closeOthers Close other messages before displaying this one.
      */
-    displayAlert(msg, timeMs, type = 'info') {
-        let typeIcon = type;
-        if (type !== 'info' && type !== 'success' && type !== 'error' && type !== 'warning' && type !== 'question')
-            typeIcon = 'error';
-        let backgroundColor;
-        let iconColor;
-        if (type === 'error') {
-            iconColor = '#616161';
-            backgroundColor = '#ff9e9e';
-        }
-        if (type === 'warning') {
-            iconColor = '#616161';
-            backgroundColor = '#f8bb86';
-        }
 
-        this.Alert.fire({
-            icon: typeIcon,
-            titleText: msg,
-            timer: timeMs,
-            iconColor,
-            background: backgroundColor,
-        }).then(() => {});
+    displayAlert(msg, timeMs, type = 'info', closeOthers = false) {
+        const options = {
+            showOnlyTheLastOne: closeOthers,
+        };
+        if (timeMs !== undefined) {
+            options.timeout = timeMs;
+        }
+        notifyTypes[type](msg, options);
     },
 
     /**
