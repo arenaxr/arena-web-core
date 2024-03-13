@@ -16,6 +16,7 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v2
               with:
+                  fetch-depth: 0
                   fetch-tags: true
 
             - name: "Set up QEMU"
@@ -24,16 +25,11 @@ jobs:
             - name: "Set up Docker Buildx"
               uses: docker/setup-buildx-action@v3.0.0        
 
-            #- name: Get release
-            #  id: get_release
-            #  uses: bruceadams/get-release@v1.2.3
-            #  env:
-            #      GITHUB_TOKEN: ${{ github.token }}
-
             - name: Get release
               id: get_release
-              run: |
-                  echo "tag_name=`git describe --tags --abbrev=0`" >> $GITHUB_ENV
+              uses: bruceadams/get-release@v1.2.3
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
 
             - name: Build and push Docker image
               id: docker_build
