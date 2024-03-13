@@ -27,10 +27,9 @@ jobs:
 
             - name: Get release
               id: get_release
-              uses: bruceadams/get-release@v1.2.3
-              env:
-                  GITHUB_TOKEN: ${{ github.token }}
-
+              run: |
+                  echo "tag_name=`git describe --tags --abbrev=0`" >> $GITHUB_ENV
+                  
             - name: Build and push Docker image
               id: docker_build
               uses: docker/build-push-action@v5.1.0
