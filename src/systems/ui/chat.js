@@ -83,6 +83,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.isSpeaker = false;
         this.stats = {};
         this.status = {};
+        this.muted = true;
 
         // users list
         this.liveUsers = {};
@@ -393,6 +394,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         this.onJitsiStatsLocal = this.onJitsiStatsLocal.bind(this);
         this.onJitsiStatsRemote = this.onJitsiStatsRemote.bind(this);
         this.onJitsiStatus = this.onJitsiStatus.bind(this);
+        this.onJitsiTrackMuteChanged = this.onJitsiTrackMuteChanged.bind(this);
 
         sceneEl.addEventListener(ARENA_EVENTS.NEW_SETTINGS, this.onNewSettings);
         sceneEl.addEventListener(JITSI_EVENTS.USER_JOINED, this.onUserJoin);
@@ -405,6 +407,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         sceneEl.addEventListener(JITSI_EVENTS.STATS_LOCAL, this.onJitsiStatsLocal);
         sceneEl.addEventListener(JITSI_EVENTS.STATS_REMOTE, this.onJitsiStatsRemote);
         sceneEl.addEventListener(JITSI_EVENTS.STATUS, this.onJitsiStatus);
+        sceneEl.addEventListener(JITSI_EVENTS.TRACK_MUTE_CHANGED, this.onJitsiTrackMuteChanged);
 
         await this.connect();
     },
@@ -603,6 +606,23 @@ AFRAME.registerSystem('arena-chat-ui', {
         // remote
         if (this.liveUsers[arenaId]) {
             this.liveUsers[arenaId].status = status;
+        }
+        this.populateUserList();
+    },
+
+    /**
+     * Called when Jitsi remote and local audio tracks mute changes.
+     * @param {Object} e event object; e.detail contains the callback arguments
+     */
+    onJitsiTrackMuteChanged(e) {
+        const arenaId = e.detail.id;
+        // local
+        if (this.userId === arenaId) {
+            this.muted = e.muted;
+        }
+        // remote
+        if (this.liveUsers[arenaId]) {
+            this.liveUsers[arenaId].muted = e.muted;
         }
         this.populateUserList();
     },
@@ -850,6 +870,7 @@ AFRAME.registerSystem('arena-chat-ui', {
                 speaker: _this.liveUsers[key].speaker,
                 stats: _this.liveUsers[key].stats,
                 status: _this.liveUsers[key].status,
+                muted: _this.liveUsers[key].muted,
             });
         });
 
@@ -881,7 +902,7 @@ AFRAME.registerSystem('arena-chat-ui', {
         meUli.appendChild(myUBtnCtnr);
 
         const usspan = document.createElement('span');
-        usspan.className = 'users-list-btn s';
+        usspan.className = this.muted ? 'users-list-btn ns' : 'users-list-btn s';
         usspan.title = 'Mute Myself';
         myUBtnCtnr.appendChild(usspan);
         // span click event (sound off)
@@ -922,7 +943,7 @@ AFRAME.registerSystem('arena-chat-ui', {
 
                 if (user.scene === _this.scene) {
                     const sspan = document.createElement('span');
-                    sspan.className = 'users-list-btn s';
+                    sspan.className = user.muted ? 'users-list-btn ns' : 'users-list-btn s';
                     sspan.title = 'Mute User';
                     uBtnCtnr.appendChild(sspan);
 

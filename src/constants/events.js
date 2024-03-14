@@ -10,7 +10,7 @@ export const ARENA_EVENTS = Object.freeze({
     ON_AUTH: 'onauth',
     USER_PARAMS_LOADED: 'onarenauserparamsloaded',
     MQTT_LOADED: 'onarenamqttloaded',
-    JITSI_LOADED: 'onarenajitsiLoaded',
+    JITSI_LOADED: 'onarenajitsiloaded',
     SCENE_OPT_LOADED: 'onarenasceneoptionsloaded',
     SCENE_OBJ_LOADED: 'onarenasceneobjectsloaded',
     ARENA_LOADED: 'onarenaloaded',
@@ -34,6 +34,7 @@ export const JITSI_EVENTS = Object.freeze({
     STATS_REMOTE: 'onarenajitsistatsremote',
     STATUS: 'onarenajitsistatus',
     CONFERENCE_ERROR: 'onarenajitsierror',
+    TRACK_MUTE_CHANGED: 'onarenajitsitrackmutechanged',
 });
 
 export const EVENT_SOURCES = Object.freeze({
