@@ -1,5 +1,5 @@
 # build the js
-FROM node:lts-hydrogen
+FROM node:lts-iron
 ARG chash
 ARG version
 RUN mkdir -p /arena-core
