@@ -197,7 +197,7 @@
             "type": "object"
         },
         "click-listener": {
-            "description": "Object will listen for clicks.",
+            "description": "Object will listen for mouse events like clicks.",
             "title": "Click Listener",
             "type": "object",
             "properties": {
@@ -352,7 +352,7 @@
             "type": "object"
         },
         "goto-landmark": {
-            "description": "Teleports user to the landmark with the given name; Requires click-listener.",
+            "description": "Teleports user to the landmark with the given name. Requires click-listener.",
             "properties": {
                 "on": {
                     "default": "mousedown",
@@ -371,7 +371,7 @@
             "type": "object"
         },
         "goto-url": {
-            "description": "Goto given URL; Requires click-listener.",
+            "description": "Load new URL when object is clicked. Requires click-listener.",
             "properties": {
                 "dest": {
                     "default": "sametab",
@@ -545,6 +545,7 @@
         },
         "shadow": {
             "title": "Shadow",
+            "description": "The shadow component enables shadows for an entity and its children. Adding the shadow component alone is not enough to display shadows in your scene. We must have at least one light with castShadow: true enabled.",
             "type": "object",
             "properties": {
                 "cast": {
@@ -704,7 +705,7 @@
             "type": "object"
         },
         "video-control": {
-            "description": "Video Control.",
+            "description": "Adds a video to an entity and controls its playback.",
             "properties": {
                 "frame_object": {
                     "description": "URL of a thumbnail image, e.g. 'store/users/wiselab/images/conix-face-white.jpg'.",
