@@ -21,7 +21,7 @@ jobs:
                   username: ${{ secrets.ARENA_DEV1_DEPLOY_USER }}
                   key: ${{ secrets.ARENA_DEV1_DEPLOY_KEY }}
                   port: ${{ secrets.DEPLOY_PORT }}
-                  envs: TARGET
+                  envs: DEPLOY_TARGET
                   script_stop: true
                   script: |
                       cd  $DEPLOY_TARGET
