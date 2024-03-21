@@ -429,7 +429,7 @@
                 },
                 "on": {
                     "description": "Event to listen 'on'.",
-                    "default": "",
+                    "default": "mousedown",
                     "enum": ["mousedown", "mouseup"],
                     "type": "string"
                 },
