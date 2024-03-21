@@ -15,7 +15,7 @@ jobs:
             - name: ssh deploy
               uses: appleboy/ssh-action@master
               env:
-                  TARGET: ${{ secrets.ARENA_DEV1_DEPLOY_TARGET }}
+                  DEPLOY_TARGET: ${{ secrets.ARENA_DEV1_DEPLOY_TARGET }}
               with:
                   host: ${{ secrets.ARENA_DEV1_DEPLOY_HOST }}
                   username: ${{ secrets.ARENA_DEV1_DEPLOY_USER }}
@@ -24,7 +24,7 @@ jobs:
                   envs: TARGET
                   script_stop: true
                   script: |
-                      cd  $TARGET
+                      cd  $DEPLOY_TARGET
                       git checkout master
                       git fetch
                       git reset --hard origin/master
