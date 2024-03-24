@@ -41,9 +41,7 @@
                   "WA",
                   "PY"
                ],
-               "default": [
-                  "WA"
-               ]
+               "default": "WA"
             },
             "parent": {
                "type": "string",
