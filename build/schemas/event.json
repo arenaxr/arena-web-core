@@ -16,22 +16,8 @@
                         },
                         "position": {
                             "description": "The event destination position in 3D.",
-                            "properties": {
-                                "x": {
-                                    "default": 0,
-                                    "type": "number"
-                                },
-                                "y": {
-                                    "default": 0,
-                                    "type": "number"
-                                },
-                                "z": {
-                                    "default": 0,
-                                    "type": "number"
-                                }
-                            },
-                            "required": ["x", "y", "z"],
-                            "type": "object",
+                            "format": "grid",
+                            "$ref": "#/definitions/vector3",
                             "title": "Position"
                         },
                         "clickPos": {

@@ -1,6 +1,6 @@
 {
     "definitions": {
-        "environment-presets": {
+        "env-presets": {
             "properties": {
                 "active": {
                     "default": true,
@@ -709,7 +709,7 @@
         "data": {
             "properties": {
                 "env-presets": {
-                    "$ref": "#/definitions/environment-presets"
+                    "$ref": "#/definitions/env-presets"
                 },
                 "renderer-settings": {
                     "$ref": "#/definitions/renderer-settings"
