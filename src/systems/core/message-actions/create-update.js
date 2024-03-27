@@ -312,7 +312,6 @@ export default class CreateUpdate {
                 if (!Object.hasOwn(data, 'material-extras')) {
                     // default images to SRGBColorSpace, if not specified
                     entityEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
-                    entityEl.setAttribute('material-extras', 'needsUpdate', 'true');
                 }
                 delete data.image; // no other properties applicable to image; delete it
                 break;

@@ -509,19 +509,14 @@
                     "default": "",
                     "description": "Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
                 },
-                "encoding": {
-                    "default": "sRGBEncoding",
+                "colorSpace": {
+                    "description": "The material colorspace.",
+                    "default": "SRGBColorSpace",
                     "enum": [
-                        "LinearEncoding",
-                        "sRGBEncoding",
-                        "GammaEncoding",
-                        "RGBEEncoding",
-                        "LogLuvEncoding",
-                        "RGBM7Encoding",
-                        "RGBM16Encoding",
-                        "RGBDEncoding",
-                        "BasicDepthPacking",
-                        "RGBADepthPacking"
+                        "SRGBColorSpace",
+                        "LinearSRGBColorSpace",
+                        "DisplayP3ColorSpace",
+                        "NoColorSpace"
                     ],
                     "type": "string"
                 },

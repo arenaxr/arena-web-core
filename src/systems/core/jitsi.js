@@ -263,7 +263,6 @@ AFRAME.registerSystem('arena-jitsi', {
         screenShareEl.setAttribute('material', 'src', `#${videoId}`);
         screenShareEl.setAttribute('material', 'shader', 'flat');
         screenShareEl.setAttribute('material-extras', 'colorSpace', 'SRGBColorSpace');
-        screenShareEl.setAttribute('material-extras', 'needsUpdate', 'true');
         this.screenShareDict[participantId] = screenShareEl;
     },
 
