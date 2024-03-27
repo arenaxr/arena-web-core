@@ -6,7 +6,7 @@
     },
     "camera-override": {
         "description": "Camera Override is used to re-position and re-pose a client's camera.",
-        "file": "schemas/arena-override.json",
+        "file": "schemas/camera-override.json",
         "title": "Camera Override"
     },
     "event": {
