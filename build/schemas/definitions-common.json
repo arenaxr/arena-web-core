@@ -383,18 +383,20 @@
             "description": "Load new URL when object is clicked. Requires click-listener.",
             "properties": {
                 "dest": {
+                    "description": "Where to open the URL.",
                     "default": "sametab",
                     "enum": ["popup", "newtab", "sametab"],
                     "type": "string"
                 },
                 "on": {
+                    "description": "A case-sensitive string representing the event type to listen for. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>.",
                     "default": "mousedown",
                     "enum": ["mousedown", "mouseup"],
                     "type": "string"
                 },
                 "url": {
+                    "description": "The destination url, e.g. https://example.com.",
                     "default": "",
-                    "title": "Landmark Url",
                     "format": "uri",
                     "type": "string"
                 }
@@ -653,7 +655,7 @@
             "properties": {
                 "on": {
                     "default": "mousedown",
-                    "description": "A case-sensitive string representing the event type to listen for, e.g. 'mousedown', 'mouseup'. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>",
+                    "description": "A case-sensitive string representing the event type to listen for. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>",
                     "enum": [
                         "mousedown",
                         "mouseup",
