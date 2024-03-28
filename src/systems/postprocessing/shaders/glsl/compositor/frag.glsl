@@ -30,6 +30,8 @@ const bool stretchBorders = true;
 
 // #define DO_ASYNC_TIMEWARP
 
+#define DEPTH_SCALAR (50.0)
+
 // adapted from: https://gist.github.com/hecomi/9580605
 float linear01Depth(float depth) {
     float x = 1.0 - cameraFar / cameraNear;
@@ -56,7 +58,7 @@ float linearEyeDepth(float depth) {
 
 float readDepthRemote(sampler2D depthSampler, vec2 coord) {
     float depth = texture2D( depthSampler, coord ).r;
-    return depth / 50.0;
+    return depth / DEPTH_SCALAR;
 }
 
 float readDepthLocal(sampler2D depthSampler, vec2 coord) {
@@ -83,7 +85,7 @@ vec2 worldToCamera(vec3 pt, mat4 projectionMatrix, mat4 matrixWorldInverse) {
 
 vec3 getWorldPos(vec3 cameraVector, vec3 cameraForward, vec3 cameraPos, vec2 uv) {
     float d = dot(cameraForward, cameraVector);
-    float sceneDistance = linearEyeDepth(unlinearizeDepth(texture2D(tRemoteFrame, uv).r / 50.0)) / d;
+    float sceneDistance = linearEyeDepth(unlinearizeDepth(texture2D(tRemoteFrame, uv).r / DEPTH_SCALAR)) / d;
     vec3 worldPos = cameraPos + cameraVector * sceneDistance;
     return worldPos;
 }
@@ -214,7 +216,7 @@ void main() {
                 uvRemote.y
             );
         }
-        
+
         if (oneCamera) {
             uvDepth.x = uvRemote.x / 2.0 + 0.5;
             uvDepth.y = uvRemote.y;
@@ -246,16 +248,19 @@ void main() {
     if (oneCamera) {
         xMin = 0.0; xMax = 0.5;
         depthOffset = 0.5;
+
         coordRemoteColor.x = coordRemoteColor.x / 2.0;
     }
     if (leftEye) {
         xMin = 0.0; xMax = 0.25;
         depthOffset = 0.25;
+
         coordRemoteColor.x = coordRemoteColor.x / 4.0;
     }
     if (rightEye) {
         xMin = 0.5; xMax = 0.75;
         depthOffset = 0.25;
+
         coordRemoteColor.x = coordRemoteColor.x / 4.0 + 0.5;
     }
 
@@ -331,15 +336,14 @@ void main() {
         // color = remoteColor;
         // color = localDepth * remoteColor + remoteDepth * localColor;
 
-        if (remoteDepth <= localDepth) {
+        if (remoteDepth < localDepth) {
             color = remoteColor;
             // handle passthrough
-            //if (arMode && remoteDepth >= (1.0-(5.0*onePixel))/DEPTH_SCALAR) {
-            // if (arMode && remoteDepth >= (1.0-(5.0*onePixel))) {
-            //     color = localColor;
-            // }
+            if (arMode && remoteDepth >= (1.0-(5.0*onePixel))/DEPTH_SCALAR) {
+                color = localColor;
+            }
+            
         }
-    // }
     
     
     gl_FragColor = color;
