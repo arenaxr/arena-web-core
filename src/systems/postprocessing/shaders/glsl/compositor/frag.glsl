@@ -282,8 +282,8 @@ void main() {
         xMin = xMin + onePixel;
         xMax = xMax - onePixel;
 
-        coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax); // make sure x is [xMin, xMax]
-        coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0); // make sure y is [0.0, 1.0]
+        coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax);
+        coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
         coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
         coordRemoteDepth.y = coordRemoteColor.y;
         remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
@@ -342,10 +342,8 @@ void main() {
             if (arMode && remoteDepth >= (1.0-(5.0*onePixel))/DEPTH_SCALAR) {
                 color = localColor;
             }
-            
         }
     
     
     gl_FragColor = color;
 }
-
