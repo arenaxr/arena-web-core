@@ -28,8 +28,6 @@ const float onePixel = (1.0 / 255.0);
 
 const bool stretchBorders = true;
 
-// #define DO_ASYNC_TIMEWARP
-
 #define DEPTH_SCALAR (50.0)
 
 // adapted from: https://gist.github.com/hecomi/9580605
@@ -85,7 +83,7 @@ vec2 worldToCamera(vec3 pt, mat4 projectionMatrix, mat4 matrixWorldInverse) {
 
 vec3 getWorldPos(vec3 cameraVector, vec3 cameraForward, vec3 cameraPos, vec2 uv) {
     float d = dot(cameraForward, cameraVector);
-    float sceneDistance = linearEyeDepth(unlinearizeDepth(texture2D(tRemoteFrame, uv).r / DEPTH_SCALAR)) / d;
+    float sceneDistance = linearEyeDepth(unlinearizeDepth(texture2D(tRemoteFrame, uv).r / 50.0)) / d;
     vec3 worldPos = cameraPos + cameraVector * sceneDistance;
     return worldPos;
 }
@@ -117,7 +115,7 @@ void main() {
     float localDepth = readDepthLocal( tLocalDepth, coordLocalDepth );
 
     vec4 backgroundColor = vec4(0.0);
-    
+
     vec2 coordRemoteColor = uvLocal;
     vec2 coordRemoteDepth = uvLocal;
 
@@ -203,7 +201,7 @@ void main() {
     for (int i = 0; i < steps; i++) {
         currentPos += (cameraVector * stepSize);
         uvRemote = worldToCamera(currentPos, remoteProjectionMatrix, remoteMatrixWorldInverse);
-        
+
         if (targetWidthGreater) {
             uvRemote = vec2(
                 ( (uvRemote.x * localSizeF.x - padding) / float(localSize.x - totalPad) ),
@@ -229,6 +227,7 @@ void main() {
             uvDepth.x = uvRemote.x / 4.0 + 0.5 + 0.25;
             uvDepth.y = uvRemote.y;
         }
+
         vec3 tracedPos = getWorldPos(normalize(currentPos - remotePos), remoteForward, remotePos, uvDepth);
         float distanceToCurrentPos = distance(remotePos, currentPos);
         float distanceToWorld = distance(remotePos, tracedPos);
@@ -241,31 +240,26 @@ void main() {
             break;
         }
     }
-#endif // DO_TRANSLATION_WARPING
 
     coordRemoteColor = uvRemote;
+#endif // DO_TRANSLATION_WARPING
 
     if (oneCamera) {
         xMin = 0.0; xMax = 0.5;
         depthOffset = 0.5;
-
         coordRemoteColor.x = coordRemoteColor.x / 2.0;
     }
     if (leftEye) {
         xMin = 0.0; xMax = 0.25;
         depthOffset = 0.25;
-
         coordRemoteColor.x = coordRemoteColor.x / 4.0;
     }
     if (rightEye) {
         xMin = 0.5; xMax = 0.75;
         depthOffset = 0.25;
-
         coordRemoteColor.x = coordRemoteColor.x / 4.0 + 0.5;
     }
 
-
-    //Set remoteColor and remoteDepth
     if (arMode || !stretchBorders) {
         coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
         coordRemoteDepth.y = coordRemoteColor.y;
@@ -282,15 +276,16 @@ void main() {
         xMin = xMin + onePixel;
         xMax = xMax - onePixel;
 
-        coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax);
-        coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0);
+        coordRemoteColor.x = min(max(coordRemoteColor.x, xMin), xMax); // make sure x is [xMin, xMax]
+        coordRemoteColor.y = min(max(coordRemoteColor.y, 0.0), 1.0); // make sure y is [0.0, 1.0]
         coordRemoteDepth.x = coordRemoteColor.x + depthOffset;
         coordRemoteDepth.y = coordRemoteColor.y;
         remoteColor = texture2D( tRemoteFrame, coordRemoteColor );
         remoteDepth = readDepthRemote( tRemoteFrame, coordRemoteDepth );
     }
 
-    //Handling the occluded
+#if (DO_TRANSLATION_WARPING == 1)
+    // Handle occlusions
     if (occluded) {
         if (stretchBorders) {
             vec2 offsetUVLeft      = coordRemoteColor + vec2(1.0, 0.0)  * 0.01;
@@ -308,7 +303,7 @@ void main() {
             float remoteDepthRight = linearEyeDepth(texture2D(tRemoteFrame, offsetUVRight   ).r);
             float remoteDepthTop   = linearEyeDepth(texture2D(tRemoteFrame, offsetUVTop     ).r);
             float remoteDepthDown  = linearEyeDepth(texture2D(tRemoteFrame, offsetUVDown    ).r);
-            
+
             // find the furthest away one of these five samples
             float remoteDepth = max(max(max(max(remoteDepth0, remoteDepthLeft), remoteDepthRight), remoteDepthTop), remoteDepthDown);
             if (remoteDepth == remoteDepthLeft) {
@@ -325,6 +320,8 @@ void main() {
             }
         }
     }
+#endif // DO_TRANSLATION_WARPING
+
     // force srgb
 #ifdef IS_SRGB
     localColor = LinearTosRGB(localColor);
@@ -336,14 +333,14 @@ void main() {
         // color = remoteColor;
         // color = localDepth * remoteColor + remoteDepth * localColor;
 
-        if (remoteDepth < localDepth) {
+        if (remoteDepth <= localDepth) {
             color = remoteColor;
             // handle passthrough
             if (arMode && remoteDepth >= (1.0-(5.0*onePixel))/DEPTH_SCALAR) {
                 color = localColor;
             }
         }
-    
-    
+    // }
+
     gl_FragColor = color;
 }
