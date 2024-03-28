@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.26.4](https://github.com/arenaxr/arena-web-core/compare/v1.26.3...v1.26.4) (2024-03-28)
+
+
+### Bug Fixes
+
+* actually rename var ([1a80fd5](https://github.com/arenaxr/arena-web-core/commit/1a80fd551c771e5d3bcddc1f94a0f6d70cd4f09f))
+* **material-extras:** update schemas for colorSpace ([5061e7e](https://github.com/arenaxr/arena-web-core/commit/5061e7e708ec53c1cb99b926f84d5ab1db39f993))
+* **schema:** add registered shader options to material ([4ebbad1](https://github.com/arenaxr/arena-web-core/commit/4ebbad18a26d4c13fd6edd3bbb9c65d895426c56))
+* **schema:** added missing material properties per shader ([c4184a1](https://github.com/arenaxr/arena-web-core/commit/c4184a1fb8e299c24305ef4282ca89439358e2ef))
+
 ## [1.26.3](https://github.com/arenaxr/arena-web-core/compare/v1.26.2...v1.26.3) (2024-02-28)
 
 
