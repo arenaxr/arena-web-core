@@ -135,6 +135,14 @@ AFRAME.registerComponent('arena-hand', {
         if (!data.enabled || !data.hand) return;
         // const hand = data.hand.charAt(0).toUpperCase() + data.hand.slice(1);
 
+        const offset = this.el.components["tracked-controls"].attrValue.orientationOffset;
+        console.log(offset);
+        const rotationOffset = this.rotation;// * this.el.components["tracked-controls"].attrValue.orientationOffset;
+
+        // TODO:(mwfarb): resolve oculus-touch controls publishing +43 x-axis rotation orientationOffset from arena-web
+        // TODO:(mwfarb): https://aframe.io/docs/1.5.0/components/tracked-controls.html#value_orientationoffset
+        // TODO:(mwfarb): We could apply the orientationOffset to the external publish if we need to...
+
         const msg = {
             object_id: this.name,
             action: 'update',
@@ -148,10 +156,10 @@ AFRAME.registerComponent('arena-hand', {
                 },
                 rotation: {
                     // always send quaternions over the wire
-                    x: parseFloat(this.rotation._x.toFixed(3)),
-                    y: parseFloat(this.rotation._y.toFixed(3)),
-                    z: parseFloat(this.rotation._z.toFixed(3)),
-                    w: parseFloat(this.rotation._w.toFixed(3)),
+                    x: parseFloat(rotationOffset._x.toFixed(3)),
+                    y: parseFloat(rotationOffset._y.toFixed(3)),
+                    z: parseFloat(rotationOffset._z.toFixed(3)),
+                    w: parseFloat(rotationOffset._w.toFixed(3)),
                 },
                 url: this.getControllerURL(),
                 dep: this.arena.camName,
