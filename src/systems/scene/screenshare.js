@@ -38,14 +38,14 @@ AFRAME.registerSystem('screenshareable', {
     asHTMLSelect() {
         // creates an HTML select list for usage in screen share icon
         let res = `<select id='screenshareables' class='swal2-select' multiple>`;
+        // always include the default screen share object name
+        const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
+        res += `<option value='${defaultScreenObj}'>${defaultScreenObj}</option>`;
+        // look for additional screen objects to share on with the screen share component enabled
         if (Object.keys(this.screenshareables).length > 0) {
             Object.keys(this.screenshareables).forEach((obj) => {
                 res += `<option value='${obj}'>${obj}</option>`;
             });
-        } else {
-            // add only one option: the default screen share object name
-            const defaultScreenObj = ARENA.screenshare ? ARENA.screenshare : 'screenshare';
-            res += `<option value='${defaultScreenObj}'>${defaultScreenObj}</option>`;
         }
         res += `</select>`;
         return res;
