@@ -11,7 +11,7 @@
  * @private
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENA */
 
 class LoadAlertTable {
     constructor(maxRows = 10, errorsOnTop = true, timeoutMs = 4000, rowTimeout = 2000) {
@@ -119,6 +119,7 @@ AFRAME.registerSystem('model-progress', {
      * @alias module:model-progress
      */
     registerModel(el, src) {
+        const { demoMode } = ARENA.params;
         if (!AFRAME.THREE.Cache.files[src]) {
             this.loadProgress[src] = {
                 done: false,
@@ -129,7 +130,10 @@ AFRAME.registerSystem('model-progress', {
             const _this = this;
             // add load event listeners, only if not already cached
             el.addEventListener('model-progress', (evt) => {
-                _this.updateProgress(false, evt);
+                if (!demoMode) {
+                    // Silence model loading progress popup in demo mode
+                    _this.updateProgress(false, evt);
+                }
             });
             el.addEventListener('model-error', (evt) => {
                 _this.updateProgress(true, evt);

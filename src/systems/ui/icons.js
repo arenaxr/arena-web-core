@@ -139,6 +139,8 @@ AFRAME.registerSystem('arena-side-menu-ui', {
         const jitsiPermitted = this.arena.isJitsiPermitted();
         const usersPermitted = this.arena.isUsersPermitted();
 
+        const { demoMode } = ARENA.params;
+
         // Create audio button
         if (data.audioButtonEnabled) {
             this.audioButton = createIconButton('audio-off', data.audioButtonText, this.onAudioButtonClick);
@@ -146,6 +148,11 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             if (jitsiPermitted) {
                 this._buttonList[this.buttons.AUDIO] = this.audioButton;
                 this.iconsDiv.appendChild(this.audioButton);
+            }
+
+            if (demoMode) {
+                this.audioButton.style.display = 'none';
+                this.settingsButtons.push(this.audioButton);
             }
         }
 
@@ -157,6 +164,11 @@ AFRAME.registerSystem('arena-side-menu-ui', {
                 this._buttonList[this.buttons.VIDEO] = this.videoButton;
                 this.iconsDiv.appendChild(this.videoButton);
             }
+
+            if (demoMode) {
+                this.videoButton.style.display = 'none';
+                this.settingsButtons.push(this.videoButton);
+            }
         }
 
         // Create AV Settings button
@@ -166,6 +178,11 @@ AFRAME.registerSystem('arena-side-menu-ui', {
             if (jitsiPermitted) {
                 this._buttonList[this.buttons.AVSETTINGS] = this.avButton;
                 this.iconsDiv.appendChild(this.avButton);
+            }
+
+            if (demoMode) {
+                this.avButton.style.display = 'none';
+                this.settingsButtons.push(this.avButton);
             }
         }
 

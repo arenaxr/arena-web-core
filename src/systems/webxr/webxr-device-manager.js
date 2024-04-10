@@ -48,6 +48,11 @@ AFRAME.registerComponent('webxr-device-manager', {
             rHand.setAttribute('raycaster', 'enabled', true);
         }
         if (sceneEl.is('ar-mode')) {
+            // Hide some UI elements
+            const chatExpandBtn = document.getElementById('chat-button-group-expand-icon');
+            if (chatExpandBtn.classList.contains('fa-angle-left')) {
+                chatExpandBtn.click();
+            }
             document.getElementById('env').setAttribute('visible', false);
             const arMarkerSys = sceneEl.systems.armarker;
             arMarkerSys.webXRSessionStarted(sceneEl.xrSession);
