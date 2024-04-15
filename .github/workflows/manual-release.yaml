@@ -40,7 +40,7 @@ jobs:
                       chash=${{ github.sha }}
                       version=${{ steps.get_tag.outputs.tag }}                
                   push: true
-                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/arena-core, ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_tag.outputs.tag }}
+                  tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.get_release.outputs.tag }}, ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:latest
 
             - name: Image digest
               run: echo ${{ steps.docker_build.outputs.digest }}
