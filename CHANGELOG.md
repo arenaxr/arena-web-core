@@ -3,6 +3,11 @@
 ## [1.26.4](https://github.com/arenaxr/arena-web-core/compare/v1.26.3...v1.26.4) (2024-04-17)
 
 
+### Features
+* Add `demoMode` URL param for minimizing UI elements (minimize chat/AV icons, hide GLTF progress popup)
+* Add `reprojectMovement` URL param for translational time warping for renderfusion client
+
+
 ### Bug Fixes
 
 * actually rename var ([1a80fd5](https://github.com/arenaxr/arena-web-core/commit/1a80fd551c771e5d3bcddc1f94a0f6d70cd4f09f))
