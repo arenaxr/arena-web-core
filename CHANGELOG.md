@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.26.4](https://github.com/arenaxr/arena-web-core/compare/v1.26.3...v1.26.4) (2024-04-17)
+
+
+### Bug Fixes
+
+* actually rename var ([1a80fd5](https://github.com/arenaxr/arena-web-core/commit/1a80fd551c771e5d3bcddc1f94a0f6d70cd4f09f))
+* add latest tag ([879f8d8](https://github.com/arenaxr/arena-web-core/commit/879f8d88bce421ebc3174e687a907f72820ccc6d))
+* add latest tag ([27c0af0](https://github.com/arenaxr/arena-web-core/commit/27c0af01aede0312b88487438412ad755ece091b))
+* deal with undefined tag ([d7cd295](https://github.com/arenaxr/arena-web-core/commit/d7cd2951ce685f2d1eb13b6fc83fab3b0227d66c))
+* deal with undefined tag ([ab1d881](https://github.com/arenaxr/arena-web-core/commit/ab1d8813fad0aca84230f6de73fd9998491e22a9))
+* **material-extras:** update schemas for colorSpace ([5061e7e](https://github.com/arenaxr/arena-web-core/commit/5061e7e708ec53c1cb99b926f84d5ab1db39f993))
+* **schema:** add registered shader options to material ([4ebbad1](https://github.com/arenaxr/arena-web-core/commit/4ebbad18a26d4c13fd6edd3bbb9c65d895426c56))
+* **schema:** added missing material properties per shader ([c4184a1](https://github.com/arenaxr/arena-web-core/commit/c4184a1fb8e299c24305ef4282ca89439358e2ef))
+* **screenshare:** allow user-defined screen objects alongside default ([dbcf91b](https://github.com/arenaxr/arena-web-core/commit/dbcf91bf19815f5799461b379c332c7df8f104f4))
+* **screenshare:** don't duplicate default screensahre ([4ee153a](https://github.com/arenaxr/arena-web-core/commit/4ee153a5fd6b8e9efe65ac6b0a819402066350ed))
+* **screenshare:** fix screenshare to named screenshares ([3da8636](https://github.com/arenaxr/arena-web-core/commit/3da86361d56f576ef43888241ec68d458105d2f9))
+
 ## [1.26.3](https://github.com/arenaxr/arena-web-core/compare/v1.26.2...v1.26.3) (2024-02-28)
 
 
