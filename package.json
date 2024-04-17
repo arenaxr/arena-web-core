@@ -26,7 +26,7 @@
     "comlink": "^4.3.0",
     "he": "^1.2.0",
     "linkifyjs": "^2.1.9",
-    "mqtt-pattern": "^1.2.0",
+    "mqtt-pattern": "^2.1.0",
     "msgpackr": "^1.10.1",
     "notiflix": "^3.2.7",
     "paho-mqtt": "^1.1.0",
@@ -34,7 +34,7 @@
     "three-mesh-ui": "github:felixmariotto/three-mesh-ui#8294586",
     "three-pathfinding": "^1.1.0",
     "three-shim": "file:src/shims/three-shim",
-    "uuidjs": "^4.2.11",
+    "uuidjs": "^5.0.1",
     "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {

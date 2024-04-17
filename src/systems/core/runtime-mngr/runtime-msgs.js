@@ -7,7 +7,7 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2022
  */
-import UUID from 'uuidjs';
+import { UUID } from 'uuidjs';
 
 /**
  * Create runtime message requests for orchestrator
