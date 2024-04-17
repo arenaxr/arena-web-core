@@ -44,7 +44,7 @@ AFRAME.registerSystem('screenshareable', {
         // look for additional screen objects to share on with the screen share component enabled
         if (Object.keys(this.screenshareables).length > 0) {
             Object.keys(this.screenshareables).forEach((obj) => {
-                if (obj !== defaultScreenObj){
+                if (obj !== defaultScreenObj) {
                     res += `<option value='${obj}'>${obj}</option>`;
                 }
             });
