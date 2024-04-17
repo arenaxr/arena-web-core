@@ -6,4 +6,4 @@ src/components/vendor/
 *_wasm.js
 webxrios.js
 build/third-party/*
-src/shims/three-shim/*
+src/shims/
