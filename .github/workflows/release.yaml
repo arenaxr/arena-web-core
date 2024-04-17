@@ -7,7 +7,7 @@ on:
       - published
 
   schedule:
-    - cron: "0 1 * * SUN" # every week publish a new 'latest'
+    - cron: "0 1 * * *" # every day publish a new 'latest'
 
   workflow_dispatch:
       
