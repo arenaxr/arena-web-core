@@ -105,11 +105,12 @@ AFRAME.registerComponent('openvps', {
             (flipVertical ? -1 : 0) * cameraCanvas.height // Offset by -1 * height if flipVertical, otherwise 0
         );
 
-        const imgBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
+        cameraEl.updateMatrixWorld(true);
+        const imageBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
 
         const formData = new FormData();
         formData.append('name', ARENA.sceneName);
-        formData.append('img', imgBlob);
+        formData.append('image', imageBlob, 'image.jpeg');
         formData.append('aframe_camera_matrix_world', cameraEl.object3D.matrixWorld.toArray());
 
         fetch(data.url, {
