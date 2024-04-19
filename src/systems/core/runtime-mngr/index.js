@@ -7,7 +7,7 @@
  * Copyright (c) 2021, The CONIX Research Center. All rights reserved.
  * @date 2022
  */
-import UUID from 'uuidjs';
+import { UUID } from 'uuidjs';
 import MQTTClient from './mqtt-client';
 import RuntimeMsgs from './runtime-msgs';
 import { ARENA_EVENTS } from '../../../constants';

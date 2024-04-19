@@ -434,7 +434,7 @@
             "properties": {
                 "force": {
                     "description": "Impulse vector.",
-                    "default": {"x": 1, "y": 1, "z": 1},
+                    "default": { "x": 1, "y": 1, "z": 1 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -446,7 +446,7 @@
                 },
                 "position": {
                     "description": "World position.",
-                    "default": {"x": 1, "y": 1, "z": 1},
+                    "default": { "x": 1, "y": 1, "z": 1 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 }
@@ -514,12 +514,7 @@
                 "colorSpace": {
                     "description": "The material colorspace.",
                     "default": "SRGBColorSpace",
-                    "enum": [
-                        "SRGBColorSpace",
-                        "LinearSRGBColorSpace",
-                        "DisplayP3ColorSpace",
-                        "NoColorSpace"
-                    ],
+                    "enum": ["SRGBColorSpace", "LinearSRGBColorSpace", "DisplayP3ColorSpace", "NoColorSpace"],
                     "type": "string"
                 },
                 "colorWrite": {
@@ -806,7 +801,7 @@
             "properties": {
                 "acceleration": {
                     "description": "For sphere and disc distributions, only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -818,7 +813,7 @@
                 },
                 "accelerationSpread": {
                     "description": "Spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -983,13 +978,13 @@
                 },
                 "positionOffset": {
                     "description": "Fixed offset to the apply to the emitter relative to its parent entity.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "positionSpread": {
                     "description": "Particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1000,7 +995,7 @@
                 },
                 "radiusScale": {
                     "description": "Scales the emitter for sphere and disc shapes to form oblongs and ellipses.",
-                    "default": {"x": 1, "y": 1, "z": 1},
+                    "default": { "x": 1, "y": 1, "z": 1 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1062,13 +1057,13 @@
                 },
                 "rotationAxis": {
                     "description": "Local axis when using rotation.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
                 "rotationAxisSpread": {
                     "description": "Variance in the axis of rotation.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1118,7 +1113,7 @@
                 },
                 "textureFrames": {
                     "description": "X and Y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop).",
-                    "default": {"x": 1, "y": 1},
+                    "default": { "x": 1, "y": 1 },
                     "format": "grid",
                     "$ref": "#/definitions/vector2"
                 },
@@ -1129,7 +1124,7 @@
                 },
                 "velocity": {
                     "description": "For sphere and disc distributions, only the x axis is used.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },
@@ -1141,7 +1136,7 @@
                 },
                 "velocitySpread": {
                     "description": "Variance for the velocity.",
-                    "default": {"x": 0, "y": 0, "z": 0},
+                    "default": { "x": 0, "y": 0, "z": 0 },
                     "format": "grid",
                     "$ref": "#/definitions/vector3"
                 },

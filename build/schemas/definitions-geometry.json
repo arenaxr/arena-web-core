@@ -259,8 +259,7 @@
                     "type": "string"
                 }
             },
-            "required": ["srcspath",
-                "srcs"],
+            "required": ["srcspath", "srcs"],
             "title": "Multi Source",
             "type": "object"
         },
