@@ -328,10 +328,10 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
+                console.log(data)
                 this.setEntityAttributes(entityEl, {
                     position: data.position,
                     rotation: data.rotation,
-                    scale: data.scale,
                     'gltf-model': data.url,
                     // TODO: Add support new component for arena-other-user-hand for grab handling
                 }); // Only set permitted hands attributes, return
