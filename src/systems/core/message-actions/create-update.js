@@ -328,7 +328,6 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
-                console.log(data)
                 this.setEntityAttributes(entityEl, {
                     position: data.position,
                     rotation: data.rotation,
