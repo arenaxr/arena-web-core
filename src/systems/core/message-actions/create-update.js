@@ -328,12 +328,16 @@ export default class CreateUpdate {
                 break;
             case 'handLeft':
             case 'handRight':
-                this.setEntityAttributes(entityEl, {
+                const newAttributes = {
                     position: data.position,
                     rotation: data.rotation,
                     'gltf-model': data.url,
                     // TODO: Add support new component for arena-other-user-hand for grab handling
-                }); // Only set permitted hands attributes, return
+                };
+                if (data.scale !== undefined) {
+                    newAttributes.scale = data.scale;
+                }
+                this.setEntityAttributes(entityEl, newAttributes); // Only set permitted hands attributes, return
                 return true;
             case 'cube':
                 type = 'box'; // arena legacy! new libraries/persist objects should use box!
