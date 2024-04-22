@@ -113,6 +113,8 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
     onRemoteTrack(evt) {
         info('Got remote stream! Hybrid Rendering session started.');
 
+        this.setupTransceiver(evt.transceiver);
+
         const stream = new MediaStream();
         stream.addTrack(evt.track);
 
@@ -173,11 +175,10 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
         }
     },
 
-    setupTransceivers() {
+    setupTransceiver(transceiver) {
         if (supportsSetCodecPreferences) {
-            const transceiver = this.pc.getTransceivers()[0];
             // const transceiver = this.pc.addTransceiver('video', {direction: 'recvonly'});
-            const { codecs } = RTCRtpSender.getCapabilities('video');
+            const { codecs } = RTCRtpReceiver.getCapabilities('video');
             const validCodecs = codecs.filter((codec) => !invalidCodecs.includes(codec.mimeType));
             const preferredCodecs = validCodecs.sort((c1, c2) => {
                 if (c1.mimeType === preferredCodec && c1.sdpFmtpLine.includes(preferredSdpFmtpPrefix)) {
@@ -193,7 +194,7 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
                 preferredCodecs.splice(selectedCodecIndex, 1);
                 preferredCodecs.unshift(selectedCodec);
             }
-            // console.debug('codecs', preferredCodecs);
+            console.log('codecs', preferredCodecs);
             transceiver.setCodecPreferences(preferredCodecs);
         }
     },
@@ -287,8 +288,6 @@ AFRAME.registerComponent('arena-hybrid-render-client', {
 
     createAnswer() {
         // console.debug('creating answer.');
-
-        this.setupTransceivers();
 
         this.pc
             .createAnswer()
