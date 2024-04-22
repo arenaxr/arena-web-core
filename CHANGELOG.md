@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.26.6](https://github.com/arenaxr/arena-web-core/compare/v1.26.5...v1.26.6) (2024-04-22)
+
+
+### Bug Fixes
+
+* release version ([2f7a7fb](https://github.com/arenaxr/arena-web-core/commit/2f7a7fb0678dad47a061357926185750b763f406))
+
 ## [1.26.5](https://github.com/arenaxr/arena-web-core/compare/v1.26.4...v1.26.5) (2024-04-22)
 
 
