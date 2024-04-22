@@ -182,9 +182,9 @@ void main() {
     }
 #endif // DO_ASYNC_TIMEWARP
 
+#if (DO_TRANSLATION_WARPING == 1)
     vec2 uvDepth;
     vec3 cameraVector = normalize(pt - cameraPos);
-#if (DO_TRANSLATION_WARPING == 1)
     if (!(arMode || vrMode)) {
         vec3 cameraTopLeft  = normalize(cameraToWorld(vec2(0.0, 1.0), cameraProjectionMatrixInverse, cameraMatrixWorld) - cameraPos);
         vec3 cameraTopRight = normalize(cameraToWorld(vec2(1.0, 1.0), cameraProjectionMatrixInverse, cameraMatrixWorld) - cameraPos);
