@@ -134,7 +134,7 @@ AFRAME.registerComponent('arena-camera', {
                 'arena-user': arenaUser,
             },
         };
-        const presence = document.getElementById('presence');
+        const presence = document.getElementById('presenceSelect');
         if (presence) {
             arenaUser.presence = presence.value;
         }
