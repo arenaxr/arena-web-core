@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.26.5](https://github.com/arenaxr/arena-web-core/compare/v1.26.4...v1.26.5) (2024-04-22)
+
+
+### Bug Fixes
+
+* controllers dont have scale property, so dont set it ([0261a48](https://github.com/arenaxr/arena-web-core/commit/0261a487651b3994791ea0635782c12bd33403f4))
+* still allow scale for create/updates for hands ([070d97d](https://github.com/arenaxr/arena-web-core/commit/070d97d318d0b3b9d87376f39a648735f695dc73))
+* transceiver codec selection bug fix ([4087cad](https://github.com/arenaxr/arena-web-core/commit/4087cad08f27dfd955639a5e09e6b780f8188adb))
+* typos for presenceSelect, breaks portal mode ([b78a0fb](https://github.com/arenaxr/arena-web-core/commit/b78a0fb73fd07348c4fbbc6f222cc617865515ec))
+
 ## [1.26.4](https://github.com/arenaxr/arena-web-core/compare/v1.26.3...v1.26.4) (2024-04-17)
 
 
