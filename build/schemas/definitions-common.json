@@ -542,7 +542,7 @@
             },
             "title": "Material extras",
             "type": "object",
-            "required": ["encoding", "gltfOpacity"]
+            "required": ["colorSpace", "gltfOpacity"]
         },
         "shadow": {
             "title": "Shadow",
