@@ -30,10 +30,10 @@ AFRAME.registerComponent('openvps', {
 
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.interval, this);
 
-        // Set ccwebxr needsOffscreenCanvas to true
+        // Set ccwebxr needOffscreenCanvas to true
         ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, () => {
             const webxrcc = new WebXRCameraCapture();
-            webxrcc.needsOffscreenCanvas = true;
+            webxrcc.needOffscreenCanvas = true;
         });
 
         this.cameraCanvas = undefined;
