@@ -1,4 +1,4 @@
-/* global AFRAME, ARENA, Swal */
+/* global AFRAME, ARENA, Swal, THREE */
 
 import { ARENAUtils } from '../../utils';
 import WebXRCameraCapture from './camera-capture/ccwebxr';
@@ -43,10 +43,12 @@ AFRAME.registerComponent('openvps', {
         this.flipOffscreenCanvas = document.createElement('offscreenCanvas');
         this.flipHorizontal = true;
         this.flipVertical = true;
+        this.tempPoseMatrix = new THREE.Matrix4();
     },
 
     webXRSessionStarted() {
         this.webxrActive = true;
+        this.sessionMaxConfidence = 0;
     },
 
     webXrSessionEnded() {
@@ -109,7 +111,6 @@ AFRAME.registerComponent('openvps', {
         const imageBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
 
         const formData = new FormData();
-        formData.append('name', ARENA.sceneName);
         formData.append('image', imageBlob, 'image.jpeg');
         formData.append('aframe_camera_matrix_world', cameraEl.object3D.matrixWorld.toArray());
 
@@ -122,7 +123,12 @@ AFRAME.registerComponent('openvps', {
                     console.error(`openVPS Server error response: ${response.statusText}`);
                 } else {
                     const resJson = response.json();
-                    ARENAUtils.relocateUserCamera(null, null, resJson.arscene_pose);
+                    if (resJson.confidence < this.sessionMaxConfidence) {
+                        return;
+                    }
+                    this.sessionMaxConfidence = resJson.confidence;
+                    this.tempPoseMatrix.fromArray(resJson.arscene_pose).invert();
+                    ARENAUtils.relocateUserCamera(null, null, this.tempPoseMatrix);
                 }
             })
             .catch((error) => {
