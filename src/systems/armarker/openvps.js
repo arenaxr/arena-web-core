@@ -44,7 +44,10 @@ AFRAME.registerComponent('openvps', {
         this.flipOffscreenCanvas = new OffscreenCanvas(1, 1);
         this.flipHorizontal = true;
         this.flipVertical = true;
-        this.tempPoseMatrix = new THREE.Matrix4();
+        this.origRigMatrix = new THREE.Matrix4();
+        this.solutionMatrix = new THREE.Matrix4();
+        this.newRigMatrix = new THREE.Matrix4();
+        this.scaleVector = new THREE.Vector3(1, 1, 1);
     },
 
     webXRSessionStarted() {
@@ -97,10 +100,17 @@ AFRAME.registerComponent('openvps', {
             return;
         }
 
+        const rig = document.getElementById('cameraRig').object3D;
+        const spinner = document.getElementById('cameraSpinner').object3D;
+        this.origRigMatrix.compose(rig.position, spinner.quaternion, this.scaleVector);
+
         flipOffscreenCanvas.width = cameraCanvas.width;
         flipOffscreenCanvas.height = cameraCanvas.height;
         const flipCtx = flipOffscreenCanvas.getContext('2d');
         flipCtx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1); // Flip the image horizontally and/or vertically
+
+        cameraEl.object3D.updateMatrixWorld(true);
+        const matrixArray = cameraEl.object3D.matrixWorld.toArray(); // Do this close as possible to canvas image set
 
         flipCtx.drawImage(
             cameraCanvas,
@@ -108,12 +118,11 @@ AFRAME.registerComponent('openvps', {
             (flipVertical ? -1 : 0) * cameraCanvas.height // Offset by -1 * height if flipVertical, otherwise 0
         );
 
-        cameraEl.object3D.updateMatrixWorld(true);
         const imageBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
 
         const formData = new FormData();
         formData.append('image', imageBlob, 'image.jpeg');
-        formData.append('aframe_camera_matrix_world', cameraEl.object3D.matrixWorld.toArray());
+        formData.append('aframe_camera_matrix_world', matrixArray);
 
         fetch(data.url, {
             method: 'POST',
@@ -128,8 +137,10 @@ AFRAME.registerComponent('openvps', {
                         return;
                     }
                     this.sessionMaxConfidence = resJson.confidence;
-                    this.tempPoseMatrix.fromArray(resJson.arscene_pose).invert();
-                    ARENAUtils.relocateUserCamera(null, null, this.tempPoseMatrix);
+                    this.solutionMatrix.fromArray(resJson.arscene_pose).invert();
+                    this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.origRigMatrix);
+                    rig.position.setFromMatrixPosition(this.newRigMatrix);
+                    spinner.quaternion.setFromRotationMatrix(this.newRigMatrix);
                 }
             })
             .catch((error) => {
