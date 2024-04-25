@@ -1,7 +1,6 @@
 /* global AFRAME, ARENA, Swal, THREE */
 
 import { ARENAUtils } from '../../utils';
-import WebXRCameraCapture from './camera-capture/ccwebxr';
 import { ARENA_EVENTS } from '../../constants';
 
 AFRAME.registerComponent('openvps', {
@@ -32,8 +31,10 @@ AFRAME.registerComponent('openvps', {
 
         // Set ccwebxr needOffscreenCanvas to true
         ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, () => {
-            const webxrcc = new WebXRCameraCapture();
-            webxrcc.needOffscreenCanvas = true;
+            const cameraCapture = sceneEl.systems.armarker?.cameraCapture;
+            if (cameraCapture?.getOffscreenCanvas) {
+                cameraCapture.needOffscreenCanvas = true;
+            }
         });
 
         this.cameraCanvas = undefined;
@@ -139,7 +140,14 @@ AFRAME.registerComponent('openvps', {
         if (this.cameraCanvas) {
             return this.cameraCanvas;
         }
-        // Try cameraCanvas id object. Works for ar headset, spot ar, and webxr
+        // ccwebxr, offscreen arheadset, spotar canvases
+        const cameraCapture = this.el.systems.armarker?.cameraCapture;
+        if (cameraCapture?.canvas) {
+            this.cameraCanvas = cameraCapture.canvas;
+            return this.cameraCanvas;
+        }
+
+        // Try cameraCanvas id object. Works for non-offscreen arheadset, spotar
         const cameraCanvas = document.getElementById('cameraCanvas');
         if (cameraCanvas) {
             this.cameraCanvas = cameraCanvas;
