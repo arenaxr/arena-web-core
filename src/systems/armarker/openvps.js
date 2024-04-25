@@ -119,11 +119,11 @@ AFRAME.registerComponent('openvps', {
             method: 'POST',
             body: formData,
         })
-            .then((response) => {
+            .then(async (response) => {
                 if (!response.ok) {
                     console.error(`openVPS Server error response: ${response.statusText}`);
                 } else {
-                    const resJson = response.json();
+                    const resJson = await response.json();
                     if (resJson.confidence < this.sessionMaxConfidence) {
                         return;
                     }
