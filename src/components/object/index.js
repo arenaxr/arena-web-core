@@ -27,4 +27,5 @@ import './screenshare';
 import './text-input';
 import './threejs-scene';
 import './ttl';
+import './urdf-model';
 import './video-control';

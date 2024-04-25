@@ -164,6 +164,11 @@
         "file": "schemas/triangle.json",
         "title": "Triangle"
     },
+    "urdf-model": {
+        "description": "Load a URFD model.",
+        "file": "schemas/urdf-model.json",
+        "title": "URDF Model"
+    },    
     "videosphere": {
         "description": "Videosphere 360 Video.",
         "file": "schemas/videosphere.json",
