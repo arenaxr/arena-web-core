@@ -20,7 +20,7 @@ AFRAME.registerComponent('openvps', {
         if (!this.openvpsAllowedList.includes(this.data.url)) {
             this.confirmPermission();
         } else {
-            this.enabled = true;
+            this.data.enabled = true;
         }
 
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
@@ -56,7 +56,7 @@ AFRAME.registerComponent('openvps', {
     },
 
     tick() {
-        if (!this.enabled || !this.url || !this.webxrActive) return;
+        if (!this.data.enabled || !this.data.url || !this.webxrActive) return;
         this.uploadImage().then(() => {
             // Some indicator?
         });
@@ -79,7 +79,7 @@ AFRAME.registerComponent('openvps', {
             if (result.isConfirmed) {
                 if (result.value) {
                     // Save this URL to localStorage
-                    this.openvpsAllowedList.push(this.data.openvps.url);
+                    this.openvpsAllowedList.push(this.data.url);
                     localStorage.setItem('openvpsAllowedList', JSON.stringify(openvpsAllowedList));
                 }
                 this.data.confirmed = true;
@@ -107,7 +107,7 @@ AFRAME.registerComponent('openvps', {
             (flipVertical ? -1 : 0) * cameraCanvas.height // Offset by -1 * height if flipVertical, otherwise 0
         );
 
-        cameraEl.updateMatrixWorld(true);
+        cameraEl.object3D.updateMatrixWorld(true);
         const imageBlob = await flipOffscreenCanvas.convertToBlob({ type: data.imgType, quality: data.imgQuality });
 
         const formData = new FormData();
@@ -146,7 +146,7 @@ AFRAME.registerComponent('openvps', {
             return cameraCanvas;
         }
         // Try to get XRBrowser's injected canvas
-        const canvasEls = document.querySelector('canvas');
+        const canvasEls = document.querySelectorAll('canvas');
         // eslint-disable-next-line no-restricted-syntax
         for (const canvasEl of canvasEls) {
             const elStyle = canvasEl.style;
