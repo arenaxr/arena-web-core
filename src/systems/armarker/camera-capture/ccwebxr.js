@@ -69,6 +69,8 @@ export default class WebXRCameraCapture {
 
     offscreenCanvas;
 
+    offScreenImageData;
+
     /**
      * Setup camera frame capture
      * @param {object} xrSession -  WebXR Device API's XRSession
@@ -183,6 +185,9 @@ export default class WebXRCameraCapture {
         if (!this.offscreenCanvas) {
             this.offscreenCanvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
             this.offscreenCanvas.id = 'cameraCanvas';
+            this.offScreenImageData = this.offscreenCanvas
+                .getContext('2d')
+                .createImageData(this.frameWidth, this.frameHeight);
         }
         return this.offscreenCanvas;
     }
@@ -241,8 +246,9 @@ export default class WebXRCameraCapture {
         if (this.needOffscreenCanvas && this.getOffscreenCanvas()) {
             this.offscreenCanvas.width = this.frameWidth;
             this.offscreenCanvas.height = this.frameHeight;
+            this.offScreenImageData.data.set(this.framePixels);
             const ctx = this.offscreenCanvas.getContext('2d');
-            ctx.putImageData(this.framePixels, 0, 0);
+            ctx.putImageData(this.offScreenImageData, 0, 0);
         }
 
         // grayscale and mirror image
