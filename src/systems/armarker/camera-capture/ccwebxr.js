@@ -67,7 +67,8 @@ export default class WebXRCameraCapture {
     /* Offscreen canvas to draw the camera frame for other CV */
     needOffscreenCanvas = false;
 
-    offscreenCanvas;
+    // This is offscreenCanvas, but we use same name across all pipelines
+    canvas;
 
     offScreenImageData;
 
@@ -182,14 +183,12 @@ export default class WebXRCameraCapture {
      * Gets or creates a new offscreenCanvas
      */
     getOffscreenCanvas() {
-        if (!this.offscreenCanvas) {
-            this.offscreenCanvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
-            this.offscreenCanvas.id = 'cameraCanvas';
-            this.offScreenImageData = this.offscreenCanvas
-                .getContext('2d')
-                .createImageData(this.frameWidth, this.frameHeight);
+        if (!this.canvas) {
+            this.canvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
+            this.canvas.id = 'cameraCanvas';
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
         }
-        return this.offscreenCanvas;
+        return this.canvas;
     }
 
     /**
@@ -244,11 +243,10 @@ export default class WebXRCameraCapture {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glLayer.framebuffer);
 
         if (this.needOffscreenCanvas && this.getOffscreenCanvas()) {
-            this.offscreenCanvas.width = this.frameWidth;
-            this.offscreenCanvas.height = this.frameHeight;
+            this.canvas.width = this.frameWidth;
+            this.canvas.height = this.frameHeight;
             this.offScreenImageData.data.set(this.framePixels);
-            const ctx = this.offscreenCanvas.getContext('2d');
-            ctx.putImageData(this.offScreenImageData, 0, 0);
+            this.canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
         }
 
         // grayscale and mirror image
