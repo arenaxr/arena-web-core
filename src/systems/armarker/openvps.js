@@ -41,7 +41,7 @@ AFRAME.registerComponent('openvps', {
         this.cameraEl = document.getElementById('my-camera');
         this.webxrActive = false;
         // Use offscreen canvas to flip the camera image, not mutate original canvas
-        this.flipOffscreenCanvas = document.createElement('offscreenCanvas');
+        this.flipOffscreenCanvas = new OffscreenCanvas(1, 1);
         this.flipHorizontal = true;
         this.flipVertical = true;
         this.tempPoseMatrix = new THREE.Matrix4();
