@@ -123,6 +123,8 @@ AFRAME.registerComponent('openvps', {
         formData.append('image', imageBlob, 'image.jpeg');
         formData.append('aframe_camera_matrix_world', matrixArray);
 
+        console.log('Sending image. FlippedH: ', flipHorizontal, ' FlippedV: ', flipVertical);
+
         fetch(data.url, {
             method: 'POST',
             body: formData,
@@ -135,8 +137,10 @@ AFRAME.registerComponent('openvps', {
                     const now = new Date();
                     ARENA.debugXR(`New vps solution at ${now.toISOString()}, confidence: ${resJson.confidence}`);
                     if (resJson.confidence < this.sessionMaxConfidence) {
+                        ARENA.debugXR('| Worse confidence, ignoring', false);
                         return;
                     }
+                    ARENA.debugXR('| New higher confidence, relocalizing', false);
                     this.sessionMaxConfidence = resJson.confidence;
                     this.solutionMatrix.fromArray(resJson.arscene_pose).invert();
                     this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.origRigMatrix);
