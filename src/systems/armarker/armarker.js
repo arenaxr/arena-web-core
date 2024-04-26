@@ -85,7 +85,7 @@ AFRAME.registerSystem('armarker', {
         this.arena = sceneEl.systems['arena-scene'];
 
         // init this.ATLASMarkers with list of markers within range
-        this.getARMArkersFromATLAS(true);
+        // this.getARMArkersFromATLAS(true);
 
         // init networkedLocationSolver flag from ARENA scene options
         this.data.networkedLocationSolver = !!this.arena.sceneOptions.networkedLocationSolver;
@@ -490,7 +490,7 @@ AFRAME.registerSystem('armarker', {
                 });
             }
             // force update from ATLAS if not found
-            this.getARMArkersFromATLAS();
+            // this.getARMArkersFromATLAS();
         }
         return this.ATLASMarkers[String(markerid)];
     },
