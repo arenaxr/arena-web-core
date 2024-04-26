@@ -357,11 +357,11 @@ export default class ARMarkerRelocalization {
 
                 // do we have detected markers to publish ?
                 if (pubDetList.length > 0 && ARENA) {
-                    if (ARENA.clientCoords === undefined) {
-                        ARENAUtils.getLocation((coords, err) => {
-                            if (!err) ARENA.clientCoords = coords;
-                        });
-                    }
+                    // if (ARENA.clientCoords === undefined) {
+                    //     ARENAUtils.getLocation((coords, err) => {
+                    //         if (!err) ARENA.clientCoords = coords;
+                    //     });
+                    // }
                     const jsonMsg = {
                         ...this.DFT_DETECTION_MSG,
                         timestamp,

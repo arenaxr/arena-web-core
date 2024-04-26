@@ -484,11 +484,11 @@ AFRAME.registerSystem('armarker', {
             };
         }
         if (!this.ATLASMarkers[markerid]) {
-            if (ARENA.clientCoords === undefined) {
-                ARENAUtils.getLocation((coords, err) => {
-                    if (!err) ARENA.clientCoords = coords;
-                });
-            }
+            // if (ARENA.clientCoords === undefined) {
+            //     ARENAUtils.getLocation((coords, err) => {
+            //         if (!err) ARENA.clientCoords = coords;
+            //     });
+            // }
             // force update from ATLAS if not found
             // this.getARMArkersFromATLAS();
         }
