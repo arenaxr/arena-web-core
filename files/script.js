@@ -78,7 +78,16 @@ function loadStoreFront(authToken) {
     } catch (err) {
         console.warn(err);
         localStorage.setItem('jwt', null);
-        loadHtmlToFrame('<div style="text-align:center;">Login with a user account to manage files.</div>');
+        let fsErrorMsg = 'Login with a user account to manage files.';
+        const interval = setInterval(() => {
+            if (window.auth) {
+                clearInterval(interval);
+                if (window.auth.authenticated) {
+                    fsErrorMsg = `Invalid file store auth token for user "${window.auth.username}".`;
+                }
+                loadHtmlToFrame(`<div style="text-align:center;">${fsErrorMsg}</div>`);
+            }
+        }, 250);
     }
 }
 
@@ -92,12 +101,8 @@ function updateStoreLogin() {
     xhr.setRequestHeader('X-CSRFToken', csrftoken);
     xhr.send();
     xhr.onload = () => {
-        if (xhr.status === 200) {
-            const authToken = getCookie('auth');
-            loadStoreFront(authToken);
-        } else {
-            loadStoreFront();
-        }
+        const authToken = getCookie('auth');
+        loadStoreFront(authToken);
     };
 }
 

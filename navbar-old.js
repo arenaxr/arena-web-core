@@ -4,19 +4,18 @@ $(document).ready(() => {
     // add page header
     $('#header').load('/header-old.html', () => {
         // update auth state in nav bar
-        let auth = null;
         fetch('/user/user_state')
             .then((response) => response.json())
             .then((data) => {
-                auth = data;
+                window.auth = data;
                 const authDrop = $('#auth-dropdown');
                 authDrop.attr('class', 'dropdown-toggle');
                 authDrop.attr('data-toggle', 'dropdown');
                 authDrop.after("<ul class='dropdown-menu' role='menu' aria-labelledby='dropdownMenu'></ul>");
                 const dropdownMenu = $('ul .dropdown-menu');
                 dropdownMenu.append('<li><a href="/conf/versions.html">Version</a></li>');
-                if (data.authenticated) {
-                    authDrop.html(`${data.username} <b class='caret'></b>`);
+                if (window.auth.authenticated) {
+                    authDrop.html(`${window.auth.username} <b class='caret'></b>`);
                     dropdownMenu.append('<li><a href="/user/profile">Profile</a></li>');
                     dropdownMenu.append('<li><a id="show_perms" href="#">Permissions</a></li>');
                     $('#show_perms').on('click', () => {
@@ -58,7 +57,7 @@ $(document).ready(() => {
             let storePath = getStorePath();
             if (storePath.startsWith('/storemng/files')) {
                 storePath = storePath.replace('/storemng/files', '');
-                const storeUnscopedPrefix = auth.is_staff ? '' : `/users/${auth.username}`;
+                const storeUnscopedPrefix = window.auth.is_staff ? '' : `/users/${window.auth.username}`;
                 const fullPath = `${window.location.protocol}//${window.location.host}/store${storeUnscopedPrefix}${storePath}`;
                 navigator.clipboard.writeText(fullPath);
                 Swal.fire('Copied!', fullPath, 'success');
