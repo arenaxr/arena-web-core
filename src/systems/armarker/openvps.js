@@ -1,6 +1,5 @@
 /* global AFRAME, ARENA, Swal, THREE */
 
-import { ARENAUtils } from '../../utils';
 import { ARENA_EVENTS } from '../../constants';
 
 AFRAME.registerComponent('openvps', {
@@ -133,6 +132,8 @@ AFRAME.registerComponent('openvps', {
                     console.error(`openVPS Server error response: ${response.statusText}`);
                 } else {
                     const resJson = await response.json();
+                    const now = new Date();
+                    ARENA.debugXR(`New vps solution at ${now.toISOString()}, confidence: ${resJson.confidence}`);
                     if (resJson.confidence < this.sessionMaxConfidence) {
                         return;
                     }
