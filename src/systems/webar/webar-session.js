@@ -65,7 +65,8 @@ AFRAME.registerComponent('arena-webar-session', {
         this.onResize();
         window.addEventListener('resize', this.onResize.bind(this));
 
-        await document.querySelector('a-scene').systems.armarker.webXRSessionStarted();
+        await this.el.sceneEl.systems.armarker.webXRSessionStarted();
+        this.el.sceneEl.components.openvps?.webXRSessionStarted();
     },
 
     update() {
