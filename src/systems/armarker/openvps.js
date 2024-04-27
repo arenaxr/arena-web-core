@@ -123,7 +123,9 @@ AFRAME.registerComponent('openvps', {
         formData.append('image', imageBlob, 'image.jpeg');
         formData.append('aframe_camera_matrix_world', matrixArray);
 
-        console.log('Sending image. FlippedH: ', flipHorizontal, ' FlippedV: ', flipVertical);
+        console.log(
+            `Sending image of size ${imageBlob.size}. FlippedH: ${flipHorizontal}, FlippedV: ${flipVertical}, Dims: ${cameraCanvas.width}x${cameraCanvas.height} to ${data.url}`
+        );
 
         fetch(data.url, {
             method: 'POST',
@@ -131,7 +133,7 @@ AFRAME.registerComponent('openvps', {
         })
             .then(async (response) => {
                 if (!response.ok) {
-                    console.error(`openVPS Server error response: ${response.statusText}`);
+                    console.error(`openVPS Server error response: ${response.status}`);
                 } else {
                     const resJson = await response.json();
                     const now = new Date();
@@ -149,7 +151,7 @@ AFRAME.registerComponent('openvps', {
                 }
             })
             .catch((error) => {
-                console.error(`Error getting pose from openVPS server: ${error.message}`);
+                console.error(`Error getting pose from openVPS server: ${error.message}. ImageBlob: ${imageBlob.size}`);
             });
     },
     getCanvas() {
