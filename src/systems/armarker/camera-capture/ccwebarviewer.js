@@ -37,6 +37,12 @@ export default class WebARViewerCameraCapture {
     /* worker to send images captured */
     cvWorker;
 
+    canvas;
+
+    offScreenImageData;
+
+    byteArrayView;
+
     /**
      * Setup camera frame capture
      */
@@ -49,6 +55,7 @@ export default class WebARViewerCameraCapture {
 
         // WebXRViewer/WebARViewer deliver camera frames to 'processCV'
         window.processCV = this.processCV.bind(this);
+        this.updateOffscreenCanvas = this.updateOffscreenCanvas.bind(this);
 
         // For no obvious reason, parcel is optimizing away the import of Base64Binary, so we force include here...
         try {
@@ -162,10 +169,10 @@ export default class WebARViewerCameraCapture {
         // frame is received as a YUV pixel buffer that is base64 encoded;
         // convert to a YUV Uint8Array and get grayscale pixels
         const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
-        const byteArrayView = new Uint8Array(byteArray);
+        this.byteArrayView = new Uint8Array(byteArray);
         // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
         for (let i = 0; i < this.frameWidth * this.frameHeight; i++) {
-            this.frameGsPixels[i] = byteArrayView[i];
+            this.frameGsPixels[i] = this.byteArrayView[i];
         }
 
         // construct cam frame data to send to worker
@@ -204,5 +211,51 @@ export default class WebARViewerCameraCapture {
             // Skew factor in pixels
             gamma: 0,
         };
+    }
+
+    getOffscreenCanvas() {
+        if (!this.canvas) {
+            this.canvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
+        return this.canvas;
+    }
+
+    updateOffscreenCanvas() {
+        const { byteArrayView } = this;
+        if (!byteArrayView) return false;
+        const canvas = this.getOffscreenCanvas();
+        canvas.width = this.frameWidth;
+        canvas.height = this.frameHeight;
+
+        const totalPixels = this.frameWidth * this.frameHeight;
+        const rgbData = new Uint8ClampedArray(totalPixels * 4);
+        const vOffset = (totalPixels / 4) | 0;
+
+        // Convert byteArrayView from YUV to RGB and set it to the canvas.
+        // Assuming we're working with YUV420p (?)
+        for (let i = 0; i < totalPixels; i++) {
+            const y = byteArrayView[i];
+
+            const uIndex = totalPixels + ((i / 4) | 0);
+            const u = byteArrayView[uIndex] - 128;
+
+            const vIndex = uIndex + vOffset;
+            const v = byteArrayView[vIndex] - 128;
+
+            const r = y + 1.402 * v;
+            const g = y - 0.344136 * u - 0.714136 * v;
+            const b = y + 1.772 * u;
+
+            const rgbIndex = i * 4;
+            rgbData[rgbIndex] = r;
+            rgbData[rgbIndex + 1] = g;
+            rgbData[rgbIndex + 2] = b;
+            rgbData[rgbIndex + 3] = 255; // Alpha channel
+        }
+
+        this.offScreenImageData.data.set(rgbData);
+        canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
+        return true;
     }
 }
