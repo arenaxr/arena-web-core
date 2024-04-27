@@ -222,36 +222,45 @@ export default class WebARViewerCameraCapture {
     }
 
     updateOffscreenCanvas() {
-        const { byteArrayView } = this;
+        const { byteArrayView, frameWidth, frameHeight } = this;
         if (!byteArrayView) return false;
         const canvas = this.getOffscreenCanvas();
-        canvas.width = this.frameWidth;
-        canvas.height = this.frameHeight;
+        canvas.width = frameWidth;
+        canvas.height = frameHeight;
 
-        const totalPixels = this.frameWidth * this.frameHeight;
-        const rgbData = new Uint8ClampedArray(totalPixels * 4);
-        const vOffset = (totalPixels / 4) | 0;
+        const ySize = frameWidth * frameHeight;
+        const rgbData = new Uint8ClampedArray(ySize * 4);
 
         // Convert byteArrayView from YUV to RGB and set it to the canvas.
         // Assuming we're working with YUV420p (?)
-        for (let i = 0; i < totalPixels; i++) {
-            const y = byteArrayView[i];
+        const uvSize = ((frameWidth / 2) * (frameHeight / 2)) | 0;
 
-            const uIndex = totalPixels + ((i / 4) | 0);
-            const u = byteArrayView[uIndex] - 128;
+        const Y = byteArrayView.subarray(0, ySize);
+        const U = byteArrayView.subarray(ySize, ySize + uvSize);
+        const V = byteArrayView.subarray(ySize + uvSize, ySize + 2 * uvSize);
 
-            const vIndex = uIndex + vOffset;
-            const v = byteArrayView[vIndex] - 128;
+        for (let y = 0; y < frameHeight; y++) {
+            for (let x = 0; x < frameWidth; x++) {
+                const xyIndex = y * frameWidth + x;
 
-            const r = y + 1.402 * v;
-            const g = y - 0.344136 * u - 0.714136 * v;
-            const b = y + 1.772 * u;
+                // (y // 2) * (width // 2) + (x // 2);
+                const uvIndex = ((y / 2) | 0) * ((frameWidth / 2) | 0) + ((x / 2) | 0);
 
-            const rgbIndex = i * 4;
-            rgbData[rgbIndex] = r;
-            rgbData[rgbIndex + 1] = g;
-            rgbData[rgbIndex + 2] = b;
-            rgbData[rgbIndex + 3] = 255; // Alpha channel
+                const yVal = Y[xyIndex];
+                const uVal = U[uvIndex] - 128;
+                const vVal = V[uvIndex] - 128;
+
+                // Ref: https://developer.apple.com/documentation/arkit/arkit_in_ios/displaying_an_ar_experience_with_metal#2891878
+                const R = yVal + 1.402 * vVal;
+                const G = yVal - 0.344136 * uVal - 0.714136 * vVal;
+                const B = yVal + 1.772 * uVal;
+
+                const rgbaIndex = xyIndex * 4;
+                rgbData[rgbaIndex] = R;
+                rgbData[rgbaIndex + 1] = G;
+                rgbData[rgbaIndex + 2] = B;
+                rgbData[rgbaIndex + 3] = 255; // Alpha
+            }
         }
         if (this.offScreenImageData.width !== this.frameWidth || this.offScreenImageData.height !== this.frameHeight) {
             this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
