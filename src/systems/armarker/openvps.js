@@ -129,6 +129,7 @@ AFRAME.registerComponent('openvps', {
 
         fetch(data.url, {
             method: 'POST',
+            mode: 'cors',
             body: formData,
         })
             .then(async (response) => {
