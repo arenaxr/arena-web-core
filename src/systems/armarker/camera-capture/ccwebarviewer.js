@@ -253,7 +253,9 @@ export default class WebARViewerCameraCapture {
             rgbData[rgbIndex + 2] = b;
             rgbData[rgbIndex + 3] = 255; // Alpha channel
         }
-
+        if (this.offScreenImageData.width !== this.frameWidth || this.offScreenImageData.height !== this.frameHeight) {
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
         this.offScreenImageData.data.set(rgbData);
         canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
         return true;
