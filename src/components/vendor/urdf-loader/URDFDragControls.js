@@ -1,0 +1,327 @@
+// Find the nearest parent that is a joint
+function isJoint(j) {
+
+    return j.isURDFJoint && j.jointType !== 'fixed';
+
+};
+
+function findNearestJoint(child) {
+
+    let curr = child;
+    while (curr) {
+
+        if (isJoint(curr)) {
+
+            return curr;
+
+        }
+
+        curr = curr.parent;
+
+    }
+
+    return curr;
+
+};
+
+const prevHitPoint = new THREE.Vector3();
+const newHitPoint = new THREE.Vector3();
+const pivotPoint = new THREE.Vector3();
+const tempVector = new THREE.Vector3();
+const tempTHREE.Vector2 = new THREE.Vector3();
+const projectedStartPoint = new THREE.Vector3();
+const projectedEndPoint = new THREE.Vector3();
+const THREE.Plane = new THREE.Plane();
+export class URDFDragControls {
+
+    constructor(scene) {
+
+        this.enabled = true;
+        this.scene = scene;
+        this.THREE.Raycaster = new THREE.Raycaster();
+        this.initialGrabPoint = new THREE.Vector3();
+
+        this.hitDistance = -1;
+        this.hovered = null;
+        this.manipulating = null;
+
+    }
+
+    update() {
+
+        const {
+            THREE.Raycaster,
+            hovered,
+            manipulating,
+            scene,
+        } = this;
+
+        if (manipulating) {
+
+            return;
+
+        }
+
+        let hoveredJoint = null;
+        const intersections = THREE.Raycaster.intersectObject(scene, true);
+        if (intersections.length !== 0) {
+
+            const hit = intersections[0];
+            this.hitDistance = hit.distance;
+            hoveredJoint = findNearestJoint(hit.object);
+            this.initialGrabPoint.copy(hit.point);
+
+        }
+
+        if (hoveredJoint !== hovered) {
+
+            if (hovered) {
+
+                this.onUnhover(hovered);
+
+            }
+
+            this.hovered = hoveredJoint;
+
+            if (hoveredJoint) {
+
+                this.onHover(hoveredJoint);
+
+            }
+
+        }
+
+    }
+
+    updateJoint(joint, angle) {
+
+        joint.setJointValue(angle);
+
+    }
+
+    onDragStart(joint) {
+
+    }
+
+    onDragEnd(joint) {
+
+    }
+
+    onHover(joint) {
+
+    }
+
+    onUnhover(joint) {
+
+    }
+
+    getRevoluteDelta(joint, startPoint, endPoint) {
+
+        // set up the THREE.Plane
+        tempVector
+            .copy(joint.axis)
+            .transformDirection(joint.matrixWorld)
+            .normalize();
+        pivotPoint
+            .set(0, 0, 0)
+            .applyMatrix4(joint.matrixWorld);
+        THREE.Plane
+            .setFromNormalAndCoplanarPoint(tempVector, pivotPoint);
+
+        // project the drag points onto the THREE.Plane
+        THREE.Plane.projectPoint(startPoint, projectedStartPoint);
+        THREE.Plane.projectPoint(endPoint, projectedEndPoint);
+
+        // get the directions relative to the pivot
+        projectedStartPoint.sub(pivotPoint);
+        projectedEndPoint.sub(pivotPoint);
+
+        tempVector.crossVectors(projectedStartPoint, projectedEndPoint);
+
+        const direction = Math.sign(tempVector.dot(THREE.Plane.normal));
+        return direction * projectedEndPoint.angleTo(projectedStartPoint);
+
+    }
+
+    getPrismaticDelta(joint, startPoint, endPoint) {
+
+        tempVector.subVectors(endPoint, startPoint);
+        THREE.Plane
+            .normal
+            .copy(joint.axis)
+            .transformDirection(joint.parent.matrixWorld)
+            .normalize();
+
+        return tempVector.dot(THREE.Plane.normal);
+
+    }
+
+    moveRay(toRay) {
+
+        const { THREE.Raycaster, hitDistance, manipulating } = this;
+        const { ray } = THREE.Raycaster;
+
+        if (manipulating) {
+
+            ray.at(hitDistance, prevHitPoint);
+            toRay.at(hitDistance, newHitPoint);
+
+            let delta = 0;
+            if (manipulating.jointType === 'revolute' || manipulating.jointType === 'continuous') {
+
+                delta = this.getRevoluteDelta(manipulating, prevHitPoint, newHitPoint);
+
+            } else if (manipulating.jointType === 'prismatic') {
+
+                delta = this.getPrismaticDelta(manipulating, prevHitPoint, newHitPoint);
+
+            }
+
+            if (delta) {
+
+                this.updateJoint(manipulating, manipulating.angle + delta);
+
+            }
+
+        }
+
+        this.THREE.Raycaster.ray.copy(toRay);
+        this.update();
+
+    }
+
+    setGrabbed(grabbed) {
+
+        const { hovered, manipulating } = this;
+
+        if (grabbed) {
+
+            if (manipulating !== null || hovered === null) {
+
+                return;
+
+            }
+
+            this.manipulating = hovered;
+            this.onDragStart(hovered);
+
+        } else {
+
+            if (this.manipulating === null) {
+                return;
+            }
+
+            this.onDragEnd(this.manipulating);
+            this.manipulating = null;
+            this.update();
+
+        }
+
+    }
+
+}
+
+export class PointerURDFDragControls extends URDFDragControls {
+
+    constructor(scene, camera, domElement) {
+
+        super(scene);
+        this.camera = camera;
+        this.domElement = domElement;
+
+        const THREE.Raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function updateMouse(e) {
+
+            mouse.x = ((e.pageX - domElement.offsetLeft) / domElement.offsetWidth) * 2 - 1;
+            mouse.y = -((e.pageY - domElement.offsetTop) / domElement.offsetHeight) * 2 + 1;
+
+        }
+
+        this._mouseDown = e => {
+
+            updateMouse(e);
+            THREE.Raycaster.setFromCamera(mouse, this.camera);
+            this.moveRay(THREE.Raycaster.ray);
+            this.setGrabbed(true);
+
+        };
+
+        this._mouseMove = e => {
+
+            updateMouse(e);
+            THREE.Raycaster.setFromCamera(mouse, this.camera);
+            this.moveRay(THREE.Raycaster.ray);
+
+        };
+
+        this._mouseUp = e => {
+
+            updateMouse(e);
+            THREE.Raycaster.setFromCamera(mouse, this.camera);
+            this.moveRay(THREE.Raycaster.ray);
+            this.setGrabbed(false);
+
+        };
+
+        domElement.addEventListener('mousedown', this._mouseDown);
+        domElement.addEventListener('mousemove', this._mouseMove);
+        domElement.addEventListener('mouseup', this._mouseUp);
+
+    }
+
+    getRevoluteDelta(joint, startPoint, endPoint) {
+
+        const { camera, initialGrabPoint } = this;
+
+        // set up the THREE.Plane
+        tempVector
+            .copy(joint.axis)
+            .transformDirection(joint.matrixWorld)
+            .normalize();
+        pivotPoint
+            .set(0, 0, 0)
+            .applyMatrix4(joint.matrixWorld);
+        THREE.Plane
+            .setFromNormalAndCoplanarPoint(tempVector, pivotPoint);
+
+        tempVector
+            .copy(camera.position)
+            .sub(initialGrabPoint)
+            .normalize();
+
+        // if looking into the THREE.Plane of rotation
+        if (Math.abs(tempVector.dot(THREE.Plane.normal)) > 0.3) {
+
+            return super.getRevoluteDelta(joint, startPoint, endPoint);
+
+        } else {
+
+            // get the up direction
+            tempVector.set(0, 1, 0).transformDirection(camera.matrixWorld);
+
+            // get points projected onto the THREE.Plane of rotation
+            THREE.Plane.projectPoint(startPoint, projectedStartPoint);
+            THREE.Plane.projectPoint(endPoint, projectedEndPoint);
+
+            tempVector.set(0, 0, -1).transformDirection(camera.matrixWorld);
+            tempVector.cross(THREE.Plane.normal);
+            tempTHREE.Vector2.subVectors(endPoint, startPoint);
+
+            return tempVector.dot(tempTHREE.Vector2);
+
+        }
+
+    }
+
+    dispose() {
+
+        const { domElement } = this;
+        domElement.removeEventListener('mousedown', this._mouseDown);
+        domElement.removeEventListener('mousemove', this._mouseMove);
+        domElement.removeEventListener('mouseup', this._mouseUp);
+
+    }
+
+}
