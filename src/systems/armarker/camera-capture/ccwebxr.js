@@ -192,6 +192,9 @@ export default class WebXRCameraCapture {
         const canvas = this.getOffscreenCanvas();
         canvas.width = this.frameWidth;
         canvas.height = this.frameHeight;
+        if (this.offScreenImageData.width !== this.frameWidth || this.offScreenImageData.height !== this.frameHeight) {
+            this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
+        }
         this.offScreenImageData.data.set(this.framePixels);
         canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
         return true;
