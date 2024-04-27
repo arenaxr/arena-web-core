@@ -251,15 +251,23 @@ export default class WebARViewerCameraCapture {
                 const vVal = V[uvIndex] - 128;
 
                 // Ref: https://developer.apple.com/documentation/arkit/arkit_in_ios/displaying_an_ar_experience_with_metal#2891878
-                const R = yVal + 1.402 * vVal;
-                const G = yVal - 0.344136 * uVal - 0.714136 * vVal;
-                const B = yVal + 1.772 * uVal;
+                /* (tranposed matrix)
+                const float4x4 ycbcrToRGBTransform = float4x4(
+                    float4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
+                    float4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
+                    float4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
+                    float4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)
+                );
+                 */
+                const R = yVal + 1.402 * vVal - 178.755; // -0.701 * 255
+                const G = yVal - 0.3441 * uVal - 0.7141 * vVal + 134.9205; // 0.5291 * 255
+                const B = yVal + 1.772 * uVal - 225.93; // -0.886 * 255
 
                 const rgbaIndex = xyIndex * 4;
                 rgbData[rgbaIndex] = R;
                 rgbData[rgbaIndex + 1] = G;
                 rgbData[rgbaIndex + 2] = B;
-                rgbData[rgbaIndex + 3] = 255; // Alpha
+                rgbData[rgbaIndex + 3] = 255; // Alpha always full
             }
         }
         if (this.offScreenImageData.width !== this.frameWidth || this.offScreenImageData.height !== this.frameHeight) {
