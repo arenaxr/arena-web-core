@@ -61,4 +61,8 @@ AFRAME.registerComponent('pcd-model', {
             }
         );
     },
+    remove: function () {
+        if (!this.points) { return; }
+        this.el.removeObject3D('mesh');
+      }    
 });
