@@ -29,11 +29,10 @@ AFRAME.registerComponent('openvps', {
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.interval, this);
 
         // Set ccwebxr needOffscreenCanvas to true
+        this.updateCaptureCanvas = undefined;
         ARENA.events.addEventListener(ARENA_EVENTS.CV_INITIALIZED, () => {
-            const cameraCapture = sceneEl.systems.armarker?.cameraCapture;
-            if (cameraCapture?.getOffscreenCanvas) {
-                cameraCapture.needOffscreenCanvas = true;
-            }
+            const cameracapture = sceneEl.systems.armarker?.cameraCapture;
+            this.updateCaptureCanvas = cameracapture?.updateOffscreenCanvas;
         });
 
         this.cameraCanvas = undefined;
@@ -93,6 +92,13 @@ AFRAME.registerComponent('openvps', {
     },
     async uploadImage() {
         const { data, cameraEl, flipOffscreenCanvas, flipHorizontal, flipVertical } = this;
+        // Call canvas update if exists
+        if (this.updateCaptureCanvas) {
+            if (!this.updateCaptureCanvas()) {
+                console.error('Error updating captureCanvas canvas');
+                return;
+            }
+        }
         const cameraCanvas = this.getCanvas();
         if (!cameraCanvas) {
             console.error('No camera image canvas found');
@@ -159,28 +165,11 @@ AFRAME.registerComponent('openvps', {
         if (this.cameraCanvas) {
             return this.cameraCanvas;
         }
-        // ccwebxr, offscreen arheadset, spotar canvases
+        // ccwebxr, xrbrowser,  arheadset, spotar canvases
         const cameraCapture = this.el.systems.armarker?.cameraCapture;
         if (cameraCapture?.canvas) {
             this.cameraCanvas = cameraCapture.canvas;
             return this.cameraCanvas;
-        }
-
-        // Try cameraCanvas id object. Works for non-offscreen arheadset, spotar
-        const cameraCanvas = document.getElementById('cameraCanvas');
-        if (cameraCanvas) {
-            this.cameraCanvas = cameraCanvas;
-            return cameraCanvas;
-        }
-        // Try to get XRBrowser's injected canvas
-        const canvasEls = document.querySelectorAll('canvas');
-        // eslint-disable-next-line no-restricted-syntax
-        for (const canvasEl of canvasEls) {
-            const elStyle = canvasEl.style;
-            if (elStyle.display === 'block' && elStyle.width === '100%') {
-                this.cameraCanvas = canvasEl;
-                return canvasEl;
-            }
         }
 
         return undefined;

@@ -64,9 +64,6 @@ export default class WebXRCameraCapture {
     /* worker to send images captured */
     cvWorker;
 
-    /* Offscreen canvas to draw the camera frame for other CV */
-    needOffscreenCanvas = false;
-
     // This is offscreenCanvas, but we use same name across all pipelines
     canvas;
 
@@ -110,6 +107,7 @@ export default class WebXRCameraCapture {
         this.gl = gl;
 
         this.onXRFrame = this.onXRFrame.bind(this);
+        this.updateOffscreenCanvas = this.updateOffscreenCanvas.bind(this);
 
         const WebGlBinding = window.XRWebGLBinding;
         // check if we have webXR camera capture available
@@ -185,10 +183,18 @@ export default class WebXRCameraCapture {
     getOffscreenCanvas() {
         if (!this.canvas) {
             this.canvas = new OffscreenCanvas(this.frameWidth, this.frameHeight);
-            this.canvas.id = 'cameraCanvas';
             this.offScreenImageData = this.canvas.getContext('2d').createImageData(this.frameWidth, this.frameHeight);
         }
         return this.canvas;
+    }
+
+    updateOffscreenCanvas() {
+        const canvas = this.getOffscreenCanvas();
+        canvas.width = this.frameWidth;
+        canvas.height = this.frameHeight;
+        this.offScreenImageData.data.set(this.framePixels);
+        canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
+        return true;
     }
 
     /**
@@ -241,13 +247,6 @@ export default class WebXRCameraCapture {
         );
         // bind back to xr session's framebuffer
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, glLayer.framebuffer);
-
-        if (this.needOffscreenCanvas && this.getOffscreenCanvas()) {
-            this.canvas.width = this.frameWidth;
-            this.canvas.height = this.frameHeight;
-            this.offScreenImageData.data.set(this.framePixels);
-            this.canvas.getContext('2d').putImageData(this.offScreenImageData, 0, 0);
-        }
 
         // grayscale and mirror image
         for (let r = this.frameWidth * (this.frameHeight - 1), j = 0; r >= 0; r -= this.frameWidth) {
