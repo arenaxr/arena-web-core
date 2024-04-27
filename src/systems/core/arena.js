@@ -689,11 +689,13 @@ AFRAME.registerSystem('arena-scene', {
                 sceneEl.setAttribute('ar-hit-test-listener', { enabled: true });
             }
 
-            if (sceneOptions.openvps?.enabled && sceneOptions.openvps.url) {
+            const { enabled, imageUrl, meshUrl, interval } = sceneOptions.openvps || {};
+            if (enabled && (imageUrl || meshUrl)) {
                 if (ARENAUtils.isMobile() || ARENAUtils.isWebXRViewer() || ARENAUtils.detectARHeadset() !== 'unknown') {
                     sceneEl.setAttribute('openvps', {
-                        url: sceneOptions.openvps.url,
-                        interval: sceneOptions.openvps.interval,
+                        imageUrl,
+                        meshUrl,
+                        interval,
                     });
                 }
                 delete sceneOptions.openvps;
