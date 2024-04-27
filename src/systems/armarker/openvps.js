@@ -94,6 +94,11 @@ AFRAME.registerComponent('openvps', {
     },
     async uploadImage() {
         const { data, cameraEl, flipOffscreenCanvas, flipHorizontal, flipVertical } = this;
+
+        const rig = document.getElementById('cameraRig').object3D;
+        const spinner = document.getElementById('cameraSpinner').object3D;
+        this.origRigMatrix.compose(rig.position, spinner.quaternion, this.scaleVector);
+
         // Call canvas update if exists
         if (this.updateCaptureCanvas) {
             if (!this.updateCaptureCanvas()) {
@@ -107,17 +112,13 @@ AFRAME.registerComponent('openvps', {
             return;
         }
 
-        const rig = document.getElementById('cameraRig').object3D;
-        const spinner = document.getElementById('cameraSpinner').object3D;
-        this.origRigMatrix.compose(rig.position, spinner.quaternion, this.scaleVector);
+        cameraEl.object3D.updateMatrixWorld(true);
+        const matrixArray = cameraEl.object3D.matrixWorld.toArray(); // Do this close as possible to canvas image set
 
         flipOffscreenCanvas.width = cameraCanvas.width;
         flipOffscreenCanvas.height = cameraCanvas.height;
         const flipCtx = flipOffscreenCanvas.getContext('2d');
         flipCtx.scale(flipHorizontal ? -1 : 1, flipVertical ? -1 : 1); // Flip the image horizontally and/or vertically
-
-        cameraEl.object3D.updateMatrixWorld(true);
-        const matrixArray = cameraEl.object3D.matrixWorld.toArray(); // Do this close as possible to canvas image set
 
         flipCtx.drawImage(
             cameraCanvas,
@@ -130,10 +131,6 @@ AFRAME.registerComponent('openvps', {
         const formData = new FormData();
         formData.append('image', imageBlob, 'image.jpeg');
         formData.append('aframe_camera_matrix_world', matrixArray);
-
-        console.log(
-            `Sending image of size ${imageBlob.size}. FlippedH: ${flipHorizontal}, FlippedV: ${flipVertical}, Dims: ${cameraCanvas.width}x${cameraCanvas.height} to ${data.imageUrl}`
-        );
 
         fetch(data.imageUrl, {
             method: 'POST',
@@ -148,10 +145,10 @@ AFRAME.registerComponent('openvps', {
                     const now = new Date();
                     ARENA.debugXR(`New vps solution at ${now.toISOString()}, confidence: ${resJson.confidence}`);
                     if (resJson.confidence < this.sessionMaxConfidence) {
-                        ARENA.debugXR('| Worse confidence, ignoring', false);
+                        ARENA.debugXR('| Worse, ignoring', false);
                         return;
                     }
-                    ARENA.debugXR('| New higher confidence, relocalizing', false);
+                    ARENA.debugXR('| Higher, relocalizing', false);
                     this.sessionMaxConfidence = resJson.confidence;
                     this.solutionMatrix.fromArray(resJson.arscene_pose).invert();
                     this.newRigMatrix.multiplyMatrices(this.solutionMatrix, this.origRigMatrix);
