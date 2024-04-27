@@ -15,8 +15,11 @@ import CVWorkerMsgs from '../worker-msgs';
 export default class WebARViewerCameraCapture {
     static instance = null;
 
-    /* buffer we process in the frames received  */
-    buffIndex = 0;
+    /* y buffer we process in the frames received  */
+    yBuffIndex = 0;
+
+    /* uv buffer we process in the frames received  */
+    uvBuffIndex = 1;
 
     /* last captured frame width */
     frameWidth;
@@ -41,7 +44,9 @@ export default class WebARViewerCameraCapture {
 
     offScreenImageData;
 
-    byteArrayView;
+    yByteArray;
+
+    uvByteArray;
 
     /**
      * Setup camera frame capture
@@ -146,8 +151,8 @@ export default class WebARViewerCameraCapture {
      * @param {object} frame - the frame object given by WebXRViewer/WebARViewer
      */
     getCameraImagePixels(frame) {
-        // we expect the image at _buffers[this.buffIndex]
-        if (!frame._buffers[this.buffIndex]) {
+        // we expect the image at _buffers[this.yBuffIndex]
+        if (!frame._buffers[this.yBuffIndex]) {
             console.warn('No image buffer received.');
             return;
         }
@@ -155,11 +160,11 @@ export default class WebARViewerCameraCapture {
         if (
             this.frameGsPixels === undefined ||
             this.frameCamera === undefined ||
-            this.frameWidth !== frame._buffers[this.buffIndex].size.width ||
-            this.frameHeight !== frame._buffers[this.buffIndex].size.height
+            this.frameWidth !== frame._buffers[this.yBuffIndex].size.width ||
+            this.frameHeight !== frame._buffers[this.yBuffIndex].size.height
         ) {
-            this.frameWidth = frame._buffers[this.buffIndex].size.width;
-            this.frameHeight = frame._buffers[this.buffIndex].size.height;
+            this.frameWidth = frame._buffers[this.yBuffIndex].size.width;
+            this.frameHeight = frame._buffers[this.yBuffIndex].size.height;
             this.frameGsPixels = new Uint8Array(this.frameWidth * this.frameHeight); // grayscale (1 value per pixel)
 
             // update camera intrinsics
@@ -168,11 +173,13 @@ export default class WebARViewerCameraCapture {
 
         // frame is received as a YUV pixel buffer that is base64 encoded;
         // convert to a YUV Uint8Array and get grayscale pixels
-        const byteArray = Base64Binary.decodeArrayBuffer(frame._buffers[this.buffIndex]._buffer);
-        this.byteArrayView = new Uint8Array(byteArray);
-        // grayscale image is just the Y values (first this.frameWidth * this.frameHeight values)
+        const yArrayBuffer = Base64Binary.decodeArrayBuffer(frame._buffers[this.yBuffIndex]._buffer);
+        this.yByteArray = new Uint8Array(yArrayBuffer);
+        const uvArrayBuffer = Base64Binary.decodeArrayBuffer(frame._buffers[this.uvBuffIndex]._buffer);
+        this.uvByteArray = new Uint8Array(uvArrayBuffer);
+        // grayscale image is just the Y values
         for (let i = 0; i < this.frameWidth * this.frameHeight; i++) {
-            this.frameGsPixels[i] = this.byteArrayView[i];
+            this.frameGsPixels[i] = this.yByteArray[i];
         }
 
         // construct cam frame data to send to worker
@@ -222,33 +229,29 @@ export default class WebARViewerCameraCapture {
     }
 
     updateOffscreenCanvas() {
-        const { byteArrayView, frameWidth, frameHeight } = this;
-        if (!byteArrayView) return false;
+        const { yByteArray, uvByteArray, frameWidth, frameHeight } = this;
+        if (!yByteArray) return false;
         const canvas = this.getOffscreenCanvas();
         canvas.width = frameWidth;
         canvas.height = frameHeight;
 
         const ySize = frameWidth * frameHeight;
+        const uvWidth = frameWidth >> 1;
         const rgbData = new Uint8ClampedArray(ySize * 4);
 
-        // Convert byteArrayView from YUV to RGB and set it to the canvas.
+        // Convert yByteArray from YUV to RGB and set it to the canvas.
         // Assuming we're working with YUV420p (?)
-        const uvSize = ((frameWidth / 2) * (frameHeight / 2)) | 0;
-
-        const Y = byteArrayView.subarray(0, ySize);
-        const U = byteArrayView.subarray(ySize, ySize + uvSize);
-        const V = byteArrayView.subarray(ySize + uvSize, ySize + 2 * uvSize);
 
         for (let y = 0; y < frameHeight; y++) {
             for (let x = 0; x < frameWidth; x++) {
                 const xyIndex = y * frameWidth + x;
 
                 // (y // 2) * (width // 2) + (x // 2);
-                const uvIndex = ((y / 2) | 0) * ((frameWidth / 2) | 0) + ((x / 2) | 0);
+                const uvIndex = ((y >> 1) * uvWidth + (x >> 1)) << 1; // Subsampled 4:2:0, but each UV is 2 bytes
 
-                const yVal = Y[xyIndex];
-                const uVal = U[uvIndex] - 128;
-                const vVal = V[uvIndex] - 128;
+                const yVal = yByteArray[xyIndex];
+                const uVal = uvByteArray[uvIndex] - 128; // First byte is U
+                const vVal = uvByteArray[uvIndex + 1] - 128; // Second byte is V
 
                 // Ref: https://developer.apple.com/documentation/arkit/arkit_in_ios/displaying_an_ar_experience_with_metal#2891878
                 /* (tranposed matrix)
@@ -256,12 +259,12 @@ export default class WebARViewerCameraCapture {
                     float4(+1.0000f, +1.0000f, +1.0000f, +0.0000f),
                     float4(+0.0000f, -0.3441f, +1.7720f, +0.0000f),
                     float4(+1.4020f, -0.7141f, +0.0000f, +0.0000f),
-                    float4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)
+                    float4(-0.7010f, +0.5291f, -0.8860f, +1.0000f)  // For some reason, this row is ignored
                 );
                  */
-                const R = yVal + 1.402 * vVal - 178.755; // -0.701 * 255
-                const G = yVal - 0.3441 * uVal - 0.7141 * vVal + 134.9205; // 0.5291 * 255
-                const B = yVal + 1.772 * uVal - 225.93; // -0.886 * 255
+                const R = yVal + 1.402 * vVal;
+                const G = yVal - 0.3441 * uVal - 0.7141 * vVal;
+                const B = yVal + 1.772 * uVal;
 
                 const rgbaIndex = xyIndex * 4;
                 rgbData[rgbaIndex] = R;
