@@ -42,7 +42,7 @@ AFRAME.registerComponent('openvps', {
         // Use offscreen canvas to flip the camera image, not mutate original canvas
         this.flipOffscreenCanvas = new OffscreenCanvas(1, 1);
         this.flipHorizontal = false;
-        this.flipVertical = true;
+        this.flipVertical = false;
         this.origRigMatrix = new THREE.Matrix4();
         this.solutionMatrix = new THREE.Matrix4();
         this.newRigMatrix = new THREE.Matrix4();
