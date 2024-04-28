@@ -168,6 +168,7 @@ AFRAME.registerComponent('openvps', {
         const cameraCapture = this.el.systems.armarker?.cameraCapture;
         if (cameraCapture?.canvas) {
             this.cameraCanvas = cameraCapture.canvas;
+            this.flipVertical = !!cameraCapture.cvFlipVertical; // TODO: determine if we need horiz flip anywhere
             return this.cameraCanvas;
         }
 
