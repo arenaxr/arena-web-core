@@ -71,6 +71,8 @@ export default class WebXRCameraCapture {
 
     offScreenImageData;
 
+    cvFlipVertical = true;
+
     /**
      * Setup camera frame capture
      * @param {object} xrSession -  WebXR Device API's XRSession
