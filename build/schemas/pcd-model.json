@@ -34,7 +34,13 @@
                                     "title": "Points Color",
                                     "format": "color",
                                     "type": "string",
-                                    "default": "#7f7f7f"
+                                    "default": ""
+                                },
+                                "opacity": {
+                                    "description": "Opacity of all points.",
+                                    "title": "Opacity",
+                                    "type": "number",
+                                    "default": 1
                                 }
                             }
                         },
@@ -50,7 +56,7 @@
                     "default": {
                         "object_type": "pcd-model"
                     },
-                    "required": ["object_type", "url", "pointColor", "pointSize", "position", "rotation", "scale"]
+                    "required": ["object_type", "url", "pointSize", "opacity", "position", "rotation", "scale"]
                 }
             }
         }
