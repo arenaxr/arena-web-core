@@ -47,7 +47,7 @@
             stats-monitor="enabled: false"
             arena-hybrid-render-client
             renderer="antialias: true; maxCanvasWidth: 3840; maxCanvasHeight: 3840;"
-            webxr="optionalFeatures: dom-overlay, computerVision, mesh-detection, plane-detection; overlayElement: overlay;"
+            webxr="optionalFeatures: dom-overlay, computerVision, mesh-detection, plane-detection; overlayElement: #overlay;"
             webxr-device-manager
             gltf-model="dracoDecoderPath: /static/vendor/draco/;"
             inspector="url: static/vendor/aframe-inspector.min.js;"
@@ -114,6 +114,10 @@
                 </a-entity>
             </a-entity>
         </a-scene>
+        <div id="overlay">
+            <button id="openvpsButton" style="position:absolute;bottom:30px;left:50%;text-align:center"> Manual Calibration
+            </button>
+        </div>
 
         <div id="side-menu-container" class="side-menu-container d-none d-flex flex-column">
             <div id="side-menu" class="side-menu d-flex flex-column align-items-center"></div>
