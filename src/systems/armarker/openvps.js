@@ -27,6 +27,8 @@ AFRAME.registerComponent('openvps', {
         sceneEl.addEventListener('enter-vr', this.webXRSessionStarted);
         sceneEl.addEventListener('exit-vr', this.webXrSessionEnded);
 
+        document.getElementById('openvpsButton').addEventListener('click', this.uploadImage);
+
         this.tick = AFRAME.utils.throttleTick(this.tick, this.data.interval, this);
 
         // Set ccwebxr needOffscreenCanvas to true
