@@ -24,6 +24,7 @@ AFRAME.registerComponent('openvps', {
 
         this.webXRSessionStarted = this.webXRSessionStarted.bind(this);
         this.webXrSessionEnded = this.webXrSessionEnded.bind(this);
+        this.uploadImage = this.uploadImage.bind(this);
         sceneEl.addEventListener('enter-vr', this.webXRSessionStarted);
         sceneEl.addEventListener('exit-vr', this.webXrSessionEnded);
 
