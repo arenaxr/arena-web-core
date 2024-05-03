@@ -72,6 +72,7 @@ window.addEventListener('onauth', async (e) => {
         'pcd-model': '*.pcd',
         'threejs-scene': '*.json',
         gaussian_splatting: '*.splat',
+        'urdf-model': '*.urdf',
     };
 
     // copy to clipboard buttons
