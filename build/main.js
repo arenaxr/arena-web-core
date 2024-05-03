@@ -405,14 +405,14 @@ window.addEventListener('onauth', async (e) => {
         const htmlval = `${htmlopt}`;
 
         await Swal.fire({
-            title: `Upload ${objtype} to Filestore`,
+            title: `Upload ${objtype} to Filestore & Publish`,
             html: htmlval,
             input: 'file',
             inputAttributes: {
                 accept: `${accept}`,
                 'aria-label': `Select ${objtype}`,
             },
-            confirmButtonText: 'Upload',
+            confirmButtonText: 'Upload & Publish',
             focusConfirm: false,
             showCancelButton: true,
             cancelButtonText: 'Cancel',
@@ -494,13 +494,27 @@ window.addEventListener('onauth', async (e) => {
                                         if (img.width > img.height) {
                                             const ratio = img.width / img.height;
                                             obj.data.width = ratio;
-                                            obj.data.height = 1.0;
+                                            obj.data.height = 1;
                                         } else {
                                             const ratio = img.height / img.width;
-                                            obj.data.width = 1.0;
+                                            obj.data.width = 1;
                                             obj.data.height = ratio;
                                         }
+                                        obj.data.scale = { x: 1, y: 1, z: 1 };
                                     }
+                                    // publish to mqtt
+                                    const scene = `${namespaceinput.value}/${sceneinput.value}`;
+                                    PersistObjects.performActionArgObjList('create', scene, [obj], false);
+                                    setTimeout(async () => {
+                                        await PersistObjects.populateObjectList(
+                                            `${namespaceinput.value}/${sceneinput.value}`,
+                                            objFilter.value,
+                                            objTypeFilter,
+                                            obj.object_id
+                                        );
+
+                                        $(`label[innerHTML='${obj.object_id} (${obj.data.object_type})']`).focus();
+                                    }, 500);
                                     // push updated data to forms
                                     output.value = JSON.stringify(obj, null, 2);
                                     jsoneditor.setValue(obj);
