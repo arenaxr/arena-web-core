@@ -513,7 +513,7 @@ window.addEventListener('onauth', async (e) => {
                                             obj.object_id
                                         );
 
-                                        $(`label[innerHTML='${obj.object_id} (${obj.data.object_type})']`).focus();
+                                        $(`label[innerHTML='${obj.object_id} (${objtype})']`).focus();
                                     }, 500);
                                     // push updated data to forms
                                     output.value = JSON.stringify(obj, null, 2);
