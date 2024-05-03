@@ -163,7 +163,7 @@ window.addEventListener('onauth', async (e) => {
             } else {
                 validate.value = 'valid';
             }
-            insertEulerRotationEditor(json);
+            insertEulerRotationEditor();
             uploadFilestoreButton.style.display =
                 uploadFileTypes[json.data.object_type] === undefined ? 'none' : 'inline';
         });
@@ -224,7 +224,7 @@ window.addEventListener('onauth', async (e) => {
      * Seeks the Rotation block (if any) and inserts a user-friendly Euler degree editor.
      * @param {*} json The object returned from editor.getValue().
      */
-    let insertEulerRotationEditor = function (json) {
+    let insertEulerRotationEditor = function () {
         editor.querySelectorAll('[data-schemapath="root.data.rotation"]').forEach((rowRotation) => {
             // divide rotation attribute into 2 GUI columns
             const rowQuat = rowRotation.childNodes[3];
@@ -271,6 +271,7 @@ window.addEventListener('onauth', async (e) => {
                         THREE.MathUtils.degToRad(elEz.value)
                     )
                 );
+                const json = jsoneditor.getValue();
                 if (json) {
                     json.data.rotation.x = parseFloat(q.x.toFixed(5));
                     json.data.rotation.y = parseFloat(q.y.toFixed(5));
