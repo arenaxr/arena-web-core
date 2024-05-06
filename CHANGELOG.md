@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.27.0](https://github.com/arenaxr/arena-web-core/compare/v1.26.6...v1.27.0) (2024-05-03)
+
+
+### Features
+
+* add model joints ([5d1ff04](https://github.com/arenaxr/arena-web-core/commit/5d1ff045b7fd4d403db28fd040e6bb791100ec8f))
+* urdf loader ([75284be](https://github.com/arenaxr/arena-web-core/commit/75284be2123a7686c3a74ff251781d8b9243e015))
+
+
+### Bug Fixes
+
+* **build:** allow build page responsive layout, closes [#638](https://github.com/arenaxr/arena-web-core/issues/638) ([a909e61](https://github.com/arenaxr/arena-web-core/commit/a909e61710929989912fadb0ce7915fb8e49e305))
+* **build:** allow filestore upload of urdf model ([aa874fb](https://github.com/arenaxr/arena-web-core/commit/aa874fbfc638dd35151211b4ef88c8b69d87129b))
+* **build:** auto-publish mqtt filestore upload, closes [#640](https://github.com/arenaxr/arena-web-core/issues/640) ([0d01a30](https://github.com/arenaxr/arena-web-core/commit/0d01a306241a6742b5b69d2be8a4acab5a4d2b5b))
+* **build:** correctly update editor after euler edit, closes #[#639](https://github.com/arenaxr/arena-web-core/issues/639) ([76af366](https://github.com/arenaxr/arena-web-core/commit/76af36679b0a740e9c586dbe124b566441268fa7))
+* **filestore:** improve error feedback for rare fs auth errors ([cc1fb7d](https://github.com/arenaxr/arena-web-core/commit/cc1fb7df62f93338643f727f8017691db994111d))
+* make release please trigger other workflows (using a PAT) ([576b78f](https://github.com/arenaxr/arena-web-core/commit/576b78fcf8022504646fbdbb08319729145a019f))
+* renderfusion shader bug fix ([d94cc48](https://github.com/arenaxr/arena-web-core/commit/d94cc4809c45e6a121e92f167d989382f53abecf))
+* required param for material-extras colorSpace ([47dca20](https://github.com/arenaxr/arena-web-core/commit/47dca208c15d63a47316ee5ba79410d3ef826aa5))
+
 ## [1.26.6](https://github.com/arenaxr/arena-web-core/compare/v1.26.5...v1.26.6) (2024-04-22)
 
 
