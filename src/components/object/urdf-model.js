@@ -1,5 +1,6 @@
 /* global AFRAME */
-import URDFLoader from '../vendor/urdf-loader/URDFLoader.js';
+import { XacroLoader } from '../vendor/xacro-parser';
+import URDFLoader from '../vendor/urdf-loader/URDFLoader';
 
 /**
  * @fileoverview Load URDF models
@@ -52,14 +53,14 @@ AFRAME.registerComponent('urdf-model', {
     init() {
         this.scene = this.el.sceneEl.object3D;
         this.manager = new THREE.LoadingManager();
-        this.loader = new URDFLoader(this.manager);
+        this.loader = this.data.url.endsWith('.xacro') ? new XacroLoader(this.manager) : new URDFLoader(this.manager);
         this.model = null;
     },
 
     update(oldData) {
-        let self = this;
-        let {el} = this;
-        const {url} = this.data;
+        const self = this;
+        const { el } = this;
+        const { url } = this.data;
 
         if (!url) {
             return;
@@ -72,7 +73,13 @@ AFRAME.registerComponent('urdf-model', {
             document.querySelector('a-scene').systems['model-progress'].registerModel(el, url);
 
             this.loader.load(url, (urdfModel) => {
-                self.model = urdfModel;
+                if (this.data.url.endsWith('.xacro')) {
+                    const urdfLoader = new URDFLoader();
+                    // urdfLoader.workingPath = LoaderUtils.extractUrlBase(url);
+                    self.model = urdfLoader.parse(urdfModel);
+                } else {
+                    self.model = urdfModel;
+                }
             });
 
             self.manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -86,8 +93,8 @@ AFRAME.registerComponent('urdf-model', {
             };
 
             self.manager.onError = (url) => {
-                warn(`Failed to load urdf model: ${url}`);
-                el.emit('model-error', { format: 'urfd', src: url });
+                console.warn(`Failed to load urdf model: ${url}`);
+                el.emit('model-error', { format: 'urdf', src: url });
             };
         } else if (AFRAME.utils.deepEqual(oldData.joints, this.data.joints) == false) this.updateJoints();
     },

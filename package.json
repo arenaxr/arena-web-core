@@ -24,6 +24,7 @@
     "aframe-gaussian-splatting-component": "^0.0.19",
     "aframe-thickline-component": "^0.0.3",
     "comlink": "^4.3.0",
+    "expr-eval": "^2.0.2",
     "he": "^1.2.0",
     "linkifyjs": "^2.1.9",
     "mqtt-pattern": "^2.1.0",
@@ -35,8 +36,7 @@
     "three-pathfinding": "^1.1.0",
     "three-shim": "file:src/shims/three-shim",
     "uuidjs": "^5.0.1",
-    "webxr-polyfill": "^2.0.3",
-    "xacro-parser": "^0.3.9"
+    "webxr-polyfill": "^2.0.3"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",
