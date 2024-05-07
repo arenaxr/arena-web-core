@@ -1,4 +1,4 @@
-/* global AFRAME */
+/* global AFRAME, THREE */
 import { XacroLoader } from '../vendor/xacro-parser';
 import URDFLoader from '../vendor/urdf-loader/URDFLoader';
 
@@ -75,7 +75,7 @@ AFRAME.registerComponent('urdf-model', {
             this.loader.load(url, (urdfModel) => {
                 if (this.data.url.endsWith('.xacro')) {
                     const urdfLoader = new URDFLoader();
-                    // urdfLoader.workingPath = LoaderUtils.extractUrlBase(url);
+                    urdfLoader.workingPath = THREE.LoaderUtils.extractUrlBase(url);
                     self.model = urdfLoader.parse(urdfModel);
                 } else {
                     self.model = urdfModel;
