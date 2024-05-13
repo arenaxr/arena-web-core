@@ -189,7 +189,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLog.id = 'inspectorMqttLog';
                 inspectorMqttLog.className = 'outliner';
                 inspectorMqttLog.style.overflowY = 'auto';
-                inspectorMqttLog.style.width = '100%';
+                inspectorMqttLog.style.width = '70%';
                 inspectorMqttLog.style.height = '100%';
                 inspectorMqttLog.style.backgroundColor = '#242424';
                 inspectorMqttLog.style.color = 'c3c3c3';
@@ -203,6 +203,20 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 line.innerHTML += `Watching for local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
+
+                // util
+                const inspectorMqttUtil = document.createElement('div');
+                inspectorMqttUtil.id = 'inspectorMqttUtil';
+                inspectorMqttUtil.className = 'outliner';
+                inspectorMqttUtil.style.overflowY = 'auto';
+                inspectorMqttUtil.style.width = '30%';
+                inspectorMqttUtil.style.height = '100%';
+                inspectorMqttUtil.style.backgroundColor = '#242424';
+                inspectorMqttUtil.style.color = 'c3c3c3';
+                inspectorMqttUtil.style.opacity = '.75';
+                inspectorMqttUtil.style.paddingLeft = '10px';
+                inspectorMqttUtil.innerHTML = 'util test';
+                inspectorMqttLogWrap.appendChild(inspectorMqttLog);
             }
         }
         if (!this.cursor) {
