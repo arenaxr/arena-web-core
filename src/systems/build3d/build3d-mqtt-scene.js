@@ -13,6 +13,16 @@
  * @module build3d-mqtt-scene
  */
 let toolbarName = 'translate';
+
+function updateMqttWidth() {
+    const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
+    const entire = window.innerWidth;
+    const left = document.getElementById('scenegraph').clientWidth;
+    const right = document.getElementById('rightPanel').clientWidth;
+    const correct = entire - left - right;
+    inspectorMqttLogWrap.style.width = `${correct}px`;
+}
+
 AFRAME.registerComponent('build3d-mqtt-scene', {
     // create an observer to listen for changes made locally in the a-frame inspector and publish them to mqtt.
     schema: {
@@ -147,24 +157,20 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
                 inspectorMqttLogWrap.className = 'outliner';
                 inspectorMqttLogWrap.tabIndex = 2;
-                const entire = window.innerWidth;
-                // const contW =
-                console.log('entire', entire);
-                const left = document.getElementById('scenegraph').clientWidth;
-                console.log('left', left);
-                const right = document.getElementById('rightPanel').clientWidth;
-                console.log('right', right);
-                const correct = entire - left - right;
-                console.log('correct', correct);
-                // inspectorMqttLogWrap.style.width = contW;
-                inspectorMqttLogWrap.style.width = `${(correct / entire) * 100}%`; // TODO (mwfarb): should match right column
-                // inspectorMqttLogWrap.style.width = '-webkit-fill-available';
+                inspectorMqttLogWrap.style.width = '-webkit-fill-available';
                 inspectorMqttLogWrap.style.bottom = '0';
                 inspectorMqttLogWrap.style.position = 'fixed';
                 inspectorMqttLogWrap.style.height = '25%';
                 inspectorMqttLogWrap.style.display = 'flex';
                 inspectorMqttLogWrap.style.flexDirection = 'column';
                 this.scenegraphDiv.appendChild(inspectorMqttLogWrap);
+                // update width as needed
+                const rightPanel = document.getElementById('rightPanel');
+                const resizeObserver = new ResizeObserver((entries) => {
+                    updateMqttWidth();
+                });
+                resizeObserver.observe(rightPanel);
+                window.onresize = updateMqttWidth;
 
                 // title
                 const inspectorMqttTitle = document.createElement('span');
