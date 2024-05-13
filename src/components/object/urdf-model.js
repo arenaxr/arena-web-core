@@ -53,7 +53,11 @@ AFRAME.registerComponent('urdf-model', {
     init() {
         this.scene = this.el.sceneEl.object3D;
         this.manager = new THREE.LoadingManager();
-        this.loader = this.data.url.endsWith('.xacro') ? new XacroLoader(this.manager) : new URDFLoader(this.manager);
+        if (this.data.url.endsWith('.xacro')) {
+            this.loader = new XacroLoader(this.manager);
+        } else {
+            this.loader = new URDFLoader(this.manager);
+        }
         this.model = null;
     },
 
@@ -72,15 +76,23 @@ AFRAME.registerComponent('urdf-model', {
             // register with model-progress system to handle model loading events
             document.querySelector('a-scene').systems['model-progress'].registerModel(el, url);
 
-            this.loader.load(url, (urdfModel) => {
-                if (this.data.url.endsWith('.xacro')) {
-                    const urdfLoader = new URDFLoader();
-                    urdfLoader.workingPath = THREE.LoaderUtils.extractUrlBase(url);
-                    self.model = urdfLoader.parse(urdfModel);
-                } else {
+            if (this.data.url.endsWith('.xacro')) {
+                this.loader.load(
+                    url,
+                    (xml) => {
+                        console.log('xacro loaded', xml);
+                        const urdfLoader = new URDFLoader();
+                        self.model = urdfLoader.parse(xml);
+                    },
+                    (err) => {
+                        console.error('xacro err', err);
+                    }
+                );
+            } else {
+                this.loader.load(url, (urdfModel) => {
                     self.model = urdfModel;
-                }
-            });
+                });
+            }
 
             self.manager.onProgress = function (url, itemsLoaded, itemsTotal) {
                 el.emit('model-progress', { url, progress: (itemsLoaded / itemsTotal) * 100 });
