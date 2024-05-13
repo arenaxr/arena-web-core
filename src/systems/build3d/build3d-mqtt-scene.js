@@ -197,6 +197,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLog.style.paddingLeft = '10px';
                 inspectorMqttLog.style.fontFamily = 'monospace,monospace';
                 inspectorMqttLog.style.fontSize = '10px';
+                inspectorMqttLog.style.position = 'relative';
                 inspectorMqttLogWrap.appendChild(inspectorMqttLog);
 
                 const line = document.createElement('span');
@@ -215,8 +216,9 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttUtil.style.color = 'c3c3c3';
                 inspectorMqttUtil.style.opacity = '.75';
                 inspectorMqttUtil.style.paddingLeft = '10px';
-                inspectorMqttUtil.innerHTML = 'util test';
-                inspectorMqttLogWrap.appendChild(inspectorMqttLog);
+                inspectorMqttUtil.style.position = 'relative';
+                inspectorMqttUtil.innerHTML = 'Utilities for...';
+                inspectorMqttLogWrap.appendChild(inspectorMqttUtil);
             }
         }
         if (!this.cursor) {
