@@ -443,7 +443,7 @@ AFRAME.registerSystem('arena-scene', {
         setTimeout(() => {
             const perm = this.isUserSceneWriter();
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
-            updateInspectorPanel(perm, '#inspectorContainer #viewportBar #transformToolbar');
+            updateInspectorPanel(perm, '#inspectorContainer #viewportBar');
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
             const scene = document.querySelector('a-scene');

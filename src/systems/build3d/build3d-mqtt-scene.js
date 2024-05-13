@@ -147,8 +147,18 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
                 inspectorMqttLogWrap.className = 'outliner';
                 inspectorMqttLogWrap.tabIndex = 2;
-                // inspectorMqttLogWrap.style.width = '100%';
-                inspectorMqttLogWrap.style.width = '-webkit-fill-available';
+                const entire = window.innerWidth;
+                // const contW =
+                console.log('entire', entire);
+                const left = document.getElementById('scenegraph').clientWidth;
+                console.log('left', left);
+                const right = document.getElementById('rightPanel').clientWidth;
+                console.log('right', right);
+                const correct = entire - left - right;
+                console.log('correct', correct);
+                // inspectorMqttLogWrap.style.width = contW;
+                inspectorMqttLogWrap.style.width = `${(correct / entire) * 100}%`; // TODO (mwfarb): should match right column
+                // inspectorMqttLogWrap.style.width = '-webkit-fill-available';
                 inspectorMqttLogWrap.style.bottom = '0';
                 inspectorMqttLogWrap.style.position = 'fixed';
                 inspectorMqttLogWrap.style.height = '25%';
