@@ -107,6 +107,7 @@ function extractDataUpdates(mutation, attribute, changes) {
         case 'text':
         case 'thickline':
         case 'threejs-scene':
+        case 'urdf-model':
             data.object_type = mutation.attributeName;
             break;
         default:
@@ -167,6 +168,40 @@ function extractDataUpdates(mutation, attribute, changes) {
     return data;
 }
 
+function addComponentAction(componentName, property, dataAction, title, iconName) {
+    const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
+    const thebutton = $(`.component .componentHeader .componentTitle .componentHeaderActions a[data-action="${dataAction}"]`);
+    // does the graph have a new component?
+    // does the addComponentContainer have a listener for the upload action?
+    // insert the upload link and and action listener
+    // handle the upload action
+
+    // insert
+    // <div class="collapsible component">
+    //     <div class="static">
+    //         <div class="collapse-button"></div>
+    //         <div class="componentHeader collapsible-header">
+    //             <span class="componentTitle" title="gltf-model"><span>gltf-model</span></span>
+    //             <div class="componentHeaderActions">
+    //                 <a title="Upload to Filestore" data-action="upload-to-filestore" data-component="gltf-model"
+    //                     class="button fa fa-upload" href="#"></a>
+    //                 <a title="Copy to clipboard" data-action="copy-component-to-clipboard" data-component="gltf-model"
+    //                     class="button fa fa-clipboard" href="#"></a>
+    //                 <a title="Remove component" class="button fa fa-trash-o"></a>
+    //             </div>
+    //         </div>
+    //     </div>
+
+    if (thetitle.length > 0 && thebutton.length === 0) {
+        console.debug('addComponentAction', componentName, property, dataAction, title, iconName, thetitle);
+        thetitle
+            .siblings('.componentHeaderActions')
+            .prepend(
+                `<a title="${title}" data-action="${dataAction}" data-component="${componentName}" class="button fa ${iconName}" href="#"></a>`
+            );
+    }
+}
+
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
  * @module build3d-mqtt-object
@@ -186,7 +221,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
     },
     init() {
         this.observer = new MutationObserver(this.objectAttributesUpdate);
-        this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     objectAttributesUpdate(mutationList, observer) {
         mutationList.forEach((mutation) => {
@@ -260,6 +294,14 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 attributes: true,
                 attributeOldValue: true,
             });
+            addComponentAction('gaussian_splatting', 'src', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('gltf-lod', 'detailedUrl', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('gltf-model', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('material', 'src', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('pcd-model', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('sound', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('threejs-scene', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('urdf-model', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
         } else {
             this.observer.disconnect();
             console.log(`build3d watching entity ${this.el.id} attributes stopped`);
@@ -284,40 +326,6 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             LogToUser(msg);
             console.log('pub:', msg);
             ARENA.Mqtt.publish(`${ARENA.outputTopic}${msg.object_id}`, msg);
-        }
-    },
-    tick() {
-        if (!this.addComponentsDiv) {
-            this.addComponentsDiv = document.getElementById('addComponentContainer');
-            if (this.addComponentsDiv) {
-                // container
-                const build3dComponentContainer = document.createElement('div');
-                build3dComponentContainer.id = 'build3dComponentContainer';
-                this.addComponentsDiv.appendChild(build3dComponentContainer);
-            }
-        } else {
-            const build3dComponentContainer = document.getElementById('build3dComponentContainer');
-
-            // does the graph have a new component?
-            // does the addComponentContainer have a listener for the upload action?
-            // insert the upload link and and action listener
-            // handle the upload action
-
-            // insert
-            // <div class="collapsible component">
-            //     <div class="static">
-            //         <div class="collapse-button"></div>
-            //         <div class="componentHeader collapsible-header">
-            //             <span class="componentTitle" title="attribution"><span>attribution</span></span>
-            //             <div class="componentHeaderActions">
-            //                 <a title="Upload to Filestore" data-action="upload-to-filestore" data-component="attribution"
-            //                     class="button fa fa-upload" href="#"></a>
-            //                 <a title="Copy to clipboard" data-action="copy-component-to-clipboard" data-component="attribution"
-            //                     class="button fa fa-clipboard" href="#"></a>
-            //                 <a title="Remove component" class="button fa fa-trash-o"></a>
-            //             </div>
-            //         </div>
-            //     </div>
         }
     },
 });
