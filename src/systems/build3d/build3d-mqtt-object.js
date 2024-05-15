@@ -170,7 +170,8 @@ function extractDataUpdates(mutation, attribute, changes) {
 
 function addComponentAction(componentName, property, dataAction, title, iconName) {
     const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
-    const thebutton = $(`.component .componentHeader .componentTitle .componentHeaderActions a[data-action="${dataAction}"]`);
+    const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
+
     // does the graph have a new component?
     // does the addComponentContainer have a listener for the upload action?
     // insert the upload link and and action listener
@@ -193,7 +194,6 @@ function addComponentAction(componentName, property, dataAction, title, iconName
     //     </div>
 
     if (thetitle.length > 0 && thebutton.length === 0) {
-        console.debug('addComponentAction', componentName, property, dataAction, title, iconName, thetitle);
         thetitle
             .siblings('.componentHeaderActions')
             .prepend(
