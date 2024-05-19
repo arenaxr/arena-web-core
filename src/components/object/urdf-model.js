@@ -1,5 +1,5 @@
 /* global AFRAME, THREE */
-import { XacroLoader } from '../vendor/xacro-parser';
+import { XacroLoader } from 'xacro-parser';
 import URDFLoader from '../vendor/urdf-loader/URDFLoader';
 
 /**
