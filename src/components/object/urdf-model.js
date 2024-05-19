@@ -50,14 +50,16 @@ AFRAME.registerComponent('urdf-model', {
             },
         },
     },
+
     init() {
         this.scene = this.el.sceneEl.object3D;
         this.manager = new THREE.LoadingManager();
+        //TODO: think this will have an issue if we change between xacro and urdf on the same object
         if (this.data.url.endsWith('.xacro')) {
             this.loader = new XacroLoader(this.manager);
         } else {
             this.loader = new URDFLoader(this.manager);
-        }
+        }        
         this.model = null;
     },
 
@@ -71,26 +73,27 @@ AFRAME.registerComponent('urdf-model', {
         }
 
         if (oldData.url !== url) {
-            this.remove();
+            self.remove();
 
             // register with model-progress system to handle model loading events
             document.querySelector('a-scene').systems['model-progress'].registerModel(el, url);
 
-            if (this.data.url.endsWith('.xacro')) {
-                this.loader.load(
+            if (self.data.url.endsWith('.xacro')) {
+                self.loader.load(
                     url,
                     (xml) => {
-                        console.log('xacro loaded', xml);
                         const urdfLoader = new URDFLoader();
                         self.model = urdfLoader.parse(xml);
+                        self.modelLoaded();
                     },
                     (err) => {
                         console.error('xacro err', err);
                     }
                 );
             } else {
-                this.loader.load(url, (urdfModel) => {
+                self.loader.load(url, (urdfModel) => {                    
                     self.model = urdfModel;
+                    self.modelLoaded();
                 });
             }
 
@@ -98,29 +101,32 @@ AFRAME.registerComponent('urdf-model', {
                 el.emit('model-progress', { url, progress: (itemsLoaded / itemsTotal) * 100 });
             };
 
-            self.manager.onLoad = () => {
-                el.setObject3D('mesh', self.model);
-                el.emit('model-loaded', { format: 'urdf', model: self.model });
-                this.updateJoints();
-            };
-
             self.manager.onError = (url) => {
                 console.warn(`Failed to load urdf model: ${url}`);
                 el.emit('model-error', { format: 'urdf', src: url });
             };
-        } else if (AFRAME.utils.deepEqual(oldData.joints, this.data.joints) == false) this.updateJoints();
+        } else if (AFRAME.utils.deepEqual(oldData.joints, self.data.joints) == false) this.updateJoints();
     },
+
+    modelLoaded() {
+        const { el } = this;
+        el.setObject3D('mesh', this.model);
+        el.emit('model-loaded', { format: 'urdf', src: this.data });
+        this.updateJoints();
+    },
+
     updateJoints() {
-        if (!this.model) {
+        if (!this.model || !this.model.joints) {
             return;
         }
         const joints = this.data.joints ? this.data.joints : {};
 
         // set joints, if given
         for (const [key, value] of Object.entries(joints)) {
-            this.model.joints[key].setJointValue(THREE.MathUtils.degToRad(value));
+            if (this.model.joints[key]) this.model.joints[key].setJointValue(THREE.MathUtils.degToRad(value));
         }
     },
+
     remove() {
         if (!this.model) {
             return;
