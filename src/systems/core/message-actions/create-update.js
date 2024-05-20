@@ -422,7 +422,7 @@ export default class CreateUpdate {
         Object.entries(data).forEach(([attribute, value]) => {
             if (AFRAME.components[cName].Component.prototype.schema[attribute]) {
                 // replace dropbox links in any 'src' or 'url' attributes
-                if (attribute === 'src' || attribute === 'url') {
+                if (attribute === 'src' || attribute === 'url' || attribute === 'obj' || attribute === 'mtl') {
                     // eslint-disable-next-line no-param-reassign
                     value = ARENAUtils.crossOriginDropboxSrc(value);
                 }
@@ -483,6 +483,8 @@ export default class CreateUpdate {
                     // ttl is applied to property 'seconds' of ttl component
                     entityEl.setAttribute('ttl', { seconds: value });
                     break;
+                case 'obj':
+                case 'mtl':
                 case 'src':
                 case 'url':
                     // replace dropbox links in any 'src'/'url' attributes that get here
@@ -496,6 +498,8 @@ export default class CreateUpdate {
                     } else {
                         // replace dropbox links in any url or src attribute inside value
                         /* eslint-disable no-param-reassign */
+                        if (Object.hasOwn(value, 'mtl')) value.src = ARENAUtils.crossOriginDropboxSrc(value.mtl);
+                        if (Object.hasOwn(value, 'obj')) value.src = ARENAUtils.crossOriginDropboxSrc(value.obj);
                         if (Object.hasOwn(value, 'src')) value.src = ARENAUtils.crossOriginDropboxSrc(value.src);
                         if (Object.hasOwn(value, 'url')) value.url = ARENAUtils.crossOriginDropboxSrc(value.url);
                         entityEl.setAttribute(attribute, value);
