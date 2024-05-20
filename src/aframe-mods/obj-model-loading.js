@@ -8,36 +8,19 @@
 
 /* global AFRAME */
 
-AFRAME.components['obj-model'].Component.prototype.update = function () {
+// AFRAME Monkeypatch (src/components/obj-model.js)
+AFRAME.components['obj-model'].Component.prototype.update = function update() {
     const self = this;
     const { el } = this;
-    const src = this.data;
 
-    if (!src) {
+    const { data } = this;
+    if (!data.obj) {
         return;
     }
-
-    this.remove();
+    this.resetMesh();
 
     // register with model-progress system to handle model loading events
-    document.querySelector('a-scene').systems['model-progress'].registerModel(el, src);
+    document.querySelector('a-scene').systems['model-progress'].registerModel(el, data.obj);
 
-    this.loader.load(
-        src,
-        (objModel) => {
-            self.model = objModel.scene || objModel.scenes[0];
-            self.model.animations = objModel.animations;
-            self.model.asset = objModel.asset; // save asset
-            el.setObject3D('mesh', self.model);
-            el.emit('model-loaded', { format: 'obj', model: self.model });
-        },
-        (xhr) => {
-            el.emit('model-progress', { src, loaded: xhr.loaded, total: xhr.total });
-        },
-        (error) => {
-            const message = error && error.message ? error.message : 'Failed to load obj model';
-            console.error(message);
-            el.emit('model-error', { format: 'obj', src });
-        }
-    );
+    this.loadObj(data.obj, data.mtl);
 };
