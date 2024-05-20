@@ -38,6 +38,9 @@
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
                     "title": "OBJ Model Data",
