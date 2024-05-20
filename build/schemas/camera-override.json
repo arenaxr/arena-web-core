@@ -1,0 +1,63 @@
+{
+    "definitions": {
+        "camera-override": {
+            "type": "object",
+            "title": "Camera Override Data",
+            "description": "Object data payload; Camera Override config data.",
+            "allOf": [
+                {
+                    "properties": {
+                        "object_type": {
+                            "type": "string",
+                            "title": "3D object type",
+                            "description": "3D object type.",
+                            "enum": ["camera", "look-at", "teleport-to-landmark"]
+                        },
+                        "target": {
+                            "type": "string",
+                            "description": "Look at target object_id or position. Requires object_type: look-at",
+                            "default": null
+                        },
+                        "landmarkObj": {
+                            "type": "string",
+                            "description": "Teleport to the same id as the target object. Requires object_type: teleport-to-landmark",
+                            "default": null
+                        }
+                    }
+                },
+                {
+                    "$ref": "./schemas/definitions-entity.json#/properties"
+                }
+            ],
+            "required": ["object_type"]
+        }
+    },
+    "type": "object",
+    "title": "Camera Override",
+    "properties": {
+        "object_id": {
+            "type": "string",
+            "description": "Object identifier; Must be a valid camera ID."
+        },
+        "action": {
+            "type": "string",
+            "description": "Message action create, update, delete.",
+            "enum": ["create", "delete", "update"],
+            "default": "update"
+        },
+        "persist": {
+            "type": "boolean",
+            "description": "Persist this object in the database.",
+            "default": false
+        },
+        "type": {
+            "type": "string",
+            "enum": ["camera-override"]
+        },
+        "data": {
+            "$ref": "#/definitions/camera-override",
+            "description": "Object data payload; Camera Override config data"
+        }
+    },
+    "required": ["object_id", "action", "persist", "type", "data"]
+}

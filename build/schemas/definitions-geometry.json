@@ -1,188 +1,279 @@
 {
     "properties": {
-      "buffer": {
-        "default": true,
-        "description": "Transform geometry into a BufferGeometry to reduce memory usage at the cost of being harder to manipulate (geometries only: box, circle, cone, ...).",
-        "title": "Buffer",
-        "type": "boolean"
-      },
-      "jitsi-video": {
-        "description": "Apply a jitsi video source to the geometry",
-        "title": "Jitsi Video",
-        "type":"object",
-        "properties": {
-            "jitsiId": {
-                "description": "JitsiId of the video source; If defined will override displayName",
-                "type": "string"
-            },
-            "displayName": {
-                "description": "ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. (* change requires reload* ) ",
-                "type": "string"
-            }
+        "buffer": {
+            "default": true,
+            "description": "Transform geometry into a BufferGeometry to reduce memory usage at the cost of being harder to manipulate (geometries only: box, circle, cone, ...).",
+            "title": "Buffer",
+            "type": "boolean"
         },
-        "required": ["displayName"]
-      },
-      "material": {
-        "description": "The material properties of the object’s surface. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/material.html'>https://aframe.io/docs/1.4.0/components/material.html</a>",
-        "properties": {
-          "alphaTest": {
-            "default": 0,
-            "description": "Alpha test threshold for transparency.",
-            "type": "number"
-          },
-          "blending": {
-            "default": "normal",
-            "description": "The blending mode for the material’s RGB and Alpha sent to the WebGLRenderer. Can be one of none, normal, additive, subtractive or multiply",
-            "enum": [
-              "none",
-              "normal",
-              "additive",
-              "subtractive",
-              "multiply"
-            ],
-            "type": "string"
-          },
-          "color": {
-            "default": "#7f7f7f",
-            "description": "Base diffuse color.",
-            "format": "color",
-            "title": "color",
-            "type": "string"
-          },
-          "depthTest": {
-            "default": true,
-            "description": "Whether depth testing is enabled when rendering the material.",
-            "type": "boolean"
-          },
-          "dithering": {
-            "default": true,
-            "description": "Whether material is dithered with noise. Removes banding from gradients like ones produced by lighting.",
-            "type": "boolean"
-          },
-          "flatShading": {
-            "default": false,
-            "description": "Use THREE.FlatShading rather than THREE.StandardShading.",
-            "type": "boolean"
-          },
-          "npot": {
-            "default": false,
-            "description": "Use settings for non-power-of-two (NPOT) texture.",
-            "type": "boolean"
-          },
-          "offset": {
-            "default": {
-              "x": 1,
-              "y": 1
-            },
-            "description": "Texture offset to be used.",
+        "color": {
+            "title": "DEPRECATED (color)",
+            "type": "string",
+            "description": "DEPRECATED: data.color is deprecated for primitive geometry, use data.material.color instead.",
+            "deprecated": true
+        },
+        "jitsi-video": {
+            "description": "Apply a jitsi video source to the geometry.",
+            "title": "Jitsi Video",
+            "type": "object",
             "properties": {
-              "x": {
-                "type": "number"
-              },
-              "y": {
-                "type": "number"
-              }
+                "jitsiId": {
+                    "description": "JitsiId of the video source; If defined will override displayName.",
+                    "type": "string"
+                },
+                "displayName": {
+                    "description": "ARENA or Jitsi display name of the video source; Will be ignored if jitsiId is given. (* change requires reload* ).",
+                    "type": "string"
+                }
             },
-            "required": [
-              "x",
-              "y"
-            ],
-            "type": "object"
-          },
-          "opacity": {
-            "default": 1,
-            "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
-            "type": "number"
-          },
-          "repeat": {
-            "default": {
-              "x": 1,
-              "y": 1
-            },
-            "description": "Texture repeat to be used.",
+            "required": ["displayName"]
+        },
+        "material": {
+            "description": "The material properties of the object's surface.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/material.html'>A-Frame Material</a>.",
             "properties": {
-              "x": {
-                "type": "number"
-              },
-              "y": {
-                "type": "number"
-              }
+                "alphaTest": {
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Alpha test threshold for transparency.",
+                    "type": "number"
+                },
+                "anisotropy": {
+                    "default": 0,
+                    "minimum": 0,
+                    "description": "The anisotropic filtering sample rate to use for the textures. A value of 0 means the default value will be used, see renderer.",
+                    "type": "number"
+                },
+                "blending": {
+                    "default": "normal",
+                    "description": "The blending mode for the material's RGB and Alpha sent to the WebGLRenderer.",
+                    "enum": ["none", "normal", "additive", "subtractive", "multiply"],
+                    "type": "string"
+                },
+                "color": {
+                    "default": "#ffffff",
+                    "description": "Base diffuse color.",
+                    "format": "color",
+                    "type": "string"
+                },
+                "combine": {
+                    "default": "mix",
+                    "description": "How the environment map mixes with the material. Requires shader: phong.",
+                    "enum": ["mix", "add", "multiply"],
+                    "type": "string"
+                },
+                "depthTest": {
+                    "default": true,
+                    "description": "Whether depth testing is enabled when rendering the material.",
+                    "type": "boolean"
+                },
+                "depthWrite": {
+                    "default": true,
+                    "description": "Render when depth test succeeds.",
+                    "type": "boolean"
+                },
+                "dithering": {
+                    "default": true,
+                    "description": "Whether material is dithered with noise. Removes banding from gradients like ones produced by lighting.",
+                    "type": "boolean"
+                },
+                "emissive": {
+                    "default": "#000000",
+                    "description": "The color of the emissive lighting component. Used to make objects produce light even without other lighting in the scene. Requires shader: standard or phong",
+                    "format": "color",
+                    "type": "string"
+                },
+                "emissiveIntensity": {
+                    "default": 1,
+                    "description": "Intensity of the emissive lighting component. Requires shader: standard or phong",
+                    "type": "number"
+                },
+                "flatShading": {
+                    "default": false,
+                    "description": "Use THREE.FlatShading rather than THREE.StandardShading.",
+                    "type": "boolean"
+                },
+                "fog": {
+                    "default": true,
+                    "description": "Whether or not material is affected by fog.",
+                    "type": "boolean"
+                },
+                "height": {
+                    "default": 256,
+                    "description": "Height of video (in pixels), if defining a video texture. Requires shader: standard or flat.",
+                    "type": "integer"
+                },
+                "metalness": {
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "How metallic the material is from 0 to 1. Requires shader: standard.",
+                    "type": "number"
+                },
+                "npot": {
+                    "default": false,
+                    "description": "Use settings for non-power-of-two (NPOT) texture.",
+                    "type": "boolean"
+                },
+                "offset": {
+                    "default": {
+                        "x": 0,
+                        "y": 0
+                    },
+                    "description": "Texture offset to be used.",
+                    "properties": {
+                        "x": {
+                            "type": "number"
+                        },
+                        "y": {
+                            "type": "number"
+                        }
+                    },
+                    "required": ["x", "y"],
+                    "type": "object"
+                },
+                "opacity": {
+                    "default": 1,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Extent of transparency. If the transparent property is not true, then the material will remain opaque and opacity will only affect color.",
+                    "type": "number"
+                },
+                "reflectivity": {
+                    "default": 0.9,
+                    "description": "How much the environment map affects the surface. Requires shader: phong.",
+                    "type": "number"
+                },
+                "refract": {
+                    "default": false,
+                    "description": "Whether the defined envMap should refract. Requires shader: phong.",
+                    "type": "boolean"
+                },
+                "refractionRatio": {
+                    "default": 0.98,
+                    "description": "1/refractive index of the material. Requires shader: phong.",
+                    "type": "number"
+                },
+                "repeat": {
+                    "default": {
+                        "x": 1,
+                        "y": 1
+                    },
+                    "description": "How many times a texture (defined by src) repeats in the X and Y direction.",
+                    "properties": {
+                        "x": {
+                            "type": "number"
+                        },
+                        "y": {
+                            "type": "number"
+                        }
+                    },
+                    "required": ["x", "y"],
+                    "type": "object"
+                },
+                "roughness": {
+                    "default": 0,
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "How rough the material is from 0 to 1. A rougher material will scatter reflected light in more directions than a smooth material. Requires shader: standard.",
+                    "type": "number"
+                },
+                "shader": {
+                    "default": "standard",
+                    "description": "Which material to use. Defaults to the standard material. Can be set to the flat material or to a registered custom shader material.",
+                    "enum": ["flat", "standard", "phong"],
+                    "type": "string"
+                },
+                "shininess": {
+                    "default": 30,
+                    "description": "How shiny the specular highlight is; a higher value gives a sharper highlight. Requires shader: phong.",
+                    "type": "number"
+                },
+                "side": {
+                    "default": "front",
+                    "description": "Which sides of the mesh to render.",
+                    "enum": ["front", "back", "double"],
+                    "type": "string"
+                },
+                "specular": {
+                    "default": "#111111",
+                    "description": "This defines how shiny the material is and the color of its shine. Requires shader: phong.",
+                    "format": "color",
+                    "type": "string"
+                },
+                "src": {
+                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "toneMapped": {
+                    "default": true,
+                    "description": "Whether to ignore toneMapping, set to false you are using renderer.toneMapping and an element should appear to emit light. Requires shader: flat.",
+                    "type": "boolean"
+                },
+                "transparent": {
+                    "default": false,
+                    "description": "Whether material is transparent. Transparent entities are rendered after non-transparent entities.",
+                    "type": "boolean"
+                },
+                "vertexColorsEnabled": {
+                    "default": false,
+                    "description": "Whether to use vertex or face colors to shade the material.",
+                    "type": "boolean"
+                },
+                "visible": {
+                    "default": true,
+                    "description": "Whether material is visible. Raycasters will ignore invisible materials.",
+                    "type": "boolean"
+                },
+                "width": {
+                    "default": 512,
+                    "description": "Width of video (in pixels), if defining a video texture. Requires shader: standard or flat.",
+                    "type": "integer"
+                },
+                "wireframe": {
+                    "default": false,
+                    "description": "Whether to render just the geometry edges.",
+                    "type": "boolean"
+                },
+                "wireframeLinewidth": {
+                    "default": 2,
+                    "description": "Width in px of the rendered line.",
+                    "type": "integer"
+                }
             },
-            "required": [
-              "x",
-              "y"
-            ],
+            "format": "grid",
+            "title": "Material",
             "type": "object"
-          },
-          "shader": {
-            "default": "standard",
-            "description": "Which material to use. Defaults to the standard material. Can be set to the flat material or to a registered custom shader material.",
-            "type": "string"
-          },
-          "side": {
-            "default": "front",
-            "description": "Which sides of the mesh to render. Can be one of front, back, or double.",
-            "enum": [
-              "front",
-              "back",
-              "double"
-            ],
-            "type": "string"
-          },
-          "src": {
-            "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
-            "format": "uri",
-            "type": "string"
-          },
-          "transparent": {
-            "default": false,
-            "description": "Whether material is transparent. Transparent entities are rendered after non-transparent entities.",
-            "type": "boolean"
-          },
-          "vertexColors": {
-            "default": "none",
-            "description": "Whether to use vertex or face colors to shade the material. Can be one of none, vertex, or face.",
-            "enum": [
-              "none",
-              "vertex",
-              "face"
-            ],
-            "type": "string"
-          },
-          "visible": {
+        },
+        "multisrc": {
+            "description": "Define multiple visual sources applied to an object.",
+            "properties": {
+                "srcs": {
+                    "description": "A comma-delimited list if URIs, e.g. 'side1.png, side2.png, side3.png, side4.png, side5.png, side6.png' (required).",
+                    "type": "string"
+                },
+                "srcspath": {
+                    "description": "URI, relative or full path of a directory containing srcs, e.g. 'store/users/wiselab/images/dice/' (required).",
+                    "format": "uri",
+                    "type": "string"
+                }
+            },
+            "required": ["srcspath", "srcs"],
+            "title": "Multi Source",
+            "type": "object"
+        },
+        "screenshareable": {
             "default": true,
-            "description": "Whether material is visible. Raycasters will ignore invisible materials.",
+            "description": "Whether or not a user can screenshare on an object.",
+            "title": "Screenshare-able",
             "type": "boolean"
-          }
         },
-        "title": "Material",
-        "type": "object"
-      },
-      "multisrc": {
-        "description": "Define multiple visual sources applied to an object.",
-        "properties": {
-          "srcs": {
-            "description": "A comma-delimited list if URIs, e.g. “side1.png, side2.png, side3.png, side4.png, side5.png, side6.png” (required).",
-            "type": "string"
-          },
-          "srcspath": {
-            "description": "URI, relative or full path of a directory containing srcs, e.g. “store/users/wiselab/images/dice/” (required).",
-            "format": "uri",
-            "type": "string"
-          }
-        },
-        "required": [
-          "srcspath",
-          "srcs"
-        ],
-        "title": "Multi Source",
-        "type": "object"
-      },
-      "skipCache": {
-        "default": true,
-        "description": "Disable retrieving the shared geometry object from the cache. (geometries only: box, circle, cone, ...).",
-        "title": "Skip Cache",
-        "type": "boolean"
-      }
+        "skipCache": {
+            "default": false,
+            "description": "Disable retrieving the shared geometry object from the cache. (geometries only: box, circle, cone, ...).",
+            "title": "Skip Cache",
+            "type": "boolean"
+        }
     }
-  }
+}

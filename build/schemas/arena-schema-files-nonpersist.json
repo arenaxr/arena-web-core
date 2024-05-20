@@ -1,7 +1,27 @@
 {
-   "event":{
-      "description":"Events are ephemeral messages used to send user events like mouse movements or controller actions.",
-      "file":"schemas/event.json",
-      "title":"Event"
-   }
+    "camera": {
+        "description": "Camera is the pose and arena-user component data representing a user avatar.",
+        "file": "schemas/camera.json",
+        "title": "Camera"
+    },
+    "camera-override": {
+        "description": "Camera Override is used to re-position and re-pose a client's camera.",
+        "file": "schemas/camera-override.json",
+        "title": "Camera Override"
+    },
+    "event": {
+        "description": "Events are ephemeral messages used to send user events like mouse movements or controller actions.",
+        "file": "schemas/event.json",
+        "title": "Event"
+    },
+    "handLeft": {
+        "description": "Hand Left is the left hand metadata pose and controller type of the user avatar.",
+        "file": "schemas/hand.json",
+        "title": "Hand Left"
+    },
+    "handRight": {
+        "description": "Hand Right is the right hand metadata pose and controller type of the user avatar.",
+        "file": "schemas/hand.json",
+        "title": "Hand Right"
+    }
 }

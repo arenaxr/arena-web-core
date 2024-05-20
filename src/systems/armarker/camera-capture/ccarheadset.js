@@ -7,52 +7,67 @@
  * @date 2022
  */
 
-import {CVWorkerMsgs} from '../worker-msgs.js';
+/* global ARENA */
+
+import CVWorkerMsgs from '../worker-msgs';
+import { ARENAUtils } from '../../../utils';
 
 /**
  * Grab front facing camera frames using getUserMedia()
  */
-export class ARHeadsetCameraCapture {
+export default class ARHeadsetCameraCapture {
     static instance = null;
-    /* worker to send images captured */
-    cvWorker;
 
     video;
+
     canvas;
+
     canvasCtx;
 
     // last captured frame timestamp (Date.now())
-    frameTs;
+    // frameTs;
+
     // last captured frame width
     frameWidth;
+
     // last captured frame height
     frameHeight;
+
     // last captured frame grayscale image pixels (Uint8ClampedArray[width x height]);
     // this is the grayscale image we will pass to the detector
     frameGsPixels;
+
     // last captured frame RGBA pixels (Uint8ClampedArray[width x height x 4])
-    framePixels;
+    // framePixels;
+
     // last captured frame camera properties
     frameCamera;
+
     /* worker to send images captured */
     cvWorker;
 
     localizeOnce;
+
     arMarkerSystem;
 
     /* projection matrices for supported headsets [TODO: get more values/check these] */
     headsetPM = {
+        // prettier-ignore
         ml: [
             2.842104, 0, 0, 0,
             0, 3.897521, 0, 0,
             -0.000893, -0.004491, -1.171066, -1,
-            0, 0, -0.839120, 0],
+            0, 0, -0.83912, 0
+        ],
+        // prettier-ignore
         hl: [
             2.842104, 0, 0, 0,
             0, 3.897521, 0, 0,
             -0.000893, -0.004491, -1.171066, -1,
-            0, 0, -0.839120, 0],
+            0, 0, -0.83912, 0
+        ],
     };
+
     /* selected projection matrix for device */
     projectionMatrix;
 
@@ -60,9 +75,8 @@ export class ARHeadsetCameraCapture {
      * Setup camera frame capture
      * @param {object} arHeadset - heaset name to lookup in headsetPM list
      * @param {object} [arMarkerSystem=undefined] - the AFRAME ARMarker system
-     * @param {object} [debug=false] - debug messages on/off
      */
-    constructor(arHeadset, arMarkerSystem, debug = false) {
+    constructor(arHeadset, arMarkerSystem) {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw 'No getUserMedia support found for camera capture.';
         }
@@ -72,6 +86,8 @@ export class ARHeadsetCameraCapture {
             return ARHeadsetCameraCapture.instance;
         }
         ARHeadsetCameraCapture.instance = this;
+
+        this.getCameraImagePixels = this.getCameraImagePixels.bind(this);
 
         this.arHeadset = arHeadset;
         if (!this.headsetPM[arHeadset]) {
@@ -84,12 +100,15 @@ export class ARHeadsetCameraCapture {
         this.arMarkerSystem.initialLocalized = false;
         this.video = document.createElement('video');
         this.canvas = document.createElement('canvas');
-        this.canvasCtx = this.canvas.getContext('2d', {willReadFrequently: true});
+        if (ARENAUtils.isWebGLOffscreenCanvasSupported(this.canvas)) {
+            this.canvas = this.canvas.transferControlToOffscreen();
+        }
+        this.canvasCtx = this.canvas.getContext('2d', { willReadFrequently: true });
 
         this.frameWidth = 1280;
         this.frameHeight = 720;
-        this.video.style.width = this.frameWidth + 'px';
-        this.video.style.height = this.frameHeight + 'px';
+        this.video.style.width = `${this.frameWidth}px`;
+        this.video.style.height = `${this.frameHeight}px`;
         this.canvas.width = this.frameWidth;
         this.canvas.height = this.frameHeight;
 
@@ -110,7 +129,7 @@ export class ARHeadsetCameraCapture {
             .getUserMedia(options)
             .then((ms) => {
                 this.video.srcObject = ms;
-                this.video.onloadedmetadata = (e) => {
+                this.video.onloadedmetadata = () => {
                     this.video.play();
                 };
             })
@@ -144,7 +163,7 @@ export class ARHeadsetCameraCapture {
     setCVWorker(worker, frameRequested = true) {
         this.cvWorker = worker;
 
-        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        if (frameRequested) requestAnimationFrame(this.getCameraImagePixels);
     }
 
     /**
@@ -163,7 +182,7 @@ export class ARHeadsetCameraCapture {
             this.frameGsPixels = grayscalePixels;
         }
         if (worker) this.cvWorker = worker;
-        requestAnimationFrame(this.getCameraImagePixels.bind(this));
+        requestAnimationFrame(this.getCameraImagePixels);
     }
 
     /**
@@ -172,13 +191,16 @@ export class ARHeadsetCameraCapture {
      * @private
      */
     async getCameraImagePixels(time) {
+        if (this.frameGsPixels.length === 0) {
+            return;
+        }
         let imageData;
         try {
             this.canvasCtx.drawImage(this.video, 0, 0, this.frameWidth, this.frameHeight);
             imageData = this.canvasCtx.getImageData(0, 0, this.frameWidth, this.frameHeight);
         } catch (err) {
             console.warn('Failed to get video frame. Video not started ?', err);
-            setTimeout(this.getCameraImagePixels.bind(this), 1000); // try again..
+            setTimeout(this.getCameraImagePixels, 1000); // try again..
             return;
         }
         const imageDataPixels = imageData.data;
@@ -243,8 +265,8 @@ export class ARHeadsetCameraCapture {
         const hl2Ratio = 0.905886;
         return {
             // Focal lengths in pixels (these are equal for square pixels)
-            cx: (this.frameWidth / 2),
-            cy: (this.frameHeight / 2),
+            cx: this.frameWidth / 2,
+            cy: this.frameHeight / 2,
             // Principal point in pixels (typically at or near the center of the viewport)
             fx: this.frameWidth * hl2Ratio,
             fy: this.frameWidth * hl2Ratio,

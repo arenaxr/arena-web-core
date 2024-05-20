@@ -6,11 +6,12 @@
  * @date 2023
  */
 
-/* global AFRAME */
+/* global AFRAME, THREE */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
-AFRAME.components['gltf-model'].Component.prototype.init = function() {
+// AFRAME Monkeypatch (src/components/gltf-model.js)
+AFRAME.components['gltf-model'].Component.prototype.init = function init() {
     const self = this;
     const dracoLoader = this.system.getDRACOLoader();
     const meshoptDecoder = this.system.getMeshoptDecoder();
@@ -21,8 +22,8 @@ AFRAME.components['gltf-model'].Component.prototype.init = function() {
         this.loader.setDRACOLoader(dracoLoader);
     }
     if (meshoptDecoder) {
-        this.ready = meshoptDecoder.then(function(meshoptDecoder) {
-            self.loader.setMeshoptDecoder(meshoptDecoder);
+        this.ready = meshoptDecoder.then((_meshoptDecoder) => {
+            self.loader.setMeshoptDecoder(_meshoptDecoder);
         });
     } else {
         this.ready = Promise.resolve();
@@ -31,7 +32,7 @@ AFRAME.components['gltf-model'].Component.prototype.init = function() {
         this.loader.setKTX2Loader(ktxLoader);
     }
     // Add event listener for model-loaded event
-    this.el.addEventListener('model-loaded', function() {
+    this.el.addEventListener('model-loaded', () => {
         // Check for modelUpdate stashed prop
         const modelUpdate = self.el.deferredModelUpdate;
         if (modelUpdate) {

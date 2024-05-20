@@ -1,6 +1,6 @@
 {
     "title": "Triangle",
-    "description": "Triangle Geometry",
+    "description": "Triangle Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,53 +14,23 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "triangle"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["triangle"]
                                 },
                                 "vertexA": {
                                     "title": "vertex A",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "format": "grid",
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
-                                        "x": -0.5,
-                                        "y": -0.5,
+                                        "x": 0,
+                                        "y": 0.5,
                                         "z": 0
                                     }
                                 },
                                 "vertexB": {
                                     "title": "vertex B",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "format": "grid",
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -69,24 +39,10 @@
                                 },
                                 "vertexC": {
                                     "title": "vertex C",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "format": "grid",
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
-                                        "x": -0.5,
+                                        "x": 0.5,
                                         "y": -0.5,
                                         "z": 0
                                     }
@@ -104,54 +60,40 @@
                         }
                     ],
                     "title": "Triangle Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "triangle",
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "vertexA": {
-                            "x": 0,
-                            "y": 0.5,
-                            "z": 0
-                        },
-                        "vertexB": {
-                            "x": -0.5,
-                            "y": -0.5,
-                            "z": 0
-                        },
-                        "vertexC": {
-                            "x": 0.5,
-                            "y": -0.5,
-                            "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "vertexA",
-                        "vertexB",
-                        "vertexC"
-                    ]
+                    "required": ["object_type", "vertexA", "vertexB", "vertexC", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"],
+    "definitions": {
+        "vector3": {
+            "title": "Vector3",
+            "format": "grid",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object"
+        }
+    }
 }

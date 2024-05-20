@@ -1,6 +1,6 @@
 {
     "title": "GLTF Model",
-    "description":"Load a GLTF model. \n\nBesides applying standard rotation and position attributes to the center-point of the GLTF model, the individual child components can also be manually manipulated. See format details in the `modelUpdate` data attribute.",
+    "description": "Load a GLTF model. \n\nBesides applying standard rotation and position attributes to the center-point of the GLTF model, the individual child components can also be manually manipulated. See format details in the `modelUpdate` data attribute. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,14 +14,12 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "gltf-model"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["gltf-model"]
                                 },
                                 "url": {
-                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under '/store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
-                                    "format": "uri",
+                                    "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "format": "normal",
                                     "title": "Url",
                                     "type": "string"
                                 }
@@ -40,40 +38,12 @@
                     "title": "GLTF Model Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "gltf-model",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "gltf-model"
                     },
-                    "required": [
-                        "object_type",
-                        "url",
-                        "position",
-                        "rotation",
-                        "scale"
-                    ]
+                    "required": ["object_type", "url", "position", "rotation", "scale"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

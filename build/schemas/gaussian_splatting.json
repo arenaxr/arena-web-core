@@ -1,0 +1,64 @@
+{
+    "title": "3D Gaussian Splat",
+    "description": "Load a 3D Gaussian Splat for Real-Time Radiance Field Rendering.\n\nMore information: <a href='https://github.com/quadjr/aframe-gaussian-splatting'>A-Frame Gaussian Splatting</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["gaussian_splatting"]
+                                },
+                                "src": {
+                                    "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "format": "uri",
+                                    "title": "Url",
+                                    "type": "string"
+                                },
+                                "cutoutEntity": {
+                                    "description": "Selector to a box primitive that uses scale and position to define the bounds of splat points to render.",
+                                    "type": "string",
+                                    "title": "Cutout Entity (Optional)",
+                                    "default": ""
+                                },
+                                "pixelRatio": {
+                                    "description": "Pixel ratio for rendering. Reducing the value decreases the resolution and improves performance. If a negative value is set, the device's native value will be applied.",
+                                    "type": "number",
+                                    "title": "Pixel Ratio",
+                                    "default": 1.0
+                                },
+                                "xrPixelRatio": {
+                                    "description": "Same as pixelRatio. Applied to XR devices.",
+                                    "type": "number",
+                                    "title": "XR Pixel Ratio",
+                                    "default": 0.5
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "3D Gaussian Splat",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "gaussian_splatting"
+                    },
+                    "required": ["object_type", "src", "position", "rotation", "scale"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

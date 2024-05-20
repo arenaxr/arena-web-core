@@ -1,1389 +1,1202 @@
 {
-    "properties":{
-       "animation":{
-          "description":"Animate and tween values. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/animation.html'>https://aframe.io/docs/1.4.0/components/animation.html</a>",
-          "properties":{
-             "autoplay":{
-                "default":true,
-                "description":"Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
-                "type":"boolean"
-             },
-             "delay":{
-                "default":0,
-                "description":"How long (milliseconds) to wait before starting.",
-                "type":"number"
-             },
-             "dir":{
-                "default":"normal",
-                "description":"Which dir to go from from to to.",
-                "enum":[
-                   "normal",
-                   "alternate",
-                   "reverse"
-                ],
-                "type":"string"
-             },
-             "dur":{
-                "default":1000,
-                "description":"How long (milliseconds) each cycle of the animation is.",
-                "type":"number"
-             },
-             "easing":{
-                "enum":[
-                  "easeInQuad",
-                  "easeInCubic",
-                  "easeInQuart",
-                  "easeInQuint",
-                  "easeInSine",
-                  "easeInExpo",
-                  "easeInCirc",
-                  "easeInBack",
-                  "easeInElastic",
-                  "easeOutQuad",
-                  "easeOutCubic",
-                  "easeOutQuart",
-                  "easeOutQuint",
-                  "easeOutSine",
-                  "easeOutExpo",
-                  "easeOutCirc",
-                  "easeOutBack",
-                  "easeOutElastic",
-                  "easeInOutQuad",
-                  "easeInOutCubic",
-                  "easeInOutQuart",
-                  "easeInOutQuint",
-                  "easeInOutSine",
-                  "easeInOutExpo",
-                  "easeInOutCirc",
-                  "easeInOutBack",
-                  "easeInOutElastic",
-                  "linear"
-               ],
-               "default":"easeInQuad",
-                "description":"Easing function of animation. To ease in, ease out, ease in and out (https://easings.net).",
-                "type":"string"
-             },
-             "elasticity":{
-                "default":400,
-                "description":"How much to bounce (higher is stronger).",
-                "type":"number"
-             },
-             "enabled":{
-                "default":true,
-                "description":"If disabled, animation will stop and startEvents will not trigger animation start.",
-                "type":"boolean"
-             },
-             "from":{
-                "default":"",
-                "description":"Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
-                "type":"string"
-             },
-             "isRawProperty":{
-                "default":false,
-                "description":"Flag to animate an arbitrary object property outside of A-Frame components for better performance. If set to true, for example, we can set property to like components.material.material.opacity. If property starts with components or object3D, this will be inferred to true.",
-                "type":"boolean"
-             },
-             "loop":{
-                "default":0,
-                "description":"How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
-                "type":"string"
-             },
-             "pauseEvents":{
-                "default":[
-
-                ],
-                "description":"Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
-                "type":"array"
-             },
-             "property":{
-                "description":"Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute.",
-                "type":"string"
-             },
-             "resumeEvents":{
-                "default":[
-
-                ],
-                "description":"Comma-separated list of events to listen to trigger resume after pausing.",
-                "type":"array"
-             },
-             "round":{
-                "default":false,
-                "description":"Whether to round values.",
-                "type":"boolean"
-             },
-             "startEvents":{
-                "default":[
-
-                ],
-                "description":"Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
-                "type":"array"
-             },
-             "to":{
-                "default":"",
-                "description":"Target value at end of animation.",
-                "type":"string"
-             },
-             "type":{
-                "default":"",
-                "description":"Right now only supports color for tweening isRawProperty color XYZ/RGB vector values.",
-                "type":"string"
-             }
-          },
-          "title":"Animation",
-          "type":"object"
-       },
-       "armarker":{
-          "default":{
-             "buildable": false,
-             "dynamic": false,
-             "markerid":"0",
-             "markertype":"apriltag_36h11",
-             "size":150
-          },
-          "description":"A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes, or scene objects, in the real world.",
-          "properties":{
-             "publish":{
-                "type":"boolean",
-                "title":"publish",
-                "description":"Publish detections. Send detections to external agents (e.g. external builder script that places new markers in the scene). If dynamic=true and publish=true, object position is not updated (left up to external agent).",
-                "default":false
-             },
-             "dynamic":{
-                "type":"boolean",
-                "title":"dynamic",
-                "description":"Dynamic tag, not used for localization. E.g., to move object to which this ARMarker component is attached to. Requires permissions to update the scene (if dynamic=true).",
-                "default":false
-             },
-             "ele":{
-                "default":0,
-                "title":"elevation",
-                "description":"Tag elevation in meters.",
-                "type":"number"
-             },
-             "lat":{
-                "default":0,
-                "maximum":90,
-                "minimum":-90,
-                "title":"latitude",
-                "description":"Tag latitude.",
-                "type":"number"
-             },
-             "long":{
-                "default":0,
-                "maximum":180,
-                "minimum":-180,
-                "title":"longitude",
-                "description":"Tag longitude.",
-                "type":"number"
-             },
-             "markerid":{
-                "default":0,
-                "title":"markerid",
-                "description":"The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586])",
-                "type":"string"
-             },
-             "markertype":{
-                "default":"apriltag_36h11",
-                "enum":[
-                   "apriltag_36h11",
-                   "lightanchor",
-                   "uwb"
-                ],
-                "title":"markertype",
-                "description":"The marker type (apriltag_36h11, lightanchor, uwb)",
-                "type":"string"
-             },
-             "size":{
-                "default":150,
-                "title":"size",
-                "description":"Tag size in millimeters",
-                "type":"number"
-             },
-             "url":{
-                "default":"",
-                "url":"size",
-                "description":"URL associated with the tag",
-                "type":"string"
-             }
-          },
-          "required":[
-             "markertype",
-             "markerid",
-             "size"
-          ],
-          "title":"ARMarker",
-          "type":"object"
-       },
-       "click-listener":{
-          "description":"Object will listen for clicks",
-          "title":"Click Listener",
-          "type":"object",
-          "properties":{
-             "enabled": {
-                "default": true,
-                "type":"boolean",
-                "description": "Publish events, set false to disable"
-             },
-             "bubble":{
-                "default":true,
-                "type":"boolean",
-                "description": "Set false to prevent click events from bubbling up to parent objects. See https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#event_bubbling"
-             }
-          },
-          "required": ["bubble", "enabled"]
-       },
-       "box-collision-listener":{
-          "description":"Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps",
-          "title":"Box Collision Listener",
-          "type":"object",
-          "properties":{
-             "enabled": {
-                "default": true,
-                "type":"boolean",
-                "description": "Publish detections, set `false` to disable"
-             },
-             "dynamic":{
-                "default": false,
-                "type":"boolean",
-                "description": "Set true for a moving object, which should have its bounding box recalculated regularly to determine proper collision"
-             }
-          },
-          "required":[
-             "dynamic"
-          ]
-       },
-       "collision-listener":{
-          "description":"Name of the collision-listener, default can be empty string. Collisions trigger click events",
-          "title":"Collision Listener (legacy)",
-          "type":"string"
-       },
-       "color":{
-          "deprecated": true,
-          "default":"#ffa500",
-          "format":"color",
-          "description":"(deprecated) Color of the material. Please use material.color instead.",
-          "title":"Color (legacy)",
-          "type":"string"
-       },
-       "dynamic-body":{
-          "description":"Physics type attached to the object. \n\nMore properties at <a href='https://github.com/n5ro/aframe-physics-system#dynamic-body-and-static-body'>https://github.com/n5ro/aframe-physics-system#dynamic-body-and-static-body</a>",
-          "properties":{
-             "type":{
-                "default": "static",
-                "enum":[
-                   "static",
-                   "dynamic"
-                ],
-                "type":"string"
-             }
-          },
-          "required":[
-             "type"
-          ],
-          "title":"Physics",
-          "type":"object"
-       },
-       "goto-landmark": {
-          "description": "Teleports user to the landmark with the given name; Requires click-listener",
-          "properties": {
-             "on":{
-                "default": "mousedown",
-                "description":"Event to listen 'on'.",
-                "enum":[
-                   "mousedown",
-                   "mouseup"
-                ],
-                "type":"string"
-             },
-             "landmark": {
-                "default": "",
-                "description":"Id of landmark to teleport to.",
-                "type":"string"
-             }
-          },
-          "required":[
-             "landmark",
-             "on"
-          ],
-          "title":"Goto Landmark",
-          "type":"object"
-       },
-       "goto-url":{
-          "description":"Goto given URL; Requires click-listener",
-          "properties":{
-             "dest":{
-                "default": "sametab",
-                "enum":[
-                   "popup",
-                   "newtab",
-                   "sametab"
-                ],
-                "type":"string"
-             },
-             "on":{
-                "default": "mousedown",
-                "enum":[
-                   "mousedown",
-                   "mouseup"
-                ],
-                "type":"string"
-             },
-             "url":{
-                "default": "",
-                "format":"uri",
-                "type":"string"
-             }
-          },
-          "required":[
-             "dest",
-             "on",
-             "url"
-          ],
-          "title":"Goto URL",
-          "type":"object"
-       },
-       "hide-on-enter-ar":{
-          "description":"Hide object when entering AR. Remove component to *not* hide",
-          "title":"Hide in AR",
-          "type":"boolean",
-          "enum":[
-             true
-          ]
-       },
-       "hide-on-enter-vr":{
-          "description":"Hide object when entering VR. Remove component to *not* hide",
-          "title":"Hide in VR",
-          "type":"boolean",
-          "enum":[
-             true
-          ]
-       },
-       "impulse":{
-          "description":"The force applied using physics. Requires click-listener",
-          "properties":{
-             "force":{
-                "type":"string"
-             },
-             "on":{
-                "type":"string"
-             },
-             "position":{
-                "type":"string"
-             }
-          },
-          "title":"Impulse",
-          "type":"object"
-       },
-       "landmark":{
-          "title":"Landmark",
-          "type":"object",
-          "description":"Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is constrained by a navmesh (when it exists)",
-          "properties":{
-             "randomRadiusMin":{
-                "default":0,
-                "description":"Minimum radius from the landmark to teleport to. (randomRadiusMax must > 0)",
-                "type":"number"
-             },
-             "randomRadiusMax":{
-                "default":0,
-                "description":"Maximum radius from the landmark to teleport to.",
-                "type":"number"
-             },
-             "offsetPosition":{
-                "default":{
-                  "x":0,
-                  "y":1.6,
-                  "z":0
+    "properties": {
+        "animation": {
+            "description": "Animate and tween values.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/animation.html'>A-Frame Animation</a> component. Easing properties are detailed at <a href='https://easings.net'>easings.net</a>.",
+            "properties": {
+                "autoplay": {
+                    "default": true,
+                    "description": "Whether or not the animation should autoplay. Should be specified if the animation is defined for the animation-timeline component (currently not supported).",
+                    "type": "boolean"
                 },
-                "description":"Use as a static teleport x,y,z offset",
-                "properties":{
-                   "x":{
-                      "type":"number"
-                   },
-                   "y":{
-                      "type":"number"
-                   },
-                   "z":{
-                      "type":"number"
-                   }
+                "delay": {
+                    "default": 0,
+                    "description": "How long (milliseconds) to wait before starting.",
+                    "type": "number"
                 },
-                "required":[
-                   "x",
-                   "y",
-                   "z"
-                ],
-                "type":"object"
-             },
-             "constrainToNavMesh":{
-                "description":"Teleports should snap to navmesh. Valid values: 'false', 'any', 'coplanar'",
-                "enum":[
-                   "false",
-                   "any",
-                   "coplanar"
-                ],
-                "type":"string",
-                "default":"false"
-             },
-             "startingPosition":{
-                "default":false,
-                "description":"Set to true to use this landmark as a scene start (spawn) position. If several landmarks with startingPosition=true exist in a scene, one will be randomly selected.",
-                "type":"boolean"
-             },
-             "lookAtLandmark":{
-                "default":true,
-                "description":"Set to true to make users face the landmark when teleported to it.",
-                "type":"boolean"
-             },
-             "label":{
-                "default":"",
-                "description":"Landmark description to display in the landmark list",
-                "type":"string"
-             }
-          },
-          "default":{
-             "randomRadiusMin":0,
-             "randomRadiusMax":0,
-             "lookAtLandmark":true
-          },
-          "required":[
-             "label"
-          ]
-       },
-       "material-extras":{
-          "default":{
-             "encoding":"sRGBEncoding"
-          },
-          "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order. The properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>https://threejs.org/docs/#api/en/materials/Material</a>",
-          "properties":{
-             "overrideSrc":{
-                "type":"string",
-                "default":"",
-                "description":"Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
-             },
-             "encoding":{
-                "default":"sRGBEncoding",
-                "enum":[
-                   "LinearEncoding",
-                   "sRGBEncoding",
-                   "GammaEncoding",
-                   "RGBEEncoding",
-                   "LogLuvEncoding",
-                   "RGBM7Encoding",
-                   "RGBM16Encoding",
-                   "RGBDEncoding",
-                   "BasicDepthPacking",
-                   "RGBADepthPacking"
-                ],
-                "type":"string"
-             },
-             "colorWrite":{
-                "type":"boolean",
-                "default":true,
-                "description":"Whether to render the material's color."
-             },
-            "renderOrder":{
-                "type":"number",
-                "default":1,
-                "description":"Allows the default rendering order of scene graph objects to be overridden."
-             },
-             "transparentOccluder":{
-                "type":"boolean",
-                "default":false,
-                "description":"If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder."
-             }
-          },
-          "title":"Material extras",
-          "type":"object"
-       },
-       "shadow":{
-          "title":"Shadow",
-          "type":"object",
-          "default":{
-             "cast":false,
-             "receive":false
-          },
-          "properties":{
-             "cast":{
-                "default":false,
-                "description":"Whether the entity casts shadows onto the surrounding scene",
-                "title":"cast shadow",
-                "type":"boolean"
-             },
-             "receive":{
-                "default":false,
-                "description":"Whether the entity receives shadows from the surrounding scene",
-                "title":"receive shadow",
-                "type":"boolean"
-             }
-          }
-       },
-       "sound":{
-          "description":"The sound component defines the entity as a source of sound or audio. The sound component is positional and is thus affected by the component's position. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/sound.html'>https://aframe.io/docs/1.4.0/components/sound.html</a>",
-          "properties":{
-             "autoplay":{
-                "default":false,
-                "description":"Whether to automatically play sound once set.",
-                "type":"boolean"
-             },
-             "distanceModel":{
-                "default":"inverse",
-                "description":"Sound model: linear, inverse, or exponential.",
-                "enum":[
-                   "linear",
-                   "inverse",
-                   "exponential"
-                ],
-                "type":"string"
-             },
-             "loop":{
-                "default":false,
-                "description":"Whether to loop the sound once the sound finishes playing.",
-                "type":"boolean"
-             },
-             "maxDistance":{
-                "default":10000,
-                "description":"Maximum distance between the audio source and the listener, after which the volume is not reduced any further.",
-                "type":"number"
-             },
-             "on":{
-                "default":"mousedown",
-                "description":"An event for the entity to listen to before playing sound.",
-                "enum":[
-                   "mousedown",
-                   "mouseup",
-                   "mouseenter",
-                   "mouseleave",
-                   "triggerdown",
-                   "triggerup",
-                   "gripdown",
-                   "gripup",
-                   "menudown",
-                   "menuup",
-                   "systemdown",
-                   "systemup",
-                   "trackpaddown",
-                   "trackpadup"
-                ],
-                "type":"string"
-             },
-             "poolSize":{
-                "default":1,
-                "description":"Numbers of simultaneous instances of this sound that can be playing at the same time",
-                "type":"number"
-             },
-             "positional":{
-                "default":true,
-                "description":"Whether or not the audio is positional (movable).",
-                "type":"boolean"
-             },
-             "refDistance":{
-                "default":1,
-                "description":"Reference distance for reducing volume as the audio source moves further from the listener.",
-                "type":"number"
-             },
-             "rolloffFactor":{
-                "default":1,
-                "description":"Describes how quickly the volume is reduced as the source moves away from the listener.",
-                "type":"number"
-             },
-             "src":{
-                "description":"URL path to sound file e.g. 'store/users/wiselab/sound/wave.mp3'",
-                "format":"uri",
-                "type":"string"
-             },
-             "volume":{
-                "default":1,
-                "description":"How loud to play the sound",
-                "type":"number"
-             }
-          },
-          "title":"Positional Sound",
-          "type":"object"
-       },
-       "textinput":{
-         "title":"Text Input",
-         "description":"Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
-         "type":"object",
-         "default":{
-            "on":"mousedown",
-            "title":"Text Input",
-            "label":"Input text below (max is 140 characters)",
-            "placeholder":"Type here"
-         },
-         "properties":{
-            "on":{
-               "default":"mousedown",
-               "description":"A case-sensitive string representing the event type to listen for, e.g. 'mousedown', 'mouseup'. See https://developer.mozilla.org/en-US/docs/Web/Events",
-               "enum":[
-                  "mousedown",
-                  "mouseup",
-                  "mouseenter",
-                  "mouseleave",
-                  "triggerdown",
-                  "triggerup",
-                  "gripdown",
-                  "gripup",
-                  "menudown",
-                  "menuup",
-                  "systemdown",
-                  "systemup",
-                  "trackpaddown",
-                  "trackpadup"
-               ],
-               "type":"string"
-            },
-            "title":{
-               "default":"Text Input",
-               "description":"The prompt title",
-               "type":"string"
-            },
-            "label":{
-               "default":"Input text below (max is 140 characters)",
-               "description":"Text prompt label",
-               "type":"string"
-            },
-            "placeholder":{
-               "default":"Type here",
-               "description":"Text input place holder",
-               "type":"string"
-            }
-         }
-       },
-       "url":{
-          "description":"Model URL. Store files paths under 'store/users/<username>' (e.g. store/users/wiselab/models/factory_robot_arm/scene.gltf); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/models/factory_robot_arm/scene.gltf)",
-          "format":"uri",
-          "title":"Url",
-          "type":"string"
-       },
-       "screenshareable":{
-          "default":true,
-          "description":"Whether or not a user can screenshare on an object",
-          "title":"Screenshare-able",
-          "type":"boolean"
-       },
-       "remote-render":{
-          "description":"Whether or not an object should be remote rendered [Experimental]",
-          "properties":{
-             "enabled":{
-                "description":"Remote Render this object",
-                "type":"boolean",
-                "default":true
-             }
-          },
-          "title":"Remote Render",
-          "type":"object"
-       },
-       "video-control":{
-          "description":"Video Control",
-          "properties":{
-             "frame_object":{
-                "description":"URL of a thumbnail image, e.g. 'store/users/wiselab/images/conix-face-white.jpg'",
-                "format":"uri",
-                "type":"string"
-             },
-             "video_object":{
-                "description":"Name of object where to put the video, e.g. 'square_vid6'",
-                "type":"string"
-             },
-             "video_path":{
-                "description":"URL of the video file, e.g. 'store/users/wiselab/videos/kungfu.mp4'",
-                "format":"uri",
-                "type":"string"
-             },
-             "anyone_clicks":{
-                "description":"Responds to clicks from any user",
-                "type":"boolean",
-                "default":true
-             },
-             "video_loop":{
-                "description":"Video automatically loops",
-                "type":"boolean",
-                "default":true
-             },
-             "autoplay":{
-                "description":"Video starts playing automatically",
-                "type":"boolean",
-                "default":false
-             },
-             "volume":{
-                "description":"Video sound volume",
-                "type":"number",
-                "default":1
-             },
-             "cleanup": {
-                "description": "Automatically remove HTML5 video and img assets from DOM on object removal",
-                "type": "boolean",
-                "default":true
-             }
-          },
-          "required":[
-             "video_object",
-             "frame_object",
-             "video_path"
-          ],
-          "title":"Video",
-          "type":"object"
-       },
-       "attribution": {
-          "description": "Attribution Component. Saves attribution data in any entity.",
-          "properties": {
-             "author": {
-                "type": "string",
-                "default": "Unknown",
-                "description": "Author name; e.g. “Vaptor-Studio”"
-             },
-             "authorURL": {
-                "type": "string",
-                "description": "Author homepage/profile; e.g. https://sketchfab.com/VapTor"
-             },
-             "license": {
-                "type": "string",
-                "default": "Unknown",
-                "description": "License summary/short name; e.g. “CC-BY-4.0”."
-             },
-             "licenseURL": {
-                "type": "string",
-                "description": "License URL; e.g. http://creativecommons.org/licenses/by/4.0/"
-             },
-             "source": {
-                "type": "string",
-                "default": "Unknown",
-                "description": "Model source e.g. “Sketchfab”."
-             },
-             "sourceURL": {
-                "type": "string",
-                "description": "Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7"
-             },
-             "title": {
-                "type": "string",
-                "default": "No Title",
-                "description": "Model title; e.g. “Spinosaurus”."
-             },
-             "extractAssetExtras": {
-               "type": "boolean",
-               "default": true,
-               "description": "Extract attribution info from asset extras; will override attribution info given (default: true)"
-            }
-         },
-          "title": "Attribution",
-          "type": "object"
-      },
-      "particle-system": {
-         "description": "Particle system component for A-Frame. \n\nMore properties at <a href='https://github.com/c-frame/aframe-particle-system-component'>https://github.com/c-frame/aframe-particle-system-component</a>",
-         "properties": {
-            "preset": {
-               "description": "Preset configuration. Possible values are: default, dust, snow, rain.",
-               "enum": [
-                  "default",
-                  "dust",
-                  "snow",
-                  "rain"
-               ],
-               "type": "string",
-               "default": "default"
-            },
-            "maxAge": {
-               "description": "The particle's maximum age in seconds.",
-               "type": "number",
-               "default": 6
-            },
-            "positionSpread": {
-               "description": "Describes this emitter's position variance on a per-particle basis.",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "type": {
-               "description": "The default distribution this emitter should use to control its particle's spawn position and force behaviour. Possible values are 1 (box), 2 (sphere), 3 (disc)",
-               "type": "number",
-               "default": 1
-            },
-            "rotationAxis": {
-               "description": "Describes this emitter's axis of rotation. Possible values are x, y and z.",
-               "enum": [
-                  "x",
-                  "y",
-                  "x"
-               ],
-               "type": "string",
-               "default": "x"
-            },
-            "rotationAngle": {
-               "description": "The angle of rotation, given in radians. Dust preset is 3.14.",
-               "type": "number",
-               "default": 0
-            },
-            "rotationAngleSpread": {
-               "description": "The amount of variance in the angle of rotation per-particle, given in radians.",
-               "type": "number",
-               "default": 0
-            },
-            "accelerationValue": {
-               "description": "Describes this emitter's base acceleration.",
-               "default": "{x: 0, y: -10, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "accelerationSpread": {
-               "description": "Describes this emitter's acceleration variance on a per-particle basis.",
-               "default": "{x: 10, y: 0, z: 10}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "velocityValue": {
-               "description": "Describes this emitter's base velocity.",
-               "default": "{x: 0, y: 25, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "velocitySpread": {
-               "description": "Describes this emitter's acceleration variance on a per-particle basis.",
-               "default": "{x: 10, y: 7.5, z: 10}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "dragValue": {
-               "description": "Number between 0 and 1 describing drag applied to all particles.",
-               "type": "number",
-               "default": 0
-            },
-            "dragSpread": {
-               "description": "Number describing drag variance on a per-particle basis.",
-               "type": "number",
-               "default": 0
-            },
-            "dragRandomise": {
-               "description": "WHen a particle is re-spawned, whether it's drag should be re-randomised or not. Can incur a performance hit.",
-               "type": "boolean",
-               "default": false
-            },
-            "color": {
-               "description": "Describes a particle's color. This property is a 'value-over-lifetime' property, meaning an array of values can be given to describe specific value changes over a particle's lifetime.",
-               "type": "array",
-               "default": [
-                  "#0000FF",
-                  "#FF0000"
-               ],
-               "items": {
-                  "format": "color",
-                  "type": "string"
-                  }
-            },
-            "size": {
-               "description": "Describes a particle's size.",
-               "type": "array",
-               "default": [
-                  1
-               ],
-               "items": {
-                  "type": "number"
-               }
-            },
-            "sizeSpread": {
-               "type": "array",
-               "default": [
-                  0
-               ],
-               "items": {
-                  "type": "number"
-               }
-            },
-            "direction": {
-               "description": "The direction of the emitter. If value is 1, emitter will start at beginning of particle's lifecycle. If value is -1, emitter will start at end of particle's lifecycle and work it's way backwards.",
-               "type": "number",
-               "default": 1
-            },
-            "duration": {
-               "description": "The duration in seconds that this emitter should live for. If not specified, the emitter will emit particles indefinitely.",
-               "type": "number",
-               "default": null
-            },
-            "enabled": {
-               "description": "When true the emitter will emit particles, when false it will not. This value can be changed dynamically during a scene. While particles are emitting, they will disappear immediately when set to false.",
-               "type": "boolean",
-               "default": true
-            },
-            "particleCount": {
-               "description": "The total number of particles this emitter will hold. NOTE: this is not the number of particles emitted in a second, or anything like that. The number of particles emitted per-second is calculated by particleCount ",
-               "type": "number",
-               "default": 1000
-            },
-            "texture": {
-               "description": "The texture used by this emitter. Examples: [star2.png, smokeparticle.png, raindrop.png], like path 'static/images/textures/star2.png'",
-               "type": "string",
-               "default": "static/images/textures/star2.png"
-            },
-            "randomise": {
-               "description": "When a particle is re-spawned, whether it's position should be re-randomised or not. Can incur a performance hit.",
-               "type": "boolean",
-               "default": false
-            },
-            "opacity": {
-               "description": "Either a single number to describe the opacity of a particle.",
-               "type": "array",
-               "default": [
-                  1
-               ],
-               "items": {
-                  "type": "number"
-               }
-            },
-            "opacitySpread": {
-               "type": "array",
-               "default": [
-                  1
-               ],
-               "items": {
-                  "type": "number"
-               }
-            },
-            "blending": {
-               "description": "The blending mode of the particles. Possible values are 0 (no blending), 1 (normal), 2 (additive), 3 (subtractive), 4 (multiply)",
-               "enum": [
-                  "0",
-                  "1",
-                  "2",
-                  "3",
-                  "4"
-               ],
-               "type": "string",
-               "default": "2"
-            },
-            "maxParticleCount": {
-               "type": "number",
-               "default": 250000
-            }
-         },
-         "required": [
-            "texture",
-            "size"
-         ],
-         "title": "Particle System",
-         "type": "object"
-      },
-      "spe-particles": {
-         "description": "GPU based particle systems in A-Frame. \n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>https://github.com/harlyq/aframe-spe-particles-component</a>",
-         "properties": {
-            "acceleration": {
-               "description": "for sphere and disc distributions, only the x axis is used",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "accelerationDistribution": {
-               "description": "distribution of particle acceleration, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for accelerationDistribution",
-               "default": "none",
-               "enum": [
-                  "none",
-                  "box",
-                  "sphere",
-                  "disc"
-               ],
-               "type": "string"
-            },
-            "accelerationSpread": {
-               "description": "spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "activeMultiplier": {
-               "description": "multiply the rate of particles emission, if larger than 1 then the particles will be emitted in bursts. note, very large numbers will emit all particles at once",
-               "default": "1",
-               "type": "number"
-            },
-            "affectedByFog": {
-               "description": "if true, the particles are affected by THREE js fog",
-               "default": true,
-               "type": "boolean"
-            },
-            "alphaTest": {
-               "description": "alpha values below the alphaTest threshold are considered invisible",
-               "default": "0",
-               "type": "number"
-            },
-            "angle": {
-               "description": "2D rotation of the particle over the particle's lifetime, max 4 elements",
-               "default": [
-                  0
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "type": "number"
-               }
-            },
-            "angleSpread": {
-               "description": "spread in angle over the particle's lifetime, max 4 elements",
-               "default": [
-                  0
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "type": "number"
-               }
-            },
-            "blending": {
-               "description": "blending mode, when drawing particles",
-               "default": "normal",
-               "enum": [
-                  "no",
-                  "normal",
-                  "additive",
-                  "subtractive",
-                  "multiply",
-                  "custom"
-               ],
-               "type": "string"
-            },
-            "color": {
-               "description": "array of colors over the particle's lifetime, max 4 elements",
-               "default": [
-                  "#fff"
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "format": "color",
-                  "type": "string"
-                  }
-            },
-            "colorSpread": {
-               "description": "spread to apply to colors, spread an array of vec3 (r g b) with 0 for no spread. note the spread will be re-applied through-out the lifetime of the particle",
-               "default": [],
-               "type": "array",
-               "items": {
-                  "$ref": "#/definitions/Vector3"
-               }
-            },
-            "depthTest": {
-               "description": "if true, don't render a particle's pixels if something is closer in the depth buffer",
-               "default": true,
-               "type": "boolean"
-            },
-            "depthWrite": {
-               "description": "if true, particles write their depth into the depth buffer. this should be false if we use transparent particles",
-               "default": false,
-               "type": "boolean"
-            },
-            "direction": {
-               "description": "make the emitter operate forward or backward in time",
-               "default": "forward",
-               "enum": [
-                  "forward",
-                  "backward"
-               ],
-               "type": "string"
-            },
-            "distribution": {
-               "description": "distribution for particle positions, velocities and acceleration. will be overriden by specific '...Distribution' attributes",
-               "default": "box",
-               "enum": [
-                  "box",
-                  "sphere",
-                  "disc"
-               ],
-               "type": "string"
-            },
-            "drag": {
-               "description": "apply resistance to moving the particle, 0 is no resistance, 1 is full resistance, particle will stop moving at half of it's maxAge",
-               "default": "0",
-               "type": "number"
-            },
-            "dragSpread": {
-               "description": "spread to apply to the drag attribute",
-               "default": "0",
-               "type": "number"
-            },
-            "duration": {
-               "description": "duration of the emitter (seconds), if less than 0 then continuously emit particles",
-               "default": "-1",
-               "type": "number"
-            },
-            "emitterScale": {
-               "description": "global scaling factor for all particles from the emitter",
-               "default": "100",
-               "type": "number"
-            },
-            "enableInEditor": {
-               "description": "enable the emitter while the editor is active (i.e. while scene is paused)",
-               "default": false,
-               "type": "boolean"
-            },
-            "enabled": {
-               "description": "enable/disable the emitter",
-               "default": true,
-               "type": "boolean"
-            },
-            "frustumCulled": {
-               "description": "enable/disable frustum culling",
-               "default": false,
-               "type": "boolean"
-            },
-            "hasPerspective": {
-               "description": "if true, particles will be larger the closer they are to the camera",
-               "default": true,
-               "type": "boolean"
-            },
-            "maxAge": {
-               "description": "maximum age of a particle before reusing",
-               "default": "1",
-               "type": "number"
-            },
-            "maxAgeSpread": {
-               "description": "variance for the 'maxAge' attribute",
-               "default": "0",
-               "type": "number"
-            },
-            "opacity": {
-               "description": "opacity over the particle's lifetime, max 4 elements",
-               "default": [
-                  1
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "type": "number"
-               }
-            },
-            "opacitySpread": {
-               "description": "spread in opacity over the particle's lifetime, max 4 elements",
-               "default": [
-                  0
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "type": "number"
-               }
-            },
-            "particleCount": {
-               "description": "maximum number of particles for this emitter",
-               "default": "100",
-               "type": "integer"
-            },
-            "positionDistribution": {
-               "description": "distribution of particle positions, disc and sphere will use the radius attributes. For box particles emit at 0,0,0, for sphere they emit on the surface of the sphere and for disc on the edge of a 2D disc on the XY plane",
-               "default": "none",
-               "enum": [
-                  "none",
-                  "box",
-                  "sphere",
-                  "disc"
-               ],
-               "type": "string"
-            },
-            "positionOffset": {
-               "description": "fixed offset to the apply to the emitter relative to its parent entity",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "positionSpread": {
-               "description": "particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "radius": {
-               "description": "radius of the disc or sphere emitter (ignored for box). note radius of 0 will prevent velocity and acceleration if they use a sphere or disc distribution",
-               "default": "1",
-               "type": "number"
-            },
-            "radiusScale": {
-               "description": "scales the emitter for sphere and disc shapes to form oblongs and ellipses",
-               "default": "{x: 1, y: 1, z: 1}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "randomizeAcceleration": {
-               "description": "if true, re-randomize acceleration when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeAngle": {
-               "description": "if true, re-randomize angle when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeColor": {
-               "description": "if true, re-randomize colour when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeDrag": {
-               "description": "if true, re-randomize drag when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeOpacity": {
-               "description": "if true, re-randomize opacity when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizePosition": {
-               "description": "if true, re-randomize position when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeRotation": {
-               "description": "if true, re-randomize rotation when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeSize": {
-               "description": "if true, re-randomize size when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "randomizeVelocity": {
-               "description": "if true, re-randomize velocity when re-spawning a particle, can incur a performance hit",
-               "default": false,
-               "type": "boolean"
-            },
-            "relative": {
-               "description": "world relative particles move relative to the world, while local particles move relative to the emitter (i.e. if the emitter moves, all particles move with it)",
-               "default": "local",
-               "enum": [
-                  "local",
-                  "world"
-               ],
-               "type": "string"
-            },
-            "rotation": {
-               "description": "rotation in degrees",
-               "default": "0",
-               "type": "number"
-            },
-            "rotationAxis": {
-               "description": "local axis when using rotation",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "rotationAxisSpread": {
-               "description": "variance in the axis of rotation",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "rotationSpread": {
-               "description": "rotation variance in degrees",
-               "default": "0",
-               "type": "number"
-            },
-            "rotationStatic": {
-               "description": "if true, the particles are fixed at their initial rotation value. if false, the particle will rotate from 0 to the 'rotation' value",
-               "default": false,
-               "type": "boolean"
-            },
-            "size": {
-               "description": "array of sizes over the particle's lifetime, max 4 elements",
-               "default": [
-                  1
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "type": "number"
-               }
-            },
-            "sizeSpread": {
-               "description": "spread in size over the particle's lifetime, max 4 elements",
-               "default": [
-                  0
-               ],
-               "type": "array",
-               "maxItems": 4,
-               "items": {
-                  "type": "number"
-               }
-            },
-            "texture": {
-               "description": "texture to be used for each particle, may be a spritesheet.  Examples: [blob.png, fog.png, square.png, explosion_sheet.png, fireworks_sheet.png], like path 'static/images/textures/blob.png'",
-               "default": "",
-               "type": "string"
-            },
-            "textureFrameCount": {
-               "description": "number of frames in the spritesheet, negative numbers default to textureFrames.x * textureFrames.y",
-               "default": "-1",
-               "type": "integer"
-            },
-            "textureFrameLoop": {
-               "description": "number of times the spritesheet should be looped over the lifetime of a particle",
-               "default": "1",
-               "type": "integer"
-            },
-            "textureFrames": {
-               "description": "x and y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop)",
-               "default": "{x: 1, y: 1}",
-               "$ref": "#/definitions/Vector2"
-            },
-            "useTransparency": {
-               "description": "should the particles be rendered with transparency?",
-               "default": true,
-               "type": "boolean"
-            },
-            "velocity": {
-               "description": "for sphere and disc distributions, only the x axis is used",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "velocityDistribution": {
-               "description": "distribution of particle velocities, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for velocityDistribution",
-               "default": "none",
-               "enum": [
-                  "none",
-                  "box",
-                  "sphere",
-                  "disc"
-               ],
-               "type": "string"
-            },
-            "velocitySpread": {
-               "description": "variance for the velocity",
-               "default": "{x: 0, y: 0, z: 0}",
-               "$ref": "#/definitions/Vector3"
-            },
-            "wiggle": {
-               "description": "extra distance the particle moves over its lifetime",
-               "default": "0",
-               "type": "number"
-            },
-            "wiggleSpread": {
-               "description": "+- spread for the wiggle attribute",
-               "default": "0",
-               "type": "number"
-            }
-         },
-         "required": [],
-         "title": "SPE Particles",
-         "type": "object"
-      }
-   },
-   "definitions": {
-      "Vector2": {
-         "properties": {
-            "x": {
-               "type": "number"
-            },
-            "y": {
-               "type": "number"
-            }
-         },
-         "required": [
-            "x",
-            "y"
-         ],
-         "type": "object"
-      },
-      "Vector3": {
-         "properties": {
-            "x": {
-               "type": "number"
-            },
-            "y": {
-               "type": "number"
-            },
-            "z": {
-               "type": "number"
-            }
-         },
-         "required": [
-            "x",
-            "y",
-            "z"
-         ],
-         "type": "object"
-      }
-   }
- }
+                "dir": {
+                    "default": "normal",
+                    "description": "Which dir to go from from to to.",
+                    "enum": ["normal", "alternate", "reverse"],
+                    "type": "string"
+                },
+                "dur": {
+                    "default": 1000,
+                    "description": "How long (milliseconds) each cycle of the animation is.",
+                    "type": "number"
+                },
+                "easing": {
+                    "enum": [
+                        "easeInQuad",
+                        "easeInCubic",
+                        "easeInQuart",
+                        "easeInQuint",
+                        "easeInSine",
+                        "easeInExpo",
+                        "easeInCirc",
+                        "easeInBack",
+                        "easeInElastic",
+                        "easeOutQuad",
+                        "easeOutCubic",
+                        "easeOutQuart",
+                        "easeOutQuint",
+                        "easeOutSine",
+                        "easeOutExpo",
+                        "easeOutCirc",
+                        "easeOutBack",
+                        "easeOutElastic",
+                        "easeInOutQuad",
+                        "easeInOutCubic",
+                        "easeInOutQuart",
+                        "easeInOutQuint",
+                        "easeInOutSine",
+                        "easeInOutExpo",
+                        "easeInOutCirc",
+                        "easeInOutBack",
+                        "easeInOutElastic",
+                        "linear"
+                    ],
+                    "default": "easeInQuad",
+                    "description": "Easing function of animation. To ease in, ease out, ease in and out. See easings.net for more.",
+                    "type": "string"
+                },
+                "elasticity": {
+                    "default": 400,
+                    "description": "How much to bounce (higher is stronger).",
+                    "type": "number"
+                },
+                "enabled": {
+                    "default": true,
+                    "description": "If disabled, animation will stop and startEvents will not trigger animation start.",
+                    "type": "boolean"
+                },
+                "from": {
+                    "default": "",
+                    "description": "Initial value at start of animation. If not specified, the current property value of the entity will be used (will be sampled on each animation start). It is best to specify a from value when possible for stability.",
+                    "type": "string"
+                },
+                "isRawProperty": {
+                    "default": false,
+                    "description": "Flag to animate an arbitrary object property outside of A-Frame components for better performance. If set to true, for example, we can set property to like components.material.material.opacity. If property starts with components or object3D, this will be inferred to true.",
+                    "type": "boolean"
+                },
+                "loop": {
+                    "default": 0,
+                    "description": "How many times the animation should repeat. If the value is true, the animation will repeat infinitely.",
+                    "type": "string"
+                },
+                "pauseEvents": {
+                    "default": [],
+                    "description": "Comma-separated list of events to listen to trigger pause. Can be resumed with resumeEvents.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "property": {
+                    "description": "Property to animate. Can be a component name, a dot-delimited property of a component (e.g., material.color), or a plain attribute.",
+                    "type": "string"
+                },
+                "resumeEvents": {
+                    "default": [],
+                    "description": "Comma-separated list of events to listen to trigger resume after pausing.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "round": {
+                    "default": false,
+                    "description": "Whether to round values.",
+                    "type": "boolean"
+                },
+                "startEvents": {
+                    "default": [],
+                    "description": "Comma-separated list of events to listen to trigger a restart and play. Animation will not autoplay if specified. startEvents will restart the animation, use pauseEvents to resume it. If there are other animation components on the entity animating the same property, those animations will be automatically paused to not conflict.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "to": {
+                    "default": "",
+                    "description": "Target value at end of animation.",
+                    "type": "string"
+                },
+                "type": {
+                    "default": "",
+                    "description": "Right now only supports color for tweening isRawProperty color XYZ/RGB vector values.",
+                    "type": "string"
+                }
+            },
+            "title": "Animation",
+            "type": "object"
+        },
+        "armarker": {
+            "description": "A location marker (such as an AprilTag, a lightAnchor, or an UWB tag), used to anchor scenes, or scene objects, in the real world.",
+            "properties": {
+                "publish": {
+                    "type": "boolean",
+                    "title": "publish",
+                    "description": "Publish detections. Send detections to external agents (e.g. external builder script that places new markers in the scene). If dynamic=true and publish=true, object position is not updated (left up to external agent).",
+                    "default": false
+                },
+                "buildable": {
+                    "type": "boolean",
+                    "title": "buildable",
+                    "description": "Whether tag has 'dynamic' toggled on click. Used to position a tag, then lock into position.",
+                    "default": false
+                },
+                "dynamic": {
+                    "type": "boolean",
+                    "title": "dynamic",
+                    "description": "Dynamic tag, not used for localization. E.g., to move object to which this ARMarker component is attached to. Requires permissions to update the scene (if dynamic=true).",
+                    "default": false
+                },
+                "ele": {
+                    "default": 0,
+                    "title": "elevation",
+                    "description": "Tag elevation in meters.",
+                    "type": "number"
+                },
+                "lat": {
+                    "default": 0,
+                    "maximum": 90,
+                    "minimum": -90,
+                    "title": "latitude",
+                    "description": "Tag latitude.",
+                    "type": "number"
+                },
+                "long": {
+                    "default": 0,
+                    "maximum": 180,
+                    "minimum": -180,
+                    "title": "longitude",
+                    "description": "Tag longitude.",
+                    "type": "number"
+                },
+                "markerid": {
+                    "default": "0",
+                    "title": "markerid",
+                    "description": "The marker id (e.g. for AprilTag 36h11 family, an integer in the range [0, 586]).",
+                    "type": "string"
+                },
+                "markertype": {
+                    "default": "apriltag_36h11",
+                    "enum": ["apriltag_36h11", "lightanchor", "uwb", "vive", "optitrack"],
+                    "title": "markertype",
+                    "description": "The marker type, technology-based.",
+                    "type": "string"
+                },
+                "size": {
+                    "default": 150,
+                    "title": "size",
+                    "description": "Tag size in millimeters.",
+                    "type": "number"
+                },
+                "url": {
+                    "default": "",
+                    "format": "uri",
+                    "title": "Tag Url",
+                    "description": "URL associated with the tag.",
+                    "type": "string"
+                }
+            },
+            "required": ["markertype", "markerid", "size", "buildable", "dynamic"],
+            "title": "ARMarker",
+            "type": "object"
+        },
+        "click-listener": {
+            "description": "Object will listen for mouse events like clicks.",
+            "title": "Click Listener",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Publish events, set false to disable."
+                },
+                "bubble": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Set false to prevent click events from bubbling up to parent objects. See <a href='https://developer.mozilla.org/en-US/docs/Learn/JavaScript/Building_blocks/Events#event_bubbling'>Event Bubbling</a>."
+                }
+            },
+            "required": ["bubble", "enabled"]
+        },
+        "box-collision-listener": {
+            "description": "Listen for bounding-box collisions with user camera and hands. Must be applied to an object or model with geometric mesh. Collisions are determined by course bounding-box overlaps.",
+            "title": "Box Collision Listener",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Publish detections, set `false` to disable."
+                },
+                "dynamic": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "Set true for a moving object, which should have its bounding box recalculated regularly to determine proper collision."
+                }
+            },
+            "required": ["dynamic"]
+        },
+        "collision-listener": {
+            "description": "Name of the collision-listener, default can be empty string. Collisions trigger click events.",
+            "title": "Collision Listener (legacy)",
+            "type": "string"
+        },
+        "blip": {
+            "description": "When the object is created or deleted, it will animate in/out of the scene instead of appearing/disappearing instantly. Must have a geometric mesh.",
+            "title": "Blip Effect",
+            "type": "object",
+            "properties": {
+                "blipin": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Animate in on create, set false to disable."
+                },
+                "blipout": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Animate out on delete, set false to disable."
+                },
+                "geometry": {
+                    "default": "rect",
+                    "description": "Geometry of the blipout plane.",
+                    "type": "string",
+                    "enum": ["rect", "disk", "ring"]
+                },
+                "planes": {
+                    "default": "both",
+                    "description": "Which which clipping planes to use for effect. A top plane clips above it, bottom clips below it.",
+                    "type": "string",
+                    "enum": ["both", "top", "bottom"]
+                },
+                "duration": {
+                    "default": 750,
+                    "type": "number",
+                    "description": "Animation duration in milliseconds."
+                },
+                "applyDescendants": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "Apply blipout effect to include all descendents. Does not work for blipin."
+                }
+            },
+            "required": ["blipin", "blipout", "planes", "geometry", "duration"]
+        },
+        "static-body": {
+            "description": "A fixed-position or animated object. Other objects may collide with static bodies, but static bodies themselves are unaffected by gravity and collisions.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
+            "properties": {
+                "shape": {
+                    "default": "auto",
+                    "type": "string",
+                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
+                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices."
+                },
+                "cylinderAxis": {
+                    "default": "y",
+                    "enum": ["x", "y", "z"],
+                    "type": "string",
+                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
+                },
+                "sphereRadius": {
+                    "type": "number",
+                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
+                },
+                "type": {
+                    "default": "static",
+                    "enum": ["dynamic", "static"],
+                    "type": "string",
+                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
+                }
+            },
+            "title": "Physics Static Body",
+            "type": "object"
+        },
+        "dynamic-body": {
+            "description": "A freely-moving object. Dynamic bodies have mass, collide with other objects, bounce or slow during collisions, and fall if gravity is enabled.\n\nMore properties at <a href='https://github.com/c-frame/aframe-physics-system/blob/master/CannonDriver.md'>A-Frame Physics System</a>.",
+            "properties": {
+                "mass": {
+                    "default": 5,
+                    "exclusiveMinimum": 0,
+                    "type": "number",
+                    "description": "Simulated mass of the object, > 0."
+                },
+                "linearDamping": {
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Resistance to movement."
+                },
+                "angularDamping": {
+                    "default": 0.01,
+                    "type": "number",
+                    "description": "Resistance to rotation."
+                },
+                "shape": {
+                    "default": "auto",
+                    "type": "string",
+                    "enum": ["auto", "box", "cylinder", "sphere", "hull", "none"],
+                    "description": "Body components will attempt to find an appropriate CANNON.js shape to fit your model. When defining an object you may choose a shape or leave the default, auto. Select a shape carefully, as there are performance implications with different choices."
+                },
+                "cylinderAxis": {
+                    "default": "y",
+                    "enum": ["x", "y", "z"],
+                    "type": "string",
+                    "description": "Override default axis of bounding cylinder. Requires shape:cylinder."
+                },
+                "sphereRadius": {
+                    "type": "number",
+                    "description": "Override default radius of bounding sphere. Requires shape:sphere. NaN by default."
+                },
+                "type": {
+                    "default": "dynamic",
+                    "enum": ["dynamic", "static"],
+                    "type": "string",
+                    "description": "Define the result of collisions. Dynamic can be moved, Static cannot be moved."
+                }
+            },
+            "title": "Physics Dynamic Body",
+            "type": "object"
+        },
+        "goto-landmark": {
+            "description": "Teleports user to the landmark with the given name. Requires click-listener.",
+            "properties": {
+                "on": {
+                    "default": "mousedown",
+                    "description": "Event to listen 'on'.",
+                    "enum": ["mousedown", "mouseup"],
+                    "type": "string"
+                },
+                "landmark": {
+                    "default": "",
+                    "description": "Id of landmark to teleport to.",
+                    "type": "string"
+                }
+            },
+            "required": ["landmark", "on"],
+            "title": "Goto Landmark",
+            "type": "object"
+        },
+        "goto-url": {
+            "description": "Load new URL when object is clicked. Requires click-listener.",
+            "properties": {
+                "dest": {
+                    "description": "Where to open the URL.",
+                    "default": "sametab",
+                    "enum": ["popup", "newtab", "sametab"],
+                    "type": "string"
+                },
+                "on": {
+                    "description": "A case-sensitive string representing the event type to listen for. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>.",
+                    "default": "mousedown",
+                    "enum": ["mousedown", "mouseup"],
+                    "type": "string"
+                },
+                "url": {
+                    "description": "The destination url, e.g. https://example.com.",
+                    "default": "",
+                    "format": "uri",
+                    "type": "string"
+                }
+            },
+            "required": ["dest", "on", "url"],
+            "title": "Goto URL",
+            "type": "object"
+        },
+        "hide-on-enter-ar": {
+            "description": "Hide object when entering AR. Remove component to *not* hide.",
+            "title": "Hide in AR",
+            "type": "boolean",
+            "enum": [true]
+        },
+        "hide-on-enter-vr": {
+            "description": "Hide object when entering VR. Remove component to *not* hide.",
+            "title": "Hide in VR",
+            "type": "boolean",
+            "enum": [true]
+        },
+        "show-on-enter-ar": {
+            "description": "Show object when entering AR. Hidden otherwise.",
+            "title": "Show in AR",
+            "type": "boolean",
+            "enum": [true]
+        },
+        "show-on-enter-vr": {
+            "description": "Show object when entering VR. Hidden otherwise.",
+            "title": "Show in VR",
+            "type": "boolean",
+            "enum": [true]
+        },
+        "impulse": {
+            "description": "Apply an impulse to an object to set it in motion. This happens in conjunction with an event. Requires click-listener and physics.",
+            "properties": {
+                "force": {
+                    "description": "Impulse vector.",
+                    "default": { "x": 1, "y": 1, "z": 1 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "on": {
+                    "description": "Event to listen 'on'.",
+                    "default": "mousedown",
+                    "enum": ["mousedown", "mouseup"],
+                    "type": "string"
+                },
+                "position": {
+                    "description": "World position.",
+                    "default": { "x": 1, "y": 1, "z": 1 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                }
+            },
+            "title": "Impulse",
+            "type": "object"
+        },
+        "landmark": {
+            "title": "Landmark",
+            "type": "object",
+            "description": "Define entities as a landmark; Landmarks appears in the landmark list and you can move (teleport) to them; You can define the behavior of the teleport: if you will be at a fixed or random distance, looking at the landmark, fixed offset or if it is constrained by a navmesh (when it exists).",
+            "properties": {
+                "randomRadiusMin": {
+                    "default": 0,
+                    "description": "Minimum radius from the landmark to teleport to. (randomRadiusMax must > 0).",
+                    "type": "number"
+                },
+                "randomRadiusMax": {
+                    "default": 0,
+                    "description": "Maximum radius from the landmark to teleport to.",
+                    "type": "number"
+                },
+                "offsetPosition": {
+                    "default": {
+                        "x": 0,
+                        "y": 1.6,
+                        "z": 0
+                    },
+                    "description": "Use as a static teleport x,y,z offset.",
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "constrainToNavMesh": {
+                    "description": "Teleports should snap to navmesh.",
+                    "enum": ["false", "any", "coplanar"],
+                    "type": "string",
+                    "default": "false"
+                },
+                "startingPosition": {
+                    "default": false,
+                    "description": "Set to true to use this landmark as a scene start (spawn) position. If several landmarks with startingPosition=true exist in a scene, one will be randomly selected.",
+                    "type": "boolean"
+                },
+                "lookAtLandmark": {
+                    "default": true,
+                    "description": "Set to true to make users face the landmark when teleported to it.",
+                    "type": "boolean"
+                },
+                "label": {
+                    "default": "",
+                    "description": "Landmark description to display in the landmark list.",
+                    "type": "string"
+                }
+            },
+            "required": ["label", "randomRadiusMin", "randomRadiusMax", "lookAtLandmark"]
+        },
+        "material-extras": {
+            "description": "Define extra material properties, namely texture encoding, whether to render the material's color and render order.\n\nThe properties set here access directly Three.js material component. \n\nMore properties at <a href='https://threejs.org/docs/#api/en/materials/Material'>THREE.js Material</a>.",
+            "properties": {
+                "overrideSrc": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Overrides the material source in all meshes of an object (e.g. a basic shape or a GLTF); Use, for example, to change the texture of a GLTF."
+                },
+                "colorSpace": {
+                    "description": "The material colorspace.",
+                    "default": "SRGBColorSpace",
+                    "enum": ["SRGBColorSpace", "LinearSRGBColorSpace", "DisplayP3ColorSpace", "NoColorSpace"],
+                    "type": "string"
+                },
+                "colorWrite": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Whether to render the material's color."
+                },
+                "renderOrder": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Allows the default rendering order of scene graph objects to be overridden."
+                },
+                "transparentOccluder": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If `true`, will set `colorWrite=false` and `renderOrder=0` to make the material a transparent occluder."
+                },
+                "gltfOpacity": {
+                    "type": "number",
+                    "description": "Opacity value to apply to the model. 1 is fully opaque, 0 is fully transparent.",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "default": 1
+                }
+            },
+            "title": "Material extras",
+            "type": "object",
+            "required": ["colorSpace", "gltfOpacity"]
+        },
+        "shadow": {
+            "title": "Shadow",
+            "description": "The shadow component enables shadows for an entity and its children. Adding the shadow component alone is not enough to display shadows in your scene. We must have at least one light with castShadow: true enabled.",
+            "type": "object",
+            "properties": {
+                "cast": {
+                    "default": false,
+                    "description": "Whether the entity casts shadows onto the surrounding scene.",
+                    "title": "cast shadow",
+                    "type": "boolean"
+                },
+                "receive": {
+                    "default": false,
+                    "description": "Whether the entity receives shadows from the surrounding scene.",
+                    "title": "receive shadow",
+                    "type": "boolean"
+                }
+            },
+            "required": ["cast", "receive"]
+        },
+        "sound": {
+            "description": "The sound component defines the entity as a source of sound or audio. The sound component can be positional and is thus affected by the component's position.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/sound.html'>A-Frame Sound</a>.",
+            "properties": {
+                "autoplay": {
+                    "default": false,
+                    "description": "Whether to automatically play sound once set.",
+                    "type": "boolean"
+                },
+                "distanceModel": {
+                    "default": "inverse",
+                    "description": "Sound model.",
+                    "enum": ["linear", "inverse", "exponential"],
+                    "type": "string"
+                },
+                "loop": {
+                    "default": false,
+                    "description": "Whether to loop the sound once the sound finishes playing.",
+                    "type": "boolean"
+                },
+                "maxDistance": {
+                    "default": 10000,
+                    "description": "Maximum distance between the audio source and the listener, after which the volume is not reduced any further.",
+                    "type": "number"
+                },
+                "on": {
+                    "default": "mousedown",
+                    "description": "An event for the entity to listen to before playing sound.",
+                    "enum": [
+                        "mousedown",
+                        "mouseup",
+                        "mouseenter",
+                        "mouseleave",
+                        "triggerdown",
+                        "triggerup",
+                        "gripdown",
+                        "gripup",
+                        "menudown",
+                        "menuup",
+                        "systemdown",
+                        "systemup",
+                        "trackpaddown",
+                        "trackpadup"
+                    ],
+                    "type": "string"
+                },
+                "poolSize": {
+                    "default": 1,
+                    "description": "Numbers of simultaneous instances of this sound that can be playing at the same time.",
+                    "type": "number"
+                },
+                "positional": {
+                    "default": true,
+                    "description": "Whether or not the audio is positional (movable).",
+                    "type": "boolean"
+                },
+                "refDistance": {
+                    "default": 1,
+                    "description": "Reference distance for reducing volume as the audio source moves further from the listener.",
+                    "type": "number"
+                },
+                "rolloffFactor": {
+                    "default": 1,
+                    "description": "Describes how quickly the volume is reduced as the source moves away from the listener.",
+                    "type": "number"
+                },
+                "src": {
+                    "description": "URL path to sound file e.g. 'store/users/wiselab/sound/wave.mp3'.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "volume": {
+                    "default": 1,
+                    "description": "How loud to play the sound.",
+                    "type": "number"
+                }
+            },
+            "title": "Sound",
+            "type": "object"
+        },
+        "textinput": {
+            "title": "Text Input",
+            "description": "Opens an HTML prompt when clicked. Sends text input as an event on MQTT. Requires click-listener.",
+            "type": "object",
+            "properties": {
+                "on": {
+                    "default": "mousedown",
+                    "description": "A case-sensitive string representing the event type to listen for. See <a href='https://developer.mozilla.org/en-US/docs/Web/Events'>Web Events</a>",
+                    "enum": [
+                        "mousedown",
+                        "mouseup",
+                        "mouseenter",
+                        "mouseleave",
+                        "triggerdown",
+                        "triggerup",
+                        "gripdown",
+                        "gripup",
+                        "menudown",
+                        "menuup",
+                        "systemdown",
+                        "systemup",
+                        "trackpaddown",
+                        "trackpadup"
+                    ],
+                    "type": "string"
+                },
+                "title": {
+                    "default": "Text Input",
+                    "description": "The prompt title.",
+                    "type": "string"
+                },
+                "label": {
+                    "default": "Input text below (max is 140 characters).",
+                    "description": "Text prompt label",
+                    "type": "string"
+                },
+                "placeholder": {
+                    "default": "Type here",
+                    "description": "Text input place holder.",
+                    "type": "string"
+                }
+            },
+            "required": ["on", "title", "label", "placeholder"]
+        },
+        "url": {
+            "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+            "format": "uri",
+            "title": "Url",
+            "type": "string"
+        },
+        "remote-render": {
+            "description": "Whether or not an object should be remote rendered [Experimental].",
+            "properties": {
+                "enabled": {
+                    "description": "Remote Render this object.",
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "title": "Remote Render",
+            "type": "object"
+        },
+        "video-control": {
+            "description": "Adds a video to an entity and controls its playback.",
+            "properties": {
+                "frame_object": {
+                    "description": "URL of a thumbnail image, e.g. 'store/users/wiselab/images/conix-face-white.jpg'.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "video_object": {
+                    "description": "Name of object where to put the video, e.g. 'square_vid6'.",
+                    "type": "string"
+                },
+                "video_path": {
+                    "description": "URL of the video file, e.g. 'store/users/wiselab/videos/kungfu.mp4'.",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "anyone_clicks": {
+                    "description": "Responds to clicks from any user.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "video_loop": {
+                    "description": "Video automatically loops.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "autoplay": {
+                    "description": "Video starts playing automatically.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "volume": {
+                    "description": "Video sound volume.",
+                    "type": "number",
+                    "default": 1
+                },
+                "cleanup": {
+                    "description": "Automatically remove HTML5 video and img assets from DOM on object removal.",
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "required": ["video_object", "frame_object", "video_path"],
+            "title": "Video",
+            "type": "object"
+        },
+        "attribution": {
+            "description": "Attribution Component. Saves attribution data in any entity.",
+            "properties": {
+                "author": {
+                    "type": "string",
+                    "default": "Unknown",
+                    "description": "Author name; e.g. 'Vaptor-Studio'."
+                },
+                "authorURL": {
+                    "type": "string",
+                    "description": "Author homepage/profile; e.g. https://sketchfab.com/VapTor."
+                },
+                "license": {
+                    "type": "string",
+                    "default": "Unknown",
+                    "description": "License summary/short name; e.g. 'CC-BY-4.0'."
+                },
+                "licenseURL": {
+                    "type": "string",
+                    "description": "License URL; e.g. http://creativecommons.org/licenses/by/4.0/."
+                },
+                "source": {
+                    "type": "string",
+                    "default": "Unknown",
+                    "description": "Model source e.g. 'Sketchfab'."
+                },
+                "sourceURL": {
+                    "type": "string",
+                    "description": "Model source URL; e.g. https://sketchfab.com/models/2135501583704537907645bf723685e7."
+                },
+                "title": {
+                    "type": "string",
+                    "default": "No Title",
+                    "description": "Model title; e.g. 'Spinosaurus'."
+                },
+                "extractAssetExtras": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Extract attribution info from asset extras; will override attribution info given (default: true)."
+                }
+            },
+            "title": "Attribution",
+            "type": "object"
+        },
+        "spe-particles": {
+            "description": "GPU based particle systems in A-Frame.\n\nMore properties at <a href='https://github.com/harlyq/aframe-spe-particles-component'>A-Frame SPE Particles</a> component.",
+            "properties": {
+                "acceleration": {
+                    "description": "For sphere and disc distributions, only the x axis is used.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "accelerationDistribution": {
+                    "description": "Distribution of particle acceleration, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for accelerationDistribution.",
+                    "default": "none",
+                    "enum": ["none", "box", "sphere", "disc"],
+                    "type": "string"
+                },
+                "accelerationSpread": {
+                    "description": "Spread of the particle's acceleration. for sphere and disc distributions, only the x axis is used.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "activeMultiplier": {
+                    "description": "Multiply the rate of particles emission, if larger than 1 then the particles will be emitted in bursts. note, very large numbers will emit all particles at once.",
+                    "default": "1",
+                    "type": "number"
+                },
+                "affectedByFog": {
+                    "description": "If true, the particles are affected by THREE js fog.",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "alphaTest": {
+                    "description": "Alpha values below the alphaTest threshold are considered invisible.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "angle": {
+                    "description": "2D rotation of the particle over the particle's lifetime, max 4 elements.",
+                    "default": [0],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "angleSpread": {
+                    "description": "Spread in angle over the particle's lifetime, max 4 elements.",
+                    "default": [0],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "blending": {
+                    "description": "Blending mode, when drawing particles.",
+                    "default": "normal",
+                    "enum": ["no", "normal", "additive", "subtractive", "multiply", "custom"],
+                    "type": "string"
+                },
+                "color": {
+                    "description": "Array of colors over the particle's lifetime, max 4 elements.",
+                    "default": ["#fff"],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "format": "color",
+                        "type": "string"
+                    }
+                },
+                "colorSpread": {
+                    "description": "Spread to apply to colors, spread an array of vec3 (r g b) with 0 for no spread. note the spread will be re-applied through-out the lifetime of the particle.",
+                    "default": [],
+                    "type": "array",
+                    "items": {
+                        "format": "grid",
+                        "$ref": "#/definitions/vector3"
+                    }
+                },
+                "depthTest": {
+                    "description": "If true, don't render a particle's pixels if something is closer in the depth buffer.",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "depthWrite": {
+                    "description": "If true, particles write their depth into the depth buffer. this should be false if we use transparent particles.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "direction": {
+                    "description": "Make the emitter operate forward or backward in time.",
+                    "default": "forward",
+                    "enum": ["forward", "backward"],
+                    "type": "string"
+                },
+                "distribution": {
+                    "description": "Distribution for particle positions, velocities and acceleration. will be overridden by specific '...Distribution' attributes.",
+                    "default": "box",
+                    "enum": ["box", "sphere", "disc"],
+                    "type": "string"
+                },
+                "drag": {
+                    "description": "Apply resistance to moving the particle, 0 is no resistance, 1 is full resistance, particle will stop moving at half of it's maxAge.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "dragSpread": {
+                    "description": "Spread to apply to the drag attribute.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "duration": {
+                    "description": "Duration of the emitter (seconds), if less than 0 then continuously emit particles.",
+                    "default": "-1",
+                    "type": "number"
+                },
+                "emitterScale": {
+                    "description": "Global scaling factor for all particles from the emitter.",
+                    "default": "100",
+                    "type": "number"
+                },
+                "enableInEditor": {
+                    "description": "Enable the emitter while the editor is active (i.e. while scene is paused).",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "enabled": {
+                    "description": "Enable/disable the emitter.",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "frustumCulled": {
+                    "description": "Enable/disable frustum culling.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "hasPerspective": {
+                    "description": "If true, particles will be larger the closer they are to the camera.",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "maxAge": {
+                    "description": "Maximum age of a particle before reusing.",
+                    "default": "1",
+                    "type": "number"
+                },
+                "maxAgeSpread": {
+                    "description": "Variance for the 'maxAge' attribute.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "opacity": {
+                    "description": "Opacity over the particle's lifetime, max 4 elements.",
+                    "default": [1],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "opacitySpread": {
+                    "description": "Spread in opacity over the particle's lifetime, max 4 elements.",
+                    "default": [0],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "particleCount": {
+                    "description": "Maximum number of particles for this emitter.",
+                    "default": "100",
+                    "type": "integer"
+                },
+                "positionDistribution": {
+                    "description": "Distribution of particle positions, disc and sphere will use the radius attributes. For box particles emit at 0,0,0, for sphere they emit on the surface of the sphere and for disc on the edge of a 2D disc on the XY plane.",
+                    "default": "none",
+                    "enum": ["none", "box", "sphere", "disc"],
+                    "type": "string"
+                },
+                "positionOffset": {
+                    "description": "Fixed offset to the apply to the emitter relative to its parent entity.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "positionSpread": {
+                    "description": "Particles are positioned within +- of these local bounds. for sphere and disc distributions only the x axis is used.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "radius": {
+                    "description": "Radius of the disc or sphere emitter (ignored for box). note radius of 0 will prevent velocity and acceleration if they use a sphere or disc distribution.",
+                    "default": "1",
+                    "type": "number"
+                },
+                "radiusScale": {
+                    "description": "Scales the emitter for sphere and disc shapes to form oblongs and ellipses.",
+                    "default": { "x": 1, "y": 1, "z": 1 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "randomizeAcceleration": {
+                    "description": "If true, re-randomize acceleration when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeAngle": {
+                    "description": "If true, re-randomize angle when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeColor": {
+                    "description": "If true, re-randomize colour when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeDrag": {
+                    "description": "If true, re-randomize drag when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeOpacity": {
+                    "description": "If true, re-randomize opacity when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizePosition": {
+                    "description": "If true, re-randomize position when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeRotation": {
+                    "description": "If true, re-randomize rotation when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeSize": {
+                    "description": "If true, re-randomize size when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "randomizeVelocity": {
+                    "description": "If true, re-randomize velocity when re-spawning a particle, can incur a performance hit.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "relative": {
+                    "description": "World relative particles move relative to the world, while local particles move relative to the emitter (i.e. if the emitter moves, all particles move with it).",
+                    "default": "local",
+                    "enum": ["local", "world"],
+                    "type": "string"
+                },
+                "rotation": {
+                    "description": "Rotation in degrees.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "rotationAxis": {
+                    "description": "Local axis when using rotation.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "rotationAxisSpread": {
+                    "description": "Variance in the axis of rotation.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "rotationSpread": {
+                    "description": "Rotation variance in degrees.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "rotationStatic": {
+                    "description": "If true, the particles are fixed at their initial rotation value. if false, the particle will rotate from 0 to the 'rotation' value.",
+                    "default": false,
+                    "type": "boolean"
+                },
+                "size": {
+                    "description": "Array of sizes over the particle's lifetime, max 4 elements.",
+                    "default": [1],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "sizeSpread": {
+                    "description": "Spread in size over the particle's lifetime, max 4 elements.",
+                    "default": [0],
+                    "type": "array",
+                    "maxItems": 4,
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "texture": {
+                    "description": "Texture to be used for each particle, may be a spritesheet.  Examples: [blob.png, fog.png, square.png, explosion_sheet.png, fireworks_sheet.png], like path 'static/images/textures/blob.png'.",
+                    "default": "",
+                    "format": "uri",
+                    "type": "string"
+                },
+                "textureFrameCount": {
+                    "description": "Number of frames in the spritesheet, negative numbers default to textureFrames.x * textureFrames.y.",
+                    "default": "-1",
+                    "type": "integer"
+                },
+                "textureFrameLoop": {
+                    "description": "Number of times the spritesheet should be looped over the lifetime of a particle.",
+                    "default": "1",
+                    "type": "integer"
+                },
+                "textureFrames": {
+                    "description": "X and Y frames for a spritesheet. each particle will transition through every frame of the spritesheet over its lifetime (see textureFramesLoop).",
+                    "default": { "x": 1, "y": 1 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector2"
+                },
+                "useTransparency": {
+                    "description": "Should the particles be rendered with transparency?",
+                    "default": true,
+                    "type": "boolean"
+                },
+                "velocity": {
+                    "description": "For sphere and disc distributions, only the x axis is used.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "velocityDistribution": {
+                    "description": "Distribution of particle velocities, for disc and sphere, only the x component will be used. if set to NONE use the 'distribution' attribute for velocityDistribution.",
+                    "default": "none",
+                    "enum": ["none", "box", "sphere", "disc"],
+                    "type": "string"
+                },
+                "velocitySpread": {
+                    "description": "Variance for the velocity.",
+                    "default": { "x": 0, "y": 0, "z": 0 },
+                    "format": "grid",
+                    "$ref": "#/definitions/vector3"
+                },
+                "wiggle": {
+                    "description": "Extra distance the particle moves over its lifetime.",
+                    "default": "0",
+                    "type": "number"
+                },
+                "wiggleSpread": {
+                    "description": "+- spread for the wiggle attribute.",
+                    "default": "0",
+                    "type": "number"
+                }
+            },
+            "required": [],
+            "title": "SPE Particles",
+            "type": "object"
+        },
+        "look-at": {
+            "description": "The look-at component defines the behavior for an entity to dynamically rotate or face towards another entity or position. Use '#my-camera' to face the user camera, otherwise can take either a vec3 position or a query selector to another entity.",
+            "title": "Look At",
+            "type": "string"
+        }
+    },
+    "definitions": {
+        "vector2": {
+            "title": "Vector2",
+            "format": "grid",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y"],
+            "type": "object"
+        },
+        "vector3": {
+            "title": "Vector3",
+            "format": "grid",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object"
+        }
+    }
+}

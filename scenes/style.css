@@ -34,9 +34,9 @@ html {
     font-size: 13px;
 }
 
-.lt-ie9 input[type="email"],
-.lt-ie9 input[type="text"],
-.lt-ie9 input[type="password"] {
+.lt-ie9 input[type='email'],
+.lt-ie9 input[type='text'],
+.lt-ie9 input[type='password'] {
     line-height: 34px;
 }
 
@@ -52,7 +52,7 @@ span.icon {
 }
 
 .min-vh-75 {
-    min-height: 75vh
+    min-height: 75vh;
 }
 
 /* allow/deny permissions icons for profile dashboard */
@@ -73,7 +73,7 @@ span.icon {
 }
 
 .border-grey {
-    border-color: #BBB;
+    border-color: #bbb;
 }
 
 @media only screen and (min-width: 850px) {
@@ -90,7 +90,6 @@ span.icon {
     width: 50%;
     border: 0;
     margin-bottom: 10px;
-
 }
 
 #sceneSelect .nav-link {
@@ -100,8 +99,8 @@ span.icon {
     color: #495057;
 }
 
-#sceneSelect .nav-tabs{
-    border:none;
+#sceneSelect .nav-tabs {
+    border: none;
 }
 
 #sceneSelect .nav-link.active {
@@ -114,17 +113,20 @@ span.icon {
     opacity: 1;
 }
 
-#sceneSelect button.disabled i.fas, #sceneSelect button.disabled i.far {
+#sceneSelect button.disabled i.fas,
+#sceneSelect button.disabled i.far {
     color: #666;
 }
 
-#sceneSelect button i.fas, #sceneSelect button i.far {
+#sceneSelect button i.fas,
+#sceneSelect button i.far {
     color: #a42629;
 }
 
-#sceneSelect button.btn-light, #cloneScene button.btn-light {
+#sceneSelect button.btn-light,
+#cloneScene button.btn-light {
     background: none;
-    border:none;
+    border: none;
     box-shadow: none;
     padding-left: 0.8em;
     padding-right: 0.8em;

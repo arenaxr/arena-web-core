@@ -1,54 +1,54 @@
 {
     "title": "Videosphere",
-    "description": "Videosphere Geometry",
-    "allOf": [{
+    "description": "Videosphere Geometry.",
+    "allOf": [
+        {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
         },
         {
             "properties": {
                 "data": {
-                    "allOf": [{
+                    "allOf": [
+                        {
                             "properties": {
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "videosphere"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["videosphere"]
                                 },
                                 "autoplay": {
                                     "default": true,
-                                    "description": "autoplay",
+                                    "title": "Autoplay",
                                     "type": "boolean"
                                 },
                                 "crossOrigin": {
                                     "default": "anonymous",
                                     "type": "string",
-                                    "title": "crossOrigin"
+                                    "title": "Cross Origin"
                                 },
                                 "loop": {
                                     "default": true,
-                                    "title": "loop",
+                                    "title": "Loop",
                                     "type": "boolean"
                                 },
                                 "radius": {
                                     "type": "number",
-                                    "title": "radius",
-                                    "default": 5000
+                                    "title": "Radius",
+                                    "default": 500
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
-                                    "title": "segments height",
-                                    "default": 64
+                                    "type": "integer",
+                                    "title": "Segments Height",
+                                    "default": 32
                                 },
                                 "segmentsWidth": {
-                                    "type": "number",
-                                    "title": "segments width",
+                                    "type": "integer",
+                                    "title": "Segments Width",
                                     "default": 64
                                 },
                                 "src": {
-                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'",
+                                    "description": "URI, relative or full path of an image/video file. e.g. 'store/users/wiselab/images/360falls.mp4'.",
                                     "format": "uri",
                                     "type": "string"
                                 }
@@ -64,32 +64,12 @@
                     "title": "Videosphere Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "videosphere",
-                        "radius": 5000,
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "videosphere"
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type", "radius", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

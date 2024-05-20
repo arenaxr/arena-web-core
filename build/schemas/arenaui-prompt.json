@@ -1,0 +1,83 @@
+{
+    "title": "ARENAUI Prompt",
+    "description": "ARENAUI element which displays prompt with button actions.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": ["arenaui-prompt"]
+                                },
+                                "title": {
+                                    "type": "string",
+                                    "title": "Title",
+                                    "default": "Prompt"
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "title": "Description",
+                                    "default": "This is a prompt. Please confirm or cancel."
+                                },
+                                "buttons": {
+                                    "type": "array",
+                                    "title": "Buttons",
+                                    "default": ["Confirm", "Cancel"],
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "width": {
+                                    "type": "number",
+                                    "title": "Override width",
+                                    "default": 1.5
+                                },
+                                "font": {
+                                    "type": "string",
+                                    "title": "Font",
+                                    "description": "Font to use for button text.",
+                                    "default": "Roboto",
+                                    "enum": ["Roboto", "Roboto-Mono"]
+                                },
+                                "theme": {
+                                    "type": "string",
+                                    "title": "Color Theme",
+                                    "default": "light",
+                                    "enum": ["light", "dark"]
+                                },
+                                "materialSides": {
+                                    "type": "string",
+                                    "title": "Material Sides",
+                                    "default": "both",
+                                    "enum": ["both", "front"],
+                                    "description": "Which sides display the rendered UI material"
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "Prompt Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "arenaui-prompt"
+                    },
+                    "required": ["object_type", "title", "buttons", "width", "position", "rotation"]
+                }
+            }
+        }
+    ],
+    "required": ["object_id", "action", "type", "data", "persist"]
+}

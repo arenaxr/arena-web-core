@@ -1,10 +1,12 @@
+/* global AFRAME */
+
 AFRAME.registerComponent('panel', {
     schema: {
-        width: {default: 1},
-        height: {default: 1},
-        depth: {default: 0.05},
+        width: { default: 1 },
+        height: { default: 1 },
+        depth: { default: 0.05 },
     },
-    init: function() {
+    init() {
         this.el.setAttribute('geometry', {
             primitive: 'roundedbox',
             width: this.data.width,

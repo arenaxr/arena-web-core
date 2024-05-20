@@ -1,5 +1,411 @@
 # Changelog
 
+## [1.27.0](https://github.com/arenaxr/arena-web-core/compare/v1.26.6...v1.27.0) (2024-05-03)
+
+
+### Features
+
+* add model joints ([5d1ff04](https://github.com/arenaxr/arena-web-core/commit/5d1ff045b7fd4d403db28fd040e6bb791100ec8f))
+* urdf loader ([75284be](https://github.com/arenaxr/arena-web-core/commit/75284be2123a7686c3a74ff251781d8b9243e015))
+
+
+### Bug Fixes
+
+* **build:** allow build page responsive layout, closes [#638](https://github.com/arenaxr/arena-web-core/issues/638) ([a909e61](https://github.com/arenaxr/arena-web-core/commit/a909e61710929989912fadb0ce7915fb8e49e305))
+* **build:** allow filestore upload of urdf model ([aa874fb](https://github.com/arenaxr/arena-web-core/commit/aa874fbfc638dd35151211b4ef88c8b69d87129b))
+* **build:** auto-publish mqtt filestore upload, closes [#640](https://github.com/arenaxr/arena-web-core/issues/640) ([0d01a30](https://github.com/arenaxr/arena-web-core/commit/0d01a306241a6742b5b69d2be8a4acab5a4d2b5b))
+* **build:** correctly update editor after euler edit, closes #[#639](https://github.com/arenaxr/arena-web-core/issues/639) ([76af366](https://github.com/arenaxr/arena-web-core/commit/76af36679b0a740e9c586dbe124b566441268fa7))
+* **filestore:** improve error feedback for rare fs auth errors ([cc1fb7d](https://github.com/arenaxr/arena-web-core/commit/cc1fb7df62f93338643f727f8017691db994111d))
+* make release please trigger other workflows (using a PAT) ([576b78f](https://github.com/arenaxr/arena-web-core/commit/576b78fcf8022504646fbdbb08319729145a019f))
+* renderfusion shader bug fix ([d94cc48](https://github.com/arenaxr/arena-web-core/commit/d94cc4809c45e6a121e92f167d989382f53abecf))
+* required param for material-extras colorSpace ([47dca20](https://github.com/arenaxr/arena-web-core/commit/47dca208c15d63a47316ee5ba79410d3ef826aa5))
+
+## [1.26.6](https://github.com/arenaxr/arena-web-core/compare/v1.26.5...v1.26.6) (2024-04-22)
+
+
+### Bug Fixes
+
+* release version ([2f7a7fb](https://github.com/arenaxr/arena-web-core/commit/2f7a7fb0678dad47a061357926185750b763f406))
+
+## [1.26.5](https://github.com/arenaxr/arena-web-core/compare/v1.26.4...v1.26.5) (2024-04-22)
+
+
+### Bug Fixes
+
+* controllers dont have scale property, so dont set it ([0261a48](https://github.com/arenaxr/arena-web-core/commit/0261a487651b3994791ea0635782c12bd33403f4))
+* still allow scale for create/updates for hands ([070d97d](https://github.com/arenaxr/arena-web-core/commit/070d97d318d0b3b9d87376f39a648735f695dc73))
+* transceiver codec selection bug fix ([4087cad](https://github.com/arenaxr/arena-web-core/commit/4087cad08f27dfd955639a5e09e6b780f8188adb))
+* typos for presenceSelect, breaks portal mode ([b78a0fb](https://github.com/arenaxr/arena-web-core/commit/b78a0fb73fd07348c4fbbc6f222cc617865515ec))
+
+## [1.26.4](https://github.com/arenaxr/arena-web-core/compare/v1.26.3...v1.26.4) (2024-04-17)
+
+
+### Features
+* Add `demoMode` URL param for minimizing UI elements (minimize chat/AV icons, hide GLTF progress popup)
+* Add `reprojectMovement` URL param for translational time warping for renderfusion client
+
+
+### Bug Fixes
+
+* actually rename var ([1a80fd5](https://github.com/arenaxr/arena-web-core/commit/1a80fd551c771e5d3bcddc1f94a0f6d70cd4f09f))
+* add latest tag ([879f8d8](https://github.com/arenaxr/arena-web-core/commit/879f8d88bce421ebc3174e687a907f72820ccc6d))
+* add latest tag ([27c0af0](https://github.com/arenaxr/arena-web-core/commit/27c0af01aede0312b88487438412ad755ece091b))
+* deal with undefined tag ([d7cd295](https://github.com/arenaxr/arena-web-core/commit/d7cd2951ce685f2d1eb13b6fc83fab3b0227d66c))
+* deal with undefined tag ([ab1d881](https://github.com/arenaxr/arena-web-core/commit/ab1d8813fad0aca84230f6de73fd9998491e22a9))
+* **material-extras:** update schemas for colorSpace ([5061e7e](https://github.com/arenaxr/arena-web-core/commit/5061e7e708ec53c1cb99b926f84d5ab1db39f993))
+* **schema:** add registered shader options to material ([4ebbad1](https://github.com/arenaxr/arena-web-core/commit/4ebbad18a26d4c13fd6edd3bbb9c65d895426c56))
+* **schema:** added missing material properties per shader ([c4184a1](https://github.com/arenaxr/arena-web-core/commit/c4184a1fb8e299c24305ef4282ca89439358e2ef))
+* **screenshare:** allow user-defined screen objects alongside default ([dbcf91b](https://github.com/arenaxr/arena-web-core/commit/dbcf91bf19815f5799461b379c332c7df8f104f4))
+* **screenshare:** don't duplicate default screensahre ([4ee153a](https://github.com/arenaxr/arena-web-core/commit/4ee153a5fd6b8e9efe65ac6b0a819402066350ed))
+* **screenshare:** fix screenshare to named screenshares ([3da8636](https://github.com/arenaxr/arena-web-core/commit/3da86361d56f576ef43888241ec68d458105d2f9))
+
+## [1.26.3](https://github.com/arenaxr/arena-web-core/compare/v1.26.2...v1.26.3) (2024-02-28)
+
+
+### Bug Fixes
+
+* bad raytrace xrselect after reloc in xr ([730657e](https://github.com/arenaxr/arena-web-core/commit/730657ef66c5e65068dfa9786b4af839ad30d844))
+* **jitsi:** allow all users access to kick out moderation ([6eba98d](https://github.com/arenaxr/arena-web-core/commit/6eba98d8e1c8999ee09c5e55e1a7e3bdec9b4f57))
+* **jitsi:** allow anonymous users ability to moderate loud users with mute ([a0428af](https://github.com/arenaxr/arena-web-core/commit/a0428afb1507cc7fd4f843eed0e62cea5dbd0519))
+* **jitsi:** allow moderators, not owners, access to mute all ([3cc4da5](https://github.com/arenaxr/arena-web-core/commit/3cc4da510340ddf59c43c9447f422a19683685b7))
+* **jitsi:** fixed sending kick command to xmpp ([8d37c2e](https://github.com/arenaxr/arena-web-core/commit/8d37c2e9f69d052a426ab4bbe1d025b09436c2c0))
+* **jitsi:** log all error data on connection fail ([b775abb](https://github.com/arenaxr/arena-web-core/commit/b775abbe6847aa6f8eca38c68d049a2d5b60445f))
+* **program:** remove warning for program message updates ([2494ac4](https://github.com/arenaxr/arena-web-core/commit/2494ac4d3c2fb808e91cd5bb140caa277ae7f241))
+* typo for button panel options enum ([20b4fd2](https://github.com/arenaxr/arena-web-core/commit/20b4fd2fe76f760c69a5ff64c5eb5e41af84592d))
+* update cursor/raycasters for both ar and vr ([b761673](https://github.com/arenaxr/arena-web-core/commit/b7616730ea9b9d70b968c8e03c52181a47e2670a))
+* update videosphere default radius to match a-frame ([b63c5aa](https://github.com/arenaxr/arena-web-core/commit/b63c5aa2d3a06ae5c27dc8356e3e58c006864c53))
+
+## [1.26.2](https://github.com/arenaxr/arena-web-core/compare/v1.26.1...v1.26.2) (2024-02-16)
+
+
+### Bug Fixes
+
+* **screenshare:** fixed screenshare failure validating token ([60d712e](https://github.com/arenaxr/arena-web-core/commit/60d712e8fc39ac2fc359ae7549b0c982faa7cb73))
+
+## [1.26.1](https://github.com/arenaxr/arena-web-core/compare/v1.26.0...v1.26.1) (2024-02-13)
+
+
+### Bug Fixes
+
+* camera overrides and lookats w/ look-controls ([6deef09](https://github.com/arenaxr/arena-web-core/commit/6deef091ec22477e74b21ccf0368210a11716607))
+* (hotfix) use safe getter for scene stats component ([6342083](https://github.com/arenaxr/arena-web-core/commit/63420836323ba811fb54e3dd22f2f134d5d3407f))
+
+## [1.26.0](https://github.com/arenaxr/arena-web-core/compare/v1.25.0...v1.26.0) (2024-02-08)
+
+
+### Features
+
+* Update to prerelease AFRAME#71f1a2b for hand tracking and iOS > 12 fixes
+* add runtime info to program schema ([d003a55](https://github.com/arenaxr/arena-web-core/commit/d003a550201ee776225d879dec70153b7f415a47))
+* adding more program info properties ([0c3030b](https://github.com/arenaxr/arena-web-core/commit/0c3030b0591f127f6cd86b57b23f15393e0ed21b))
+* attempt offscreencanvas for ccar/ccwebar cv ([b1c4d04](https://github.com/arenaxr/arena-web-core/commit/b1c4d0495a403c082a241a7bb94f0b245163c82d)), closes [#611](https://github.com/arenaxr/arena-web-core/issues/611)
+
+
+### Bug Fixes
+
+* **build:** refactor schema and target grid layout to save whitespace on build page ([#606](https://github.com/arenaxr/arena-web-core/issues/606)) ([84ef265](https://github.com/arenaxr/arena-web-core/commit/84ef26508c999d6f251eef609ece2b27c4b45b5a))
+* check for xrSession to setOriginAnchor ([d4641e7](https://github.com/arenaxr/arena-web-core/commit/d4641e7aaf3225f903f178c5f71d433abf76668f))
+* only stopVideo on jitsi start if withVideo ([b9376d8](https://github.com/arenaxr/arena-web-core/commit/b9376d8c85c6ca3d1d453cd9f5cddff610c3581a))
+* **particle-system:** remove particle-system, favoring spe-particles in schema ([b8899e3](https://github.com/arenaxr/arena-web-core/commit/b8899e364a5896c25b556c9eeea51616809e2040))
+* references to vio pose vars ([2f57b54](https://github.com/arenaxr/arena-web-core/commit/2f57b54bae68ef4a45c78654d309f377a747362e))
+* release test gUM vid stream ([f4f5bb3](https://github.com/arenaxr/arena-web-core/commit/f4f5bb38a1caf31cde73c86ee7d59739ba809b34))
+
+## [1.25.0](https://github.com/arenaxr/arena-web-core/compare/v1.24.1...v1.25.0) (2023-12-14)
+
+
+### Features
+
+* add (renamed) XR env-publisher ([8e703ee](https://github.com/arenaxr/arena-web-core/commit/8e703ee2a1b0ec6723016a9f97fdc3039dec2fdd))
+* add raw flag for mqtt publish ([82fe4f1](https://github.com/arenaxr/arena-web-core/commit/82fe4f1fdee93dfd0f0f529084fbb5221e97a31a))
+* add xr system `debug-ui` ([2ced380](https://github.com/arenaxr/arena-web-core/commit/2ced3801ce5d753895cae82244e7cc8afc6539d2))
+
+
+### Bug Fixes
+
+* **build3d:** improve logging window, small bug fixes, failed attempts at auto-play ([#600](https://github.com/arenaxr/arena-web-core/issues/600)) ([342a833](https://github.com/arenaxr/arena-web-core/commit/342a833338dd33b8d931caecf40ef26424d790c2))
+* **build:** add missing gltf-morph to schema ([52b9220](https://github.com/arenaxr/arena-web-core/commit/52b92201475fa522ffce1fafca7acd9387c3ee24))
+* **build:** add range validation for opacity ([c31b744](https://github.com/arenaxr/arena-web-core/commit/c31b744da5a77bb95e675036f93c8386f651995f))
+* **build:** add roation/scale range validation ([e4ab61c](https://github.com/arenaxr/arena-web-core/commit/e4ab61c70ad5197178533fe0ee47dfd62d6a89ef))
+* **build:** add schema for detailed physics dynamic/static bodies ([00c2849](https://github.com/arenaxr/arena-web-core/commit/00c284936ed95d7a9b1e241ee724cab7c732e7c9))
+* dont send vrmode=true to remote server when in fullscreen mode ([fb20678](https://github.com/arenaxr/arena-web-core/commit/fb206784dfe3187254039b2a0270f1b845fd4194))
+* handle persistent anchor setting failure ([7f3cad4](https://github.com/arenaxr/arena-web-core/commit/7f3cad4c210e35dca0543daf681f7f5432b00d0c))
+* **physics:** wait to load aframe-physics before making groundPlane static ([7c67816](https://github.com/arenaxr/arena-web-core/commit/7c678161c7fa614e366a3c92ec2b05f85ee55027))
+* precompute proj and pose matrix inverse for atw to improve performance ([ecf17a9](https://github.com/arenaxr/arena-web-core/commit/ecf17a997b2be4328e075df690ae88b589df90bc))
+* xr-env-publisher init listener ([d900add](https://github.com/arenaxr/arena-web-core/commit/d900add10278755ad260b21185a0d9f70cbb7fd4))
+
+## [1.24.1](https://github.com/arenaxr/arena-web-core/compare/v1.24.0...v1.24.1) (2023-11-17)
+
+
+### Bug Fixes
+
+* update AFRAME w/ pre-rls that fixes ar-hit-test anchor tracking ([9915844](https://github.com/arenaxr/arena-web-core/commit/991584445085e40decad197d4c2d57cfaf61e387))
+* another typo in material-extras, video cubes transparency restored ([8068a9a](https://github.com/arenaxr/arena-web-core/commit/8068a9ac3bfd3bcc6a41505225384721c316ee36))
+
+## [1.24.0](https://github.com/arenaxr/arena-web-core/compare/v1.23.4...v1.24.0) (2023-11-16)
+
+
+### Features
+
+* Update AFRAME v1.5.0
+* add gaussian splatting component ([0368dfd](https://github.com/arenaxr/arena-web-core/commit/0368dfd0dbc932bc35875375ab84f7e3318a83a5))
+* Add material-extras gltfOpacity option ([a8eeddf](https://github.com/arenaxr/arena-web-core/commit/a8eeddf3acf60e5e3f7711fbb22fa1be1a1bf084))
+
+
+### Bug Fixes
+
+* (build3d): change component name *build-watch* =&gt; *build3d-mqtt* ([ed5e9c3](https://github.com/arenaxr/arena-web-core/commit/ed5e9c32b7fd3e9afd1415339925151b668d7bae))
+* align schema key for gaussian_splatting ([0a8615a](https://github.com/arenaxr/arena-web-core/commit/0a8615a4879ff770b89921ec96d638f6a7216b96))
+* better atw and atw bug fix for vr devices ([9dbd42a](https://github.com/arenaxr/arena-web-core/commit/9dbd42a9c8bac649dcb9424e6a35c7cac45a26cc))
+* **build3d:** check permissions on build3d request, show error otherwise ([d749053](https://github.com/arenaxr/arena-web-core/commit/d7490537d1e3e3396a8045e60934c51a2abf5cf8))
+* **build:** add gaussian_splatting upload to filestore ([9e9269d](https://github.com/arenaxr/arena-web-core/commit/9e9269de2c4cb71c3db5ae1b7a5cf59b65b29af0))
+* **build:** streamlined FileStore upload flow ([#597](https://github.com/arenaxr/arena-web-core/issues/597)) ([4470c68](https://github.com/arenaxr/arena-web-core/commit/4470c68e2873a1c19124b40f6b5a97233a1db68c))
+* splatting object type ([e85d619](https://github.com/arenaxr/arena-web-core/commit/e85d6196f497761b6a98b97bddc7c35cecc068f1))
+* typo ([4e1a1f3](https://github.com/arenaxr/arena-web-core/commit/4e1a1f3dd33b28c1737275d5dcef3413fa56907a))
+
+## [1.23.3](https://github.com/arenaxr/arena-web-core/compare/v1.23.2...v1.23.3) (2023-11-02)
+
+### Refactor
+
+* **BREAKING CHANGE**: All `arena-user` attributes (descriptors of users in the scene) now are published under the
+                       `arena-user` key within the `data` block, rather than the top-level or directly under `data`
+                       of the of the MQTT message.
+* **BREAKING CHANGE**: Only `position` and `rotation` attributes are processed
+                       within `data` besides `arena-user` for `object_type:"camera"`. L/R hand objects also are
+                       filtered to only process `position`, `rotation`, `scale` attributes alongside `url`.
+
+### Bug Fixes
+
+* **arena-user:** publish/read all camera data in data block ([73e382e](https://github.com/arenaxr/arena-web-core/commit/73e382ebf1656cdbbd67bda815005c401d22759c))
+* arenaui colors to SRGB ([68d818c](https://github.com/arenaxr/arena-web-core/commit/68d818c228c84b9c6b4edd0a7c0866bf34b1f08b))
+* **build:** eliminate redundant (and conflicting) defaults in wire schema  ([#592](https://github.com/arenaxr/arena-web-core/issues/592)) ([fff3450](https://github.com/arenaxr/arena-web-core/commit/fff3450aeffebe705758cbadbc5c9267e9d32865))
+* localStorage saved head model set on subsequent loads ([fd6372f](https://github.com/arenaxr/arena-web-core/commit/fd6372fa1898f8829dfd41fd962c290764bdbe0e))
+* remove hand tracking from webr features ([50a01c9](https://github.com/arenaxr/arena-web-core/commit/50a01c976f7996c4beae6306f7183be114d8ba01))
+* return bool true from arena-camera/hands create-update ([9d6d749](https://github.com/arenaxr/arena-web-core/commit/9d6d749ccaedd05a0017a463c8d7ea18d4dd95e3))
+* update lingering arena-camera.position from 41caa23 ([8e94b14](https://github.com/arenaxr/arena-web-core/commit/8e94b1479abfc270a05f9c417f88d4c11f7eda6c))
+
+## [1.23.2](https://github.com/arenaxr/arena-web-core/compare/v1.23.1...v1.23.2) (2023-10-16)
+
+
+### Bug Fixes
+
+* **build:** fix euler degree rotation editor updates ([a279ab3](https://github.com/arenaxr/arena-web-core/commit/a279ab3cb61a811547d50408f76c2f72c5173f3c))
+* dark card img bg color ([3c63169](https://github.com/arenaxr/arena-web-core/commit/3c6316938304e72e660c3a8fec7902be41a45793))
+* **jitsi:** allow degradation of multi-videospheres by user position ([#588](https://github.com/arenaxr/arena-web-core/issues/588)) ([19233ed](https://github.com/arenaxr/arena-web-core/commit/19233ed834bc803a146d9819a1b936fcd800d8c7))
+* **jitsi:** allow videosphere resolution based on sphere not avatar ([76402cb](https://github.com/arenaxr/arena-web-core/commit/76402cbf7cd484f862a92019630918b5f597aa19))
+* **schema:** small fixes to default arenaui object types ([5e8b033](https://github.com/arenaxr/arena-web-core/commit/5e8b033ead0f1b18f84a58fc1e958f7a273c5e99))
+
+## [1.23.1](https://github.com/arenaxr/arena-web-core/compare/v1.23.0...v1.23.1) (2023-10-02)
+
+
+### Bug Fixes
+
+* **auth:** fixed anonymous build page scenes redirect after login ([0f92857](https://github.com/arenaxr/arena-web-core/commit/0f92857f4e34a6e9ae51948d2911d56c98b9adf3))
+* **console:** also bind console.assert to not throw exceptions in spe-particles ([b4c7c5b](https://github.com/arenaxr/arena-web-core/commit/b4c7c5b802eac5fc14633873dd52a9321ed9ac6f))
+* **schema:** update integer types to match components ([091c918](https://github.com/arenaxr/arena-web-core/commit/091c9183a0a02197c10d1538681fc919ae559777))
+
+## [1.23.0](https://github.com/arenaxr/arena-web-core/compare/v1.22.0...v1.23.0) (2023-09-10)
+
+
+### Features
+
+* add blip in/out vfx ([397ac8c](https://github.com/arenaxr/arena-web-core/commit/397ac8c4d7996ce601920dc791f4141dac488403))
+
+
+### Bug Fixes
+
+* add backup timeout for el del on blipout ([6456414](https://github.com/arenaxr/arena-web-core/commit/6456414d5217672101743961f974f3332df535fe))
+* **build:** add image geometry properties to schema ([81474ba](https://github.com/arenaxr/arena-web-core/commit/81474ba8c62d996306784366dede169c93d94ad7))
+* **build:** fixed errors in particle-system schema ([6351d87](https://github.com/arenaxr/arena-web-core/commit/6351d87765568581ffc404807de487f1caaa0643))
+* **build:** place image properties at proper level ([8d29291](https://github.com/arenaxr/arena-web-core/commit/8d29291cc99d3e632b2e395f4d4c217fb9896020))
+* **build:** preserve mesh aspect ratio in image file upload ([e57e53c](https://github.com/arenaxr/arena-web-core/commit/e57e53ce8e949b786d869ae0398d88fbd782c7e6))
+* defer until object fully loaded ([b189691](https://github.com/arenaxr/arena-web-core/commit/b189691d8f645673c09f8946896c362df945e180))
+* **image:** allow users to set image plane geometry attributes ([dadb766](https://github.com/arenaxr/arena-web-core/commit/dadb766b1e2459c6f1aec3ad8a357b2082d2c23a))
+* remove init camera pos/rot set in arena-users ([985f998](https://github.com/arenaxr/arena-web-core/commit/985f998edabe707a341f9a229ebc80989e2646d9))
+* **scenes:** allow anon users access to public scenes list ([322b673](https://github.com/arenaxr/arena-web-core/commit/322b6737cbc88e2d665f3a38b236d68938ceb370))
+* set ANIME tick to aframe tick to enable in XR ([e1a0556](https://github.com/arenaxr/arena-web-core/commit/e1a055668a3426ff947b28db3f7de3184dee10d4))
+
+## [1.22.0](https://github.com/arenaxr/arena-web-core/compare/v1.21.2...v1.22.0) (2023-09-04)
+
+
+### Features
+
+* Add build page model/image filestore upload buttons ([#577](https://github.com/arenaxr/arena-web-core/issues/577)) ([abb0f11](https://github.com/arenaxr/arena-web-core/commit/abb0f1122b53fb7af663abcc38da2568501f483f))
+* add url param to disable atw for remote rendering ([0a852aa](https://github.com/arenaxr/arena-web-core/commit/0a852aabc35f5dc77957b749233f76621cee7e98))
+* **build:** add model upload hide-in-ar for digital twin option ([3377cf1](https://github.com/arenaxr/arena-web-core/commit/3377cf1c62b6b57e6788066b3b92064d7d122008))
+
+
+### Bug Fixes
+
+* **build:** fixed auth await for updated fs token ([f4c69d9](https://github.com/arenaxr/arena-web-core/commit/f4c69d925cf29ef1dde8c87d202e5f1b4ea7179c))
+* **build:** make consistant uplaod file path ([1d0411e](https://github.com/arenaxr/arena-web-core/commit/1d0411e579871c2451926239c20eb010a7c1bf78))
+* **fs:** fixed filestore path link to use de-scoped resource path ([b5afcce](https://github.com/arenaxr/arena-web-core/commit/b5afccee1cbfa8e0ecd6aeb667e62797621a82b2))
+* working window listener for XRBrowser touch ([fef91cf](https://github.com/arenaxr/arena-web-core/commit/fef91cfe1c8ac61a56bf350e832f36a6dc7b8b12))
+
+## [1.21.2](https://github.com/arenaxr/arena-web-core/compare/v1.21.1...v1.21.2) (2023-08-28)
+
+
+### Bug Fixes
+
+* race condition b/w programs vs runtime-mngr ([ff76797](https://github.com/arenaxr/arena-web-core/commit/ff76797244e00e328d7e35fd1c76e79df7101de1))
+
+## [1.21.1](https://github.com/arenaxr/arena-web-core/compare/v1.21.0...v1.21.1) (2023-08-25)
+
+
+### Bug Fixes
+
+* bind publish to ARENA.Mqtt ([5f73683](https://github.com/arenaxr/arena-web-core/commit/5f73683eb47b064f87e15347c3ca9b95cb8019eb))
+* don't init arena-console w/o a pub func ([6866f8a](https://github.com/arenaxr/arena-web-core/commit/6866f8a07402acddb7aa77c6f1f94a94347dc1d9))
+* Move arena-console init to MQTT_LOADED ([259c7fc](https://github.com/arenaxr/arena-web-core/commit/259c7fc048dad8a74b669dbc223bd6c9086411fb))
+
+## [1.21.0](https://github.com/arenaxr/arena-web-core/compare/v1.20.8...v1.21.0) (2023-08-10)
+
+
+### Features
+
+* add initial test arenaui components/systems ([6848fb7](https://github.com/arenaxr/arena-web-core/commit/6848fb74fb0ddb23ba4257ea0deb93a103465d70))
+
+
+### Bug Fixes
+
+* card image background corner ([2f4a73f](https://github.com/arenaxr/arena-web-core/commit/2f4a73f9df3d33fe9283b2d9aa71c7ad935c053e))
+* deprecated ThreeMesh fontColor to color ([0f88f4a](https://github.com/arenaxr/arena-web-core/commit/0f88f4a6b42e2e49ff749c97fa5a8fe87af70066))
+* Use touchstart/end for webxr-viewer AR click ([66750ab](https://github.com/arenaxr/arena-web-core/commit/66750ab1cd2adfee699d67ce3e8cdc6bcd3c44e6))
+
+## [1.20.8](https://github.com/arenaxr/arena-web-core/compare/v1.20.7...v1.20.8) (2023-08-09)
+
+
+### Bug Fixes
+
+* reference to signoutpath ([d76324a](https://github.com/arenaxr/arena-web-core/commit/d76324a65ce5cf8ea238ffd7624ba3f6d340c7ad))
+
+## [1.20.7](https://github.com/arenaxr/arena-web-core/compare/v1.20.6...v1.20.7) (2023-08-09)
+
+
+### Bug Fixes
+
+* catch and log errors from parsing linked dependent messages ([be2cee1](https://github.com/arenaxr/arena-web-core/commit/be2cee133f4d08dd76e36572d6a48d5d8e062eb8))
+* move fs logout to site logout ([95724a9](https://github.com/arenaxr/arena-web-core/commit/95724a9d86ead35e2741c14f6e3502d24e5323c1))
+* show passthrough for atw gaps in hybrid rendering for ar devices ([4a69cd9](https://github.com/arenaxr/arena-web-core/commit/4a69cd9432269050ddc81a11e4de86d886a205e0))
+* WebXR Browser broken CV pipeline ([976c43f](https://github.com/arenaxr/arena-web-core/commit/976c43f253cdf1aad58a2c10498f1fa9c2849b04))
+
+## [1.20.6](https://github.com/arenaxr/arena-web-core/compare/v1.20.5...v1.20.6) (2023-07-26)
+
+
+### Bug Fixes
+
+* remote video playback in safari ([6d1a88c](https://github.com/arenaxr/arena-web-core/commit/6d1a88c5cbdb4b38fb93775e7404410c7ab00025))
+
+## [1.20.5](https://github.com/arenaxr/arena-web-core/compare/v1.20.4...v1.20.5) (2023-07-10)
+
+
+### Bug Fixes
+
+* variable replacement on module create ([aa152c7](https://github.com/arenaxr/arena-web-core/commit/aa152c770e586e0cafaedc14cd6f46c5a5095668))
+
+## [1.20.4](https://github.com/arenaxr/arena-web-core/compare/v1.20.3...v1.20.4) (2023-07-10)
+
+
+### Bug Fixes
+
+* add runtime manager again after refactor ([74643fb](https://github.com/arenaxr/arena-web-core/commit/74643fb0bec9360a55c354c1ef4dfe39beb8b1b4))
+* **auth:** only show profile when authenticated ([0588c59](https://github.com/arenaxr/arena-web-core/commit/0588c5913fcdaba4b55f306f83227eafe784638b))
+* **auth:** only show profile when authenticated ([2ed296b](https://github.com/arenaxr/arena-web-core/commit/2ed296b85d9d62153a426a462f06d7a769219003))
+* don't req `scene` auth token when unneeded ([6b7d172](https://github.com/arenaxr/arena-web-core/commit/6b7d1726f99fe82f9835f636f8b3f2f8f3ad8479))
+
+## [1.20.3](https://github.com/arenaxr/arena-web-core/compare/v1.20.2...v1.20.3) (2023-07-06)
+
+
+### Bug Fixes
+
+* bind av-setup detectDevices to system ([c7038f4](https://github.com/arenaxr/arena-web-core/commit/c7038f42c911f3dcd2bd6697ba12bad98ea43b7a))
+* do not init local av with armode/vrmode ([f9e8d7e](https://github.com/arenaxr/arena-web-core/commit/f9e8d7e20b47ae7ba6ac48ec23a0e4f2ce6eb8ed))
+* remove async load of mdb css due to safari ([81c2904](https://github.com/arenaxr/arena-web-core/commit/81c29049e59b4e55ee0b320302c8588d9f81ff3c))
+* WebXRViewer doesn't init ARMarkerSys ([1306e7b](https://github.com/arenaxr/arena-web-core/commit/1306e7b960b1eb85af56bc3419ddfc6d293a140a))
+
+## [1.20.2](https://github.com/arenaxr/arena-web-core/compare/v1.20.1...v1.20.2) (2023-06-29)
+
+
+### Bug Fixes
+
+* Add missing debug to arena-console ([4534c78](https://github.com/arenaxr/arena-web-core/commit/4534c783befdd8e8fc060ff9bbcd22c5dfdb4d6f))
+
+## [1.20.1](https://github.com/arenaxr/arena-web-core/compare/v1.20.0...v1.20.1) (2023-06-29)
+
+
+### Bug Fixes
+
+* update Dockerfile set arena_version.js ([3fe6999](https://github.com/arenaxr/arena-web-core/commit/3fe69991c6c3228e54e7c701bfd1f8e1fa08aff8))
+
+## [1.20.0](https://github.com/arenaxr/arena-web-core/compare/v1.19.1...v1.20.0) (2023-06-29)
+
+
+### Features
+
+* add inscene-opts for postprocess fx ([4cb4ad4](https://github.com/arenaxr/arena-web-core/commit/4cb4ad45864f70a483c37cb8b76aa1a298fd672e))
+* consolidate, add show/hide-on-enter-vr/ar ([51ba95a](https://github.com/arenaxr/arena-web-core/commit/51ba95a9a0d54026caa635de12283376b0f72243))
+
+
+### Bug Fixes
+
+* "arena-side-menu-ui" is a system ([b763831](https://github.com/arenaxr/arena-web-core/commit/b7638315670c6cbf8bcb65f73f0152ff3745f5a1))
+* add init'd flag for init-&gt;ready listener pattern ([e9da1a1](https://github.com/arenaxr/arena-web-core/commit/e9da1a1efdb93afee2b8e2f11612154a2ff676dd))
+* bad refactor around webxr session for webar ([f4cfaf7](https://github.com/arenaxr/arena-web-core/commit/f4cfaf7607ad15a8ea24b90e16d33b30d71feeb9))
+* bad refactor populating build namespaces ([3884657](https://github.com/arenaxr/arena-web-core/commit/3884657339c62adc18283ce0e6ab99292ab41d24))
+* bad scoping in anon func for filter ([1d8ee6e](https://github.com/arenaxr/arena-web-core/commit/1d8ee6e01b26a5d83343005f567b9d1ffbc81738))
+* better solid angle calc for hybrid rendering ([b64c8e3](https://github.com/arenaxr/arena-web-core/commit/b64c8e31eefb57ad7082539b3fe0ffb37ce67f71))
+* **build3d:** special case videosphere type ([#539](https://github.com/arenaxr/arena-web-core/issues/539)) ([a41c153](https://github.com/arenaxr/arena-web-core/commit/a41c1533d89e6d4a8f6b1312effa7b85256224bd))
+* change check of pref settings to audioin ([c77a71f](https://github.com/arenaxr/arena-web-core/commit/c77a71ff70ddc8cc5ffd4a11fd670b13fafe8d46))
+* chat liveUsers should be obj ([45f4b21](https://github.com/arenaxr/arena-web-core/commit/45f4b21c19432f85576f8c096b6cb505f7d0935e))
+* colorspace fix for hybrid rendering ([0a9b944](https://github.com/arenaxr/arena-web-core/commit/0a9b944ed1aae4da3e9017e8ed02948b8595fd8e))
+* convert glitch and pixel to SRGB as needed ([6f6d6f4](https://github.com/arenaxr/arena-web-core/commit/6f6d6f463e6961402d39335f239ede7676053909))
+* createAnchor frame must be from RAF callback ([41a9d2d](https://github.com/arenaxr/arena-web-core/commit/41a9d2df389d72c77411a4c738700d744f9b4d55))
+* del refs to videocube on remove ([3357f8c](https://github.com/arenaxr/arena-web-core/commit/3357f8ce0d1fc17a306c3afd414aed01630ad1e4))
+* don't await non async mqttc proxied methods ([3500b9d](https://github.com/arenaxr/arena-web-core/commit/3500b9d3defd63c7aa76f99821ff6f12fbb74971))
+* **env:** use lighter preset env 'default' over 'starry' for updated colorspace ([de92053](https://github.com/arenaxr/arena-web-core/commit/de920530f55868969f9c1e792eb549858bd5cc2d))
+* face tracking and expose controller events ([e03c50f](https://github.com/arenaxr/arena-web-core/commit/e03c50fd3b866ed1f4b0a1643d698853d6bd83cf))
+* force matrixworld update on startpos teleportTo ([5b8a467](https://github.com/arenaxr/arena-web-core/commit/5b8a467e7a03b16c0b3a025c2e336ea77c347eb5))
+* **geometry:** remove redundant prism geometry, rather use cylinder ([14bb4ff](https://github.com/arenaxr/arena-web-core/commit/14bb4ff998eade09d84d36d864c4854c78e7fd5f))
+* handle broken model load srcs ([610a6c6](https://github.com/arenaxr/arena-web-core/commit/610a6c67adfc5bb95d2ae3b697a8f53dd869b3d4))
+* icon load condition ([7e96c1c](https://github.com/arenaxr/arena-web-core/commit/7e96c1c72ffbea2ff92f34109acd26d941b3913f))
+* import extension ([b0e5cd5](https://github.com/arenaxr/arena-web-core/commit/b0e5cd5fc6b42e2d433e878408c50776cbeda4d0))
+* import extension again ([233e259](https://github.com/arenaxr/arena-web-core/commit/233e25967ffeea8fde369f9e46a8942fdf1294e1))
+* **jitsi:** restored dominant speaker signalling ([f28d54f](https://github.com/arenaxr/arena-web-core/commit/f28d54f9bd301bd0362ddc6b7800483a17154e91))
+* jittery aabb-collider in dual-view XR ([2d73d44](https://github.com/arenaxr/arena-web-core/commit/2d73d4461cdeb56d459c72006e9739dbc01495b7))
+* landmarks ref of chat-ui as system ([2f98bba](https://github.com/arenaxr/arena-web-core/commit/2f98bbae0e7b023da2d63801571d8925ae758340))
+* loadscene moved to multilistener ([49cfc1b](https://github.com/arenaxr/arena-web-core/commit/49cfc1bcf0d4204a8e4c5f0732a58e30eb025939))
+* manually init mdb form for setupav ([3949aa6](https://github.com/arenaxr/arena-web-core/commit/3949aa6e77703f05d65c16b90bbaeb307acdd1ee))
+* move jitsi.health alias in ready ([fb23e0e](https://github.com/arenaxr/arena-web-core/commit/fb23e0e50a8b87fe08c2260d2e066d28d5aecc7a))
+* move startpos loaded emit into landmark sys ([0ba381a](https://github.com/arenaxr/arena-web-core/commit/0ba381ac1c9a22f89f2c89dd25bacc6551bd4343))
+* null-coalesce userName from defaults ([051313c](https://github.com/arenaxr/arena-web-core/commit/051313cd89d98c8137d1c3584b0df11c832e36bb))
+* paho not async, defer MQTT emit to onSuccess ([efa8d16](https://github.com/arenaxr/arena-web-core/commit/efa8d16f9111d963351de848e16be9062fb58ba0))
+* properly send controller events ([f6d3794](https://github.com/arenaxr/arena-web-core/commit/f6d3794a716fcb3c896d141310c2a77440e551a4))
+* reassign const ([56e6a46](https://github.com/arenaxr/arena-web-core/commit/56e6a461529652a3cd017755815ba8536b5c0b67))
+* ref arena-side-menu-ui as system not component ([8ea78ad](https://github.com/arenaxr/arena-web-core/commit/8ea78ad77c749d8cc7f4e1ca9cb4fd5aec21c224))
+* refactored references to ARENA.Jitsi (jitsi) ([41ee1fc](https://github.com/arenaxr/arena-web-core/commit/41ee1fc5317201ad183b0b837698035a38b99301))
+* reject anon user from build page ([0e55a25](https://github.com/arenaxr/arena-web-core/commit/0e55a252a0993d125d1348ec152db67fc906177a))
+* rename jitsi.ready flag to initialized ([5bbb5f2](https://github.com/arenaxr/arena-web-core/commit/5bbb5f2cf30f06720b2057f7b2407786a578405b))
+* renamed variable consistency ([d8434f0](https://github.com/arenaxr/arena-web-core/commit/d8434f0e09b58787db6a23d2e95c95913e81d74f))
+* required schema for colorspace in build ([cd1ec91](https://github.com/arenaxr/arena-web-core/commit/cd1ec912b732cbc2689f172e0a780536eea2f56b))
+* restore a-assets needed for a/v appending ([c981b2d](https://github.com/arenaxr/arena-web-core/commit/c981b2d96e33f538c3b070f20b02139be989508e))
+* restore ARENA.defaults until refactored out ([6153baf](https://github.com/arenaxr/arena-web-core/commit/6153bafaef62bc421c5a567f67610355676483c7))
+* restore default scene options ([25bd2af](https://github.com/arenaxr/arena-web-core/commit/25bd2afa5adee96707a4b6baeaae9faacea5b2db))
+* revert b24f13bb, use _this for jquery compat ([03e666f](https://github.com/arenaxr/arena-web-core/commit/03e666f64a06f1e8729eb95e55671f3f34ffe07f))
+* rough formatting on calc function ([00085a4](https://github.com/arenaxr/arena-web-core/commit/00085a427c49fa8ee469a983eb1c39a5426d08a1))
+* Set armarkersys listener xr sessionstart ([ef19748](https://github.com/arenaxr/arena-web-core/commit/ef1974806f972213fad65a1c57fac3a0c8589fec))
+* set displayname as active on start to push label up ([fce3bae](https://github.com/arenaxr/arena-web-core/commit/fce3bae288a009f8b4c9f4c21ba23217a2e569f3))
+* set mouseover/leave for chat as arrow func ([b24f13b](https://github.com/arenaxr/arena-web-core/commit/b24f13bb6526e694bca7366b69cc60d912ad20d9))
+* spotar refactor ([99f3d57](https://github.com/arenaxr/arena-web-core/commit/99f3d576dbd428177b72ea512062ab34fa85181b))
+* spread copy gltf-model attrs to restore later ([15ac173](https://github.com/arenaxr/arena-web-core/commit/15ac1734fdab379f66312eb277ca18d30e13108d))
+* startcoords setting ([5bd4af0](https://github.com/arenaxr/arena-web-core/commit/5bd4af032cee6e5eb5f9175c59a1eb39083cec1e))
+* tick arena-users after jitsi conference init ([b696354](https://github.com/arenaxr/arena-web-core/commit/b6963549da33fbccca55accbed4ddf295698b10c))
+* toggling on/off flying and depth for hybrid rendering fixed ([0bf7472](https://github.com/arenaxr/arena-web-core/commit/0bf7472f53f001ea9593991f9b3fdce5992b439b))
+* typo ([7d2dcc9](https://github.com/arenaxr/arena-web-core/commit/7d2dcc9609e229a6381a02f585ad41e4b138cc88))
+* typo ([4c6d415](https://github.com/arenaxr/arena-web-core/commit/4c6d415ed2f34bd50577b025dd3a3516b9f9904b))
+* typo double import?? ([45059a0](https://github.com/arenaxr/arena-web-core/commit/45059a06d43b83f2536a9df17b9c3a19c891ca50))
+* typos for events ([907f1ba](https://github.com/arenaxr/arena-web-core/commit/907f1bae3e022c96b274a8b3154bb59ff62a669d))
+* Various refs (defaults, arenatopic stuff) ([08dea36](https://github.com/arenaxr/arena-web-core/commit/08dea36492669d8652ccbc8c7f898f50d5e5a221))
+* wait for scene options to load before objs ([db28074](https://github.com/arenaxr/arena-web-core/commit/db28074b4b398ba61df649348a391af3497e5089))
+
 ## [1.19.0](https://github.com/arenaxr/arena-web-core/compare/v1.18.0...v1.19.0) (2023-05-16)
 
 

@@ -1,0 +1,62 @@
+{
+    "title": "URDF Model",
+    "description": "Load a URDF model.\n\nSee guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
+    "allOf": [
+        {
+            "$ref": "./schemas/definitions-arena-object.json#/properties"
+        },
+        {
+            "properties": {
+                "data": {
+                    "allOf": [
+                        {
+                            "properties": {
+                                "object_type": {
+                                    "type": "string",
+                                    "title": "3D object type",
+                                    "description": "3D object type.",
+                                    "enum": [
+                                        "urdf-model"
+                                    ]
+                                },
+                                "url": {
+                                    "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
+                                    "format": "uri",
+                                    "title": "Url",
+                                    "type": "string"
+                                },
+                                "joints": {
+                                    "description": "Set joint values (in degrees) in the form 'JointName1: ValueInDegrees1, JointName2: ValueInDegrees2, ...'. ",
+                                    "title": "joints",
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "./schemas/definitions-entity.json#/properties"
+                        },
+                        {
+                            "$ref": "./schemas/definitions-common.json#/properties"
+                        }
+                    ],
+                    "title": "URDF Model Data",
+                    "additionalProperties": true,
+                    "default": {
+                        "object_type": "urdf-model"
+                    },
+                    "required": [
+                        "object_type",
+                        "url"
+                    ]
+                }
+            }
+        }
+    ],
+    "required": [
+        "object_id",
+        "action",
+        "type",
+        "data",
+        "persist"
+    ]
+}

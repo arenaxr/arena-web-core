@@ -6,9 +6,9 @@
  * @date 2023
  */
 
-/* global AFRAME, THREE */
+/* global AFRAME, ARENA, THREE */
 
-import {ARENAUtils} from '../utils';
+import { ARENAUtils } from '../utils';
 
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
@@ -22,6 +22,15 @@ const OBSERVER_CONFIG = {
     subtree: true,
 };
 
+function copyArray(dest, source) {
+    /* eslint-disable no-param-reassign */
+    dest.length = 0;
+    for (let i = 0; i < source.length; i++) {
+        dest[i] = source[i];
+    }
+    /* eslint-disable no-param-reassign */
+}
+
 /**
  * Supermedium/aabb-collider#24a9d3e. Renamed to box-collider for clarity
  *
@@ -32,14 +41,14 @@ const OBSERVER_CONFIG = {
  */
 AFRAME.registerComponent('box-collider', {
     schema: {
-        collideNonVisible: {default: false},
-        debug: {default: false},
-        enabled: {default: true},
-        interval: {default: 100}, // Change to match default camera tick rate
-        objects: {default: '[box-collision-listener]'}, // Default only intersects with collision-listeners
+        collideNonVisible: { default: false },
+        debug: { default: false },
+        enabled: { default: true },
+        interval: { default: 100 }, // Change to match default camera tick rate
+        objects: { default: '[box-collision-listener]' }, // Default only intersects with collision-listeners
     },
 
-    init: function() {
+    init() {
         this.centerDifferenceVec3 = new THREE.Vector3();
         this.clearedIntersectedEls = [];
         this.closestIntersectedEl = null;
@@ -60,47 +69,53 @@ AFRAME.registerComponent('box-collider', {
         this.observer = new MutationObserver(this.setDirty);
         this.dirty = true;
 
-        this.hitStartEventDetail = {intersectedEls: this.newIntersectedEls};
-        this.hitEndEventDetail = {endIntersectedEls: this.clearedIntersectedEls};
+        this.collideStartEventDetail = { intersectedEls: this.newIntersectedEls };
+        this.collideEndEventDetail = { endIntersectedEls: this.clearedIntersectedEls };
+
+        this.tempMatrixWorld = new THREE.Matrix4();
+        this.tempMatrixWorldSceneCam = new THREE.Matrix4();
+        this.isCamera = !!this.el.components.camera;
     },
 
-    play: function() {
+    play() {
         this.observer.observe(this.el.sceneEl, OBSERVER_CONFIG);
         this.el.sceneEl.addEventListener('object3dset', this.setDirty);
         this.el.sceneEl.addEventListener('object3dremove', this.setDirty);
     },
 
-    remove: function() {
+    remove() {
         this.observer.disconnect();
         this.el.sceneEl.removeEventListener('object3dset', this.setDirty);
         this.el.sceneEl.removeEventListener('object3dremove', this.setDirty);
         if (this.data.debug) {
             if (this.boxHelper) {
                 this.el.sceneEl.object3D.remove(this.boxHelper);
-                this.boxHelper.dispose && this.boxHelper.dispose();
+                this.boxHelper.dispose?.();
                 this.boxHelper = null;
             }
             for (let i = 0; i < this.objectEls.length; i++) {
-                const boxHelper = this.objectEls[i].object3D.boxHelper;
+                const { boxHelper } = this.objectEls[i].object3D;
                 if (boxHelper) {
                     this.el.sceneEl.object3D.remove(boxHelper);
                     this.objectEls[i].object3D.boxHelper = null;
-                    boxHelper.dispose && boxHelper.dispose();
+                    boxHelper.dispose?.();
                 }
             }
         }
     },
 
-    tick: function(time) {
-        const boundingBox = this.boundingBox;
-        const centerDifferenceVec3 = this.centerDifferenceVec3;
-        const clearedIntersectedEls = this.clearedIntersectedEls;
-        const el = this.el;
-        const intersectedEls = this.intersectedEls;
-        const newIntersectedEls = this.newIntersectedEls;
-        const objectEls = this.objectEls;
-        const prevCheckTime = this.prevCheckTime;
-        const previousIntersectedEls = this.previousIntersectedEls;
+    tick(time) {
+        const {
+            boundingBox,
+            centerDifferenceVec3,
+            clearedIntersectedEls,
+            el,
+            intersectedEls,
+            newIntersectedEls,
+            objectEls,
+            prevCheckTime,
+            previousIntersectedEls,
+        } = this;
 
         let closestCenterDifference;
         let newClosestEl;
@@ -111,7 +126,7 @@ AFRAME.registerComponent('box-collider', {
         }
 
         // Only check for intersection if interval time has passed.
-        if (prevCheckTime && (time - prevCheckTime < this.data.interval)) {
+        if (prevCheckTime && time - prevCheckTime < this.data.interval) {
             return;
         }
         // Update check time.
@@ -122,7 +137,16 @@ AFRAME.registerComponent('box-collider', {
         }
 
         // Update the bounding box to account for rotations and position changes.
+        // Workaround for matrixWorld update issue when in dual-view immersive mode after THREE r152
+        if (this.isCamera && el.sceneEl.renderer.xr.enabled === true && el.sceneEl.renderer.xr.isPresenting === true) {
+            this.tempMatrixWorld.copy(el.object3D.matrixWorld);
+            this.tempMatrixWorldSceneCam.copy(el.sceneEl.camera.matrixWorld);
+        }
         boundingBox.setFromObject(el.object3D);
+        if (this.isCamera && el.sceneEl.renderer.xr.enabled === true && el.sceneEl.renderer.xr.isPresenting === true) {
+            el.object3D.matrixWorld.copy(this.tempMatrixWorld);
+            el.sceneEl.camera.matrixWorld.copy(this.tempMatrixWorldSceneCam);
+        }
         this.boxMin.copy(boundingBox.min);
         this.boxMax.copy(boundingBox.max);
         boundingBox.getCenter(this.boxCenter);
@@ -137,6 +161,7 @@ AFRAME.registerComponent('box-collider', {
         copyArray(previousIntersectedEls, intersectedEls);
 
         // Populate intersectedEls array.
+        /* eslint-disable no-continue */
         intersectedEls.length = 0;
         for (i = 0; i < objectEls.length; i++) {
             if (objectEls[i] === this.el) {
@@ -151,11 +176,11 @@ AFRAME.registerComponent('box-collider', {
             if (!this.data.collideNonVisible && !objectEls[i].getAttribute('visible')) {
                 // Remove box helper if debug flag set and has box helper.
                 if (this.data.debug) {
-                    const boxHelper = objectEls[i].object3D.boxHelper;
+                    const { boxHelper } = objectEls[i].object3D;
                     if (boxHelper) {
                         el.sceneEl.object3D.remove(boxHelper);
                         objectEls[i].object3D.boxHelper = null;
-                        boxHelper.dispose && boxHelper.dispose();
+                        boxHelper?.dispose();
                     }
                 }
                 continue;
@@ -166,6 +191,7 @@ AFRAME.registerComponent('box-collider', {
                 intersectedEls.push(objectEls[i]);
             }
         }
+        /* eslint-disable no-continue */
 
         // Get newly intersected entities.
         newIntersectedEls.length = 0;
@@ -182,7 +208,7 @@ AFRAME.registerComponent('box-collider', {
                 continue;
             }
             if (!previousIntersectedEls[i].hasAttribute('box-collider')) {
-                previousIntersectedEls[i].emit('hitend');
+                previousIntersectedEls[i].emit('box-collide-end');
             }
             clearedIntersectedEls.push(previousIntersectedEls[i]);
         }
@@ -195,7 +221,7 @@ AFRAME.registerComponent('box-collider', {
             if (newIntersectedEls[i].hasAttribute('box-collider')) {
                 continue;
             }
-            newIntersectedEls[i].emit('hitstart');
+            newIntersectedEls[i].emit('box-collide-start');
         }
 
         // Calculate closest intersected entity based on centers.
@@ -203,11 +229,8 @@ AFRAME.registerComponent('box-collider', {
             if (intersectedEls[i] === this.el) {
                 continue;
             }
-            centerDifferenceVec3
-                .copy(intersectedEls[i].object3D.boundingBoxCenter)
-                .sub(this.boxCenter);
-            if (closestCenterDifference === undefined ||
-                centerDifferenceVec3.length() < closestCenterDifference) {
+            centerDifferenceVec3.copy(intersectedEls[i].object3D.boundingBoxCenter).sub(this.boxCenter);
+            if (closestCenterDifference === undefined || centerDifferenceVec3.length() < closestCenterDifference) {
                 closestCenterDifference = centerDifferenceVec3.length();
                 newClosestEl = intersectedEls[i];
             }
@@ -236,11 +259,11 @@ AFRAME.registerComponent('box-collider', {
         }
 
         if (clearedIntersectedEls.length) {
-            el.emit('hitend', this.hitEndEventDetail);
+            el.emit('box-collide-end', this.collideEndEventDetail);
         }
 
         if (newIntersectedEls.length) {
-            el.emit('hitstart', this.hitStartEventDetail);
+            el.emit('box-collide-start', this.collideStartEventDetail);
         }
     },
 
@@ -248,10 +271,10 @@ AFRAME.registerComponent('box-collider', {
      * AABB collision detection.
      * 3D version of https://www.youtube.com/watch?v=ghqD3e37R7E
      */
-    isIntersecting: (function() {
+    isIntersecting: (function isIntersectingFactory() {
         const boundingBox = new THREE.Box3();
 
-        return function(el) {
+        return function intersectingFn(el) {
             let box;
 
             // Dynamic, recalculate each tick.
@@ -280,7 +303,9 @@ AFRAME.registerComponent('box-collider', {
             if (this.data.debug) {
                 if (!el.object3D.boxHelper) {
                     el.object3D.boxHelper = new THREE.BoxHelper(
-                        el.object3D, new THREE.Color(Math.random(), Math.random(), Math.random()));
+                        el.object3D,
+                        new THREE.Color(Math.random(), Math.random(), Math.random())
+                    );
                     el.sceneEl.object3D.add(el.object3D.boxHelper);
                 }
                 el.object3D.boxHelper.setFromObject(el.object3D);
@@ -288,88 +313,84 @@ AFRAME.registerComponent('box-collider', {
 
             const boxMin = box.min;
             const boxMax = box.max;
-            return (this.boxMin.x <= boxMax.x && this.boxMax.x >= boxMin.x) &&
-                (this.boxMin.y <= boxMax.y && this.boxMax.y >= boxMin.y) &&
-                (this.boxMin.z <= boxMax.z && this.boxMax.z >= boxMin.z);
+            return (
+                this.boxMin.x <= boxMax.x &&
+                this.boxMax.x >= boxMin.x &&
+                this.boxMin.y <= boxMax.y &&
+                this.boxMax.y >= boxMin.y &&
+                this.boxMin.z <= boxMax.z &&
+                this.boxMax.z >= boxMin.z
+            );
         };
     })(),
 
     /**
      * Mark the object list as dirty, to be refreshed before next raycast.
      */
-    setDirty: function() {
+    setDirty() {
         this.dirty = true;
     },
 
     /**
      * Update list of objects to test for intersection.
      */
-    refreshObjects: function() {
-        const data = this.data;
+    refreshObjects() {
+        const { data } = this;
         // If objects not defined, intersect with everything.
-        this.objectEls = data.objects ?
-            this.el.sceneEl.querySelectorAll(data.objects) :
-            this.el.sceneEl.children;
+        this.objectEls = data.objects ? this.el.sceneEl.querySelectorAll(data.objects) : this.el.sceneEl.children;
         this.dirty = false;
     },
 });
 
-function copyArray(dest, source) {
-    dest.length = 0;
-    for (let i = 0; i < source.length; i++) {
-        dest[i] = source[i];
-    }
-}
-
 AFRAME.registerComponent('box-collision-listener', {
     schema: {
-        enabled: {default: true},
-        dynamic: {default: false},
+        enabled: { default: true },
+        dynamic: { default: false },
     },
-    remove: function() {
+    remove() {
         // Possible cleanup on box-collider?
     },
 });
 
 AFRAME.registerComponent('box-collision-publisher', {
     schema: {
-        enabled: {default: true},
+        enabled: { default: true },
     },
-    init: function() {
+    init() {
         const thisEl = this.el;
-        thisEl.addEventListener('hitstart', function(e) {
-            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
-            const thisMsg = {
-                object_id: objName,
-                action: 'clientEvent',
-                type: 'collision-start',
-                data: {
-                    source: objName,
-                    position: ARENAUtils.getWorldPos(thisEl),
-                    targets: e.detail.intersectedEls.map((inEl) => (
-                        {id: inEl.id, position: ARENAUtils.getWorldPos(inEl)}
-                    )),
-                },
-            };
-            // This is either the camera or a hand
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
+        thisEl.addEventListener('box-collide-start', (e) => {
+            e.detail.intersectedEls.forEach((inEl) => {
+                const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
+                const thisMsg = {
+                    object_id: inEl.id,
+                    action: 'clientEvent',
+                    type: 'collision-start',
+                    data: {
+                        source: sourceName,
+                        targetPosition: ARENAUtils.getWorldPos(inEl),
+                        position: ARENAUtils.getWorldPos(thisEl),
+                    },
+                };
+                // This is either the camera or a hand
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${sourceName}`, thisMsg);
+            });
         });
-        thisEl.addEventListener('hitend', function(e) {
-            const objName = (thisEl.id === 'my-camera') ? ARENA.camName : thisEl.components['arena-hand'].name;
-            const thisMsg = {
-                object_id: objName,
-                action: 'clientEvent',
-                type: 'collision-end',
-                data: {
-                    source: objName,
-                    position: ARENAUtils.getWorldPos(thisEl),
-                    targets: e.detail.endIntersectedEls.map((inEl) => (
-                        {id: inEl.id, position: ARENAUtils.getWorldPos(inEl)}
-                    )),
-                },
-            };
-            // This is either the camera or a hand
-            ARENA.Mqtt.publish(`${ARENA.outputTopic}${objName}`, thisMsg);
+        thisEl.addEventListener('box-collide-end', (e) => {
+            e.detail.endIntersectedEls.forEach((inEl) => {
+                const sourceName = thisEl.id === 'my-camera' ? ARENA.camName : thisEl.components['arena-hand'].name;
+                const thisMsg = {
+                    object_id: inEl.id,
+                    action: 'clientEvent',
+                    type: 'collision-end',
+                    data: {
+                        source: sourceName,
+                        targetPosition: ARENAUtils.getWorldPos(inEl),
+                        position: ARENAUtils.getWorldPos(thisEl),
+                    },
+                };
+                // This is either the camera or a hand
+                ARENA.Mqtt.publish(`${ARENA.outputTopic}${sourceName}`, thisMsg);
+            });
         });
     },
 });

@@ -1,6 +1,6 @@
 {
     "title": "Light",
-    "description": "A light. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/light.html'>https://aframe.io/docs/1.4.0/components/light.html</a>",
+    "description": "A light.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/light.html'>A-Frame Light</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,20 +14,19 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "light"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["light"]
                                 },
                                 "angle": {
                                     "title": "angle (spot)",
                                     "type": "number",
-                                    "description": "Maximum extent of spot light from its direction (in degrees). NOTE: Spot light type only.",
+                                    "description": "Maximum extent of spot light from its direction (in degrees). Requires type:spot.",
                                     "default": 60
                                 },
                                 "castShadow": {
                                     "title": "castShadow (point, spot, directional)",
                                     "type": "boolean",
+                                    "description": "Whether this light casts shadows on the scene.",
                                     "default": false
                                 },
                                 "color": {
@@ -35,185 +34,134 @@
                                     "type": "string",
                                     "format": "color",
                                     "default": "#ffffff",
-                                    "description": "Light color."
+                                    "description": "Light color. For 'hemisphere', light color from above."
                                 },
                                 "decay": {
                                     "title": "decay (point and spot)",
                                     "type": "number",
-                                    "description": "Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
-                                    "default": 1.0
+                                    "description": "Amount the light dims along the distance of the light. Requires type:point or type:spot.",
+                                    "default": 1
                                 },
                                 "distance": {
                                     "title": "distance (point and spot)",
                                     "type": "number",
-                                    "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
-                                    "default": 0.0
+                                    "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. Requires type:point or type:spot.",
+                                    "default": 0
+                                },
+                                "envMap": {
+                                    "title": "envMap",
+                                    "type": "string",
+                                    "description": "Cube Map to load.",
+                                    "default": null
                                 },
                                 "groundColor": {
                                     "title": "ground color (hemisphere)",
                                     "type": "string",
                                     "format": "color",
                                     "default": "#ffffff",
-                                    "description": "Light color from below. NOTE: Hemisphere light type only"
+                                    "description": "Light color from below. Requires type:hemisphere."
                                 },
                                 "intensity": {
                                     "title": "intensity",
                                     "type": "number",
-                                    "description": "Light strength.",
-                                    "default": 1.0
+                                    "description": "Amount of light provided.",
+                                    "default": 1
                                 },
                                 "light": {
-                                    "title": "light (deprecated; don't use)",
-                                    "deprecated": true,
-                                    "description": "These attributes (light, intensity, color, ...) can be set directly on the light object (instead of this light attribute inside the light object); dont use in new light objects",
-                                    "properties": {
-                                        "type": {
-                                            "title": "type",
-                                            "type": "string",
-                                            "enum": [
-                                                "ambient",
-                                                "directional",
-                                                "hemisphere",
-                                                "point",
-                                                "spot"
-                                            ],
-                                            "description": "One of ambient, directional, hemisphere, point, spot.",
-                                            "default": "directional"
-                                        },
-                                        "color": {
-                                            "title": "light color",
-                                            "type": "string",
-                                            "format": "color",
-                                            "default": "#ffffff",
-                                            "description": "Light color."
-                                        },
-                                        "intensity": {
-                                            "title": "intensity",
-                                            "type": "number",
-                                            "description": "Light strength."
-                                        },
-                                        "groundColor": {
-                                            "title": "ground color",
-                                            "type": "string",
-                                            "format": "color",
-                                            "default": "#ffffff",
-                                            "description": "Light color from below. NOTE: Hemisphere light type only"
-                                        },
-                                        "decay": {
-                                            "title": "decay",
-                                            "type": "number",
-                                            "description": "Amount the light dims along the distance of the light. NOTE: Point and Spot light type only.",
-                                            "default": 1.0
-                                        },
-                                        "distance": {
-                                            "title": "distance",
-                                            "type": "number",
-                                            "description": "Distance where intensity becomes 0. If distance is 0, then the point light does not decay with distance. NOTE: Point and Spot light type only.",
-                                            "default": 0.0
-                                        },
-                                        "angle": {
-                                            "title": "angle",
-                                            "type": "number",
-                                            "description": "Maximum extent of spot light from its direction (in degrees). NOTE: Spot light type only.",
-                                            "default": 60
-                                        },
-                                        "penumbra": {
-                                            "title": "penumbra",
-                                            "type": "number",
-                                            "description": "Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
-                                            "default": 0.0
-                                        },
-                                        "target": {
-                                            "title": "target",
-                                            "type": "object",
-                                            "description": "element the spot should point to. set to null to transform spotlight by orientation, pointing to it\u2019s -Z axis. NOTE: Spot light type only.",
-                                            "default": null
-                                        }
-                                    }
+                                    "title": "DEPRECATED (light)",
+                                    "type": "object",
+                                    "description": "DEPRECATED: data.light.[property] is deprecated, use object_type: light and data.[property] instead.",
+                                    "deprecated": true
                                 },
                                 "penumbra": {
                                     "title": "penumbra (spot)",
                                     "type": "number",
-                                    "description": "Percent of the spotlight cone that is attenuated due to penumbra. NOTE: Spot light type only.",
-                                    "default": 0.0
+                                    "description": "Percent of the spotlight cone that is attenuated due to penumbra. Requires type:spot.",
+                                    "default": 0
                                 },
                                 "shadowBias": {
                                     "title": "shadowBias (castShadow=true)",
                                     "type": "number",
+                                    "description": "Offset depth when deciding whether a surface is in shadow. Tiny adjustments here (in the order of +/-0.0001) may reduce artifacts in shadows.",
                                     "default": 0
                                 },
                                 "shadowCameraBottom": {
                                     "title": "shadowCameraBottom (castShadow=true)",
                                     "type": "number",
+                                    "description": "Bottom plane of shadow camera frustum. Requires type:directional.",
                                     "default": -5
                                 },
                                 "shadowCameraFar": {
                                     "title": "shadowCameraFar (castShadow=true)",
                                     "type": "number",
+                                    "description": "Far plane of shadow camera frustum.",
                                     "default": 500
                                 },
                                 "shadowCameraFov": {
                                     "title": "shadowCameraFov (castShadow=true)",
                                     "type": "number",
-                                    "default": 90
+                                    "description": "Shadow camera's FOV. Requires type:point or spot.",
+                                    "default": 50
                                 },
                                 "shadowCameraLeft": {
                                     "title": "shadowCameraBottom (castShadow=true)",
                                     "type": "number",
+                                    "description": "Left plane of shadow camera frustum. Requires type:directional.",
                                     "default": -5
                                 },
                                 "shadowCameraNear": {
                                     "title": "shadowCameraNear (castShadow=true)",
                                     "type": "number",
+                                    "description": "Near plane of shadow camera frustum.",
                                     "default": 0.5
                                 },
                                 "shadowCameraRight": {
                                     "title": "shadowCameraRight (castShadow=true)",
                                     "type": "number",
+                                    "description": "Right plane of shadow camera frustum. Requires type:directional.",
                                     "default": 5
                                 },
                                 "shadowCameraTop": {
                                     "title": "shadowCameraTop (castShadow=true)",
                                     "type": "number",
+                                    "description": "Top plane of shadow camera frustum. Requires type:directional.",
                                     "default": 5
                                 },
                                 "shadowCameraVisible": {
                                     "title": "shadowCameraVisible (castShadow=true)",
                                     "type": "boolean",
+                                    "description": "Displays a visual aid showing the shadow camera's position and frustum. This is the light's view of the scene, used to project shadows.",
                                     "default": false
                                 },
                                 "shadowMapHeight": {
                                     "title": "shadowMapHeight (castShadow=true)",
                                     "type": "number",
+                                    "description": "Shadow map's vertical resolution. Larger shadow maps display more crisp shadows, at the cost of performance.",
                                     "default": 512
                                 },
                                 "shadowMapWidth": {
                                     "title": "shadowMapWidth (castShadow=true)",
                                     "type": "number",
+                                    "description": "Shadow map's horizontal resolution.",
                                     "default": 512
                                 },
                                 "shadowRadius": {
                                     "title": "shadowRadius (castShadow=true)",
                                     "type": "number",
+                                    "description": "",
                                     "default": 1
                                 },
                                 "target": {
                                     "title": "target (spot)",
                                     "type": "string",
-                                    "description": "Id of element the spot should point to. set to null to transform spotlight by orientation, pointing to it\u2019s -Z axis. NOTE: Spot light type only.",
+                                    "description": "Id of element the spot should point to. Set to null to transform spotlight by orientation, pointing to it's -Z axis. Requires type:spot.",
                                     "default": null
                                 },
                                 "type": {
                                     "title": "type",
                                     "type": "string",
-                                    "enum": [
-                                        "ambient",
-                                        "directional",
-                                        "hemisphere",
-                                        "point",
-                                        "spot"
-                                    ],
-                                    "description": "One of ambient, directional, hemisphere, point, spot.",
+                                    "enum": ["ambient", "directional", "hemisphere", "point", "spot"],
+                                    "description": "The type of light, or what shape the light should take.",
                                     "default": "directional"
                                 }
                             }
@@ -228,39 +176,12 @@
                     "title": "Light Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "light",
-                        "color": "#ffffff",
-                        "intensity": 1,
-                        "type": "directional",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "light"
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type", "color", "intensity", "type", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

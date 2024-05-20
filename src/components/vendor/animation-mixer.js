@@ -8,15 +8,16 @@
 
 /* global AFRAME, THREE */
 
+// AFRAME Monkeypatch - AFRAME Extras Animation-Mixer (src/loaders/animation-mixer.js)
 AFRAME.components['animation-mixer'].Component.prototype.load = function(model) {
     const el = this.el;
     this.model = model;
     this.mixer = new THREE.AnimationMixer(model);
     this.mixer.addEventListener('loop', (e) => {
-        el.emit('animation-loop', {action: e.action, loopDelta: e.loopDelta});
+        el.emit('animation-loop', { action: e.action, loopDelta: e.loopDelta });
     });
     this.mixer.addEventListener('finished', (e) => {
-        el.emit('animation-finished', {action: e.action, direction: e.direction});
+        el.emit('animation-finished', { action: e.action, direction: e.direction });
         const thisAction = this.activeActions.indexOf(e.action);
         if (thisAction > -1) {
             this.activeActions.splice(thisAction, 1);

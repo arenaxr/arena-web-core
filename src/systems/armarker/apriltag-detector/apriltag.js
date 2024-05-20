@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable camelcase */
 /* eslint-disable max-len */
+/* eslint-disable no-restricted-globals */
 
 /**
  * @fileoverview Process grayscale camera frames in WASM detector.
@@ -13,6 +14,7 @@
  * @authors Nuno Pereira
  */
 
+/* global importScripts, AprilTagWasm */
 importScripts('./apriltag_wasm.js');
 
 // CV Worker message types (**copy of worker-msgs.js**)
@@ -65,16 +67,16 @@ class Apriltag {
         };
 
         const _this = this;
-        AprilTagWasm().then(function(Module) {
+        AprilTagWasm().then((Module) => {
             console.debug('Apriltag WASM module loaded.');
             _this.onWasmInit(Module);
         });
     }
 
     /**
-       * Init warapper calls
-       * @param {*} Module WASM module instance
-       */
+     * Init wrapper calls
+     * @param {*} Module WASM module instance
+     */
     onWasmInit(Module) {
         // save a reference to the module here
         this._Module = Module;
@@ -83,7 +85,15 @@ class Apriltag {
         // int atagjs_destroy(); Releases resources allocated by the wasm module
         this._destroy = Module.cwrap('atagjs_destroy', 'number', []);
         // int atagjs_set_detector_options(float decimate, float sigma, int nthreads, int refine_edges, int max_detections, int return_pose, int return_solutions); Sets the given detector options
-        this._set_detector_options = Module.cwrap('atagjs_set_detector_options', 'number', ['number', 'number', 'number', 'number', 'number', 'number', 'number']);
+        this._set_detector_options = Module.cwrap('atagjs_set_detector_options', 'number', [
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+            'number',
+        ]);
         // int atagjs_set_pose_info(double fx, double fy, double cx, double cy); Sets the tag size (meters) and camera intrinsics (in pixels) for tag pose estimation
         this._set_pose_info = Module.cwrap('atagjs_set_pose_info', 'number', ['number', 'number', 'number', 'number']);
         // uint8_t* atagjs_set_img_buffer(int width, int height, int stride); Creates/changes size of the image buffer where we receive the images to process
@@ -97,7 +107,6 @@ class Apriltag {
         // inits detector
         this._init();
 
-
         // set max_detections = 0, meaning no max; will return all detections
         // options: float decimate, float sigma, int nthreads, int refine_edges, int max_detections, int return_pose, int return_solutions
         this._set_detector_options(
@@ -107,22 +116,23 @@ class Apriltag {
             this._opt.refine_edges,
             this._opt.max_detections,
             this._opt.return_pose,
-            this._opt.return_solutions);
+            this._opt.return_solutions
+        );
 
         this.onDetectorReadyCallback();
     }
 
     /**
-         * **public** detect method
-         * @param {Array} grayscaleImg grayscale image buffer
-         * @param {Number} imgWidth image with
-         * @param {Number} imgHeight image height
-         * @return {detection} detection object
-         */
+     * **public** detect method
+     * @param {Array} grayscaleImg grayscale image buffer
+     * @param {Number} imgWidth image with
+     * @param {Number} imgHeight image height
+     * @return {Array} detection object
+     */
     detect(grayscaleImg, imgWidth, imgHeight) {
         // set_img_buffer allocates the buffer for image and returns it; just returns the previously allocated buffer if size has not changed
         const imgBuffer = this._set_img_buffer(imgWidth, imgHeight, imgWidth);
-        if (imgWidth * imgHeight < grayscaleImg.length) return {result: 'Image data too large.'};
+        if (imgWidth * imgHeight < grayscaleImg.length) return { result: 'Image data too large.' };
         this._Module.HEAPU8.set(grayscaleImg, imgBuffer); // copy grayscale image data
         const strJsonPtr = this._detect();
         /* detect returns a pointer to a t_str_json c struct as follows
@@ -130,7 +140,8 @@ class Apriltag {
               char *str;
               size_t alloc_size; // allocated size */
         const strJsonLen = this._Module.getValue(strJsonPtr, 'i32'); // get len from struct
-        if (strJsonLen == 0) { // returned empty string
+        if (strJsonLen === 0) {
+            // returned empty string
             return [];
         }
         const strJsonStrPtr = this._Module.getValue(strJsonPtr + 4, 'i32'); // get *str from struct
@@ -146,27 +157,27 @@ class Apriltag {
     }
 
     /**
-       * **public** set camera parameters
-       * @param {Number} fx camera focal length
-       * @param {Number} fy camera focal length
-       * @param {Number} cx camera principal point
-       * @param {Number} cy camera principal point
-       */
+     * **public** set camera parameters
+     * @param {Number} fx camera focal length
+     * @param {Number} fy camera focal length
+     * @param {Number} cx camera principal point
+     * @param {Number} cy camera principal point
+     */
     set_camera_info(fx, fy, cx, cy) {
         this._set_pose_info(fx, fy, cx, cy);
     }
 
     /**
-       * **public** set size of known tag (size in meters)
-       * @param {Number} tagid the tag id
-       * @param {Number} size the size of the tag in meters
-       */
+     * **public** set size of known tag (size in meters)
+     * @param {Number} tagid the tag id
+     * @param {Number} size the size of the tag in meters
+     */
     set_tag_size(tagid, size) {
         let _tagid = tagid;
-        if (isNaN(_tagid)) {
-             // try to convert to number
-            _tagid = parseInt(tagid);
-            if (isNaN(_tagid)) {
+        if (Number.isNaN(_tagid)) {
+            // try to convert to number
+            _tagid = Number.parseInt(tagid, 10);
+            if (Number.isNaN(_tagid)) {
                 console.warn(`Apriltag Tagid must be a number! Ignoring given size for tagId '${tagid}'.`);
                 return;
             }
@@ -175,9 +186,9 @@ class Apriltag {
     }
 
     /**
-       * **public** set maximum detections to return (0=return all)
-       * @param {Number} maxDetections
-       */
+     * **public** set maximum detections to return (0=return all)
+     * @param {Number} maxDetections
+     */
     set_max_detections(maxDetections) {
         this._opt.max_detections = maxDetections;
         this._set_detector_options(
@@ -187,13 +198,14 @@ class Apriltag {
             this._opt.refine_edges,
             this._opt.max_detections,
             this._opt.return_pose,
-            this._opt.return_solutions);
+            this._opt.return_solutions
+        );
     }
 
     /**
-       * **public** set return pose estimate (0=do not return; 1=return)
-       * @param {Number} returnPose
-       */
+     * **public** set return pose estimate (0=do not return; 1=return)
+     * @param {Number} returnPose
+     */
     set_return_pose(returnPose) {
         this._opt.return_pose = returnPose;
         this._set_detector_options(
@@ -203,13 +215,14 @@ class Apriltag {
             this._opt.refine_edges,
             this._opt.max_detections,
             this._opt.return_pose,
-            this._opt.return_solutions);
+            this._opt.return_solutions
+        );
     }
 
     /**
-       * **public** set return pose estimate alternative solution details (0=do not return; 1=return)
-       * @param {Number} returnSolutions
-       */
+     * **public** set return pose estimate alternative solution details (0=do not return; 1=return)
+     * @param {Number} returnSolutions
+     */
     set_return_solutions(returnSolutions) {
         this._opt.return_solutions = returnSolutions;
         this._set_detector_options(
@@ -219,7 +232,8 @@ class Apriltag {
             this._opt.refine_edges,
             this._opt.max_detections,
             this._opt.return_pose,
-            this._opt.return_solutions);
+            this._opt.return_solutions
+        );
     }
 }
 
@@ -229,53 +243,14 @@ const pendingMarkerMsgs = [];
 
 // init apriltag detector; argument is a callback for when it is done loading
 const aprilTag = new Apriltag(() => {
-    self.postMessage({type: CVWorkerMsgs.type.INIT_DONE});
+    self.postMessage({ type: CVWorkerMsgs.type.INIT_DONE });
     initDone = true;
     console.debug('CV Worker ready!');
-    pendingMarkerMsgs.forEach( (msg) => {
+    pendingMarkerMsgs.forEach((msg) => {
         aprilTag.set_tag_size(msg.markerid, msg.size);
         console.debug('Setting marker size', msg.markerid, msg.size);
     }); // process pending marker data msgs
 });
-
-// process worker messages
-onmessage = async function(e) {
-    const cvWorkerMsg = e.data;
-
-    // console.log('CV Worker received message');
-    switch (cvWorkerMsg.type ) {
-        // process a new image frame
-        case CVWorkerMsgs.type.PROCESS_GSFRAME:
-            if (!initDone) {
-                // return empty detection result
-                const resMsg = {
-                    type: CVWorkerMsgs.type.FRAME_RESULTS,
-                    detections: [],
-                    ts: performance.now(),
-                    grayscalePixels: cvWorkerMsg.grayscalePixels,
-                };
-                // post detection results, returning ownership of the pixel buffer
-                self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
-                return;
-            }
-            processGsFrame(cvWorkerMsg);
-            break;
-        case CVWorkerMsgs.type.KNOWN_MARKER_ADD:
-            if (!initDone) {
-                pendingMarkerMsgs.push(cvWorkerMsg);
-                return;
-            }
-            console.debug('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
-            // let the detector know the size of markers, so it can compute their pose
-            aprilTag.set_tag_size(cvWorkerMsg.markerid, cvWorkerMsg.size);
-            break;
-        case CVWorkerMsgs.type.KNOWN_MARKER_DEL:
-            // TODO (maybe we don't need to remove?)
-            break;
-        default:
-            console.warn('CVWorker: unknow message received.', cvWorkerMsg);
-    }
-};
 
 /**
  * Process grayscale camera frame
@@ -300,7 +275,7 @@ async function processGsFrame(frame) {
     // construct detection result message
     const resMsg = {
         type: CVWorkerMsgs.type.FRAME_RESULTS,
-        detections: detections,
+        detections,
         ts: frame.ts,
         grayscalePixels: frame.grayscalePixels,
     };
@@ -314,3 +289,42 @@ async function processGsFrame(frame) {
     // post detection results, returning ownership of the pixel buffer
     self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
 }
+
+// process worker messages
+onmessage = async function onmessage(e) {
+    const cvWorkerMsg = e.data;
+
+    // console.log('CV Worker received message');
+    switch (cvWorkerMsg.type) {
+        // process a new image frame
+        case CVWorkerMsgs.type.PROCESS_GSFRAME:
+            if (!initDone) {
+                // return empty detection result
+                const resMsg = {
+                    type: CVWorkerMsgs.type.FRAME_RESULTS,
+                    detections: [],
+                    ts: performance.now(),
+                    grayscalePixels: cvWorkerMsg.grayscalePixels,
+                };
+                // post detection results, returning ownership of the pixel buffer
+                self.postMessage(resMsg, [resMsg.grayscalePixels.buffer]);
+                return;
+            }
+            await processGsFrame(cvWorkerMsg);
+            break;
+        case CVWorkerMsgs.type.KNOWN_MARKER_ADD:
+            if (!initDone) {
+                pendingMarkerMsgs.push(cvWorkerMsg);
+                return;
+            }
+            console.debug('Setting marker size', cvWorkerMsg.markerid, cvWorkerMsg.size);
+            // let the detector know the size of markers, so it can compute their pose
+            aprilTag.set_tag_size(cvWorkerMsg.markerid, cvWorkerMsg.size);
+            break;
+        case CVWorkerMsgs.type.KNOWN_MARKER_DEL:
+            // TODO (maybe we don't need to remove?)
+            break;
+        default:
+            console.warn('CVWorker: unknow message received.', cvWorkerMsg);
+    }
+};

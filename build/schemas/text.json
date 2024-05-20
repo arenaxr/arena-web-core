@@ -1,6 +1,6 @@
 {
     "title": "Text",
-    "description": "Display text. \n\nMore properties at <a href='https://aframe.io/docs/1.4.0/components/text.html'>https://aframe.io/docs/1.4.0/components/text.html</a>",
+    "description": "Display text.\n\nMore properties at <a href='https://aframe.io/docs/1.5.0/components/text.html'>A-Frame Text</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,19 +14,14 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "text"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["text"]
                                 },
                                 "align": {
-                                    "description": "Multi-line text alignment (left, center, right).",
+                                    "type": "string",
+                                    "description": "Multi-line text alignment.",
                                     "default": "left",
-                                    "enum": [
-                                        "left",
-                                        "center",
-                                        "right"
-                                    ]
+                                    "enum": ["left", "center", "right"]
                                 },
                                 "alphaTest": {
                                     "description": "Discard text pixels if alpha is less than this value.",
@@ -34,32 +29,25 @@
                                     "type": "number"
                                 },
                                 "anchor": {
-                                    "description": "Horizontal positioning (left, center, right, align).",
+                                    "type": "string",
+                                    "description": "Horizontal positioning.",
                                     "default": "center",
-                                    "enum": [
-                                        "left",
-                                        "right",
-                                        "center",
-                                        "align"
-                                    ]
+                                    "enum": ["left", "right", "center", "align"]
                                 },
                                 "baseline": {
-                                    "description": "Vertical positioning (top, center, bottom).",
+                                    "type": "string",
+                                    "description": "Vertical positioning.",
                                     "default": "center",
-                                    "enum": [
-                                        "top",
-                                        "center",
-                                        "bottom"
-                                    ]
+                                    "enum": ["top", "center", "bottom"]
                                 },
                                 "color": {
                                     "description": "Text color.",
                                     "default": "#000000",
                                     "format": "color",
                                     "type": "string"
-                                  },
+                                },
                                 "font": {
-                                    "description": "Font to render text, either the name of one of A-Frame's stock fonts or a URL to a font file",
+                                    "description": "Font to render text, either the name of one of A-Frame's stock fonts or a URL to a font file.",
                                     "type": "string",
                                     "default": "roboto",
                                     "enum": [
@@ -75,11 +63,11 @@
                                     ]
                                 },
                                 "fontImage": {
-                                    "description": "Font image texture path to render text. Defaults to the font's name with extension replaced to .png. Don't need to specify if using a stock font. (derived from font name)",
+                                    "description": "Font image texture path to render text. Defaults to the font's name with extension replaced to .png. Don't need to specify if using a stock font. (derived from font name).",
                                     "type": "string"
                                 },
                                 "height": {
-                                    "description": "Height of text block. (derived from text size)",
+                                    "description": "Height of text block. (derived from text size).",
                                     "type": "number"
                                 },
                                 "letterSpacing": {
@@ -88,19 +76,18 @@
                                     "default": 0
                                 },
                                 "lineHeight": {
-                                    "description": "Line height in pixels. (derived from font file)",
+                                    "description": "Line height in pixels. (derived from font file).",
                                     "type": "number"
-                                },
-                                "negate": {
-                                    "type": "boolean",
-                                    "default": true
                                 },
                                 "opacity": {
                                     "description": "Opacity, on a scale from 0 to 1, where 0 means fully transparent and 1 means fully opaque.",
                                     "type": "number",
-                                    "default": 1.0
+                                    "minimum": 0,
+                                    "maximum": 1,
+                                    "default": 1
                                 },
                                 "shader": {
+                                    "type": "string",
                                     "description": "Shader used to render text.",
                                     "default": "sdf",
                                     "enum": [
@@ -115,13 +102,10 @@
                                     ]
                                 },
                                 "side": {
-                                    "description": "Side to render. (front, back, double)",
+                                    "type": "string",
+                                    "description": "Side to render.",
                                     "default": "double",
-                                    "enum": [
-                                        "front",
-                                        "back",
-                                        "double"
-                                    ]
+                                    "enum": ["front", "back", "double"]
                                 },
                                 "tabSize": {
                                     "description": "Tab size in spaces.",
@@ -129,10 +113,10 @@
                                     "default": 4
                                 },
                                 "text": {
+                                    "title": "DEPRECATED (text)",
                                     "type": "string",
-                                    "deprecated": true,
-                                    "title": "Text Value (deprecated; don't use)",
-                                    "description": "(deprecated) Please use attribute 'value' in new Text objects;"
+                                    "description": "DEPRECATED: data.text is deprecated for object_type: text, use data.value instead.",
+                                    "deprecated": true
                                 },
                                 "transparent": {
                                     "description": "Whether text is transparent.",
@@ -140,21 +124,18 @@
                                     "default": true
                                 },
                                 "value": {
-                                    "description": "The actual content of the text. Line breaks and tabs are supported with \\n and \\t.",
+                                    "description": "The actual content of the text. Line breaks and tabs are supported with `\\n` and `\\t`.",
                                     "title": "Value (Text)",
                                     "type": "string"
                                 },
                                 "whiteSpace": {
-                                    "description": "How whitespace should be handled (i.e., normal, pre, nowrap).</a>",
+                                    "type": "string",
+                                    "description": "How whitespace should be handled.",
                                     "default": "normal",
-                                    "enum": [
-                                        "normal",
-                                        "pre",
-                                        "nowrap"
-                                    ]
+                                    "enum": ["normal", "pre", "nowrap"]
                                 },
                                 "width": {
-                                    "description": "Width in meters. (derived from geometry if exists)",
+                                    "description": "Width in meters. (derived from geometry if exists).",
                                     "type": "number",
                                     "default": 5
                                 },
@@ -164,7 +145,7 @@
                                     "default": 40
                                 },
                                 "wrapPixels": {
-                                    "description": "Number of pixels before wrapping text. (derived from wrapCount)",
+                                    "description": "Number of pixels before wrapping text. (derived from wrapCount).",
                                     "type": "number"
                                 },
                                 "xOffset": {
@@ -186,36 +167,12 @@
                     "title": "Text Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "text",
-                        "font": "roboto",
-                        "side": "double",
-                        "value": "",
-                        "width": 5,
-                        "color": "white",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        }
+                        "object_type": "text"
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type", "font", "side", "value", "color", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

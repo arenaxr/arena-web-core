@@ -1,5 +1,4 @@
 /* eslint-disable no-throw-literal */
-/* global ARENA */
 
 /**
  * @fileoverview Relocalization from AR Marker detection events
@@ -10,60 +9,78 @@
  * @authors Ivan Liang, Nuno Pereira
  */
 
+/* global AFRAME, ARENA, THREE */
+
+import { ARENAUtils } from '../../utils';
+
 /**
  *
  */
-export class ARMarkerRelocalization {
+export default class ARMarkerRelocalization {
     /* singleton instance */
     static instance = null;
+
     /* reference to ARMarker system (we ask the ARMarker system data about known markers) */
     arMarkerSystem;
+
     /* let relocalization up to a networked solver */
     networkedLocationSolver;
+
     /* debug; output debug messages */
     debug;
+
     /* cameraSpinner and cameraRig scene object3D instances */
     cameraSpinnerObj3D;
+
     cameraRigObj3D;
+
     /* base/default detection msg attributes; initialized in constructor */
     DFT_DETECTION_MSG;
+
     /* matrices used for relocalization */
     dtagMatrix = new THREE.Matrix4();
+
     rigMatrix = new THREE.Matrix4();
+
     vioMatrixPrev = new THREE.Matrix4();
+
     vioMatrix = new THREE.Matrix4();
+
     vioMatrixInv = new THREE.Matrix4();
+
     vioMatrixDiff = new THREE.Matrix4();
+
     tagPoseMatrix = new THREE.Matrix4();
+
     identityMatrix = new THREE.Matrix4();
+
     vioRot = new THREE.Quaternion();
+
     vioPos = new THREE.Vector3();
+
     vioPosDiff = new THREE.Vector3();
+
     tagPoseRot = new THREE.Quaternion();
-    flipMatrix = new THREE.Matrix4().set(
-        1, 0, 0, 0,
-        0, -1, 0, 0,
-        0, 0, -1, 0,
-        0, 0, 0, 1);
+
+    flipMatrix = new THREE.Matrix4().set(1, 0, 0, 0, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
 
     /* error and movement thresholds */
     DTAG_ERROR_THRESH = 1e-3;
+
     MOVE_THRESH = 0.0125;
+
     ROT_THRESH = 0.02175;
+
+    arenaScene;
 
     /**
      * Singleton constructor; init internal options and other data; setup detection event handler
-     * @param {function} arMakerSys - ARMarker system; to lookup markers
+     * @param {object} arMakerSys - ARMarker system; to lookup markers
      * @param {object} detectionsEventTarget - Detections event target
      * @param {boolean} [networkedLocationSolver=false] - If true, send detection messages to pubsub
      * @param {boolean} [debug=false] - If true, output debug messages
      */
-    constructor({
-        arMakerSys,
-        detectionsEventTarget,
-        networkedLocationSolver = false,
-        debug = false,
-    }) {
+    constructor({ arMakerSys, detectionsEventTarget, networkedLocationSolver = false, debug = false }) {
         if (detectionsEventTarget === undefined) throw 'Please provide a detection event target';
         // singleton
         if (ARMarkerRelocalization.instance) {
@@ -72,7 +89,7 @@ export class ARMarkerRelocalization {
         ARMarkerRelocalization.instance = this;
 
         // check/init internal options
-        if (networkedLocationSolver==true) {
+        if (networkedLocationSolver === true) {
             if (!ARENA) throw 'Networked tag solver requires ARENA functionality.';
             console.info('networkedLocationSolver = true; letting relocalization up to a networked solver.');
         }
@@ -91,26 +108,26 @@ export class ARMarkerRelocalization {
         };
         Object.freeze(this.DFT_DETECTION_MSG); // no more changes
         if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) {
-        // wait for scene to load and try again
+            // wait for scene to load and try again
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 this.cameraObject3D = document.getElementById('my-camera').object3D;
                 this.cameraSpinnerObj3D = document.getElementById('cameraSpinner').object3D;
                 this.cameraRigObj3D = document.getElementById('cameraRig').object3D;
                 // eslint-disable-next-line max-len
-                if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D) throw 'Camera rig and camera spinner are required for relocalization!';
+                if (!this.cameraObject3D || !this.cameraSpinnerObj3D || !this.cameraRigObj3D)
+                    throw 'Camera rig and camera spinner are required for relocalization!';
             });
         }
 
         // setup marker detection event listener
-        detectionsEventTarget.addEventListener(
-            'armarker-detection',
-            this.markerDetection.bind(this),
-        );
+        detectionsEventTarget.addEventListener('armarker-detection', this.markerDetection.bind(this));
 
         if (ARENA.arHeadset !== undefined) {
             this.MOVE_THRESH = 0.05;
             this.ROT_THRESH = 0.087;
         }
+
+        [this.arenaScene] = AFRAME.scenes;
     }
 
     /**
@@ -127,11 +144,7 @@ export class ARMarkerRelocalization {
             return false;
         }
         const rotDiff = Math.acos(
-            (this.vioMatrixDiff.elements[0] +
-          this.vioMatrixDiff.elements[5] +
-          this.vioMatrixDiff.elements[10] -
-          1) /
-          2,
+            (this.vioMatrixDiff.elements[0] + this.vioMatrixDiff.elements[5] + this.vioMatrixDiff.elements[10] - 1) / 2
         ); // math.acos((np.trace(posediff[0:3, 0:3]) - 1) / 2)
         if (rotDiff > this.ROT_THRESH) {
             return false;
@@ -178,11 +191,11 @@ export class ARMarkerRelocalization {
      *   ts: Mon Aug 23 2021 15:49:00 GMT-0400 (Eastern Daylight Time)
      */
     markerDetection(e) {
-        const ARENA = window.ARENA;
+        const { ARENA } = window;
         if (this.debug) {
             console.debug('Tag detected:', e.detail);
         }
-        const detections = e.detail.detections;
+        const { detections } = e.detail;
         const timestamp = e.detail.ts; // detection timestamp = when frame was captured
 
         // Save vio before processing apriltag
@@ -197,19 +210,15 @@ export class ARMarkerRelocalization {
         this.vioRot.setFromRotationMatrix(this.vioMatrix);
         this.vioPos.setFromMatrixPosition(this.vioMatrix);
 
-        const vio = {position: this.vioPos, rotation: this.vioRot};
+        const vio = { position: this.vioPos, rotation: this.vioRot };
 
         if (this.networkedLocationSolver) {
             // create message
-            const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
-                timestamp: timestamp,
-                vio: vio,
-                detections: [],
-            });
-            for (const detection of detections) {
+            const jsonMsg = { ...this.DFT_DETECTION_MSG, timestamp, vio, detections: [] };
+            detections.forEach((detection) => {
                 const d = detection;
                 if (d.pose.e > this.DTAG_ERROR_THRESH) {
-                    continue;
+                    return;
                 }
                 delete d.corners;
                 delete d.center;
@@ -219,24 +228,26 @@ export class ARMarkerRelocalization {
                     d.refTag = indexedTag;
                 }
                 jsonMsg.detections.push(d);
-            }
-            ARENA.Mqtt.publish(
-                `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
-                JSON.stringify(jsonMsg),
-            );
+            });
+            ARENA.Mqtt.publish(`${ARENA.defaults.realm}/g/a/${ARENA.camName}`, JSON.stringify(jsonMsg));
         }
         // this the one
         if (!this.networkedLocationSolver) {
             let localizerTag = false;
             const pubDetList = [];
-            for (const detection of detections) {
+            detections.forEach((detection) => {
                 if (detection.pose.e > this.DTAG_ERROR_THRESH) {
                     // eslint-disable-next-line max-len
-                    if (this.debug) console.warn(`Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`);
-                    continue;
+                    if (this.debug)
+                        console.warn(
+                            `Tag id ${detection.id} detection: error threshold exceeded (error=${detection.pose.e})`
+                        );
+                    return;
                 }
+                /* eslint-disable no-param-reassign */
                 delete detection.corners;
                 delete detection.center;
+                /* eslint-disable no-param-reassign */
                 let refTag = null;
                 // get marker data
                 const indexedTag = this.arMakerSystem.getMarker(detection.id);
@@ -245,17 +256,17 @@ export class ARMarkerRelocalization {
                     if (this.debug) {
                         console.debug('ARMarker system has no data about tag id:', detection.id);
                     }
-                    continue;
+                    return;
                 }
                 if (this.debug) {
                     console.debug('ARMarker system found tag:', refTag);
                 }
 
                 // publish this detection ?
-                if (refTag.publish == true) {
+                if (refTag.publish) {
                     detection.refTag = refTag;
                     pubDetList.push(detection);
-                };
+                }
 
                 // tag is static ?
                 if (!refTag.dynamic) {
@@ -272,15 +283,33 @@ export class ARMarkerRelocalization {
                           // Flip to column-major, so that rigPose.elements comes out row-major for numpy;
                           this.rigMatrixT.transpose();
                         */
+
+                        const { xrSession } = this.arenaScene;
+                        if (xrSession) {
+                            xrSession.requestAnimationFrame((time, frame) => {
+                                this.arMakerSystem.setOriginAnchor(
+                                    {
+                                        // Copy values
+                                        position: { ...this.cameraRigObj3D.position },
+                                        rotation: { ...this.cameraSpinnerObj3D.quaternion },
+                                    },
+                                    frame
+                                );
+                            });
+                        }
+
                         this.arMakerSystem.initialLocalized = true;
                     }
-                } else if (refTag.dynamic && refTag.publish==false) { // tag is dynamic? push update if publish=false
+                } else if (refTag.dynamic && refTag.publish === false) {
+                    // tag is dynamic? push update if publish=false
                     if (ARENA && ARENA.isUserSceneWriter()) {
                         // Dynamic + writable, push marker update
                         if (this.rigMatrix.equals(this.identityMatrix)) {
                             // eslint-disable-next-line max-len
                             if (this.debug) {
-                                console.debug('Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first');
+                                console.debug(
+                                    'Client apriltag solver no calculated this.rigMatrix yet, zero on origin tag first'
+                                );
                             }
                         } else {
                             if (this.debug) {
@@ -289,7 +318,8 @@ export class ARMarkerRelocalization {
                             const tagPose = this.getTagPoseFromRig(detection.pose);
                             this.tagPoseRot.setFromRotationMatrix(tagPose);
                             // Send update directly to scene (arguments order such that we overwrite 'type')
-                            const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
+                            const jsonMsg = {
+                                ...this.DFT_DETECTION_MSG,
                                 object_id: refTag.obj_id,
                                 action: 'update',
                                 type: 'object',
@@ -300,19 +330,26 @@ export class ARMarkerRelocalization {
                                         y: tagPose.elements[13],
                                         z: tagPose.elements[14],
                                     },
-                                    rotation: { // always send quaternions over the wire
+                                    rotation: {
+                                        // always send quaternions over the wire
                                         x: this.tagPoseRot.x,
                                         y: this.tagPoseRot.y,
                                         z: this.tagPoseRot.z,
                                         w: this.tagPoseRot.w,
                                     },
                                 },
-                            });
+                            };
                             // eslint-disable-next-line max-len
-                            if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`);
+                            if (this.debug)
+                                console.info(
+                                    'Publish',
+                                    JSON.stringify(jsonMsg),
+                                    'to',
+                                    `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`
+                                );
                             ARENA.Mqtt.publish(
                                 `${ARENA.defaults.realm}/s/${ARENA.namespacedScene}/${refTag.obj_id}`,
-                                JSON.stringify(jsonMsg),
+                                JSON.stringify(jsonMsg)
                             );
                         }
                     } else console.error('Object update not sent; User does not have write permissions!');
@@ -320,29 +357,33 @@ export class ARMarkerRelocalization {
 
                 // do we have detected markers to publish ?
                 if (pubDetList.length > 0 && ARENA) {
-                    if (ARENA.clientCoords === undefined) {
-                        ARENAUtils.getLocation((coords, err) => {
-                            if (!err) ARENA.clientCoords = coords;
-                        });
-                    }
-                    const jsonMsg = Object.assign({}, this.DFT_DETECTION_MSG, {
-                        timestamp: timestamp,
-                        vio: vio,
+                    // if (ARENA.clientCoords === undefined) {
+                    //     ARENAUtils.getLocation((coords, err) => {
+                    //         if (!err) ARENA.clientCoords = coords;
+                    //     });
+                    // }
+                    const jsonMsg = {
+                        ...this.DFT_DETECTION_MSG,
+                        timestamp,
+                        vio,
                         detections: pubDetList,
                         geolocation: {
                             latitude: ARENA.clientCoords.latitude,
                             longitude: ARENA.clientCoords.longitude,
                         },
                         localize_tag: true,
-                    });
+                    };
                     // eslint-disable-next-line max-len
-                    if (this.debug) console.info('Publish', JSON.stringify(jsonMsg), 'to', `${ARENA.defaults.realm}/g/a/${ARENA.camName}`);
-                    ARENA.Mqtt.publish(
-                        `${ARENA.defaults.realm}/g/a/${ARENA.camName}`,
-                        JSON.stringify(jsonMsg),
-                    );
+                    if (this.debug)
+                        console.info(
+                            'Publish',
+                            JSON.stringify(jsonMsg),
+                            'to',
+                            `${ARENA.defaults.realm}/g/a/${ARENA.camName}`
+                        );
+                    ARENA.Mqtt.publish(`${ARENA.defaults.realm}/g/a/${ARENA.camName}`, JSON.stringify(jsonMsg));
                 }
-            }
+            });
         }
     }
 
@@ -356,13 +397,26 @@ export class ARMarkerRelocalization {
      */
     getRigPoseFromAprilTag(dtag, refTag) {
         const r = dtag.R;
-        const t = dtag.t;
+        const { t } = dtag;
 
-        this.dtagMatrix.set( // Transposed rotation
-            r[0][0], r[1][0], r[2][0], t[0],
-            r[0][1], r[1][1], r[2][1], t[1],
-            r[0][2], r[1][2], r[2][2], t[2],
-            0, 0, 0, 1,
+        this.dtagMatrix.set(
+            // Transposed rotation
+            r[0][0],
+            r[1][0],
+            r[2][0],
+            t[0],
+            r[0][1],
+            r[1][1],
+            r[2][1],
+            t[1],
+            r[0][2],
+            r[1][2],
+            r[2][2],
+            t[2],
+            0,
+            0,
+            0,
+            1
         );
         this.dtagMatrix.premultiply(this.flipMatrix);
         this.dtagMatrix.multiply(this.flipMatrix);
@@ -385,12 +439,25 @@ export class ARMarkerRelocalization {
      */
     getTagPoseFromRig(dtag) {
         const r = dtag.R;
-        const t = dtag.t;
-        this.dtagMatrix.set( // Transposed rotation
-            r[0][0], r[1][0], r[2][0], t[0],
-            r[0][1], r[1][1], r[2][1], t[1],
-            r[0][2], r[1][2], r[2][2], t[2],
-            0, 0, 0, 1,
+        const { t } = dtag;
+        this.dtagMatrix.set(
+            // Transposed rotation
+            r[0][0],
+            r[1][0],
+            r[2][0],
+            t[0],
+            r[0][1],
+            r[1][1],
+            r[2][1],
+            t[1],
+            r[0][2],
+            r[1][2],
+            r[2][2],
+            t[2],
+            0,
+            0,
+            0,
+            1
         );
         this.dtagMatrix.premultiply(this.flipMatrix);
         this.dtagMatrix.multiply(this.flipMatrix);

@@ -1,6 +1,6 @@
 {
     "title": "Thickline",
-    "description": "Draw a line that can have a custom width",
+    "description": "Draw a line that can have a custom width.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,39 +14,32 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "thickline"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["thickline"]
                                 },
                                 "color": {
                                     "default": "#000000",
                                     "format": "color",
+                                    "description": "Line color.",
                                     "type": "string"
-                                  },
+                                },
                                 "lineWidth": {
                                     "type": "number",
                                     "title": "Line width",
+                                    "description": "Width of line in px.",
                                     "default": 1
                                 },
                                 "lineWidthStyler": {
                                     "type": "string",
                                     "title": "Line width styler",
-                                    "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. You may also choose one of the preset functions",
+                                    "description": "Allows defining the line width as a function of relative position p along the path of the line. By default it is set to a constant 1. You may also choose one of the preset functions.",
                                     "default": "default",
-                                    "enum": [
-                                        "default",
-                                        "grow",
-                                        "shrink",
-                                        "center-sharp",
-                                        "center-smooth",
-                                        "sine-wave"
-                                    ]
+                                    "enum": ["default", "grow", "shrink", "center-sharp", "center-smooth", "sine-wave"]
                                 },
                                 "path": {
                                     "type": "string",
                                     "title": "Line path",
-                                    "description": "Comma-separated list of x y z coordinates of the line vertices",
+                                    "description": "Comma-separated list of x y z coordinates of the line vertices.",
                                     "default": "-2 -1 0, 0 20 0, 10 -1 10"
                                 }
                             }
@@ -58,25 +51,12 @@
                     "title": "Thickline Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "thickline",
-                        "lineWidth": 5,
-                        "lineWidthStyler": "default",
-                        "path": "-2 -1 0, 0 20 0, 10 -1 10",
-                        "color": "#7f7f7f"
+                        "object_type": "thickline"
                     },
-                    "required": [
-                        "object_type",
-                        "path"
-                    ]
+                    "required": ["object_type", "path", "lineWidth", "lineWidthStyler", "color"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

@@ -1,0 +1,8 @@
+# lint: autofix and format project
+41daa31e1569cc00cc0699c042a0e0dcdb3a3f02
+
+# restore es5 trailingComma, run on project
+b32841823984b6a73ecd22dfb4485d8e7a87fdf0
+
+# autoformat
+c951c19a0899ac8574ad7f15b754f5a177576ac1

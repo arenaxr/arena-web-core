@@ -1,6 +1,7 @@
 {
     "title": "Cube (deprecated; don't use)",
     "description": "Cube (=Box) Geometry (deprecated); Supported for Legacy reasons; Please use Box in new scenes",
+    "deprecated": true,
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -12,13 +13,10 @@
                         {
                             "properties": {
                                 "object_type": {
-                                    "deprecated": true,
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "cube"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["cube"]
                                 },
                                 "depth": {
                                     "type": "number",
@@ -31,17 +29,17 @@
                                     "default": 1
                                 },
                                 "segmentsDepth": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments depth",
                                     "default": 1
                                 },
                                 "segmentsHeight": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments height",
                                     "default": 1
                                 },
                                 "segmentsWidth": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments width",
                                     "default": 1
                                 },
@@ -63,22 +61,18 @@
                         }
                     ],
                     "title": "Cube (deprecated; don't use) Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "cube"
+                        "object_type": "cube",
+                        "material": {
+                            "color": "#7f7f7f"
+                        }
                     },
-                    "required": [
-                        "object_type"
-                    ]
+                    "required": ["object_type", "width", "height", "depth", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

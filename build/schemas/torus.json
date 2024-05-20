@@ -1,6 +1,6 @@
 {
     "title": "Torus",
-    "description": "Torus Geometry",
+    "description": "Torus Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,10 +14,8 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "torus"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["torus"]
                                 },
                                 "arc": {
                                     "type": "number",
@@ -32,15 +30,15 @@
                                 "radiusTubular": {
                                     "type": "number",
                                     "title": "radius tubular",
-                                    "default": 0.4
+                                    "default": 0.2
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 36
                                 },
                                 "segmentsTubular": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments tubular",
                                     "default": 32
                                 }
@@ -57,39 +55,18 @@
                         }
                     ],
                     "title": "Torus Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "torus",
-                        "radius": 1,
-                        "radiusTubular": 0.4,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "radius"
-                    ]
+                    "required": ["object_type", "radius", "radiusTubular", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

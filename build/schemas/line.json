@@ -1,6 +1,6 @@
 {
     "title": "Line",
-    "description": "Draw a line",
+    "description": "Draw a line.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,29 +14,21 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "line"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["line"]
+                                },
+                                "color": {
+                                    "title": "Color",
+                                    "description": "Line color.",
+                                    "default": "#74BEC1",
+                                    "format": "color",
+                                    "type": "string"
                                 },
                                 "end": {
                                     "title": "vertex B (end)",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "description": "End coordinate.",
+                                    "format": "grid",
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": -0.5,
                                         "y": -0.5,
@@ -44,28 +36,18 @@
                                     }
                                 },
                                 "opacity": {
+                                    "title": "Opacity",
+                                    "description": "Line opacity.",
                                     "type": "number",
-                                    "title": "Line Opacity",
+                                    "minimum": 0,
+                                    "maximum": 1,
                                     "default": 1
                                 },
                                 "start": {
                                     "title": "vertex A (start)",
-                                    "properties": {
-                                        "x": {
-                                            "type": "number"
-                                        },
-                                        "y": {
-                                            "type": "number"
-                                        },
-                                        "z": {
-                                            "type": "number"
-                                        }
-                                    },
-                                    "required": [
-                                        "x",
-                                        "y",
-                                        "z"
-                                    ],
+                                    "description": "Start point coordinate.",
+                                    "format": "grid",
+                                    "$ref": "#/definitions/vector3",
                                     "default": {
                                         "x": 0,
                                         "y": 0.5,
@@ -73,53 +55,48 @@
                                     }
                                 },
                                 "visible": {
-                                    "type": "boolean",
                                     "title": "Visible",
+                                    "description": "Whether the material is visible.",
+                                    "type": "boolean",
                                     "default": true
                                 }
                             }
                         },
                         {
                             "$ref": "./schemas/definitions-entity.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-geometry.json#/properties"
                         }
                     ],
                     "title": "Line Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "line",
-                        "end": {
-                            "x": -0.5,
-                            "y": -0.5,
-                            "z": 0
-                        },
-                        "start": {
-                            "x": 0,
-                            "y": 0.5,
-                            "z": 0
-                        },
-                        "visible": true,
-                        "color": "#7f7f7f"
+                        "object_type": "line"
                     },
-                    "required": [
-                        "object_type",
-                        "start",
-                        "end"
-                    ]
+                    "required": ["object_type", "start", "end", "color"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"],
+    "definitions": {
+        "vector3": {
+            "title": "Vector3",
+            "format": "grid",
+            "properties": {
+                "x": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "y": {
+                    "default": 0,
+                    "type": "number"
+                },
+                "z": {
+                    "default": 0,
+                    "type": "number"
+                }
+            },
+            "required": ["x", "y", "z"],
+            "type": "object"
+        }
+    }
 }

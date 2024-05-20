@@ -1,6 +1,6 @@
 {
     "title": "PCD Model",
-    "description": "Load a PCD model. \n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>https://pointclouds.org/documentation/tutorials/index.html</a>",
+    "description": "Load a PCD model.\n\nFormat: <a href='https://pointclouds.org/documentation/tutorials/index.html'>Point Clouds</a>. See guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,29 +14,33 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "pcd-model"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["pcd-model"]
                                 },
                                 "url": {
-                                    "description": "Model URL. Dropbox share links also accepted. Store files paths under 'store/users/<username>' (e.g. /store/users/wiselab/pcd-models/bunny.pcd); to use CDN, prefix with `https://arena-cdn.conix.io/` (e.g. https://arena-cdn.conix.io/store/users/wiselab/pcd-models/bunny.pcd).",
+                                    "description": "Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "Url",
                                     "type": "string"
                                 },
                                 "pointSize": {
-                                    "description": "Size of the points",
+                                    "description": "Size of the points.",
                                     "title": "Points Size",
                                     "type": "number",
-                                    "default":  0.01
+                                    "default": 0.01
                                 },
                                 "pointColor": {
-                                    "description": "Color of the points",
+                                    "description": "Color of the points.",
                                     "title": "Points Color",
                                     "format": "color",
                                     "type": "string",
-                                    "default": "#7f7f7f"
+                                    "default": ""
+                                },
+                                "opacity": {
+                                    "description": "Opacity of all points.",
+                                    "title": "Opacity",
+                                    "type": "number",
+                                    "default": 1
                                 }
                             }
                         },
@@ -45,51 +49,17 @@
                         },
                         {
                             "$ref": "./schemas/definitions-common.json#/properties"
-                        },
-                        {
-                            "$ref": "./schemas/definitions-gltf.json#/properties"
                         }
                     ],
                     "title": "PCD Model Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "pcd-model",
-                        "pointSize": 0.01,
-                        "pointColor": "#7f7f7f",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "pcd-model"
                     },
-                    "required": [
-                        "object_type",
-                        "url",
-                        "pointSize",
-                        "position",
-                        "rotation",
-                        "scale"
-                    ]
+                    "required": ["object_type", "url", "pointSize", "opacity", "position", "rotation", "scale"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }

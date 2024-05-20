@@ -1,186 +1,185 @@
 {
-  "properties": {
-    "animation-mixer": {
-      "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'. \n\nMore properties at <a href='https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation'>https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation</a>",
-      "properties": {
-        "clampWhenFinished": {
-          "default": false,
-          "description": "If true, halts the animation at the last frame.",
-          "type": "boolean"
-        },
-        "clip": {
-          "default": "*",
-          "description": "Name of the animation clip(s) to play. Accepts wildcards.",
-          "type": "string"
-        },
-        "crossFadeDuration": {
-          "default": 0,
-          "description": "Duration of cross-fades between clips, in seconds.",
-          "type": "number"
-        },
-        "duration": {
-          "default": 0,
-          "description": "Duration of the animation, in seconds (0 = auto).",
-          "type": "number"
-        },
-        "loop": {
-          "default": "repeat",
-          "description": "once, repeat, or pingpong. In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
-          "enum": [
-            "once",
-            "repeat",
-            "pingpong"
-          ],
-          "type": "string"
-        },
-        "repetitions": {
-          "default": "",
-          "description": "Number of times to play the clip, in addition to the first play (empty string = Infinity). Repetitions are ignored for loop: once.",
-          "type": "string"
-        },
-        "startAt": {
-          "default": 0,
-          "description": "Sets the start of an animation to a specific time (in milliseconds). This is useful when you need to jump to an exact time in an animation. The input parameter will be scaled by the mixer's timeScale.",
-          "type": "number"
-        },
-        "timeScale": {
-          "default": 1,
-          "description": "Scaling factor for playback speed. A value of 0 causes the animation to pause. Negative values cause the animation to play backwards.",
-          "type": "number"
-        }
-      },
-      "required": [
-        "clip"
-      ],
-      "title": "Animation Mixer",
-      "type": "object"
-    },
-    "gltf-model-lod": {
-      "default": {
-        "detailedUrl": "",
-        "detailedDistance": 10,
-        "updateRate": 333,
-        "retainCache": false
-      },
-      "description": "Simple switch between the default gltf-model and a detailed one when a user camera is within specified distance",
-      "properties": {
-        "detailedUrl": {
-          "type": "string",
-          "title": "detailedUrl",
-          "description": "Alternative 'detailed' gltf model to load by URL",
-          "default": ""
-        },
-        "detailedDistance": {
-          "type": "number",
-          "title": "detailedDistance",
-          "description": "At what distance to switch between the models",
-          "default": 10
-        },
-        "updateRate": {
-          "type": "number",
-          "title": "updateRate",
-          "description": "How often user camera is checked for LOD (default 333ms)",
-          "default": 333
-        },
-        "retainCache": {
-          "type": "boolean",
-          "title": "retainCache",
-          "description": "Whether to skip freeing the detailed model from browser cache (default false)",
-          "default": false
-        }
-      },
-      "title": "GLTF Model Level of Detail",
-      "type": "object"
-    },
-    "modelUpdate": {
-      "title": "GLTF Model Update",
-      "type": "object",
-      "description": "The GLTF-specific `modelUpdate` attribute is an object with child component names as keys. The top-level keys are the names of the child components to be updated. The values of each are nested `position` and `rotation` attributes to set as new values, respectively. Either `position` or `rotation` can be omitted if unchanged.",
-      "additionalProperties": true,
-      "patternProperties": {
-          "^[A-Za-z][A-Za-z0-9_-]*$": {
-            "type": "object",
-            "description": "One of this model's named child components.",
+    "properties": {
+        "animation-mixer": {
+            "description": "A list of available animations can usually be found by inspecting the model file or its documentation. All animations will play by default. To play only a specific set of animations, use wildcards: animation-mixer='clip: run_*'.\n\nMore properties at <a href='https://github.com/n5ro/aframe-extras/tree/master/src/loaders#animation'>A-Frame Extras Animation</a>.",
             "properties": {
-              "position":{
-                "properties":{
-                   "x":{
-                      "default":0,
-                      "type":"number"
-                   },
-                   "y":{
-                      "default":0,
-                      "type":"number"
-                   },
-                   "z":{
-                      "default":0,
-                      "type":"number"
-                   }
+                "clampWhenFinished": {
+                    "default": false,
+                    "description": "If true, halts the animation at the last frame.",
+                    "type": "boolean"
                 },
-                "required":[
-                   "x",
-                   "y",
-                   "z"
-                ],
-                "type":"object",
-                "title":"Position"
-             },
-             "rotation":{
-                "properties":{
-                   "w":{
-                      "default":1,
-                      "type":"number"
-                   },
-                   "x":{
-                      "default":0,
-                      "type":"number"
-                   },
-                   "y":{
-                      "default":0,
-                      "type":"number"
-                   },
-                   "z":{
-                      "default":0,
-                      "type":"number"
-                   }
+                "clip": {
+                    "default": "*",
+                    "description": "Name of the animation clip(s) to play. Accepts wildcards.",
+                    "type": "string"
                 },
-                "required":[
-                   "w",
-                   "x",
-                   "y",
-                   "z"
-                ],
-                "type":"object",
-                "title":"Rotation"
-             }
+                "crossFadeDuration": {
+                    "default": 0,
+                    "description": "Duration of cross-fades between clips, in seconds.",
+                    "type": "number"
+                },
+                "duration": {
+                    "default": 0,
+                    "description": "Duration of the animation, in seconds (0 = auto).",
+                    "type": "number"
+                },
+                "loop": {
+                    "default": "repeat",
+                    "description": "In repeat and pingpong modes, the clip plays once plus the specified number of repetitions. For pingpong, every second clip plays in reverse.",
+                    "enum": ["once", "repeat", "pingpong"],
+                    "type": "string"
+                },
+                "repetitions": {
+                    "default": "",
+                    "description": "Number of times to play the clip, in addition to the first play (empty string = Infinity). Repetitions are ignored for loop: once.",
+                    "type": "string"
+                },
+                "startAt": {
+                    "default": 0,
+                    "description": "Sets the start of an animation to a specific time (in milliseconds). This is useful when you need to jump to an exact time in an animation. The input parameter will be scaled by the mixer's timeScale.",
+                    "type": "number"
+                },
+                "timeScale": {
+                    "default": 1,
+                    "description": "Scaling factor for playback speed. A value of 0 causes the animation to pause. Negative values cause the animation to play backwards.",
+                    "type": "number"
+                }
+            },
+            "required": ["clip"],
+            "title": "Animation Mixer",
+            "type": "object"
+        },
+        "gltf-morph": {
+            "description": "Allows you to target and control a gltf model's morphTargets created in Blender.\n\nMore properties at <a href='https://github.com/elbobo/aframe-gltf-morph-component'>A-Frame GLTF Morph</a> component.",
+            "properties": {
+                "morphtarget": {
+                    "type": "string",
+                    "title": "Morph Target",
+                    "description": "Name of morphTarget, can be found as part of the GLTF model.",
+                    "default": ""
+                },
+                "value": {
+                    "type": "number",
+                    "title": "Morph Value",
+                    "description": "Value that you want to set that morphTarget to (0 - 1).",
+                    "default": 0
+                }
+            },
+            "title": "GLTF Morph",
+            "type": "object",
+            "required": ["morphtarget", "value"]
+        },
+        "gltf-model-lod": {
+            "description": "Simple switch between the default gltf-model and a detailed one when a user camera is within specified distance",
+            "properties": {
+                "detailedUrl": {
+                    "type": "string",
+                    "title": "detailedUrl",
+                    "description": "Alternative 'detailed' gltf model to load by URL.",
+                    "default": ""
+                },
+                "detailedDistance": {
+                    "type": "number",
+                    "title": "detailedDistance",
+                    "description": "At what distance to switch between the models.",
+                    "default": 10
+                },
+                "updateRate": {
+                    "type": "number",
+                    "title": "updateRate",
+                    "description": "How often user camera is checked for LOD (default 333ms).",
+                    "default": 333
+                },
+                "retainCache": {
+                    "type": "boolean",
+                    "title": "retainCache",
+                    "description": "Whether to skip freeing the detailed model from browser cache (default false).",
+                    "default": false
+                }
+            },
+            "title": "GLTF Model Level of Detail",
+            "type": "object",
+            "required": ["detailedUrl", "detailedDistance", "updateRate", "retainCache"]
+        },
+        "modelUpdate": {
+            "title": "GLTF Model Update",
+            "type": "object",
+            "description": "The GLTF-specific `modelUpdate` attribute is an object with child component names as keys. The top-level keys are the names of the child components to be updated. The values of each are nested `position` and `rotation` attributes to set as new values, respectively. Either `position` or `rotation` can be omitted if unchanged.",
+            "additionalProperties": true,
+            "patternProperties": {
+                "^[A-Za-z][A-Za-z0-9_-]*$": {
+                    "type": "object",
+                    "description": "One of this model's named child components.",
+                    "properties": {
+                        "position": {
+                            "properties": {
+                                "x": {
+                                    "default": 0,
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "default": 0,
+                                    "type": "number"
+                                },
+                                "z": {
+                                    "default": 0,
+                                    "type": "number"
+                                }
+                            },
+                            "required": ["x", "y", "z"],
+                            "type": "object",
+                            "title": "Position"
+                        },
+                        "rotation": {
+                            "properties": {
+                                "w": {
+                                    "default": 1,
+                                    "type": "number"
+                                },
+                                "x": {
+                                    "default": 0,
+                                    "type": "number"
+                                },
+                                "y": {
+                                    "default": 0,
+                                    "type": "number"
+                                },
+                                "z": {
+                                    "default": 0,
+                                    "type": "number"
+                                }
+                            },
+                            "required": ["w", "x", "y", "z"],
+                            "type": "object",
+                            "title": "Rotation"
+                        }
+                    }
+                }
+            },
+            "example": {
+                "left-elbow": {
+                    "position": {
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    },
+                    "rotation": {
+                        "w": 1,
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    }
+                },
+                "right-elbow": {
+                    "rotation": {
+                        "w": 1,
+                        "x": 0,
+                        "y": 0,
+                        "z": 0
+                    }
+                },
+                "left-knee": {}
             }
-          }
-      },
-      "example": {
-        "left-elbow": {
-          "position": {
-            "x": 0,
-            "y": 0,
-            "z": 0
-          },
-          "rotation": {
-            "w": 1,
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
-        },
-        "right-elbow": {
-          "rotation": {
-            "w": 1,
-            "x": 0,
-            "y": 0,
-            "z": 0
-          }
-        },
-        "left-knee": {
         }
-      }
     }
-  }
 }

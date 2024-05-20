@@ -1,6 +1,6 @@
 {
     "title": "Capsule",
-    "description": "Capsule Geometry",
+    "description": "Capsule Geometry.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,10 +14,8 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
-                                    "enum": [
-                                        "capsule"
-                                    ]
+                                    "description": "3D object type.",
+                                    "enum": ["capsule"]
                                 },
                                 "length": {
                                     "type": "number",
@@ -30,12 +28,12 @@
                                     "default": 1
                                 },
                                 "segmentsCap": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments capsule",
                                     "default": 18
                                 },
                                 "segmentsRadial": {
-                                    "type": "number",
+                                    "type": "integer",
                                     "title": "segments radial",
                                     "default": 36
                                 }
@@ -52,40 +50,18 @@
                         }
                     ],
                     "title": "Capsule Data",
+                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "capsule",
-                        "radius": 1,
-                        "length": 1,
                         "material": {
                             "color": "#7f7f7f"
-                        },
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
                         }
                     },
-                    "required": [
-                        "object_type",
-                        "radius",
-                        "length"
-                    ]
+                    "required": ["object_type", "radius", "length", "position", "rotation"]
                 }
             }
         }
     ],
-    "required": [
-        "object_id",
-        "action",
-        "type",
-        "data",
-        "persist"
-    ]
+    "required": ["object_id", "action", "type", "data", "persist"]
 }
