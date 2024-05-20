@@ -8,9 +8,9 @@
 
 /* global AFRAME */
 
-AFRAME.components['object-model'].Component.prototype.update = function() {
+AFRAME.components['obj-model'].Component.prototype.update = function () {
     const self = this;
-    const el = this.el;
+    const { el } = this;
     const src = this.data;
 
     if (!src) {
@@ -22,17 +22,22 @@ AFRAME.components['object-model'].Component.prototype.update = function() {
     // register with model-progress system to handle model loading events
     document.querySelector('a-scene').systems['model-progress'].registerModel(el, src);
 
-    this.loader.load(src, function objLoaded(objModel) {
-        self.model = objModel.scene || objModel.scenes[0];
-        self.model.animations = objModel.animations;
-        self.model.asset = objModel.asset; // save asset
-        el.setObject3D('mesh', self.model);
-        el.emit('model-loaded', {format: 'obj', model: self.model});
-    }, function objProgress(xhr) {
-        el.emit('model-progress', {src: src, loaded: xhr.loaded, total: xhr.total});
-    }, function objFailed(error) {
-        const message = (error && error.message) ? error.message : 'Failed to load obj model';
-        console.error(message);
-        el.emit('model-error', {format: 'obj', src: src});
-    });
+    this.loader.load(
+        src,
+        (objModel) => {
+            self.model = objModel.scene || objModel.scenes[0];
+            self.model.animations = objModel.animations;
+            self.model.asset = objModel.asset; // save asset
+            el.setObject3D('mesh', self.model);
+            el.emit('model-loaded', { format: 'obj', model: self.model });
+        },
+        (xhr) => {
+            el.emit('model-progress', { src, loaded: xhr.loaded, total: xhr.total });
+        },
+        (error) => {
+            const message = error && error.message ? error.message : 'Failed to load obj model';
+            console.error(message);
+            el.emit('model-error', { format: 'obj', src });
+        }
+    );
 };

@@ -1,6 +1,6 @@
 {
     "title": "OBJ Model",
-    "description":"Loads a 3D model and material using a Wavefront (.OBJ) file and a .MTL file.",
+    "description":"Loads a 3D model and material using a Wavefront (.OBJ) file and a .MTL file.\n\nSee guidance to store paths under <a href='https://docs.arenaxr.org/content/interface/filestore.html'>ARENA File Store, CDN, or DropBox</a>.",
     "allOf": [
         {
             "$ref": "./schemas/definitions-arena-object.json#/properties"
@@ -14,13 +14,13 @@
                                 "object_type": {
                                     "type": "string",
                                     "title": "3D object type",
-                                    "description": "3D object type (derived from 'type' select above).",
+                                    "description": "3D object type.",
                                     "enum": [
-                                        "object-model"
+                                        "obj-model"
                                     ]
                                 },
                                 "obj": {
-                                    "description": "Url pointing to a .OBJ file",
+                                    "description": "Url pointing to a .OBJ file. Use File Store paths under 'store/users/username', see CDN and other storage options in the description above.",
                                     "format": "uri",
                                     "title": "OBJ Wavefront Url",
                                     "type": "string"
@@ -43,30 +43,11 @@
                     "title": "OBJ Model Data",
                     "additionalProperties": true,
                     "default": {
-                        "object_type": "object-model",
-                        "position": {
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "rotation": {
-                            "w": 1,
-                            "x": 0,
-                            "y": 0,
-                            "z": 0
-                        },
-                        "scale": {
-                            "x": 1,
-                            "y": 1,
-                            "z": 1
-                        }
+                        "object_type": "obj-model"
                     },
                     "required": [
                         "object_type",
-                        "obj",
-                        "position",
-                        "rotation",
-                        "scale"
+                        "obj"
                     ]
                 }
             }

@@ -69,6 +69,7 @@ window.addEventListener('onauth', async (e) => {
     const uploadFileTypes = {
         image: 'image/*',
         'gltf-model': '*.glb',
+        'obj-model': '*.obj',
         'pcd-model': '*.pcd',
         'threejs-scene': '*.json',
         gaussian_splatting: '*.splat',
@@ -483,6 +484,8 @@ window.addEventListener('onauth', async (e) => {
                                     }
                                     if (objtype === 'gaussian_splatting') {
                                         obj.data.src = `${storeExtPath}`;
+                                    } else if (objtype === 'obj-model') {
+                                        obj.data.obj = `${storeExtPath}`;
                                     } else {
                                         obj.data.url = `${storeExtPath}`;
                                     }
