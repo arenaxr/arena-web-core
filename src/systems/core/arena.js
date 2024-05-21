@@ -462,7 +462,7 @@ AFRAME.registerSystem('arena-scene', {
             $('a.toggle-edit').click(() => {
                 this.removeBuild3d();
             });
-        }, 2000);
+        }, 500);
     },
 
     /**
