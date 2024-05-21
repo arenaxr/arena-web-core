@@ -26,7 +26,7 @@
                                     "type": "string"
                                 },
                                 "urlBase": {
-                                    "description": "Use File Store base path for includes under 'store/users/username'",
+                                    "description": "Use File Store base path for includes. This must be an absolute path, e.g. '/store/users/...",
                                     "format": "uri",
                                     "title": "Url Base for Includes",
                                     "type": "string"
