@@ -69,6 +69,7 @@ AFRAME.registerComponent('urdf-model', {
                 }
                 return null;
             };
+            this.urdfLoader.packages = this.data.urlBase;
         } else {
             this.loader = new URDFLoader(this.manager);
         }
