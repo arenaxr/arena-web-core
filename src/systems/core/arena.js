@@ -436,6 +436,15 @@ AFRAME.registerSystem('arena-scene', {
         sceneEl.components.inspector.openInspector(el || null);
         console.log('build3d', 'A-Frame Inspector loaded');
 
+        // auto-start build3d scene when pause occurs, activate play
+        document.querySelector('a-scene').addEventListener('pause', (evt) => {
+            if (evt.target === sceneEl) {
+                document.querySelector('a-scene').play();
+                console.log('build3d', 'scene is playing...');
+            }
+            // TODO (mwfarb): would be nice to update play button visually to pause, to reflect current state
+        });
+
         function updateInspectorPanel(perm, jqSelect, permColor = false) {
             $(jqSelect).css('opacity', '.75');
             if (permColor) {
@@ -448,14 +457,6 @@ AFRAME.registerSystem('arena-scene', {
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
             updateInspectorPanel(perm, '#inspectorContainer #viewportBar', true);
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
-
-            const scene = document.querySelector('a-scene');
-            scene.play();
-            console.log('build3d', 'scene.play()');
-
-            // <a id="playPauseScene" class="button fa fa-pause" title="Pause scene"></a>
-            $('#playPauseScene').triggerHandler('click');
-            console.log('build3d', 'playPauseScene click');
 
             // use "Back to Scene" to send to real ARENA scene
             $('a.toggle-edit').click(() => {

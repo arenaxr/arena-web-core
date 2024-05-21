@@ -296,6 +296,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                 attributes: true,
                 attributeOldValue: true,
             });
+            addComponentAction('build3d-mqtt-object', '', 'Open Json Editor', 'open-json-editor', 'fa-code');
             addComponentAction('gaussian_splatting', 'src', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('gltf-lod', 'detailedUrl', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('gltf-model', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
