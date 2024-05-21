@@ -39,6 +39,7 @@ function extractDataFullDOM(mutation) {
             case 'text':
             case 'thickline':
             case 'threejs-scene':
+            case 'urdf-model':
                 data.object_type = attr.name;
                 break;
             default:
@@ -299,6 +300,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             addComponentAction('gltf-lod', 'detailedUrl', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('gltf-model', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('material', 'src', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
+            addComponentAction('obj-model', 'obj', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('pcd-model', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('sound', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');
             addComponentAction('threejs-scene', 'url', 'upload-to-filestore', 'Upload to Filestore', 'fa-upload');

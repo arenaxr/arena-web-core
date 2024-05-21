@@ -436,15 +436,17 @@ AFRAME.registerSystem('arena-scene', {
         sceneEl.components.inspector.openInspector(el || null);
         console.log('build3d', 'A-Frame Inspector loaded');
 
-        function updateInspectorPanel(perm, jqSelect, backgroundColor = null) {
+        function updateInspectorPanel(perm, jqSelect, permColor = false) {
             $(jqSelect).css('opacity', '.75');
-            if (backgroundColor) $(jqSelect).css('background-color', backgroundColor);
+            if (permColor) {
+                $(jqSelect).css('background-color', perm ? 'darkgreen' : 'darkorange');
+            }
         }
 
         setTimeout(() => {
             const perm = this.isUserSceneWriter();
             updateInspectorPanel(perm, '#inspectorContainer #scenegraph');
-            updateInspectorPanel(perm, '#inspectorContainer #viewportBar', 'darkgreen');
+            updateInspectorPanel(perm, '#inspectorContainer #viewportBar', true);
             updateInspectorPanel(perm, '#inspectorContainer #rightPanel');
 
             const scene = document.querySelector('a-scene');
