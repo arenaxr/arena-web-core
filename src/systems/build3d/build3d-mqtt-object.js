@@ -238,6 +238,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         return; // no need to handle on/off mutations to our own component
                     }
                     if (mutation.target.id) {
+                        // TODO (mwfarb): make name change occur only on focus loss, otherwise is too frequent
                         const attribute = mutation.target.getAttribute(mutation.attributeName);
                         // when 'id' changes, we have a new object, maybe a name change
                         const msg = {
@@ -306,6 +307,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
             this.observer.disconnect();
             console.log(`build3d watching entity ${this.el.id} attributes stopped`);
         }
+        // TODO (mwfarb): move openJsonEditor to an action for the object using addComponentAction
         // quick setting for user to edit in the build page
         if (this.data.openJsonEditor) {
             this.data.openJsonEditor = false;
