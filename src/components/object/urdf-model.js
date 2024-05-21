@@ -22,6 +22,7 @@ import URDFLoader from '../vendor/urdf-loader/URDFLoader';
 AFRAME.registerComponent('urdf-model', {
     schema: {
         url: { type: 'string' },
+        urlBase: { type: 'string', default: '' }, // base URL for xacro find command
         joints: {
             default: '',
             // Deserialize joints in the form J1:V1,J2:V2, ...
@@ -30,7 +31,7 @@ AFRAME.registerComponent('urdf-model', {
                 if (typeof value === 'object') {
                     return value;
                 } // return value if already an object
-                if (value.length == 0) {
+                if (value.length === 0) {
                     return {};
                 }
                 // remove space; replace equal for ":"
@@ -54,13 +55,25 @@ AFRAME.registerComponent('urdf-model', {
     init() {
         this.scene = this.el.sceneEl.object3D;
         this.manager = new THREE.LoadingManager();
-        //TODO: think this will have an issue if we change between xacro and urdf on the same object
+        // TODO: think this will have an issue if we change between xacro and urdf on the same object
         if (this.data.url.endsWith('.xacro')) {
+            /*
+            TODO: Consider moving the loaders to a URDF system as a single instance, then namespace the find commands
+                  to each component.
+            */
             this.loader = new XacroLoader(this.manager);
+            this.urdfLoader = new URDFLoader();
+            this.loader.rospackCommands = (command, ...args) => {
+                if (command === 'find') {
+                    return this.data.urlBase;
+                }
+                return null;
+            };
         } else {
             this.loader = new URDFLoader(this.manager);
-        }        
+        }
         this.model = null;
+        this.modelProgressSystem = this.el.sceneEl.systems['model-progress'];
     },
 
     update(oldData) {
@@ -76,14 +89,13 @@ AFRAME.registerComponent('urdf-model', {
             self.remove();
 
             // register with model-progress system to handle model loading events
-            document.querySelector('a-scene').systems['model-progress'].registerModel(el, url);
+            this.modelProgressSystem.registerModel(el, url);
 
             if (self.data.url.endsWith('.xacro')) {
                 self.loader.load(
                     url,
                     (xml) => {
-                        const urdfLoader = new URDFLoader();
-                        self.model = urdfLoader.parse(xml);
+                        self.model = this.urdfLoader.parse(xml);
                         self.modelLoaded();
                     },
                     (err) => {
@@ -91,21 +103,23 @@ AFRAME.registerComponent('urdf-model', {
                     }
                 );
             } else {
-                self.loader.load(url, (urdfModel) => {                    
+                self.loader.load(url, (urdfModel) => {
                     self.model = urdfModel;
                     self.modelLoaded();
                 });
             }
 
-            self.manager.onProgress = function (url, itemsLoaded, itemsTotal) {
-                el.emit('model-progress', { url, progress: (itemsLoaded / itemsTotal) * 100 });
+            self.manager.onProgress = function (loadUrl, itemsLoaded, itemsTotal) {
+                el.emit('model-progress', { loadUrl, progress: (itemsLoaded / itemsTotal) * 100 });
             };
 
-            self.manager.onError = (url) => {
-                console.warn(`Failed to load urdf model: ${url}`);
-                el.emit('model-error', { format: 'urdf', src: url });
+            self.manager.onError = (loadUrl) => {
+                console.warn(`Failed to load urdf model: ${loadUrl}`);
+                el.emit('model-error', { format: 'urdf', src: loadUrl });
             };
-        } else if (AFRAME.utils.deepEqual(oldData.joints, self.data.joints) == false) this.updateJoints();
+        } else if (AFRAME.utils.deepEqual(oldData.joints, self.data.joints) === false) {
+            this.updateJoints();
+        }
     },
 
     modelLoaded() {

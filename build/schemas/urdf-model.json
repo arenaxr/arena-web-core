@@ -25,6 +25,12 @@
                                     "title": "Url",
                                     "type": "string"
                                 },
+                                "urlBase": {
+                                    "description": "Use File Store base path for includes under 'store/users/username'",
+                                    "format": "uri",
+                                    "title": "Url Base for Includes",
+                                    "type": "string"
+                                },
                                 "joints": {
                                     "description": "Set joint values (in degrees) in the form 'JointName1: ValueInDegrees1, JointName2: ValueInDegrees2, ...'. ",
                                     "title": "joints",
@@ -46,7 +52,8 @@
                     },
                     "required": [
                         "object_type",
-                        "url"
+                        "url",
+                        "urlBase"
                     ]
                 }
             }
