@@ -6,7 +6,7 @@
  * @date 2020
  */
 
-/* global AFRAME */
+/* global AFRAME, ARENAAUTH */
 
 /**
  * Create an observer to listen for changes made locally in the A-Frame Inspector and publish them to MQTT.
@@ -181,7 +181,7 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 inspectorMqttTitle.style.opacity = '.75';
                 inspectorMqttTitle.style.width = '100%';
                 inspectorMqttTitle.style.paddingLeft = '10px';
-                inspectorMqttTitle.textContent = "ARENA's Build3D MQTT Publish Log";
+                inspectorMqttTitle.textContent = `ARENA's Build3D MQTT Publish Log (user: ${ARENAAUTH.user_username})`;
                 inspectorMqttLogWrap.appendChild(inspectorMqttTitle);
 
                 // log

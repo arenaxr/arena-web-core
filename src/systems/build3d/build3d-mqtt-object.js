@@ -39,6 +39,7 @@ function extractDataFullDOM(mutation) {
             case 'text':
             case 'thickline':
             case 'threejs-scene':
+            case 'urdf-model':
                 data.object_type = attr.name;
                 break;
             default:
@@ -107,6 +108,7 @@ function extractDataUpdates(mutation, attribute, changes) {
         case 'text':
         case 'thickline':
         case 'threejs-scene':
+        case 'urdf-model':
             data.object_type = mutation.attributeName;
             break;
         default:
@@ -203,6 +205,7 @@ AFRAME.registerComponent('build3d-mqtt-object', {
                         return; // no need to handle on/off mutations to our own component
                     }
                     if (mutation.target.id) {
+                        // TODO (mwfarb): make name change occur only on focus loss, otherwise is too frequent
                         const attribute = mutation.target.getAttribute(mutation.attributeName);
                         // when 'id' changes, we have a new object, maybe a name change
                         const msg = {
