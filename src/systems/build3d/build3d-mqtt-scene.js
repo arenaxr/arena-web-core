@@ -15,7 +15,7 @@
 let toolbarName = 'translate';
 
 // register component actions
-const uploadFS = {
+const fsUploadActions = {
     gaussian_splatting: 'src',
     'gltf-lod': 'src',
     'gltf-model': 'url',
@@ -29,9 +29,9 @@ const uploadFS = {
 const arenaComponentActions = {
     'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
 };
-Object.keys(uploadFS).forEach((key) => {
-    arenaComponentActions[key] = {
-        property: uploadFS[key],
+Object.keys(fsUploadActions).forEach((property) => {
+    arenaComponentActions[property] = {
+        property: fsUploadActions[property],
         action: 'upload-to-filestore',
         label: 'Upload to Filestore',
         icon: 'fa-upload',
@@ -54,11 +54,21 @@ function addComponentAction(componentName, property, dataAction, title, iconName
     // does the graph have a new component?
     // insert the upload link and and action listener
     if (thetitle.length > 0 && thebutton.length === 0) {
-        thetitle
-            .siblings('.componentHeaderActions')
-            .prepend(
-                `<a title="${title}" data-action="${dataAction}" data-component="${componentName}" class="button fa ${iconName}" href="#"></a>`
-            );
+        const buttonId = `${componentName}-${dataAction}`;
+        const actionButton = document.createElement('a');
+        actionButton.id = buttonId;
+        actionButton.title = title;
+        actionButton.classList.add('button', 'fa', iconName);
+        actionButton.dataset.action = dataAction;
+        actionButton.dataset.component = componentName;
+        actionButton.addEventListener(
+            'click',
+            (e) => {
+                alert(buttonId);
+            },
+            false
+        );
+        thetitle.siblings('.componentHeaderActions').prepend(actionButton);
     }
 }
 
@@ -256,7 +266,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
 
                             // query active components
                             Object.keys(arenaComponentActions).forEach((key) => {
-                                console.log(key, arenaComponentActions[key]);
                                 addComponentAction(
                                     key,
                                     arenaComponentActions[key].property,
