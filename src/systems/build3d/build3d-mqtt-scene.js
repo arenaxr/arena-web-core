@@ -14,6 +14,30 @@
  */
 let toolbarName = 'translate';
 
+// register component actions
+const uploadFS = {
+    gaussian_splatting: 'src',
+    'gltf-lod': 'src',
+    'gltf-model': 'url',
+    material: 'src',
+    'obj-model': 'obj',
+    'pcd-model': 'url',
+    sound: 'url',
+    'threejs-scene': 'url',
+    'urdf-model': 'url',
+};
+const arenaComponentActions = {
+    'build3d-mqtt-object': { action: 'edit-json', label: 'Edit Json', icon: 'fa-code' },
+};
+Object.keys(uploadFS).forEach((key) => {
+    arenaComponentActions[key] = {
+        property: uploadFS[key],
+        action: 'upload-to-filestore',
+        label: 'Upload to Filestore',
+        icon: 'fa-upload',
+    };
+});
+
 function updateMqttWidth() {
     const inspectorMqttLogWrap = document.getElementById('inspectorMqttLogWrap');
     const entire = window.innerWidth;
@@ -21,6 +45,21 @@ function updateMqttWidth() {
     const right = document.getElementById('rightPanel').clientWidth;
     const correct = entire - left - right;
     inspectorMqttLogWrap.style.width = `${correct}px`;
+}
+
+function addComponentAction(componentName, property, dataAction, title, iconName) {
+    const thetitle = $(`.component .componentHeader .componentTitle[title="${componentName}"]`);
+    const thebutton = $(thetitle).siblings(`.componentHeaderActions`).find(`[data-action="${dataAction}"]`);
+
+    // does the graph have a new component?
+    // insert the upload link and and action listener
+    if (thetitle.length > 0 && thebutton.length === 0) {
+        thetitle
+            .siblings('.componentHeaderActions')
+            .prepend(
+                `<a title="${title}" data-action="${dataAction}" data-component="${componentName}" class="button fa ${iconName}" href="#"></a>`
+            );
+    }
 }
 
 AFRAME.registerComponent('build3d-mqtt-scene', {
@@ -155,7 +194,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // container
                 const inspectorMqttLogWrap = document.createElement('div');
                 inspectorMqttLogWrap.id = 'inspectorMqttLogWrap';
-                inspectorMqttLogWrap.className = 'outliner';
                 inspectorMqttLogWrap.tabIndex = 2;
                 inspectorMqttLogWrap.style.width = '-webkit-fill-available';
                 inspectorMqttLogWrap.style.bottom = '0';
@@ -175,7 +213,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // title
                 const inspectorMqttTitle = document.createElement('span');
                 inspectorMqttTitle.id = 'inspectorMqttTitle';
-                inspectorMqttTitle.className = 'outliner';
                 inspectorMqttTitle.style.backgroundColor = 'darkgreen';
                 inspectorMqttTitle.style.color = 'white';
                 inspectorMqttTitle.style.opacity = '.75';
@@ -187,7 +224,6 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 // log
                 const inspectorMqttLog = document.createElement('div');
                 inspectorMqttLog.id = 'inspectorMqttLog';
-                inspectorMqttLog.className = 'outliner';
                 inspectorMqttLog.style.overflowY = 'auto';
                 inspectorMqttLog.style.width = '100%';
                 inspectorMqttLog.style.height = '100%';
@@ -203,6 +239,41 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
                 line.innerHTML += `Watching for local changes...`;
                 inspectorMqttLog.appendChild(document.createElement('br'));
                 inspectorMqttLog.appendChild(line);
+            }
+        }
+        if (!this.components) {
+            if (document.getElementsByClassName('components').length > 0) {
+                console.log('componentsTest ok');
+                // eslint-disable-next-line prefer-destructuring
+                this.components = document.getElementsByClassName('components')[0];
+                if (this.components) {
+                    // TODO (mwfarb): listening for Inspector's own emitted events 'entityselect' or 'componentadd' would be ideal
+
+                    // handle selected entity
+                    const observer = new MutationObserver((mutationList) => {
+                        mutationList.forEach((mutation) => {
+                            // handle class change
+
+                            // query active components
+                            Object.keys(arenaComponentActions).forEach((key) => {
+                                console.log(key, arenaComponentActions[key]);
+                                addComponentAction(
+                                    key,
+                                    arenaComponentActions[key].property,
+                                    arenaComponentActions[key].action,
+                                    arenaComponentActions[key].label,
+                                    arenaComponentActions[key].icon
+                                );
+                            });
+                        });
+                    });
+                    const options = {
+                        attributeFilter: ['class'],
+                        childList: true,
+                        subtree: true,
+                    };
+                    observer.observe(this.components, options);
+                }
             }
         }
         if (!this.cursor) {
