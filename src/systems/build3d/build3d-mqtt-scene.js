@@ -73,7 +73,8 @@ function addComponentAction(componentName, property, dataAction, title, iconName
                         );
                         break;
                     case 'upload-to-filestore':
-                        alert(`Still working on ${dataAction}...`);
+                        selectedEntity.setAttribute(componentName, property, 'src/systems/ui/images/audio-off.png'); // TODO(mwfarb): remove hack
+                        AFRAME.INSPECTOR.selectEntity(selectedEntity);
                         break;
                     default:
                         console.error(`Build3d data-action '${dataAction}' unsupported!`);
