@@ -12,7 +12,9 @@ import Background from './Background.js';
 import Nodes from './nodes/Nodes.js';
 import Color4 from './Color4.js';
 import ClippingContext from './ClippingContext.js';
-import { Scene, Frustum, Matrix4, Vector2, Vector3, Vector4, DoubleSide, BackSide, FrontSide, SRGBColorSpace, NoToneMapping } from 'three';
+import { Scene, Frustum, Matrix4, Vector2, Vector3, Vector4, DoubleSide, BackSide, FrontSide, SRGBColorSpace, NoColorSpace, NoToneMapping, LinearFilter, LinearSRGBColorSpace, RenderTarget, HalfFloatType, RGBAFormat } from 'three';
+import { NodeMaterial } from '../../nodes/Nodes.js';
+import QuadMesh from '../../objects/QuadMesh.js';
 
 const _scene = new Scene();
 const _drawingBufferSize = new Vector2();
@@ -20,6 +22,7 @@ const _screen = new Vector4();
 const _frustum = new Frustum();
 const _projScreenMatrix = new Matrix4();
 const _vector3 = new Vector3();
+const _quad = new QuadMesh( new NodeMaterial() );
 
 class Renderer {
 
@@ -57,11 +60,15 @@ class Renderer {
 		this.sortObjects = true;
 
 		this.depth = true;
-		this.stencil = true;
+		this.stencil = false;
 
 		this.clippingPlanes = [];
 
 		this.info = new Info();
+
+		// nodes
+
+		this.toneMappingNode = null;
 
 		// internals
 
@@ -90,6 +97,7 @@ class Renderer {
 		this._opaqueSort = null;
 		this._transparentSort = null;
 
+		this._frameBufferTarget = null;
 
 		const alphaClear = this.alpha === true ? 0 : 1;
 
@@ -312,7 +320,7 @@ class Renderer {
 
 		if ( this._initialized === false ) await this.init();
 
-		const renderContext = this._renderContext( scene, camera );
+		const renderContext = this._renderScene( scene, camera );
 
 		await this.backend.resolveTimestampAsync( renderContext, 'render' );
 
@@ -322,16 +330,66 @@ class Renderer {
 
 		if ( this._initialized === false ) {
 
-			console.error( 'THREE.Renderer: .render() called before the backend is initialized. Try using .renderAsync() instead.' );
-			return;
+			console.warn( 'THREE.Renderer: .render() called before the backend is initialized. Try using .renderAsync() instead.' );
+
+			return this.renderAsync( scene, camera );
 
 		}
 
-		this._renderContext( scene, camera );
+		this._renderScene( scene, camera );
 
 	}
 
-	_renderContext( scene, camera ) {
+	_getFrameBufferTarget() {
+
+		const { currentColorSpace } = this;
+
+		const useToneMapping = this._renderTarget === null && ( this.toneMapping !== NoToneMapping || this.toneMappingNode !== null );
+		const useColorSpace = currentColorSpace !== LinearSRGBColorSpace && currentColorSpace !== NoColorSpace;
+
+		if ( useToneMapping === false && useColorSpace === false ) return null;
+
+		const { width, height } = this.getDrawingBufferSize( _drawingBufferSize );
+		const { depth, stencil } = this;
+
+		let frameBufferTarget = this._frameBufferTarget;
+
+		if ( frameBufferTarget === null ) {
+
+			frameBufferTarget = new RenderTarget( width, height, {
+				depthBuffer: depth,
+				stencilBuffer: stencil,
+				type: HalfFloatType, // FloatType
+				format: RGBAFormat,
+				colorSpace: LinearSRGBColorSpace,
+				generateMipmaps: false,
+				minFilter: LinearFilter,
+				magFilter: LinearFilter,
+				samples: this.backend.parameters.antialias ? 4 : 0
+			} );
+
+			frameBufferTarget.isPostProcessingRenderTarget = true;
+
+			this._frameBufferTarget = frameBufferTarget;
+
+		}
+
+		frameBufferTarget.depthBuffer = depth;
+		frameBufferTarget.stencilBuffer = stencil;
+		frameBufferTarget.setSize( width, height );
+		frameBufferTarget.viewport.copy( this._viewport );
+		frameBufferTarget.scissor.copy( this._scissor );
+		frameBufferTarget.viewport.multiplyScalar( this._pixelRatio );
+		frameBufferTarget.scissor.multiplyScalar( this._pixelRatio );
+		frameBufferTarget.scissorTest = this._scissorTest;
+
+		return frameBufferTarget;
+
+	}
+
+	_renderScene( scene, camera, useFrameBufferTarget = true ) {
+
+		const frameBufferTarget = useFrameBufferTarget ? this._getFrameBufferTarget() : null;
 
 		// preserve render tree
 
@@ -345,10 +403,30 @@ class Renderer {
 
 		const sceneRef = ( scene.isScene === true ) ? scene : _scene;
 
-		const renderTarget = this._renderTarget;
-		const renderContext = this._renderContexts.get( scene, camera, renderTarget );
+		const outputRenderTarget = this._renderTarget;
+
 		const activeCubeFace = this._activeCubeFace;
 		const activeMipmapLevel = this._activeMipmapLevel;
+
+		//
+
+		let renderTarget;
+
+		if ( frameBufferTarget !== null ) {
+
+			renderTarget = frameBufferTarget;
+
+			this.setRenderTarget( renderTarget );
+
+		} else {
+
+			renderTarget = outputRenderTarget;
+
+		}
+
+		//
+
+		const renderContext = this._renderContexts.get( scene, camera, renderTarget );
 
 		this._currentRenderContext = renderContext;
 		this._currentRenderObjectFunction = this._renderObjectFunction || this.renderObject;
@@ -378,7 +456,6 @@ class Renderer {
 
 		if ( camera.parent === null && camera.matrixWorldAutoUpdate === true ) camera.updateMatrixWorld();
 
-		if ( this.info.autoReset === true ) this.info.reset();
 
 		//
 
@@ -502,6 +579,18 @@ class Renderer {
 
 		this._currentRenderContext = previousRenderContext;
 		this._currentRenderObjectFunction = previousRenderObjectFunction;
+
+		//
+
+		if ( frameBufferTarget !== null ) {
+
+			this.setRenderTarget( outputRenderTarget, activeCubeFace, activeMipmapLevel );
+
+			_quad.material.fragmentNode = this._nodes.getOutputNode( renderTarget.texture );
+
+			this._renderScene( _quad, _quad.camera, false );
+
+		}
 
 		//
 
@@ -761,8 +850,17 @@ class Renderer {
 
 	clear( color = true, depth = true, stencil = true ) {
 
+		if ( this._initialized === false ) {
+
+			console.warn( 'THREE.Renderer: .clear() called before the backend is initialized. Try using .clearAsync() instead.' );
+
+			return this.clearAsync( color, depth, stencil );
+
+		}
+
+		const renderTarget = this._renderTarget || this._getFrameBufferTarget();
+
 		let renderTargetData = null;
-		const renderTarget = this._renderTarget;
 
 		if ( renderTarget !== null ) {
 
@@ -897,7 +995,6 @@ class Renderer {
 		nodeFrame.renderId = this.info.calls;
 
 		//
-		if ( this.info.autoReset === true ) this.info.resetCompute();
 
 		const backend = this.backend;
 		const pipelines = this._pipelines;
@@ -957,13 +1054,23 @@ class Renderer {
 
 	}
 
-	hasFeatureAsync( name ) {
+	async hasFeatureAsync( name ) {
 
-		return this.backend.hasFeatureAsync( name );
+		if ( this._initialized === false ) await this.init();
+
+		return this.backend.hasFeature( name );
 
 	}
 
 	hasFeature( name ) {
+
+		if ( this._initialized === false ) {
+
+			console.warn( 'THREE.Renderer: .hasFeature() called before the backend is initialized. Try using .hasFeatureAsync() instead.' );
+
+			return false;
+
+		}
 
 		return this.backend.hasFeature( name );
 
@@ -979,9 +1086,19 @@ class Renderer {
 
 	}
 
-	readRenderTargetPixelsAsync( renderTarget, x, y, width, height ) {
+	copyTextureToTexture( position, srcTexture, dstTexture, level = 0 ) {
 
-		return this.backend.copyTextureToBuffer( renderTarget.texture, x, y, width, height );
+		this._textures.updateTexture( srcTexture );
+		this._textures.updateTexture( dstTexture );
+
+		this.backend.copyTextureToTexture( position, srcTexture, dstTexture, level );
+
+	}
+
+
+	readRenderTargetPixelsAsync( renderTarget, x, y, width, height, index = 0 ) {
+
+		return this.backend.copyTextureToBuffer( renderTarget.textures[ index ], x, y, width, height );
 
 	}
 
@@ -1141,6 +1258,7 @@ class Renderer {
 
 		let overridePositionNode;
 		let overrideFragmentNode;
+		let overrideDepthNode;
 
 		//
 
@@ -1157,7 +1275,6 @@ class Renderer {
 			if ( material.positionNode && material.positionNode.isNode ) {
 
 				overridePositionNode = overrideMaterial.positionNode;
-
 				overrideMaterial.positionNode = material.positionNode;
 
 			}
@@ -1165,6 +1282,14 @@ class Renderer {
 			if ( overrideMaterial.isShadowNodeMaterial ) {
 
 				overrideMaterial.side = material.shadowSide === null ? material.side : material.shadowSide;
+
+				if ( material.depthNode && material.depthNode.isNode ) {
+
+					overrideDepthNode = overrideMaterial.depthNode;
+					overrideMaterial.depthNode = material.depthNode;
+
+				}
+
 
 				if ( material.shadowNode && material.shadowNode.isNode ) {
 
@@ -1210,16 +1335,16 @@ class Renderer {
 		if ( material.transparent === true && material.side === DoubleSide && material.forceSinglePass === false ) {
 
 			material.side = BackSide;
-			this._handleObjectFunction( object, material, scene, camera, lightsNode, 'backSide' ); // create backSide pass id
+			this._handleObjectFunction( object, material, scene, camera, lightsNode, group, 'backSide' ); // create backSide pass id
 
 			material.side = FrontSide;
-			this._handleObjectFunction( object, material, scene, camera, lightsNode ); // use default pass id
+			this._handleObjectFunction( object, material, scene, camera, lightsNode, group ); // use default pass id
 
 			material.side = DoubleSide;
 
 		} else {
 
-			this._handleObjectFunction( object, material, scene, camera, lightsNode );
+			this._handleObjectFunction( object, material, scene, camera, lightsNode, group );
 
 		}
 
@@ -1228,6 +1353,12 @@ class Renderer {
 		if ( overridePositionNode !== undefined ) {
 
 			scene.overrideMaterial.positionNode = overridePositionNode;
+
+		}
+
+		if ( overrideDepthNode !== undefined ) {
+
+			scene.overrideMaterial.depthNode = overrideDepthNode;
 
 		}
 
@@ -1243,9 +1374,10 @@ class Renderer {
 
 	}
 
-	_renderObjectDirect( object, material, scene, camera, lightsNode, passId ) {
+	_renderObjectDirect( object, material, scene, camera, lightsNode, group, passId ) {
 
 		const renderObject = this._objects.get( object, material, scene, camera, lightsNode, this._currentRenderContext, passId );
+		renderObject.drawRange = group || object.geometry.drawRange;
 
 		//
 

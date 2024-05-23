@@ -143,6 +143,7 @@ class WebGLTextureUtils {
 			if ( glType === gl.UNSIGNED_SHORT_5_6_5 ) internalFormat = gl.RGB565;
 			if ( glType === gl.UNSIGNED_SHORT_5_5_5_1 ) internalFormat = gl.RGB5_A1;
 			if ( glType === gl.UNSIGNED_SHORT_4_4_4_4 ) internalFormat = gl.RGB4;
+			if ( glType === gl.UNSIGNED_INT_5_9_9_9_REV ) internalFormat = gl.RGB9_E5;
 
 		}
 
@@ -523,6 +524,48 @@ class WebGLTextureUtils {
 
 	}
 
+	copyTextureToTexture( position, srcTexture, dstTexture, level = 0 ) {
+
+		const { gl, backend } = this;
+		const { state } = this.backend;
+
+		const width = srcTexture.image.width;
+		const height = srcTexture.image.height;
+		const { textureGPU: dstTextureGPU, glTextureType, glType, glFormat } = backend.get( dstTexture );
+
+		state.bindTexture( glTextureType, dstTextureGPU );
+
+		// As another texture upload may have changed pixelStorei
+		// parameters, make sure they are correct for the dstTexture
+		gl.pixelStorei( gl.UNPACK_FLIP_Y_WEBGL, dstTexture.flipY );
+		gl.pixelStorei( gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, dstTexture.premultiplyAlpha );
+		gl.pixelStorei( gl.UNPACK_ALIGNMENT, dstTexture.unpackAlignment );
+
+		if ( srcTexture.isDataTexture ) {
+
+			gl.texSubImage2D( gl.TEXTURE_2D, level, position.x, position.y, width, height, glFormat, glType, srcTexture.image.data );
+
+		} else {
+
+			if ( srcTexture.isCompressedTexture ) {
+
+				gl.compressedTexSubImage2D( gl.TEXTURE_2D, level, position.x, position.y, srcTexture.mipmaps[ 0 ].width, srcTexture.mipmaps[ 0 ].height, glFormat, srcTexture.mipmaps[ 0 ].data );
+
+			} else {
+
+				gl.texSubImage2D( gl.TEXTURE_2D, level, position.x, position.y, glFormat, glType, srcTexture.image );
+
+			}
+
+		}
+
+		// Generate mipmaps only when copying level 0
+		if ( level === 0 && dstTexture.generateMipmaps ) gl.generateMipmap( gl.TEXTURE_2D );
+
+		state.unbindTexture();
+
+	}
+
 	copyFramebufferToTexture( texture, renderContext ) {
 
 		const { gl } = this;
@@ -533,20 +576,35 @@ class WebGLTextureUtils {
 		const width = texture.image.width;
 		const height = texture.image.height;
 
-		if ( texture.isDepthTexture ) {
+		const requireDrawFrameBuffer = texture.isDepthTexture === true || ( renderContext.renderTarget && renderContext.renderTarget.samples > 0 );
 
-			let mask = gl.DEPTH_BUFFER_BIT;
+		if ( requireDrawFrameBuffer ) {
 
-			if ( renderContext.stencil ) {
+			let mask;
+			let attachment;
 
-				mask |= gl.STENCIL_BUFFER_BIT;
+			if ( texture.isDepthTexture === true ) {
+
+				mask = gl.DEPTH_BUFFER_BIT;
+				attachment = gl.DEPTH_ATTACHMENT;
+
+				if ( renderContext.stencil ) {
+
+					mask |= gl.STENCIL_BUFFER_BIT;
+
+				}
+
+			} else {
+
+				mask = gl.COLOR_BUFFER_BIT;
+				attachment = gl.COLOR_ATTACHMENT0;
 
 			}
 
 			const fb = gl.createFramebuffer();
 			state.bindFramebuffer( gl.DRAW_FRAMEBUFFER, fb );
 
-			gl.framebufferTexture2D( gl.DRAW_FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, textureGPU, 0 );
+			gl.framebufferTexture2D( gl.DRAW_FRAMEBUFFER, attachment, gl.TEXTURE_2D, textureGPU, 0 );
 
 			gl.blitFramebuffer( 0, 0, width, height, 0, 0, width, height, mask, gl.NEAREST );
 
@@ -582,7 +640,6 @@ class WebGLTextureUtils {
 			let glInternalFormat = gl.DEPTH_COMPONENT24;
 
 			if ( samples > 0 ) {
-
 
 				if ( depthTexture && depthTexture.isDepthTexture ) {
 
@@ -649,7 +706,7 @@ class WebGLTextureUtils {
 
 		await backend.utils._clientWaitAsync();
 
-		const dstBuffer = new typedArrayType( elementCount );
+		const dstBuffer = new typedArrayType( byteLength / typedArrayType.BYTES_PER_ELEMENT );
 
 		gl.bindBuffer( gl.PIXEL_PACK_BUFFER, buffer );
 		gl.getBufferSubData( gl.PIXEL_PACK_BUFFER, 0, dstBuffer );

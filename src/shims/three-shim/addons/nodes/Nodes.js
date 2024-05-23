@@ -26,7 +26,7 @@ export { default as NodeUniform } from './core/NodeUniform.js';
 export { default as NodeVar } from './core/NodeVar.js';
 export { default as NodeVarying } from './core/NodeVarying.js';
 export { default as ParameterNode, parameter } from './core/ParameterNode.js';
-export { default as PropertyNode, property, varyingProperty, output, diffuseColor, roughness, metalness, clearcoat, clearcoatRoughness, sheen, sheenRoughness, iridescence, iridescenceIOR, iridescenceThickness, specularColor, shininess, dashSize, gapSize, pointWidth } from './core/PropertyNode.js';
+export { default as PropertyNode, property, varyingProperty, output, diffuseColor, roughness, metalness, clearcoat, clearcoatRoughness, sheen, sheenRoughness, iridescence, iridescenceIOR, iridescenceThickness, specularColor, shininess, dashSize, gapSize, pointWidth, alphaT, anisotropy, anisotropyB, anisotropyT } from './core/PropertyNode.js';
 export { default as StackNode, stack } from './core/StackNode.js';
 export { default as TempNode } from './core/TempNode.js';
 export { default as UniformGroupNode, uniformGroup, objectGroup, renderGroup, frameGroup } from './core/UniformGroupNode.js';
@@ -64,7 +64,6 @@ export { default as RemapNode, remap, remapClamp } from './utils/RemapNode.js';
 export { default as RotateUVNode, rotateUV } from './utils/RotateUVNode.js';
 export { default as RotateNode, rotate } from './utils/RotateNode.js';
 export { default as SetNode } from './utils/SetNode.js';
-export { default as SpecularMIPLevelNode, specularMIPLevel } from './utils/SpecularMIPLevelNode.js';
 export { default as SplitNode } from './utils/SplitNode.js';
 export { default as SpriteSheetUVNode, spritesheetUV } from './utils/SpriteSheetUVNode.js';
 export { default as StorageArrayElementNode } from './utils/StorageArrayElementNode.js';
@@ -76,7 +75,7 @@ export { default as ReflectorNode, reflector } from './utils/ReflectorNode.js';
 export * from './shadernode/ShaderNode.js';
 
 // accessors
-export { TBNViewMatrix, parallaxDirection, parallaxUV } from './accessors/AccessorsUtils.js';
+export { TBNViewMatrix, parallaxDirection, parallaxUV, transformedBentNormalView } from './accessors/AccessorsUtils.js';
 export { default as UniformsNode, uniforms } from './accessors/UniformsNode.js';
 export { default as BitangentNode, bitangentGeometry, bitangentLocal, bitangentView, bitangentWorld, transformedBitangentView, transformedBitangentWorld } from './accessors/BitangentNode.js';
 export { default as BufferAttributeNode, bufferAttribute, dynamicBufferAttribute, instancedBufferAttribute, instancedDynamicBufferAttribute } from './accessors/BufferAttributeNode.js';
@@ -85,8 +84,10 @@ export { default as CameraNode, cameraProjectionMatrix, cameraProjectionMatrixIn
 export { default as VertexColorNode, vertexColor } from './accessors/VertexColorNode.js';
 export { default as CubeTextureNode, cubeTexture } from './accessors/CubeTextureNode.js';
 export { default as InstanceNode, instance } from './accessors/InstanceNode.js';
-export { default as MaterialNode, materialAlphaTest, materialColor, materialShininess, materialEmissive, materialOpacity, materialSpecularColor, materialSpecularStrength, materialReflectivity, materialRoughness, materialMetalness, materialNormal, materialClearcoat, materialClearcoatRoughness, materialClearcoatNormal, materialRotation, materialSheen, materialSheenRoughness, materialIridescence, materialIridescenceIOR, materialIridescenceThickness, materialLineScale, materialLineDashSize, materialLineGapSize, materialLineWidth, materialLineDashOffset, materialPointWidth } from './accessors/MaterialNode.js';
+export { default as BatchNode, batch } from './accessors/BatchNode.js';
+export { default as MaterialNode, materialAlphaTest, materialColor, materialShininess, materialEmissive, materialOpacity, materialSpecular, materialSpecularStrength, materialReflectivity, materialRoughness, materialMetalness, materialNormal, materialClearcoat, materialClearcoatRoughness, materialClearcoatNormal, materialRotation, materialSheen, materialSheenRoughness, materialIridescence, materialIridescenceIOR, materialIridescenceThickness, materialLineScale, materialLineDashSize, materialLineGapSize, materialLineWidth, materialLineDashOffset, materialPointWidth, materialAnisotropy, materialAnisotropyVector } from './accessors/MaterialNode.js';
 export { default as MaterialReferenceNode, materialReference } from './accessors/MaterialReferenceNode.js';
+export { default as RendererReferenceNode, rendererReference } from './accessors/RendererReferenceNode.js';
 export { default as MorphNode, morphReference } from './accessors/MorphNode.js';
 export { default as TextureBicubicNode, textureBicubic } from './accessors/TextureBicubicNode.js';
 export { default as ModelNode, modelDirection, modelViewMatrix, modelNormalMatrix, modelWorldMatrix, modelPosition, modelViewPosition, modelScale } from './accessors/ModelNode.js';
@@ -157,8 +158,13 @@ export { default as LightingNode /* @TODO: lighting (abstract), light */ } from 
 export { default as LightingContextNode, lightingContext } from './lighting/LightingContextNode.js';
 export { default as HemisphereLightNode } from './lighting/HemisphereLightNode.js';
 export { default as EnvironmentNode } from './lighting/EnvironmentNode.js';
+export { default as IrradianceNode } from './lighting/IrradianceNode.js';
 export { default as AONode } from './lighting/AONode.js';
 export { default as AnalyticLightNode } from './lighting/AnalyticLightNode.js';
+
+// pmrem
+export { default as PMREMNode, pmremTexture } from './pmrem/PMREMNode.js';
+export * as PMREMUtils from './pmrem/PMREMUtils.js';
 
 // procedural
 export { default as CheckerNode, checker } from './procedural/CheckerNode.js';
