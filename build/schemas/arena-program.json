@@ -194,6 +194,7 @@
     },
     "type": "object",
     "title": "Program",
+    "format": "grid",
     "properties": {
         "object_id": {
             "type": "string",

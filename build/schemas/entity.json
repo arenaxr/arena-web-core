@@ -51,7 +51,6 @@
                                 },
                                 "panel": {
                                     "title": "UI Panel",
-                                    "format": "grid",
                                     "description": "The rounded UI panel primitive.",
                                     "type": "object",
                                     "properties": {

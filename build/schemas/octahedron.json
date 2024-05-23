@@ -40,7 +40,6 @@
                         }
                     ],
                     "title": "Octahedron Data",
-                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "octahedron",

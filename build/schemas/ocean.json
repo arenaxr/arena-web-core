@@ -74,7 +74,6 @@
                         }
                     ],
                     "title": "Ocean Data",
-                    "format": "grid",
                     "additionalProperties": true,
                     "default": {
                         "object_type": "ocean",

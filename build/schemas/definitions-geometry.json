@@ -242,7 +242,6 @@
                     "type": "integer"
                 }
             },
-            "format": "grid",
             "title": "Material",
             "type": "object"
         },
