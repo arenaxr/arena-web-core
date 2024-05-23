@@ -104,6 +104,8 @@ AFRAME.registerComponent('build3d-mqtt-scene', {
             subtree: true,
         });
 
+        // TODO (mwfarb): possible better selector? AFRAME.INSPECTOR.selectEntity(document.getElementById('env'));
+
         this.tick = AFRAME.utils.throttleTick(this.tick, 1000, this);
     },
     sceneNodesUpdate(mutationList, observer) {

@@ -99,7 +99,7 @@ function extractDataUpdates(mutation, attribute, changes) {
     switch (mutation.attributeName) {
         case 'gaussian_splatting':
         case 'gltf-model':
-        case 'image':
+        case 'image': // TODO (mwfarb): add url update to material.src
         case 'light':
         case 'line':
         case 'obj-model':
