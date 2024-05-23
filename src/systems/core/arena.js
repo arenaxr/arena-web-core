@@ -676,6 +676,7 @@ AFRAME.registerSystem('arena-scene', {
                     if (AFRAME.components['static-body']) {
                         clearInterval(physicsWait);
                         document.getElementById('groundPlane').setAttribute('static-body', 'type', 'static');
+                        this.events.emit(ARENA_EVENTS.PHYSICS_LOADED, true);
                     }
                 }, 10);
             }
